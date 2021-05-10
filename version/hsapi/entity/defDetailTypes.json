@@ -1,0 +1,311 @@
+{
+        "entityName": "defDetailTypes",
+
+        "tableName": "defDetailTypes",
+        
+        "tablePrefix": "dty",
+        
+        "helpContent": "defDetailTypes.html",
+        
+        "searchFormContent": "searchDefDetailTypes.html",
+        
+        "entityTitle": "Base Field",
+        "entityTitlePlural": "Base Fields",
+        "empty_remark": "No fields in this group",
+        
+        "fields": [
+                {
+                    "dtID": "dty_Modified",
+                    "dtFields":{
+                        "dty_Type":"date",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "dty_Name",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"title",
+                        "dty_Size":255,
+                        "rst_DisplayName": "Field name:",
+                        "rst_DisplayHelpText": "A concise generic name used as a default for this field wherever it is used eg. 'creator' rather than 'artist' or 'author'. Fields may be reused in multiple record types. This name is normally overridden with a name specific to each record type in which it is used.", 
+                        "rst_DisplayExtendedDescription":"",
+                        "rst_DisplayWidth":60,
+                        "rst_DefaultValue":"",
+                        "rst_RequirementType":"required",
+                        "rst_MaxValues":1
+                    }
+                },
+                {
+                    "dtID": "dty_HelpText",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "rst_DisplayName":"Default help text:",
+                        "dty_Size":255,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayHeight":3,
+                        "rst_DisplayHelpText": "A default generic help text which may be overridden with more specific help for each record type that uses this field type", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "dty_Type",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName":"Data type:",
+                        "rst_DisplayHelpText": "The type of data to be recorded in this field. Note: in most cases this cannot be changed once set", 
+                        "rst_RequirementType":"required",
+                        "rst_DefaultValue":"",
+                        "rst_FieldConfig":[
+                            {"key":"blocktext", "title":"Memo (multi-line)"},
+                            {"key":"boolean", "title":"Boolean (T/F)"},
+                            {"key":"date", "title":"Date / temporal"},
+                            {"key":"enum", "title":"Terms list"},
+                            {"key":"file", "title":"File"},
+                            {"key":"float", "title":"Numeric"},
+                            {"key":"freetext", "title":"Text (single line)"},
+                            {"key":"geo", "title":"Geospatial"},
+                            {"key":"integer", "title":"Numeric - integer"},
+                            {"key":"relationtype", "title":"Relationship type"},
+                            {"key":"relmarker", "title":"Relationship marker"},
+                            {"key":"resource", "title":"Record pointer"},
+                            {"key":"year", "title":"Year (no mm-dd)"}]                        
+                    }
+                },
+                {
+                    "dtID": "rst_RequirementType",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_Class":"newFieldForRtyID",
+                        "rst_DisplayName":"Requirement:",
+                        "rst_DisplayHelpText": "Define requirement type", 
+                        "rst_Display":"hidden",
+                        "rst_DefaultValue":"optional",
+                        "rst_FieldConfig":[
+                            {"key":"required", "title":"required"},
+                            {"key":"recommended", "title":"recommended"},
+                            {"key":"optional", "title":"optional"},
+                            {"key":"forbidden", "title":"hidden"}]
+                    }
+                },
+                {
+                    "dtID": "rst_MaxValues",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_Class":"newFieldForRtyID",
+                        "rst_DisplayName":"Repeatability:",
+                        "rst_DefaultValue":"single",
+                        "rst_Display":"hidden",
+                        "rst_DefaultValue":"1",
+                        "rst_FieldConfig":[
+                            {"key":"1", "title":"single"},
+                            {"key":"0", "title":"repeatable"},
+                            {"key":"2", "title":"limited 2"},
+                            {"key":"3", "title":"limited 3"},
+                            {"key":"5", "title":"limited 5"},
+                            {"key":"10", "title":"limited 10"}]
+                        
+                    }
+                },
+                {
+                    "dtID": "rst_DisplayWidth",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Size":3,
+                        "dty_Role":"virtual",
+                        "rst_DisplayName": "Field width:",
+                        "rst_DisplayHelpText": "Display width of this field in the data entry form (does not limit maximum data length)",
+                        "rst_RequirementType":"optional",
+                        "rst_DisplayWidth":5,
+                        "rst_Display":"hidden",
+                        "rst_DefaultValue":100
+                    }
+                },
+                
+                {
+                    "dtID": "dty_Mode_freetext",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_Class":"XXXfreetext",
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"Input type:",
+                        "rst_DisplayHelpText": "Define specific subtype", 
+                        "rst_DefaultValue":"text",
+                        "rst_FieldConfig":["text","password","color"]
+                    }
+                },
+                {
+                    "dtID": "dty_Mode_blocktext",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_Class":"XXXblocktext",
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"Input type:",
+                        "rst_DisplayHelpText": "Define specific subtype", 
+                        "rst_DefaultValue":"text",
+                        "rst_FieldConfig":["text","query","editor","symbology"]
+                    }
+                },
+                {
+                    "dtID": "dty_Mode_date",
+                    "dtFields":{
+                        "dty_Type":"boolean",
+                        "dty_Role":"virtual",
+                        "rst_Class":"XXXdate",
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"Allow temporal object:",
+                        "rst_DisplayHelpText": "Define specific subtype"
+                    }
+                },
+                {  "dtID": "dty_Mode_enum",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"virtual",
+                        "rst_Class":"relationtype enum relmarker",
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"Vocabulary (terms):",
+                        "rst_DisplayHelpText": "The set of terms which may be selected for this field. If there is no suitable vocabulary use the vocabularies editor to create one. If the terms you need already exist in other vocabularies, for example a subset of countries or languages, create a new vocabulary in the editor, then use the Ref(erence) button to add references in the vocabulary which point to existing terms."
+                    }
+                },
+                {  "dtID": "dty_JsonTermIDTree",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_DisplayName":"Terms:",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {  "dtID": "dty_TermIDTreeNonSelectableIDs",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_DisplayName":"Term headers:",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "dty_PtrTargetRectypeIDs",
+                    "dtFields":{
+                        "dty_Type":"resource",
+                        "rst_Display":"hidden",
+                        "rst_Class":"resource relmarker",
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"Target record type(s):",
+                        "rst_DisplayHelpText": "The set of record types to which this field can point (for pointer fields and relationship markers. If undefined, it can point to any record type.", 
+                        "rst_FieldConfig": {"entity":"DefRecTypes","csv":true}
+                    }
+                },
+                {
+                    "groupHeader": "Additional",
+                    "groupType": "accordion",
+                    "groupHelpText":"",
+                    "groupHidden": false,
+                    "groupStyle": null,
+                    "children":[
+                
+                {
+                    "dtID": "dty_SemanticReferenceURL",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":255,
+                        "rst_DisplayWidth":80,
+                        "rst_DisplayName": "Semantic/Reference URI:",
+                        "rst_DisplayHelpText": "URI to a full description or ontological reference definition of the base field" 
+                    }
+                },
+                {
+                    "dtID": "dty_ExtendedDescription",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":5000,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayName":"Extended description:",
+                        "rst_DisplayHelpText": "An extended description of the content of this field type and references to any standards used"
+                    }
+                },
+                {
+                    "dtID": "dty_DetailTypeGroupID",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName":"Group:",
+                        "rst_DisplayHelpText": "Field type group", 
+                        "rst_FieldConfig": {"entity":"defDetailTypeGroups"},
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "dty_Status",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName":"Status:",
+                        "rst_DisplayHelpText": "'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress; 'Open' for freely modifiable/personal record types", 
+                        "rst_DisplayExtendedDescription":"",
+                        "rst_DisplayWidth":25,
+                        "rst_DefaultValue":"open",
+                        "rst_RequirementType":"optional",
+                        "rst_MaxValues":1,
+                        "rst_FieldConfig":["reserved","approved","pending","open"]
+                    }
+                },
+                {
+                    "dtID": "dty_NonOwnerVisibility",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName":"Non-owner visibility:",
+                        "rst_DisplayHelpText": "Hidden = visible only to owners, Viewable = any logged in user, Public = visible to non-logged in viewers", 
+                        "rst_DisplayExtendedDescription":"viewable",
+                        "rst_DisplayWidth":25,
+                        "rst_DefaultValue":"viewable",
+                        "rst_RequirementType":"optional",
+                        "rst_MaxValues":1,
+                        "rst_FieldConfig":["hidden","viewable","public"]
+                    }
+                },
+                {
+                    "dtID": "dty_ShowInLists",
+                    "dtFields":{
+                        "dty_Type":"boolean",
+                        "rst_DisplayName":"Show in lists:",
+                        "rst_DisplayHelpText": "Show this field type in pulldown lists etc. (always visible in field management screen)", 
+                        "rst_DisplayExtendedDescription":"",
+                        "rst_DefaultValue":"1",
+                        "rst_RequirementType":"optional",
+                        "rst_MaxValues":1,
+                        "rst_FieldConfig":["1","0"],
+                        "rst_Display":"hidden"
+                    }
+                },
+                {  "dtID": "dty_LocallyModified",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden",
+                        "rst_DefaultValue":"0"
+                    }
+                },
+                {  "dtID": "dty_OriginatingDBID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {  "dtID": "dty_IDInOriginatingDB",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden",
+                        "rst_DefaultValue":0                   }
+                },
+                {
+                    "dtID": "dty_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"readonly"
+                    }
+                }
+                ]}                
+     ]
+}

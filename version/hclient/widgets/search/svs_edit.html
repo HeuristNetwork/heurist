@@ -1,0 +1,115 @@
+<!--
+/**
+* Popup form for editing saved searches and RuleSets
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+<fieldset>
+    <input type="hidden" name="svs_ID" id="svs_ID" />
+
+    <div>
+        <div class="header" style="vertical-align:top; margin-top:5px;"><label for="svs_Name">Filter name</label></div>
+        <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all"
+            maxlength="64" size="64" style="width:250px" />
+        <div style="font-size: smaller; margin-top: 2px; margin-bottom: 10px;">
+            Used in navigation tree (maximum 64 characters).
+        </div>
+    </div>
+
+    <div>
+        <div class="header"><label for="svs_UGrpID">Save in work group</label></div>
+        <select name="svs_UGrpID" id="svs_UGrpID" class="text ui-widget-content ui-corner-all"></select>
+        <div style="width: 420px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+            Use a shared workgroup if you want other people to be able to use your search.
+        </div>
+    </div>
+    
+    <div>
+        <div class="header" style="vertical-align:top; margin-top:5px;"><label for="svs_Query">Filter string</label></div>
+        <textarea name="svs_Query" id="svs_Query" rows="3" class="text ui-widget-content ui-corner-all"
+            style="margin-top:0.4em;width:400px"></textarea>
+        <div style="width: 380px; font-size: smaller; margin-top: 5px; margin-bottom: 15px;">
+            A standard Heurist filter string which extracts a subset of the database. 
+            Close this popup, use the filter builder (icon in the filter field) to build a filter, 
+            then reopen this popup - this field will be populated automatically.
+        </div>
+    </div>
+
+    <div class="hide-if-short">
+        <div class="header" ><label for="svs_RulesOnly">Show expansion only</label></div>
+        <input type="checkbox" id="svs_RulesOnly" class="text ui-widget-content ui-corner-all" style="margin:0 4px 4px 0"/>
+        <label style="font-size: smaller; margin-top: 2px;" for="svs_RulesOnly">
+            Exclude results from the initial filter, only show results from expansion rules
+        </label>
+        <div id="divRulesOnly" style="display:none;padding-left: 25px;">
+        <label style="font-size: smaller"><input type="radio" name="svs_RulesOnly" id="svs_RulesOnly1" checked value="1" style="margin:0 0 20px 0"/>&nbsp;return all expansion results</label>
+        <label style="font-size: smaller;padding-left: 10px;"><input type="radio" name="svs_RulesOnly" id="svs_RulesOnly2" value="2" style="margin:0 0 20px 0"/>&nbsp;only return last level of expansion</label>
+        </div>
+    </div>
+
+    
+    <div class="hide-if-short"></div>
+    <div class="hide-if-short">
+        <div class="header" style="vertical-align:top; margin-top: 10px;"><label for="svs_Rules">Expansion rules</label></div>
+        <div style="display:table-cell">
+            <textarea name="svs_Rules" id="svs_Rules" rows="3" class="text ui-widget-content ui-corner-all"
+
+                style="margin-top:0.4em;width:400px" readonly="readonly"></textarea>
+            <div style="width: 380px; font-size: smaller; margin-top: 5px; margin-bottom: 5px;">
+                Rules are applied to the result set after each selection. They expand the results
+                to include connected records (entities). Rules can narrow this expansion
+                down to specific entity types, connection types or filters.
+                Use rules to bring in information such as map location or dates for display on a map or timeline.
+                Edit rules with the pencil icon on the right.
+            </div>
+            <input id="svs_Rules2" type="hidden"/>
+        </div>
+        <div id="svs_btnset"  style="width:18px;display:table-cell;vertical-align:top">
+            <div id="svs_Rules_edit" style="margin-top:0.4em"></div>
+            <div id="svs_Rules_clear" style="margin-top:0.4em"></div>
+        </div>
+
+    </div>
+
+    <div class="hide-if-short">
+        <div class="header" style="vertical-align:top"><label for="svs_Notes">Notes</label></div>
+        <textarea name="svs_Notes" id="svs_Notes" rows="2" class="text ui-widget-content ui-corner-all"  style="margin-top:0.4em;width:400px"></textarea>
+    </div>
+    <div class="hide-if-short">
+        <div class="header"><label for="svs_ViewMode">Result View Mode</label></div>
+        <select name="svs_ViewMode" id="svs_ViewMode" class="text ui-widget-content ui-corner-all">
+            <option value="">as is</option>
+            <option value="list">Single lines</option>
+            <option value="icons">Single lines with icon</option>
+            <option value="record_content">Record contents</option>
+            <option value="thumbs">Small images</option>
+            <option value="thumbs3">Large image</option>
+        </select>
+    </div>  
+
+    <!--
+    <div>
+        <div class="header" style="vertical-align:top"></div>
+        <div id="svs_GetQuery" style="margin-top:0.4em"></div>
+    </div>
+    -->
+
+
+</fieldset>
+
+<br />
+<p class="messages"></p>

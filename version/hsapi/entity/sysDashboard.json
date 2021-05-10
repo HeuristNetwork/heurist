@@ -1,0 +1,155 @@
+{
+        "entityName": "sysDashboard",
+
+        "tableName": "sysDashboard",
+        "tablePrefix": "dsh",
+        
+        "helpContent": "sysDashboard.html",
+        
+        "searchFormContent": "searchSysDashboard.html",
+        
+        "entityTitle": "Shortcuts entry",
+        "entityTitlePlural": "Shortcuts entries",
+        "empty_remark": "Nothing has been added to the shortcuts",
+
+        "fields": [
+                {
+                    "dtID": "dsh_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "dsh_CommandToRun",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Size":63,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayName": "Command:",
+                        "rst_DisplayHelpText": "Name of commonly used functions", 
+                        "rst_RequirementType":"required",
+                        "rst_FieldConfig":[
+                        ]
+                    }
+                },
+                {
+                    "dtID": "dsh_Parameters",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":250,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayName": "Parameters:",
+                        "rst_DisplayHelpText": "Parameters to pass to the command"
+                    }
+                },
+                
+                {
+                    "dtID": "dsh_ParameterAddRecord",
+                    "dtFields":{
+                        "dty_Type":"action",
+                        "dty_Role":"virtual",
+                        "rst_DisplayName":"Define Parameters:",
+                        "rst_DisplayHelpText": "Record type, owner and access parameters for new record", 
+                        "rst_FieldConfig": {"actionName":"recordAdd", "title":"Define parameters"}
+                    }
+                },
+                {
+                    "dtID": "dsh_ParameterSavedSearch",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Size":63,
+                        "rst_DisplayWidth":60,
+                        "dty_Role":"virtual",
+                        "rst_DisplayName":"Saved Filter:",
+                        "rst_DisplayHelpText": "Saved filter that will be executed", 
+                        "rst_FieldConfig": []
+                    }
+                },
+                
+                {
+                    "dtID": "dsh_Label",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":63,
+                        "rst_DisplayWidth":25,
+                        "rst_DisplayName": "Label:",
+                        "rst_DisplayHelpText": "The short text which will describe this function in the shortcuts", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                
+                {
+                    "dtID": "dsh_Description",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":1024,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayHeight":3,
+                        "rst_DisplayName": "Description:",
+                        "rst_DisplayHelpText": "A longer text giving more information about this function to show as a description"
+                    }
+                },
+                
+                {
+                    "dtID": "dsh_Image",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"Icon:",
+                        "rst_DisplayHelpText": "The icon which will represent this function in the shortcuts", 
+                        "rst_FieldConfig":{"entity":"sysDashboard", "accept":".png,.jpg,.gif", "size":64, "use_assets":["admin/setup/iconLibrary/64px/","HEURIST_ICON_DIR/thumb/"]},
+                        "dty_Role":"virtual",
+                        "rst_RequirementType":"required"
+                    }
+                },
+                
+                {
+                    "dtID": "dsh_Enabled",
+                    "titleField": true,
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayWidth":5,
+                        "rst_DisplayName": "Enabled:",
+                        "rst_DisplayHelpText": "Allows unused functions to be retained so they can be switched back on",
+                        "rst_DefaultValue":"y",
+                        "rst_FieldConfig":[
+                            {"key":"y","title":"Show"},
+                            {"key":"n","title":"Hidden"}
+                        ]
+                    }
+                }, 
+                {
+                    "dtID": "dsh_ShowIfNoRecords",
+                    "titleField": true,
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayWidth":3,
+                        "rst_DisplayName": "Show for empty DB:",
+                        "rst_DisplayHelpText": "Determines whether the function will be shown in the shortcuts if there are no records in the database",
+                        "rst_DefaultValue":"y",
+                        "rst_FieldConfig":[
+                            {"key":"y","title":"Yes"},
+                            {"key":"n","title":"No"}
+                        ]
+                    }
+                },
+                
+                {
+                    "dtID": "dsh_Order",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Size":20,
+                        "rst_Display":"hidden",
+                        "rst_DisplayWidth":20,
+                        "rst_DisplayName": "Order:",
+                        "rst_DefaultValue":0,
+                        "rst_DisplayHelpText": "Define the order in which the shortcuts entries are shown"
+                    }
+                }
+                
+                
+            ]
+}

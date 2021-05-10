@@ -1,0 +1,106 @@
+{
+        "entityName": "records",
+
+        "tableName": "Records",
+        "tablePrefix": "rec",
+        
+        "helpContent": "records.html",
+        
+        "searchFormContent": "searchRecords.html",
+        
+        "entityTitle": "Record",
+        "entityTitlePlural": "Records",
+        "empty_remark": "No record types in this group",
+
+        "sel_actions": [{"key":"edit", "title":"Edit Record"},
+                        {"key":"delete", "title":"Remove Record"}],
+        "btn_actions": [{"key":"add_file", "title":"Add New Record"}],
+
+        "reference_query": {},
+        
+        "fields": [
+                {
+                    "dtID": "rec_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "rec_Title",
+                    "titleField": true,
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"title",
+                        "dty_Size":1023,
+                        "rst_DisplayName": "Record title",
+                        "rst_DisplayHelpText": "", 
+                        "rst_Display":"hidden"
+                    }
+                },
+                {   
+                    "dtID": "rec_URL",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":2000,
+                        "rst_DisplayWidth": 85,
+                        "rst_DisplayName": "Record hyperlink URL",
+                        "rst_DisplayHelpText": "This is a special URL field which is hyperlinked in search results. Use where one primary URL applies to <br>each record, eg. for internet bookmarks. These URLs can be auto-verified. Turn on/off in record attributes" ,
+                        "rst_Display": "hidden"
+                    }
+                },
+                {
+                    "dtID": "rec_ScratchPad",
+                    "titleField": true,
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":65535,
+                        "rst_DisplayName": "ScratchPad",
+                        "rst_DisplayHelpText": "", 
+                        "rst_Display": "hidden"
+                    }
+                },
+                {
+                    "dtID": "rec_RecTypeID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Size":5,
+                        "rst_DisplayName": "Record type",
+                        "rst_DisplayHelpText": "" ,
+                        "rst_Display": "hidden"
+                    }
+                },
+                {
+                    "dtID": "rec_OwnerUGrpID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Size":5,
+                        "rst_DisplayName": "Ownership",
+                        "rst_DisplayHelpText": "" ,
+                        "rst_Display": "hidden"
+                    }
+                },
+                {
+                    "dtID": "rec_NonOwnerVisibility",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":20,
+                        "rst_DisplayName": "Non owner access",
+                        "rst_DisplayHelpText": "" ,
+                        "rst_Display": "hidden"
+                    }
+                },
+                {
+                    "dtID": "rec_NonOwnerVisibilityGroups",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"virtual",
+                        "dty_Size":2000,
+                        "rst_Display": "hidden"
+                    }
+                }
+        ]
+}

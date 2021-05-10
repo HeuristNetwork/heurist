@@ -1,0 +1,59 @@
+<div style="display:none" id="row_parententity_helper3">
+    <div class="div-table-cell"></div>
+    <div class="div-table-cell heurist-helper1" style="padding: 4px 0 0 9px;">
+        You are creating <span style="font-weight:bold"></span> record. Please select (or create) its parent record
+    </div>
+</div>
+<div style="display: table-row;height:5em;" id="row_addbtn">
+    <div class="div-table-cell" style="padding-right:1.5em;text-align:right"></div>
+    <div class="div-table-cell" style="vertical-align:bottom">
+        <button id="btn_add_record" style="min-width:11.9em;z-index:2;height:2em;font-size:12px"></button>
+        <button id="btn_select_rt" style="z-index:2;height:2em;font-size:12px"></button>
+    </div>
+</div>
+<div style="display: table-row;" id="row_helper">
+    <div class="div-table-cell"></div>
+    <div class="div-table-cell heurist-helper1" style="padding-top:10px;font-weight:bold;padding-bottom: 12px;">or select in list below</div>
+    <!-- . [enter] or <span class="ui-icon ui-icon-search" style="display:inline;font-size:0.9em">&nbsp;&nbsp;&nbsp;</span> to search -->
+</div>
+<hr class="not-addonly"/><br/>
+<div style="display: table-row;" class="not-addonly">
+    <div class="div-table-cell" style="padding-right:0.5em;text-align:right">
+        <label>Find</label>
+    </div>
+    <div class="div-table-cell">
+        <input id="input_search" class="text ui-widget-content ui-corner-all" 
+                style="max-width: 250px; min-width: 10em; width: 250px; margin-right:0.2em"/>
+        <div id="btn_search_start"></div>        
+        <label>in</label>
+        <select id="sel_rectypes" class="text ui-widget-content ui-corner-all" 
+                style="max-width:300px;min-width:300px"></select>
+    </div>
+</div>
+<div style="display: table-row;line-height: 2em;" class="not-addonly">
+    <div class="div-table-cell"></div>
+    <div class="div-table-cell">
+    <!--
+        <input id="cb_bookmarked" type="checkbox"/><label for="cb_bookmarked">bookmarked</label>
+    -->        
+        <input id="cb_selected" type="checkbox"/><label for="cb_selected">&nbsp;&nbsp;recently selected</label>&nbsp;&nbsp;
+        <input id="cb_modified" type="checkbox"/><label for="cb_modified" >&nbsp;&nbsp;recently modified</label>
+        <input id="cb_initial" type="checkbox" class="i-filter"/><label for="cb_initial" class="i-filter">initial filter</label>
+        <span id="cb_initial_filter" class="i-filter prompt"></span>
+        
+        <input id="cb_getcounts" checked type="checkbox" class="i-counts"/><label for="cb_getcounts" class="i-counts">get usage counts</label>
+    </div>
+</div>
+
+<div style="display: none;line-height: 2em" id="row_parententity_helper" class="not-addonly">
+    <div class="div-table-cell"></div>
+    <div class="div-table-cell heurist-helper1">Note: child records are not shown in this search</div>
+</div>
+<div style="display: none;height:3em;" id="row_parententity_helper2" class="not-addonly">
+    <div class="div-table-cell"></div>
+    <div class="div-table-cell" style="padding:20px 40px">
+        <p style="padding:10px 0"><span class="ui-icon ui-icon-arrowthick-1-n" style="width:23px;"></span>&nbsp;&nbsp;We recommend adding a new child record</p>
+        <p><div id="btn_search_start2"></div>&nbsp;Click search icon to display existing records</p>
+        <p style="padding:15px 0"><span style="color:red">Warning</span> selecting an existing record makes it a child record</p>
+    </div>
+</div>

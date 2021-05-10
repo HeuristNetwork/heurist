@@ -1,0 +1,23 @@
+
+Directory:	/smarty
+
+Overview:	Routines for rendering views of the search subset using Smarty templates
+
+Notes:      Smarty templates are to a large degree a replacement for the XSL templates in .../printview
+
+            Unlike the printview templates, Smarty templates can be edited through the Heurist
+            web interface. Although they use internal codes to define variables, routines are
+            provided to translate a Smarty templte to global concept codes and vice versa, to
+            allow standard templates to be written and exchange of templates between databases
+
+Updated:     26 Nov 2015
+
+---------------------------------------------------------------------
+
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2019 University of Sydney
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
+

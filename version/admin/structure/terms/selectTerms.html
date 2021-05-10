@@ -1,0 +1,112 @@
+<!--
+
+/**
+* selectTerms.html
+* Show a (selection) tree with every available term. Show every selected term in a second tree, and create
+* a preview from every selected term, with the terms selected in the second tree being disabled
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>Select terms for field dropdown</title>
+
+        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/treeview/assets/skins/sam/treeview.css" />
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/treeview/treeview-min.js"></script>
+
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+       
+        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
+
+        <script type="text/javascript" src="../../../hclient/core/detectHeurist.js"></script>
+        
+        <script type="text/javascript" src="selectTerms.js"></script>
+        <script type="text/javascript" src="editTerms_util.js"></script>
+        
+        <script type="text/javascript">
+            $(document).ready(function() {
+                window.selectTerms = new  SelectTerms(false, true);
+                $('button').button();
+            });
+        </script>
+
+        <style type="text/css">
+            .termTree, .selectedTerms, .termTreeText, .selectedTermsText {width:49%}
+            .previewListText {float:none;}
+        </style>
+        
+    </head>
+
+    <body class="popup">
+
+        <div id="headerDiv" style="display:block;">
+            <div id="dtyName" style="width:49%;display:inline-block;"></div>
+            <div style="width:49%;display:inline-block;padding-top:2px;text-align:left;">
+                <h3 style="margin:0px;padding-left:5px;display:inline-block;">Preview</h3>
+                <div id="previewListDiv" style="display:inline-block;padding-top:0px;padding-right:10px;padding-left: 5px;">
+                    <select id="previewList" class="previewList"></select>
+                </div>
+                <button title="Save current selection of terms for this field pulldown" onClick="selectTerms.apply();">Save</button>
+            </div>
+
+            <div id="termTreeText" class="termTreeText" style="display:inline-block;">
+                <h3 style="padding: 0px;">Select the terms to include</h3>
+                <div style="float:right;padding-top:8px;padding-right:10px;visibility: hidden;">
+                    <button title="Clear selection" onClick="selectTerms.clearSelection()">Clear</button>
+                    </div>
+            </div>
+            <div id="termTreeText" class="selectedTermsText" style="display:inline-block;">
+                <h3 style="padding: 0px;">Preview tree</h3><span style="padding-left:10px;">checked = selectable</span>
+                <div style="float:right;padding-top:8px;padding-right:20px;visibility: hidden;">
+                    <button title="Clear disbales" onClick="selectTerms.clearDisables()">Enable All</button>
+                    </div>
+            </div>
+        </div>
+
+        <div id="termTree" class="termTree ygtv-checkbox"></div>
+        <div id="selectedTermsTree" class="selectedTerms ygtv-checkbox"></div>
+
+        <div style="text-align:right;">&nbsp;</div>
+        <div>
+            <div id="dtyName" style="margin-left:40px;width:49%;padding-top:10px;display:inline-block;text-align:left;">
+                <button title="Add or edit term" onClick="selectTerms.addNewTerm();"
+                    style="width:120px;font-weight: 800;">Add or edit term</button>
+                <span style="margin-left:10px;">Add terms to tree or edit existing terms</span>
+            </div>
+
+            <div style="float:right;text-align:right;padding-top:10px;padding-right:10px;">
+                <button onClick="selectTerms.apply();" style="margin-right:10px;"
+                    title="Save current selection of terms for this field pulldown" >Save</button>
+                <button onClick="selectTerms.cancel();" style="margin-right:20px;"
+                    title="Cancel changes to selection" >Cancel</button>
+            </div>
+        </div>
+
+
+    </body>
+</html>

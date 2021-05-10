@@ -1,0 +1,55 @@
+Details are dumped in /var/log/apache2/error.log
+
+
+CONSTRUCTING RECORD RESPONSE
+{"URL":null,"Added":"2017-01-09 17:35:46","Modified":"2017-01-09 17:35:54","Title":"BMW 3-series","RecTypeID":"48","AddedBy":"2","Imported":"0","Popularity":"0","Temporary":"0","OwnerUGrpID":"0","NonOwnerVis":"viewable","URLLastVerif":null,"URLErrMsg":null,"URLExtMimeType":null,"236":"BMW","237":"3-series"}
+
+INDEXING RECORD RESPONSE
+{"_index":"hdb_janja_vehicles","_type":"48","_id":"16","_version":1,"_shards":{"total":2,"successful":1,"failed":0},"created":true}
+
+DELETING RECORD RESPONSE
+{"acknowledged":true}
+
+
+
+CHECK INDICES
+curl -XGET 'localhost:9200/_cat/indices?v'
+
+health status index              pri rep docs.count docs.deleted store.size pri.store.size 
+yellow open   hdb_janja_vehicles   5   1          5            0     23.7kb         23.7kb 
+
+
+CHECK INDEX
+curl -XGET 'localhost:9200/hdb_janja_vehicles'
+Result: {"hdb_janja_vehicles":{"aliases":{},"mappings":{"48":{"properties":{"236":{"type":"string"},"237":{"type":"string"},"Added":{"type":"string"},"AddedBy":{"type":"string"},"Imported":{"type":"string"},"Modified":{"type":"string"},"NonOwnerVis":{"type":"string"},"OwnerUGrpID":{"type":"string"},"Popularity":{"type":"string"},"RecTypeID":{"type":"string"},"Temporary":{"type":"string"},"Title":{"type":"string"}}},"49":{"properties":{"236":{"type":"string"},"237":{"type":"string"},"Added":{"type":"string"},"AddedBy":{"type":"string"},"Imported":{"type":"string"},"Modified":{"type":"string"},"NonOwnerVis":{"type":"string"},"OwnerUGrpID":{"type":"string"},"Popularity":{"type":"string"},"RecTypeID":{"type":"string"},"Temporary":{"type":"string"},"Title":{"type":"string"},"URL":{"type":"string"},"URLErrMsg":{"type":"string"},"URLExtMimeType":{"type":"string"},"URLLastVerif":{"type":"string"}}}},"settings":{"index":{"creation_date":"1483971341650","uuid":"rQkJshXfQDCv01ibz_OIVw","number_of_replicas":"1","number_of_shards":"5","version":{"created":"2030599"}}},"warmers":{}}}
+
+
+COUNT
+curl -XGET 'localhost:9200/hdb_janja_vehicles/_count'
+Result: {"count":7,"_shards":{"total":5,"successful":5,"failed":0}}
+
+
+AGGREGATIONS
+Title
+RecTypeID
+Make (detailID = 236)
+Model (detailID = 237)
+
+curl -XGET 'localhost:9200/hdb_janja_vehicles/_search?search_type=count' -d '{
+    "aggs" : {
+        "titles" : {
+            "terms" : { "field" : "Title" }
+        },
+        "types" : {
+            "terms" : { "field" : "RecTypeID" }
+        },
+        "makes" : {
+            "terms" : { "field" : "236" }
+        },
+        "models" : {
+            "terms" : { "field" : "237" }
+        }
+    }
+}'
+
+Result: {"took":13,"timed_out":false,"_shards":{"total":5,"successful":5,"failed":0},"hits":{"total":7,"max_score":0.0,"hits":[]},"aggregations":{"models":{"doc_count_error_upper_bound":0,"sum_other_doc_count":0,"buckets":[{"key":"series","doc_count":4},{"key":"1","doc_count":1},{"key":"2","doc_count":1},{"key":"3","doc_count":1},{"key":"5","doc_count":1},{"key":"bicycle","doc_count":1},{"key":"copper","doc_count":1},{"key":"dutch","doc_count":1},{"key":"line","doc_count":1},{"key":"old","doc_count":1}]},"makes":{"doc_count_error_upper_bound":0,"sum_other_doc_count":0,"buckets":[{"key":"bmw","doc_count":4},{"key":"batavus","doc_count":1},{"key":"gazelle","doc_count":1},{"key":"grand","doc_count":1}]},"titles":{"doc_count_error_upper_bound":0,"sum_other_doc_count":0,"buckets":[{"key":"bmw","doc_count":4},{"key":"series","doc_count":4},{"key":"1","doc_count":1},{"key":"2","doc_count":1},{"key":"3","doc_count":1},{"key":"5","doc_count":1},{"key":"grandbicycle","doc_count":1}]},"types":{"doc_count_error_upper_bound":0,"sum_other_doc_count":0,"buckets":[{"key":"48","doc_count":4},{"key":"49","doc_count":1}]}}}

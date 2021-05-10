@@ -1,0 +1,4 @@
+If you can't run copy_distribution_files.sh it is probably due to it having acquired Windows line endings
+
+Run    dos2unix copy_distribution_files.sh   to fix the problem
+

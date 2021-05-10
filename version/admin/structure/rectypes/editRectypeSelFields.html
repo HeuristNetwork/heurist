@@ -1,0 +1,112 @@
+<!--
+    /*
+    * Copyright (C) 2005-2020 University of Sydney
+    *
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+    * in compliance with the License. You may obtain a copy of the License at
+    *
+    * http://www.gnu.org/licenses/gpl-3.0.txt
+    *
+    * Unless required by applicable law or agreed to in writing, software distributed under the License
+    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+    * or implied. See the License for the specific language governing permissions and limitations under
+    * the License.
+    */
+
+    /**
+    * editRectypeSelFields.html
+    * select initial set of fields for new record type
+    *
+    * @author      Tom Murtagh
+    * @author      Kim Jackson
+    * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+    * @author      Stephen White   
+    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @copyright   (C) 2005-2020 University of Sydney
+    * @link        http://HeuristNetwork.org
+    * @version     3.1.0
+    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @package     Heurist academic knowledge management system
+    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+    */
+-->
+<html>
+    <head>
+
+        <title>Select fields for new record type</title>
+        <meta http-equiv="content-type" content="text/html;charset=utf-8">
+        <link rel="stylesheet" type="text/css" href="../../../h4styles.css">
+        <link rel="stylesheet" type="text/css" href="../../../h6styles.css">
+        
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript" src="../../../hclient/core/detectHeurist.js"></script>
+        
+        <script>
+            function closewin(){
+                
+                var fields = [], reqs=[];
+                $('input.ids:checked').each(function() {
+                    fields.push($(this).attr('data-id'));
+                });                
+                $('input.reqs:checked').each(function() {
+                    reqs.push($(this).attr('data-id'));
+                });                
+                
+                if(fields.length===0){
+                    alert('Select at least one field');
+                    return;
+                }
+                
+                window.close({fields:fields, reqs:reqs});
+            }
+            
+            $(document).ready(function() {
+                
+                $('button').button();
+                
+                var fields = [
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_THUMBNAIL'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_START_DATE'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_END_DATE'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_CREATOR']];
+                
+                var _checked = 'checked';
+                var tbl =$('#field_list'); 
+                
+                for(var idx=0; idx< fields.length; idx++){
+                    var dty_ID = fields[idx];
+                    _checked = (idx==0)?'checked disabled="disabled"':'';
+                    
+            $('<tr><td style="padding:10px" align="center"><input type="checkbox" class="ids" data-id="'+dty_ID+'" '+_checked
+            +'></td>'
+            +'<td align="center"><input type="checkbox" class="reqs" data-id="'+dty_ID+'" '+_checked+'></td>'
+            +'<td style="padding-left:20px">'+window.hWin.HEURIST4.detailtypes.names[dty_ID]+'</td></tr>').appendTo(tbl);
+                    
+                    _checked = ''
+                }
+            });
+        </script>
+        
+    </head>
+
+    <body class="popup" style="overflow: hidden">
+    
+    <p>Please select at least one of the following commonly-used fields to pre-populate this record type.
+    <br><br>
+    Please indicate which will be Required fields (you can easily change or delete these fields later):</p>
+    <div style="width:100%;text-align:center;padding:10px">
+        <table style="margin:auto;width:50%" id="field_list">
+            <tr><th align="center">Use</th><th>Required</th><th align="left" style="padding-left:20px">Name</th></tr>
+            
+        </table>
+        <br><br>
+        <button onclick="closewin()" class="ui-button-action">Select</button>
+    </div>
+    
+    
+    </body>
+</html>

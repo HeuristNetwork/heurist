@@ -1,0 +1,224 @@
+{
+        "entityName": "defRecTypes",
+
+        "tableName": "defRecTypes",
+        "tablePrefix": "rty",
+        
+        "helpContent": "defRecTypes.html",
+        
+        "searchFormContent": "searchDefRecTypes.html",
+        
+        "entityTitle": "Record type",
+        "entityTitlePlural": "Record types",
+        "empty_remark": "",
+
+
+        "fields": [
+                {
+                    "dtID": "rty_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"readonly"  
+                    }
+                },
+                {
+                    "dtID": "rty_ID_local",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"virtual",
+                        "rst_Display":"hidden"  
+                    }
+                },
+                {
+                    "dtID": "rty_Name",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":63,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Record type name:",
+                        "rst_DisplayHelpText": "The name which is used to describe this record (object) type. This name for display in selection lists, formats or reporting. Restricted characters: [ ] { } ' \"", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "rty_Plural",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":63,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Plural:",
+                        "rst_DisplayHelpText": ""
+                    }
+                },
+                {
+                    "dtID": "rty_Description",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":5000,
+                        "rst_DisplayWidth":100,
+                        "rst_DisplayHeight":4,
+                        "rst_RequirementType":"required",
+                        "rst_DisplayName": "Description",
+                        "rst_DisplayHelpText": "Detailed description of the record type, providing an explanation of its content. A good description here is important for future documentation of the database." 
+                    }
+                },
+                {
+                    "dtID": "rty_TitleMask",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":5000,
+                        "rst_DisplayWidth":100,
+                        "rst_DisplayHeight":2,
+                        "rst_DisplayName": "Title mask",
+                        "rst_DisplayHelpText": "The title mask is a string into which data field values are inserted to create a constructed title for each record, e.g. [Title], pp. [Start_Page]-[End_Page] renders a title such as \"Alice in Wonderland, pp. 37-39\". The constructed title is displayed in search results and other lists. [ ] encloses a field name. To insert [ or ], use [[ or ]]",
+                        "rst_RequirementType":"required",
+                        "dty_Role":"virtual"
+                    }
+                }, 
+                {
+                    "dtID": "rty_CanonicalTitleMask",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":5000,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayName": "Title mask in codes",
+                        "rst_RequirementType":"optional",
+                        "rst_Display":"hidden",
+                        "dty_Role":"virtual"
+                    }
+                }, 
+                {
+                    "dtID": "rty_ReferenceURL",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":250,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayName": "Semantic/Reference URI",
+                        "rst_DisplayHelpText": "URI to a full description or ontological reference definition of the record type"
+                    }
+                },
+                {
+                    "dtID": "rty_ShowURLOnEditForm",
+                    "dtFields":{
+                        "dty_Type":"boolean",
+                        "rst_DisplayName": "Show record URL on edit form:",
+                        "rst_DisplayHelpText": "Display URL at top of edit form for this record type. This is a special URL used to hyperlink search results. It is distinct from any URL fields in the record, which are not affected. Use only where a majority of records of this type have one, and only one, principle URL eg. for web sites/internet bookmarks.",
+                        "rst_DefaultValue": "0",
+                        "rst_FieldConfig":["1","0"]
+                    }
+                },
+                {
+                    "dtID": "rty_Thumb",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"Thumbnail (~64x64):",
+                        "rst_DisplayHelpText": "Image to represent this record type", 
+                        "rst_FieldConfig":{"entity":"defRecTypes", "accept":".png,.jpg,.gif", "size":64, 
+                             "use_assets":["admin/setup/iconLibrary/64px/"],
+                        "css":{"display":"inline-block","width":"45%"}},
+                        "dty_Role":"virtual"
+                    }
+                },
+                {
+                    "dtID": "rty_Icon",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"Icon (~16x16):",
+                        "rst_DisplayHelpText": "Icon to represent this record type", 
+                        "rst_FieldConfig":{"entity":"defRecTypes", "accept":".png,.jpg,.gif", "size":16, "version":"icon",
+                        "use_assets":["admin/setup/iconLibrary/16px/"],
+                        "css":{"display":"inline-block","width":"45%"}},
+                        "dty_Role":"virtual"
+                    }
+                },
+                {  "dtID": "rty_LocallyModified",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {  "dtID": "rty_OriginatingDBID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {  "dtID": "rty_IDInOriginatingDB",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden"
+                    }
+                },
+                
+                {
+                "groupHeader": "Additional information",
+                "groupTitleVisible": true,
+                "groupType": "accordion",
+                "children":[
+
+                
+                {
+                    "dtID": "rty_RecTypeGroupID",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName":"Display group:",
+                        "rst_DisplayHelpText": "Record types are grouped together into related types for easier management. Add new groups from the record type management screen.", 
+                        "rst_FieldConfig": {"entity":"defRecTypeGroups"},
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "rty_Status",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName": "Status:",
+                        "rst_DisplayHelpText": "'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress; 'Open' for freely modifiable/personal record types",
+                        "rst_DefaultValue": "open",
+                        "rst_FieldConfig":[
+                            {"key":"open","title":"open"},
+                            {"key":"pending","title":"pending"},
+                            {"key":"approved","title":"approved"},
+                            {"key":"reserved","title":"reserved"}
+                        ]
+                    }
+                },
+                {
+                    "dtID": "rty_ShowInLists",
+                    "dtFields":{
+                        "dty_Type":"boolean",
+                        "rst_DisplayName": "Show in lists:",
+                        "rst_DisplayHelpText": "Show this record type in pulldown lists etc. (always visible in record management screen)",
+                        "rst_DefaultValue": "1",
+                        "rst_FieldConfig":["1","0"]
+                    }
+                },
+                {
+                    "dtID": "rty_ShowDescriptionOnEditForm",
+                    "dtFields":{
+                        "dty_Type":"boolean",
+                        "rst_DisplayName": "Show description on edit form:",
+                        "rst_DisplayHelpText": "Display record type description at top of edit form for this record type. This is a useful way of providing some context for the content of the form",
+                        "rst_DefaultValue": "1",
+                        "rst_FieldConfig":["1","0"]
+                    }
+                },
+                {
+                    "dtID": "rty_RecCount",
+                    "dtFields":{
+                        "rst_DisplayName": "Records count",
+                        "rst_Display":"readonly",
+                        "dty_Type":"integer",
+                        "dty_Role":"virtual"
+                    }
+                }
+
+                    
+                    ]
+                }
+                
+                
+     ]
+}

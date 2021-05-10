@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>HEURIST Context Help - Smarty Reports</title>
+
+
+
+
+
+    <link rel="stylesheet" href="../common/css/heurist.css">
+    <style type="text/css">
+        /* .search_term { padding: 2px; border: 1px solid lightgray; font-weight: bold; } */
+        body { line-height: 125%; }
+        .search_term { font-weight: bold; background-color: lightgray; border: 0px none; padding: 0 2px; }
+        .search_term i { font-weight: normal; }
+    </style></head><body width="600" height="500">
+
+
+
+
+    <b><font size="4">HEURIST Help</font></b>
+
+    <h2>Smarty Templates<br>
+    </h2>
+    <hr>
+
+    <h4>Why use it?</h4>
+
+    <p>Smarty templates allow you to design and publish your own sophisticated report outputs directly within the Heurist interface.<br>
+    </p>
+
+    <h4>What it does</h4>Simple templates built with the records/fields
+    tree on the right of the template editing window can produce neatly
+    formatted lists in text eg. CSV, and html formats, including images,
+    video and so forth.
+    <br>
+    <br>
+    More complex formats can use all the power of the Smarty templating
+    language, including PHP functions (standard or user-defined) directly
+    in the template. For full information about Smarty templates see <a href="http://www.smarty.net/docs/en/">Smarty User Manual</a><br>
+
+    <h4>How to use it</h4>Choose <span style="font-weight: bold;">New template</span> from the menu at top right of the<span style="font-weight: bold;"> Report</span> tab. The new template will come up with some default content:<br>
+    <ul>
+        <li>Some guidance as comments, enclosed in {*&nbsp; *}<br>
+        </li>
+        <li>A records loop which should enclose everything you want reproduced for each record<br>
+        </li>
+        <li>Some example fields within the loop<br>
+        </li>
+    </ul>
+    <h4>General Principles</h4>A typical new template will look like this:<br>
+    <br>
+    <div style="margin-left: 40px;"><small>{* Enter html for web pages or
+        other text format. Use tree on right to insert fields. Use
+        &lt;!--&nbsp; --&gt; for html comments *}<br>
+        &lt;h2&gt;Title for report&lt;/h2&gt;<br>
+        &lt;hr&gt;<br>
+        {foreach $results as $r} {* Records loop, do not remove *}<br>
+        &nbsp;&nbsp; {$r.recID}<br>
+        &nbsp;&nbsp; {$r.recTitle}<br>
+        &nbsp;&nbsp; {$r.recURL}<br>
+        &nbsp;&nbsp; {* add further sub-loops and fields here *}<br>
+        &nbsp;&nbsp; &lt;hr&gt;<br>
+        {/foreach} {* end records loop, do not remove *}<br>
+        &lt;h2&gt;End of report&lt;/h2&gt;<br>
+        &lt;h2&gt;Text here appears at end of report&lt;/h2&gt;</small><br>
+    </div>
+    <br>
+    <span style="text-decoration: underline;">Main records</span><br>
+    The foreach statements enclose a loop which outputs information for
+    each record in the query result. Fields can be inserted with the <span style="text-decoration: underline;">insert</span> links next to each field. Use the <span style="text-decoration: underline;">if</span> links to insert tests based on the value of a field (eg. to only output text if a field is set).<br>
+    <span style="font-weight: bold;"><br>
+    </span><span style="text-decoration: underline;">Subrecords</span><br>
+    Further loops can be inserted  to output multiple sub-records within the main record loop, using the <span style="text-decoration: underline;">loop</span> link after the subrecord name. Fields within sub records can be inserted with either the <span style="text-decoration: underline;">in</span> or <span style="text-decoration: underline;">out</span> links; use the <span style="text-decoration: underline;">in</span> link to insert a field within a loop, use the <span style="text-decoration: underline;">out</span> link to insert a field outside a loop.<br>
+    <br>
+    <span style="text-decoration: underline;">Style pulldown<br>
+    </span>Normally use Field only - this inserts the field specification
+    to render the content of the field as-is. Choose Field + function to
+    insert the field with the <span style="font-style: italic;">wrap</span> function, which is useful for special types such as URLs, images and videos, as it inserts required html code, for example:<br>
+    <br>
+    <div style="margin-left: 40px;">{wrap var=$r.recURL dt="url"} inserts a hyperlink<br>
+        {wrap var=$r.thumbnail_image_originalvalue dt="file" width="300" height="auto"} inserts an image<br>
+    </div>
+    <span style="text-decoration: underline;"></span><h4>Functions</h4>Smarty
+    has many built in functions for formatting, sorting, totalling etc.
+    some of which can be entered from the pulldown labelled <span style="font-style: italic;">Modifiers</span>.
+    However there is a much wider range available - consult the Smarty
+    documentation for a full list. You can also use PHP functions (built-in
+    or ones you define in the code) in a Smarty template, for example:<br>
+    <br>
+    <div style="margin-left: 40px;">{$r,fldname}&nbsp;&nbsp; will output the value of the field<br>
+        {$r.fldname|upper}&nbsp; will output the value of the field converted to upper case (Smarty function)<br>
+        {str_pad($r.fldname},10,"0", STR_PAD_LEFT) }&nbsp; will pad the string to length 10 with leading zeroes (PHP function)<br>
+    </div>
+    <h3>See also</h3><br>
+    </body></html>
