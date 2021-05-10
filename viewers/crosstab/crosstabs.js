@@ -576,14 +576,28 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             $('<div class="col-md-4">')
             //.css({'width':'160px','display':'inline-block'})
-            .append(
-                $('<div>')
-                .html(interval.name)
-                .css({'font-weight':'bold'} ))
-            /*$('<input>')
-            .addClass('text ui-widget-content ui-corner-all')
-            .val(interval.name)
-            .css({'width':'150px'} ))*/
+            .html(interval.name)
+            .css({'font-weight':'bold'} )
+            .dblclick(function(event){
+                //Collect the interval number of the clicked row
+                var intervalElement = $(this).parent();
+                var intervalPosition = intervalElement.attr('id').replace(name, '');
+
+                intervalPosition = parseInt(intervalPosition);
+
+                if(intervalPosition >= fields3[name].values.length){
+                    //Create input box to change name
+                    $(this).html('<input id="changeNameBox" value="'+interval.name+'">');
+                    //When user clicks out of input box edit name
+                    $('#changeNameBox').blur(function(){
+                        var nameChanged = $('#changeNameBox').val();
+                        $(this).parent().html(nameChanged);
+
+                        fields3[name].intervals[intervalPosition].name = nameChanged;
+                        _doRender();    //Apply to table
+                    });
+                }
+            })
             .appendTo($intdiv);
 
             if(intervals[idx].values.length > 1){
