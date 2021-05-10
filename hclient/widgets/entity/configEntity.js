@@ -62,13 +62,13 @@ $.widget( "heurist.configEntity", {
         var that = this;
 
 
-        $('<div class="header" style="padding: 0 16px 0 16px;"><label for="sel_saved_settings">'
+        $('<div class="col-3"><label for="sel_saved_settings">'
             +(this.options.loadSettingLabel?this.options.loadSettingLabel:'Saved settings:')+'</label></div>'
-            +'<select class="sel_saved_settings text ui-widget-content ui-corner-all" style="width:20em;max-width:30em"></select>&nbsp;&nbsp;'
+            +'<div class="col-6"><select class="sel_saved_settings text ui-widget-content ui-corner-all" style="width:100%;"></select></div>'
             + ((this.options.showButtons)?
-            ('<span class="btn-action-div"><span class="btn-action btn-rename"/>'
+            ('<div class="btn-action-div col-3"><span class="btn-action btn-rename"/>'
             +'<span class="btn-action btn-openedit"/>'
-            +'<span class="btn-action btn-remove"/></div>'):'') )
+            +'<span class="btn-action btn-remove"/></div></div>'):'') )
             //('<span class="ui-icon ui-icon-pencil" style="font-size:smaller;cursor:pointer"></span>'
             //+'<span class="ui-icon ui-icon-delete" style="font-size:smaller;cursor:pointer"></span>'):'') )
         .appendTo(this.element);
@@ -234,9 +234,13 @@ $.widget( "heurist.configEntity", {
         // save settings
         //
         if(this.options.divSaveSettings){
-            $('<div class="header" style="padding: 0 16px;width:20em;"><label>Name settings to save for future use</label></div>'
-                +'<input class="inpt_save_setting_name text ui-widget-content ui-corner-all" style="max-width:30em"/>'
-                + (this.options.saveOnExit?'':'&nbsp;&nbsp;<button class="btnSaveSettings">Save</button>'))
+
+            // $('<div class="header" style="padding: 0 16px;width:20em;"><label>Name settings to save for future use</label></div>'
+            //     +'<input class="inpt_save_setting_name text ui-widget-content ui-corner-all" style="max-width:30em"/>'
+            //     + (this.options.saveOnExit?'':'&nbsp;&nbsp;<button class="btnSaveSettings">Save</button>'))
+
+            $('<div class="col-12"><label>Name settings to save for future use</label></div><div class="col-12 mb-1"><input class="inpt_save_setting_name text form-control"/></div>'
+            + (this.options.saveOnExit?'':'<div class="col-12 d-grid gap-2"><button class="btn btn-success btnSaveSettings">Save</button></div>'))
             .appendTo(this.options.divSaveSettings);
             this.inpt_save_setting_name = this.options.divSaveSettings.find('.inpt_save_setting_name');        
             
