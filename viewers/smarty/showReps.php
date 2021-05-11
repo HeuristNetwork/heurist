@@ -405,23 +405,61 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
     
     global $is_jsallowed;
     
-    if($is_jsallowed || true){
+    if($is_jsallowed){
         
         return $tpl_source;
         
     }else{
 
-        $config = HTMLPurifier_Config::createDefault();
+        $config = \HTMLPurifier_Config::createDefault();
+        $config->set('HTML.Doctype', 'HTML 4.01 Transitional');        
+
+        $config->set('HTML.DefinitionID', 'html5-definitions'); // unqiue id
+        $config->set('HTML.DefinitionRev', 1);
+
+        //$config = HTMLPurifier_Config::createDefault();
         $config->set('Cache', 'SerializerPath', HEURIST_SCRATCHSPACE_DIR);
         $config->set('CSS.Trusted', true);
         $config->set('Attr.AllowedFrameTargets','_blank');
-        
-        //$config->set('HTML.Allowed','audio');
         $config->set('HTML.SafeIframe', true);
         //allow YouTube, Soundlcoud and Vimeo     
         // https://w.soundcloud.com/player/
-           
         $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%'); 
+        
+        $def = $config->getHTMLDefinition(true);
+        $def->addElement(
+            'audio',
+            'Block',
+            'Flow',
+            'Common',
+            [
+                'controls' => 'Bool',
+                'autoplay' => 'Bool',
+                'data-id' => 'Number'
+            ]
+        );        
+        $def->addElement('source', 'Block', 'Flow', 'Common', array(
+            'src' => 'URI',
+            'type' => 'Text',
+        ));
+
+        /* @todo test it
+        if ($def = $config->maybeGetRawHTMLDefinition()) {
+            // http://developers.whatwg.org/the-video-element.html#the-video-element
+            $def->addElement('video', 'Block', 'Optional: (source, Flow) | (Flow, source) | Flow', 'Common', array(
+                'src' => 'URI',
+                'type' => 'Text',
+                'width' => 'Length',
+                'height' => 'Length',
+                'poster' => 'URI',
+                'preload' => 'Enum#auto,metadata,none',
+                'controls' => 'Bool',
+            ));
+        }        
+        */
+        
+        
+        
         //$config->set('HTML.Trusted', true);
         //$config->set('Filter.ExtractStyleBlocks', true);
         $purifier = new HTMLPurifier($config);
