@@ -249,13 +249,13 @@ window.hWin.HEURIST4.dbs = {
                 
                 if(all_header_fields || $fieldtypes.indexOf('ID')>=0 || $fieldtypes.indexOf('rec_ID')>=0){
                     $children.push({key:'rec_ID', type:'integer',
-                        title:"ID  <span style='font-size:0.7em'>(integer)</span>", 
+                        title:"ID  <span style='font-size:0.7em'>(Integer)</span>", 
                         code:($recTypeId+':ids'), name:'Record ID'});
                 }
 
                 if(all_header_fields || $fieldtypes.indexOf('title')>=0 || $fieldtypes.indexOf('rec_Title')>=0){
                     $children.push({key:'rec_Title', type:'freetext',
-                        title:"Title <span style='font-size:0.7em'>(Constructed text)</span>", 
+                        title:"Title <span style='font-size:0.7em'>(Constructed Text)</span>", 
                         code:($recTypeId+':title'), name:'Record title'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('added')>=0 || $fieldtypes.indexOf('rec_Added')>=0){
@@ -270,40 +270,39 @@ window.hWin.HEURIST4.dbs = {
                 }
                 if(all_header_fields || $fieldtypes.indexOf('addedby')>=0 || $fieldtypes.indexOf('rec_AddedBy')>=0){
                     $children.push({key:'rec_AddedBy', type:'freetext',
-                        title:"Creator  <span style='font-size:0.7em'>(user)</span>", 
+                        title:"Creator  <span style='font-size:0.7em'>(User)</span>", 
                         code:($recTypeId+':addedby'), name:'Creator (user)'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('url')>=0 || $fieldtypes.indexOf('rec_URL')>=0){
                     $children.push({key:'rec_URL', type:'freetext',
-                        title:"URL  <span style='font-size:0.7em'>(freetext)</span>", 
+                        title:"URL  <span style='font-size:0.7em'>(Text)</span>", 
                         code:($recTypeId+':url'), name:'Record URL'});
                 }
-                
                 if(all_header_fields || $fieldtypes.indexOf('url')>=0 || $fieldtypes.indexOf('rec_ScratchPad')>=0){
                     $children.push({key:'rec_ScratchPad', type:'freetext',
-                        title:"Notes  <span style='font-size:0.7em'>(freetext)</span>", 
+                        title:"Notes  <span style='font-size:0.7em'>(Text)</span>", 
                         code:($recTypeId+':notes'), name:'Record Notes'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('url')>=0 || $fieldtypes.indexOf('rec_OwnerUGrpID')>=0){
                     $children.push({key:'rec_OwnerUGrpID', type:'freetext',
-                        title:"Owner  <span style='font-size:0.7em'>(user or group)</span>", 
+                        title:"Owner  <span style='font-size:0.7em'>(User or Group)</span>", 
                         code:($recTypeId+':owner'), name:'Record Owner'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('url')>=0 || $fieldtypes.indexOf('rec_NonOwnerVisibility')>=0){
-                    $children.push({key:'rec_NonOwnerVisibility', type:'freetext',
-                        title:"Visibility  <span style='font-size:0.7em'>(freetext)</span>", 
+                    $children.push({key:'rec_NonOwnerVisibility', type:'enum',
+                        title:"Visibility  <span style='font-size:0.7em'>(Terms)</span>", 
                         code:($recTypeId+':access'), name:'Record Visibility'});
                 }
 
                 if(all_header_fields || $fieldtypes.indexOf('tags')>=0 || $fieldtypes.indexOf('rec_Tags')>=0){
-                    $children.push({key:'rec_Tags', type:'freetext',
-                        title:"Tags  <span style='font-size:0.7em'>(freetext)</span>", 
+                    $children.push({key:'rec_Tags', type:'terms',
+                        title:"Tags  <span style='font-size:0.7em'>(Terms)</span>", 
                         code:($recTypeId+':tag'), name:'Record Tags'});
                 }
               
 
                 if(all_header_fields){
-                    var s = '<span style="font-style:italic">Generic fields</span>';
+                    var s = '<span style="font-style:italic">Generic Fields</span>';
                     $children = [
                         {title:s, folder:true, is_generic_fields:true, children:$children},
                         {key:'anyfield', type:'freetext',                       //-16px -80px      -48px -80px open
@@ -742,7 +741,6 @@ window.hWin.HEURIST4.dbs = {
         var res = [];
 
         if($mode==5){ //with reverse links
-            
             var def = __getRecordTypeTree(rectypeids, 0, $mode, fieldtypes, null);
 
             if(def!==null) {
@@ -1884,7 +1882,7 @@ window.hWin.HEURIST4.dbs = {
             }else if(dtid=='access'){
                 rec_header = "Visibility"; 
             }else if(dtid=='tag'){
-                rec_header = "Keywords"; 
+                rec_header = "Tags"; 
             }else if(dtid=='anyfield'){
                 rec_header = "Any field"; 
             }
