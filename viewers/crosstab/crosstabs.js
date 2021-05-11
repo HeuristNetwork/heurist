@@ -455,6 +455,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var $addIntervalBtn;
         var $btnDiv;
         var $intervalHeadRow;
+        var $listDiv;
 
         $modalDialogBody.empty();
         $container.empty();
@@ -666,7 +667,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $addIntervalBtn = $('<button>',{class: "btn btn-success w-100"})
             //.button({icons: {primary: "ui-icon-plus"}} )
             .click(function( event ) {
-                renderIntervals(name); //Refresh intervals to remove existing arrows and create a clean display.
                 editInterval( name, -1, true);
             })
             .html('<i class="bi bi-plus"></i> Add Interval')
@@ -677,12 +677,175 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $('<div class="col-11">')
             .append($addIntervalBtn)
             .appendTo($btnDiv);
+
+        //render checkboxes
+        $firstRowDiv = $(document.createElement('div'))
+        .addClass('row')
+        .appendTo($leftColDiv);
+
+        //Heading for left col values
+        $('<div id="topdiv" class="col-6"></div>')
+        .append('<h5>Available Values</h5>')
+        .appendTo($firstRowDiv);
+
+        $('<div class="col-6">')
+        .append('<p>Select and assign to new intervals</p>')
+        .appendTo($firstRowDiv);
+
+        var detailtype = fields3[name].type;
+        //EDIT THIS
+        //Create body of checkboxes
+        if ( detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype")
+        {
+            //Creates select all checkbox
+            $intdiv = $(document.createElement('div'))
+            .addClass('row p-1')
+            .appendTo($leftColDiv);
+
+            $listDiv = $(document.createElement('div'))
+            .addClass('col-md-1 d-flex align-items-center')
+            .appendTo($intdiv);
+
+            $('<input>')
+            .attr('type','checkbox')
+            .attr('checked', false)
+            .attr('id','selectAll')
+            .addClass('recordIcons')
+            .change(function(){
+                //Unchecks selectall checkbox if a value is unchecked.
+                var checked = this.checked;
+                //selects checkbox which are not disabled in edit mode
+                $('input[name="'+name+'Options"]:not(:disabled)').each(function(){
+                    this.checked = checked;
+                });
+            })
+            .appendTo($listDiv);
+
+            $('<div>')
+            .addClass('recordTitle col-md p-1')
+            .html('Select All')
+            .appendTo($intdiv);
+
+            //Creates value checkboxes
+            var i, j,
+            termlist = fields3[name].values; //all terms or pointers
+            for(i=0; i<termlist.length; i++)
+            {
+                var notused = true, isAllocated = false;
+                /*for(j=0; j<intvalues.length; j++){
+                    if(window.hWin.HEURIST4.util.findArrayIndex(termlist[i].id, intvalues[j])>=0){
+                        if(idx==j){
+                            itself = true;  //itself
+                        }else{
+                            notused = false;
+                        }
+                        break;
+                    }
+                }
+                */
+
+                //Check to see if the fields have already been allocated
+                for(j=0;j<intervals.length;j++){
+                    if(intervals[j].values.length > 1){
+                        for(k=0;k<intervals[j].values.length;k++){
+                            if(termlist[i].id == intervals[j].values[k]){
+                                isAllocated = true;
+                                break;
+                            }
+                        }
+                    }
+                    else if(termlist[i].id == intervals[j].values[0]){
+                        isAllocated = true;
+                    }
+                }
+
+                if(notused){
+
+                    $intdiv = $(document.createElement('div'))
+                    .addClass('intervalDiv list p-1 row')
+                    .attr('intid', i )
+                    .appendTo($leftColDiv);
+
+                    $listDiv = $(document.createElement('div'))
+                    .addClass('col-md-1 d-flex align-items-center')
+                    .appendTo($intdiv);
+
+                    $('<input>')
+                    .attr('type','checkbox')
+                    .attr('checked', isAllocated)
+                    .attr('disabled', isAllocated)
+                    .addClass('recordIcons')
+                    .attr('termid',termlist[i].id)
+                    .attr('termname',termlist[i].text)
+                    .attr('name', name+'Options')
+                    .change(function(){
+                        //If select all is chosen and user deselects a value, select all checkbox will be unchecked.
+                        if(($('input[id=selectAll]').prop('checked') == true) && ($(this).prop('checked') == false)){
+                            $('input[id=selectAll]').prop('checked', false);
+                        }
+                        
+                        if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
+                            $('input[id=selectAll]').prop('checked', true);
+                        }
+                    })
+                    .appendTo($listDiv);
+
+                    $('<div>')
+                    .addClass('recordTitle col-md p-1')
+                    //.css('margin-top','0.4em')
+                    .html( termlist[i].text )
+                    .appendTo($intdiv);
+
+                }
+
+                //Add arrows to fields that are already allocated
+                if(isAllocated){
+                    var $removeButton = $('<button></button>')
+                    .addClass('btn btn-outline-primary')
+                    .attr('valueid',termlist[i].id)
+                    .attr('indexField', i)
+                    .click(function(){
+                        //Get the name of the value clicked to remove from group interval
+                        var clicked = $(this).attr('valueid');
+
+                        //Find checkbox with same valueid
+                        $('input[termid='+ clicked+']')
+                        .prop('checked', false)
+                        .attr('disabled', false);
+
+                        if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
+                            $('#selectAll').prop('checked', false)
+                            .attr('disabled',false);
+                        }
+
+                        //Remove interval from rendered field.
+                        var fieldID = parseInt($(this).attr('indexField'));
+                        removeInterval(name, fieldID);
+                        //Remove div containing field.
+                        $('div[id='+name+fieldID+']').remove();
+                        //Remove arrow button from the selected value
+                        $(this).remove();
+                    });
+
+                    $('<i class="bi bi-arrow-left"></i>')
+                    .appendTo($removeButton);
+
+                    $('#'+name+i+'ArrowPlacement')
+                    .append($removeButton);
+                }
+            }
+
+            if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
+                $('#selectAll').prop('checked', true)
+                .attr('disabled',true);
+            }
+        }
     }
 
     /**
     * remove interval
     */
-    function removeInterval( name, idx ){
+    function removeInterval( name, idx){
         fields3[name].intervals.splice(idx,1);
 
         /*
@@ -690,7 +853,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $container.find( '#'+name+idx ).remove();
         */
 
-        renderIntervals(name);
+        //renderIntervals(name);
         _doRender(); //Render after the removal of a value.
     }
 
@@ -1007,7 +1170,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $dlg.find("#applyButton").append('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">' 
                 + '<path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>'
                 + '</svg>');
-            $($dlg.find("#applyButton")).appendTo('#'+name+idx+'ArrowPlacement'); //Places arrow at the begining of the edited or newly added interval.
+            if(isAdd){
+                $($dlg.find("#applyButton")).appendTo('#'+name+idx+'ArrowPlacement'); //Places arrow at the begining of the edited or newly added interval.
+            }
+            
             /*$dialogbox = window.hWin.HEURIST4.msg.showElementAsDialog(
                     {element:$dlg.get(0), height: iHeight, width:320, title:"Edit interval", modal:true} ); */
             /*
