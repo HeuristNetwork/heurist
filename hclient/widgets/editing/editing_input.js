@@ -880,6 +880,7 @@ $.widget( "heurist.editing_input", {
                 ];
 
                 window.hWin.HEURIST4.ui.createSelector($input.get(0), sel_options);
+                window.hWin.HEURIST4.ui.initHSelect($input, false);
             }
             else if(this.detailType=='tag'){
                 var groups = [];
@@ -954,6 +955,7 @@ $.widget( "heurist.editing_input", {
                                     sel_options.push(values);
                                 });
                                 window.hWin.HEURIST4.ui.createSelector($input.get(0), sel_options);
+                                window.hWin.HEURIST4.ui.initHSelect($input, false);
                             }else{ // No Tags Found
                                 window.hWin.HEURIST4.ui.createSelector($input.get(0), [{key: '', title: 'No Tags Found'}]);
                             }
