@@ -81,7 +81,7 @@ $.widget( "heurist.media_viewer", {
 
                         var fileURL_forembed = window.hWin.HAPI4.baseURL
                                 + 'hsapi/controller/file_download.php?db=' 
-                                + window.hWin.HAPI4.database + '&embed=1&file='+obf_recID;
+                                + window.hWin.HAPI4.database + '&embedplayer=1&file='+obf_recID;
                                 
                         /* inline html  */
                         $('<div style="display:none;width:80%;height:90%" id="pdf-viewer">'

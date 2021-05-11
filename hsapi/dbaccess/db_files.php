@@ -534,8 +534,11 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
                 . sprintf('filename="%s"; ', rawurlencode($originalFileName))
                 . sprintf("filename*=utf-8''%s", rawurlencode($originalFileName));            
             
-            header($contentDispositionField);
+        }else{
+            $contentDispositionField = 'Content-Disposition: inline';
         }
+        header($contentDispositionField);
+        
         header('Content-Transfer-Encoding: binary');
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
@@ -711,7 +714,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
             
             $autoplay = '';
             if($params && @$params['auto_play']){
-                $autoplay = ' autoplay';
+                $autoplay = ' autoplay="autoplay"';
             }
             
             $result = '<audio controls="controls"'.$autoplay.'>'

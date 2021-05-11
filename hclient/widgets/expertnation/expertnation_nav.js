@@ -2058,7 +2058,7 @@ $.widget( "heurist.expertnation_nav", {
 
                             var fileURL_forembed = window.hWin.HAPI4.baseURL
                             + 'hsapi/controller/file_download.php?db=' 
-                            + window.hWin.HAPI4.database + '&embed=1&file='+obf[0];
+                            + window.hWin.HAPI4.database + '&embedplayer=1&file='+obf[0];
 
                             /*div.pdf {
                             position: absolute;
