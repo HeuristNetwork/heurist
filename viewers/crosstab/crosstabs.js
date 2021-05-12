@@ -655,7 +655,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .append('<i class="bi bi-trash"></i>')
                 //.css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif)'})
                 .click(function( event ) {
-                    removeInterval( name, $(this).attr('intid') );
+                    removeInterval( name, $(this).attr('intid'), -1 );
                 })
                 .appendTo($bodyDiv);
             }
@@ -821,7 +821,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         $(this).parents('div.list').remove();
                         //Remove interval from rendered field.
                         var index = findPositionInArray(name, parseInt(clicked))
-                        removeInterval(name, index);
+                        removeInterval(name, index,-1);
                     });
 
                     $('<i class="bi bi-arrow-left"></i>')
@@ -842,16 +842,29 @@ function CrosstabsAnalysis(_query, _query_domain) {
     /**
     * remove interval
     */
-    function removeInterval( name, idx){
-        //Remove from intervals
-        fields3[name].intervals.splice(idx,1);
+    function removeInterval(name, idx, groupidx){
+
+        //Remove the value from the interval with multiple values.
+        if(groupidx != -1){
+            fields3[name].intervals[groupidx].values.splice(idx,1);
+
+            //If last value in interval remove entire value.
+            if(fields3[name].intervals[groupidx].values.length == 0){
+                fields3[name].intervals.splice(groupidx,1);
+                isIntervalRemoved = true;   //Used to help keep track of the removed variable.
+            }
+        }
+        else{
+            //Remove from intervals
+            fields3[name].intervals.splice(idx,1);        
+        }
 
         //Re-adjust rowids
         var currentRows = $('#rightColDiv'+name+' > .list');
         currentRows.each(function(i, ele){
             $(ele).attr('id', name+i);
         });
-
+        
         _doRender(); //Render after the removal of a value.
     }
 
@@ -937,8 +950,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
 
             //window.hWin.HEURIST4.msg.showMsgDlg('There are no more terms available');
-
-
     }
 
     function __addeditInterval( name, idx){
@@ -983,7 +994,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .attr('id', name+idx )
             .insertBefore($('#addInterval'));
 
-            $('<div class="col-md-1 bg-white">')
+            $('<div class="col-md-1 bg-white arrowDiv">')
             .attr('id', name+idx+'ArrowPlacement')
             .appendTo($intdiv);
 
@@ -1010,19 +1021,86 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 })
             .appendTo($intdiv);
 
+            //If group contains more than one value
             if(interval.values.length > 1){
                 var splitDescription = interval.description.split("+");
-                var listGroup = $('<ul class="list-group list-group-flush"></ul>');
+
+                var listGroup = $('<div class="col-md">')
+                .appendTo($intdiv);
             
                 for(x=0;x<(splitDescription.length-1); x++){
-                    var listItem = $('<li class="list-group-item p-0 bg-transparent">')
-                    .html(splitDescription[x])
+                    var listItem = $('<div class="row p-0 bg-transparent groupList">')
+                    .append('<div class="col-2" id="'+x+'">')
+                    .append('<div class="col border-bottom border-dark description">'+splitDescription[x]+'</div>')
                     .appendTo(listGroup);
                 }
 
-                $('<div class="col-md">')
-                .append(listGroup)
-                .appendTo($intdiv);
+                //Create Remove Buttons
+                for(i=0;i<interval.values.length;i++){
+                    var $removeButton = $('<button></button>')
+                        .addClass('btn btn-outline-primary')
+                        .attr('valueid',interval.values[i])
+                        .click(function(){
+                            //Get the name of the value clicked to remove from group interval
+                            var clicked = $(this).attr('valueid');
+
+                            //Find checkbox with same valueid
+                            $('input[termid='+ clicked+']')
+                            .prop('checked', false)
+                            .attr('disabled', false);
+
+                            if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
+                                $('#selectAll').prop('checked', false)
+                                .attr('disabled',false);
+                            }
+
+                            //Remove interval from rendered field.
+                            var index = findPositionInArray(name, parseInt(clicked))
+                            var groupIndex = parseInt($(this).parents('div.list').attr('id').replace(name,''));
+                            
+                            var singleIndex = (fields3[name].intervals[groupIndex].values.length == 1) ? -1 : groupIndex;
+
+                            removeInterval(name, index, singleIndex);
+
+                            if(singleIndex != -1){
+                                if(fields3[name].intervals[groupIndex].values.length > 1){
+                                    //Remove div containing the corresponding field.
+                                    $(this).parents('div.groupList').remove();
+                                }
+                                else if(fields3[name].intervals[groupIndex].values.length == 1){
+                                    /*If only 1 value is left rearange to be consistent with other interval
+                                    *
+                                    * Find entire row.
+                                    */  
+                                    var rowElement = $(this).parents('div.list');
+                                    //remove list element.
+                                    $(this).parents('div.groupList').remove();
+                                    //Find the only list element left
+                                    var listElement = rowElement.find('div.groupList').children();
+                                    var button = listElement.find('button');
+                                    //append to front of div
+                                    button.appendTo(rowElement.find('div.arrowDiv'));
+
+                                    var nameOfLastInterval = listElement.parent().find('div.description').html();
+                                    //remove all elements within this div
+                                    listElement = listElement.parent();
+                                    listElement.empty();
+                                    listElement.html(nameOfLastInterval);
+                                }
+                            }
+                            else{
+                                $(this).parents('div.list').remove();
+                            }
+                            
+
+                        });
+
+                        $('<i class="bi bi-arrow-left"></i>')
+                        .appendTo($removeButton);
+
+                        //Append arrow to the first child element of the div
+                        listGroup.find('#'+i).append($removeButton);
+                }
 
             }
             else{
@@ -1034,7 +1112,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 //Add remove button if a single value is added
                 var $removeButton = $('<button></button>')
                     .addClass('btn btn-outline-primary')
-                    .attr('valueid',interval.value)
+                    .attr('valueid',interval.values[0])
                     .click(function(){
                         //Get the name of the value clicked to remove from group interval
                         var clicked = $(this).attr('valueid');
@@ -1051,7 +1129,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                         //Remove interval from rendered field.
                         var index = findPositionInArray(name, parseInt(clicked))
-                        removeInterval(name, index);
+                        removeInterval(name, index, -1);
                         //Remove div containing field.
                         $(this).parents('div.list').remove();
                     });
@@ -1059,10 +1137,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     $('<i class="bi bi-arrow-left"></i>')
                     .appendTo($removeButton);
 
-                    $('#'+name+i+'ArrowPlacement')
-                    .append($removeButton);
+                    //Append arrow to the first child element of the div
+                    $('#'+name+idx+' div:first-child').append($removeButton);
             }
 
+        if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
+            $('#selectAll').prop('checked', true)
+            .attr('disabled',true);
+        }
 
             $('#templateInterval').remove();
             
