@@ -181,15 +181,25 @@ console.log('load google map api')
                     
                     $('#get-coordinates-helper').show();
                     $('#set-coordinates-helper').hide();
-                    $('#geodata_textarea').css({top:'2em'});
+                    $('#geodata_textarea').css({top:'4em'});
                     
                     $('#get-coord-wkt').change();
                     
-                    var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
+                    var $dlg;
+
+                    var titleYes = window.hWin.HR('[Add to Map]');
+                    var button={};
+                    button[titleYes] = function() {
+                        mapping.mapping( 'drawLoadGeometry', $dlg.find('#geodata_textarea').val());
+                        $dlg.dialog( "close" );
+                    };
+
+                    $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
                         element: document.getElementById( "get-set-coordinates" ),
                         resizable: false,
                         width:690, height:400,
-                        title:window.hWin.HR('Copy the result')
+                        title:window.hWin.HR('Copy the result'),
+                        buttons:button
                 
                     });
                 });
@@ -414,12 +424,12 @@ console.log('load google map api')
                     }
                     
                 }else{
-					
+
                     var t_geocoder = this.map_geocoder;
                     if(!window.hWin.HEURIST4.util.isnull(t_geocoder)){  // Two instances, first instance t_geocoder will be undefined
                         $(t_geocoder._container).addClass('leaflet-control-geocoder-expanded'); // Show search box 
                     }
-					
+
                     $('#cbAllowMulti').prop('checked',false);
                     mapping.mapping( 'drawClearAll' );
                     
@@ -432,7 +442,7 @@ console.log('load google map api')
                         window.hWin.HEURIST4.msg.showMsgFlash(sMsgDigizeSearch, 2000);
                     }
                 }
-				
+
                 var that = this;
                 
                 if(!window.hWin.HEURIST4.util.isnull(this.map_geocoder)){
@@ -605,7 +615,7 @@ console.log('load google map api')
                     <button id="view-button">Remember view</button>
                 </div>
                 <div style="padding-top:20px">
-                    <button class="save-button" style="font-weight:bold;font-size:1.1em">Save</button>
+                    <button class="save-button ui-button-action" style="font-weight:bold;font-size:1.1em">Save</button>
                 </div> 
                 
                 <div style="position:absolute;bottom:5;text-align:left;padding:10px;">
@@ -640,7 +650,7 @@ console.log('load google map api')
             <div id="set-coordinates-helper">
                 <label>Paste geo data as Simple points, GeoJSON or WKT</label>
                 <div class="heurist-helper1" style="padding:5px 0">
-                    WKT:  Point (x y)   Linestring (x1 y1, x2 y2, x3 y3)   Polygon ((x1 y1, x2 y2, x3 y3)) see 
+                    WKT:  POINT(x y)   LINESTRING(x1 y1, x2 y2, x3 y3)   POLYGON((x1 y1, x2 y2, x3 y3)) see 
                     <a href="https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry" target="_blank">wikipedia</a> for more.<br>
                     Simple points can be represented as: Y X or Y,X. Coordinates in decimal lat/long or UTM (first easting then northing)<br>
                 </div>
@@ -651,7 +661,7 @@ console.log('load google map api')
                 <label><input type="radio" name="get-coord-format" id="get-coord-wkt">WKT</label>
             </div>
             <textarea cols="" rows="" id="geodata_textarea"
-                style="position:absolute;top:2em;bottom:0;width:97%;resize:none"></textarea>
+                style="position:absolute;top:4em;bottom:0;width:97%;resize:none"></textarea>
         </div>
 
     </body>
