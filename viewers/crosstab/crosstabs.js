@@ -1382,7 +1382,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         $divres.append('<span>Type of value displayed: <b>'+aggregationMode+'</b></span>');
 
-        $divres.append('<div>---------------------------------</div>');
+        $divres.append('<div></div>');
         //Type of value displayed (count, average, sum)
 
 
@@ -1933,7 +1933,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
             $table.appendTo($divres);
             
-            $divres.append('<div>---------------------------------</div>');
+            $divres.append('<div></div>');
 
             //$("#modalButton").attr("disabled", false);
 
