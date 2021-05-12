@@ -424,7 +424,7 @@ $.widget( "heurist.searchBuilder", {
                     if(this.field_array.length>1){
                         var conjunct = (this.search_conjunction.val()=='any')?'OR':'AND';
 
-                        ele.find('.field_header').text(conjunct);
+                        ele.find('.field_header').text(conjunct).attr('title', 'Change value in dropdown above fields');
                     }
                 }
                 
