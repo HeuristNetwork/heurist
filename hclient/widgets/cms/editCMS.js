@@ -388,7 +388,7 @@ function editCMS( options ){
 
                                         //init buttons
                                         if(!no_access){
-                                            edit_dialog.find('#btn_edit_home').button({icon:'ui-icon-pencil'}).click(function(){
+                                            edit_dialog.find('#btn_edit_home').button({icon:'ui-icon-gear'}).click(function(){
                                                 _editHomePageRecord();
                                             });
 
@@ -405,7 +405,7 @@ function editCMS( options ){
                                                 preview_frame[0].contentWindow.cmsEditing.editFooterContent();
                                             });
 
-                                            edit_dialog.find('#btn_edit_page_content').button({icon:'ui-icon-window'}).click(function(){
+                                            edit_dialog.find('#btn_edit_page_content').button({icon:'ui-icon-pencil'}).click(function(){
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 //preview_frame[0].contentWindow.editPageContent();
                                                 preview_frame[0].contentWindow.cmsEditing.editPageContent();
@@ -413,6 +413,9 @@ function editCMS( options ){
                                             edit_dialog.find('#btn_edit_page_source').button({icon:'ui-icon-script'}).click(function(){
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 preview_frame[0].contentWindow.cmsEditing.editPageSource();
+                                            });
+                                            edit_dialog.find('#btn_embed_dialog').button({icon:'ui-icon-extlink'}).click(function(){
+                                                window.hWin.HEURIST4.ui.showRecordActionDialog('embedDialog',{layout_rec_id: home_page_record_id});
                                             });
                                             /*
                                             edit_dialog.find('#btn_edit_page_record').button().click(function(){
