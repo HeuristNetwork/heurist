@@ -1454,7 +1454,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 "info" : false,
                 dom:"Bfrtip",
                 buttons:[
-                    'csv','pdf','print'
+                    {extend: 'csv', footer: true }, {extend:'pdf',footer: true}, {extend:'print', footer: true}
                 ]
             }
             );
