@@ -661,7 +661,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
         }
 
-        $btnDiv = $('<div class="row my-2"></div>').attr('id', 'addInterval')
+        $btnDiv = $('<div class="row my-2"></div>').attr('id', 'addIntervalDiv')
             .appendTo($rightColDiv);
 
         $addIntervalBtn = $('<button>',{class: "btn btn-success w-100"})
@@ -860,7 +860,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
         //Re-adjust rowids
-        var currentRows = $('#rightColDiv'+name+' > .list');
+        var currentRows = $('#rightColDiv'+name+' > .list').not('#templateInterval');
         currentRows.each(function(i, ele){
             $(ele).attr('id', name+i);
         });
@@ -902,7 +902,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var $newInterval = $(document.createElement('div'))
             .addClass('intervalDiv list row')
             .attr('id','templateInterval')
-            .appendTo('#rightColDiv'+name)
+            .insertBefore($('#addIntervalDiv'));
 
             $('<div class="col-md-1 bg-white">')
             .attr('id', name+idx+'ArrowPlacement')
@@ -954,7 +954,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     function __addeditInterval( name, idx){
 
-        var detailtype = fields3[name].type; 
+        var detailtype = fields3[name].type;
 
         if(idx<0){
             fields3[name].intervals.push( {name:'', description:'', values:[] });
@@ -992,7 +992,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $intdiv = $(document.createElement('div'))
             .addClass('intervalDiv list row')
             .attr('id', name+idx )
-            .insertBefore($('#addInterval'));
+            .insertBefore($('#addIntervalDiv'));
 
             $('<div class="col-md-1 bg-white arrowDiv">')
             .attr('id', name+idx+'ArrowPlacement')
@@ -1060,21 +1060,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             
                             var singleIndex = (fields3[name].intervals[groupIndex].values.length == 1) ? -1 : groupIndex;
 
-                            removeInterval(name, index, singleIndex);
-
                             if(singleIndex != -1){
                                 if(fields3[name].intervals[groupIndex].values.length > 1){
                                     //Remove div containing the corresponding field.
                                     $(this).parents('div.groupList').remove();
                                 }
-                                else if(fields3[name].intervals[groupIndex].values.length == 1){
-                                    /*If only 1 value is left rearange to be consistent with other interval
-                                    *
+                                
+                                if(fields3[name].intervals[groupIndex].values.length == 2){
+                                    /*If two values are left rearange to be consistent with other interval
+                                    * This is done before it is deleted within the array.
                                     * Find entire row.
                                     */  
-                                    var rowElement = $(this).parents('div.list');
-                                    //remove list element.
-                                    $(this).parents('div.groupList').remove();
+                                    var rowElement = $('#'+name+singleIndex);
                                     //Find the only list element left
                                     var listElement = rowElement.find('div.groupList').children();
                                     var button = listElement.find('button');
@@ -1091,8 +1088,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             else{
                                 $(this).parents('div.list').remove();
                             }
-                            
 
+                            removeInterval(name, index, singleIndex);
                         });
 
                         $('<i class="bi bi-arrow-left"></i>')
@@ -1146,11 +1143,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .attr('disabled',true);
         }
 
-            $('#templateInterval').remove();
+        $('#templateInterval').remove();
+
+        $('#addInterval').prop('disabled',false);
             
         _doRender();
-
-        //$dialogbox.dialog( "close" );
     }
 
     //
@@ -1412,7 +1409,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                 break;
                             }
                         }
-
 
                         if(page_interval_idx>=0 && curr_interval_idx!=page_interval_idx && records.length>0){
                             if(curr_interval_idx>=0){
