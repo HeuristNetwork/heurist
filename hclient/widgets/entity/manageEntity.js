@@ -869,6 +869,11 @@ $.widget( "heurist.manageEntity", {
                 sh = sh + $(ele).height();
             }
         });
+        //description above edit form        
+        var ele = $dlg.find('.entity-description')
+        if(ele.length>0 && ele.is(':visible')){
+            sh = sh + ele.height();
+        }
         
         sh = sh+140
         

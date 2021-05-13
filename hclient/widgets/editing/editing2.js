@@ -403,7 +403,7 @@ function hEditing(_options) {
 
         if(entityConfig && entityConfig.entityDescription){
             //add description at the beginning of form
-            $('<div>').css({padding: '4px'}).addClass('heurist-helper2')
+            $('<div>').css({padding: '4px'}).addClass('heurist-helper2 entity-description')
                 .html(entityConfig.entityDescription).appendTo($container);
         }
         
