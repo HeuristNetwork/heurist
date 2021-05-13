@@ -854,7 +854,7 @@ $.widget( "heurist.editing_input", {
             } 
 
         }
-        else if(this.detailType=='enum' || this.detailType=='relationtype'){//--------------------------------------
+        else if(this.detailType=='enum' || this.detailType=='relationtype' || this.detailType=='access' || this.detailType=='tag'){//--------------------------------------
 
             var dwidth;
             if(this.configMode && this.configMode.entity!='records'){
@@ -870,7 +870,104 @@ $.widget( "heurist.editing_input", {
                 .val(value)
                 .appendTo( $inputdiv );
             
-            $input = this._recreateSelector($input, value);
+            if(this.detailType=='access'){
+                var sel_options = [
+                    {key: '', title: ''}, 
+                    {key: 'viewable', title: 'viewable'}, 
+                    {key: 'hidden', title: 'hidden'}, 
+                    {key: 'public', title: 'public'}, 
+                    {key: 'pending', title: 'pending'}
+                ];
+
+                window.hWin.HEURIST4.ui.createSelector($input.get(0), sel_options);
+                window.hWin.HEURIST4.ui.initHSelect($input, false);
+            }
+            else if(this.detailType=='tag'){
+                var groups = [];
+                var req = {};
+                req['a'] = 'search';
+                req['details'] = 'name'; // Get group id and name
+                req['entity'] = 'sysGroups';
+                req['request_id'] = window.hWin.HEURIST4.util.random();
+
+                /* Retrieve List of User Groups, mostly the names for displaying */
+                window.hWin.HAPI4.EntityMgr.doRequest(req, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            var recset = new hRecordSet(response.data);
+                            if(recset.length()>0){
+                                recset.each2(function(id, val){
+                                    groups.push([val['ugr_ID'], val['ugr_Name']]);
+                                });
+                            }
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+                );
+
+                var sel_options = [];
+                var u_id = window.hWin.HAPI4.currentUser['ugr_ID'];
+
+                req = {};
+                req['a'] = 'search';
+                req['details'] = 'name'; // Get tag id, name, and gorup id
+                req['entity'] = 'usrTags';
+                req['sort:tag_Text'] = 2; // Order tags by tag name
+                req['request_id'] = window.hWin.HEURIST4.util.random();
+
+                /* Retrieve Tags */
+                window.hWin.HAPI4.EntityMgr.doRequest(req, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            var gIDs = [];
+                            var recset = new hRecordSet(response.data);
+                            if(recset.length()>0){
+                                records = recset.getSubSetByRequest({'sort:tag_UGrpID':1});
+                                
+                                u_tags = records.getSubSetByRequest({'tag_UGrpID':'='+u_id});
+                                u_tags.each2(function(id, val){ // Get User Tags first
+                                    var tag_name = filter_val = val['tag_Text'];
+                                    var tag_group = val['tag_UGrpID'];
+
+                                    var values = {};
+                                    values['key'] = filter_val;
+                                    values['title'] = tag_name;
+
+                                    sel_options.push(values);
+                                });  
+
+                                w_tags = records.getSubSetByRequest({'tag_UGrpID':'!='+u_id});
+                                w_tags.each2(function(id, val){ // Get Workgroup Tags second
+                                    var tag_name = filter_val = val['tag_Text'];
+                                    var tag_group = val['tag_UGrpID'];
+
+                                    for(var i=0; i<groups.length; i++){
+                                        if(groups[i][0] == tag_group){
+                                            tag_name = groups[i][1] + '.' + tag_name;
+                                        }
+                                    }
+
+                                    var values = {};
+                                    values['key'] = filter_val;
+                                    values['title'] = tag_name;
+
+                                    sel_options.push(values);
+                                });
+                                window.hWin.HEURIST4.ui.createSelector($input.get(0), sel_options);
+                                window.hWin.HEURIST4.ui.initHSelect($input, false);
+                            }else{ // No Tags Found
+                                window.hWin.HEURIST4.ui.createSelector($input.get(0), [{key: '', title: 'No Tags Found'}]);
+                            }
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+                );
+            }
+            else{
+                $input = this._recreateSelector($input, value);
+            }
             $input = $($input);
             
             this._on( $input, {change:this._onTermChange} );
@@ -2212,24 +2309,6 @@ $.widget( "heurist.editing_input", {
                                 this.newvalues[$input.attr('id')] = value;
                             }*/
                         }
-                
-				/* Check User Preferences, displays thumbnail inline by default if set */
-                if (window.hWin.HAPI4.get_prefs_def('imageRecordEditor', 0)!=0 && value.ulf_ID)
-                {
-                    $input_img.show();
-                    $dwnld_anchor.show();
-
-                    $dwnld_anchor.appendTo( $inputdiv );
-
-                    $input_img.css('cursor', 'zoom-in');
-
-                    $small_text.hide();
-
-                    $input.off("mouseout");
-
-                    isClicked++;
-                }
-				
             }
             else
             if( this.detailType=='folder' ){ //----------------------------------------------------
