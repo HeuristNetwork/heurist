@@ -633,7 +633,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             */
         }
 
-        $btnDiv = $('<div class="row my-2"></div>').attr('id', 'addIntervalDiv')
+        $btnDiv = $('<div class="row my-2"></div>').attr('id', 'addIntervalDiv'+name)
             .appendTo($rightColDiv);
 
         $addIntervalBtn = $('<button>',{class: "btn btn-success w-100"})
@@ -681,7 +681,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $('<input>')
             .attr('type','checkbox')
             .attr('checked', false)
-            .attr('id','selectAll')
+            .attr('id','selectAll'+name)
             .addClass('recordIcons')
             .change(function(){
                 //Unchecks selectall checkbox if a value is unchecked.
@@ -752,12 +752,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     .attr('name', name+'Options')
                     .change(function(){
                         //If select all is chosen and user deselects a value, select all checkbox will be unchecked.
-                        if(($('input[id=selectAll]').prop('checked') == true) && ($(this).prop('checked') == false)){
-                            $('input[id=selectAll]').prop('checked', false);
+                        if(($('input[id=selectAll'+name+']').prop('checked') == true) && ($(this).prop('checked') == false)){
+                            $('input[id=selectAll'+name+']').prop('checked', false);
                         }
                         
                         if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
-                            $('input[id=selectAll]').prop('checked', true);
+                            $('input[id=selectAll'+name+']').prop('checked', true);
                         }
                     })
                     .appendTo($listDiv);
@@ -785,7 +785,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         .attr('disabled', false);
 
                         if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
-                            $('#selectAll').prop('checked', false)
+                            $('#selectAll'+name).prop('checked', false)
                             .attr('disabled',false);
                         }
 
@@ -805,7 +805,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
 
             if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
-                $('#selectAll').prop('checked', true)
+                $('#selectAll'+name).prop('checked', true)
                 .attr('disabled',true);
             }
         }
@@ -874,7 +874,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var $newInterval = $(document.createElement('div'))
             .addClass('intervalDiv list row')
             .attr('id','templateInterval')
-            .insertBefore($('#addIntervalDiv'));
+            .insertBefore($('#addIntervalDiv'+name));
 
             $('<div class="col-md-1 bg-white">')
             .attr('id', name+idx+'ArrowPlacement')
@@ -983,7 +983,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $intdiv = $(document.createElement('div'))
             .addClass('intervalDiv list row')
             .attr('id', name+idx )
-            .insertBefore($('#addIntervalDiv'));
+            .insertBefore($('#addIntervalDiv'+name));
 
             $('<div class="col-md-1 bg-white arrowDiv">')
             .attr('id', name+idx+'ArrowPlacement')
@@ -1034,7 +1034,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         }
 
                         if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
-                            $('#selectAll').prop('checked', false)
+                            $('#selectAll'+name).prop('checked', false)
                             .attr('disabled',false);
                         }
 
@@ -1062,6 +1062,26 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .append($('<button>')
                 .addClass("btn btn-outline-success applyToGroup")
                 .click(function(){
+
+                    var isAllChecked = ($('input[name='+name+'Options]:checked:disabled').length == $('input[name='+name+'Options]').length) ? true : false;
+                    var isNotChecked = ($('input[name='+name+'Options]:checked:not(:disabled)').length == 0) ? true : false;
+                    //Generate error message to prevent user from submitting an empty interval
+                    if(isAllChecked || isNotChecked){
+                        var errorMessage = 'All values have been assigned. If you would like to add a value to this group, please click the blue arrow to de-assign.'
+                        $(this).popover({
+                            container : 'body',
+                            placement : 'bottom',
+                            content : errorMessage,
+                            trigger : 'click',
+                            delay : {
+                                show : '100', 
+                                hide :'100'
+                            }
+                        }).popover('show');
+
+                        return;
+                    }
+
                     //Add new value to group
                     var interval = parseInt($(this).parents('div.list').attr('id').replace(name,''));
                     var newValue = [];
@@ -1105,7 +1125,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             .attr('disabled', false);
 
                             if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
-                                $('#selectAll').prop('checked', false)
+                                $('#selectAll'+name).prop('checked', false)
                                 .attr('disabled',false);
                             }
 
@@ -1183,7 +1203,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             .attr('disabled', false);
 
                             if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
-                                $('#selectAll').prop('checked', false)
+                                $('#selectAll'+name).prop('checked', false)
                                 .attr('disabled',false);
                             }
 
@@ -1258,7 +1278,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         .attr('disabled', false);
 
                         if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
-                            $('#selectAll').prop('checked', false)
+                            $('#selectAll'+name).prop('checked', false)
                             .attr('disabled',false);
                         }
 
@@ -1277,7 +1297,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
 
         if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
-            $('#selectAll').prop('checked', true)
+            $('#selectAll'+name).prop('checked', true)
             .attr('disabled',true);
         }
 
