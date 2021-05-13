@@ -1102,6 +1102,10 @@ class HPredicate {
             }else{
                 $res = "exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
                 .$p.'dtl_DetailTypeID';
+                
+                if($this->negate && ($this->field_type=='enum' || $this->field_type=='relationtype')){
+                    $res = 'NOT '.$res;       
+                }
             }
             
             if($several_ids && count($several_ids)>0){
@@ -1128,7 +1132,7 @@ class HPredicate {
                 }
                 
             }else{
-                $res = $res.' AND '.$field_name.$val.')';    
+                $res = $res.' AND '.$field_name.$val.')';        
             }
 
         }
@@ -1884,8 +1888,8 @@ class HPredicate {
                 }
                 $res  =  $res.' or trm_Code="'.$value.'")';
             }
-            $res = (($this->negate)?' not':'').$res;
-            
+            //if put negate here is will accept any multivalue enum field
+            //see negate for enum on level above $res = (($this->negate)?' not':'').$res;
         }else
         if ($this->field_type=='file'){        
             
