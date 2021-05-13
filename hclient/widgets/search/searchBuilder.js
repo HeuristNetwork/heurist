@@ -196,7 +196,6 @@ $.widget( "heurist.searchBuilder", {
         if(this.field_array.length==0){
             this.btnAddFieldItem.click();
         }else{
-            this.pnl_Items.find('.field_header').css('visibility','hidden');
             this.pnl_Items.find('.field_header:first').css('visibility','visible');
         }
         if(this.field_array.length>1){
@@ -423,7 +422,9 @@ $.widget( "heurist.searchBuilder", {
                     });
                     
                     if(this.field_array.length>1){
-                        ele.find('.field_header').css('visibility','hidden');
+                        var conjunct = (this.search_conjunction.val()=='any')?'OR':'AND';
+
+                        ele.find('.field_header').text(conjunct).attr('title', 'Change value in dropdown above fields');
                     }
                 }
                 
@@ -1279,9 +1280,15 @@ console.log(aCodes);
             });
             
             this.pnl_Result.text( JSON.stringify(mainquery) );    
+        } 
+        
+        var conjunct = (this.search_conjunction.val()=='any')?'OR':'AND';
+        var $fields_headers = $('.field_header');
+        var cnt = $fields_headers.length;
+
+        for(var i=1; i<cnt; i++){
+            $($fields_headers[i]).text(conjunct);
         }
-        
-        
         
     }
 });

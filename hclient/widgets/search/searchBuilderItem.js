@@ -521,7 +521,7 @@ Whole value = EQUAL
             }
         }
 
-        if(this.options.dty_ID>0 && field_type!='relmarker'){  
+        if((this.options.dty_ID>0 || this.options.dty_ID=='notes' || this.options.dty_ID=='url') && field_type!='relmarker'){  
             eqopts.push({key:'', title:'──────────', disabled:true});
             eqopts.push({key:'any', title:'any value (exists)'});
             eqopts.push({key:'NULL', title:'no data (missing)'});
