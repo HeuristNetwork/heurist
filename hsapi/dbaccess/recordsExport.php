@@ -996,8 +996,10 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                 if($field_type=='date' || $field_type=='year'){
                     if($dty_ID==DT_START_DATE){
                         $date_start = temporalToSimple($value);
+                        if(strpos($date_start,'unknown')!==false) $date_start = null;
                     }else if($dty_ID==DT_END_DATE){
                         $date_end = temporalToSimple($value);
+                        if(strpos($date_end,'unknown')!==false) $date_end = null;
                     }else if($value!=null){
                         //parse temporal
                         $ta = temporalToSimpleRange($value);
