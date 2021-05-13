@@ -588,7 +588,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 if(intervalPosition >= fields3[name].values.length){
                     //Create input box to change name
-                    $(this).html('<input id="changeNameBox" value="'+interval.name+'">');
+                    $(this).html('<input class="w-100" id="changeNameBox" value="'+interval.name+'">');
                     //When user clicks out of input box edit name
                     $('#changeNameBox').blur(function(){
                         var nameChanged = $('#changeNameBox').val();
@@ -631,34 +631,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
             'onclick="{top.HEURIST.search.savedSearchDelete('+sid+');}"></div>';
             $intdiv.append(editbuttons);
             */
-
-            if(idx >= fields3[name].values.length){
-                $bodyDiv = $('<div class="col-md-2"></div>')
-                .appendTo($intdiv);
-
-                $('<button>')
-                .attr('intid', idx)
-                //.button({icons: {primary: "ui-icon-pencil"}, text: false })
-                .addClass('btn btn-warning border-dark')
-                .append('<i class="bi bi-pencil"></i>')
-                //css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif)'})
-                .click(function( event ) {
-                    renderIntervals(name); //Refresh intervals to remove existing arrows and create a clean display.
-                    editInterval( name,  $(this).attr('intid'), false);
-                })
-                .appendTo($bodyDiv);
-    
-                $('<button>')
-                //.button({icons: {primary: "ui-icon-close"}, text: false })
-                .attr('intid', idx)
-                .addClass('btn btn-danger border-dark')
-                .append('<i class="bi bi-trash"></i>')
-                //.css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif)'})
-                .click(function( event ) {
-                    removeInterval( name, $(this).attr('intid'), -1 );
-                })
-                .appendTo($bodyDiv);
-            }
         }
 
         $btnDiv = $('<div class="row my-2"></div>').attr('id', 'addIntervalDiv')
@@ -693,7 +665,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         .appendTo($firstRowDiv);
 
         var detailtype = fields3[name].type;
-        //EDIT THIS
+
         //Create body of checkboxes
         if ( detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype")
         {
@@ -954,6 +926,25 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     function __addeditInterval( name, idx){
 
+        var isAllChecked = ($('input[name='+name+'Options]:checked:disabled').length == $('input[name='+name+'Options]').length) ? true : false;
+        var isNotChecked = ($('input[name='+name+'Options]:checked:not(:disabled)').length == 0) ? true : false;
+        //Generate error message to prevent user from submitting an empty interval
+        if(isAllChecked || isNotChecked){
+            var errorMessage = 'This new interval cannot be empty. If all available values are used, click the blue arrow to make it available.'
+            $('#applyButton').popover({
+                container : 'body',
+                placement : 'bottom',
+                content : errorMessage,
+                trigger : 'click',
+                delay : {
+                    show : '100', 
+                    hide :'100'
+                }
+            }).popover('show');
+
+            return;
+        }
+
         var detailtype = fields3[name].type;
 
         if(idx<0){
@@ -998,7 +989,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .attr('id', name+idx+'ArrowPlacement')
             .appendTo($intdiv);
 
-            $('<div class="col-md-4">')
+            $('<div class="col-md">')
             //.css({'width':'160px','display':'inline-block'})
             .html(interval.name)
             .css({'font-weight':'bold'} )
@@ -1009,7 +1000,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 intervalPosition = parseInt(intervalPosition);
 
-                $(this).html('<input id="changeNameBox" value="'+interval.name+'">');
+                $(this).html('<input  class="w-100" id="changeNameBox" value="'+interval.name+'">');
                 //When user clicks out of input box edit name
                 $('#changeNameBox').blur(function(){
                     var nameChanged = $('#changeNameBox').val();
@@ -1023,9 +1014,40 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             //If group contains more than one value
             if(interval.values.length > 1){
+                //Add delete button
+                $('<div class="col-md-1 delete">')
+                .append($('<button>')
+                    .addClass('btn btn-danger border-dark')
+                    .append('<i class="bi bi-trash"></i>')
+                    .click(function(){
+                        //Remove interval and uncheck checkboxes
+                        var interval = parseInt($(this).parents('div.list').attr('id').replace(name,''));
+
+                        for(s=0;s<fields3[name].intervals[interval].values.length;s++)
+                        {
+                            var clicked = fields3[name].intervals[interval].values[s];
+
+                            //Find checkbox with same valueid
+                            $('input[termid='+ clicked+']')
+                                .prop('checked', false)
+                                .attr('disabled', false);
+                        }
+
+                        if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
+                            $('#selectAll').prop('checked', false)
+                            .attr('disabled',false);
+                        }
+
+                        $('#'+name+interval).remove();
+
+                        removeInterval(name, interval, -1);
+                    })
+                )
+                .appendTo($intdiv);
+
                 var splitDescription = interval.description.split("+");
 
-                var listGroup = $('<div class="col-md">')
+                var listGroup = $('<div class="col-md-7 groupings">')
                 .appendTo($intdiv);
             
                 for(x=0;x<(splitDescription.length-1); x++){
@@ -1034,6 +1056,117 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     .append('<div class="col border-bottom border-dark description">'+splitDescription[x]+'</div>')
                     .appendTo(listGroup);
                 }
+
+                //Create add button for the group
+                $intdiv.find('#'+name+idx+'ArrowPlacement')
+                .append($('<button>')
+                .addClass("btn btn-outline-success applyToGroup")
+                .click(function(){
+                    //Add new value to group
+                    var interval = parseInt($(this).parents('div.list').attr('id').replace(name,''));
+                    var newValue = [];
+                    var newDescription = [];
+                    //Find all checkboxes that have been clicked.
+                    var sels = $('input[name='+name+'Options]').filter(function(){
+                        return !this.disabled && this.checked;
+                    });
+                    //Add to the existing array.
+                    var isMulti = (sels.length > 1) ? '+' : ''
+                    $.each(sels, function(i, ele){
+                        fields3[name].intervals[interval].values.push( parseInt($(ele).attr('termid')) );
+                        fields3[name].intervals[interval].description = fields3[name].intervals[interval].description + $(ele).attr('termname')+isMulti;
+                        newValue[i] = parseInt($(ele).attr('termid'));
+                        newDescription[i] = $(ele).attr('termname');
+                        sels.attr('disabled',true);
+                        sels.attr('checked', true);
+                    });
+                    //Find list group
+                    listGroup = $(this).parents('div.list');
+                    listGroup = listGroup.find('div.groupings');
+                    //Add new layer to group interface.
+                    for(i=0;i<newDescription.length;i++){
+                        //Add description
+                        $('<div class="row p-0 bg-transparent groupList">')
+                        .append('<div class="col-2" id="'+x+'">')
+                        .append('<div class="col border-bottom border-dark description">'+newDescription[i]+'</div>')
+                        .appendTo(listGroup);
+
+                        //Append remove button
+                        var $removeButton = $('<button></button>')
+                        .addClass('btn btn-outline-primary')
+                        .attr('valueid',newValue[i])
+                        .click(function(){
+                            //Get the name of the value clicked to remove from group interval
+                            var clicked = $(this).attr('valueid');
+
+                            //Find checkbox with same valueid
+                            $('input[termid='+ clicked+']')
+                            .prop('checked', false)
+                            .attr('disabled', false);
+
+                            if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
+                                $('#selectAll').prop('checked', false)
+                                .attr('disabled',false);
+                            }
+
+                            //Remove interval from rendered field.
+                            var index = findPositionInArray(name, parseInt(clicked))
+                            var groupIndex = parseInt($(this).parents('div.list').attr('id').replace(name,''));
+                            
+                            var singleIndex = (fields3[name].intervals[groupIndex].values.length == 1) ? -1 : groupIndex;
+
+                            if(singleIndex != -1){
+                                if(fields3[name].intervals[groupIndex].values.length > 1){
+                                    //Remove div containing the corresponding field.
+                                    $(this).parents('div.groupList').remove();
+                                }
+                                
+                                if(fields3[name].intervals[groupIndex].values.length == 2){
+                                    /*If two values are left rearange to be consistent with other interval
+                                    * This is done before it is deleted within the array.
+                                    * Find entire row.
+                                    */  
+                                    var rowElement = $('#'+name+singleIndex);
+                                    //Find the only list element left
+                                    var listElement = rowElement.find('div.groupList').children();
+                                    var button = listElement.find('button');
+                                    //append to front of div
+                                    button.appendTo(rowElement.find('div.arrowDiv'));
+
+                                    var nameOfLastInterval = listElement.parent().find('div.description').html();
+                                    //remove all elements within this div
+                                    listElement = listElement.parents('div.groupings');
+                                    listElement.empty();
+                                    listElement.html(nameOfLastInterval);
+
+                                    //Remove add button if single interval is found
+                                    rowElement.find("button.applyToGroup").remove();
+                                    //Remove delete button if single interval found.
+                                    rowElement.find('div.delete').remove();
+                                }
+                            }
+                            else{
+                                $(this).parents('div.list').remove();
+                            }
+
+                            removeInterval(name, index, singleIndex);
+                        });
+
+                        $('<i class="bi bi-arrow-left"></i>')
+                        .appendTo($removeButton);
+
+                        //Append arrow to the first child element of the div
+                        listGroup.find('#'+x).append($removeButton);
+                        x++;
+                    }
+                    _doRender();
+                }));
+
+                $intdiv.find(".applyToGroup").append('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">' 
+                + '<path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>'
+                + '</svg>');
+ 
+                $($intdiv.find("#applyButton")).appendTo('#'+name+idx+'ArrowPlacement'); //Places arrow at the begining of the edited or newly added interval.
 
                 //Create Remove Buttons
                 for(i=0;i<interval.values.length;i++){
@@ -1080,9 +1213,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                                     var nameOfLastInterval = listElement.parent().find('div.description').html();
                                     //remove all elements within this div
-                                    listElement = listElement.parent();
+                                    listElement = listElement.parents('div.groupings');
                                     listElement.empty();
                                     listElement.html(nameOfLastInterval);
+
+                                    //Remove add button if single interval is found
+                                    rowElement.find("button.applyToGroup").remove();
+                                    //Remove delete button if single interval found.
+                                    rowElement.find('div.delete').remove();
                                 }
                             }
                             else{
@@ -1101,7 +1239,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             }
             else{
-                $('<div class="col-md">')
+                $('<div class="col-md-7">')
                 .html(interval.description)
                 //.css({'max-width':'250px','width':'250px','display':'inline-block','padding-left':'1.5em'})
                 .appendTo($intdiv);
