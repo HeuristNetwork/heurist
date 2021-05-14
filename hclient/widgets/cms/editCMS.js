@@ -388,7 +388,7 @@ function editCMS( options ){
 
                                         //init buttons
                                         if(!no_access){
-                                            edit_dialog.find('#btn_edit_home').button({icon:'ui-icon-pencil'}).click(function(){
+                                            edit_dialog.find('#btn_edit_home').button({icon:'ui-icon-gear'}).click(function(){
                                                 _editHomePageRecord();
                                             });
 
@@ -405,7 +405,7 @@ function editCMS( options ){
                                                 preview_frame[0].contentWindow.cmsEditing.editFooterContent();
                                             });
 
-                                            edit_dialog.find('#btn_edit_page_content').button({icon:'ui-icon-window'}).click(function(){
+                                            edit_dialog.find('#btn_edit_page_content').button({icon:'ui-icon-pencil'}).click(function(){
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 //preview_frame[0].contentWindow.editPageContent();
                                                 preview_frame[0].contentWindow.cmsEditing.editPageContent();
@@ -657,9 +657,11 @@ function editCMS( options ){
                                             }else 
                                                 if(ele.hasClass('ui-icon-trash')){    //remove menu entry
 
+                                                    var menu_title = ele.parents('.fancytree-node').find('.fancytree-title')[0].innerText; // Get menu title
 
                                                     function __doRemove(){
-                                                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                                                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                                        var isDelete = $dlg.find('#del_menu').is(':checked');
                                                         $dlg.dialog( "close" );
 
                                                         var to_del = [];
@@ -669,6 +671,10 @@ function editCMS( options ){
                                                                 },true);
                                                         }
 
+                                                        if(!isDelete){ // Check if the menu and related records are to be deleted, or just removed
+                                                            to_del = null;
+                                                        }
+                                                        
                                                         removeMenuEntry(parent_id, menuid, to_del, function(){
                                                             item.remove();    
                                                             was_something_edited = true;
@@ -693,9 +699,12 @@ function editCMS( options ){
                                                     };
 
                                                     window.hWin.HEURIST4.msg.showMsgDlg(
-                                                        'This removes the menu entry and web page content from the database, '
-                                                        +'as well as all sub-menus of this menu (if any). '
-                                                        +'<br><br>To avoid deleting sub-menus, move them out of this menu before deletion.',buttons);
+                                                        'This removes the menu entry from the website, as well as all sub-menus of this menu (if any).<br><br>'
+                                                        + 'To avoid removing sub-menus, move them out of this menu before removing it.<br><br>'
+                                                        + '<input type="checkbox" id="del_menu">'
+                                                        + '<label for="del_menu" style="display: inline-flex;">If you want to delete the actual web pages from the database, not simply remove<br>'
+                                                        + 'the menu entreis from this website, check this box. Note that this is not reversible.</label>', buttons,
+                                                        'Remove "'+ menu_title +'" Menu');
 
                                                 }
 
@@ -913,7 +922,7 @@ function editCMS( options ){
         if(!btn_refresh.button('instance')){
 
             if(!no_access){
-                edit_dialog.find('#btn_edit_page_content2').button({icon:'ui-icon-window'}).click(function(){
+                edit_dialog.find('#btn_edit_page_content2').button({icon:'ui-icon-pencil'}).click(function(){
                     var preview_frame = edit_dialog.find('#web_preview');
                     preview_frame[0].contentWindow.cmsEditing.editPageContent();
                 });
@@ -921,7 +930,7 @@ function editCMS( options ){
                     var preview_frame = edit_dialog.find('#web_preview');
                     preview_frame[0].contentWindow.cmsEditing.editPageSource();
                 });
-                edit_dialog.find('#btn_edit_page_record').button({icon:'ui-icon-pencil'}).click(function(){
+                edit_dialog.find('#btn_edit_page_record').button({icon:'ui-icon-gear'}).click(function(){
                     var preview_frame = edit_dialog.find('#web_preview');
                     //preview_frame[0].contentWindow.editPageRecord();
                     //preview_frame[0].contentWindow.cmsEditing.editPageRecord();
@@ -946,6 +955,10 @@ function editCMS( options ){
             //
             //
             //
+            edit_dialog.find('#btn_preview_page').button({icon:'ui-icon-extlink'}).click(function(){
+                window.open(url, '_blank');
+            });
+            
             edit_dialog.find('#btn_embed_dialog').button({icon:'ui-icon-extlink'}).click(function(){
                 window.hWin.HEURIST4.ui.showRecordActionDialog('embedDialog',{layout_rec_id: home_page_record_id});
             });
