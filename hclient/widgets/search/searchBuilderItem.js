@@ -521,7 +521,7 @@ Whole value = EQUAL
             }
         }
 
-        if((this.options.dty_ID>0 || this.options.dty_ID=='notes' || this.options.dty_ID=='url') && field_type!='relmarker'){  
+        if((this.options.dty_ID>0 || this.options.dty_ID=='notes' || this.options.dty_ID=='url')){  // && field_type!='relmarker'
             eqopts.push({key:'', title:'──────────', disabled:true});
             eqopts.push({key:'any', title:'any value (exists)'});
             eqopts.push({key:'NULL', title:'no data (missing)'});
@@ -541,10 +541,12 @@ Whole value = EQUAL
 
             var cval = this.select_comparison.val();
             if(cval=='NULL' || cval=='any' ){
+                if(this._predicate_reltype_ele) this._predicate_reltype_ele.hide();
                 this._predicate_input_ele.hide();
                 this.select_conjunction.hide();
                 this.cb_negate.hide();
             }else{
+                if(this._predicate_reltype_ele) this._predicate_reltype_ele.show();
                 this._predicate_input_ele.show();
                 this._manageConjunction();
                 //this.cb_negate.show();
@@ -590,6 +592,10 @@ Whole value = EQUAL
             ed_options['dtFields'] = dtFields;
             
             this._predicate_reltype_ele = $("<div>").editing_input(ed_options).appendTo(this.values_container);
+            var ele = this._predicate_reltype_ele.find('.editint-inout-repeat-button')
+                        .css({'margin-left':'22px','min-width':'16px'});
+            var ele = ele.parent();
+            ele.css('min-width','44px');
 
             
             ed_options['detailtype'] = 'resource';
