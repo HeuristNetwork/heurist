@@ -446,16 +446,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         var $container = $('#'+name+'Intervals');
         var $modalDialogBody = $('#'+name+'IntervalsBody'); //Hosts the entire body of modal
-        var $rowDiv;  //First row within the modal.
-        var $leftColDiv;   //Left column of div 
-        var $rightColDiv;   //Right column of div
-        var $firstRowDiv;  
-        var $buttons;
-        var $bodyDiv;
-        var $addIntervalBtn;
-        var $btnDiv;
-        var $intervalHeadRow;
-        var $listDiv;
+        
         var detailtype = fields3[name].type;
 
         $modalDialogBody.empty();
@@ -470,6 +461,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if(fields3[name].values && fields3[name].values.length>0)
         {
             if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype") {
+
+                var $rowDiv;        //First row within the modal.
+                var $leftColDiv;    //Left column of div 
+                var $rightColDiv;   //Right column of div
+                var $firstRowDiv;  
+                var $buttons;
+                var $bodyDiv;
+                var $addIntervalBtn;
+                var $btnDiv;
+                var $intervalHeadRow;
+                var $listDiv;
+
                 $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase());
 
                 //Creates entire element in modal
@@ -785,6 +788,150 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     }
                 }
             }
+            else if(detailtype=="float" || detailtype=="integer"){
+                var $entireDiv;
+                var $resetRow;
+                var $roundingDiv;
+                var $intervalsDiv;
+                var $intervalColumn;
+                var $individualValues;
+                var selectBox;
+
+                var decimalPlaces = [0,1,2,3];
+
+                $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase());
+
+                //Creates entire element in modal
+                $intdiv = $(document.createElement('div'))
+                .css({'padding':'0.4em'})
+                .attr('intid', 'b0' )
+                .addClass('container-fluid')
+                .appendTo($modalDialogBody);
+
+                $entireDiv = $(document.createElement('div'))
+                .addClass('row '+name)
+                .appendTo($intdiv);
+
+                //Create the reset row.
+                $resetRow = $(document.createElement('div'))
+                .addClass('row')
+                .appendTo($entireDiv);
+                
+                $('<div class="col-2">').append('<h5>Reset Intervals:</h5>').appendTo($resetRow);
+                $('<div class="col">')
+                .append($('<input id="'+name+'IntCount">').attr('size',6).val(keepCount))
+                .append($('<span>').html('intervals from'))
+                .append($('<input>'))
+                .append($('<span>').html('to'))
+                .append($('<input>'))
+                .append($('<button>Apply</button>').click(function(event){
+                    calculateIntervals(name, parseInt($('#'+name+'IntCount').val()) );
+                }))
+                .appendTo($resetRow);
+
+                //Create rounding row
+                $roundingDiv = $(document.createElement('div'))
+                .addClass('row')
+                .appendTo($entireDiv);
+
+                $('<div class="col-2">').append('<h5>Rounding:</h5>').appendTo($roundingDiv);
+                $('<div class="col">')
+                .append($('<select id="roundingSelect">'))
+                .append($('<span>').html('decimal place'))
+                .appendTo($roundingDiv);
+
+                //Append rounding numbers in select box
+                for(j=0;j<decimalPlaces.length;j++){
+                    selectBox = $roundingDiv.find('#roundingSelect');
+
+                    selectBox.append('<option value="'+decimalPlaces[j]+'">'+decimalPlaces[j]+'</option>');
+                }
+
+                selectBox.change(function(){
+                    changeIntervalDecimal(name,$(this).val(),);
+                    var changedIntervals = fields3[name].intervals
+                    generateNumericIntervalsRows(name, changedIntervals, $(this).val())
+                });
+
+                //Create intervals
+                $intervalsDiv = $(document.createElement('div'))
+                .addClass('row')
+                .appendTo($entireDiv);
+
+                $('<div class="col-2">').append('<h5>Intervals:</h5>').appendTo($intervalsDiv);
+
+                $intervalColumn = $(document.createElement('div'))
+                .addClass('col')
+                .appendTo($intervalsDiv);
+
+                //Create number rows of intervals
+                var idx;
+                var intervals = fields3[name].intervals;
+
+                generateNumericIntervalsRows(name, intervals, $intervalColumn);
+            }
+        }
+        
+    }
+
+    /*
+    * Create the rows for the numeric detail types.
+    */
+    function generateNumericIntervalsRows(name, int, htmlElement){
+        htmlElement.empty();
+
+        for(i=0;i<int.length;i++){
+            //Create the row div.
+            var $intRows = $(document.createElement('div'));
+
+            $intRows.addClass('intervalDiv list row')
+            .attr('id',name+i)
+            .appendTo(htmlElement);
+
+            $('<div class="col-4">').html(int[i].values[0]).appendTo($intRows);
+            $('<div class="col-4">').html('to <').appendTo($intRows);
+            $('<div class="col-4">').html(int[i].values[1])
+            .dblclick(function(){
+                var intervalId = parseInt($(this).parent().attr('id').replace(name,''));
+                var intervalValue = fields3[name].intervals[intervalId].values[1];
+
+                $(this).html('<input type="number" class="w-100" id="changeValueBox" value="'+intervalValue+'">');
+                //When user clicks out of input box change the intervals value min and max
+                $('#changeValueBox').blur(function(){
+
+                    //Need an if statement to prevent user from entering beyond the max value.
+
+                    //Change the max value for the intervals based on what the user has entered.
+                    for(k=0;k<fields3[name].intervals.length;k++){
+                        if(k < intervalId){
+                            continue;
+                        }
+                        else{
+                            var newNumber = Number($('#changeValueBox').val());
+                            if(k==intervalId){
+                                fields3[name].intervals[intervalId].values[1] = newNumber;
+                                fields3[name].intervals[intervalId].name = rnd(fields3[name].intervals[intervalId].values[0]) + ' ~ ' +  rnd(fields3[name].intervals[intervalId].values[1]);
+                                fields3[name].intervals[intervalId].description = rnd(fields3[name].intervals[intervalId].values[0]) + ' ~ ' +  rnd(fields3[name].intervals[intervalId].values[1]);
+                            }
+                            else{
+                                if(newNumber >= fields3[name].intervals[k].values[1]){
+                                    fields3[name].intervals.splice(k, 1);
+                                    k=0;
+                                    continue;
+                                }
+                                else{
+                                    fields3[name].intervals[k].values[0] = newNumber;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    generateNumericIntervalsRows(name, fields3[name].intervals, htmlElement);
+
+                    _doRender();    //Apply to table
+                 });
+            })
+            .appendTo($intRows);
         }
     }
 
@@ -797,6 +944,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if(groupidx != -1){
             fields3[name].intervals[groupidx].values.splice(idx,1);
 
+            //Re-adjust value ids for each div.
             var currentValues = $('#'+name+groupidx).find('div.groupList > :first-child');
             currentValues.each(function(i,ele){
                 $(ele).attr('id', i);
@@ -1459,6 +1607,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
     //round to two digits
     function rnd(original){
         return Math.round(original*100)/100;
+    }
+
+    //Change the decimal places within the array
+    function changeIntervalDecimal(name, option){
+        for(i=0;i<fields3[name].intervals.length;i++){
+            for(j=0;j<fields3[name].intervals[i].values.length;j++){
+                var num = fields3[name].intervals[i].values[j].toFixed(parseInt(option));
+                fields3[name].intervals[i].values[j] = Number(num);
+            }
+        }
     }
 
     /**
