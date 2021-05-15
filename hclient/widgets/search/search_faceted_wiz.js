@@ -1397,6 +1397,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             isfacet: old_facet.isfacet,
                             multisel: old_facet.multisel,
                             groupby: old_facet.groupby,
+                            orderby: old_facet.orderby,
                             type: node.data.type,
                             order: old_facet.order>=0?old_facet.order:order_for_new
                         } );
@@ -1410,6 +1411,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             code:node.data.code,
                             title:'{NEW}', //(node.data.name?node.data.name:node.title),
                             groupby: null,
+                            orderby: null,
                             type:node.data.type,
                             order: order_for_new
                         } );
@@ -1564,9 +1566,15 @@ $.widget( "heurist.search_faceted_wiz", {
                         +'<button label="slider" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="slider"/>';
                     
                     sGroupBy = '<span id="facet_DateGroup'+idd+'"><label>Group by '
-                        +'<select id="facet_Group'+idd+'"><option>year</option><option>decade</option><option>century</option></select>'
+                        +'<select name="facet_Group'+idd+'"><option>month</option>'
+                        +'<option>year</option><option>decade</option><option>century</option></select>'
                         +'</label></span>';
-                    
+                        
+                    sGroupBy = sGroupBy
+                        +'<label><input type="checkbox" data-sort="desc" data-id="'
+                        + idd+'" style="vertical-align: middle;margin-left:16px">'
+                        + window.hWin.HR("Order descending")+"</label>";
+                   
                 }else if(facets[k].type=='enum' || facets[k].type=='relationtype'){
                     sContent = sContent 
                         //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_1" name="facet_Type'
@@ -1603,7 +1611,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 + '<div style="float:right;font-size:smaller;margin-right:20px;margin-top: 4px;">'
                 + sGroupBy 
-                +'<label><input type="checkbox" id="facet_Order'    // style="float:right;font-size:smaller;"
+                +'<label><input type="checkbox" data-sort="count" data-id="'
                 + idd+'" style="vertical-align: middle;margin-left:16px">'
                 + window.hWin.HR("Order by count")+"</label>"
                 + '</div>'
@@ -1654,7 +1662,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 listdiv.find('#facet_Title'+idd).val(facets[k].title);
                 listdiv.find('#facet_Help'+idd).val(facets[k].help);
                 
-                listdiv.find('#facet_Order'+idd).attr('checked', (facets[k].orderby=='count'));
+                listdiv.find('input[data-sort="count"][data-id="'+idd+'"]').prop('checked', (facets[k].orderby=='count'));
+                listdiv.find('input[data-sort="desc"][data-id="'+idd+'"]').prop('checked', (facets[k].orderby=='desc'));
 
                 //listdiv.find('input:radio[name="facet_Type'+idd+'"][value="'+facets[k].isfacet+'"]').attr('checked', true);
                 listdiv.find('button.btnset_radio[data-idx="'+idd+'"]').removeClass('ui-heurist-btn-header1');
@@ -1677,9 +1686,9 @@ $.widget( "heurist.search_faceted_wiz", {
                                     listdiv.find('#facet_DateGroup'+idd).css({'visibility':is_allowed?'visible':'hidden'});        
                                     if(is_allowed){
                                         if(Hul.isempty(facets[idx].groupby)){
-                                                                                facets[idx].groupby = 'year';
+                                            facets[idx].groupby = 'year';
                                         }
-                                        listdiv.find('#facet_Group'+idd).val(facets[idx].groupby);
+                                        listdiv.find('select[name="facet_Group'+idd+'"]').val(facets[idx].groupby);
                                     }
                                 }
                             }else{
@@ -1770,11 +1779,23 @@ $.widget( "heurist.search_faceted_wiz", {
             
             this._on( listdiv.find('input[id^="facet_Title"]'), {change: this._refresh_FacetsPreview});
             this._on( listdiv.find('input[id^="facet_Help"]'), {change: this._refresh_FacetsPreview});
-            this._on( listdiv.find('input[name^="facet_Group"]'), {change: this._refresh_FacetsPreview});
+            this._on( listdiv.find('select[name^="facet_Group"]'), {change: this._refresh_FacetsPreview});
             this._on( listdiv.find('input[name^="facet_MultiSel"]'), {change: this._refresh_FacetsPreview});
-            this._on( listdiv.find('input[id^="facet_Group"]'), {change: this._refresh_FacetsPreview});
-            this._on( listdiv.find('input[id^="facet_Order"]'), {change: this._refresh_FacetsPreview});
+            this._on( listdiv.find('input[name^="facet_Group"]'), {change: this._refresh_FacetsPreview});
             this._on( $(this.step3).find('#cbShowHierarchy'), {change: this._refresh_FacetsPreview});
+
+            this._on( listdiv.find('input[data-sort]'), {change: function(e){
+                
+                var iid = $(e.target).attr('data-id');
+                var ssort = $(e.target).attr('data-sort');
+                
+                $.each(listdiv.find('input[data-sort]'), function(i,item){
+                    if(iid==$(item).attr('data-id') && ssort!=$(item).attr('data-sort')){
+                        $(item).removeAttr('checked');
+                    }
+                });
+                this._refresh_FacetsPreview();   
+            }});
             
             
             return true;
@@ -1802,13 +1823,20 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(title!='') this.options.params.facets[k].title = title;
                 this.options.params.facets[k].help = listdiv.find('#facet_Help'+idd).val();
                 this.options.params.facets[k].isfacet = listdiv.find('button.ui-heurist-btn-header1[data-idx="'+idd+'"]').attr('data-value');
-                                //was  listdiv.find('input:radio[name="facet_Type'+idd+'"]:checked').val();
-                this.options.params.facets[k].orderby = listdiv.find('#facet_Order'+idd).is(':checked')?'count':null;
+                                
+                this.options.params.facets[k].orderby = null;    
+                if(listdiv.find('input[data-sort="count"][data-id="'+idd+'"]').is(':checked'))
+                {
+                    this.options.params.facets[k].orderby = 'count';    
+                }else if(listdiv.find('input[data-sort="desc"][data-id="'+idd+'"]').is(':checked')){
+                    this.options.params.facets[k].orderby = 'desc';    
+                }
+                    
                 
                 if(this.options.params.facets[k].type=='date' 
                   || this.options.params.facets[k].type=='year'){
                     if(this.options.params.facets[k].isfacet>1){
-                        this.options.params.facets[k].groupby = listdiv.find('#facet_Group'+idd).val();
+                        this.options.params.facets[k].groupby = listdiv.find('select[name="facet_Group'+idd+'"]').val();
                     }else{
                         this.options.params.facets[k].groupby = null;    
                     }

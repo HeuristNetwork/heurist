@@ -1265,7 +1265,11 @@ $.widget( "heurist.search_faceted", {
                                 
                                 if(selval && !window.hWin.HEURIST4.util.isempty(selval.value)){
                                     
-                                    if(facets[facet_index].groupby=='decade'){
+                                    if(facets[facet_index].groupby=='month'){
+                                        var y_m = selval.value.split('-');
+                                        selval.value = y_m[0]+'-'+y_m[1]+'-01 00:00<>'+selval.value+' 23:59';
+                                        
+                                    }else if(facets[facet_index].groupby=='decade'){
                                         selval.value = selval.value + '<>' +(Number(selval.value)+10+'-01-01 00:00');
                                     }else if(facets[facet_index].groupby=='century'){
                                         selval.value = selval.value + '<>' +(Number(selval.value)+100+'-01-01 00:00');
@@ -2483,6 +2487,8 @@ if(!(vocab_id>0)){
                         //sort by count
                         if(field['orderby']=='count'){
                             response.data.sort(function(a, b){ return (Number(a[1])>Number(b[1]))?-1:1;});
+                        }else if(field['orderby']=='desc'){
+                            response.data.sort(function(a, b){ return (a[0]>b[0]?-1:1);});
                         }
                         
                         var display_mode = (field['isfacet']==this._FT_LIST || (field['groupby']=='firstchar' && step_level==0))
@@ -2491,12 +2497,18 @@ if(!(vocab_id>0)){
                         for (i=0;i<response.data.length;i++){
                             var cterm = response.data[i];
                             
+                            var title = cterm[0];
+                            
                             //for enum get term label w/o code
                             if(field['type']=='enum' && cterm[0]>0){
-                                cterm[0] = $Db.getTermValue(cterm[0], false);    
+                                title = $Db.getTermValue(cterm[0], false);    
+                            }else if( field['type']=='date' && field['groupby']=='month' ){
+                                
+                                var tDate = new TDate((new Date(cterm[0])).toISOString());
+                                title = tDate.toString('MMM yyyy');
                             }
 
-                            var f_link = this._createFacetLink(facet_index, {title:cterm[0], value:cterm[2], count:cterm[1]}, display_mode);
+                            var f_link = this._createFacetLink(facet_index, {title:title, value:cterm[2], count:cterm[1]}, display_mode);
                             
                             //@todo draw first level for groupby firs tchar always inline
                             var step_level = (field['groupby']=='firstchar' && field['selectedvalue'])
