@@ -1380,24 +1380,28 @@ $.widget( "heurist.search_faceted", {
                             (isform_empty && this.options.params.ui_temporal_filter_initial)
                                 ?this.options.params.ui_temporal_filter_initial: ''
                             );
-            
+                            
 //{"f:10":"1934-12-31T23:59:59.999Z<>1935-12-31T23:59:59.999Z"}            
+            var sort_clause;
             if(this.options.params.sort_order){
                 
-                this._current_query.push({sortby:this.options.params.sort_order});
+                sort_clause = {sortby:this.options.params.sort_order};
             
             }else if(window.hWin.HAPI4.database=='johns_hamburg' &&
                 //special order by date fields 
                 window.hWin.HEURIST4.util.findArrayIndex(this.options.svs_ID,[21,23,24])>=0){
                     
-                this._current_query.push({sortby:'hie'});
+                sort_clause = {sortby:'hie'};
                 
             }else {
-                this._current_query.push({sortby:'t'});
+                sort_clause = {sortby:'t'};
             }
+
+            this._current_query.push(sort_clause);
+
         
-console.log( 'start search' );        
-console.log( this._current_query );
+//console.log( 'start search' );        
+//console.log( this._current_query );
 
             
             var request = { q: this._current_query, 
@@ -1475,7 +1479,7 @@ console.log( this._current_query );
                 
                 var subs_value = null; //either initial query OR rectype+current result set
                 
-                if(this._isInited || (field.multisel && field.selectedvalue!=null)){
+                if(this.options.params.ui_temporal_filter_initial || this._isInited || (field.multisel && field.selectedvalue!=null)){
                     //replace with current query   - @todo check for empty 
                     subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query, 
                                     (this._use_sup_filter)?this.options.params.sup_filter:'',
@@ -1542,7 +1546,7 @@ console.log( this._current_query );
                 var query, needcount = 2;
                 if( (typeof field['facet'] === 'string') && (field['facet'] == '$IDS') ){ //this is field form target record type
                 
-                    if(this._isInited){
+                    if(this.options.params.ui_temporal_filter_initial || this._isInited){
                         //replace with current query   - @todo check for empty 
                         query = this._first_query;
 
@@ -1577,12 +1581,15 @@ console.log( this._current_query );
                     }
                     
                 }
+
+                var count_query = window.hWin.HEURIST4.util.cloneJSON(this.options.params.q);
+                count_query = count_query.splice(1); //remove t:XX                
                 
                 //this is query to calculate counts for facet values
                 // it is combination of a) currect first query plus ids of result OR first query plus supplementary filters
                 // b) facets[i].query  with replacement of $Xn to value
-                var count_query = window.hWin.HEURIST4.util.mergeHeuristQuery(subs_value,
-                                                 window.hWin.HEURIST4.util.cloneJSON(this.options.params.q).splice(1) ); //remove t:XX
+                count_query = window.hWin.HEURIST4.util.mergeHeuristQuery(subs_value, count_query)
+
                 
                 //var count_query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q );
                 this._fillQueryWithValues( count_query, i );
@@ -1686,6 +1693,9 @@ console.log( this._current_query );
         
         
         if(i  >= this.options.params.facets.length){
+            
+            this.options.params.ui_temporal_filter_initial = null; //used only once
+            
             this.btn_terminate.hide();
             this._refreshButtons();
         }
