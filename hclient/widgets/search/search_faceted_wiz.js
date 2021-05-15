@@ -159,7 +159,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
         this._dialog = this.element.dialog({
             autoOpen: false,
-            height: 350,
+            height: 400,
             width: 650,
             modal: this.options.is_modal,
 
@@ -338,7 +338,7 @@ $.widget( "heurist.search_faceted_wiz", {
             minw = $dlg.find( ".ui-accordion-content-active" ).length>0?800:650;
             
             ch = Math.max($dlg.height(),$dlg[0].scrollHeight)+100; 
-            if(ch<350) ch = 350;
+            if(ch<400) ch = 400;
             
         }else{
             minw = 650;
@@ -871,6 +871,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_Title').val(this.options.params.ui_title);
                 $dlg.find('#svs_ViewMode').val(this.options.params.ui_viewmode);
                 $dlg.find('#svs_SearchOnReset').prop('checked', this.options.params.search_on_reset);
+                $dlg.find('#svs_TempInitSearch').val(this.options.params.ui_temporal_filter_initial);
                 
                 $dlg.find('#svs_SpatialFilter').prop('checked', this.options.params.ui_spatial_filter!==false);
                 $dlg.find('#svs_SpatialFilterInit').prop('checked', this.options.params.ui_spatial_filter_init!==false);
@@ -920,6 +921,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_SpatialFilterInit').prop('checked', false);
                 $dlg.find('#svs_SpatialFilterLabel').val(window.hWin.HR('Map Search'));                
                 $dlg.find('#svs_SpatialFilterInitial').val('');                
+                $dlg.find('#svs_TempInitSearch').val('');
+
                 $dlg.find('#svs_AdditionalFilter').prop('checked', false);
                 $dlg.find('#svs_AdditionalFilterLabel').val(window.hWin.HR('Search everything'));
                 
@@ -1981,8 +1984,9 @@ $.widget( "heurist.search_faceted_wiz", {
         
         this.options.params.ui_spatial_filter = $dlg.find('#svs_SpatialFilter').is(':checked');
         this.options.params.ui_spatial_filter_init = $dlg.find('#svs_SpatialFilterInit').is(':checked');
-        this.options.params.ui_spatial_filter_label =$dlg.find('#svs_SpatialFilterLabel').val();
-        this.options.params.ui_spatial_filter_initial =$dlg.find('#svs_SpatialFilterInitial').val();
+        this.options.params.ui_spatial_filter_label = $dlg.find('#svs_SpatialFilterLabel').val();
+        this.options.params.ui_spatial_filter_initial = $dlg.find('#svs_SpatialFilterInitial').val();
+        this.options.params.ui_temporal_filter_initial = $dlg.find('#svs_TempInitSearch').val();
         
         this.options.params.ui_additional_filter = $dlg.find('#svs_AdditionalFilter').is(':checked');
         this.options.params.ui_additional_filter_label =$dlg.find('#svs_AdditionalFilterLabel').val();

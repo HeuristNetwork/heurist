@@ -119,6 +119,8 @@ ui_spatial_filter_label
 ui_spatial_filter_initial - initial spatial search
 ui_spatial_filter_init - apply spatial search at once
 
+ui_temporal_filter_initial - initial temporal search for empty form only
+
 ui_additional_filter - show search everything input (for add_filter)
 ui_additional_filter_label
 
@@ -1336,7 +1338,7 @@ $.widget( "heurist.search_faceted", {
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr('Define at least one search criterion');
                 }
-                return;
+                return; 
             }else if(!this.options.ispreview && this.options.showresetbutton && !this.options.params.ui_spatial_filter){
                 //this.div_title.css('width','45%');
                 if(this.btn_reset) this.btn_reset.show()   
@@ -1373,8 +1375,11 @@ $.widget( "heurist.search_faceted", {
             this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
                             (this._use_sup_filter)?this.options.params.sup_filter:'', 
                             search_any_filter,
-                            this._prepareSpatial(this.options.params.spatial_filter));
-            
+                            this._prepareSpatial(this.options.params.spatial_filter),
+                            
+                            (isform_empty && this.options.params.ui_temporal_filter_initial)
+                                ?this.options.params.ui_temporal_filter_initial: ''
+                            );
             
 //{"f:10":"1934-12-31T23:59:59.999Z<>1935-12-31T23:59:59.999Z"}            
             if(this.options.params.sort_order){
@@ -1391,8 +1396,8 @@ $.widget( "heurist.search_faceted", {
                 this._current_query.push({sortby:'t'});
             }
         
-//console.log( 'start search' );        
-//console.log( this._current_query );
+console.log( 'start search' );        
+console.log( this._current_query );
 
             
             var request = { q: this._current_query, 
