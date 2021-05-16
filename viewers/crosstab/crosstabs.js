@@ -26,6 +26,7 @@
 var crosstabsAnalysis;
 var buttonDiv;
 var visualisationButton;
+var intervalsNumeric;
 
 /**
 *  CrosstabsAnalysis - class for crosstab analysis
@@ -844,13 +845,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 for(j=0;j<decimalPlaces.length;j++){
                     selectBox = $roundingDiv.find('#roundingSelect');
 
+                    //Make 1 decimal place default.
+                    if(j == 1){
+                        selectBox.append('<option value="'+decimalPlaces[j]+'" selected>'+decimalPlaces[j]+'</option>');
+                        continue;
+                    }
                     selectBox.append('<option value="'+decimalPlaces[j]+'">'+decimalPlaces[j]+'</option>');
                 }
 
                 selectBox.change(function(){
-                    changeIntervalDecimal(name,$(this).val(),);
+                    changeIntervalDecimal(name,$(this).val());
                     var changedIntervals = fields3[name].intervals
-                    generateNumericIntervalsRows(name, changedIntervals, $(this).val())
+                    generateNumericIntervalsRows(name, changedIntervals, $intervalColumn, $(this).val())
                 });
 
                 //Create intervals
@@ -866,9 +872,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 //Create number rows of intervals
                 var idx;
-                var intervals = fields3[name].intervals;
-
-                generateNumericIntervalsRows(name, intervals, $intervalColumn);
+                //Create deep copy of object
+                intervalsNumeric = $.extend(true,{},fields3[name].intervals);
+                
+                changeIntervalDecimal(name, 1);
+                generateNumericIntervalsRows(name, fields3[name].intervals, $intervalColumn, 1);
             }
         }
         
@@ -877,10 +885,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
     /*
     * Create the rows for the numeric detail types.
     */
-    function generateNumericIntervalsRows(name, int, htmlElement){
+    function generateNumericIntervalsRows(name, int, htmlElement, decimalPlace){
+        //Update description before rendering.
+        updateDescriptionName(name, int, decimalPlace);
         htmlElement.empty();
 
         for(i=0;i<int.length;i++){
+            //Calculate the length of the value so as to put decimal places in front to display in HTML.
+            var min = int[i].values[0].toString();
+            var max = int[i].values[1].toString();
+            var lengthBefore = (min.includes('.')) ? min.split('.')[0].length : min.length;
+            var numberOfZeros = ((decimalPlace == 0) ? 0 : (decimalPlace == 1) ? 1 : (decimalPlace == 2) ? 2 : 3) + lengthBefore;
+
             //Create the row div.
             var $intRows = $(document.createElement('div'));
 
@@ -888,9 +904,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .attr('id',name+i)
             .appendTo(htmlElement);
 
-            $('<div class="col-4">').html(int[i].values[0]).appendTo($intRows);
+            $('<div class="col-4">').html(int[i].values[0].toPrecision(numberOfZeros)).appendTo($intRows);
+
             $('<div class="col-4">').html('to <').appendTo($intRows);
-            $('<div class="col-4">').html(int[i].values[1])
+
+            lengthBefore = (max.includes('.')) ? max.split('.')[0].length : max.length;
+            numberOfZeros = ((decimalPlace == 0) ? 0 : (decimalPlace == 1) ? 1 : (decimalPlace == 2) ? 2 : 3) + lengthBefore;
+
+            $('<div class="col-4">').html(int[i].values[1].toPrecision(numberOfZeros))
             .dblclick(function(){
                 var intervalId = parseInt($(this).parent().attr('id').replace(name,''));
                 var intervalValue = fields3[name].intervals[intervalId].values[1];
@@ -926,12 +947,34 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             }
                         }
                     }
-                    generateNumericIntervalsRows(name, fields3[name].intervals, htmlElement);
+                    //Because user is making changes to the values, save the object, making it easier to return to the original value when decimals are changed.
+                    intervalsNumeric = $.extend(true,{},fields3[name].intervals);
+                    generateNumericIntervalsRows(name, fields3[name].intervals, htmlElement, $('#roundingSelect').val());
 
                     _doRender();    //Apply to table
                  });
             })
             .appendTo($intRows);
+        }
+    }
+
+    /* 
+    * Update the description and name within the fields3 objects
+    */
+    function updateDescriptionName(name, ints, decimalPlace){
+
+        for(i=0;i<ints.length;i++){
+            var min = ints[i].values[0].toString();
+            var max = ints[i].values[1].toString();
+            var lengthBeforeMin = (min.includes('.')) ? min.split('.')[0].length : min.length;
+            var lengthBeforeMax = (max.includes('.')) ? max.split('.')[0].length : max.length;
+            var numberOfZerosMin = ((decimalPlace == 0) ? 0 : (decimalPlace == 1) ? 1 : (decimalPlace == 2) ? 2 : 3) + lengthBeforeMin;
+            var numberOfZerosMax = ((decimalPlace == 0) ? 0 : (decimalPlace == 1) ? 1 : (decimalPlace == 2) ? 2 : 3) + lengthBeforeMax;
+
+            var intervalName = ints[i].values[0].toPrecision(numberOfZerosMin) + ' ~ ' + ints[i].values[1].toPrecision(numberOfZerosMax);
+
+            fields3[name].intervals[i].name = intervalName;
+            fields3[name].intervals[i].description = intervalName;
         }
     }
 
@@ -1611,6 +1654,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     //Change the decimal places within the array
     function changeIntervalDecimal(name, option){
+        $.extend(true, fields3[name].intervals, intervalsNumeric);
         for(i=0;i<fields3[name].intervals.length;i++){
             for(j=0;j<fields3[name].intervals[i].values.length;j++){
                 var num = fields3[name].intervals[i].values[j].toFixed(parseInt(option));
