@@ -1662,10 +1662,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
     * render crosstab data as set of tables
     */
     function _doRender(){
+        //Destroy chart if exists
+        if(Chart.getChart('pieResults')){
+            Chart.getChart('pieResults').destroy();
+        }
 
         if($.fn.dataTable.isDataTable("#resultsTable")){
             $("#resultsTable").DataTable().destroy(true);
         }
+
+
 
         $("#pmessage").html('Rendering...');
         _setMode(1);//progress
@@ -1780,6 +1786,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
 
+        //Create datatable
         $(document).ready(function(){
             $(".resultsTable").DataTable({
                 "paging" : false,
@@ -1791,11 +1798,50 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
             );
         });
+
+        //Extract label and data values for pie chart
+        var labelsNames = extractData('row', true);
+        var dataValues = extractData('row', false);
+
+        //Create the pie chart
+        var pieCanvas = $('#pieResults');
+        var pieChart = new Chart(pieCanvas, {
+            type: 'pie',
+            data: {
+                labels: labelsNames,
+                  datasets: [{
+                    data: dataValues,
+                    backgroundColor: [
+                      'rgb(255, 99, 132)',
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: false
+            }
+        });
         
         //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
 
         _setMode(2);//results
     }//_doRenders
+
+    function extractData(name, isLabel){
+        var data = [];
+        if(isLabel){
+            for(i=0;i<fields3[name].intervals.length;i++){
+                data.push(fields3[name].intervals[i].name);
+            }
+        }
+        else{
+            for(i=0;i<fields3[name].intervals.length;i++){
+                data.push(fields3[name].intervals[i].output);
+            }
+        }
+
+        return data;
+    }
 
     /**
     * render particular page (group)
