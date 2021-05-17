@@ -414,6 +414,13 @@ function editCMS( options ){
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 preview_frame[0].contentWindow.cmsEditing.editPageSource();
                                             });
+                                            edit_dialog.find('#btn_edit_page_template').button({icon:'ui-icon-addon'
+                                                    ,title:'Insert components from a template'})
+                                            .click(function(){
+                                                var preview_frame = edit_dialog.find('#web_preview');
+                                                preview_frame[0].contentWindow.cmsEditing.addTemplate();
+                                            });
+                                            
                                             /*
                                             edit_dialog.find('#btn_edit_page_record').button().click(function(){
                                             var preview_frame = edit_dialog.find('#web_preview');

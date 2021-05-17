@@ -125,7 +125,7 @@ function hCmsEditing(_options) {
     //since v5 they are built in to the core: contextmenu textcolor
             ],      
             //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-            toolbar: ['formatselect | bold italic forecolor backcolor  | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help | customAddWidget customSaveButton customCloseButton' ],  
+            toolbar: ['formatselect | bold italic forecolor backcolor  | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help | customAddWidget customAddTemplate customSaveButton customCloseButton' ],  
             content_css: [
                 '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
                 //,'//www.tinymce.com/css/codepen.`min.css'
@@ -169,6 +169,14 @@ function hCmsEditing(_options) {
                       text: 'Add database widget',
                       onclick: function (_) {  //since v5 onAction
                             __addEditWidget();
+                      }
+                    });
+
+                editor.addButton('customAddTemplate', { //since v5 .ui.registry
+                      icon: null,
+                      text: 'Insert template',
+                      onclick: function (_) {  //since v5 onAction
+                            __addTemplate();
                       }
                     });
                                 
@@ -801,6 +809,127 @@ function hCmsEditing(_options) {
     }
 
     //
+    // 1. Shows dialog with list of templates 
+    // 2. Loads template
+    // 3. Execute template script to replace template variables
+    // 4. Adds to content
+    // 5. Init edit/remove links
+    //
+    function __addTemplate(){
+    
+        
+        // 1. Shows dialog with list of templates 
+        var sURL = window.hWin.HAPI4.baseURL+'/hclient/widgets/cms/templates/snippets/blog.html';
+        var sURL2 = window.hWin.HAPI4.baseURL+'/hclient/widgets/cms/templates/snippets/blog.js';
+        
+        // 2. Loads template
+        var ele = $('<div>').attr('data-template-temp',1).appendTo(doc_body).hide().load(sURL, function(){
+
+        var t_style = ele.find('style').text(); //style will be added to page css
+        
+        
+        function _onScriptExecute(){
+                
+                // 4. Adds to tinymce
+                var content = ele.html();
+                tinymce.activeEditor.insertContent(content);
+                // 5. Init edit/remove links
+                __initWidgetEditLinks();
+                //$.each(ids, __initWidgetEditLinks);
+                
+                ele.empty().remove(); //remove temp div
+                
+        };
+                        
+        // 3. Execute template script to replace template variables
+        try{
+            //$.getScript(sURL2, _onScriptExecute);
+        }catch(e){
+            alert('Error in template script');
+        }
+            
+var container = $('div[data-template-temp]');
+
+//this script will be executed once after addition of template
+//add new faceted search
+
+var sfilter = {"facets":[{"var":43482,"code":"7:1111","title":"Month","help":"","isfacet":"3","multisel":true,"type":"enum","order":0,"orderby":null},{"var":21948,"code":"7:1110","title":"Author","help":"","isfacet":"3","multisel":false,"type":"enum","order":1,"orderby":null},{"var":25488,"code":"7:1112","title":"Categories","help":"","isfacet":"3","multisel":false,"type":"enum","order":2,"orderby":null},{"var":82034,"code":"7:1","title":"Title of post","help":"","isfacet":"0","multisel":false,"type":"freetext","order":3,"orderby":null}],"rectypes":["7"],"version":2,"rules":"","rulesonly":0,"sup_filter":"t:7 sortby:-m ","ui_title":"Project blog","ui_viewmode":"","search_on_reset":true,"ui_prelim_filter_toggle":false,"ui_prelim_filter_toggle_mode":0,"ui_prelim_filter_toggle_label":"Apply preliminary filter","ui_spatial_filter":false,"ui_spatial_filter_init":false,"ui_spatial_filter_label":"Map Search","ui_spatial_filter_initial":"","ui_additional_filter":false,"ui_additional_filter_label":"Search everything","ui_exit_button":true,"ui_exit_button_label":"","domain":"all","title_hierarchy":false,"viewport":null,"sort_order":"-a"};
+
+
+var request = {svs_Name: 'Project blog',
+            svs_Query: JSON.stringify(sfilter),
+            svs_UGrpID: '4'}; //Website filters
+            
+window.hWin.HAPI4.SystemMgr.ssearch_save(request,
+    function(response){
+        if(response.status == window.hWin.ResponseStatus.OK){
+
+            var svsID = response.data;
+
+            //window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
+
+            //replace template values
+            container.find('a[data-heurist-id="add_link"]').attr('href',window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+
+            '&rec_rectype=7&rec_owner=1&rec_visibility=public'); //@todo replace rectype
+
+            //replace search realm
+            var realm_id = 'sr'+window.hWin.HEURIST4.util.random();
+            var widgetid = 'mywidget_'+window.hWin.HEURIST4.util.random();
+
+            //replace widget id, filter id and realm
+            var ele = container.find('div[data-heurist-app-id="heurist_SearchTree"]');
+            var content = window.hWin.HEURIST4.util.isJSON(ele.text());
+            console.log(ele.text());
+            console.log(content);
+            ele.attr('id', widgetid);
+            content.search_realm = realm_id;
+            content.init_svsID = svsID;
+            content.allowed_svsIDs = svsID;
+            ele.text(JSON.stringify(content));
+
+            //copy blog template to smarty folder
+            var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
+            
+            var request = {mode:'import', 
+                           import_template:{name:'Blog entry.tpl',tmp_name:'cms/Blog entry.gpl',size:999}, 
+                           db:window.hWin.HAPI4.database};
+            
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(res){
+                
+                if(res['error']){
+                    window.hWin.HEURIST4.msg.showMsgErr(res['error'], true);
+                }else{
+                    var template_name = res['ok'];
+                    
+                    var ele = container.find('div[data-heurist-app-id="heurist_resultList"]');
+                    var content = window.hWin.HEURIST4.util.isJSON(ele.text());
+                    ele.attr('id', widgetid+1);
+                    content.search_realm = realm_id;
+                    content.rendererExpandDetails = template_name;
+                    ele.text(JSON.stringify(content));
+                    
+                    _onScriptExecute();
+                }
+                
+            });
+            
+        }else{
+            window.hWin.HEURIST4.msg.showMsgErr(response, true);
+        }
+    }
+
+);//ssearch_save
+                        
+            
+
+        }); //on template load
+        
+        //$.get("http://www.mypage.com", function( my_var ) {
+            // my_var contains whatever that request returned
+        //});
+    }
+    
+    //
     // defines widget to be inserted (heurist-app-id) and its options (heurist-app-options)
     //      
     //select widget in list
@@ -1042,10 +1171,12 @@ function hCmsEditing(_options) {
             }
             */
 
-            var content = content + '<div data-heurist-app-id="'+widget_name+'" '
+            var content = content 
+                +'<div data-heurist-app-id="'+widget_name+'" '
                 + ' style="'+ widgetCss+'" '
-                + ' id="'+widgetid+'" class="mceNonEditable"'
-                + '>' + widget_options +  '</div>';
+                + ' class="mceNonEditable" id="'+widgetid+'">'
+                + '<!-- '+widget_name.toUpperCase().substring(8)+'   -->'
+                + widget_options +  '</div>';
   
                 
             return content; 
@@ -1865,6 +1996,11 @@ function hCmsEditing(_options) {
         editWidget: function (wid) {
             __addEditWidget(wid);
         },
+
+        addTemplate: function (wid) {
+            __addTemplate(wid);
+        },
+
         
         loadPageById: function (pageid) {
             __iniLoadPageById(pageid)

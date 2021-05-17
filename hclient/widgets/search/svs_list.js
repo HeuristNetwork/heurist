@@ -72,7 +72,11 @@ $.widget( "heurist.svs_list", {
         }
         
         if(this.options.allowed_svsIDs && !$.isArray(this.options.allowed_svsIDs)){
-            this.options.allowed_svsIDs = this.options.allowed_svsIDs.split(',');
+            if($.isNumeric(this.options.allowed_svsIDs)){
+                this.options.allowed_svsIDs = [this.options.allowed_svsIDs];
+            }else{
+                this.options.allowed_svsIDs = this.options.allowed_svsIDs.split(',');    
+            }
         }
         if(this.options.allowed_UGrpID && !$.isArray(this.options.allowed_UGrpID)){
             this.options.allowed_UGrpID = this.options.allowed_UGrpID.split(',');

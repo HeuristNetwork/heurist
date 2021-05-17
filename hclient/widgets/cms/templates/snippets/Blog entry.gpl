@@ -1,0 +1,50 @@
+<html>
+<head>
+<style>
+h1 {
+  text-align: center;
+}
+
+p.date {
+  text-align: right;
+}
+
+p.main {
+  text-align: justify;
+}
+</style>
+</head>
+
+<body>
+
+
+
+{*------------------------------------------------------------*}
+{foreach $results as $r} {* Start records loop, do not remove *}
+{$r = $heurist->getRecord($r)}
+{*------------------------------------------------------------*}
+
+        
+<h2>    
+    {wrap var=$r.f2_39_originalvalue dt="file" width="100" height="auto"}{*Thumbnail Image*}
+		 {$r.f2_1} {* Title *}
+</h2> 
+
+
+  &nbsp;&nbsp;&nbsp;
+{$r.recAdded|date_format:"%A, %B %e, %Y"}{*Record Modified*}
+
+
+
+ 
+  
+
+
+     {$r.f2_3}{*Blog Entry*} 
+
+<br/> {* line break between each record *}
+
+{*------------------------------------------------------------*}
+{/foreach} {* end records loop, do not remove *}
+{*------------------------------------------------------------*}
+
