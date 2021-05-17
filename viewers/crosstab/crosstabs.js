@@ -24,8 +24,6 @@
 */
 
 var crosstabsAnalysis;
-var buttonDiv;
-var visualisationButton;
 var intervalsNumeric;
 
 /**
@@ -112,10 +110,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
       configEntityWidget.configEntity( 'updateList', $recTypeSelector.val() );
 
-        buttonDiv = $("<div></div>");
-        visualisationButton = $("<button>Visualise</button>");
-
-        visualisationButton.appendTo(buttonDiv);
     }
 
     function _OnRowTypeChange(value) {
@@ -800,7 +794,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 var decimalPlaces = [0,1,2,3];
 
-                $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase());
+                $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase()
+                    + ' Range: '+fields3[name].values[0]+' - ' +fields3[name].values[1]);
 
                 //Creates entire element in modal
                 $intdiv = $(document.createElement('div'))
@@ -1782,8 +1777,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
             'border-right':'1px solid black'
         });
         */
-        
-        buttonDiv.appendTo($divres);
 
         //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
 
@@ -2525,9 +2518,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
     });
     */
 
-    visualisationButton.click(function(){
-        window.hWin.HEURIST4.msg.showMsgDlg('Button feature has not been implemented.');
-    });
     return that;
 
 }

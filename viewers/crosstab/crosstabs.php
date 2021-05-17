@@ -259,7 +259,25 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                     </div>
                 </div>
                 <div class="col-12 mb-2" id="bottomContainer">
-                    <!-- Datables goes here!!! -->
+                    <!--Tab Bar for table and visualisation -->
+                    <ul class="nav nav-tabs" id="tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="table-tab" data-bs-toggle="tab" data-bs-target="#table" type="button" role="tab" aria-controls="table" aria-selected="true">Table</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="pie-tab" data-bs-toggle="tab" data-bs-target="#pie" type="button" role="tab" aria-controls="pie" aria-selected="false">Pie Chart</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="tabContent">
+                        <!-- Datables goes here!!! -->
+                        <div class="tab-pane fade show active" id="table" role="tabpanel" aria-labelledby="table-tab">
+                            <div id="divres" class="output-content" style="display:none;">
+                            </div>
+                        </div>
+                        <!--Pie Chart goes here!!! -->
+                        <div class="tab-pane fade" id="pie" role="tabpanel" aria-labelledby="pie-tab"></div>
+                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -275,10 +293,6 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                 <button id="modalButton" class="btn btn-success btn-lg" data-toggle="modal" data-target="#modalDisplay" disabled>View Analysis</button>
             </div>
         -->
-
-        <div id="divres" class="output-content" style="display:none;">
-        </div>
-
 
         <div id="div_empty" class="output-content" style="color:red;font-weight:bold;display:none;">
             Please apply a filter to create a result set
