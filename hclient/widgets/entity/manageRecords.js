@@ -705,8 +705,24 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               css:{'margin-left':'0.5em'},
                               click: function() { that._saveEditAndClose( null, 'none' ); }}, //'close'
                             {text:window.hWin.HR('Close'), 
-                              click: function() { 
-                                  that.closeEditDialog();
+                              click: function() {
+                                var recset = $Db.rst(that._currentEditRecTypeID);
+                                var hasField = false;
+
+                                recset.each2(function(id, f){
+                                    if(f.rst_DefaultValue == 'tabs' || f.rst_DefaultValue == 'group'){ return; }
+                                    hasField = true;
+                                });
+
+                                if(!hasField){
+                                    window.hWin.HEURIST4.msg.showMsgDlg('You need to define fields to make this record type usable.', 
+                                    function(){ that.closeEditDialog(); },
+                                        {title:'No fields defined', no:window.hWin.HR('Continue editing'), yes:window.hWin.HR('Exit with no fields')}
+                                    );
+                                }
+                                else{
+                                    that.closeEditDialog();
+                                }
                             }}];
                     
                 }else{
@@ -3682,6 +3698,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             //switch on optional fields and disable checckbox
             this.element.find('.chb_opt_fields').prop('checked',true).attr('disabled', true).change();
             
+            //show the attributes and title mask dialog
+            this.element.find('.btn-edit-rt').show();
+            this.element.find('.btn-edit-rt-titlemask').show();			
+			
             //hide message about forbidden fields
             $(this.element).find('.hidden_field_warning').hide();
             
@@ -3697,6 +3717,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             $(this.element).find('.separator').css({width: '80%', display: 'inline-block'});
             $(this.element).find('.separator-hidden').css({width: '80%', display: 'inline-block'});
             
+            //display message at bottom
+            $('<div id="mod-struct-help" style="font-size:1.2em;margin-top:30px;">Use the gearwheel <span class="ui-icon-gear"></span> to add/edit fields and headings</div>')
+            .appendTo(this.editForm.last('.editForm.recordEditor'));			
+			
             //if record type has been changed - reload rts_editor
             this._reloadRtsEditor();
             
@@ -3709,6 +3733,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             this.element.find('.chb_opt_fields').attr('disabled', false);
             this.element.find('.lbl_opt_fields').show();
             
+            this.element.find('.btn-edit-rt').hide();
+            this.element.find('.btn-edit-rt-titlemask').hide();  
             
             $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
 
