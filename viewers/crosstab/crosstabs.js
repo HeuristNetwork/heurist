@@ -23,8 +23,14 @@
 * @package     Heurist academic knowledge management system
 */
 
+/*
+* Global variables
+*/
 var crosstabsAnalysis;
 var intervalsNumeric;
+var intervalsValues;
+var minMax = [];
+var originalOutliers = [];
 
 /**
 *  CrosstabsAnalysis - class for crosstab analysis
@@ -298,6 +304,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             $container.show();
                         }else{
                             fields3[name].values = [val0, valmax];
+                            minMax[0] = fields3[name].values[0];    //Store min value in seperate array to save the copy as to use in the rendering.
+                            minMax[1] = fields3[name].values[1];    //Store min value in seperate array to save the copy as to use in the rendering.
                             calculateIntervals(name);
                         }
 
@@ -353,7 +361,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
             //alphabetically, or if distinct values less that 50 like terms
 
         }
-
 
         if($.isFunction(callback)) callback.call();
         renderIntervals(name);
@@ -789,13 +796,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 var $roundingDiv;
                 var $intervalsDiv;
                 var $intervalColumn;
-                var $individualValues;
                 var selectBox;
-
+                
                 var decimalPlaces = [0,1,2,3];
 
                 $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase()
-                    + ' Range: '+fields3[name].values[0]+' - ' +fields3[name].values[1]);
+                    + ' (Range: '+fields3[name].values[0]+' - ' +fields3[name].values[1]+')');
 
                 //Creates entire element in modal
                 $intdiv = $(document.createElement('div'))
@@ -817,11 +823,44 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $('<div class="col">')
                 .append($('<input id="'+name+'IntCount">').attr('size',6).val(keepCount))
                 .append($('<span>').html('intervals from'))
-                .append($('<input>'))
+                .append($('<input id="minOutlier">').attr('size',6).val(minMax[0]))
                 .append($('<span>').html('to'))
-                .append($('<input>'))
-                .append($('<button>Apply</button>').click(function(event){
-                    calculateIntervals(name, parseInt($('#'+name+'IntCount').val()) );
+                .append($('<input id="maxOutlier">').attr('size',6).val(minMax[1]))
+                .append($('<button>Apply</button>').addClass('btn btn-success').click(function(event){
+                    var isMinWithin = (parseInt($('#minOutlier').val()) >= fields3[name].values[0] && parseInt($('#minOutlier').val()) <= fields3[name].values[1]) ? true : false;    //If min within range.
+                    var isMaxWithin = (parseInt($('#maxOutlier').val()) <= fields3[name].values[1] && parseInt($('#maxOutlier').val()) >= fields3[name].values[0]) ? true : false;    //If man within range.
+                    var isMaxGreater = (parseInt($('#maxOutlier').val()) < parseInt($('#minOutlier').val())) ? true : false;
+                    var isMinGreater = (parseInt($('#minOutlier').val()) > parseInt($('#maxOutlier').val())) ? true : false;
+
+                    if(isMinWithin && isMaxWithin && !isMaxGreater && !isMinGreater){
+                        minMax[0] = $('#minOutlier').val();
+                        minMax[1] = $('#maxOutlier').val();
+                        calculateIntervals(name, parseInt($('#'+name+'IntCount').val()) );
+                    }
+                    else{
+                        var errorMessage = "When entering the range of intervals to apply to a dataset, the from and to values must be between the range above."
+                        + " The from value must also not exceed the to value and vice versa.";
+                        var alert = document.createElement('div');
+                        $(alert).addClass('alert alert-warning alert-dismissible fade show')
+                        .attr('role', 'alert')
+                        .attr('id','numberAlert')
+                        .html(errorMessage)
+                        .append($('<button>')
+                            .attr('type', 'button')
+                            .attr('class','btn-close')
+                            .attr('data-bs-dismiss', 'alert')
+                            .attr('aria-label', 'close')
+                        )
+                        .prependTo($('#'+name+'IntervalsBody'));
+
+                        /*
+                        setTimeout(function(){
+                            $('#numberAlert').fadeOut(500, function(){
+                                $('#numberAlert').remove();
+                            })
+                        }, 3000)
+                        */
+                    }     
                 }))
                 .appendTo($resetRow);
 
@@ -886,71 +925,199 @@ function CrosstabsAnalysis(_query, _query_domain) {
         htmlElement.empty();
 
         for(i=0;i<int.length;i++){
-            //Calculate the length of the value so as to put decimal places in front to display in HTML.
-            var min = int[i].values[0].toString();
-            var max = int[i].values[1].toString();
-            var lengthBefore = (min.includes('.')) ? min.split('.')[0].length : min.length;
-            var numberOfZeros = ((decimalPlace == 0) ? 0 : (decimalPlace == 1) ? 1 : (decimalPlace == 2) ? 2 : 3) + lengthBefore;
 
-            //Create the row div.
-            var $intRows = $(document.createElement('div'));
+            var isOutlierMin = (int[i].values[0] < Number($('#minOutlier').val())) ? true : false;
+            var isOutlierMax = ((int[i].values[1] > Number($('#maxOutlier').val())) && (int[i].values[0] > Number($('#maxOutlier').val()))) ? true : false;
 
-            $intRows.addClass('intervalDiv list row')
-            .attr('id',name+i)
-            .appendTo(htmlElement);
+            if(!isOutlierMin && !isOutlierMax){
+                if((int[i].values[0] < Number($('#maxOutlier').val())) && int[i].values[1] > Number($('#maxOutlier').val())){
+                    fields3[name].intervals[i].values[1] = Number($('#maxOutlier').val());
+                    fields3[name].intervals[i].name = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + fields3[name].intervals[i].values[1].toFixed(decimalPlace);
+                    fields3[name].intervals[i].name = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + fields3[name].intervals[i].values[1].toFixed(decimalPlace);
+                }
+                //Create the row div.
+                var $intRows = $(document.createElement('div'));
 
-            $('<div class="col-4">').html(int[i].values[0].toPrecision(numberOfZeros)).appendTo($intRows);
+                $intRows.addClass('intervalDiv list row')
+                .attr('id',name+i)
+                .appendTo(htmlElement);
 
-            $('<div class="col-4">').html('to <').appendTo($intRows);
+                $('<div class="col-4">').html(int[i].values[0].toFixed(decimalPlace)).appendTo($intRows);
 
-            lengthBefore = (max.includes('.')) ? max.split('.')[0].length : max.length;
-            numberOfZeros = ((decimalPlace == 0) ? 0 : (decimalPlace == 1) ? 1 : (decimalPlace == 2) ? 2 : 3) + lengthBefore;
+                $('<div class="col-4">').html('to <').appendTo($intRows);
 
-            $('<div class="col-4">').html(int[i].values[1].toPrecision(numberOfZeros))
-            .dblclick(function(){
-                var intervalId = parseInt($(this).parent().attr('id').replace(name,''));
-                var intervalValue = fields3[name].intervals[intervalId].values[1];
+                $('<div class="col-4">').html(int[i].values[1].toFixed(decimalPlace))
+                .dblclick(function(){
+                    var intervalId = parseInt($(this).parent().attr('id').replace(name,''));
+                    var intervalValue = fields3[name].intervals[intervalId].values[1];
 
-                $(this).html('<input type="number" class="w-100" id="changeValueBox" value="'+intervalValue+'">');
-                //When user clicks out of input box change the intervals value min and max
-                $('#changeValueBox').blur(function(){
+                    $(this).html('<input type="number" class="w-100" id="changeValueBox" value="'+intervalValue+'">');
+                    //When user clicks out of input box change the intervals value min and max
+                    $('#changeValueBox').blur(function(){
 
-                    //Need an if statement to prevent user from entering beyond the max value.
+                        //Need an if statement to prevent user from entering beyond the max value.
 
-                    //Change the max value for the intervals based on what the user has entered.
-                    for(k=0;k<fields3[name].intervals.length;k++){
-                        if(k < intervalId){
-                            continue;
-                        }
-                        else{
-                            var newNumber = Number($('#changeValueBox').val());
-                            if(k==intervalId){
-                                fields3[name].intervals[intervalId].values[1] = newNumber;
-                                fields3[name].intervals[intervalId].name = rnd(fields3[name].intervals[intervalId].values[0]) + ' ~ ' +  rnd(fields3[name].intervals[intervalId].values[1]);
-                                fields3[name].intervals[intervalId].description = rnd(fields3[name].intervals[intervalId].values[0]) + ' ~ ' +  rnd(fields3[name].intervals[intervalId].values[1]);
+                        //Change the max value for the intervals based on what the user has entered.
+                        for(k=0;k<fields3[name].intervals.length;k++){
+                            if(k < intervalId){
+                                continue;
                             }
                             else{
-                                if(newNumber >= fields3[name].intervals[k].values[1]){
-                                    fields3[name].intervals.splice(k, 1);
-                                    k=0;
-                                    continue;
+                                var newNumber = Number($('#changeValueBox').val());
+                                if(k==intervalId){
+                                    fields3[name].intervals[intervalId].values[1] = newNumber;
+                                    fields3[name].intervals[intervalId].name = rnd(fields3[name].intervals[intervalId].values[0]) + ' ~ ' +  rnd(fields3[name].intervals[intervalId].values[1]);
+                                    fields3[name].intervals[intervalId].description = rnd(fields3[name].intervals[intervalId].values[0]) + ' ~ ' +  rnd(fields3[name].intervals[intervalId].values[1]);
                                 }
                                 else{
-                                    fields3[name].intervals[k].values[0] = newNumber;
-                                    break;
+                                    if(newNumber >= fields3[name].intervals[k].values[1]){
+                                        fields3[name].intervals.splice(k, 1);
+                                        k=0;
+                                        continue;
+                                    }
+                                    else{
+                                        fields3[name].intervals[k].values[0] = newNumber;
+                                        break;
+                                    }
                                 }
                             }
                         }
-                    }
-                    //Because user is making changes to the values, save the object, making it easier to return to the original value when decimals are changed.
-                    intervalsNumeric = $.extend(true,{},fields3[name].intervals);
-                    generateNumericIntervalsRows(name, fields3[name].intervals, htmlElement, $('#roundingSelect').val());
+                        //Because user is making changes to the values, save the object, making it easier to return to the original value when decimals are changed.
+                        intervalsNumeric = $.extend(true,{},fields3[name].intervals);
+                        generateNumericIntervalsRows(name, fields3[name].intervals, htmlElement, $('#roundingSelect').val());
 
-                    _doRender();    //Apply to table
-                 });
-            })
-            .appendTo($intRows);
+                        _doRender();    //Apply to table
+                    });
+                })
+                .appendTo($intRows);
+            }
+            else{
+                if(isOutlierMin){
+                    var clickedMinOutlier = false;
+                    var clickedMaxOutlier = false;
+                    //Creates seperate div for outliers min
+                    var outlierNumber = Number($('#minOutlier').val());
+                    //Change array to incorporate outliers for min
+                    for(t=0;t<fields3[name].intervals.length;t++){
+                        if(t==0){
+                            fields3[name].intervals[t].values[0] = fields3[name].values[0];
+                            fields3[name].intervals[t].values[1] = outlierNumber;
+                            fields3[name].intervals[t].name = '<' + outlierNumber.toFixed(decimalPlace);
+                            fields3[name].intervals[t].description = '<' + outlierNumber.toFixed(decimalPlace);
+                            continue;
+                        }
+
+                        if(t==1){
+                            if(fields3[name].intervals[t].values[0] > outlierNumber){
+                                fields3[name].intervals[t].values[0] = outlierNumber;
+                                fields3[name].intervals[t].name = outlierNumber.toFixed(decimalPlace) + ' ~ ' + fields3[name].intervals[t].values[1].toFixed(decimalPlace);
+                                fields3[name].intervals[t].description = outlierNumber.toFixed(decimalPlace) + ' ~ ' + fields3[name].intervals[t].values[1].toFixed(decimalPlace);
+                                continue;
+                            }
+                        }
+                    
+                        if((fields3[name].intervals[t].values[0] < outlierNumber)&&(fields3[name].intervals[t].values[1] < outlierNumber)){
+                            fields3[name].intervals.splice(t, 1);
+                            t=0;
+                            continue
+                        }
+                        
+                        if((fields3[name].intervals[t].values[0] < outlierNumber) && (fields3[name].intervals[t].values[1] > outlierNumber)){
+                            fields3[name].intervals[t].values[0] = outlierNumber;
+                            fields3[name].intervals[t].name = outlierNumber.toFixed(decimalPlace)+ ' ~ ' + fields3[name].intervals[t].values[1].toFixed(decimalPlace);
+                            fields3[name].intervals[t].description = outlierNumber.toFixed(decimalPlace)+ ' ~ ' + fields3[name].intervals[t].values[1].toFixed(decimalPlace);
+                            continue;
+                        }
+                    }
+                    var $intRows = $(document.createElement('div'));
+
+                    $intRows.addClass('row')
+                    .appendTo(htmlElement);
+                    
+                    $('<div class="col-4">').html('Outliers').appendTo($intRows);
+                    $('<div class="col-4">').html('<'+outlierNumber.toFixed(decimalPlace)).appendTo($intRows);
+                    $('<div class="col-4">').append($('<button>').addClass('btn btn-danger border-dark').attr('id','removeMinOutlier')
+                    .append('<i class="bi bi-trash"></i>'))
+                    .click(function(){
+                        if(!clickedMinOutlier){
+                            originalOutliers[0] = fields3[name].intervals[0];
+                            fields3[name].intervals.splice(0,1);
+
+                            $('#removeMinOutlier').empty();
+                            $('#removeMinOutlier').toggleClass('btn-danger border-dark btn-success')
+                            .append('<i class="bi bi-plus-circle"></i>');
+                            clickedMinOutlier = true;
+                        }
+                        else {
+                            fields3[name].intervals.unshift(originalOutliers[0]);
+                            $('#removeMinOutlier').empty();
+                            $('#removeMinOutlier').append('<i class="bi bi-trash"></i>');
+                            $('#removeMinOutlier').toggleClass('btn-success btn-danger border-dark');
+                            clickedMinOutlier = false;
+                        }
+                        _doRender();
+                        
+                    })
+                    .appendTo($intRows);
+                }
+                else if(isOutlierMax){
+                    //Creates seperate div for outliers min
+                    var outlierNumber = Number($('#maxOutlier').val());
+                    fields3[name].intervals[i].values[1] = outlierNumber;
+                    fields3[name].intervals[i].name = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + outlierNumber.toFixed(decimalPlace);
+                    fields3[name].intervals[i].description = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + outlierNumber.toFixed(decimalPlace);
+                    
+                    //Change array to incorporate outliers for min
+                    for(t=0;t<fields3[name].intervals.length;t++){
+                        if(t== fields3[name].intervals.length-1){
+                            fields3[name].intervals[t].values[1] = fields3[name].values[1];
+                            fields3[name].intervals[t].values[0] = outlierNumber;
+                            fields3[name].intervals[t].name = '>' + outlierNumber.toFixed(decimalPlace);
+                            fields3[name].intervals[t].description = '>' + outlierNumber.toFixed(decimalPlace);
+                            continue;
+                        }
+                        
+                        if(fields3[name].intervals[t].values[1] > outlierNumber){
+                            fields3[name].intervals.splice(t, 1);
+                            t-=1;
+                        }
+                    }
+                    var $intRows = $(document.createElement('div'));
+
+                    $intRows.addClass('row')
+                    .appendTo(htmlElement);
+                    
+                    $('<div class="col-4">').html('Outliers').appendTo($intRows);
+                    $('<div class="col-4">').html('>'+outlierNumber.toFixed(decimalPlace)).appendTo($intRows);
+                    $('<div class="col-4">').append($('<button>').addClass('btn btn-danger border-dark').attr('id','removeMaxOutlier')
+                    .append('<i class="bi bi-trash"></i>'))
+                    .click(function(){
+                        if(!clickedMaxOutlier){
+                            originalOutliers[1] = fields3[name].intervals[fields3[name].intervals.length-1];
+                            fields3[name].intervals.splice(fields3[name].intervals.length-1,1);
+
+                            $('#removeMaxOutlier').empty();
+                            $('#removeMaxOutlier').toggleClass('btn-danger border-dark btn-success')
+                            .append('<i class="bi bi-plus-circle"></i>');
+                            clickedMaxOutlier = true;
+                        }
+                        else {
+                            fields3[name].intervals.push(originalOutliers[1]);
+                            $('#removeMaxOutlier').empty();
+                            $('#removeMaxOutlier').append('<i class="bi bi-trash"></i>');
+                            $('#removeMaxOutlier').toggleClass('btn-success btn-danger border-dark');
+                            clickedMaxOutlier = false;
+                        }
+                        _doRender();
+                        
+                    })
+                    .appendTo($intRows);
+                    break;
+                }
+            }
         }
+
+        _doRender();
     }
 
     /* 
@@ -959,14 +1126,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
     function updateDescriptionName(name, ints, decimalPlace){
 
         for(i=0;i<ints.length;i++){
-            var min = ints[i].values[0].toString();
-            var max = ints[i].values[1].toString();
-            var lengthBeforeMin = (min.includes('.')) ? min.split('.')[0].length : min.length;
-            var lengthBeforeMax = (max.includes('.')) ? max.split('.')[0].length : max.length;
-            var numberOfZerosMin = ((decimalPlace == 0) ? 0 : (decimalPlace == 1) ? 1 : (decimalPlace == 2) ? 2 : 3) + lengthBeforeMin;
-            var numberOfZerosMax = ((decimalPlace == 0) ? 0 : (decimalPlace == 1) ? 1 : (decimalPlace == 2) ? 2 : 3) + lengthBeforeMax;
-
-            var intervalName = ints[i].values[0].toPrecision(numberOfZerosMin) + ' ~ ' + ints[i].values[1].toPrecision(numberOfZerosMax);
+            var intervalName = ints[i].values[0].toFixed(decimalPlace) + ' ~ ' + ints[i].values[1].toFixed(decimalPlace);
 
             fields3[name].intervals[i].name = intervalName;
             fields3[name].intervals[i].description = intervalName;
