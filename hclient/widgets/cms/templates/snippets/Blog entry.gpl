@@ -1,3 +1,8 @@
+{* 
+  This report format is used by the Heurist blog function to render blog posts. 
+  PLEASE DO NOT DELETE THIS FORMAT or change the fields it renders.
+  You may change the styles if you wish to reflect the style of your website.
+*}
 <html>
 <head>
 <style>
@@ -40,7 +45,7 @@ p.main {
   
 
 
-     {$r.f2_3}{*Blog Entry*} 
+     {$r.f2_4}{*Blog Entry*} 
 
 <br/> {* line break between each record *}
 
