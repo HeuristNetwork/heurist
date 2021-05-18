@@ -263,7 +263,7 @@
                     <legend>Recently Used Keywords:</legend>
                     <label class="label-tag">Keywords assigned to recently viewed works</label>
                     <button id="btnPrevAssign" class="btn btn-add" style="text-align:left; font-size:1em;">Add Selected</button>
-                    <label><input type="checkbox" onclick="checkAllOptions(prev_field, this.checked);">Check All</label>
+                    <label><input type="checkbox" id="check-all" onclick="checkAllOptions(prev_field, this.checked);">Check All</label>
                     <br>
                     
                     <div class="checkboxlist" style="width:100%;">
@@ -281,7 +281,7 @@
     	            <legend>Associated Keywords:</legend>
     	            <label class="label-tag">Keywords commonly associated with <span id="assoc_kywd">&lt;click Find Associated&gt;</span> <span id="assoc_total"></span></label>
     	            <button id="btnAssocAssign" class="btn btn-add" style="text-align:left; font-size:1em;">Add Selected</button>
-                    <label><input type="checkbox" onclick="checkAllOptions(associated_field, this.checked);">Check All</label>	            
+                    <label><input type="checkbox" id="check-all" onclick="checkAllOptions(associated_field, this.checked);">Check All</label>	            
     	            <br>
 
     	            <div class="checkboxlist" style="width:100%;">
