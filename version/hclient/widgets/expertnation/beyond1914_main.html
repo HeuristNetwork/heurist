@@ -1,0 +1,426 @@
+<nav class="navbar navbar-default bor-utility-nav" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bor-navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="fa fa-bars"></span>
+            </button>
+            <a class="navbar-brand bor-sydney-logo" href="javascript:window.location.reload(true)">Book of Remembrance</a>
+        </div>
+
+        <div class="collapse navbar-collapse bor-nav" id="bor-navbar-collapse">
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <header class="bor-header">
+        <a href="javascript:window.location.reload(true)" class="bor-logo">
+            <h1 class="bor-header-title sr-only">Beyond 1914</h1>
+
+            <div class="bor-header-sub-title sr-only">The University of Sydney and the Great War</div> <!-- was p -->
+        </a>
+
+
+        <div class="form-horizontal bor-header-search">
+            <fieldset>
+                <legend class="sr-only">Search BOR</legend>
+                <div class="form-group">
+                    <label class="col-lg-12 control-label sr-only" for="query">Enter your search terms to search the BOR database</label>
+                    <div class="col-lg-12 bor-search-body">
+                        <input id="search_query" type="search" placeholder="Find people and places" style="min-width: 40ex;"
+                            class="form-control input-lg" value="">
+                        <button id="search_button" class="submit fa-search ui-icon ui-icon-search" style="height:30px"><i>&nbsp;</i></button>
+                    </div>
+                    <div class="col-lg-12">
+                        <a target="blank"  style="color:white;text-decoration:underline" id="help_link" 
+                            href="hclient/widgets/expertnation/assets/beyond1914/documents/help_search.html">How do I use this?</a>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+
+
+    </header>
+
+    <div id="main_pane" class="bor-page clearfix">
+
+        <!-- people by first character --> 
+        <div class="bor-page-people clearfix" style="display:none">
+            <div class="bor-body-region bor-people-list">
+                <h1>People of the Book of Remembrance</h1>
+
+                <div class="bor-pagination">
+                    <ul class="pagination">
+                        <li class="active">
+                            <a href="/people/a">A</a>
+                        </li>
+                        <li>
+                            <a href="/people/b">B</a>
+                        </li>
+                        <li>
+                            <a href="/people/c">C</a>
+                        </li>
+                        <li>
+                            <a href="/people/d">D</a>
+                        </li>
+                        <li>
+                            <a href="/people/e">E</a>
+                        </li>
+                        <li>
+                            <a href="/people/f">F</a>
+                        </li>
+                        <li>
+                            <a href="/people/g">G</a>
+                        </li>
+                        <li>
+                            <a href="/people/h">H</a>
+                        </li>
+                        <li>
+                            <a href="/people/i">I</a>
+                        </li>
+                        <li>
+                            <a href="/people/j">J</a>
+                        </li>
+                        <li>
+                            <a href="/people/k">K</a>
+                        </li>
+                        <li>
+                            <a href="/people/l">L</a>
+                        </li>
+                        <li>
+                            <a href="/people/m">M</a>
+                        </li>
+                        <li>
+                            <a href="/people/n">N</a>
+                        </li>
+                        <li>
+                            <a href="/people/o">O</a>
+                        </li>
+                        <li>
+                            <a href="/people/p">P</a>
+                        </li>
+                        <li>
+                            <a href="/people/q">Q</a>
+                        </li>
+                        <li>
+                            <a href="/people/r">R</a>
+                        </li>
+                        <li>
+                            <a href="/people/s">S</a>
+                        </li>
+                        <li>
+                            <a href="/people/t">T</a>
+                        </li>
+                        <li>
+                            <a href="/people/u">U</a>
+                        </li>
+                        <li>
+                            <a href="/people/v">V</a>
+                        </li>
+                        <li>
+                            <a href="/people/w">W</a>
+                        </li>
+                        <li class="disabled">
+                            <span>X</span>
+                        </li>
+                        <li>
+                            <a href="/people/y">Y</a>
+                        </li>
+                        <li class="disabled">
+                            <span>Z</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bor-emblem" id="cp_people_by_char">
+                </div>
+
+                <div class="bor-pagination">
+                    <ul class="pagination">
+                        <li class="active">
+                            <a href="/people/a">A</a>
+                        </li>
+                        <li>
+                            <a href="/people/b">B</a>
+                        </li>
+                        <li>
+                            <a href="/people/c">C</a>
+                        </li>
+                        <li>
+                            <a href="/people/d">D</a>
+                        </li>
+                        <li>
+                            <a href="/people/e">E</a>
+                        </li>
+                        <li>
+                            <a href="/people/f">F</a>
+                        </li>
+                        <li>
+                            <a href="/people/g">G</a>
+                        </li>
+                        <li>
+                            <a href="/people/h">H</a>
+                        </li>
+                        <li>
+                            <a href="/people/i">I</a>
+                        </li>
+                        <li>
+                            <a href="/people/j">J</a>
+                        </li>
+                        <li>
+                            <a href="/people/k">K</a>
+                        </li>
+                        <li>
+                            <a href="/people/l">L</a>
+                        </li>
+                        <li>
+                            <a href="/people/m">M</a>
+                        </li>
+                        <li>
+                            <a href="/people/n">N</a>
+                        </li>
+                        <li>
+                            <a href="/people/o">O</a>
+                        </li>
+                        <li>
+                            <a href="/people/p">P</a>
+                        </li>
+                        <li>
+                            <a href="/people/q">Q</a>
+                        </li>
+                        <li>
+                            <a href="/people/r">R</a>
+                        </li>
+                        <li>
+                            <a href="/people/s">S</a>
+                        </li>
+                        <li>
+                            <a href="/people/t">T</a>
+                        </li>
+                        <li>
+                            <a href="/people/u">U</a>
+                        </li>
+                        <li>
+                            <a href="/people/v">V</a>
+                        </li>
+                        <li>
+                            <a href="/people/w">W</a>
+                        </li>
+                        <li class="disabled">
+                            <span>X</span>
+                        </li>
+                        <li>
+                            <a href="/people/y">Y</a>
+                        </li>
+                        <li class="disabled">
+                            <span>Z</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>        
+
+        <div class="bor-page-loading clearfix" style="display:none">
+            <div class="loading" style="background-color: transparent;line-height:64px;max-width:64px;margin:auto">
+                &nbsp;
+            </div>
+        </div> 
+
+        <div class="bor-page-error clearfix" style="display:none">
+            <div>
+                Wrong request
+            </div>
+        </div> 
+
+        <!-- CONNECTED PEOPLE (to particular place or attribute) -->
+        <div class="bor-page bor-page-aggregate clearfix" style="display:none">
+            <div class="bor-body-region">
+                <h1 id="cp_header"></h1>
+
+                <div class="bor-map" id="cp_mapframe_container" 
+                    style="position: relative; background-color: rgb(229, 227, 223); overflow: hidden;min-height:100px" >
+                    <!--src='https://heuristplus.sydney.edu.au/heurist/viewers/map/map.php?ll=Beyond1914&db=ExpertNation&header=off&legend=off'-->
+                    <iframe id="cp_mapframe" class="mapframe"  
+                        width="100%" height="100%" border="0"></iframe>
+                </div>
+
+                <h2 class="bor-section-title" style="padding-top:20px">Connected people</h2>
+                <div id="expertnation_place" style="position:relative;min-height:500px"></div>
+            </div>
+        </div>        
+
+        <!-- PROFILE -->    
+        <div class="bor-page bor-page-profile clearfix" style="display:none">
+
+            <aside class="col-lg-3 col-sm-4 bor-gutter">
+                <div class="bor-emblem" id="p_image">
+                </div>
+
+                <section class="bor-group-emphasised"><h3 class="bor-group-title">Lifetime</h3><ul id="p_lifetime" class="bor-group"></ul></section>
+                <section class="bor-group-emphasised"><h3 class="bor-group-title">Gender</h3><ul id="p_gender"class=" bor-group"></ul></section>
+
+                <section class="bor-group-emphasised"><h3 class="bor-group-title">Early education
+                        <span class="bor-tooltip ui-icon ui-icon-circle-help" data-toggle="tooltip" data-placement="auto top" title="These are the primary and secondary schools attended before university."></span></h3>
+                    <ul class="bor-group" id="p_education">
+                    </ul>
+                </section>
+
+                <section class="bor-group-emphasised"><h3 class="bor-group-title">Tertiary education
+                        <span class="bor-tooltip ui-icon ui-icon-circle-help" data-toggle="tooltip" data-placement="auto top" title="This is the degree earned or studied for. Unless otherwise indicated this was at the University of Sydney."></span></h3>
+                    <ul class="bor-group" id="p_tertiary">
+                    </ul>
+                </section>
+
+                <section class="bor-group-emphasised"><h3 class="bor-group-title">Military honours
+                        <span class="bor-tooltip ui-icon ui-icon-circle-help" data-toggle="tooltip" data-placement="auto top" title="Any military decorations or awards."></span></h3>
+                    <ul class="bor-group" id="p_awards">
+                    </ul>
+                </section>
+
+                <section class="bor-group-emphasised"><h3 class="bor-group-title">Military rank
+                        <span class="bor-tooltip ui-icon ui-icon-circle-help" data-toggle="tooltip" data-placement="auto top" title="A person's rank at the end of the War, as listed in The Book of Remembrance."></span></h3>
+                    <ul class="bor-group" id="p_service">
+                    </ul>
+                </section>
+
+                <section class="bor-group-emphasised"><h3 class="bor-group-title">Other resources</h3>
+                    <ul class="bor-group" id="p_resources">
+                    </ul>
+                </section>
+
+                <section class="bor-group-emphasised"><h4 class="bor-last-updated">Last updated &nbsp;<span class="bor-tooltip ui-icon ui-icon-circle-help" data-toggle="tooltip" data-placement="bottom" title="This is the date of the last change made to Beyond 1914"></span></h4>
+                    <p style="margin-left:15px" id="p_lastupdated"></p>
+                </section>      
+            </aside>
+
+            <!-- PERSON'S PAGE  -->
+            <div class="col-lg-9 col-sm-8 bor-gutter-main-content">
+                <div class="bor-map bor-map-1000423901" id="p_mapframe_container"
+                    style="position: relative; overflow: hidden;min-height:100px">
+                    <div style="height: 100%; width: 100%; position: absolute; top: 0px; left: 0px; background-color: rgb(229, 227, 223);">
+                        <!-- src='https://heuristplus.sydney.edu.au/heurist/viewers/map/map.php?ll=Beyond1914&db=ExpertNation&header=off&legend=off' -->                             <iframe id="p_mapframe" class="mapframe"  
+                            width="100%" height="100%" frameborder="0"></iframe>
+                    </div>
+                </div>
+
+                <div class="bor-body-region">
+                    <h2>Book of Remembrance entry     <span class="bor-tooltip ui-icon ui-icon-circle-help" data-toggle="tooltip" data-placement="auto top" title="The Book of Remembrance is a list of every man and woman who who served overseas that was compiled by the University and published in 1939. This is the entry as it appears in the Book."></span>
+                    </h2>
+                    <p id="p_narrative">
+                    </p>
+
+                    <p id="p_pdf_entry">
+                    </p>
+                </div>
+
+                <div class="bor-body-region" style="padding-top: 0 !important">
+                    <h2>Furthermore</h2>
+                    <p id="p_short_description_entry">
+                    </p>
+                </div>
+
+                <hr class="bor-profile-separator">
+
+                <section class="bor-body-region">
+                    <h2 class="bor-section-title">Timeline</h2>
+                    <ul class="bor-path" id="p_timeline">
+
+                    </ul>
+                    <p class="help-block">These dates have been taken from the Book of Remembrance archive files and other sources, and we know
+                        they're not complete. If you have any information or dates that we can add, please see our
+                        <a href="/contribute" onclick="{return window.hWin.enResolver(event);}">contribute page</a> and find
+                        out how to help.</p>
+                </section>
+
+                <hr class="bor-profile-separator">
+
+                <section class="bor-body-region">
+                    <h2 class="bor-section-title">From the archives</h2>
+
+                    <div class="bor-gallery" id="p_gallery">
+
+                    </div>
+                </section>
+            </div>
+        </div>            
+        <!-- end profile page --->            
+
+
+        <div class="bor-page-search clearfix" style="display:none" id="bor-page-search">
+            <aside class="col-lg-3 col-sm-4 bor-gutter">
+                <div class="bor-search-facets" id="search_pane"></div>
+            </aside>
+
+            <div class="col-lg-9 col-sm-8 bor-gutter-main-content">
+                <section class="bor-body-region" id="result_pane"></section>
+            </div>
+        </div>
+
+        <div class="bor-page-search clearfix" style="display:none;padding:10px" id="bor-page-resource">
+        </div>
+
+        <!-- invisible div for navigation widget -->
+        <div id="expertnation_nav" style="display:none">
+        </div>
+    </div>
+    <!-- end main pane -->    
+
+    <footer class="bor-footer">
+        <div class="bor-social-badges">
+
+            <a href="https://www.facebook.com/sydneyuni" target="_blank"><img src="hclient/widgets/expertnation/assets/beyond1914/images/common/facebook-logo.png" width="30" title="Facebook"/></a>
+            <a href="http://twitter.com/sydney_uni" target="_blank"><img src="hclient/widgets/expertnation/assets/beyond1914/images/common/twitter-logo.png" width="30" title="Twitter"/></a>
+            <a href="http://beyond1914.tumblr.com/archive" target="_blank"><img src="hclient/widgets/expertnation/assets/beyond1914/images/common/tumblr-logo.png" width="30" title="Tumblr"/></a>
+            <!---            
+            <a href="https://www.facebook.com/sydneyuni"><span class="fa fa-facebook bor-social-badge"><span class="sr-only">Facebook</span></span></a>
+            <a href="http://twitter.com/sydney_uni"><span class="fa fa-twitter bor-social-badge"><span class="sr-only">Twitter</span></span></a>
+            <a href="http://beyond1914.tumblr.com/archive"><span class="fa fa-tumblr bor-social-badge"><span class="sr-only">Tumblr</span></span></a>
+            -->                
+        </div>
+        <div>
+            <hr class="bor-footer-separator">
+            <span class="bor-footer-separator-icon">❉</span>
+            <hr class="bor-footer-separator">
+        </div>
+        <div class="bor-sponsors">
+            <div>Generously supported by:</div>
+            <div>
+                <!-- was p -->
+                <div class="lead">The University of Sydney Chancellor’s Committee</div>
+                <div>with additional support from</div>
+                <img class="bor-sponsors-logo" src="hclient/widgets/expertnation/assets/beyond1914/images/common/sponsors/SAC.png" alt="Saint Andrew's College">
+                <img class="bor-sponsors-logo" src="hclient/widgets/expertnation/assets/beyond1914/images/common/sponsors/StJohns.png" alt="St John's College">
+                <img class="bor-sponsors-logo" src="hclient/widgets/expertnation/assets/beyond1914/images/common/sponsors/st-pauls-college.png" alt="Saint Paul's College">
+                <img class="bor-sponsors-logo" src="hclient/widgets/expertnation/assets/beyond1914/images/common/sponsors/WC.png" alt="The Women's College">
+            </div>
+        </div>
+        <div class="bor-photographer">
+            <div>Background photograph by Sam Hood, taken at the University of Sydney in 1927.</div>
+            <div>Courtesy of the <a href="http://www.acmssearch.sl.nsw.gov.au/search/itemDetailPaged&#10;&#9;&#9;&#9;&#9;.cgi?itemID=7544" target="_blank">collections of the State Library of NSW</a></div>
+        </div>
+        <div>
+            <hr class="bor-footer-separator">
+            <span class="bor-footer-separator-icon">❉</span>
+            <hr class="bor-footer-separator">
+        </div>
+        <div class="bor-legal">
+            <small>© 2002-14 The University of Sydney. ABN: 15 211 513 464. CRICOS Number: 00026A.</small>
+        </div>
+    </footer>
+
+</div>
+
+<div class="float-panel" data-top="120" style="display:none;">
+    <div style="color:white;text-align:left">History&nbsp;
+        <span class="ui-icon ui-icon-close" title="clear history" style="cursor:pointer;float:right"/>
+        <span class="ui-icon ui-icon-triangle-1-n" style="cursor:pointer;float:right"/>
+    </div>
+    <!--
+    <select style="min-width:90px;max-width:110px;color:black" size="10"></select>
+    -->
+    <ul class="historylist" style="min-width:90px;max-width:180px;color:white;text-align:left;margin:0;padding-left:20px"></ul>
+</div>
+

@@ -1,0 +1,43 @@
+
+Directory:	/hclient/widgets/digital_harlem
+
+Overview:   The customised University of Sydney Digital Harlem interface (see DigitalHarlem.org)
+
+Updated: 	18 Oct 2015
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2019 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
+/*
+
+NOTES:
+
+Saved (facet) searches are shown as buttons in the lefthand panel based on their occurence in the
+Digital Harlem 1915 - 1930 group 1007 or a Year of the Riot 1935 group 1010 (set in dfh_search.js line 30).
+The order in which these buttons are presented in the interface is determined by saved search ID. 
+
+Map documents occur as Featued Individuals (pull down in left panel) ro Featured Maps (clickable thumbnails 
+in Maps panel on the right) according to value of Featured Map or Individual field (field 144), which specifies
+map or individual and which of the interfaces (1915-30 or 1935) the map document will appear in.
+
+Web content records (type 25) define the buttons along the top and the content which pops up when they are clicked
+
+
+*/

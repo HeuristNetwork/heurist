@@ -1,0 +1,286 @@
+<!--
+
+/*
+* Copyright (C) 2005-2020 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* add/edit Record type
+*
+* @author      Juan Adriaanse
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2020 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  AdminStructure
+* @todo    Add functionality to look for rectype, to save a pointer
+* @todo    Figure out a way to display all groups in which the rectype is located, and to change it
+* @todo    (art) replace document.getElementById to jquery $
+* @todo    (art) use display block for terms fields instead of dynamic addition
+*/
+
+-->
+
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>Create new record type</title>
+
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
+
+        <script type="text/javascript" src="../../../hclient/core/detectHeurist.js"></script>
+        
+        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+
+        <style type="text/css">
+            .input-row div.input-header-cell {
+                width:160px;
+                /*color:#6a7c99;
+                text-align: right;
+                padding-right:4px;*/
+            }
+            .rtyHiddenField {
+                display:none
+            }
+        </style>
+        
+        <script type="text/javascript" src="editRectype.js"></script>
+        
+        <script type="text/javascript">
+            $(document).ready(function() {
+                window.editRectypeEditor = new EditRectype();
+            });
+        </script>
+        
+    </head>
+
+    <body class="popup">
+
+        
+
+        <div class="tooltip" id="toolTip2" onMouseOut="forcehideInfo()"><p></p></div>
+
+        <div id="statusMsg" style="display: none;"></div>
+        <div id="rectypeValues">
+            <!--<div style="float:right;"><a href="javascript:void(0)" onClick="viewEquivalences()">View equivalences</a></div>-->
+            <div class="input-row">
+                <div class="input-header-cell" style="vertical-align: baseline;"><h2 style="line-height: 14px;">Id:</h2></div>
+                <div class="input-cell">
+                    <h2 style="line-height: 14px;display: inline-block; margin-right: 20px;"><span class="recTypeName" id="rty_ID"></span></h2>
+                    <img id="infoImage" src="../../../common/images/info.png"
+                        onmouseover="_showInfoToolTip(event)"
+                        onmouseout="hideInfo()"
+                        style="display: inline-block;"/>
+                    <div style="margin-left: 20px;display: inline-block;font-weight: bold;" id="div_rty_ConceptID"></div>
+                </div>
+            </div>
+            <div id="divIconAndThumbNew" style="display:none;">
+                <div style="min-width: 180px;display:inline-block;color:#6a7c99;text-align: right;padding-right: 10px; padding-top: 5px;" class="input-header-cell"><label>Thumbnail and icon</label></div>
+                <div class="input-cell" style="display:inline-block">
+                    <div id="rectypeThumb2" style="display:inline-block;" ><img id="imgThumb2" width="1" height="1"></div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div id="rectypeIcon2" style="display:inline-block;margin: 10px 0;vertical-align: middle;"><img id="imgIcon2" width="1" height="1"></div>
+                    &nbsp;&nbsp;&nbsp;
+                    <input type="button" id="btnSelectIcon" style="width:100px"  value="Please select">
+                </div>
+            </div>
+            <div class="input-row" id="divIconAndThumb">
+                <div class="input-header-cell" style="vertical-align: middle;">Thumbnail (~64x64):</div>
+                <div class="input-cell" style="vertical-align: middle;">
+                    <div id="rectypeThumb" style="display:inline-block;" ></div>
+                    <div class="input-header-cell" style="display:inline-block;vertical-align: middle;width:90px; min-width:90px;max-width:90px;">Icon (~16x16): </div>
+                    <div id="rectypeIcon" style="display:inline-block;margin: 10px 0;vertical-align: middle;"></div>
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="input-header-cell required" style="display: table-cell;">
+                    <label for="rty_Name">Record type name *</label></div>
+                <div class="input-cell">
+                    <input id="rty_Name" maxlength="40" style="min-width:190px;width:190px;" 
+                    onkeypress="editRectypeEditor.onPreventChars(event)"
+                    onKeyUp="editRectypeEditor.createPlural()" />
+                    <span style="display:inline-block;text-align:right;width:64px">Plural:</span>
+                    <input id="rty_Plural" maxlength="40" style="min-width:190px;width:190px;" />
+                    <div class="width: 380px; font-size: smaller; margin-top: 5px; margin-bottom: 15px;">Name for display in selection lists, formats or reporting. Restricted characters: [ ] { } ' "</div>
+                </div>
+            </div>
+            
+
+            <div class="input-row">
+                <div class="input-header-cell required" style="vertical-align:top;display: table-cell;"><label for="rty_Description">Description *</label></div>
+                <div class="input-cell">
+                    <textarea cols="200" id="rty_Description" rows="5" style="width:450px;"></textarea>
+                    <div class="help prompt">Detailed description of the record type, providing an explanation of its content. 
+                    <br/>A good description here is important for future documentation of the database.</div>
+                </div>
+            </div>
+
+            <div class="input-row" id="rty_TitleMask_row">
+                <div class="input-header-cell required" style="display: table-cell;"><label for="rty_TitleMask">Title mask *</label></div>
+                    
+                <div class="input-cell">
+                    <textarea readonly cols="450" id="rty_TitleMask" rows="2" style="width:450px; background-color: lightgray;"></textarea>
+                    <span><button onClick="editRectypeEditor.editMask()">Edit mask</button></span>
+                    <div class="help prompt">
+                        The title mask is a string into which data field values are inserted to create a constructed<br/> 
+                        title for each record, e.g. [Title], pp. [Start_Page]-[End_Page] renders a title such as<br/>
+                        "Alice in Wonderland, pp. 37-39". The constructed title is displayed in search results and <br/> 
+                        other lists. [ ] encloses a field name. To insert [ or ], use [[ or ]]</div>
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="input-header-cell" style="display: table-cell;;"><label for="rty_ReferenceURL">Semantic/Reference URI</label></div>
+                <div class="input-cell">
+                    <input id="rty_ReferenceURL" maxlength="250" style="width:450px;" />
+                    <div class="help prompt">URI to a full description or ontological reference definition of the record type</div>
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="input-header-cell" style="display: table-cell;"><label for="rty_ShowURLOnEditForm">Show record URL on edit form:</label></div>
+                <div class="input-cell">
+                    <input id="rty_ShowURLOnEditForm" type="checkbox"/>
+                    <div class="help prompt">
+                    Display URL at top of edit form for this record type. This is a special URL used to<br/>
+                    hyperlink search results. It is distinct from any URL fields in the record, which are<br/>
+                    not affected. Use only where a majority of records of this type have one, and only one,<br/>
+                    principle URL eg. for web sites/internet bookmarks.</div>
+                </div>
+            </div>
+
+            <!-- OPTIONAL FIELDS - hidden behind a turndown arrow -->
+            <div id="optional" class="togglepnl" style="margin-top: 20px; margin-bottom: 20px;"><a
+                    style="margin-left: 40px;"
+                    onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('show'); $('#options').toggleClass('hidden');">Additional information</a>
+                <div id="options" class="hidden" style="background-color:#ffffff;">
+
+                    <div class="input-row">
+                        <div class="input-header-cell" style="display: table-cell;"><label  for="rty_RecTypeGroupID">Display group</label></div>
+                        <div class="input-cell">
+                            <div class="rtyValue" id="rty_RecTypeGroupID"></div>
+                            <div class="help prompt help1">Record types are grouped together into related types for easier management. Add new groups from the record type management screen.</div>
+                        </div>
+                    </div>
+
+                    <!-- STATUS -->
+                    <div class="input-row">
+                        <div class="input-header-cell" style="display:table-cell;"><label  for="rty_Status">Status</label></div>
+                        <div class="input-cell">
+                            <select class="rtyValue" id="rty_Status" onChange="editRectypeEditor.onChangeStatus(event)">
+                                <option selected="selected">open</option>
+                                <option>pending</option>
+                                <option>approved</option>
+                                <!-- option>reserved</option -->
+                            </select>
+                            <div class="help prompt">'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress;  'Open' for freely modifiable/personal record types</div>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-header-cell" style="display:table-cell;" for="rty_ShowInLists">Show in lists</div>
+                        <div class="input-cell">
+                            <input id="rty_ShowInLists" type="checkbox"/>
+                            <div class="help prompt">Show this record type in pulldown lists etc. (always visible in record management screen)</div>
+                        </div>
+                    </div>
+
+                    <!-- Show URL on form moved from here b/coverly hidden -->
+ 
+                    <div class="input-row">
+                        <div class="input-header-cell" style="display:table-cell;" for="rty_ShowDescriptionOnEditForm">Show description on edit form</div>
+                        <div class="input-cell">
+                            <input id="rty_ShowDescriptionOnEditForm" type="checkbox"/>
+                            <div class="help prompt">Display record type description at top of edit form for this record type.
+                                This is a useful way of providing some context for the content of the form</div>
+                        </div>
+                    </div>
+
+                    <!-- This doesn't actually work, but is it really useful? I think not -->
+                    <div id="definitdiv" style="display:inline-block;"><input id="definit" type="checkbox" checked="checked" value="1" />&nbsp;<label for="definit">Add fields by default</label></div>
+
+                    <!-- HIDDEN  IJ REQ 2012-10-11 as not yet implemented in code - TODO: check status-->
+                    <div class="input-row" style="display:none">
+                        <div class="input-header-cell" style="display:table-cell;" for="rty_NonOwnerVisibility">Non-owner visibility</div>
+                        <div class="input-cell">
+                            <select class="rtyValue" id="rty_NonOwnerVisibility">
+                                <option selected="selected">viewable</option>
+                                <option>hidden</option>
+                                <option>public</option>
+                            </select>
+                            <div class="help prompt">Hidden = visible only to owners, Viewable = any logged in user, Public = visible to non-logged in viewers</div>
+                        </div>
+                    </div>
+
+                    <!-- HIDDEN -->
+                    <div class="input-row" style="display:none">
+                        <div class="input-header-cell" style="display:table-cell;" for="rty_Type">Record type:</div>
+                        <div class="input-cell">
+                            <div class="rtyValue" id="rty_Type"></div>
+                            <div class="help prompt">Distinguish ordinary records from relationship records</div>
+                        </div>
+                    </div>
+
+                    <!-- HIDDEN -->
+                    <div class="input-row" style="display:none">
+                        <div class="input-header-cell" style="display:table-cell;" for="rty_OrderInGroup">Order in group:</div>
+                        <input onKeyPress="window.hWin.HEURIST4.ui.preventNonNumeric(event)" maxlength="3" id="rty_OrderInGroup" style="width:30px;"/>
+                    </div>
+
+                    <!-- HIDDEN -->
+                    <div class="input-row"  style="display:none">
+                        <div class="input-header-cell" style="display:table-cell;" for="rty_FlagAsFieldset">Use as fieldset:</div>
+                        <div class="input-cell">
+                            <input id="rty_FlagAsFieldset" type="checkbox"/>
+                            <div class="help prompt">Fieldsets are partial records for reuse in other records</div>
+                        </div>
+                    </div>
+
+                    <!-- HIDDEN -->
+                    <div class="input-row" style="display:none">
+                        <div class="input-header-cell" style="display:table-cell;" for="rty_AlternativeRecEditor">Alternative record editor:</div>
+                        <div class="input-cell">
+                            <input id="rty_AlternativeRecEditor" maxlength="250" style="width:450px;" />
+                            <div class="help prompt">PHP file providing a specialised editor for this record type</div>
+                        </div>
+                    </div>
+                    <div class="rtyHiddenField">
+                        <input id="rty_CanonicalTitleMask" />
+                    </div>
+                    <div class="rtyHiddenField">
+                        <input id="rty_RecTypeGroupID" />
+                    </div>
+
+                </div> <!-- optional div -->
+            </div>
+
+            <div class="actionButtons">
+                <!-- 10/12/13 The workflow here is a bit confusing, better to just have a single standard workflow through record structure
+                <input type="button" value="Save &amp; close" onClick="EditPopup.save(false);" />
+                <div id="btnSaveAndEditStructure" style="display:inline-block;"><input type="button" value="Save &amp; show fields &gt;&gt;" onClick="EditPopup.save(true)"/></div>
+                -->
+
+                <input type="button" id="btnSave" value="Save" onClick="editRectypeEditor.save(true);" /> <!-- true = open rec structure popup -->
+                
+                <!-- <input type="button" value="Cancel" onClick="EditPopup.cancel();" /> -->
+            </div>
+        </div>
+
+    </body>
+</html>

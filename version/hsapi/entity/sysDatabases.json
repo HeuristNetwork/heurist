@@ -1,0 +1,74 @@
+{
+        "entityName": "sysDatabases",
+
+        "tableName": "sysIdentifications",
+        "tablePrefix": "sys",
+        
+        "helpContent": "sysDatabases.html",
+        
+        "searchFormContent": "searchSysDatabases.html",
+        
+        "entityTitle": "Database",
+        "entityTitlePlural": "Databases",
+        "empty_remark": "Please use the search fields above to locate database",
+
+        "fields": [
+            {
+                "dtID": "sys_Database",
+                "keyField": true,
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "dty_Role":"primary"
+                }
+            },
+            {
+                "dtID": "sys_dbRegisteredID",
+                "dtFields":{
+                    "dty_Type":"integer"
+                }
+            },
+            {
+                "dtID": "sys_Version",
+                "dtFields":{
+                    "dty_Type":"freetext"
+                }
+            },
+            {
+                "dtID": "sys_dbName",
+                "dtFields":{
+                    "dty_Type":"freetext"
+                }
+            },
+            {
+                "dtID": "sys_dbOwner",
+                "dtFields":{
+                    "dty_Type":"freetext"
+                }
+            },
+            {
+                "dtID": "sys_dbDescription",
+                "dtFields":{
+                    "dty_Type":"freetext"
+                }
+            },
+            {
+                "dtID": "sys_AllowRegistration",
+                "dtFields":{
+                    "dty_Type":"integer"
+                }
+            },
+            {
+                "dtID": "sus_Role",
+                "dtFields":{
+                    "dty_Type":"freetext"
+                }
+            },
+            {
+                "dtID": "sus_Count",
+                "dtFields":{
+                    "dty_Type":"integer"
+                }
+            }
+            
+        ]
+}

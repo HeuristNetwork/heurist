@@ -1,0 +1,275 @@
+<!--
+/**
+* Editing form for faceted searches
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+<fieldset class="main_fieldset">
+<input type="hidden" name="svs_ID" id="svs_ID" />
+
+<div class="main-rectype">
+    <div class="header"><label for="opt_rectypes">Search for (entity type)</label></div>
+    <select name="sa_rectype" id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
+    
+    <div style="vertical-align:top;display:inline-block;font-size:smaller;padding: 7px">
+            <label>search for more than one record types
+                <input name="svs_MultiRtSearch" id="svs_MultiRtSearch" class="text ui-widget-content ui-corner-all" type="checkbox"
+                style="display:inline-block;margin:0"/>
+            </label>
+    </div>
+    
+    
+    <div style="width: 420px; margin-top: 0px; margin-bottom: 5px;" class="heurist-helper2">
+    This determines the record type which will be retrieved by the search.
+    The facets can, however, be based on attributes of other record types linked from this type.
+    </div>
+    
+</div>
+
+<div>
+    <div class="header"><label for="svs_Name">Faceted search name</label></div>
+    <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all"
+        maxlength="64" size="64" style="width:250px" />
+    <div style="width: 290px; margin-top: 0px; margin-bottom: 5px;" class="heurist-helper2">
+        Used in navigation tree (maximum 64 characters).
+
+    </div>
+</div>
+<div>
+    <div class="header"  style="margin-bottom: 10px; "><label for="svs_UGrpID">Save in work group</label></div>
+    <select name="svs_UGrpID" id="svs_UGrpID" class="text ui-widget-content ui-corner-all"></select>
+    <div style="width: 420px; margin-top: 0px; margin-bottom: 10px;" class="heurist-helper2">
+        Use a shared workgroup if you want other people to be able to use your search.
+    </div>
+</div>
+
+<div>
+    <div class="header"><label for="svs_SearchOnReset"></label></div>
+    <input name="svs_SearchOnReset" id="svs_SearchOnReset" class="text ui-widget-content ui-corner-all" type="checkbox"
+            style="display:inline-block;margin:0" title="Perform search on init"/>
+    <div style="width: 420px; padding-left:10px; font-size: smaller; display:inline-block">
+        Display full set of records prior to facet selection
+    </div>
+    <div style="width: 420px; margin: 4px 0px 5px 22px;" class="heurist-helper2">
+        Recommended on public websites unless too slow due to large number of records
+    </div>
+</div>
+
+</fieldset>
+
+<div class="optional_fields"><h4>Advanced</h4>
+<fieldset>
+
+<div>
+    <div class="header"><label>Sort by</label></div>
+    <select class="text ui-widget-content ui-corner-all sa_sortby" style="min-width:220px;margin:4px 0px;">
+            <option value="">define order...</option>
+            <option value="t">record title</option>
+            <option value="id">record id</option>
+            <option value="u">record URL</option>
+            <option value="m">date modified</option>
+            <option value="a">date added</option>
+            <option value="r">personal rating</option>
+            <option value="p">popularity</option>
+    </select>&nbsp;&nbsp;
+    <select class="text ui-widget-content ui-corner-all sa_sortasc" style="min-width:220px;margin:0;">
+        <option value="0">Ascending (A..Z, 1..9)</option>
+        <option value="1">Descending (Z..A, 9..1)</option>
+    </select>
+</div>
+
+
+<div>
+    <div class="header">
+        <label for="svs_SpatialFilter">Show spatial filter</label>
+    </div>
+    <input name="svs_SpatialFilter" id="svs_SpatialFilter" class="text ui-widget-content ui-corner-all" type="checkbox"
+            style="display:inline-block;margin:0" title="Allow draw and apply spatial search limits"/>
+            
+        <div class="header svs_SpatialFilter" style="vertical-align:top;display:inline-block;font-size:smaller;padding: 7px">
+            <label>Apply on init
+                <input name="svs_SpatialFilterInit" id="svs_SpatialFilterInit" class="text ui-widget-content ui-corner-all" type="checkbox"
+                style="display:inline-block;margin:0" title="Apply spatial filter at once"/>
+            </label></div>
+            
+        <div class="header svs_SpatialFilter" style="vertical-align:top;display:inline-block;font-size:smaller;padding: 7px">
+            <label for="svs_SpatialFilterLabel">Label on user interface</label></div>
+        <div style="padding-top:5px;display:inline-block;" class="svs_SpatialFilter">
+            <input type="text" name="svs_SpatialFilterLabel" id="svs_SpatialFilterLabel" class="text ui-widget-content ui-corner-all"
+                maxlength="40" size="40" />
+        </div>    
+</div>
+<div class="svs_SpatialFilter">
+    <div class="header">
+        <label for="svs_SpatialFilterInitial">Initial spatial filter</label>
+    </div>
+    <input name="svs_SpatialFilterInitial" id="svs_SpatialFilterInitial" class="text ui-widget-content ui-corner-all"
+            style="display:inline-block;margin:0;width:400px;" title="Click to defiane search rectangle/polygon"/>
+    &nbsp;&nbsp;<a href="#" id="svs_SpatialFilterSet">Define</a>
+</div>
+
+<div>
+    <div class="header">
+        <label for="svs_AdditionalFilter">Show simple search</label>
+    </div>
+    <input name="svs_AdditionalFilter" id="svs_AdditionalFilter" class="text ui-widget-content ui-corner-all" type="checkbox"
+            style="display:inline-block;margin:0" title="Show simple search on top of facets"/>
+        <div class="header svs_AdditionalFilter" style="vertical-align:top;display:inline-block;font-size:smaller;padding: 7px">
+            <label for="svs_AdditionalFilterLabel">Label on user interface</label></div>
+        <div style="padding-top:5px;display:inline-block;" class="svs_AdditionalFilter">
+            <input type="text" name="svs_AdditionalFilterLabel" id="svs_AdditionalFilterLabel" class="text ui-widget-content ui-corner-all"
+                maxlength="40" size="40" />
+        </div>    
+</div>
+
+<div>
+    <div class="header" style="vertical-align:top;"><label for="svs_Query">Preliminary filter</label></div>
+    <div>
+        <textarea name="svs_Query" id="svs_Query" rows="2" class="text ui-widget-content ui-corner-all"
+                style="margin-top:0.4em;width:500px"></textarea>
+        <div id="svs_btnset2" style="float:right;padding-left:0.4em">
+            <div id="svs_getCurrentFilter"  style="margin-top:0.4em"></div>
+        </div>
+    </div>    
+    <div style="width: 420px; margin-top: 5px; margin-bottom: 5px;" class="heurist-helper2">
+                A Heurist filter string which extracts a subset of the database, to which the faceted search is then applied.
+    </div>
+    <div class="prefilter-settings">
+        <label><input name="svs_PrelimFilterToggle" id="svs_PrelimFilterToggle" class="text ui-widget-content ui-corner-all" type="checkbox"
+                style="display:inline-block;margin:0"  checked="checked"/>&nbsp;Allow user to toggle preliminary filter</label>
+    </div>
+    <div style="padding:5px 0 0 20px;" id="svs_PrelimFilterToggleSettings">
+        <label>
+        <input name="svs_PrelimFilterToggleMode" id="svs_PrelimFilterToggleMode0" class="text ui-widget-content ui-corner-all" type="radio"
+                style="display:inline-block;margin:0" checked="checked"/>&nbsp;Normal : Checked = filter ON</label>
+        <label>&nbsp;&nbsp;&nbsp;
+        <input name="svs_PrelimFilterToggleMode" id="svs_PrelimFilterToggleMode1" class="text ui-widget-content ui-corner-all" type="radio"
+                style="display:inline-block;margin:0"/>&nbsp;Reversed : Checked = filter OFF</label>
+        <br>        
+        <div class="header" style="vertical-align:top;display:inline-block;padding-top: 8px;">
+            <label for="svs_PrelimFilterToggleLabel">Label on user interface</label>
+        </div>
+        <div style="padding-top:5px;display:inline-block;">
+            <input type="text" name="svs_PrelimFilterToggleLabel" id="svs_PrelimFilterToggleLabel" class="text ui-widget-content ui-corner-all"
+                maxlength="40" size="40" />
+            <div style="width: 320px; padding:5px 0; font-size: smaller;">
+                     Remember to reverse the sense of the label if Reversed is chosen)
+            </div>
+        </div>    
+    </div>
+</div>
+
+
+<div>
+        <div class="header" ><label for="svs_RulesOnly">Show expansion only</label></div>
+        <input type="checkbox" id="svs_RulesOnly" class="text ui-widget-content ui-corner-all" style="margin:0 4px 4px 0"/>
+        <label style="font-size: smaller; margin-top: 2px;" for="svs_RulesOnly">
+            Exclude results from the initial filter, only show results from expansion rules
+        </label>
+        <div id="divRulesOnly" style="display:none;padding-left: 25px;">
+        <label style="font-size: smaller"><input type="radio" name="svs_RulesOnly" id="svs_RulesOnly1" checked value="1" style="margin:0 0 20px 0"/>&nbsp;return all expansion results</label>
+        <label style="font-size: smaller;padding-left: 10px;"><input type="radio" name="svs_RulesOnly" id="svs_RulesOnly2" value="2" style="margin:0 0 20px 0"/>&nbsp;only return last level of expansion</label>
+        </div>        
+</div>
+<div>
+    <div class="header" style="vertical-align:top">
+        <label for="svs_Rules">Expansion rules</label>
+    </div>
+    <div>
+        <textarea name="svs_Rules" id="svs_Rules" rows="5" class="text ui-widget-content ui-corner-all"
+        style="margin-top:0.4em;width:500px" readonly="readonly"></textarea>
+        <div id="svs_btnset" style="float:right;padding-left:0.4em">
+            <div id="svs_Rules_edit"  style="margin-top:0.4em;display:block"></div>
+            <div id="svs_Rules_clear" style="margin-top:0.4em"></div>
+        </div>
+    </div>
+    
+    <div style="width: 420px; margin-top: 5px;  margin-bottom: 5px;" class="heurist-helper2">
+    Rules are applied to the result set after each selection. They expand the results
+    to include connected records (entities). This expansion may be restricted
+    to specific entity types, connection types or filters.
+    Use rules to bring in information such as map location or dates for display on a map or timeline.
+    Edit with the pencil icon on the right.
+    </div>
+
+</div>    
+<!--
+<div>
+    <div class="header" style="vertical-align:top">
+        <label for="svs_MapRules">Query for linked geo recrods</label>
+    </div>
+    <div>
+        <textarea name="svs_MapRules" id="svs_MapRules" rows="5" class="text ui-widget-content ui-corner-all"
+        style="margin-top:0.4em;width:450px" Xreadonly="readonly"></textarea>
+    </div>
+    
+    <div style="width: 420px; font-size: smaller; margin-top: 5px;  margin-bottom: 5px;">
+    Rules are applied to the result set after each selection. 
+    Use this rules to bring in information such as map location or dates for display on a map or timeline. 
+    The result will not be visible in search results and applied for map and timeline components only</div>
+
+</div>    
+-->
+</fieldset>
+</div>
+
+
+<div class="optional_fields"><h4>Public interface</h4>
+<fieldset style="padding-top:10px">
+
+<div>
+    <div class="header"><label for="svs_Title">Title in user interface</label></div>
+    <input type="text" name="svs_Title" id="svs_Title" class="text ui-widget-content ui-corner-all"
+        maxlength="64" size="64" />
+    <div style="margin-top: 0px; margin-bottom: 5px;" class="heurist-helper2">
+        Used in user search interface (maximum 64 characters).
+    </div>
+</div>
+
+<div>
+    <div class="header"><label for="svs_ViewMode">Result View Mode</label></div>
+    <select name="svs_ViewMode" id="svs_ViewMode" class="text ui-widget-content ui-corner-all">
+            <option value="">as is</option>
+            <option value="list">Single lines</option>
+            <option value="icons">Single lines with icon</option>
+            <option value="record_content">Record contents</option>
+            <option value="thumbs">Small images</option>
+            <option value="thumbs3">Large image</option>
+    </select>
+</div>  
+
+<div>
+    <div class="header">
+        <label for="svs_ExitButton">Show close/exit button</label>
+    </div>
+    <input name="svs_ExitButton" id="svs_ExitButton" class="text ui-widget-content ui-corner-all" type="checkbox" checked
+            style="display:inline-block;margin:0" title="Show close button. Hide it if there is the only search in web interface"/>
+            
+        <div class="header svs_ExitButton" style="vertical-align:top;display:inline-block;font-size:smaller;padding: 7px">
+            <label for="svs_ExitButtonLabel">Label on exit button</label></div>
+        <div style="padding-top:5px;display:inline-block;" class="svs_ExitButton">
+            <input type="text" name="svs_ExitButtonLabel" id="svs_ExitButtonLabel" class="text ui-widget-content ui-corner-all"
+                maxlength="40" size="40" />
+        </div>    
+</div>
+
+
+</fieldset>
+</div>
+
+<!-- TODO: If the only function of this class is name length warning, remove it and replace with better methodology -->
+<div class="messages"></div>

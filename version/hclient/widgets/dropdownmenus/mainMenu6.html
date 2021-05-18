@@ -1,0 +1,95 @@
+<!--
+/**
+* mainMenu6.html: top-level menu
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     2
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<div class="ui-heurist-admin ui-heurist-header" style="top:0px;">Admin</div>
+<div class="ui-heurist-design ui-heurist-header" style="top:36px;border-top:1px solid lightgray;">Design</div>
+<div class="ui-heurist-populate ui-heurist-header" style="top:72px;border-top:1px solid lightgray;">Populate</div>
+<div class="ui-heurist-explore ui-heurist-header" style="top:108px;border-top:1px solid lightgray;">Explore</div>
+<div class="ui-heurist-publish ui-heurist-header" style="top:144px;border-top:1px solid lightgray;">Publish</div>
+
+<div class="ui-heurist-quicklinks" 
+    style="top:180px;left:0;right:0px;bottom:0px;overflow-y:auto;position:absolute;text-align:center;background:lightgray;color:black">
+
+    <span style="display:block;margin:0;padding:12px 6px 0px 6px">
+        <span class="section-head"  data-pl="0">New</span>
+    </span>                                                              
+    
+    <ul style="border-bottom:1px gray solid;list-style-type:none;margin:0;padding:12px 30px 12px 0px">
+
+        <li class="menu-explore" data-action-popup="recordAdd">
+            <span class="ui-icon ui-icon-file-plus-black"/>
+            <span class="menu-text truncate" style="display:inline-block;max-width:105px;">Add record</span>
+        </li>
+
+        <span style="display:block;margin:0;padding:12px 6px 6px 0px">
+            <span class="section-head" data-pl="17" style="padding-left:17px">Navigate</span>
+        </span>                                                              
+
+        <li class="menu-explore" data-action-popup="search_recent">
+            <span class="ui-icon ui-icon-clock-b"/><span class="menu-text">Recent&nbsp;|
+                                        <span data-search-all="1">All</span>
+            </span>
+        </li>
+        <li class="menu-explore" data-action-popup="searchByEntity">
+            <span class="ui-icon ui-icon-entity"/><span class="menu-text">Entities</span>
+        </li>
+        <li class="menu-explore" data-action-popup="search_filters">
+            <span class="ui-icon ui-icon-filter-black"/><span class="menu-text">Saved filters</span>
+        </li>
+
+<!-- Removed Ian 8 Jan 2021 to reduce clutter and focus on instant access to repetitive actions
+        
+        <span style="display:block;margin:0;padding:12px 6px 6px 0px">
+            <span class="section-head" data-pl="28" style="padding-left:28px">Build</span>
+        </span>                                                              
+        
+        <li class="menu-explore" data-action-popup="searchQuick">
+            <span class="ui-icon ui-icon-magnify-search"/><span class="menu-text">Filter builder</span>
+        </li>
+        <li class="menu-explore" data-action-popup="svsAddFaceted">
+            <span class="ui-icon ui-icon-box"/><span class="menu-text">Facets builder</span>
+        </li>
+        <li class="menu-explore"  data-action-popup="svsAdd">
+            <span class="ui-icon ui-icon-filter-plus"/><span class="menu-text">Save filter
+            <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"/></span>
+        </li>
+        
+-->
+    </ul>
+    
+    <span style="display:none;margin:0;padding:12px 6px">
+        <span class="section-head">Saved filters</span>
+    </span>                                                              
+    <ul style="display:none;list-style-type:none;margin:0;padding:0px 0px 12px 0px;position:absolute;bottom:0px;left:0px;right:30px;top:215px" 
+            id="filter_by_groups">
+    
+    </ul>
+    <!-- was 188px -->
+<!--    
+<span class="menu-text ui-icon ui-icon-arrowthick-1-ne" style="float:right;font-size:1.3em;padding-top:8px;"></span>
+<div class="svs_list_container" style="position:absolute;bottom:0px;left:0px;right:0px;top:160px;font-size:0.8em;display:none;"></div>
+-->
+</div>
+<!-- style="position:absolute;bottom:37;height:37px" -->
+
+
+ 

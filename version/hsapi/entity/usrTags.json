@@ -1,0 +1,74 @@
+{
+        "entityName": "usrTags",
+
+        "tableName": "usrTags",
+        "tablePrefix": "tag",
+        
+        "helpContent": "usrTags.html",
+        
+        "searchFormContent": "searchUsrTags.html",
+        
+        "entityTitle": "Tag",
+        "entityTitlePlural": "User and Workgroup tags",
+        "empty_remark": "Please use the search field above to locate relevant tag",
+
+        "fields": [
+                {
+                    "dtID": "tag_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "tag_Text",
+                    "titleField": true,
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"title",
+                        "dty_Size":63,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Tag:",
+                        "rst_DisplayHelpText": "The value (text) of the tag provided by the user or workgroup administrator", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "tag_Description",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "rst_DisplayName":"Description:",
+                        "rst_DisplayWidth":40,
+                        "dty_Size":250,
+                        "rst_DisplayHelpText": "Description of the concept to which this tag is attached, optional."
+                    }
+                },
+                {
+                    "dtID": "tag_Modified",
+                    "dtFields":{
+                        "dty_Type":"date",
+                        "rst_DisplayName": "Modified:",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "tag_UGrpID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "tag_Usage",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"virtual",
+                        "rst_Display":"readonly",
+                        "rst_DisplayName": "Usage:"
+                    }
+                }
+     ]
+}

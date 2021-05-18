@@ -1,0 +1,70 @@
+<div id="div_search" class="ent_wrapper">
+    <fieldset class="ent_header" style="height:110px;border-bottom:1px solid gray;">
+    
+        <div style="padding: 0.2em; width: 100%; line-height:3" class="input">
+            <div class="header">
+                <label for="sel_record_scope">Records type:</label>
+            </div>
+            <div id="div_button-toolbar">
+                <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em"></select>
+            </div>
+        </div>
+        
+        
+        <div style="padding:0.2em; width: 100%;" class="input">
+
+            <div class="header">
+                <label>Difference percentage: </label>
+            </div>
+
+            <select id="distance" class="text ui-widget-content ui-corner-all" style="width:100px;max-width:100px">
+                <option value="0">exact match</option>
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>&nbsp;%&nbsp;&nbsp;
+
+            <label style="color:#6A7C99" for="sort_field">Sort field: </label>
+            <select id="sort_field" class="text ui-widget-content ui-corner-all" style="width:200px;max-width:200px">
+                <option value="rec_Title">Record title</option>
+            </select>&nbsp;&nbsp;&nbsp;
+            
+            <label style="color:#6A7C99" for="startgroup">Group by beginning: </label>
+            <select id="startgroup" class="text ui-widget-content ui-corner-all" style="width:80px;max-width:80px">
+                <option value="0" selected>not use</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>&nbsp;characters
+            
+            
+                <div class="heurist-helper2"  style="padding: 5px 0 10px 0;">
+                    Locates duplicates based on similarity of the selected field(s). We recommend use of the constructed title in the first instance. <br> 
+                    Strings use levenshtein character distance as a percentage of string length. 0% = exact match only, 10 - 20% recommended. Terms, numeric and date fields apply exact match. 
+
+                </div>
+        </div>
+    </fieldset>
+
+    <!-- TREE for field selection -->
+    <div style="top:117px; bottom:0; position:absolute; width:500px;" class="input ent_content">
+        <div style="padding:10px 0 0 18px"><label>Select fields to compare</label></div>
+        <div class="detailRow rtt-tree" style="padding:10px;outline: none;" id="rectype_tree">
+        </div>
+    </div>
+
+    <div id="div_result" style="position:absolute; top:117px; bottom:0px; left:501px; right:0px; border-left:1px solid gray;overflow:auto">
+    </div>
+</div>
+
+
+<div class="ent_wrapper progressbar_div" style="display: none; background:white">
+        <div class="loading" style="display:none;height:100%"></div>
+        <div style="width:80%;height:40px;padding:5px;text-align:center;margin:auto;margin-top:20%;">
+            <div id="progressbar">
+                <div class="progress-label">Processing data...</div>
+            </div>
+            <div class="progress_stop" style="text-align:center;margin-top:4px">Abort</div>
+        </div>
+</div>

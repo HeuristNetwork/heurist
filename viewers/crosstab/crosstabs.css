@@ -23,17 +23,20 @@ fieldset > div{
 
 fieldset > div > .fldheader{
     display:table-cell;
-    width:100px;
+    /*width:100px;
     min-width:100px;
-    text-align:right;
+    */
+    text-align:left;
+    /*
     padding-top:0.4em;
     padding-right:2em;
+    */
     font-weight: bold;
 }
 fieldset > div > .input-cell{
     display:table-cell;
-    min-width:120px;
-    Xwidth:380px;
+    /*min-width:120px*/;
+    /*width:380px;*/
     padding-bottom:2px;
     vertical-align: bottom;
 }
@@ -61,6 +64,7 @@ input.text, select.text {
     background:-webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#EEEEEE));
 }
 
+/*
 div.intervalDiv:hover {
     -moz-box-shadow:0 1px 4px #000;
     -webkit-box-shadow:0 1px 4px #000;
@@ -69,6 +73,7 @@ div.intervalDiv:hover {
     background:-moz-linear-gradient(center top, #EFEFEF, #DDDDDD) repeat scroll 0 0 transparent;
     background:-webkit-gradient(linear, left top, left bottom, from(#EFEFEF), to(#DDD));
 }
+*/
 
 H2 {
     color: #6A7C99;
@@ -103,11 +108,12 @@ div .selected, div .selected:hover{
 
 .intervalDiv .recordTitle {
     color: #666666;
-    position: absolute;
+    /* position: absolute;
     text-align: left;
     overflow: hidden;
 
     line-height: 12px;
+    */
 }
 
 /* LIST VIEW */
@@ -154,13 +160,23 @@ div .selected, div .selected:hover{
 }
 
 .crosstab-header0{
-    font-size: 1em;
+    /*font-size: 200em;*/
     font-weight: bold;
     text-transform:uppercase;
+    border-top :1px solid black;
+    border-right: 1px solid black;
 }
+
+.crosstab-header1{
+    font-weight: bold;
+    text-transform:uppercase;
+    border-right :1px solid black;
+}
+
 .crosstab-header{
     font-size: 1em;
     text-align:center;
+    border-right : 1px solid black;
 }
 .crosstab-value{
     font-size: 1em;
@@ -172,28 +188,43 @@ div .selected, div .selected:hover{
     min-width:4em;
     text-align:right;
     font-weight: bold;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
 }
 .percent {
     font-size: 0.9em;
     color:gray;
     min-width:4em;
     text-align:right;
+    border-right: 1px solid black;
+}
+
+.total-percent{
+    font-size: 0.9em;
+    color:gray;
+    min-width:4em;
+    text-align:right;
+    border-bottom: 1px solid black;
+    border-right: 1px solid black;
 }
 
 .crosstab-page{
     padding-top:4px;
 }
 
+/*
 .showintervals{
     width: 16px !important;
     height: 16px !important;
     background-image: url('../../common/images/blue-up-triangle.png');
     background-repeat: no-repeat
 }
+*/
+/*
 .collapsed{
     background-image: url('../../common/images/blue-down-triangle.png');
 }
-
+*/
 
 .crosstab-interval-edit{
     width: 16px !important;
@@ -209,8 +240,10 @@ button{
 }
 
 .crosstab-aggregation{
-    display:inline-block;
-    margin-left:2em;
+    display: inline-block;
+    margin-left: 0em;
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 .input-cell > input[type=checkbox]{
     margin-left:2em;
@@ -235,4 +268,25 @@ div .progress-message {
     text-align:center;
 }
 
+.checkboxValues{
+    display:inline-block;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+}
+
+.verticalLine{
+    border-left: 5px solid black;
+    float: left;
+    height: 250px;
+    width:5%;
+}
+
+.blankCheckboxes{
+    margin-left: 0em;
+    display: inline-block;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    width: 49%;
+}
 
