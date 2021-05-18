@@ -1,0 +1,63 @@
+<html>
+
+    <head>
+        <title>HEURIST Context Help - Database structure: Fields data types</title>
+    </head>
+
+    <body width=600 height=500>
+
+        <div id="content" style="width: 100%; height: 100%; overflow: auto;">
+
+            <h2>Database structure: Fields data types</h2>
+
+            <div id="content_body">
+
+            <div id="enum">
+            
+            <p style="font-size: 11px;padding-bottom:1em"> 
+                <b>Term list</b> fields should be used for any form of controlled list,
+                typology, categorisation or coding in which the same value will be reused repeatedly
+                (eg. gender, condition, country, species, type of artefact, presence/absence)
+                but no additional information needs to be attached to each term other than a code value and label.
+
+                Term lists can be hierarchichal and generate a dropdown list in data entry.
+                Consider using a record pointer field, below, if you want to record more information
+                about each category eg. characteristics of the country, images and description of a species.
+            </p>
+            </div>
+            
+            <div id="resource">
+
+                <p style="font-size: 11px;padding-bottom:1em">                 
+                <b>Record pointer</b> fields allow a record to reference other records of specified type
+                which contain sets of related information, often components of the parent record,
+                eg. a ship's captain, a person's father, a period of military service, educational episode, place of birth.
+                The referenced record may be an independent entity (eg. place, publisher, person, work) or group
+                together related information such as the attributes of a person or object, a set of attributes
+                which apply for a specified time period, or the attributes of some part of an object or for a
+                particular type of object. The type of relationship, however, is implicit in the field name -
+                father, mother, service, education, place or component all imply a fixed relationship to the parent entity -
+                but is not otherwise recorded.</p>
+                
+            </div>
+            <div id="relmarker">
+            
+            <p style="font-size: 11px;padding-bottom:1em">
+                <b>Relationship marker</b> fields create a connection between two entities with an explicit relationship
+                type (selected from a dropdown), as well as a date range and other contextual information.
+
+                They are particularly useful when there is a large list of potential relationships,
+                such as roles of actors in an event, interpersonal relationships, stratigraphic relationships and so forth.
+
+                Relationship marker fields look like a composite field in the data entry form but,
+                rather than creating an attribute attached to the record, they create a separate relationship
+                record which can carry significant extra information about the relationship.
+            </p>
+            </div>
+            
+            </div>
+        </div>
+
+    </body>
+
+</html>

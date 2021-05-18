@@ -1,0 +1,542 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>HEURIST Context Help - Advanced Search</title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" href="../common/css/heurist.css">
+        <style type="text/css">
+            /* .search_term { padding: 2px; border: 1px solid lightgray; font-weight: bold; } */
+            body { line-height: 125%; }
+            .search_term { font-weight: bold; background-color: lightgray; border: 0px none; padding: 0 2px; }
+            .search_term i { font-weight: normal; }
+        </style>
+    </head>
+
+    <body width="600" height="500">
+        <b><font size="4">HEURIST Help</font></b>
+
+        <h2>Searching</h2>
+        <hr>
+        <h4>Basic, Quick, Advanced, and Faceted searches (filters)</h4>
+
+        <p>
+            <b>Basic search:</b> Words typed in the filter field are matched against any part of the record titles
+            (only). This is very good for quickly retrieving records where
+            you know what words are likely to appear in the title and the set of results will be small. However it doesn't allow
+            discrimination and filtering of specific sets of records out of a large or complex
+            set of records in a complete Heurist database.</p>
+            <p>
+            <b>Quick search:</b> the downwards arrow to the right of the filter field allows one to build a more targeted search 
+            by simply choosing from a set of dropdowns for record type, field, content, negation and sorting.</p>
+            <p>
+            <b>Advanced search</b> is a more complete search builder which allows one to add a series of queries to the search field. 
+            You will also see queries constructed by the search system, which are generally too complex to be entered by hand.</p>
+            <p>
+            <b>Facet search:</b> Last but not least, faceted searching allows one to set up searches which drill down through content
+            following links between records and the attributes of the records encountered.</p>
+            <p>
+            <u>All search types can be saved as Saved Searches (filters) in the lefthand (navigation) panel using the Save Filter button.</u>u>
+        </p>
+
+        <h4>What it does</h4>
+
+        <p>
+            Searching or filtering the database allows for precisely targeted filters which will retreive precise subseyts of the database
+            for specific tasks - analysis, indexing collections, publishing a web page etc.
+        </p>
+
+        <ul>
+            <li>
+                restriction of searches to specific record types
+                (eg. journals, research projects, historical events, course units)
+            </li>
+            <li>
+                restriction of searches to specific fields (eg. tags, creator, owner
+                or web address)
+            </li>
+            <li>
+                requiring the presence of several terms together (a AND b)
+            </li>
+            <li>
+                requiring the presence of any of several terms (a OR b)
+            </li>
+            <li>
+                exclusion of records in which a particular term occurs
+            </li>
+            <li>
+                sorting to create an alphabetised list or a list with the most relevant
+                entries at the top
+            </li>
+            <li>
+                combinations of all of the above
+            </li>
+            <li>
+                applying sets of rules to expand the search or to carry out a faceted search (as these specifications are complex, these are not documented for end users and will always be constrcuted by the RuleSet and faceted search wizards)
+            </li>
+        </ul>
+
+        <p>
+            Sorting can be by ID, title (default), by web address, by date added or modified, by any of the data fields or by popularity (star rating).
+        </p>
+
+        <h4>How to use it</h4>
+
+        <p>
+            Click on the down arrow to the right of the <span style="color: green;">Filter</span>. 
+            You may then click on the link in the Quick Search dropdown to go to the Advanced Search popup.
+            The Advanced Search popup constructs search instructions for you as you select from the pulldown values or
+            type search terms in the fields. It displays the search instructions in the Search field at the top of the popup.
+            You can also type or edit these instructions directly in the Search field on the
+            popup or the Search field on the main page - all Search fields are
+            functionally equivalent:
+        </p>
+
+        <p align="center">
+
+        <h4>General Principles</h4>
+
+        <p>
+            By default, Heurist searches are partial string matches and require ALL
+            search terms to be present:
+        </p>
+
+        <ul>
+            <li>
+                <span class="search_term">temporal map</span> requires
+                that both <span class="search_term">temporal</span> and <span class="search_term">map</span>
+                be present somewhere in the title
+            </li>
+            <li>
+                <span class="search_term">temporal</span> will also match <span class="search_term">temporality</span> and <span class="search_term">map</span> will match
+                <span class="search_term">mapping</span> and <span class="search_term">unmappable</span>
+            </li>
+            <li>the search terms need not be in order, adjacent or whole words, and it is
+                not case-sensitive
+            </li>
+        </ul>
+
+        <ul>
+            <li>to match a phrase, enclose it in quotes: <span class="search_term">"temporal mapping"</span></li>
+            <li>to match at least one of the search terms, place uppercase OR between them: <span class="search_term">temporal OR mapping OR GIS</span></li>
+            <li>to exclude records in which a search term occurs, use minus sign immediately at start of term, without space: <span class="search_term">-temporal</span> (the use of a minus sign can also precede specific fields identified by f: or field: - see below)</li>
+            <li>to match values without partial string matching, use an equals sign instead of a colon: <span class="search_term">title="google calendar"</span></li>
+            <li>to match values that are less than or greater than the search term, use &lt; and &gt; instead of a colon: <span class="search_term">field:year&gt;1980</span></li>
+        </ul>
+
+        <h4>Special Data Fields</h4>
+
+        <p>To match values in a particular field in the data, specify the field followed by the search term:</p>
+
+        <table style="font-family: sans-serif; font-size: 12px;" border="0" cellspacing="8">
+            <tbody>
+                <tr>
+                    <td style="vertical-align: top; text-align: right;"><span class="search_term">title:<i>xxx</i></span></td>
+                    <td>
+                        Search for records with <i>xxx</i> in the title.<br>
+                        This is also the default search if no field is specified.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="vertical-align: top; text-align: right;"><span class="search_term">type:<i>xxx</i></span></td>
+                    <td>
+                        Only search records of the given type.<br>
+                        The parameter <i>xxx</i> may describe the record type by name,
+                        for example <span class="search_term">type:book</span> or <span class="search_term">type:"web&nbsp;bookmark"</span>;
+                        or by numerical identifier, for example <span class="search_term">type:3</span> (journal article).
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="vertical-align: top; text-align: right;"><span class="search_term">tag:<i>xxx</i></span></td>
+                    <td>
+                        Search for records tagged with the given tag <i>xxx</i>.<br>
+                        Note that this search will also match records tagged with a tag that <u>begins</u> with the search term;
+                        for example, searching for <span class="search_term">tag:time</span> will find records tagged with <b>time</b> and <b>time</b>map,
+                        but not mari<b>time</b> or mul<b>time</b>dia. Using equals instead will ONLY match tags which are the specified word, for example <span class="search_term">tag=time</span> will not match the tag <b>timemap</b>.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="vertical-align: top; text-align: right;"><span class="search_term">user:<i>xxx</i></span></td>
+                    <td>
+                        Search for records which have been bookmarked by the specified user.<br>
+                        The parameter <i>xxx</i> may be a user's name, for example <span class="search_term">user:"Ian&nbsp;Johnson"</span>;
+                        or a user ID, for example <span class="search_term">user:224</span>.
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top; text-align: right;"><span class="search_term">addedby:<i>xxx</i></span></td>
+                    <td>
+                        Search for records which have been added by the specified user.<br>
+                        The parameter <i>xxx</i> may be a user's name, for example <span class="search_term">user:"Ian&nbsp;Johnson"</span>;
+                        or a user ID, for example <span class="search_term">user:224</span>.
+                    </td>
+                </tr>
+               <tr>
+                    <td style="vertical-align: top; text-align: right;"><span class="search_term">visibility:<i>xxx</i></span></td>
+                    <td>
+                        Search for records which have the visibility set to a specific value.<br>
+                        The values accepted are public, pending, viewable, hidden, for example <span class="search_term">{"access":"public"}</span>. viewable indicates viewable by any logged-in user, hidden indicates visible only to the owner. Use -public to find all records which are not publicly visible. You can also use simple searches such as <span class="search_term">vt:public</span> or <span class="search_term">vt:hiden</span> but negation is not supported.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="vertical-align: top; text-align: right;"><span class="search_term">url:<i>xxx</i></span></td>
+                    <td>
+                        Search for records with <i>xxx</i> anywhere in the URL.<br>
+                        For example, <span class="search_term">url:google</span> will find records with URL <b>www.google.com</b>, <b>www.google.com.au</b>
+                        and <b>en.wikipedia.org/wiki/Google</b>.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="vertical-align: top; text-align: right;"><span class="search_term">notes:<i>xxx</i></span></td>
+                    <td>
+                        Search for records with <i>xxx</i> anywhere in your private notes (if searching "My&nbsp;Resources")
+                        or the information scratchpad (if searching "All&nbsp;Resources").
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="vertical-align: top; text-align: right;">
+                        <span class="search_term">before:<i>xxx</i></span><br>
+                        <span class="search_term">after:<i>xxx</i></span><br>
+                        <span class="search_term">date:<i>xxx</i></span>
+                        <span class="search_term">modified:<i>xxx</i></span>
+                    </td>
+                    <td>
+                        Search for records that were last modified before / after / on the given date.
+                        The date may be specified as an ISO format date (e.g. <span class="search_term">before:2007-10-28</span>),
+                        using human-readable date formats (e.g. <span class="search_term">after:"3 June 2006"</span>),
+                        or as a relative date (e.g. <span class="search_term">date:"last Tuesday"</span> or <span class="search_term">after:"60 days ago"</span>
+                        or <span class="search_term">after:"today"</span>).<br>
+                        It is also possible to specify the date down to one-second precision
+                        (e.g. <span class="search_term">before:"12.30pm November 22"</span> or <span class="search_term">date="1945-07-16 05:29:45"</span>).
+                        Additionally, operators such as <span class="search_term">modified&gt;2001-09-11</span>, <span class="search_term">modified&lt;yesterday</span> may be used.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="vertical-align: top; text-align: right;">
+                        <span class="search_term">added:<i>xxx</i></span><br>
+                    </td>
+                    <td>
+                        Search for records that were added before / after / on the given date.  The date may be specified as above.
+                        For example, <span class="search_term">added&gt;yesterday</span>.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Data Fields</h4>
+
+        Data fields vary between record types, however different record types may
+        (and often do) share some of the same fields.
+
+        <br>&nbsp;
+
+        <table style="font-family: sans-serif; font-size: 12px;" border="0" cellspacing="8">
+            <tbody>
+                <tr>
+                    <td style="vertical-align: top; text-align: right;"><span class="search_term">all:<i>xxx</i></span></td>
+                    <td>
+                        Search for records containing <i>xxx</i> in any of the data fields.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="vertical-align: top; text-align: right;">
+                        <span class="search_term">field:<i>abc</i>:<i>xxx</i></span>
+                        <br>
+                        <span class="search_term">field:<i>abc</i>:</span>
+                        <br>
+                        <span class="search_term">field:<i>xxx</i></span>
+                        <br>
+                        <span class="search_term">fc:<i>abc</i>:<i>xxx</i></span>
+                        <br>
+                        <span class="search_term">f:<i>abc</i>:<i>xxx</i></span>
+                    </td>
+                    <td>
+                        Search for records in public data field <i>abc</i> containing the string <i>xxx</i>.
+                        <br>
+                        Search for records that have <u>any</u> value in field <i>abc</i>. 
+                        <span class="search_term">-field:<i>abc</i>:</span> searches for records with <u>no</u> values in the field.<span></span>
+                        <br>
+                        Search for records that have value <i>xxx</i> in <u>any</u> field. 
+                        <span class="search_term">-field:<i>xxx</i>:</span> searches for records with value <i>xxx</i> in <u>no</u> fields.<span></span>
+                        <br>                        
+                        Search for records that have <i>xxx</i> values in field <i>abc</i>. Also use 
+                        <span class="search_term">fc:<i>abc</i>:<i>&gt;xxx</i></span> or 
+                        <span class="search_term">fc:<i>abc</i>:<i>xxx&lt;&gt;yyy</i></span> for ranges.<span></span>
+                        <br>                        
+                        <b>field</b> can be shortened to <b>f</b>. The field identifier <i>abc</i> may be the name of the field, for example
+                        <span class="search_term">field:"AuthorEditor":Hill</span>,
+                        or the field's numerical identifier, <span class="search_term">field:196:Hill</span>.
+                        The numerical identifier is preferred, since the name must be the base field name which is often difficult to determine.
+                        <br>
+                        <b>=</b>, <b>&lt;</b> and <b>&gt;</b> operators may be used, e.g.
+                        <span class="search_term">f:123=456</span>, <span class="search_term">f:"date added"&lt;yesterday</span>.
+                        <br>Less than and greater than can also be used with text fields, so the following will retrieve all records
+                        with a name/title field (field 1) starting with "B" <span class="search+term">f:1&gt;B f:1&lt;C</span>
+
+                        <!-- For a list of field IDs and names, click here [TO BE CREATED].  -->
+                        <br> Note that the same field eg. 196 (Author/Editor), may be used in different
+                        record types and may appear to be labeled differently in different record types;
+                        for example, AuthorEditor may be called Author for Journal Articles and Editor for Journals.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Geographic search</h4>
+
+        Searches for records with geographic objects use the <b>latitude</b> and <b>longitude</b> search terms.
+        These may be used in conjunction with the <b>=</b>, <b>&lt;</b> and <b>&gt;</b> modifiers.
+
+        <table style="font-family: sans-serif; font-size: 12px;" border="0" cellspacing="8">
+            <tbody>
+                <tr>
+                    <td style="vertical-align: top; text-align: right;" width="66"><span class="search_term">
+                            latitude:<i>y</i>
+                        </span></td>
+                    <td>Search for records with a geographic object that includes the given latitude</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top; text-align: right;" width="66"><span class="search_term">
+                            longitude:<i>x</i>
+                        </span></td>
+                    <td>Search for records with a geographic object that includes the given longitude</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top; text-align: right;" width="66"><span class="search_term">
+                            latitude&lt;<i>y</i>
+                        </span></td>
+                    <td>Search for records with a geographic object that lies <i>entirely south</i> of the given latitude</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top; text-align: right;" width="66"><span class="search_term">
+                            latitude&gt;<i>y</i>
+                        </span></td>
+                    <td>Search for records with a geographic object that lies <i>entirely north</i> of the given latitude</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top; text-align: right;" width="66"><span class="search_term">
+                            longitude&lt;<i>x</i>
+                        </span></td>
+                    <td>Search for records with a geographic object that lies <i>entirely west</i> of the given longitude</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top; text-align: right;" width="66"><span class="search_term">
+                            longitude&gt;<i>x</i>
+                        </span></td>
+                    <td>Search for records with a geographic object that lies <i>entirely east</i> of the given longitude</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top; text-align: right;" width="66"><span class="search_term">
+                            latitude=<i>y</i>
+                        </span></td>
+                    <td>Search for records with a geographic point with exactly the given latitude</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top; text-align: right;" width="66"><span class="search_term">
+                            longitude=<i>x</i>
+                        </span></td>
+                    <td>Search for records with a geographic point with exactly the given longitude</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+        <h4>Sorting</h4>
+
+        <table style="font-family: sans-serif; font-size: 12px;" border="0" cellspacing="8">
+
+            <tbody>
+                <tr>
+                    <td style="vertical-align: top; text-align: right;" width="66"><span class="search_term">
+                        sortby:<i>xxx</i></span></td>
+                    <td>
+                        where <i>xxx</i> can be "id", "url", "m" (modified), "a" (added), "t" (title), "rt" (record type)
+                        "r" (rating) and "p" (popularity) (the full words can also be used);
+                        " rating" is the user's personal rating of the record (nubmer of stars),
+                        "popularity" indicates how many times each record has been bookmarked;
+                        or <i>sortby:field:abc</i> / <i>sortby:field:abc:m</i>
+                        <ul>
+                            <li><i>abc</i> is the numerical identifier of a field (internally,
+                                bib_detail.bdt_id). Note that <i>field</i> can be abbreviated to <i>f</i></li>
+                            <li>the optional <i>m</i> (multiple) parameter causes records to be displayed in more
+                                than one location in the list if&nbsp; the sort field has more than one
+                                value.<br>
+                                For example, the normal behaviour where there are multiple authors is to
+                                display the record once, alphabetically sorted by first author. If <i>m </i>is specified, the record will be displayed once for each of the
+                                authors in the appropriate alphabetical locations. </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+
+
+        <h4>Advanced functions</h4>
+
+        <h5>Retrieving specific records</h5>
+
+        <p>The Heurist search engine can be asked to retrieve a specific set of
+            records by supplying their Heurist IDs:</p>
+
+        <table style="font-family: sans-serif; font-size: 12px;" border="0" cellspacing="8">
+            <tbody><tr>
+                    <td style="vertical-align: top; text-align: right;">
+                        <span class="search_term">ids:<i>xxx</i></span></td>
+                    <td>
+                        where xxx is a comma-separated list of internal record IDs (the unique
+                        identifier for each record in Heurist)</td>
+                </tr></tbody>
+        </table>
+
+
+
+        <h5>Retrieving relationships and pointers</h5>
+
+        <p>
+            Retrieve the set of records which are pointed to within the public
+            information of a record (eg. all the authors listed for a paper, all the
+            projects listed for an organisation), which point to a record in their public
+            information, or which are connected with a record by
+            relationship records:
+        </p>
+
+        <table style="font-family: sans-serif; font-size: 12px;" border="0" cellspacing="8">
+            <tbody>
+                <tr>
+                    <td style="vertical-align: top; text-align: right;">
+                        <span class="search_term">linkedfrom:<i>xxx</i></span></td>
+                    <td>
+                        set of records which have pointers (in their public information) TO this record
+                        (this includes all relationship records in which the record is involved)</td>
+                </tr>
+
+                <tr>
+                    <td style="vertical-align: top; text-align: right;">
+                        <b>linked_to:xxx</b></td>
+                    <td>
+                        set of records which are pointed to (in the public information) BY this
+                        record</td>
+                </tr>
+
+                <tr>
+                    <td style="vertical-align: top; text-align: right;">
+                        <b>links:xxx</b></td>
+                    <td>
+                        set of records which have any links (either to other objects or from other objects)</td>
+                </tr>
+
+                <tr>
+                    <td style="vertical-align: top; text-align: right;">
+                        <b>related_to:xxx</b></td>
+                    <td>
+                        set of related records - that is, records which have relationships
+                        (relationship records) with this record</td>
+                </tr>
+
+                <tr>
+                    <td style="vertical-align: top; text-align: right;">
+                        <b>relatedfrom:xxx</b></td>
+                    <td>
+                        set of relationship records plus the records involved in those relationships,
+                        for this record (that is, all the related records, plus their relationships)</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+
+
+        <h5>Search URL parameters</h5>
+
+        <p>
+            The Advanced Search window, and the search field, are simply convenient ways
+            of entering information which is converted into a search URL such as <a href=".../q=tag:Favourites&amp;w=bookmark">/q=tag:Favourites&amp;w=bookmark</a>.
+        </p>
+
+
+        <p>
+            Search URLs can be entered directly, for example if one wishes to construct a
+            hyperlink in a web page which will bring up a particualr Heurist search. There
+            is a fairly straightforward translation from search string to URL which can be
+            worked out by doing some searches and comparing the string with the URL. The
+            following parameters, though, are less obvious, and are listed here for those
+            who wish to use this feature.
+        </p>
+
+        <table style="font-family: sans-serif; font-size: 12px;" border="0" cellspacing="8">
+            <tbody>
+                <tr>
+                    <td valign="top" width="2%">&nbsp;</td>
+                    <td nowrap="nowrap" valign="top" width="200">w = bookmark | biblio | all</td>
+                    <td valign="top" width="82%"><i>bookmark</i> means restrict search to
+                        your personal bookmark data; <i>biblio</i> means restrict search to public
+                        record data; <i>all</i>means to search both</td>
+                </tr>
+                <tr>
+                    <td valign="top" width="2%">&nbsp;</td>
+                    <td nowrap="nowrap" valign="top" width="200">s = <i>a</i> | <i>m</i> | <i>t</i> | <i>u</i></td>
+                    <td valign="top" width="82%">Sort by: a = Added date; m = Modified date; t = Title; u = URL</td>
+                </tr>
+                <tr>
+                    <td valign="top" width="2%">&nbsp;</td>
+                    <td nowrap="nowrap" valign="top" width="200">ver = 1</td>
+                    <td valign="top" width="82%">Records the search version, no function at
+                        present but may be used later to trap direct references which use an
+                        outdated format</td>
+                </tr>
+                <tr>
+                    <td valign="top" width="2%">&nbsp;</td>
+                    <td nowrap="nowrap" valign="top" width="200">cf = 1</td>
+                    <td valign="top" width="82%">Clear the search fields when the search results
+                        are displayed (if omitted the search fields continue to display the search
+                        criteria). Clearing the fields is useful when one will most likely
+                        immediately type a different search, as in the case of the default
+                        Favourites search which is run when Heurist is loaded.</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+        <h4>Further examples</h4>
+
+        <p>
+            If multiple search terms are provided, their effect is ANDed -
+            Heurist returns only the records matching all the search terms.<br>
+            For example, searching <span class="search_term">tag:timelines tag:mapping</span> matches only records that have been marked with
+            the tag <b>timelines</b> and the tag <b>mapping</b>.
+        </p>
+
+        <p>
+            Entire phrases can be matched by enclosing them in double-quotes.
+            For example, searching <span class="search_term">"sydney university"</span> will match all records with a title containing
+            "sydney university" in that order, as a complete phrase; whereas searching <span class="search_term">sydney university</span>
+            (without the double-quotes) will match records with both <b>sydney</b> and <b>university</b>, anywhere in the title,
+            such as "University of New South Wales, Sydney".
+        </p>
+
+        <p>
+            To find records matching either of two search terms, add an uppercase OR between the terms.
+            For example, searching <span class="search_term">tag:timelines OR tag:mapping</span> matches records that have been marked with
+            either of the <b>timelines</b> or <b>mapping</b> tags.
+        </p>
+
+        <p>
+            Resources matching a term may be omitted from the results by preceding the term with a minus sign.
+            For example, searching <span class="search_term">university -url:usyd.edu.au</span> matches any record which has <b>university</b>
+            in the title, and does not have <b>usyd.edu.au</b> in the URL.
+        </p>
+
+        <hr noshade="noshade" size="1">
+
+
+    </body>
+</html>

@@ -854,7 +854,7 @@ $.widget( "heurist.editing_input", {
             } 
 
         }
-        else if(this.detailType=='enum' || this.detailType=='relationtype'){//--------------------------------------
+        else if(this.detailType=='enum' || this.detailType=='relationtype' || this.detailType=='access' || this.detailType=='tag'){//--------------------------------------
 
             var dwidth;
             if(this.configMode && this.configMode.entity!='records'){
@@ -870,7 +870,104 @@ $.widget( "heurist.editing_input", {
                 .val(value)
                 .appendTo( $inputdiv );
             
-            $input = this._recreateSelector($input, value);
+            if(this.detailType=='access'){
+                var sel_options = [
+                    {key: '', title: ''}, 
+                    {key: 'viewable', title: 'viewable'}, 
+                    {key: 'hidden', title: 'hidden'}, 
+                    {key: 'public', title: 'public'}, 
+                    {key: 'pending', title: 'pending'}
+                ];
+
+                window.hWin.HEURIST4.ui.createSelector($input.get(0), sel_options);
+                window.hWin.HEURIST4.ui.initHSelect($input, false);
+            }
+            else if(this.detailType=='tag'){
+                var groups = [];
+                var req = {};
+                req['a'] = 'search';
+                req['details'] = 'name'; // Get group id and name
+                req['entity'] = 'sysGroups';
+                req['request_id'] = window.hWin.HEURIST4.util.random();
+
+                /* Retrieve List of User Groups, mostly the names for displaying */
+                window.hWin.HAPI4.EntityMgr.doRequest(req, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            var recset = new hRecordSet(response.data);
+                            if(recset.length()>0){
+                                recset.each2(function(id, val){
+                                    groups.push([val['ugr_ID'], val['ugr_Name']]);
+                                });
+                            }
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+                );
+
+                var sel_options = [];
+                var u_id = window.hWin.HAPI4.currentUser['ugr_ID'];
+
+                req = {};
+                req['a'] = 'search';
+                req['details'] = 'name'; // Get tag id, name, and gorup id
+                req['entity'] = 'usrTags';
+                req['sort:tag_Text'] = 2; // Order tags by tag name
+                req['request_id'] = window.hWin.HEURIST4.util.random();
+
+                /* Retrieve Tags */
+                window.hWin.HAPI4.EntityMgr.doRequest(req, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            var gIDs = [];
+                            var recset = new hRecordSet(response.data);
+                            if(recset.length()>0){
+                                records = recset.getSubSetByRequest({'sort:tag_UGrpID':1});
+                                
+                                u_tags = records.getSubSetByRequest({'tag_UGrpID':'='+u_id});
+                                u_tags.each2(function(id, val){ // Get User Tags first
+                                    var tag_name = filter_val = val['tag_Text'];
+                                    var tag_group = val['tag_UGrpID'];
+
+                                    var values = {};
+                                    values['key'] = filter_val;
+                                    values['title'] = tag_name;
+
+                                    sel_options.push(values);
+                                });  
+
+                                w_tags = records.getSubSetByRequest({'tag_UGrpID':'!='+u_id});
+                                w_tags.each2(function(id, val){ // Get Workgroup Tags second
+                                    var tag_name = filter_val = val['tag_Text'];
+                                    var tag_group = val['tag_UGrpID'];
+
+                                    for(var i=0; i<groups.length; i++){
+                                        if(groups[i][0] == tag_group){
+                                            tag_name = groups[i][1] + '.' + tag_name;
+                                        }
+                                    }
+
+                                    var values = {};
+                                    values['key'] = filter_val;
+                                    values['title'] = tag_name;
+
+                                    sel_options.push(values);
+                                });
+                                window.hWin.HEURIST4.ui.createSelector($input.get(0), sel_options);
+                                window.hWin.HEURIST4.ui.initHSelect($input, false);
+                            }else{ // No Tags Found
+                                window.hWin.HEURIST4.ui.createSelector($input.get(0), [{key: '', title: 'No Tags Found'}]);
+                            }
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+                );
+            }
+            else{
+                $input = this._recreateSelector($input, value);
+            }
             $input = $($input);
             
             this._on( $input, {change:this._onTermChange} );
@@ -1928,7 +2025,7 @@ $.widget( "heurist.editing_input", {
                     .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input ); 
                 
                 /* Image and Player (enalrged image) container */
-                $input_img = $('<br /><div class="image_input ui-widget-content ui-corner-all thumb_image" style="margin:10px 0 2px;">'
+                $input_img = $('<br/><div class="image_input ui-widget-content ui-corner-all thumb_image" style="margin:10px 0 2px;">'
                 + '<img id="img'+f_id+'" class="image_input">'
                 + '<div id="player'+f_id+'" style="min-height:240px; min-width:320px; display:none;"></div>'
                 + '</div>')
@@ -2002,33 +2099,59 @@ $.widget( "heurist.editing_input", {
                 });
                 
                 /* Handler Variables */
-                var hideTimer = 0;  //  Time for hiding thumbnail
+                var hideTimer = 0, showTimer = 0;  //  Time for hiding thumbnail
                 var isClicked = 0;  // Number of image clicks, one = freeze image inline, two = enlarge/srink
 
                 /* Input element's hover handler */
-                $input.mouseover(function(event){
+                function __showImagePreview(event){
+
                     if(!window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src')) && isClicked == 0){
                         if (hideTimer) {
                             window.clearTimeout(hideTimer);
                             hideTimer = 0;
                         }
-                        $input_img.show();
-                        $(event.target.parentNode).find('div.smallText').show();
+                        
+                        if($input_img.is(':visible')){
+                            $input_img.stop(true, true).show();    
+                        }else{
+                            if(showTimer==0){
+                                showTimer = window.setTimeout(function(){
+                                    $input_img.show();
+                                    $inputdiv.find('div.smallText').show();
+                                    showTimer = 0;
+                                },500);
+                            }
+                        }
                     }
-                });
+                }
+                this._on($input,{mouseover: __showImagePreview});
+                this._on($input_img,{mouseover: __showImagePreview}); //mouseover
 
                 /* Input element's mouse out handler, attached and dettached depending on user preferences */
-                function img_mouseout(event){
+                function __hideImagePreview(event){
+                        if (showTimer) {
+                            window.clearTimeout(showTimer);
+                            showTimer = 0;
+                        }
                     if($input_img.is(':visible')){
+                        
+                        //var ele = $(event.target);
+                        var ele = event.toElement || event.relatedTarget;
+                        ele = $(ele);
+                        if(ele.hasClass('image_input') || ele.parent().hasClass('image_input')){
+                            return;
+                        }
+                                                
                         hideTimer = window.setTimeout(function(){
                             if(isClicked==0){
-                                $input_img.hide(1000);
-                                $(event.target.parentNode).find('div.smallText').hide(1000);
+                                $input_img.fadeOut(1000);
+                                $inputdiv.find('div.smallText').hide(1000);
                             }
                         }, 500);
                     }
                 }
-                $input.on('mouseout', img_mouseout);
+                this._on($input, {mouseout:__hideImagePreview});
+                this._on($input_img, {mouseout:__hideImagePreview});
 
                 /* Thumbnail's click handler */
                 $input_img.click(function(event){
@@ -2036,9 +2159,9 @@ $.widget( "heurist.editing_input", {
                     var elem = event.target;
                     
                     if (isClicked==0){
-                        isClicked++;
+                        isClicked=1;
                         
-                        $input.off("mouseout");
+                        that._off($input_img,'mouseout');
 
                         $(elem.parentNode.parentNode).find('div.smallText').hide(); // Hide image help text
 
@@ -2080,7 +2203,8 @@ $.widget( "heurist.editing_input", {
 
                     isClicked = 0;
 
-                    $input.on("mouseout", img_mouseout);
+                    that._on($input, {mouseout:__hideImagePreview});
+                    that._on($input_img, {mouseout:__hideImagePreview});
 
                     $(event.target.parentNode).hide();
 
@@ -2108,7 +2232,7 @@ $.widget( "heurist.editing_input", {
 
                     $input.off("mouseout");
 
-                    isClicked++;
+                    isClicked=1;
                 }
 
                         var __show_select_dialog = null;
@@ -2212,24 +2336,6 @@ $.widget( "heurist.editing_input", {
                                 this.newvalues[$input.attr('id')] = value;
                             }*/
                         }
-                
-				/* Check User Preferences, displays thumbnail inline by default if set */
-                if (window.hWin.HAPI4.get_prefs_def('imageRecordEditor', 0)!=0 && value.ulf_ID)
-                {
-                    $input_img.show();
-                    $dwnld_anchor.show();
-
-                    $dwnld_anchor.appendTo( $inputdiv );
-
-                    $input_img.css('cursor', 'zoom-in');
-
-                    $small_text.hide();
-
-                    $input.off("mouseout");
-
-                    isClicked++;
-                }
-				
             }
             else
             if( this.detailType=='folder' ){ //----------------------------------------------------
@@ -2769,7 +2875,8 @@ console.log('onpaste');
                         $parentNode.find('.download_link').hide();
                         $parentNode.find('#player'+value.ulf_ID).hide();
                         
-                        $input.on('mouseout', img_mouseout);
+                        that._on($input, {mouseout:__hideImagePreview});
+                        that._on($input_img, {mouseout:__hideImagePreview});
                         
                         isClicked = 0;
                     }

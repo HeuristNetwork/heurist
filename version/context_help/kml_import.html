@@ -1,0 +1,154 @@
+<html>
+
+    <head>
+
+        <title>HEURIST Context Help - KML import</title>
+        <link rel=stylesheet href=../common/css/heurist.css>
+    </head>
+
+    <body width=600 height=500>
+
+        <div style="width: 100%; height: 100%; overflow: auto;">
+
+            <h2>KML import</h2>
+            <hr>
+
+            <h4>What is it?</h4>
+
+            <p>KML is an XML-based file format for describing geographic objects, used
+                in particular by Google Earth and Google Maps.  Heurist has some support for
+                importing KML files - this is currently the only practical method for
+                adding large amounts of geographic data to the system other than creating a shapefile record and uploading a shapefile.</p>
+
+            <h4>How do I use it?</h4>
+
+            <p>Select "KML" from the "Import" menu on the Heurist main (search/filter) page.
+                Select a KML file to import; Heurist will recognise the format and
+                process the file, and prompt you for a record type.  <em>All records created
+                    by a single KML import will have the same record type.</em></p>
+
+            <p>Heurist attempts to import each <tt>&lt;Placemark&gt;</tt> as a separate record.
+                The following table lists the KML tags that Heurist recognises as record
+                details, and the bibliographic data fields that they are imported to.</p>
+
+            <center>
+                <table border=1 cellpadding=3 id=types>
+                    <tr>
+                        <th width=200>KML tag</th>
+                        <th width=300>Heurist detail field</th>
+                    </tr>
+
+                    <tr>
+                        <td><pre>&lt;name&gt;</pre></td>
+                        <td>Title (detail type #160)</td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <pre>&lt;address&gt;
+                                &lt;AddressDetails&gt;</pre>
+                        </td>
+                        <td>Location (#181)</td>
+                    </tr>
+
+                    <tr>
+                        <td><pre>&lt;phoneNumber&gt;</pre></td>
+                        <td>Contact information (#309)</td>
+                    </tr>
+
+                    <tr>
+                        <td><pre>&lt;TimeSpan&gt;&lt;begin&gt;</pre></td>
+                        <td>Start Date (#177)</td>
+                    </tr>
+
+                    <tr>
+                        <td><pre>&lt;TimeSpan&gt;&lt;end&gt;</pre></td>
+                        <td>End Date (#178)</td>
+                    </tr>
+
+                    <tr>
+                        <td><pre>&lt;TimeStamp&gt;&lt;when&gt;</pre></td>
+                        <td>Date (#166)</td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <pre>&lt;Region&gt;
+                                &lt;Point&gt;
+                                &lt;LineString&gt;
+                                &lt;LinearRing&gt;
+                                &lt;Polygon&gt;
+                                &lt;MultiGeometry&gt;</pre>
+                        </td>
+                        <td>Geographic object (#230)</td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <pre>&lt;Snippet&gt;
+                                &lt;description&gt;
+                                &lt;Metadata&gt;</pre>
+                        </td>
+                        <td>
+                            Public scratchpad
+                        </td>
+                    </tr>
+                </table>
+            </center>
+
+            <p>It is possible to specify Heurist-formatted data in HXTBL format between
+                KML's <tt>&lt;Metadata&gt;</tt> tags, e.g.
+                <style>
+                    .snippet { color: #666666; }
+                    .snippet b { color: black; }
+                </style>
+                <pre class=snippet>
+                    ...
+                    &lt;Placemark&gt;
+                    ...
+                    &lt;Metadata&gt;
+
+                    <b>&lt;detail name="Name of organisation" id="160"&gt;
+                        Archaeological Computing Laboratory
+                        &lt;/detail&gt;</b>
+
+                    <b>&lt;detail name="Organisation type" id="203"&gt;
+                        Laboratory
+                        &lt;/detail&gt;</b>
+
+                    &lt;/Metadata&gt;
+                    ...
+                    &lt;/Placemark&gt;
+                    ...
+                </pre>
+                Heurist will add fields of type #160 (Title) and type #203 (Organisation type)
+                to the record corresponding to this <tt>&lt;Placemark&gt;</tt>.</p>
+
+            <h4>Updating existing records</h4>
+
+            <p>If you specify an existing record ID in the <tt>ExtendedData</tt> element,
+                the importer will update that record as follows:</p>
+            <ul>
+                <li>All existing geo details will be removed, and replaced with the new values from the KML</li>
+                <li>Other fields will be merged, as is normal behaviour for the importer when duplicate records are detected</li>
+            </ul>
+            <p>For example,<p>
+            <p><tt>&lt;ExtendedData&gt;&lt;Data name="HeuristID"&gt;&lt;value&gt;1234&lt;/value&gt;</tt></p>
+
+            <h4>How do I create KML?</h4>
+
+            <p>KML is natively exported by Google Earth.  Other applications can export
+                data in KML format using a plugin, including ArcGIS and CartoWeb.  The format
+                is <a href="http://code.google.com/apis/kml/documentation/" target=_blank>documented online</a>
+                so it is possible to "hand roll" your own KML by hand, using an XML editor.</p>
+
+            <!--
+            <hr>
+            <h3>See also</h3>
+            -->
+
+        </div>
+
+    </body>
+
+</html>

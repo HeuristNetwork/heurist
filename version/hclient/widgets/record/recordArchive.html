@@ -1,0 +1,55 @@
+<div id="ent_header" style="height:6em; padding: 0.2em; width: 100%;">
+<fieldset style="display:inline-block">
+    <!--
+    Name,  (fuzzyname)
+    anps_id
+    lga
+    state
+
+    format=json
+    paging=500
+    bbox - todo
+    -->
+    <div style="padding: 0.2em; width: 100%;" class="input">
+        <div class="header" style="padding: 0 16px 0 16px;">
+            <label for="inpt_recid">Record ID:</label>
+        </div>
+        <input id="inpt_recid" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
+    </div>
+
+    <div style="padding: 0.2em; width: 100%;" class="input">
+        <div class="header" style="padding: 0 16px 0 16px;">
+            <label for="inpt_user">Affected by (User):</label>
+        </div>
+        <input id="inpt_user" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
+    </div>
+
+
+</fieldset>
+<fieldset style="display:inline-block">
+    <div style="padding: 0.2em; width: 100%;" class="input">
+        <div class="header" style="padding: 0 16px 0 16px;">
+            <label for="inpt_state">Was:</label>
+        </div>
+        <select id="inpt_state" class="text ui-widget-content ui-corner-all" style="max-width:30em">
+            <option value="">&nbsp;</option>
+            <option value="del">deleted</option>
+            <option value="raw">updated</option>
+        </select>
+    </div>
+
+    <div style="padding: 0.2em; width: 100%;" class="input">
+        <div class="header" style="padding: 0 16px 0 16px;">
+            <label for="inpt_date">On (date):</label>
+        </div>
+        <input id="inpt_date" class="text ui-widget-content ui-corner-all" style="max-width:10em"/>
+    </div>
+
+</fieldset>
+<div style="float:right;height:inherit;padding:7px;">
+    <button id="btnStartSearch">Search</button>
+</div>
+</div>
+<div id="div_result" class="ent_content_full recordList" style="display: none;top:6em">
+</div>
+

@@ -1,0 +1,85 @@
+<!--
+/**
+* mainMenu6_explore.html: exlore menu
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<div class="ui-heurist-header" style="top:0px;padding:9px;">Explore
+    <span class="ui-icon ui-icon-circle-b-help" style="float:right;margin:0px;padding-right:8px;"></span></div>
+<div style="top:37px;position:absolute;width:100%;">
+
+    <ul style="list-style-type:none;margin:0;padding:12px;">
+
+        <li style="padding:0px 8px 6px;" class="ui-heurist-title">Filters</li>
+    
+        <li class="fancytree-node" data-action-popup="search_recent" style="padding:6px;font-size: smaller;">
+            <span class="ui-icon ui-icon-clock-b"/><span class="menu-text">Recent&nbsp;|
+                                <span data-search-all="1">All</span>
+            </span>
+        </li>
+        <li class="menu-explore fancytree-node" data-action-popup="searchByEntity" style="padding:6px">
+            <span class="ui-icon ui-icon-entity-explore"/><span class="menu-text">Entities</span>
+        </li>
+        <li class="menu-explore fancytree-node" data-action-popup="search_filters" style="padding:6px">
+            <span class="ui-icon ui-icon-filter-explore"/><span class="menu-text">Saved filters</span>
+        </li>
+    </ul>
+    
+    <ul style="list-style-type:none;margin:0;padding:12px;">
+
+        <li style="padding:0px 8px 6px;" class="ui-heurist-title">Build</li>
+    
+        <li class="menu-explore fancytree-node" data-action-popup="searchBuilder" style="padding:6px">
+            <span class="ui-icon ui-icon-magnify-explore"/><span class="menu-text">Filter builder</span>
+        </li>
+        <li class="menu-explore fancytree-node" data-action-popup="svsAddFaceted" style="padding:6px">
+            <span class="ui-icon ui-icon-box"/><span class="menu-text">Facets builder</span>
+        </li>
+        <li class="menu-explore fancytree-node"  data-action-popup="svsAdd" style="padding:6px">
+            <span class="ui-icon ui-icon-save"/><span class="menu-text">Save filter
+            <!-- <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"/></span> -->
+        </li>
+        
+
+    </ul>
+        
+    <ul style="list-style-type:none;margin:0;padding:12px;">
+
+        <li style="padding:0px 8px 6px;" class="ui-heurist-title">Advanced</li>
+       
+        <li class="menu-explore fancytree-node" data-action-popup="search_rules" style="padding:6px">
+            <span class="ui-icon ui-icon-shuffle"/><span class="menu-text">Rules</span>
+        </li>
+        <li class="menu-explore fancytree-node" data-action="menu-subset-set"/>
+        
+    </ul>
+<!-- 2020-12-15    
+    <ul style="list-style-type:none;margin:0;padding:12px;border-top:3px #305586 solid;">
+        <li style="padding:0px 8px 6px;" class="ui-heurist-title">Saved filters</li>
+    </ul>
+-->    
+</div>
+<!-- 2020-12-15
+<div id="svs_list" style="position:absolute;bottom:0px;left:0px;right:0px;top:255px;font-size:0.8em;display:none;">
+</div>
+-->
+        
+
+
+ 

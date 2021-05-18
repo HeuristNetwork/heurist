@@ -1,0 +1,166 @@
+<!--
+/**
+*
+* visualize.html: Toolbar for the network diagram of database structure or current resultset
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Jan-Jaap de Groot
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<!-- Network diagram HTML -->
+<div class="ent_header" style="height:9em;border:none;display:table-row">
+
+    <div id="divHint" style="display:none;font-weight:normal;padding:4px; margin-left:10px;">
+        <br>Choose entities in dropdown below. Entities can be dragged to position them. Drag background to reposition, mousewheel or +/- buttons to zoom.
+        <br>Layout is remembered across sessions if gravity is OFF (recommended). 
+        <br>Drag link icon to another node to create a linking field (record pointer or relationship marker).
+    </div>
+
+   <div id="rectypeSelector" class="toolbar-section" style="width:25ex;display:none;vertical-align:top;">
+            <button id="showRectypeSelector" style="min-width:15ex">Select types to show</button>
+            <label id="lblShowRectypeSelector"></label>
+   </div>
+
+   <div id="toolbar" style="display:none;">
+
+
+        <div id="setSelectMode" class="toolbar-section" style="min-width:40px">
+            
+            <button id="btnSingleSelect" name="selectMode" value="single">"Select and drag nodes"</button>
+            <button id="btnMultipleSelect" name="selectMode" value="multi">Select multiple nodes</button>
+            
+            <span style="display:inline-block;width:15px"></span>
+            
+            <button id="btnZoomIn" style="width:20px">Zoom In</button>
+            <button id="btnZoomOut" style="width:20px">Zoom In</button>
+        </div>
+
+        <div id="setViewMode" class="toolbar-section" style="min-width:40px;padding-left:15px;">
+            <button id="btnViewModeIcon" name="videMode" value="icons">Icons</button>
+            <button id="btnViewModeInfo" name="videMode" value="infoboxes">Info</button>
+            <button id="btnViewModeFull" name="videMode" value="infoboxes_full">Info + Links</button>
+        </div>
+
+        <div id="setDivGravity" class="toolbar-section" 
+            style="border-left: solid 1px gray; min-width:90px">
+            
+            <div id="setGravityMode" style="padding-left:10px">
+                <label class="ui-controlgroup-label" style="border:none;background:none">gravity</label> 
+                <button id="gravityMode0" name="gravityMode" value="off">off</button>
+                <button id="gravityMode1" name="gravityMode" value="touch">on</button>
+<!-- 2017-02-02
+                <input type="radio" id="gravityMode2" name="gravityMode" value="aggressive">
+                <label for="gravityMode2">strong</label>
+-->                
+            </div>
+        </div>
+        
+        <div id="setAdvancedMode" style="border-left: solid 1px gray;padding-left:15px;min-height:22px;vertical-align:middle">
+                <span class="ui-icon ui-icon-triangle-1-w advanced" title="Hide advanced functions" style="height: 22px;">&nbsp;</span>
+                <a href="#">advanced functions&nbsp;<span class="ui-icon ui-icon-triangle-1-e"
+                 style="display: inline-block;vertical-align: middle;height: 22px;"></span></a></div>
+
+        <!-- -->
+        <div id="setDivNodes" class="toolbar-section advanced" 
+            style="display:none;padding-left:15px; min-width:190px">
+            <label>Nodes</label>
+            <div class="colorblock" style="margin-left:10px;width:auto; title="Color of nodes"">
+                <input id="entityColor" style="width:0px;border:none"/></div>
+                
+            <div id="setNodesMode" style="display:inline-block">
+                <button id="nodesMode0" name="nodesMode" value="linear" 
+                    title="radius of nodes changes linearly">lin</button>
+                <button id="nodesMode1" name="nodesMode" value="logarithmic"
+                    title="radius of nodes changes logarithmically">log</button>
+                <button id="nodesMode2" name="nodesMode" value="unweighted" checked="checked" 
+                    title="radius of nodes has fixed size">fixed</button>
+            </div>
+            <input id="nodesRadius" class="number-input small" type="number" min="12" max="45" step="1" />
+        </div>
+
+        <!-- -->
+        <div id="setDivLinks" class="toolbar-section advanced" 
+            style="display:none;border-left: solid 1px gray; min-width:214px;padding-right: 10px;">
+            <label>Links</label>
+
+            <div id="linksPathColor" class="colorblock" title="Color of links" style="margin-left:10px">/<input id="linksPathColor_inpt" style="width:0px;border:none"/></div>
+            
+            <div id="linksMarkerColor" class="colorblock" title="Color of markers/arrows on links"></div>
+            <div style="display:inline-block;width:0"><input id="linksMarkerColor_inpt" style="width:0px;border:none;"/></div>
+            <div id="setLinksMode" style="display:inline-block">
+                <button id="linksMode0" name="linksMode" value="straight" 
+                    title="link shape is straight">straight</button>
+
+                <button id="linksMode1" name="linksMode" value="curved" checked="checked" 
+                    title="link shape is curved">curved</button>
+                
+                <button id="linksMode2" name="linksMode" value="stepped"
+                    title="link shape is stepped">stepped</button>
+            </div>
+
+            <input id="linksLength" title="Links Length" class="number-input medium" type="number" min="1" step="25" />
+            x
+            <input id="linksWidth" title="Links Thickness" class="number-input small" type="number" min="1" max="25" step="1" />
+            
+            <label><input id="linksEmpty" title="Show empty links" type="checkbox"/>&nbsp;empty</label>
+        </div>
+
+        <div id="setDivLabels" class="toolbar-section" 
+            style="display:none;border-left: solid 1px gray; padding-left: 10px; min-width:140px;">
+            <label>Labels</label>
+
+            <input type="checkbox" id="textOnOff" value="on" title="Show labels when infobox is hidden" style="margin: 5px;">
+            <div id="textColor" class="xcolorblock" title="Text color">Text</div>
+
+            <input id="textLength" title="Labels Length" class="number-input medium" type="number" min="50" max="250" step="10" />
+            x
+            <input id="fontSize" title="Font Size" class="number-input small" type="number" min="8" max="25" step="1" />
+        </div>
+        
+        
+        <div id="setDivExport" class="toolbar-section advanced" 
+            style="display:none;border-left: solid 1px gray; padding-left:10px;text-align:right;min-width:50px;">
+            <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI</button>
+            <button type="button" id="embed-export">Embed</button>
+        </div>
+
+    </div> <!-- end of toolbar -->
+
+</div>
+
+<div id="divSvg" class="ent_content_full" style="top:8em;">
+            <!-- SVG -->
+            <svg id="d3svg" class="fullscreen">
+                <text x="25" y="25" fill="black">Building graph ...</text>
+            </svg>  
+            
+            <div id="net_limit_warning" 
+                style="z-index:2000;position:absolute;top:0;right:0;border-radius:6px;background-color: rgb(172, 231, 255);font-weight:bold;color:red; padding:8px; display:none;">
+            </div>
+</div>
+
+
+<div id="embed-dialog" style="display:none">
+        <p>Embed this Network Diagram in your own web page. Enclose within &lt;code&gt; &lt;/code&gt; 
+    for Wordpress sites (the use of &lt;code&gt; may need to be enabled for your site).</p>
+        <p style="padding:1em 0 1em 0;font-size:0.9em">Copy the following html code into your page where you want to place the graph, or use the URL on its own. The graph will be generated live from the database using the current search criteria whenever the graph is loaded. Use the web-safe version if the readable version does not work</p>
+        <label style="font-size:0.9em">Readable code:</label>
+        <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
+        <label style="font-size:0.9em">Web-safe code:</label>
+        <textarea id="code-textbox2" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="     border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
+</div>

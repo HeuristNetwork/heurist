@@ -1,0 +1,373 @@
+<!--
+/**
+* Set user's preferences for session
+* Replaces editPreferences.html in h3 (now deleted)
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+<script type="text/javascript">
+
+    function initProfilePreferences(){
+
+        var sel = $("#layout_language");
+        if(!(typeof regional === 'undefined') && sel.length==1){ //global variable defined in localization.js
+
+            var key;
+            sel.empty();
+            sel = sel.get(0);
+            for(key in regional){
+                if(key){
+                    window.hWin.HEURIST4.ui.addoption(sel, key, regional[key].language);
+                }
+            }
+        }
+
+        sel = $("#layout_id");
+        if(sel.length==1){ //global variable defined in layout_default.js
+
+            var key;
+            sel.empty();
+            sel = sel.get(0);
+            for(key in cfg_layouts){
+                if(key){
+                    window.hWin.HEURIST4.ui.addoption(sel, cfg_layouts[key]['id'], cfg_layouts[key]['name']);
+                }
+            }
+        }
+        
+
+        //init bookmarklet
+        // NOTE: bookmarklet source is duplicated in /import/bookmarklet/bookmarkletSource.js
+        sel = $("#bookmarklet-link");
+        if(sel.length==1){ //global variable defined in layout_default.js
+            sel.attr('href',
+"javascript:(function(){"
+    + "e=encodeURIComponent;d=document;h='" + window.hWin.HAPI4.baseURL + "';"
+    + "if(location.protocol=='https:'){"
+        + "if(window.confirm('Only the URL and web page title can be extracted from https:// pages."
+                + "\\nAdditional information will need to be set manually."
+                + "\\n\\nClick OK to add a record for this page.')){"
+                    + "window.open(h+'?fmt=edit&db="+window.hWin.HAPI4.database
+                    + "&rec_rectype=2&rec_owner=1&rec_visibility=viewable&t='+e(d.title)+'&u='+e(location.href));"
+        + "}"
+    + "return;}"
+
+    + "c=d.contentType;"
+    + "if(c=='text/html'||!c){"
+        + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
+        
+        + "s=d.createElement('script');s.type='text/javascript';"
+        + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+window.hWin.HAPI4.database+"';"
+        + "d.getElementsByTagName('head')[0].appendChild(s);"
+    + "}"
+    + "else{"
+    +   "w=open(h+'?fmt=edit&db="+window.hWin.HAPI4.database+"&t='+e(d.title)+'&u='+e(location.href));"
+                //+ "window.setTimeout('w.focus()',200);}"
+    + "}})();"
+            );
+            
+            sel.text('>> '+window.hWin.HAPI4.database)
+        }
+    }
+
+</script>
+
+<div class="ent_wrapper">
+    <div class="ui-heurist-header"></div>
+    <div class="ent_content" style="top:38px">
+
+    <fieldset style="padding:10px">
+
+    <h3 style="margin:0">Bookmarklet</h3>
+    <div>
+        <label class="header">Drag this link to your browser bookmarks bar</label><b><u>
+                <a style="color: blue;" id="bookmarklet-link"
+                    onclick="{alert('Heurist Bookmarklet <br/><br/>drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites. <br/><br/>Clicking on the bookmarklet link when in a page will give options for creating a new Web page (or other) Heurist record, copying any highlighted text to an appropriate field. It also allows capturing of hyperlinks in the page as new Web page records.');return false;}"
+                    title="Heurist Bookmarklet: Drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites. "
+                    href="#"></a>
+            </u></b><label>&nbsp;to allow bookmarking of web pages</label><br><br>
+    </div>
+
+    <div>
+        <div class="header"><label for="userCompetencyLevel">
+                User interface style / level of user
+            </label></div>
+        <select name="userCompetencyLevel" id="userCompetencyLevel" class="text ui-widget-content ui-corner-all" style="min-width:300px"
+            title="Determines some aspects of the user interface, from simplified and maximum help for Beginner through to leaner interface, with additional 'raw' functions, for Advanced">
+            <option value="2">Beginner/intermediate</option>
+            <option value="1">Experienced</option>
+            <option value="0">Advanced (obscure functions, command strings)</option>
+        </select>
+    </div>
+
+    <!-- ================================================= -->
+    <hr/>
+    <!-- ================================================= -->
+    <h3 style="margin:0">Mapping</h3>
+                                   
+
+    <!-- Allowing this is dangerous b/c you can end up in a style which doesn't allow editing or logout, and is remembered in session -->
+    <div style="display: none;">
+        <div class="header"><label for="layout_id">Layout (normally specified by parameter)</label></div>
+        <select name="layout_id" id="layout_id" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
+    </div>
+
+    <div style="display: none;">
+        <div class="header"><label for="layout_language">Interface language <i>(under implemented)</i></label></div>
+        <select name="layout_language" id="layout_language" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
+    </div>
+
+    
+    <!-- we don't really want them changing this, can get into trouble, besides popus up UNDER form @14/4/18
+    <div>
+        <div class="header"><label>Theme (colours &amp; styles)</label></div>
+        <div id="layout_theme" style="min-width: 300px;"></div>
+        -->
+        <!-- <select name="layout_theme" id="layout_theme" class="text ui-widget-content ui-corner-all"></select> -->
+    <!--
+    </div>
+    -->
+
+    <!--
+    <div>
+        <div class="header"><label for="help_on">Show help texts for fields in data entry</label></div>
+        <input type="checkbox" name="help_on" id="help_on" class="text ui-widget-content ui-corner-all"/>
+    </div>
+    -->
+
+    <div>
+        <div class="header"><label for="mapcluster_on">Map marker clustering</label></div>
+        <input type="checkbox" name="mapcluster_on" id="mapcluster_on" class="text ui-widget-content ui-corner-all"/>
+        
+        <label for="mapcluster_grid">grid pixels </label>
+        <input id="mapcluster_grid" name="mapcluster_grid" style="max-width: 45px;" type="number" min="1" step="1" value="20"
+            title="The grid size of a cluster in pixels"/>&nbsp;
+<!--            
+        <label for="mapcluster_count">Min count: </label>
+        <input id="mapcluster_count" name="mapcluster_count" style="max-width: 35px;" type="number" min="2" step="1" value="2"
+            title="The minimum number of markers to be in a cluster before the markers are hidden and a count is shown"/>&nbsp;
+-->         
+    </div>
+    <div>
+        <div class="header"><label for="mapcluster_zoom">Stop clustering closer than (rollover for explanation) </label></div>
+        <select id="mapcluster_zoom" name="mapcluster_zoom" style="width:150px;"
+            title="The maximum zoom level that a marker can be part of a cluster. Level 1 = ~10,000km (15 deg.) to ~65,000 km (equator). 
+     Level 18 = ~50m (15 deg.) to ~250m (equator)"> 
+            <option value="1">Level 1 (Worldwide)</option>
+            <option value="2">Level 2</option>
+            <option value="3">Level 3</option>
+            <option value="4">Level 4</option>
+            <option value="5">Level 5</option>
+            <option value="6">Level 6</option>
+            <option value="7">Level 7</option>
+            <option value="8">Level 8</option>
+            <option value="9">Level 9</option>
+            <option value="10">Level 10 (City scale)</option>
+            <option value="11">Level 11</option>
+            <option value="12">Level 12</option>
+            <option value="13">Level 13</option>
+            <option value="14">Level 14</option>
+            <option value="15">Level 15</option>
+            <option value="16">Level 16</option>
+            <option value="17">Level 17</option>
+            <option value="18">Level 18 (Zoomed right in)</option>
+        </select>    
+        <!--
+        <input id="mapcluster_zoom" name="mapcluster_zoom" style="max-width: 35px;" type="number" min="1" max="18" step="1" value="18"
+            title="The maximum zoom level that a marker can be part of a cluster"/>
+        -->    
+    </div>
+    <div>
+        <div class="header"><label for="deriveMapLocation">Derive location of entities w/out coordinates from connected Places</label></div>
+        <input type="checkbox" name="deriveMapLocation " id="deriveMapLocation" checked class="text ui-widget-content ui-corner-all"/>
+    </div>
+    <div>
+        <!--
+        <div class="header"><label for="mapSelectTools">Map select tools (by click, in rect, in shape)</label></div>
+        <input type="checkbox" name="mapSelectTools " id="mapSelectTools" checked class="text ui-widget-content ui-corner-all"/>
+        -->
+        <div class="header"><label>Controls</label></div>
+            <label><input type="checkbox" id="mctrl_bookmark" value="bookmark">bookmark</label>&nbsp;
+            <label><input type="checkbox" id="mctrl_geocoder" value="geocoder">geocoder</label>&nbsp;
+            <label title="Map select tools (by click, in rect, in shape)">
+                    <input type="checkbox" id="mctrl_selector" value="selector">selector</label>&nbsp;
+            <label><input type="checkbox" id="mctrl_print" value="print">print </label>
+            <label><input type="checkbox" id="mctrl_publish" value="publish">publish</label>
+    </div>
+    
+    <div>
+        <div class="header"><label>Map popup template</label></div>
+        <select id="map_template" name="map_template" class="text ui-widget-content ui-corner-all" 
+            title="" style="width:250px;min-width:300px;max-width:300px">
+        </select>
+        <label style="padding-left:20px">Show on rollover<input type="checkbox" id="map_rollover"></label>
+    </div>
+
+    <div id="map_default_style_div">
+        <div class="header"><label>Symbology for results (aka Current Query) on map </label></div>
+        <input id="map_default_style" name="map_default_style" class="text ui-widget-content ui-corner-all"/>
+    </div>
+    
+    <br/><hr />
+
+
+    <h3 style="margin:0">Filter</h3>
+    <div>
+        <div class="header"><label for="defaultSearch">Filter string to apply when loading main page</label></div>
+        <input name="defaultSearch" id="defaultSearch" class="text ui-widget-content ui-corner-all" style="min-width:300px"/>
+    </div>
+
+    <div>
+        <div class="header"><label for="searchQueryInBrowser">Include current filter in URL for page</label></div>
+        <input type="checkbox" name="searchQueryInBrowser" id="searchQueryInBrowser" class="text ui-widget-content ui-corner-all"/>
+    </div>
+
+    <div>
+        <div class="header">
+            <label for="search_result_pagesize">
+                Page size for display of search results list<br/><i style="font-size:smaller">Searches with many results will display slowly with larger page sizes</i>
+            </label>
+        </div>
+        <select name="search_result_pagesize" id="search_result_pagesize" class="text ui-widget-content ui-corner-all" style="min-width:50px"
+            title="This limit does not apply to filter. This is just for pagination of result list">
+            <option value="50">50 (optimum)</option>
+            <option value="100">100</option>
+            <option value="500">500  (not recommended)</option>
+            <option value="1000">1,000 (very slow)</option>
+            <option value="5000">5,000 (glacial ...)</option>
+        </select>
+    </div>
+
+
+    <div>
+        <div class="header">
+            <label for="smarty-output-limit">
+                Limit lines in interactive custom report output<br/><i style="font-size:smaller">Heurist interface only, not external calls</i>
+            </label>
+        </div>
+        <select name="smarty-output-limit" id="smarty-output-limit" class="text ui-widget-content ui-corner-all" style="min-width:50px"
+            title="This limit does not apply to external calls or periodic report generation to file">
+            <option value="50">50 (optimum)</option>
+            <option value="200">200</option>
+            <option value="500">500 (slow)</option>
+            <option value="1000">1,000 (slower)</option>
+            <option value="2000">2,000 (very slow)</option>
+        </select>
+    </div>
+
+    <div>
+        <div class="header"><label for="search_detail_limit">
+                Limit objects on interactive map/timeline<br/><i style="font-size:smaller">Heurist interface, not external calls.<br/>Beware overloading websites with too many objects.</i>
+            </label></div>
+        <select name="search_detail_limit" id="search_detail_limit" class="text ui-widget-content ui-corner-all" style="min-width:50px"
+            title="This limit does not apply to external calls - make sure you do not overload websites with maps or timelines with too many objects">
+            <option value="500">500</option>
+            <option value="1000">1,000</option>
+            <option value="2000">2,000</option>
+            <option value="5000">5,000 (may overload browser)</option>
+            <!--
+            <option value="10000">10,000 (not recommended)</option>
+            <option value="20000">20,000 (not recommended)</option>
+            -->
+        </select>
+    </div>
+
+    <div>
+        <div class="header">
+        <label for="bookmarks_on">Show My Bookmarks in navigation panel<br/><i style="font-size:smaller">Turn on only if using bookmarks in shared db</i></label></div>
+        <input type="checkbox" name="bookmarks_on" id="bookmarks_on" class="text ui-widget-content ui-corner-all"/>
+    </div>
+<!--
+    <div>
+        <div class="header">
+        <label for="entity_btn_on">Entity quick filter buttons </label></div>
+        <input type="checkbox" name="entity_btn_on" id="entity_btn_on" class="text ui-widget-content ui-corner-all"/>
+    </div>
+-->    
+    <!-- ================================================= -->
+    <br/><hr />
+    <h3 style="margin:0">Other</h3>
+ 
+ <!-- Appears not to have been implemented in new editing functions 2017, possibly reinstate?
+
+    <div>
+        <div class="header"><label for="tagging-popup">Prompt for tags when saving records<br /><i>if no tags have been set</i></label></div>
+        <input type="checkbox" name="tagging-popup" id="tagging-popup" class="text ui-widget-content ui-corner-all"/>
+    </div>
+-->
+
+    <div>
+        <div class="header"><label for="defaultRecentPointerSearch">Default to recent records search when editing<br />pointer fields <i>(otherwise All Records)</i></label></div>
+        <input type="checkbox" name="defaultRecentPointerSearch" id="defaultRecentPointerSearch" class="text ui-widget-content ui-corner-all"/>
+    </div>
+    
+    <div id="custom_theme_div">
+        <div class="header"><label>Interface colour scheme (detailed):</label></div>
+        <input id="custom_theme" name="custom_theme" class="text ui-widget-content ui-corner-all"/>
+    </div>
+    
+
+<!-- 14/4/18: This does not appear to do anything, besides it should really be replaced by proper indexing using Elastic and specification of composite key for each record type 
+    <div>
+        <div class="header"><label for="findFuzzyMatches">Check for similar records on creation<br /><i>can slow new-record save</i></label></div>
+        <input type="checkbox" name="findFuzzyMatches" id="findFuzzyMatches" class="text ui-widget-content ui-corner-all"/>
+    </div>
+-->
+    
+    <!-- Pre 2018: options which are no longer used or need rethinking or need proper maintenance
+    <br />
+    <hr />
+    <br />
+
+    <div>
+    <div class="header"><label for="edit_open_in_new_window">Open edit in new window</label></div>
+    <input type="checkbox" name="edit_open_in_new_window" id="edit_open_in_new_window" class="text ui-widget-content ui-corner-all" value="1"/>
+    </div>
+    <div>
+    <div class="header"><label for="edit_force_tags">When exiting record edit, prompt for tags if no tags have been set</label></div>
+    <input type="checkbox" name="edit_force_tags" id="edit_force_tags" class="text ui-widget-content ui-corner-all" value="1"/>
+    </div>
+    <div>
+    <div class="header"><label for="edit_pointer_recentsearch">When entering a pointer field, default to recent records search (otherwise All Records)</label></div>
+    <input type="checkbox" name="edit_pointer_recentsearch" id="edit_pointer_recentsearch" class="text ui-widget-content ui-corner-all" value="1"/>
+    </div>
+    <div class="input-row">
+    <div class="input-header-cell">How do you spell Favourites/Favorites?</div><div  class="input-cell"><input id="favourites"></div>
+    </div>
+    <div class="input-header-cell">Show Favourites link in search screen navigation panel
+    </div>
+    <div  class="input-cell"><input type="checkbox" id="showFavouritesSearch">
+    </div>
+    </div>
+
+    <div class="input-row">
+    <div class="input-header-cell">Show Aggregations link in search screen navigation panel
+    </div>
+    <div  class="input-cell"><input type="checkbox" id="showAggregations">
+    </div>
+    -->
+    </fieldset>
+
+    </div>
+    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix popup_buttons_div" style="display:none;padding:13px">
+            <div class="ui-dialog-buttonset">
+                <div class="btn-ok ui-button-action">Apply</div>
+                <div class="btn-cancel">Close</div>
+            </div>
+    </div>
+</div>    
+

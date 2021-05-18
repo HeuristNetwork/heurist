@@ -125,7 +125,7 @@ function hCmsEditing(_options) {
     //since v5 they are built in to the core: contextmenu textcolor
             ],      
             //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-            toolbar: ['formatselect | bold italic forecolor backcolor  | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help | customAddWidget customSaveButton customCloseButton' ],  
+            toolbar: ['formatselect | bold italic forecolor backcolor  | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help | customAddWidget customAddTemplate customSaveButton customCloseButton' ],  
             content_css: [
                 '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
                 //,'//www.tinymce.com/css/codepen.`min.css'
@@ -169,6 +169,14 @@ function hCmsEditing(_options) {
                       text: 'Add database widget',
                       onclick: function (_) {  //since v5 onAction
                             __addEditWidget();
+                      }
+                    });
+
+                editor.addButton('customAddTemplate', { //since v5 .ui.registry
+                      icon: 'template',
+                      text: 'Insert template',
+                      onclick: function (_) {  //since v5 onAction
+                            __addTemplate();
                       }
                     });
                                 
@@ -801,6 +809,58 @@ function hCmsEditing(_options) {
     }
 
     //
+    // 1. Shows dialog with list of templates 
+    // 2. Loads template
+    // 3. Execute template script to replace template variables
+    // 4. Adds to content
+    // 5. Init edit/remove links
+    //
+    function __addTemplate(){
+    
+        
+        // 1. Shows dialog with list of templates 
+        var sURL = window.hWin.HAPI4.baseURL+'/hclient/widgets/cms/templates/snippets/blog.html';
+        var sURL2 = window.hWin.HAPI4.baseURL+'/hclient/widgets/cms/templates/snippets/blog.js';
+        
+        // 2. Loads template
+        var ele = $('<div>').attr('data-template-temp',1).appendTo(doc_body).hide().load(sURL, function(){
+
+        var t_style = ele.find('style').text(); //style will be added to page css
+        
+        ele.on('oncomplete', function(){
+            
+                // 4. Adds to tinymce
+                var content = ele.html();
+                tinymce.activeEditor.insertContent(content);
+                // 5. Init edit/remove links
+                __initWidgetEditLinks();
+                //$.each(ids, __initWidgetEditLinks);
+                
+                ele.empty().remove(); //remove temp div
+                
+        });
+                        
+        // 3. Execute template script to replace template variables
+        try{
+            $.getScript(sURL2, function(){
+                //console.log('getScript');                
+            });
+        }catch(e){
+            alert('Error in template script');
+        }
+            
+
+                        
+            
+
+        }); //on template load
+        
+        //$.get("http://www.mypage.com", function( my_var ) {
+            // my_var contains whatever that request returned
+        //});
+    }
+    
+    //
     // defines widget to be inserted (heurist-app-id) and its options (heurist-app-options)
     //      
     //select widget in list
@@ -1042,10 +1102,12 @@ function hCmsEditing(_options) {
             }
             */
 
-            var content = content + '<div data-heurist-app-id="'+widget_name+'" '
+            var content = content 
+                +'<div data-heurist-app-id="'+widget_name+'" '
                 + ' style="'+ widgetCss+'" '
-                + ' id="'+widgetid+'" class="mceNonEditable"'
-                + '>' + widget_options +  '</div>';
+                + ' class="mceNonEditable" id="'+widgetid+'">'
+                + '<!-- '+widget_name.toUpperCase().substring(8)+'   -->'
+                + widget_options +  '</div>';
   
                 
             return content; 
@@ -1865,6 +1927,11 @@ function hCmsEditing(_options) {
         editWidget: function (wid) {
             __addEditWidget(wid);
         },
+
+        addTemplate: function (wid) {
+            __addTemplate(wid);
+        },
+
         
         loadPageById: function (pageid) {
             __iniLoadPageById(pageid)

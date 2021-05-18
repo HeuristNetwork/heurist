@@ -466,7 +466,11 @@ $website_title -> #main-title>h2
   var ele = $('#main-title');
   if(ele.length>0){
       ele.empty().hide();
-      $('<h2<?php echo ($image_banner?' style="text-shadow: 3px 3px 5px black"':'');?>><?php print strip_tags($website_title,'<i><b><u><em><strong><sup><sub><small><br>');?></h2>').appendTo(ele);
+  <?php       
+  print '$(\'<h2 '.($image_banner?' style="text-shadow: 3px 3px 5px black"':'').'>'
+        . str_replace("'",'&#039;',strip_tags($website_title,'<i><b><u><em><strong><sup><sub><small><br>'))
+        .'</h2>\').appendTo(ele);';
+  ?>
       if(ele.parent().is('#main-header'))
       {
           if(!$('#main-logo-alt').is(':visible')){

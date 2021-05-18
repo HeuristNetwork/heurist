@@ -672,37 +672,28 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
 
         var name_field = this._editing.getInputs('dty_Name');	// Base Field Name input
+        $('h2:contains("Important note")').css({'margin-block-start': '0', 'margin-block-end': '0'});
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(name_field)){	
 
             if(this._currentEditID<=0){	// Check that a new field is being defined
+            
+//to Brandon: All this required for addition new field to record type (this.options.newFieldForRtyID>0)
+            
                 var ele = $('<select></select>');
-                var lbl = $('<label style="margin-left:5px"> or Enter a new name: </label>');
+                var tb_lbl = $('<label style="margin-left:5px"> Enter name: </label>');
+                var sel_lbl = $('<label style="margin-left:5px"> or: </label>');
                 name_field = $($($(name_field[0])[0])[0]);
 
-                window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele[0], this._currentEditID, null, null); // populate select
-                ele.prepend("<option value='' selected disable>Choose a base field</option>"); // add flavor
-
-                var rty_ID = this.options.newFieldForRtyID; // current record type being edited
-
-                // list of fields that are already in record type
-                var formRec = $Db.rst(rty_ID);
-                if(!window.hWin.HEURIST4.util.isRecordSet(formRec)){
-                    formRec = null;
-                }
+                name_field.after(ele);// Insert Select
+                name_field.before(tb_lbl);// Insert label before name field
+                ele.before(sel_lbl);// Insert label before selector
                 
-                if(formRec){
-                    $(ele.find('option')).each(function(){  // Disable fields already added to form
-                        if(formRec.getById($(this).val())){
-                            $(this).attr('disabled', true);
-                        }
-                    });
-                }
-
-                name_field.before(ele);// Insert Select
-                ele.after(lbl);// Insert label before name input
+                // populate select
+                var hSel = window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele[0], this._currentEditID, null, 
+                [{key:'',title:'Choose a base field'}],{useHtmlSelect:false});  
 
                 // Selector onchange handler, selected a pre-defined base field
-                ele.on('change', function(event){
+                hSel.on('change', function(event){
                     var ele = $(event.target);
                     var _dty_ID = ele.val();
 
@@ -720,7 +711,27 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     }
                     console.log('manageDefDetailTypes, id => ' + _dty_ID);
                     return;
-                });
+                });                
+                
+                var rty_ID = this.options.newFieldForRtyID; // current record type being edited
+
+                // list of fields that are already in record type
+                var formRec = $Db.rst(rty_ID);
+                if(!window.hWin.HEURIST4.util.isRecordSet(formRec)){
+                    formRec = null;
+                }
+                
+                if(formRec){
+                    $(ele.find('option')).each(function(){  // Disable fields already added to form
+                        if(formRec.getById($(this).val())){
+                            $(this).attr('disabled', true);
+                        }
+                    });
+                    hSel.hSelect('refresh');
+                }
+
+                //var hSel = window.hWin.HEURIST4.ui.initHSelect(ele); 
+                
             }
         }
 
@@ -881,9 +892,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             var ishelp_on = $(event.target).is(':checked');
             this.usrPreferences['help_on'] = ishelp_on;
             window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
+            window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper2');
         }});
         
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
+        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper2');
         
         this._adjustEditDialogHeight();
     },    

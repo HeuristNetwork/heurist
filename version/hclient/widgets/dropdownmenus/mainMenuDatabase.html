@@ -1,0 +1,101 @@
+<!--
+/**
+* mainMenuDatabase.html: Database top-level menu
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<li><a href="#" id="menu-database-browse"
+        data-user-admin-status="-1" 
+        data-logaction="db_Browse" 
+        data-icon="ui-icon-database"
+        data-container="admin"
+        title="Open and login to another Heurist database - current database remains open">
+        Open</a>
+</li>
+
+<li><a href="admin/setup/dbcreate/createNewDB.php" id="menu-database-create"
+        data-user-admin-status="0" 
+        data-logaction="db_New" 
+        data-icon="ui-icon-plus"
+        data-header="Create new database"
+        data-help=""
+        data-container="admin"
+        title="Create a new database on the current server - essential structure elements are populated automatically">
+        New</a>
+</li>
+
+<li><a href="admin/setup/dboperations/cloneDB.php" id="menu-database-clone"
+        data-user-admin-status="1"  data-icon="ui-icon-databases"
+        data-header="Clone database"
+        data-help=""
+        data-container="admin"
+        title="Clones an identical database from the currrent database with all data, users, attached files, templates etc.">
+        Clone</a>
+</li>
+
+<li data-user-admin-status="1">-</li>
+
+<li><a href="#" id="menu-database-properties"
+        data-user-admin-status="1" data-logaction="db_Properties"  data-icon="ui-icon-wrench"
+        data-container="design"
+        title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
+        Properties</a>
+</li>
+
+
+<li>
+    <a href="admin/setup/dbproperties/registerDB.php"        
+        id="menu-database-register"
+        data-user-admin-status="1" data-logaction="db_Register" data-pwd-nonowner="ServerFunctions"  
+        data-icon="ui-icon-star"
+        data-header="Register database"
+        data-help=""
+        data-container="design"
+        title="Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases">
+        Register</a>
+</li>
+
+
+<li data-user-admin-status="0" data-user-experience-level="1">-</li>
+
+<li><a href="admin/setup/dboperations/deleteCurrentDB.php"
+        id="menu-database-delete"
+        data-container="admin"
+        data-user-admin-status="0" data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"  data-icon="ui-icon-trash"
+        title="Delete the current database completely - cannot be undone, although data is copied to a backup which could be reloaded by a system administrator">
+        Delete</a>
+</li>
+
+<li><a href="admin/setup/dboperations/clearCurrentDB.php"
+        id="menu-database-clear"
+        data-container="admin"
+        data-user-admin-status="0"  data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"  data-icon="ui-icon-erase"
+        title="Clear all data (records, values, attached files) from the current database. Database structure - record types, fields, terms, constraints - is unaffected">
+        Clear</a>
+</li>
+
+<li data-user-admin-status="1" data-user-experience-level="1">-</li>
+
+<li> <!-- admin/rollback/rollbackRecords.php -->
+    <a href="#" id="menu-database-rollback"       
+        data-user-admin-status="1"  data-user-experience-level="1"  data-icon="ui-icon-undo"
+        title="Selectively roll back the data in the database to a specific date and time">
+        Rollback</a>
+</li>
+

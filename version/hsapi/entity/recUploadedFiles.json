@@ -1,0 +1,163 @@
+{
+        "entityName": "recUploadedFiles",
+
+        "tableName": "recUploadedFiles",
+        "tablePrefix": "ulf",
+        
+        "helpContent": "recUploadedFiles.html",
+        
+        "searchFormContent": "searchRecUploadedFiles.html",
+        
+        "entityTitle": "File/reference",
+        "entityTitlePlural": "Files/references",
+        "empty_remark": "No files found",
+
+        "sel_actions": [{"key":"edit", "title":"Edit File"},
+                        {"key":"delete", "title":"Remove File"}],
+        "btn_actions": [{"key":"add_url", "title":"Add New URL"},
+                        {"key":"add_file", "title":"Add New File"}],
+
+        "reference_query": {},
+        
+        "fields": [
+                {
+                    "dtID": "ulf_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"readonly"
+                    }
+                },
+                {
+                    "dtID": "ulf_OrigFileName",
+                    "titleField": true,
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"title",
+                        "dty_Size":255,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "File name:",
+                        "rst_DisplayHelpText": "The original name of the file uploaded", 
+                        "rst_Display":"hidden",
+                        "xxxxrst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ulf_HeuristURL",
+                    "dtFields":{
+                        "dty_Type":"url",
+                        "rst_DisplayName": "Download URL:",
+                        "rst_DisplayWidth":80,
+                        "rst_DisplayHelpText": "Heurist URL to download file", 
+                        "rst_Display":"hidden",
+                        "dty_Role":"virtual"
+                    }
+                },
+                {
+                    "dtID": "ulf_ExternalFileReference",
+                    "dtFields":{
+                        "dty_Type":"url",
+                        "rst_DisplayName": "External URL:",
+                        "rst_DisplayHelpText": "URL of an external file, which may or may not be cached locally", 
+                        "rst_DisplayWidth":80,
+                        "rst_Display":"visible",
+                        "dty_Size":1000
+                    }
+                },
+                {
+                    "dtID": "ulf_FileUpload",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"Upload file:",
+                        "rst_FieldConfig":{"entity":"recUploadedFiles","hideclear":1},
+                        "dty_Role":"virtual",
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ulf_MimeExt",
+                    "dtFields":{
+                        "dty_Type":"resource",
+                        "rst_DisplayName":"Mime type:",
+                        "rst_DisplayHelpText": "Type of resource", 
+                        "rst_FieldConfig": {"entity":"defFileExtToMimetype"},
+                        "rst_RequirementType":"required",
+                        "rst_DisplayWidth":30
+                    }
+                },
+                {
+                    "dtID": "ulf_Description",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "rst_DisplayName":"Description:",
+                        "dty_Size":65535,
+                        "rst_DisplayWidth":"70",
+                        "rst_DisplayHelpText": "A user-entered textual description of the file or image contents."
+                    }
+                },
+                {
+                    "dtID": "ulf_FileSizeKB",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_DisplayName": "Size (in KB):",
+                        "rst_DisplayHelpText": "File size in Kbytes calculated at upload", 
+                        "rst_Display":"readonly"
+                    }
+                },
+                {
+                    "dtID": "ulf_ObfuscatedFileID",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "ulf_FilePath",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "ulf_FileName",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "ulf_Added",
+                    "dtFields":{
+                        "dty_Type":"date",
+                        "rst_DisplayName": "Added:",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "ulf_UploaderUGrpID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "fxm_MimeType",
+                    "dtFields":{
+                        "rst_DisplayName": "Mimetype:",
+                        "dty_Type":"freetext",
+                        "dty_Role":"virtual",
+                        "rst_Display":"readonly"
+                    }
+                },
+                {
+                    "dtID": "ulf_PlayerTag",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_Display":"hidden",
+                        "dty_Role":"virtual"
+                    }
+                }
+     ]
+}

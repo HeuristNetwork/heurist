@@ -1,0 +1,145 @@
+<!--
+/**
+* mainMenuImport.html: Import top-level menu
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+    <li style="display:none">
+        <a href="#" id="menu-import-add-record"
+            data-logaction="add_Record" data-header="Add new record"
+            data-icon="ui-icon-file-plus"
+            title="Add new record of specified record type">
+            Add record</a>
+    </li>
+
+<li style="display:none">-</li>
+
+    <li>
+        <a href="import/delimited/importRecordsCSV.php"
+            id="menu-import-csv"
+            data-user-member-status="1"
+            data-logaction="imp_Delimed" data-size="large"
+            data-header="Import &gt; Records from CSV/TSV"
+            data-help="importRecordsCSV"
+            data-icon="ui-icon-file-table"
+            data-container="populate"
+            title="Import data from delimited text file. Supports matching, record creation, record update.">
+            Delimited text / CSV</a>
+    </li>
+    <li>
+        <a href="import/biblio/syncZotero.php"
+            id="menu-import-zotero"
+            data-logaction="sync_Zotero" data-size="portrait"
+            data-header="Import &gt; Synchronise with a Zotero web library"
+            data-help="syncZotero"
+            data-icon="ui-icon-book-b"
+            data-container="populate"
+            title="Synchronise with a Zotero web library - new records are added to Heurist, existing records updated">
+            Zotero bibliography sync</a>
+    </li>
+    <li>
+        <a href="import/delimited/importRecordsCSV.php?format=kml"
+            data-user-member-status="1"
+            id="menu-import-kml"
+            data-logaction="imp_KML" data-size="large"
+            data-header="Import &gt; Records from KML"
+            data-help="importRecordsKML"
+            data-icon="ui-icon-globe-b"
+            data-container="populate"
+            title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)">
+            KML</a>
+    </li>
+
+    <li>
+        <a href="import/utilities/importRecords.php"
+            data-user-member-status="1"
+            id="menu-import-xml"
+            data-logaction="imp_Records"
+            data-header="Import &gt; XML or JSON file"
+            data-help="importRecordsXML"
+            data-dialog-width="760" data-dialog-height="570"
+            data-icon="ui-icon-script"
+            data-container="populate"
+            title="Import records from another database">
+            Heurist XML/JSon</a>
+    </li>
+
+    <li>
+        <a href="#"
+            id="menu-import-get-template"
+            target="_blank"
+            title="Get XML template that describes database structure">
+            Download template (XML)</a>
+    </li>
+    
+    
+<li data-user-admin-status="1">-</li>
+    
+    <li>
+        <a href="import/utilities/manageFilesUpload.php"
+           id="menu-files-upload"
+           data-user-admin-status="1" data-size="medium" class="upload_files"
+           data-header="Import &gt; Upload media files"
+           data-icon="ui-icon-upload"
+           data-container="populate"
+           title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files">
+           Upload media files</a>
+    </li>
+    <li>
+        <a href="import/fieldhelper/synchroniseWithFieldHelper.php"
+           id="menu-files-index"
+           data-user-admin-status="1" data-size="medium" 
+           data-header="Import &gt; Index media files"
+           data-icon="ui-icon-list"
+           data-container="populate"
+           title="Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)">
+           Index media files</a>
+    </li>
+
+    <li>
+        <a href="#" id="menu-subset-set" data-user-experience-level="3"
+           data-icon="ui-icon-lightning-explore"
+           title="Make the current filter the active subset to which all subsequent actions are applied">Set as subset</a>
+    </li>
+
+    <li>
+        <a href="#" id="menu-extract-pdf" data-user-experience-level="0"
+           data-icon="ui-icon-file-pdf"
+           title="Extract text from PDF files">
+           Extract text from PDF (experimental)</a>
+    </li>
+
+    
+<li data-user-experience-level="1">-</li>
+    
+    <!-- import/email/emailProcessingSetup.php -->
+    <li>
+        <a href="#" id="menu-import-email"
+            data-user-admin-status="1" data-size="medium" data-logaction="imp_Emails" data-user-experience-level="1"
+            data-header="Import &gt; Harvest emails"
+            title="Harvest email from a designated IMAP email server (set in Database > Properties)">
+            Harvest emails</a>
+    </li>
+    <li>
+        <a href="import/hyperlinks/importHyperlinks.php"
+            data-logaction="imp_Hyperlinks" data-size="medium" data-user-experience-level="1"
+            data-header="Import &gt; Records from bookmakrs file ot web page hyperlinks"
+            title="Import web links from a browser bookmarks file or html web page saved as a file - use bookmarklet for web pages online">
+            Harvest hyperlinks</a>
+    </li>

@@ -1,0 +1,108 @@
+{
+        "entityName": "sysArchive",
+
+        "tableName": "sysArchive",
+        "tablePrefix": "arc",
+        
+        "helpContent": "sysArchive.html",
+        
+        "searchFormContent": "searchSysArchive.html",
+        
+        "entityTitle": "Archive entry",
+        "entityTitlePlural": "Archive entries",
+        "empty_remark": "Please use the search fields above to locate archive entry",
+
+        "fields": [
+                {
+                    "dtID": "arc_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "arc_Table",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Size":3,
+                        "rst_DisplayWidth":30,
+                        "rst_DisplayName": "Table:",
+                        "rst_DisplayHelpText": "Identification of the MySQL table in which a record is being modified", 
+                        "rst_RequirementType":"required",
+                        "rst_FieldConfig":[
+                            {"key":"rec","title":"Records"},
+                            {"key":"dtl","title":"Details"}
+                        ]
+                    }
+                },
+                {
+                    "dtID": "arc_PriKey",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_DisplayName": "ID in table:",
+                        "rst_DisplayHelpText": "Primary key of the MySQL record in the table being modified",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "arc_ChangedByUGrpID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_DisplayName": "Changed by user:",
+                        "rst_DisplayHelpText": "User who is logged in and modifying this data",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "arc_OwnerUGrpID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_DisplayName": "Owner of entry:",
+                        "rst_DisplayHelpText": "Owner of the data being modified (if applicable eg. records, bookmarks, tags)",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "arc_RecID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_DisplayName": "Record ID:",
+                        "rst_DisplayHelpText": "Heurist record id (if applicable, eg. for records, bookmarks, tag links)",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "arc_TimeOfChange",
+                    "dtFields":{
+                        "dty_Type":"date",
+                        "rst_DisplayName": "Date and time:",
+                        "rst_DisplayHelpText": "Timestamp of the modification",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "arc_DataBeforeChange",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "rst_DisplayName": "Data:",
+                        "rst_DisplayHelpText": "A representation of the data in the MySQL record before the mod, may be a diff",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "arc_ContentType",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName": "Format:",
+                        "rst_DisplayHelpText": "Format of the data stored, del=deleted, raw=text dump, Diff=delta, Z=zipped indicates ",
+                        "rst_Display":"hidden",
+                        "rst_FieldConfig":[
+                        
+                        ]
+                    }
+                }
+        ]
+}

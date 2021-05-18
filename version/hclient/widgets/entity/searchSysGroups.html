@@ -1,0 +1,59 @@
+<div>
+    <div class="sub-title"/>
+    <div style="float:right" id="btn_add_record"></div>
+    
+    <div style="float:left;padding:0.2em">
+        <div class="header4" style="display: inline-block;width:7em;text-align:right;">
+            <label for="input_search" accesskey="N">Find by <U>N</U>ame</label></div>
+        <input id="input_search" class="text ui-widget-content ui-corner-all" 
+            style="width:90px; margin-right:0.2em"/>
+    </div>
+    
+    <div style="float:left;padding:0.2em" id="input_search_type_div">
+        <div class="header4" style="display: inline-block;width:7em;text-align:right;">
+            <label for="input_search_type" accesskey="M"><U>M</U>embership</label></div>
+        <select id="input_search_type" class="text ui-widget-content ui-corner-all" 
+            style="width:90px; margin-right:0.2em">
+                <option value="any">All Groups</option>            
+                <option value="mygroups">My Groups</option>
+                <option value="admin">Admin only</option>
+                <option value="member">Member only</option>
+            </select>
+    </div>
+
+    <div style="float:left;padding:0.2em" id="input_sort_type_div">
+        <div class="header4" style="display: inline-block;width:5em;text-align:right;">
+            <label for="input_sort_type" accesskey="M"><U>S</U>ort by</label></div>
+        <select id="input_sort_type" class="text ui-widget-content ui-corner-all" 
+            style="width:90px; margin-right:0.2em">
+                <option value="name">Name</option>            
+                <option value="member">Members</option>
+                <option value="recent">Recent</option>
+            </select>
+    </div>
+
+    
+    <div id="btn_search_start"></div>   
+
+    <!-- help can depend on select_mode and level -->    
+    <div style="position:absolute;right:10;bottom:20;font-size:0.8em" class="heurist-helper1">
+        <span class="common_help"> 
+        Use filter criteria to narrow the list of groups. 
+        </span>
+        <span class="manager">
+        </span>
+        <span class="manager_for_user">
+        </span>
+        <span class="manager_for_admin">
+        </span>
+        <span class="select_roles">
+        Select membership or administrator rights in or more groups
+        </span>
+        <span class="select_single">
+        </span>
+        <span class="select_multi">
+        </span>
+    </div>
+    
+</div>
+
