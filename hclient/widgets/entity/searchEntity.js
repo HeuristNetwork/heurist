@@ -117,6 +117,13 @@ $.widget( "heurist.searchEntity", {
         
         
             //EXTEND this.startSearch();
+        
+            this.element.find( 'input' )
+            .attr('autocomplete','disabled')
+            .attr('autocorrect','off')
+            .attr('autocapitalize','none')
+            .attr('spellcheck','false');
+            
     },  
     
     //

@@ -676,36 +676,24 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(name_field)){	
 
             if(this._currentEditID<=0){	// Check that a new field is being defined
+            
+//to Brandon: All this required for addition new field to record type (this.options.newFieldForRtyID>0)
+            
                 var ele = $('<select></select>');
                 var tb_lbl = $('<label style="margin-left:5px"> Enter name: </label>');
                 var sel_lbl = $('<label style="margin-left:5px"> or: </label>');
                 name_field = $($($(name_field[0])[0])[0]);
 
-                window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele[0], this._currentEditID, null, null); // populate select
-                ele.prepend("<option value='' selected disable>Choose a base field</option>"); // add flavor
-
-                var rty_ID = this.options.newFieldForRtyID; // current record type being edited
-
-                // list of fields that are already in record type
-                var formRec = $Db.rst(rty_ID);
-                if(!window.hWin.HEURIST4.util.isRecordSet(formRec)){
-                    formRec = null;
-                }
-                
-                if(formRec){
-                    $(ele.find('option')).each(function(){  // Disable fields already added to form
-                        if(formRec.getById($(this).val())){
-                            $(this).attr('disabled', true);
-                        }
-                    });
-                }
-
                 name_field.after(ele);// Insert Select
                 name_field.before(tb_lbl);// Insert label before name field
                 ele.before(sel_lbl);// Insert label before selector
+                
+                // populate select
+                var hSel = window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele[0], this._currentEditID, null, 
+                [{key:'',title:'Choose a base field'}],{useHtmlSelect:false});  
 
                 // Selector onchange handler, selected a pre-defined base field
-                ele.on('change', function(event){
+                hSel.on('change', function(event){
                     var ele = $(event.target);
                     var _dty_ID = ele.val();
 
@@ -723,7 +711,27 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     }
                     console.log('manageDefDetailTypes, id => ' + _dty_ID);
                     return;
-                });
+                });                
+                
+                var rty_ID = this.options.newFieldForRtyID; // current record type being edited
+
+                // list of fields that are already in record type
+                var formRec = $Db.rst(rty_ID);
+                if(!window.hWin.HEURIST4.util.isRecordSet(formRec)){
+                    formRec = null;
+                }
+                
+                if(formRec){
+                    $(ele.find('option')).each(function(){  // Disable fields already added to form
+                        if(formRec.getById($(this).val())){
+                            $(this).attr('disabled', true);
+                        }
+                    });
+                    hSel.hSelect('refresh');
+                }
+
+                //var hSel = window.hWin.HEURIST4.ui.initHSelect(ele); 
+                
             }
         }
 
@@ -839,6 +847,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                                     }
                                 }
+           
                             });
 
                     }});
@@ -848,12 +857,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             $(elements[0]).change(); //trigger
         }
 
+        elements = this._editing.getInputs('dty_Name');
+        this._on( $(elements[0]), {
+                keypress: window.hWin.HEURIST4.ui.preventChars} );
+        
         if(this.options.newFieldForRtyID>0){
 
             //disable all fields except field name
-            var elements = this._editing.getInputs('dty_Name');
             this._on( $(elements[0]), {
-                keypress: window.hWin.HEURIST4.ui.preventChars,
                 keyup: this._onFieldAddSuggestion });
 
             var depended_fields = this._editing.getFieldByClass('newFieldForRtyID');

@@ -1,0 +1,57 @@
+{
+        "entityName": "usrSavedSearches",
+
+        "tableName": "usrSavedSearches",
+        "tablePrefix": "svs",
+        
+        "helpContent": "usrSavedSearches.html",
+        
+        "searchFormContent": "searchUsrSavedSearches.html",
+        
+        "entityTitle": "Saved filter",
+        "entityTitlePlural": "Saved filters",
+        "empty_remark": "Please use the search field above to locate saved filter",
+
+        "fields": [
+                {
+                    "dtID": "svs_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"readonly"
+                    }
+                },
+                {
+                    "dtID": "svs_Name",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":128,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayName": "Name",
+                        "rst_DisplayHelpText": "The display name for this saved filter", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "svs_UGrpID",
+                    "dtFields":{
+                        "dty_Type":"resource",
+                        "rst_DisplayName": "Workgroup:",
+                        "rst_DisplayHelpText": "The workgroup to which the saved filter belongs to", 
+                        "rst_FieldConfig": {"entity":"sysGroups"},
+                        "rst_DisplayWidth":30
+                    }
+                },
+                {
+                    "dtID": "svs_Query",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "rst_DisplayName": "Query",
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayHelpText": "The text of the saved search - added to search URL"
+                    }
+                }
+                ]
+}

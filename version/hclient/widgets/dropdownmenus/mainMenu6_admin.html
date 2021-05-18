@@ -1,0 +1,75 @@
+<!--
+/**
+* mainMenu6_admin.html: admin menu
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<div class="ui-heurist-header" style="top:0px;padding:9px;">Admin
+    <span class="ui-icon ui-icon-circle-b-help" style="float:right;margin:0px;padding-right:8px;"></span></div>
+<div style="top:37px;position:absolute;width:100%;">
+
+    <ul style="list-style-type:none;margin:0;padding:12px">
+
+        <li style="padding:0px 6px 8px;" class="ui-heurist-title">Database</li>
+        
+        <li data-action="menu-database-browse"/>
+        <li data-action="menu-database-create"/>
+        <li data-action="menu-database-clone" />
+
+        <li data-action="menu-database-delete"/>
+        <li data-action="menu-database-clear"/>
+        
+    </ul>
+        
+    <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;">
+        <li style="padding:0px 8px 6px;" class="ui-heurist-title">Manage Users</li>
+
+        <li data-action="menu-profile-groups"/>
+        <li data-action="menu-profile-users"/>
+        <li data-action="menu-profile-import"/>
+        
+    </ul>
+
+    <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;">
+    
+        <li style="padding:0px 8px 6px;" class="ui-heurist-title">Utilities</li>
+
+        <li data-action="menu-structure-verify"/>
+        <li data-action="menu-profile-files"/>
+        <li data-action="menu-manage-rectitles"/>
+        <li data-action="menu-structure-duplicates"/>
+        
+    </ul>
+
+    <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;">
+    
+        <li style="padding:0px 8px 6px;" class="ui-heurist-title">Server Manager</li>
+        <li data-action="menu-admin-server"/>
+        
+    </ul>
+
+<!--        
+    <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;">
+        <li data-action="menu-manage-refresh"/>
+    </ul>
+-->        
+</div>
+
+
+ 

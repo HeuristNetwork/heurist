@@ -1,0 +1,22 @@
+
+Directory:    /hclient/widgets
+
+Overview:    Heurist vsn 4 widgets
+
+Notes:
+
+digital_harlem is a public interface for the Digital Harlem project, developed as a reskinning of the standard search.
+It may provide a good model for public websites running directly off a Heurist database.
+
+Updated:     16 december 2015
+
+---------------------------------------------------------------------
+
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2019 University of Sydney
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.1
+
+

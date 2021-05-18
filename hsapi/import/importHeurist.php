@@ -237,7 +237,17 @@ private static function hmlToJson($filename){
                        }else if($xml_det->raw){
                            $detail = ''.$xml_det->raw;
                        }else if($dets['termID']){
-                           $detail = ''.$dets['termID'];
+                           
+                           $trm_cCode = @$dets['termConceptID'];
+                           
+                           if($trm_cCode!=null && $trm_cCode!=''){
+                              
+                                $ids = explode('-', $trm_cCode);
+                                if ($ids && (count($ids) == 2) && is_numeric($ids[0]) && ($ids[0] > 0)){
+                                        $detail = ''.$dets['termID'];         
+                                } 
+                           }
+                           
                        }else if($xml_det->geo){
                            
                            $geotype = @$GEO_TYPES[ ''.$xml_det->geo->type ];

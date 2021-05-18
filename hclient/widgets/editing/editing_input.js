@@ -1086,7 +1086,7 @@ $.widget( "heurist.editing_input", {
                                 input = $(input);
                                 input.css('width','auto');
                                 input = that._recreateSelector(input, true);
-                                that._on( input, {change:this._onTermChange} );
+                                that._on( input, {change:that._onTermChange} );
                                 that._showHideSelByImage(input);
 
                             });
@@ -1209,7 +1209,7 @@ $.widget( "heurist.editing_input", {
                             isOpened = true;
                             
                             if(that.options.editing && (that.options.editing.editStructureFlag()===true)){
-                                window.hWin.HEURIST4.msg.showMsgFlash('This feature is disabled in edit structure mode');                     return;
+                                window.hWin.HEURIST4.msg.showMsgFlash('This feature is disabled in edit structure mode',2000);                     return;
                             }
                             
                             function __onCloseAddLink(context){
@@ -2025,7 +2025,7 @@ $.widget( "heurist.editing_input", {
                     .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input ); 
                 
                 /* Image and Player (enalrged image) container */
-                $input_img = $('<br /><div class="image_input ui-widget-content ui-corner-all thumb_image" style="margin:10px 0 2px;">'
+                $input_img = $('<br/><div class="image_input ui-widget-content ui-corner-all thumb_image" style="margin:10px 0 2px;">'
                 + '<img id="img'+f_id+'" class="image_input">'
                 + '<div id="player'+f_id+'" style="min-height:240px; min-width:320px; display:none;"></div>'
                 + '</div>')
@@ -2099,33 +2099,59 @@ $.widget( "heurist.editing_input", {
                 });
                 
                 /* Handler Variables */
-                var hideTimer = 0;  //  Time for hiding thumbnail
+                var hideTimer = 0, showTimer = 0;  //  Time for hiding thumbnail
                 var isClicked = 0;  // Number of image clicks, one = freeze image inline, two = enlarge/srink
 
                 /* Input element's hover handler */
-                $input.mouseover(function(event){
+                function __showImagePreview(event){
+
                     if(!window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src')) && isClicked == 0){
                         if (hideTimer) {
                             window.clearTimeout(hideTimer);
                             hideTimer = 0;
                         }
-                        $input_img.show();
-                        $(event.target.parentNode).find('div.smallText').show();
+                        
+                        if($input_img.is(':visible')){
+                            $input_img.stop(true, true).show();    
+                        }else{
+                            if(showTimer==0){
+                                showTimer = window.setTimeout(function(){
+                                    $input_img.show();
+                                    $inputdiv.find('div.smallText').show();
+                                    showTimer = 0;
+                                },500);
+                            }
+                        }
                     }
-                });
+                }
+                this._on($input,{mouseover: __showImagePreview});
+                this._on($input_img,{mouseover: __showImagePreview}); //mouseover
 
                 /* Input element's mouse out handler, attached and dettached depending on user preferences */
-                function img_mouseout(event){
+                function __hideImagePreview(event){
+                        if (showTimer) {
+                            window.clearTimeout(showTimer);
+                            showTimer = 0;
+                        }
                     if($input_img.is(':visible')){
+                        
+                        //var ele = $(event.target);
+                        var ele = event.toElement || event.relatedTarget;
+                        ele = $(ele);
+                        if(ele.hasClass('image_input') || ele.parent().hasClass('image_input')){
+                            return;
+                        }
+                                                
                         hideTimer = window.setTimeout(function(){
                             if(isClicked==0){
-                                $input_img.hide(1000);
-                                $(event.target.parentNode).find('div.smallText').hide(1000);
+                                $input_img.fadeOut(1000);
+                                $inputdiv.find('div.smallText').hide(1000);
                             }
                         }, 500);
                     }
                 }
-                $input.on('mouseout', img_mouseout);
+                this._on($input, {mouseout:__hideImagePreview});
+                this._on($input_img, {mouseout:__hideImagePreview});
 
                 /* Thumbnail's click handler */
                 $input_img.click(function(event){
@@ -2133,9 +2159,9 @@ $.widget( "heurist.editing_input", {
                     var elem = event.target;
                     
                     if (isClicked==0){
-                        isClicked++;
+                        isClicked=1;
                         
-                        $input.off("mouseout");
+                        that._off($input_img,'mouseout');
 
                         $(elem.parentNode.parentNode).find('div.smallText').hide(); // Hide image help text
 
@@ -2177,7 +2203,8 @@ $.widget( "heurist.editing_input", {
 
                     isClicked = 0;
 
-                    $input.on("mouseout", img_mouseout);
+                    that._on($input, {mouseout:__hideImagePreview});
+                    that._on($input_img, {mouseout:__hideImagePreview});
 
                     $(event.target.parentNode).hide();
 
@@ -2205,7 +2232,7 @@ $.widget( "heurist.editing_input", {
 
                     $input.off("mouseout");
 
-                    isClicked++;
+                    isClicked=1;
                 }
 
                         var __show_select_dialog = null;
@@ -2848,7 +2875,8 @@ console.log('onpaste');
                         $parentNode.find('.download_link').hide();
                         $parentNode.find('#player'+value.ulf_ID).hide();
                         
-                        $input.on('mouseout', img_mouseout);
+                        that._on($input, {mouseout:__hideImagePreview});
+                        that._on($input_img, {mouseout:__hideImagePreview});
                         
                         isClicked = 0;
                     }
@@ -3237,7 +3265,7 @@ console.log('onpaste');
             innerTitle: false,
             innerCommonHeader: $('<div>'
                 +(that.options.dtID>0?('<span style="margin-left:260px">Field: <b>'+$Db.dty(that.options.dtID,'dty_Name')+'</b></span>'):'')
-                +'<span style="margin-left:110px">This field uses vocabulary: <b>'+$Db.trm(allTerms,'trm_Label')+'</b></span></div>'),
+                +'<span style="margin-left:110px">This field uses vocabulary: <b>'+$Db.trm(vocab_id,'trm_Label')+'</b></span></div>'),
             onInitFinished: function(){
                 var that2 = this;
                 setTimeout(function(){

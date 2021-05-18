@@ -76,7 +76,13 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
 
                 case 'import':
                 
-                    importTemplate();
+                    if(@$_REQUEST['import_template']){
+                        $params = $_REQUEST['import_template'];
+                    }else{
+                        $params = $_FILES['import_template'];
+                    }
+                
+                    importTemplate($params);
                 
                     break;
                 case 'serve':
@@ -404,15 +410,21 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
     *
     * @param mixed $instream - source data with global concept IDs
     */
-    function importTemplate(){
+    function importTemplate($params){
         global $dir;
         
-        if ( !$_FILES['import_template']['size'] ) {
+        if ( !@$params['size'] ) {
             $res = array("error"=>'Error occurred during upload - file had zero size');
             
         }else{
-            $filename = $_FILES['import_template']['tmp_name'];
-            $origfilename = $_FILES['import_template']['name'];
+            $filename = $params['tmp_name'];
+            $origfilename = $params['name'];
+            
+            if(strpos($filename,'cms/')===0){
+                $path = dirname(__FILE__).'/../../hclient/widgets/cms/templates/snippets/';
+                $path = realpath($path);
+                $filename = $path.DIRECTORY_SEPARATOR.substr($filename,4);
+            }
 
             //read tempfile
             $template = file_get_contents($filename);

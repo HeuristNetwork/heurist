@@ -231,6 +231,7 @@ function loadPageContent(pageid){
               if(page_footer.length>0) page_footer.detach();
 //console.log('load '+pageid+'   '+page_footer.length);              
 
+              //page_target will have header (webpageheading) and content  
               page_target.empty().load(window.hWin.HAPI4.baseURL+'?db='
                         +window.hWin.HAPI4.database+'&field=1&recid='+pageid,
                   function(){
@@ -263,13 +264,11 @@ var datatable_custom_render = null;
 //
 function afterPageLoad(document, pageid){
     
-//console.log('afterPageLoad');    
-    
     //var pagetitle = $($(page_target).children()[0]);
     var pagetitle = $('#main-content > h2.webpageheading');
     var title_container = $('#main-pagetitle');
     var show_page_title = false;
-        
+
     if(pagetitle.length>0  && title_container.length>0)  //&& pagetitle.parent().attr('id')=='main-content'
     {
         //move page title to header - visibility is set in websiteRecord
@@ -281,6 +280,7 @@ function afterPageLoad(document, pageid){
     }
     
     if($('#main-header').length>0 && $('#main-content-container').length>0){
+        title_container.show();
         $('#main-header').height(show_page_title?180:144);
         $('#main-content-container').css({top:show_page_title?190:152});
     }
@@ -466,7 +466,11 @@ $website_title -> #main-title>h2
   var ele = $('#main-title');
   if(ele.length>0){
       ele.empty().hide();
-      $('<h2<?php echo ($image_banner?' style="text-shadow: 3px 3px 5px black"':'');?>><?php print strip_tags($website_title,'<i><b><u><em><strong><sup><sub><small><br>');?></h2>').appendTo(ele);
+  <?php       
+  print '$(\'<h2 '.($image_banner?' style="text-shadow: 3px 3px 5px black"':'').'>'
+        . str_replace("'",'&#039;',strip_tags($website_title,'<i><b><u><em><strong><sup><sub><small><br>'))
+        .'</h2>\').appendTo(ele);';
+  ?>
       if(ele.parent().is('#main-header'))
       {
           if(!$('#main-logo-alt').is(':visible')){
@@ -496,14 +500,14 @@ $(document).ready(function() {
         ele.show();
     
         $('body').find('#main-menu').hide(); //will be visible after menu init
-  
-/*        
+
+/*          
         if(is_show_pagetitle){
             $('body').find('#main-pagetitle').show();
         }else{
             $('body').find('#main-pagetitle').hide();
         }
-            
+
 console.log('webpage doc ready ');
 */
 //+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));

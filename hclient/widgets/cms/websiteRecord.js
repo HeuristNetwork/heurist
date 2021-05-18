@@ -56,11 +56,13 @@ _init - #main-menu navigation wizard onselect -> __iniLoadPageById warn for chan
 function hCmsEditing(_options) {
     var _className = "CmsEditing",
         _version   = "0.4";
+        
+    var doc_body = $(document).find('body'); //.'body'
 
-    var main_content = $('body').find('#main-content');
-//console.log('assign main_content');        
-    var main_menu = $('body').find('#main-menu');
-    var main_header = $('body').find('#main-header');
+    var main_content = doc_body.find('#main-content');
+
+    var main_menu = doc_body.find('#main-menu');
+    var main_header = doc_body.find('#main-header');
     
     var home_pageid = main_content.attr('data-homepageid'),
         init_pageid = main_content.attr('data-initid'),
@@ -123,7 +125,7 @@ function hCmsEditing(_options) {
     //since v5 they are built in to the core: contextmenu textcolor
             ],      
             //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-            toolbar: ['formatselect | bold italic forecolor backcolor  | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help | customAddWidget customSaveButton customCloseButton' ],  
+            toolbar: ['formatselect | bold italic forecolor backcolor  | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help | customAddWidget customAddTemplate customSaveButton customCloseButton' ],  
             content_css: [
                 '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
                 //,'//www.tinymce.com/css/codepen.`min.css'
@@ -167,6 +169,14 @@ function hCmsEditing(_options) {
                       text: 'Add database widget',
                       onclick: function (_) {  //since v5 onAction
                             __addEditWidget();
+                      }
+                    });
+
+                editor.addButton('customAddTemplate', { //since v5 .ui.registry
+                      icon: 'template',
+                      text: 'Insert template',
+                      onclick: function (_) {  //since v5 onAction
+                            __addTemplate();
                       }
                     });
                                 
@@ -256,24 +266,24 @@ function hCmsEditing(_options) {
             .appendTo(main_content.parent());
         
         $('<a href="#" id="btn_inline_editor">Edit page content</a>')
-                .appendTo($('body')).addClass('ui-front cms-button') //was body > .ent_wrapper:first
+                .appendTo(doc_body).addClass('ui-front cms-button') //was body > .ent_wrapper:first
                 .click( _editPageContent )
                 .show();
 
         //switch to direct edit OR save direct edit                        
         $('<a href="#" id="btn_inline_editor3">source</a>')
-                .appendTo($('body')).addClass('ui-front cms-button')
+                .appendTo(doc_body).addClass('ui-front cms-button')
                 .click( _editPageSource )
                 .show();
             
             
                 $('<a href="#" id="btn_inline_editor4"></a>') //edit page settings
-                .appendTo($('body')).addClass('cms-button')
+                .appendTo(doc_body).addClass('cms-button')
                 .click(_editPageRecord)
                 .show();
 
         $('<a href="#" id="btn_inline_editor5">Cancel</a>')
-            .appendTo($('body'))
+            .appendTo(doc_body)
             .addClass('ui-front cms-button')
             .click(function (event) {
                 __hideEditor();
@@ -342,15 +352,15 @@ function hCmsEditing(_options) {
     function __loadPageById( pageid ){
         
         if(pageid>0){
-            window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('.ent_wrapper'));
+            window.hWin.HEURIST4.msg.bringCoverallToFront(doc_body.find('.ent_wrapper'));
             
-            
-            //edit_dialog.find('#web_preview').attr('src', surl);                                            
-            
-            //var ele = $('#main-content').find('div[widgetid="heurist_Search"]');
-            //if(ele.length>0 && ele.search('instance')) ele.search('destroy');
             current_pageid = pageid;
-            main_content.empty().load(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+
+            //main_content = doc_body.find('#main-content'); DEBUG
+            //main_content.html('LOADED '+pageid);return; DEBUG
+
+            main_content.empty();
+            main_content.load(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                 +'&field=1&recid='+pageid, function()
                 {
                         var show_page_title = false;
@@ -366,41 +376,41 @@ function hCmsEditing(_options) {
                                 pagetitle.attr('date-empty',0);
                                 
                                 if(pageid==home_pageid){
-                                    window.hWin.HEURIST4.msg.showMsgFlash('Home page is empty. First menu item will be loaded');
+                                    window.hWin.HEURIST4.msg.showMsgFlash('Home page is empty. First menu item will be loaded',3000);
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgDlg(
                                         'This menu item does not have associated page content.'
                                         +'<br>It will not be selectable in the website. '
                                         +'<br>We recommend this for parent menus.',null,null,
-                                        {my:'left top', at:'left+200 top+100', of:$('#main-content-container')});    
+                                        {my:'left top', at:'left+200 top+100', of: doc_body.find('#main-content-container')});    
                                 }
                             }
                             
-                            var title_container = $('#main-pagetitle');
+                            var title_container = doc_body.find('#main-pagetitle');
                             if(title_container.length>0){
                                 //move page title to header - visibility is set in websiteRecord
-                                title_container.empty();
+                                title_container.empty().show();
                                 pagetitle.detach().appendTo(title_container);
                                 show_page_title = pagetitle.is(':visible');
                             }
                         }
-                        if($('#main-header').length>0 && $('#main-content-container').length>0){
-                            $('#main-header').height(show_page_title?180:144);
-                            $('#main-content-container').css({top:show_page_title?190:152});
+                        if(main_header.length>0 && doc_body.find('#main-content-container').length>0){
+                            main_header.height(show_page_title?180:144);
+                            doc_body.find('#main-content-container').css({top:show_page_title?190:152});
                         }
                         
                         
                         //assign content to editor
-                        $('.tinymce-body').val($('#main-content').html());
+                        $('.tinymce-body').val(main_content.html());
                         //init widgets 
                         
-                        LayoutMgr.appInitFromContainer( document, "#main-content" );
+                        LayoutMgr.appInitFromContainer( null, main_content ); //was document, "#main-content"
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         
                         __alignButtons();
                         
                         //find all link elements
-                        $('#main-content').find('a').each(function(i,link){
+                        main_content.find('a').each(function(i,link){
                             
                             var href = $(link).attr('href');
                             if(href && href!='#'){
@@ -474,7 +484,7 @@ function hCmsEditing(_options) {
     //
     function __saveChanges( need_close, new_pageid ){
         
-        window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('.ent_wrapper'));
+        window.hWin.HEURIST4.msg.bringCoverallToFront(doc_body.find('.ent_wrapper'));
 
         var newval = '';
         if(_isDirectEditMode()){
@@ -577,9 +587,9 @@ function hCmsEditing(_options) {
             if(is_header_editor){
                 
                 
-                $('#main-header').html(header_content_raw);
+                main_header.html(header_content_raw);
                 
-                if($('#main-header').find('#main-menu').length==0){
+                if(main_menu.length==0){
                     window.hWin.HEURIST4.msg.showMsgDlg(
                         '<p>Warning: You have not specified the main menu in your html using '
                         +'&lt;div id="main menu"&gt;.</p>'
@@ -588,7 +598,7 @@ function hCmsEditing(_options) {
                 }
                 
                 //reinit widgtets in header
-                LayoutMgr.appInitFromContainer( document, "#main-header",
+                LayoutMgr.appInitFromContainer( null, main_header, //was document, "#main-header",
                     {heurist_Navigation:{menu_recIDs:home_pageid
                     , use_next_level:true
                     , orientation:'horizontal'
@@ -622,8 +632,8 @@ function hCmsEditing(_options) {
                     $('.tinymce-body').val(last_save_content); 
                     
                     if(was_modified){
-                        $('#main-content').html(last_save_content);
-                        LayoutMgr.appInitFromContainer( document, "#main-content" );
+                        main_content.html(last_save_content);
+                        LayoutMgr.appInitFromContainer( null, main_content); //was document, "#main-content" );
                     }
                 }
             }
@@ -631,8 +641,8 @@ function hCmsEditing(_options) {
             last_save_content = null;    
             was_modified = false;    
             $('.tinymce-body').hide();
-            $('#main-content').show();
-            $('#main-content').parent().css('overflow-y','auto');
+            main_content.show();
+            main_content.parent().css('overflow-y','auto');
             $('#edit_mode').val(0).click();
 
             //exit edit mode
@@ -650,12 +660,12 @@ function hCmsEditing(_options) {
             $('#btn_inline_editor4').hide();
         }else{
             
-            var ele_header = $('#main-header');
+            var ele_header = main_header;
             
             if(ele_header.length==0){
                 
                 var tp = 5;
-                var lp = $('#main-content').width();
+                var lp = main_content.width();
                 $('#btn_inline_editor').css({position:'absolute',
                             top:tp, left:lp-190}).show();
                 $('#btn_inline_editor3').css({position:'absolute',
@@ -667,8 +677,8 @@ function hCmsEditing(_options) {
             
             }else{
                 
-                var tp = $('#main-header').height()-($('#main-header').height()==180?15:-10);
-                var lp = $('#main-header').width();
+                var tp = main_header.height()-(main_header.height()==180?15:-10);
+                var lp = main_header.width();
                 $('#btn_inline_editor').css({position:'absolute',
                             top:tp,left:lp-190}).show();
                 $('#btn_inline_editor3').css({position:'absolute',
@@ -676,12 +686,12 @@ function hCmsEditing(_options) {
                 $('#btn_inline_editor5').css({position:'absolute',
                     top:tp,left:lp-340}).hide();
                 
-                //$('#btn_inline_editor').position({my:'right top',at:'right-90 top-15',of:$('#main-content')}).show();
-                //$('#btn_inline_editor3').position({my:'right top',at:'right-40 top-15',of:$('#main-content')}).show();
+                //$('#btn_inline_editor').position({my:'right top',at:'right-90 top-15',of:main_content}).show();
+                //$('#btn_inline_editor3').position({my:'right top',at:'right-40 top-15',of:main_content}).show();
                 
-                var ele = $('#main-pagetitle > h2');
+                var ele = doc_body.find('#main-pagetitle > h2');
                 if(ele.length>0){
-                    var pos = {my:'left top', at:'right+20 top+2', of:$('#main-pagetitle > h2')};   
+                    var pos = {my:'left top', at:'right+20 top+2', of: doc_body.find('#main-pagetitle > h2')};   
                     $('#btn_inline_editor4').position(pos).show();
                 }
                 
@@ -798,6 +808,58 @@ function hCmsEditing(_options) {
         window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
     }
 
+    //
+    // 1. Shows dialog with list of templates 
+    // 2. Loads template
+    // 3. Execute template script to replace template variables
+    // 4. Adds to content
+    // 5. Init edit/remove links
+    //
+    function __addTemplate(){
+    
+        
+        // 1. Shows dialog with list of templates 
+        var sURL = window.hWin.HAPI4.baseURL+'/hclient/widgets/cms/templates/snippets/blog.html';
+        var sURL2 = window.hWin.HAPI4.baseURL+'/hclient/widgets/cms/templates/snippets/blog.js';
+        
+        // 2. Loads template
+        var ele = $('<div>').attr('data-template-temp',1).appendTo(doc_body).hide().load(sURL, function(){
+
+        var t_style = ele.find('style').text(); //style will be added to page css
+        
+        ele.on('oncomplete', function(){
+            
+                // 4. Adds to tinymce
+                var content = ele.html();
+                tinymce.activeEditor.insertContent(content);
+                // 5. Init edit/remove links
+                __initWidgetEditLinks();
+                //$.each(ids, __initWidgetEditLinks);
+                
+                ele.empty().remove(); //remove temp div
+                
+        });
+                        
+        // 3. Execute template script to replace template variables
+        try{
+            $.getScript(sURL2, function(){
+                //console.log('getScript');                
+            });
+        }catch(e){
+            alert('Error in template script');
+        }
+            
+
+                        
+            
+
+        }); //on template load
+        
+        //$.get("http://www.mypage.com", function( my_var ) {
+            // my_var contains whatever that request returned
+        //});
+    }
+    
     //
     // defines widget to be inserted (heurist-app-id) and its options (heurist-app-options)
     //      
@@ -1040,10 +1102,12 @@ function hCmsEditing(_options) {
             }
             */
 
-            var content = content + '<div data-heurist-app-id="'+widget_name+'" '
+            var content = content 
+                +'<div data-heurist-app-id="'+widget_name+'" '
                 + ' style="'+ widgetCss+'" '
-                + ' id="'+widgetid+'" class="mceNonEditable"'
-                + '>' + widget_options +  '</div>';
+                + ' class="mceNonEditable" id="'+widgetid+'">'
+                + '<!-- '+widget_name.toUpperCase().substring(8)+'   -->'
+                + widget_options +  '</div>';
   
                 
             return content; 
@@ -1199,7 +1263,7 @@ function hCmsEditing(_options) {
                         
                         if(!is_addition){  //edit
                             /*  old way it does not activeate noneditable
-                            var ele = $(content).appendTo($('body'));
+                            var ele = $(content).appendTo(doc_body);
                             tinymce.activeEditor.dom.replace( ele[0], tinymce.activeEditor.dom.get(widgetid_edit) );
                             */
                             
@@ -1620,7 +1684,7 @@ function hCmsEditing(_options) {
                 return;
         }
         
-        window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('.ent_wrapper'));        
+        window.hWin.HEURIST4.msg.bringCoverallToFront(doc_body.find('.ent_wrapper'));        
         var request = {a: 'delete',
                     recIDs: home_pageid,
                     dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER']};
@@ -1743,7 +1807,7 @@ function hCmsEditing(_options) {
         /*setTimeout(function(){
         $('.mce-tinymce').css({position:'absolute',
         top:140,  //
-        bottom:20 //$('#main-content').css('bottom')
+        bottom:20 //main_content.css('bottom')
         });    
         },500);*/
 
@@ -1863,6 +1927,11 @@ function hCmsEditing(_options) {
         editWidget: function (wid) {
             __addEditWidget(wid);
         },
+
+        addTemplate: function (wid) {
+            __addTemplate(wid);
+        },
+
         
         loadPageById: function (pageid) {
             __iniLoadPageById(pageid)

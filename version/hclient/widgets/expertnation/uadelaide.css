@@ -1,0 +1,15 @@
+html{
+  background: black url("assets/uadelaide/img/background.jpg") no-repeat center center;
+}
+
+.bor-emblem .bor-emblem-portrait .img-circle{
+    width: 110px;
+    height: 110px;
+}
+
+.bor-toggler{
+    padding-top:0px;
+}
+.bor-toggler-second-arrow{
+    display:inline-block !important;
+}

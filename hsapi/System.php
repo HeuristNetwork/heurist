@@ -316,7 +316,11 @@ error_log(print_r($_REQUEST, true));
             $res = $this->mysqli->query('select rty_ID as localID,
             rty_OriginatingDBID as dbID, rty_IDInOriginatingDB as id from defRecTypes order by dbID');
             if (!$res) {
-                echo "Unable to build internal record-type lookup table. Please ".CONTACT_SYSADMIN." for assistance. MySQL error: " . mysql_error();
+                $this->addError(HEURIST_DB_ERROR, 'Unable to build internal record-type lookup table', $this->mysqli->error);
+                
+                echo "Unable to build internal record-type lookup table. Please "
+                    . CONTACT_SYSADMIN." for assistance. MySQL error: " 
+                    . $this->mysqli->error;
                 exit();
             }
             
@@ -870,7 +874,7 @@ error_log(print_r($_REQUEST, true));
             fileAdd($Title.'  '.$sMsg, $root_folder.$curr_logfile);
 
             $message = 'Heurist was unable to process. '.$message;
-            $sysmsg = 'This error has been emailed to the Heurist team. We apologise for any inconvenience';
+            $sysmsg = 'This error has been emailed to the Heurist team (for servers maintained by the project - may not be enabled on personal servers). We apologise for any inconvenience';
 
             //$root_folder.$curr_logfile."\n".
             error_log($Title.'  '.$sMsg);     
@@ -891,8 +895,7 @@ error_log(print_r($_REQUEST, true));
         if($total_not_in_cache==null || $total_not_in_cache>0){
 */            
             
-        $value = mysql__select_value($this->mysqli, "SHOW TABLES LIKE 'recLinks'");
-        if($value==null || $value==""){
+        if(!hasTable($this->mysqli, 'recLinks')){
                 //recreate cache
                 include(dirname(__FILE__).'/utilities/utils_db_load_script.php'); // used to execute SQL script
 
@@ -1104,7 +1107,7 @@ error_log(print_r($_REQUEST, true));
         if($ugrID>0){
             $groups = @$this->current_User['ugr_Groups'];
             if($refresh || !is_array($groups)){
-                $this->current_User['ugr_Groups'] = user_getWorkgroups($this->mysqli, $ugrID);
+                $groups = $this->current_User['ugr_Groups'] = user_getWorkgroups($this->mysqli, $ugrID);
             }
             if($level!=null){
                 $groups = array();

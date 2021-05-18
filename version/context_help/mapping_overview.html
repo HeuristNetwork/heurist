@@ -1,0 +1,37 @@
+<html>
+
+    <head>
+
+        <title>HEURIST Context Help - Mapping Overview</title>
+        <link rel=stylesheet href=../css/heurist.css>
+    </head>
+
+    <body width=600 height=500>
+
+        <div id="content" style="width: 100%; height: 100%; overflow: auto;">
+
+            <h2>Mapping Overview</h2>
+
+            <hr>
+
+            <h4>Map Documents, Map Layers and Data Sources</h4>
+
+            <p><b>Map documents</b> are a record type in Heurist. Map documents describe the map you wish to display. They specify a series of <b>Map Layers</b> which are to appear on the map, the order in which they appear and general characteristics about the map such as its name, the initial zoom of the map and bookmarks for different areas and sets of layers. </p>
+
+            <p><b>Map Layers</b> are another record type in Heurist. They specify a <b>Data Source</b> such as a KML record, Shapefile record, Image record etc. They also express the way that data source is rendered on the map, eg. its label, symbology, transparency and behaviours such as zoom range.</p>
+
+            <p><b>Data Sources</b> are a set of record types in Heurist. They specify an actual data file or, in the case of KML, they can contain a snippet of KML code in a memo text field. There is a separate record type for each different data file type - KML, Shapefile, untiled image, tiled image, Heurist qeuery and potentially other types. </p>
+
+            <h4>Setting up for mapping</h4>
+
+            <p>You will need to get the mapping record types above in order to use mapping fully. They can be found in the HeuristReferenceSet database (Heurist ID # 3) using the Structure > Browse templates menu</p>
+
+            <h4>Setting up a Map Document</h4>
+
+            <p>Start by creating the Map Document. This can be done with Add Record, or through the Add Map Document button in the map legend. Within the Map Document, add Map Layers by clicking on the Map Layers field, and then clicking Add Record in the popup search dialogue. At this stage you will probably need to create a data source for each layer as part of the layer creation process. Later on, you may simply select one of the available Map Layers, or create new Map Layers but select one of the existing Data Sources.</p>
+
+        </div>
+
+    </body>
+
+</html>

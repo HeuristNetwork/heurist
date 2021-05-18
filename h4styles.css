@@ -127,11 +127,12 @@ a{
     width:16px;
     margin-left:12px;
 }
-
+/*
 #layout_panes{
     height: 100%;
     width: 100%;
 }
+*/
 
 .tab_ctrl{
     position: absolute;
@@ -446,9 +447,11 @@ div.recordDiv > .action-button-container,
 div.recordDiv  .rec_actions {
     display: none;
 }
+/*
 div.recordDiv.public  > .action-button-container{
     display: block;
 }
+*/
 .list .recordDiv:hover .recordTitle{
     right:96px;
 }
@@ -928,12 +931,6 @@ div.div-result-list-content.icons_list{
 
     white-space: normal;
     font-size:1.2em;
-}
-.list .recordDiv.public .recordTitle{
-    right: 64px;
-}
-.icons .recordDiv.public .recordTitle {
-    right: 140px;
 }
     
 .icons .recordDiv .recordSelector {

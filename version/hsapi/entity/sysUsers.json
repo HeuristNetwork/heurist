@@ -1,0 +1,235 @@
+{
+        "entityName": "sysUsers",
+
+        "tableName": "sysUGrps",
+        "tablePrefix": "ugr",
+        
+        "helpContent": "sysUsers.html",
+        
+        "searchFormContent": "searchSysUsers.html",
+        
+        "entityTitle": "User",
+        "entityTitlePlural": "Users",
+        "empty_remark": "Please use the search field above to locate relevant user",
+
+        "fields": [
+                {
+                    "dtID": "ugr_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"readonly"
+                    }
+                },
+                {
+                    "dtID": "ugr_Type",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "ugr_FirstName",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":40,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "First name",
+                        "rst_DisplayHelpText": "Person's first name", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_LastName",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":63,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Last name",
+                        "rst_DisplayHelpText": "Person's last name", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_eMail",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":100,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Email:",
+                        "rst_DisplayHelpText": "Contact email address", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_Password",
+                    "dtFields":{
+                        "dty_Type":"password",
+                        "dty_Size":40,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Password:",
+                        "rst_DisplayHelpText": "Leave blank if you do not want to change your password"
+                    }
+                },
+                {
+                    "dtID": "ugr_Name",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":63,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Login name:",
+                        "rst_DisplayHelpText": "The unique user name, user name defaults to email address", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_Organisation",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":120,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Institution/company",
+                        "rst_DisplayHelpText": "Enter 'None' if not affiliated with an institution or company", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_Interests",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":255,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Research interests",
+                        "rst_DisplayHelpText": "Enter a concise description (up to 250 characters) of your research interests", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "ugr_Enabled",
+                    "titleField": true,
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName": "Enabled:",
+                        "rst_DisplayHelpText": "Check to enable the user, unchecked users will not be able to log in",
+                        "rst_DefaultValue": "y",
+                        "rst_FieldConfig":[
+                            {"key":"y","title":"Yes"},
+                            {"key":"n","title":"No"}
+                        ]
+                    }
+                }, 
+
+        {
+        "groupHeader": "Optional information",
+        "groupTitleVisible": true,
+        "groupType": "accordion",
+            "children":[
+
+                {
+                    "dtID": "ugr_IncomingEmailAddresses",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":4000,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Incoming email addresses:",
+                        "rst_DisplayHelpText": "Comma-separated list of email addresses you may use to send email to the database Email sent from these addresses may be harvested into database records"
+                    }
+                },
+                {
+                    "dtID": "ugr_TargetEmailAddresses",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":255,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Outgoing email addresses:",
+                        "rst_DisplayHelpText": "Comma-separated list of email addresses to which you may want to send database records as email. This will be added to the default list for the database when choosing an email destination to which to email records."
+                    }
+                },
+                {
+                    "dtID": "ugr_Department",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":120,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Department",
+                        "rst_DisplayHelpText": ""
+                    }
+                },
+                {
+                    "dtID": "ugr_City",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":120,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Suburb/City",
+                        "rst_DisplayHelpText": ""
+                    }
+                },
+                {
+                    "dtID": "ugr_State",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":40,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "State",
+                        "rst_DisplayHelpText": ""
+                    }
+                },
+                {
+                    "dtID": "ugr_Postcode",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":20,
+                        "rst_DisplayWidth":20,
+                        "rst_DisplayName": "Zip/postcode",
+                        "rst_DisplayHelpText": ""
+                    }
+                },
+                {
+                    "dtID": "ugl_GroupID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"virtual",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "ugl_Role",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_DisplayName": "Role:",
+                        "rst_FieldConfig":["admin","member"],
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "ugr_URLs",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":2000,
+                        "rst_DisplayWidth":40,
+                        "rst_DisplayName": "Personal Website URLs:",
+                        "rst_DisplayHelpText": ""
+                    }
+                },
+                {
+                    "dtID": "ugr_Thumb",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"User picture:",
+                        "rst_DisplayHelpText": "Image to represent this user", 
+                        "rst_FieldConfig":{"entity":"sysUsers", "accept":".png,.jpg,.gif", "size":200},
+                        "dty_Role":"virtual"
+                    }
+                }
+            ]
+        }
+                
+                
+                
+                
+     ]
+}

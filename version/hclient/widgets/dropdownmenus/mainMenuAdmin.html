@@ -1,0 +1,92 @@
+<!--
+/**
+* mainMenuAdmin.html: top-level menu
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<li>
+    <a href="admin/describe/dbStatistics.php" data-pwd="ServerFunctions"
+        data-action="menu-admin-stats"
+        data-user-admin-status="0" data-size="medium" data-header="Administration &gt; Server usage statistics"
+        title="Size and usage statistics for all Heurist databases on this server">
+       Server usage statistics
+    </a>
+</li>
+
+<li>
+    <a href="admin/describe/dbStatistics.php?csv=1" 
+        data-pwd="ServerFunctions" target="_blank"
+        data-user-admin-status="0" 
+        data-size="medium" 
+        data-header="Administration &gt; Server usage statistics"
+        title="Size and usage statistics for all Heurist databases on this server">
+       Server usage statistics (CSV)
+    </a>
+</li>
+
+<!--
+<li>
+    <a href="admin/verification/listUploadedFilesErrors.php"
+        data-user-admin-status="2" data-size="medium" data-header="Administration &gt; Server file errors"
+        title="Find errors in database uploaded files">
+        Server file errors
+    </a>
+</li>
+
+<li>
+    <a href="admin/verification/fileLinkingError.php"
+        data-user-admin-status="2" data-size="medium" data-header="Administration &gt; File linking errors"        
+        title="Find uploaded file records which point at non-existent files for all Heurist databases on this server">
+        File linking errors
+    </a>
+</li>
+-->
+
+<li>
+    <a href="admin/verification/verifyConceptCodes.php" 
+        data-pwd="ServerFunctions"
+        Xdata-user-admin-status="0" 
+        data-size="medium" 
+        data-header="Administration &gt; Verify concept codes"
+        title="Find duplications of concept codes in all databases">
+        Verify concept codes
+    </a>
+</li>
+                    
+<li>
+    <a href="admin/verification/verifyInstallation.php" 
+        data-user-admin-status="1" 
+        data-size="medium" 
+        data-header="Administration &gt; Verify installation"
+        title="Verifies that all required JS libraries, other components and directories are in expected locations">
+        Verify installation
+    </a>
+</li>
+
+
+<li>
+    <a href="#" 
+        id="menu-admin-server"
+        data-icon="ui-icon-databases"
+        data-pwd="ServerFunctions"
+        data-user-admin-status="1" 
+        title="Manage databases">
+        Manage databases
+    </a>
+</li>

@@ -10,7 +10,7 @@
 * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 * or implied. See the License for the specific language governing permissions and limitations under
 * the License.
-*/                                                     
+*/
 
 /**
 *  Corsstabs UI class
@@ -24,19 +24,21 @@
 */
 
 var crosstabsAnalysis;
+var buttonDiv;
+var visualisationButton;
 
 /**
-*  CrosstabsAnalysis - class for crosstab analysis                                           
+*  CrosstabsAnalysis - class for crosstab analysis
 *
 * @author Artem Osmakov <osmakov@gmail.com>
 * @version 2013.0530
-*/
+*/ 
 function CrosstabsAnalysis(_query, _query_domain) {
 
     var _className = "CrosstabsAnalysis";
 
     var MAX_FOR_AUTO_RETRIEVE = 6000;
-    
+
     var fields3 = {column:{field:0, type:'', values:[], intervals:[]}, row:{}, page:{}};
     //     intervals:{name: , description:, values:[  ] }
     var records_resp;
@@ -46,14 +48,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
     var inProgress = false;
     var query_main;
     var query_domain;
-    
+
     var $recTypeSelector;
-    
+
     var _currentRecordset = null;
     var _selectedRtyID = null;
 
     var configEntityWidget = null;
-    
+
     var _isPopupMode = false;
 
     function _init(_query, _query_domain)
@@ -63,48 +65,61 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }else{
             $('#btnCancel').hide();
         }
-        
+
         $('#btnPanels').find('button').button();
 
 
         query_main = _query?_query:'';
         query_domain =_query_domain?_query_domain:'all';
 
-        //record type dropdown    
-        $recTypeSelector = window.hWin.HEURIST4.ui.createRectypeSelect( $('#cbRectypes').get(0), null, 
+        //record type dropdown
+        $recTypeSelector = window.hWin.HEURIST4.ui.createRectypeSelect( $('#cbRectypes').get(0), null,
                     window.hWin.HR('select record type'), false );
         $recTypeSelector.hSelect({ change: _onRectypeChange });
         //$rec_select.change(_onRectypeChange);
 
         $('.showintervals')
         .click(function( event ) {
-            var isVisible = showHideIntervals( $(this).attr('tt') );
+            /*var isVisible = showHideIntervals( $(this).attr('tt') );
             if(isVisible){
                 $(this).removeClass('collapsed');
             }else{
                 $(this).addClass('collapsed');
-            }
+            }*/
+            var $modal = determineModalType( $(this).attr('tt') );
+
+            $modal.modal('show');
         });
 
         //hide left panel(saved searches) and maximize analysis
         //var _kept_width = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
         //window.hWin.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
         //window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
-        
+
       configEntityWidget = $('#divLoadSettings').configEntity({
         entityName: 'defRecTypes',
         configName: 'crosstabs',
-        
+
         getSettings: function(){ return _getSettings(); }, //callback function to retieve configuration
         setSettings: function( settings ){ _applySettings(settings); }, //callback function to apply configuration
-        
+
         //divLoadSettingsName: this.element
         divSaveSettings: $('#divSaveSettings'),  //element
         showButtons: true,
-        useHTMLselect: true          
+        useHTMLselect: true
       });
-      
-      configEntityWidget.configEntity( 'updateList', $recTypeSelector.val() );    
+
+      configEntityWidget.configEntity( 'updateList', $recTypeSelector.val() );
+
+        buttonDiv = $("<div></div>");
+        visualisationButton = $("<button>Visualise</button>");
+
+        visualisationButton.appendTo(buttonDiv);
+    }
+
+    function _OnRowTypeChange(value) {
+        console.log('%cvalue', 'color:seagreen', value);
+        console.log('$(value)', $(value));
     }
 
     /**
@@ -119,7 +134,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             _selectedRtyID = Number(data.item.value);
         }else{
             _selectedRtyID = Number($recTypeSelector.val());
-            $recTypeSelector.hSelect("refresh"); 
+            $recTypeSelector.hSelect("refresh");
         }
 
         var allowedlist = ["enum", "integer", "float", "resource", "relationtype"];//, "date", "freetext"]; //"resource",
@@ -127,7 +142,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //var selObj = createRectypeDetailSelect($('#cbColumns').get(0), _selectedRtyID, allowedlist, ' ');
         //createRectypeDetailSelect($('#cbRows').get(0), _selectedRtyID, allowedlist, ' ');
         //createRectypeDetailSelect($('#cbPages').get(0), _selectedRtyID, allowedlist, ' ');
-        
+
         var selObj = window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbColumns').get(0), _selectedRtyID, allowedlist, ' ', null );
         window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbRows').get(0), _selectedRtyID, allowedlist, ' ', null );
         window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbPages').get(0), _selectedRtyID, allowedlist, ' ', null );
@@ -152,10 +167,22 @@ function CrosstabsAnalysis(_query, _query_domain) {
         clearIntervals('column');
         clearIntervals('row');
         clearIntervals('page');
-        
-        
+
+
         //get list of settings
-        configEntityWidget.configEntity( 'updateList', _selectedRtyID );    
+        configEntityWidget.configEntity( 'updateList', _selectedRtyID );
+    }
+
+    /**
+     * Determine the modal type, 
+     * either row, column or page
+     * return its value.
+     */
+    function determineModalType(name){
+        var modal = $('#'+name+'IntervalsModal');
+
+        return modal;
+
     }
 
 
@@ -194,18 +221,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
     //
     //
     function _resetAllIntervals(fields, name){
-        
+
         suppressRetrieve = true;
-        
+
         if(!name) name = 'column';
-        
+
         var detailid = fields[name];
         $('#cb'+name[0].toUpperCase()+name.slice(1)+'s').val(detailid);
-        
+
         _resetIntervals_continue(name, detailid, function(){
-            if(name == 'column') 
+            if(name == 'column')
                 name = 'row'
-            else if(name == 'row') 
+            else if(name == 'row')
                 name = 'page'
             else {
                 suppressRetrieve = false;
@@ -215,7 +242,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             _resetAllIntervals(fields, name);
         });
     }
-    
+
     /**
     * create set of intervals specific for particular detail type
     * get min and max values
@@ -224,15 +251,15 @@ function CrosstabsAnalysis(_query, _query_domain) {
         needServerRequest = true;
         var detailid = event.target.value;
         var name = $(event.target).attr('name');  //type
-        
+
         _resetIntervals_continue(name, detailid);
-    }    
-       
+    }
+
     //
     //
-    //    
+    //
     function _resetIntervals_continue(name, detailid, callback){
-        
+
         var $container = $('#'+name+'Intervals');
         $container.empty();
         fields3[name] = {field:0, fieldname:'', type:'', values:[], intervals:[], allownulls:false};
@@ -278,13 +305,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             fields3[name].values = [val0, valmax];
                             calculateIntervals(name);
                         }
-                        
+
                         if($.isFunction(callback)) callback.call();
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
-                });                
+                });
 
             return;
 
@@ -293,7 +320,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             //get list of possible values for pointer detail type
             var request = { a:'pointers', rt:_selectedRtyID , dt:detailid };
             var baseurl = window.hWin.HAPI4.baseURL + "viewers/crosstab/crosstabs_srv.php";
-            
+
             if(_currentRecordset!=null){
                 request['recordset'] = _currentRecordset;  //CSV
             }else{
@@ -314,13 +341,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             fields3[name].values = response.data;
                             calculateIntervals(name);
                         }
-            
+
                         if($.isFunction(callback)) callback.call();
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
-                });                
+                });
 
             return;
 
@@ -332,7 +359,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }
 
-            
+
         if($.isFunction(callback)) callback.call();
         renderIntervals(name);
     }
@@ -390,7 +417,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }else if(fields3[name].type=="enum" || fields3[name].type=="relationtype"){
 
-            var vocab_id = $Db.dty(fields3[name].field, 'dty_JsonTermIDTree');    
+            var vocab_id = $Db.dty(fields3[name].field, 'dty_JsonTermIDTree');
             var termlist = $Db.trm_TreeData(vocab_id, 'select'); //{key: code: title:}
 
             var mcnt = (count>0)?Math.min(termlist.length, count):termlist.length;
@@ -406,9 +433,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }
         renderIntervals(name);
-        
+
         if(suppressRetrieve) return;
-        
+
         _autoRetrieve();
     }
 
@@ -418,6 +445,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
     function renderIntervals(name){
 
         var $container = $('#'+name+'Intervals');
+        var $modalDialogBody = $('#'+name+'IntervalsBody'); //Hosts the entire body of modal
+        var $rowDiv;  //First row within the modal.
+        var $leftColDiv;   //Left column of div 
+        var $rightColDiv;   //Right column of div
+        var $firstRowDiv;  
+        var $buttons;
+        var $bodyDiv;
+        var $addIntervalBtn;
+        var $btnDiv;
+        var $intervalHeadRow;
+
+        $modalDialogBody.empty();
         $container.empty();
 
         if(fields3[name].intervals.length<1){
@@ -428,28 +467,71 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         if(fields3[name].values && fields3[name].values.length>0)
         {
+            $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase());
+
+            //Creates entire element in modal
             $intdiv = $(document.createElement('div'))
             .css({'padding':'0.4em'})
             .attr('intid', 'b0' )
-            .appendTo($container);
+            .addClass('container-fluid')
+            .appendTo($modalDialogBody);
 
-            $intdiv
-            .append('&nbsp;&nbsp;<label>Number of intervals:</label>')
-            .append($('<input id="'+name+'IntCount">').attr('size',6).val(keepCount))
+            $rowDiv = $(document.createElement('div'))
+            .addClass('row '+name)
+            .appendTo($intdiv);
+
+            $leftColDiv = $(document.createElement('div'))
+            .addClass('col-4')
+            .attr('id', 'leftColDiv'+name)
+            .css({'padding-right':'2rem'})
+            .appendTo($rowDiv);
+
+            $rightColDiv = $(document.createElement('div'))
+            .addClass('col-8')
+            .attr('id','rightColDiv'+name)
+            //.css({'padding-right':'2rem'})
+            .appendTo($rowDiv);
+
+            $firstRowDiv = $(document.createElement('div'))
+            .addClass('row')
+            .css('margin-bottom','1rem')
+            .appendTo($rightColDiv);
+
+            $firstRowDiv.append('<div class="col-md-1"></div>')//Blank div
+            $firstRowDiv.append('<div class="col-md-8"><h5>Intervals</h5></div>')
+
+            /* Input field to show number of intervals
+            $firstRowDiv
+            .append('<div class="col-6 form-group"><label>Number of intervals:</label><input id="'+name+'IntCount" size="6" value="'+keepCount+'"></div>')
+            */
+
+            //$('<input id="'+name+'IntCount">').attr('size',6).val(keepCount)
+
+            $buttons = $(document.createElement('div'))
+            .addClass('col-md-3')
+            .append($('<button>',{text: "Reset",class: "btn btn-secondary"})
+                .click(function( event ) {
+                    calculateIntervals(name, parseInt($('#'+name+'IntCount').val()) );
+                }).css('margin-right',"1rem"))
+            
+            $buttons.appendTo($firstRowDiv);
+            /*
             .append($('<button>',{text: "Reset"})
                 .css('margin-left','1em')
                 .css('margin-right','3em')
                 .click(function( event ) {
                     calculateIntervals(name, parseInt($('#'+name+'IntCount').val()) );
             }));
+            */
 
-
+            /*
             $('<button>',{text: "Add"})
             //.button({icons: {primary: "ui-icon-plus"}} )
             .click(function( event ) {
                 editInterval(  name, -1 );
             })
-            .appendTo($intdiv);
+            .appendTo($rowDiv);
+            */
 
             /* @TODO perhaps
             $intdiv.append($('<input>').attr('type','checkbox').css('margin-left','1em').click(function(event){
@@ -457,8 +539,22 @@ function CrosstabsAnalysis(_query, _query_domain) {
             })
             ).append('&nbsp;include null values');
             */
-        }
 
+            $intervalHeadRow = $(document.createElement('div'))
+            .addClass('row')
+            .appendTo($rightColDiv);
+
+            $('<div class="col-md-1">')
+            .appendTo($intervalHeadRow);
+
+            $('<div class="col-md-4">')
+            .append('<h6>Label<h6>')
+            .appendTo($intervalHeadRow);
+
+            $('<div class="col-md">')
+            .append('<h6>Value</h6>')
+            .appendTo($intervalHeadRow);
+        }
 
         var idx;
         var intervals = fields3[name].intervals;
@@ -470,27 +566,47 @@ function CrosstabsAnalysis(_query, _query_domain) {
             var interval = intervals[idx];
 
             $intdiv = $(document.createElement('div'))
-            .addClass('intervalDiv list')
-            .css({'padding':'0.2em'})
+            .addClass('intervalDiv list row')
             .attr('id', name+idx )
-            .appendTo($container);
+            .appendTo($rightColDiv);
 
-            $('<div>')
-            .css({'width':'160px','display':'inline-block'})
+            $('<div class="col-md-1 bg-white">')
+            .attr('id', name+idx+'ArrowPlacement')
+            .appendTo($intdiv);
+
+            $('<div class="col-md-4">')
+            //.css({'width':'160px','display':'inline-block'})
             .append(
                 $('<div>')
                 .html(interval.name)
-                .css({'width':'140px', 'font-weight':'bold'} ))
+                .css({'font-weight':'bold'} ))
             /*$('<input>')
             .addClass('text ui-widget-content ui-corner-all')
             .val(interval.name)
             .css({'width':'150px'} ))*/
             .appendTo($intdiv);
 
-            $('<div>')
-            .html(interval.description)
-            .css({'max-width':'250px','width':'250px','display':'inline-block','padding-left':'1.5em'})
-            .appendTo($intdiv);
+            if(intervals[idx].values.length > 1){
+                var splitDescription = interval.description.split("+");
+                var listGroup = $('<ul class="list-group list-group-flush"></ul>');
+            
+                for(x=0;x<(splitDescription.length-1); x++){
+                    var listItem = $('<li class="list-group-item p-0 bg-transparent">')
+                    .html(splitDescription[x])
+                    .appendTo(listGroup);
+                }
+
+                $('<div class="col-md">')
+                .append(listGroup)
+                .appendTo($intdiv);
+
+            }
+            else{
+                $('<div class="col-md">')
+                .html(interval.description)
+                //.css({'max-width':'250px','width':'250px','display':'inline-block','padding-left':'1.5em'})
+                .appendTo($intdiv);    
+            }
 
             /*
             var editbuttons = '<div class="saved-search-edit">'+
@@ -501,29 +617,52 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $intdiv.append(editbuttons);
             */
 
-            $('<button>')
-            .attr('intid', idx)
-            //.button({icons: {primary: "ui-icon-pencil"}, text: false })
-            .addClass('crosstab-interval-edit')
-            .css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif)'})
-            .click(function( event ) {
-                editInterval( name,  $(this).attr('intid') );
-            })
-            .appendTo($intdiv);
+            if(idx >= fields3[name].values.length){
+                $bodyDiv = $('<div class="col-md-2"></div>')
+                .appendTo($intdiv);
 
-            $('<button>')
-            //.button({icons: {primary: "ui-icon-close"}, text: false })
-            .attr('intid', idx)
-            .addClass('crosstab-interval-edit')
-            .css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif)'})
-            .click(function( event ) {
-                removeInterval( name, $(this).attr('intid') );
-            })
-            .appendTo($intdiv);
+                $('<button>')
+                .attr('intid', idx)
+                //.button({icons: {primary: "ui-icon-pencil"}, text: false })
+                .addClass('btn btn-warning border-dark')
+                .append('<i class="bi bi-pencil"></i>')
+                //css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif)'})
+                .click(function( event ) {
+                    renderIntervals(name); //Refresh intervals to remove existing arrows and create a clean display.
+                    editInterval( name,  $(this).attr('intid'), false);
+                })
+                .appendTo($bodyDiv);
+    
+                $('<button>')
+                //.button({icons: {primary: "ui-icon-close"}, text: false })
+                .attr('intid', idx)
+                .addClass('btn btn-danger border-dark')
+                .append('<i class="bi bi-trash"></i>')
+                //.css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif)'})
+                .click(function( event ) {
+                    removeInterval( name, $(this).attr('intid') );
+                })
+                .appendTo($bodyDiv);
+            }
         }
 
+        $btnDiv = $('<div class="row my-2"></div>')
+            .appendTo($rightColDiv);
 
+        $addIntervalBtn = $('<button>',{class: "btn btn-success w-100"})
+            //.button({icons: {primary: "ui-icon-plus"}} )
+            .click(function( event ) {
+                renderIntervals(name); //Refresh intervals to remove existing arrows and create a clean display.
+                editInterval( name, -1, true);
+            })
+            .html('<i class="bi bi-plus"></i> Add Interval')
+            .attr('id','addInterval');
 
+        $('<div class="col-1">').appendTo($btnDiv);
+
+        $('<div class="col-11">')
+            .append($addIntervalBtn)
+            .appendTo($btnDiv);
     }
 
     /**
@@ -538,46 +677,126 @@ function CrosstabsAnalysis(_query, _query_domain) {
         */
 
         renderIntervals(name);
+        _doRender(); //Render after the removal of a value.
     }
 
     /**
     * add/edit interval
     */
-    function editInterval( name, idx ){
+    function editInterval( name, idx, isAdd ){
 
-        var $dialogbox;
+        var $editedRow = $('#'+name+idx);
+
+        if(isAdd){
+            var $newInterval = $(document.createElement('div'))
+            .addClass('intervalDiv list row')
+            .appendTo('#rightColDiv'+name)
+
+            $('<div class="col-md-1 bg-white">')
+            .attr('id', name+idx+'ArrowPlacement')
+            .appendTo($newInterval);
+
+            $('<div class="col-md-4">')
+            .append(
+                $('<div>')
+                .html('newInterval')
+                .css({'font-weight':'bold'} ))
+            .appendTo($newInterval);
+
+            $('<div class="col-md">')
+            .html('empty')
+            .appendTo($newInterval);
+
+            $('#addInterval').attr('disabled', true);
+        }
+        else{
+            //Toggle edit background colour for the interval that is being used.
+            for(e=0;e<fields3[name].intervals.length;e++){
+                if(e == idx){
+                    $editedRow.toggleClass("intervalDiv", false);
+                    $editedRow.toggleClass("bg-warning", true);
+                }
+                else{
+                    $('#'+name+e).toggleClass("intervalDiv", true);
+                    $('#'+name+e).toggleClass("bg-warning", false);
+                }
+            }
+        }
+        
+        //var $dialogbox;
+        var modalEditBox = $('#leftColDiv'+name);
+        var $rowDiv;
 
         //create multiselect list of terms
         var $dlg = $("#terms-dialog");
+        
         if($dlg.length==0){
             $dlg = $('<div>')
             .attr('id','terms-dialog')
-            .css('overflow-y', 'auto')
-            .appendTo($('body'));
+            .appendTo('body');
         }
-        $dlg.empty();
+        $dlg.empty()
+        .appendTo(modalEditBox);
 
         var intname = (idx<0)?'new interval':fields3[name].intervals[idx].name;
-        $('<div id="topdiv">Label:<input id="intname" value="'+intname+'"></div>')
-        //.addClass('intervalDiv list')
-        .css({'padding':'0.2em'})
+
+        $rowDiv = $(document.createElement('div'))
+        .addClass('row')
         .appendTo($dlg);
+
+        //Heading for left col values
+        $('<div id="topdiv" class="col-6">'/*Label:<input id="intname" value="'+intname+'">*/+'</div>')
+        //.addClass('intervalDiv list')
+        .append('<h5>Available Values</h5>')
+        .appendTo($rowDiv);
+
+        $('<div class="col-6">')
+        .append('<p>Select and assign to new intervals</p>')
+        .appendTo($rowDiv);
 
         var iHeight = 220;
         var detailtype = fields3[name].type;
         var cnt=0;
 
-
         if ( detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype")
         {
+            //Creates select all checkbox
+            $intdiv = $(document.createElement('div'))
+            .addClass('row p-1')
+            .appendTo($dlg);
 
+            $listDiv = $(document.createElement('div'))
+            .addClass('col-md-1 d-flex align-items-center')
+            .appendTo($intdiv);
+
+            $('<input>')
+            .attr('type','checkbox')
+            .attr('checked', false)
+            .attr('id','selectAll')
+            .addClass('recordIcons')
+            .change(function(){
+                //Unchecks selectall checkbox if a value is unchecked.
+                var checked = this.checked;
+                //selects checkbox which are not disabled in edit mode
+                $('input[name="'+name+'Options"]:not(:disabled)').each(function(){
+                    this.checked = checked;
+                });
+            })
+            .appendTo($listDiv);
+
+            $('<div>')
+            .addClass('recordTitle col-md p-1')
+            .html('Select All')
+            .appendTo($intdiv);
+
+            //Creates value checkboxes
             var i, j,
             termlist = fields3[name].values; //all terms or pointers
             for(i=0; i<termlist.length; i++)
             {
                 var notused = true, itself = false;
                 var intvalues = fields3[name].intervals;
-                for(j=0; j<intvalues.length; j++){
+                /*for(j=0; j<intvalues.length; j++){
                     if(window.hWin.HEURIST4.util.findArrayIndex(termlist[i].id, intvalues[j])>=0){
                         if(idx==j){
                             itself = true;  //itself
@@ -587,34 +806,96 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         break;
                     }
                 }
+                */
+
+                //Determines which intervals have been allocated to the new interval
+                if(termlist.length < intvalues.length && !isAdd){
+                    for(k=0;k<intvalues[idx].values.length;k++){
+                        if(termlist[i].id == intvalues[idx].values[k]){
+                            itself = true;
+                            break;
+                        }
+                    }
+               }
 
                 if(notused){
 
                     $intdiv = $(document.createElement('div'))
-                    .addClass('intervalDiv list')
-                    .css({'padding':'0.2em'})
+                    .addClass('intervalDiv list p-1 row')
                     .attr('intid', idx )
                     .appendTo($dlg);
+
+                    $listDiv = $(document.createElement('div'))
+                    .addClass('col-md-1 d-flex align-items-center')
+                    .appendTo($intdiv);
 
                     $('<input>')
                     .attr('type','checkbox')
                     .attr('checked', itself)
+                    .attr('disabled', itself)
                     .addClass('recordIcons')
                     .attr('termid',termlist[i].id)
                     .attr('termname',termlist[i].text)
-                    .css('margin','0.4em')
-                    .appendTo($intdiv);
+                    .attr('name', name+'Options')
+                    .change(function(){
+                        //If select all is chosen and user deselects a value, select all checkbox will be unchecked.
+                        if(($('input[id=selectAll]').prop('checked') == true) && ($(this).prop('checked') == false)){
+                            $('input[id=selectAll]').prop('checked', false);
+                        }
+                        
+                        if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
+                            $('input[id=selectAll]').prop('checked', true);
+                        }
+                    })
+                    //.css('margin','0.4em')
+                    .appendTo($listDiv);
 
                     $('<div>')
-                    .css('display','inline-block')
-                    .addClass('recordTitle')
-                    .css('margin-top','0.4em')
+                    .addClass('recordTitle col-md p-1')
+                    //.css('margin-top','0.4em')
                     .html( termlist[i].text )
                     .appendTo($intdiv);
 
                     cnt++;
 
                 }//notused
+
+                //Add arrows to fields that already exist in the group
+                if(itself){
+                    var $removeButton = $('<button></button>')
+                    .addClass('btn btn-outline-primary')
+                    .attr('valueid',termlist[i].id)
+                    .click(function(){
+                        //Get the name of the value clicked to remove from group interval
+                        var clicked = $(this).attr('valueid');
+
+                        //Find checkbox with same valueid
+                        $('input[termid='+ clicked+']')
+                        .prop('checked', false)
+                        .attr('disabled', false);
+
+                        if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
+                            $('#selectAll').prop('checked', false)
+                            .attr('disabled',false);
+                        }
+
+                        //Remove arrow button from the selected value
+                        $(this).remove();
+                    });
+
+                    $('<i class="bi bi-arrow-left"></i>')
+                    .appendTo($removeButton);
+
+                    $('#'+name+i+'ArrowPlacement')
+                    .append($removeButton);
+                }
+            }
+
+            if(!isAdd){
+                if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
+                    $('#selectAll').prop('checked', true)
+                    .attr('disabled',true);
+                }
             }
 
             iHeight = 420;
@@ -646,7 +927,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         if(cnt>0){
             function __addeditInterval( event ){
-                
+
                 $(event.target).off('click');
 
                 if(idx<0){
@@ -656,15 +937,33 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     fields3[name].intervals[idx].values = [];
                     fields3[name].intervals[idx].description = '';
                 }
-                fields3[name].intervals[idx].name = $dlg.find("#intname").val();
+                fields3[name].intervals[idx].name = "newInterval";
 
                 if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype"){ //false &&
-                    var sels = $dlg.find("input:checked")
+                    var sels = $dlg.find('input[name='+name+'Options]:checked')
+                    var isMulti = (sels.length > 1) ? '+' : ''
                     $.each(sels, function(i, ele){
                         fields3[name].intervals[idx].values.push( parseInt($(ele).attr('termid')) );
-                        fields3[name].intervals[idx].description = fields3[name].intervals[idx].description + $(ele).attr('termname')+' ';
+                        fields3[name].intervals[idx].description = fields3[name].intervals[idx].description + $(ele).attr('termname')+isMulti;
+                        
+                        /*if($(ele).attr('termid') != fields3[name].values[idx].id){
+                            idxToDelete.push($(ele).attr('termid'));
+                        }
+                        */
                     });
-
+                    //Remove interval after it has been added to another interval
+                    /*for(i in fields3[name].intervals){
+                        for(x = 0; x<fields3[name].intervals[i].values.length;x++){
+                            if((fields3[name].intervals[i].values[x] == fields3[name].intervals[idx].values[x]) 
+                                && (fields3[name].intervals[i].values[x] != fields3[name].values[idx].id)){
+                                
+                                    idxToDelete = i;
+                                    fields3[name].intervals.splice(idxToDelete,1);
+                                    break;
+                            }
+                        }
+                    }*/
+                    
                 }else if(detailtype=="float" || detailtype=="integer"){
 
                     fields3[name].intervals[idx].values.push( parseFloat($dlg.find('#minval').val() ));
@@ -673,17 +972,32 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 }
 
+                //Delete intervals 
+                /*for(x=0;x<idxToDelete.length; x++){
+                    for(a=0;a<fields3[name].intervals.length;a++){
+                        if(idxToDelete[x] == fields3[name].intervals[a].values[0]){
+                            fields3[name].intervals.splice(a,1);
+                        }
+                        
+                    }
+                }
+                */
                 renderIntervals(name);
+                _doRender();
 
-                $dialogbox.dialog( "close" );
+                //$dialogbox.dialog( "close" );
             }
 
 
-            $dlg.find("#topdiv").append($('<button>').html('Apply').css('margin','1em').click(__addeditInterval));
-
-            $dialogbox = window.hWin.HEURIST4.msg.showElementAsDialog( 
-                    {element:$dlg.get(0), height: iHeight, width:320, title:"Edit interval", modal:true} );
+            $dlg.find("#topdiv").append($('<button>').addClass("btn btn-outline-success").attr('id','applyButton').click(__addeditInterval));
+            $dlg.find("#applyButton").append('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">' 
+                + '<path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>'
+                + '</svg>');
+            $($dlg.find("#applyButton")).appendTo('#'+name+idx+'ArrowPlacement'); //Places arrow at the begining of the edited or newly added interval.
+            /*$dialogbox = window.hWin.HEURIST4.msg.showElementAsDialog(
+                    {element:$dlg.get(0), height: iHeight, width:320, title:"Edit interval", modal:true} ); */
             /*
+
             $dlg.dialog({
             autoOpen: true,
             height: iHeight,
@@ -704,10 +1018,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
             window.hWin.HEURIST4.msg.showMsgDlg('There are no more terms available');
         }
 
-
     }
 
-    
+
     //
     //
     //
@@ -718,7 +1031,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 _setMode(3); //no results
             }else if( _currentRecordset.resultCount < MAX_FOR_AUTO_RETRIEVE){
                 _setMode(2);
-                
+
                 if(!_selectedRtyID || isNaN(_selectedRtyID) || fields3.row.intervals.length<1 || Number(fields3.row.field)<1){
                     //critical settings are not defined
                     return;
@@ -731,7 +1044,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
         }
     }
-    
+
     /**
     * request to server for crosstab data
     */
@@ -757,7 +1070,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             if(!_selectedRtyID || _selectedRtyID<1){
                 window.hWin.HEURIST4.msg.showMsgFlash('Record type is not defined',1000);
                 $recTypeSelector.focus();
-                
+
                 return;
             }
             if(fields3.row.field<1){
@@ -774,22 +1087,22 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             $("#pmessage").html('Requesting...');
             _setMode(1); //progress
-            
-        var session_id = Math.round((new Date()).getTime()/1000);    
-        
+
+        var session_id = Math.round((new Date()).getTime()/1000);
+
         var request = { a:'crosstab',
                 rt:_selectedRtyID ,
-                dt_row:fields3.row.field, 
+                dt_row:fields3.row.field,
                 dt_rowtype:fields3.row.type,
                 session:session_id}
-            
+
         if(_currentRecordset!=null){
             request['recordset'] = _currentRecordset; //CSV
         }else{
             request['q'] = query_main;
             request['w'] = query_domain;
         }
-        
+
         params = '';
 
             if(fields3.page.field>0){
@@ -804,7 +1117,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 params = params + '&dt_page='+fields3.page.field;
                 params = params + '&dt_pagetype='+fields3.page.type;
-                
+
                 request['dt_page'] = fields3.page.field;
                 request['dt_pagetype'] = fields3.page.type;
             }
@@ -846,18 +1159,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 clearTimeout(to);
                 to = 0;
                 inProgress = false;
-           }                     
-                
+           }
+
             var baseurl = window.hWin.HAPI4.baseURL + "viewers/crosstab/crosstabs_srv.php";
-            
+
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null,
                 function( response ){
                     __hideProgress();
 //
 //console.log('finised');
-//console.log(response.data);                    
+//console.log(response.data);
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        
+
                         needServerRequest = false;
                         records_resp = response.data;
                         _doRender();
@@ -865,8 +1178,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
-                });                
-                
+                });
+
         }else{
             _doRender();
         }
@@ -883,13 +1196,17 @@ function CrosstabsAnalysis(_query, _query_domain) {
     */
     function _doRender(){
 
+        if($.fn.dataTable.isDataTable("#resultsTable")){
+            $("#resultsTable").DataTable().destroy(true);
+        }
+
         $("#pmessage").html('Rendering...');
         _setMode(1);//progress
 
         var pages = fields3.page.intervals;
         var plen = pages.length;
 
-        $divres = $("#divres");
+        $divres = $('#divres');
         $divres.hide();
         $divres.empty();
 
@@ -898,22 +1215,24 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }else{
             $('#btnPrint').show();
         }
-        
 
-        $divres.append('<div>Database name: <b>'+window.hWin.HAPI4.database+'</b></div>');
-        $divres.append('<div>Date and time: '+ (new Date()) +'</div>');
-        $divres.append('<div>Type of analysis: Crosstab</div>');
+        var date = new Date();
+        var showZeroBlankText = "";
+
+        $divres.append('<div></div>')
+        $divres.append('<span>DB: <b>'+window.hWin.HAPI4.database+' </b></span>');
+        $divres.append('<span>Date and time: '+ (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear())+' </span>');
+        //$divres.append('<div>Type of analysis: Crosstab</div>');
         //$divres.append('<div>Title (name) of saved analysis: '+ +'</div>');
         //????? $divres.append('<div>Record type analysed: '++'</div>');
         if(_currentRecordset!=null){
-            $divres.append('<div>Record count: '+ _currentRecordset['recordCount'] +'</div>');
-            $divres.append('<div>Query string: '+_currentRecordset['query_main'] +'</div>');
-            
+            $divres.append('<span>N = '+ _currentRecordset['recordCount'] +' </span>');
+            $divres.append('<span>Query string: '+_currentRecordset['query_main'] +' </span>');
+
         }else{
-            $divres.append('<div>Query string: q='+query_main+'&w='+query_domain +'</div>');
+            $divres.append('<span>Query string: q='+query_main+'&w='+query_domain +' </span>');
         }
-        
-            
+
         //$divres.append('<div>Total number of records: '+ +'</div>');
         //$divres.append('<div>Number of records for each record type</div>');
 
@@ -927,7 +1246,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
             aggregationMode = "Counts";
         }
 
-        $divres.append('<div>Type of value displayed: <b>'+aggregationMode+'</b></div>');
+
+
+        $divres.append('<span>Type of value displayed: <b>'+aggregationMode+'</b></span>');
 
         $divres.append('<div>---------------------------------</div>');
         //Type of value displayed (count, average, sum)
@@ -982,9 +1303,35 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }
 
-        $divres.find('td').css( {'padding':'4px', 'border':'1px dotted gray'} );//{'border':'1px dotted gray'}); //1px solid gray'});
+        //$divres.find('td').css( {'padding':'4px', 'border':'1px dotted gray'} );//{'border':'1px dotted gray'}); //1px solid gray'});
+        /*$divres.find('.crosstab-header0').css({
+            'border-top':'1px solid black',
+        });
+        $divres.find('th').css({
+            'border-right':'1px solid black'
+        });
+        */
+        
+        buttonDiv.appendTo($divres);
+
+        //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
+
+        $(document).ready(function(){
+            $(".resultsTable").DataTable({
+                "paging" : false,
+                "info" : false,
+                dom:"Bfrtip",
+                buttons:[
+                    {extend: 'csv', footer: true }, {extend:'pdf',footer: true}, {extend:'print', footer: true}
+                ]
+            }
+            );
+        });
+        
+        //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
+
         _setMode(2);//results
-    }//_doRender
+    }//_doRenders
 
     /**
     * render particular page (group)
@@ -1025,7 +1372,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var hasValues = false;
         var grantotal = 0;
         var colspan = 1;
+        var rowspan = 1;
 
+        if((showPercentageRow || showPercentageColumn) && clen>1) rowspan++;
         if(showPercentageRow && clen>0) colspan++;
         if(showPercentageColumn) colspan++;
 
@@ -1064,60 +1413,72 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
 
-        var currow_val=-1, row_interval_idx;
+        var currow_val=-1
+        var row_interval_idx=[]; //If a value contains more than one value type of the same variable it stores in this array, assisting output.
 
         //create output array, calculate totals
         for (idx in records){
+            var count = 0;
             if(idx){
 
                 if(currow_val!=records[idx][0]){
                     var rval = records[idx][0]; //row
                     currow_val = rval;
                     //find row interval it fits
-                    row_interval_idx = -1;
+                    row_interval_idx = [-1];
                     for (i in rows){
                         if( fitToInterval( fields3.row.type, rows[i].values, rval ) ){
-                            row_interval_idx = i;
-                            break;
+                            //Some records may contain more than one value, this stores it in an array and generates based on this.
+                            if(count<1){
+                                row_interval_idx[0]=i;
+                            }
+                            else{
+                                row_interval_idx[count]=i;
+                            }
+                            count++;
                         }
                     }
                 }
 
-                if(row_interval_idx>=0)
+                if(row_interval_idx[0]>=0)
                 {
                     if(noColumns){ //no columns
-
                         var val = parseFloat(records[idx][2]);   //WARNING - fix for AVG
-                        if(!isNaN(val) && rnd(val)!=0){
-                            rows[row_interval_idx].output[0] = rows[row_interval_idx].output[0] + rnd(val);
-                            rows[row_interval_idx].avgcount[0] ++;
-                            grantotal = grantotal + val;
-                            rows[row_interval_idx].isempty = false;
+                        //Iterate through each row_interval_idx to add the output of values that contain more than one.
+                        for(i=0;i<row_interval_idx.length; i++){
+                            if(!isNaN(val) && rnd(val)!=0){
+                                rows[row_interval_idx[i]].output[0] = rows[row_interval_idx[i]].output[0] + rnd(val);
+                                rows[row_interval_idx[i]].avgcount[0] ++;
+                                grantotal = grantotal + val;
+                                rows[row_interval_idx[i]].isempty = false;
+                            }
                         }
+                        
 
                     }else{
 
                         for (j=0; j<clen; j++){
                             if( fitToInterval( fields3.column.type, columns[j].values, records[idx][1] ) ){
                                 var val = parseFloat(records[idx][2]);   //WARNING - fix for AVG
-                                if(!isNaN(val) && rnd(val)!=0){
-                                    rows[row_interval_idx].output[j] = rows[row_interval_idx].output[j] + rnd(val);
-                                    rows[row_interval_idx].avgcount[j] ++;
-                                    rows[row_interval_idx].total = rows[row_interval_idx].total + val;
-                                    rows[row_interval_idx].isempty = false;
-
-                                    columns[j].isempty = false;
-                                    columns[j].total = columns[j].total + val;
+                                //Iterate through each row_interval_idx to add the output of values that contain more than one.
+                                for(k=0;k<row_interval_idx.length; k++){
+                                    if(!isNaN(val) && rnd(val)!=0){
+                                        rows[row_interval_idx[k]].output[j] = rows[row_interval_idx[k]].output[j] + rnd(val);
+                                        rows[row_interval_idx[k]].avgcount[j] ++;
+                                        rows[row_interval_idx[k]].total = rows[row_interval_idx[k]].total + val;
+                                        rows[row_interval_idx[k]].isempty = false;
+    
+                                        columns[j].isempty = false;
+                                        columns[j].total = columns[j].total + val;
+                                    }
                                 }
-
-                                break;
                             }
                         }
                     }
                 }
             }
         }//records
-
+        
         //special calc fo average
         if(isAVG)
         {
@@ -1129,23 +1490,23 @@ function CrosstabsAnalysis(_query, _query_domain) {
             for (i=0; i<rlen; i++){
                 cols_with_values_for_row.push(0);
             }
-            
-            
+
+
             for (j=0; j<clen; j++){  //cols
                 columns[j].total = 0;
-                
+
                 var rows_with_values = 0;
-                
+
                 for (i=0; i<rlen; i++){  //rows
                     if(rows[i].avgcount[j]>1){
                         rows[i].output[j] = rnd(rows[i].output[j]/rows[i].avgcount[j]);
                     }
 
                     if(rows[i].output[j]>0){
-                        cols_with_values_for_row[i]++;  
-                        rows_with_values++;  
-                    } 
-                    
+                        cols_with_values_for_row[i]++;
+                        rows_with_values++;
+                    }
+
                     rows[i].total = rows[i].total + rows[i].output[j];
                     columns[j].total = columns[j].total + rows[i].output[j];
                 }
@@ -1211,52 +1572,100 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var s, notemtycolumns = 0;
         //main render output   .css({'border':'1px solid black'})
         var $table = $('<table>').attr('cellspacing','0');
+        $table.attr("id", "resultsTable");
+        $table.attr("class", "display cell-border resultsTable");
+        var $rowPercentageHeader;
+        var styleTypeHeader = "crosstab-header0";
 
+        //Must have a table header for DataTables to work correctly.
+        var $row = $('<thead>').appendTo($table);
+        
         if(!noColumns){
-            var row1 = $('<tr>').appendTo($table);
+            styleTypeHeader = "crosstab-header1";
+            var rowHeader1 = $('<tr>');
             for (j=0; j<clen; j++){
                 if(supressBlankColumn && columns[j].isempty) continue;
                 notemtycolumns++;
             }
-            row1.append('<td>&nbsp;</td><td class="crosstab-header0" style="{text-align:center;}" colspan="'+notemtycolumns*colspan+(showTotalsColumn?1:0)+'">'+fields3.column.fieldname+'</td>');
+            rowHeader1.append('<th>&nbsp;</th><th class="crosstab-header0" style="text-align:left; border-left:1px solid black;" colspan="'+notemtycolumns*colspan+(showTotalsColumn?1:0)+'">'+fields3.column.fieldname+'</th>');
+            $row.append(rowHeader1);
         }
 
-        var $row = $('<tr>').appendTo($table);
-        $row.append('<td class="crosstab-header0">'+fields3.row.fieldname+'</td>');
+        var $rowHeader = $('<tr>');
+        $rowHeader.append('<th class="'+styleTypeHeader+'" style="border-left:1px solid black" rowspan="'+rowspan+'">'+fields3.row.fieldname+'</th>');
+    
+        //$row.append('<th class="crosstab-header0">'+fields3.row.fieldname+'</th>');
 
         // render HEADER, reset column totals
-        if(noColumns){
-            $row.append('<td colspan="'+colspan+'">&nbsp;</td>');
-        }else{
+        if(noColumns){ //If only Variable 1 is chosen
+            $rowHeader.append('<th class="crosstab-header0">'+aggregationMode+'</th>');
+
+            //If 'Column %' checkbox is ticked.
+            if(showPercentageColumn){
+                $rowHeader.append('<th class="percent" style="border-top: 1px solid black;">%</th>')
+            }
+        }else{ //If two variables are chosen
+            //Appends column names of the second variable.
             for (j=0; j<clen; j++){
                 if(supressBlankColumn && columns[j].isempty) continue;
-                $row.append('<td class="crosstab-header" style="{width:'+colspan*4+'em;max-width:'+colspan*4+'em}" colspan="'+colspan+'">'+columns[j].name+'</td>');
+                $rowHeader.append('<th class="crosstab-header" style="{width:'+colspan*4+'em;max-width:'+colspan*4+'em}" colspan="'+colspan+'">'+columns[j].name+'</th>');
                 //notemtycolumns++;
             }
             if(showTotalsRow){ //special column for totals
-                $row.append('<td class="crosstab-header0" style="{text-align:center;}" colspan="'+colspan+'">totals</td>');  //(showPercentageRow?2:1)  ART2
+                $rowHeader.append('<th class="'+styleTypeHeader+'" style="{text-align:center;}" colspan="'+colspan+'">totals</th>');  //(showPercentageRow?2:1)  ART2
             }else if(showTotalsColumn){
-                $row.append('<td class="crosstab-header0" style="{text-align:center;}">totals</td>');
+                $rowHeader.append('<th class="'+styleTypeHeader+'" style="{text-align:center;}">totals</th>');
             }
 
-            if(showPercentageRow && showPercentageColumn){
-                $row = $('<tr>').appendTo($table);
-                $row.append('<td>&nbsp;</td>');
+            //If 'Row %' checkbox has been chosen only.
+            if(showPercentageRow && !showPercentageColumn){
+                $rowPercentageHeader = $('<tr>');
+                for(t=0; t<clen;t++){
+                    if(supressBlankColumn && columns[t].isempty) continue;
+                    $rowPercentageHeader.append('<th class="crosstab-header">'+aggregationMode+'</th><th class="percent">Row%</th>');
+                }
+                if(showTotalsRow){
+                    $rowPercentageHeader.append('<th>&nbsp;</th>');
+                    $rowPercentageHeader.append('<th class="percent">%</th>');
+                }
+            }
+            else if(!showPercentageRow && showPercentageColumn){ //If 'Column %' checkbox has been chosen only.
+                $rowPercentageHeader = $('<tr>');
+                for(t=0; t<clen;t++){
+                    if(supressBlankColumn && columns[t].isempty) continue;
+                    $rowPercentageHeader.append('<th class="crosstab-header">'+aggregationMode+'</th><th class="percent">Col%</th>');
+                }
+                if(showTotalsRow){
+                    $rowPercentageHeader.append('<th class="crosstab-header">&nbsp;</th>');
+                    $rowPercentageHeader.append('<th class="percent">%</th>');  
+                }
+            }
+            else if(showPercentageRow && showPercentageColumn){ //If both 'Column %' and 'Row %' have been chosen.
+                $rowPercentageHeader = $('<tr>');
                 for (j=0; j<clen; j++){
                     if(supressBlankColumn && columns[j].isempty) continue;
-                    $row.append('<td class="crosstab-value">&nbsp;</td><td class="percent">row%</td><td class="percent">col%</td>');
+                    $rowPercentageHeader.append('<th class="crosstab-header">&nbsp;</th><th class="percent">Row%</th><th class="percent">Col%</th>');
                 }
                 if(showTotalsRow || showTotalsColumn){
-                    $row.append('<td colspan="'+colspan+'">&nbsp;</td>');  //(showTotalsRow && showPercentageRow?2:1)   ART2
+                    $rowPercentageHeader.append('<th class="crosstab-header">&nbsp;</th><th class="percent">Row%</th><th class="percent">Col%</th>');  //(showTotalsRow && showPercentageRow?2:1)   ART2
                 }
             }
         }
 
+        $row.append($rowHeader);
+        
+        if(!noColumns){
+            if((showPercentageRow && showPercentageColumn) || (showPercentageRow && !showPercentageColumn) || (!showPercentageRow && showPercentageColumn)){
+                $row.append($rowPercentageHeader);
+            }
+        }
 
+
+        //Render row body
         for (i=0; i<rlen; i++){
 
             if(supressBlankRow && rows[i].isempty) continue;
-            
+
             hasValues = true;
 
             $row = $('<tr>').appendTo($table);
@@ -1271,6 +1680,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     $row.append(s);
                 }else{
                     $row.append('<td colspan="'+colspan+'">&nbsp;</td>');
+
+                    if(showPercentageColumn){
+                        $row.append('<td colspan="'+colspan+'">&nbsp;</td>'); //Add extra data for DataTables to work correctly
+                    }
                 }
             }else{
 
@@ -1289,13 +1702,20 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                         $row.append(s);
                     }else{
-                        $row.append('<td colspan="'+colspan+'">&nbsp;</td>');
+                        if(showPercentageRow || showPercentageColumn){
+                            for(k=0; k<colspan; k++){
+                                $row.append('<td colspan="'+1+'">&nbsp;</td>');
+                            }
+                        }
+                        else{
+                            $row.append('<td colspan="'+1+'">&nbsp;</td>');
+                        }
                     }
                 }
 
                 if(showTotalsRow){ //special column for totals
                     if(rows[i].total!=0 || !supressZero){
-                        s = '<td class="crosstab-total">'+rnd(rows[i].total) +'</td>';
+                        s = '<td class="crosstab-value">'+rnd(rows[i].total) +'</td>';
                         if(showPercentageRow){
                             s = s+'<td class="percent">'+rows[i].percent +'%</td>'
                         }
@@ -1304,7 +1724,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         }
                         $row.append(s);
                     }else{
-                        $row.append('<td colspan="'+colspan+'">&nbsp;</td>'); //(showPercentageRow?2:1) ART2
+                        for(n=0;n<colspan; n++){
+                            $row.append('<td>&nbsp;</td>'); //(showPercentageRow?2:1) ART2
+                        }
                     }
                 }else if(showTotalsColumn){
                     $row.append('<td>&nbsp;</td>');
@@ -1312,20 +1734,30 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
         }
 
-        // LAST ROW - totals
+        // LAST ROW - totals (Footer)
         if(noColumns){
 
             if(showTotalsColumn && grantotal!=0){
-                $row = $('<tr>').appendTo($table);
-                $row.append('<td class="crosstab-header0" >totals</td>');
-                $row.append('<td class="crosstab-total" colspan="'+colspan+'">'+rnd(grantotal) +'</td>');
+                $row = $('<tfoot>').appendTo($table);
+
+                var $rowFooter = $('<tr>');
+                $rowFooter.append('<td class="crosstab-header0" style="border-left:1px solid black; border-bottom: 1px solid black;">totals</td>');
+                $rowFooter.append('<td class="crosstab-total">'+rnd(grantotal) +'</td>');
+
+                if(showPercentageColumn){
+                    $rowFooter.append('<td class="total-percent">100%</td>');
+                }
+
+                $row.append($rowFooter);
             }
 
         }else{
 
             if(showTotalsColumn){ //columns totals - last row in table
-                $row = $('<tr>').appendTo($table);
-                $row.append('<td class="crosstab-header0">Totals</td>');
+                $row = $('<tfoot>').appendTo($table);
+
+                var $rowFooter1 = $('<tr>');
+                $rowFooter1.append('<td class="crosstab-header0" style="border-left:1px solid black; border-bottom: 1px solid black;">Totals</td>');
 
                 for (j=0; j<clen; j++){
                     if(supressBlankColumn && columns[j].isempty) continue;
@@ -1334,39 +1766,52 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         s = '<td class="crosstab-total">'+rnd(columns[j].total) +'</td>';
 
                         if(showPercentageRow){
-                            s = s+'<td class="percent">'+(showPercentageColumn?'100%':'&nbsp;')+'</td>'
+                            s = s+'<td class="total-percent">'+(showPercentageColumn?'100%':'&nbsp;')+'</td>'
                         }
                         if(showPercentageColumn){
-                            s = s+'<td class="percent">'+  columns[j].percent +'%</td>'
+                            s = s+'<td class="total-percent">'+  columns[j].percent +'%</td>'
                         }
 
-                        $row.append(s);
+                        $rowFooter1.append(s);
                     }else{
-                        $row.append('<td colspan="'+colspan+'">&nbsp;</td>');
+                        for(l=0;l<colspan;l++){
+                            $rowFooter1.append('<td class="total-percent">&nbsp;</td>');
+                        }
                     }
                 }
 
-                $row.append('<td class="crosstab-total">'+rnd(grantotal)+'</td>');
-                if(showPercentageRow || showPercentageColumn){
-                    $row.append('<td colspan="'+colspan+'">&nbsp;</td>');  //(showPercentageRow?2:1)
+                $rowFooter1.append('<td class="crosstab-total">'+rnd(grantotal)+'</td>');
+                if(showPercentageRow && showPercentageColumn){
+                    $rowFooter1.append('<td class="total-percent">&nbsp;</td><td class="total-percent">&nbsp;</td>');
                 }
-            }else if(showTotalsRow){
+                else if(showPercentageRow || showPercentageColumn){
+                    $rowFooter1.append('<td class="total-percent" colspan="'+1+'">&nbsp;</td>');  //(showPercentageRow?2:1)
+                }
+            }else if(showTotalsRow){//??????
                 $row = $('<tr>').appendTo($table);
                 $row.append('<td colspan="'+(notemtycolumns*colspan+1)+'">&nbsp;</td>');
                 $row.append('<td class="crosstab-total" colspan="'+colspan+'">'+grantotal+'</td>');  //(showPercentageRow?2:1) ART2
             }
+
+            $row.append($rowFooter1);
 
         }
 
         if(hasValues){ //grantotal!=0){
             $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
             $table.appendTo($divres);
-
+            
             $divres.append('<div>---------------------------------</div>');
+
+            //$("#modalButton").attr("disabled", false);
+
 
         }else if (!supressBlankPage) {
             $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
             $divres.append("<div>empty set</div>");
+            
+            //$("#modalButton").attr("disabled", false);
+        
         }
 
         /*
@@ -1413,8 +1858,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             $('#aggregationModeCount').prop('checked',true); //val("count");
         }else{
-            $('#aggSum').css('display','inline-block');
-            $('#aggAvg').css('display','inline-block');
+            //$('#aggSum').css('display','block');
+           //$('#aggAvg').css('display','block');
             $('#divAggField').css('display','inline-block');
         }
         var aggMode = $("input:radio[name=aggregationMode]:checked").val();
@@ -1456,7 +1901,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $("#divres").hide();
             $("#qform").hide();
             $("#div_empty").show();
-        }else{  
+        }else{
             //show results
             $("#divres").show();
             $("#qform").show();
@@ -1472,19 +1917,19 @@ function CrosstabsAnalysis(_query, _query_domain) {
             //$("#qform").show();
         }
     }
-    
+
     //
     //
     //
     function _getSettings(){
-        
+
         var settings = {
             aggregationMode: $("input:radio[name=aggregationMode]:checked").val(),
             agg_field: $('#cbAggField').val(),
             supressZero: $('#rbSupressZero').is(':checked')?1:0,
             showValue: $('#rbShowValue').is(':checked')?1:0,
             showTotals: $('#rbShowTotals').is(':checked')?1:0,
-            
+
             showPercentageRow: $('#rbShowPercentRow').is(':checked')?1:0,
             showPercentageColumn: $('#rbShowPercentColumn').is(':checked')?1:0,
             supressBlanks: !$('#rbShowBlanks').is(':checked')?1:0,
@@ -1498,11 +1943,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
     //
     //
     function _applySettings( settings ){
-        
+
         clearIntervals('column');
         clearIntervals('row');
         clearIntervals('page');
-        
+
         $('input:radio[value="'+settings.aggregationMode+'"]').prop('checked', true);
         $('#cbAggField').val(settings.agg_field);
         _changeAggregationMode();
@@ -1510,14 +1955,19 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $('#rbSupressZero').prop('checked',settings.supressZero==1);
         $('#rbShowValue').prop('checked',settings.showValue==1);
         $('#rbShowTotals').prop('checked',settings.showTotals==1);
-        
+
         $('#rbShowPercentRow').prop('checked',settings.showPercentageRow==1);
         $('#rbShowPercentColumn').prop('checked',settings.showPercentageColumn==1);
         $('#rbShowBlanks').prop('checked',settings.supressBlanks==0);
-        
+
         _resetAllIntervals(settings.fields);
     }
-    
+
+    //Export function for table.
+    function _exportTable(buttons){
+        
+    }
+
     //
     //public members
     //
@@ -1538,6 +1988,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         resetIntervals: function(event){
             _resetIntervals(event);
+        },
+
+        OnRowTypeChange: (value) => {
+            _OnRowTypeChange(value)
         },
 
         doRetrieve: function(){
@@ -1565,23 +2019,23 @@ function CrosstabsAnalysis(_query, _query_domain) {
         assignRecordset: function(recordset){
 
             _currentRecordset = recordset;
-            
+
             //change value of rectype selector
             var rt = $recTypeSelector.val();
             if(!(rt>0) && recordset['first_rt']>0){
                 $recTypeSelector.val(recordset['first_rt']);
                 _onRectypeChange();
             }
-            
+
             if(_currentRecordset.resultCount < MAX_FOR_AUTO_RETRIEVE){
                 $('#btnUpdate').hide();
             }else{
                 $('#btnUpdate').show();
             }
-            
+
             _autoRetrieve();
         },
-        
+
         autoRetrieve:function(){
             _autoRetrieve();
         },
@@ -1592,6 +2046,17 @@ function CrosstabsAnalysis(_query, _query_domain) {
     };
 
     _init(_query, _query_domain);  // initialize before returning
+
+    //On click of View Analysis button, modal appears.
+    /*$("#modalButton").click(function(){
+        window.hWin.HEURIST4.msg.showElementAsDialog(
+            {element:$divres.get(0), height: 600, width:1000, title:"Results", modal:true} );
+    });
+    */
+
+    visualisationButton.click(function(){
+        window.hWin.HEURIST4.msg.showMsgDlg('Button feature has not been implemented.');
+    });
     return that;
 
 }

@@ -1,0 +1,91 @@
+<!--
+/**
+* Set user's preferences for session
+* Replaces editPreferences.html in h3 (now deleted)
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+<div class="ent_wrapper">
+    <div class="ui-heurist-header"></div>
+    <div class="ent_content" style="top:38px">
+
+<ul>    
+<li>
+    <a href="admin/describe/dbStatistics.php" 
+        data-header="Administration &gt; Server usage statistics"
+        title="Size and usage statistics for all Heurist databases on this server">
+       Server usage statistics
+    </a>
+</li>
+
+<li>
+    <a href="admin/describe/dbStatistics.php?csv=1" 
+        target="_blank"
+        data-header="Administration &gt; Server usage statistics"
+        title="Size and usage statistics for all Heurist databases on this server">
+       Server usage statistics (CSV)
+    </a>
+</li>
+
+<li>
+    <a href="admin/verification/verifyInstallation.php" 
+        data-user-admin-status="1" 
+        data-size="medium" 
+        data-header="Administration &gt; Verify installation"
+        title="Verifies that all required JS libraries, other components and directories are in expected locations">
+        Verify installation
+    </a>
+</li>
+
+<li>
+    <a href="admin/verification/verifyConceptCodes.php" 
+        target="_blank"
+        data-header="Administration &gt; Verify concept codes"
+        title="Find duplications of concept codes in all databases">
+        Repetition of a concept code within a database (warning)
+    </a>
+</li>
+
+<li>
+    <a href="admin/verification/verifyConceptCodes2.php" 
+        target="_blank"
+        data-header="Administration &gt; Verify concept codes">
+        Missing values for IDinOriginatingDB where originatingDBID is set (error)
+    </a>
+</li>
+                    
+<li>
+    <a href="admin/verification/verifyConceptCodes3.php" 
+        data-header="Administration &gt; Verify concept codes">
+        Missing concept codes in registered databases (error)
+    </a>
+</li>
+
+
+</ul>    
+
+    </div>
+    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix popup_buttons_div" style="display:none;padding:13px">
+            <div class="ui-dialog-buttonset">
+                <div class="btn-cancel">Close</div>
+            </div>
+    </div>
+</div>    
+<form method="post" target="_blank" action="" style="display:none" id="mainForm" style="display:none">
+<input name="db"/>
+<input name="pwd" type="password"/>
+</form>

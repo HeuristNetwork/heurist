@@ -74,7 +74,7 @@ function EditRectypeTitle() {
             var baseurl = window.hWin.HAPI4.baseURL + 'common/php/recordTypeTree.php';
             
             var request = {method:'checkDtPtr', db:window.hWin.HAPI4.database, mode:'varsonly',
-                                     rty_id:_rectypeID, ver:1, w:'all',q:('type:'+_rectypeID) }; //styep
+                                     rty_id:_rectypeID, ver:1, w:'all',q:('type:'+_rectypeID) }; //step
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, _onGenerateVars);
             
         }
@@ -302,6 +302,7 @@ function EditRectypeTitle() {
 
                     //term.labelonly = label;
                     
+                    var fullstop_sep = '..';
 
                     if( is_multicontstrained ){
 
@@ -315,7 +316,8 @@ function EditRectypeTitle() {
                             
                             rt_term.label =  '<div style="padding-left:10px;"><b>'+child[k].rt_name + '</b>('+child[0]+')</div>';
                             //rt_term.href = "javascript:void(0)";
-                            term.full_path = ((parent_full)?parent_full+".":"")+label+'.{'+child[k].rt_name+'}';
+                            term.full_path = ((parent_full)?parent_full+fullstop_sep:'')
+                                        +label+fullstop_sep+'{'+child[k].rt_name+'}';
 
                             var rectypeNode = new YAHOO.widget.TextNode(rt_term, parentNode, false);
                             
@@ -325,7 +327,7 @@ function EditRectypeTitle() {
                         
                     }else{
                         
-                        term.full_path = ((parent_full)?parent_full+".":"")+label;
+                        term.full_path = ((parent_full)?parent_full+fullstop_sep:'')+label;
                         
                          childNode = new YAHOO.widget.TextNode(term, parentNode, false); // Create the node
                          //childNode.enableHighlight = false;

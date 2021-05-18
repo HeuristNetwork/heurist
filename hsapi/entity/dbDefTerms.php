@@ -194,8 +194,15 @@ class DbDefTerms extends DbEntityBase
         
         $mysqli = $this->system->get_mysqli();    
         
+        $dbVer = $this->system->get_system('sys_dbVersion');
+        $dbVerSub = $this->system->get_system('sys_dbSubVersion');
+        
         //compose query
-        $query = 'SELECT trl_ParentID, trl_TermID FROM defTermsLinks ORDER BY trl_ParentID';
+        if($dbVer==1 && $dbVerSub>2){
+            $query = 'SELECT trl_ParentID, trl_TermID FROM defTermsLinks ORDER BY trl_ParentID';
+        }else{
+            $query = 'SELECT trm_ParentTermID, trm_ID FROM defTerms ORDER BY trm_ParentTermID';
+        }
         
         $res = $mysqli->query($query);
         if ($res){

@@ -1,0 +1,102 @@
+<!--
+
+/*
+* Copyright (C) 2005-2020 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* selectTermParent.html
+* Show a (selection) tree with every available term. Select new parent term
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White   
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2020 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+*/
+
+-->
+
+
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>Heurist - Select new parent term</title>
+
+        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/treeview/assets/skins/sam/treeview.css" />
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/treeview/treeview-min.js"></script>
+
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+
+<!--        
+        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+-->        
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
+
+        <script type="text/javascript" src="../../../hclient/core/detectHeurist.js"></script>
+        
+        <script type="text/javascript" src="selectTermParent.js"></script>
+        
+        <script type="text/javascript">
+            $(document).ready(function() {
+                window.selectTermParent = new  SelectTermParent();
+                $('button').button();
+            });
+        </script>
+        
+        
+    </head>
+
+    <body class="popup">
+
+        <div>
+            <div id="childTermName"></div>
+        </div>
+
+        <div id="termTreeText">
+	        <h3 id="header1">Select the term you want to be a new parent</h3>
+        </div>
+
+        <div id="termTree" class="termTree ygtv-highlight" style="width:290px;display:inline-block;"></div>
+
+        <div style="display:inline-block;text-align:center">
+            <!-- This is not particualrly useful and makes the form confusing
+            <div id="divParentIsRoot">
+                 <button title="Set root as a parent (convert to a vocabulary)" onClick="selectTermParent.apply(true);" style="width:100px">Parent is Root</button>
+            </div>
+            -->
+            <div style="padding:20px 0;">
+                <button title="Set selected terms as new parent" onClick="selectTermParent.apply(false);" id="btnSet" 
+                 style="width:100px">Set Parent</button>
+            </div>
+            <div>
+	            <button title="Cancel changes" onClick="selectTermParent.cancel();" style="width:100px">Cancel</button>
+            </div>
+        </div>
+
+        <!--  div id="selectedTerms"></div -->
+
+    </body>
+</html>

@@ -1167,10 +1167,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             if(this.options.suppress_edit_structure!==true){
                 
             var $s = $('<div style="margin: 15px 0 20px 175px;' //border: 2px solid orange;border-radius: 10px;
-            +'padding: 10px 10px 5px;display: block;width: 570px;">'
-            +'<div class="input-cell"><button></button>'
-            +'<span class="heurist-helper3" style="vertical-align: middle;padding-left: 20px;">'
-                +'You can also modify the fields for this record type whenever you are editing data</span>'
+            +'padding: 10px 10px 5px;display: block;">' //width: 570px;
+            +'<div class="input-cell"><span style="display:inline-block"><button></button></span>'
+            +'<span class="heurist-helper3" style="display:inline-block;vertical-align: middle;padding-left: 20px;">'
++'This will open a blank record of this type in structure modification mode.<br>'
++'Tip: You can switch on structure modification mode at any time while entering data to make instant structural changes'            
+            +'</span>'
             +'</div></div>');
             
             var edit_ele = this._editing.getFieldByName('rty_ShowURLOnEditForm');
@@ -1217,6 +1219,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
         }});
         
+        ele = this._editing.getInputs('rty_Name');
+        this._on( $(ele[0]), {
+                keypress: window.hWin.HEURIST4.ui.preventChars} );
+        
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
         
         this.editForm.find('div.header').css({'min-widht':160, width:160});
@@ -1228,7 +1234,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
        this._super(changed_element);
        
-       if(changed_element!==true && this._editing.isModified() && changed_element.options.dtID=='rty_Name'){
+       if(changed_element && changed_element!==true 
+            && this._editing.isModified() 
+            && changed_element.options.dtID=='rty_Name')
+       {
             var val = this._editing.getValue('rty_Name');
             var ele = this._editing.getInputs('rty_Plural');
             $(ele[0]).val(val+'s');

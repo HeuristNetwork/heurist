@@ -1,0 +1,60 @@
+[{
+    "service": "tlcmap",
+    "rty_ID": "3-1009",
+    "label": "Lookup in AGHP",
+    "description": "Search for Australian Gazetteer of historic places",
+    "dialog": "recordLookup",
+    "fields":{
+      "properties.placename": "2-1",
+      "geometry": "2-28",
+      "properties.anps id": "2-581",
+      "properties.state": "2-234",
+      "properties.LGA": "2-2",
+      "properties.description": "2-3"
+    }
+},
+{
+    "service": "postalCodeSearch",
+    "rty_ID": "",
+    "label": "Postal Codes (GeoNames)",
+    "description": "Returns a list of postal codes and places for the placename/postalcode query.",
+    "dialog": "recordLookupGN_postalCode",
+    "fields": {
+        "postalcode":"",
+        "lng":"",    
+        "lat":"",    
+        "countryCode":"",    
+        "adminCode1":"",    
+        "adminName1":"",    
+        "adminCode2":"",    
+        "adminName2":"",    
+        "adminCode3":"",    
+        "adminName3":"",    
+        "placeName":""
+    }
+},
+{
+    "service": "MPCE",
+    "rty_ID": "1268-53",
+    "label": "MPCE Classify Work",
+    "dialog": "recordLookupMPCE",
+    "description": "A project keyword classification toolkit for the Super Book (Work) Table.",
+    "fields": {
+        "workID":"",
+        "projectKywds":"",
+        "parisianClassify":"",
+        "basisClassify":"",
+        "classifyNotes":""
+    }
+},
+  {
+    "service": "ESTC",
+    "rty_ID": "94",
+    "label": "Lookup ESTC",
+    "description": "",
+    "dialog": "recordLookupLRC18C",
+    "fields": {
+      "properties.edition": "1028"
+    }
+  }
+]

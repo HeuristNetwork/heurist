@@ -159,7 +159,8 @@ var cfg_layouts = [
     
         }
     },
-        
+
+    // old version - search panel on top, center - result list, east - tabs        
     {id:'SearchAnalyze2', name:'Search Analyze Publish2', theme:'heurist', type:'cardinal',
         north:{size:'8em', resizable:false, overflow:'hidden',
             apps:[
@@ -203,9 +204,9 @@ var cfg_layouts = [
         }
     },
 
-
+    // Heurist v6 version. It is inited in mainMenu6.js
     {id:'SearchAnalyze3', name:'Search Analyze Publish2', theme:'heurist', type:'cardinal',
-        center:{Xminsize:300, dropable:false, apps:[{appid:'heurist_resultList', hasheader:false,
+        center:{minsize:156, dropable:false, apps:[{appid:'heurist_resultList', hasheader:false,
                      dockable:false, dragable:false, css:{'background-color':'white','font-size':'0.9em'}, //AO 2020-01-30 ,'font-size':'12px'
                      options:{empty_remark:null, show_menu:true, support_collection:true, is_h6style:true,
                      XXXrecordDivEvenClass: 'ui-widget-content',

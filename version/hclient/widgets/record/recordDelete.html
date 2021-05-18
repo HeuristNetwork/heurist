@@ -1,0 +1,69 @@
+<div class="ent_wrapper">
+    <div class="ent_header" id="div_header" style="overflow-y:auto">
+    
+    
+        <div id="div_4" style="display:none">
+
+            <p style="color:red;padding-top:5px">
+            
+            </p>
+    
+            <p style="padding:5px 0">
+                If the record is a child record you can avoid creating invalid data by 
+                editing the parent and deleting the child record pointer - by default this deletes 
+                the child and the pointer to it.
+            </p>
+            
+            <p style="padding:5px 0">
+                You may look at relationships and edit parent records
+                <a target=_new style="outline:0">
+                    here
+                    <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span>
+                </a>
+            </p>
+            
+        </div>
+        
+        <p id="div_2" style="display:none">
+            <a style="float:right;outline:0" target="blank">
+                fix duplicates
+                <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span>
+            </a>            
+        </p>
+    
+        <p id="div_3" style="display:none;color:#BB0000; font-size:12px; line-height:14px">
+            <strong>NOTE:</strong>
+            You may not delete records you did not create, or records that have been bookmarked by other users
+        </p>
+        <!--div class="separator_row"></div-->
+
+        <p id="div_1" style="display:none">
+            Deletion is a fairly slow process, taking several minutes per 1000 records, please be patient…
+        </p>
+        
+
+        <fieldset id="div_fieldset">
+            <div style="padding: 0.2em; width: 100%;" class="input">
+                <div class="header" style="padding: 0 16px 0 16px;min-width:100px;width:100px">
+                    <label for="sel_record_scope">Records scope:</label>
+                </div>
+                <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+            </div>
+        </fieldset>
+    </div>     
+    <div class="ent_content_full recordList"></div>
+</div>
+
+<div id="div_result" class="ent_wrapper" style="display: none;">
+    RESULT
+</div>
+
+<div class="ent_wrapper progressbar_div" style="display: none; background:white">
+        <div class="loading" style="display:none;height:100%"></div>
+        <div style="width:80%;height:40px;padding:5px;text-align:center;margin:auto;margin-top:20%;">
+            <div id="progressbar">
+                <div class="progress-label">Processing data...</div>
+            </div>
+            <div class="progress_stop" style="text-align:center;margin-top:4px">Abort</div>
+        </div>
+</div>

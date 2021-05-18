@@ -983,6 +983,10 @@ class HPredicate {
         }else if(intval($this->field_id)>0){
             //find field type - @todo from cache
             $this->field_type = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$this->field_id);
+            
+            if($this->field_type=='relmarker'){
+                return $this->predicateRelatedTo();    
+            }
         }else{
             $this->field_type = 'freetext';
         }
@@ -1039,7 +1043,7 @@ class HPredicate {
             if($this->pred_type=='f') $this->pred_type = $this->field_id;
             
             if($is_empty){
-                $res = "(r".$this->qlevel.".$sHeaderField is NULL OR r".$this->qlevel.".$sHeaderField=='')";    
+                $res = "(r".$this->qlevel.".$sHeaderField is NULL OR r".$this->qlevel.".$sHeaderField='')";    
             }else{
                 $ignoreApostrophe = $ignoreApostrophe && (strpos($val,"'")===false);
                 
@@ -1102,6 +1106,10 @@ class HPredicate {
             }else{
                 $res = "exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
                 .$p.'dtl_DetailTypeID';
+                
+                if($this->negate && ($this->field_type=='enum' || $this->field_type=='relationtype')){
+                    $res = 'NOT '.$res;       
+                }
             }
             
             if($several_ids && count($several_ids)>0){
@@ -1128,7 +1136,7 @@ class HPredicate {
                 }
                 
             }else{
-                $res = $res.' AND '.$field_name.$val.')';    
+                $res = $res.' AND '.$field_name.$val.')';        
             }
 
         }
@@ -1373,13 +1381,13 @@ class HPredicate {
             
             if($this->field_id){
                 //no pointer field exists among record details
-                $where = (($this->negate)?'':'NOT')." exists (select dtl_ID from recDetails $rd where r$p.rec_ID=$rd.dtl_RecID AND "
+                $where = (($this->negate)?'':'NOT')." EXISTS (select dtl_ID from recDetails $rd where r$p.rec_ID=$rd.dtl_RecID AND "
             ."$rd.dtl_DetailTypeID=".$this->field_id.")";
             
             }else{
                 //no links at all or any link
                 $where = "r$p.rec_ID ".(($this->negate)?'':'NOT')
-                    ." IN (select rl_SourceID from recLinks where $rl.rl_RelationID is null";
+                    ." IN (select rl_SourceID from recLinks $rl where $rl.rl_RelationID IS NULL)";
             }
             
             return array("where"=>$where);
@@ -1432,7 +1440,7 @@ class HPredicate {
                 
             }else{
                 $where = "r$p.rec_ID=$rl.rl_SourceID AND ".
-                (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID is null")
+                (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID IS NULL")
                 ." AND $rl.rl_TargetID".$val;
             }
 
@@ -1496,7 +1504,7 @@ class HPredicate {
         }else{
         
             $where = "r$p.rec_ID=$rl.rl_TargetID AND ".
-            (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID is null")
+            (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID IS NULL")
             ." AND $rl.rl_SourceID".$val;
         }
 
@@ -1563,55 +1571,108 @@ class HPredicate {
     */
     function predicateRelatedTo(){
 
-        global $top_query, $params_global;
+        global $top_query, $params_global, $mysqli;
         $not_nested = (@$params_global['nested']===false);
         
 
         $this->field_type = "link";
         $p = $this->qlevel;
         $rl = "rl".$p."x".$this->index_of_predicate;
-
-        if($this->query){
-            $this->query->makeSQL();
-            if($this->query->where_clause && trim($this->query->where_clause)!=""){
+        
+        
+        if($this->isEmptyValue()){
+            
+            $rd = "rd".$this->qlevel;
+            
+            if($this->field_id){
+                //find constraints and all terms 
+                list($vocab_id, $rty_constraints) = mysql__select_row($mysqli, 
+                        'SELECT dty_JsonTermIDTree, dty_PtrTargetRectypeIDs '
+                        .'FROM defDetailTypes WHERE dty_ID='.$this->field_id);
+                $reltypes = getTermChildrenAll($mysqli, $vocab_id);
+                $rty_constraints = explode(',',$rty_constraints);
                 
-                if($not_nested){
-                    $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
-                    $top_query->top_limb->addTable($this->query->from_clause);
+                if(count($rty_constraints)>0){
+                    if(count($rty_constraints)==1){
+                        $rty_constraints = '='.$rty_constraints[0];       
+                    }else{
+                        $rty_constraints = 'IN ('.implode(',',$rty_constraints).')';
+                    }
+                    
+                    $rty_constraints = ', Records where rl_TargetID=rec_ID and rec_RecTypeID '.$rty_constraints.' AND ';
                 }else{
-                    $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
+                    $rty_constraints = ' where ';
                 }
+                
+                if(count($reltypes)>0){
+                    if(count($reltypes)==1){
+                        $reltypes = '='.$reltypes[0];       
+                    }else{
+                        $reltypes = 'IN ('.implode(',',$reltypes).')';
+                    }
+                    $reltypes = ' rl_RelationTypeID '.$reltypes;
+                }else{
+                    $reltypes = 'rl_RelationTypeID IS NOT NULL';
+                }
+                
+                $where = "r$p.rec_ID ".(($this->negate)?'':'NOT')
+                    .' IN (select rl_SourceID from recLinks'
+                                .$rty_constraints
+                                .$reltypes.')';
+            
             }else{
-                return null;
+                //relmarker field not defined
+                //no relation at all or any relation with specified reltypes (term) and record types
+                $where = "r$p.rec_ID ".(($this->negate)?'':'NOT')
+                        ." IN (select rl_SourceID from recLinks where rl_RelationID IS NOT NULL)";
             }
-
-        }else{
-            $val = $this->getFieldValue();
-
-            if(!$this->field_list){
-                $val = "!=0";
-                //@todo  findAnyField query
-                //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
-            }
-        }
-
-        //search by relation type is disabled since it assigns field id instead  @todo fix
-        $where = "r$p.rec_ID=$rl.rl_SourceID AND $rl.rl_TargetID".$val;
-        
-        if(is_array($this->relation_types)&& count($this->relation_types)>0){
-            //(($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :)
             
-            $where = $where . " AND ($rl.rl_RelationTypeID " .(count($this->relation_types)>1
-                        ?' IN ('.implode(',',$this->relation_types).')'
-                        :'='.$this->relation_types[0])
-                        .')';    
+            return array("where"=>$where);
             
         }else{
-            $where = $where . " AND $rl.rl_RelationID is not null";
-        }
-        
 
-        return array("from"=>"recLinks ".$rl, "where"=>$where);
+            if($this->query){
+                $this->query->makeSQL();
+                if($this->query->where_clause && trim($this->query->where_clause)!=""){
+                    
+                    if($not_nested){
+                        $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
+                        $top_query->top_limb->addTable($this->query->from_clause);
+                    }else{
+                        $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
+                    }
+                }else{
+                    return null;
+                }
+
+            }else{
+                $val = $this->getFieldValue();                
+
+                if(!$this->field_list){
+                    $val = "!=0";
+                    //@todo  findAnyField query
+                    //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
+                }
+            }
+
+            //search by relation type is disabled since it assigns field id instead  @todo fix
+            $where = "r$p.rec_ID=$rl.rl_SourceID AND $rl.rl_TargetID".$val;
+            
+            if(is_array($this->relation_types)&& count($this->relation_types)>0){
+                //(($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :)
+                
+                $where = $where . " AND ($rl.rl_RelationTypeID " .(count($this->relation_types)>1
+                            ?' IN ('.implode(',',$this->relation_types).')'
+                            :'='.$this->relation_types[0])
+                            .')';    
+                
+            }else{
+                $where = $where . " AND $rl.rl_RelationID is not null";
+            }
+            
+
+            return array("from"=>"recLinks ".$rl, "where"=>$where);
+        }
     }
 
     /**
@@ -1884,8 +1945,8 @@ class HPredicate {
                 }
                 $res  =  $res.' or trm_Code="'.$value.'")';
             }
-            $res = (($this->negate)?' not':'').$res;
-            
+            //if put negate here is will accept any multivalue enum field
+            //see negate for enum on level above $res = (($this->negate)?' not':'').$res;
         }else
         if ($this->field_type=='file'){        
             

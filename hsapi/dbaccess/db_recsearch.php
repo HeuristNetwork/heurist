@@ -220,8 +220,18 @@ function recordSearchFacets($system, $params){
             .'cast(getTemporalDateString('.$select_field.') as SIGNED) !=0) )';
 
             //for dates we search min and max values to provide data to slider
-            //@todo facet_groupby   by year, day, month, decade, century
-            if($facet_groupby=='year' || $facet_groupby=='decade' || $facet_groupby=='century'){
+            //facet_groupby   by year, day, month, decade, century
+            if ($facet_groupby=='month') {
+                
+                $select_field = 'LAST_DAY(cast(getTemporalDateString('.$select_field.') as DATE))';
+                //"DATE_SUB(d,INTERVAL DAYOFMONTH(d)-1 DAY) "; first day
+                //date_add(date_add(LAST_DAY(@date),interval 1 DAY),interval -1 MONTH) AS first_day
+                $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
+                if($grouporder_clause==''){
+                    $grouporder_clause = ' GROUP BY rng ORDER BY rng';
+                }
+                
+            }else if ($facet_groupby=='year' || $facet_groupby=='decade' || $facet_groupby=='century') {
 
                 $select_field = '(cast(getTemporalDateString('.$select_field.') as SIGNED))';
                 //'YEAR(cast(getTemporalDateString('.$select_field.') as DATE))';
@@ -231,7 +241,6 @@ function recordSearchFacets($system, $params){
                     $select_field = $select_field.' DIV 100 * 100';
                 }
 
-
                 $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
                 if($grouporder_clause==''){
                     $grouporder_clause = ' GROUP BY rng ORDER BY rng';
@@ -240,9 +249,9 @@ function recordSearchFacets($system, $params){
 
             }else{    
 
-                $select_field = "cast(if(cast(getTemporalDateString(".$select_field.") as DATETIME) is null,"
-                ."concat(cast(getTemporalDateString(".$select_field.") as SIGNED),'-1-1'),"
-                ."getTemporalDateString(".$select_field.")) as DATETIME)";
+                $select_field = "cast(if(cast(getTemporalDateString( $select_field ) as DATETIME) is null,"
+                ."concat(cast(getTemporalDateString( $select_field ) as SIGNED),'-1-1'),"  //year
+                ."getTemporalDateString( $select_field )) as DATETIME)";
 
                 $select_clause = "SELECT min($select_field) as min, max($select_field) as max, count(distinct r0.rec_ID) as cnt ";
 

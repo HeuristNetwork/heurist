@@ -2625,8 +2625,8 @@ window.hWin.HEURIST4.ui = {
                (value.indexOf('>')>0 && keyChar=='<')){
                    sWarn = 'Both < and > are forbid';
             }else
-            if(/^[{}'".\[\]]+$/.test(keyChar)){
-                sWarn = 'Restricted characters: . [ ] { } \' " ';
+            if(/^[{}"\[\]]+$/.test(keyChar)){ // . and ' are allowed
+                sWarn = 'Restricted characters: [ ] { } " '; // .'
             }
             
             if(sWarn!=''){

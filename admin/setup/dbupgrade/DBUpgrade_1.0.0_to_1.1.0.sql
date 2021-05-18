@@ -136,9 +136,8 @@ DELIMITER ;
         COMMENT 'Null=none 0=not allowed 1,2..=max # times a term from termSet ident. by termID can be used';
 
    -- not used anywhere in the code
-   ALTER TABLE defRelationshipConstraints
-        CHANGE rcs_RelationshipsLimit rcs_RelationshipsLimit TINYINT(3) UNSIGNED NULL DEFAULT NULL
-        COMMENT 'Deprecated: Null= no limit; 0=forbidden, 1, 2 ... =max # of relationship records per record per detailtype/rectypes triplet';
+  CALL sp_AlterTable("defRelationshipConstraints","rcs_RelationshipsLimit",
+  "TINYINT(3) UNSIGNED NULL DEFAULT NULL COMMENT 'Deprecated: Null= no limit; 0=forbidden, 1, 2 ... =max # of relationship records per record per detailtype/rectypes triplet'");
 
 
 -- Add PENDING status to existing non owner visibilites -

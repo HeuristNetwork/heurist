@@ -1,0 +1,116 @@
+<!--
+/**
+* mainMenuVerify.html: top-level menu
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<li>
+    <a href="#" id="menu-structure-refresh" data-icon="ui-icon-refresh"
+        data-user-admin-status="0" data-logaction="refresh_st"
+        title="Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.">
+        Refresh memory</a>
+</li>
+
+<li>
+    <a href="admin/verification/longOperationInit.php" id="menu-structure-verify"
+        data-user-admin-status="1" data-logaction="verify_st" data-size="medium" 
+        data-header="Verify &gt; Errors in database structure" data-icon="ui-icon-check"
+        data-container="admin"
+        title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missing data etc)">
+        Verify integrity</a>
+</li>
+
+<li>-</li>
+
+<li>
+    <a href="admin/verification/listDuplicateRecords.php?fuzziness=10"
+       id="menu-structure-duplicates-old"
+       data-user-admin-status="1" data-size="medium" data-icon="ui-icon-grip-solid-vertical"
+       data-header="Find duplicate records"
+       data-container="admin"
+       title="Fuzzy search to identify records which might contain duplicate data">
+       Find duplicate records
+    </a>
+</li>
+
+<li>
+    <a href="#" id="menu-structure-duplicates"
+        data-icon="ui-icon-grip-solid-vertical"
+        data-container="admin"
+        title="Fuzzy search to identify records which might contain duplicate data">
+        Find duplicate records</a>
+</li>
+
+
+<li>
+    <a href="?w=bookmark&q=-tag&label=Bookmarks without tags" target="_blank" data-user-admin-status="0" data-user-experience-level="1"
+        title="Show bookmarked records which you have not tagged">
+         Bookmarks w/o tags <span class="smallicon ui-icon-extlink" style="float:right"></span>
+    </a>
+</li>
+<li>
+    <a href="?q=_BROKEN_&w=all" target="_blank" data-user-admin-status="0" data-user-experience-level="1"
+       title="Show records with URLs which point to a non-existant or otherwise faulty address - this only works if nightly verification is turned ON in Database > Properties">
+       Records with broken URLs <span class="smallicon ui-icon-extlink" style="float:right"></span>
+    </a>
+</li>
+<li>
+    <a href="?q=_NOTLINKED_&w=all" target="_blank" data-user-admin-status="0" data-user-experience-level="1"
+        title="Show records with no outgoing or incoming pointers (includes records without any relationships)">
+        Records without links <span class="smallicon ui-icon-extlink" style="float:right"></span>
+    </a>
+</li>
+
+<!--                    
+<li data-user-admin-status="1">-</li>
+
+<li>
+    <a href="admin/verification/checkXHTML.php"
+        data-user-admin-status="1"
+        data-header="Verify &gt; Verify wysiwyg texts"
+        title="Check the wysiwyg text fields in records/blog entries for structural errors">
+        Verify wysiwyg texts                           
+    </a>
+</li>
+
+<li>
+    <a href="admin/verification/checkInvalidChars.php"
+        data-user-admin-status="1" 
+        data-header="Verify &gt; Fix invalid characters"
+        title="Check the text fields in records entries for invalid characters">
+        Fix invalid characters
+    </a>
+</li>
+
+<li class="admin-only">
+    <a href="admin/verification/longOperationInit.php?type=files"
+        data-user-admin-status="1" data-size="medium"
+        data-header="Verify &gt; Files">
+        Verify files</a>
+</li>
+
+<li>
+    <a href="admin/verification/checkRectypeTitleMask.php?check=1"
+        data-user-admin-status="1" data-size="medium"
+        data-header="Verify &gt; Title masks"
+        title="Check correctness of each Record Type\'s title mask with respect to field definitions">
+        Verify title masks
+    </a>
+</li>
+-->

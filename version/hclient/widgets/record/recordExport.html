@@ -1,0 +1,46 @@
+<div class="ent_wrapper"  id="div_fieldset">
+
+    <fieldset class="ent_header" style="height:5em">
+        <div style="padding: 0.2em; width: 100%;" class="input">
+            <div class="header" style="padding: 0 16px 0 16px;">
+                <label for="sel_record_scope">Records scope:</label>
+            </div>
+            <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em"></select>
+        </div>
+
+
+        <hr style="margin:5px"/>
+
+    </fieldset>
+
+    <div class="ent_content" style="top:6em; padding:10px 20px">
+    <p>
+        The records you are exporting may contain pointers to other records which are not in your current results set. These records may additionally point to other records.
+    </p>                
+    <p style="padding:20px 0">
+        <label>
+            <input type="radio" name="links" value="direct" style="float:left;margin-right:8px;" checked="checked"/>
+            Follow pointers and relationship markers in records <b>(recommended)</b>
+        </label>
+        <br><br>
+        <label><input type="radio" name="links" value="direct_links" style="float:left;margin-right:8px;"/>
+            Follow only pointers, ignore relationship markers &lt;warning about losing relationships&gt;
+        </label>
+        <br><br>
+        <label><input type="radio" name="links" value="none" style="float:left;margin-right:8px;"/>
+            Don't follow pointers or relationship markers (you will lose any data which is referenced by pointer fields in the exported records)
+        </label>
+        <br><br>
+        <label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>
+            Follow ALL connections including reverse pointers" (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)
+        </label>
+    </p>
+    </div>
+    <div class="kml-info" style="position:absolute;top:6em; padding:10px 20px;display:none">
+        Only records with specified coordinates will be exported
+    </div>
+
+<form method="post" target="_blank" id="postform">
+<input type="hidden" id="postdata" name="postdata"/>
+</form>
+</div>

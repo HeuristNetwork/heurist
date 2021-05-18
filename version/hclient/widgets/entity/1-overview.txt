@@ -1,0 +1,182 @@
+Directory:    /hclient/widgets/entity
+
+Overview:   Search, manage and edit forms for all tables 
+
+manageEntity.js base widget (ancestor) for all manageXXX widgets
+
+It consists of recordList widgets and manages edit form (editing/editing2.js) (based on entity.json config file) 
+
+searchEntity.js base search widget. It loads searchXXX.html template with search form and generates search request
+
+
+Updated:     14 Dec 2018
+
+----------------------------------------------------------------------------------------------------------------
+
+/**
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2019 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
+Notes:
+
+(in order of development): 1) Records, 2)WorkGroups 2a)Users, 3)Tags, 
+4)UploadedFiles, 5)Reminders, 6)Databases, 7)SavedSearches,
+8)RecordTypes and 9)RT Groups, 10)FieldTypes and 11)FT  Groups, 12)Terms, 
+14)Record Comments 15)Record Bookmarks
+16)Smarty Reports (from files) and 17)Report Schedules, 
+
+
+How entity managers are implemented:
+
+It consists of 3 widgets: manageEntity (and descendants), searchEntity(and descendants), resultList (optional) 
+
+3) manageEntity - an any widget can be applied to element (and optionally this element can be displayed as popup dialog).
+
+        this widget is manager for 3 main parts: search, represent(list) and edit
+        
+        layout is defined in _initControls method 
+                    by default this is fixed cardinal layout 
+                    north - search
+                    west - list
+                    east - edit
+
+        widget options can be devided on the same parts: search, list, edit
+        
+        //DIALOG section       
+        isdialog: false,     // show as dialog @see  _initDialog(), popupDialog(), _closeDialog
+        dialogcleanup: true, // remove dialog div on close
+        height: 400,
+        width:  760,
+        modal:  true,
+        title:  '',
+        
+        //LIST section 
+        pagesize: 100,      // page size in resultList 
+        
+        //SEARCH/filter section
+        list_header: false, // show header in list mode (@todo implement)
+        use_cache: false,   // search performed once and then we apply local filter  @see updateRecordList, filterRecordList
+        //initial search/filter values by title and subset of groups to search
+        filter_title: null,
+        filter_group_selected:null,
+        filter_groups: null,
+
+        //EDIT section
+        edit_dialog: true,  //show editor in east panel or as popup
+        edit_height:null,
+        edit_width :null,
+        edit_title :null,
+        edit_need_load_fullrecord: false, //if for edit form we need to load full(all data) record
+        
+        // manager - all selection ui (buttons, checkboxes, label with number of sel.records) is hidden
+        //        highlight in list works as usual and selected records are used in actions
+        // select_single - in list only one item can be highlighted, in dialog mode it will be closed
+        // select_multi - several items can be highlighted, chekboxes are visible in list, onselect works only if button prerssed
+        select_mode: 'manager', //'select_single','select_multi','manager'
+
+        selectbutton_label: 'Select',  //@todo remove?? 
+        
+        
+        //it either loaded from server side if _entityName defined or defined explicitely on client side
+        entity: {}       //configuration
+
+    
+    
+
+
+
+
+2) searchEntity 
+    Content is loaded from associated html snippet and activated in widget.
+    Each search header has search by name input field,  by user/group filter or some other basic filters, 
+    as well: recently added/selected filters. 
+    
+    it performs the search with top.HAPI4.entityManager.crud('entityName', crud_method);
+    
+    options
+        add_new_record: add button
+        select_mode
+        onstart
+        onresult
+    
+3) resultList - display records in list, allow selection, pagination and action menu
+
+    options
+        renderer: custom renderer function
+        items_init: callback to initialize elements(button,links) 
+        keep_selection: to keep selection among pages
+        multiselect: allows multiselection (ctrl, shift or checkboxes)
+
+        actions: array of actions with callback
+                 or special widget (for records for example)
+        //Add new entity button (option: can_add_new)
+    methods    
+        selection
+        updateRecordList  
+    
+    
+
+                   
+                 
+4) editEntity      
+        uses JSON array to create the EDIT form (list of editing_input)            
+                   
+---
+HAPI.entityManager
+crud methods: search,get,save,delete,merge
+custom methods: specific for each entity 
+                   
+----
+Entity Hierarchies: workgroup(user), rectype, fieldtype, term (vocabulary)
+
+1) Records
+        by Record Type->Record Type Groups
+        by Added By User
+        by Onwer User or Workgroup
+
+2) Workgroup
+        by SuperGroup(s)   can have many parents
+2a)Users
+        by Workgroup(->SuperWorkgroup) - can belong to many groups with different roles
+
+3)Tags 
+        by User or Workgroup
+
+4)UploadedFiles
+        by Added By User
+5)Reminders
+        by Added By User
+        by Recipient User or Workgroup
+6)Databases
+7)SavedSearches
+        by User or Workgroup and by tree stored in User navigation tree
+
+8)RecordTypes and 9)Groups, 10)FieldTypes and 11)Groups, 12)Terms, 
+
+14)Record Comments
+        by Added By User (for admin only)
+15)Record Bookmarks
+        by User
+16)Smarty Reports (from files) 
+        to implement
+17)Report Schedules, 
+        to implement
+
+
+
+
+        

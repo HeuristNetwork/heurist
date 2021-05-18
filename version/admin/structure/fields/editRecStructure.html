@@ -1,0 +1,402 @@
+<!--
+
+/*
+* Copyright (C) 2005-2020 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* editRecStructure.html
+* manages the structure of given rectype, edit properties for view  (width, label, order, tooltip)
+* for fields and allows to preview the record's entry form on-fly,
+* invokes selectDetailType.html - to add new detailtype into record structure
+*
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White   
+* @copyright   (C) 2005-2020 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+*/
+
+-->
+
+<html>
+    <head>
+        <title>RECORD STRUCTURE</title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link rel="icon" href="../../../favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="../../../favicon.ico" type="image/x-icon">
+
+        <!-- YUI -->
+        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/treeview/assets/skins/sam/treeview.css" />
+        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/menu/assets/skins/sam/menu.css">
+
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/container/container_core-min.js"></script>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/menu/menu-min.js"></script>
+
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+
+        <!-- link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/reset-fonts-grids/reset-fonts-grids.css"/ -->
+        <!-- Skin CSS files resize.css must load before layout.css -->
+        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/assets/skins/sam/resize.css">
+        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/assets/skins/sam/layout.css">
+        <!-- Utility Dependencies -->
+        <script src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+        <script src="../../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
+        <script src="../../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+        <!-- Optional Animation Support-->
+        <script src="../../../external/yui/2.8.2r1/build/animation/animation-min.js"></script>
+        <!-- Optional Resize Support -->
+        <script src="../../../external/yui/2.8.2r1/build/resize/resize-min.js"></script>
+        <!-- Source file for the Layout Manager
+        <script src="../../external/yui/2.8.2r1/build/layout/layout-min.js"></script>
+        -->
+
+        <!-- DATATABLE DEFS -->
+        <link type="text/css" rel="stylesheet" href="../../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
+        <!-- datatable Dependencies -->
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
+        <!-- OPTIONAL: Drag Drop (enables resizeable or reorderable columns) -->
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
+        <!-- Source files -->
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
+        <!-- END DATATABLE DEFS-->
+
+        <!-- PAGINATOR
+        <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
+         END PAGINATOR -->
+
+        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/samples/yui-dt-expandable.css"/>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/samples/yui-dt-expandable.js"></script>
+        <!-- END YUI -->
+
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
+        
+        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+        
+        <style type="text/css">
+            .input-row div.input-header-cell {vertical-align:baseline; width:100px}
+            .dtyField {
+                    padding-bottom: 3px;
+                    padding-top: 3px;
+                    display: block;
+            }
+            .dtyLabel {
+                    display: inline-block;
+                    width: 150px;
+                    text-align: right;
+                    padding-right: 3px;
+            }
+            .dtyValue {
+                    display: inline-block;
+            }
+            .list_div {
+                cursor: pointer;
+                border: 1px solid rgba(0, 0, 0, 0.2);
+                margin: 2px 0;
+                padding: 4px;
+                background:#F4F2F4 !important;
+                overflow-y:auto;
+            }            
+            .list_div > div{
+                padding: 2px;
+            }
+            /*.yui-dt table
+            {
+                    width: 590;
+                    max-width: 590;
+            }*/
+            .yui-dt-highlighted {
+            background-color: #000;
+            color: #FFF;
+            }
+            .yui-dt-expanded .yui-dt-expandablerow-trigger{
+                background:none;
+            }
+            .yui-dt-expandablerow-trigger, .yui-dt-collapsed .yui-dt-expandablerow-trigger{
+                background:none;
+            }
+            .yui-dt-expanded .yui-dt-expandablerow-trigger.spinner{
+                background:none;
+            }  
+            .yui-dt-editor{
+                border: none;
+                background:none;             
+            }
+            .yui-dt-data > tr:hover .yui-dt-liner-editable{
+                border: 1px solid gray;
+                background: #fff;
+                margin:-1px;         
+            }
+            .yui-dt-data > tr:hover .yui-dt-liner-editable2{
+                border: 1px solid gray;
+                margin:-1px;         
+                /*width:80px;*/
+                background: #fff;
+                background-image: url('../../../common/images/blue-down-triangle.png');
+                background-repeat: no-repeat;
+                background-position: right center; 
+            }
+            .yui-dt-editor > form > input, .yui-dt-editor > select{
+                padding: 2px;
+            }
+                      
+            .tooltip {
+                    position:absolute;
+                    z-index:999;
+                    left:-9999px;
+                    top:0px;
+                    background-color:#dedede;
+                    padding:5px;
+                    border:1px solid #fff;
+                    min-width:300;
+                    min-height:300;
+            }
+
+            .depth0 {
+                margin-left: 0px;
+            }
+            .depth1 {
+                margin-left: 10px;
+            }
+            .depth2 {
+                margin-left: 20px;
+            }
+            .depth3 {
+                margin-left: 30px;
+            }
+            .depth4 {
+                margin-left: 40px;
+            }
+            .depth5 {
+                margin-left: 50px;
+            }
+            .depth6 {
+                margin-left: 60px;
+            }
+            .depth7 {
+                margin-left: 70px;
+            }
+
+            .termHeader {
+                font-weight: bold;
+                color: black;
+            }
+            .dtyName {
+                text-align:left;
+                padding-left: 10px;
+                padding-bottom: 3px;
+                padding-top: 3px;
+                font-weight: 200;
+            }
+
+            /* grey rows in datatable */
+            .yui-skin-sam .yui-dt tr.gray,
+            .yui-skin-sam .yui-dt tr.gray td.yui-dt-asc,
+            .yui-skin-sam .yui-dt tr.gray td.yui-dt-desc,
+            .yui-skin-sam .yui-dt tr.gray td.yui-dt-asc,
+            .yui-skin-sam .yui-dt tr.gray td.yui-dt-desc {
+                color: #aaaaaa;
+            }
+                                      
+            .yui-skin-sam .yui-dt-selected, .yui-skin-sam tr.yui-dt-selected td{
+                background-color: #aaaaaa;
+            }
+            .yui-skin-sam tr.yui-dt-highlighted td{
+                background-color: #9cf;
+                /*border-top:2px blue solid;
+                border-bottom:2px blue solid;*/
+            }
+            
+            .dragrow{
+                padding-left:30px;
+                padding-top:6px;
+                font-size:1.2em;
+            }
+            .dragrow-class{
+            }
+            /* drag row */
+            #ygddfdiv {
+                border:2px dotted blue;
+                background:black;
+                opacity:0.5;
+                box-shadow: none;
+                width:100px;
+                /*background-color:#FFE;
+                box-shadow:0 2px 3px RGBA(0,0,0,0.5);
+                border:2px solid #62A7F8 !important;
+                */
+            }
+            .yui-dt th{
+                vertical-align: baseline !important;
+            }
+            .truncate {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            div.coverall-div
+            {
+                position: absolute;
+                left:0;
+                top: 0;
+                height:100%;
+                width:100%;
+                border: 0;
+                padding: 0;
+                margin: 0;
+
+                background-color: rgba(0, 0, 0, 0.025);
+                /*opacity: 0.025;
+                filter: progid:DXImageTransform.Microsoft.Alpha(opacity=5);*/
+                background-image: url(../../../hclient/assets/loading-animation-white.gif);
+                background-repeat: no-repeat;
+                background-position: center;     
+                cursor:wait;
+            }
+            
+            .ui-state-error {
+                color: red !important;
+                font-weight: bold;   
+                background-color: #FDDADA !important;
+            }            
+            
+            .ui-selectmenu-text{
+                padding:4px 0 4px 8px;\
+                    
+            }
+
+            #selVocab-menu {
+                max-height: 300px !important;
+            }
+            
+        </style>
+        
+        <script type="text/javascript">
+            $(document).ready(function() {
+                window.editStructure = new  EditRecStructure();                
+            });
+        </script>
+        
+        <script type="text/javascript" src="../../../hclient/core/detectHeurist.js"></script>
+        
+        <link rel="stylesheet" type="text/css" href="../../../external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css"/>
+        <script type="text/javascript" src="../../../hclient/core/utils_ui.js"></script>
+        <script type="text/javascript" src="../../../hclient/core/recordset.js"></script>
+        <script type="text/javascript" src="../../../hclient/widgets/editing/editing_input.js"></script>
+        
+        <script type="text/javascript" src="../terms/editTerms_util.js"></script>
+        
+    </head>
+
+    <body class="popup yui-skin-sam" style="overflow: auto;" onunload="showWarningAboutOptionalFields()">
+    
+        <script type="text/javascript" src="editRecStructure.js"></script>
+        <script type="text/javascript" src="../terms/selectTerms.js"></script>
+        <script type="text/javascript" src="../rectypes/selectRectype.js"></script>
+
+    
+        <h2 id="recordTitle" style="margin:10px 20px"></h2>
+        
+        <div  id="divDescription" style="margin:10px 20px">
+            <div style="vertical-align:top;font-weight:bold;display:inline-block;padding-right:20px">
+                 <a href="#" onclick="{onEditRecordType();}">edit attributes<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>
+            </div>
+            <div id="rty_Description" class="truncate" style="max-width:600px;display:inline-block;"></div>
+        </div>
+        <div  id="divTitleMask" style="margin:10px 20px">
+            <div style="vertical-align:top;font-weight:bold;display:inline-block;;padding-right:20px">
+                 <!-- <label for="rty_TitleMask">Constructed title mask</label><br/> -->
+                 <a href="#" onclick="{editStructure.doEditTitleMask(false);}">edit title mask<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>
+            </div>
+            <textarea readonly cols="400" id="rty_TitleMask" rows="2" 
+                style="width:600px;max-width:600px;height:30px;display:inline-block; background-color:#EFF;"></textarea>
+        </div>
+
+        <div  id="divStreamLinedAddition" style="margin:10px 20px">
+            <label style="padding-left: 80px;"><input type="checkbox" checked="checked" id="cbStreamLinedAddition"
+            onchange="window.hWin.HAPI4.save_pref('editRecStructure_StreamLinedAddition', $(event.target).is(':checked')?1:0 )"/>&nbsp;
+                    <b>Streamlined field addition (commonest options, quicker addition)</b></label>
+            <label style="padding-left:100px">Drag rows up and down to change field order</label>
+        </div>
+
+        
+        <div id="page-inner" style="top:145px; bottom:80px;">
+            <!--  class="yui-navset yui-navset-top"  -->
+            <div id="modelTabs" style="margin:auto;text-align:left;"></div>
+        </div>
+
+        <div style="bottom:10px;left:10px; right:10px;text-align:left; position:absolute;" id="recStrcuture_bottom">
+            <span style="float:left">
+                    <input class="add_field_btn" type="button" value="Add field (at the end)" 
+                            style="font-size:0.65em"
+                            onClick="editStructure.onAddFieldAtIndex(null, false);"/>
+            </span>
+            <span style="float:left;padding-left:14px">
+                            
+                  <i>Click row to edit field specifications. Drag arrows at left to change the order in the form. Click + icon to insert headings/fields.</i>
+                  <br/>
+                  To see the effects of record structure changes on the data entry form, keep a record open in the record edit form<br/>
+                  and simply hit Reload to view the revised form - changes here take effect immediately, there is no need to hit [Save]
+                  <br/>
+                  <label><input type="checkbox" checked="checked" id="showEditOnNewField"/>show edit immediately for new field</label>
+            </span>
+
+            <span style="float:right; text-align:right">
+                <!--<input type="button" value="Back to list of record types" onClick="{window.history.back();}"/>-->
+                <!-- input type="button" value="Preview" onClick="editStructure.initPreview()"/ -->
+                <input class="save-btn" type="button" value="Save/Close" onClick="editStructure.closeWin();"/>
+            </span>
+        </div>
+
+        <div style="display: none;text-align:left; padding:5px; width:90%" id="dlgWrongTitleMask">
+            The current title mask appears to be invalid.
+            This generally means that fields used in the mask have been removed from the record structure.
+            A valid title mask is essential for display of the record in search results.
+            <!-- div style="padding-top: 10px;text-align:center;">
+                <input style="margin-right: 10px;" type="button" value="Fix title mask" id="dlgWrongTitleMask_closeBtn"/>
+            </div-->
+        </div>
+
+        <div id="info_rst_CreateChildIfRecPtr" style="display:none">
+
+<p style="padding:10px 0">If this box is checked, new records created from within this pointer field will be created as children of the current record.
+
+This is very suitable for records which describe parts of an entity, ie. whole-part or parent-child relationships such as specific figures in an artwork or decoration, artefacts which belongs to an excavation unit, a verse belonging to a poem, a life event such as birth or death which can only apply to one person.</p>
+
+<p style="padding:10px 0">On the other hand, child records should not be used where the relationship implied by this pointer field is not a whole-part, parent-child or specific ownership of the created record. Unlike someone's birth or a sample belonging to a particular context or a nested administrative area, non-child records might have equivalent links from many similar records. For instance, a bibliographic record or a person might be referenced repeatedly, they are not owned by another entity.</p>
+
+<p style="padding:10px 0">Child records of one entity can of course be referenced from another entity, 
+a record can only be the child of ONE record.</p>
+        
+        </div>
+
+        
+        <div class="list_div" 
+                style="z-index:999999999;height:auto;max-height:200px;padding:4px;cursor:pointer;">
+        </div>
+    </body>
+</html>

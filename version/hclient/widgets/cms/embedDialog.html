@@ -1,0 +1,67 @@
+<!--
+/**
+* Embed dialog form - to get code (url or script snippet) to embed Heurist page
+* 
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+<fieldset id="div_layout">
+    <div id="div_header" style="padding: 0.2em; width: 100%; display:block;font-size:larger">
+        <p>This function allows one to design and edit a web page which can include Heurist widgets (search, saved filters, results lists, custom reports, maps, timelines, network diagrams etc.) which can be embedded in a third-party website.</p>
+        <p>Create a new web page or select an existing one from the dropdown (existing pages can be edited).</p>
+    </div>
+    <div style="padding: 0.2em; width: 100%;" class="input">
+        
+        <div class="header" style="padding: 0 16px 0 16px;min-width:40px;width:112px">
+            <label for="sel_layout">Select existing layout:</label>
+        </div>
+        <select id="sel_layout" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+        
+        <div class="header" style="padding: 0 16px 0 16px;min-width:40px;width:165px">
+            <label for="layout_name">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OR &nbsp;&nbsp;&nbsp;Name for new page:</label>
+        </div>
+        <input id="layout_name" class="text ui-widget-content ui-corner-all" style="max-width:30em">
+        <button id="btnCreateLayout" style="margin-left:4px">Create new</button> 
+        
+    </div>
+    <div style="padding: 0.2em; width: 100%;" class="input">
+    </div>
+    
+</fieldset>
+
+<div id="div_embed" class="content_div" style="display: none;">
+<!--
+    <p>
+        One or more saved facet (or ordinary) searches can be embedded into an iframe in a website using the following code:
+    </p>
+    <p style="padding:1em 0 1em 0;font-size:0.9em">
+        For more than one search, separate the IDs by commas (the searches will appear as buttons). Enclose within &lt;code&gt; &lt;/code&gt; 
+        for Wordpress sites (the use of &lt;code&gt; may need to be enabled for your site).
+        The URL can also be opened on its own in a separate tab. Note that ordinary searches can also be embedded simply through
+        specifying the URL obtained when the search is run in the Heurist interface.
+    </p>
+-->
+    <p style="padding:0.5em 0 0.5em 0;">Owing to the rich functionality and interconnection of Heurist widgets and cross-domain access restrictions, embedding widgets directly in the html of an external site is complex and could lead to long-term instability due to code changes. By populating an iframe with a layout maintained in Heurist, we can ensure that the functionality in this layout is maintained as part of the Heurist codebase.</p> 
+    <p style="padding-bottom:0.5">The appearance and behaviour of the embedded functions can be modified by editing the layout within the Heurist database (this will alter all web pages which use the layout - create several layouts if required).</p>
+    
+    <label style="font-weight:bold">iframe embedding code:</label>
+    <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
+
+    <br><br>    
+    <label style="font-weight:bold">Standalone URL:</label>
+    <textarea id="code-textbox3" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
+
+</div>

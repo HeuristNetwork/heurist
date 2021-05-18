@@ -1522,6 +1522,11 @@ console.log('No active tree node!!!!')
                     }
                 }); 
             }
+            
+            var ele = this._editing.getInputs('rst_DisplayName');
+            this._on( $(ele[0]), {
+                keypress: window.hWin.HEURIST4.ui.preventChars} );
+            
                 
         }
 

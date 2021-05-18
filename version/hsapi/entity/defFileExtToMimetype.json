@@ -1,0 +1,49 @@
+{
+        "entityName": "defFileExtToMimetype",
+
+        "tableName": "defFileExtToMimetype",
+        "tablePrefix": "fxm",
+        
+        "helpContent": "defFileExtToMimetype.html",
+        
+        "searchFormContent": "searchDefFileExtToMimetype.html",
+        
+        "entityTitle": "File Type",
+        "entityTitlePlural": "File Types",
+        "empty_remark": "Please use the search fields above to locate relevant file type",
+        
+        "fields": [
+                {
+                    "dtID": "fxm_Extension",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"primary",
+                        "dty_Size":10,
+                        "rst_DisplayName": "Extension:"
+                    }
+                },
+                {
+                    "dtID": "fxm_MimeType",
+                    "titleField": true,
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"title",
+                        "dty_Size":"100",
+                        "rst_DisplayName": "Mime type:",
+                        "rst_DisplayHelpText": "The standard mime type string",
+                        "rst_DisplayWidth":"40"
+                    }
+                },
+                {
+                    "dtID": "fxm_FiletypeName",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":"30",
+                        "rst_DisplayName": "File type name:",
+                        "rst_DisplayHelpText": "A textual name for the file type represented by the extension",
+                        "rst_DisplayWidth":"40"
+                    }
+                }
+     ]
+}
