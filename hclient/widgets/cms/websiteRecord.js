@@ -178,7 +178,7 @@ function hCmsEditing(_options) {
                       icon: 'page-embed',
                       text: 'Insert template',
                       onclick: function (_) {  //since v5 onAction
-                            __addTemplate();
+                         __insertTemplate();   
                       }
                     });
                                 
@@ -872,26 +872,31 @@ function hCmsEditing(_options) {
     // 4. Adds to content
     // 5. Init edit/remove links
     //
-    function __addTemplate(){
+    function __addTemplate(template_name){
     
         
         // 1. Shows dialog with list of templates 
-        var sURL = window.hWin.HAPI4.baseURL+'/hclient/widgets/cms/templates/snippets/blog.html';
-        var sURL2 = window.hWin.HAPI4.baseURL+'/hclient/widgets/cms/templates/snippets/blog.js';
+        var sURL = window.hWin.HAPI4.baseURL+'/hclient/widgets/cms/templates/snippets/'+template_name+'.html';
+        var sURL2 = window.hWin.HAPI4.baseURL+'/hclient/widgets/cms/templates/snippets/'+template_name+'.js';
         
         // 2. Loads template
         var ele = $('<div>').attr('data-template-temp',1).appendTo(doc_body).hide().load(sURL, function(){
 
         var t_style = ele.find('style').text(); //style will be added to page css
         
-        ele.on('oncomplete', function(){
+        ele.on('oncomplete', function(event, data){
             
                 // 4. Adds to tinymce
                 var content = ele.html();
                 tinymce.activeEditor.insertContent(content);
                 // 5. Init edit/remove links
                 __initWidgetEditLinks();
-                //$.each(ids, __initWidgetEditLinks);
+                
+                //scroll to pos
+                if(data && data.widgetid){
+                    $(tinymce.activeEditor.getBody()).find('#'+data.widgetid).get(0).scrollIntoView();    
+                }
+                
                 
                 ele.empty().remove(); //remove temp div
                 
@@ -1350,7 +1355,7 @@ function hCmsEditing(_options) {
            default_palette_class: 'ui-heurist-publish',
            width:750,
            close: function(){
-               is_edit_widget_open = false;
+                is_edit_widget_open = false;
                 $dlg.dialog('destroy');       
                 $dlg.remove();
            },
@@ -1740,6 +1745,71 @@ function hCmsEditing(_options) {
            }  //end open event
         });
         
+        
+    }
+    
+    //
+    //
+    //
+    function __insertTemplate(){
+
+        var $dlg;
+
+        if(is_edit_widget_open) return;
+        is_edit_widget_open = true;
+        
+        var selected_template = null;
+        
+        var templates = {
+                blog:{name:'Blog posts', author:'Heurist team',
+                    description:'List of blog post with filter'},
+                search_list_map:{name:'Search, List and Map', author:'Unknow author',
+                    description:'Filters, result list and mapping.... (NOT IMPLEMENTED)'}};
+
+        var buttons= [
+                 {text:window.hWin.HR('Cancel'), 
+                    id:'btnCancel',
+                    css:{'float':'right','margin-left':'30px','margin-right':'20px'}, 
+                    click: function() { 
+                        $dlg.dialog( "close" );
+                    }},
+                 {text:window.hWin.HR('Insert'), 
+                    id:'btnDoAction',
+                    class:'ui-button-action',
+                    disabled:'disabled',
+                    css:{'float':'right'}, 
+                    click: function() { 
+                        if(selected_template){
+                            __addTemplate(selected_template);
+                            $dlg.dialog( "close" );    
+                        }
+                    }}];
+      
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
+                +"hclient/widgets/cms/editCMS_SelectTemplate.html?t="+(new Date().getTime()), 
+                buttons, 'Select Template to insert to your Web Page', 
+        {  container:'cms-add-widget-popup',
+           default_palette_class: 'ui-heurist-publish',
+           width:750,
+           close: function(){
+                is_edit_widget_open = false;
+                $dlg.dialog('destroy');       
+                $dlg.remove();
+           },
+           open: function(){
+                is_edit_widget_open = true;
+                
+                //load list of templates and init selector
+                $dlg.find('#templates').change(function(e){
+                    window.hWin.HEURIST4.util.setDisabled( $dlg.parents('.ui-dialog').find('#btnDoAction'), false );
+                    var t_name = $(e.target).val();
+                    selected_template  = t_name;
+                    $dlg.find('.template_author').html(templates[t_name]['author']);
+                    $dlg.find('.template_description').html(templates[t_name]['description']);
+                });
+               
+           }
+        });
         
     }
  

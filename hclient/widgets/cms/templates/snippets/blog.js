@@ -36,10 +36,16 @@ window.hWin.HAPI4.SystemMgr.ssearch_save(request,
             var widgetid = 'mywidget_'+window.hWin.HEURIST4.util.random();
 
             //replace widget id, filter id and realm
-            var ele = container.find('div[data-heurist-app-id="heurist_SearchTree"]');
+            var ele = container.find('div[data-heurist-app-id="heurist_recordAddButton"]');
+            ele.attr('id', widgetid);
+            var content = window.hWin.HEURIST4.util.isJSON(ele.text());
+            content.search_realm = realm_id;
+            ele.text(JSON.stringify(content));
+            
+            ele = container.find('div[data-heurist-app-id="heurist_SearchTree"]');
             var content = window.hWin.HEURIST4.util.isJSON(ele.text());
             //DEBUG console.log(ele.text());
-            ele.attr('id', widgetid);
+            ele.attr('id', widgetid+1);
             content.search_realm = realm_id;
             content.init_svsID = svsID;
             content.allowed_svsIDs = svsID;
@@ -61,12 +67,12 @@ window.hWin.HAPI4.SystemMgr.ssearch_save(request,
                     
                     var ele = container.find('div[data-heurist-app-id="heurist_resultList"]');
                     var content = window.hWin.HEURIST4.util.isJSON(ele.text());
-                    ele.attr('id', widgetid+1);
+                    ele.attr('id', widgetid+2);
                     content.search_realm = realm_id;
                     content.rendererExpandDetails = template_name;
                     ele.text(JSON.stringify(content));
-                    
-                    container.trigger('oncomplete');
+                  
+                    container.trigger('oncomplete',{widgetid:widgetid});
                 }
                 
             });
