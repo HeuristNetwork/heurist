@@ -926,7 +926,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         for(i=0;i<int.length;i++){
 
-            var isOutlierMin = (int[i].values[0] < Number($('#minOutlier').val())) ? true : false;
+            var isOutlierMin = ((int[i].values[0] < Number($('#minOutlier').val())) && (int[i].values[1] < Number($('#minOutlier').val()))) ? true : false;
             var isOutlierMax = ((int[i].values[1] > Number($('#maxOutlier').val())) && (int[i].values[0] > Number($('#maxOutlier').val()))) ? true : false;
 
             if(!isOutlierMin && !isOutlierMax){
@@ -956,7 +956,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     $('#changeValueBox').blur(function(){
 
                         //Need an if statement to prevent user from entering beyond the max value.
-
+                        
                         //Change the max value for the intervals based on what the user has entered.
                         for(k=0;k<fields3[name].intervals.length;k++){
                             if(k < intervalId){
@@ -1016,7 +1016,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             }
                         }
                     
-                        if((fields3[name].intervals[t].values[0] < outlierNumber)&&(fields3[name].intervals[t].values[1] < outlierNumber)){
+                        if((fields3[name].intervals[t].values[0] < outlierNumber)&&(fields3[name].intervals[t].values[1] <= outlierNumber)){
                             fields3[name].intervals.splice(t, 1);
                             t=0;
                             continue
