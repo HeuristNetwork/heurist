@@ -74,6 +74,10 @@ if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
 }else if (@$_REQUEST['file'] || @$_REQUEST['thumb'] || @$_REQUEST['rurl']){
     header( 'Location: hsapi/controller/file_download.php?'.$_SERVER['QUERY_STRING'] );
     return;
+}else if (@$_REQUEST['template']){
+    header( 'Location: viewers/smarty/showReps.php?'.$_SERVER['QUERY_STRING'] );
+    return;    
+    
 }else if (@$_REQUEST['logo']){
     $host_logo = realpath(dirname(__FILE__)."/../organisation_logo.jpg");
     if(file_exists($host_logo)){

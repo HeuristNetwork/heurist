@@ -1091,7 +1091,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 //window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
 
-                var allowed_fieldtypes = ['title','modified','enum','freetext',"year","date","integer","float","resource","relmarker"];
+                var allowed_fieldtypes = ['title','added','modified','enum','freetext',"year","date","integer","float","resource","relmarker"];
                 
                 var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes );
 /*                
@@ -1472,7 +1472,10 @@ $.widget( "heurist.search_faceted_wiz", {
                     }else
                     if(dtid=='modified'){
                        harchy_fields.push("Modified"); 
+                    }else if(dtid=='added'){
+                       harchy_fields.push("Added"); 
                     }
+
                     
                     var linktype = dtid.substr(0,2);                                
                     if(isNaN(Number(linktype))){

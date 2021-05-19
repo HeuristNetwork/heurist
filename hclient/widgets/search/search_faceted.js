@@ -336,6 +336,9 @@ $.widget( "heurist.search_faceted", {
                     }
                     if(data.closeFacetedSearch){
                         that._trigger( "onclose" );    
+                    }else
+                    if(data.restartSearch){
+                        that.doSearch();
                     }
                     
                 }

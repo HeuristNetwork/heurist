@@ -946,11 +946,10 @@ function hCmsEditing(_options) {
         //
         function __prepareWidgetDiv( widgetid, widget_old ){
             //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-            
-            
+
             var sel = $dlg.find('#widgetName');
             var widget_name = sel.val();
-            var widget_title = sel.find('option:selected').attr('data-name');
+            var widget_title = sel.find('option:selected').attr('data-name'); //not used
             var widgetCss = $dlg.find('#widgetCss').val();
             var groupContent = '';
             
@@ -1002,7 +1001,7 @@ function hCmsEditing(_options) {
                     var mapdoc_id = $dlg.find('select[name="mapdocument"]').val();
                     if(mapdoc_id>0) opts['mapdocument'] = mapdoc_id;
                     
-            }else 
+            }else
             if (widget_name=='heurist_Groups'){
                 
                 //find all inputs with class = tabs
@@ -1045,7 +1044,8 @@ function hCmsEditing(_options) {
                 
                 
                     
-            }else{
+            }
+            else{
                 
                 var cont = $dlg.find('div.'+widget_name);
                 
@@ -1117,7 +1117,7 @@ function hCmsEditing(_options) {
 //console.log(opts);          
             
             opts['init_at_once'] = true;
-            opts['search_realm'] = 'sr1';
+            opts['search_realm'] = $dlg.find('input[name="search_realm"]').val();
             
             var widget_options = JSON.stringify(opts);
             /*var widget_options = '';//JSON.stringify(opts);
@@ -1155,10 +1155,10 @@ function hCmsEditing(_options) {
             var content = '';
             
 
-            var content = content 
-                + '<div style="display:none">'
-                + ' ========================== '+widget_name.toUpperCase().substring(8)+' ========================== </div>'
-                + '<div data-heurist-app-id="'+widget_name+'" '
+            var content = content = 
+                //+ '<div style="display:none">'
+                //+ ' ========================== '+widget_name.toUpperCase().substring(8)+' ========================== </div>'
+                '<div data-heurist-app-id="'+widget_name+'" '
                 + ' style="'+ widgetCss+'" '
                 + ' class="mceNonEditable" id="'+widgetid+'">'
                 + widget_options +  '</div>';
@@ -1187,6 +1187,8 @@ function hCmsEditing(_options) {
             var opts = window.hWin.HEURIST4.util.isJSON(cfgele.text());
             
             if(opts!==false){
+
+                $dlg.find('input[name="search_realm"]').val(opts.search_realm);    
             
                 if(widget_name=='heurist_Map'){
                     
@@ -1378,6 +1380,9 @@ function hCmsEditing(_options) {
                        }else if(val=='heurist_Search'){
                             s = s + 'border:0px solid gray;'
                             s = s + '\nheight:50px;\nwidth:400px;';        
+                       }else if(val=='heurist_recordAddButton'){
+                            s = s + 'border:1px solid gray;\ncolor:black;'
+                            s = s + '\nheight:26px;\nwidth:120px;';        
                        }else {
                            s = s + 'border:1px solid gray;'
                            if(val=='heurist_Navigation'){
@@ -1456,6 +1461,35 @@ function hCmsEditing(_options) {
                        });
                        
                        
+
+                   }else 
+                   if (val=='heurist_recordAddButton'){
+                        
+                        var ele = dele.find('button[name="add_record_cfg"]');
+                        
+                        if(!ele.button('instance')){
+                        
+                            ele.button().click(
+                                function(){
+                                    window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd',{
+                                        title: 'Select record type',
+                                        height: 520,
+                                        get_params_only: true,
+                                        onClose: function(context){
+                                            if(context && context.RecTypeID>0){
+                                                dele.find('input[name="RecTypeID"]').val(context.RecTypeID);
+                                                dele.find('input[name="OwnerUGrpID"]').val(context.OwnerUGrpID);
+                                                dele.find('input[name="NonOwnerVisibility"]').val(context.NonOwnerVisibility);
+                                            }
+                                                
+                                        },
+                                        default_palette_class: 'ui-heurist-publish'                                        
+                                    }
+                                    );    
+                                }
+                            );
+                        }
+                
                    }else
                    if(val=='heurist_SearchTree'){
                        

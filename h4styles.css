@@ -447,11 +447,12 @@ div.recordDiv > .action-button-container,
 div.recordDiv  .rec_actions {
     display: none;
 }
-/*
+
 div.recordDiv.public  > .action-button-container{
-    display: block;
+    display: none;
 }
-*/
+
+
 .list .recordDiv:hover .recordTitle{
     right:96px;
 }

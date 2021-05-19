@@ -32,20 +32,32 @@ p.main {
         
 <h2>    
     {wrap var=$r.f2_39_originalvalue dt="file" width="100" height="auto"}{*Thumbnail Image*}
-		 {$r.f2_1} {* Title *}
+         {$r.f2_1} {* Title *}
 </h2> 
 
+
+by <b>
+{$r.f2_15=$heurist->getRecord($r.f2_15)}
+{$r.f2_15.recTitle}{*Creator(s) >> Record Title*}</b>
 
   &nbsp;&nbsp;&nbsp;
 {$r.recAdded|date_format:"%A, %B %e, %Y"}{*Record Modified*}
 
-
-
+ &nbsp;&nbsp;&nbsp;[
  
+  {foreach $r.f2_942s as $f2_942 name=valueloop}{*  multi-value field loop *}
+      {$f2_942.term} {* Category>>Term Note: $r.f942.term outputs first term only *}
+      {if not $smarty.foreach.valueloop.last}, {/if}
+  {/foreach} 
+
+]
+
+  &nbsp;&nbsp;&nbsp;
+   <a href="{HEURIST_BASE_URL}?db={HEURIST_DBNAME}&q=id:{$r.recID}&template={$template_file}" 
+       target="_blank">
+  URL (new tab)</a> 
   
-
-
-     {$r.f2_4}{*Blog Entry*} 
+      {$r.f2_4}{*Blog Entry*} 
 
 <br/> {* line break between each record *}
 

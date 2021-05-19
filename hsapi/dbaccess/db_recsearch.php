@@ -194,6 +194,8 @@ function recordSearchFacets($system, $params){
         }else if($fieldid=='recTitle' || $fieldid=='title'){
             $select_field = "r0.rec_Title";
             $dt_type = "freetext";
+        }else if($fieldid=='recAdded' || $fieldid=='added'){
+            $select_field = "r0.rec_Added";
         }else if($fieldid=='recModified' || $fieldid=='modified'){
             $select_field = "r0.rec_Modified";
         }else{
