@@ -840,19 +840,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     else{
                         var errorMessage = "When entering the range of intervals to apply to a dataset, the from and to values must be between the range above."
                         + " The from value must also not exceed the to value and vice versa.";
-                        var alert = document.createElement('div');
-                        $(alert).addClass('alert alert-warning alert-dismissible fade show')
-                        .attr('role', 'alert')
-                        .attr('id','numberAlert')
-                        .html(errorMessage)
-                        .append($('<button>')
-                            .attr('type', 'button')
-                            .attr('class','btn-close')
-                            .attr('data-bs-dismiss', 'alert')
-                            .attr('aria-label', 'close')
-                        )
-                        .prependTo($('#'+name+'IntervalsBody'));
 
+                        createErrorMessage($('#'+name+'IntervalsBody'), errorMessage);
                         /*
                         setTimeout(function(){
                             $('#numberAlert').fadeOut(500, function(){
@@ -901,7 +890,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $('<div class="col-2">').append('<h5>Intervals:</h5>').appendTo($intervalsDiv);
 
                 $intervalColumn = $(document.createElement('div'))
-                .addClass('col')
+                .addClass('col-4')
                 .appendTo($intervalsDiv);
 
                 //Create number rows of intervals
@@ -953,10 +942,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                     $(this).html('<input type="number" class="w-100" id="changeValueBox" value="'+intervalValue+'">');
                     //When user clicks out of input box change the intervals value min and max
-                    $('#changeValueBox').blur(function(){
-
-                        //Need an if statement to prevent user from entering beyond the max value.
-                        
+                    $('#changeValueBox').blur(function(){                        
                         //Change the max value for the intervals based on what the user has entered.
                         for(k=0;k<fields3[name].intervals.length;k++){
                             if(k < intervalId){
@@ -964,21 +950,35 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             }
                             else{
                                 var newNumber = Number($('#changeValueBox').val());
-                                if(k==intervalId){
-                                    fields3[name].intervals[intervalId].values[1] = newNumber;
-                                    fields3[name].intervals[intervalId].name = rnd(fields3[name].intervals[intervalId].values[0]) + ' ~ ' +  rnd(fields3[name].intervals[intervalId].values[1]);
-                                    fields3[name].intervals[intervalId].description = rnd(fields3[name].intervals[intervalId].values[0]) + ' ~ ' +  rnd(fields3[name].intervals[intervalId].values[1]);
-                                }
-                                else{
-                                    if(newNumber >= fields3[name].intervals[k].values[1]){
-                                        fields3[name].intervals.splice(k, 1);
-                                        k=0;
-                                        continue;
+
+                                if((newNumber < fields3[name].values[1]) && (newNumber >= fields3[name].intervals[k].values[0])){
+                                    if(k==intervalId){
+                                        fields3[name].intervals[intervalId].values[1] = newNumber;
+                                        fields3[name].intervals[intervalId].name = rnd(fields3[name].intervals[intervalId].values[0]) + ' ~ ' +  rnd(fields3[name].intervals[intervalId].values[1]);
+                                        fields3[name].intervals[intervalId].description = rnd(fields3[name].intervals[intervalId].values[0]) + ' ~ ' +  rnd(fields3[name].intervals[intervalId].values[1]);
                                     }
                                     else{
-                                        fields3[name].intervals[k].values[0] = newNumber;
-                                        break;
+                                        if(newNumber >= fields3[name].intervals[k].values[1]){
+                                            fields3[name].intervals.splice(k, 1);
+                                            k=0;
+                                            continue;
+                                        }
+                                        else{
+                                            fields3[name].intervals[k].values[0] = newNumber;
+                                            break;
+                                        }
                                     }
+                                }
+                                else{
+                                    var errorMessage;
+                                    if((newNumber > fields3[name].values[1]) && (newNumber >= fields3[name].intervals[k].values[0])){
+                                        errorMessage = 'Number cannot be greater than the max range.'
+                                    }
+                                    else if((newNumber < fields3[name].values[1]) && (newNumber < fields3[name].intervals[k].values[0])){
+                                        errorMessage = 'Number cannot be less than the min range of this interval.'
+                                    }
+                                    createErrorMessage($('#'+name+'IntervalsBody'), errorMessage);
+                                    break;
                                 }
                             }
                         }
@@ -1635,6 +1635,27 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $('#addInterval').prop('disabled',false);
             
         _doRender();
+    }
+
+    //Create error message
+    function createErrorMessage(location, message){
+        
+        if($('#alert').length){
+            $('#alert').remove();
+        }
+
+        var alert = document.createElement('div');
+            $(alert).addClass('alert alert-warning alert-dismissible fade show')
+            .attr('role', 'alert')
+            .attr('id','alert')
+            .html(message)
+            .append($('<button>')
+                .attr('type', 'button')
+                .attr('class','btn-close')
+                .attr('data-bs-dismiss', 'alert')
+                .attr('aria-label', 'close')
+            )
+            .prependTo(location);
     }
 
     //
