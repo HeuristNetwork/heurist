@@ -599,10 +599,10 @@ function ShowReps() {
         codeEditor.setValue(content);
 
         setTimeout(function(){
-                $('.CodeMirror').show();
+                    $('div.CodeMirror').css('height','100%').show();
                     codeEditor.refresh();
                     _keepTemplateValue = codeEditor.getValue();
-                },2000);
+                },1000);
     }
 
 
