@@ -45,7 +45,7 @@ _init - #main-menu navigation wizard onselect -> __iniLoadPageById warn for chan
 
 
 // 
-//  tinymce-body - textare container with data - it becomes visible when editor is ON
+//  tinymce-body - textarea container with data - it becomes visible when editor is ON
 //  .mce-edit-area > iframe - real editor
 //  btn_inline_editor3 button invokes direct editor
 //  btn_inline_editor button invokes wyswyg editor _editPageContent
@@ -83,6 +83,8 @@ function hCmsEditing(_options) {
     
     var original_editor_content = '';
     var LayoutMgr = new hLayout(); //to avoid interferene with  window.hWin.HAPI4.LayoutMgr  
+    
+    var codeEditor = null; //codemirror
 
     
     // define tinymce configuration
@@ -173,7 +175,7 @@ function hCmsEditing(_options) {
                     });
 
                 editor.addButton('customAddTemplate', { //since v5 .ui.registry
-                      icon: 'template',
+                      icon: 'page-embed',
                       text: 'Insert template',
                       onclick: function (_) {  //since v5 onAction
                             __addTemplate();
@@ -264,6 +266,12 @@ function hCmsEditing(_options) {
         
         $('<textarea class="tinymce-body" style="position:absolute;left:0;width:99.9%;top:0;bottom:0;display:none"></textarea>')
             .appendTo(main_content.parent());
+
+        //codemirror container
+        $('<div id="codemirror-body" style="position:absolute;left:0;width:99.9%;top:0;bottom:0;display:none"></div>')
+            .hide()
+            .appendTo(main_content.parent());
+
         
         $('<a href="#" id="btn_inline_editor">Edit page content</a>')
                 .appendTo(doc_body).addClass('ui-front cms-button') //was body > .ent_wrapper:first
@@ -298,6 +306,51 @@ function hCmsEditing(_options) {
 
     }//_init  
     
+    
+    //
+    // init codemirror editor
+    //
+    function _initCodeEditor(content) {
+        
+        if(codeEditor==null){
+
+                codeEditor = CodeMirror(document.getElementById('codemirror-body'), {
+                    mode           : "htmlmixed",
+                    tabSize        : 2,
+                    indentUnit     : 2,
+                    indentWithTabs : false,
+                    lineNumbers    : false,
+                    matchBrackets  : true,
+                    smartIndent    : true,
+                    /*extraKeys: {
+                        "Enter": function(e){
+                            insertAtCursor(null, "");
+                        }
+                    },*/
+                    onFocus:function(){},
+                    onBlur:function(){}
+                });
+        }
+
+        codeEditor.setValue(content);
+        $('#codemirror-body').show();
+
+        setTimeout(function(){
+                    $('div.CodeMirror').css('height','100%').show();
+                
+                    //CodeMirror.commands["selectAll"](codeEditor);
+                    //var range = { from: codeEditor.getCursor(true), to: codeEditor.getCursor(false) };
+                    //codeEditor.autoFormatRange(range.from, range.to);                
+                    
+                    var totalLines = codeEditor.lineCount();  
+                    codeEditor.autoFormatRange({line:0, ch:0}, {line:totalLines});                    
+                    codeEditor.scrollTo(0,0);
+                    codeEditor.setCursor(0,0); //clear selection
+                    //codeEditor.getDoc().setSelection({from:0,to:0});
+                    //codeEditor.refresh();
+                    //_keepTemplateValue = codeEditor.getValue();
+                },500);
+    }
     
             
     //
@@ -489,7 +542,8 @@ function hCmsEditing(_options) {
         var newval = '';
         if(_isDirectEditMode()){
            //save as is
-           newval = $('.tinymce-body').val();
+           //newval = $('.tinymce-body').val();
+           newval = codeEditor.getValue();
             
         }else{
            newval = __getEditorContent(); 
@@ -575,7 +629,7 @@ function hCmsEditing(_options) {
     function __hideEditor( new_pageid ){
             
             if(!_isDirectEditMode()){ //detach
-                tinymce.remove('.tinymce-body');
+                tinymce.remove('.tinymce-body'); //detach
             }
             $('#btn_inline_editor').show();
             $('#btn_inline_editor3').show();
@@ -641,6 +695,8 @@ function hCmsEditing(_options) {
             last_save_content = null;    
             was_modified = false;    
             $('.tinymce-body').hide();
+            $('#codemirror-body').hide();
+            
             main_content.show();
             main_content.parent().css('overflow-y','auto');
             $('#edit_mode').val(0).click();
@@ -674,6 +730,7 @@ function hCmsEditing(_options) {
                     top:tp,left:lp-340}).hide();
                     
                 $('textarea.tinymce-body').css('top',30);
+                $('#codemirror-body').css('top',30);
             
             }else{
                 
@@ -1096,17 +1153,14 @@ function hCmsEditing(_options) {
 */                
 
             var content = '';
-            /*
-            if(window.hWin.HEURIST4.util.isempty(widget_old)){
-                content =  '<!-- =========================='+ widget_name +'======================= -->'; // + "\n";
-            }
-            */
+            
 
             var content = content 
-                +'<div data-heurist-app-id="'+widget_name+'" '
+                + '<div style="display:none">'
+                + ' ========================== '+widget_name.toUpperCase().substring(8)+' ========================== </div>'
+                + '<div data-heurist-app-id="'+widget_name+'" '
                 + ' style="'+ widgetCss+'" '
                 + ' class="mceNonEditable" id="'+widgetid+'">'
-                + '<!-- '+widget_name.toUpperCase().substring(8)+'   -->'
                 + widget_options +  '</div>';
   
                 
@@ -1834,9 +1888,11 @@ function hCmsEditing(_options) {
             
             main_content.parent().css('overflow-y','hidden');
             main_content.hide();
-            //$('#edit_mode').val(1).click();//to disable left panel
-            $('.tinymce-body').show();
+            
             original_editor_content = $('.tinymce-body').val();
+            
+            //$('.tinymce-body').show();
+            _initCodeEditor(original_editor_content);
             
         }
         window.hWin.HEURIST4.util.stopEvent(event);

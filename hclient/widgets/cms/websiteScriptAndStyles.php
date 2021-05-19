@@ -148,6 +148,15 @@ if($edit_Available){
     <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js"></script>
     <script src="<?php echo PDIR;?>external/tinymce/jquery.tinymce.min.js"></script>
     -->
+    
+    <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/util/formatting.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/xml/xml.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/javascript/javascript.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/css/css.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/htmlmixed/htmlmixed.js"></script>
+    
     <script src="websiteRecord.js"></script>
     <?php
 }else{
@@ -533,6 +542,20 @@ div.coverall-div {
     background-color: white;
     opacity: 1;
 }
+
+div.CodeMirror{
+    height:100%;
+}
+.CodeMirror *{
+    /* font-family: Courier, Monospace !important; */
+    font-family: Arial, sans-serif !important;
+    font-size: 14px;
+}
+.CodeMirror div.CodeMirror-cursor {
+    visibility: visible;
+}
+
+
 <?php        
 }
 //style from field DT_CMS_CSS of home record 
