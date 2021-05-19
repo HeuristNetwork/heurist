@@ -648,11 +648,11 @@ console.log('load google map api')
             <!--
             -->
             <div id="set-coordinates-helper">
-                <label>Paste geo data as Simple points, GeoJSON or WKT</label>
+                <label>Paste geo data as Simple points (X,Y or X Y), GeoJSON or WKT</label>
                 <div class="heurist-helper1" style="padding:5px 0">
                     WKT:  POINT(x y)   LINESTRING(x1 y1, x2 y2, x3 y3)   POLYGON((x1 y1, x2 y2, x3 y3)) see 
                     <a href="https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry" target="_blank">wikipedia</a> for more.<br>
-                    Simple points can be represented as: Y X or Y,X. Coordinates in decimal lat/long or UTM (first easting then northing)<br>
+                    Coordinates in decimal lat/long or UTM (x/easting then y/northing). Easting in W hemisphere starts at -180, northing in S Hemisphere starts at -90.<br>
                 </div>
             </div>
             <div id="get-coordinates-helper">
