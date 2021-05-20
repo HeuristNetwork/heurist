@@ -51,7 +51,6 @@ by <b>
   {/foreach} 
 
 ]
-
   &nbsp;&nbsp;&nbsp;
    <a href="{HEURIST_BASE_URL}?db={HEURIST_DBNAME}&q=id:{$r.recID}&template={$template_file}" 
        target="_blank">

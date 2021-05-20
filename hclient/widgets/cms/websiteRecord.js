@@ -157,43 +157,45 @@ function hCmsEditing(_options) {
                     $('.mce-edit-area > iframe').height( sheight );
                 });
                 
-                editor.addButton('customHeuristMedia', {
+                editor.ui.registry.addButton('customHeuristMedia', {
                       icon: 'image',
                       text: 'Add Media',
-                      onclick: function (_) {  //since v5 onAction in v4 onclick
+                      onAction: function (_) {  //since v5 onAction in v4 onclick
                             __addHeuristMedia();
                       }
                     });
                 
                 
-                editor.addButton('customAddWidget', { //since v5 .ui.registry
+                editor.ui.registry.addButton('customAddWidget', { //since v5 .ui.registry
                       icon: 'plus',
-                      text: 'Add database widget',
-                      onclick: function (_) {  //since v5 onAction
+                      text: 'Widget',
+                      tooltip: 'Add database widget',
+                      onAction: function (_) {  //since v5 onAction
                             __addEditWidget();
                       }
                     });
 
-                editor.addButton('customAddTemplate', { //since v5 .ui.registry
-                      icon: 'page-embed',
-                      text: 'Insert template',
-                      onclick: function (_) {  //since v5 onAction
+                editor.ui.registry.addButton('customAddTemplate', { //since v5 .ui.registry
+                      icon: 'embed-page', //paste-text
+                      text: 'Template',
+                      tooltip: 'Insert Template',
+                      onAction: function (_) {  //since v5 onAction
                          __insertTemplate();   
                       }
                     });
                                 
-                editor.addButton('customSaveButton', { //since v5 .ui.registry
+                editor.ui.registry.addButton('customSaveButton', { //since v5 .ui.registry
                       icon: 'save',
                       text: 'Save',
-                      onclick: function (_) {  //since v5 onAction in v4 onclick
+                      onAction: function (_) {  //since v5 onAction in v4 onclick
                             __saveChanges(false);
                       }
                     });            
 
-                editor.addButton('customCloseButton', {
+                editor.ui.registry.addButton('customCloseButton', {
                       icon: 'checkmark',
                       text: 'Done',
-                      onclick: function (_) {
+                      onAction: function (_) {
                           __iniLoadPageById(0); //reload current page
                       }
                     });            
@@ -331,7 +333,17 @@ function hCmsEditing(_options) {
                     onBlur:function(){}
                 });
         }
-
+        
+        
+        //preformat - break lines for co
+        var ele = $('<div>').html(content);
+        $.each(ele.find('div[data-heurist-app-id]'),function(i,el){
+            var s = $(el).text();
+            s = "\n"+s.replace(/,/g, ", \n");
+            $(el).text(s);
+        });
+        content = ele.html();
+        
         codeEditor.setValue(content);
         $('#codemirror-body').show();
 
@@ -760,7 +772,7 @@ function hCmsEditing(_options) {
     
     //
     // adds widget-design-header and widget-options
-    // assigns events for edit/remove links on widget placeholder in timymce editor
+    // assigns events for edit/remove links on widget placeholder in tinymce editor
     //
     function __initWidgetEditLinks(widgetid){
 
@@ -959,6 +971,7 @@ function hCmsEditing(_options) {
             var groupContent = '';
             
             var opts = {};
+            opts['__widget_name'] = '========================== '+widget_name.toUpperCase().substring(8)+' ==========================';
             
             if(widget_name=='heurist_Map'){
                 
@@ -1125,6 +1138,7 @@ function hCmsEditing(_options) {
             opts['search_realm'] = $dlg.find('input[name="search_realm"]').val();
             
             var widget_options = JSON.stringify(opts);
+            
             /*var widget_options = '';//JSON.stringify(opts);
             for(var key in opts){
                 widget_options = widget_options+key+':'+opts[key]+';'                
@@ -1161,8 +1175,6 @@ function hCmsEditing(_options) {
             
 
             var content = content = 
-                //+ '<div style="display:none">'
-                //+ ' ========================== '+widget_name.toUpperCase().substring(8)+' ========================== </div>'
                 '<div data-heurist-app-id="'+widget_name+'" '
                 + ' style="'+ widgetCss+'" '
                 + ' class="mceNonEditable" id="'+widgetid+'">'
@@ -1994,7 +2006,7 @@ function hCmsEditing(_options) {
             main_content.hide();
             
             original_editor_content = $('.tinymce-body').val();
-            
+
             //$('.tinymce-body').show();
             _initCodeEditor(original_editor_content);
             

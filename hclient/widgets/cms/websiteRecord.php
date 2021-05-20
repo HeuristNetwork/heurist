@@ -1,5 +1,5 @@
 <?php
-
+print '<!DOCTYPE html>';
     /**
     *  Website generator based on CMS records 99-51,52,53
     * 
