@@ -190,10 +190,10 @@ if($response!=null){
 
     foreach($res['files'] as $idx=>$file){
         if(@$file->error){
-            $sMsg = "Sorry, file was not processed due to the following reported error: ".$file->error.'.';
+            $sMsg = "Sorry, file was not processed due to the following reported error: ".$file->error.".\n\n";
             
             if(strpos($file->error, 'ownership permissions')==false){
-                $sMsg = $sMsg.' The most likely cause is that the file extension is not currently enabled for the upload function, jquery UploadHandler. Please use the bug report link above to request addition of this file type.';
+                $sMsg = $sMsg.' The most likely cause is that the file extension ('. ($file->type?$file->type:'XXX!') .') is not currently enabled for the upload function, jquery UploadHandler. Please use the bug report link above to request addition of this file type.';
             }
             
             $response = $system->addError(HEURIST_UNKNOWN_ERROR, $sMsg, null);

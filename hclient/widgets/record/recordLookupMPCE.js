@@ -2,10 +2,10 @@
  * recordLookupMPCE.js
  *
  *  1) This file loads html content from recordLookupMPCE.html
- *  2) This file completed the functionality for the MPCE toolkit, including:
+ *  2) And contains the functionality of the MPCE toolkit, including:
  *      - Assigning New Keywords to a Super Book (Work) record
- *      - Selecting a keyword to generate a list of other keywords assigned with each other
- *      - Display a list of keywords assigned to previously viewed works, automatically checking those used last
+ *      - Looking up a list of keywords that have been assigned with a selected keyword in other works
+ *      - Display a list of keywords assigned to previously viewed works, checking those used last
  *
  *
  *
@@ -103,7 +103,7 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
             {
                 vocab_id: [id_map.VI_Category],    // Vocabulary ID/Term ID
                 defaultTermID: sessionStorage.getItem("rec_category"),   //Default/Selected Term
-                topOptions: [{key:0, title:"Select a Parisian Classification...", value:"null"}],      //Top Options  [{key:0, title:'...select me...'},....]
+                topOptions: [{key:0, title:"Select a Parisian Classification..."}],      //Top Options  [{key:0, title:'...select me...'},....]
                 useHtmlSelect: false     // use native select of jquery select
             }
         );
@@ -113,7 +113,6 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
             {
                 vocab_id: [id_map.VI_Basis],    // Vocabulary ID/Term ID
                 defaultTermID: sessionStorage.getItem("rec_basis"),   // Default/Selected Term
-                topOptions: [{key:0, title:"Select Basis for Classification", value:"null"}],
                 useHtmlSelect: false    // use native select of jquery select
             }
         ); 
@@ -188,6 +187,7 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
 
         /* Set what the 'Update Record' button, bottom right of form, does */
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), false );
+        this.element.parents('.ui-dialog').find('#btnDoAction').before('<span id="save-msg" style="display:none;font-size:1.2em;">Add or Uncheck Selections</span>');
 
         /* Disable the 'X' button, located top-right corner */
         this.element.parent().find('.ui-dialog-titlebar-close').button().hide();
@@ -279,29 +279,6 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
         this._as_dialog.dialog('close');    // close popup
     },
 
-    beforeClose: function(){
-        //show warning in case of modification
-        if(_editing_symbology.isModified()){
-            var $dlg, buttons = {};
-            buttons['Save'] = function(){
-                edit_dialog.parent().find('#btnDoAction').click();
-                $dlg.dialog('close'); 
-            }; 
-            buttons['Ignore and close'] = function(){ 
-                _editing_symbology.setModified(false);
-                edit_dialog.dialog('close'); 
-                $dlg.dialog('close'); 
-            };
-
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
-                buttons,
-                {title:'Confirm',yes:'Save',no:'Ignore and close'});
-            return false;   
-        }
-        return true;
-    },
-
     /** Keyword Assignment **/
 
     /*
@@ -356,6 +333,7 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
                     }
 
                     var targetID = recordset.fld(record,'rec_ID');
+                    
                     var keyword_IDs = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem("rec_kywd"));
 
                     if (keyword_IDs)
@@ -482,7 +460,9 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
 
             removeFromList(list, items[i]);    /* Remove from Previous Keyword Table */
             addKeyword(items[i], title);   /* Add to Assigned Table and List */
-        }       
+        } 
+
+        disableUpdateBtn();      
     },
 
     /*
@@ -519,6 +499,8 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
             removeFromList(list, items[i]);    /* Remove from Associated Keyword Table */
             addKeyword(items[i], title);   /* Add to Assigned Table and List */
         }
+
+        disableUpdateBtn();
     },
 
     /** External Searches **/
@@ -784,7 +766,7 @@ function updateAssocDisplay(){
         }
         else
         {
-            item.innerHTML = "<input type='checkbox' value='" + keywords[i][0] + "' name='" + keywords[i][0] + "'><label for='" + keywords[i][0] + "'> " 
+            item.innerHTML = "<input type='checkbox' onclick='disableUpdateBtn();' value='" + keywords[i][0] + "' name='" + keywords[i][0] + "'><label for='" + keywords[i][0] + "'> " 
                                 + keywords[i][2] + " </label>&nbsp;&nbsp;<label> [ " + keywords[i][1] + " ] </label>";
 
             list.appendChild(item);
@@ -882,6 +864,8 @@ async function setupRecentWorks(){
             /* This is to allow the keywords to be displayed in the correct order, without this the default checked keywords can appear out of order */
             await sleep(50);
         }
+
+        disableUpdateBtn(true);
     }
 
     /* Check if current work can be added to the list of previously (recent) works */
@@ -1028,11 +1012,11 @@ function addRecentKeywords(id, title, set){
 
     if (set == 1)
     {
-        item.innerHTML = "<input type='checkbox' value='" + id + "' name='" + id + "' checked><label for='" + id + "'> " + title + " </label>";
+        item.innerHTML = "<input type='checkbox' onclick='disableUpdateBtn();' value='" + id + "' name='" + id + "' checked><label for='" + id + "'> " + title + " </label>";
     }
     else
     {
-        item.innerHTML = "<input type='checkbox' value='" + id + "' name='" + id + "'><label for='" + id + "'> " + title + " </label>";
+        item.innerHTML = "<input type='checkbox' onclick='disableUpdateBtn();' value='" + id + "' name='" + id + "'><label for='" + id + "'> " + title + " </label>";
     }
 
     list.appendChild(item);
@@ -1221,10 +1205,10 @@ function removeFromList(list, id){
     }
     else if (list_in == -1)
     {
-        console.log('removeFromList() Msg: List item does not exist');
+        msgToConsole('removeFromlist() Msg: List item does not exist', null);
         return;
     }
-
+    
     list.getElementsByTagName('li')[list_in].remove();
 }
 
@@ -1375,6 +1359,32 @@ function findListItem(list, value) {
 }
 
 /*
+    Disable the Update Record button when a checkbox is checked, displaying message to uncheck or add selections
+
+    Param:
+        override(false) -> ignore usual check, recent keywords wasn't triggering the disable correctly
+
+    Return: VOID
+*/
+function disableUpdateBtn(override = false){
+
+    if(override){
+        $($('.mpce')[0].parentNode.parentNode).find('#btnDoAction').attr('disabled', true).css({'cursor': 'default', 'opacity': '0.5'});
+        $($('.mpce')[0].parentNode.parentNode).find('#save-msg').css({'margin':'10px', 'display':'inline-block'});
+        return;
+    }
+
+    if($('.mpce').find('input:checked').not('#check-all').length > 0){
+        $($('.mpce')[0].parentNode.parentNode).find('#btnDoAction').attr('disabled', true).css({'cursor': 'default', 'opacity': '0.5'});
+        $($('.mpce')[0].parentNode.parentNode).find('#save-msg').css({'margin':'10px', 'display':'inline-block'});
+    }
+    else{
+        $($('.mpce')[0].parentNode.parentNode).find('#btnDoAction').attr('disabled', false).css({'cursor': 'default', 'opacity': '1'});
+        $($('.mpce')[0].parentNode.parentNode).find('#save-msg').css({'margin':'10px', 'display':'none'});
+    }
+}
+
+/*
     Toggles the checkboxes based on whether the "Check All" options is set
 
     Param: 
@@ -1396,6 +1406,7 @@ function checkAllOptions(list, isChecked){
         }
     }
 
+    disableUpdateBtn();
 }
 
 /*
