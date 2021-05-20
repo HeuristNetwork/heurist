@@ -1,4 +1,0 @@
-// This file lists databases on this server which may include JS code in the CMS Home Page or CMS Menu records
-// All other databases are excluded from executing such code. 
-// MOVE THIS FILE TO HEURIST BASE DIRECTORY (normally /var/www/html/HEURIST) in order to enable it
-// List one database name per line (exclude hdb_ prefix). Order is unimportant.
