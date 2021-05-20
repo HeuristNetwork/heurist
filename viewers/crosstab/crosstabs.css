@@ -290,3 +290,17 @@ div .progress-message {
     width: 49%;
 }
 
+/* for chrome */
+#changeValueBox::-webkit-outer-spin-button,
+#changeValueBox::-webkit-inner-spin-button{
+    -webkit-appearance: none;
+    margin:0;
+    text-align: center;
+}
+
+/* for firefox */
+input[type=number]{
+    -moz-appearance: textfield;
+    text-align: center;
+}
+

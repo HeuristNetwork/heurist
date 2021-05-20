@@ -446,17 +446,20 @@ function CrosstabsAnalysis(_query, _query_domain) {
     */
     function renderIntervals(name){
 
-        var $container = $('#'+name+'Intervals');
+        //var $container = $('#'+name+'Intervals');
         var $modalDialogBody = $('#'+name+'IntervalsBody'); //Hosts the entire body of modal
         
         var detailtype = fields3[name].type;
 
         $modalDialogBody.empty();
-        $container.empty();
+        //$container.empty();
 
         if(fields3[name].intervals.length<1){
+
+            /*
             $container.html('There are no values for these fields in the current results set');
             $container.show();
+            */
             return;
         }
 
@@ -474,6 +477,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 var $btnDiv;
                 var $intervalHeadRow;
                 var $listDiv;
+
+                $('#'+name+'Dialog').addClass('modal-xl');
 
                 $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase());
 
@@ -793,12 +798,17 @@ function CrosstabsAnalysis(_query, _query_domain) {
             else if(detailtype=="float" || detailtype=="integer"){
                 var $entireDiv;
                 var $resetRow;
+                var $resetRowBody;
                 var $roundingDiv;
+                var $roundingRowBody;
                 var $intervalsDiv;
                 var $intervalColumn;
                 var selectBox;
                 
                 var decimalPlaces = [0,1,2,3];
+
+                //Change size of modal to accommodate and remove white space. These fields are not large.
+                $('#'+name+'Dialog').removeClass('modal-xl');
 
                 $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase()
                     + ' (Range: '+fields3[name].values[0]+' - ' +fields3[name].values[1]+')');
@@ -816,17 +826,20 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 //Create the reset row.
                 $resetRow = $(document.createElement('div'))
-                .addClass('row')
+                .addClass('col-12 card mb-2 pt-2 bg-light')
                 .appendTo($entireDiv);
                 
-                $('<div class="col-2">').append('<h5>Reset Intervals:</h5>').appendTo($resetRow);
-                $('<div class="col">')
-                .append($('<input id="'+name+'IntCount">').attr('size',6).val(keepCount))
-                .append($('<span>').html('intervals from'))
-                .append($('<input id="minOutlier">').attr('size',6).val(minMax[0]))
-                .append($('<span>').html('to'))
-                .append($('<input id="maxOutlier">').attr('size',6).val(minMax[1]))
-                .append($('<button>Apply</button>').addClass('btn btn-success').click(function(event){
+                $resetRowBody = '<div class="row">'+
+                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Reset Intervals:</label></div><div class="col-sm col-xs-12"><input id="'+name+'IntCount" size="6" value="'+keepCount+'"></input></div></div></div>'+
+                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Range (from):</label></div><div class="col-sm col-xs-12"><input id="minOutlier" size="6" value="'+minMax[0]+'"></input></div></div></div>'+
+                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Range (to):</label></div><div class="col-sm col-xs-12"><input id="maxOutlier" size="6" value="'+minMax[1]+'"></input></div></div></div>' +
+                    '<div class="col-12 mb-2"><button class="btn btn-success w-100" id="numericApply">Apply</button></div>' +
+                    '</div>';
+
+                $($resetRowBody).appendTo($resetRow);
+                
+                //Add click function to apply button.
+                $($resetRow).find('#numericApply').click(function(event){
                     var isMinWithin = (parseInt($('#minOutlier').val()) >= fields3[name].values[0] && parseInt($('#minOutlier').val()) <= fields3[name].values[1]) ? true : false;    //If min within range.
                     var isMaxWithin = (parseInt($('#maxOutlier').val()) <= fields3[name].values[1] && parseInt($('#maxOutlier').val()) >= fields3[name].values[0]) ? true : false;    //If man within range.
                     var isMaxGreater = (parseInt($('#maxOutlier').val()) < parseInt($('#minOutlier').val())) ? true : false;
@@ -850,19 +863,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         }, 3000)
                         */
                     }     
-                }))
-                .appendTo($resetRow);
+                });
 
                 //Create rounding row
                 $roundingDiv = $(document.createElement('div'))
-                .addClass('row')
+                .addClass('col-12 card mb-2 pt-2 bg-light')
                 .appendTo($entireDiv);
 
-                $('<div class="col-2">').append('<h5>Rounding:</h5>').appendTo($roundingDiv);
-                $('<div class="col">')
-                .append($('<select id="roundingSelect">'))
-                .append($('<span>').html('decimal place'))
-                .appendTo($roundingDiv);
+                $roundingRowBody = '<div class="row">' +
+                '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Rounding:</label></div><div class="col-sm col-xs-12"><select id="roundingSelect"><span>decimal place</span></div></div></div>' +
+                '</div>'
+
+                $($roundingRowBody).appendTo($roundingDiv);
 
                 //Append rounding numbers in select box
                 for(j=0;j<decimalPlaces.length;j++){
@@ -884,13 +896,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 //Create intervals
                 $intervalsDiv = $(document.createElement('div'))
-                .addClass('row')
+                .addClass('col-12 card mb-2 pt-2 bg-light')
                 .appendTo($entireDiv);
 
-                $('<div class="col-2">').append('<h5>Intervals:</h5>').appendTo($intervalsDiv);
+                $('<div class="row">').append($('<div class="col-12">').append('<h5>Intervals:</h5>')).appendTo($intervalsDiv);
 
                 $intervalColumn = $(document.createElement('div'))
-                .addClass('col-4')
+                .addClass('col-12 mb-2')
                 .appendTo($intervalsDiv);
 
                 //Create number rows of intervals
@@ -927,7 +939,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 //Create the row div.
                 var $intRows = $(document.createElement('div'));
 
-                $intRows.addClass('intervalDiv list row')
+                $intRows.addClass('row text-center pb-1')
                 .attr('id',name+i)
                 .appendTo(htmlElement);
 
@@ -1031,7 +1043,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     }
                     var $intRows = $(document.createElement('div'));
 
-                    $intRows.addClass('row')
+                    $intRows.addClass('row text-center pb-1')
                     .appendTo(htmlElement);
                     
                     $('<div class="col-4">').html('Outliers').appendTo($intRows);
@@ -1084,7 +1096,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     }
                     var $intRows = $(document.createElement('div'));
 
-                    $intRows.addClass('row')
+                    $intRows.addClass('row text-center pt-1')
                     .appendTo(htmlElement);
                     
                     $('<div class="col-4">').html('Outliers').appendTo($intRows);
@@ -1986,15 +1998,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         //Create the pie chart
         var pieCanvas = $('#pieResults');
+        let colorsList = [
+            '#660066'
+        ]
         var pieChart = new Chart(pieCanvas, {
             type: 'pie',
             data: {
                 labels: labelsNames,
                   datasets: [{
                     data: dataValues,
-                    backgroundColor: [
-                      'rgb(255, 99, 132)',
-                    ],
+                    backgroundColor: colorsList,
                     hoverOffset: 4
                 }]
             },
