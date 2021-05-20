@@ -190,7 +190,6 @@ if($response!=null){
 
     foreach($res['files'] as $idx=>$file){
         if(@$file->error){
-<<<<<<< Updated upstream
             $sMsg = "Sorry, file was not processed due to the following reported error: ".$file->error.'.';
             
             if(strpos($file->error, 'ownership permissions')==false){
@@ -198,9 +197,7 @@ if($response!=null){
             }
             
             $response = $system->addError(HEURIST_UNKNOWN_ERROR, $sMsg, null);
-=======
-            $response = $system->addError(HEURIST_UNKNOWN_ERROR, "Sorry, file was not processed due to the following reported error: ".$file->error.". Please check file type is listed under Extensions in Design > Properties. If listed there, the most likely cause is that the file extension is not currently enabled for the upload function, jquery UploadHandler. Please use the bug report link above to request addition of this file type.", null);
->>>>>>> Stashed changes
+
             break;            
         }else if($entity_name=="recUploadedFiles"){ //register at once
             
