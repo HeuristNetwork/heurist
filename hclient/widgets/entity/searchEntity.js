@@ -117,12 +117,7 @@ $.widget( "heurist.searchEntity", {
         
         
             //EXTEND this.startSearch();
-        
-            this.element.find( 'input' )
-            .attr('autocomplete','disabled')
-            .attr('autocorrect','off')
-            .attr('autocapitalize','none')
-            .attr('spellcheck','false');
+            window.hWin.HEURIST4.ui.disableAutoFill( this.element.find( 'input' ) );
             
     },  
     

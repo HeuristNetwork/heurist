@@ -500,11 +500,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             }
                         });
                         
-                        $dlg.find('input')                        
-                            .attr('autocomplete','disabled')
-                            .attr('autocorrect','off')
-                            .attr('autocapitalize','none')
-                            .attr('spellcheck','false');
+                        window.hWin.HEURIST4.ui.disableAutoFill($dlg.find('input'));
 
                     });
                 }else{

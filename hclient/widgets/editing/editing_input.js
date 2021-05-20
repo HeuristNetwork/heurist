@@ -1847,16 +1847,14 @@ $.widget( "heurist.editing_input", {
             $input = $( "<input>")
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
-            .attr('autocomplete','disabled')
-            .attr('autocorrect','off')
-            .attr('autocapitalize','none')
-            .attr('spellcheck','false')
             .val(value)
             .keyup(function(){that.onChange();})
             .change(function(){
                     that.onChange();
             })
             .appendTo( $inputdiv );
+            
+            window.hWin.HEURIST4.ui.disableAutoFill( $input );
             
             if(!(this.options.dtID=='file' || this.detailType=='resource' || 
                  this.detailType=='date' || this.detailType=='geo' || this.detailType=='action')){
@@ -4399,14 +4397,13 @@ console.log('onpaste');
                     
                     var inpt2 = $('<input>').attr('id',$input.attr('id')+'-2')
                             .addClass('text ui-widget-content ui-corner-all')
-                            .attr('autocomplete','disabled')
-                            .attr('autocorrect','off')
-                            .attr('autocapitalize','none')
-                            .attr('spellcheck','false')
                             .change(function(){
                                 that.onChange();
                             })
                             .insertAfter(edash);
+                            
+                    window.hWin.HEURIST4.ui.disableAutoFill( $inpt2 );
+                            
                     that._createDateInput(inpt2, $inputdiv);
             
                     /*

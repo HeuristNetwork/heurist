@@ -912,7 +912,7 @@ $.widget( "heurist.search_faceted", {
                 +'<h4 style="display:inline-block;margin:0;">'+lbl+'</h4></div>'
                 +'<div style=" padding:5px 0 20px 21px;display: block;">'
                     +'<div class="input-div" style="display: inline-block;padding:0px">'
-                    +'<input class="ui-widget-content ui-corner-all" autocomplete="disabled" autocorrect="off" autocapitalize="none" spellcheck="false" style="width: 150px;">'
+                    +'<input class="ui-widget-content ui-corner-all" style="width: 150px;">'
                     +'</div><button title="To clear previous search click the RESET button" class="smallbutton ui-button ui-corner-all ui-widget ui-button-icon-only">'
                         +'<span class="ui-button-icon ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span></button>'
                     +'</div>').css({'border-bottom': '1px solid lightgray','margin-bottom':'10px'}).appendTo($fieldset);
@@ -931,6 +931,8 @@ $.widget( "heurist.search_faceted", {
 
                that.doSearch();
            }});   
+           
+           window.hWin.HEURIST4.ui.disableAutoFill(ele.find('input'));
            
            this._on( ele.find('input'), {
                             keypress:

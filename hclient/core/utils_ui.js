@@ -2916,7 +2916,20 @@ window.hWin.HEURIST4.ui = {
         $('#div_public_data').css('max-width', w_win-250);    
         */
     }
+  },
+
+  //
+  //
+  //  
+  disableAutoFill: function(ele){
+
+      ele.attr('autocomplete','off') //disabled
+      .attr('autocorrect','off')
+      .attr('autocapitalize','none')
+      .attr('spellcheck','false');
+
   }
+  
   
 }//end ui
 
@@ -3028,6 +3041,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
         });
       
   },
+  
 });
 
 $.fn.sideFollow = function(dtime) {
