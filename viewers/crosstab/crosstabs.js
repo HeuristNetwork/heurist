@@ -213,9 +213,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
     function clearIntervals(name){
         var $headerModal = $('#'+name+'Header');
         var $container = $('#'+name+'IntervalsBody');
+        var $tooltip = $('#'+name+'Tooltip')
         $headerModal.empty();
         $container.empty();
-        $container.html('Select field to set intervals');
+        $tooltip.attr('title','Select field to set intervals');
         fields3[name] = {field:0, type:'', values:[], intervals:[]};
         return $container;
     }
@@ -496,6 +497,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             //Re-enable buton.
             $('#'+name+'Vars').find('button').prop('disabled', false);
+            //Disable tooltip
+            $('#'+name+'Tooltip').attr('title', 'Edit the values in this interval.');
 
             if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype") {
 
