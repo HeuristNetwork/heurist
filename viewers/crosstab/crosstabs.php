@@ -63,6 +63,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
         <div class="container-fluid">
             <!-- Page container -->
             <div class="row">
+                <div class="col-12 col-mb-2 d-none" id="errorContainer"></div>
                 <div class="col-12 mb-2" id="topContainer">
                     <div id="qform" class="disign-content" style="width:100%;">
                         <!-- <div style="position: absolute;top:20px;left:450px;width:200px"><img src="crosstabs_image.png"/></div> -->
@@ -114,7 +115,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                 <div class="row">
                                     <div class="col-12">
                                         <fieldset id="vars" style="display:none;">
-                                            <div class="row">
+                                            <div class="row" id="rowVars">
                                                 <div class="fldheader col-4"><label for="cbRows">Var 1 (rows)</label></div>
                                                 <div class="input-cell col-6">
                                                     <select id="cbRows" name="row" onchange="crosstabsAnalysis.resetIntervals(event); crosstabsAnalysis.OnRowTypeChange(this);" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
@@ -130,7 +131,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                 <div id="rowIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
                                             </div>
                                             <div style="height:2em">&nbsp;</div>
-                                            <div class="row">
+                                            <div class="row" id="columnVars">
                                                 <div class="fldheader col-4"><label for="cbColumns">Var 2 (columns)</label></div>
                                                 <div class="input-cell col-6">
                                                     <select id="cbColumns" name="column" onchange="crosstabsAnalysis.resetIntervals(event)" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
@@ -146,7 +147,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                 <div id="columnIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
                                             </div>
                                             <div style="height:2em">&nbsp;</div>
-                                            <div class="row">
+                                            <div class="row" id="pageVars">
                                                 <div class="fldheader col-4"><label for="cbPages">Var3 (pages)</label></div>
                                                 <div class="input-cell col-6">
                                                     <select id="cbPages" name="page" onchange="crosstabsAnalysis.resetIntervals(event)" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
@@ -259,7 +260,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                         </div>
                     </div>
                 </div>
-                <div class="col-12 mb-2" id="bottomContainer">
+                <div class="col-12 mb-2 d-none" id="bottomContainer">
                     <!--Tab Bar for table and visualisation -->
                     <ul class="nav nav-tabs" id="tabs" role="tablist">
                         <li class="nav-item" role="presentation">

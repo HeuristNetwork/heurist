@@ -211,8 +211,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
     * remove all intervals for given type (page,col,row)
     */
     function clearIntervals(name){
-        var $container = $('#'+name+'Intervals');
-        $container.empty().hide();
+        var $headerModal = $('#'+name+'Header');
+        var $container = $('#'+name+'IntervalsBody');
+        $headerModal.empty();
+        $container.empty();
         $container.html('Select field to set intervals');
         fields3[name] = {field:0, type:'', values:[], intervals:[]};
         return $container;
@@ -363,7 +365,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
         if($.isFunction(callback)) callback.call();
-        renderIntervals(name);
+        $('#bottomContainer').removeClass('d-none');    //Show table results
+        renderIntervals(name);  //DisplayPopup
     }
 
     /**
@@ -455,6 +458,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //$container.empty();
 
         if(fields3[name].intervals.length<1){
+            var errorMessage = 'There are no values for these fields in the current results set.';
+            createErrorMessage($('#errorContainer'), errorMessage);
+            $('#errorContainer').removeClass('d-none');
+
+            //Highlight area (animation)
+            $('#'+name+'Vars').animate(
+                {backgroundColor : "#FFF3cd"}, 500
+            );
 
             /*
             $container.html('There are no values for these fields in the current results set');
@@ -465,6 +476,21 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         if(fields3[name].values && fields3[name].values.length>0)
         {
+            var totalVars = 0;  //Holds number of fields that have no style
+            //Remove previous error animation style
+            $('#'+name+'Vars').removeAttr('style');
+
+            //Check to see if all fields have no style and remove error message.
+            $('#rowVars,#columnVars,#pageVars').each(function(i, ele){
+                if($(ele).attr('style') == null){
+                    totalVars++;
+                }
+                
+                if(totalVars == 3){
+                    $('#errorContainer').addClass('d-none');
+                }
+            });
+
             if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype") {
 
                 var $rowDiv;        //First row within the modal.
