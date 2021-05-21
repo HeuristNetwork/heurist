@@ -2025,18 +2025,18 @@ $.widget( "heurist.editing_input", {
                     .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input ); 
                 
                 /* Image and Player (enalrged image) container */
-                $input_img = $('<br/><div class="image_input ui-widget-content ui-corner-all thumb_image" style="margin:10px 0 2px;">'
-                + '<img id="img'+f_id+'" class="image_input">'
-                + '<div id="player'+f_id+'" style="min-height:240px; min-width:320px; display:none;"></div>'
+                $input_img = $('<br/><div class="image_input ui-widget-content ui-corner-all thumb_image" style="margin-bottom:2px;border:none;">'
+                + '<img id="img'+f_id+'" class="image_input" style="max-width:none;">'
+                + '<div id="player'+f_id+'" style="min-height:100px;min-width:200px;display:none;"></div>'
                 + '</div>')
                 .appendTo( $inputdiv )
                 .hide();
 
 				/* Record Type help text for Record Editor */
-				$small_text = $('<br /><div class="smallText" style="display:inline-block;padding-right:20px;color:gray;font-size:smaller;">'
+				$small_text = $('<br /><div class="smallText" style="display:inline-block;color:gray;font-size:smaller;">'
                     + 'Click image to freeze in place</div>')
                 .clone()
-                .appendTo( $inputdiv )
+                .prependTo( $inputdiv )
                 .hide();
 
                 /* urls for downloading and loading the thumbnail */
