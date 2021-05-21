@@ -467,6 +467,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 {backgroundColor : "#FFF3cd"}, 500
             );
 
+            //Disable Button.
+            $('#'+name+'Vars').find('button').prop('disabled', true);
+
             /*
             $container.html('There are no values for these fields in the current results set');
             $container.show();
@@ -490,6 +493,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     $('#errorContainer').addClass('d-none');
                 }
             });
+
+            //Re-enable buton.
+            $('#'+name+'Vars').find('button').prop('disabled', false);
 
             if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype") {
 
