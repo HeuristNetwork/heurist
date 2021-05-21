@@ -2714,7 +2714,141 @@ console.log('onpaste');
                         val:value});
                 $input.parent('.evo-cp-wrap').css({display:'inline-block',width:'200px'});
 
-            }
+            }else if($Db.getConceptID('dty', this.options.dtID) == '3-1082'){ // Geo Bookmark, four input form, experimental 
+
+                $input.css({cursor:'hand'});
+
+                __show_geoBookmark_dialog = function(event) { // MORE HERE
+                    event.preventDefault();
+
+                    if(that.is_disabled) return;
+
+                    var current_val = $input.val();
+
+                    // split current_val into parts based on , 
+                    var setup_val = current_val.split(",");
+
+                    var $dlg = null;
+
+                    var pdiv = '<div style="display:grid;grid-template-columns:100%;">'
+
+                            + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px 200px;">'
+                            + '<label class="required">Bookmark Name:</label><input type="text" id="bkm_name">'
+                            + '<span class="heurist-helper1" style="padding-left:5px">Bookmark\'s Title</span></div>'
+
+                            + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px 200px;">'
+                            + '<label class="required">Bookmark Coordinates:</label><input type="text" id="bkm_points" style="cursor:pointer;">'
+                            + '<span class="heurist-helper1" style="padding-left:5px">Bookmark\'s Coordinates, needs four points</span></div>'
+
+                            + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px 200px;">'
+                            + '<label style="color:#6A7C99">Starting Date:</label><input type="text" id="bkm_sdate">'
+                            + '<span class="heurist-helper1" style="padding-left:5px">Bookmark\'s Starting Date, OPTIONAL</span></div>'
+
+                            + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px 200px;">'
+                            + '<label style="color:#6A7C99">Ending Date:</label><input type="text" id="bkm_edate">'
+                            + '<span class="heurist-helper1" style="padding-left:5px">Bookmark\'s Ending Date, OPTIONAL</span></div></div>';
+
+                    var popele = $(pdiv);
+
+                    popele.find('input[id="bkm_points"]').click(function(e){
+                        var url = window.hWin.HAPI4.baseURL 
+                            +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
+
+                        window.hWin.HEURIST4.msg.showDialog(url, {
+                            height:that.options.is_faceted_search?540:'900',
+                            width:that.options.is_faceted_search?600:'1000',
+                            window: window.hWin,  //opener is top most heurist window
+                            dialogid: 'map_digitizer_dialog',
+                            default_palette_class: 'ui-heurist-populate',
+                            params: null,
+                            title: window.hWin.HR('Heurist map digitizer'),
+                            callback: function(location){
+                                if( !window.hWin.HEURIST4.util.isempty(location) ){
+                                    
+                                    var geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(location.type+' '+location.wkt);
+                                    var geocode = geovalue.summary;
+                                    geocode = geocode.replace('X', '');
+                                    geocode = geocode.replace('Y', '');
+
+                                    $('input[id="bkm_points"]').val(geocode);
+                                    $('input[id="bkm_points"]').change();
+                                }
+                            }
+                        } );
+                    });
+
+                    popele.find('input[id="bkm_name"]').val(setup_val[0]);
+                    popele.find('input[id="bkm_points"]').val(setup_val[1] +','+ setup_val[2] +','+ setup_val[3] +','+ setup_val[4]);
+
+                    if(setup_val.length == 7){
+                        popele.find('input[id="bkm_sdate"]').val(setup_val[5]);
+                        popele.find('input[id="bkm_edate"]').val(setup_val[6]);
+                    }
+
+                    var btns = [
+                        {text:window.hWin.HR('Apply'),
+                            click: function(){
+
+                                var title = popele.find('input[id="bkm_name"]').val();
+                                var geo_points = popele.find('input[id="bkm_points"]').val();
+                                var sdate = popele.find('input[id="bkm_sdate"]').val();
+                                var edate = popele.find('input[id="bkm_edate"]').val();
+
+                                if(window.hWin.HEURIST4.util.isempty(title) || window.hWin.HEURIST4.util.isempty(geo_points)){
+                                    window.hWin.HEURIST4.msg.showMsgFlash('A title and map points must be provided', 2500);
+                                    return;
+                                }
+
+                                var points = geo_points.split(/[\s,]+/);
+
+                                points.splice(0, 1);
+
+                                if(points.length != 4){
+                                    window.hWin.HEURIST4.msg.showMsgFlash('You need 4 geographical points', 2500);
+                                    return;
+                                }
+
+                                geo_points = "";
+                                for(var i = 0; i < points.length; i++){
+                                    var n = points[i];
+                                    geo_points = geo_points + ',' + parseFloat(n).toFixed(2);
+                                }
+
+                                var has_start_date = window.hWin.HEURIST4.util.isempty(sdate);
+                                var has_end_date = window.hWin.HEURIST4.util.isempty(edate);
+
+                                if(has_start_date && has_end_date){
+                                    $input.val(title + geo_points);
+                                }
+                                else if(!has_start_date && !has_end_date){
+                                    $input.val(title + geo_points +','+ sdate +','+ edate);
+                                }
+                                else{
+                                    window.hWin.HEURIST4.msg.showMsgFlash('You must provide both a start and end date, or neither', 2500);
+                                    return;
+                                }
+
+                                $dlg.dialog('close');
+                            }
+                        },
+                        {text:window.hWin.HR('Close'),
+                            click: function() { $dlg.dialog('close'); }
+                        }
+                    ];
+
+                    $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({
+                        window:  window.hWin, //opener is top most heurist window
+                        title: window.hWin.HR('Geographical bookmark form'),
+                        width: 575,
+                        height: 230,
+                        element:  popele[0],
+                        resizable: false,
+                        buttons: btns,
+                        default_palette_class: 'ui-heurist-populate'
+                    });
+                }
+                this._on( $input, { keypress: __show_geoBookmark_dialog, click: __show_geoBookmark_dialog } );   
+            } // end of geo bookmark
             
         }//end if by detailType
 
