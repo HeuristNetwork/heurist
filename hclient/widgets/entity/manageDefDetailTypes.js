@@ -791,24 +791,31 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                */
                         }
                     });
-                }else {  //change selector to button
-                    
-                    var ele = this._editing.getFieldByName('dty_Type');  
-                    ele = ele.find('.input-div');
-                    ele.find('.ui-selectmenu-button').hide();
-                    
-                    if(this.set_detail_type_btn){
-                        this._off( this.set_detail_type_btn);
-                        this.set_detail_type_btn.remove();
-                    }
-                    
-                    
-                    this.set_detail_type_btn = $('<button>')
-                        .button({label:'click to select data type'})
-                        .css('min-width', '200px');
-                    this.set_detail_type_btn.appendTo(ele);
+                }else {  // setup record type button and handler for selector
                     
                     var that = this;
+
+                    var ele = this._editing.getFieldByName('dty_Type');  
+                    ele = ele.find('.input-div');
+
+                    this._on(ele.find('select'), {
+                        'change':function(event){
+                            var new_dty = $(event.target).val();
+
+                            if(!window.hWin.HEURIST4.util.isempty(new_dty)){
+                                that._onDataTypeChange(new_dty);
+                            }
+                        }
+                    });
+                    
+                    this.set_detail_type_btn = $('<button>')
+                        .button({icon:'ui-icon-circle-b-help'})
+                        .css({'min-width':'25px','margin-left':'10px','padding-left':'5px','padding-right':'5px','background':'#523365','color':'white'});
+                    this.set_detail_type_btn.appendTo(ele);
+
+                    $('<span style="margin-left:5px;font-style:italic">guided choice</span>').appendTo(ele);
+                    
+                    ele.find('.btn_input_clear').appendTo(ele);
                     
                     this._on( this.set_detail_type_btn, {    
                         'click': function(event){
@@ -913,9 +920,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
            ele.editing_input('setValue', dt_type);
            */
            if(this.set_detail_type_btn){
-               this.set_detail_type_btn.button({label:$Db.baseFieldType[dt_type]});
-               var elements = this._editing.getInputs('dty_Type');               
+               var elements = this._editing.getInputs('dty_Type');
                $(elements[0]).val( dt_type );
+               if($(elements[0]).hSelect("instance")!=undefined){
+                   $(elements[0]).hSelect("refresh"); 
+               }
                
                var ele = this._editing.getFieldByName('dty_Type');  
                ele.editing_input('showErrorMsg',null);
