@@ -175,7 +175,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 }
                         });
 
-            }                
+            }
+
+            this.coverMessage();			
         }
         
 //console.log( 'DT initControls  ' + (new Date().getTime() / 1000 - this._time_debug));
@@ -1783,22 +1785,48 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     // show warning
     //
     addEditRecord: function(recID, is_proceed){
-    
+
         if(recID<0 && is_proceed !== true){
             var that = this;
-            window.hWin.HEURIST4.msg.showMsgDlg(
-            '<p>We <b>strongly</b> recommend not adding base fields directly, as they are not added automatically to any record type and will therefore not appear in data entry forms or most dropdown lists eg. filter creation, CSV import, report formatter etc.</p>'
-            +'<p>Instead, we recommend adding fields to a specific record type while testing them out with data - the process is much more intuitive. Adding them in this way will automatically create an equivalent base field. This base field can then be re-used in other record types.</p>'
-            +'<p>To add a new field to a record type, either edit the record type in Design > Record types and click on the Edit fields button, or add a new record or edit an existing record of the appropriate type and click Modify Structure on the data entry form.</p>'
-                    , function(){
-                        that.addEditRecord(recID, true); 
-                        //that._super(recID); 
-                    }, {title:'Confirm',yes:'Continue',no:'Cancel'},
-                    {default_palette_class:this.options.default_palette_class});
-        
+
+            this.coverMessage(recID);
         }else{
-               this._super(recID, is_proceed); 
+            this._super(recID, is_proceed); 
         }
     },
+
+    //
+    // cover message warning a standard user to not define base fields at this location
+    //
+    coverMessage: function(recID){
+        var that = this;
+
+        if(this.element.find('#base-field-warning').length == 0){ // Check if message already exists
+            this.element.append('<div id="base-field-warning" style="position:relative;background:rgb(0,0,0,0.6);z-index:60000;height:100%;">'
+                + '<div style="background:lightgrey;border:2px solid black;color:black;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);height:200px;width:510px;font-size:1.2em;padding:20px;">'
+                + 'The base fields editing function is provided for completeness and for<br/>advanced data management. Most users will not need to use it.<br/><br/>'
+                + '<strong>We strongly recommend NOT using this function to create new<br/>base fields. It is much more intuitive to create them <em>in situ</em> while<br/>designing your record structure.</strong><br/></br>'
+                + 'Recommended: Design > <span style="text-decoration:underline;cursor:pointer" onclick="$(\'li[data-action=menu-structure-rectypes]\').click();">Record Types</span><br/><br/>'
+                + 'Click outside this box for access to base fields manager'
+                + '</div></div>'); // Add message
+
+            $('#base-field-warning').on('click', function(e){
+                if(e.target !== this){ return; }
+
+                $('#base-field-warning').hide();
+            });
+        }
+        else{ // Show message
+            this.element.find('#base-field-warning').show();
+
+            $('#base-field-warning').on('click', function(e){
+                if(e.target !== this){ return; }
+
+                var id = (recID)?recID : -1;
+
+                that.addEditRecord(id, true);
+            });
+        }
+    }
 
 });
