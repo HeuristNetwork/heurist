@@ -310,3 +310,7 @@ input[type=number]{
     max-width: 90%;
 }
 
+.pointer {
+    cursor: pointer;
+}
+
