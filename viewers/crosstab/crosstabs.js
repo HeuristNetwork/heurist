@@ -2046,7 +2046,49 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 "info" : false,
                 dom:"Bfrtip",
                 buttons:[
-                    {extend: 'csv', footer: true }, {extend:'pdf',footer: true}, {extend:'print', footer: true}
+                    {
+                        extend: 'csv',
+                        footer: true 
+                    },
+
+                    {
+                        extend:'pdf',
+                        customize: function(pdfDocument){
+                            if(fields3['column'].intervals.length == 0) return;
+
+                            pdfDocument.content[1].table.headerRows = 2;
+                            var firstHeaderRow = [];
+                            $('#resultsTable').find('thead>tr:first-child>th').each(
+                                function(index, element){
+                                    var cols = element.getAttribute('colSpan');
+                                    if(index == 0){
+                                        firstHeaderRow.push({
+                                            text: '',
+                                            style: 'tableHeader',
+                                            colSpan: cols
+                                        });
+                                    }
+                                    else{
+                                        firstHeaderRow.push({
+                                            text: element.innerHTML,
+                                            style: 'tableHeader',
+                                            colSpan: cols
+                                        });
+                                    }
+                                    for(var i= 0;i<cols-1;i++){
+                                        firstHeaderRow.push({});
+                                    }
+                                });
+                                pdfDocument.content[1].table.body.unshift(firstHeaderRow);
+                        },
+                        footer: true
+                    
+                    }, 
+
+                    {
+                        extend:'print',
+                        footer: true
+                    }
                 ]
             }
             );
@@ -2351,7 +2393,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 if(supressBlankColumn && columns[j].isempty) continue;
                 notemtycolumns++;
             }
-            rowHeader1.append('<th>&nbsp;</th><th class="crosstab-header0" style="text-align:left; border-left:1px solid black;" colspan="'+notemtycolumns*colspan+(showTotalsColumn?1:0)+'">'+fields3.column.fieldname+'</th>');
+            rowHeader1.append('<th>&nbsp;</th><th class="crosstab-header0" style="text-align:left; border-left:1px solid black;" colspan="'+(notemtycolumns+(showTotalsColumn?1:0))+'">'+fields3.column.fieldname+'</th>');
             $row.append(rowHeader1);
         }
 
@@ -2725,11 +2767,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $('#rbShowBlanks').prop('checked',settings.supressBlanks==0);
 
         _resetAllIntervals(settings.fields);
-    }
-
-    //Export function for table.
-    function _exportTable(buttons){
-        
     }
 
     //
