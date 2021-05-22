@@ -235,6 +235,34 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     //
+    //Apply intervals from saved file
+    //Replace intervals with saved intervals
+    //Only used when settings have been saved.
+    //
+    function _applySavedIntervals(allFields, name){
+        fields3['column'] = allFields['column'];
+        fields3['row'] = allFields['row'];
+        fields3['page'] = allFields['page'];
+
+        for(d=0;d<3;d++){
+            if(d==0) name = 'column'; 
+            if(d==1) name = 'row';
+            if(d==2) name = 'page';
+
+            $('#cb'+name[0].toUpperCase()+name.slice(1)+'s').val(fields3[name].field);
+            
+            if(fields3[name].intervals.length > 0){
+                renderIntervals(name, false);
+                for(j=0;j<fields3[name].intervals.length;j++){
+                    __addeditInterval( name, j, false);
+                }
+            }
+        }
+
+        _doRender();
+    }
+
+    //
     //
     //
     function _resetAllIntervals(fields, name){
@@ -246,7 +274,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var detailid = fields[name];
         $('#cb'+name[0].toUpperCase()+name.slice(1)+'s').val(detailid);
 
-        _resetIntervals_continue(name, detailid, function(){
+        _resetIntervals_continue(name, detailid, false, function(){
             if(name == 'column')
                 name = 'row'
             else if(name == 'row')
@@ -256,7 +284,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 _autoRetrieve();
                 return;
             }
-            _resetAllIntervals(fields, name);
+            _resetAllIntervals(fields, name, false);
         });
     }
 
@@ -269,13 +297,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var detailid = event.target.value;
         var name = $(event.target).attr('name');  //type
 
-        _resetIntervals_continue(name, detailid);
+        _resetIntervals_continue(name, detailid, true);
     }
 
     //
     //
     //
-    function _resetIntervals_continue(name, detailid, callback){
+    function _resetIntervals_continue(name, detailid, notSaved, callback){
 
         var $container = $('#'+name+'Intervals');
         $container.empty();
@@ -380,13 +408,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         if($.isFunction(callback)) callback.call();
         $('#bottomContainer').removeClass('d-none');    //Show table results
-        renderIntervals(name);  //DisplayPopup
+        if(notSaved) renderIntervals(name, true);  //DisplayPopup
     }
 
     /**
     * create intervals
     */
-    function calculateIntervals(name, count)
+    function calculateIntervals(name, count, notSaved)
     {
         if(fields3[name].type=="float" || fields3[name].type=="integer")
         {
@@ -451,7 +479,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
 
         }
-        renderIntervals(name);
+
+        if(notSaved) renderIntervals(name, true);
 
         if(suppressRetrieve) return;
 
@@ -461,7 +490,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
     /**
     * render intervals (create divs)
     */
-    function renderIntervals(name){
+    function renderIntervals(name, notSaved){
 
         //var $container = $('#'+name+'Intervals');
         var $modalDialogBody = $('#'+name+'IntervalsBody'); //Hosts the entire body of modal
@@ -571,7 +600,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .addClass('col-3 p-2')
                 .append($('<button>',{text: "Reset",class: "btn btn-secondary"})
                     .click(function( event ) {
-                        calculateIntervals(name, parseInt($('#'+name+'IntCount').val()) );
+                        calculateIntervals(name, parseInt($('#'+name+'IntCount').val()), true );
                     }).css('margin-right',"1rem"))
                 
                 $buttons.appendTo($firstRowDiv);
@@ -591,78 +620,81 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .append('<h6>Value</h6>')
                 .appendTo($intervalHeadRow);
 
+                
                 var idx;
                 var intervals = fields3[name].intervals;
 
-                $('#'+name+'IntCount').val(intervals.length)
+                if(notSaved){
+                    $('#'+name+'IntCount').val(intervals.length)
 
-                for (idx=0; idx<intervals.length; idx++){
+                    for (idx=0; idx<intervals.length; idx++){
 
-                    var interval = intervals[idx];
+                        var interval = intervals[idx];
 
-                    $intdiv = $(document.createElement('div'))
-                    .addClass('intervalDiv list row pe-1 bg-light')
-                    .attr('id', name+idx )
-                    .appendTo($rightColDiv);
+                        $intdiv = $(document.createElement('div'))
+                        .addClass('intervalDiv list row pe-1 bg-light')
+                        .attr('id', name+idx )
+                        .appendTo($rightColDiv);
 
-                    $('<div class="col-1 p-1">')
-                    .attr('id', name+idx+'ArrowPlacement')
-                    .appendTo($intdiv);
-
-                    $('<div class="col-4 p-1 border-2 border-top border-secondary pointer">')
-                    //.css({'width':'160px','display':'inline-block'})
-                    .html(interval.name)
-                    .css({'font-weight':'bold'} )
-                    .dblclick(function(event){
-                        //Collect the interval number of the clicked row
-                        var intervalElement = $(this).parent();
-                        var intervalPosition = intervalElement.attr('id').replace(name, '');
-
-                        intervalPosition = parseInt(intervalPosition);
-
-                        //Create input box to change name
-                        $(this).html('<input class="w-100" id="changeNameBox" value="'+fields3[name].intervals[intervalPosition].name+'">');
-                        //When user clicks out of input box edit name
-                        $('#changeNameBox').blur(function(){
-                            var nameChanged = $('#changeNameBox').val();
-                            $(this).parent().html(nameChanged);
-
-                            fields3[name].intervals[intervalPosition].name = nameChanged;
-                            _doRender();    //Apply to table
-                        });
-                    })
-                    .appendTo($intdiv);
-
-                    if(intervals[idx].values.length > 1){
-                        var splitDescription = interval.description.split("+");
-                        var listGroup = $('<ul class="list-group list-group-flush"></ul>');
-                    
-                        for(x=0;x<(splitDescription.length-1); x++){
-                            var listItem = $('<li class="list-group-item p-0 bg-transparent">')
-                            .html(splitDescription[x])
-                            .appendTo(listGroup);
-                        }
-
-                        $('<div class="col-md">')
-                        .append(listGroup)
+                        $('<div class="col-1 p-1">')
+                        .attr('id', name+idx+'ArrowPlacement')
                         .appendTo($intdiv);
 
-                    }
-                    else{
-                        $('<div class="col p-1 border-2 border-top border-secondary">')
-                        .html(interval.description)
-                        //.css({'max-width':'250px','width':'250px','display':'inline-block','padding-left':'1.5em'})
-                        .appendTo($intdiv);    
-                    }
+                        $('<div class="col-4 p-1 border-2 border-top border-secondary pointer">')
+                        //.css({'width':'160px','display':'inline-block'})
+                        .html(interval.name)
+                        .css({'font-weight':'bold'} )
+                        .dblclick(function(event){
+                            //Collect the interval number of the clicked row
+                            var intervalElement = $(this).parent();
+                            var intervalPosition = intervalElement.attr('id').replace(name, '');
 
-                    /*
-                    var editbuttons = '<div class="saved-search-edit">'+
-                    '<img title="edit" src="' +window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif" '+
-                    'onclick="{top.HEURIST.search.savedSearchEdit('+sid+');}">';
-                    editbuttons += '<img  title="delete" src="'+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif" '+
-                    'onclick="{top.HEURIST.search.savedSearchDelete('+sid+');}"></div>';
-                    $intdiv.append(editbuttons);
-                    */
+                            intervalPosition = parseInt(intervalPosition);
+
+                            //Create input box to change name
+                            $(this).html('<input class="w-100" id="changeNameBox" value="'+fields3[name].intervals[intervalPosition].name+'">');
+                            //When user clicks out of input box edit name
+                            $('#changeNameBox').blur(function(){
+                                var nameChanged = $('#changeNameBox').val();
+                                $(this).parent().html(nameChanged);
+
+                                fields3[name].intervals[intervalPosition].name = nameChanged;
+                                _doRender();    //Apply to table
+                            });
+                        })
+                        .appendTo($intdiv);
+
+                        if(intervals[idx].values.length > 1){
+                            var splitDescription = interval.description.split("+");
+                            var listGroup = $('<ul class="list-group list-group-flush"></ul>');
+                        
+                            for(x=0;x<(splitDescription.length-1); x++){
+                                var listItem = $('<li class="list-group-item p-0 bg-transparent">')
+                                .html(splitDescription[x])
+                                .appendTo(listGroup);
+                            }
+
+                            $('<div class="col-md">')
+                            .append(listGroup)
+                            .appendTo($intdiv);
+
+                        }
+                        else{
+                            $('<div class="col p-1 border-2 border-top border-secondary">')
+                            .html(interval.description)
+                            //.css({'max-width':'250px','width':'250px','display':'inline-block','padding-left':'1.5em'})
+                            .appendTo($intdiv);    
+                        }
+
+                        /*
+                        var editbuttons = '<div class="saved-search-edit">'+
+                        '<img title="edit" src="' +window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif" '+
+                        'onclick="{top.HEURIST.search.savedSearchEdit('+sid+');}">';
+                        editbuttons += '<img  title="delete" src="'+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif" '+
+                        'onclick="{top.HEURIST.search.savedSearchDelete('+sid+');}"></div>';
+                        $intdiv.append(editbuttons);
+                        */
+                    }
                 }
 
                 $btnDiv = $('<div class="row my-2"></div>').attr('id', 'addIntervalDiv'+name)
@@ -1197,7 +1229,19 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         //Remove the value from the interval with multiple values.
         if(groupidx != -1){
+            fields3[name].intervals[groupidx].description = '';
             fields3[name].intervals[groupidx].values.splice(idx,1);
+
+            //Re-adjust description.
+            for(k=0;k<fields3[name].values.length;k++){
+                var string = (fields3[name].intervals[groupidx].values.length > 1) ? '+' : '';
+                
+                for(j=0;j<fields3[name].intervals[groupidx].values.length;j++){
+                    if(parseInt(fields3[name].values[k].id) == fields3[name].intervals[groupidx].values[j]){
+                        fields3[name].intervals[groupidx].description = fields3[name].values[k].text + string
+                    }
+                }
+            }
 
             //Re-adjust value ids for each div.
             var currentValues = $('#'+name+groupidx).find('div.groupList > :first-child');
@@ -1297,7 +1341,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .addClass("btn btn-outline-success w-100 p-1")
             .attr('id','applyButton')
             .click(function(){
-                __addeditInterval(name, idx);
+                __addeditInterval(name, idx, true);
             }));
         $newInterval.find("#applyButton").append('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right w-100" viewBox="0 0 16 16">' 
             + '<path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>'
@@ -1309,67 +1353,69 @@ function CrosstabsAnalysis(_query, _query_domain) {
             //window.hWin.HEURIST4.msg.showMsgDlg('There are no more terms available');
     }
 
-    function __addeditInterval( name, idx){
+    function __addeditInterval( name, idx, notSaved){
 
-        var isAllChecked = ($('input[name='+name+'Options]:checked:disabled').length == $('input[name='+name+'Options]').length) ? true : false;
-        var isNotChecked = ($('input[name='+name+'Options]:checked:not(:disabled)').length == 0) ? true : false;
-        //Generate error message to prevent user from submitting an empty interval
-        if(isAllChecked || isNotChecked){
-            var errorMessage = 'This new interval cannot be empty. If all available values are used, click the blue arrow to make it available.'
-            $('#applyButton').popover({
-                container : 'body',
-                placement : 'bottom',
-                content : errorMessage,
-                trigger : 'click',
-                delay : {
-                    show : '100', 
-                    hide :'100'
-                }
-            }).popover('show');
+        if(notSaved){
+            var isAllChecked = ($('input[name='+name+'Options]:checked:disabled').length == $('input[name='+name+'Options]').length) ? true : false;
+            var isNotChecked = ($('input[name='+name+'Options]:checked:not(:disabled)').length == 0) ? true : false;
+            //Generate error message to prevent user from submitting an empty interval
+            if(isAllChecked || isNotChecked){
+                var errorMessage = 'This new interval cannot be empty. If all available values are used, click the blue arrow to make it available.'
+                $('#applyButton').popover({
+                    container : 'body',
+                    placement : 'bottom',
+                    content : errorMessage,
+                    trigger : 'click',
+                    delay : {
+                        show : '100', 
+                        hide :'100'
+                    }
+                }).popover('show');
 
-            //Hide the popover after 5 seconds.
-            setTimeout(function(){
+                //Hide the popover after 5 seconds.
+                setTimeout(function(){
+                    $('#applyButton').popover('hide');
+                }, 10000);
+
+                return;
+            }
+
+            if($('div.popover:visible').length){
                 $('#applyButton').popover('hide');
-            }, 10000);
+            }
 
-            return;
+            var detailtype = fields3[name].type;
+
+            if(idx<0){
+                fields3[name].intervals.push( {name:'', description:'', values:[] });
+                idx = fields3[name].intervals.length-1;
+            }else{
+                fields3[name].intervals[idx].values = [];
+                fields3[name].intervals[idx].description = '';
+            }
+            fields3[name].intervals[idx].name = "newInterval";
+
+            if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype"){ //false &&
+                var sels = $('input[name='+name+'Options]').filter(function(){
+                    return !this.disabled && this.checked;
+                });
+                var isMulti = (sels.length > 1) ? '+' : ''
+                $.each(sels, function(i, ele){
+                    fields3[name].intervals[idx].values.push( parseInt($(ele).attr('termid')) );
+                    fields3[name].intervals[idx].description = fields3[name].intervals[idx].description + $(ele).attr('termname')+isMulti;
+                    sels.attr('disabled',true);
+                    sels.attr('checked', true);
+                });
+            
+            }/*else if(detailtype=="float" || detailtype=="integer"){
+
+                fields3[name].intervals[idx].values.push( parseFloat($dlg.find('#minval').val() ));
+                fields3[name].intervals[idx].values.push(  parseFloat($dlg.find('#maxval').val() ));
+                fields3[name].intervals[idx].description = $dlg.find('#minval').val()+' ~ '+$dlg.find('#maxval').val();
+
+            }
+            */
         }
-
-        if($('div.popover:visible').length){
-            $('#applyButton').popover('hide');
-        }
-
-        var detailtype = fields3[name].type;
-
-        if(idx<0){
-            fields3[name].intervals.push( {name:'', description:'', values:[] });
-            idx = fields3[name].intervals.length-1;
-        }else{
-            fields3[name].intervals[idx].values = [];
-            fields3[name].intervals[idx].description = '';
-        }
-        fields3[name].intervals[idx].name = "newInterval";
-
-        if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype"){ //false &&
-            var sels = $('input[name='+name+'Options]').filter(function(){
-                return !this.disabled && this.checked;
-            });
-            var isMulti = (sels.length > 1) ? '+' : ''
-            $.each(sels, function(i, ele){
-                fields3[name].intervals[idx].values.push( parseInt($(ele).attr('termid')) );
-                fields3[name].intervals[idx].description = fields3[name].intervals[idx].description + $(ele).attr('termname')+isMulti;
-                sels.attr('disabled',true);
-                sels.attr('checked', true);
-            });
-        
-        }/*else if(detailtype=="float" || detailtype=="integer"){
-
-            fields3[name].intervals[idx].values.push( parseFloat($dlg.find('#minval').val() ));
-            fields3[name].intervals[idx].values.push(  parseFloat($dlg.find('#maxval').val() ));
-            fields3[name].intervals[idx].description = $dlg.find('#minval').val()+' ~ '+$dlg.find('#maxval').val();
-
-        }
-        */  
 
         //Render new interval
         var interval = fields3[name].intervals[idx];
@@ -1705,8 +1751,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $('#templateInterval').remove();
 
         $('#addInterval').prop('disabled',false);
-            
-        _doRender();
+        
+        if(notSaved) _doRender();
     }
 
     //Create error message
@@ -1923,8 +1969,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if($.fn.dataTable.isDataTable("#resultsTable")){
             $("#resultsTable").DataTable().destroy(true);
         }
-
-
 
         $("#pmessage").html('Rendering...');
         _setMode(1);//progress
@@ -2739,7 +2783,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             showPercentageRow: $('#rbShowPercentRow').is(':checked')?1:0,
             showPercentageColumn: $('#rbShowPercentColumn').is(':checked')?1:0,
             supressBlanks: !$('#rbShowBlanks').is(':checked')?1:0,
-            fields: {column:fields3.column.field,row:fields3.row.field,page:fields3.page.field}
+            fields: {column:fields3.column.field,row:fields3.row.field,page:fields3.page.field},
+            allFields: {column:fields3.column,row:fields3.row,page:fields3.page}
         };
 
         return settings;
@@ -2767,6 +2812,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $('#rbShowBlanks').prop('checked',settings.supressBlanks==0);
 
         _resetAllIntervals(settings.fields);
+        _applySavedIntervals(settings.allFields);
     }
 
     //
