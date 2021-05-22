@@ -1376,7 +1376,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .attr('id', name+idx+'ArrowPlacement')
             .appendTo($intdiv);
 
-            $('<div class="col-3">')
+            $('<div class="col-3 p-1 border-2 border-top border-secondary">')
             //.css({'width':'160px','display':'inline-block'})
             .html(interval.name)
             .css({'font-weight':'bold'} )
@@ -1387,7 +1387,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 intervalPosition = parseInt(intervalPosition);
 
-                $(this).html('<input  class="w-100" id="changeNameBox" value="'+interval.name+'">');
+                $(this).html('<input class="w-100" id="changeNameBox" value="'+interval.name+'">');
                 //When user clicks out of input box edit name
                 $('#changeNameBox').blur(function(){
                     var nameChanged = $('#changeNameBox').val();
@@ -1402,9 +1402,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
             //If group contains more than one value
             if(interval.values.length > 1){
                 //Add delete button
-                $('<div class="col-1 delete">')
+                $('<div class="col-1 p-1 border-2 border-top border-secondary delete">')
                 .append($('<button>')
-                    .addClass('btn btn-danger border-dark')
+                    .addClass('btn btn-danger border-dark w-100 p-0 py-1')
                     .append('<i class="bi bi-trash"></i>')
                     .click(function(){
                         //Remove interval and uncheck checkboxes
@@ -1434,13 +1434,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 var splitDescription = interval.description.split("+");
 
-                var listGroup = $('<div class="col-7 groupings">')
+                var listGroup = $('<div class="col p-1 border-2 border-top border-secondary groupings">')
                 .appendTo($intdiv);
             
                 for(x=0;x<(splitDescription.length-1); x++){
-                    var listItem = $('<div class="row p-0 bg-transparent groupList">')
-                    .append('<div class="col-2" id="'+x+'">')
-                    .append('<div class="col border-bottom border-dark description">'+splitDescription[x]+'</div>')
+                    var listItem = $('<div class="row p-1 w-100 bg-transparent groupList">')
+                    .append('<div class="col-2 p-1" id="'+x+'">')
+                    .append('<div class="col p-1 border-bottom border-dark description">'+splitDescription[x]+'</div>')
                     .appendTo(listGroup);
                 }
 
@@ -1494,14 +1494,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     //Add new layer to group interface.
                     for(i=0;i<newDescription.length;i++){
                         //Add description
-                        $('<div class="row p-0 bg-transparent groupList">')
-                        .append('<div class="col-2" id="'+numberValues+'">')
-                        .append('<div class="col border-bottom border-dark description">'+newDescription[i]+'</div>')
+                        $('<div class="row p-1 w-100 bg-transparent groupList">')
+                        .append('<div class="col-2 p-1" id="'+numberValues+'">')
+                        .append('<div class="col p-1 border-bottom border-dark description">'+newDescription[i]+'</div>')
                         .appendTo(listGroup);
 
                         //Append remove button
                         var $removeButton = $('<button></button>')
-                        .addClass('btn btn-outline-primary')
+                        .addClass('btn btn-outline-primary w-100 p-0 py-1')
                         .attr('valueid',newValue[i])
                         .click(function(){
                             //Get the name of the value clicked to remove from group interval
@@ -1579,7 +1579,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 //Create Remove Buttons
                 for(i=0;i<interval.values.length;i++){
                     var $removeButton = $('<button></button>')
-                        .addClass('btn btn-outline-primary')
+                        .addClass('btn btn-outline-primary w-100 p-0 py-1')
                         .attr('valueid',interval.values[i])
                         .click(function(){
                             //Get the name of the value clicked to remove from group interval
@@ -1647,14 +1647,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             }
             else{
-                $('<div class="col-7">')
+                $('<div class="col p-1">')
                 .html(interval.description)
                 //.css({'max-width':'250px','width':'250px','display':'inline-block','padding-left':'1.5em'})
                 .appendTo($intdiv);
                 
                 //Add remove button if a single value is added
                 var $removeButton = $('<button></button>')
-                    .addClass('btn btn-outline-primary w-100')
+                    .addClass('btn btn-outline-primary w-100 p-1')
                     .attr('valueid',interval.values[0])
                     .click(function(){
                         //Get the name of the value clicked to remove from group interval
