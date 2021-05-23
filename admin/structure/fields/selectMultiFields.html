@@ -1,0 +1,102 @@
+<!--
+/**
+* Quick addition of fields to a record type
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Brandon McKay   <blmckay13@gmail.com>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     6.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>Rapid Field Additions</title>
+
+        <!-- Style Sheets -->
+        <link rel="stylesheet" type="text/css" href="../../../external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+        <link rel="stylesheet" type="text/css" href="../../../external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
+
+        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+
+        <link rel="stylesheet" type="text/css" href="../../../h4styles.css">
+        <link rel="stylesheet" type="text/css" href="../../../h6styles.css">
+
+        <!-- Scripts -->
+        <script type="text/javascript" src="../../../hclient/core/detectHeurist.js"></script>
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript" src="../../../hclient/core/utils_dbs.js"></script>
+
+        <script type="text/javascript" src="selectMultiFields.js"></script>
+
+        <script>
+        	$(document).ready(function(){
+        		_init();
+        	});
+        </script>
+
+        <style type="text/css">
+            .tabs{
+                padding: 0;
+                border: none;
+            }
+            .tabs-list{
+                background:#C9BFD4;
+            }
+            .tabs-text{
+                font-size:1.2em;
+            }
+            .tabs-desc{
+                font-size: 1.2em;
+                padding-top: 5px;
+            }
+            .tabs-panel{}          
+            .field-group{
+                display: grid;
+                grid-template-columns: 100%;
+                overflow: auto;
+            }
+            .field-container{
+                margin:5px 0;
+                display: grid;
+                grid-template-columns: 30px 200px 130px 800px;
+            }
+            .field-item{
+                font-size: 1.2em;
+            }
+            .no-overflow-item{
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        </style>
+    </head>
+
+    <body style="background: #DAD0E4;height: 100%;">
+        <div>
+            <span style="font-size:1.2em;">Select base fields for insertion into the form - you can select from multiple tabs</span>
+        </div>
+        <div class="tabs">
+            <ul class="tabs-list">
+            </ul>
+        </div>
+        <div>
+            <span id="btnClose"></span>
+            <span id="btnAddSelected"></span>
+        </div>
+    </body>
+</html>

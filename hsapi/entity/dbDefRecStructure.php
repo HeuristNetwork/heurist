@@ -387,6 +387,7 @@ class DbDefRecStructure extends DbEntityBase
         $reqs   = @$newfields['reqs']?$newfields['reqs']:array();
         $newfields_values  = @$newfields['values']?$newfields['values']:array();
         $order = 0;
+        if(isset($this->data['order'])){ $order = $this->data['order']; }
         
         $dt_fields = dbs_GetDetailTypes($this->system, $fields);
         $dt_fields = $dt_fields['typedefs'];
@@ -421,7 +422,8 @@ class DbDefRecStructure extends DbEntityBase
             
             $records[] = $recvalues;
             
-            $order = $order+10;
+            if(isset($this->data['order'])){ $order = $this->data['order']; }
+            else { $order = $order+10; }
         }
         
         if(count($records)>0){

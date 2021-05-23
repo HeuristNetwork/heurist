@@ -734,7 +734,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                             recset.each2(function(id, f){
                                 if(f.rst_DefaultValue == 'tabs' || f.rst_DefaultValue == 'group'){ return; }
-                                console.log('field'); console.log(f);
                                 hasField = true;
                             });
 
