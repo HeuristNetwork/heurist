@@ -239,7 +239,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
     //Replace intervals with saved intervals
     //Only used when settings have been saved.
     //
-    function _applySavedIntervals(allFields, name){
+    function _applySavedIntervals(allFields, counts, name){
         fields3['column'] = allFields['column'];
         fields3['row'] = allFields['row'];
         fields3['page'] = allFields['page'];
@@ -250,22 +250,35 @@ function CrosstabsAnalysis(_query, _query_domain) {
             if(d==2) name = 'page';
 
             $('#cb'+name[0].toUpperCase()+name.slice(1)+'s').val(fields3[name].field);
-            
-            if(fields3[name].intervals.length > 0){
-                renderIntervals(name, false);
-                for(j=0;j<fields3[name].intervals.length;j++){
-                    __addeditInterval( name, j, false);
+
+            if(fields3[name].type=="enum" || fields3[name].type=="resource" || fields3[name].type=="relationtype"){
+                if(fields3[name].intervals.length > 0){
+                    renderIntervals(name, false);
+                    for(j=0;j<fields3[name].intervals.length;j++){
+                        __addeditInterval( name, j, false);
+                    }
                 }
             }
+            else if(fields3[name].type=="float" || fields3[name].type=="integer"){
+                if(fields3[name].intervals.length > 0){
+                    minMax[0] = fields3[name].values[0];
+                    minMax[1] = fields3[name].values[1];
+                    keepCount = counts;
+                    renderIntervals(name);
+                }
+            }
+        
         }
 
-        _doRender();
+        _doRetrieve();
+        $('#bottomContainer').removeClass('d-none');
+
     }
 
     //
+    //Redundant function when settings are saved.
     //
-    //
-    function _resetAllIntervals(fields, name){
+    function _resetAllIntervals(fields, name, notSaved){
 
         suppressRetrieve = true;
 
@@ -1044,7 +1057,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             else{
                                 var newNumber = Number($('#changeValueBox').val());
 
-                                if((newNumber < fields3[name].values[1]) && (newNumber >= fields3[name].intervals[k].values[0])){
+                                if((newNumber <= fields3[name].values[1]) && (newNumber >= fields3[name].intervals[k].values[0])){
                                     if(k==intervalId){
                                         fields3[name].intervals[intervalId].values[1] = newNumber;
                                         fields3[name].intervals[intervalId].name = rnd(fields3[name].intervals[intervalId].values[0]) + ' ~ ' +  rnd(fields3[name].intervals[intervalId].values[1]);
@@ -2787,7 +2800,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             showPercentageRow: $('#rbShowPercentRow').is(':checked')?1:0,
             showPercentageColumn: $('#rbShowPercentColumn').is(':checked')?1:0,
             supressBlanks: !$('#rbShowBlanks').is(':checked')?1:0,
-            fields: {column:fields3.column.field,row:fields3.row.field,page:fields3.page.field},
+            count: keepCount,
             allFields: {column:fields3.column,row:fields3.row,page:fields3.page}
         };
 
@@ -2815,8 +2828,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $('#rbShowPercentColumn').prop('checked',settings.showPercentageColumn==1);
         $('#rbShowBlanks').prop('checked',settings.supressBlanks==0);
 
-        _resetAllIntervals(settings.fields);
-        _applySavedIntervals(settings.allFields);
+        _applySavedIntervals(settings.allFields, settings.count);
     }
 
     //
