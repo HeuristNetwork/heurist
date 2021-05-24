@@ -701,30 +701,53 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               ];    
                 }else if(this.options.edit_structure==true){
 
-                        btns = [ 
-                            {text:window.hWin.HR('Save'), id:'btnRecSave', //AndClose
-                              css:{'margin-left':'0.5em'},
-                              click: function() { that._saveEditAndClose( null, 'none' ); }}, //'close'
-                            {text:window.hWin.HR('Close'), 
-                              click: function() {
-                                var recset = $Db.rst(that._currentEditRecTypeID);
-                                var hasField = false;
+                    function checkTitleMask(){ // Check if title mask is the default, request user to change it
+                        var title_mask = $Db.rty(that._currentEditRecTypeID, 'rty_TitleMask');
 
-                                recset.each2(function(id, f){
-                                    if(f.rst_DefaultValue == 'tabs' || f.rst_DefaultValue == 'group'){ return; }
-                                    hasField = true;
-                                });
+                        if(title_mask == 'record [ID]'){
 
-                                if(!hasField){
-                                    window.hWin.HEURIST4.msg.showMsgDlg('You need to define fields to make this record type usable.', 
-                                    function(){ that.closeEditDialog(); },
-                                        {title:'No fields defined', no:window.hWin.HR('Continue editing'), yes:window.hWin.HR('Exit with no fields')}
-                                    );
-                                }
-                                else{
-                                    that.closeEditDialog();
-                                }
-                            }}];
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+                                'The title mask is used to construct the record title from the data in the record.<br/>'
+                                    + 'Constructed record titles are very important: they are used to represent the record in<br/>'
+                                    + 'search results and record pointer fields, and can also be used in record filters and<br/>'
+                                    + 'custom report formats.<br/><br/>'
+                                    + 'To avoid an uninformative title we strongly recommend having at least one required field in<br/>'
+                                    + 'the title mask or several fields of which one will always be filled in.<br/><br/>'
+                                    + 'Please define the title mask before exiting.', 
+                                function(){ that.editRecordTypeTitle(); that.closeEditDialog(); },
+                                {title:'Default title mask', yes:'OK', no:'Cancel'});
+
+                            return;
+                        }
+
+                        that.closeEditDialog();
+                    }
+
+                    btns = [ 
+                        {text:window.hWin.HR('Save'), id:'btnRecSave', //AndClose
+                          css:{'margin-left':'0.5em'},
+                          click: function() { that._saveEditAndClose( null, 'none' ); }}, //'close'
+                        {text:window.hWin.HR('Close'), 
+                          click: function() { 
+                            var recset = $Db.rst(that._currentEditRecTypeID);
+                            var hasField = false;
+
+                            recset.each2(function(id, f){
+                                if(f.rst_DefaultValue == 'tabs' || f.rst_DefaultValue == 'group'){ return; }
+                                hasField = true;
+                            });
+
+                            if(!hasField){ // check if any fields have been added to rectype
+                                window.hWin.HEURIST4.msg.showMsgDlg('You need to define fields to make this record type usable.', 
+                                    function(){ checkTitleMask(); }, 
+                                    {title:'No fields defined', no:window.hWin.HR('Continue editing'), yes:window.hWin.HR('Exit with no fields')}); 
+                            }
+                            else{
+								checkTitleMask();
+                            } 
+                          }
+                        }
+                    ];
                     
                 }else{
                 

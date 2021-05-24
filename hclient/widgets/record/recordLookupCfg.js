@@ -364,7 +364,9 @@ $.widget( "heurist.recordLookupCfg", {
                 var field = $(ele).attr('data-field');
                 var dty_ID = that._current_cfg.fields[field];
 
-                var dty_ID = dty_ID>0 ?$Db.getLocalID('dty', dty_ID) :'';
+                if(!(dty_ID.indexOf('_long') >= 0) && !(dty_ID.indexOf('_lat') >= 0)){ // account for individual geopoints
+                    dty_ID = dty_ID>0 ?$Db.getLocalID('dty', dty_ID) :'';
+                }
                 
                 window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele, rty_ID, 
                     ['freetext','blocktext','enum','date','geo','float','year','integer','resource'], '...', 
