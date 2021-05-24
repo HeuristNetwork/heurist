@@ -311,7 +311,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
 
     <!-- Modal for Add, Edit and Delete values -->
     <div class="modal fade" tabindex="-1" id="rowIntervalsModal">
-        <div class="modal-dialog" id="rowDialog">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header" id="rowIntervalHeader">
                     <h4 id="rowHeader"></h4>

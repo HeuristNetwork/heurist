@@ -327,7 +327,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if(detailtype=="enum" || detailtype=="relationtype") //false &&
         {
             //get all terms and create intervals
-            calculateIntervals(name);
+            calculateIntervals(name, null,true);
 
         }else if(detailtype=="float" || detailtype=="integer"){
             //get min and max for this detail in database
@@ -350,7 +350,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             fields3[name].values = [val0, valmax];
                             minMax[0] = fields3[name].values[0];    //Store min value in seperate array to save the copy as to use in the rendering.
                             minMax[1] = fields3[name].values[1];    //Store min value in seperate array to save the copy as to use in the rendering.
-                            calculateIntervals(name);
+                            calculateIntervals(name, null, true);
+                            $('#bottomContainer').removeClass('d-none');
                         }
 
                         if($.isFunction(callback)) callback.call();
@@ -386,7 +387,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             $container.show();
                         }else{
                             fields3[name].values = response.data;
-                            calculateIntervals(name);
+                            calculateIntervals(name, null, true);
+                            $('#bottomContainer').removeClass('d-none');
                         }
 
                         if($.isFunction(callback)) callback.call();
@@ -556,6 +558,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 var $listDiv;
 
                 $('#'+name+'Dialog').addClass('modal-xl');
+                $('#'+name+'Dialog').addClass('modal-dialog-width');
 
                 $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase());
 
@@ -886,6 +889,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 //Change size of modal to accommodate and remove white space. These fields are not large.
                 $('#'+name+'Dialog').removeClass('modal-xl');
+                $('#'+name+'Dialog').removeClass('modal-dialog-width');
 
                 $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase()
                     + ' (Range: '+fields3[name].values[0]+' - ' +fields3[name].values[1]+')');
@@ -925,7 +929,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     if(isMinWithin && isMaxWithin && !isMaxGreater && !isMinGreater){
                         minMax[0] = $('#minOutlier').val();
                         minMax[1] = $('#maxOutlier').val();
-                        calculateIntervals(name, parseInt($('#'+name+'IntCount').val()) );
+                        calculateIntervals(name, parseInt($('#'+name+'IntCount').val()), true );
                     }
                     else{
                         var errorMessage = "When entering the range of intervals to apply to a dataset, the from and to values must be between the range above."
