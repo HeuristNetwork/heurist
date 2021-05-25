@@ -1468,7 +1468,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this._currentEditID = -1;
             this._initEditForm_step3(this._currentEditID); //reload 
             var that = this;
-            setTimeout(function(){that._editing.setFocus();},1000);
+            setTimeout(function(){that._editing.setFocus();},500);
             this.refreshRecordList();
             return;
         }
