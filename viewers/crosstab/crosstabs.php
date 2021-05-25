@@ -58,7 +58,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
 <body style="padding:5px;overflow-x:auto;" class="popup">
 
     <script type="text/javascript" src="crosstabs.js"></script>
-
+    
     <div style="margin:0px auto; padding: 0.5em; height: 100%;overflow: auto;">
         <div class="container-fluid">
             <!-- Page container -->
