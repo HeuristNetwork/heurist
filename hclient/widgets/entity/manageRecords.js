@@ -738,8 +738,19 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             });
 
                             if(!hasField){ // check if any fields have been added to rectype
+
+                                var btns = {};
+                                btns[window.hWin.HR('Continue editing')] = function(){
+                                    var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                    $dlg.dialog('close');
+                                };
+                                btns[window.hWin.HR('Exit with no fields')] = function(){
+                                    var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                    $dlg.dialog('close');
+                                    titleMaskCheck();
+                                };
                                 window.hWin.HEURIST4.msg.showMsgDlg('You need to define fields to make this record type usable.', 
-                                    function(){ checkTitleMask(); }, 
+                                    btns, 
                                     {title:'No fields defined', no:window.hWin.HR('Continue editing'), yes:window.hWin.HR('Exit with no fields')}); 
                             }
                             else{
