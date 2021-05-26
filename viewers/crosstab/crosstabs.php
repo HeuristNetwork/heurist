@@ -283,8 +283,8 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                             </div>
                         </div>
                         <!--Pie Chart goes here!!! -->
-                        <div class="tab-pane fade" id="pie" role="tabpanel" aria-labelledby="pie-tab">
-                            <canvas id="pieResults" width="400" height="400"></canvas>
+                        <div class="tab-pane fade d-flex justify-content-center" id="pie" role="tabpanel" aria-labelledby="pie-tab">
+                            <canvas id="pieResults" width="700" height="700"></canvas>
                         </div>
                     </div>
                     

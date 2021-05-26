@@ -2162,7 +2162,19 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //Create the pie chart
         var pieCanvas = $('#pieResults');
         let colorsList = [
-            '#660066'
+            '#f08080',
+            '#7fffd4',
+            '#c39797',
+            '#fff68f',
+            '#eeeeee',
+            '#ffc3a0',
+            '#20b2aa',
+            '#333333',
+            '#ac25e2',
+            '#4ca3dd',
+            '#ff6666',
+            '#ffc0cb'
+            
         ]
         var pieChart = new Chart(pieCanvas, {
             type: 'pie',
@@ -2175,7 +2187,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 }]
             },
             options: {
-                responsive: false
+                responsive: false,
+                plugins: {
+                  legend: {
+                    display: false
+                  }
+                }
             }
         });
         
