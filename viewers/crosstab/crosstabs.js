@@ -1473,7 +1473,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             //If group contains more than one value
             if(interval.values.length > 1){
                 //Add delete button
-                $('<div class="col-1 p-1 border-2 border-top border-secondary delete">')
+                $('<div class="col-1 p-1 border-2 border-top border-secondary delete d-flex align-items-center">')
                 .append($('<button>')
                     .addClass('btn btn-danger border-dark w-100 p-0 py-1')
                     .append('<i class="bi bi-trash"></i>')
@@ -1641,7 +1641,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                         //Append arrow to the first child element of the div
                         listGroup.find('#'+numberValues).append($removeButton);
-                        x++;
+                        numberValues++;
                     }
                     _doRender();
                 }));

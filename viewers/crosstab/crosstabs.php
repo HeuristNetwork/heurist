@@ -351,6 +351,26 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
             </div>
         </div>
     </div>
+
+    <!--Confirmation Modal
+    <div class="modal fade" tabindex="-1" id="confirmationModal">
+        <div class="modal-dialog ">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>Delete?</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Deleting this group will unallocate all values within this group. Are you sure you would like to delete this group? 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="no" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-primary" id="yes" data-bs-dismiss="modal">Yes</button>
+                </div>
+            </div>    
+        </div>
+    </div>
+    -->
 </body>
 
 </html>
