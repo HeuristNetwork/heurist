@@ -2155,10 +2155,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
             );
         });
 
-        //Extract label and data values for pie chart
-        var labelsNames = extractData('row', true);
-        var dataValues = extractData('row', false);
-
         //Create the pie chart
         var pieCanvas = $('#pieResults');
         let colorsList = [
@@ -2176,25 +2172,62 @@ function CrosstabsAnalysis(_query, _query_domain) {
             '#ffc0cb'
             
         ]
-        var pieChart = new Chart(pieCanvas, {
-            type: 'pie',
-            data: {
-                labels: labelsNames,
-                  datasets: [{
-                    data: dataValues,
-                    backgroundColor: colorsList,
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: false,
-                plugins: {
-                  legend: {
-                    display: false
-                  }
+
+        //Extract label and data values for pie chart
+        let labelsNames = extractData('row', true);
+        let dataValues = extractData('row', false);
+
+        if(fields3['row'].intervals.length > 0 && fields3['column'].intervals.length <= 0 && fields3['page'].intervals.length <= 0){
+            var config = {
+                type: 'pie',
+                data: {
+                    labels: labelsNames,
+                      datasets: [{
+                        data: dataValues,
+                        backgroundColor: colorsList,
+                        hoverOffset: 4
+                    }
+                ]
+                },
+                options: {
+                    responsive: false,
+                    plugins: {
+                      legend: {
+                        display: false
+                      }
+                    }
                 }
+            };
+        }
+
+        if(fields3['row'].intervals.length > 0 && fields3['column'].intervals.length > 0){
+            var dataVals;
+            var config = {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [10,20,30],
+                        backgroundColor: colorsList,
+                    },
+                ], 
+                    labels: labelsNames
+                },
+                options: {
+                    responsive: false,
+                    plugins: {
+                    legend: {
+                        display: false
+                    }
+                    },
+                }
+            };;
+
+            for(t=0; t<dataValues.length;t++){
+
             }
-        });
+        }
+
+        var pieChart = new Chart(pieCanvas, config);
         
         //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
 

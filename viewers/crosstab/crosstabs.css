@@ -314,3 +314,24 @@ input[type=number]{
     cursor: pointer;
 }
 
+#tabs > li > button.nav-link {
+    background: white;
+    color:gray;
+    border: 0;
+    opacity: 0.5;
+}
+
+#tabs > li > button.nav-link:hover {
+    font-weight: bold;
+    color: white !important;
+    background: teal;
+    border: 0;
+    opacity: 1;
+}
+
+#tabs > li > button.nav-link.active {
+    font-weight: bold;
+    color:teal;
+    border: 0;
+    opacity: 1;
+}

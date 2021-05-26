@@ -68,7 +68,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                     <div id="qform" class="disign-content" style="width:100%;">
                         <!-- <div style="position: absolute;top:20px;left:450px;width:200px"><img src="crosstabs_image.png"/></div> -->
                         <div class="row">
-                            <div class="col-12 col-md-4 border border-dark">
+                            <div class="col-12 col-md-4 border border-dark bg-white">
                                 <fieldset>
                                     <!-- Dataset selection -->
                                     <div class="row">
@@ -111,7 +111,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                         &nbsp;&nbsp;<button id="btnSaveSettings">Save</button> -->
                                 <!-- </div> -->
                             </div>
-                            <div class="col-12 col-md-4 border border-dark">
+                            <div class="col-12 col-md-4 border border-dark bg-white">
                                 <div class="row">
                                     <div class="col-12">
                                         <fieldset id="vars" style="display:none;">
@@ -172,7 +172,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-md-4 border border-dark">
+                            <div class="col-12 col-md-4 border border-dark bg-white">
                                 <div class="row">
                                     <div class="col-12">
                                         <fieldset id="shows" style="display:none;">
@@ -251,8 +251,6 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                             Select record type.
                         </div>
 
-                        <div style="border-color: black; border-style: solid; border-width:3px; padding-left: 5px;">
-
                         </div>
 
                         </fieldset>
@@ -278,12 +276,12 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                     </ul>
                     <div class="tab-content" id="tabContent">
                         <!-- Datables goes here!!! -->
-                        <div class="tab-pane fade show active" id="table" role="tabpanel" aria-labelledby="table-tab">
+                        <div class="tab-pane fade show active bg-white p-3" id="table" role="tabpanel" aria-labelledby="table-tab">
                             <div id="divres" class="output-content" style="display:none;">
                             </div>
                         </div>
                         <!--Pie Chart goes here!!! -->
-                        <div class="tab-pane fade d-flex justify-content-center" id="pie" role="tabpanel" aria-labelledby="pie-tab">
+                        <div class="tab-pane fade d-flex justify-content-center bg-white p-3" id="pie" role="tabpanel" aria-labelledby="pie-tab">
                             <canvas id="pieResults" width="700" height="700"></canvas>
                         </div>
                     </div>
