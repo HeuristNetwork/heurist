@@ -30,6 +30,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
 <link rel="stylesheet" type="text/css" href="DataTables/datatables.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.2.0/chart.min.js"></script>
 <script type="text/javascript" src="<?php echo PDIR; ?>hclient/widgets/entity/configEntity.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
 <script type="text/javascript" charset="utf8" src="DataTables/datatables.js"></script>
@@ -62,6 +63,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
         <div class="container-fluid">
             <!-- Page container -->
             <div class="row">
+                <div class="col-12 col-mb-2 d-none" id="errorContainer"></div>
                 <div class="col-12 mb-2" id="topContainer">
                     <div id="qform" class="disign-content" style="width:100%;">
                         <!-- <div style="position: absolute;top:20px;left:450px;width:200px"><img src="crosstabs_image.png"/></div> -->
@@ -113,50 +115,56 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                 <div class="row">
                                     <div class="col-12">
                                         <fieldset id="vars" style="display:none;">
-                                            <div class="row">
+                                            <div class="row" id="rowVars">
                                                 <div class="fldheader col-4"><label for="cbRows">Var 1 (rows)</label></div>
                                                 <div class="input-cell col-6">
                                                     <select id="cbRows" name="row" onchange="crosstabsAnalysis.resetIntervals(event); crosstabsAnalysis.OnRowTypeChange(this);" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
                                                 </div>
                                                 <div class="col-2">
-                                                    <button type="button" tt='row' class='btn btn-warning showintervals'>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                                                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                                                        </svg>
-                                                    </button>
+                                                    <span class="d-inline-block" id="rowTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals">
+                                                        <button type="button" tt='row' class="btn btn-warning showintervals" disabled>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                                                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                                                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
                                                 </div>
                                                 <div id="rowIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
                                             </div>
                                             <div style="height:2em">&nbsp;</div>
-                                            <div class="row">
+                                            <div class="row" id="columnVars">
                                                 <div class="fldheader col-4"><label for="cbColumns">Var 2 (columns)</label></div>
                                                 <div class="input-cell col-6">
                                                     <select id="cbColumns" name="column" onchange="crosstabsAnalysis.resetIntervals(event)" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
                                                 </div>
                                                 <div class="col-2">
-                                                    <button type="button" tt="column" class='btn btn-warning showintervals'>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                                                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                                                        </svg>
-                                                    </button>
+                                                    <span class="d-inline-block" id="columnTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals">
+                                                        <button type="button" tt="column" class="btn btn-warning showintervals" disabled>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                                                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                                                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
                                                 </div>
                                                 <div id="columnIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
                                             </div>
                                             <div style="height:2em">&nbsp;</div>
-                                            <div class="row">
+                                            <div class="row" id="pageVars">
                                                 <div class="fldheader col-4"><label for="cbPages">Var3 (pages)</label></div>
                                                 <div class="input-cell col-6">
                                                     <select id="cbPages" name="page" onchange="crosstabsAnalysis.resetIntervals(event)" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
                                                 </div>
                                                 <div class="col-2">
-                                                    <button type="button" tt='page' class='btn btn-warning showintervals'>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                                                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                                                        </svg>
-                                                    </button>
+                                                    <span class="d-inline-block" id="pageTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals">
+                                                        <button type="button" tt='page' class="btn btn-warning showintervals" disabled>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                                                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                                                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                                                            </svg>
+                                                        </button>
+                                                    </span> 
                                                 </div>
                                                 <div id="pageIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
                                             </div>
@@ -258,8 +266,28 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                         </div>
                     </div>
                 </div>
-                <div class="col-12 mb-2" id="bottomContainer">
-                    <!-- Datables goes here!!! -->
+                <div class="col-12 mb-2 d-none" id="bottomContainer">
+                    <!--Tab Bar for table and visualisation -->
+                    <ul class="nav nav-tabs" id="tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="table-tab" data-bs-toggle="tab" data-bs-target="#table" type="button" role="tab" aria-controls="table" aria-selected="true">Table</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="pie-tab" data-bs-toggle="tab" data-bs-target="#pie" type="button" role="tab" aria-controls="pie" aria-selected="false">Pie Chart</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="tabContent">
+                        <!-- Datables goes here!!! -->
+                        <div class="tab-pane fade show active" id="table" role="tabpanel" aria-labelledby="table-tab">
+                            <div id="divres" class="output-content" style="display:none;">
+                            </div>
+                        </div>
+                        <!--Pie Chart goes here!!! -->
+                        <div class="tab-pane fade" id="pie" role="tabpanel" aria-labelledby="pie-tab">
+                            <canvas id="pieResults" width="400" height="400"></canvas>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -276,10 +304,6 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
             </div>
         -->
 
-        <div id="divres" class="output-content" style="display:none;">
-        </div>
-
-
         <div id="div_empty" class="output-content" style="color:red;font-weight:bold;display:none;">
             Please apply a filter to create a result set
         </div>
@@ -287,7 +311,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
 
     <!-- Modal for Add, Edit and Delete values -->
     <div class="modal fade" tabindex="-1" id="rowIntervalsModal">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-dialog-width" id="rowDialog">
             <div class="modal-content">
                 <div class="modal-header" id="rowIntervalHeader">
                     <h4 id="rowHeader"></h4>
@@ -301,7 +325,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
     </div>
 
     <div class="modal fade" tabindex="-1" id="columnIntervalsModal">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-dialog-width" id="columnDialog">
             <div class="modal-content">
                 <div class="modal-header" id="columnIntervalHeader">
                     <h4 id="columnHeader"></h4>
@@ -315,7 +339,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
     </div>
 
     <div class="modal fade" tabindex="-1" id="pageIntervalsModal">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-dialog-width" id="pageDialog">
             <div class="modal-content">
                 <div class="modal-header" id="pageIntervalHeader">
                     <h4 id="pageHeader"></h4>
@@ -327,6 +351,26 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
             </div>
         </div>
     </div>
+
+    <!--Confirmation Modal
+    <div class="modal fade" tabindex="-1" id="confirmationModal">
+        <div class="modal-dialog ">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>Delete?</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Deleting this group will unallocate all values within this group. Are you sure you would like to delete this group? 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="no" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-primary" id="yes" data-bs-dismiss="modal">Yes</button>
+                </div>
+            </div>    
+        </div>
+    </div>
+    -->
 </body>
 
 </html>

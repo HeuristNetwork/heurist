@@ -23,9 +23,14 @@
 * @package     Heurist academic knowledge management system
 */
 
+/*
+* Global variables
+*/
 var crosstabsAnalysis;
-var buttonDiv;
-var visualisationButton;
+var intervalsNumeric;
+var intervalsValues;
+var minMax = [];
+var originalOutliers = [];
 
 /**
 *  CrosstabsAnalysis - class for crosstab analysis
@@ -111,10 +116,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
       configEntityWidget.configEntity( 'updateList', $recTypeSelector.val() );
 
-        buttonDiv = $("<div></div>");
-        visualisationButton = $("<button>Visualise</button>");
-
-        visualisationButton.appendTo(buttonDiv);
     }
 
     function _OnRowTypeChange(value) {
@@ -210,17 +211,74 @@ function CrosstabsAnalysis(_query, _query_domain) {
     * remove all intervals for given type (page,col,row)
     */
     function clearIntervals(name){
-        var $container = $('#'+name+'Intervals');
-        $container.empty().hide();
-        $container.html('Select field to set intervals');
+        var $headerModal = $('#'+name+'Header');
+        var $container = $('#'+name+'IntervalsBody');
+        var $tooltip = $('#'+name+'Tooltip')
+        var $editButton = $('#'+name+'Vars').find('button');
+        var $errorContainer = $('#errorContainer');
+
+        $headerModal.empty();
+        $container.empty();
+        $errorContainer.addClass('d-none');
+        $editButton.prop('disabled', true);
+        $tooltip.attr('title','Select field to set intervals');
+
+        $('#rowVars,#columnVars,#pageVars').each(function(i, ele){
+            if($(ele).attr('style')){
+                $(ele).removeAttr('style');
+            }
+        });
+
         fields3[name] = {field:0, type:'', values:[], intervals:[]};
+
         return $container;
     }
 
     //
+    //Apply intervals from saved file
+    //Replace intervals with saved intervals
+    //Only used when settings have been saved.
     //
+    function _applySavedIntervals(allFields, counts, name){
+        fields3['column'] = allFields['column'];
+        fields3['row'] = allFields['row'];
+        fields3['page'] = allFields['page'];
+
+        for(d=0;d<3;d++){
+            if(d==0) name = 'column'; 
+            if(d==1) name = 'row';
+            if(d==2) name = 'page';
+
+            $('#cb'+name[0].toUpperCase()+name.slice(1)+'s').val(fields3[name].field);
+
+            if(fields3[name].type=="enum" || fields3[name].type=="resource" || fields3[name].type=="relationtype"){
+                if(fields3[name].intervals.length > 0){
+                    renderIntervals(name, false);
+                    for(j=0;j<fields3[name].intervals.length;j++){
+                        __addeditInterval( name, j, false);
+                    }
+                }
+            }
+            else if(fields3[name].type=="float" || fields3[name].type=="integer"){
+                if(fields3[name].intervals.length > 0){
+                    minMax[0] = fields3[name].values[0];
+                    minMax[1] = fields3[name].values[1];
+                    keepCount = counts;
+                    renderIntervals(name);
+                }
+            }
+        
+        }
+
+        _doRetrieve();
+        $('#bottomContainer').removeClass('d-none');
+
+    }
+
     //
-    function _resetAllIntervals(fields, name){
+    //Redundant function when settings are saved.
+    //
+    function _resetAllIntervals(fields, name, notSaved){
 
         suppressRetrieve = true;
 
@@ -229,7 +287,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var detailid = fields[name];
         $('#cb'+name[0].toUpperCase()+name.slice(1)+'s').val(detailid);
 
-        _resetIntervals_continue(name, detailid, function(){
+        _resetIntervals_continue(name, detailid, false, function(){
             if(name == 'column')
                 name = 'row'
             else if(name == 'row')
@@ -239,7 +297,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 _autoRetrieve();
                 return;
             }
-            _resetAllIntervals(fields, name);
+            _resetAllIntervals(fields, name, false);
         });
     }
 
@@ -252,13 +310,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var detailid = event.target.value;
         var name = $(event.target).attr('name');  //type
 
-        _resetIntervals_continue(name, detailid);
+        _resetIntervals_continue(name, detailid, true);
     }
 
     //
     //
     //
-    function _resetIntervals_continue(name, detailid, callback){
+    function _resetIntervals_continue(name, detailid, notSaved, callback){
 
         var $container = $('#'+name+'Intervals');
         $container.empty();
@@ -282,7 +340,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if(detailtype=="enum" || detailtype=="relationtype") //false &&
         {
             //get all terms and create intervals
-            calculateIntervals(name);
+            calculateIntervals(name, null,true);
 
         }else if(detailtype=="float" || detailtype=="integer"){
             //get min and max for this detail in database
@@ -303,7 +361,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             $container.show();
                         }else{
                             fields3[name].values = [val0, valmax];
-                            calculateIntervals(name);
+                            minMax[0] = fields3[name].values[0];    //Store min value in seperate array to save the copy as to use in the rendering.
+                            minMax[1] = fields3[name].values[1];    //Store min value in seperate array to save the copy as to use in the rendering.
+                            calculateIntervals(name, null, true);
+                            $('#bottomContainer').removeClass('d-none');
                         }
 
                         if($.isFunction(callback)) callback.call();
@@ -339,7 +400,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             $container.show();
                         }else{
                             fields3[name].values = response.data;
-                            calculateIntervals(name);
+                            calculateIntervals(name, null, true);
+                            $('#bottomContainer').removeClass('d-none');
                         }
 
                         if($.isFunction(callback)) callback.call();
@@ -359,15 +421,15 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }
 
-
         if($.isFunction(callback)) callback.call();
-        renderIntervals(name);
+        $('#bottomContainer').removeClass('d-none');    //Show table results
+        if(notSaved) renderIntervals(name, true);  //DisplayPopup
     }
 
     /**
     * create intervals
     */
-    function calculateIntervals(name, count)
+    function calculateIntervals(name, count, notSaved)
     {
         if(fields3[name].type=="float" || fields3[name].type=="integer")
         {
@@ -432,7 +494,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
 
         }
-        renderIntervals(name);
+
+        if(notSaved) renderIntervals(name, true);
 
         if(suppressRetrieve) return;
 
@@ -442,273 +505,840 @@ function CrosstabsAnalysis(_query, _query_domain) {
     /**
     * render intervals (create divs)
     */
-    function renderIntervals(name){
+    function renderIntervals(name, notSaved){
 
-        var $container = $('#'+name+'Intervals');
+        //var $container = $('#'+name+'Intervals');
         var $modalDialogBody = $('#'+name+'IntervalsBody'); //Hosts the entire body of modal
-        var $rowDiv;  //First row within the modal.
-        var $leftColDiv;   //Left column of div 
-        var $rightColDiv;   //Right column of div
-        var $firstRowDiv;  
-        var $buttons;
-        var $bodyDiv;
-        var $addIntervalBtn;
-        var $btnDiv;
-        var $intervalHeadRow;
+        
+        var detailtype = fields3[name].type;
 
         $modalDialogBody.empty();
-        $container.empty();
+        //$container.empty();
 
         if(fields3[name].intervals.length<1){
+            var errorMessage = 'There are no values for these fields in the current results set.';
+            createErrorMessage($('#errorContainer'), errorMessage);
+            $('#errorContainer').removeClass('d-none');
+
+            //Highlight area (animation)
+            $('#'+name+'Vars').animate(
+                {backgroundColor : "#FFF3cd"}, 500
+            );
+
+            //Disable Button.
+            $('#'+name+'Vars').find('button').prop('disabled', true);
+
+            /*
             $container.html('There are no values for these fields in the current results set');
             $container.show();
+            */
             return;
         }
 
         if(fields3[name].values && fields3[name].values.length>0)
         {
-            $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase());
+            var totalVars = 0;  //Holds number of fields that have no style
+            //Remove previous error animation style
+            $('#'+name+'Vars').removeAttr('style');
 
-            //Creates entire element in modal
-            $intdiv = $(document.createElement('div'))
-            .css({'padding':'0.4em'})
-            .attr('intid', 'b0' )
-            .addClass('container-fluid')
-            .appendTo($modalDialogBody);
+            //Check to see if all fields have no style and remove error message.
+            $('#rowVars,#columnVars,#pageVars').each(function(i, ele){
+                if($(ele).attr('style') == null){
+                    totalVars++;
+                }
+                
+                if(totalVars == 3){
+                    $('#errorContainer').addClass('d-none');
+                }
+            });
 
-            $rowDiv = $(document.createElement('div'))
-            .addClass('row '+name)
-            .appendTo($intdiv);
+            //Re-enable buton.
+            $('#'+name+'Vars').find('button').prop('disabled', false);
+            //Disable tooltip
+            $('#'+name+'Tooltip').attr('title', 'Edit the values in this interval.');
 
-            $leftColDiv = $(document.createElement('div'))
-            .addClass('col-4')
-            .attr('id', 'leftColDiv'+name)
-            .css({'padding-right':'2rem'})
-            .appendTo($rowDiv);
+            if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype") {
 
-            $rightColDiv = $(document.createElement('div'))
-            .addClass('col-8')
-            .attr('id','rightColDiv'+name)
-            //.css({'padding-right':'2rem'})
-            .appendTo($rowDiv);
+                var $rowDiv;        //First row within the modal.
+                var $leftColDiv;    //Left column of div 
+                var $rightColDiv;   //Right column of div
+                var $firstRowDiv;  
+                var $buttons;
+                var $bodyDiv;
+                var $addIntervalBtn;
+                var $btnDiv;
+                var $intervalHeadRow;
+                var $listDiv;
 
-            $firstRowDiv = $(document.createElement('div'))
-            .addClass('row')
-            .css('margin-bottom','1rem')
-            .appendTo($rightColDiv);
+                $('#'+name+'Dialog').addClass('modal-xl');
+                $('#'+name+'Dialog').addClass('modal-dialog-width');
 
-            $firstRowDiv.append('<div class="col-md-1"></div>')//Blank div
-            $firstRowDiv.append('<div class="col-md-8"><h5>Intervals</h5></div>')
+                $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase());
 
-            /* Input field to show number of intervals
-            $firstRowDiv
-            .append('<div class="col-6 form-group"><label>Number of intervals:</label><input id="'+name+'IntCount" size="6" value="'+keepCount+'"></div>')
-            */
+                //Creates entire element in modal
+                $intdiv = $(document.createElement('div'))
+                .css({'padding':'0.4em'})
+                .attr('intid', 'b0' )
+                .addClass('container-fluid')
+                .appendTo($modalDialogBody);
 
-            //$('<input id="'+name+'IntCount">').attr('size',6).val(keepCount)
+                $rowDiv = $(document.createElement('div'))
+                .addClass('row '+name)
+                .appendTo($intdiv);
 
-            $buttons = $(document.createElement('div'))
-            .addClass('col-md-3')
-            .append($('<button>',{text: "Reset",class: "btn btn-secondary"})
-                .click(function( event ) {
-                    calculateIntervals(name, parseInt($('#'+name+'IntCount').val()) );
-                }).css('margin-right',"1rem"))
-            
-            $buttons.appendTo($firstRowDiv);
-            /*
-            .append($('<button>',{text: "Reset"})
-                .css('margin-left','1em')
-                .css('margin-right','3em')
-                .click(function( event ) {
-                    calculateIntervals(name, parseInt($('#'+name+'IntCount').val()) );
-            }));
-            */
+                $leftColDiv = $(document.createElement('div'))
+                .addClass('col-md col-sm-12 card me-md-2 mb-sm-2 mb-2 bg-light')
+                .attr('id', 'leftColDiv'+name)
+                .css({'padding-right':'2rem'})
+                .appendTo($rowDiv);
 
-            /*
-            $('<button>',{text: "Add"})
-            //.button({icons: {primary: "ui-icon-plus"}} )
-            .click(function( event ) {
-                editInterval(  name, -1 );
-            })
-            .appendTo($rowDiv);
-            */
+                $rightColDiv = $(document.createElement('div'))
+                .addClass('col-md-8 col-sm-12 card mb-sm-2 mb-2 bg-light')
+                .attr('id','rightColDiv'+name)
+                //.css({'padding-right':'2rem'})
+                .appendTo($rowDiv);
 
-            /* @TODO perhaps
-            $intdiv.append($('<input>').attr('type','checkbox').css('margin-left','1em').click(function(event){
-            fields3[name].allownulls = event.target.checked;
-            })
-            ).append('&nbsp;include null values');
-            */
+                $firstRowDiv = $(document.createElement('div'))
+                .addClass('row')
+                .css('margin-bottom','1rem')
+                .appendTo($rightColDiv);
 
-            $intervalHeadRow = $(document.createElement('div'))
-            .addClass('row')
-            .appendTo($rightColDiv);
+                $firstRowDiv.append('<div class="col pt-2"><h5>Intervals</h5></div>')
 
-            $('<div class="col-md-1">')
-            .appendTo($intervalHeadRow);
+                /* Input field to show number of intervals
+                $firstRowDiv
+                .append('<div class="col-6 form-group"><label>Number of intervals:</label><input id="'+name+'IntCount" size="6" value="'+keepCount+'"></div>')
+                */
 
-            $('<div class="col-md-4">')
-            .append('<h6>Label<h6>')
-            .appendTo($intervalHeadRow);
+                //$('<input id="'+name+'IntCount">').attr('size',6).val(keepCount)
 
-            $('<div class="col-md">')
-            .append('<h6>Value</h6>')
-            .appendTo($intervalHeadRow);
-        }
+                $buttons = $(document.createElement('div'))
+                .addClass('col-3 p-2')
+                .append($('<button>',{text: "Reset",class: "btn btn-secondary"})
+                    .click(function( event ) {
+                        calculateIntervals(name, parseInt($('#'+name+'IntCount').val()), true );
+                    }).css('margin-right',"1rem"))
+                
+                $buttons.appendTo($firstRowDiv);
 
-        var idx;
-        var intervals = fields3[name].intervals;
+                $intervalHeadRow = $(document.createElement('div'))
+                .addClass('row')
+                .appendTo($rightColDiv);
 
-        $('#'+name+'IntCount').val(intervals.length)
+                $('<div class="col-1 p-1">')
+                .appendTo($intervalHeadRow);
 
-        for (idx=0; idx<intervals.length; idx++){
+                $('<div class="col-4">')
+                .append('<h6>Label<h6>')
+                .appendTo($intervalHeadRow);
 
-            var interval = intervals[idx];
+                $('<div class="col">')
+                .append('<h6>Value</h6>')
+                .appendTo($intervalHeadRow);
 
-            $intdiv = $(document.createElement('div'))
-            .addClass('intervalDiv list row')
-            .attr('id', name+idx )
-            .appendTo($rightColDiv);
+                
+                var idx;
+                var intervals = fields3[name].intervals;
 
-            $('<div class="col-md-1 bg-white">')
-            .attr('id', name+idx+'ArrowPlacement')
-            .appendTo($intdiv);
+                if(notSaved){
+                    $('#'+name+'IntCount').val(intervals.length)
 
-            $('<div class="col-md-4">')
-            //.css({'width':'160px','display':'inline-block'})
-            .append(
-                $('<div>')
-                .html(interval.name)
-                .css({'font-weight':'bold'} ))
-            /*$('<input>')
-            .addClass('text ui-widget-content ui-corner-all')
-            .val(interval.name)
-            .css({'width':'150px'} ))*/
-            .appendTo($intdiv);
+                    for (idx=0; idx<intervals.length; idx++){
 
-            if(intervals[idx].values.length > 1){
-                var splitDescription = interval.description.split("+");
-                var listGroup = $('<ul class="list-group list-group-flush"></ul>');
-            
-                for(x=0;x<(splitDescription.length-1); x++){
-                    var listItem = $('<li class="list-group-item p-0 bg-transparent">')
-                    .html(splitDescription[x])
-                    .appendTo(listGroup);
+                        var interval = intervals[idx];
+
+                        $intdiv = $(document.createElement('div'))
+                        .addClass('intervalDiv list row pe-1 bg-light')
+                        .attr('id', name+idx )
+                        .appendTo($rightColDiv);
+
+                        $('<div class="col-1 p-1">')
+                        .attr('id', name+idx+'ArrowPlacement')
+                        .appendTo($intdiv);
+
+                        $('<div class="col-4 p-1 border-2 border-top border-secondary pointer">')
+                        //.css({'width':'160px','display':'inline-block'})
+                        .html(interval.name)
+                        .css({'font-weight':'bold'} )
+                        .dblclick(function(event){
+                            //Collect the interval number of the clicked row
+                            var intervalElement = $(this).parent();
+                            var intervalPosition = intervalElement.attr('id').replace(name, '');
+
+                            intervalPosition = parseInt(intervalPosition);
+
+                            //Create input box to change name
+                            $(this).html('<input class="w-100" id="changeNameBox" value="'+fields3[name].intervals[intervalPosition].name+'">');
+                            //When user clicks out of input box edit name
+                            $('#changeNameBox').blur(function(){
+                                var nameChanged = $('#changeNameBox').val();
+                                $(this).parent().html(nameChanged);
+
+                                fields3[name].intervals[intervalPosition].name = nameChanged;
+                                _doRender();    //Apply to table
+                            });
+                        })
+                        .appendTo($intdiv);
+
+                        if(intervals[idx].values.length > 1){
+                            var splitDescription = interval.description.split("+");
+                            var listGroup = $('<ul class="list-group list-group-flush"></ul>');
+                        
+                            for(x=0;x<(splitDescription.length-1); x++){
+                                var listItem = $('<li class="list-group-item p-0 bg-transparent">')
+                                .html(splitDescription[x])
+                                .appendTo(listGroup);
+                            }
+
+                            $('<div class="col-md">')
+                            .append(listGroup)
+                            .appendTo($intdiv);
+
+                        }
+                        else{
+                            $('<div class="col p-1 border-2 border-top border-secondary">')
+                            .html(interval.description)
+                            //.css({'max-width':'250px','width':'250px','display':'inline-block','padding-left':'1.5em'})
+                            .appendTo($intdiv);    
+                        }
+
+                        /*
+                        var editbuttons = '<div class="saved-search-edit">'+
+                        '<img title="edit" src="' +window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif" '+
+                        'onclick="{top.HEURIST.search.savedSearchEdit('+sid+');}">';
+                        editbuttons += '<img  title="delete" src="'+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif" '+
+                        'onclick="{top.HEURIST.search.savedSearchDelete('+sid+');}"></div>';
+                        $intdiv.append(editbuttons);
+                        */
+                    }
                 }
 
-                $('<div class="col-md">')
-                .append(listGroup)
+                $btnDiv = $('<div class="row my-2"></div>').attr('id', 'addIntervalDiv'+name)
+                    .appendTo($rightColDiv);
+
+                $addIntervalBtn = $('<button>',{class: "btn btn-success w-100"})
+                    //.button({icons: {primary: "ui-icon-plus"}} )
+                    .click(function( event ) {
+                        editInterval( name, -1);
+                    })
+                    .html('<i class="bi bi-plus"></i> Add Interval')
+                    .attr('id','addInterval');
+
+                $('<div class="col-1">').appendTo($btnDiv);
+
+                $('<div class="col-11">')
+                    .append($addIntervalBtn)
+                    .appendTo($btnDiv);
+
+                //render checkboxes
+                $firstRowDiv = $(document.createElement('div'))
+                .addClass('row')
+                .appendTo($leftColDiv);
+
+                //Heading for left col values
+                $('<div id="topdiv" class="col-12 p-2"></div>')
+                .append('<h5>Available Values</h5>')
+                .appendTo($firstRowDiv);
+
+                $('<div class="col-12">')
+                .append('<p>Select and assign to new intervals</p>')
+                .appendTo($firstRowDiv);
+
+                //Create body of checkboxes
+                if ( detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype")
+                {
+                    //Creates select all checkbox
+                    $intdiv = $(document.createElement('div'))
+                    .addClass('row p-1')
+                    .appendTo($leftColDiv);
+
+                    $listDiv = $(document.createElement('div'))
+                    .addClass('col-1 d-flex align-items-center')
+                    .appendTo($intdiv);
+
+                    $('<input>')
+                    .attr('type','checkbox')
+                    .attr('checked', false)
+                    .attr('id','selectAll'+name)
+                    .addClass('recordIcons')
+                    .change(function(){
+                        //Unchecks selectall checkbox if a value is unchecked.
+                        var checked = this.checked;
+                        //selects checkbox which are not disabled in edit mode
+                        $('input[name="'+name+'Options"]:not(:disabled)').each(function(){
+                            this.checked = checked;
+                        });
+                    })
+                    .appendTo($listDiv);
+
+                    $('<div>')
+                    .addClass('recordTitle col p-1')
+                    .html('Select All')
+                    .appendTo($intdiv);
+
+                    //Creates value checkboxes
+                    var i, j,
+                    termlist = fields3[name].values; //all terms or pointers
+                    for(i=0; i<termlist.length; i++)
+                    {
+                        var notused = true, isAllocated = false;
+                        /*for(j=0; j<intvalues.length; j++){
+                            if(window.hWin.HEURIST4.util.findArrayIndex(termlist[i].id, intvalues[j])>=0){
+                                if(idx==j){
+                                    itself = true;  //itself
+                                }else{
+                                    notused = false;
+                                }
+                                break;
+                            }
+                        }
+                        */
+
+                        //Check to see if the fields have already been allocated
+                        for(j=0;j<intervals.length;j++){
+                            if(intervals[j].values.length > 1){
+                                for(k=0;k<intervals[j].values.length;k++){
+                                    if(termlist[i].id == intervals[j].values[k]){
+                                        isAllocated = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            else if(termlist[i].id == intervals[j].values[0]){
+                                isAllocated = true;
+                            }
+                        }
+
+                        if(notused){
+
+                            $intdiv = $(document.createElement('div'))
+                            .addClass('intervalDiv list p-1 row')
+                            .attr('intid', i )
+                            .appendTo($leftColDiv);
+
+                            $listDiv = $(document.createElement('div'))
+                            .addClass('col-1 d-flex align-items-center')
+                            .appendTo($intdiv);
+
+                            $('<input>')
+                            .attr('type','checkbox')
+                            .attr('checked', isAllocated)
+                            .attr('disabled', isAllocated)
+                            .addClass('recordIcons')
+                            .attr('termid',termlist[i].id)
+                            .attr('termname',termlist[i].text)
+                            .attr('name', name+'Options')
+                            .change(function(){
+                                //If select all is chosen and user deselects a value, select all checkbox will be unchecked.
+                                if(($('input[id=selectAll'+name+']').prop('checked') == true) && ($(this).prop('checked') == false)){
+                                    $('input[id=selectAll'+name+']').prop('checked', false);
+                                }
+                                
+                                if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
+                                    $('input[id=selectAll'+name+']').prop('checked', true);
+                                }
+                            })
+                            .appendTo($listDiv);
+
+                            $('<div>')
+                            .addClass('recordTitle col p-1')
+                            //.css('margin-top','0.4em')
+                            .html( termlist[i].text )
+                            .appendTo($intdiv);
+
+                        }
+
+                        //Add arrows to fields that are already allocated (original values)
+                        if(isAllocated){
+                            var $removeButton = $('<button></button>')
+                            .addClass('btn btn-outline-primary w-100 p-1')
+                            .attr('valueid',termlist[i].id)
+                            .click(function(){
+                                //Get the name of the value clicked to remove from group interval
+                                var clicked = $(this).attr('valueid');
+
+                                //Find checkbox with same valueid
+                                $('input[termid='+ clicked+']')
+                                .prop('checked', false)
+                                .attr('disabled', false);
+
+                                if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
+                                    $('#selectAll'+name).prop('checked', false)
+                                    .attr('disabled',false);
+                                }
+
+                                //Remove div containing field.
+                                $(this).parents('div.list').remove();
+                                //Remove interval from rendered field.
+                                var index = findPositionInArray(name, parseInt(clicked))
+                                removeInterval(name, index,-1);
+                            });
+
+                            $('<i class="bi bi-arrow-left w-100"></i>')
+                            .appendTo($removeButton);
+
+                            $('#'+name+i+'ArrowPlacement')
+                            .append($removeButton);
+                        }
+                    }
+
+                    if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
+                        $('#selectAll'+name).prop('checked', true)
+                        .attr('disabled',true);
+                    }
+                }
+            }
+            else if(detailtype=="float" || detailtype=="integer"){
+                var $entireDiv;
+                var $resetRow;
+                var $resetRowBody;
+                var $roundingDiv;
+                var $roundingRowBody;
+                var $intervalsDiv;
+                var $intervalColumn;
+                var selectBox;
+                
+                var decimalPlaces = [0,1,2,3];
+
+                //Change size of modal to accommodate and remove white space. These fields are not large.
+                $('#'+name+'Dialog').removeClass('modal-xl');
+                $('#'+name+'Dialog').removeClass('modal-dialog-width');
+
+                $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase()
+                    + ' (Range: '+fields3[name].values[0]+' - ' +fields3[name].values[1]+')');
+
+                //Creates entire element in modal
+                $intdiv = $(document.createElement('div'))
+                .css({'padding':'0.4em'})
+                .attr('intid', 'b0' )
+                .addClass('container-fluid')
+                .appendTo($modalDialogBody);
+
+                $entireDiv = $(document.createElement('div'))
+                .addClass('row '+name)
                 .appendTo($intdiv);
 
+                //Create the reset row.
+                $resetRow = $(document.createElement('div'))
+                .addClass('col-12 card mb-2 pt-2 bg-light')
+                .appendTo($entireDiv);
+                
+                $resetRowBody = '<div class="row">'+
+                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Reset Intervals:</label></div><div class="col-sm col-xs-12"><input id="'+name+'IntCount" size="6" value="'+keepCount+'"></input></div></div></div>'+
+                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Range (from):</label></div><div class="col-sm col-xs-12"><input id="minOutlier" size="6" value="'+minMax[0]+'"></input></div></div></div>'+
+                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Range (to):</label></div><div class="col-sm col-xs-12"><input id="maxOutlier" size="6" value="'+minMax[1]+'"></input></div></div></div>' +
+                    '<div class="col-12 mb-2"><button class="btn btn-success w-100" id="numericApply">Apply</button></div>' +
+                    '</div>';
+
+                $($resetRowBody).appendTo($resetRow);
+                
+                //Add click function to apply button.
+                $($resetRow).find('#numericApply').click(function(event){
+                    var isMinWithin = (parseInt($('#minOutlier').val()) >= fields3[name].values[0] && parseInt($('#minOutlier').val()) <= fields3[name].values[1]) ? true : false;    //If min within range.
+                    var isMaxWithin = (parseInt($('#maxOutlier').val()) <= fields3[name].values[1] && parseInt($('#maxOutlier').val()) >= fields3[name].values[0]) ? true : false;    //If man within range.
+                    var isMaxGreater = (parseInt($('#maxOutlier').val()) < parseInt($('#minOutlier').val())) ? true : false;
+                    var isMinGreater = (parseInt($('#minOutlier').val()) > parseInt($('#maxOutlier').val())) ? true : false;
+
+                    if(isMinWithin && isMaxWithin && !isMaxGreater && !isMinGreater){
+                        minMax[0] = $('#minOutlier').val();
+                        minMax[1] = $('#maxOutlier').val();
+                        calculateIntervals(name, parseInt($('#'+name+'IntCount').val()), true );
+                    }
+                    else{
+                        var errorMessage = "When entering the range of intervals to apply to a dataset, the from and to values must be between the range above."
+                        + " The from value must also not exceed the to value and vice versa.";
+
+                        createErrorMessage($('#'+name+'IntervalsBody'), errorMessage);
+                        /*
+                        setTimeout(function(){
+                            $('#numberAlert').fadeOut(500, function(){
+                                $('#numberAlert').remove();
+                            })
+                        }, 3000)
+                        */
+                    }     
+                });
+
+                //Create rounding row
+                $roundingDiv = $(document.createElement('div'))
+                .addClass('col-12 card mb-2 pt-2 bg-light')
+                .appendTo($entireDiv);
+
+                $roundingRowBody = '<div class="row">' +
+                '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Rounding:</label></div><div class="col-sm col-xs-12"><select id="roundingSelect"><span>decimal place</span></div></div></div>' +
+                '</div>'
+
+                $($roundingRowBody).appendTo($roundingDiv);
+
+                //Append rounding numbers in select box
+                for(j=0;j<decimalPlaces.length;j++){
+                    selectBox = $roundingDiv.find('#roundingSelect');
+
+                    //Make 1 decimal place default.
+                    if(j == 1){
+                        selectBox.append('<option value="'+decimalPlaces[j]+'" selected>'+decimalPlaces[j]+'</option>');
+                        continue;
+                    }
+                    selectBox.append('<option value="'+decimalPlaces[j]+'">'+decimalPlaces[j]+'</option>');
+                }
+
+                selectBox.change(function(){
+                    changeIntervalDecimal(name,$(this).val());
+                    var changedIntervals = fields3[name].intervals
+                    generateNumericIntervalsRows(name, changedIntervals, $intervalColumn, $(this).val())
+                });
+
+                //Create intervals
+                $intervalsDiv = $(document.createElement('div'))
+                .addClass('col-12 card mb-2 pt-2 bg-light')
+                .appendTo($entireDiv);
+
+                $('<div class="row">').append($('<div class="col-12">').append('<h5>Intervals:</h5>')).appendTo($intervalsDiv);
+
+                $intervalColumn = $(document.createElement('div'))
+                .addClass('col-12 mb-2')
+                .appendTo($intervalsDiv);
+
+                //Create number rows of intervals
+                var idx;
+                //Create deep copy of object
+                intervalsNumeric = $.extend(true,{},fields3[name].intervals);
+                
+                changeIntervalDecimal(name, 1);
+                generateNumericIntervalsRows(name, fields3[name].intervals, $intervalColumn, 1);
+            }
+        }
+        
+    }
+
+    /*
+    * Create the rows for the numeric detail types.
+    */
+    function generateNumericIntervalsRows(name, int, htmlElement, decimalPlace){
+        //Update description before rendering.
+        updateDescriptionName(name, int, decimalPlace);
+        htmlElement.empty();
+
+        for(i=0;i<int.length;i++){
+
+            var isOutlierMin = ((int[i].values[0] < Number($('#minOutlier').val())) && (int[i].values[1] < Number($('#minOutlier').val()))) ? true : false;
+            var isOutlierMax = ((int[i].values[1] > Number($('#maxOutlier').val())) && (int[i].values[0] > Number($('#maxOutlier').val()))) ? true : false;
+
+            if(!isOutlierMin && !isOutlierMax){
+                if((int[i].values[0] < Number($('#maxOutlier').val())) && int[i].values[1] > Number($('#maxOutlier').val())){
+                    fields3[name].intervals[i].values[1] = Number($('#maxOutlier').val());
+                    fields3[name].intervals[i].name = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + fields3[name].intervals[i].values[1].toFixed(decimalPlace);
+                    fields3[name].intervals[i].name = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + fields3[name].intervals[i].values[1].toFixed(decimalPlace);
+                }
+                //Create the row div.
+                var $intRows = $(document.createElement('div'));
+
+                $intRows.addClass('row text-center pb-1')
+                .attr('id',name+i)
+                .appendTo(htmlElement);
+
+                $('<div class="col-4">').html(int[i].values[0].toFixed(decimalPlace)).appendTo($intRows);
+
+                $('<div class="col-4">').html('to <').appendTo($intRows);
+
+                $('<div class="col-4 pointer">').html(int[i].values[1].toFixed(decimalPlace))
+                .dblclick(function(){
+                    var intervalId = parseInt($(this).parent().attr('id').replace(name,''));
+                    var intervalValue = fields3[name].intervals[intervalId].values[1];
+
+                    $(this).html('<input type="number" class="w-100" id="changeValueBox" value="'+intervalValue+'">');
+                    //When user clicks out of input box change the intervals value min and max
+                    $('#changeValueBox').blur(function(){                        
+                        //Change the max value for the intervals based on what the user has entered.
+                        for(k=0;k<fields3[name].intervals.length;k++){
+                            if(k < intervalId){
+                                continue;
+                            }
+                            else{
+                                var newNumber = Number($('#changeValueBox').val());
+
+                                if((newNumber <= fields3[name].values[1]) && (newNumber >= fields3[name].intervals[k].values[0])){
+                                    if(k==intervalId){
+                                        fields3[name].intervals[intervalId].values[1] = newNumber;
+                                        fields3[name].intervals[intervalId].name = rnd(fields3[name].intervals[intervalId].values[0]) + ' ~ ' +  rnd(fields3[name].intervals[intervalId].values[1]);
+                                        fields3[name].intervals[intervalId].description = rnd(fields3[name].intervals[intervalId].values[0]) + ' ~ ' +  rnd(fields3[name].intervals[intervalId].values[1]);
+                                    }
+                                    else{
+                                        if(newNumber >= fields3[name].intervals[k].values[1]){
+                                            fields3[name].intervals.splice(k, 1);
+                                            k=0;
+                                            continue;
+                                        }
+                                        else{
+                                            fields3[name].intervals[k].values[0] = newNumber;
+                                            break;
+                                        }
+                                    }
+                                }
+                                else{
+                                    var errorMessage;
+                                    if((newNumber > fields3[name].values[1]) && (newNumber >= fields3[name].intervals[k].values[0])){
+                                        errorMessage = 'Number cannot be greater than the max range.'
+                                    }
+                                    else if((newNumber < fields3[name].values[1]) && (newNumber < fields3[name].intervals[k].values[0])){
+                                        errorMessage = 'Number cannot be less than the min range of this interval.'
+                                    }
+                                    createErrorMessage($('#'+name+'IntervalsBody'), errorMessage);
+                                    break;
+                                }
+                            }
+                        }
+                        //Because user is making changes to the values, save the object, making it easier to return to the original value when decimals are changed.
+                        intervalsNumeric = $.extend(true,{},fields3[name].intervals);
+                        generateNumericIntervalsRows(name, fields3[name].intervals, htmlElement, $('#roundingSelect').val());
+
+                        _doRender();    //Apply to table
+                    });
+                })
+                .appendTo($intRows);
             }
             else{
-                $('<div class="col-md">')
-                .html(interval.description)
-                //.css({'max-width':'250px','width':'250px','display':'inline-block','padding-left':'1.5em'})
-                .appendTo($intdiv);    
-            }
+                if(isOutlierMin){
+                    var clickedMinOutlier = false;
+                    var clickedMaxOutlier = false;
+                    //Creates seperate div for outliers min
+                    var outlierNumber = Number($('#minOutlier').val());
+                    //Change array to incorporate outliers for min
+                    for(t=0;t<fields3[name].intervals.length;t++){
+                        if(t==0){
+                            fields3[name].intervals[t].values[0] = fields3[name].values[0];
+                            fields3[name].intervals[t].values[1] = outlierNumber;
+                            fields3[name].intervals[t].name = '<' + outlierNumber.toFixed(decimalPlace);
+                            fields3[name].intervals[t].description = '<' + outlierNumber.toFixed(decimalPlace);
+                            continue;
+                        }
 
-            /*
-            var editbuttons = '<div class="saved-search-edit">'+
-            '<img title="edit" src="' +window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif" '+
-            'onclick="{top.HEURIST.search.savedSearchEdit('+sid+');}">';
-            editbuttons += '<img  title="delete" src="'+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif" '+
-            'onclick="{top.HEURIST.search.savedSearchDelete('+sid+');}"></div>';
-            $intdiv.append(editbuttons);
-            */
+                        if(t==1){
+                            if(fields3[name].intervals[t].values[0] > outlierNumber){
+                                fields3[name].intervals[t].values[0] = outlierNumber;
+                                fields3[name].intervals[t].name = outlierNumber.toFixed(decimalPlace) + ' ~ ' + fields3[name].intervals[t].values[1].toFixed(decimalPlace);
+                                fields3[name].intervals[t].description = outlierNumber.toFixed(decimalPlace) + ' ~ ' + fields3[name].intervals[t].values[1].toFixed(decimalPlace);
+                                continue;
+                            }
+                        }
+                    
+                        if((fields3[name].intervals[t].values[0] < outlierNumber)&&(fields3[name].intervals[t].values[1] <= outlierNumber)){
+                            fields3[name].intervals.splice(t, 1);
+                            t=0;
+                            continue
+                        }
+                        
+                        if((fields3[name].intervals[t].values[0] < outlierNumber) && (fields3[name].intervals[t].values[1] > outlierNumber)){
+                            fields3[name].intervals[t].values[0] = outlierNumber;
+                            fields3[name].intervals[t].name = outlierNumber.toFixed(decimalPlace)+ ' ~ ' + fields3[name].intervals[t].values[1].toFixed(decimalPlace);
+                            fields3[name].intervals[t].description = outlierNumber.toFixed(decimalPlace)+ ' ~ ' + fields3[name].intervals[t].values[1].toFixed(decimalPlace);
+                            continue;
+                        }
+                    }
+                    var $intRows = $(document.createElement('div'));
 
-            if(idx >= fields3[name].values.length){
-                $bodyDiv = $('<div class="col-md-2"></div>')
-                .appendTo($intdiv);
+                    $intRows.addClass('row text-center pb-1')
+                    .appendTo(htmlElement);
+                    
+                    $('<div class="col-4">').html('Outliers').appendTo($intRows);
+                    $('<div class="col-4">').html('<'+outlierNumber.toFixed(decimalPlace)).appendTo($intRows);
+                    $('<div class="col-4">').append($('<button>').addClass('btn btn-danger border-dark').attr('id','removeMinOutlier')
+                    .append('<i class="bi bi-trash"></i>'))
+                    .click(function(){
+                        if(!clickedMinOutlier){
+                            originalOutliers[0] = fields3[name].intervals[0];
+                            fields3[name].intervals.splice(0,1);
 
-                $('<button>')
-                .attr('intid', idx)
-                //.button({icons: {primary: "ui-icon-pencil"}, text: false })
-                .addClass('btn btn-warning border-dark')
-                .append('<i class="bi bi-pencil"></i>')
-                //css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif)'})
-                .click(function( event ) {
-                    renderIntervals(name); //Refresh intervals to remove existing arrows and create a clean display.
-                    editInterval( name,  $(this).attr('intid'), false);
-                })
-                .appendTo($bodyDiv);
-    
-                $('<button>')
-                //.button({icons: {primary: "ui-icon-close"}, text: false })
-                .attr('intid', idx)
-                .addClass('btn btn-danger border-dark')
-                .append('<i class="bi bi-trash"></i>')
-                //.css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif)'})
-                .click(function( event ) {
-                    removeInterval( name, $(this).attr('intid') );
-                })
-                .appendTo($bodyDiv);
+                            $('#removeMinOutlier').empty();
+                            $('#removeMinOutlier').toggleClass('btn-danger border-dark btn-success')
+                            .append('<i class="bi bi-plus-circle"></i>');
+                            clickedMinOutlier = true;
+                        }
+                        else {
+                            fields3[name].intervals.unshift(originalOutliers[0]);
+                            $('#removeMinOutlier').empty();
+                            $('#removeMinOutlier').append('<i class="bi bi-trash"></i>');
+                            $('#removeMinOutlier').toggleClass('btn-success btn-danger border-dark');
+                            clickedMinOutlier = false;
+                        }
+                        _doRender();
+                        
+                    })
+                    .appendTo($intRows);
+                }
+                else if(isOutlierMax){
+                    //Creates seperate div for outliers min
+                    var outlierNumber = Number($('#maxOutlier').val());
+                    fields3[name].intervals[i].values[1] = outlierNumber;
+                    fields3[name].intervals[i].name = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + outlierNumber.toFixed(decimalPlace);
+                    fields3[name].intervals[i].description = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + outlierNumber.toFixed(decimalPlace);
+                    
+                    //Change array to incorporate outliers for min
+                    for(t=0;t<fields3[name].intervals.length;t++){
+                        if(t== fields3[name].intervals.length-1){
+                            fields3[name].intervals[t].values[1] = fields3[name].values[1];
+                            fields3[name].intervals[t].values[0] = outlierNumber;
+                            fields3[name].intervals[t].name = '>' + outlierNumber.toFixed(decimalPlace);
+                            fields3[name].intervals[t].description = '>' + outlierNumber.toFixed(decimalPlace);
+                            continue;
+                        }
+                        
+                        if(fields3[name].intervals[t].values[1] > outlierNumber){
+                            fields3[name].intervals.splice(t, 1);
+                            t-=1;
+                        }
+                    }
+                    var $intRows = $(document.createElement('div'));
+
+                    $intRows.addClass('row text-center pt-1')
+                    .appendTo(htmlElement);
+                    
+                    $('<div class="col-4">').html('Outliers').appendTo($intRows);
+                    $('<div class="col-4">').html('>'+outlierNumber.toFixed(decimalPlace)).appendTo($intRows);
+                    $('<div class="col-4">').append($('<button>').addClass('btn btn-danger border-dark').attr('id','removeMaxOutlier')
+                    .append('<i class="bi bi-trash"></i>'))
+                    .click(function(){
+                        if(!clickedMaxOutlier){
+                            originalOutliers[1] = fields3[name].intervals[fields3[name].intervals.length-1];
+                            fields3[name].intervals.splice(fields3[name].intervals.length-1,1);
+
+                            $('#removeMaxOutlier').empty();
+                            $('#removeMaxOutlier').toggleClass('btn-danger border-dark btn-success')
+                            .append('<i class="bi bi-plus-circle"></i>');
+                            clickedMaxOutlier = true;
+                        }
+                        else {
+                            fields3[name].intervals.push(originalOutliers[1]);
+                            $('#removeMaxOutlier').empty();
+                            $('#removeMaxOutlier').append('<i class="bi bi-trash"></i>');
+                            $('#removeMaxOutlier').toggleClass('btn-success btn-danger border-dark');
+                            clickedMaxOutlier = false;
+                        }
+                        _doRender();
+                        
+                    })
+                    .appendTo($intRows);
+                    break;
+                }
             }
         }
 
-        $btnDiv = $('<div class="row my-2"></div>')
-            .appendTo($rightColDiv);
+        _doRender();
+    }
 
-        $addIntervalBtn = $('<button>',{class: "btn btn-success w-100"})
-            //.button({icons: {primary: "ui-icon-plus"}} )
-            .click(function( event ) {
-                renderIntervals(name); //Refresh intervals to remove existing arrows and create a clean display.
-                editInterval( name, -1, true);
-            })
-            .html('<i class="bi bi-plus"></i> Add Interval')
-            .attr('id','addInterval');
+    /* 
+    * Update the description and name within the fields3 objects
+    */
+    function updateDescriptionName(name, ints, decimalPlace){
 
-        $('<div class="col-1">').appendTo($btnDiv);
+        for(i=0;i<ints.length;i++){
+            var intervalName = ints[i].values[0].toFixed(decimalPlace) + ' ~ ' + ints[i].values[1].toFixed(decimalPlace);
 
-        $('<div class="col-11">')
-            .append($addIntervalBtn)
-            .appendTo($btnDiv);
+            fields3[name].intervals[i].name = intervalName;
+            fields3[name].intervals[i].description = intervalName;
+        }
     }
 
     /**
-    * remove interval
+    * remove interval and rearange div rowids to correspond to the array.
     */
-    function removeInterval( name, idx ){
-        fields3[name].intervals.splice(idx,1);
+    function removeInterval(name, idx, groupidx){
 
-        /*
-        var $container = $('#'+name+'Intervals');
-        $container.find( '#'+name+idx ).remove();
-        */
+        //Remove the value from the interval with multiple values.
+        if(groupidx != -1){
+            fields3[name].intervals[groupidx].description = '';
+            fields3[name].intervals[groupidx].values.splice(idx,1);
 
-        renderIntervals(name);
+            //Re-adjust description.
+            for(k=0;k<fields3[name].values.length;k++){
+                var string = (fields3[name].intervals[groupidx].values.length > 1) ? '+' : '';
+                
+                for(j=0;j<fields3[name].intervals[groupidx].values.length;j++){
+                    if(parseInt(fields3[name].values[k].id) == fields3[name].intervals[groupidx].values[j]){
+                        fields3[name].intervals[groupidx].description = fields3[name].values[k].text + string
+                    }
+                }
+            }
+
+            //Re-adjust value ids for each div.
+            var currentValues = $('#'+name+groupidx).find('div.groupList > :first-child');
+            currentValues.each(function(i,ele){
+                $(ele).attr('id', i);
+            });
+
+            //If last value in interval remove entire value.
+            if(fields3[name].intervals[groupidx].values.length == 0){
+                fields3[name].intervals.splice(groupidx,1);
+                isIntervalRemoved = true;   //Used to help keep track of the removed variable.
+            }
+        }
+        else{
+            //Remove from intervals
+            fields3[name].intervals.splice(idx,1);        
+        }
+
+        //Re-adjust rowids
+        var currentRows = $('#rightColDiv'+name+' > .list').not('#templateInterval');
+        currentRows.each(function(i, ele){
+            $(ele).attr('id', name+i);
+        });
+        
         _doRender(); //Render after the removal of a value.
+    }
+
+    //Find the position of the value within the stored array
+    function findPositionInArray(name, detailID){
+        var idx;
+
+        for(i=0;i<fields3[name].intervals.length;i++){
+            if(fields3[name].intervals[i].values.length > 1){
+                for(j=0;j<fields3[name].intervals[i].values.length;j++){
+                    if(fields3[name].intervals[i].values[j]==detailID){
+                        idx = j;
+                        break;
+                    }
+                }
+            }
+            else {
+                if(fields3[name].intervals[i].values[0]==detailID){
+                    idx = i;
+                    break;
+                }
+            }
+        }
+
+        return idx;
     }
 
     /**
     * add/edit interval
     */
-    function editInterval( name, idx, isAdd ){
+    function editInterval( name, idx){
 
         var $editedRow = $('#'+name+idx);
 
-        if(isAdd){
-            var $newInterval = $(document.createElement('div'))
-            .addClass('intervalDiv list row')
-            .appendTo('#rightColDiv'+name)
+        var $newInterval = $(document.createElement('div'))
+            .addClass('intervalDiv list row pe-1')
+            .attr('id','templateInterval')
+            .insertBefore($('#addIntervalDiv'+name));
 
-            $('<div class="col-md-1 bg-white">')
+            $('<div class="col-1 p-1">')
             .attr('id', name+idx+'ArrowPlacement')
             .appendTo($newInterval);
 
-            $('<div class="col-md-4">')
+            $('<div class="col-4 border-2 border-top border-secondary">')
             .append(
                 $('<div>')
                 .html('newInterval')
                 .css({'font-weight':'bold'} ))
             .appendTo($newInterval);
 
-            $('<div class="col-md">')
+            $('<div class="col border-2 border-top border-secondary">')
             .html('empty')
             .appendTo($newInterval);
 
             $('#addInterval').attr('disabled', true);
-        }
+        /*
         else{
             //Toggle edit background colour for the interval that is being used.
             for(e=0;e<fields3[name].intervals.length;e++){
@@ -722,149 +1352,386 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 }
             }
         }
-        
-        //var $dialogbox;
-        var modalEditBox = $('#leftColDiv'+name);
-        var $rowDiv;
+        */
+        $newInterval.find('#'+name+idx+'ArrowPlacement')
+            .append($('<button>')
+            .addClass("btn btn-outline-success w-100 p-1")
+            .attr('id','applyButton')
+            .click(function(){
+                __addeditInterval(name, idx, true);
+            }));
+        $newInterval.find("#applyButton").append('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right w-100" viewBox="0 0 16 16">' 
+            + '<path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>'
+            + '</svg>');
+ 
+        $($newInterval.find("#applyButton")).appendTo('#'+name+idx+'ArrowPlacement'); //Places arrow at the begining of the edited or newly added interval.
 
-        //create multiselect list of terms
-        var $dlg = $("#terms-dialog");
-        
-        if($dlg.length==0){
-            $dlg = $('<div>')
-            .attr('id','terms-dialog')
-            .appendTo('body');
-        }
-        $dlg.empty()
-        .appendTo(modalEditBox);
 
-        var intname = (idx<0)?'new interval':fields3[name].intervals[idx].name;
+            //window.hWin.HEURIST4.msg.showMsgDlg('There are no more terms available');
+    }
 
-        $rowDiv = $(document.createElement('div'))
-        .addClass('row')
-        .appendTo($dlg);
+    function __addeditInterval( name, idx, notSaved){
 
-        //Heading for left col values
-        $('<div id="topdiv" class="col-6">'/*Label:<input id="intname" value="'+intname+'">*/+'</div>')
-        //.addClass('intervalDiv list')
-        .append('<h5>Available Values</h5>')
-        .appendTo($rowDiv);
+        if(notSaved){
+            var isAllChecked = ($('input[name='+name+'Options]:checked:disabled').length == $('input[name='+name+'Options]').length) ? true : false;
+            var isNotChecked = ($('input[name='+name+'Options]:checked:not(:disabled)').length == 0) ? true : false;
+            //Generate error message to prevent user from submitting an empty interval
+            if(isAllChecked || isNotChecked){
+                var errorMessage = 'This new interval cannot be empty. If all available values are used, click the blue arrow to make it available.'
+                $('#applyButton').popover({
+                    container : 'body',
+                    placement : 'bottom',
+                    content : errorMessage,
+                    trigger : 'click',
+                    delay : {
+                        show : '100', 
+                        hide :'100'
+                    }
+                }).popover('show');
 
-        $('<div class="col-6">')
-        .append('<p>Select and assign to new intervals</p>')
-        .appendTo($rowDiv);
+                //Hide the popover after 5 seconds.
+                setTimeout(function(){
+                    $('#applyButton').popover('hide');
+                }, 10000);
 
-        var iHeight = 220;
-        var detailtype = fields3[name].type;
-        var cnt=0;
+                return;
+            }
 
-        if ( detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype")
-        {
-            //Creates select all checkbox
-            $intdiv = $(document.createElement('div'))
-            .addClass('row p-1')
-            .appendTo($dlg);
+            if($('div.popover:visible').length){
+                $('#applyButton').popover('hide');
+            }
 
-            $listDiv = $(document.createElement('div'))
-            .addClass('col-md-1 d-flex align-items-center')
-            .appendTo($intdiv);
+            var detailtype = fields3[name].type;
 
-            $('<input>')
-            .attr('type','checkbox')
-            .attr('checked', false)
-            .attr('id','selectAll')
-            .addClass('recordIcons')
-            .change(function(){
-                //Unchecks selectall checkbox if a value is unchecked.
-                var checked = this.checked;
-                //selects checkbox which are not disabled in edit mode
-                $('input[name="'+name+'Options"]:not(:disabled)').each(function(){
-                    this.checked = checked;
+            if(idx<0){
+                fields3[name].intervals.push( {name:'', description:'', values:[] });
+                idx = fields3[name].intervals.length-1;
+            }else{
+                fields3[name].intervals[idx].values = [];
+                fields3[name].intervals[idx].description = '';
+            }
+            fields3[name].intervals[idx].name = "newInterval";
+
+            if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype"){ //false &&
+                var sels = $('input[name='+name+'Options]').filter(function(){
+                    return !this.disabled && this.checked;
                 });
-            })
-            .appendTo($listDiv);
+                var isMulti = (sels.length > 1) ? '+' : ''
+                $.each(sels, function(i, ele){
+                    fields3[name].intervals[idx].values.push( parseInt($(ele).attr('termid')) );
+                    fields3[name].intervals[idx].description = fields3[name].intervals[idx].description + $(ele).attr('termname')+isMulti;
+                    sels.attr('disabled',true);
+                    sels.attr('checked', true);
+                });
+            
+            }/*else if(detailtype=="float" || detailtype=="integer"){
 
-            $('<div>')
-            .addClass('recordTitle col-md p-1')
-            .html('Select All')
+                fields3[name].intervals[idx].values.push( parseFloat($dlg.find('#minval').val() ));
+                fields3[name].intervals[idx].values.push(  parseFloat($dlg.find('#maxval').val() ));
+                fields3[name].intervals[idx].description = $dlg.find('#minval').val()+' ~ '+$dlg.find('#maxval').val();
+
+            }
+            */
+        }
+
+        //Render new interval
+        var interval = fields3[name].intervals[idx];
+
+        $intdiv = $(document.createElement('div'))
+            .addClass('intervalDiv list row pe-1')
+            .attr('id', name+idx )
+            .insertBefore($('#addIntervalDiv'+name));
+
+            $('<div class="col-1 p-1 arrowDiv">')
+            .attr('id', name+idx+'ArrowPlacement')
             .appendTo($intdiv);
 
-            //Creates value checkboxes
-            var i, j,
-            termlist = fields3[name].values; //all terms or pointers
-            for(i=0; i<termlist.length; i++)
-            {
-                var notused = true, itself = false;
-                var intvalues = fields3[name].intervals;
-                /*for(j=0; j<intvalues.length; j++){
-                    if(window.hWin.HEURIST4.util.findArrayIndex(termlist[i].id, intvalues[j])>=0){
-                        if(idx==j){
-                            itself = true;  //itself
-                        }else{
-                            notused = false;
+            $('<div class="col-4 p-1 border-2 border-top border-secondary pointer">')
+            //.css({'width':'160px','display':'inline-block'})
+            .html(interval.name)
+            .css({'font-weight':'bold'} )
+            .dblclick(function(event){
+                //Collect the interval number of the clicked row
+                var intervalElement = $(this).parent();
+                var intervalPosition = intervalElement.attr('id').replace(name, '');
+
+                intervalPosition = parseInt(intervalPosition);
+
+                $(this).html('<input class="w-100" id="changeNameBox" value="'+interval.name+'">');
+                //When user clicks out of input box edit name
+                $('#changeNameBox').blur(function(){
+                    var nameChanged = $('#changeNameBox').val();
+                    $(this).parent().html(nameChanged);
+
+                    fields3[name].intervals[intervalPosition].name = nameChanged;
+                    _doRender();    //Apply to table
+
+                 });
+                })
+            .appendTo($intdiv);
+
+            //If group contains more than one value
+            if(interval.values.length > 1){
+                //Add delete button
+                $('<div class="col-1 p-1 border-2 border-top border-secondary delete d-flex align-items-center">')
+                .append($('<button>')
+                    .addClass('btn btn-danger border-dark w-100 p-0 py-1')
+                    .append('<i class="bi bi-trash"></i>')
+                    .click(function(){
+                        //Remove interval and uncheck checkboxes
+                        var interval = parseInt($(this).parents('div.list').attr('id').replace(name,''));
+
+                        for(s=0;s<fields3[name].intervals[interval].values.length;s++)
+                        {
+                            var clicked = fields3[name].intervals[interval].values[s];
+
+                            //Find checkbox with same valueid
+                            $('input[termid='+ clicked+']')
+                                .prop('checked', false)
+                                .attr('disabled', false);
                         }
-                        break;
-                    }
-                }
-                */
 
-                //Determines which intervals have been allocated to the new interval
-                if(termlist.length < intvalues.length && !isAdd){
-                    for(k=0;k<intvalues[idx].values.length;k++){
-                        if(termlist[i].id == intvalues[idx].values[k]){
-                            itself = true;
-                            break;
+                        if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
+                            $('#selectAll'+name).prop('checked', false)
+                            .attr('disabled',false);
                         }
-                    }
-               }
 
-                if(notused){
+                        $('#'+name+interval).remove();
 
-                    $intdiv = $(document.createElement('div'))
-                    .addClass('intervalDiv list p-1 row')
-                    .attr('intid', idx )
-                    .appendTo($dlg);
-
-                    $listDiv = $(document.createElement('div'))
-                    .addClass('col-md-1 d-flex align-items-center')
-                    .appendTo($intdiv);
-
-                    $('<input>')
-                    .attr('type','checkbox')
-                    .attr('checked', itself)
-                    .attr('disabled', itself)
-                    .addClass('recordIcons')
-                    .attr('termid',termlist[i].id)
-                    .attr('termname',termlist[i].text)
-                    .attr('name', name+'Options')
-                    .change(function(){
-                        //If select all is chosen and user deselects a value, select all checkbox will be unchecked.
-                        if(($('input[id=selectAll]').prop('checked') == true) && ($(this).prop('checked') == false)){
-                            $('input[id=selectAll]').prop('checked', false);
-                        }
-                        
-                        if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
-                            $('input[id=selectAll]').prop('checked', true);
-                        }
+                        removeInterval(name, interval, -1);
                     })
-                    //.css('margin','0.4em')
-                    .appendTo($listDiv);
+                )
+                .appendTo($intdiv);
 
-                    $('<div>')
-                    .addClass('recordTitle col-md p-1')
-                    //.css('margin-top','0.4em')
-                    .html( termlist[i].text )
-                    .appendTo($intdiv);
+                var splitDescription = interval.description.split("+");
 
-                    cnt++;
+                var listGroup = $('<div class="col p-1 border-2 border-top border-secondary groupings">')
+                .appendTo($intdiv);
+            
+                for(x=0;x<(splitDescription.length-1); x++){
+                    var listItem = $('<div class="row p-1 w-100 bg-transparent groupList">')
+                    .append('<div class="col-2 p-1" id="'+x+'">')
+                    .append('<div class="col p-1 border-bottom border-dark description">'+splitDescription[x]+'</div>')
+                    .appendTo(listGroup);
+                }
 
-                }//notused
+                //Create add button for the group
+                $intdiv.find('#'+name+idx+'ArrowPlacement')
+                .append($('<button>')
+                .addClass("btn btn-outline-success w-100 p-1 applyToGroup")
+                .click(function(){
 
-                //Add arrows to fields that already exist in the group
-                if(itself){
+                    var isAllChecked = ($('input[name='+name+'Options]:checked:disabled').length == $('input[name='+name+'Options]').length) ? true : false;
+                    var isNotChecked = ($('input[name='+name+'Options]:checked:not(:disabled)').length == 0) ? true : false;
+                    //Generate error message to prevent user from submitting an empty interval
+                    if(isAllChecked || isNotChecked){
+                        var errorMessage = 'All values have been assigned. If you would like to add a value to this group, please click the blue arrow to de-assign.'
+                        $(this).popover({
+                            container : 'body',
+                            placement : 'bottom',
+                            content : errorMessage,
+                            trigger : 'click',
+                            delay : {
+                                show : '100', 
+                                hide :'100'
+                            }
+                        }).popover('show');
+
+                        //Hide the popover after 5 seconds.
+                        setTimeout(function(){
+                            $('#applyButton').popover('hide');
+                        }, 10000);
+                        
+                        return;
+                    }
+
+                    //Add new value to group
+                    var interval = parseInt($(this).parents('div.list').attr('id').replace(name,''));
+                    var newValue = [];
+                    var newDescription = [];
+                    var numberValues = fields3[name].intervals[interval].values.length;
+                    //Find all checkboxes that have been clicked.
+                    var sels = $('input[name='+name+'Options]').filter(function(){
+                        return !this.disabled && this.checked;
+                    });
+                    //Add to the existing array.
+                    var isMulti = (sels.length > 1) ? '+' : ''
+                    $.each(sels, function(i, ele){
+                        fields3[name].intervals[interval].values.push( parseInt($(ele).attr('termid')) );
+                        fields3[name].intervals[interval].description = fields3[name].intervals[interval].description + $(ele).attr('termname')+isMulti;
+                        newValue[i] = parseInt($(ele).attr('termid'));
+                        newDescription[i] = $(ele).attr('termname');
+                        sels.attr('disabled',true);
+                        sels.attr('checked', true);
+                    });
+                    //Find list group
+                    listGroup = $(this).parents('div.list');
+                    listGroup = listGroup.find('div.groupings');
+                    //Add new layer to group interface.
+                    for(i=0;i<newDescription.length;i++){
+                        //Add description
+                        $('<div class="row p-1 w-100 bg-transparent groupList">')
+                        .append('<div class="col-2 p-1" id="'+numberValues+'">')
+                        .append('<div class="col p-1 border-bottom border-dark description">'+newDescription[i]+'</div>')
+                        .appendTo(listGroup);
+
+                        //Append remove button
+                        var $removeButton = $('<button></button>')
+                        .addClass('btn btn-outline-primary w-100 p-0 py-1')
+                        .attr('valueid',newValue[i])
+                        .click(function(){
+                            //Get the name of the value clicked to remove from group interval
+                            var clicked = $(this).attr('valueid');
+
+                            //Find checkbox with same valueid
+                            $('input[termid='+ clicked+']')
+                            .prop('checked', false)
+                            .attr('disabled', false);
+
+                            if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
+                                $('#selectAll'+name).prop('checked', false)
+                                .attr('disabled',false);
+                            }
+
+                            //Remove interval from rendered field.
+                            var index = findPositionInArray(name, parseInt(clicked))
+                            var groupIndex = parseInt($(this).parents('div.list').attr('id').replace(name,''));
+                            
+                            var singleIndex = (fields3[name].intervals[groupIndex].values.length == 1) ? -1 : groupIndex;
+
+                            if(singleIndex != -1){
+                                if(fields3[name].intervals[groupIndex].values.length > 1){
+                                    //Remove div containing the corresponding field.
+                                    $(this).parents('div.groupList').remove();
+                                }
+                                
+                                if(fields3[name].intervals[groupIndex].values.length == 2){
+                                    /*If two values are left rearange to be consistent with other interval
+                                    * This is done before it is deleted within the array.
+                                    * Find entire row.
+                                    */  
+                                    var rowElement = $('#'+name+singleIndex);
+                                    //Find the only list element left
+                                    var listElement = rowElement.find('div.groupList').children();
+                                    var button = listElement.find('button');
+                                    //append to front of div
+                                    button.appendTo(rowElement.find('div.arrowDiv'));
+
+                                    var nameOfLastInterval = listElement.parent().find('div.description').html();
+                                    //remove all elements within this div
+                                    listElement = listElement.parents('div.groupings');
+                                    listElement.empty();
+                                    listElement.html(nameOfLastInterval);
+
+                                    //Remove add button if single interval is found
+                                    rowElement.find("button.applyToGroup").remove();
+                                    //Remove delete button if single interval found.
+                                    rowElement.find('div.delete').remove();
+                                }
+                            }
+                            else{
+                                $(this).parents('div.list').remove();
+                            }
+
+                            removeInterval(name, index, singleIndex);
+                        });
+
+                        $('<i class="bi bi-arrow-left"></i>')
+                        .appendTo($removeButton);
+
+                        //Append arrow to the first child element of the div
+                        listGroup.find('#'+numberValues).append($removeButton);
+                        numberValues++;
+                    }
+                    _doRender();
+                }));
+
+                $intdiv.find(".applyToGroup").append('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right w-100" viewBox="0 0 16 16">' 
+                + '<path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>'
+                + '</svg>');
+ 
+                $($intdiv.find("#applyButton")).appendTo('#'+name+idx+'ArrowPlacement'); //Places arrow at the begining of the edited or newly added interval.
+
+                //Create Remove Buttons
+                for(i=0;i<interval.values.length;i++){
                     var $removeButton = $('<button></button>')
-                    .addClass('btn btn-outline-primary')
-                    .attr('valueid',termlist[i].id)
+                        .addClass('btn btn-outline-primary w-100 p-0 py-1')
+                        .attr('valueid',interval.values[i])
+                        .click(function(){
+                            //Get the name of the value clicked to remove from group interval
+                            var clicked = $(this).attr('valueid');
+
+                            //Find checkbox with same valueid
+                            $('input[termid='+ clicked+']')
+                            .prop('checked', false)
+                            .attr('disabled', false);
+
+                            if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
+                                $('#selectAll'+name).prop('checked', false)
+                                .attr('disabled',false);
+                            }
+
+                            //Remove interval from rendered field.
+                            var index = findPositionInArray(name, parseInt(clicked))
+                            var groupIndex = parseInt($(this).parents('div.list').attr('id').replace(name,''));
+                            
+                            var singleIndex = (fields3[name].intervals[groupIndex].values.length == 1) ? -1 : groupIndex;
+
+                            if(singleIndex != -1){
+                                if(fields3[name].intervals[groupIndex].values.length > 1){
+                                    //Remove div containing the corresponding field.
+                                    $(this).parents('div.groupList').remove();
+                                }
+                                
+                                if(fields3[name].intervals[groupIndex].values.length == 2){
+                                    /*If two values are left rearange to be consistent with other interval
+                                    * This is done before it is deleted within the array.
+                                    * Find entire row.
+                                    */  
+                                    var rowElement = $('#'+name+singleIndex);
+                                    //Find the only list element left
+                                    var listElement = rowElement.find('div.groupList').children();
+                                    var button = listElement.find('button');
+                                    //append to front of div
+                                    button.appendTo(rowElement.find('div.arrowDiv'));
+
+                                    var nameOfLastInterval = listElement.parent().find('div.description').html();
+                                    //remove all elements within this div
+                                    listElement = listElement.parents('div.groupings');
+                                    listElement.empty();
+                                    listElement.html(nameOfLastInterval);
+
+                                    //Remove add button if single interval is found
+                                    rowElement.find("button.applyToGroup").remove();
+                                    //Remove delete button if single interval found.
+                                    rowElement.find('div.delete').remove();
+                                }
+                            }
+                            else{
+                                $(this).parents('div.list').remove();
+                            }
+
+                            removeInterval(name, index, singleIndex);
+                        });
+
+                        $('<i class="bi bi-arrow-left"></i>')
+                        .appendTo($removeButton);
+
+                        //Append arrow to the first child element of the div
+                        listGroup.find('#'+i).append($removeButton);
+                }
+
+            }
+            else{
+                $('<div class="col p-1 border-2 border-top border-secondary">')
+                .html(interval.description)
+                //.css({'max-width':'250px','width':'250px','display':'inline-block','padding-left':'1.5em'})
+                .appendTo($intdiv);
+                
+                //Add remove button if a single value is added
+                var $removeButton = $('<button></button>')
+                    .addClass('btn btn-outline-primary w-100 p-1')
+                    .attr('valueid',interval.values[0])
                     .click(function(){
                         //Get the name of the value clicked to remove from group interval
                         var clicked = $(this).attr('valueid');
@@ -875,151 +1742,56 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         .attr('disabled', false);
 
                         if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
-                            $('#selectAll').prop('checked', false)
+                            $('#selectAll'+name).prop('checked', false)
                             .attr('disabled',false);
                         }
 
-                        //Remove arrow button from the selected value
-                        $(this).remove();
+                        //Remove interval from rendered field.
+                        var index = findPositionInArray(name, parseInt(clicked))
+                        removeInterval(name, index, -1);
+                        //Remove div containing field.
+                        $(this).parents('div.list').remove();
                     });
 
                     $('<i class="bi bi-arrow-left"></i>')
                     .appendTo($removeButton);
 
-                    $('#'+name+i+'ArrowPlacement')
-                    .append($removeButton);
-                }
+                    //Append arrow to the first child element of the div
+                    $('#'+name+idx+' div:first-child').append($removeButton);
             }
 
-            if(!isAdd){
-                if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
-                    $('#selectAll').prop('checked', true)
-                    .attr('disabled',true);
-                }
-            }
-
-            iHeight = 420;
-
-        }else if(detailtype=="float" || detailtype=="integer"){
-
-            iHeight = 180;
-
-            var minv = idx<0?0:fields3[name].intervals[idx].values[0];
-            var maxv = idx<0?0:fields3[name].intervals[idx].values[1];
-
-            $intdiv = $(document.createElement('div'))
-            .attr('intid', idx )
-            .appendTo($dlg);
-
-            $intdiv.append($('<div style="padding-top:0.5em">&nbsp;from:&nbsp;<input id="minval" value="'+minv+'" /></div>'));
-            $intdiv.append($('<div style="padding-top:0.5em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to:&nbsp;<input id="maxval" value="'+maxv+'" /></div>'));
-            /*
-            .append( $('<input>')
-            .attr('id','minval')
-            .val(minv))
-            .append($('<label>to</label>'))
-            .append( $('<input>')
-            .attr('id','maxval')
-            .val(maxv));
-            */
-            cnt++;
+        if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
+            $('#selectAll'+name).prop('checked', true)
+            .attr('disabled',true);
         }
 
-        if(cnt>0){
-            function __addeditInterval( event ){
+        $('#templateInterval').remove();
 
-                $(event.target).off('click');
-
-                if(idx<0){
-                    fields3[name].intervals.push( {name:'', description:'', values:[] });
-                    idx = fields3[name].intervals.length-1;
-                }else{
-                    fields3[name].intervals[idx].values = [];
-                    fields3[name].intervals[idx].description = '';
-                }
-                fields3[name].intervals[idx].name = "newInterval";
-
-                if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype"){ //false &&
-                    var sels = $dlg.find('input[name='+name+'Options]:checked')
-                    var isMulti = (sels.length > 1) ? '+' : ''
-                    $.each(sels, function(i, ele){
-                        fields3[name].intervals[idx].values.push( parseInt($(ele).attr('termid')) );
-                        fields3[name].intervals[idx].description = fields3[name].intervals[idx].description + $(ele).attr('termname')+isMulti;
-                        
-                        /*if($(ele).attr('termid') != fields3[name].values[idx].id){
-                            idxToDelete.push($(ele).attr('termid'));
-                        }
-                        */
-                    });
-                    //Remove interval after it has been added to another interval
-                    /*for(i in fields3[name].intervals){
-                        for(x = 0; x<fields3[name].intervals[i].values.length;x++){
-                            if((fields3[name].intervals[i].values[x] == fields3[name].intervals[idx].values[x]) 
-                                && (fields3[name].intervals[i].values[x] != fields3[name].values[idx].id)){
-                                
-                                    idxToDelete = i;
-                                    fields3[name].intervals.splice(idxToDelete,1);
-                                    break;
-                            }
-                        }
-                    }*/
-                    
-                }else if(detailtype=="float" || detailtype=="integer"){
-
-                    fields3[name].intervals[idx].values.push( parseFloat($dlg.find('#minval').val() ));
-                    fields3[name].intervals[idx].values.push(  parseFloat($dlg.find('#maxval').val() ));
-                    fields3[name].intervals[idx].description = $dlg.find('#minval').val()+' ~ '+$dlg.find('#maxval').val();
-
-                }
-
-                //Delete intervals 
-                /*for(x=0;x<idxToDelete.length; x++){
-                    for(a=0;a<fields3[name].intervals.length;a++){
-                        if(idxToDelete[x] == fields3[name].intervals[a].values[0]){
-                            fields3[name].intervals.splice(a,1);
-                        }
-                        
-                    }
-                }
-                */
-                renderIntervals(name);
-                _doRender();
-
-                //$dialogbox.dialog( "close" );
-            }
-
-
-            $dlg.find("#topdiv").append($('<button>').addClass("btn btn-outline-success").attr('id','applyButton').click(__addeditInterval));
-            $dlg.find("#applyButton").append('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">' 
-                + '<path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>'
-                + '</svg>');
-            $($dlg.find("#applyButton")).appendTo('#'+name+idx+'ArrowPlacement'); //Places arrow at the begining of the edited or newly added interval.
-            /*$dialogbox = window.hWin.HEURIST4.msg.showElementAsDialog(
-                    {element:$dlg.get(0), height: iHeight, width:320, title:"Edit interval", modal:true} ); */
-            /*
-
-            $dlg.dialog({
-            autoOpen: true,
-            height: iHeight,
-            width: 220,
-            modal: true,
-            resizable: false,
-            draggable: true,
-            title: window.hWin.HR("Select terms"),
-            buttons: [
-            {text:window.hWin.HR('Apply'), click: __addeditInterval},
-            {text:window.hWin.HR('Cancel'), click: function() {
-            $( this ).dialog( "close" );
-            }}
-            ]
-            });
-            */
-        }else{
-            window.hWin.HEURIST4.msg.showMsgDlg('There are no more terms available');
-        }
-
+        $('#addInterval').prop('disabled',false);
+        
+        if(notSaved) _doRender();
     }
 
+    //Create error message
+    function createErrorMessage(location, message){
+        
+        if($('#alert').length){
+            $('#alert').remove();
+        }
+
+        var alert = document.createElement('div');
+            $(alert).addClass('alert alert-warning alert-dismissible fade show')
+            .attr('role', 'alert')
+            .attr('id','alert')
+            .html(message)
+            .append($('<button>')
+                .attr('type', 'button')
+                .attr('class','btn-close')
+                .attr('data-bs-dismiss', 'alert')
+                .attr('aria-label', 'close')
+            )
+            .prependTo(location);
+    }
 
     //
     //
@@ -1191,10 +1963,25 @@ function CrosstabsAnalysis(_query, _query_domain) {
         return Math.round(original*100)/100;
     }
 
+    //Change the decimal places within the array
+    function changeIntervalDecimal(name, option){
+        $.extend(true, fields3[name].intervals, intervalsNumeric);
+        for(i=0;i<fields3[name].intervals.length;i++){
+            for(j=0;j<fields3[name].intervals[i].values.length;j++){
+                var num = fields3[name].intervals[i].values[j].toFixed(parseInt(option));
+                fields3[name].intervals[i].values[j] = Number(num);
+            }
+        }
+    }
+
     /**
     * render crosstab data as set of tables
     */
     function _doRender(){
+        //Destroy chart if exists
+        if(Chart.getChart('pieResults')){
+            Chart.getChart('pieResults').destroy();
+        }
 
         if($.fn.dataTable.isDataTable("#resultsTable")){
             $("#resultsTable").DataTable().destroy(true);
@@ -1250,7 +2037,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         $divres.append('<span>Type of value displayed: <b>'+aggregationMode+'</b></span>');
 
-        $divres.append('<div>---------------------------------</div>');
+        $divres.append('<div></div>');
         //Type of value displayed (count, average, sum)
 
 
@@ -1281,7 +2068,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             }
                         }
 
-
                         if(page_interval_idx>=0 && curr_interval_idx!=page_interval_idx && records.length>0){
                             if(curr_interval_idx>=0){
                                 doRenderPage(fields3.page.fieldname+'. '+pages[curr_interval_idx].name, records);
@@ -1311,27 +2097,107 @@ function CrosstabsAnalysis(_query, _query_domain) {
             'border-right':'1px solid black'
         });
         */
-        
-        buttonDiv.appendTo($divres);
 
         //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
 
+        //Create datatable
         $(document).ready(function(){
             $(".resultsTable").DataTable({
                 "paging" : false,
                 "info" : false,
                 dom:"Bfrtip",
                 buttons:[
-                    {extend: 'csv', footer: true }, {extend:'pdf',footer: true}, {extend:'print', footer: true}
+
+                    {
+                        extend: 'csv',
+                        footer: true 
+                    },
+
+                    {
+                        extend:'pdf',
+                        customize: function(pdfDocument){
+                            if(fields3['column'].intervals.length == 0) return;
+
+                            pdfDocument.content[1].table.headerRows = 2;
+                            var firstHeaderRow = [];
+                            $('#resultsTable').find('thead>tr:first-child>th').each(
+                                function(index, element){
+                                    var cols = element.getAttribute('colSpan');
+                                    if(index == 0){
+                                        firstHeaderRow.push({
+                                            text: '',
+                                            style: 'tableHeader',
+                                            colSpan: cols
+                                        });
+                                    }
+                                    else{
+                                        firstHeaderRow.push({
+                                            text: element.innerHTML,
+                                            style: 'tableHeader',
+                                            colSpan: cols
+                                        });
+                                    }
+                                    for(var i= 0;i<cols-1;i++){
+                                        firstHeaderRow.push({});
+                                    }
+                                });
+                                pdfDocument.content[1].table.body.unshift(firstHeaderRow);
+                        },
+                        footer: true
+                    
+                    }, 
+
+                    {
+                        extend:'print',
+                        footer: true
+                    }
                 ]
             }
             );
+        });
+
+        //Extract label and data values for pie chart
+        var labelsNames = extractData('row', true);
+        var dataValues = extractData('row', false);
+
+        //Create the pie chart
+        var pieCanvas = $('#pieResults');
+        let colorsList = ['#660066'];
+        var pieChart = new Chart(pieCanvas, {
+            type: 'pie',
+            data: {
+                labels: labelsNames,
+                  datasets: [{
+                    data: dataValues,
+                    backgroundColor: colorsList,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: false
+            }
         });
         
         //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
 
         _setMode(2);//results
     }//_doRenders
+
+    function extractData(name, isLabel){
+        var data = [];
+        if(isLabel){
+            for(i=0;i<fields3[name].intervals.length;i++){
+                data.push(fields3[name].intervals[i].name);
+            }
+        }
+        else{
+            for(i=0;i<fields3[name].intervals.length;i++){
+                data.push(fields3[name].intervals[i].output);
+            }
+        }
+
+        return data;
+    }
 
     /**
     * render particular page (group)
@@ -1587,7 +2453,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 if(supressBlankColumn && columns[j].isempty) continue;
                 notemtycolumns++;
             }
-            rowHeader1.append('<th>&nbsp;</th><th class="crosstab-header0" style="text-align:left; border-left:1px solid black;" colspan="'+notemtycolumns*colspan+(showTotalsColumn?1:0)+'">'+fields3.column.fieldname+'</th>');
+            rowHeader1.append('<th>&nbsp;</th><th class="crosstab-header0" style="text-align:left; border-left:1px solid black;" colspan="'+(notemtycolumns+(showTotalsColumn?1:0))+'">'+fields3.column.fieldname+'</th>');
             $row.append(rowHeader1);
         }
 
@@ -1801,7 +2667,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
             $table.appendTo($divres);
             
-            $divres.append('<div>---------------------------------</div>');
+            $divres.append('<div></div>');
 
             //$("#modalButton").attr("disabled", false);
 
@@ -1933,7 +2799,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             showPercentageRow: $('#rbShowPercentRow').is(':checked')?1:0,
             showPercentageColumn: $('#rbShowPercentColumn').is(':checked')?1:0,
             supressBlanks: !$('#rbShowBlanks').is(':checked')?1:0,
-            fields: {column:fields3.column.field,row:fields3.row.field,page:fields3.page.field}
+            count: keepCount,
+            allFields: {column:fields3.column,row:fields3.row,page:fields3.page}
         };
 
         return settings;
@@ -1960,12 +2827,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $('#rbShowPercentColumn').prop('checked',settings.showPercentageColumn==1);
         $('#rbShowBlanks').prop('checked',settings.supressBlanks==0);
 
-        _resetAllIntervals(settings.fields);
-    }
-
-    //Export function for table.
-    function _exportTable(buttons){
-        
+        _applySavedIntervals(settings.allFields, settings.count);
     }
 
     //
@@ -1990,7 +2852,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             _resetIntervals(event);
         },
 
-        OnRowTypeChange: (value) => {
+        OnRowTypeChange: function(value) {
             _OnRowTypeChange(value)
         },
 
@@ -2054,9 +2916,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
     });
     */
 
-    visualisationButton.click(function(){
-        window.hWin.HEURIST4.msg.showMsgDlg('Button feature has not been implemented.');
-    });
     return that;
 
 }
