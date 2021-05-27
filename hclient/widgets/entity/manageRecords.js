@@ -1968,22 +1968,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         var rty_ID = this._currentEditRecTypeID;
         var maskvalue = $Db.rty(rty_ID, 'rty_TitleMask')
-
-        var sURL = window.hWin.HAPI4.baseURL +
-            "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rty_ID
-            +"&mask="+encodeURIComponent(maskvalue)+"&db="+window.hWin.HAPI4.database;
-            
-        window.hWin.HEURIST4.msg.showDialog(sURL, {    
-                "no-resize": true,
-                title: 'Record Type Title Mask Edit',
-                height: 800,
-                width: 800,
-                default_palette_class: 'ui-heurist-design',
-                callback: function(newvalue) {
-                    if(newvalue){
-                    }
-                }
-        });
+        
+        window.hWin.HEURIST4.ui.showRecordActionDialog('rectypeTitleMask',
+                {rty_ID:this._currentEditRecTypeID, rty_TitleMask:maskvalue, path: 'widgets/entity/popups/',
+                 onClose: function(newvalue){}});
     },
 
     //

@@ -966,7 +966,7 @@ function editCMS( options ){
             });
             
             edit_dialog.find('#btn_embed_dialog').button({icon:'ui-icon-extlink'}).click(function(){
-                window.hWin.HEURIST4.ui.showRecordActionDialog('embedDialog',{layout_rec_id: home_page_record_id});
+                window.hWin.HEURIST4.ui.showRecordActionDialog('embedDialog',{layout_rec_id: home_page_record_id, path:'cms/'});
             });
 
             var url = window.hWin.HAPI4.baseURL+

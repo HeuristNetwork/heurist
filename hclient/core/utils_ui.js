@@ -2523,8 +2523,10 @@ window.hWin.HEURIST4.ui = {
         
         }else{
             
-            var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/'
-                +(actionName=='embedDialog'?'cms/':'record/');
+            options.path
+            
+            var path = window.hWin.HAPI4.baseURL + 'hclient/'
+                +(options.path?options.path:'widgets/record/');
             
             var scripts = [ path+actionName+'.js'];
             if(actionName=='recordAdd'){

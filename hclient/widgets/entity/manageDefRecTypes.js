@@ -1133,25 +1133,17 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     var maskvalue = ele_mask.editing_input('getValues');
                     maskvalue = maskvalue[0];
 
-                    var sURL = window.hWin.HAPI4.baseURL +   
-                    "admin/structure/rectypes/editRectypeTitle.html?rectypeID="
-                            + that._currentEditID + "&mask="
-                            + encodeURIComponent(maskvalue)+"&db="+window.hWin.HAPI4.database;
+                    window.hWin.HEURIST4.ui.showRecordActionDialog('rectypeTitleMask',
+                        {rty_ID:that._currentEditID, 
+                            rty_TitleMask:maskvalue, path: 'widgets/entity/popups/',
+                            onClose: function(newvalue){
+                                if(!window.hWin.HEURIST4.util.isnull(newvalue)){
+                                    ele_mask.editing_input('setValue', newvalue);
+                                    that._editing.setModified(true); //restore flag after autosave
+                                    that.onEditFormChange();
+                                }
+                    }});
 
-                    window.hWin.HEURIST4.msg.showDialog(sURL, {     
-                        "close-on-blur": false,
-                        "no-resize": true,
-                        height: 800,
-                        width: 800,
-                        callback: function(newvalue) {
-                            if(!window.hWin.HEURIST4.util.isnull(newvalue)){
-                                ele_mask.editing_input('setValue', newvalue);
-                                that._editing.setModified(true); //restore flag after autosave
-                                that.onEditFormChange();
-                            }
-                        },
-                        default_palette_class: this.options.default_palette_class
-                    });
 
                 }} );
                 
