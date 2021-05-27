@@ -335,3 +335,8 @@ input[type=number]{
     border: 0;
     opacity: 1;
 }
+
+.exportButtons {
+    background: #627e5d !important;
+    color: white !important;
+}

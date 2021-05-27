@@ -117,12 +117,12 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                 <div class="row">
                                     <div class="col-12">
                                         <fieldset id="vars" style="display:none;">
-                                            <div class="row" id="rowVars">
+                                            <div class="row d-flex align-items-center" id="rowVars">
                                                 <div class="fldheader col-4"><label for="cbRows">Var 1 (rows)</label></div>
-                                                <div class="input-cell col-6">
+                                                <div class="input-cell col-6 mt-1">
                                                     <select id="cbRows" name="row" onchange="crosstabsAnalysis.resetIntervals(event); crosstabsAnalysis.OnRowTypeChange(this);" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
                                                 </div>
-                                                <div class="col-2">
+                                                <div class="col-2 p-0">
                                                     <span class="d-inline-block" id="rowTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals">
                                                         <button type="button" tt='row' class="btn btn-warning showintervals" disabled>
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
@@ -135,12 +135,12 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                 <div id="rowIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
                                             </div>
                                             <div style="height:2em">&nbsp;</div>
-                                            <div class="row" id="columnVars">
+                                            <div class="row d-flex align-items-center" id="columnVars">
                                                 <div class="fldheader col-4"><label for="cbColumns">Var 2 (columns)</label></div>
-                                                <div class="input-cell col-6">
+                                                <div class="input-cell col-6 mt-1">
                                                     <select id="cbColumns" name="column" onchange="crosstabsAnalysis.resetIntervals(event)" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
                                                 </div>
-                                                <div class="col-2">
+                                                <div class="col-2 p-0">
                                                     <span class="d-inline-block" id="columnTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals">
                                                         <button type="button" tt="column" class="btn btn-warning showintervals" disabled>
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
@@ -153,12 +153,12 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                 <div id="columnIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
                                             </div>
                                             <div style="height:2em">&nbsp;</div>
-                                            <div class="row" id="pageVars">
+                                            <div class="row d-flex align-items-center" id="pageVars">
                                                 <div class="fldheader col-4"><label for="cbPages">Var3 (pages)</label></div>
-                                                <div class="input-cell col-6">
+                                                <div class="input-cell col-6 mt-1">
                                                     <select id="cbPages" name="page" onchange="crosstabsAnalysis.resetIntervals(event)" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
                                                 </div>
-                                                <div class="col-2">
+                                                <div class="col-2 p-0">
                                                     <span class="d-inline-block" id="pageTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals">
                                                         <button type="button" tt='page' class="btn btn-warning showintervals" disabled>
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">

@@ -80,6 +80,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //record type dropdown
         $recTypeSelector = window.hWin.HEURIST4.ui.createRectypeSelect( $('#cbRectypes').get(0), null,
                     window.hWin.HR('select record type'), false );
+        //Make width run to 100% of col
+        $('#cbRectypes-button').css('width', '100%');
         $recTypeSelector.hSelect({ change: _onRectypeChange });
         //$rec_select.change(_onRectypeChange);
 
@@ -1392,10 +1394,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     }
                 }).popover('show');
 
-                //Hide the popover after 5 seconds.
+                //Hide the popover after 7 seconds.
                 setTimeout(function(){
                     $('#applyButton').popover('hide');
-                }, 10000);
+                }, 7000);
 
                 return;
             }
@@ -1540,12 +1542,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             }
                         }).popover('show');
 
-                        //Hide the popover after 5 seconds.
+                        //Hide the popover after 7 seconds.
                         setTimeout(function(){
-                            $('#applyButton').popover('hide');
-                        }, 10000);
+                            $('.applyToGroup').popover('hide');
+                        }, 7000);
                         
                         return;
+                    }
+
+                    if($('div.popover:visible').length){
+                        $(this).popover('hide');
                     }
 
                     //Add new value to group
@@ -2008,6 +2014,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         var date = new Date();
         var showZeroBlankText = "";
+        var topText = 'DB: '+window.hWin.HAPI4.database+ 'Date and time: ' + (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear());
 
         $divres.append('<div></div>')
         $divres.append('<span>DB: <b>'+window.hWin.HAPI4.database+' </b></span>');
@@ -2018,9 +2025,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if(_currentRecordset!=null){
             $divres.append('<span>N = '+ _currentRecordset['recordCount'] +' </span>');
             $divres.append('<span>Query string: '+_currentRecordset['query_main'] +' </span>');
+            topText += 'N = '+ _currentRecordset['recordCount'] +  'Query string: '+_currentRecordset['query_main'];
 
         }else{
             $divres.append('<span>Query string: q='+query_main+'&w='+query_domain +' </span>');
+            topText += 'Query string: q='+query_main+'&w='+query_domain;
         }
 
         //$divres.append('<div>Total number of records: '+ +'</div>');
@@ -2112,12 +2121,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 buttons:[
                     {
                         extend: 'csv',
+                        className: 'exportButtons',
+                        customize: function(csv){
+                            return topText +"\n\n" + csv;
+                        },
                         footer: true 
                     },
 
                     {
                         extend:'pdf',
+                        className: 'exportButtons',
                         customize: function(pdfDocument){
+                            pdfDocument.content.splice(1, 0, topText);
                             if(fields3['column'].intervals.length == 0) return;
 
                             pdfDocument.content[1].table.headerRows = 2;
@@ -2151,9 +2166,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                     {
                         extend:'print',
+                        className: 'exportButtons',
+                        messageTop: topText,
                         footer: true
                     }
-                ]
+                ],
             }
             );
         });
@@ -2494,6 +2511,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var $table = $('<table>').attr('cellspacing','0');
         $table.attr("id", "resultsTable");
         $table.attr("class", "display cell-border resultsTable");
+        $table.css('width', '0%');
+        $table.css('margin', '0');
         var $rowPercentageHeader;
         var styleTypeHeader = "crosstab-header0";
 
