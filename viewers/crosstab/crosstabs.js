@@ -152,12 +152,15 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $("#vars").hide();
             $("#shows").hide();
             $("#btnPanels").hide();
-            $("#nofields").html(_selectedRtyID>0?'No suitable fields: numeric, pointer or enumeration types.':'Select record type.');
-            $("#nofields").show();
+            createErrorMessage($('#errorContainerRecChange'), _selectedRtyID>0?'No suitable fields: numeric, pointer or enumeration types.':'Select record type.');
+            $('#errorContainerRecChange').removeClass('d-none')
+            //$("#nofields").html(_selectedRtyID>0?'No suitable fields: numeric, pointer or enumeration types.':'Select record type.');
+            //$("#nofields").show();
         }else{
             $("#vars").show();
             $("#shows").show();
-            $("#nofields").hide();
+            $('#errorContainerRecChange').addClass('d-none');
+            //$("#nofields").hide();
             $("#btnPanels").show();
         }
 
@@ -2817,12 +2820,15 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if(mode==3){  //no results
             $("#divres").hide();
             $("#qform").hide();
-            $("#div_empty").show();
+            createErrorMessage($('#errorContainerFilter'), 'Please apply a filter to create a result set');
+            $("#errorContainerFilter").removeClass('d-none');
+            //$("#div_empty").show();
         }else{
             //show results
             $("#divres").show();
             $("#qform").show();
-            $("#div_empty").hide();
+            $("#errorContainerFilter").addClass('d-none');
+            //$("#div_empty").hide();
         }
         if(mode==1){ //progress
             $("#inporgress").show();

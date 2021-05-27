@@ -63,6 +63,8 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
         <div class="container-fluid">
             <!-- Page container -->
             <div class="row">
+                <div class="col-12 col-mb-2 d-none" id="errorContainerFilter" class="output-content"></div>
+                <div class="col-12 col-mb-2 d-none" id="errorContainerRecChange"></div>
                 <div class="col-12 col-mb-2 d-none" id="errorContainer"></div>
                 <div class="col-12 mb-2" id="topContainer">
                     <div id="qform" class="disign-content" style="width:100%;">
@@ -246,10 +248,11 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
 
 
                         <div style="height:2em">&nbsp;</div>
-
+                        <!-- 
                         <div id="nofields" style="padding-left:180px; font-weight:bold;">
                             Select record type.
                         </div>
+                        -->
 
                         </div>
 
@@ -302,9 +305,12 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
             </div>
         -->
 
+        <!--
         <div id="div_empty" class="output-content" style="color:red;font-weight:bold;display:none;">
             Please apply a filter to create a result set
         </div>
+        -->
+
     </div>
 
     <!-- Modal for Add, Edit and Delete values -->
