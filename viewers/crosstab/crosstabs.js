@@ -2051,7 +2051,27 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         $divres.append('<div></div>');
         //Type of value displayed (count, average, sum)
+        
+        if(fields3['page'].intervals.length <=0){
+            var tableTitle = 'Table Displaying ';
+            if(fields3['row'].intervals.length > 0 && fields3['column'].intervals.length <= 0) tableTitle += fields3['row'].fieldname;
+            if(fields3['row'].intervals.length > 0 && fields3['column'].intervals.length > 0) tableTitle += fields3['row'].fieldname + ' and ' + fields3['column'].fieldname;
+            tableTitle += ' ' + aggregationMode;
+            //Append text box for user to enter table title.
+            $divres.append('<div class="p-2 d-flex align-items-center justify-content-center"><label class="me-2" for="tableTitle">Enter a table title:</label><input type="text" id="tableTitle"></input><button class="btn btn-success ms-2" id="titleSubmit">Submit</button></div>');
+            $divres.append('<h2 class="crosstab-page" id="tableHeader">'+tableTitle+'</h2>');
+            $('#titleSubmit').click(function(){
+                var title = $('#tableTitle').val();
 
+                if($('#tableTitle').val().length <=0 || $.trim($('#tableTitle').val() == '')){
+                    $('#tableHeader').html(tableTitle);
+                }
+                else{
+                    $('#tableHeader').html(title);
+                }
+                
+            });
+        }
 
         if(plen<1){ //less than 1 page
             doRenderPage('', records_resp);
@@ -2110,8 +2130,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
         });
         */
 
-        //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
-
         //Create datatable
         $(document).ready(function(){
             $(".resultsTable").DataTable({
@@ -2122,20 +2140,50 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     {
                         extend: 'csv',
                         className: 'exportButtons',
+                        filename: $('#tableHeader').html(),
                         customize: function(csv){
-                            return topText +"\n\n" + csv;
+                            var extendedRow = '';
+
+                            if(($('#rbShowPercentRow').is(':checked') && !($('#rbShowPercentColumn').is(':checked'))) || (!($('#rbShowPercentRow').is(':checked')) && $('#rbShowPercentColumn').is(':checked'))){
+                                $('#resultsTable').find('thead>tr:nth-child(2)>th').each(
+                                    function(index, element){
+                                        var text = $(element).text();
+                                        if(index == 0){
+                                            extendedRow += '\n\t';
+                                        }
+                                        else{
+                                            extendedRow += '"'+text+'"' + '\t\t';
+                                        }
+                                });
+                            }
+
+                            if($('#rbShowPercentRow').is(':checked') && $('#rbShowPercentColumn').is(':checked')){
+                                $('#resultsTable').find('thead>tr:nth-child(2)>th').each(
+                                    function(index, element){
+                                        var text = $(element).text();
+                                        if(index == 0){
+                                            extendedRow += '\n\t';
+                                        }
+                                        else{
+                                            extendedRow += '"'+text+'"' + '\t\t\t';
+                                        }
+                                });
+                            }
+
+                            return topText+ '\n\n\t' + fields3['column'].fieldname+ extendedRow + '\n' + csv;
                         },
-                        footer: true 
+                        footer: true
                     },
 
                     {
                         extend:'pdf',
                         className: 'exportButtons',
                         customize: function(pdfDocument){
+                            pdfDocument.content[0].text = $('#tableHeader').html();
                             pdfDocument.content.splice(1, 0, topText);
                             if(fields3['column'].intervals.length == 0) return;
 
-                            pdfDocument.content[1].table.headerRows = 2;
+                            pdfDocument.content[2].table.headerRows = 2;
                             var firstHeaderRow = [];
                             $('#resultsTable').find('thead>tr:first-child>th').each(
                                 function(index, element){
@@ -2158,7 +2206,34 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                         firstHeaderRow.push({});
                                     }
                                 });
-                                pdfDocument.content[1].table.body.unshift(firstHeaderRow);
+
+                            if($('#rbShowPercentRow').is(':checked') || $('#rbShowPercentColumn').is(':checked')){
+                                var secondHeaderRow = [];
+                                $('#resultsTable').find('thead>tr:nth-child(2)>th').each(
+                                    function(index, element){
+                                        var cols = element.getAttribute('colSpan');
+                                        if(index == 0){
+                                            secondHeaderRow.push({
+                                                text: '',
+                                                style: 'tableHeader',
+                                                rowSpan: '1'
+                                            });
+                                        }
+                                        else{
+                                            secondHeaderRow.push({
+                                                text: element.innerHTML,
+                                                style: 'tableHeader',
+                                                colSpan: cols
+                                            });
+                                        }
+                                        for(var i= 0;i<cols-1;i++){
+                                            secondHeaderRow.push({});
+                                        }
+                                    });
+
+                                pdfDocument.content[2].table.body.unshift(secondHeaderRow);
+                            }
+                            pdfDocument.content[2].table.body.unshift(firstHeaderRow);
                         },
                         footer: true
                     
@@ -2310,10 +2385,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var grantotal = 0;
         var colspan = 1;
         var rowspan = 1;
+        var totalspan = 1;
 
         if((showPercentageRow || showPercentageColumn) && clen>1) rowspan++;
         if(showPercentageRow && clen>0) colspan++;
         if(showPercentageColumn) colspan++;
+        if(showPercentageRow && showTotalsColumn) totalspan++;
+        if(showPercentageColumn && showTotalsColumn) totalspan++;
 
         var noColumns = (clen==0);
         if(noColumns){
@@ -2526,7 +2604,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 if(supressBlankColumn && columns[j].isempty) continue;
                 notemtycolumns++;
             }
-            rowHeader1.append('<th>&nbsp;</th><th class="crosstab-header0" style="text-align:left; border-left:1px solid black;" colspan="'+(notemtycolumns+(showTotalsColumn?1:0))+'">'+fields3.column.fieldname+'</th>');
+            rowHeader1.append('<th>&nbsp;</th><th class="crosstab-header0" style="text-align:left; border-left:1px solid black;" colspan="'+((notemtycolumns*colspan)+(showTotalsColumn?totalspan:0))+'">'+fields3.column.fieldname+'</th>');
             $row.append(rowHeader1);
         }
 
@@ -2742,14 +2820,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
             
             $divres.append('<div></div>');
 
-            //$("#modalButton").attr("disabled", false);
-
 
         }else if (!supressBlankPage) {
             $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
             $divres.append("<div>empty set</div>");
             
-            //$("#modalButton").attr("disabled", false);
         
         }
 
