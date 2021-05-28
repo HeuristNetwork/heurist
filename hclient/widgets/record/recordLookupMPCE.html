@@ -49,7 +49,7 @@
     }
 
     .label-tag {
-        margin: 5px;
+        margin-bottom: 5px;
         width: auto;
         font-size: 1.05em;
     }
@@ -57,7 +57,7 @@
     .btn {
         display: inline-flex;
         margin: 5px 5px;
-        border: 0.16em solid rgba(255,255,255,0);
+        border: 0.16em solid rgba(255,255,255,0) !important;
         box-sizing: border-box;
         text-decoration: none;
         text-align: center;
@@ -68,7 +68,7 @@
     }
 
     .mpce button:hover {
-        border-color: rgba(100,100,100,10);
+        border: 2px solid rgba(100,100,100,10) !important;
     }
 
     .btn-delete {
@@ -234,7 +234,7 @@
             </table>
     		
             <label for="notes_field" class="label-tag">Reason for Classification:</label>
-    		<textarea id="notes_field" cols="225" rows="2" style="width:99%; font-size:1.25em; margin-left:10px; margin-top:4px;"> </textarea>
+    		<textarea id="notes_field" cols="225" rows="2" style="width:99%; font-size:1.25em; margin-left:10px; margin-top:4px;"></textarea>
         
         </fieldset>
 
@@ -249,7 +249,7 @@
     	            <br>
 
                     <div class="checkboxlist" style="width:100%;">
-        	            <ul id="keyword_field">
+        	            <ul id="keyword_field" style="max-height:300px;">
         	            </ul>
                     </div>
     	            
@@ -263,7 +263,7 @@
                     <legend>Recently Used Keywords:</legend>
                     <label class="label-tag">Keywords assigned to recently viewed works</label>
                     <button id="btnPrevAssign" class="btn btn-add" style="text-align:left; font-size:1em;">Add Selected</button>
-                    <label><input type="checkbox" id="check-all" onclick="checkAllOptions(prev_field, this.checked);">Check All</label>
+                    <label><input type="checkbox" class="check-all" id="checkall-prev">Check All</label>
                     <br>
                     
                     <div class="checkboxlist" style="width:100%;">
@@ -281,13 +281,20 @@
     	            <legend>Associated Keywords:</legend>
     	            <label class="label-tag">Keywords commonly associated with <span id="assoc_kywd">&lt;click Find Associated&gt;</span> <span id="assoc_total"></span></label>
     	            <button id="btnAssocAssign" class="btn btn-add" style="text-align:left; font-size:1em;">Add Selected</button>
-                    <label><input type="checkbox" id="check-all" onclick="checkAllOptions(associated_field, this.checked);">Check All</label>	            
+                    <button id="btnAssocRemove" class="btn btn-delete" style="text-align:left; font-size:1em;">Clear Selection</button>
+                    <label><input type="checkbox" class="check-all" id="checkall-assoc">Check All Visible</label>	            
     	            <br>
 
     	            <div class="checkboxlist" style="width:100%;">
     	            	<ul id="associated_field">
     	            	</ul>
+
     	            </div>
+
+                    <div style="width: 100%">
+                        <span id="assoc_prev" style="display: none;cursor: pointer;float: left;user-select: none;">&lt;&lt;BACK</span>
+                        <span id="assoc_next" style="display: none;cursor: pointer;float: right;user-select: none;">NEXT&gt;&gt;</span>
+                    </div>
 
     	        </fieldset>
 
