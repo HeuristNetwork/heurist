@@ -2014,7 +2014,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         var date = new Date();
         var showZeroBlankText = "";
-        var topText = 'DB: '+window.hWin.HAPI4.database+ 'Date and time: ' + (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear());
+        var topText = 'DB: '+window.hWin.HAPI4.database+ ',Date and time: ' + (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear());
 
         $divres.append('<div></div>')
         $divres.append('<span>DB: <b>'+window.hWin.HAPI4.database+' </b></span>');
@@ -2025,11 +2025,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if(_currentRecordset!=null){
             $divres.append('<span>N = '+ _currentRecordset['recordCount'] +' </span>');
             $divres.append('<span>Query string: '+_currentRecordset['query_main'] +' </span>');
-            topText += 'N = '+ _currentRecordset['recordCount'] +  'Query string: '+_currentRecordset['query_main'];
+            topText += ',N = '+ _currentRecordset['recordCount'] +  ',Query string: '+_currentRecordset['query_main'];
 
         }else{
             $divres.append('<span>Query string: q='+query_main+'&w='+query_domain +' </span>');
-            topText += 'Query string: q='+query_main+'&w='+query_domain;
+            topText += ',Query string: q='+query_main+'&w='+query_domain;
         }
 
         //$divres.append('<div>Total number of records: '+ +'</div>');
@@ -2063,7 +2063,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $('#titleSubmit').click(function(){
                 var title = $('#tableTitle').val();
 
-                if($('#tableTitle').val().length <=0 || $.trim($('#tableTitle').val() == '')){
+                if($('#tableTitle').val().length <=0 || $.trim($('#tableTitle').val()) == ''){
                     $('#tableHeader').html(tableTitle);
                 }
                 else{
@@ -2140,7 +2140,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     {
                         extend: 'csv',
                         className: 'exportButtons',
-                        filename: $('#tableHeader').html(),
+                        filename: function(){
+                            var title = (fields3['page'].intervals.length <=0) ? $('#tableHeader').html() : fields3['page'].fieldname;
+                            return title;
+                        },
                         customize: function(csv){
                             var extendedRow = '';
 
@@ -2179,7 +2182,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         extend:'pdf',
                         className: 'exportButtons',
                         customize: function(pdfDocument){
-                            pdfDocument.content[0].text = $('#tableHeader').html();
+                            pdfDocument.content[0].text = (fields3['page'].intervals.length <=0) ? $('#tableHeader').html() : fields3['page'].fieldname;
                             pdfDocument.content.splice(1, 0, topText);
                             if(fields3['column'].intervals.length == 0) return;
 
@@ -2239,12 +2242,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     
                     }, 
 
+                    /*
                     {
                         extend:'print',
                         className: 'exportButtons',
                         messageTop: topText,
                         footer: true
                     }
+                    */
                 ],
             }
             );
