@@ -2714,11 +2714,11 @@ console.log('onpaste');
                         val:value});
                 $input.parent('.evo-cp-wrap').css({display:'inline-block',width:'200px'});
 
-            }else if($Db.getConceptID('dty', this.options.dtID) == '3-1082'){ // Geo Bookmark, four input form, experimental 
+            }else if($Db.getConceptID('dty', this.options.dtID) == '3-1082'){ // Geo Bookmark, five input form, experimental 
 
                 $input.css({cursor:'hand'});
 
-                __show_geoBookmark_dialog = function(event) { // MORE HERE
+                __show_geoBookmark_dialog = function(event) {
                     event.preventDefault();
 
                     if(that.is_disabled) return;
@@ -2732,27 +2732,36 @@ console.log('onpaste');
 
                     var pdiv = '<div style="display:grid;grid-template-columns:100%;">'
 
+                            + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px;">'
+                            + '<label class="required">Bookmark Name:</label><input type="text" id="bkm_name"></div>'
+                    
                             + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px 200px;">'
-                            + '<label class="required">Bookmark Name:</label><input type="text" id="bkm_name">'
-                            + '<span class="heurist-helper1" style="padding-left:5px">Bookmark\'s Title</span></div>'
+                            + '<label class="required">Bookmark\'s Longitude:</label><input type="text" id="bkm_long" class="bkm_points" style="cursor:pointer;">'
+                            + '<span class="heurist-helper1" style="padding-left:5px">Min, Max Values</span></div>'
 
                             + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px 200px;">'
-                            + '<label class="required">Bookmark Coordinates:</label><input type="text" id="bkm_points" style="cursor:pointer;">'
-                            + '<span class="heurist-helper1" style="padding-left:5px">Bookmark\'s Coordinates, needs four points</span></div>'
-
-                            + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px 200px;">'
-                            + '<label style="color:#6A7C99">Starting Date:</label><input type="text" id="bkm_sdate">'
-                            + '<span class="heurist-helper1" style="padding-left:5px">Bookmark\'s Starting Date, OPTIONAL</span></div>'
-
-                            + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px 200px;">'
-                            + '<label style="color:#6A7C99">Ending Date:</label><input type="text" id="bkm_edate">'
-                            + '<span class="heurist-helper1" style="padding-left:5px">Bookmark\'s Ending Date, OPTIONAL</span></div></div>';
+                            + '<label class="required">Bookmark\'s Latitude:</label><input type="text" id="bkm_lat" class="bkm_points" style="cursor:pointer;">'
+                            + '<span class="heurist-helper1" style="padding-left:5px">Min, Max Values</span></div>'                            
+                    
+                            + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px;">'
+                            + '<label style="color:#6A7C99">Starting Date:</label><input type="text" id="bkm_sdate"></div>'
+                    
+                            + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px;">'
+                            + '<label style="color:#6A7C99">Ending Date:</label><input type="text" id="bkm_edate"></div>'
 
                     var popele = $(pdiv);
 
-                    popele.find('input[id="bkm_points"]').click(function(e){
+                    popele.find('input[class="bkm_points"]').click(function(e){
                         var url = window.hWin.HAPI4.baseURL 
                             +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
+
+                        var wkt_points = $('input[id="bkm_long"]').val() + ',' + $('input[id="bkm_lat"]').val();
+                        var points = wkt_points.split(/[\s,]+/);
+
+                        var geo_points = points[0] + ',' + points[2] + ' ' + points[1] + ',' + points[3];
+
+                        var wkt_params = {'wkt': geo_points};
+                        wkt_params['start_tool'] = 'rectangle';
 
                         window.hWin.HEURIST4.msg.showDialog(url, {
                             height:that.options.is_faceted_search?540:'900',
@@ -2760,7 +2769,7 @@ console.log('onpaste');
                             window: window.hWin,  //opener is top most heurist window
                             dialogid: 'map_digitizer_dialog',
                             default_palette_class: 'ui-heurist-populate',
-                            params: null,
+                            params: wkt_params,
                             title: window.hWin.HR('Heurist map digitizer'),
                             callback: function(location){
                                 if( !window.hWin.HEURIST4.util.isempty(location) ){
@@ -2769,16 +2778,20 @@ console.log('onpaste');
                                     var geocode = geovalue.summary;
                                     geocode = geocode.replace('X', '');
                                     geocode = geocode.replace('Y', '');
+                                    geocode = geocode.replace(' ', '');
 
-                                    $('input[id="bkm_points"]').val(geocode);
-                                    $('input[id="bkm_points"]').change();
+                                    var points = geocode.split(/[\s,]+/);
+
+                                    $('input[id="bkm_long"]').val(points[0] + ',' + points[2]).change();
+                                    $('input[id="bkm_lat"]').val(points[1] + ',' + points[3]).change();
                                 }
                             }
                         } );
                     });
 
                     popele.find('input[id="bkm_name"]').val(setup_val[0]);
-                    popele.find('input[id="bkm_points"]').val(setup_val[1] +','+ setup_val[2] +','+ setup_val[3] +','+ setup_val[4]);
+                    popele.find('input[id="bkm_long"]').val(setup_val[1] +','+ setup_val[2]);
+                    popele.find('input[id="bkm_lat"]').val(setup_val[3] +','+ setup_val[4]);
 
                     if(setup_val.length == 7){
                         popele.find('input[id="bkm_sdate"]').val(setup_val[5]);
@@ -2790,9 +2803,12 @@ console.log('onpaste');
                             click: function(){
 
                                 var title = popele.find('input[id="bkm_name"]').val();
-                                var geo_points = popele.find('input[id="bkm_points"]').val();
+                                var long_points = popele.find('input[id="bkm_long"]').val();
+                                var lat_points = popele.find('input[id="bkm_lat"]').val();
                                 var sdate = popele.find('input[id="bkm_sdate"]').val();
                                 var edate = popele.find('input[id="bkm_edate"]').val();
+
+                                var geo_points = long_points + ',' + lat_points;
 
                                 if(window.hWin.HEURIST4.util.isempty(title) || window.hWin.HEURIST4.util.isempty(geo_points)){
                                     window.hWin.HEURIST4.msg.showMsgFlash('A title and map points must be provided', 2500);
@@ -2801,10 +2817,8 @@ console.log('onpaste');
 
                                 var points = geo_points.split(/[\s,]+/);
 
-                                points.splice(0, 1);
-
                                 if(points.length != 4){
-                                    window.hWin.HEURIST4.msg.showMsgFlash('You need 4 geographical points', 2500);
+                                    window.hWin.HEURIST4.msg.showMsgFlash('You need 2 sets of geographical points', 2500);
                                     return;
                                 }
 
@@ -2840,12 +2854,12 @@ console.log('onpaste');
                         window:  window.hWin, //opener is top most heurist window
                         title: window.hWin.HR('Geographical bookmark form'),
                         width: 575,
-                        height: 230,
+                        height: 252,
                         element:  popele[0],
                         resizable: false,
                         buttons: btns,
                         default_palette_class: 'ui-heurist-populate'
-                    });
+                    });                 
                 }
                 this._on( $input, { keypress: __show_geoBookmark_dialog, click: __show_geoBookmark_dialog } );   
             } // end of geo bookmark
