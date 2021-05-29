@@ -148,7 +148,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $recTypeSelector.hSelect("refresh");
         }
 
-        var allowedlist = ["enum", "integer", "float", "resource", "relationtype"];//, "date", "freetext"]; //"resource",
+        var allowedlist = ["enum", "integer", "float", "resource", "relationtype", "date"];//, "date", "freetext"]; //"resource",
 
         //var selObj = createRectypeDetailSelect($('#cbColumns').get(0), _selectedRtyID, allowedlist, ' ');
         //createRectypeDetailSelect($('#cbRows').get(0), _selectedRtyID, allowedlist, ' ');
@@ -428,6 +428,36 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }else if(detailtype=="date"){
             //get min and max for this detail in database
+            var baseurl = window.hWin.HAPI4.baseURL + "viewers/crosstab/crosstabs_srv.php";
+            var request = { a:'minmax', rt:_selectedRtyID , dt:detailid, session: Math.round((new Date()).getTime()/1000) };
+
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null,
+                function( response ){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        var val0 = parseFloat(response.data.MIN);
+                        var valmax = parseFloat(response.data.MAX);
+
+                        if(isNaN(val0) || isNaN(valmax)){
+                            $container = clearIntervals(name);
+                            $container.html('There are no min max values for this field.');
+                            $container.show();
+                        }else{
+                            fields3[name].values = [val0, valmax];
+                            minMax[0] = fields3[name].values[0];    //Store min value in seperate array to save the copy as to use in the rendering.
+                            minMax[1] = fields3[name].values[1];    //Store min value in seperate array to save the copy as to use in the rendering.
+                            calculateIntervals(name, null, true);
+                            $('#bottomContainer').removeClass('d-none');
+                        }
+
+                        if($.isFunction(callback)) callback.call();
+
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+
+            return;
 
         }else if(detailtype=="freetext"){
             //alphabetically, or if distinct values less that 50 like terms
@@ -506,6 +536,38 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
 
 
+        }else if(fields3[name].type=="date" ){
+            if(count>0){
+                keepCount = count;
+            }else if(keepCount>0){
+                count = keepCount;
+            }else{
+                count = 10;
+                keepCount = 10;
+            }
+
+            var val0 = fields3[name].values[0];
+            var valmax = fields3[name].values[1];
+            fields3[name].intervals = [];
+
+            var delta = (valmax - val0)/count;
+            if(fields3[name].type=="date"){
+                delta = Math.round(delta);
+                if(Math.abs(delta)<1){
+                    delta = delta<0?-1:1;
+                }
+            }
+            var cnt = 0;
+            while (val0<valmax && cnt<count){
+                var val1 = (val0+delta>valmax)?valmax:val0+delta;
+                if(cnt==count-1 && val1!=valmax){
+                    val1 = valmax;
+                }
+
+                fields3[name].intervals.push( {name:rnd(val0)+' ~ '+rnd(val1), description: rnd(val0)+' ~ '+rnd(val1) , values:[ val0, val1 ] });  //minvalue, maxvalue
+                val0 = val1;
+                cnt++;
+            }
         }
 
         if(notSaved) renderIntervals(name, true);
@@ -930,7 +992,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     }
                 }
             }
-            else if(detailtype=="float" || detailtype=="integer"){
+            else if(detailtype=="float" || detailtype=="integer" || detailtype=="date"){
                 var $entireDiv;
                 var $resetRow;
                 var $resetRowBody;
@@ -1001,34 +1063,36 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     }     
                 });
 
-                //Create rounding row
-                $roundingDiv = $(document.createElement('div'))
-                .addClass('col-12 card mb-2 pt-2 bg-light')
-                .appendTo($entireDiv);
+                if(detailtype=="float" || detailtype=="integer" ){
+                    //Create rounding row
+                    $roundingDiv = $(document.createElement('div'))
+                    .addClass('col-12 card mb-2 pt-2 bg-light')
+                    .appendTo($entireDiv);
 
-                $roundingRowBody = '<div class="row">' +
-                '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Rounding:</label></div><div class="col-sm col-xs-12"><select id="roundingSelect"><span>decimal place</span></div></div></div>' +
-                '</div>'
+                    $roundingRowBody = '<div class="row">' +
+                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Rounding:</label></div><div class="col-sm col-xs-12"><select id="roundingSelect"><span>decimal place</span></div></div></div>' +
+                    '</div>'
 
-                $($roundingRowBody).appendTo($roundingDiv);
+                    $($roundingRowBody).appendTo($roundingDiv);
 
-                //Append rounding numbers in select box
-                for(j=0;j<decimalPlaces.length;j++){
-                    selectBox = $roundingDiv.find('#roundingSelect');
+                    //Append rounding numbers in select box
+                    for(j=0;j<decimalPlaces.length;j++){
+                        selectBox = $roundingDiv.find('#roundingSelect');
 
-                    //Make 1 decimal place default.
-                    if(j == 1){
-                        selectBox.append('<option value="'+decimalPlaces[j]+'" selected>'+decimalPlaces[j]+'</option>');
-                        continue;
+                        //Make 1 decimal place default.
+                        if(j == 1){
+                            selectBox.append('<option value="'+decimalPlaces[j]+'" selected>'+decimalPlaces[j]+'</option>');
+                            continue;
+                        }
+                        selectBox.append('<option value="'+decimalPlaces[j]+'">'+decimalPlaces[j]+'</option>');
                     }
-                    selectBox.append('<option value="'+decimalPlaces[j]+'">'+decimalPlaces[j]+'</option>');
-                }
 
-                selectBox.change(function(){
-                    changeIntervalDecimal(name,$(this).val());
-                    var changedIntervals = fields3[name].intervals
-                    generateNumericIntervalsRows(name, changedIntervals, $intervalColumn, $(this).val())
-                });
+                    selectBox.change(function(){
+                        changeIntervalDecimal(name,$(this).val());
+                        var changedIntervals = fields3[name].intervals
+                        generateNumericIntervalsRows(name, changedIntervals, $intervalColumn, $(this).val())
+                    });
+                }
 
                 //Create intervals
                 $intervalsDiv = $(document.createElement('div'))
@@ -1046,8 +1110,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 //Create deep copy of object
                 intervalsNumeric = $.extend(true,{},fields3[name].intervals);
                 
-                changeIntervalDecimal(name, 1);
-                generateNumericIntervalsRows(name, fields3[name].intervals, $intervalColumn, 1);
+                if(detailtype=="float" || detailtype=="integer"){
+                    changeIntervalDecimal(name, 1);
+                    generateNumericIntervalsRows(name, fields3[name].intervals, $intervalColumn, 1);
+                }
+                else if(detailtype=="date"){
+                    generateNumericIntervalsRows(name, fields3[name].intervals, $intervalColumn, 0);
+                }
             }
         }
         
@@ -1099,6 +1168,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             else{
                                 var newNumber = Number($('#changeValueBox').val());
 
+                                if((newNumber % 1) != 0 && fields3[name].type == 'date'){
+                                    var errorMessage = 'Cannot add decimal points to dates';
+                                    createErrorMessage($('#'+name+'IntervalsBody'), errorMessage);
+                                    break;
+                                }
+
                                 if((newNumber <= fields3[name].values[1]) && (newNumber >= fields3[name].intervals[k].values[0])){
                                     if(k==intervalId){
                                         fields3[name].intervals[intervalId].values[1] = newNumber;
@@ -1119,11 +1194,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                 }
                                 else{
                                     var errorMessage;
+                                    var text = (fields3[name].type == 'date') ? 'Date' : 'Number';
                                     if((newNumber > fields3[name].values[1]) && (newNumber >= fields3[name].intervals[k].values[0])){
-                                        errorMessage = 'Number cannot be greater than the max range.'
+                                        errorMessage = text+' cannot be greater than the max range.'
                                     }
                                     else if((newNumber < fields3[name].values[1]) && (newNumber < fields3[name].intervals[k].values[0])){
-                                        errorMessage = 'Number cannot be less than the min range of this interval.'
+                                        errorMessage = text+' cannot be less than the min range of this interval.'
                                     }
                                     createErrorMessage($('#'+name+'IntervalsBody'), errorMessage);
                                     break;
@@ -1132,7 +1208,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         }
                         //Because user is making changes to the values, save the object, making it easier to return to the original value when decimals are changed.
                         intervalsNumeric = $.extend(true,{},fields3[name].intervals);
-                        generateNumericIntervalsRows(name, fields3[name].intervals, htmlElement, $('#roundingSelect').val());
+                        if(!fields3[name].type == 'date'){
+                            generateNumericIntervalsRows(name, fields3[name].intervals, htmlElement, $('#roundingSelect').val());
+                        }else{
+                            generateNumericIntervalsRows(name, fields3[name].intervals, htmlElement, 0);
+                        }
 
                         _doRender();    //Apply to table
                     });
