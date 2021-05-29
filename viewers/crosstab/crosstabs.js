@@ -1143,6 +1143,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 }
                 //Create the row div.
                 var $intRows = $(document.createElement('div'));
+                var betweenText = (fields3[name].type == 'date') ? 'to before' : 'to <';
 
                 $intRows.addClass('row text-center pb-1')
                 .attr('id',name+i)
@@ -1150,7 +1151,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 $('<div class="col-4">').html(int[i].values[0].toFixed(decimalPlace)).appendTo($intRows);
 
-                $('<div class="col-4">').html('to <').appendTo($intRows);
+                $('<div class="col-4">').html(betweenText).appendTo($intRows);
 
                 $('<div class="col-4 pointer">').html(int[i].values[1].toFixed(decimalPlace))
                 .dblclick(function(){
@@ -1261,12 +1262,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         }
                     }
                     var $intRows = $(document.createElement('div'));
+                    var lessThanPrior = (fields3[name].type == 'date') ? 'Prior to ' : '<';
 
                     $intRows.addClass('row text-center pb-1')
                     .appendTo(htmlElement);
                     
                     $('<div class="col-4">').html('Outliers').appendTo($intRows);
-                    $('<div class="col-4">').html('<'+outlierNumber.toFixed(decimalPlace)).appendTo($intRows);
+                    $('<div class="col-4">').html(lessThanPrior+outlierNumber.toFixed(decimalPlace)).appendTo($intRows);
                     $('<div class="col-4">').append($('<button>').addClass('btn btn-secondary border-dark').attr('id','removeMinOutlier')
                     .append('<i class="bi bi-trash"></i>'))
                     .click(function(){
@@ -1314,12 +1316,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         }
                     }
                     var $intRows = $(document.createElement('div'));
+                    var greaterThanPrior = (fields3[name].type == 'date') ? 'After ' : '>';
 
                     $intRows.addClass('row text-center pt-1')
                     .appendTo(htmlElement);
                     
                     $('<div class="col-4">').html('Outliers').appendTo($intRows);
-                    $('<div class="col-4">').html('>'+outlierNumber.toFixed(decimalPlace)).appendTo($intRows);
+                    $('<div class="col-4">').html(greaterThanPrior+outlierNumber.toFixed(decimalPlace)).appendTo($intRows);
                     $('<div class="col-4">').append($('<button>').addClass('btn btn-secondary border-dark').attr('id','removeMaxOutlier')
                     .append('<i class="bi bi-trash"></i>'))
                     .click(function(){
