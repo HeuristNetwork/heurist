@@ -2666,7 +2666,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $rowPercentageHeader = $('<tr>');
                 for (j=0; j<clen; j++){
                     if(supressBlankColumn && columns[j].isempty) continue;
-                    $rowPercentageHeader.append('<th class="crosstab-header">&nbsp;</th><th class="percent">Row%</th><th class="percent">Col%</th>');
+                    $rowPercentageHeader.append('<th class="crosstab-header">'+aggregationMode+'</th><th class="percent">Row%</th><th class="percent">Col%</th>');
                 }
                 if(showTotalsRow || showTotalsColumn){
                     $rowPercentageHeader.append('<th class="crosstab-header">&nbsp;</th><th class="percent">Row%</th><th class="percent">Col%</th>');  //(showTotalsRow && showPercentageRow?2:1)   ART2
@@ -2701,10 +2701,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     }
                     $row.append(s);
                 }else{
-                    $row.append('<td colspan="'+colspan+'">&nbsp;</td>');
+                    $row.append('<td>&nbsp;</td>');
 
                     if(showPercentageColumn){
-                        $row.append('<td colspan="'+colspan+'">&nbsp;</td>'); //Add extra data for DataTables to work correctly
+                        $row.append('<td>&nbsp;</td>'); //Add extra data for DataTables to work correctly
                     }
                 }
             }else{
