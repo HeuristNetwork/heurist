@@ -124,7 +124,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
       $('span.btn-remove').addClass('bg-danger');
       $('.btn-remove span:first-child').removeClass('ui-icon-delete');
       $('.btn-remove span:first-child').addClass('ui-icon-trash');
-
+      $('.btnSaveSettings').html('<i class="bi bi-save"></i> Save')
 
     }
 
@@ -627,10 +627,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 $buttons = $(document.createElement('div'))
                 .addClass('col-3 p-2')
-                .append($('<button>',{text: "Reset",class: "btn btn-secondary"})
+                .append($('<button>',{html: "<i class='bi bi-arrow-counterclockwise'></i> Reset",class: "btn btn-secondary"})
                     .click(function( event ) {
                         calculateIntervals(name, parseInt($('#'+name+'IntCount').val()), true );
-                    }).css('margin-right',"1rem"))
+                    }).css('margin-right',"1rem"));
                 
                 $buttons.appendTo($firstRowDiv);
 
@@ -1833,7 +1833,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $(alert).addClass('alert alert-warning alert-dismissible fade show')
             .attr('role', 'alert')
             .attr('id','alert')
-            .html(message)
+            .append('<i class="bi bi-exclamation-triangle" style="font-size: 24px;"></i>')
+            .append('<span> '+message+'</span>')
             .append($('<button>')
                 .attr('type', 'button')
                 .attr('class','btn-close')
@@ -2099,7 +2100,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             if(fields3['row'].intervals.length > 0 && fields3['column'].intervals.length > 0) tableTitle += fields3['row'].fieldname + ' and ' + fields3['column'].fieldname;
             tableTitle += ' ' + aggregationMode;
             //Append text box for user to enter table title.
-            $divres.append('<div class="p-2 d-flex align-items-center justify-content-center"><label class="me-2" for="tableTitle">Enter a table title:</label><input type="text" id="tableTitle"></input><button class="btn btn-success ms-2" id="titleSubmit">Submit</button></div>');
+            $divres.append('<div class="p-2 d-flex align-items-center justify-content-center"><label class="me-2" for="tableTitle">Enter a table title:</label><input type="text" id="tableTitle"></input><button class="btn btn-success ms-2" id="titleSubmit"><i class="bi bi-box-arrow-in-right" style="font-size: 18px;"></i> Submit</button></div>');
             $divres.append('<h2 class="crosstab-page" id="tableHeader">'+tableTitle+'</h2>');
             $('#titleSubmit').click(function(){
                 var title = $('#tableTitle').val();
