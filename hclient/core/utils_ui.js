@@ -1462,10 +1462,8 @@ window.hWin.HEURIST4.ui = {
             $helper_div.hide(oEffect);
             $help_button.button({icons:{primary:"ui-icon-circle-help"}});
         }
-        //ui-menu6
         
-        
-        $help_button.on('click', function(){
+        $help_button.on('click', function(event){
             
                         var $helper_div = options.container.find('.ui-helper-popup');
                         
@@ -2782,35 +2780,6 @@ window.hWin.HEURIST4.ui = {
 
           }
       }
-  },
-  
-  // @todo remove
-  // edit base field definition (see saveStructureLib.php)
-  //
-  editBaseFieldDefinition: function(dty_ID, callback){
-  
-    var sURL = window.hWin.HAPI4.baseURL + "admin/structure/fields/editDetailType.html?db="
-        +window.hWin.HAPI4.database+ "&detailTypeID="+dty_ID; //existing
-
-    window.hWin.HEURIST4.msg.showDialog(sURL, {
-           "close-on-blur": false,
-            "no-resize": false,
-            height: 680,
-            width: 840,
-            callback: function(context) {
-                if(!Hul.isnull(context)){
-                    window.hWin.HEURIST4.detailtypes = context.detailtypes;
-                }
-                if($.isFunction(callback)){
-                    callback.call();
-                }
-            },
-            afterclose: function(){
-            }
-            
-    });
-    
-    return false;
   },
   
   // @todo reimplement

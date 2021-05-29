@@ -1,3 +1,14 @@
+/**
+*  Message and popup functions
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
 if (!window.hWin.HEURIST4){
     window.hWin.HEURIST4 = {};
 }
@@ -5,7 +16,6 @@ if (!window.hWin.HEURIST4){
 /*
 showMsgErrJson - check if response is json 
 showMsgErr     -    loads into id=dialog-error-messages
-showMsgDlgUrl  - loads content url (not frame!) into dialog (getMsgDlg) and show it (showMsgDlg)
 
 getMsgDlg      - creates and returns div (id=dialog-common-messages) that is base element for jquery ui dialog
 getPopupDlg    - creates and returns div (id=dialog-popup) similar to  dialog-common-messages - but without width limit
@@ -19,6 +29,8 @@ showHintFlash
 checkLength  - fill given element with error message and highlight it
 checkLength2 - get message if input value beyound given ranges
 
+showMsgDlgUrl  - loads content url (not frame!) into dialog (getMsgDlg) and show it (showMsgDlg)
+
 showDialog - creates div with frame, loads url content into it and shows it as popup dialog, on close this div will be removed
 showElementAsDialog
 
@@ -26,6 +38,8 @@ createAlertDiv - return error-state html with alert icon
 
 bringCoverallToFront - show loading icon and lock all screen (curtain)
 sendCoverallToBack
+
+showDialogInDiv - show diaog content inline for h6 ui
 
 */
 if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {

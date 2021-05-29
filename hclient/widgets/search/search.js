@@ -495,29 +495,6 @@ $.widget( "heurist.search", {
             } });
         }
 
-
-        // Manage structure button
-        if(window.hWin.HAPI4.sysinfo['layout']=='original'){
-            
-        this.btn_manage_structure = $( "<button>", {
-                label: window.hWin.HR("Manage Structure"),
-                title: "Add new / modify existing record types - general characteristics, data fields and rules which compose a record"
-            })
-            .css({'width':'140px','min-width': '120px','margin-left':'3em'})
-            //.addClass('logged-in-only')
-            .addClass(this.options.button_class)
-            .appendTo( this.div_add_record )
-            .button()
-            .click(function(){ 
-                window.hWin.HAPI4.SystemMgr.verify_credentials(function(){ 
-                    window.hWin.HEURIST4.msg.showDialog(window.HAPI4.baseURL + 'admin/structure/rectypes/manageRectypes.php?popup=1&db='+window.hWin.HAPI4.database,
-                    { width:1200, height:600, title:'Manage Structure', 
-                      afterclose: function(){ window.hWin.HAPI4.SystemMgr.get_defs_all( false, that.document)}} )
-                });
-            });
-        }    
-        
-
         /* rotate icon with given interval
         setInterval( function(){ linkGear.addClass('rotate'); 
                     setTimeout( function(){ linkGear.removeClass('rotate'); }, 1000 ) }, 5000 );

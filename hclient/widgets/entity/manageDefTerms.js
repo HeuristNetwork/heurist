@@ -1661,7 +1661,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
-            +"hclient/widgets/entity/manageDefTermsMerge.html?t="+(new Date().getTime()), 
+            +"hclient/widgets/entity/popups/manageDefTermsMerge.html?t="+(new Date().getTime()), 
             buttons, 'Merge Terms', 
             {  container:'terms-merge-popup',
                 width:500,
@@ -2490,10 +2490,10 @@ function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_
     var $dlg, buttons = [
         {text:window.hWin.HR('Cancel'),
             //id:'btnRecCancel',
-            css:{'float':'right',margin:'.5em .4em .5em 0'},  
+            css:{'float':'right',margin:'.5em .4em .5em 0px'},  
             click: function() { $dlg.dialog( "close" ); }},
         {text:window.hWin.HR('Apply'),
-            css:{'float':'right',margin:'.5em .4em .5em 0'},  
+            css:{'float':'right',margin:'.5em .4em .5em 0px'},  
             class: 'ui-button-action',
             click: function() { 
                 
@@ -2537,7 +2537,7 @@ function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_
     
     //open dialog
     $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
-        +"hclient/widgets/entity/manageDefTermsCorrect.html?t="+(new Date().getTime()), 
+        +"hclient/widgets/entity/popups/manageDefTermsCorrect.html?t="+(new Date().getTime()), 
         buttons, 'Correction of invalid term', 
         {  container:'terms-merge-popup',
             width:500,

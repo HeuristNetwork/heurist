@@ -1655,31 +1655,6 @@ $.widget( "heurist.editing_input", {
                 }
                 
                 window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', rg_options);
-/*                
-                var sURL =  window.hWin.HAPI4.baseURL + "admin/structure/rectypes/selectRectype.html?type=" 
-                        + that.detailType  + "&dtID=" + that.options.recID +"&ids=" 
-                        + sels
-                        + "&db="+ window.hWin.HAPI4.database;  
-
-                window.hWin.HEURIST4.msg.showDialog(sURL, {
-                    "close-on-blur": false,
-                    "no-resize": true,
-                    title: 'Select Record Type',
-                    height: 600,
-                    width: 640,
-                    callback: function(selection) {
-                        if(!window.hWin.HEURIST4.util.isempty(selection) && !$.isArray(selection)){
-                            selection = selection.split(','); 
-                        }  
-                        var newsel = window.hWin.HEURIST4.util.isArrayNotEmpty(selection)?selection:[];
-                        
-                        //config and data are loaded already, since dialog was opened
-                        that._findAndAssignTitle($input, newsel);
-                        that.newvalues[$input.attr('id')] = newsel.join(',');
-                        that.onChange();
-                    }
-                });
-*/                
             }
             
             //replace input with div

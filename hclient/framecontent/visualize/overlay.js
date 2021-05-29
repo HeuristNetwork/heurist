@@ -686,23 +686,6 @@ function _editRecStructure(rty_ID) {
     window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                         {new_record_params:{RecTypeID: rty_ID}, edit_structure:true});
     
-/*    
-    var URL = window.hWin.HAPI4.baseURL + "admin/structure/fields/editRecStructure.html?db="
-            +  window.hWin.HAPI4.database+ '&rty_ID='+rty_ID;
-
-    //var dim = Hul.innerDimensions(top);
-
-    window.hWin.HEURIST4.msg.showDialog(URL, {
-            "close-on-blur": false,
-            resizable: true,
-            title: 'RECORD STRUCTURE',
-            height: 600, //dim.h*0.9,
-            width: 860,
-            "no-close": true,
-            closeCallback: function(){ },
-            callback: function(context) { }
-    });
-*/    
 }
 
 /** Repositions all overlays */
