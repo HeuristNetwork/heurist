@@ -31,6 +31,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.7.0/css/buttons.dataTables.min.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.7/css/responsive.dataTables.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.2.0/chart.min.js"></script>
 <script type="text/javascript" src="<?php echo PDIR; ?>hclient/widgets/entity/configEntity.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
@@ -42,6 +43,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.print.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.7/js/dataTables.responsive.min.js"></script>
 
 <script type="text/javascript">
     var mapping, menu_datasets, btn_datasets;
@@ -191,17 +193,17 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                     <div class="input-cell" style="padding-top: 4px;">
                                                         <div class="crosstab-aggregation">
                                                             <input type="radio" class="btn-check" checked value="count" id="aggregationModeCount" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">
-                                                            <label class="btn btn-outline-secondary" for="aggregationModeCount">Counts</label>
+                                                            <label class="btn btn-outline-primary" for="aggregationModeCount">Counts</label>
                                                         </div>
 
                                                         <div id="aggSum" class="crosstab-aggregation">
                                                             <input type="radio" class="btn-check" id="aggregationModeSum" value="sum" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">
-                                                            <label class="btn btn-outline-secondary" for="aggregationModeSum">Sum</label>
+                                                            <label class="btn btn-outline-primary" for="aggregationModeSum">Sum</label>
                                                         </div>
 
                                                         <div id="aggAvg" class="crosstab-aggregation">
                                                             <input type="radio" class="btn-check" id="aggregationModeAvg" value="avg" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">
-                                                            <label class="btn btn-outline-secondary" for="aggregationModeAvg">Average</labels>
+                                                            <label class="btn btn-outline-primary" for="aggregationModeAvg">Average</labels>
                                                         </div>
 
                                                         <div id="divAggField" class="crosstab-aggregation" style="margin-top:10px;">of&nbsp;<select id="cbAggField" name="column" onchange="crosstabsAnalysis.changeAggregationMode()" class="text ui-widget-content ui-corner-all"></select></div>
@@ -213,22 +215,22 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                 <div class="input-cell">
                                                     <div class="checkboxValues">
                                                         <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" style="margin-left: 0;" checked id="rbShowValue">
-                                                        <label class="btn btn-outline-secondary" for="rbShowValue">Values</label>
+                                                        <label class="btn btn-outline-primary" for="rbShowValue">Values</label>
                                                     </div>
 
                                                     <div class="checkboxValues">
                                                         <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentRow">
-                                                        <label class="btn btn-outline-secondary" for="rbShowPercentRow">Row %</label>
+                                                        <label class="btn btn-outline-primary" for="rbShowPercentRow">Row %</label>
                                                     </div>
 
                                                     <div class="checkboxValues">
                                                         <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentColumn">
-                                                        <label class="btn btn-outline-secondary" for="rbShowPercentColumn">Column %</label>
+                                                        <label class="btn btn-outline-primary" for="rbShowPercentColumn">Column %</label>
                                                     </div>
 
                                                     <div class="checkboxValues">
                                                         <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" checked id="rbShowTotals">
-                                                        <label class="btn btn-outline-secondary" for="rbShowTotals">Totals</label>
+                                                        <label class="btn btn-outline-primary" for="rbShowTotals">Totals</label>
                                                     </div>
                                                 </div>
                                             </div>
