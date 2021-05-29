@@ -2334,7 +2334,7 @@ window.hWin.HEURIST4.ui = {
         }
         return selObj;
     },
-
+    
     //
     // checks wether the appropriate javascript is loaded
     //

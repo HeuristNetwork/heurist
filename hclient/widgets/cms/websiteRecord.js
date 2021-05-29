@@ -46,7 +46,7 @@ _init - #main-menu navigation wizard onselect -> __iniLoadPageById warn for chan
 
 // 
 //  tinymce-body - textarea container with data - it becomes visible when editor is ON
-//  .mce-edit-area > iframe - real editor
+//  .tox-edit-area (.mce-edit-area v3) > iframe - real editor
 //  btn_inline_editor3 button invokes direct editor
 //  btn_inline_editor button invokes wyswyg editor _editPageContent
 //
@@ -151,10 +151,22 @@ function hCmsEditing(_options) {
                     __initWidgetEditLinks(null);
                     
                     //adjust height
-                    var itop = $('.mce-top-area').height()>0?$('.mce-top-area').height():68;
+                    var itop = 68;
+                    if($('.mce-top-area').length>0 && $('.mce-top-area').height()>0){
+                        itop = $('.mce-top-area').height();   
+                    }else if($('.tox-toolbar-overlord').length>0 && $('.tox-toolbar-overlord').height()>0){
+                        itop = $('.tox-toolbar-overlord').height();
+                    }
+                    
+                    
+                    
                     var sheight = $('.tinymce-body').height() - itop;
                     sheight = ($('.tinymce-body').height() - itop<=100)?'90%':(sheight+'px');
                     $('.mce-edit-area > iframe').height( sheight );
+                    $('.tox-edit-area > iframe').height( sheight );
+                    $('.tox-edit-area').height( sheight );
+                    
+console.log( sheight );                    
                 });
                 
                 editor.ui.registry.addButton('customHeuristMedia', {
