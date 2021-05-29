@@ -340,3 +340,17 @@ input[type=number]{
     background: #627e5d !important;
     color: white !important;
 }
+
+@media (min-width: 768px){
+    .borderChange {
+        border-left: 0 !important;
+        border-right: 0 !important;
+    }
+}
+
+@media (max-width: 768px){
+    .borderChange {
+        border-top: 0 !important;
+        border-bottom: 0 !important;
+    }
+}

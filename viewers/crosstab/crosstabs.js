@@ -118,6 +118,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
       configEntityWidget.configEntity( 'updateList', $recTypeSelector.val() );
 
+      //Reconfigure save buttons
+      $('span.btn-rename').addClass('bg-warning');
+      $('span.btn-remove').css('margin', '2px');
+      $('span.btn-remove').addClass('bg-danger');
+      $('.btn-remove span:first-child').removeClass('ui-icon-delete');
+      $('.btn-remove span:first-child').addClass('ui-icon-trash');
+
+
     }
 
     function _OnRowTypeChange(value) {
@@ -1147,7 +1155,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     
                     $('<div class="col-4">').html('Outliers').appendTo($intRows);
                     $('<div class="col-4">').html('<'+outlierNumber.toFixed(decimalPlace)).appendTo($intRows);
-                    $('<div class="col-4">').append($('<button>').addClass('btn btn-danger border-dark').attr('id','removeMinOutlier')
+                    $('<div class="col-4">').append($('<button>').addClass('btn btn-secondary border-dark').attr('id','removeMinOutlier')
                     .append('<i class="bi bi-trash"></i>'))
                     .click(function(){
                         if(!clickedMinOutlier){
@@ -1155,7 +1163,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             fields3[name].intervals.splice(0,1);
 
                             $('#removeMinOutlier').empty();
-                            $('#removeMinOutlier').toggleClass('btn-danger border-dark btn-success')
+                            $('#removeMinOutlier').toggleClass('btn-secondary border-dark btn-success')
                             .append('<i class="bi bi-plus-circle"></i>');
                             clickedMinOutlier = true;
                         }
@@ -1163,7 +1171,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             fields3[name].intervals.unshift(originalOutliers[0]);
                             $('#removeMinOutlier').empty();
                             $('#removeMinOutlier').append('<i class="bi bi-trash"></i>');
-                            $('#removeMinOutlier').toggleClass('btn-success btn-danger border-dark');
+                            $('#removeMinOutlier').toggleClass('btn-success btn-secondary border-dark');
                             clickedMinOutlier = false;
                         }
                         _doRender();
@@ -1200,7 +1208,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     
                     $('<div class="col-4">').html('Outliers').appendTo($intRows);
                     $('<div class="col-4">').html('>'+outlierNumber.toFixed(decimalPlace)).appendTo($intRows);
-                    $('<div class="col-4">').append($('<button>').addClass('btn btn-danger border-dark').attr('id','removeMaxOutlier')
+                    $('<div class="col-4">').append($('<button>').addClass('btn btn-secondary border-dark').attr('id','removeMaxOutlier')
                     .append('<i class="bi bi-trash"></i>'))
                     .click(function(){
                         if(!clickedMaxOutlier){
@@ -1208,7 +1216,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             fields3[name].intervals.splice(fields3[name].intervals.length-1,1);
 
                             $('#removeMaxOutlier').empty();
-                            $('#removeMaxOutlier').toggleClass('btn-danger border-dark btn-success')
+                            $('#removeMaxOutlier').toggleClass('btn-secondary border-dark btn-success')
                             .append('<i class="bi bi-plus-circle"></i>');
                             clickedMaxOutlier = true;
                         }
@@ -1216,7 +1224,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             fields3[name].intervals.push(originalOutliers[1]);
                             $('#removeMaxOutlier').empty();
                             $('#removeMaxOutlier').append('<i class="bi bi-trash"></i>');
-                            $('#removeMaxOutlier').toggleClass('btn-success btn-danger border-dark');
+                            $('#removeMaxOutlier').toggleClass('btn-success btn-secondary border-dark');
                             clickedMaxOutlier = false;
                         }
                         _doRender();
@@ -1480,7 +1488,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 //Add delete button
                 $('<div class="col-1 p-1 border-2 border-top border-secondary delete d-flex align-items-center">')
                 .append($('<button>')
-                    .addClass('btn btn-danger border-dark w-100 p-0 py-1')
+                    .addClass('btn btn-secondary border-dark w-100 p-0 py-1')
                     .append('<i class="bi bi-trash"></i>')
                     .click(function(){
                         //Remove interval and uncheck checkboxes

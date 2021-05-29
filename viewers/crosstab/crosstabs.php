@@ -97,7 +97,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                             <div style="font-size: 0.9em;">Note: choice of record type determines the list of fields avaiable but does not filter the results - the analysis is based on all records in the result set</div>
                                         </div>
                                     </div>
-                                    <div class="row" style="padding: 0.2em; width: 100%; display:none;" id="divLoadSettings">
+                                    <div class="row align-items-center" style="padding: 0.2em; width: 100%; display:none;" id="divLoadSettings">
                                         <!-- 
                                             <div style="padding: 0.2em; width: 100%; display:none;" class="input" id="divLoadSettings">
                                         -->
@@ -121,7 +121,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                         &nbsp;&nbsp;<button id="btnSaveSettings">Save</button> -->
                                 <!-- </div> -->
                             </div>
-                            <div class="col-12 col-md-4 border border-dark bg-white">
+                            <div class="col-12 col-md-4 border border-dark bg-white borderChange">
                                 <div class="row">
                                     <div class="col-12">
                                         <fieldset id="vars" style="display:none;">
