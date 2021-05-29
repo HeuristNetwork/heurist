@@ -324,14 +324,14 @@ input[type=number]{
 #tabs > li > button.nav-link:hover {
     font-weight: bold;
     color: white !important;
-    background: teal;
+    background: #305586;
     border: 0;
     opacity: 1;
 }
 
 #tabs > li > button.nav-link.active {
     font-weight: bold;
-    color:teal;
+    color:#305586;
     border: 0;
     opacity: 1;
 }

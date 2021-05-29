@@ -639,6 +639,35 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .appendTo($rightColDiv);
 
                 $('<div class="col-1 p-1">')
+                .append($('<button>').addClass('btn btn-primary w-100 p-1')
+                .attr('id','deselectAll')
+                .attr('data-bs-toggle', 'tooltips')
+                .attr('data-bs-placement', 'top')
+                .attr('title', 'Deselect all values')
+                .append('<i class="bi bi-arrow-left w-100"></i>')
+                .click(function(){
+                    //Remove all fields from array
+                    fields3[name].intervals = [];
+
+                    //Clear UI
+                    $('#rightColDiv'+name+' > .intervalDiv').each(function(index, element){
+                        $(element).remove();
+                    });
+
+                    //Uncheck checkboxes
+                    $('input[name="'+name+'Options"]').each(function(index, element){
+                        $(element).prop('checked', false);
+                        $(element).prop('disabled', false);
+
+                    });
+
+                    //Uncheck select all button
+                    $('#selectAll'+name).prop('checked', false);
+                    $('#selectAll'+name).prop('disabled', false);
+
+                    //Hide deselect all button.
+                    $('#deselectAll').addClass('d-none');
+                }))
                 .appendTo($intervalHeadRow);
 
                 $('<div class="col-4">')
@@ -1372,6 +1401,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .attr('id','applyButton')
             .click(function(){
                 __addeditInterval(name, idx, true);
+                $('#deselectAll').removeClass('d-none');
             }));
         $newInterval.find("#applyButton").append('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right w-100" viewBox="0 0 16 16">' 
             + '<path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>'
