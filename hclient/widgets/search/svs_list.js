@@ -1047,7 +1047,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
 
             //position:absolute;bottom:0px;
             if(!this.direct_search_div){
-                this.direct_search_div = $('<div style="height:2.5em;padding:4px;width:100%">'
+                this.direct_search_div = $('<div style="height:8.5em;padding:4px;width:100%">'
                     +'<h4 style="padding:20px 0px;margin:0">Simple search</h4><label>Search everything:</label>'
                     +'&nbsp;<input id="search_query" style="display:inline-block;width:40%" type="search" value="">'
                     +'&nbsp;<button id="search_button"/></div>')
