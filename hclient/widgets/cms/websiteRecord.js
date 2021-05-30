@@ -278,11 +278,11 @@ console.log( sheight );
             
         //$('<a href="#" id="btn_refresh_menu" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">refresh menu</a>').click( __reloadMainMenu );
         
-        $('<textarea class="tinymce-body" style="position:absolute;left:0;width:99.9%;top:0;bottom:0;display:none"></textarea>')
+        $('<textarea class="tinymce-body" style="position:absolute;left:0;right:2px;top:0;bottom:0;display:none"></textarea>')
             .appendTo(main_content.parent());
 
         //codemirror container
-        $('<div id="codemirror-body" style="position:absolute;left:0;width:99.9%;top:0;bottom:0;display:none"></div>')
+        $('<div id="codemirror-body" style="position:absolute;left:0;right:2px;top:0;bottom:0;display:none;border:lightblue 1px dotted"></div>')
             .hide()
             .appendTo(main_content.parent());
 
@@ -356,23 +356,22 @@ console.log( sheight );
         });
         content = ele.html();
         
+        if(window.hWin.HEURIST4.util.isempty(content)) content = ' ';
+        
         codeEditor.setValue(content);
         $('#codemirror-body').show();
 
+        //autoformat
         setTimeout(function(){
                     $('div.CodeMirror').css('height','100%').show();
-                
-                    //CodeMirror.commands["selectAll"](codeEditor);
-                    //var range = { from: codeEditor.getCursor(true), to: codeEditor.getCursor(false) };
-                    //codeEditor.autoFormatRange(range.from, range.to);                
                     
                     var totalLines = codeEditor.lineCount();  
                     codeEditor.autoFormatRange({line:0, ch:0}, {line:totalLines});                    
                     codeEditor.scrollTo(0,0);
                     codeEditor.setCursor(0,0); //clear selection
-                    //codeEditor.getDoc().setSelection({from:0,to:0});
-                    //codeEditor.refresh();
-                    //_keepTemplateValue = codeEditor.getValue();
+                    
+                    codeEditor.focus()
+                    //setTimeout(function(){;},200);
                 },500);
     }
     
