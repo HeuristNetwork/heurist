@@ -1143,7 +1143,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 }
                 //Create the row div.
                 var $intRows = $(document.createElement('div'));
-                var betweenText = (fields3[name].type == 'date') ? 'to before' : 'to <';
+                var betweenText = (fields3[name].type == 'date') ? 'to' : 'to <';
 
                 $intRows.addClass('row text-center pb-1')
                 .attr('id',name+i)
