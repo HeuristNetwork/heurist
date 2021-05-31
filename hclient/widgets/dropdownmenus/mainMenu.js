@@ -899,7 +899,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else if(action == "menu-cms-embed"){
 
             window.hWin.HEURIST4.ui.showRecordActionDialog('embedDialog', 
-                                {cms_popup_dialog_options:popup_dialog_options });
+                                {cms_popup_dialog_options:popup_dialog_options, path: 'widgets/cms/' });
             
         }else if(action == "menu-database-properties"){
 

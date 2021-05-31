@@ -19,10 +19,10 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 require_once(dirname(__FILE__)."/../System.php");
-require_once(dirname(__FILE__).'/../../external/jquery-file-upload/server/php/UploadHandler.php');
 require_once(dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
 require_once(dirname(__FILE__).'/../utilities/utils_file.php');
 require_once(dirname(__FILE__).'/../utilities/utils_image.php');
+require_once('UploadHandler.php');
 
 $response = null;
 $system = new System();
@@ -42,9 +42,7 @@ if($system->init(@$_REQUEST['db'])){
     $recID = @$_REQUEST['recID'];
     $registerAtOnce = (@$_REQUEST['registerAtOnce']==1);
     
-    if(!$entity_name){
-            $response = $system->addError(HEURIST_INVALID_REQUEST, "'entity' parameter is not defined");
-    }else if ( !$system->has_access() ) { //not logged in
+    if ( !$system->has_access() ) { //not logged in
             $response = $system->addError(HEURIST_REQUEST_DENIED);
     }else if ($entity_name=='sysGroups' || $entity_name=='sysUsers') {
             if(!$system->has_access($recID)){ //only user or group admin
@@ -56,6 +54,7 @@ if($system->init(@$_REQUEST['db'])){
               $response = $system->addError(HEURIST_REQUEST_DENIED);
             }
     }
+    
 }else{
     $response = $system->getError();
 }
@@ -79,6 +78,36 @@ if($response!=null){
 
 //define options for upload handler    
     
+    if(!$entity_name){
+        
+        //direct upload from manageFileUpload
+        $options = array(
+                'upload_dir' => HEURIST_FILESTORE_DIR.'insitu/',
+                'upload_url' => HEURIST_FILESTORE_URL.'insitu/',
+                'unique_filename' => false,
+                'correct_image_extensions' => true,
+                'image_versions' => array(
+                    ''=>array(
+                        'auto_orient' => true,
+                        ),
+                    'thumbnail'=>array(
+                        'auto_orient' => true,
+                        'upload_dir' => HEURIST_THUMB_DIR,
+                        'upload_url' => HEURIST_THUMB_URL,
+                        'max_width' => 400,
+                        'max_height' => 400,
+                        'scale_to_png' => true    
+                    )
+                )
+        );
+/*
+  it was form parameters in manageFilesUpload        
+            <input type="hidden" name="upload_thumb_dir" value="<?php echo HEURIST_THUMB_DIR; ?>"/>
+            <input type="hidden" name="upload_thumb_url" value="<?php echo (defined('HEURIST_THUMB_URL')?HEURIST_THUMB_URL:''); ?>"/>
+*/        
+        //$response = $system->addError(HEURIST_INVALID_REQUEST, "'entity' parameter is not defined");
+            
+    }else
     if($entity_name=="terms"){//for terms from old term management - upload term image
 
         $options = array(
