@@ -46,7 +46,7 @@ _init - #main-menu navigation wizard onselect -> __iniLoadPageById warn for chan
 
 // 
 //  tinymce-body - textarea container with data - it becomes visible when editor is ON
-//  .mce-edit-area > iframe - real editor
+//  .tox-edit-area (.mce-edit-area v3) > iframe - real editor
 //  btn_inline_editor3 button invokes direct editor
 //  btn_inline_editor button invokes wyswyg editor _editPageContent
 //
@@ -151,49 +151,63 @@ function hCmsEditing(_options) {
                     __initWidgetEditLinks(null);
                     
                     //adjust height
-                    var itop = $('.mce-top-area').height()>0?$('.mce-top-area').height():68;
+                    var itop = 68;
+                    if($('.mce-top-area').length>0 && $('.mce-top-area').height()>0){
+                        itop = $('.mce-top-area').height();   
+                    }else if($('.tox-toolbar-overlord').length>0 && $('.tox-toolbar-overlord').height()>0){
+                        itop = $('.tox-toolbar-overlord').height();
+                    }
+                    
+                    
+                    
                     var sheight = $('.tinymce-body').height() - itop;
                     sheight = ($('.tinymce-body').height() - itop<=100)?'90%':(sheight+'px');
                     $('.mce-edit-area > iframe').height( sheight );
+                    $('.tox-edit-area > iframe').height( sheight );
+                    $('.tox-edit-area').height( sheight );
+                    
+console.log( sheight );                    
                 });
                 
-                editor.addButton('customHeuristMedia', {
+                editor.ui.registry.addButton('customHeuristMedia', {
                       icon: 'image',
                       text: 'Add Media',
-                      onclick: function (_) {  //since v5 onAction in v4 onclick
+                      onAction: function (_) {  //since v5 onAction in v4 onclick
                             __addHeuristMedia();
                       }
                     });
                 
                 
-                editor.addButton('customAddWidget', { //since v5 .ui.registry
+                editor.ui.registry.addButton('customAddWidget', { //since v5 .ui.registry
                       icon: 'plus',
-                      text: 'Add database widget',
-                      onclick: function (_) {  //since v5 onAction
+                      text: 'Widget',
+                      tooltip: 'Add database widget',
+                      onAction: function (_) {  //since v5 onAction
                             __addEditWidget();
                       }
                     });
 
-                editor.addButton('customAddTemplate', { //since v5 .ui.registry
-                      icon: 'page-embed',
-                      text: 'Insert template',
-                      onclick: function (_) {  //since v5 onAction
+                editor.ui.registry.addButton('customAddTemplate', { //since v5 .ui.registry
+                      icon: 'embed-page', //paste-text
+                      text: 'Template',
+                      tooltip: 'Insert Template',
+                      onAction: function (_) {  //since v5 onAction
                          __insertTemplate();   
                       }
                     });
                                 
-                editor.addButton('customSaveButton', { //since v5 .ui.registry
+                editor.ui.registry.addButton('customSaveButton', { //since v5 .ui.registry
                       icon: 'save',
                       text: 'Save',
-                      onclick: function (_) {  //since v5 onAction in v4 onclick
+                      onAction: function (_) {  //since v5 onAction in v4 onclick
                             __saveChanges(false);
                       }
                     });            
 
-                editor.addButton('customCloseButton', {
+                editor.ui.registry.addButton('customCloseButton', {
                       icon: 'checkmark',
                       text: 'Done',
-                      onclick: function (_) {
+                      onAction: function (_) {
                           __iniLoadPageById(0); //reload current page
                       }
                     });            
@@ -264,11 +278,11 @@ function hCmsEditing(_options) {
             
         //$('<a href="#" id="btn_refresh_menu" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">refresh menu</a>').click( __reloadMainMenu );
         
-        $('<textarea class="tinymce-body" style="position:absolute;left:0;width:99.9%;top:0;bottom:0;display:none"></textarea>')
+        $('<textarea class="tinymce-body" style="position:absolute;left:0;right:2px;top:0;bottom:0;display:none"></textarea>')
             .appendTo(main_content.parent());
 
         //codemirror container
-        $('<div id="codemirror-body" style="position:absolute;left:0;width:99.9%;top:0;bottom:0;display:none"></div>')
+        $('<div id="codemirror-body" style="position:absolute;left:0;right:2px;top:0;bottom:0;display:none;border:lightblue 1px dotted"></div>')
             .hide()
             .appendTo(main_content.parent());
 
@@ -331,24 +345,33 @@ function hCmsEditing(_options) {
                     onBlur:function(){}
                 });
         }
-
+        
+        
+        //preformat - break lines for co
+        var ele = $('<div>').html(content);
+        $.each(ele.find('div[data-heurist-app-id]'),function(i,el){
+            var s = $(el).text();
+            s = "\n"+s.replace(/,/g, ", \n");
+            $(el).text(s);
+        });
+        content = ele.html();
+        
+        if(window.hWin.HEURIST4.util.isempty(content)) content = ' ';
+        
         codeEditor.setValue(content);
         $('#codemirror-body').show();
 
+        //autoformat
         setTimeout(function(){
                     $('div.CodeMirror').css('height','100%').show();
-                
-                    //CodeMirror.commands["selectAll"](codeEditor);
-                    //var range = { from: codeEditor.getCursor(true), to: codeEditor.getCursor(false) };
-                    //codeEditor.autoFormatRange(range.from, range.to);                
                     
                     var totalLines = codeEditor.lineCount();  
                     codeEditor.autoFormatRange({line:0, ch:0}, {line:totalLines});                    
                     codeEditor.scrollTo(0,0);
                     codeEditor.setCursor(0,0); //clear selection
-                    //codeEditor.getDoc().setSelection({from:0,to:0});
-                    //codeEditor.refresh();
-                    //_keepTemplateValue = codeEditor.getValue();
+                    
+                    codeEditor.focus()
+                    //setTimeout(function(){;},200);
                 },500);
     }
     
@@ -760,7 +783,7 @@ function hCmsEditing(_options) {
     
     //
     // adds widget-design-header and widget-options
-    // assigns events for edit/remove links on widget placeholder in timymce editor
+    // assigns events for edit/remove links on widget placeholder in tinymce editor
     //
     function __initWidgetEditLinks(widgetid){
 
@@ -959,6 +982,7 @@ function hCmsEditing(_options) {
             var groupContent = '';
             
             var opts = {};
+            opts['__widget_name'] = '========================== '+widget_name.toUpperCase().substring(8)+' ==========================';
             
             if(widget_name=='heurist_Map'){
                 
@@ -1125,6 +1149,7 @@ function hCmsEditing(_options) {
             opts['search_realm'] = $dlg.find('input[name="search_realm"]').val();
             
             var widget_options = JSON.stringify(opts);
+            
             /*var widget_options = '';//JSON.stringify(opts);
             for(var key in opts){
                 widget_options = widget_options+key+':'+opts[key]+';'                
@@ -1161,8 +1186,6 @@ function hCmsEditing(_options) {
             
 
             var content = content = 
-                //+ '<div style="display:none">'
-                //+ ' ========================== '+widget_name.toUpperCase().substring(8)+' ========================== </div>'
                 '<div data-heurist-app-id="'+widget_name+'" '
                 + ' style="'+ widgetCss+'" '
                 + ' class="mceNonEditable" id="'+widgetid+'">'
@@ -1994,7 +2017,7 @@ function hCmsEditing(_options) {
             main_content.hide();
             
             original_editor_content = $('.tinymce-body').val();
-            
+
             //$('.tinymce-body').show();
             _initCodeEditor(original_editor_content);
             

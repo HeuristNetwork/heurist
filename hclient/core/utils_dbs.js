@@ -209,10 +209,14 @@ window.hWin.HEURIST4.dbs = {
      
       rectypeids - set of rty ids     
       fieldtypes - 
-            array of fieldtypes, and 'all', 'header', 'header_ext'
+            array of fieldtypes, 
+                    all
+                    header - only title and modified fields
+                    header_ext - all header fields
+                    parent_link - include field DT_PARENT_ENTITY - link to parent record
             header - all+header fields
       $mode 
-         3 - for record title mask editor @todo!!!
+         3 - for record title mask editor - without reverse, enum (id,label,code,internal id)
          4 - find reverse links and relations   
          5 - for lazy treeview with reverse links (faceted search wiz, filter builder)
          6 - for lazy tree without reverse (import structure, export csv)
@@ -230,6 +234,8 @@ window.hWin.HEURIST4.dbs = {
         
         var rst_links = $Db.rst_links();
         
+        var _separator = ($mode==3)?'..':':';
+        
     //-------------------- internal functions    
         
     function __getRecordTypeTree($recTypeId, $recursion_depth, $mode, $fieldtypes, $pointer_fields){
@@ -239,76 +245,88 @@ window.hWin.HEURIST4.dbs = {
             var headerFields = [];
             
             //add default fields - RECORD TYPE HEADER
+            if($mode==3){
+                
+                    $children.push({key:'rec_ID',title:'Record ID', code:'Record ID'});
+                    if($recursion_depth>0){
+                        $children.push({key:'rec_Title', type:'freetext',
+                            title:'Record Title', 
+                            code:'Record Title'});
+                    }
+                    $children.push({key:'rec_TypeID', title:'Record TypeID', code:'Record TypeID'});
+                    $children.push({key:'rec_TypeName', title:'Record TypeName', code:'Record TypeName'});
+                    $children.push({key:'rec_Modified', title:"Record Modified", code:'Record Modified'});
+            }else
             if($recursion_depth==0 && $fieldtypes.length>0){    
                  //include record header fields
                 var all_header_fields = $fieldtypes.indexOf('header_ext')>=0;
                 if($fieldtypes.indexOf('header')>=0){
                     $fieldtypes.push('title');
                     $fieldtypes.push('modified');
-                }                 
+                }  
                 
                 if(all_header_fields || $fieldtypes.indexOf('ID')>=0 || $fieldtypes.indexOf('rec_ID')>=0){
                     $children.push({key:'rec_ID', type:'integer',
                         title:"ID  <span style='font-size:0.7em'>(Integer)</span>", 
-                        code:($recTypeId+':ids'), name:'Record ID'});
+                        code:($recTypeId+_separator+'ids'), name:'Record ID'});
                 }
 
                 if(all_header_fields || $fieldtypes.indexOf('title')>=0 || $fieldtypes.indexOf('rec_Title')>=0){
                     $children.push({key:'rec_Title', type:'freetext',
                         title:"Title <span style='font-size:0.7em'>(Constructed Text)</span>", 
-                        code:($recTypeId+':title'), name:'Record title'});
+                        code:($recTypeId+_separator+'title'), name:'Record title'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('added')>=0 || $fieldtypes.indexOf('rec_Added')>=0){
                     $children.push({key:'rec_Modified', type:'date',
                         title:"Added  <span style='font-size:0.7em'>(Date)</span>", 
-                        code:($recTypeId+':added'), name:'Date added'});
+                        code:($recTypeId+_separator+'added'), name:'Date added'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('modified')>=0 || $fieldtypes.indexOf('rec_Modified')>=0){
                     $children.push({key:'rec_Modified', type:'date',
                         title:"Modified  <span style='font-size:0.7em'>(Date)</span>", 
-                        code:($recTypeId+':modified'), name:'Date modified'});
+                        code:($recTypeId+_separator+'modified'), name:'Date modified'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('addedby')>=0 || $fieldtypes.indexOf('rec_AddedBy')>=0){
                     $children.push({key:'rec_AddedBy', type:'freetext',
                         title:"Creator  <span style='font-size:0.7em'>(User)</span>", 
-                        code:($recTypeId+':addedby'), name:'Creator (user)'});
+                        code:($recTypeId+_separator+'addedby'), name:'Creator (user)'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('url')>=0 || $fieldtypes.indexOf('rec_URL')>=0){
                     $children.push({key:'rec_URL', type:'freetext',
                         title:"URL  <span style='font-size:0.7em'>(Text)</span>", 
-                        code:($recTypeId+':url'), name:'Record URL'});
+                        code:($recTypeId+_separator+'url'), name:'Record URL'});
                 }
-                if(all_header_fields || $fieldtypes.indexOf('url')>=0 || $fieldtypes.indexOf('rec_ScratchPad')>=0){
+                if(all_header_fields || $fieldtypes.indexOf('notes')>=0 || $fieldtypes.indexOf('rec_ScratchPad')>=0){
                     $children.push({key:'rec_ScratchPad', type:'freetext',
                         title:"Notes  <span style='font-size:0.7em'>(Text)</span>", 
-                        code:($recTypeId+':notes'), name:'Record Notes'});
+                        code:($recTypeId+_separator+'notes'), name:'Record Notes'});
                 }
-                if(all_header_fields || $fieldtypes.indexOf('url')>=0 || $fieldtypes.indexOf('rec_OwnerUGrpID')>=0){
+                if(all_header_fields || $fieldtypes.indexOf('owner')>=0 || $fieldtypes.indexOf('rec_OwnerUGrpID')>=0){
                     $children.push({key:'rec_OwnerUGrpID', type:'freetext',
                         title:"Owner  <span style='font-size:0.7em'>(User or Group)</span>", 
-                        code:($recTypeId+':owner'), name:'Record Owner'});
+                        code:($recTypeId+_separator+'owner'), name:'Record Owner'});
                 }
-                if(all_header_fields || $fieldtypes.indexOf('url')>=0 || $fieldtypes.indexOf('rec_NonOwnerVisibility')>=0){
+                if(all_header_fields || $fieldtypes.indexOf('visibility')>=0 || $fieldtypes.indexOf('rec_NonOwnerVisibility')>=0){
                     $children.push({key:'rec_NonOwnerVisibility', type:'enum',
                         title:"Visibility  <span style='font-size:0.7em'>(Terms)</span>", 
-                        code:($recTypeId+':access'), name:'Record Visibility'});
+                        code:($recTypeId+_separator+'access'), name:'Record Visibility'});
                 }
 
                 if(all_header_fields || $fieldtypes.indexOf('tags')>=0 || $fieldtypes.indexOf('rec_Tags')>=0){
                     $children.push({key:'rec_Tags', type:'terms',
                         title:"Tags  <span style='font-size:0.7em'>(Terms)</span>", 
-                        code:($recTypeId+':tag'), name:'Record Tags'});
+                        code:($recTypeId+_separator+'tag'), name:'Record Tags'});
                 }
-              
-
+                
                 if(all_header_fields){
                     var s = '<span style="font-style:italic">Generic Fields</span>';
                     $children = [
-                        {title:s, folder:true, is_generic_fields:true, children:$children},
-                        {key:'anyfield', type:'freetext',                       //-16px -80px      -48px -80px open
+                        {title:s, folder:true, is_generic_fields:true, children:$children}];
+                    if($mode==5){ //for filter builder 
+                        $children.push({key:'anyfield', type:'freetext', //-16px -80px      -48px -80px open
                         title:"<span style='font-size:0.9em;font-style:italic;padding-left:22px'>ANY FIELD</span>", 
-                        code:($recTypeId+':anyfield'), name:'Any field'}
-                        ];
+                        code:($recTypeId+_separator+'anyfield'), name:'Any field'});    
+                    }
                 }
             }
 
@@ -357,7 +375,8 @@ window.hWin.HEURIST4.dbs = {
                         if($dtValue['rst_RequirementType']!='forbidden'){
 
                             var $dt_type = $Db.dty($dtID,'dty_Type');
-                            if($dt_type=='resource' || $dt_type=='relmarker'){
+                            
+                            if($dt_type=='resource' || $dt_type=='relmarker'){ //title mask w/o relations
                                     $new_pointer_fields.push( $dtID );
                             }
                             
@@ -366,7 +385,21 @@ window.hWin.HEURIST4.dbs = {
                             if($res_dt){
                                 
                                 if($res_dt['type']=='resource' || $res_dt['type']=='relmarker'){
-                                    $children_links.push($res_dt);
+                                    
+                                    
+                                    if($mode==3 && $res_dt['constraint'] && $res_dt['constraint']>1){ 
+                                        //for rectitle mask do not create additional level for  multiconstrained link
+                                        
+                                        for (var i=0; i<$res_dt['constraint']; i++){
+                                            $res_dt['children'][i]['code'] = $res_dt['code']
+                                                                + _separator + '{'+$res_dt['children'][i]['title'] +'}';
+                                            $res_dt['children'][i]['title'] = $res_dt['children'][i]['title'] + '('+$res_dt['title']+')';
+                                            $children_links.push($res_dt['children'][i]);    
+                                        }
+                                    }else{
+                                        $children_links.push($res_dt);    
+                                    }                                           
+                                    
                                 }else{
                                     $children.push($res_dt);
                                 }
@@ -428,7 +461,7 @@ window.hWin.HEURIST4.dbs = {
                 }
                 
                 if($mode==3 && $recursion_depth==0){
-                    $children.push(__getRecordTypeTree('Relationship', $recursion_depth+1, $mode, $fieldtypes, null));
+                    //$children.push(__getRecordTypeTree('Relationship', $recursion_depth+1, $mode, $fieldtypes, null));
                 }   
 
             }
@@ -496,9 +529,9 @@ window.hWin.HEURIST4.dbs = {
                                                                     $fieldtypes, null, $new_pointer_fields);
                             if($res_dt){
                                 
-                                var codes = $res_dt['code'].split(':');
+                                var codes = $res_dt['code'].split(_separator);
                                 codes[0] = $recTypeId;
-                                $res_dt['code'] = codes.join(':');
+                                $res_dt['code'] = codes.join(_separator);
                                 
                                 if($res_dt['type']=='resource' || $res_dt['type']=='relmarker'){
                                     $children_links.push($res_dt);
@@ -528,7 +561,7 @@ window.hWin.HEURIST4.dbs = {
 
             return $res;
             
-        } //__getRecordTypeTree
+    } //__getRecordTypeTree
 
     /*
     $dtID   - detail type ID
@@ -544,6 +577,9 @@ window.hWin.HEURIST4.dbs = {
 
         var $detailType = $Db.dty($dtID,'dty_Type');
         
+        if($mode==3 && $detailType=='relmarker'){
+            return null;   
+        }
         
         var $dt_label   = $dtValue['rst_DisplayName'];
         var $dt_title   = $dtValue['rst_DisplayName'];
@@ -554,7 +590,6 @@ window.hWin.HEURIST4.dbs = {
         var $pointerRecTypeId = ($dtID==DT_PARENT_ENTITY)?$dtValue['rst_PtrFilteredIDs']:$Db.dty($dtID,'dty_PtrTargetRectypeIDs');
         if(window.hWin.HEURIST4.util.isnull($pointerRecTypeId)) $pointerRecTypeId = '';
         
-
         var $pref = "";
         
         if (($mode==3) || $fieldtypes.indexOf('all')>=0 
@@ -571,13 +606,13 @@ window.hWin.HEURIST4.dbs = {
 
                 $res = {};
                 if($mode==3){
-                    /* todo ????
-                    $res['children'] = []
-                        array("text"=>"internalid"),
-                        array("text"=>"code"),
-                        array("text"=>"term"),
-                        array("text"=>"conceptid"));
-                    */    
+
+                    $res['children'] = [
+                        {key:'term',title: 'Term',code: 'Term'},       
+                        {key:'code',title: 'Code',code: 'Code'},       
+                        {key:'conceptid',title: 'Concept ID',code: 'Concept ID'},       
+                        {key:'internalid',title: 'Internal ID',code: 'Internal ID'}
+                                ];
                 }
                 break;
 
@@ -635,7 +670,7 @@ window.hWin.HEURIST4.dbs = {
                                 if($rectype_ids.length>1){
                                     $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
                                     $res['constraint'] = $rectype_ids.length;
-                                    if($mode<5) $res['children'] = array();
+                                    if($mode<5) $res['children'] = [];
                                 }
                                 if($mode==5 || $mode==6){
                                     $res['rt_ids'] = $pointerRecTypeId;
@@ -652,8 +687,15 @@ window.hWin.HEURIST4.dbs = {
                                             $res['constraint'] = 1;
                                             $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
                                         }else if($rt_res!=null){
+                                            
                                             $res['children'].push($rt_res);
-                                            $res['constraint'] = $rt_res.length;
+                                            $res['constraint'] = $rectype_ids.length;
+                                            
+                                        }else{
+                                            $res['constraint'] = null;
+                                            $res['children'].push({
+                                                title:'Unconstrained pointer; constrain to record type to see field', 
+                                                code:null});
                                         }
                                     }
                                 
@@ -675,12 +717,18 @@ window.hWin.HEURIST4.dbs = {
         if($res!=null){
 
             if(window.hWin.HEURIST4.util.isnull($res['code'])){
-              $res['code'] = (($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)+":"+$pref+$dtID;  //(($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)  
+              
+              if($mode==3){
+                  $res['code'] = $dt_label;
+              }else{
+                  $res['code'] = (($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)+_separator+$pref+$dtID;  //(($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)  
+              }  
+                
             } 
             $res['key'] = "f:"+$dtID;
             if($mode==4 || $mode==5 || $mode==6){
                     
-                var $stype = ($detailType=='resource' || $detailType=='relmarker')?"":$Db.baseFieldType[$detailType];
+                var $stype = ($detailType=='resource' || $detailType=='relmarker')?'':$Db.baseFieldType[$detailType];
                 if($reverseRecTypeId!=null){
                     //before 2017-06-20  $stype = $stype."linked from";
                     $res['isreverse'] = 1;
@@ -717,7 +765,7 @@ window.hWin.HEURIST4.dbs = {
             if(!window.hWin.HEURIST4.util.isnull($def['code'])){
 
                 if(!window.hWin.HEURIST4.util.isnull($det['code'])){
-                    $def['children'][$idx]['code'] = $def['code'] + ":" + $det['code']; 
+                    $def['children'][$idx]['code'] = $def['code'] + _separator + $det['code']; 
                 }else{
                     $def['children'][$idx]['code'] = $def['code'];    
                 }
@@ -746,7 +794,7 @@ window.hWin.HEURIST4.dbs = {
             if(def!==null) {
                 if(parentcode!=null){
                     if(def['code']){
-                        def['code'] = parentcode+':'+def['code'];
+                        def['code'] = parentcode+_separator+def['code'];
                     }else{
                         def['code'] = parentcode;
                     }
@@ -770,7 +818,7 @@ window.hWin.HEURIST4.dbs = {
                     if(def!==null) {
                         if(parentcode!=null){
                             if(def['code']){
-                                def['code'] = parentcode+':'+def['code'];
+                                def['code'] = parentcode+_separator+def['code'];
                             }else{
                                 def['code'] = parentcode;
                             }
@@ -782,6 +830,10 @@ window.hWin.HEURIST4.dbs = {
                             res.push( def );
                         }                    
                     }
+            }
+            
+            if(rectypeids.length==1 && $mode==3){
+                res = res[0]['children'];            
             }
             
         }

@@ -1,7 +1,7 @@
 {
         "entityName": "defDetailTypes",
 
-        "entityDescription": "<h2>Important note on defining new fields</h2><br><p>If possible, find an equivalent base field. The base field should have a similar role, e.g. start date for birth date, short description for abstract, extended description for notes.</p><p>The name, description, required, repeatability can be freely edited after selection, but the vocavulary or target record types are<br>shared across all record types which use the base field.</p><p>If you can't find a suitable base field, type a new name. This will create a new base field. It is a good idea to use a rather generic name<br>so you can re-use the base field and edit the name appropriately for each record type in which it is used.</p>",
+        "entityDescription": "",
 
         "tableName": "defDetailTypes",
         

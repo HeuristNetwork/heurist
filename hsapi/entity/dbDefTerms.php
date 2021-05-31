@@ -511,7 +511,7 @@ class DbDefTerms extends DbEntityBase
                 if(!$record['is_new']){
 
                     $this->records[$idx]['old_inverse_id'] = mysql__select_value($mysqli, 
-                        'select trm_InverseTermId from defTerms where trmID='.$record['trm_ID']);
+                        'select trm_InverseTermId from defTerms where trm_ID='.$record['trm_ID']);
 
                 }
             }

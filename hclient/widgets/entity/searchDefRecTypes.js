@@ -116,7 +116,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                 this.input_search.parent().show();
                 
                 this.element.find('#btn_ui_config').parent().css({'float':'none'});
-                this.element.find('#inner_title').parent().css({'float':'none',position:'absolute',top:'40px'});
+                this.element.find('#inner_title').parent().css({'float':'none',position:'absolute',top:'55px'});
                 
                 this.element.find('#inner_title')
                     .css('font-size','smaller')

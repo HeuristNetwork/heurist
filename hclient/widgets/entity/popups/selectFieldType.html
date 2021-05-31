@@ -1,0 +1,100 @@
+        <style>
+            .ft_col{
+                display:inline-block;
+                width:45%;
+                vertical-align:top;
+                padding-left:10px;
+                min-width:280px;
+            }
+            .ft_col > h2{
+                padding-bottom:1em;
+                margin:0px;
+            }
+            .ft_col > label{
+                color: black; 
+                /*#6A7C99;*/
+                font-weight:bold;
+                font-size: 13px;
+                line-height: 25px;
+                padding-top:1em;
+                padding-left:0.5em;
+            }
+            .ft_notes{
+                padding-left:2em;
+                padding-bottom:1em;
+            }               
+        </style>
+
+<div style="width:98%;height:90%;padding:10px 10px 0px 0;overflow:hidden">
+    <div class="ft_col">
+
+        <h2 style="color:black">Simple fields</h2>
+
+        <input type="radio" name="ft_type" id="t_enum" value="enum" checked>
+        <label for="t_enum">Dropdown (Terms)</label>
+        <div class="ft_notes">
+            A flat or hierarchical list of categories, generally from a single vocabulary eg. countries, languages, source, condition, material, colour. Use where the list is relatively static and the categories do not exist as separate records in the database (in which case use record pointers).
+        </div>
+
+        <input type="radio" name="ft_type" id="t_numeric" value="float">
+        <label for="t_numeric">Numeric (integer or decimal)</label>
+        <div class="ft_notes">
+            A positive or negative number, with or without decimals. Non-numeric characters other than minus, decimal point or comma are ignored.
+        </div>
+
+        <input type="radio" name="ft_type" id="t_freetext" value="freetext">
+        <label for="t_freetext">Text (single line)</label>
+        <div class="ft_notes">
+            A single line of plain text, typically used for names, titles and short descriptions. Use multi-line text for longer descriptions. Max 250 characters.
+        </div>
+
+        <input type="radio" name="ft_type" id="t_blocktext" value="blocktext">
+        <label for="t_blocktext">Text (multi line)</label>                                                         
+        <div class="ft_notes">
+            A plain text field which can accomodate multiple lines of text. Use for longer descriptions.
+        </div>
+
+        <input type="radio" name="ft_type" id="t_date" value="date">
+        <label for="t_date">Date / time</label>
+        <div class="ft_notes">
+            A calendar date with or without time of day. Whole years can be used. BCE dates are expressed as negative. Can also accommodate date range and uncertainty.
+        </div>
+
+    </div>
+
+    <div class="ft_col">
+        <h2 style="color:black">Special fields</h2>
+
+        <input type="radio" name="ft_type" id="t_geo" value="geo">
+        <label for="t_geo">Geospatial (point, line, polygon ...)</label>
+        <div class="ft_notes">
+            A vector spatial object describing a location on the earth's surface. The location can be digitised by clicking on a map or entered as coordinates.
+        </div>
+
+        <input type="radio" name="ft_type" id="t_file" value="file">
+        <label for="t_file">File or remote URL</label>
+        <div class="ft_notes">
+            A file such as a photo, PDF, scanned document, spreadsheet or XML, uploaded and stored in the database or a URL to a remote file or streamed content.
+        </div>
+
+        <h2 style="color:black">Record linking fields</h2>
+
+        <input type="radio" name="ft_type" id="t_resourse" value="resource">
+        <label for="t_resourse">Record pointer</label>                                                         
+        <div class="ft_notes">
+            A simple connection to another record, normally constrained to specific target record type(s). Use where the field represents a direct connection and is permanent eg.parent, author, component, place, period.
+            <a id="hint_more_info1" class="ft_notes" style="cursor:pointer">more...</a>
+        </div>
+
+
+        <input type="radio" name="ft_type" id="t_relmarker" value="relmarker">
+        <label for="t_relmarker">Relationship marker</label>                                                         
+        <div class="ft_notes">
+            A more complex connection which allows specification of relationship type and period of validity. Use where there are numerous possible connection types and/or connections have a time span eg.roles in an event, social relationships, ownership, marriage, address.
+            <a id="hint_more_info2" class="ft_notes" style="cursor:pointer">more...</a>
+        </div>
+
+    </div>
+
+</div>
+

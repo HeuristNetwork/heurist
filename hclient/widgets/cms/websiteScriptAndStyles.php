@@ -130,8 +130,11 @@ if(!array_key_exists('embed', $_REQUEST)){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAccess.js"></script>
     
-    <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce/tinymce.min.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
+    <!--
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce/jquery.tinymce.min.js"></script>
+    -->
     
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
     
@@ -141,9 +144,10 @@ if(!array_key_exists('embed', $_REQUEST)){
 
 if($edit_Available){
 ?>
-    <script src="<?php echo PDIR;?>external/tinymce/tinymce.min.js"></script>
-    <!--
     <script src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
+    <!--
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="<?php echo PDIR;?>external/tinymce/tinymce.min.js"></script>
     <script src="<?php echo PDIR;?>external/tinymce5/jquery.tinymce.min.js"></script>
     <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js"></script>
     <script src="<?php echo PDIR;?>external/tinymce/jquery.tinymce.min.js"></script>

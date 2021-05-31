@@ -1,0 +1,77 @@
+<div class="ent_wrapper">
+    
+        <div style="position:absolute;top:0px;bottom:30px;left:0px;width:202px;">
+        
+            <select id="sel_record_scope" style="display:none"></select>         
+            
+            <div style="text-align:left;padding:5px;" class="heurist-helper3">
+                &nbsp;<br>
+                Select fields to insert
+                <br>
+                (add to record structure first)
+                <br>&nbsp;<br>
+            </div>
+            
+            <div style="position:absolute;top:50px;bottom:0px;left:0px;width:200px;outline: none;margin-top:-8px;overflow:auto">
+                <div id="rectype_tree" class="rtt-tree tree-facets"></div>
+            </div>
+        </div>
+            
+        <div id="formContainer" style="position:absolute;top:0px;bottom:30px;left:202px;right:5px;"  class="heurist-helper2">
+                <div style="padding:10px;text-align:left">
+                    The title mask builds a composite title from fields in the record (see manual).
+
+                    Field values identified by [ ] are inserted into the mask,
+
+                    e.g. <b>[Title], pp. [Start_Page]-[End_Page] </b> might generate:
+
+                    <b>"Alice in Wonderland, pp. 37-39" </b><br>&nbsp;<br>
+
+                    The element names in square brackets should match field names for this record type.<br>
+
+                    The constructed value is used as the extended title displayed in search results and other lists.<br>
+
+                    To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).
+
+                    <br/>&nbsp;<br/>
+                </div>
+
+                <hr/>
+
+                <div style="text-align:left; padding-top:20px;padding-bottom:1px;padding-left: 20px;">
+                    <b>Build Mask:</b> &nbsp;&nbsp;&nbsp; <button id="btnInsertField" style="width:60px;">Insert fields</button>
+                    &nbsp;&nbsp;<i>Select fields in tree and click button to insert in mask at cursor position</i>
+                    <br/>&nbsp;<br/>
+                    <textarea cols="550" id="rty_TitleMask" rows="5" style="font-size:1.2em;width:550px;"></textarea><br/>
+                    <br>
+                </div>
+
+                <!-- Artem: do not remove this - it is used for debug 
+                <div style="text-align:left; padding-top:10px; padding-left: 10px;display: block;" >
+                    Canonical Mask:&nbsp;
+
+                    <input maxlength="500" id="rty_CanonincalMask" style="width:350;"/> &nbsp;&nbsp;
+
+                    <button style="width:60px;" onclick="window.editRectypeTitle.doCanonical(2)">make canonic</button>
+
+                    <button style="width:60px;" onclick="window.editRectypeTitle.doCanonical(3)">make text</button>
+
+                    <br>&nbsp;<br>&nbsp;<br>
+                </div>
+                -->
+                
+
+                <hr/>
+
+                <div style="padding-top:10px;padding-bottom:10px;padding-left: 20px;text-align:left">
+                    <b>Test mask</b> <br>&nbsp;<br>
+
+                    <select id="listRecords" style="width:300px;"><option>select from records of this type (if any exist) ...</option></select>
+
+                    <br>&nbsp;<br><button id="btnTestMask" style="width:40px;">Test</button>
+
+                    <div id="testResult" title="Test result will appear here"  style="padding-left:40px; padding:5px; width: 400px; height: 10px;text-align:left"></div>
+                </div>
+
+        </div>
+</div>

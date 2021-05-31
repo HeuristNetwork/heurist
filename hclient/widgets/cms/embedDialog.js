@@ -32,6 +32,8 @@ $.widget( "heurist.embedDialog", {
         htmlContent: 'embedDialog.html',
         helpContent: null,
         
+        path: 'cms/',
+        
         //parameters
         layout_rec_id: 0,
         

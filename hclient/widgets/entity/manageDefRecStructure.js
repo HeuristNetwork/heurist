@@ -990,6 +990,33 @@ dty_TermIDTreeNonSelectableIDs
                     }
                 }
             };
+            popup_options['multiselect'] = function(event, res)
+            {
+
+                that._cachedRecordset = $Db.rst(that.options.rty_ID); // ensure cache is update to date before updating
+                
+                if(res && res.selection){ // ensure that something has been sent
+                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.selection)){ // ensure that fields have been sent
+                        
+                        var rst = {};
+
+                        if(!window.hWin.HEURIST4.util.isempty(res.rst_fields)){ // check if field requirements have been sent
+                            rst = res.rst_fields;
+                        }
+                        else{
+                            rst = {
+                                rst_RequirementType: that._editing.getValue('rst_RequirementType')[0], 
+                                rst_MaxValues: that._editing.getValue('rst_MaxValues')[0], 
+                                rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')[0] 
+                            };
+                        }
+
+                        var dty_IDs = res.selection;
+
+                        that.addMultiNewFields(dty_IDs, after_dty_ID, rst);
+                    }
+                }
+            };			
             that._lockDefaultEdit = false;
         }else{
             popup_options['onClose'] = function(){
@@ -1146,6 +1173,119 @@ console.log('No active tree node!!!!')
             
         });
 
+    },
+	
+    //
+    // add several base fields at once to rectype, and update structure
+    //
+    addMultiNewFields: function(dty_IDs, after_dty_ID, rst_fields){
+
+        var that = this;
+
+        var idCnt = dty_IDs.length; // number of new fields
+        var rty_ID = that.options.rty_ID; // current rectype
+
+        if(window.hWin.HEURIST4.util.isempty(rst_fields)){
+            rst_fields = {};
+        }
+
+        var sel_fields = {};
+        sel_fields['fields'] = dty_IDs;
+        sel_fields['values'] = {};
+
+        // Add fields to rectyp structure, places the fields at the start of structure
+        for(var i = 0; i < idCnt; i++){
+            if(this._cachedRecordset.getById(dty_IDs[i])){ // Check if field is already a part of rectype
+                continue;
+            }
+
+            var id = dty_IDs[i];
+
+            var basefield_name = $Db.dty(id, 'dty_Name');
+
+            sel_fields['values'][id] = {dty_Name: basefield_name};
+        }
+
+        // Request to add all new base fields to rectype structure, this will place all new fields at the top
+        var request = {
+            'a': 'action',
+            'entity': 'defRecStructure',
+            'newfields': sel_fields,
+            'order': 0,
+            'rtyID': rty_ID,
+            'request_id': window.hWin.HEURIST4.util.random()
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    // re-structure tree to place new fields at the place the user requested
+                    for(var j = 0; j < idCnt; j++){
+                        var recID = dty_IDs[j];
+						
+                        request = {
+                            'a': 'search',
+                            'entity': that.options.entity.entityName,
+                            'details': 'list',
+                            'rst_RecTypeID': rty_ID,
+                            'rst_DetailTypeID': recID,
+                            'request_id': window.hWin.HEURIST4.util.random()
+                        }; // Retrieve field information
+
+                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                            function(response){
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                                    
+                                    var recset = hRecordSet(response.data); // get recset
+                                    var fields = recset.getRecord( response.data.order[0] ); // get fields from recset
+                                    fields['rst_ID'] = fields['rst_DetailTypeID']; // set id values
+                                    recID = fields['rst_DetailTypeID'];
+
+                                    that._cachedRecordset.setRecord(recID, fields); // update cached record
+                                    
+                                    var tree = that._treeview.fancytree("getTree"); // get fancytree to update
+                                    var parentnode;
+									// get parentnode for new leaf
+                                    if(after_dty_ID>0){
+                                        parentnode = tree.getNodeByKey(after_dty_ID);
+                                    }else{
+                                        parentnode = tree.rootNode;
+                                    }
+                                    if(!parentnode){ 
+                                        return;  
+                                    } 
+                                    
+                                    // insert node into rectype structured francytree
+                                    parentnode.addNode({key:recID}, 
+                                            (parentnode.isRootNode() || parentnode.folder==true)
+                                                                    ?'firstChild':'after');
+                                    if(parentnode.folder){
+                                        parentnode.setExpanded(true);
+                                    }
+                                    
+                                    that._stillNeedUpdateForRecID = 0;
+                                    
+                                    that._afterSaveEventHandler(recID, fields); // save general handler
+                                    
+                                    that._show_optional = (fields['rst_RequirementType']=='optional');
+
+                                    that._open_formlet_for_recID = recID;
+                                    //save new order, update preview and open formlet field editor (modify structure)
+                                    that._saveRtStructureTree();
+                                }
+                                else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                                }
+                            }
+                        );
+                    }
+                }
+                else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            }
+        );
     },
     
     //
