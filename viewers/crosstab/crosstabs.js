@@ -124,7 +124,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
       $('span.btn-remove').addClass('bg-danger');
       $('.btn-remove span:first-child').removeClass('ui-icon-delete');
       $('.btn-remove span:first-child').addClass('ui-icon-trash');
+      $('.btnSaveSettings').html('<i class="bi bi-save"></i> Save')
 
+      $('#pie').append('<p class="d-none" id="pieMessage">Graphs currently do not work for column and page selections. Only selection of a row variable will produce a result.</p>');
 
     }
 
@@ -689,10 +691,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 $buttons = $(document.createElement('div'))
                 .addClass('col-3 p-2')
-                .append($('<button>',{text: "Reset",class: "btn btn-secondary"})
+                .append($('<button>',{html: "<i class='bi bi-arrow-counterclockwise'></i> Reset",class: "btn btn-secondary"})
                     .click(function( event ) {
                         calculateIntervals(name, parseInt($('#'+name+'IntCount').val()), true );
-                    }).css('margin-right',"1rem"))
+                    }).css('margin-right',"1rem"));
                 
                 $buttons.appendTo($firstRowDiv);
 
@@ -1916,7 +1918,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $(alert).addClass('alert alert-warning alert-dismissible fade show')
             .attr('role', 'alert')
             .attr('id','alert')
-            .html(message)
+            .append('<i class="bi bi-exclamation-triangle" style="font-size: 24px;"></i>')
+            .append('<span> '+message+'</span>')
             .append($('<button>')
                 .attr('type', 'button')
                 .attr('class','btn-close')
@@ -2182,7 +2185,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             if(fields3['row'].intervals.length > 0 && fields3['column'].intervals.length > 0) tableTitle += fields3['row'].fieldname + ' and ' + fields3['column'].fieldname;
             tableTitle += ' ' + aggregationMode;
             //Append text box for user to enter table title.
-            $divres.append('<div class="p-2 d-flex align-items-center justify-content-center"><label class="me-2" for="tableTitle">Enter a table title:</label><input type="text" id="tableTitle"></input><button class="btn btn-success ms-2" id="titleSubmit">Submit</button></div>');
+            $divres.append('<div class="p-2 d-flex align-items-center justify-content-center"><label class="me-2" for="tableTitle">Enter a table title:</label><input type="text" id="tableTitle"></input><button class="btn btn-success ms-2" id="titleSubmit"><i class="bi bi-box-arrow-in-right" style="font-size: 18px;"></i> Apply</button></div>');
             $divres.append('<h2 class="crosstab-page" id="tableHeader">'+tableTitle+'</h2>');
             $('#titleSubmit').click(function(){
                 var title = $('#tableTitle').val();
@@ -2401,7 +2404,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
         let labelsNames = extractData('row', true);
         let dataValues = extractData('row', false);
 
+        // Pie chart will only work for row variables.
         if(fields3['row'].intervals.length > 0 && fields3['column'].intervals.length <= 0 && fields3['page'].intervals.length <= 0){
+            $('#pieResults').removeClass('d-none');
+            $('#pieMessage').addClass('d-none');
             var config = {
                 type: 'pie',
                 data: {
@@ -2418,20 +2424,28 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     plugins: {
                       legend: {
                         display: false
+                      },
+                      title: {
+                          display: true,
+                          text: fields3['row'].fieldname
                       }
                     }
                 }
             };
         }
 
-        if(fields3['row'].intervals.length > 0 && fields3['column'].intervals.length > 0){
+        /* For both column and row selections.
+         * No implementation for row and column select.
+        */
+        if(fields3['row'].intervals.length > 0 && (fields3['column'].intervals.length > 0 || fields3['page'].intervals.length > 0)){
+            $('#pieMessage').removeClass('d-none');
+            $('#pieResults').addClass('d-none');
+            /*
             var dataVals;
             var config = {
                 type: 'doughnut',
                 data: {
                     datasets: [{
-                        data: [10,20,30],
-                        backgroundColor: colorsList,
                     },
                 ], 
                     labels: labelsNames
@@ -2449,7 +2463,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
             for(t=0; t<dataValues.length;t++){
 
             }
+            */
         }
+        
 
         var pieChart = new Chart(pieCanvas, config);
         
