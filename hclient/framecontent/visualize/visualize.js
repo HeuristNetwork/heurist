@@ -144,7 +144,7 @@ var svg;        // The SVG where the visualisation will be executed on
             
             translatex: 0,
             translatey: 0,
-            scale: 1
+            scale: 0.5
         }, options );
  
         // Handle settings (settings.js)
@@ -379,10 +379,7 @@ function filterData(json_data) {
                 return true;
             }
             return false;
-        });
-
-        
-//console.log(json_data.links);        
+        });      
         
         // Filter links
         var links = [];
@@ -399,11 +396,12 @@ function filterData(json_data) {
 }
 
 function visualizeData() {
+    
     svg.selectAll("*").remove();
     addSelectionBox();
+
     //define shadow filter
     _addDropShadowFilter();
-    
     
     /*Set up tooltip
     var tip = d3.tip()
@@ -417,7 +415,6 @@ function visualizeData() {
     // SVG data  
     this.data = settings.getData.call(this, settings.data);
     determineMaxCount(data);
-    //console.log("Data used for visualisation", data);
 
     // Container with zoom and force
     var container = addContainer();
@@ -427,31 +424,8 @@ function visualizeData() {
     // Lines 
     addMarkerDefinitions(); //markers/arrows on lines
     addLines("bottom-lines", getSetting(setting_linecolor, '#000'), 0);
-    
-    addLines("top-lines", "rgba(255, 255, 255, 0.0)", 8.5); //tick transparent line to catch mouse over
-
-/*    
-svg.append("svg:defs").selectAll("marker")
-    .data(data.links)
-  .enter().append("svg:marker")
-    .attr("id", 'marker')
-    .attr("viewBox", "0 -5 10 10")
-    .attr("refX", 5)
-    .attr("markerWidth", 6)
-    .attr("markerHeight", 6)
-    .attr("orient", "auto")
-  .append("svg:path")
-    .attr("d", "M0,-5L10,0L0,5");    
-var lines = svg.append("svg:g").selectAll("path")
-    .data(data.links)
-    .enter().append("svg:path")
-    .attr("marker-mid", "url(#marker)")
-    .style("stroke-width", 2)
-    .attr("stroke", '#ff0000');    
-  lines.attr("class", function(d) {
-            return "bottom-lines link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-         });
-*/    
+    addLines("top-lines", "rgba(255, 255, 255, 0.0)", 10); //tick transparent line to catch mouse over
+   
     // Nodes
     addNodes();
     //addTitles();
@@ -462,11 +436,9 @@ var lines = svg.append("svg:g").selectAll("path")
     //addIcons();
     
     // Labels
-    if(getSetting(setting_labels) == "true") {
-    // addLabels("shadow", "#000");
-    // addLabels("namelabel", getSetting(setting_textcolor));
-    }
-    //DEBUG console.log("EVERYTHING HAS BEEN ADDED");
+    //addLabels("shadow", "#000");
+    //addLabels("namelabel", getSetting(setting_textcolor));
+    
     /*
     // Get everything into positon when gravity is off.
     if(getSetting(setting_gravity) == "off") {
@@ -483,7 +455,6 @@ var lines = svg.append("svg:g").selectAll("path")
         force.start();
     }
     */
-    
     
     /*var gravity = getSetting(setting_gravity);
     svg.selectAll(".node")
@@ -508,29 +479,32 @@ var lines = svg.append("svg:g").selectAll("path")
             +($('#list_rectypes').is(':visible')?'n':'s')   }}).css({'padding':'1px 2px','margin-bottom': '4px'});
             
         $('#lblShowRectypeSelector').text(sText);
+
     }
     
     $('#btnZoomIn').button({icons:{primary:'ui-icon-plus'},text:false}).click(
-    function(){
-         zoomBtn(true);
-    }
+        function(){
+             zoomBtn(true);
+        }
     );
 
     $('#btnZoomOut').button({icons:{primary:'ui-icon-minus'},text:false}).click(
-    function(){
-         zoomBtn(false);
-    }
+        function(){
+             zoomBtn(false);
+        }
     );
 
     if(settings.isDatabaseStructure || isStandAlone){
         $('#embed-export').css('visibility','hidden');//hide();
     }else{
         $('#embed-export').button({icons:{primary:'ui-icon-globe'},text:false}).click(
-        function(){
-             showEmbedDialog();
-        }
+            function(){
+                 showEmbedDialog();
+            }
         );
     }
+
+    tick(); // update display
     
 } //end visualizeData
 
@@ -540,14 +514,11 @@ var lines = svg.append("svg:g").selectAll("path")
 * The previous translateX, translateY and scale is re-used.
 */
 function addContainer() {
-    // Zoom settings
+
+    // Zoom settings, these affect adding/removing nodes as well
     var scale = getSetting(setting_scale,1);
     var translateX = getSetting(setting_translatex,0);
     var translateY = getSetting(setting_translatey,0);
-
-translateX = 0;
-translateY = 0;
-scale = 0.5;
     
     var s ='';
     if(isNaN(translateX) || isNaN(translateY) ||  translateX==null || translateY==null ||
@@ -598,21 +569,7 @@ function zoomed() {
         }else{
             putSetting(setting_translatey, d3.event.translate[1]);
         }
-/*    
-        if(prev_translate!=null && !isNaN(prev_translate[0]) && !isNaN(prev_translate[1])){
-            translateXY[0] = prev_translate[0] + 
-                        (d3.event.translate[0]==prev_translate[0])?0:Math.pow(d3.event.translate[0]-prev_translate[0], 0.5);
-            translateXY[1] = prev_translate[1] + 
-                        (d3.event.translate[1]==prev_translate[1])?0:Math.pow(d3.event.translate[1]-prev_translate[1], 0.5);
-            prev_translate = [translateXY[0], translateXY[1]];
-        }else{
-            prev_translate = d3.event.translate;
-            translateXY[0] = d3.event.translate[0];
-            translateXY[1] = d3.event.translate[1];
-        }
-console.log('A '+translateXY[0]+','+translateXY[1]);        
-console.log('B '+d3.event.translate);    
-*/    
+
         transform = "translate("+d3.event.translate+')';
     }else{
         notDefined = true;
@@ -718,8 +675,6 @@ function addMarkerDefinitions() {
     var linelength = getSetting(setting_linelength, 200);
     var markercolor = getSetting(setting_markercolor, '#000');
     
-    
-    
     var markers = d3.select("#container")
                     .append("defs")
                     .selectAll("marker")
@@ -738,6 +693,7 @@ function addMarkerDefinitions() {
                     .attr("refX", function(d) {
                         // Move markers to display a pointer on a straight line
                         if(linetype=="straight" && d.relation.pointer) {
+                            ++i;
                            return linelength*0.5;
                         }
                         return -1;
@@ -780,25 +736,13 @@ function addLines(name, color, thickness) {
     var linetype = getSetting(setting_linetype, 'straight');
     var hide_empty = (getSetting(setting_line_empty_link, 1)==0);
     
-    if(true){ //getSetting(setting_linetype) != "straight"){//} == "curved") {
-        // Add curved lines
-         lines = d3.select("#container")
-                   .append("svg:g")
-                   .selectAll("path")
-                   .data(data.links)
-                   .enter()
-                   .append("svg:path");
-    }else{
-        // Add straight lines
-        lines = d3.select("#container")
-                  .append("svg:g")
-                  .selectAll("polyline.link")
-                  .data(data.links)
-                  .enter()
-                  .append("svg:polyline");
-    }    
+    lines = d3.select("#container")
+           .append("svg:g")
+           .selectAll("path")
+           .data(data.links)
+           .enter()
+           .append("svg:path");
 
-    //var thickness = parseInt(getSetting(setting_linewidth))+1;
     var scale = this.zoomBehaviour.scale(); //current scale
     
     // Adding shared attributes
@@ -824,20 +768,23 @@ function addLines(name, color, thickness) {
              return  (scale>1)?w:(w/scale);
          });
          
+    // visible line, pointing from one node to another
     if(name=='bottom-lines' && linetype != "stepped"){
          lines.attr("marker-mid", function(d) {
-             if(!(hide_empty && d.targetcount == 0)){
+
+            if(!(hide_empty && d.targetcount == 0)){ console.log("url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
                 return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")"; //reference to marker id
-             }
+            }
          });
     }
     
+    // mouseover and mouseout events for the invisible lines
     if(name=='top-lines'){
         lines.on("mouseover", function(d) {
             //console.log(d.relation.id);  //field type id           
             if(!(hide_empty && d.targetcount == 0)){
                 var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-                createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));  
+                createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));
             }
         })
         .on("mouseout", function(d) {
@@ -899,9 +846,9 @@ function updateCurvedLines(lines) {
        var target_x = d.target.x,
            target_y = d.target.y;
        if(d.target.id==d.source.id){
-           //link to itself
-           target_x = d.source.x+100;
-           target_y = d.source.y-100;
+           // Self Link, Affects Loop Size
+           target_x = d.source.x+70;
+           target_y = d.source.y-70;
        }
         
         var dx = target_x - d.source.x,
@@ -910,7 +857,7 @@ function updateCurvedLines(lines) {
             mx = d.source.x + dx,
             my = d.source.y + dy;
 
-       if(d.target.id==d.source.id){
+       if(d.target.id==d.source.id){ // Self Linking Node
 
             return [
               "M",d.source.x,d.source.y,
@@ -919,7 +866,7 @@ function updateCurvedLines(lines) {
               "A",dr,dr,0,0,1,d.source.x,d.source.y
             ].join(" ");
            
-       }else{
+       }else{ // Node to Node Link
             
             return [
               "M",d.source.x,d.source.y,
@@ -940,7 +887,7 @@ function updateStraightLines(lines) {
     var pairs = {};
     
     $(".icon_self").each(function() {
-            $(this).remove();
+        $(this).remove();
     });
 
     
@@ -956,20 +903,29 @@ function updateStraightLines(lines) {
            indent = 0;
        }
        
-       if(indent>0){
-           pairs[key] = pairs[key]+20;
+       if(indent>0){ // This controls how far apart lines will be when going to and from the same node
+
+           if($('#expand-links').is(':Checked')){ // This is for the expanded option, displays all lines
+        
+                pairs[key] = pairs[key] + 20;
+           }else{ // This will hide all other lines, default behaviour
+        
+               return [''];
+           }
        }else{
+        
            pairs[key] = 1;
        } 
+
        var R = pairs[key];
        var pnt = [];
        var target_x = d.target.x,
            target_y = d.target.y;
            
-       if(d.target.id==d.source.id){
-           //link to itself
-           target_x = d.source.x+100;
-           target_y = d.source.y-100;
+       if(d.target.id==d.source.id){ // Self Linking Node
+           // Affects Loop Size
+           target_x = d.source.x+70;
+           target_y = d.source.y-70;
            
            var dx = target_x - d.source.x,
                dy = target_y - d.source.y,
@@ -986,7 +942,7 @@ function updateStraightLines(lines) {
               //"A",dr,dr,0,0,1,d.source.x,d.source.y
             ];
            
-       }else{
+       }else{ // Node to Node Link
        
            var dx = (target_x-d.source.x)/2;
            var dy = (target_y-d.source.y)/2;
@@ -1004,15 +960,6 @@ function updateStraightLines(lines) {
        }
        
        return pnt.join(' '); 
-  
-       //for polyline
-       /*return d.source.x + "," + d.source.y + " " +
-              //(d.source.x + dx/2-R*Math.sin(tg)) + "," + 
-              //(d.source.y + dy/2+R*Math.cos(tg)) + " " +  
-              (d.source.x + dx-R*Math.sin(tg)) + "," + 
-              (d.source.y + dy+R*Math.cos(tg)) + " " +  
-              target_x + "," + target_y;
-       */
     });
     
 }
@@ -1047,8 +994,8 @@ function updateSteppedLines(lines, type){
            target_y = d.target.y;
        var res = [];    
            
-       if(d.target.id==d.source.id){
-           //link to itself
+       if(d.target.id==d.source.id){ // Self Linking Node
+           // Affects Loop Size
            target_x = d.source.x+65;
            target_y = d.source.y-65;
            
@@ -1070,7 +1017,7 @@ function updateSteppedLines(lines, type){
             if($.isFunction($(this).attr))
             $(this).attr("marker-mid", "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
            
-       }else{  
+       }else{  // Node to Node Link
       
            var dx2 = 45*(dx==0?0:((dx<0)?-1:1));
            var dy2 = 45*(dy==0?0:((dy<0)?-1:1));
@@ -1244,7 +1191,7 @@ function addIcons() {
 /**
 * Adds <text> elements to all nodes
 * The text is based on the "name" attribute
-* 
+* Task is performed when the nodes are added
 */
 function addLabels(name, color) {
     var maxLength = getSetting(setting_textlength);
@@ -1254,7 +1201,7 @@ function addLabels(name, color) {
                   .attr("y", iconSize/4)
                   .attr("class", name + " bold")
                   .attr("fill", color)
-                  .style("font-size", fontsize, "important")
+                  .style("font-size", settings.fontsize, "important")
                   .text(function(d) {
                       return truncateText(d.name, maxLength);
                   });

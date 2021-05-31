@@ -222,10 +222,13 @@ function handleSettingsInUI() {
         .click( function(){ setLinkMode('stepped');} );
         
     $('#linksEmpty').change( function(e){
-            putSetting(setting_line_empty_link, $(e.target).is(':checked')?1:0);
-            visualizeData();
-            _syncUI();
+        putSetting(setting_line_empty_link, $(e.target).is(':checked')?1:0);
+        visualizeData();
+        _syncUI();
     });
+	$('#expand-links').change( function(){ // expand single links
+        tick(); 
+	});
         
     $( "#setLinksMode" ).controlgroup();    
     
