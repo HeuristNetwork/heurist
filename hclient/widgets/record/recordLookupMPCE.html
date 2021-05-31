@@ -191,6 +191,15 @@
     .mpce h4 {
     	font-size: 1.15em;
     }
+	
+	.assoc_btns{
+		display: none;
+		color: blue;
+		text-decoration: underline;
+		
+		cursor: pointer;
+		user-select: none;
+	}
 </style>
 
     <div class="mpce" style="min-width:800px;overflow-x:auto;">
@@ -292,8 +301,8 @@
     	            </div>
 
                     <div style="width: 100%">
-                        <span id="assoc_prev" style="display: none;cursor: pointer;float: left;user-select: none;">&lt;&lt;BACK</span>
-                        <span id="assoc_next" style="display: none;cursor: pointer;float: right;user-select: none;">NEXT&gt;&gt;</span>
+                        <span id="assoc_prev" class="assoc_btns" style="float: left;">&lt;&lt;BACK</span>
+                        <span id="assoc_next" class="assoc_btns" style="float: right;">NEXT&gt;&gt;</span>
                     </div>
 
     	        </fieldset>
