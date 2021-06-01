@@ -314,3 +314,43 @@ input[type=number]{
     cursor: pointer;
 }
 
+#tabs > li > button.nav-link {
+    background: white;
+    color:gray;
+    border: 0;
+    opacity: 0.5;
+}
+
+#tabs > li > button.nav-link:hover {
+    font-weight: bold;
+    color: white !important;
+    background: #305586;
+    border: 0;
+    opacity: 1;
+}
+
+#tabs > li > button.nav-link.active {
+    font-weight: bold;
+    color:#305586;
+    border: 0;
+    opacity: 1;
+}
+
+.exportButtons {
+    background: #627e5d !important;
+    color: white !important;
+}
+
+@media (min-width: 768px){
+    .borderChange {
+        border-left: 0 !important;
+        border-right: 0 !important;
+    }
+}
+
+@media (max-width: 768px){
+    .borderChange {
+        border-top: 0 !important;
+        border-bottom: 0 !important;
+    }
+}
