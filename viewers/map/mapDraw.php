@@ -74,7 +74,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
 
         <script type="text/javascript">
 
-            var mapping, initial_wkt, imageurl, imageOverlay=null, 
+            var mapping, initial_wkt, initial_tool, imageurl, imageOverlay=null, 
                 need_screenshot = false, is_geofilter=false,
                 menu_datasets, btn_datasets, zoom_with_delay = true,
                 sMsgDigizeSearch = 'Digitise search area as a rectangle or polygon';
@@ -376,6 +376,12 @@ console.log('load google map api')
                 }else{
                     imageurl = null;
                 }
+
+                if(params && params['start_tool']){
+                    initial_tool = params['start_tool'];
+                }else{
+                    initial_tool = null;
+                }                
                 
                 is_geofilter = params && params['geofilter'];
                 need_screenshot = params && params['need_screenshot'];
@@ -422,13 +428,11 @@ console.log('load google map api')
                                 refreshImageOverlay( true );
                         }, 2000);
                     }
-                    
+
+                    $('.leaflet-control-geocoder').removeClass('leaflet-control-geocoder-expanded'); // hide search box  
                 }else{
 
-                    var t_geocoder = this.map_geocoder;
-                    if(!window.hWin.HEURIST4.util.isnull(t_geocoder)){  // Two instances, first instance t_geocoder will be undefined
-                        $(t_geocoder._container).addClass('leaflet-control-geocoder-expanded'); // Show search box 
-                    }
+                    $('.leaflet-control-geocoder').addClass('leaflet-control-geocoder-expanded'); // expand search box
 
                     $('#cbAllowMulti').prop('checked',false);
                     mapping.mapping( 'drawClearAll' );
@@ -441,6 +445,24 @@ console.log('load google map api')
                     if(is_geofilter){
                         window.hWin.HEURIST4.msg.showMsgFlash(sMsgDigizeSearch, 2000);
                     }
+                }
+
+                if(!window.hWin.HEURIST4.util.isempty(initial_tool) && initial_tool != null){ // check if only one type of drawing tool is allowed
+                    if(initial_tool == 'rectangle'){ // only the rectangle tool is allowed
+                        $('.leaflet-draw-draw-marker').hide();
+                        $('.leaflet-draw-draw-circle').hide();
+                        $('.leaflet-draw-draw-circle').hide();
+                        $('.leaflet-draw-draw-rectangle').show();                        
+                        $('.leaflet-draw-draw-polygon').hide();
+                        $('.leaflet-draw-draw-polyline').hide();
+                    }
+                }else{
+                    $('.leaflet-draw-draw-marker').show();
+                    $('.leaflet-draw-draw-circle').show();
+                    $('.leaflet-draw-draw-circle').show();
+                    $('.leaflet-draw-draw-rectangle').show();
+                    $('.leaflet-draw-draw-polygon').show();
+                    $('.leaflet-draw-draw-polyline').show();
                 }
 
                 var that = this;

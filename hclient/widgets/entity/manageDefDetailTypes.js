@@ -737,7 +737,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                     this._on(btnBasefieldsList, 
                         {'click': function(){ // warn the user about the loss of popup data
-                            var isChanged = (that._editing && that._editing.isModified() && that._currentEditID!=null);
+                            var isChanged = (this._editing.getFieldByName('dty_Type').find('.ui-selectmenu-text').text() != 'Select...'
+                                                || !window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_HelpText')[0]).val())
+                                                || !window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_Name')[0]).val())
+                                            ); // Check if values have been placed/selected in required fields
 
                             if(isChanged){
 
@@ -751,7 +754,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 };
 
                                 $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                                    'Items entered into this form maybe lost upon completing this process, would you still like to proceed?',
+                                    'Items entered into this form may be lost upon completing this process, would you still like to proceed?',
                                     buttons,
                                     {title:'Confirm',yes:'Yes',no:'No'}
                                 );
@@ -937,16 +940,13 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 $(depended_fields[idx]).show();
             }
 
-            //add special checkbox
-            if(!(this._currentEditID>0)){ //insert       
-                var s = window.hWin.HAPI4.get_prefs_def('edit_rts_open_formlet_after_add',0)==1?'checked':'';
-                var ele = $('<label style="float:right;padding-right:30px"><input type="checkbox" '+s+' style="margin-top:10px"/>'
-                    +'Open immediately on save to set width and defaults</label>').appendTo(this.editForm);
-                this._on(ele.find('input'),{change:function(e){
-                    window.hWin.HAPI4.save_pref('edit_rts_open_formlet_after_add', $(e.target).is(':checked')?1:0);
-                }});
-            }
+            //add extra click functionalities to save buttons
+            this._toolbar.find('#btnSaveExt').show().click(function(){
+                window.hWin.HAPI4.save_pref('edit_rts_open_formlet_after_add', 1);
+            }); 
 
+            // this is used to determine whether the user will customise the new field after creation
+            window.hWin.HAPI4.save_pref('edit_rts_open_formlet_after_add', 0);
         }
 
         this.getUiPreferences();

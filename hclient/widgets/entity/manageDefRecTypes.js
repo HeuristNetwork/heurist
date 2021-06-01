@@ -1382,7 +1382,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     },
     
     //
-    // add new base fields to record type
+    // Add default tab separators to new record type
     //    
     _addNewFields: function( rty_ID, is_new ){
       
