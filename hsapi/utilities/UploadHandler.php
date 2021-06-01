@@ -65,10 +65,12 @@ class UploadHandler
         $upload_thumb_url = @$_REQUEST['upload_thumb_url'];
         //get upload folder from parameters
         $upload_dir = @$_REQUEST['folder']; //defined in form
+        
         if(!$upload_dir){
             if(@$_REQUEST['db']){
                 //'/var/www/html/HEURIST/HEURIST_FILESTORE/'.$_REQUEST['db'].'/'
                 $upload_dir = HEURIST_FILESTORE_DIR.'insitu/'; 
+                $upload_url = HEURIST_FILESTORE_URL.'insitu/';
             }else{
                 // by default into subfolder files next to script
                 $upload_dir = dirname($this->get_server_var('SCRIPT_FILENAME')).'/files/';
@@ -80,10 +82,12 @@ class UploadHandler
         }
         
         $k = strpos($upload_dir, "/HEURIST_FILESTORE/");
+        
         if($k>0) {
+            //special case - add HEURIST folder
             $upload_url = $this->get_server_url().'/HEURIST'.substr($upload_dir,$k); 
         }else if(!@$_REQUEST['db']) {
-            $upload_url = $this->get_full_url().'/files/';    
+            $upload_url = $this->get_full_url().'/files/';  //default - next to script
         }
         
         $this->response = array();

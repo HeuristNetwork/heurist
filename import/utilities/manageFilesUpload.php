@@ -233,6 +233,10 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
         <!-- The file upload form used as target for the file upload widget -->
         <form id="fileupload" action="//jquery-file-upload.appspot.com/" method="POST" enctype="multipart/form-data">
+        
+            <input type="hidden" name="upload_thumb_dir" value="<?php echo HEURIST_THUMB_DIR; ?>"/>
+            <input type="hidden" name="upload_thumb_url" value="<?php echo (defined('HEURIST_THUMB_URL')?HEURIST_THUMB_URL:''); ?>"/>
+            
             <input type="hidden" name="db" value="<?php echo HEURIST_DBNAME; ?>"/>
             <div><label for="upload_folder" style="color:black;">Select target folder:</label>
                 <select name="folder" id="upload_folder">
@@ -398,15 +402,15 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 window.hWin.HEURIST4.filesWereUploaded = false;
                 
                 var sURL = window.hWin.HAPI4.baseURL + 'hsapi/utilities/fileUpload.php';
-console.log(sURL);                
+//console.log(sURL);                
                 // Initialize the jQuery File Upload widget:
                 $('#fileupload').fileupload({
                     // Uncomment the following to send cross-domain cookies:
                     //xhrFields: {withCredentials: true},
                     
-                    //upload_thumb_dir: '<?=HEURIST_THUMB_DIR?>', 
-                    //url: '<?=HEURIST_BASE_URL?>external/jquery-file-upload/server/php/',
-                    url: sURL,                 
+                    upload_thumb_dir: '<?=HEURIST_THUMB_DIR?>', 
+                    url: '<?=HEURIST_BASE_URL?>external/jquery-file-upload/server/php/',
+                    //url: sURL,                 
                     added: function(e, data){
       
                         //verify that all files are processed and show total size to be uploaded
