@@ -1,7 +1,7 @@
 var container = $('div[data-template-temp]');
 
 //this script will be executed once after addition of template
-//add new faceted search
+//it adds new faceted search and new smarty template
 
 var sfilter = {"facets":[{"var":84411,"code":"7:added","title":"Added","groupby":"month","orderby":"desc","type":"date","order":0,"isfacet":"3","help":""},{"var":75653,"code":"7:lt15:10,4:title","title":"Creator(s)","orderby":null,"type":"freetext","order":1,"isfacet":"3","help":"","multisel":false},{"var":84259,"code":"7:942","title":"Category","orderby":null,"type":"enum","order":2,"isfacet":"3","help":"","multisel":false},{"var":75132,"code":"7:1","title":"Title of post","help":"","isfacet":"0","multisel":false,"orderby":null,"type":"freetext","order":3}],"rectypes":["7"],"version":2,"rules":"","rulesonly":0,"sup_filter":"","ui_title":"Project blog","ui_viewmode":"","search_on_reset":true,"ui_prelim_filter_toggle":false,"ui_prelim_filter_toggle_mode":0,"ui_prelim_filter_toggle_label":"Apply preliminary filter","ui_spatial_filter":false,"ui_spatial_filter_init":false,"ui_spatial_filter_label":"Map Search","ui_spatial_filter_initial":"","ui_additional_filter":false,"ui_additional_filter_label":"Search everything","ui_exit_button":true,"ui_exit_button_label":"","domain":"all","title_hierarchy":false,"viewport":null,"sort_order":"-a","ui_temporal_filter_initial":"after:\"1 week ago\""};
 

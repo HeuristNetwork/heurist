@@ -897,13 +897,15 @@ console.log( sheight );
     //
     function __addTemplate(template_name){
     
-        
+
         // 1. Shows dialog with list of templates 
-        var sURL = window.hWin.HAPI4.baseURL+'/hclient/widgets/cms/templates/snippets/'+template_name+'.html';
-        var sURL2 = window.hWin.HAPI4.baseURL+'/hclient/widgets/cms/templates/snippets/'+template_name+'.js';
-        
+        var sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.html';
+        var sURL2 = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.js';
+
         // 2. Loads template
-        var ele = $('<div>').attr('data-template-temp',1).appendTo(doc_body).hide().load(sURL, function(){
+        var ele = $('<div>').attr('data-template-temp',1).appendTo(doc_body).hide()
+        ele.load(sURL+'?t='+window.hWin.HEURIST4.util.random(),
+        function(){
 
         var t_style = ele.find('style').text(); //style will be added to page css
         
@@ -920,23 +922,24 @@ console.log( sheight );
                     $(tinymce.activeEditor.getBody()).find('#'+data.widgetid).get(0).scrollIntoView();    
                 }
                 
-                
                 ele.empty().remove(); //remove temp div
                 
         });
                         
-        // 3. Execute template script to replace template variables
-        try{
-            $.getScript(sURL2, function(){
-                //console.log('getScript');                
-            });
-        }catch(e){
-            alert('Error in template script');
+        if(template_name=='blog'){
+            // 3. Execute template script to replace template variables
+            try{
+                $.getScript(sURL2, function(){
+                    //console.log('getScript');                
+                });
+            }catch(e){
+                alert('Error in template script');
+            }
+        }else{
+            var widgetid = (template_name=='discover')?ele.find('div[data-heurist-app-id="heurist_SearchTree"]'):0;
+            
+            ele.trigger('oncomplete',{widgetid:widgetid});
         }
-            
-
-                        
-            
 
         }); //on template load
         
@@ -1784,10 +1787,13 @@ console.log( sheight );
         var selected_template = null;
         
         var templates = {
+                def:{name:'Default', author:'Heurist team',
+                    description:'Simple placeholder'},
+                discover:{name:'Discover (filters/results/map)', author:'Unknown author',
+                    description:'Filters, result list and mapping'},            
                 blog:{name:'Blog posts', author:'Heurist team',
-                    description:'List of blog post with filter'},
-                search_list_map:{name:'Search, List and Map', author:'Unknow author',
-                    description:'Filters, result list and mapping.... (NOT IMPLEMENTED)'}};
+                    description:'List of blog post with filter'}
+                };
 
         var buttons= [
                  {text:window.hWin.HR('Cancel'), 
@@ -1813,7 +1819,8 @@ console.log( sheight );
                 buttons, 'Select Template to insert to your Web Page', 
         {  container:'cms-add-widget-popup',
            default_palette_class: 'ui-heurist-publish',
-           width:750,
+           width: 400,
+           height: 430,
            close: function(){
                 is_edit_widget_open = false;
                 $dlg.dialog('destroy');       

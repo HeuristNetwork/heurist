@@ -174,6 +174,8 @@ function onPageInit(success)
 {
 
 //console.log('webpage onPageInit  '+(new Date().getTime() / 1000 - _time_debug));
+//console.log('webpage onPageInit  '+init_page_record_id);
+
 _time_debug = new Date().getTime() / 1000;
         
     if(!success) return;
@@ -242,7 +244,7 @@ function loadPageContent(pageid){
               var page_target = $('#main-content');
               var page_footer = page_target.find('#page-footer');
               if(page_footer.length>0) page_footer.detach();
-//console.log('load '+pageid+'   '+page_footer.length);              
+//console.log('load page  '+pageid+'   '+page_footer.length);              
 
               //page_target will have header (webpageheading) and content  
               page_target.empty().load(window.hWin.HAPI4.baseURL+'?db='
@@ -344,8 +346,15 @@ function afterPageLoad(document, pageid){
     if(!is_embed){    
         var s = location.pathname;
         while (s.substring(0, 2) === '//') s = s.substring(1);
-        window.history.pushState("object or string", "Title", s+'?db='
-        +window.hWin.HAPI4.database+'&website&id='+home_page_record_id);
+        
+        s = s + '?db='
+                +window.hWin.HAPI4.database+'&website&id='+home_page_record_id;
+        if(pageid!=home_page_record_id){
+                s = s + '&pageid='+pageid;
+        }
+
+        window.history.pushState("object or string", "Title", s);
+        
     }
     
     
