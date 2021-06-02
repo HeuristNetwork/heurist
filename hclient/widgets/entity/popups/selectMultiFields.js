@@ -30,16 +30,56 @@ function hMultiSelect(){
 	 * Return: (string) Type Name
 	 */
 	function getTypeName(type) {
-		if(type == 'relmarker'){ type = 'Relationship Marker'; }
-		else if(type == 'freetext'){ type = 'Single line Text'; }
-		else if(type == 'blocktext'){ type = 'Multi-line Text'; }
-		else if(type == 'float'){ type = 'Number'; }
-		else if(type == 'enum'){ type = 'Terms list'; }
-		else if(type == 'resource'){ type = 'Relationship pointer'; }
-		else if(type == 'date'){ type = 'Date/Time'; }
-		else if(type == 'separator') { type = 'Tab header'; }
-		else{ // Other Type, capitalise first letter
-			type = type.charAt(0).toUpperCase() + type.slice(1);
+
+		if(window.hWin.HEURIST4.util.isempty(type)){
+			return "Unknown";
+		}
+
+		switch (type) {
+			case 'resource':
+				type = 'Record pointer';
+
+				break;
+			case 'relmarker':
+				type = 'Relationship marker';
+				
+				break;
+			case 'freetext':
+				type = 'Single line Text';
+				
+				break;
+			case 'blocktext':
+				type = 'Multi-line Text';
+				
+				break;
+			case 'float':
+				type = 'Number';
+				
+				break;
+			case 'enum':
+				type = 'Terms list';
+				
+				break;
+			case 'date':
+				type = 'Date/Time';
+				
+				break;
+			case 'separator':
+				type = 'Tab header';
+				
+				break;
+			case 'geo':
+				type = 'Geospatial';
+
+				break;
+			case 'calculated':
+				type = 'Calculated';
+
+				break;
+			default:
+				type = type = type.charAt(0).toUpperCase() + type.slice(1);
+
+				break;
 		}
 
 		return type;
@@ -114,9 +154,9 @@ function hMultiSelect(){
 			        }
 
 			        tab_page = tab_page 
-			        	+ '<div class="field-item no-overflow-item">'+ field['dty_Name'] +'</div>'
-			        	+ '<div class="field-item">'+ type +'</div>'
-			        	+ '<div class="field-item no-overflow-item">'+ field['dty_HelpText'] +'</div></div>';
+			        	+ '<div class="field-item no-overflow-item" title="'+ field['dty_Name'] +'">'+ field['dty_Name'] +'</div>'
+			        	+ '<div class="field-item no-overflow-item" title="'+ type +'">'+ type +'</div>'
+			        	+ '<div class="field-item no-overflow-item" title="'+ field['dty_HelpText'] +'">'+ field['dty_HelpText'] +'</div></div>';
 			    }
 			});
 
