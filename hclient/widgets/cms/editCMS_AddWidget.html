@@ -49,13 +49,15 @@
             <option value="heurist_Cardinals" data-name="groups">Cardinal layout</option>
             <option value="heurist_resultListCollection" data-name="collection">Collect records (for listing, mapping or other output)</option>
             <option value="heurist_Groups" data-name="groups" disabled="disabled">Tabs/Accordion/Groups layout</option>
+            <option value="null" data-name="null" disabled="disabled">--- OTHERS ---</option>
+            <option value="heurist_recordAddButton">Add new record</option>
+            <!-- <option value="heurist_popupInfo">Popup info (contacts, about etc)</option> -->
         </select>
     </div>
     <div>
         <div class="header" style="vertical-align:top"><label>CSS (refer to help system)&nbsp;</label></div>
         <textarea id="widgetCss" rows="7" style="width:400px"></textarea>
     </div>
-
 
     <div class="heurist_Groups">
         <div class="header"><label>Mode</label></div>
@@ -333,6 +335,23 @@
             <option value="inline_page_content">inline (into div id="page-content")</option>
             <option value="popup">in popup</option>
         </select>
+    </div>
+
+    <div class="heurist_Navigation">
+        <div class="header"><label>Search group</label></div>
+            <input name="search_realm"  value="sr1"/>
+    </div>
+    
+    <div class="heurist_recordAddButton">
+        <div class="header"><label>Select record type</label></div>
+        <button name="add_record_cfg">Config</button>
+        <input name="RecTypeID" type="hidden"/>
+        <input name="OwnerUGrpID" type="hidden"/>
+        <input name="NonOwnerVisibility" type="hidden"/>
+    </div>
+    <div class="heurist_recordAddButton">
+        <div class="header"><label>Button label</label></div>
+                <input name="add_record_label" value=""/>
     </div>
 
 </fieldset>    

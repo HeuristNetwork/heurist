@@ -47,38 +47,38 @@
         <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
 
         <style>
-        	.ft_col{
-				display:inline-block;
-				width:45%;
-				vertical-align:top;
-				padding-left:10px;
-				min-width:280px;
-        	}
-        	.ft_col > h2{
-        		padding-bottom:1em;
-        	}
-        	.ft_col > label{
-				color: black; 
+            .ft_col{
+                display:inline-block;
+                width:45%;
+                vertical-align:top;
+                padding-left:10px;
+                min-width:280px;
+            }
+            .ft_col > h2{
+                padding-bottom:1em;
+            }
+            .ft_col > label{
+                color: black; 
                 /*#6A7C99;*/
-				font-weight:bold;
-    			font-size: 13px;
-    			line-height: 25px;
-				padding-top:1em;
-    			padding-left:0.5em;
-        	}
-        	.ft_notes{
-				padding-left:2em;
-				padding-bottom:1em;
-        	}               
-        	.ft_preview{
-				font-size:0.7em;
-				/*background-color: #ECF1fB !important;*/
-				margin-bottom:2em;
+                font-weight:bold;
+                font-size: 13px;
+                line-height: 25px;
+                padding-top:1em;
+                padding-left:0.5em;
+            }
+            .ft_notes{
+                padding-left:2em;
+                padding-bottom:1em;
+            }               
+            .ft_preview{
+                font-size:0.7em;
+                /*background-color: #ECF1fB !important;*/
+                margin-bottom:2em;
                 max-width:240px;
                 margin-left:5ex;
                 margin-right:5px;
                 display:none;
-        	}
+            }
         </style>
         
     </head>
@@ -87,37 +87,37 @@
         
         <script src='selectFieldType.js'></script>
         
-		<div style="width:100%;height:90%;padding:10px 10px 0px 0;overflow:hidden">
-			<div class="ft_col">
-				<h2 style="color:black">Simple fields</h2>
+        <div style="width:100%;height:90%;padding:10px 10px 0px 0;overflow:hidden">
+            <div class="ft_col">
+                <h2 style="color:black">Simple fields</h2>
 
-				<input type="radio" name="ft_type" id="t_enum" value="enum" checked>
-			 	<label for="t_enum">Dropdown (Terms)</label>
-			    <div class="ft_notes">
-			    	A flat or hierarchical list of categories, generally from a single vocabulary eg. countries, languages, source, condition, material, colour. Use where the list is relatively static and the categories do not exist as separate records in the database (in which case use record pointers).
-               	</div>
-			    <div id="inpt0" class="ft_preview"><img src="../../../common/images/edit_enum.png"></div>
+                <input type="radio" name="ft_type" id="t_enum" value="enum" checked>
+                 <label for="t_enum">Dropdown (Terms)</label>
+                <div class="ft_notes">
+                    A flat or hierarchical list of categories, generally from a single vocabulary eg. countries, languages, source, condition, material, colour. Use where the list is relatively static and the categories do not exist as separate records in the database (in which case use record pointers).
+                   </div>
+                <div id="inpt0" class="ft_preview"><img src="../../../common/images/edit_enum.png"></div>
 
-				<input type="radio" name="ft_type" id="t_numeric" value="float">
-			 	<label for="t_numeric">Numeric (integer or decimal)</label>
-			    <div class="ft_notes">
-			    	A positive or negative number, with or without decimals. Non-numeric characters other than minus, decimal point or comma are ignored.
-			    </div>
-			    <div id="inpt1" class="ft_preview"><img src="../../../common/images/edit_text.png"></div>
+                <input type="radio" name="ft_type" id="t_numeric" value="float">
+                 <label for="t_numeric">Numeric (integer or decimal)</label>
+                <div class="ft_notes">
+                    A positive or negative number, with or without decimals. Non-numeric characters other than minus, decimal point or comma are ignored.
+                </div>
+                <div id="inpt1" class="ft_preview"><img src="../../../common/images/edit_text.png"></div>
 
-			    <input type="radio" name="ft_type" id="t_freetext" value="freetext">
-			 	<label for="t_freetext">Text (single line)</label>
-			    <div class="ft_notes">
-			    	A single line of plain text, typically used for names, titles and short descriptions. Use multi-line text for longer descriptions. Max 250 characters.
-			    </div>
-			    <div id="inpt2" class="ft_preview"><img src="../../../common/images/edit_text.png"></div>
+                <input type="radio" name="ft_type" id="t_freetext" value="freetext">
+                 <label for="t_freetext">Text (single line)</label>
+                <div class="ft_notes">
+                    A single line of plain text, typically used for names, titles and short descriptions. Use multi-line text for longer descriptions. Max 250 characters.
+                </div>
+                <div id="inpt2" class="ft_preview"><img src="../../../common/images/edit_text.png"></div>
     
-			    <input type="radio" name="ft_type" id="t_blocktext" value="blocktext">
-			 	<label for="t_blocktext">Text (multi line)</label>                                                         
-			    <div class="ft_notes">
-			    	A plain text field which can accomodate multiple lines of text. Use for longer descriptions.
-			    </div>
-			    <div id="inpt3" class="ft_preview"><img src="../../../common/images/edit_area.png"></div>
+                <input type="radio" name="ft_type" id="t_blocktext" value="blocktext">
+                 <label for="t_blocktext">Text (multi line)</label>                                                         
+                <div class="ft_notes">
+                    A plain text field which can accomodate multiple lines of text. Use for longer descriptions.
+                </div>
+                <div id="inpt3" class="ft_preview"><img src="../../../common/images/edit_area.png"></div>
 
                 <input type="radio" name="ft_type" id="t_date" value="date">
                  <label for="t_date">Date / time</label>
@@ -126,54 +126,54 @@
                 </div>
                 <div id="inpt4" class="ft_preview"><img src="../../../common/images/edit_date.png"></div>
                 
-			</div>
-			
-			<div class="ft_col">
-				<h2 style="color:black">Special fields</h2>
+            </div>
+            
+            <div class="ft_col">
+                <h2 style="color:black">Special fields</h2>
 
-				<input type="radio" name="ft_type" id="t_geo" value="geo">
-			 	<label for="t_geo">Geospatial (point, line, polygon ...)</label>
-			    <div class="ft_notes">
-			    	A vector spatial object describing a location on the earth's surface. The location can be digitised by clicking on a map or entered as coordinates.
-			    </div>
-			    <div id="inpt5" class="ft_preview"><img src="../../../common/images/edit_geo.png"></div>
+                <input type="radio" name="ft_type" id="t_geo" value="geo">
+                 <label for="t_geo">Geospatial (point, line, polygon ...)</label>
+                <div class="ft_notes">
+                    A vector spatial object describing a location on the earth's surface. The location can be digitised by clicking on a map or entered as coordinates.
+                </div>
+                <div id="inpt5" class="ft_preview"><img src="../../../common/images/edit_geo.png"></div>
 
-			    <input type="radio" name="ft_type" id="t_file" value="file">
-			 	<label for="t_file">File or remote URL</label>
-			    <div class="ft_notes">
-			    	A file such as a photo, PDF, scanned document, spreadsheet or XML, uploaded and stored in the database or a URL to a remote file or streamed content.
-			    </div>
-			    <div id="inpt6" class="ft_preview"><img src="../../../common/images/edit_image.png"></div>
+                <input type="radio" name="ft_type" id="t_file" value="file">
+                 <label for="t_file">File or remote URL</label>
+                <div class="ft_notes">
+                    A file such as a photo, PDF, scanned document, spreadsheet or XML, uploaded and stored in the database or a URL to a remote file or streamed content.
+                </div>
+                <div id="inpt6" class="ft_preview"><img src="../../../common/images/edit_image.png"></div>
     
 <!--
-			    <input type="radio" name="ft_type" id="t_separator" value="separator">
-			 	<label for="t_separator">Heading / section driver</label>                                                         
-			    <div class="ft_notes">
-			    	A data entry form divider with a heading and optional description. Used to break up the data entry form into sections for easier data entry. Also defines tabs on FAIMS tablet data collection app.
-			    </div>
-			    <div id="inpt7" class="ft_preview"></div>
+                <input type="radio" name="ft_type" id="t_separator" value="separator">
+                 <label for="t_separator">Heading / section driver</label>                                                         
+                <div class="ft_notes">
+                    A data entry form divider with a heading and optional description. Used to break up the data entry form into sections for easier data entry. Also defines tabs on FAIMS tablet data collection app.
+                </div>
+                <div id="inpt7" class="ft_preview"></div>
 -->
-				<h2 style="color:black">Record linking fields</h2>
+                <h2 style="color:black">Record linking fields</h2>
                 
                 <!-- redundancy note: this functionality is repeated in selectLinkField.html/js -->
-			
-			    <input type="radio" name="ft_type" id="t_resourse" value="resource">
-			 	<label for="t_resourse">Record pointer</label>                                                         
-			    <div class="ft_notes">
-			    	A simple connection to another record, normally constrained to specific target record type(s). Use where the field represents a direct connection and is permanent eg.parent, author, component, place, period.
+            
+                <input type="radio" name="ft_type" id="t_resourse" value="resource">
+                 <label for="t_resourse">Record pointer</label>                                                         
+                <div class="ft_notes">
+                    A simple connection to another record, normally constrained to specific target record type(s). Use where the field represents a direct connection and is permanent eg.parent, author, component, place, period.
                     <a id="hint_more_info1" class="ft_notes" style="cursor:pointer">more...</a>
-			    </div>
+                </div>
                 
-			    <div id="inpt8" class="ft_preview"><img src="../../../common/images/edit_pointer.png"></div>
+                <div id="inpt8" class="ft_preview"><img src="../../../common/images/edit_pointer.png"></div>
                 
-			    <input type="radio" name="ft_type" id="t_relmarker" value="relmarker">
-			 	<label for="t_relmarker">Relationship marker</label>                                                         
-			    <div class="ft_notes">
-			    	A more complex connection which allows specification of relationship type and period of validity. Use where there are numerous possible connection types and/or connections have a time span eg.roles in an event, social relationships, ownership, marriage, address.
+                <input type="radio" name="ft_type" id="t_relmarker" value="relmarker">
+                 <label for="t_relmarker">Relationship marker</label>                                                         
+                <div class="ft_notes">
+                    A more complex connection which allows specification of relationship type and period of validity. Use where there are numerous possible connection types and/or connections have a time span eg.roles in an event, social relationships, ownership, marriage, address.
                     <a id="hint_more_info2" class="ft_notes" style="cursor:pointer">more...</a>
-			    </div>
+                </div>
                 
-			    <div id="inpt9" class="ft_preview"><img src="../../../common/images/edit_relmarker.png">
+                <div id="inpt9" class="ft_preview"><img src="../../../common/images/edit_relmarker.png">
 <!--                
 <div><fieldset class="relation editable reminder" style="width:200px"><legend>Add new relationship</legend><div class="resource"><div class="input-row"><div style="display: inline-block;"></div><div style="display: inline-block; padding-right: 10px; padding-left: 10px;">
 <span style="font-size:0.8em">This record: </span><div class="input2-row required" style="padding-left: 0px;"><div class="input2-header-cell" style="padding-left: 0px; min-width: 0px; font-size: 0.8em;"></div><div class="input2-cell" style="padding-left: 0px;"><select name="relationship-type" title="" bib-detail-type="6" data-dispname="" id="relationship-type" style="width: 150px; padding-left: 0px; font-size: 0.8em;"><option value="" style="padding-left: 0px;"></option><optgroup label="1. Generic" style="padding-left: 0px;"><option value="3108" class="depth1" style="padding-left: 0px;">IsRelatedTo</option><option value="3170" class="depth1" style="padding-left: 0px;">has_location</option></optgroup><optgroup label="2. Spatial" style="padding-left: 0px;"><option value="3290" class="depth1" style="padding-left: 0px;">Overlaps</option><option value="3291" class="depth1" style="padding-left: 0px;">Wholly outside</option><option value="3289" class="depth1" style="padding-left: 0px;">Wholly within</option></optgroup><optgroup label="3. Temporal" style="padding-left: 0px;"><option value="3005" class="depth1" style="padding-left: 0px;">Causes</option><option value="3271" class="depth1" style="padding-left: 0px;">IsCausedBy</option><option value="3269" class="depth1" style="padding-left: 0px;">Overlap</option><option value="3262" class="depth2" style="padding-left: 0px;">. . . Overlap.Contains</option><option value="3263" class="depth2" style="padding-left: 0px;">. . . Overlap.IsContainedWithin</option><option value="3091" class="depth2" style="padding-left: 0px;">. . . Overlap.IsContemporaryWith</option><option value="3264" class="depth2" style="padding-left: 0px;">. . . Overlap.IsCoterminousWith</option><option value="3268" class="depth2" style="padding-left: 0px;">. . . Overlap.OverlapsEndOf</option><option value="3267" class="depth2" style="padding-left: 0px;">. . . Overlap.OverlapsStartOf</option><option value="3270" class="depth1" style="padding-left: 0px;">Sequence</option><option value="3012" class="depth2" style="padding-left: 0px;">. . . Sequence.EndsBefore</option><option value="3266" class="depth2" style="padding-left: 0px;">. . . Sequence.ImmediatelyFollows</option><option value="3265" class="depth2" style="padding-left: 0px;">. . . Sequence.ImmediatelyPrecedes</option></optgroup></select><div class="help prompt" style="padding-left: 0px;"></div></div></div></div><div class="input2-row optional"><div class="input2-header-cell" style="min-width: 0px; font-size: 0.8em;">Related record</div><div class="input2-cell"><div class="resource-div empty" title="Related record" bib-detail-type="5" data-dispname="Related record" style=""><input type="text" value="" title="Click here to search for a record, or drag-and-drop a search value" autocomplete="off" class="resource-title" id="title_1470335610681" style="width: 150px;"><input name="relationship-type" value="" type="hidden"><img src="/heurist/common/images/12x12.gif" class="delete-resource" title="Remove this record pointer"><img src="/heurist/common/images/edit-pencil.png" class="edit-resource" title="Edit this record (opens in a new tab)"><img src="/heurist/common/images/magglass_15x14.gif" class="view-resource" title="View the record linked via this pointer field (opens in a new tab)"></div><div class="help prompt"></div></div></div><div class="input2-header-cell" style="padding: 0px; height: 22px; min-width: 0px; font-size: 0.8em;"><input type="button" name="savebutton" value="Add relationship" disabled="" style="margin-right: 10px; padding: 0px 3px; color: lightgray;"><input type="button" value="Cancel" style="padding: 0px 3px;"></div></div><div class="resource optional"><div class="input-row optional"><div class="section-header-cell optional"><a href="#" title="Optional Fields" style="text-decoration: none; background: none;"><img src="/heurist/common/images/tright.gif">Optional fields</a></div>
@@ -181,17 +181,17 @@
 </div></div></fieldset></div>                
 -->
                 </div>
-			
-		        <div style="text-align:center;width:100%;padding-top:1em;">
-		            <button type="button" id="btnSelect" 
-		            class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
-		            role="button" aria-disabled="false" style="color:black;padding:4px 10px;">
-		            <span class="ui-button-text" style="font-size: 1.6em;">Use this field type</span>
-		            </button>
-		        </div>
+            
+                <div style="text-align:center;width:100%;padding-top:1em;">
+                    <button type="button" id="btnSelect" 
+                    class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
+                    role="button" aria-disabled="false" style="color:black;padding:4px 10px;">
+                    <span class="ui-button-text" style="font-size: 1.6em;">Use this field type</span>
+                    </button>
+                </div>
                 
                 <!-- disabled="disabled" color:lightgray; -->
-			</div>
+            </div>
 
 
         </div>

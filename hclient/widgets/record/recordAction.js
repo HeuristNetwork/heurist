@@ -33,6 +33,8 @@ $.widget( "heurist.recordAction", {
         position: null,
         modal:  true,
         title:  '',
+        
+        path: '',
         htmlContent: 'recordAction.html',
         helpContent: null,
         
@@ -103,7 +105,8 @@ $.widget( "heurist.recordAction", {
             
             var url = this.options.htmlContent.indexOf(window.hWin.HAPI4.baseURL)===0
                     ?this.options.htmlContent
-                    :window.hWin.HAPI4.baseURL+'hclient/widgets/record/'+this.options.htmlContent
+                    :window.hWin.HAPI4.baseURL+'hclient/' 
+                        + (this.options.path?this.options.path:'widgets/record/')+this.options.htmlContent
                             +'?t='+window.hWin.HEURIST4.util.random();
             
             this.element.load(url, 

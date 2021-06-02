@@ -1,0 +1,43 @@
+<!--
+/**
+* Content for popup form to configure and embed Heuist widget into CMS page
+* 
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+<div class="heurist-helper1" style="padding:5px;">
+    Template consists of one or more display widgets - they will be 
+    linked to operate together if on the same page.
+    <br>
+    To position template insert them in table cells or better via DIVs,
+    if you are familiar with CSS use "display" property.
+    <br>
+    See 
+    <a href="https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">website help</a>
+</div>
+
+<div  style="padding:5px;">
+    <p>Select template</p>
+    <select id="templates" class="text ui-widget-content ui-corner-all" style="min-width:335px;padding:4px;" size="5" title="">
+        <option value="def">Default</option>
+        <option value="discover">Discover (filters/results/map)</option>
+        <option value="blog">Blog</option>
+    </select>
+</div>
+<div  style="padding:5px;">
+    <p class="template_author" style="padding:5px;border:1px solid gray; min-height:30px;display:none;"></p>
+    <p class="template_description" style="padding:5px;border:1px solid gray; min-height:70px;"></p>
+</div>

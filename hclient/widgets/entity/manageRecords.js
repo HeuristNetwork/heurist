@@ -1979,22 +1979,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         var rty_ID = this._currentEditRecTypeID;
         var maskvalue = $Db.rty(rty_ID, 'rty_TitleMask')
-
-        var sURL = window.hWin.HAPI4.baseURL +
-            "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rty_ID
-            +"&mask="+encodeURIComponent(maskvalue)+"&db="+window.hWin.HAPI4.database;
-            
-        window.hWin.HEURIST4.msg.showDialog(sURL, {    
-                "no-resize": true,
-                title: 'Record Type Title Mask Edit',
-                height: 800,
-                width: 800,
-                default_palette_class: 'ui-heurist-design',
-                callback: function(newvalue) {
-                    if(newvalue){
-                    }
-                }
-        });
+        
+        window.hWin.HEURIST4.ui.showRecordActionDialog('rectypeTitleMask',
+                {rty_ID:this._currentEditRecTypeID, rty_TitleMask:maskvalue, path: 'widgets/entity/popups/',
+                 onClose: function(newvalue){}});
     },
 
     //
@@ -2081,58 +2069,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
                 
         }
-        else if(false && is_inline){ //OLD OPTION: show as widget on full width/height with its own preview 
-            //create new widget manageDefRecStructure
-            var $structure_editor = this.element.find('.editStructure');
-            if($structure_editor.length==0){
-                $structure_editor = $('<div class="editStructure" style="display:none"/>').appendTo(this.element);
-            }else{
-                $structure_editor.empty();
-            }
-            
-            var popup_options = {
-                isdialog: false,
-                container: $structure_editor,
-                select_mode: 'manager',
-                rty_ID: that._currentEditRecTypeID,
-                rec_ID_sample: that._currentEditID,
-                external_toolbar: this._toolbar,  //send toolbar to structure editor to replace buttons
-                onClose: function()
-            {
-                //restore native toolbar
-                //$structure_editor.manageDefRecStructure('toolbarOverRecordEditor');
-                that._toolbar.find('.rts_editor').empty().remove();
-                that._toolbar.find('.ui-dialog-buttonset').show();
-                
-                $structure_editor.hide().remove();
-                $structure_editor = null;
-                that.element.find('.editor').show();
-                //remove rts_editor toolbar
-                
-                that._initEditForm_step3(that._currentEditID); //reload form    
-            }};
-            
-            this.element.find('.editor').hide();
-            $structure_editor.show();
-            window.hWin.HEURIST4.ui.showEntityDialog('DefRecStructure', popup_options); 
-            
-        }else{ //POPUP rts editor
-            var url = window.hWin.HAPI4.baseURL + 'admin/structure/fields/editRecStructure.html?db='+window.hWin.HAPI4.database
-                +'&rty_ID='+that._currentEditRecTypeID;
-
-            var body = $(window.hWin.document).find('body');
-                
-            window.hWin.HEURIST4.msg.showDialog(url, {
-                height: body.innerHeight()*0.9,
-                width: 960,
-                padding: '0px',
-                title: window.hWin.HR('Edit record structure'),
-                afterclose: function(){
-                    that._initEditForm_step3(that._currentEditID); //reload form    
-                }
-            });        
-        }
-        
 
         
     },

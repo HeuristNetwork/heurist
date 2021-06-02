@@ -130,8 +130,11 @@ if(!array_key_exists('embed', $_REQUEST)){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAccess.js"></script>
     
-    <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce/tinymce.min.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
+    <!--
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce/jquery.tinymce.min.js"></script>
+    -->
     
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
     
@@ -141,13 +144,23 @@ if(!array_key_exists('embed', $_REQUEST)){
 
 if($edit_Available){
 ?>
-    <script src="<?php echo PDIR;?>external/tinymce/tinymce.min.js"></script>
-    <!--
     <script src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
+    <!--
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="<?php echo PDIR;?>external/tinymce/tinymce.min.js"></script>
     <script src="<?php echo PDIR;?>external/tinymce5/jquery.tinymce.min.js"></script>
     <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js"></script>
     <script src="<?php echo PDIR;?>external/tinymce/jquery.tinymce.min.js"></script>
     -->
+    
+    <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/util/formatting.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/xml/xml.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/javascript/javascript.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/css/css.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/htmlmixed/htmlmixed.js"></script>
+    
     <script src="websiteRecord.js"></script>
     <?php
 }else{
@@ -161,6 +174,8 @@ function onPageInit(success)
 {
 
 //console.log('webpage onPageInit  '+(new Date().getTime() / 1000 - _time_debug));
+//console.log('webpage onPageInit  '+init_page_record_id);
+
 _time_debug = new Date().getTime() / 1000;
         
     if(!success) return;
@@ -229,7 +244,7 @@ function loadPageContent(pageid){
               var page_target = $('#main-content');
               var page_footer = page_target.find('#page-footer');
               if(page_footer.length>0) page_footer.detach();
-//console.log('load '+pageid+'   '+page_footer.length);              
+//console.log('load page  '+pageid+'   '+page_footer.length);              
 
               //page_target will have header (webpageheading) and content  
               page_target.empty().load(window.hWin.HAPI4.baseURL+'?db='
@@ -331,8 +346,15 @@ function afterPageLoad(document, pageid){
     if(!is_embed){    
         var s = location.pathname;
         while (s.substring(0, 2) === '//') s = s.substring(1);
-        window.history.pushState("object or string", "Title", s+'?db='
-        +window.hWin.HAPI4.database+'&website&id='+home_page_record_id);
+        
+        s = s + '?db='
+                +window.hWin.HAPI4.database+'&website&id='+home_page_record_id;
+        if(pageid!=home_page_record_id){
+                s = s + '&pageid='+pageid;
+        }
+
+        window.history.pushState("object or string", "Title", s);
+        
     }
     
     
@@ -533,6 +555,20 @@ div.coverall-div {
     background-color: white;
     opacity: 1;
 }
+
+div.CodeMirror{
+    height:100%;
+}
+.CodeMirror *{
+    /* font-family: Courier, Monospace !important; */
+    font-family: Arial, sans-serif !important;
+    font-size: 14px;
+}
+.CodeMirror div.CodeMirror-cursor {
+    visibility: visible;
+}
+
+
 <?php        
 }
 //style from field DT_CMS_CSS of home record 

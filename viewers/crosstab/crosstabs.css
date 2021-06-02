@@ -55,6 +55,7 @@ input.text, select.text {
     padding: .2em;
 }
 
+/*
 .intervalDiv {
     -moz-user-select: none;
     user-select: none;
@@ -63,6 +64,7 @@ input.text, select.text {
     background:-moz-linear-gradient(center top, #FFFFFF, #EEEEEE) repeat scroll 0 0 transparent;
     background:-webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#EEEEEE));
 }
+*/
 
 /*
 div.intervalDiv:hover {
@@ -290,3 +292,65 @@ div .progress-message {
     width: 49%;
 }
 
+/* for chrome */
+#changeValueBox::-webkit-outer-spin-button,
+#changeValueBox::-webkit-inner-spin-button{
+    -webkit-appearance: none;
+    margin:0;
+    text-align: center;
+}
+
+/* for firefox */
+input[type=number]{
+    -moz-appearance: textfield;
+    text-align: center;
+}
+
+.modal-dialog-width{
+    max-width: 90%;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+#tabs > li > button.nav-link {
+    background: white;
+    color:gray;
+    border: 0;
+    opacity: 0.5;
+}
+
+#tabs > li > button.nav-link:hover {
+    font-weight: bold;
+    color: white !important;
+    background: #305586;
+    border: 0;
+    opacity: 1;
+}
+
+#tabs > li > button.nav-link.active {
+    font-weight: bold;
+    color:#305586;
+    border: 0;
+    opacity: 1;
+}
+
+.exportButtons {
+    background: #627e5d !important;
+    color: white !important;
+}
+
+@media (min-width: 768px){
+    .borderChange {
+        border-left: 0 !important;
+        border-right: 0 !important;
+    }
+}
+
+@media (max-width: 768px){
+    .borderChange {
+        border-top: 0 !important;
+        border-bottom: 0 !important;
+    }
+}

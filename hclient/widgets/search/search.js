@@ -198,7 +198,14 @@ $.widget( "heurist.search", {
         
         if(this._is_publication || this.options.is_h6style){
             this.input_search.css({'height':'30px','min-height':'30px','padding':'2px 18px 2px 2px'}); //, 'width':'400'
-            this.input_search_prompt2.addClass('ui-widget-content').css({border:'none',top:'-30px'});
+            
+            var sTop = (this._is_publication)?'-40px':'-30px';
+            this.input_search_prompt2.addClass('ui-widget-content').css({border:'none',top:sTop});
+            if(this._is_publication){
+                this.input_search.css({width:'auto'});
+                this.input_search_prompt2.css({height:(this.input_search.height()-3)+'px',
+                                               width:(this.input_search.width()+5)+'px'});    
+            }
         }else{
             this.input_search_prompt2.css({top:'-40px'}); //'background':'#F4F2F4',
         }
@@ -494,29 +501,6 @@ $.widget( "heurist.search", {
                 });
             } });
         }
-
-
-        // Manage structure button
-        if(window.hWin.HAPI4.sysinfo['layout']=='original'){
-            
-        this.btn_manage_structure = $( "<button>", {
-                label: window.hWin.HR("Manage Structure"),
-                title: "Add new / modify existing record types - general characteristics, data fields and rules which compose a record"
-            })
-            .css({'width':'140px','min-width': '120px','margin-left':'3em'})
-            //.addClass('logged-in-only')
-            .addClass(this.options.button_class)
-            .appendTo( this.div_add_record )
-            .button()
-            .click(function(){ 
-                window.hWin.HAPI4.SystemMgr.verify_credentials(function(){ 
-                    window.hWin.HEURIST4.msg.showDialog(window.HAPI4.baseURL + 'admin/structure/rectypes/manageRectypes.php?popup=1&db='+window.hWin.HAPI4.database,
-                    { width:1200, height:600, title:'Manage Structure', 
-                      afterclose: function(){ window.hWin.HAPI4.SystemMgr.get_defs_all( false, that.document)}} )
-                });
-            });
-        }    
-        
 
         /* rotate icon with given interval
         setInterval( function(){ linkGear.addClass('rotate'); 
@@ -1163,14 +1147,39 @@ $.widget( "heurist.search", {
             return;
         }
         
+        var that = this;
+
+        
         if(this.options.is_h6style){
             var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
             if(widget){
                     var pos = this.element.offset();
                     widget.mainMenu6('show_ExploreMenu', null, 'searchBuilder', {top:pos.top+10, left:pos.left});
-                    return;
             }
         }else{
+            
+            if(!$.isFunction($('body')['showSearchBuilder'])){ //OK! widget script js has been loaded
+            
+                var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/';
+                var scripts = [ path+'searchBuilder.js', 
+                                path+'searchBuilderItem.js',
+                                path+'searchBuilderSort.js'];
+                $.getMultiScripts(scripts)
+                .done(function() {
+                    showSearchBuilder({search_realm:that.options.search_realm});
+                }).fail(function(error) {
+                    //console.log(error);                
+                    window.hWin.HEURIST4.msg.showMsgWorkInProgress();
+                }).always(function() {
+                    // always called, both on success and error
+                });
+            
+                return;            
+            }
+
+            
+            showSearchBuilder({search_realm:that.options.search_realm});
+            
 /* todo
                 var cont = this.element.find('#searchQuick');
                 
@@ -1214,12 +1223,11 @@ $.widget( "heurist.search", {
                 that.menues_explore_popup.css({width:'700px',overflow:'hidden'});            
 */            
         }
+        return;
         
         
         
                 
-        var that = this;
-
         if(!this.search_assistant){ //not loadaed yet
         
             //load template

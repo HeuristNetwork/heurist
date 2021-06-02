@@ -684,8 +684,14 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
             . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';                        
 
         }else{
+            
+            $autoplay = '';
+            if($params && @$params['auto_play']){
+                $autoplay = ' autoplay="autoplay" ';
+            }
+            
             //preload="none"
-            $result = '<video '.$size.$style.' controls="controls">'
+            $result = '<video '.$autoplay.$size.$style.' controls="controls">'
             .'<source type="'.$mimeType.'" src="'.$filepath.'"'
                 .($external_url?'':' data-id="'.$fileid.'"')
                 .'/>'

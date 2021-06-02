@@ -275,6 +275,7 @@ function executeSmartyTemplate($system, $params){
     $smarty->assignByRef('heurist', $heuristRec);
     
     $smarty->assign('results', $results); //assign 
+    $smarty->assign('template_file', $template_file);
 
     //$smarty->getvar()
 

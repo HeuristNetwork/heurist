@@ -1655,31 +1655,6 @@ $.widget( "heurist.editing_input", {
                 }
                 
                 window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', rg_options);
-/*                
-                var sURL =  window.hWin.HAPI4.baseURL + "admin/structure/rectypes/selectRectype.html?type=" 
-                        + that.detailType  + "&dtID=" + that.options.recID +"&ids=" 
-                        + sels
-                        + "&db="+ window.hWin.HAPI4.database;  
-
-                window.hWin.HEURIST4.msg.showDialog(sURL, {
-                    "close-on-blur": false,
-                    "no-resize": true,
-                    title: 'Select Record Type',
-                    height: 600,
-                    width: 640,
-                    callback: function(selection) {
-                        if(!window.hWin.HEURIST4.util.isempty(selection) && !$.isArray(selection)){
-                            selection = selection.split(','); 
-                        }  
-                        var newsel = window.hWin.HEURIST4.util.isArrayNotEmpty(selection)?selection:[];
-                        
-                        //config and data are loaded already, since dialog was opened
-                        that._findAndAssignTitle($input, newsel);
-                        that.newvalues[$input.attr('id')] = newsel.join(',');
-                        that.onChange();
-                    }
-                });
-*/                
             }
             
             //replace input with div
@@ -1847,16 +1822,14 @@ $.widget( "heurist.editing_input", {
             $input = $( "<input>")
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
-            .attr('autocomplete','disabled')
-            .attr('autocorrect','off')
-            .attr('autocapitalize','none')
-            .attr('spellcheck','false')
             .val(value)
             .keyup(function(){that.onChange();})
             .change(function(){
                     that.onChange();
             })
             .appendTo( $inputdiv );
+            
+            window.hWin.HEURIST4.ui.disableAutoFill( $input );
             
             if(!(this.options.dtID=='file' || this.detailType=='resource' || 
                  this.detailType=='date' || this.detailType=='geo' || this.detailType=='action')){
@@ -2456,8 +2429,7 @@ $.widget( "heurist.editing_input", {
          
                         //init upload widget
                         $input.fileupload({
-    url: window.hWin.HAPI4.baseURL +  'hsapi/utilities/fileUpload.php',  //'external/jquery-file-upload/server/php/',
-    //url: 'templateOperations.php',
+    url: window.hWin.HAPI4.baseURL +  'hsapi/utilities/fileUpload.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},
                 {name:'version', value:this.configMode.version},
@@ -4547,14 +4519,13 @@ console.log('onpaste');
                     
                     var inpt2 = $('<input>').attr('id',$input.attr('id')+'-2')
                             .addClass('text ui-widget-content ui-corner-all')
-                            .attr('autocomplete','disabled')
-                            .attr('autocorrect','off')
-                            .attr('autocapitalize','none')
-                            .attr('spellcheck','false')
                             .change(function(){
                                 that.onChange();
                             })
                             .insertAfter(edash);
+                            
+                    window.hWin.HEURIST4.ui.disableAutoFill( $inpt2 );
+                            
                     that._createDateInput(inpt2, $inputdiv);
             
                     /*

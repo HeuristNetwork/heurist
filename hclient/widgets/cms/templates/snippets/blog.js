@@ -1,10 +1,9 @@
 var container = $('div[data-template-temp]');
 
 //this script will be executed once after addition of template
-//add new faceted search
+//it adds new faceted search and new smarty template
 
-var sfilter = {"facets":[{"var":43482,"code":"7:1111","title":"Month","help":"","isfacet":"3","multisel":true,"type":"enum","order":0,"orderby":null},{"var":21948,"code":"7:1110","title":"Author","help":"","isfacet":"3","multisel":false,"type":"enum","order":1,"orderby":null},{"var":25488,"code":"7:1112","title":"Categories","help":"","isfacet":"3","multisel":false,"type":"enum","order":2,"orderby":null},{"var":82034,"code":"7:1","title":"Title of post","help":"","isfacet":"0","multisel":false,"type":"freetext","order":3,"orderby":null}],"rectypes":["7"],"version":2,"rules":"","rulesonly":0,"sup_filter":"t:7 sortby:-m ","ui_title":"Project blog","ui_viewmode":"","search_on_reset":true,"ui_prelim_filter_toggle":false,"ui_prelim_filter_toggle_mode":0,"ui_prelim_filter_toggle_label":"Apply preliminary filter","ui_spatial_filter":false,"ui_spatial_filter_init":false,"ui_spatial_filter_label":"Map Search","ui_spatial_filter_initial":"","ui_additional_filter":false,"ui_additional_filter_label":"Search everything","ui_exit_button":true,"ui_exit_button_label":"","domain":"all","title_hierarchy":false,"viewport":null,"sort_order":"-a"};
-
+var sfilter = {"facets":[{"var":84411,"code":"7:added","title":"Added","groupby":"month","orderby":"desc","type":"date","order":0,"isfacet":"3","help":""},{"var":75653,"code":"7:lt15:10,4:title","title":"Creator(s)","orderby":null,"type":"freetext","order":1,"isfacet":"3","help":"","multisel":false},{"var":84259,"code":"7:942","title":"Category","orderby":null,"type":"enum","order":2,"isfacet":"3","help":"","multisel":false},{"var":75132,"code":"7:1","title":"Title of post","help":"","isfacet":"0","multisel":false,"orderby":null,"type":"freetext","order":3}],"rectypes":["7"],"version":2,"rules":"","rulesonly":0,"sup_filter":"","ui_title":"Project blog","ui_viewmode":"","search_on_reset":true,"ui_prelim_filter_toggle":false,"ui_prelim_filter_toggle_mode":0,"ui_prelim_filter_toggle_label":"Apply preliminary filter","ui_spatial_filter":false,"ui_spatial_filter_init":false,"ui_spatial_filter_label":"Map Search","ui_spatial_filter_initial":"","ui_additional_filter":false,"ui_additional_filter_label":"Search everything","ui_exit_button":true,"ui_exit_button_label":"","domain":"all","title_hierarchy":false,"viewport":null,"sort_order":"-a","ui_temporal_filter_initial":"after:\"1 week ago\""};
 
 //@todo - create unique name for filter (counter)
 
@@ -37,10 +36,16 @@ window.hWin.HAPI4.SystemMgr.ssearch_save(request,
             var widgetid = 'mywidget_'+window.hWin.HEURIST4.util.random();
 
             //replace widget id, filter id and realm
-            var ele = container.find('div[data-heurist-app-id="heurist_SearchTree"]');
+            var ele = container.find('div[data-heurist-app-id="heurist_recordAddButton"]');
+            ele.attr('id', widgetid);
+            var content = window.hWin.HEURIST4.util.isJSON(ele.text());
+            content.search_realm = realm_id;
+            ele.text(JSON.stringify(content));
+            
+            ele = container.find('div[data-heurist-app-id="heurist_SearchTree"]');
             var content = window.hWin.HEURIST4.util.isJSON(ele.text());
             //DEBUG console.log(ele.text());
-            ele.attr('id', widgetid);
+            ele.attr('id', widgetid+1);
             content.search_realm = realm_id;
             content.init_svsID = svsID;
             content.allowed_svsIDs = svsID;
@@ -62,12 +67,12 @@ window.hWin.HAPI4.SystemMgr.ssearch_save(request,
                     
                     var ele = container.find('div[data-heurist-app-id="heurist_resultList"]');
                     var content = window.hWin.HEURIST4.util.isJSON(ele.text());
-                    ele.attr('id', widgetid+1);
+                    ele.attr('id', widgetid+2);
                     content.search_realm = realm_id;
                     content.rendererExpandDetails = template_name;
                     ele.text(JSON.stringify(content));
-                    
-                    container.trigger('oncomplete');
+                  
+                    container.trigger('oncomplete',{widgetid:widgetid});
                 }
                 
             });

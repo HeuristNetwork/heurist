@@ -709,7 +709,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                         that._editing.setModified(0);
 
-                        var sURL = window.hWin.HAPI4.baseURL + "admin/structure/fields/selectMultiFields.html?&rtyID="+rty_ID;
+                        var sURL = window.hWin.HAPI4.baseURL + "hclient/widgets/entity/popups/selectMultiFields.html?&rtyID="+rty_ID;
                                 
                         window.hWin.HEURIST4.msg.showDialog(sURL, {
                             "close-on-blur": false,
@@ -852,43 +852,71 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         'click': function(event){
 
                             var dt_type = this._editing.getValue('dty_Type')[0];
+                    
+                            var $dlg, buttons = [
+                                {text:window.hWin.HR('Cancel'),
+                                    //id:'btnRecCancel',
+                                    css:{'float':'right',margin:'.5em .4em .5em 0px'},  
+                                    click: function() { $dlg.dialog( "close" ); }},
+                                {text:window.hWin.HR('Use this field type'),
+                                    css:{'float':'right',margin:'.5em .4em .5em 0px'},  
+                                    class: 'ui-button-action',
+                                    click: function() { 
+                                        
+                                        var dt_type_new = $dlg.find('input[name="ft_type"]:checked').val();
+                                        
+                                        if(!window.hWin.HEURIST4.util.isempty(dt_type_new)) {
 
-                            var dim = { h:640, w:800 };
-                            var sURL = window.hWin.HAPI4.baseURL +
-                            "admin/structure/fields/selectFieldType.html?&db="+window.hWin.HAPI4.database;
-                            window.hWin.HEURIST4.msg.showDialog(sURL, {
-                                "close-on-blur": false,
-                                //"no-resize": true,
-                                //"no-close": true, //hide close button
-                                title: 'Select data type of field',
-                                height: dim.h,
-                                width: dim.w,
-                                callback: function(context) {
-                                    if(!window.hWin.HEURIST4.util.isempty(context)) {
+                                            var changeToNewType = true;
+                                            if(((dt_type==="resource") || (dt_type==="relmarker") || 
+                                                (dt_type==="enum"))  && dt_type!==dt_type_new)
+                                            {
 
-                                        var changeToNewType = true;
-                                        if(((dt_type==="resource") || (dt_type==="relmarker") || 
-                                            (dt_type==="enum"))  && dt_type!==context)
-                                        {
-
-                                            window.hWin.HEURIST4.msg.showMsgDlg("If you change the type to '"
-                                                + $Db.baseFieldType[context] 
-                                                + "' you will lose all your settings for type '"   //vocabulary 
-                                                + $Db.baseFieldType[dt_type]+
-                                                "'.\n\nAre you sure?",                                            
-                                                function(){   
-                                                    that._onDataTypeChange(context);                                                   
-                                                }, {title:'Change type for field',yes:'Continue',no:'Cancel'},
-                                                {default_palette_class:that.options.default_palette_class});                                                
-                                        }else{
-                                            that._onDataTypeChange(context);                                                   
-                                        }                            
-
-
-                                    }
-                                }
-           
+                                                window.hWin.HEURIST4.msg.showMsgDlg("If you change the type to '"
+                                                    + $Db.baseFieldType[dt_type_new] 
+                                                    + "' you will lose all your settings for type '"   //vocabulary 
+                                                    + $Db.baseFieldType[dt_type]+
+                                                    "'.\n\nAre you sure?",                                            
+                                                    function(){   
+                                                        that._onDataTypeChange(dt_type_new);                                                   
+                                                    }, {title:'Change type for field',yes:'Continue',no:'Cancel'},
+                                                    {default_palette_class:that.options.default_palette_class});                                                
+                                            }else{
+                                                that._onDataTypeChange(dt_type_new);                                                   
+                                            }                            
+                                        }
+                            
+                                        $dlg.dialog( "close" ); 
+                                    }}
+                            ];                
+                            
+                            
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
+                                +"hclient/widgets/entity/popups/selectFieldType.html?t="+(new Date().getTime()), 
+                                buttons, 'Select data type of field', 
+                                {  container:'detailtypes-type-popup',
+                                    width:800,
+                                    height:620,
+                                    default_palette_class: this.options.default_palette_class,
+                                    close: function(){
+                                        $dlg.dialog('destroy');       
+                                        $dlg.remove();
+                                    },
+                                    open: function(){
+                                        $dlg.css({padding:0});
+                                        
+                                        window.hWin.HEURIST4.ui.initHelper( {button:$dlg.find('#hint_more_info1'), 
+                                                        title:'Field data type: Record pointer', 
+                                                        url:window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #resource',
+                                                        position:{ my: "left top", at: "left top", of:$dlg}, no_init:true} ); 
+                                        window.hWin.HEURIST4.ui.initHelper( {button:$dlg.find('#hint_more_info2'), 
+                                                        title:'Field data type: Relationship marker', 
+                                                        url:window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
+                                                        position:{ my: "left top", at: "left top", of:$dlg}, no_init:true} ); 
+                                        
+                                    }  //end open event
                             });
+                            
 
                     }});
                     
@@ -1227,16 +1255,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this._on(this.enum_container.find('#show_terms_1'),{click: this._showOtherTerms}); //manage defTerms
             this._on(this.enum_container.find('#add_vocabulary_2'),{click: this._onAddVocabulary}); //add vocab via defTerms
             this._on(this.enum_container.find('#add_terms'),{click: this._onAddVocabOrTerms});
-            /*
-            this._on(this.enum_container.find('#show_terms_2'),{click: this._showOtherTerms});
-            this._on(this.enum_container.find('#add_advanced'),{click: function(){
-                
-                this._activateEnumControls(this._editing.getFieldByName('dty_Mode_enum'), true);
-            }});
-            this.enum_container.find('#btnSelectTerms').button();
-            this._on(this.enum_container.find('#btnSelectTerms'),{click: this._onSelectTerms});
-            */
-            
+           
             
             this._recreateTermsVocabSelector();
             //this._recreateTermsPreviewSelector();
@@ -1296,89 +1315,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options); // it recreates  
         
         
-/*
-        var sURL = window.hWin.HAPI4.baseURL +
-        "admin/structure/terms/editTermForm.php?treetype="+term_type
-            +"&parent="+(is_add_vocab?0:vocab_id)
-            +"&db="+window.hWin.HAPI4.database;
-            
-        window.hWin.HEURIST4.msg.showDialog(sURL, {
-
-            "close-on-blur": false,
-            "no-resize": true,
-            noClose: true, //hide close button
-            title: 'Edit Vocabulary',
-            height: 340,
-            width: 700,
-            onpopupload:function(dosframe){
-                //define name for new vocabulary as field name + vocab
-                var ele = $(dosframe.contentDocument).find('#trmName');
-                if(is_add_vocab && is_frist_time){
-                    is_frist_time = false;
-                    if( !window.hWin.HEURIST4.util.isempty(dt_name)){
-                        ele.val( dt_name+' vocab' );    
-                    }
-                }
-                ele.focus();
-            },
-            callback: function(context) {
-                if(context!="") {
-
-                    if(context=="ok"){    //after edit term tree
-                        that._recreateTermsVocabSelector();
-                        //that._recreateTermsPreviewSelector();
-                    }else if(!window.hWin.HEURIST4.util.isempty(context)) { //after add new vocab
-                        that._editing.setFieldValueByName('dty_JsonTermIDTree', context);
-                        that._editing.setFieldValueByName('dty_TermIDTreeNonSelectableIDs', '');
-                        that._recreateTermsVocabSelector();
-                        //that._recreateTermsPreviewSelector();
-                    }
-                }
-            }
-        });
-*/
-    },
-
-    /**
-    * @todo - remove 
-    * _onSelectTerms 
-    *
-    * Shows a popup window where user can select terms individually and creates a term tree as wanted
-    */
-    _onSelectTerms: function(){
-
-        var dt_name = this._editing.getValue('dty_Name')[0];
-        var allTerms = this._editing.getValue('dty_JsonTermIDTree')[0];
-        var disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0];
-        
-        var term_type = this._editing.getValue('dty_Type')[0];
-        if(term_type!="enum"){
-            term_type="relation";
-        }
-
-        var sURL = window.hWin.HAPI4.baseURL +
-        "admin/structure/terms/selectTerms.html?dtname="+dt_name+"&datatype="+term_type
-            +"&all="+allTerms+"&dis="+disTerms+"&db="+window.hWin.HAPI4.database;
-            
-        var that = this;
-
-        window.hWin.HEURIST4.msg.showDialog(sURL, {
-            "close-on-blur": false,
-            "no-resize": true,
-            noClose: true, //hide close button
-            title: 'Select terms',
-            height: 500,
-            width: 750,
-            callback: function(editedTermTree, editedDisabledTerms) {
-                if(editedTermTree || editedDisabledTerms) {
-                    //update hidden fields
-                    that._editing.setFieldValueByName('dty_JsonTermIDTree', editedTermTree);
-                    that._editing.setFieldValueByName('dty_TermIDTreeNonSelectableIDs', editedDisabledTerms);
-                    that._recreateTermsPreviewSelector();
-                }
-            }
-        });
-
     },
 
     _onAddVocabulary: function(){
@@ -1444,32 +1380,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 }
         });
 
-/* H3 version        
-        var sURL = window.hWin.HAPI4.baseURL + "admin/structure/terms/editTerms.php?"+
-        "popup=1&treetype="+term_type+"&db="+window.hWin.HAPI4.database;
-
-        var vocab_id = 0;
-
-        var is_vocab = ($(event.target).attr('id')=='show_terms_1');
-        if(is_vocab){
-            var vocab_id =  this.enum_container.find("#selVocab").val();
-            sURL = sURL + '&vocabid='+vocab_id;
-        }
-
-        var that = this;
-        
-        window.hWin.HEURIST4.msg.showDialog(sURL, {
-            "close-on-blur": false,
-            "no-resize": false,
-            title: (term_type=='relation')?'Manage Relationship types':'Manage Terms',
-            height: (term_type=='relation')?820:780,
-            width: 950,
-            afterclose: function() {
-                that._recreateTermsVocabSelector();
-                //_recreateTermsPreviewSelector();
-            }
-        });
-*/
     },    
     
     //

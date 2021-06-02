@@ -1,3 +1,0 @@
-Documentation for API is generated with Swagger
-https://app.swaggerhub.com
-MyHub -> Open Heurist API -> Export -> Documentation -> html2

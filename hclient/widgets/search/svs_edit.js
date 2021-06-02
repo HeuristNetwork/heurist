@@ -630,11 +630,9 @@ function hSvsEdit(args) {
                 }
                 
                 
+                window.hWin.HEURIST4.ui.disableAutoFill(allFields);
+                
                 allFields
-                    .attr('autocomplete','disabled')
-                    .attr('autocorrect','off')
-                    .attr('autocapitalize','none')
-                    .attr('spellcheck','false')
                     .on("keypress",function(event){
                         var code = (event.keyCode ? event.keyCode : event.which);
                         if (code == 13) {

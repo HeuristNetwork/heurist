@@ -1133,25 +1133,17 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     var maskvalue = ele_mask.editing_input('getValues');
                     maskvalue = maskvalue[0];
 
-                    var sURL = window.hWin.HAPI4.baseURL +   
-                    "admin/structure/rectypes/editRectypeTitle.html?rectypeID="
-                            + that._currentEditID + "&mask="
-                            + encodeURIComponent(maskvalue)+"&db="+window.hWin.HAPI4.database;
+                    window.hWin.HEURIST4.ui.showRecordActionDialog('rectypeTitleMask',
+                        {rty_ID:that._currentEditID, 
+                            rty_TitleMask:maskvalue, path: 'widgets/entity/popups/',
+                            onClose: function(newvalue){
+                                if(!window.hWin.HEURIST4.util.isnull(newvalue)){
+                                    ele_mask.editing_input('setValue', newvalue);
+                                    that._editing.setModified(true); //restore flag after autosave
+                                    that.onEditFormChange();
+                                }
+                    }});
 
-                    window.hWin.HEURIST4.msg.showDialog(sURL, {     
-                        "close-on-blur": false,
-                        "no-resize": true,
-                        height: 800,
-                        width: 800,
-                        callback: function(newvalue) {
-                            if(!window.hWin.HEURIST4.util.isnull(newvalue)){
-                                ele_mask.editing_input('setValue', newvalue);
-                                that._editing.setModified(true); //restore flag after autosave
-                                that.onEditFormChange();
-                            }
-                        },
-                        default_palette_class: this.options.default_palette_class
-                    });
 
                 }} );
                 
@@ -1371,36 +1363,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 */           
 
             this._addNewFields(recID, true);
- 
-/* 
-            //select Fields For New RecordType
-            var sURL = window.hWin.HAPI4.baseURL + "admin/structure/rectypes/editRectypeSelFields.html";
-
-            var that = this;
-            
-            this._selected_fields = [];
-            
-            window.hWin.HEURIST4.msg.showDialog(sURL, {
-                    "close-on-blur": false,
-                    "no-resize": false,
-                    height: 500, //(mode==0?200:250),
-                    width: 700,
-                    title:' Select fields for new record type',
-                    afterclose:function(){
-                        //_selected_fields assigned in closeCallback
-                        
-                        //add fields to structure in any case - by default DT_NAME and DT_DESCRIPTION
-                        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(that._selected_fields)){
-                            var dty_name_id = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']
-                            that._selected_fields = {fields:[dty_name_id],reqs:[dty_name_id]};  
-                        } 
-                    },
-                    callback:function(context){ //closeCallback
-                        that._selected_fields = context;
-                    },
-                    default_palette_class: this.options.default_palette_class 
-            });
-*/            
+           
         }else{
         }
         this._triggerRefresh('rty');

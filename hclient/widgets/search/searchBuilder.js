@@ -105,12 +105,11 @@ $.widget( "heurist.searchBuilder", {
                 },
     */            
                 buttons: [
-                    {text:window.hWin.HR('Preview'), id:'btnSave',
+                    /*{text:window.hWin.HR('Preview'), id:'btnSave',
                         click: function() {
                             that._doSaveSearch()
-                            //that.navigateWizard(1);
-                    }},
-                    {text:window.hWin.HR('Search'), id:'btnSearch',
+                    }},*/
+                    {text:window.hWin.HR('Filter'), id:'btnSearch',
                         class:'ui-button-action', 
                         click: function() {
                             that._doSearch()

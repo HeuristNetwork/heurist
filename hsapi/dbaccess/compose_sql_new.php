@@ -713,7 +713,7 @@ class HPredicate {
     var $lessthan = false;
     var $greaterthan = false;
 
-    var $allowed = array('title','t','modified','url','notes','type','ids','id','count','cnt',
+    var $allowed = array('title','t','added','modified','url','notes','type','ids','id','count','cnt',
             'f','field','geo','linked_to','linkedto','linkedfrom','related','related_to','relatedto','relatedfrom','links','plain',
             'addedby','owner','access','tag','keyword','kwd');
     /*
@@ -871,6 +871,7 @@ class HPredicate {
                 }
 
             case 'title':
+            case 'added':
             case 'modified':
             case 'url':
             case 'notes':
@@ -1011,6 +1012,10 @@ class HPredicate {
             $sHeaderField = 'rec_Title';
             $ignoreApostrophe = (strpos($val, 'LIKE')==1);
 
+        }else if($this->pred_type=='added' || $this->field_id=='added'){
+
+            $sHeaderField = "rec_Added";
+            
         }else if($this->pred_type=='modified' || $this->field_id=='modified'){
 
             $sHeaderField = "rec_Modified";
