@@ -1214,7 +1214,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         }
                         //Because user is making changes to the values, save the object, making it easier to return to the original value when decimals are changed.
                         intervalsNumeric = $.extend(true,{},fields3[name].intervals);
-                        if(!fields3[name].type == 'date'){
+                        if(!(fields3[name].type == 'date')){
                             generateNumericIntervalsRows(name, fields3[name].intervals, htmlElement, $('#roundingSelect').val());
                         }else{
                             generateNumericIntervalsRows(name, fields3[name].intervals, htmlElement, 0);
@@ -2221,7 +2221,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                         page_interval_idx = -1;
                         for (i=0; i<plen; i++){
-                            if( fitToInterval( fields3.page.type, pages[i].values, pval ) ){
+                            if( fitToInterval( fields3.page.type, pages[i].values, pval, 'page' ) ){
                                 page_interval_idx = i;
                                 break;
                             }
@@ -2587,7 +2587,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     //find row interval it fits
                     row_interval_idx = [-1];
                     for (i in rows){
-                        if( fitToInterval( fields3.row.type, rows[i].values, rval ) ){
+                        if( fitToInterval( fields3.row.type, rows[i].values, rval, 'row') ){
                             //Some records may contain more than one value, this stores it in an array and generates based on this.
                             if(count<1){
                                 row_interval_idx[0]=i;
@@ -2618,7 +2618,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     }else{
 
                         for (j=0; j<clen; j++){
-                            if( fitToInterval( fields3.column.type, columns[j].values, records[idx][1] ) ){
+                            if( fitToInterval( fields3.column.type, columns[j].values, records[idx][1], 'column' ) ){
                                 var val = parseFloat(records[idx][2]);   //WARNING - fix for AVG
                                 //Iterate through each row_interval_idx to add the output of values that contain more than one.
                                 for(k=0;k<row_interval_idx.length; k++){
@@ -2998,12 +2998,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     }
 
-    function fitToInterval(type, values, val){
+    function fitToInterval(type, values, val, name){
         if(type=="enum" || type=="resource" || type=="relationtype"){
             return (window.hWin.HEURIST4.util.findArrayIndex(val,values)>=0); // values.indexOf(val)
         }else{
-            val = parseFloat(val);
-            return (val>=values[0] && val<=values[1]);
+            if(val == fields3[name].values[1]){
+                return (val>=values[0] && val<=values[1]);    
+            }else{
+                val = parseFloat(val);
+                return (val>=values[0] && val<values[1]); 
+            }     
         }
     }
 
