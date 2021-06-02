@@ -39,11 +39,14 @@
 
         <script type="text/javascript" src="selectMultiFields.js"></script>
 
-        <script>
-        	$(document).ready(function(){
-        		_init();
-        	});
-        </script>
+        <script type="text/javascript">
+            var multiSelectObj;
+            $(document).ready(function() {
+                multiSelectObj = new hMultiSelect();
+
+                multiSelectObj.init(); // initialise popup's JS
+            });
+        </script> 
 
         <style type="text/css">
             .tabs{
@@ -78,6 +81,8 @@
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+				
+				user-select: none;
             }
         </style>
     </head>
