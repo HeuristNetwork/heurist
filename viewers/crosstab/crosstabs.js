@@ -2303,7 +2303,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                 });
                             }
 
-                            return topText+ '\n\n\t' + fields3['column'].fieldname+ extendedRow + '\n' + csv;
+                            return topText+ '\n\n\t' + ((fields3['column'].intervals.length > 0) ? fields3['column'].fieldname+ extendedRow : '') + '\n' + csv;
                         },
                         footer: true
                     },
