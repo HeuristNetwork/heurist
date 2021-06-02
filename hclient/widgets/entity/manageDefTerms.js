@@ -1809,6 +1809,32 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     return;
                 }
 
+                if(no_check!==true){    
+                    //1. check that selected terms are already in this vocabulary
+                    var trm_ids = $Db.trm_TreeData(new_parent_id, 'set'); //ids
+                    if(window.hWin.HEURIST4.util.findArrayIndex(trm_ID, trm_ids)>=0){
+                        window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
+                            + ' <b>"'+$Db.trm(trm_ID, 'trm_Label')
+                            +'"</b> is already in vocabulary <b>"'+$Db.trm(new_parent_id,'trm_Label')+'"</b>',null,'Duplication',
+                            {default_palette_class:this.options.default_palette_class}); 
+                        return;
+                    }
+                    //2. check there is not term with the same name
+                    var trm_labels = $Db.trm_TreeData(new_parent_id, 'labels'); //labels in lowcase
+                    var lbl = $Db.trm(trm_ID, 'trm_Label');
+                    if(trm_labels.indexOf(lbl.toLowerCase())>=0){
+                        window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
+                            + ' with name <b>"'+lbl
+                            +'"</b> is already in vocabulary <b>"'+$Db.trm(new_parent_id,'trm_Label')+'"</b>'
+                            +'<p>To make this move, edit the term so that it is different from any in the top level '
+                            +'of the vocabulary to which you wish to move it. Once moved, you can merge within '
+                            +'the vocabulary or reposition the term and edit it appropriately.</p>'
+                            ,null,'Duplication',
+                            {default_palette_class:this.options.default_palette_class}); 
+                        return;
+                    }
+                }
+
                 var parents = $Db.trm(new_parent_id, 'trm_Parents');
                 if(parents){
                     parents = parents.split(',');
@@ -2325,14 +2351,18 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             var is_already_exists = false;
             var vocab_id = fields['trm_ParentTermID'];
             if(vocab_id>0){
-                vocab_id = $Db.getTermVocab(vocab_id);   
+                //vocab_id = $Db.getTermVocab(vocab_id);   
                 var trm_id = fields['trm_ID'];
                 var lbl = fields['trm_Label'].toLowerCase();
 
-                if(trm_id<0){ //new one
+                if(trm_id<0 || window.hWin.HEURIST4.util.isempty(trm_id)){ //new one
                     var all_labels = $Db.trm_TreeData(vocab_id, 'labels');
                     is_already_exists = (all_labels.indexOf(lbl)>=0);
                 }else{ //existed one
+                    
+                    var parents = fields['trm_Parents'].split(','); // Need to get actual parent id, which will be the last id in the array of parents
+                    vocab_id = parents[parents.length - 1];
+
                     var all_labels = $Db.trm_TreeData(vocab_id, 'select');
                     for(var i=0; i<all_labels.length; i++){
                         if(all_labels[i].title.toLowerCase()==lbl && all_labels[i].key!=trm_id){
@@ -2351,7 +2381,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
 
         return fields;
-
     },
 
 
