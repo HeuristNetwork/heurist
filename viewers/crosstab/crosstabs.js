@@ -1031,8 +1031,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 
                 $resetRowBody = '<div class="row">'+
                     '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Reset Intervals:</label></div><div class="col-sm col-xs-12"><input id="'+name+'IntCount" size="6" value="'+keepCount+'"></input></div></div></div>'+
-                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Range (from):</label></div><div class="col-sm col-xs-12"><input id="minOutlier" size="6" value="'+minMax[0]+'"></input></div></div></div>'+
-                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Range (to):</label></div><div class="col-sm col-xs-12"><input id="maxOutlier" size="6" value="'+minMax[1]+'"></input></div></div></div>' +
+                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Range (from):</label></div><div class="col-sm col-xs-12"><input id="minOutlier'+name+'" size="6" value="'+minMax[0]+'"></input></div></div></div>'+
+                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Range (to):</label></div><div class="col-sm col-xs-12"><input id="maxOutlier'+name+'" size="6" value="'+minMax[1]+'"></input></div></div></div>' +
                     '<div class="col-12 mb-2"><button class="btn btn-success w-100" id="numericApply">Apply</button></div>' +
                     '</div>';
 
@@ -1040,14 +1040,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 
                 //Add click function to apply button.
                 $($resetRow).find('#numericApply').click(function(event){
-                    var isMinWithin = (parseInt($('#minOutlier').val()) >= fields3[name].values[0] && parseInt($('#minOutlier').val()) <= fields3[name].values[1]) ? true : false;    //If min within range.
-                    var isMaxWithin = (parseInt($('#maxOutlier').val()) <= fields3[name].values[1] && parseInt($('#maxOutlier').val()) >= fields3[name].values[0]) ? true : false;    //If man within range.
-                    var isMaxGreater = (parseInt($('#maxOutlier').val()) < parseInt($('#minOutlier').val())) ? true : false;
-                    var isMinGreater = (parseInt($('#minOutlier').val()) > parseInt($('#maxOutlier').val())) ? true : false;
+                    var isMinWithin = (parseInt($('#minOutlier'+name).val()) >= fields3[name].values[0] && parseInt($('#minOutlier'+name).val()) <= fields3[name].values[1]) ? true : false;    //If min within range.
+                    var isMaxWithin = (parseInt($('#maxOutlier'+name).val()) <= fields3[name].values[1] && parseInt($('#maxOutlier'+name).val()) >= fields3[name].values[0]) ? true : false;    //If man within range.
+                    var isMaxGreater = (parseInt($('#maxOutlier'+name).val()) < parseInt($('#minOutlier'+name).val())) ? true : false;
+                    var isMinGreater = (parseInt($('#minOutlier'+name).val()) > parseInt($('#maxOutlier'+name).val())) ? true : false;
 
                     if(isMinWithin && isMaxWithin && !isMaxGreater && !isMinGreater){
-                        minMax[0] = $('#minOutlier').val();
-                        minMax[1] = $('#maxOutlier').val();
+                        minMax[0] = $('#minOutlier'+name).val();
+                        minMax[1] = $('#maxOutlier'+name).val();
                         calculateIntervals(name, parseInt($('#'+name+'IntCount').val()), true );
                     }
                     else{
@@ -1134,12 +1134,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         for(i=0;i<int.length;i++){
 
-            var isOutlierMin = ((int[i].values[0] < Number($('#minOutlier').val())) && ((int[i].values[1] < Number($('#minOutlier').val())) || !(int[i].values[1] < Number($('#minOutlier').val())))) ? true : false;
-            var isOutlierMax = ((int[i].values[1] > Number($('#maxOutlier').val())) && ((int[i].values[0] > Number($('#maxOutlier').val())) || !(int[i].values[0] > Number($('#maxOutlier').val())))) ? true : false;
+            var isOutlierMin = ((int[i].values[0] < Number($('#minOutlier'+name).val())) && ((int[i].values[1] < Number($('#minOutlier'+name).val())) || !(int[i].values[1] < Number($('#minOutlier').val())))) ? true : false;
+            var isOutlierMax = ((int[i].values[1] > Number($('#maxOutlier'+name).val())) && ((int[i].values[0] > Number($('#maxOutlier'+name).val())) || !(int[i].values[0] > Number($('#maxOutlier').val())))) ? true : false;
 
             if(!isOutlierMin && !isOutlierMax){
-                if((int[i].values[0] < Number($('#maxOutlier').val())) && int[i].values[1] > Number($('#maxOutlier').val())){
-                    fields3[name].intervals[i].values[1] = Number($('#maxOutlier').val());
+                if((int[i].values[0] < Number($('#maxOutlier'+name).val())) && int[i].values[1] > Number($('#maxOutlier'+name).val())){
+                    fields3[name].intervals[i].values[1] = Number($('#maxOutlier'+name).val());
                     fields3[name].intervals[i].name = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + fields3[name].intervals[i].values[1].toFixed(decimalPlace);
                     fields3[name].intervals[i].name = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + fields3[name].intervals[i].values[1].toFixed(decimalPlace);
                 }
@@ -1162,7 +1162,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                     $(this).html('<input type="number" class="w-100" id="changeValueBox" value="'+intervalValue+'">');
                     //When user clicks out of input box change the intervals value min and max
-                    $('#changeValueBox').blur(function(){                        
+                    $('#changeValueBox').blur(function(){                    
                         //Change the max value for the intervals based on what the user has entered.
                         for(k=0;k<fields3[name].intervals.length;k++){
                             if(k < intervalId){
@@ -1176,6 +1176,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                     createErrorMessage($('#'+name+'IntervalsBody'), errorMessage);
                                     break;
                                 }
+
+                                var intervalK = (fields3[name].intervals.length == 1) ? 0 : (k-1);
 
                                 if((newNumber <= fields3[name].values[1]) && (newNumber >= fields3[name].intervals[k].values[0])){
                                     if(k==intervalId){
@@ -1194,8 +1196,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                             break;
                                         }
                                     }
-                                }else if((newNumber < fields3[name].intervals[k].values[0]) && (newNumber <= fields3[name].values[1])){
+                                }else if((newNumber < fields3[name].intervals[k].values[0]) && (newNumber <= fields3[name].values[1]) && newNumber >= fields3[name].intervals[intervalK].values[1]){
                                     fields3[name].intervals[k].values[0] = newNumber;
+                                    alreadyChanged = true;
                                     break;
                                 }
                                 else{
@@ -1230,7 +1233,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     var clickedMinOutlier = false;
                     var clickedMaxOutlier = false;
                     //Creates seperate div for outliers min
-                    var outlierNumber = Number($('#minOutlier').val());
+                    var outlierNumber = Number($('#minOutlier'+name).val());
                     //Change array to incorporate outliers for min
                     for(t=0;t<fields3[name].intervals.length;t++){
                         if(t==0){
@@ -1297,7 +1300,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 }
                 else if(isOutlierMax){
                     //Creates seperate div for outliers min
-                    var outlierNumber = Number($('#maxOutlier').val());
+                    var outlierNumber = Number($('#maxOutlier'+name).val());
                     fields3[name].intervals[i].values[1] = outlierNumber;
                     fields3[name].intervals[i].name = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + outlierNumber.toFixed(decimalPlace);
                     fields3[name].intervals[i].description = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + outlierNumber.toFixed(decimalPlace);
