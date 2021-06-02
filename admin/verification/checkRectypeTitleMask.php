@@ -145,7 +145,7 @@ if($mode!=3){
                             echo '<script>$("#titlemask_msg").text("OK: All record type have valid title masks.").addClass("res-valid");'; 
                             echo '$(".title_mask").css("background-color", "#6AA84F");</script>';        
                         }else{
-                            echo '<script>$(".title_mask").css("background-color", "#DC8501");</script>';
+                            echo '<script>$(".title_mask").css("background-color", "#E60000");</script>';
                         }                                   
                         print '<br /></div>';
                     }else{
