@@ -47,6 +47,7 @@ $.widget( "heurist.svs_list", {
 
     isPublished: false,
     loaded_saved_searches: null,   //loaded searches for button mode - based on options.allowed_XXX
+    missed_saved_searches: null,   //empty groups and missed filters for button mode
     svs_order: null,
     search_faceted: null,
     
@@ -75,11 +76,11 @@ $.widget( "heurist.svs_list", {
             if($.isNumeric(this.options.allowed_svsIDs)){
                 this.options.allowed_svsIDs = [this.options.allowed_svsIDs];
             }else{
-                this.options.allowed_svsIDs = this.options.allowed_svsIDs.split(',');    
+                this.options.allowed_svsIDs = this.options.allowed_svsIDs.trim().replace(/\s+/g,'').split(',');    
             }
         }
         if(this.options.allowed_UGrpID && !$.isArray(this.options.allowed_UGrpID)){
-            this.options.allowed_UGrpID = this.options.allowed_UGrpID.split(',');
+            this.options.allowed_UGrpID = this.options.allowed_UGrpID.trim().replace(/\s+/g,'').split(',');
         }
         
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.allowed_UGrpID))
@@ -98,10 +99,10 @@ $.widget( "heurist.svs_list", {
             this.options.buttons_mode = (this.options.searchTreeMode==0);
             
             if(this.options.searchTreeMode==2 
-                && !window.hWin.HAPI4.has_access()
+                && !window.hWin.HAPI4.has_access() //not logged in
                 && !window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.allowed_UGrpID)){
                 
-                    this.options.allowed_UGrpID = [4]; //web searches
+                    this.options.allowed_UGrpID = [4]; //web searches - by default
             }
         }
             
@@ -708,6 +709,14 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                                 }
                             }
                         );                            
+                    }else if(this.isPublished){
+
+                        this.helper_btm.before(
+                            $('<div>')
+                            .attr('grpid',  groupID).addClass('svs-acordeon')
+                            .append( this._defineHeader('Group '+groupID+' not found', groupID))
+                            .append( this._defineContent(groupID,this.options.container_width) ));
+                        
                     }
             }//for
             
@@ -926,7 +935,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
     },
     
     //
-    //
+    // draw list of buttons (for publish mode)
     //
     _updateAccordeonAsListOfButtons: function(){
         
@@ -951,14 +960,15 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                                 that.svs_order = Object.keys(that.loaded_saved_searches);
                             }
                             
-                            var svsID = Object.keys(that.loaded_saved_searches)
-                            var missed = [];
+                            var svsID = Object.keys(that.loaded_saved_searches);
+                            that.missed_saved_searches = [];
                             //verify
                             for(var i=0; i<that.options.allowed_svsIDs.length; i++){
                                 if(window.hWin.HEURIST4.util.findArrayIndex(that.options.allowed_svsIDs[i],svsID)<0){
-                                    missed.push(that.options.allowed_svsIDs[i]);
+                                    that.missed_saved_searches.push(that.options.allowed_svsIDs[i]);
                                 }
                             }
+                            /* old way - now this message in the end of the list
                             if(missed.length>0){
                                 window.hWin.HEURIST4.msg.showMsgErr(
                                 'Saved filter'+(missed.length>1?'s':'')+' (ID '
@@ -967,6 +977,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                                 + (missed.length>1?'does':'do')+' not exist in the database.<br><br>Please advise the database owner ('
                                 + window.hWin.HAPI4.sysinfo['dbowner_email'] +')');
                             }
+                            */
                             
                             that._updateAccordeonAsListOfButtons();
                         }
@@ -1091,6 +1102,33 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
         }else if(this.options.init_svsID){
             $(this.accordeon).find('button[data-svs-id="'+this.options.init_svsID+'"]').click();
         }
+        
+        //messages for not found groups and filters
+        if(this.missed_saved_searches && this.missed_saved_searches.length>0){
+            
+            $('<span style="padding:10px;" class="heurist-helper3">'
+                    +this._getNotFoundMessage(null, this.missed_saved_searches)+'</span>')
+                    .appendTo(this.accordeon);
+            
+        }else if(this.options.allowed_UGrpID.length>0){
+            
+            var empty_grp = window.hWin.HEURIST4.util.cloneJSON(this.options.allowed_UGrpID);
+            
+            $.each(this.loaded_saved_searches,function(i,svs){
+                var k = window.hWin.HEURIST4.util.findArrayIndex(svs[_GRPID], empty_grp);
+                if(k>=0){
+                    empty_grp.splice(k,1);
+                    if(empty_grp.length==0) return false;
+                }
+            })
+            if(empty_grp.length>0){
+                $('<span style="padding:10px;" class="heurist-helper3">'
+                        +this._getNotFoundMessage(empty_grp)+'</span>')
+                        .appendTo(this.accordeon);
+            }
+            
+        }
+
 
     },
 
@@ -1845,7 +1883,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
             tree.fancytree(fancytree_options);
 
             //treedata is empty - add div - to show empty message
-            var tree_links = $('<div class="heurist-helper3">no filters defined</div>')
+            var tree_links = $('<div class="heurist-helper3">'+this._getNotFoundMessage(groupID)+'</div>')
             .css({'display': treeData && treeData.length>0?'none':'block', 'padding-left':'1em'} );
             
             if(window.hWin.HEURIST4.util.isnull(container)){
@@ -2821,7 +2859,75 @@ console.log(err)
                     window.hWin.HEURIST4.msg.showMsgErr(response, true);
                 }
         });
-    }                        
+    },
+    
+    //
+    // no filters defined message (for publish node)
+    //
+    _getNotFoundMessage: function(groupIDs, svsIDs){
+        var is_logged = window.hWin.HAPI4.has_access();
+        
+        var sMsg = 'no filters defined';
+        
+        if(!svsIDs){
+            
+            if(!$.isArray(groupIDs)){
+                groupIDs = [groupIDs];
+            }
+            
+            var missed =  [];
+            var empty = [];
+            for (var i=0; i<groupIDs.length; i++){
+                var grp_name = window.hWin.HAPI4.sysinfo.db_usergroups[groupIDs[i]];
+                if(window.hWin.HEURIST4.util.isnull(grp_name)){
+                    missed.push(groupIDs[i]);
+                }else{
+                    empty.push(grp_name);
+                }
+            }
+            
+            sMsg = '';
+            
+            if(missed.length>0){
+                sMsg += ('<br>&nbsp;&nbsp;Unable to load workgroup'+(missed.length>1?'s':'')
+                            +' #' + missed.join(', '));
+                if(is_logged){
+                    sMsg += '. Please edit the web page, click edit on the Saved searches widget, and modify the parameters.';
+                }else{
+                    sMsg += '. Please advise website owner.';
+                }
+            }
+            if(empty.length>0){
+                if(sMsg!='') sMsg = sMsg + '<br><br>';
+                sMsg += ('&nbsp;&nbsp;There are no saved filters defined for the workgroup '
+                         +(empty.length>1?'s':'')
+                         + empty.join(', '));
+                
+                if(is_logged){
+                    sMsg += '. Please create some saved filters there (if you know what '
+                    + 'you\'re doing you may also edit the widget parameters to indicate another workgroup).';
+                }else{
+                    sMsg += '. Please advise website owner.';
+                }
+            }
+            
+        }else{
+           
+            sMsg = ('<br>&nbsp;&nbsp;Unable to load saved filter'+(svsIDs.length>1?'s':'')
+                        +' #' + svsIDs.join(', '));
+            if(is_logged){
+                sMsg += '. Please edit the web page, click edit on the Saved searches widget, and modify the parameters.';
+            }else{
+                sMsg += '. Please advise website owner.';
+            }
+            
+        }
+        
+        return sMsg;
+    }
+
+            
+                            
 
         
 

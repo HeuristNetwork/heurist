@@ -99,7 +99,7 @@
         }
         
         if(!$ugrID) {
-            $ugrID = '0,5'; //get saved searches for guest and websearches
+            $ugrID = '0,4'; //get saved searches for guest and websearches
         }
         
         if($keep_order){

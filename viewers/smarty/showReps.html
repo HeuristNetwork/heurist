@@ -569,9 +569,11 @@ console.log(e)
                 $("#btnRepEdit").button({text:false, icons: { primary: "ui-icon-pencil" }}).click(onShowEditor);
                 $("#btnRepNew").button({text:false, icons: { primary: "ui-icon-plusthick" }}).click(onGenerate);
                 $("#btnRepDelete").button({text:false, icons: { primary: "ui-icon-closethick" }}).click(onDeleteTemplate);
-                $("#btnRepImport").button({text:false, icons: { primary: "ui-icon-sign-in" }}).click(function(){
+                $("#btnRepImport").button({text:false, icons: { primary: "ui-icon-sign-out" }}).click(function(){
                     $('#fileupload').click();return false;
                 });
+                $("#btnRepImport").find('span.ui-icon').css({'transform':'rotate(180deg)','margin-top':'-9px'});
+                
                 $("#btnRepExport").button({text:false, icons: { primary: "ui-icon-sign-out" }})
                         .click( window.showReps.doExportTemplate );
                 $("#btnRepSave").button({text:false, icons: { primary: "ui-icon-disk" }})
