@@ -927,7 +927,7 @@ console.log( sheight );
         });
                         
         if(template_name=='blog'){
-            // 3. Execute template script to replace template variables
+            // 3. Execute template script to replace template variables, adds filters and smarty templates
             try{
                 $.getScript(sURL2, function(){
                     //console.log('getScript');                
@@ -1830,11 +1830,11 @@ console.log( sheight );
                 is_edit_widget_open = true;
                 
                 //load list of templates and init selector
-                $dlg.find('#templates').change(function(e){
+                $dlg.find('#templates').mouseover(function(e){
                     window.hWin.HEURIST4.util.setDisabled( $dlg.parents('.ui-dialog').find('#btnDoAction'), false );
                     var t_name = $(e.target).val();
                     selected_template  = t_name;
-                    $dlg.find('.template_author').html(templates[t_name]['author']);
+                    //$dlg.find('.template_author').html(templates[t_name]['author']);
                     $dlg.find('.template_description').html(templates[t_name]['description']);
                 });
                

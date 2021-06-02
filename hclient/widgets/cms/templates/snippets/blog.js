@@ -17,8 +17,6 @@ window.hWin.HAPI4.SystemMgr.ssearch_save(request,
 
             var svsID = response.data;
 
-            //window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
-
             //replace template values
             container.find('a[data-heurist-id="add_link"]').attr('href',window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+
             '&rec_rectype=7&rec_owner=1&rec_visibility=public');
