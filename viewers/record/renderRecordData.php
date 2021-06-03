@@ -462,7 +462,11 @@ if(!($is_map_popup || $without_header)){
             font-size: 10px;
             font-weight: normal;
             padding-top: 0.3em;
-        }        
+        }      
+
+        .detail img{
+            width: 50%;
+        }		
 <?php if($is_production){
     print '.detailType {width:160px;}';
 }?>        
@@ -1612,7 +1616,7 @@ function print_text_details($bib) {
 function output_chunker($val) {
     // chunk up the value so that it will be able to line-break if necessary
     //$val = htmlspecialchars($val);    The tags listed are the tags allowed.
-    $val = strip_tags($val,'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li>');
+    $val = strip_tags($val,'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>');
     return $val;
     /* it adds word breaker incorrectly, so Arabic words are displayed incorrecly
     return preg_replace('/(\\b.{15,20}\\b|.{20}.*?(?=[\x0-\x7F\xC2-\xF4]))/', '\\1<wbr>', $val);
