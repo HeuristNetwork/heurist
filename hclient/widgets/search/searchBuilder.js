@@ -809,7 +809,8 @@ $.widget( "heurist.searchBuilder", {
                                                 title: node.title
                                                        +'<span style="font-size:0.8em"> (record pointer)</span>',
                                                 code:codes.join(':')});                                        
-                                            node.title = node.title + ' fields';
+                                            node.title = ' fields'; //node.title + 
+                                            node.extraClasses = 'green-triangle';
                                             i++;                       
                                         }
                                     }else if(node.type=='relmarker'){
@@ -824,7 +825,8 @@ $.widget( "heurist.searchBuilder", {
                                                 title: node.title
                                                        +'<span style="font-size:0.8em"> (related record)</span>',
                                                 code:codes.join(':')});                                        
-                                            node.title = node.title + ' fields';
+                                            node.title = ' fields'; //node.title + 
+                                            node.extraClasses = 'green-triangle';
                                             i++;                       
                                         }
                                         

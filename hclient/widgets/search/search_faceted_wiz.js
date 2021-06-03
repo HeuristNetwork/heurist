@@ -1231,7 +1231,8 @@ $.widget( "heurist.search_faceted_wiz", {
 
                             that.current_tree_rectype_ids = rectypeIds.join(',');
 
-                            $("#fsw_showreverse").change(function(event){
+                            var ele = that.element.find("#fsw_showreverse");
+                            that._on(ele,{change:function(event){
 
                                 that.showHideReverse();
                                 /*
@@ -1246,12 +1247,12 @@ $.widget( "heurist.search_faceted_wiz", {
                                                 }
                                     }
                                 });*/
-                            });
+                            }});
 
                             //tree.options.filter.mode = "hide";
                             //tree.options.filter.highlight = false;
-                            $("#fsw_showreverse").attr('checked', false);
-                            $("#fsw_showreverse").change();
+                            ele.attr('checked', false);
+                            ele.change();
 
 /* server response
                         }else{
@@ -1267,11 +1268,13 @@ $.widget( "heurist.search_faceted_wiz", {
     
     , showHideReverse: function(){
         
-        var treediv = $('#field_treeview');
+        var treediv = this.element.find('#field_treeview');
+
         if(treediv.fancytree('instance')){
         
             var tree = treediv.fancytree("getTree");
-            var showrev = $('#fsw_showreverse').is(":checked");
+            var showrev = this.element.find('#fsw_showreverse').is(":checked");
+
             tree.visit(function(node){
 
                 if(node.data.isreverse==1){ 

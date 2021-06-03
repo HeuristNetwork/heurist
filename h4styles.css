@@ -1449,9 +1449,15 @@ span.fancytree-checkbox{
 }
 .tree-facets .fancytree-has-children span.fancytree-checkbox
 {
-    background-position: 0px -176px;
+    background-position: 0px -176px; /* blue arrow */
     display:inline-block;
 }
+.tree-facets .fancytree-has-children.green-triangle span.fancytree-checkbox
+{
+    background-position: -16px -128px; /* green triangle */
+    display:inline-block;
+}
+
 .tree-facets .fancytree-has-children.fancytree-partsel span.fancytree-checkbox
 {
     background-position: -64px -176px;

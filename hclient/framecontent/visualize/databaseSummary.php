@@ -23,7 +23,6 @@
 if(!defined('PDIR')) define('PDIR','../../../');
 require_once(dirname(__FILE__)."/../initPage.php");
 ?>
-<!--link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/global.css"-->
         <style>
         
 A:visited {
