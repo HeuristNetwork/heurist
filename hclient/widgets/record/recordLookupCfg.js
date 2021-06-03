@@ -364,7 +364,9 @@ $.widget( "heurist.recordLookupCfg", {
                 var field = $(ele).attr('data-field');
                 var dty_ID = that._current_cfg.fields[field];
 
-                if(!(dty_ID.indexOf('_long') >= 0) && !(dty_ID.indexOf('_lat') >= 0)){ // account for individual geopoints
+                if (dty_ID!=null && !(dty_ID>0) && (dty_ID.indexOf('_long') >= 0 || dty_ID.indexOf('_lat') >= 0)){
+                    
+                }else{
                     dty_ID = dty_ID>0 ?$Db.getLocalID('dty', dty_ID) :'';
                 }
                 
