@@ -687,7 +687,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
             
             $autoplay = '';
             if($params && @$params['auto_play']){
-                $autoplay = ' autoplay="autoplay" ';
+                $autoplay = ' autoplay="autoplay"  loop="" muted="" ';
             }
             
             //preload="none"
