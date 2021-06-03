@@ -1409,9 +1409,7 @@ console.log('No active tree node!!!!')
                         that._closeFormlet();
                     });
                 }else{
-                
-                    $($('div[data-dtid='+this._currentEditID+']')[0].childNodes[1]).addClass('ui-heurist-design-fade');
-				
+                    //make field edit formlet in "design" color
                     this.editForm
                         .css({'margin-left':'209px'})
                         .removeClass('ent_content_full ui-heurist-bg-light')
@@ -1427,11 +1425,15 @@ console.log('No active tree node!!!!')
                         this.editForm.appendTo(ed_cont);
                     }
                     
+                    //remove bg color for previous label
+                    this.previewEditor.find('div.header').removeClass('ui-heurist-design-fade');    
+                    
                     if(isHeader){
                         //insert as fist child for header
                         ed_ele.prepend( ed_cont );
                         //ed_cont.appendTo(ed_ele); //prepend
                     }else{
+                        ed_ele.find('div.header').addClass('ui-heurist-design-fade');    
                         ed_cont.insertAfter(ed_ele);    
                     }
                     //for empty fieldsets
@@ -1439,10 +1441,22 @@ console.log('No active tree node!!!!')
                         this.editForm.parents('fieldset:first').show();
                     }
                     
-                    //expand accordion tab
+                    //expand accordion or tab
                     var ele = this.editForm.parents('.ui-accordion:first');
                     if(ele.length>0){
-                        ele.accordion( 'option', 'active', 0);
+                        
+                        var atab = this.editForm.parents('.ui-accordion-content');
+                        if(!atab.is(':visible')){
+                            var header_id = atab.attr('aria-labelledby');
+                            $.each(ele.find('.ui-accordion-header'),function(idx,item){
+                                if($(item).attr('id') == header_id){
+                                    ele.accordion( 'option', 'active', idx);            
+                                    return false;
+                                }
+                            });
+                        }
+                        
+                        
                     }else{
                         ele = this.editForm.parents('.ui-tabs');
                         if(ele.length>0){
@@ -1682,7 +1696,8 @@ console.log('No active tree node!!!!')
                 .appendTo(bottom_div);
             
         this._on( btnCancel,{click: function() { 
-			$($('div[data-dtid='+this._currentEditID+']')[0].childNodes[1]).removeClass('ui-heurist-design-fade');
+            that.previewEditor.find('div[data-dtid='+that._currentEditID+']')
+                    .find('div.header').removeClass('ui-heurist-design-fade');
 
             if(that._editing && that._editing.isModified() && that._currentEditID!=null){
                 var $dlg, buttons = {};
@@ -1706,7 +1721,8 @@ console.log('No active tree node!!!!')
 		}});
                 
 		this._on( btnSave, {click: function() { 
-            $($('div[data-dtid='+this._currentEditID+']')[0].childNodes[1]).removeClass('ui-heurist-design-fade');
+            that.previewEditor.find('div[data-dtid='+that._currentEditID+']')
+                    .find('div.header').removeClass('ui-heurist-design-fade');
 
             that._saveEditAndClose( null, 'close' ); 
 		}});
