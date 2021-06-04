@@ -90,8 +90,8 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                             <!-- </label> -->
                                         </div>
                                         <!-- <div class="input-cell col-9">
-                            <select id="cbRectypes" class="text ui-widget-content ui-corner-all"></select>
-                        </div> -->
+                                                <select id="cbRectypes" class="text ui-widget-content ui-corner-all"></select>
+                                        </div> -->
                                         <div class="col-9">
                                             <select id="cbRectypes" class="form-input ui-widget-content ui-corner-all"></select>
                                         </div>
@@ -104,10 +104,10 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                             <div style="padding: 0.2em; width: 100%; display:none;" class="input" id="divLoadSettings">
                                         -->
                                             <!--
-                        <div class="header" style="padding: 0 16px 0 16px;">
-                            <label for="sel_saved_settings">Saved settings:</label>
-                        </div>
-                        <select id="sel_saved_settings" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select> -->
+                                            <div class="header" style="padding: 0 16px 0 16px;">
+                                                <label for="sel_saved_settings">Saved settings:</label>
+                                            </div>
+                                            <select id="sel_saved_settings" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select> -->
                                         <!-- </div> -->
                                     </div>
                                 </fieldset>
@@ -116,11 +116,11 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                 </div>
                                 <!-- <div style="width: 100%;" class="input" id="divSaveSettings"> -->
                                 <!-- <div class="header" style="padding: 0 16px 0 16px;">
-                            <label>Save settings for future use</label>
-                        </div>
-                        &nbsp;&nbsp;<b>Name</b>&nbsp;
-                        <input id="inpt_save_setting_name" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
-                        &nbsp;&nbsp;<button id="btnSaveSettings">Save</button> -->
+                                <label>Save settings for future use</label>
+                                </div>
+                                &nbsp;&nbsp;<b>Name</b>&nbsp;
+                                <input id="inpt_save_setting_name" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
+                                &nbsp;&nbsp;<button id="btnSaveSettings">Save</button> -->
                                 <!-- </div> -->
                             </div>
                             <div class="col-12 col-md-4 border border-dark bg-white borderChange">
@@ -261,10 +261,10 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                         <div style="text-align:center;padding-top:1em; padding-bottom:1em; display:none;" id="btnPanels">
                             <button id="btnUpdate" onclick="crosstabsAnalysis.doRetrieve()" style="font-size:larger;font-weight:bold">Update results</button>
                             <!--
-                    <button onclick="crosstabsAnalysis.doSave()">Save specification</button>
-                    <button id="btnCancel" onclick="crosstabsAnalysis.doCancel()">Cancel</button>
-                    <button id="btnPrint" onclick="crosstabsAnalysis.doPrint()">Print results</button>
-                    -->
+                                <button onclick="crosstabsAnalysis.doSave()">Save specification</button>
+                                <button id="btnCancel" onclick="crosstabsAnalysis.doCancel()">Cancel</button>
+                                <button id="btnPrint" onclick="crosstabsAnalysis.doPrint()">Print results</button>
+                            -->
                         </div>
                     </div>
                 </div>
@@ -286,6 +286,10 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                         </div>
                         <!--Pie Chart goes here!!! -->
                         <div class="tab-pane fade d-flex justify-content-center bg-white p-3" id="pie" role="tabpanel" aria-labelledby="pie-tab">
+                            <div class="alert alert-info d-none" role="alert" id="pieMessage">
+                                <i class="ui-icon ui-icon-alert"></i>
+                                Graphs currently do not work for column and page selections. Only selection of a row variable will produce a result.
+                            </div>
                             <canvas id="pieResults" width="700" height="700"></canvas>
                         </div>
                     </div>

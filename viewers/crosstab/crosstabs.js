@@ -128,8 +128,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
       $('.btn-rename span:first-child').addClass('saveIconEditButton');
       $('.btnSaveSettings').html('<i class="ui-icon ui-icon-save"></i> Save')
 
-      $('#pie').append('<p class="d-none" id="pieMessage">Graphs currently do not work for column and page selections. Only selection of a row variable will produce a result.</p>');
-
     }
 
     function _OnRowTypeChange(value) {
