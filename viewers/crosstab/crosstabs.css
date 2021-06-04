@@ -504,3 +504,22 @@ input[type="search"]:focus {
     background-color: #34793b;
     border-color: #34793b;
 }
+
+table.dataTable tfoot th, table.dataTable tfoot td {
+    padding: 8px 10px !important;
+    border-top: 1px solid #111 !important;
+}
+
+.dataTables_wrapper .dataTables_filter {
+    float: left;
+    text-align: left;
+    margin-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+@media screen and (max-width: 640px){
+    .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter {
+        float: none;
+        text-align: center;
+    }
+}
