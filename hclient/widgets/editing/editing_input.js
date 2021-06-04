@@ -967,6 +967,80 @@ $.widget( "heurist.editing_input", {
             }
             else{
                 $input = this._recreateSelector($input, value);
+				
+                if($($input[0]).hSelect("instance")!=undefined){
+					$($($input[0]).hSelect("instance").bindings[1]).on('click', function(e){ // selectmenu click extra handler
+
+						var trm_tooltip;
+						
+						$($($input[0]).hSelect("menuWidget")[0]).find('div').on({ // selectmenu's menu items
+							"mouseover": function(e){ // Retrieve information then display tooltip
+
+								var parent_container = $($input[0]).hSelect("menuWidget")[0];
+
+								var term_txt = $(e.target).text();
+								var vocab_id = that.f('rst_FilteredJsonTermIDTree');
+								var data = $Db.trm_TreeData(vocab_id, 'select');
+								
+								var details = "";
+
+								for(var i=0; i<data.length; i++){
+									if(data[i].title == term_txt){
+
+										var rec = $Db.trm(data[i].key);
+
+										if(!window.hWin.HEURIST4.util.isempty(rec.trm_Code)){
+											details += "<span style='text-align: center;'>Code &rArr; " + rec.trm_Code + "</span>";
+										}
+
+										if(!window.hWin.HEURIST4.util.isempty(rec.trm_Description)){
+
+											if(window.hWin.HEURIST4.util.isempty(details)){
+												details += "<span style='text-align: center;'>Code &rArr; N/A </span>";
+											}
+
+											details += "<hr/><span>" + rec.trm_Description + "</span>";
+										}
+									}
+								}
+
+								if(window.hWin.HEURIST4.util.isempty(details)){
+									details = "No Description Provided";
+								}
+
+								trm_tooltip = $(parent_container).tooltip({
+									items: "div.ui-state-active",
+									position: { // Post it to the right of menu item
+										my: "left+15 center",
+										at: "right center",
+										collision: "none"
+									},
+									show: { // Add delay to show
+										delay: 2000,
+										duration: 0
+									},
+									content: function(){ // Provide text
+										return details;
+									},
+									open: function(event, ui){ // Add custom CSS
+										ui.tooltip.css({
+											"color": "white",
+											"width": "200px",
+											"background": "#307D96",
+											"font-size": "1.1em"
+										});
+									}
+								});
+							},
+
+							"mouseleave": function(){ // Ensure tooltip closes
+								if(trm_tooltip.tooltip("instance")!=undefined){
+									trm_tooltip.tooltip("destroy");
+								}
+							}
+						});
+					});
+				}
             }
             $input = $($input);
             

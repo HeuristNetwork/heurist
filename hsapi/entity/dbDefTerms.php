@@ -411,7 +411,14 @@ class DbDefTerms extends DbEntityBase
             
                 if(@$this->records[$idx]['trm_ParentTermID']>0){
                     
-                    $vocab_id = getTermTopMostParent($mysqli, $this->records[$idx]['trm_ParentTermID']);    
+                    if(isset($this->data['trm_parentID'])){
+                        
+						$vocab_id = $this->data['trm_parentID']; // Replace with alternative parent, if supplied
+                    }else{
+						
+                        $vocab_id = getTermTopMostParent($mysqli, $this->records[$idx]['trm_ParentTermID']);
+                    }
+					
                     $labels = $this->getLabelsAndCodes( $vocab_id );
                     
                     if(is_array($labels)){

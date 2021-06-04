@@ -130,7 +130,7 @@ if($is_included){
         echo '<script>$("#invalid_msg").text("OK: All records have valid characters in freetext and blocktext fields.").addClass("res-valid");';        
         echo '$(".invalid_chars").css("background-color", "#6AA84F");</script>';        
     }else{
-        echo '<script>$(".invalid_chars").css("background-color", "#DC8501");</script>';
+        echo '<script>$(".invalid_chars").css("background-color", "#E60000");</script>';
     }
     print '</div>';
 }else{
