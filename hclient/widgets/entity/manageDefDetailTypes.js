@@ -178,6 +178,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
 
             this.coverMessage();			
+        }else if(this.options.select_mode=='select_multi'){
+            this.recordList.resultList('fullResultSet', $Db.dty());   
         }
         
 //console.log( 'DT initControls  ' + (new Date().getTime() / 1000 - this._time_debug));
