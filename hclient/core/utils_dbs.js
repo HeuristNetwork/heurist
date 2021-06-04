@@ -650,7 +650,8 @@ window.hWin.HEURIST4.dbs = {
                             var $rectype_ids = $pointerRecTypeId.split(",");
                              
                             if($mode==4 || $mode==5 || $mode==6){
-                                var $type_name = ($detailType=='resource' ? "Record pointer" : "Relationship marker");
+                                
+                                var $type_name = $Db.baseFieldType[$detailType];
                                 
                                 $dt_title = " <span style='font-style:italic'>" + $dt_title + "</span> <span style='font-size:0.7em'>(" + $type_name + ")</span>";
                             }

@@ -1563,6 +1563,21 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this._triggerRefresh(this.options.auxilary);    
 
     },
+    
+    _saveEditAndClose: function( fields, afterAction, onErrorAction ){
+      
+        if(!window.hWin.HEURIST4.util.isempty(fields['trm_Parents'])){
+            var parents = fields['trm_Parents'].split(',');
+            //request['trm_parentID'] = parents[parents.length - 1];
+
+            // set parent field to acutal parent filed, to avoid moving it
+            fields['trm_ParentTermID'] = parents[parents.length - 1]; 
+        }else if(!window.hWin.HEURIST4.util.isempty(fields['trm_ParentTermID'])){
+            //request['trm_parentID'] = fields['trm_ParentTermID'];
+        }
+             
+        this._super( fields, afterAction, onErrorAction );
+    },
 
     //
     // params: {trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID }
