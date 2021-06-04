@@ -2536,7 +2536,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var rowspan = 1;
         var totalspan = 1;
 
-        if((showPercentageRow || showPercentageColumn) && clen>1) rowspan++;
+        if((showPercentageRow || showPercentageColumn) && clen>0) rowspan++;
         if(showPercentageRow && clen>0) colspan++;
         if(showPercentageColumn) colspan++;
         if(showPercentageRow && showTotalsColumn) totalspan++;
