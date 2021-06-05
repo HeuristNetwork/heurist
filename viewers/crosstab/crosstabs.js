@@ -1279,7 +1279,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     $('<div class="col-4">').html('Outliers').appendTo($intRows);
                     $('<div class="col-4">').html(lessThanPrior+outlierNumber.toFixed(decimalPlace)).appendTo($intRows);
                     $('<div class="col-4">').append($('<button>').addClass('btn btn-secondary border-dark').attr('id','removeMinOutlier')
-                    .append('<i class="ui-icon ui-icon-trash w-100"></i>'))
+                    .append('<i class="ui-icon ui-icon-trash"></i>'))
                     .click(function(){
                         if(!clickedMinOutlier){
                             originalOutliers[0] = fields3[name].intervals[0];
@@ -1293,7 +1293,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         else {
                             fields3[name].intervals.unshift(originalOutliers[0]);
                             $('#removeMinOutlier').empty();
-                            $('#removeMinOutlier').append('<i class="ui-icon ui-icon-trash w-100"></i>');
+                            $('#removeMinOutlier').append('<i class="ui-icon ui-icon-trash"></i>');
                             $('#removeMinOutlier').toggleClass('btn-success btn-secondary border-dark');
                             clickedMinOutlier = false;
                         }
@@ -1333,7 +1333,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     $('<div class="col-4">').html('Outliers').appendTo($intRows);
                     $('<div class="col-4">').html(greaterThanPrior+outlierNumber.toFixed(decimalPlace)).appendTo($intRows);
                     $('<div class="col-4">').append($('<button>').addClass('btn btn-secondary border-dark').attr('id','removeMaxOutlier')
-                    .append('<i class="ui-icon ui-icon-trash w-100"></i>'))
+                    .append('<i class="ui-icon ui-icon-trash"></i>'))
                     .click(function(){
                         if(!clickedMaxOutlier){
                             originalOutliers[1] = fields3[name].intervals[fields3[name].intervals.length-1];
@@ -1347,7 +1347,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         else {
                             fields3[name].intervals.push(originalOutliers[1]);
                             $('#removeMaxOutlier').empty();
-                            $('#removeMaxOutlier').append('<i class="ui-icon ui-icon-trash w-100"></i>');
+                            $('#removeMaxOutlier').append('<i class="ui-icon ui-icon-trash"></i>');
                             $('#removeMaxOutlier').toggleClass('btn-success btn-secondary border-dark');
                             clickedMaxOutlier = false;
                         }
@@ -1612,7 +1612,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $('<div class="col-1 p-1 border-2 border-top border-secondary delete d-flex align-items-center">')
                 .append($('<button>')
                     .addClass('btn btn-secondary border-dark w-100 p-0 py-1')
-                    .append('<i class="ui-icon ui-icon-trash w-100"></i>')
+                    .append('<i class="ui-icon ui-icon-trash"></i>')
                     .click(function(){
                         //Remove interval and uncheck checkboxes
                         var interval = parseInt($(this).parents('div.list').attr('id').replace(name,''));
