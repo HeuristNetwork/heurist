@@ -41,6 +41,7 @@
     require_once(dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
     require_once(dirname(__FILE__).'/../entity/dbDefRecTypes.php');
     require_once (dirname(__FILE__).'/../utilities/titleMask.php');
+    require_once (dirname(__FILE__).'/../utilities/utils_image.php');
     require_once (dirname(__FILE__).'/../../records/index/elasticSearch.php');
     require_once (dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
 
@@ -1775,7 +1776,7 @@
                     
                         if($dtl_Value=='generate_thumbnail_from_url' && @$record['URL']){
                             
-                            $tmp_file = generate_thumbnail($record['URL']);
+                            $tmp_file = image_CreateFromURL($record['URL']);
 
                             if(!is_a($tmp_file,'stdClass')){
                                 $err_msg = is_array($tmp_file) ?$tmp_file['error'] :'Unknown error '.$tmp_file;

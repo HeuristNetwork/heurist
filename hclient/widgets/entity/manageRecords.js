@@ -2997,6 +2997,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         }
                     }
                 }//verify max size
+                
             }
             
             if(fields==null) return; //validation failed

@@ -53,8 +53,6 @@
     fileNameSanitize
     fileNameBeautify
     
-    generate_thumbnail 
-    
     saveURLasFile  loadRemoteURLContent + fileSave
     @todo move from record_shp? fileRetrievePath returns fullpath to file is storage, or to tempfile, 
                    if it requires it extracts zip archive to tempfile or download remote url to tempfile
@@ -722,55 +720,6 @@
         }
     }
 
-
-    //
-    // Generates thumbnail for given URL
-    //
-    // returns temp file path or array with error messahe 
-    //    
-    function generate_thumbnail($sURL){
-
-        if(!defined('WEBSITE_THUMBNAIL_SERVICE') || WEBSITE_THUMBNAIL_SERVICE==''){
-            return array('error'=>'Thumbnail generator service not defined');
-        }
-        
-        $res = array();
-        //get picture from service
-        //"http://www.sitepoint.com/forums/image.php?u=106816&dateline=1312480118";
-        //https://api.thumbnail.ws/api/ab73cfc7f4cdf591e05c916e74448eb37567feb81d44/thumbnail/get?url=[URL]&width=320
-        $remote_path =  str_replace("[URL]", $sURL, WEBSITE_THUMBNAIL_SERVICE);
-        $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_"); // . $file_id;
-
-        $filesize = saveURLasFile($remote_path, $heurist_path);
-
-        if($filesize>0 && file_exists($heurist_path)){
-
-            //check the dimension of returned thumbanil in case it is less than 50 - consider it as error
-            if(strpos($remote_path, substr(WEBSITE_THUMBNAIL_SERVICE,0,24))==0){
-
-                $image_info = getimagesize($heurist_path);
-                if($image_info[1]<50){
-                    //remove temp file
-                    unlink($heurist_path);
-                    return array('error'=>'Thumbnail generator service can\'t create the image for specified URL');
-                }
-            }
-
-            $file = new \stdClass();
-            $file->original_name = 'snapshot.jpg';
-            $file->name = $heurist_path; //pathinfo($heurist_path, PATHINFO_BASENAME); //name with ext
-            $file->fullpath = $heurist_path;
-            $file->size = $filesize; //fix_integer_overflow
-            $file->type = 'jpg';
-                                
-            return $file;    
-            
-        }else{
-            return array('error'=>'Cannot download image from thumbnail generator service. '.$remote_path.' to '.$heurist_path);
-        }
-        
-    }    
-    
     /**
     * save remote url as file and returns the size of saved file
     *
