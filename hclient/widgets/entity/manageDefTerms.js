@@ -1565,7 +1565,18 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     },
     
     _saveEditAndClose: function( fields, afterAction, onErrorAction ){
-      
+
+        if(window.hWin.HAPI4.is_callserver_in_progress()) {
+            //prevent repeatative call
+            return;   
+        }
+
+        if(!fields){
+            fields = this._getValidatedValues(); 
+            if(fields) fields['isfull'] = true;
+        }
+        if(fields==null) return; //validation failed
+
         if(!window.hWin.HEURIST4.util.isempty(fields['trm_Parents'])){
             var parents = fields['trm_Parents'].split(',');
             //request['trm_parentID'] = parents[parents.length - 1];
@@ -1575,7 +1586,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }else if(!window.hWin.HEURIST4.util.isempty(fields['trm_ParentTermID'])){
             //request['trm_parentID'] = fields['trm_ParentTermID'];
         }
-             
+
         this._super( fields, afterAction, onErrorAction );
     },
 

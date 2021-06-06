@@ -1484,17 +1484,17 @@ $.widget( "heurist.manageEntity", {
     _saveEditAndClose: function( fields, afterAction, onErrorAction ){
 
             if(window.hWin.HAPI4.is_callserver_in_progress()) {
-//console.log('prevent repeatative call')
+                //prevent repeatative call
                 return;   
             }
-            
-            //2020-12-06 if(this.options.edit_structure){ return; }            
             
             var is_full = 0;
         
             if(!fields){
                 fields = this._getValidatedValues(); 
                 is_full = 1;
+            }else{
+                if(fields['isfull']) is_full = 1;
             }
 
             
