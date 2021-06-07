@@ -829,6 +829,16 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     var ele = this._editing.getFieldByName('dty_Type');  
                     ele = ele.find('.input-div');
 
+                    if(ele.find('select').hSelect("instance")){ 
+                        var len = ele.find('select').find('option').length;
+                        $(ele.find('select').find('option')[len-1]).attr({ // select... is listed last
+                            "disabled": true,
+                            "selected": true
+                        }).hide();
+
+                        ele.find('select').hSelect("refresh");
+                    }
+
                     this._on(ele.find('select'), {
                         'change':function(event){
                             var new_dty = $(event.target).val();
