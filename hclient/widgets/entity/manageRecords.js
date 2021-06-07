@@ -747,7 +747,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 btns[window.hWin.HR('Exit with no fields')] = function(){
                                     var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                                     $dlg.dialog('close');
-                                    titleMaskCheck();
+                                    checkTitleMask();
                                 };
                                 window.hWin.HEURIST4.msg.showMsgDlg('You need to define fields to make this record type usable.', 
                                     btns, 
