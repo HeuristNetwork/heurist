@@ -62,11 +62,11 @@
                             {"key":"enum", "title":"Dropdown (Terms)"},
                             {"key":"float", "title":"Numeric (Integer or decimal)"},
                             {"key":"freetext", "title":"Text (single line)"},
-                            {"key":"blocktext", "title":"Text (multi-line)"},
+                            {"key":"blocktext", "title":"Memo Text (multi-line or html)"},
                             {"key":"date", "title":"Date / temporal"},
                             {"key":"geo", "title":"Geospatial"},
-                            {"key":"file", "title":"File"},
-                            {"key":"resource", "title":"Record pointer"},
+                            {"key":"file", "title":"File or media URL"},
+                            {"key":"resource", "title":"Record pointer / Foregin key"},
                             {"key":"relmarker", "title":"Relationship marker"},
                             {"key":"none", "title":"Select..."}]                        
                     }

@@ -95,6 +95,10 @@ a{
     margin: 1px;
 }
 
+/* remove displayed option from selectmenu */
+.heurist-selectmenu > li.ui-state-disabled{
+    display: none;
+}
 
 /* TODO: opacity=20 appears to be wrong, ? should be opacity 20 */
 .ui-layout-mask {
