@@ -837,6 +837,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         }).hide();
 
                         ele.find('select').hSelect("refresh");
+						
+						$(ele.find('select').hSelect("menuWidget").find('li')[len-1]).hide();
                     }
 
                     this._on(ele.find('select'), {
