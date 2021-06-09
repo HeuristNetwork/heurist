@@ -124,6 +124,7 @@ $.widget( "heurist.resultList", {
 
     _currentRecordset:null,
     _currentMultiSelection:null, //for select_multi - to keep selection across pages and queries
+    _fullRecordset:null, //keep full set for multiselection (to get records diregard current filters)
 
     _startupInfo:null,
 
@@ -2291,6 +2292,13 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
     },
     
     //
+    // keeps full set for multiselection 
+    //
+    fullResultSet: function(recset){
+        this._fullRecordset = recset;
+    },
+    
+    //
     // trigger global event
     //
     triggerSelection: function(){
@@ -2318,6 +2326,8 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 return null;
             }else if(idsonly){
                 return this._currentMultiSelection; //.getIds();
+            }else if(this._fullRecordset){
+                return this._fullRecordset.getSubSetByIds(this._currentMultiSelection);
             }else{
                 return this._currentRecordset.getSubSetByIds(this._currentMultiSelection);
             }

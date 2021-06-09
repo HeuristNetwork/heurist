@@ -393,7 +393,7 @@ window.hWin.HEURIST4.dbs = {
                                         for (var i=0; i<$res_dt['constraint']; i++){
                                             $res_dt['children'][i]['code'] = $res_dt['code']
                                                                 + _separator + '{'+$res_dt['children'][i]['title'] +'}';
-                                            $res_dt['children'][i]['title'] = $res_dt['children'][i]['title'] + '('+$res_dt['title']+')';
+                                            $res_dt['children'][i]['title'] = $res_dt['title'] + ' ('+ $res_dt['children'][i]['title']+')';
                                             $children_links.push($res_dt['children'][i]);    
                                         }
                                     }else{
@@ -482,7 +482,7 @@ window.hWin.HEURIST4.dbs = {
                 $res['title'] = 'Any record type';
                 $res['type'] = 'rectype';
                 
-                if($mode==5 && $recursion_depth==0 && $recTypeId && $recTypeId.indexOf(',')>0){ //for faceted search
+                if(false && $mode==5 && $recursion_depth==0 && $recTypeId && $recTypeId.indexOf(',')>0){ //for faceted search
                     $res['key'] = $recTypeId;
                     $res['type'] = 'rectype';
                     
@@ -493,7 +493,7 @@ window.hWin.HEURIST4.dbs = {
                     var  $details = $Db.rst(recTypes[0]); 
 
                     //if there are several rectypes - find common fields only
-                    //IJ wants show all fields of fist record type
+                    //IJ wants show all fields of fist record type only
                     /*  2020-04-25
                     var names = [];
                     $.each(recTypes, function(i, rtid){ 
@@ -650,7 +650,8 @@ window.hWin.HEURIST4.dbs = {
                             var $rectype_ids = $pointerRecTypeId.split(",");
                              
                             if($mode==4 || $mode==5 || $mode==6){
-                                var $type_name = ($detailType=='resource' ? "Record pointer" : "Relationship marker");
+                                
+                                var $type_name = $Db.baseFieldType[$detailType];
                                 
                                 $dt_title = " <span style='font-style:italic'>" + $dt_title + "</span> <span style='font-size:0.7em'>(" + $type_name + ")</span>";
                             }
@@ -790,6 +791,7 @@ window.hWin.HEURIST4.dbs = {
         
         var res = [];
 
+/*        
         if($mode==5){ //with reverse links
             var def = __getRecordTypeTree(rectypeids, 0, $mode, fieldtypes, null);
 
@@ -808,7 +810,7 @@ window.hWin.HEURIST4.dbs = {
             }
         
         } else {
-        
+*/        
             rectypeids = (!$.isArray(rectypeids)?rectypeids.split(','):rectypeids);    
             
             
@@ -838,7 +840,7 @@ window.hWin.HEURIST4.dbs = {
                 res = res[0]['children'];            
             }
             
-        }
+//        }
 
         return res;    
         

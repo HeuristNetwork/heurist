@@ -28,7 +28,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         title:  'Record Type Title Mask Edit',
         default_palette_class: 'ui-heurist-design', 
         
-        path: 'widgets/entity/popups/',
+        path: 'widgets/entity/popups/', //location of this widget
         rty_ID: 0, 
         rty_TitleMask: '',
         
@@ -62,7 +62,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         
         
         //init tree
-        this._loadRecordTypesTreeView();
+        this._loadRecordTypeTreeView();
         
         //init buttons
         var btn = this.element.find('#btnInsertField').button();
@@ -371,7 +371,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
     //
     // show treeview with record type structure
     //
-    _loadRecordTypesTreeView: function(rtyID){
+    _loadRecordTypeTreeView: function(rtyID){
         
         var that = this;
 

@@ -267,6 +267,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
          
             this.options.ui_params.width = 440;
             this.options.ui_params.fields = ['icon','name','fields'];
+            
+            this.recordList.resultList('fullResultSet', $Db.rty());   
         }
                     
 

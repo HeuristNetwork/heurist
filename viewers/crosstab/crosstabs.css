@@ -354,3 +354,172 @@ input[type=number]{
         border-bottom: 0 !important;
     }
 }
+
+.btn-check:active+.btn-outline-primary, 
+.btn-check:checked+.btn-outline-primary, 
+.btn-outline-primary.active, 
+.btn-outline-primary.dropdown-toggle.show, 
+.btn-outline-primary:active {
+    color : #FFFFFF;
+    background-color: #305486;
+    border-color: #305486;
+}
+
+.btn-outline-primary {
+    color : #305486;
+    border-color: #305486;
+}
+
+.btn-check:active+.btn-outline-secondary, 
+.btn-check:checked+.btn-outline-secondary, 
+.btn-outline-secondary.active, 
+.btn-outline-secondary.dropdown-toggle.show, 
+.btn-outline-secondary:active {
+    color : #FFFFFF;
+    background-color: #307d96;
+    border-color: #307d96;
+}
+
+.btn-outline-secondary {
+    color : #307d96;
+    border-color: #307d96;
+}
+
+.btn-outline-primary:hover {
+    color: #fff;
+    background-color: #305486;
+    border-color: #305486;
+}
+
+.btn-outline-secondary:hover {
+    color: #fff;
+    background-color: #307d96;
+    border-color: #307d96;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #305486;
+    border-color: #305486;
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: #001e4b;
+    border-color: #001e4b;
+}
+
+input[type=search] {
+    border-radius: 0px !important;
+}
+
+input[type="text"] {
+    border: 1px solid #aaa;
+    border-radius: 0px;
+    padding: 5px;
+    background-color: transparent;
+    margin-left: 3px;
+}
+
+input[type="text"]:focus {
+    color: #212529;
+    background-color: #fff;
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%);
+}
+
+input[type="search"]:focus {
+    color: #212529;
+    background-color: #fff;
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%);
+}
+
+.saveIconEditButton {
+    color: #000000 !important;
+}
+
+.saveEditButton {
+    border-radius: 0.25rem !important;
+    border-color: #ffc107 !important;
+}
+
+.saveEditButton:hover {
+    border-radius: 0.25rem !important;
+    background-color: #ffca2c !important;
+    border-color: #ffca2c !important;
+}
+
+.saveEditButton:active {
+    color: #000 !important;
+}
+
+.saveEditButton:active:focus {
+    color: #000 !important;
+}
+
+.saveIconRemoveButton {
+    color: #ffffff !important;
+}
+
+.saveRemoveButton {
+    border-radius: 0.25rem !important;
+    border-color: #dc3545 !important;
+}
+
+.saveRemoveButton:hover {
+    border-radius: 0.25rem !important;
+    background-color: #c82333 !important;
+    border-color: #c82333 !important;
+}
+
+.saveRemoveButton:active {
+    color: #ffffff !important;
+}
+
+.saveRemoveButton:active:focus {
+    color: #ffffff !important;
+}
+
+.btn-success {
+    color: #ffffff;
+    background-color: #3d9946;
+    border-color: #3d9946;
+}
+
+.btn-check:active+.btn-success, 
+.btn-check:checked+.btn-success, 
+.btn-success.active, 
+.btn-success:active, 
+.show>.btn-success.dropdown-toggle {
+    color: #fff;
+    background-color: #34793b;
+    border-color: #34793b;
+}
+
+.btn-success:hover {
+    color: #fff;
+    background-color: #34793b;
+    border-color: #34793b;
+}
+
+table.dataTable tfoot th, table.dataTable tfoot td {
+    padding: 8px 10px !important;
+    border-top: 1px solid #111 !important;
+}
+
+.dataTables_wrapper .dataTables_filter {
+    float: left;
+    text-align: left;
+    margin-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+@media screen and (max-width: 640px){
+    .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter {
+        float: none;
+        text-align: center;
+    }
+}

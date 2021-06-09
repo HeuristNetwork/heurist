@@ -41,6 +41,7 @@
     require_once(dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
     require_once(dirname(__FILE__).'/../entity/dbDefRecTypes.php');
     require_once (dirname(__FILE__).'/../utilities/titleMask.php');
+    require_once (dirname(__FILE__).'/../utilities/utils_image.php');
     require_once (dirname(__FILE__).'/../../records/index/elasticSearch.php');
     require_once (dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
 
@@ -1775,7 +1776,7 @@
                     
                         if($dtl_Value=='generate_thumbnail_from_url' && @$record['URL']){
                             
-                            $tmp_file = generate_thumbnail($record['URL']);
+                            $tmp_file = image_CreateFromURL($record['URL']);
 
                             if(!is_a($tmp_file,'stdClass')){
                                 $err_msg = is_array($tmp_file) ?$tmp_file['error'] :'Unknown error '.$tmp_file;
@@ -1995,7 +1996,7 @@
 
     }    
     //
-    //
+    // @todo transaction
     //
     function recordDuplicate($system, $id){
         
@@ -2054,6 +2055,38 @@
             //duplicate record details
             $res = mysql__duplicate_table_record($mysqli, 'recDetails', 'dtl_RecID', $id, $new_id);
             if(!is_int($res)){ $error = $res; break; }
+            
+            
+            //assign increment values
+            //1. find increment detail types
+            $dty_IDs = mysql__select_list2($mysqli, 
+            'SELECT rst_DetailTypeID FROM defRecStructure WHERE rst_RecTypeID='.$recTypeID
+            .' AND rst_DefaultValue="increment_new_values_by_1"');
+            
+            if(is_array($dty_IDs) && count($dty_IDs)>0){
+                foreach($dty_IDs as $dty_ID){            
+                    //2. get new incremented value
+                    $res = recordGetIncrementedValue($system, array('rtyID'=>$recTypeID, 'dtyID'=>$dty_ID));
+                    if($res['status']==HEURIST_OK){
+                        $new_val = $res['result'];
+                        
+                        $query = 'UPDATE recDetails set dtl_Value='.$new_val
+                        .' where dtl_RecID='.$new_id
+                        //.' and dtl_Value='.$id   //old record id
+                        .' and dtl_DetailTypeID='.$dty_ID;
+                      
+                        $res = $mysqli->query($query);
+                        if(!$res){
+                            $error = 'database error - ' .$mysqli->error;
+                            break;
+                        }
+                    }else{
+                        return $res;
+                    }
+                }//for
+            }
+    
+            
             
             //remove pointer fields where Parent-Child flag is ON
             $query = 'DELETE FROM recDetails where dtl_RecID='.$new_id.' and dtl_DetailTypeID in '

@@ -792,9 +792,9 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         $pos = strpos($inner_field_name, $fullstop);
         $pos2 = strpos($inner_field_name, "}");
         if ( $pos>0 &&  $pos2>0 && $pos2 < $pos ) { 
-            $inner_rectype_search = substr($inner_field_name, 1, $pos-2); 
+            $inner_rectype_search = substr($inner_field_name, 1, $pos-strlen($fullstop)); 
             list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
-            $inner_field_name = substr($inner_field_name, $pos+1); 
+            $inner_field_name = substr($inner_field_name, $pos+strlen($fullstop)); 
         }
 
         if($mode==0){ //replace with values

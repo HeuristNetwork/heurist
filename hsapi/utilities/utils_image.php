@@ -1,6 +1,7 @@
 <?php
 //@todo move all image manipulation here 
 // from resizeImage, db_files, rt_icon, captcha
+//use Screen\Capture; //for micorweber
 
     /**
     * Image manipulation library
@@ -74,4 +75,94 @@ function image_CreateFromString($desc) {
 
     return $im;
 }    
+
+
+/**
+* makes screenshot for given url
+* 
+* @param mixed $url
+*/
+function image_CreateFromURL($siteURL){
+
+    if(filter_var($siteURL, FILTER_VALIDATE_URL)){
+
+        //$remote_path =  str_replace("[URL]", $sURL, WEBSITE_THUMBNAIL_SERVICE);
+        $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
+
+
+        if(defined('WEBSITE_THUMBNAIL_SERVICE') && WEBSITE_THUMBNAIL_SERVICE!=''){
+        
+            $remote_path =  str_replace("[URL]", $siteURL, WEBSITE_THUMBNAIL_SERVICE);
+            $filesize = saveURLasFile($remote_path, $heurist_path);
+
+            //check the dimension of returned thumbanil in case it is less than 50 - consider it as error
+            if(strpos($remote_path, substr(WEBSITE_THUMBNAIL_SERVICE,0,24))==0){
+
+                $image_info = getimagesize($heurist_path);
+                if($image_info[1]<50){
+                    //remove temp file
+                    unlink($heurist_path);
+                    return array('error'=>'Thumbnail generator service can\'t create the image for specified URL');
+                }
+            }
+
+        }else 
+        if(true){  
+
+            //call Google PageSpeed Insights API
+            $googlePagespeedData = file_get_contents(
+            "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=$siteURL&screenshot=true");
+
+            //decode json data
+            $googlePagespeedData = json_decode($googlePagespeedData, true);
+
+            //screenshot data
+            
+            //full-page-screenshot details screenshot data
+            //screenshot-thumbnails details items[] data
+            $screenshot = @$googlePagespeedData['lighthouseResult']['audits']['final-screenshot']['details']['data'];  
+            
+            //$screenshot = str_replace(array('_','-'),array('/','+'),$screenshot);
+            
+            $fp = fopen($heurist_path, "w+");
+            fwrite($fp, base64_decode($screenshot));
+            fclose($fp);            
+            
+            //display screenshot image
+            //echo "<img src=\"data:image/jpeg;base64,".$screenshot."\" /-->";
+
+        }else{ //microweber (https://github.com/microweber/screen) - it doesn't work
+            $screenCapture = new Capture();
+            $screenCapture->setUrl($siteURL);
+            $screenCapture->setWidth(1200);
+            $screenCapture->setHeight(800);
+
+            // allowed types are 'jpg' and 'png', default is 'jpg'.
+            //$screenCapture->setImageType(Screen\Image\Types\Png::FORMAT);
+            // or $screenCapture->setImageType('png');        
+            //$screenCapture->jobs->setLocation('/path/to/jobs/dir/');
+            $screenCapture->save($heurist_path);
+        }
+        
+        if(file_exists($heurist_path)){
+            
+            $filesize = filesize($heurist_path);
+            
+            $file = new \stdClass();
+            $file->original_name = 'snapshot.jpg';
+            $file->name = $heurist_path; //pathinfo($heurist_path, PATHINFO_BASENAME); //name with ext
+            $file->fullpath = $heurist_path;
+            $file->size = $filesize; //fix_integer_overflow
+            $file->type = 'jpg';
+            
+            return $file;         
+
+        }else{
+            return array('error'=>'Cannot download image from thumbnail generator service. '.$siteURL.' to '.$heurist_path);
+        }
+        
+    }else{
+        return array('error'=>'URL to generate snapshot '.$siteURL.' is not valid');
+    }
+}
 ?>
