@@ -833,11 +833,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         var len = ele.find('select').find('option').length;
                         $(ele.find('select').find('option')[len-1]).attr({ // select... is listed last
                             "disabled": true,
-                            "selected": true
+                            "selected": true,
+                            "hidden": true
                         }).hide();
 
                         ele.find('select').hSelect("refresh");
-                    }
+                    }                    
 
                     this._on(ele.find('select'), {
                         'change':function(event){
