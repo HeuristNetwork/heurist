@@ -113,7 +113,11 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                     {service_config: cfg_value,
                     onClose: function(context){
                         that._editing.setFieldValueByName2('sys_ExternalReferenceLookups',JSON.stringify(context),true);
-                    }}
+                    },
+					classes:{
+						"ui-dialog": "ui-heurist-design",
+						"ui-dialog-titlebar": "ui-heurist-design"
+					}}
                 );
             }});
 

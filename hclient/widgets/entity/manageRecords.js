@@ -3400,24 +3400,24 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 
                 window.hWin.HAPI4.sysinfo['service_config'] = service_config;
                 
+                let btn_label = "Lookup External Sources: ";
+
+                var label = $('<div>')
+                    .html(btn_label)
+                    .css({'font-size': 'small'})
+                    .appendTo(lookup_div); 
+                
                 for(var srvname in service_config)
                 {
                     var cfg = service_config[srvname];    
                     
                     if(cfg.rty_ID == this._currentEditRecTypeID){   //@todo many services
-                        notfound = false;            
-                        
-                        let btn_label = "Lookup External Sources: ";
-
-                        var label = $('<div>')
-                            .html(btn_label)
-                            .css({'font-size': 'small'})
-                            .appendTo(lookup_div);                       
+                        notfound = false;                    
                        
                         var btn = $('<div>')
                             .button({label:cfg.label?cfg.label:('Lookup '+cfg.service) })
                             .attr('data-cfg', srvname).css({'font-size': 'inherit', // 'padding-right':'4px',
-                                border: '1px solid', 'font-weight': 'bold'})
+                                border: '1px solid', 'font-weight': 'bold', 'margin-right': '5px'})
                             .appendTo(label);
                         
                         this._on(btn, {click:
