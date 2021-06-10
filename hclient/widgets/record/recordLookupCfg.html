@@ -1,22 +1,53 @@
-<div class="ent_content_full" style="top:0;width:300px;border-right:1px solid gray">
-    <ul id="sel_service" style="list-style-type: none;width:280px;padding:5px;">
+<div class="ent_content_full" style="top:10px;padding-left:20px;">
+    Assign remote resource lookups, such as gazeteers, thesauri or other datebases, to buttons on specified records
+</div>
+
+<div class="ent_content_full" style="top:30px;width:300px;border-right:1px solid gray;border-top:1px solid gray;">
+    <div style="width:280px;padding:10px 10px 0;font-weight:bold;">
+        Lookup services assigned
+    </div><br/>
+    <span style="width:280px;padding:10px 10px 0;">
+        select to edit service
+    </span>
+
+    <ul id="sel_service" style="list-style-type: none;width:280px;padding:0 5px;">
         List of lookup services
     </ul>
+
+    <div>
+        <button id="btnAddService" title="Add new service">Assign Service</button>
+    </div>
+
+    <div style="width:197px;padding:40px;font-size:1.2em">
+        Please contact the Heurist team for instructions or assistance with adding new lookup services.
+    </div>
 </div>
-<div class="ent_content_full" style="top:0px; left:301px;padding:10px">
 
+<div class="ent_content_full" style="top:30px;left:301px;padding:10px;border-top:1px solid gray;">
 
-    <h4 id="service_name" style="padding-left:20px;"><span class="ui-icon ui-icon-arrowthick-1-w"/>Select service</h4>
+    <h4 id="service_name" style="padding-left:20px;"><span class="ui-icon ui-icon-arrowthick-1-w"/>Select a service to edit or click the assign button</h4>
     
     <div id="service_config" style="display:none">
     
-        <div id="service_description" style="font-style:italic;padding-left:20px;">
+        <fieldset id="div_fieldset">
+            
+            <div style="padding: 0.2em; width: 100%;" class="input" id="service_type">
+                <div class="header" style="padding: 0 16px 0 16px;">
+                    <label for="sel_servicetype">Service to assign:</label>
+                </div>
+                <select id="sel_servicetype" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em"></select>
+            </div>
+
+        </fieldset>
+
+        <div id="service_description" style="font-style:italic;padding-left:20px;" class="service_details">
         </div>
 
-        <fieldset id="div_fieldset">
+        <fieldset id="div_fieldset" class="service_details">
+
             <div style="padding: 0.2em; width: 100%;" class="input">
                 <div class="header" style="padding: 0 16px 0 16px;">
-                    <label for="sel_record_type">Records type:</label>
+                    <label for="sel_record_type">Record type:</label>
                 </div>
                 <select id="sel_rectype" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em"></select>
             </div>
@@ -29,7 +60,7 @@
             </div>
         </fieldset>
         
-        <div style="padding-left:20px;">
+        <div style="padding-left:20px;" class="service_details">
             <h4>Map the result fields to Heurist record fields</h4>
             
             <table id="tbl_matches" style="font-size:1em;">
@@ -40,7 +71,7 @@
         
         <div style="text-align: center;padding: 20px;">
             <button id="btnSave" class="ui-button-action" title="Use this configuration">Apply</button>
-            <button id="btnRemove">Remove</button>
+            <!--<button id="btnRemove">Remove</button>-->
         </div>
 
     </div>

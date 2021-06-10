@@ -464,7 +464,7 @@ if(!($is_map_popup || $without_header)){
             padding-top: 0.3em;
         }      
 
-        .detail img{
+        .detail img:not(.geo-image, .rv-magglass, .rv-editpencil, .rft){
             width: 50%;
         }		
 <?php if($is_production){
@@ -679,7 +679,7 @@ function print_header_line($bib) {
                 <span class="link"><a id=edit-link class="normal"
                             onClick="return sane_link_opener(this);"
                             target=_new href="<?php echo HEURIST_BASE_URL?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
-                            <img src="../../common/images/edit-pencil.png" title="Edit record" style="vertical-align: bottom"></a>
+                            <img class="rv-editpencil" src="../../common/images/edit-pencil.png" title="Edit record" style="vertical-align: bottom"></a>
                 </span>
             </div>
             <?php
@@ -862,7 +862,7 @@ function print_private_details($bib) {
                                 $grp_kwd = $grp.'\\\\'.$kwd;
                                 $label = 'Tag "'.$grp_kwd.'"';
                                 if (preg_match('/\\s/', $grp_kwd)) $grp_kwd = '"'.$grp_kwd.'"';
-                                print htmlspecialchars($grp.' - ').'<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($grp_kwd).'&amp;w=all&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd).'<img style="vertical-align: middle; margin: 1px; border: 0;" src="'.HEURIST_BASE_URL.'common/images/magglass_12x11.gif"></a>';
+                                print htmlspecialchars($grp.' - ').'<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($grp_kwd).'&amp;w=all&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd).'<img style="vertical-align: middle; margin: 1px; border: 0;" class="rv-magglass" src="'.HEURIST_BASE_URL.'common/images/magglass_12x11.gif"></a>';
                             }
                             ?>
                         </div>
@@ -900,7 +900,7 @@ function print_personal_details($bkmk) {
                     $tag = $tags[$i];
                     $label = 'Tag "'.$tag.'"';
                     if (preg_match('/\\s/', $tag)) $tag = '"'.$tag.'"';
-                    print '<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($tag).'&amp;w=bookmark&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($tags[$i]).'">'.htmlspecialchars($tags[$i]).'<img style="vertical-align: middle; margin: 1px; border: 0;" src="'.HEURIST_BASE_URL.'common/images/magglass_12x11.gif"></a>';
+                    print '<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($tag).'&amp;w=bookmark&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($tags[$i]).'">'.htmlspecialchars($tags[$i]).'<img style="vertical-align: middle; margin: 1px; border: 0;" class="rv-magglass" src="'.HEURIST_BASE_URL.'common/images/magglass_12x11.gif"></a>';
                 }
                 if (count($tags)) {
                     print "<br>\n";

@@ -96,7 +96,7 @@ window.hWin.HEURIST4.ui = {
     //
     // helper function to add option to select element
     //
-    addoption: function(sel, value, text, disabled)
+    addoption: function(sel, value, text, disabled, selected, hidden)
     {
         var option = document.createElement("option");
         //option = new Option(text,value);
@@ -105,7 +105,12 @@ window.hWin.HEURIST4.ui = {
         if(disabled===true){
             option.disabled = true;
         }
-        
+        if(selected===true){
+            option.selected = true;
+        }
+        if(hidden===true){
+            option.hidden = true;
+        }
         //$(option).appendTo($(sel));
         sel.appendChild(option);
         /*
@@ -215,7 +220,7 @@ window.hWin.HEURIST4.ui = {
     fillSelector: function(selObj, topOptions) {
         
         if(window.hWin.HEURIST4.util.isArray(topOptions)){
-            var idx,key,title,disabled,depth, border;
+            var idx,key,title,disabled,depth, border, selected, hidden;
             if(topOptions){  //list of options that must be on top of list
                 for (idx in topOptions)
                 {
@@ -228,12 +233,16 @@ window.hWin.HEURIST4.ui = {
                             disabled = false;
                             depth = 0;
                             border = false;
+                            selected = false;
+                            hidden = false;
                         }else{
                             key = topOptions[idx].key;
                             title = topOptions[idx].title;
                             disabled = (topOptions[idx].disabled===true);
                             depth = (topOptions[idx].depth>0)?topOptions[idx].depth:0;
                             border = (topOptions[idx].hasborder===true);
+                            selected = (topOptions[idx].selected===true);
+                            hidden = (topOptions[idx].hidden===true);
                         }
                         if(!window.hWin.HEURIST4.util.isnull(title))
                         {
@@ -242,7 +251,7 @@ window.hWin.HEURIST4.ui = {
                                 grp.label =  title;
                                 selObj.appendChild(grp);
                             }else{
-                                var opt = window.hWin.HEURIST4.ui.addoption(selObj, key, title, disabled);
+                                var opt = window.hWin.HEURIST4.ui.addoption(selObj, key, title, disabled, selected, hidden);
                                 if(topOptions[idx].group>0){
                                     $(opt).attr('group', topOptions[idx].group);
                                 }else if(depth>0){
@@ -2927,7 +2936,9 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     if(item.element.attr( 'ui-state-error' )){
         wrapper.addClass('ui-state-error');
     }
-    
+    if(item.element.attr( 'hidden' )){
+        li.hide();
+    }    
     
     var rt_checkbox = item.element.attr( "rt-checkbox" );
     if(rt_checkbox>=0){
