@@ -464,6 +464,10 @@ if(!($is_map_popup || $without_header)){
             padding-top: 0.3em;
         }      
 
+        .detail > p{
+            margin-block: 0;
+        }
+
         .detail img:not(.geo-image, .rv-magglass, .rv-editpencil, .rft){
             width: 50%;
         }		
