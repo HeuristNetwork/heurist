@@ -205,7 +205,7 @@ $.widget( "heurist.resultListMenu", {
             var menu = $( ele )
             //.css('width', this.btn_user.width())
             .show()
-            .position({my: "left top", at: "left bottom", of: parent });
+            .position({my: "left top", at: "left bottom", of: parent, collision:'none' });
             //$( document ).one( "click", function() { menu.hide(); });
 /*
 console.log('padleft');            

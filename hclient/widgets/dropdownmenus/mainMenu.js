@@ -529,11 +529,13 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             clearTimeout(myTimeoutId);
             
             $('.menu-or-popup').hide(); //hide other
-            var menu = $( ele )
-            //.css('width', this.btn_user.width())
-            .show()
-            .position({my: "left-2 top", at: "left bottom", of: parent });
-            //$( document ).one( "click", function() { menu.hide(); });
+            var menu = $( ele ).show()
+            
+            menu.position({my: 'left-2 top', at: 'left bottom', of: parent, collision: 'none' });
+            
+            menu.position().top = parent.position().top + parent.height();
+            
+            
             return false;
         };
 
