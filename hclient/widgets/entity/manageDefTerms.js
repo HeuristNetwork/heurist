@@ -1581,7 +1581,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             var parents = fields['trm_Parents'].split(',');
             //request['trm_parentID'] = parents[parents.length - 1];
 
-            // set parent field to acutal parent filed, to avoid moving it
+            // set parent field to acutal parent field, to avoid moving it
             fields['trm_ParentTermID'] = parents[parents.length - 1]; 
         }else if(!window.hWin.HEURIST4.util.isempty(fields['trm_ParentTermID'])){
             //request['trm_parentID'] = fields['trm_ParentTermID'];
