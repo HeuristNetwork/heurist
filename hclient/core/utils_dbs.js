@@ -218,8 +218,9 @@ window.hWin.HEURIST4.dbs = {
       $mode 
          3 - for record title mask editor - without reverse, enum (id,label,code,internal id)
          4 - find reverse links and relations   
-         5 - for lazy treeview with reverse links (faceted search wiz, filter builder)
-         6 - for lazy tree without reverse (import structure, export csv)
+         5 - for faceted search wiz, filter builder - lazy treeview with reverse links
+         6 - for import structure, export csv - lazy tree without reverse
+         7 - for smarty - lazy tree without reverse, with relationship stub and enum (id,label,code,internal id)
          
       parentcode - prefix for code 
          
@@ -267,54 +268,63 @@ window.hWin.HEURIST4.dbs = {
                 
                 if(all_header_fields || $fieldtypes.indexOf('ID')>=0 || $fieldtypes.indexOf('rec_ID')>=0){
                     $children.push({key:'rec_ID', type:'integer',
-                        title:"ID  <span style='font-size:0.7em'>(Integer)</span>", 
+                        title:('ID'+($mode!=7?' <span style="font-size:0.7em">(Integer)</span>':'')), 
                         code:($recTypeId+_separator+'ids'), name:'Record ID'});
                 }
 
                 if(all_header_fields || $fieldtypes.indexOf('title')>=0 || $fieldtypes.indexOf('rec_Title')>=0){
                     $children.push({key:'rec_Title', type:'freetext',
-                        title:"Title <span style='font-size:0.7em'>(Constructed Text)</span>", 
+                        title:('Title'+($mode!=7?' <span style="font-size:0.7em">(Constructed Text)</span>':'')), 
                         code:($recTypeId+_separator+'title'), name:'Record title'});
                 }
+                
+                if(all_header_fields || $fieldtypes.indexOf('typeid')>=0 || $fieldtypes.indexOf('rec_TypeID')>=0){
+                    $children.push({key:'rec_TypeID', title:'Record TypeID', code:$recTypeId+_separator+'typeid'});
+                }
+                if(all_header_fields || $fieldtypes.indexOf('typename')>=0 || $fieldtypes.indexOf('rec_TypeName')>=0){
+                    $children.push({key:'rec_TypeName', title:'Record TypeName', code:$recTypeId+_separator+'typename'});
+                }
+                
                 if(all_header_fields || $fieldtypes.indexOf('added')>=0 || $fieldtypes.indexOf('rec_Added')>=0){
                     $children.push({key:'rec_Modified', type:'date',
-                        title:"Added  <span style='font-size:0.7em'>(Date)</span>", 
+                        title:('Added'+($mode!=7?' <span style="font-size:0.7em">(Date)</span>':'')), 
                         code:($recTypeId+_separator+'added'), name:'Date added'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('modified')>=0 || $fieldtypes.indexOf('rec_Modified')>=0){
                     $children.push({key:'rec_Modified', type:'date',
-                        title:"Modified  <span style='font-size:0.7em'>(Date)</span>", 
+                        title:('Modified'+($mode!=7?' <span style="font-size:0.7em">(Date)</span>':'')), 
                         code:($recTypeId+_separator+'modified'), name:'Date modified'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('addedby')>=0 || $fieldtypes.indexOf('rec_AddedBy')>=0){
                     $children.push({key:'rec_AddedBy', type:'freetext',
-                        title:"Creator  <span style='font-size:0.7em'>(User)</span>", 
+                        title:('Creator'+($mode!=7?' <span style="font-size:0.7em">(User)</span>':'')), 
                         code:($recTypeId+_separator+'addedby'), name:'Creator (user)'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('url')>=0 || $fieldtypes.indexOf('rec_URL')>=0){
                     $children.push({key:'rec_URL', type:'freetext',
-                        title:"URL  <span style='font-size:0.7em'>(Text)</span>", 
+                        title:('URL'+($mode!=7?' <span style="font-size:0.7em">(Text)</span>':'')), 
                         code:($recTypeId+_separator+'url'), name:'Record URL'});
                 }
+                
                 if(all_header_fields || $fieldtypes.indexOf('notes')>=0 || $fieldtypes.indexOf('rec_ScratchPad')>=0){
                     $children.push({key:'rec_ScratchPad', type:'freetext',
-                        title:"Notes  <span style='font-size:0.7em'>(Text)</span>", 
+                        title:('Notes'+($mode!=7?' <span style="font-size:0.7em">(Text)</span>':'')), 
                         code:($recTypeId+_separator+'notes'), name:'Record Notes'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('owner')>=0 || $fieldtypes.indexOf('rec_OwnerUGrpID')>=0){
                     $children.push({key:'rec_OwnerUGrpID', type:'freetext',
-                        title:"Owner  <span style='font-size:0.7em'>(User or Group)</span>", 
+                        title:('Owner'+($mode!=7?' <span style="font-size:0.7em">(User or Group)</span>':'')), 
                         code:($recTypeId+_separator+'owner'), name:'Record Owner'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('visibility')>=0 || $fieldtypes.indexOf('rec_NonOwnerVisibility')>=0){
                     $children.push({key:'rec_NonOwnerVisibility', type:'enum',
-                        title:"Visibility  <span style='font-size:0.7em'>(Terms)</span>", 
+                        title:('Visibility'+($mode!=7?' <span style="font-size:0.7em">(Terms)</span>':'')), 
                         code:($recTypeId+_separator+'access'), name:'Record Visibility'});
                 }
 
                 if(all_header_fields || $fieldtypes.indexOf('tags')>=0 || $fieldtypes.indexOf('rec_Tags')>=0){
                     $children.push({key:'rec_Tags', type:'terms',
-                        title:"Tags  <span style='font-size:0.7em'>(Terms)</span>", 
+                        title:('Tags'+($mode!=7?' <span style="font-size:0.7em">(Terms)</span>':'')), 
                         code:($recTypeId+_separator+'tag'), name:'Record Tags'});
                 }
                 
@@ -460,21 +470,25 @@ window.hWin.HEURIST4.dbs = {
                     $details.removeRecord(DT_PARENT_ENTITY); //remove fake parent link
                 }
                 
-                if($mode==3 && $recursion_depth==0){
-                    //$children.push(__getRecordTypeTree('Relationship', $recursion_depth+1, $mode, $fieldtypes, null));
+                if($mode==7 && $recursion_depth==0 && !parentcode){
+                    $children.push(__getRecordTypeTree('Relationship', 0, $mode, $fieldtypes, null));
                 }   
 
             }
-            else if($recTypeId=="Relationship") { //----------------------------
+            else if($recTypeId=='Relationship') { //----------------------------
 
-                $res['title'] = "Relationship";
-                $res['type'] = "relationship";
+                $res['title'] = 'Relationship';
+                $res['type'] = 'relationship';
+                $res['code'] = 'Relationship';
 
                 //add specific Relationship fields
-                $children.push({key:'recRelationType', title:'RelationType'});
-                $children.push({key:'recRelationNotes', title:'RelationNotes'});
-                $children.push({key:'recRelationStartDate', title:'RelationStartDate'});
-                $children.push({key:'recRelationEndDate', title:'RelationEndDate'});
+                $children.push({code:'recRelationType', title:'Relation Type'});
+                $children.push({code:'recRelationNotes', title:'Relation Notes'});
+                $children.push({code:'recRelationStartDate', title:'Relation StartDate'});
+                $children.push({code:'recRelationEndDate', title:'Relation EndDate'});
+                
+                $res['children'] = $children;
+                
             }else if($mode==5 || $mode==6) //-----------------------------------
             {
                 //record type is array - add common fields only
@@ -577,7 +591,7 @@ window.hWin.HEURIST4.dbs = {
 
         var $detailType = $Db.dty($dtID,'dty_Type');
         
-        if($mode==3 && $detailType=='relmarker'){
+        if(($mode==3 || $mode==7) && $detailType=='relmarker'){
             return null;   
         }
         
@@ -605,7 +619,7 @@ window.hWin.HEURIST4.dbs = {
             case 'relationtype':
 
                 $res = {};
-                if($mode==3){
+                if($mode==3 || $mode==7){
 
                     $res['children'] = [
                         {key:'term',title: 'Term',code: 'Term'},       
@@ -622,7 +636,7 @@ window.hWin.HEURIST4.dbs = {
                 var $max_depth = 2;
                 if ($mode==4) //$mode==6 || 
                    $max_depth = 3;
-                else if ($mode==5 || $mode==6) //make it 1 for lazy load
+                else if ($mode==5 || $mode==6 || $mode==7) //make it 1 for lazy load
                    $max_depth = 1; 
                                                                 
                 if($recursion_depth<$max_depth){
@@ -653,7 +667,10 @@ window.hWin.HEURIST4.dbs = {
                                 
                                 var $type_name = $Db.baseFieldType[$detailType];
                                 
-                                $dt_title = " <span style='font-style:italic'>" + $dt_title + "</span> <span style='font-size:0.7em'>(" + $type_name + ")</span>";
+                                $dt_title = " <span style='font-style:italic'>" + $dt_title + 
+                                    "</span> <span style='font-size:0.7em'>(" + $type_name + ")</span>";
+                            }else{
+                                $dt_title = ' <span style="font-style:italic">' + $dt_title + '</span>';
                             }
 
                             $res = {};                            
@@ -675,7 +692,7 @@ window.hWin.HEURIST4.dbs = {
                                     $res['constraint'] = $rectype_ids.length;
                                     if($mode<5) $res['children'] = [];
                                 }
-                                if($mode==5 || $mode==6){
+                                if($mode==5 || $mode==6 || $mode==7){
                                     $res['rt_ids'] = $pointerRecTypeId;
                                     $res['lazy'] = true;
                                     

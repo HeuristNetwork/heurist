@@ -260,7 +260,7 @@ function hPublishDialog( _options )
             {  
                container:'embed-publish-popup',
                default_palette_class: 'ui-heurist-publish',
-               height: 600, // options.mapdocument_id>0?600:680,
+               height: 610, // options.mapdocument_id>0?600:680,
                width: 700,
                close: function(){
                     popupdialog.dialog('destroy');       

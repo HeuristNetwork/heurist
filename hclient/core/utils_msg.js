@@ -235,8 +235,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if($dlg.length==0){
             $dlg = $('<div>',{id:'dialog-common-messages'})
                 .css({'min-wdith':'380px','max-width':'640px'}) //,padding:'1.5em 1em'
-                .appendTo( $('body') ); //
-                //$(window.hWin.document['body'])
+                .appendTo( $('body') );
         }
         return $dlg.removeClass('ui-heurist-border');
     },
@@ -258,7 +257,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         var $dlg = $( '#'+element_id );
         if($dlg.length==0){
             $dlg = $('<div>',{id:element_id})
-                .css({'padding':'2em','min-wdith':'380px'}).appendTo('body'); //,'max-width':'640px' //$(window.hWin.document)
+                .css({'padding':'2em','min-wdith':'380px',overflow:'hidden'}).appendTo('body');
             $dlg.removeClass('ui-heurist-border');
         }
         return $dlg;
@@ -1015,16 +1014,19 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     open: options.open,  //callback
                     beforeClose: options.beforeClose,
                     close: function(event, ui){
-                        
+
+                        var need_remove = true;                        
                         if($.isFunction(onCloseCalback)){
-                             onCloseCalback.call(this, event, ui);
+                             need_remove = onCloseCalback.call(this, event, ui);
                         }
                         
-                        element.parentNode.removeChild(element);
-                        element.style.display = "none";
-                        originalParentNode.appendChild(element);
+                        if(need_remove!==false){
+                            element.parentNode.removeChild(element);
+                            element.style.display = "none";
+                            originalParentNode.appendChild(element);
 
-                        $dlg.remove();
+                            $dlg.remove();
+                        }
                     }
             };
             if(options["position"]) opts["position"] = options["position"];

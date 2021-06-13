@@ -37,35 +37,23 @@ function ShowReps() {
     var _className = "ShowReps",
     _originalFileName,
 
-    _variables, //object from server - record type tree
-    _varsTree, //treeview object
     _needListRefresh = false, //if true - reload list of templates after editor exit
     _keepTemplateValue,
     _needSelection = false,
     _sQueryMode = "all",
-    mySimpleDialog,
+
     needReload = true,
     codeEditor = null,
-    infoMessageBox,
+
     _currentRecordset = null,
     _currentQuery = null,
+
+    _add_variable_dlg = null;
     
-    embed_dialog = null,
-    mylayout = null;
     
     var top_repcontainer = '36px';
     
     var progressInterval = null;
-
-
-    var handleYes = function() {
-        _operationEditor(2);
-        this.hide();
-    };
-    var handleNo = function() {
-        _setLayout(true, false);
-        this.hide();
-    };
 
     /**
     *  show the list of available reports
@@ -136,13 +124,14 @@ function ShowReps() {
     */
     function _updateReps(context) {
 
-        infoMessageBox.hide();
+        window.hWin.HEURIST4.msg.sendCoverallToBack();
 
-        var iframe = document.getElementById("rep_container_frame");//document.getElementById("rep_container");
+        var iframe = document.getElementById("rep_container_frame");
         iframe.contentWindow.document.open();
         iframe.contentWindow.document.write(context);
         iframe.contentWindow.document.close();
-        //div_rep.innerHTML = context;
+        
+        //document.getElementById('rep_container').innerHTML = context;
 
         _needSelection = (context && context.indexOf("Select records to see template output")>0);
     }
@@ -154,8 +143,7 @@ function ShowReps() {
     * Reads GET parameters and requests for map data from server
     */
     function _init() {
-        _setLayout(true, false); //aftert load show viewer only
-
+        
         if(true){
             _sQueryMode = "all";
             $('#cbUseAllRecords1').hide();
@@ -166,41 +154,16 @@ function ShowReps() {
             document.getElementById('cbUseAllRecords1').value = _sQueryMode;
         }
 
-        window.hSmarty.insertPattern = _insertPattern;
-
         _reload_templates();
 
-        infoMessageBox  =
-        new YAHOO.widget.SimpleDialog("simpledialog2",
-            { width: "350px",
-                fixedcenter: true,
-                modal: false,
-                visible: false,
-                draggable: false,
-                close: false,
-                text: "some text"
-        } );
-        infoMessageBox.render(document.body);
-
-        mySimpleDialog =
-        new YAHOO.widget.SimpleDialog("simpledialog1",
-            { width: "350px",
-                fixedcenter: true,
-                modal: true,
-                visible: false,
-                draggable: false,
-                close: true,
-                header: 'Warning!',
-                text: "some text",
-                icon: YAHOO.widget.SimpleDialog.WARNING,
-                buttons: [
-                    { text: "Save", handler: handleYes, isDefault:true },
-                    { text:"Discard", handler: handleNo}
-                ]
-        } );
-        mySimpleDialog.render(document.body);
 
         window.onbeforeunload = _onbeforeunload;
+        
+        //aftert load show viewer only
+        //_setLayout(true, false); it is called in _updateTemplatesList
+        _onResize(this.innerWidth);
+console.log(this.innerWidth);        
+        
     }
 
     /**
@@ -293,9 +256,7 @@ function ShowReps() {
 
         if(request!=null){
 
-            //infoMessageBox.setBody("Execute template '"+template_file+"'. Please wait");
-            infoMessageBox.setBody("<img src='../../common/images/loading-animation-black.gif'>");
-            infoMessageBox.show();
+            window.hWin.HEURIST4.msg.bringCoverallToFront($(document).find('body')); //this frame
 
             _showProgress( session_id );
             
@@ -442,7 +403,6 @@ function ShowReps() {
 
             if(isLoadGenerated){
 
-                    //ApplyLineBreaks
                     var text = [
 
 
@@ -498,63 +458,22 @@ function ShowReps() {
                     _initEditor(res);
             }
 
-            _variables = context;
-
-            /* fille selection box with the list of rectypes
-            var sel = document.getElementById("selRectype");
-            //celear selection list
-            while (sel.length>0){
-            sel.remove(0);
-            }
-
-            var i;
-            for (i in _variables){
-            if(i!==undefined){
-
-            option = document.createElement("option");
-            option.text = _variables[i].name; //name of rectype
-            option.value = _variables[i].id; //id of rectype
-            try {
-            // for IE earlier than version 8
-            sel.add(option, sel.options[null]);
-            }catch (ex2){
-            sel.add(option,null);
-            }
-            }
-            } // for
-
-            sel.selectedIndex = 0;
-            */
-            _fillTreeView();
-
             _setLayout(true, true);
+            
+            _loadRecordTypeTreeView();
 
             _doExecuteFromEditor(); //execute at once
         }
         
-        function __onRectypeTree(context){
-            if(window.hWin.HEURIST4.util.isnull(context)){
-                return;
-            }
-            _variables = context;
-            _fillTreeView();
-        }
 
         if(isLoadGenerated){
             __onGenerateTemplate([]);
         }
-
-        
         
         var rtSelect = $('#rectype_selector').css('max-width','150px');
         var $rec_select = window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), null, window.hWin.HR('select record type'), true );
         $rec_select.change(function(event){
-                    var selel = $(event.target).val();
-                    if(selel>0){
-                        var baseurl = window.hWin.HAPI4.baseURL + "common/php/recordTypeTree.php";
-                        var request = {db:window.hWin.HAPI4.database, mode:'list', 'for':'smarty', rty_id:selel};
-                        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, __onRectypeTree);
-                    }
+            _loadRecordTypeTreeView();
         });
         /*$rec_select.hSelect.on({change: 
         function(event, data){
@@ -588,7 +507,7 @@ function ShowReps() {
                     smartIndent    : true,
                     extraKeys: {
                         "Enter": function(e){
-                            insertAtCursor(null, "");
+                            insertAtCursor('');
                         }
                     },
                     onFocus:function(){},
@@ -688,7 +607,7 @@ function ShowReps() {
     * Close editor
     * @param mode 0 - just close, 1 - save as (not close),  2 - save, close and execute, 3 - delete and close
     */
-    function _operationEditor(mode) {
+    function _operationEditor(mode, unconditionally) {
 
         if(mode>0){
 
@@ -701,11 +620,19 @@ function ShowReps() {
                 template_file = jQuery.trim(document.getElementById("edTemplateName").innerHTML);
 
                 if(mode==1){ //save as - get new name
-                    template_file = jQuery.trim(prompt("Please enter new template name", template_file));
-                    if (window.hWin.HEURIST4.util.isempty(template_file)){
+                
+                    if(unconditionally){
+                    
+                        document.getElementById("edTemplateName").innerHTML = unconditionally;    
+                        template_file = unconditionally;    
+                    }else{
+                        window.hWin.HEURIST4.msg.showPrompt('Please enter template name', function(tmp_name){
+                            if(!window.hWin.HEURIST4.util.isempty(tmp_name)){
+                                 _operationEditor(mode, tmp_name)
+                            }
+                        }, {title:'Save template as',yes:'Save as',no:"Cancel"});
                         return;
                     }
-                    document.getElementById("edTemplateName").innerHTML = template_file;
                 }
 
                 var template_body = codeEditor.getValue();// document.getElementById("edTemplateBody").value;
@@ -722,15 +649,18 @@ function ShowReps() {
             }
             else if (mode===3 && _originalFileName!=="") //delete template
             { //delete
-                var r=confirm("Are you sure you wish to delete template '"+_originalFileName+"'?");
 
-                if (r==true){
-                    
+                if(unconditionally===true){
                     request['mode'] = 'delete';
                     request['template'] = _originalFileName;
                     
                     _originalFileName = null;
+                    
                 }else{
+                    window.hWin.HEURIST4.msg.showMsgDlg(
+                        'Are you sure you wish to delete template "'+_originalFileName+'"?', 
+                            function(){ _operationEditor(mode, true) }, 
+                        {title:'Warning',yes:'Proceed',no:'Cancel'});        
                     return;
                 }
             }
@@ -743,6 +673,7 @@ function ShowReps() {
                 function __onOperEnd(context){
                     
                     $('*').css('cursor', 'default');
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
 
                     if(!window.hWin.HEURIST4.util.isnull(context))
                     {
@@ -772,9 +703,8 @@ function ShowReps() {
                 }
                 
                 $('*').css('cursor', 'progress');
-                infoMessageBox.setBody("<img src='../../common/images/loading-animation-black.gif'>");
-                infoMessageBox.show();
-                
+                window.hWin.HEURIST4.msg.bringCoverallToFront($(document).find('body'));
+
                  window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, __onOperEnd, 'auto');
             }
         }
@@ -782,12 +712,6 @@ function ShowReps() {
         if(mode===0){ //for close
 
             if(_keepTemplateValue!=codeEditor.getValue()){ //.get("edTemplateBody").value){
-
-                /*var myButtons = [
-                { text: "Save", handler: handleYes, isDefault:true },
-                { text:"Discard", handler: handleNo}
-                ];
-                mySimpleDialog.cfg.queueProperty("buttons", myButtons);*/
 
                     window.hWin.HEURIST4.msg.showMsgDlg(
                         'Template was changed. Are you sure you wish to exit and lose all modifications?',
@@ -869,8 +793,7 @@ function ShowReps() {
             request['replevel'] = replevel;
             request['template_body'] = template_body;
             
-            infoMessageBox.setBody("<img src='../../common/images/loading-animation-black.gif'>");
-            infoMessageBox.show();
+            window.hWin.HEURIST4.msg.bringCoverallToFront($(document).find('body'));
             
             _showProgress();
 
@@ -930,51 +853,38 @@ function ShowReps() {
         _isviewer=isviewer;
         _iseditor=iseditor;
 
+        
         document.getElementById("toolbardiv").style.display = (iseditor) ?"none" :"block";
         document.getElementById("rep_container").style.top = (iseditor) ?"0px" :top_repcontainer;
-        document.getElementById("editorcontainer").style.display = (iseditor) ?"block" :"none";
-
+        //document.getElementById("editorcontainer").style.display = (iseditor) ?"block" :"none";
         
-        var units;
+        var layout_opts = {
+            applyDefaultStyles: true,
+            maskContents: true,
+            north:{
+                minHeight:200
+            }
+        };
+        //north - editor
+        //center - preview
+        
         if(isviewer && iseditor){
-            
-        //var body = $(document).find('body'); //this frame
-        //var dim = {h:body.innerHeight(), w:body.innerWidth()};
-            dh =  this.innerHeight;
-            
-            units = [
-                { position: 'top', header: 'Editor', height: dh*0.7,
-                    resize: true, body: 'editorcontainer', gutter:'5px', useShim: true, collapse: true},
-                { position: 'center', body: 'viewercontainer', height: dh*0.3}
-            ];
-        }else if(isviewer){
-            units = [
-                { position: 'center', body: 'viewercontainer'}
-            ];
-        }else if(iseditor){
-            units = [
-                { position: 'center', body: 'editorcontainer'}
-            ];
+            layout_opts.north__minHeight = 200;
         }
         
 
-        //
-        //document.getElementById("layout").style.top = (iseditor) ?"0" :"25";
-
-        //var el = document.getElementById('layout');
-        layout = null;
-        layout = new YAHOO.widget.Layout({
-                units: units
-        });
+        var mylayout = $('#layout_container').layout(layout_opts);
         
-        /*layout = new YAHOO.widget.Layout('layout', {
-        units: units
-        });*/
-
-        layout.render();
-        layout.resize(true);
-
-
+        if(iseditor){
+            mylayout.show('north');    
+            var dh =  this.innerHeight;
+            mylayout.sizePane('north', dh*0.7);
+        }else{
+            mylayout.hide('north');    
+        }
+        
+        
+        
         //reload templates list
         if(_needListRefresh && !iseditor){
             _needListRefresh = false;
@@ -1007,381 +917,183 @@ function ShowReps() {
     }
 
 
-
-    function _selectAllChildren(parentNode) {
-        var len = parentNode.children?parentNode.children.length:0;
-        if( len > 0) {
-            var index = 0;
-            while(index < len) { // While it has children, select them and look if they have children too
-                var child = parentNode.children[index];
-                child.highlight();
-                /*child.highlightState = parentNode.highlightState;
-                if(parentNode.highlightState===1){
-                child.highlight(); //mark the checkbox
-                }else{
-                child.unhighlight()
-                }*/
-                if(child.children.length > 0) {
-                    _selectAllChildren(child.data);
-                }
-                index++;
-            }
-        }
-    }
-
-
-
-    /**
-    * Finds node by term id
-    */
-    function _findNodeById(varid) {
-
-        //internal
-        function __doSearchById(node){
-            return (node.data.id==varid);
-        }
-
-        var nodes = _varsTree.getNodesBy(__doSearchById);
-
-        if(nodes){
-            var node = nodes[0];
-            return node;
-        }else{
-            return null
-        }
-    }
-
-
-
     //
     //
     //
-    function _markAllChildren(varid){
-        var node = _findNodeById(varid);
-        if(node){
-            _selectAllChildren(node);
+    function _loadRecordTypeTreeView(){
+      
+        var rty_ID = $('#rectype_selector').val();
+
+        //load treeview
+        var treediv = $('.rtt-tree');
+        if(!treediv.is(':empty') && treediv.fancytree("instance")){
+            treediv.fancytree("destroy");
         }
-    }
-
-
-
-    //
-    //
-    //
-    function _clearAllSeelectionInTree(){
-        //function for each node in _varsTree - removes highlight
-        function __resetSelection(node){
-            node.unhighlight();
-            return false;
-        }
-        //loop all nodes of tree
-        _varsTree.getNodesBy(__resetSelection);
-        _varsTree.render();
-    }
-
-
-
-    /**
-    *	Fills the given treeview with the list of variables
-    * 	varnames  - contains vars - flat array and tree - tree array
-    */
-    function _fillTreeView (tv, varnames) {
-
-        //create treeview
-        if(window.hWin.HEURIST4.util.isnull(_varsTree)){
-            _varsTree = new YAHOO.widget.TreeView("varsTree");
-            _varsTree.singleNodeHighlight = true;
-            _varsTree.selectable = false;
-            _varsTree.subscribe("clickEvent",
-                function() { // On click, select the term, and add it to the selected terms tree
-                    this.onEventToggleHighlight.apply(this,arguments);
-                    //var parentNode = arguments[0].node;
-                    //_selectAllChildren(parentNode);
-            });
-        }
-
-
-        var first_node = null;
-
-        //internal function
-        // parent_single - true if recrod pointer or enum is not repeatable field type
-        //
-        function __createChildren(parentNode, rectypeTree, parent_id, parent_full,
-                         parent_single, grandparent_single) { // Recursively get all children
-            //  __createChildren(topLayerNode, _variables[i], "r", prefix_id+".r");
-
-            var term,
-            childNode,
-            child, id;
-
-            var rectype_id = rectypeTree.rt_id;
-
-            for(id in rectypeTree)
-            {
-                if(! (window.hWin.HEURIST4.util.isnull(id) || id=='rt_id' || id=='rt_name' || id=='termfield_name' ) ){
-
-                    var label = null;
-
-                    //cases
-                    // common fields like recID, recTitle
-                    // detail fields  fNNN: name
-                    // detail fields ENUMERATION fNNN:array(termfield_name
-                    // unconstained pointers fNNN:array(rt_name
-                    // multi-contrained pointers fNNN:array(array(rt_id  - need another recursive loop
-
-                    term = {};//new Object();
-                    term.id = parent_full+"."+id; //fullid;
-                    term.parent_full_id = parent_full;
-                    term.parent_id = parent_id;
-                    term.this_id = id;
-                    term.label = '<div style="padding-left:10px;">'; //???arVars[0];
-
-                    child = rectypeTree[id];
-
-                    var is_record = ((typeof(child) == "object") &&
-                        Object.keys(child).length > 0);
-                        
-                    var is_remark = (id=='remark');    
-
-                    var is_multiconstrained = false;
-                    var is_single = true; //non repeatable field
-
-                    var vartype = term.this_id.substring(0,1);
-                    var dtid = term.this_id.substring(1);
-
-                    if(vartype=='f' && window.hWin.HEURIST4.util.isNumber(dtid) ){
-                        term.dtype = $Db.dty(dtid, 'dty_Type');
-
-                            var maxval = $Db.rst(rectype_id, dtid, 'rst_MaxValues');
-                            is_single = (Number(maxval)===1);
-                        
-                    }else if (term.this_id=="Relationship") {
-                        is_single = false;
-                    }else if(term.this_id=='recTags'){
-                        //is_single = false;
-                    }
-
-
-                    if(!is_record){ //simple - leaf - field or term id,label,code
-
-                        label = child;
-                        
-                        if(is_remark){
-                            term.label = term.label + '<i>' + label + '</i></div>';
-                        }else
-                        if(parent_single){   //parent_id=="r"){ // || parent_id.indexOf("r")==0){
-                        
-                            if(grandparent_single){
-                        
-                                term.label = term.label + label +
-                                '&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+
-                                term.id+'\', 0, this)">insert</a>)</span>'+
-                                '<span class="insert-intree">'+
-                                '&nbsp;(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.insertSelectedVars(\''+
-                                term.id+'\', false, false)">insert</a>'+
-                                '&nbsp;<a href="javascript:void(0)" title="Insert IF operator for this variable" onClick="showReps.insertSelectedVars(\''+
-                                term.id+'\', true, true)">if</a>)</span></div>';
-                            } else {
-                                
-                                term.label = term.label + label +
-                                '&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+
-                                term.id+'\', 2, this)">insert</a>)</span></div>';
-                                
-                            }
-                        }else{
-                            term.label = term.label + label +
-                            '&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+
-                            term.id+'\', 1, this)">insert</a>)</span>'+
-                            '<span class="insert-intree">'+
-                            '&nbsp;(<a href="javascript:void(0)" title="Insert variable in repeat (without parent prefix)" onClick="showReps.insertSelectedVars(\''+
-                            term.id+'\', true, false)">in</a>'+
-                            '&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable in repeat (without parent prefix)" '+
-                            'onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>'+
-                            '&nbsp;&nbsp;<a href="javascript:void(0)" title="Insert variable with parent prefix. To use outside the repeat" '+
-                            'onClick="showReps.insertSelectedVars(\''+term.id+'\', false, false)">out</a>'+
-                            '&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable with parent prefix. To use outside the repeat" '+
-                            'onClick="showReps.insertSelectedVars(\''+term.id+'\', false, true)">if</a>)</span></div>';
-                        }
-
-                    }else{
-
-                        if(child['termfield_name']) {
-                            label = child['termfield_name'];
-                            term.label = term.label + label; //<b> + '</b>';
-                        }else{
-                            if ( typeof(child[0]) == "string" ) {
-                                is_multiconstrained = true;
-                                label = child[0];
-                            }else{
-                                label = child['rt_name'];
-                            }
-                            term.label = term.label + '<b><i>' + label + '</i></b>';
-                        }
-
-
-                        if(!is_single){
-                            term.label = term.label + '&nbsp;(<a href="javascript:void(0)" '+
-                            'title="Insert FOREACH operator for this resource" onClick="showReps.insertSelectedVarsAsLoop(\''+term.id+'\')">repeat</a>)';
-                        }
-                        term.label = term.label + '</div>';
-                    }
-
-                    term.labelonly = label;
-
-                    childNode = new YAHOO.widget.TextNode(term, parentNode, false); // Create the node
-                    childNode.enableHighlight = false;
-
-                    if(first_node==null) first_node = childNode;
-
-                    if( is_multiconstrained ){
-
-                        var k;
-                        for(k=1; k<child.length; k++){
-
-                            var rt_term = {};//new Object();
-                            rt_term.id = term.id+"."+child[k].rt_id;  //record type
-
-                            var _varname;
-                            if(is_single){
-                                _varname = term.parent_id+"."+term.id;
-                            }else{
-                                _varname = term.id;
-                            }
-
-                            rt_term.label =  '<div style="padding-left:10px;"><b>' + (child[k].rt_name?child[k].rt_name:child[k].rt_id+' name N/A') +
-                            '</b>&nbsp;(<span '+
-                            'title="Insert IF operator for this record type. It will allow to avoid an error if this type is missing in the result set" '+
-                            'onClick="showReps.insertRectypeIf(\''+term.id+'\',' + child[k].rt_id +
-                            ', \'' + (child[k].rt_name?child[k].rt_name.replace("'", "\\'"):'') + '\')">if</span>)';
-
-                            //'onClick="showReps.insertRectypeIf(\''+term.this_id+'\', \'' + child[k].rt_name.replace("'", "\\'") + '\')">if</a>)';
-
-                            rt_term.label =  rt_term.label + '</div>';
-
-                            rt_term.href = "javascript:void(0)";
-
-                            var rectypeNode = new YAHOO.widget.TextNode(rt_term, childNode, false);
-
-                            __createChildren(rectypeNode, child[k], term.this_id, term.id, is_single, parent_single);
-                        }
-
-                    }else if( is_record ){ //next recursion
-                        __createChildren(childNode, child, term.this_id, term.id, is_single, parent_single);
-                    }
-                }
-            }//for
-        }//__createChildren
-        //end internal function
-
-
-
-        //fill treeview with content
-        var i, termid, term,
-        tv = _varsTree,
-        tv_parent = tv.getRoot(),
-        varid,
-        varnames;
-
-        //clear treeview
-        tv.removeChildren(tv_parent);
-
-        //    _variables
-        //   {rt_id: , rt_name, recID, recTitle .....
-        //                  fNNN:'name',
-        //                  fNNN:array(termfield_name: , id, code:  )
-        //                  fNNN:array(rt_name: , recID ...... ) //unconstrained pointer
-        //                  fNNN:array(rt_id: , rt_name, recID, recTitle ... ) //constrined pointer
-        //
-
-
-        for (i=0; i<_variables.length; i++){ //root elements - all rectypes in search result
-
-            varnames = _variables[i];  // && _variables[i].id===recTypeID
-
-            term = {};//new Object();
-            term.id = _variables[i].rt_id;  //record type
-            term.this_id = 'r';
-            term.parent_id = null;
-                                                                 
-            term.label =  '<div style="padding-left:10px;"><b>' + _variables[i].rt_name +
-            '</b>'+
-            '&nbsp;(<span '+
-            'title="Insert IF operator for this record type. It will allow to avoid an error if this type is missing in the result set" '+
-            'onClick="showReps.insertRectypeIf(\'r\', ' + _variables[i].rt_id + ', \'' + _variables[i].rt_name.replace("'", "\\'") + '\')">if</span>)';
-            
-            //'onClick="showReps.insertRectypeIf(\'r\', \'' + _variables[i].rt_name.replace("'", "\\'") + '\')">if</a>)';
-
-            term.label =  term.label + '</div>';
-
-            term.href = "javascript:void(0)";
-
-            var topLayerNode = new YAHOO.widget.TextNode(term, tv_parent, false); // Create the node
-
-            __createChildren(topLayerNode, _variables[i], 'r', 'r', true, false);
-
-            $('#varsTree').find('.ygtvlabel').css('margin-left',0);
-        }//for  _variables
-
-        //TODO tv.subscribe("labelClick", _onNodeClick);
-        //tv.singleNodeHighlight = true;
-        //TODO tv.subscribe("clickEvent", tv.onEventToggleHighlight);
-
-        tv.render();
-        if(first_node){
-            first_node.focus();
-            first_node.toggle();
-        }
-        $('.ygtvlabel').css('margin-left',0); //otherwise ff renders wrong
-    }
-
-
-
-    function _addIfOperator(nodedata, varname){
-        //var varname = nodedata.id; //was prefix+nodedata.this_id
-        var parname = _getVariableName(nodedata.parent_full_id);
-        if(parname!=""){
-            parname = parname + " >> ";
-        }
-        var remark = "{* "+ parname + _getVariableName(nodedata.id) + " *}"; //was this_id
-        return "\n{if ($"+varname+")}"+remark+"\n\n   {$"+varname+"} \n\n{/if}\n"+remark+" {* you can also add {/else} before {/if}} *}\n";
-    }
-
-    //
-    // add loop opeartor for for multi-value field
-    //
-    function _addMagicLoopOperator(_nodep, varname){
         
-        var gp_node = _findNodeById(_nodep.parent_full_id);
-        if(gp_node && gp_node.data){
-            
-            var parent_name = _getVariableName(_nodep.parent_full_id);
-            var var_name = (parent_name + '>>' +_getVariableName(_nodep.id)).trim(); //was this_id
-            
-            return '{foreach $'+gp_node.data.parent_id+'.'+_nodep.parent_id+'s as $'+_nodep.parent_id+' name=valueloop}{*  multi-value field loop *}'
-                    //+'\n\t'+_addVariable(_nodep, varname)
-                    +'\n\t{$'+_nodep.parent_id+"."+_nodep.this_id+'} {* '
-                            +var_name+' Note: $'+gp_node.data.parent_id+'.'+_nodep.parent_id+'.'+_nodep.this_id+' outputs first term only *}'
-                    +'\n{/foreach}';
-        }else{
-            return _addVariable(_nodep, varname);
+        if(!(rty_ID>0)){
+            treediv.text('Please select a record type from the pulldown above');
+            return;
         }
+        
+        treediv.empty();
+        
+        //generate treedata from rectype structure
+        var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 7, rty_ID, 
+                        ['ID','title','typeid','typename','modified','url','tags','all'] );
 
+        treedata[0].expanded = true; //first expanded
+
+
+        treediv.fancytree({
+            checkbox: false,
+            selectMode: 1,  // single
+            source: treedata,
+            beforeSelect: function(event, data){
+                // A node is about to be selected: prevent this, for folder-nodes:
+                if( data.node.hasChildren() ){
+                    return false;
+                }
+            },
+            lazyLoad: function(event, data){
+                var node = data.node;
+                var parentcode = node.data.code; 
+                var rectypes = node.data.rt_ids;
+
+                var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 7, 
+                    rectypes, ['ID','title','typeid','typename','modified','url','tags','all'], parentcode );
+                if(res.length>1){
+                    data.result = res;
+                }else{
+                    data.result = res[0].children;
+                }
+
+                return data;                                                   
+            },
+            loadChildren: function(e, data){
+                setTimeout(function(){
+                    //that._assignSelectedFields();
+                    },500);
+            },
+            select: function(e, data) {
+            },
+            click: function(e, data){
+                
+                var ele = $(e.originalEvent.target);
+                if(ele.is('a')){
+                    
+                    if(ele.text()=='insert'){
+                        //insert-popup
+                        _showInsertPopup2( data.node, ele );
+                    }else{
+                        _closeInsertPopup();
+                        
+                        if(ele.text()=='repeat'){
+                            _insertSelectedVars2( data.node, 1, false );
+                        }else if(ele.text()=='if'){
+                            _insertSelectedVars2( data.node, 0, true );
+                        }
+                    }
+                }
+                
+                /*
+                if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
+                    data.node.setExpanded(!data.node.isExpanded());
+                    //treediv.find('.fancytree-expander').hide();
+
+                }else if( data.node.lazy) {
+                    data.node.setExpanded( true );
+                }
+                */
+            },
+            renderNode: function(event, data) {
+                // Optionally tweak data.node.span
+                var node = data.node;
+                if(true){
+                    var $span = $(node.span);
+                    var new_title = node.title;//debug + '('+node.data.code+'  key='+node.key+  ')';
+                    
+                    
+                    if(node.data.type!='enum'){
+                        var op = '';
+                        if(node.data.type=='resource' || node.title=='Relationship'){ //resource
+                            op = 'repeat';
+                        }else if(node.children){
+                            op = 'if';
+                        }else{
+                            op = 'insert';
+                        }
+                        if(op){
+                            new_title = new_title + ' (<a href="#">'+op+'</a>)'; 
+                        }
+                    }
+                    
+                    $span.find("> span.fancytree-title").html(new_title);
+                }
+            }            
+        });
+        
+    }
+
+    //
+    // NEW if for root rectypes
+    //
+    function _insertRectypeIf2(_nodep, parent, rectypeId){
+        
+        var _remark = '{* ' + _getRemark(_nodep) + ' *}';
+        
+        return '{if ($'+parent+'.recTypeID=="'+rectypeId+'")}'+_remark+ ' \n  \n{/if}'+ _remark +' \n';  
+
+    }    
+    
+    //
+    // NEW
+    //    
+    function _addIfOperator2(_nodep, varname){
+        var _remark = '{* ' + _getRemark(_nodep) + ' *}';
+        return "\n{if ($"+varname+")}"+_remark+"\n\n   {$"+varname+"} \n\n{/if}\n"+_remark+" {* you can also add {/else} before {/if}} *}\n";
+    }
+    //
+    // NEW
+    //
+    function _addMagicLoopOperator2(_nodep, varname){
+        
+            var _remark = '{* ' + _getRemark(_nodep) + ' *}';
+            
+            var codes = varname.split('.');
+            var field = codes[codes.length-1];
+            
+            
+            var loopname = (_nodep.data.type=='enum')?'ptrloop':'valueloop';
+            var getrecord = (_nodep.data.type=='resource')? ('{$'+field+'=$heurist->getRecord($'+field+')}') :'';
+            
+            if(codes[1]=='Relationship'){
+                insertGetRelatedRecords();
+            }
+            
+            return '{foreach $'+varname+'s as $'+field+' name='+loopname+'}'+_remark
+                    +'\n\t'+getrecord+'\n'  //' {* '+_remark + '*}'
+                    +'\n{/foreach} '+_remark;
     }
     //
     //
     //
-    function _addVariable(nodedata, varname){
-        var res= "",
-        insertMode = $("#selInsertMode").val();
-
-        //var varname = nodedata.id; //was prefix+nodedata.this_id
-        var parname = _getVariableName(nodedata.parent_full_id);
-        if(parname!=""){
-            parname = parname + " >> ";
+    function _getRemark(_nodep){
+        
+        var s =  window.hWin.HEURIST4.util.stripTags(_nodep.title);
+        if(_nodep.parent && _nodep.parent.data.codes ){ //!_nodep.parent.isRootNode()
+            s = window.hWin.HEURIST4.util.stripTags(_nodep.parent.title) + ' >> ' + s;
         }
-
-        var remark = (parname + _getVariableName(nodedata.id)).trim(); //was this_id
-
+        return s;
+    }
+    
+    //
+    // NEW
+    //
+    function _addVariable2(_nodep, varname, insertMode){
+        
+        var res= '';
+        
+        var remark = _getRemark(_nodep);
 
         if(insertMode==0){ //variable only
 
@@ -1389,19 +1101,22 @@ function ShowReps() {
 
         }else if (insertMode==1){ //label+field
 
-            res = nodedata.labelonly+": {$"+varname+"}";
+            res = _nodep.title+": {$"+varname+"}";  //not used
 
-        }else{ // insert with 'wrap' fumction which provides URL and image handling
-            var dtype = nodedata.dtype;
+        }else if(_nodep){ // insert with 'wrap' fumction which provides URL and image handling
+            var dtype = _nodep.data.type;
             res = '{wrap var=$'+varname;
-            if(window.hWin.HEURIST4.util.isempty(dtype) || nodedata.this_id === 'recURL'){
-                res = res + ' dt="url"';
-            }else if(dtype === 'geo'){
-                res = res + '_originalvalue dt="'+dtype+'"';
-            }else if(dtype === 'file'){
-                res = res + '_originalvalue dt="'+dtype+'"';
-                res = res + ' width="300" height="auto" auto_play="0" show_artwork="0"';
-            }else{
+            if(!(_nodep.data.code && _nodep.data.code.indexOf('Relationship')==0))
+            {
+                if(window.hWin.HEURIST4.util.isempty(dtype) || _nodep.key === 'recURL'){
+                    res = res + ' dt="url"';
+                }else if(dtype === 'ge  o'){
+                    res = res + '_originalvalue dt="'+dtype+'"';
+                }else if(dtype === 'file'){
+                    res = res + '_originalvalue dt="'+dtype+'"';
+                    res = res + ' width="300" height="auto" auto_play="0" show_artwork="0"';
+                }else{
+                }
             }
             res = res +'}{*' +  remark + '*}';
         }
@@ -1410,33 +1125,14 @@ function ShowReps() {
     }
 
 
-
-    //
-    // root loop
-    // TODO: This function no longer needed as root loop is simply one of the patterns inserted by next function
-    //
-    function _insertRootForEach(){
-        var textedit = document.getElementById("edTemplateBody");
-        var _text = '{foreach $results as $r}\n{$r = $heurist->getRecord($r)}\n\n  {if ($r.recOrder==0)}\n    \n  '+
-        '{elseif ($r.recOrder==count($results)-1)}\n    \n  {else}\n  \n{/if}\n{/foreach}\n';      //{* INSERT YOUR CODE HERE *}
-
-        insertAtCursor(textedit, _text, false, -12);
-    }
-    //
-
-
-
     /*
     * insertPattern: inserts a pattern/template/example for different actions into the editor text
     *
     */
     function _insertPattern(pattern) {
 
-        if(insertPopupID){
-            $(insertPopupID).dialog('close');
-            insertPopupID = null;
-        }
-
+        _closeInsertPopup();
+        
         var _text = '';
         var textedit = document.getElementById("edTemplateBody");
 
@@ -1531,95 +1227,256 @@ function ShowReps() {
                 _text = 'It appears that this choice has not been implemented. Please ask the Heurist team to add the required pattern';
         }
 
-        insertAtCursor(null, _text, false, 0); // insert text into text buffer
+        insertAtCursor(_text); // insert text into editor
 
     } // _insertPattern
 
 
 
-    //
-    // if for root rectypes
-    //
-    function _insertRectypeIf(parent, rectypeId, rectypeName){
-
-        var textedit = document.getElementById("edTemplateBody");
-
-        //var _text = '{if ($'+parent+'.recTypeName=="'+rectypeName+'")}\n\t\n{/if}\n';
-
-        var _text = '{if ($'+parent+'.recTypeID=="'+rectypeId+'")}{* '+rectypeName+ ' *}\n  \n{/if}{* '+rectypeName+ ' *}\n';  //{* INSERT YOUR CODE HERE *}
-
-
-        insertAtCursor(textedit, _text, false, -7);
-    }
-
-
-
     var insertPopupID, insert_ID;
     
-    // 
-    // isloop_level - insert var in loop (trim parents)
-    //  0 - no loop, 1 one level (parent is repeatable), 2 levels (grandparent is repreatable)
+
     //
-    function _showInsertPopup( varid, isloop_level, elt ){
-
-        window.hSmarty.insertSelectedVarAsLoop = _insertSelectedVarsAsLoop;
-        window.hSmarty.insertVar = isloop_level==2?_insertSelectedVars_GP_repeatable:_insertSelectedVars;
-        window.hSmarty.insertModifier = _insertModifier;
-
-        if(isloop_level>0){
-            $(".ins_isloop").show();
-        }else{
-            $(".ins_isloop").hide();
+    // Hide insert variable popup
+    //
+    function _closeInsertPopup(){
+        if(_add_variable_dlg && _add_variable_dlg.dialog('instance')){
+            _add_variable_dlg.dialog('close');
         }
-
-
-        function __shownewpopup(){
-
-            var ele = document.getElementById("insert-popup");
-
-            //var pos = top.HEURIST.getPosition(elt);
-            var scroll = document.getElementById("treeContainer").scrollTop;
-            insert_ID = varid;
-
-            var node = _findNodeById(varid);
-            var title;
-            if(node){
-                title = ucwords(node.data.labelonly);
-            }else{
-                title = 'variable';
-            }
-            document.getElementById("insert-popup-header").innerHTML = 'Inserting: <b>'+title+'</b>';
-
-
-            //show jquery dialog
-            insertPopupID = $(ele).dialog({
-                    autoOpen: true,
-                    height: 320,
-                    width: 400,
-                    modal: false,
-                    title: 'Insert field, test or pattern',
-                    position: { my: "right top", at: "left bottom", of: $(elt) }
-                });
-
-        }//__shownewpopup
-
-
-        if(insertPopupID){
-            $(insertPopupID).dialog('close');
-            insertPopupID = null;
-        }
-        __shownewpopup();
-
     }
 
     //
-    // inserts selected variables
-    // for special case: parent is not repeatable, grandparent is
+    // NEW
     //
-    function _insertSelectedVars_GP_repeatable(  varid, inloop, isif  ){
+    function _showInsertPopup2( _nodep, elt ){
         
-        _insertSelectedVars( varid, inloop?2:0, isif )
+        // init buttons
+        
+
+        // show hide         
+        var no_loop = (_nodep.data.type=='enum' || _nodep.key.indexOf('rec_')==0 || 
+                    (_nodep.data.code && _nodep.data.code.indexOf('Relationship')==0))
+        if(no_loop){
+            h = 250;
+        }else{
+            h = 350;
+        }
+        
+        if(_add_variable_dlg && _add_variable_dlg.dialog('instance')){
+            _add_variable_dlg.dialog('close');
+        }
+        
+        function __on_add(event){
+            var $dlg2 = $(event.target).parents('.ui-dialog-content');
+            var insertMode = $dlg2.find("#selInsertMode").val();
+            
+            var bid = $(event.target).attr('id');
+            
+            var inloop = (bid=='btn_insert_loop')?1:(bid.indexOf('_loop')>0?2:0);
+            
+            _insertSelectedVars2(_nodep, inloop, bid.indexOf('_if')>0, insertMode);
+            //_add_variable_dlg.dialog('close');
+        }
+        
+        $ele_popup = $('#insert-popup');
+        $ele_popup.find('#btn_insert_var').attr('onclick',null).button()
+            .off('click')
+            .click(__on_add);
+        $ele_popup.find('#btn_insert_if').attr('onclick',null).button()
+            .off('click')
+            .click(__on_add);
+            
+        $ele_popup.find('#btn_insert_loop').attr('onclick',null).button()
+            .off('click')
+            .click(__on_add);
+        $ele_popup.find('#btn_insert_loop_var').attr('onclick',null).button()
+            .off('click')
+            .click(__on_add);
+        $ele_popup.find('#btn_insert_loop_if').attr('onclick',null).button()
+            .off('click')
+            .click(__on_add);
+            
+        $ele_popup.find('#selInsertModifiers').attr('onchange',null)
+            .off('change')
+            .change(function __on_add(){
+        
+                var $dlg2 = $(event.target).parents('.ui-dialog-content');
+                var sel = $dlg2.find("#selInsertModifiers")
+                var modname = sel.val();
+                sel.val('');
+                insertAtCursor("|"+modname);        
+            });
+        
+        
+        _add_variable_dlg = window.hWin.HEURIST4.msg.showElementAsDialog(   
+            {element: $ele_popup[0],
+            modal: false,
+            width:450,
+            height:h,
+            resizable: false,
+            title:'Insert field',
+            buttons:null,
+            open: null,
+            beforeClose:null,
+            close:function(){
+                return true; //remove
+            },
+            position:{my:'top left',at:'bottom left', of: elt},
+            borderless: false,
+            default_palette_class:null});
+    
+        if(no_loop){
+                _add_variable_dlg.find('.ins_isloop').hide();
+        }else{
+                _add_variable_dlg.find('.ins_isloop').show();
+        }
     }
+    
+    
+    
+    //
+    // NEW
+    //
+    function _insertSelectedVars2( _nodep, inloop, isif, _insertMode ){
+
+        var textedit = document.getElementById('edTemplateBody'),
+        _text = "",
+        _inloop = inloop,
+        _varname = '',
+        rectypeId = 0,
+        key = '',
+        _getrec = '';
+        
+        if(_nodep){
+            
+            key = _nodep.key;
+/*            
+code:  rt:dtid   like   10:lt134:12:ids3
+key 
+
+id            : "r.f15.f26.term"
+labelonly     : "Term"
+parent_full_id: "r.f15.f26"
+parent_id     : "f26"
+this_id       : "term"          
+
+  
+*/
+/*
+            if(inloop_level==2){
+                
+                var gp_node = _findNodeById(_nodep.parent_full_id);
+                if(gp_node && gp_node.data){
+                    _varname = gp_node.data.parent_id+'.'+_nodep.parent_id+'.'+_nodep.this_id;
+                }else{
+                    _varname = _nodep.parent_id+"."+_nodep.this_id;
+                }
+                
+            }else  inloop_level==1
+*/            
+            if (true) {
+                
+                _varname = '';
+                
+                if(false && _nodep.data.varname){
+                    _varname = _nodep.data.varname;
+                }else
+                {
+                    var codes = _nodep.data.code;
+                    if(!codes) codes = key;
+                    
+                    if(true){
+                        codes = codes.split(':');
+                        var lastcode = codes[codes.length-1];
+                        
+                        if(key.indexOf('rec_')===0){
+                            _varname = key.replace('_','');
+                        }
+                        
+                        if(codes[0]=='Relationship'){ //_nodep.data.type == 'relationship'){
+                            insertGetRelatedRecords();
+                            _varname = codes[0]+'.'+(_varname!=''?_varname:codes[1]);
+                        }else{
+                                                
+                            if(_nodep.data.type == 'rectype'){
+                                rectypeId = _nodep.data.rtyID_local;
+                                _varname = '';
+                            }else if(key.indexOf('rec_')!==0)
+                            {
+                                if(key=='term' || key=='code' || key=='conceptid' || key=='internalid'){ //terms
+                                        _varname = ('.'+key);
+                                        lastcode = codes[codes.length-2];
+                                }else if (lastcode.indexOf('lt')==0) {
+                                    lastcode = lastcode.substring(2);
+                                }
+                                _varname = 'f'+lastcode+_varname;    
+                            }
+                            
+                            if(codes.length>3){ //second level (isif && codes.length==2) || 
+                                
+                                var parent_key = codes[1];
+                                if(parent_key.indexOf('lt')==0){ //resource
+                                    parent_key = 'f'+parent_key.substring(2);
+                                }else{
+                                    parent_key = 'f'+parent_key;
+                                }
+                                
+                                if( inloop<2 ){
+                                    
+                                    _getrec = '{$r.' + parent_key 
+                                                      + '=$heurist->getRecord($r.'+parent_key+')}\n';
+                                    //find if above cursor code already has such line             
+                                    if(findAboveCursor(_getrec)) {
+                                            _getrec = '';
+                                    }
+                                    _varname = parent_key +  (_varname?('.' + _varname):'');
+                                }
+                            }
+                        }
+                    }else{
+                        _varname = key;
+                    }
+                    
+                    if( inloop<2 ){
+                        _varname = 'r' + (_varname?('.' + _varname):'');
+                    }
+                    
+                    _nodep.data.varname = _varname;
+                    //_nodep.data.key = _varname;
+                }
+                
+            }
+
+            
+            var cursorIndent = 0;
+            
+            if( inloop==1 ){
+                
+                _getrec = '';
+                _text = _addMagicLoopOperator2(_nodep, _varname);
+                
+            }else if(isif){
+                
+                if(rectypeId>0){
+                    _text = _insertRectypeIf2(_nodep, _varname, rectypeId);
+                    cursorIndent = -7;
+                }else{
+                    _text = _addIfOperator2(_nodep, _varname);    
+                }
+                
+                
+            }else{
+                _text = _addVariable2(_nodep, _varname, _insertMode);
+            }
+        
+        
+            if(_text!=='')    {
+                _text = _getrec + _text;
+                insertAtCursor(_text);
+            }
+        }
+    }
+    
     //
     // inloop_level = 0 no loop
     //              = 1 parent is repeatable
@@ -1679,7 +1536,7 @@ this_id       : "term"
                 if(_nodep.this_id=='term' && !isif){
                     
                     _text = _addMagicLoopOperator(_nodep, _varname);
-                    insertAtCursor(textedit, _text, false, 0);
+                    insertAtCursor(_text);
                     return;
 
                 }else{
@@ -1722,46 +1579,8 @@ this_id       : "term"
         }
 
         if(_text!=="")    {
-            insertAtCursor(textedit, _text, false, 0);
+            insertAtCursor(_text);
         }
-    }
-
-
-
-    //
-    function _insertSelectedVarsAsLoop( varid ){
-
-        var textedit = document.getElementById("edTemplateBody"),
-        insertMode = document.getElementById("selInsertMode").value,
-        _text = "",
-        _prefix = "";
-
-        if(varid==null){
-            
-            insertPopupID = null;
-            varid = insert_ID;
-        }
-
-        var _nodep = _findNodeById(varid);
-        if(_nodep){
-            var arr_name = (_nodep.data.this_id==="r") ?"results" : _nodep.data.parent_id+'.'+_nodep.data.this_id+'s';
-            var item_name = (_nodep.data.this_id==="r") ?"r" : _nodep.data.this_id;
-            var remark = "{* "+_getVariableName(_nodep.data.id)+" *}";
-            var loopname = (_nodep.data.dtype=='enum')?'ptrloop':'valueloop';
-            var getrecord = (_nodep.data.dtype=='resource')? ('{$'+item_name+'=$heurist->getRecord($'+item_name+')}') :'';
-            
-            if(_nodep.data.id=='r.Relationship'){
-                insertGetRelatedRecords();
-            }
-
-            _text = "{foreach $"+arr_name+" as $"+item_name+" name="+loopname+"}"+remark+"\n  "+getrecord+"\n  "
-            +"\n{/foreach}"+remark+"\n";
-        }
-
-        if(_text!=="")    {
-            insertAtCursor(textedit, _text, false, -12);
-        }
-
     }
 
 
@@ -1771,57 +1590,6 @@ this_id       : "term"
             return $1.toUpperCase();
         });
     }
-
-
-
-    function _getVariableName(id){
-        if(!window.hWin.HEURIST4.util.isempty(id)){
-
-            if (id=="r"){
-                return "";
-            }else if (id=="Relationship") {
-                return id;
-            }else{
-
-                var node = _findNodeById(id);
-                if(node){
-                    return ucwords(node.data.labelonly);
-                }else{
-                    return "notfound";
-                }
-            }
-
-        }else{
-            return "";
-        }
-    }
-
-
-
-    function _getVariableName_old(id){
-        if(!window.hWin.HEURIST4.util.isempty(id)){
-
-            if (id=="r"){
-                return "";
-            }else if( id=="Relationship" || !window.hWin.HEURIST4.util.isNumber(id.substring(1)) ) {
-                return id;
-            }else{
-
-                var type = id.substring(0,1);
-                id  = id.substring(1);
-
-                if(type=="r"){
-                    return ucwords($Db.rty(id, 'rty_Name'));
-                }else{
-                    return ucwords($Db.dty(id, 'dty_Name'));
-                }
-            }
-
-        }else{
-            return "";
-        }
-    }
-
 
     //
     // returns false if token not found in current and lines until first "if" or "for" above
@@ -1888,10 +1656,9 @@ this_id       : "term"
     
 
     /**
-    * myField, isApplyBreaks, cursorIndent - not used
-    * TODO: What do the parameters do?
+    * Inserts into code mirror editor at cursor position
     */
-    function insertAtCursor(myField, myValue, isApplyBreaks, cursorIndent) {
+    function insertAtCursor(myValue) {
 
             //for codemirror
             var crs = codeEditor.getCursor();
@@ -1935,9 +1702,10 @@ this_id       : "term"
 
 
 
-    //
+    /*
+    // Inserts text into textarea at cursor
+    // Not used however it may be useful in future
     // utility function - move to utils ?
-    // TODO: What is the difference btween this and the one above. What do the parameters do?
     //
     function insertAtCursor_fortextarea(myField, myValue, isApplyBreaks, cursorIndent) {
 
@@ -1974,8 +1742,6 @@ this_id       : "term"
         setTimeout(function() {myField.focus(); }, 500);
     }
 
-
-
     //
     // apply line breaks
     //
@@ -2001,86 +1767,29 @@ this_id       : "term"
             k = text.indexOf("\\n");
         }
         oTextarea.value += text;
-        /*
-        var nEmptyWidth = oTextarea.scrollWidth;
-        var nLastWrappingIndex = -1;
-        for (var i = 0; i < strRawValue.length; i++) {
-        var curChar = strRawValue.charAt(i);
-        if (curChar == ' ' || curChar == '-' || curChar == '+')
-        nLastWrappingIndex = i;
-        oTextarea.value += curChar;
-        if (oTextarea.scrollWidth > nEmptyWidth) {
-        var buffer = "";
-        if (nLastWrappingIndex >= 0) {
-        for (var j = nLastWrappingIndex + 1; j < i; j++)
-        buffer += strRawValue.charAt(j);
-        nLastWrappingIndex = -1;
-        }
-        buffer += curChar;
-        oTextarea.value = oTextarea.value.substr(0, oTextarea.value.length - buffer.length);
-        oTextarea.value += "\n" + buffer;
-        }
-        }
-        */
         oTextarea.setAttribute("wrap", "");
 
         return oTextarea;
     }
-
+    */
 
 
     //
     //
     //
     function _insertModifier(modname){
-
-        insertAtCursor(null, "|"+modname, null, null);
-
-        /*
-        var textedit = document.getElementById("edTemplateBody");
-
-        if (textedit.selectionStart || textedit.selectionStart == '0') {
-
-        //1. detect that cursor inside the variable or wrap function {$ |  }  or {wrap  }
-        var startPos = textedit.selectionStart;
-        var endPos = textedit.selectionEnd;
-
-        //find last { occurence before endPos
-        var k = -1,
-        pos1;
-
-        do{
-        pos1 = k;
-        k = textedit.value.indexOf("{$", k+1);
-        }while (k>=0 && k<endPos);
-
-        if(pos1<0){
-        window.hWin.HEURIST4.msg.showMsgErr('Place cursor inside variable entry: between {}');
-        return;
-        }
-
-        var pos2 = textedit.value.indexOf("}", pos1);
-        if(pos2<endPos){
-        window.hWin.HEURIST4.msg.showMsgErr('Place cursor inside variable entry: between {}');
-        return;
-        }
-
-        //2. insert modifier name in the end of {}
-        textedit.value = textedit.value.substring(0, pos2)
-        + "|"+modname
-        + textedit.value.substring(pos2, textedit.value.length);
-        }
-        */
+        insertAtCursor("|"+modname);
     }
 
     function _onResize(newwidth){
 
-        var newval = newwidth>605?'36px':'60px';
-
-        if(top_repcontainer!=newval){
-            top_repcontainer = newval;
-            if(!_iseditor){
-                document.getElementById("rep_container").style.top = top_repcontainer;
+        if(newwidth>0){
+            var newval = newwidth>605?'36px':'75px';
+            if(top_repcontainer!=newval){
+                top_repcontainer = newval;
+                if(!_iseditor){
+                    document.getElementById("rep_container").style.top = top_repcontainer;
+                }
             }
         }
     }
@@ -2127,63 +1836,6 @@ this_id       : "term"
         
         
         window.hWin.HEURIST4.ui.showPublishDialog( params );
-        
-        
-/*
-        if(!embed_dialog){
-            embed_dialog = $('#smarty_publish_dialg');
-            embed_dialog.load(window.hWin.HAPI4.baseURL+'viewers/smarty/repMenu.html', 
-            function(){
-                    _onReportPublish();
-            });
-            return;
-        }
-        
-        
-        //init and fill ui
-
-        embed_dialog.find("#linkOpenInNewWindow").attr('href', surl);
-
-        embed_dialog.find("#code-textbox1").val(surl);
-        embed_dialog.find("#code-textbox2").val(
-        '<script type="text/javascript" src="'+surl+'&mode=js"><'+'/script>'+
-        '<noscript>'+
-        '<iframe width="80%" height="70%" frameborder="0" src="'+surl+'">'+
-        '</iframe>'+
-        '</noscript>');
-        
-        var $dlg_pce;
-        
-        embed_dialog.find("#btnSetupSchedule").button().click(function(event){
-            
-                        $dlg_pce.dialog('close');
-                        
-                        $(event.target).off('click');
-
-                        var q = 'hquery='+encodeURIComponent(squery)+'&template='+template_file;
-                        var sURL = window.hWin.HAPI4.baseURL + "export/publish/manageReports.html?"
-                                    + q + "&db="+window.hWin.HAPI4.database;
-
-                        var body = $(window.hWin.document).find('body');
-                        var dim = {h:body.innerHeight(), w:body.innerWidth()};
-
-                        window.hWin.HEURIST4.msg.showDialog(sURL, 
-                            {   "close-on-blur": false,
-                                "no-resize": false,
-                                height: 480,
-                                width: dim.w*0.9,
-                                callback: null
-                        });
-            
-        });
-
-        $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
-                element: embed_dialog[0],
-                height: 430,
-                width: 600,
-                title: window.hWin.HR('Publish report')
-        });        
-*/        
         
         
     }
@@ -2281,39 +1933,9 @@ this_id       : "term"
             _saveOutput();
         },
 
-        //inserts selected variables inside the loop
-        insertSelectedVarsAsLoop:function(varid){
-            _insertSelectedVarsAsLoop(varid);
-        },
-
-        showInsertPopup:function(varid, isloop_level, elt){
-            _showInsertPopup(varid, isloop_level, elt);
-            return false;
-        },
-
         //inserts selected variables
         insertSelectedVars:function(varid, inloop, isif){
             _insertSelectedVars(varid, inloop, isif);
-        },
-
-        insertRectypeIf:function(parent, rectypeId, rectypeName){
-            _insertRectypeIf(parent, rectypeId, rectypeName);
-        },
-        insertRootForEach:function(){
-            _insertRootForEach();
-        },
-        //clear all marked checkbox in variable tree
-        clearAllSeelectionInTree:function(){
-            _clearAllSeelectionInTree();
-        },
-
-        // mark - unmark child nodes
-        markAllChildren:function(varid){
-            _markAllChildren(varid);
-        },
-
-        insertModifier:function(modname){
-            _insertModifier(modname);
         },
 
         baseURL:  function (){
@@ -2329,6 +1951,10 @@ this_id       : "term"
             _onResize(newwidth);
         },
 
+        insertPattern: function(){ 
+            _insertPattern();
+        },
+        
         getClass: function () {
             return _className;
         },
