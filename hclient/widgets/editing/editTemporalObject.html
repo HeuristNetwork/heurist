@@ -48,23 +48,27 @@
 				margin:0;
 				padding:0;
 			}
+            
+            #display-div{
+                 border: none;
+                 background: none;
+                font-size:0.8em;
+            }   
+            
 			.date-button {
 				margin: 3px;
 				width: 24px;
 				height: 18px;
 				background: url(../../assets/cal.gif) lightgray scroll center center no-repeat;
 			}
+            .calendars-trigger{
+                margin-left:4px;
+                vertical-align: middle;
+            }
 		</style>
 
-
-		<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
-		<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
-
-		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-
-		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/element/element-min.js"></script>
-		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
-        
+        <link rel="stylesheet" type="text/css" href="../../../h4styles.css">
+        <link rel="stylesheet" type="text/css" href="../../../h6styles.css">
         <link rel="stylesheet" type="text/css" href="../../../external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
         
         <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
@@ -94,19 +98,18 @@
         <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
 	</head>
     
-	<body class=" yui-skin-sam" style="background-color:rgb(240,240,240);" width=440 height=420 >
+	<body style="background-color:rgb(240,240,240);" width=440 height=420 >
 
-		<div id=display-div class="yui-navset">
-			<ul class="yui-nav">
+		<div id="display-div">
+			<ul>
 				<li><a href="#s"><em>Simple Date</em></a></li>
-				<li class="selected"><a href="#p"><em>Date Range</em></a></li>
+				<li><a href="#p"><em>Date Range</em></a></li>
 				<li><a href="#f"><em>Approximate Date</em></a></li>
 				<li><a href="#c"><em>C14 Date</em></a></li>
 
 			</ul>
             
-			<div class="yui-content" style="background-color:rgb(240,240,240); border:0;">
-				<div id="s">
+			<div id="s" class="display-tab">
 					<div style="margin: 20px  0px 0px 50px">
 						<div>
 							<span title="Enter date in  y-m-d">
@@ -161,7 +164,7 @@
 					</div>
 				</div>
 
-				<div id="p">
+			<div id="p" class="display-tab">
 					<div style="text-align: center;height:108px">
                         <img src="../../assets/temporalDateRange.png" style="height:95px"/>
                         <!--
@@ -256,7 +259,7 @@
 					</div>
 				</div>
 
-				<div id="f">
+			<div id="f" class="display-tab">
 					<div style="margin:20px 0px 20px 50px; ">
 						<div style="float:left; width:430px;">
 							<div>
@@ -315,7 +318,7 @@
 					</div>
 				</div>
 
-				<div id="c">
+			<div id="c" class="display-tab">
 					<div style="margin:20px 0px 20px 50px;">
 						Mean Date:
 						<input type=text id="BCE" title="Enter date in  y-m-d h:m:s" tabindex="1" onclick="return c14DateClick('BCE');" style="width:80px; margin: 0px 5px" />
@@ -349,10 +352,13 @@
 						</span>
 					</div>
 				</div>
-			</div>
+			
 		</div>
+<!--
+<div style="background-color:rgb(240,240,240); border:0;"></div>
+-->
         
-		<div>
+		<div style="font-size:0.8em;">
 			<span style="margin:10px 270px">&nbsp;</span>
 			<span>
 				<input type="button" tabindex="11" value="Save" onclick="TemporalPopup.close();" />
@@ -362,10 +368,10 @@
         
 		<div style="border-top:1px solid grey; margin :10px 10px"></div>
         
-		<div style="margin: 10px 0px 0px 20px">
-            <div title="Select calendar">
-                <div style="width:200px;float:left;text-align:right;">Use calendar:</div>
-                    <select id="selectCLD">
+		<div style="margin: 10px 0px 0px 20px;font-size:0.8em;">
+            <div title="Select calendar" style="margin: 4px 0;">
+                <div style="width:200px;float:left;text-align:right;padding: 2px 5px;">Use calendar:</div>
+                    <select id="selectCLD" style="font-size:1em;">
                         <option value="gregorian">Gregorian</option>
                         <option value="taiwan">Taiwan</option>
                         <option value="thai">Thai</option>
@@ -383,8 +389,8 @@
             </div>
             
 			<div title="Enter comment for this temporal or ">
-				<div style="width:200px;float:left;text-align:right;">Comment/original information:</div>
-				<input type=text id="COM" tabindex="10" style="width:300px;" />
+				<div style="width:200px;float:left;text-align:right;padding: 2px 5px;">Comment/original information:</div>
+				<input type=text id="COM" tabindex="10" style="width:300px;font-size:1em;" />
 			</div>
             
 			<div style="margin:5px 0px 15px 175px; font-size:7pt; color:grey;"  >
