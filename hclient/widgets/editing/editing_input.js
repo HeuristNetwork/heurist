@@ -4520,7 +4520,7 @@ console.log('onpaste');
                                         + encodeURIComponent(that.newvalues[$input.attr('id')]
                                                     ?that.newvalues[$input.attr('id')]:$input.val());
                                     
-                                    window.hWin.HEURIST4.msg.showDialog(url, {height:550, width:750,
+                                    window.hWin.HEURIST4.msg.showDialog(url, {height:570, width:750,
                                         title: 'Temporal Object',
                                         //class:'ui-heurist-bg-light',
                                         callback: function(str){

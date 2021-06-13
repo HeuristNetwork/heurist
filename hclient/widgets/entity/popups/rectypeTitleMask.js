@@ -318,7 +318,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                 var oRectype = {rectype:{colNames:{common:['rty_TitleMask'],dtFields:[]},
                             defs:_defs}}; //{_rectypeID:[{common:[newvalue],dtFields:[]}]}
                 
-                var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
+                var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php"; //saveRT
                 
                 var request = {method:'saveRT', db:window.hWin.HAPI4.database, data:oRectype, no_purify:1 }; //styep
                 

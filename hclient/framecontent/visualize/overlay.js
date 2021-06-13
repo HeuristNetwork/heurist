@@ -714,6 +714,9 @@ function removeOverlays() {
 //
 function _addNewLinkField(source_ID, target_ID){
     
+            window.hWin.HEUIRIST4.msg.showMsgWorkInProgress();
+            return;
+    
             var body = $(this.document).find('body');
             var dim = { h:480, w:700 };//Math.max(900, body.innerWidth()-10) };                
             

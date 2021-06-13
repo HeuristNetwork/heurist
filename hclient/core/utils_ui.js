@@ -36,7 +36,6 @@ createVocabularyGroupSelect
 
 createRectypeSelect - get SELECT for record types   
 createRectypeDetailSelect - get SELECT for details of given recordtype
-createRectypeTreeSelect - get SELECT for hierarchy of record types   
     
 createUserGroupsSelect - get SELECT for list of given groups, othewise loads list of groups for current user    
 
@@ -672,74 +671,6 @@ window.hWin.HEURIST4.ui = {
         return $(selObj);
     },
 
-    // NOT USED
-    // get selector for record types tree
-    //
-    // rectypeTree - constraint options to this list, otherwise show entire list of rectypes separated by groups
-    //   id          : rectype id
-    //   text        : name
-    //   type        : "rectype"
-    //   children    : []  // array of fields
-    //
-    createRectypeTreeSelect: function(selObj, rectypeTree, topOptions, indent) {
-
-        if(!indent) indent=0;
-        
-        if(indent==0){
-            window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
-            if($.isArray(rectypeTree) && rectypeTree.length>0){
-                rectypeTree = rectypeTree[0];
-            }
-        }
-
-        var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
-        
-        var index, rectypeName, is_used = false;
-
-        var rectypes = window.hWin.HEURIST4.rectypes;
-        if(!rectypes) return selObj;
-        
-        var parent_Name = window.hWin.HEURIST4.util.trim_IanGt(rectypeTree.title);
-                
-        if(rectypeTree.type=='rectype' ||  rectypeTree.constraint==1){
-            
-            var recTypeID = rectypeTree.key;
-            if(rectypeTree.type=='rectype'){
-                rectypeName = parent_Name+((indent>0 && parent_Name!=rectypeTree.parent)?(' as '+rectypeTree.parent):'');    
-            }else {                           
-                recTypeID = rectypeTree.rt_ids;
-                rectypeName = rectypes.names[rectypeTree.rt_ids]+
-                        ((rectypes.names[rectypeTree.rt_ids]!=parent_Name)?(' as '+parent_Name):'');
-            }
-            
-            /* rerplaced witj jquery selectmenu see hSelect 
-            if(isNotFirefox && indent>0){
-                var a = new Array( ((indent<7)?indent:7)*2 );
-                rectypeName = a.join('. ') + rectypeName;
-            }
-            */
-            
-            var opt = window.hWin.HEURIST4.ui.addoption(selObj, recTypeID, rectypeName); 
-            opt.className = "depth" + (indent<7)?indent:7;
-            $(opt).attr('depth', indent);        
-            is_used = true;
-        }
-        
-        if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeTree.children))
-        for (index=0;index<rectypeTree.children.length;index++){
-               var child = rectypeTree.children[index];
-               child.parent = parent_Name;
-               window.hWin.HEURIST4.ui.createRectypeTreeSelect(selObj, child, null, 
-                    indent+(is_used?1:0) );
-        }
-
-        if(indent==0){
-            selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, false);        
-        }
-        
-        return selObj;
-    },
-    
     /**
     * get SELECT for details of given recordtype
     *

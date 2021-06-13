@@ -44,7 +44,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
         this.options.layout_mode = 'short';
         this.options.use_cache = true;
-        this.options.use_structure = false;
+
         //this.options.edit_mode = 'popup';
         
         //this.options.select_return_mode = 'recordset';

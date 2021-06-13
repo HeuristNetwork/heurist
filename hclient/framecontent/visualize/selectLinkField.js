@@ -311,7 +311,7 @@ $(document).ready(function() {
             window.close(_structureWasUpdated);
         };
 
-        var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
+        var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php"; //saveRTS
         var callback = updateResult;
 
         var request = {method:'saveRTS', db:window.hWin.HAPI4.database, data:orec};

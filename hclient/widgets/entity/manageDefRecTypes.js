@@ -22,7 +22,6 @@
 we may take data from 
 1) use_cache = false  from server on every search request (live data) 
 2) use_cache = true   from client cache - it loads once per heurist session (actually we force load)
-3) use_cache = true + use_structure - use HEURSIT4.rectypes
 */
 $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
    

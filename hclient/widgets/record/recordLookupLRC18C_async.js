@@ -375,7 +375,7 @@ _rendererResultList: function (recordset, record) {
     /* If not create a term and call method postAddingTerm */
     _addTermThatDoesNotExist: function (type, term, id, rec_data) {
         that = this;
-        var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
+        var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php"; //saveTerms
         var oTerms = {
             terms: {
                 colNames: ['trm_Label', 'trm_InverseTermId', 'trm_Description', 'trm_Domain', 'trm_ParentTermID', 'trm_Status', 'trm_Code', 'trm_SemanticReferenceURL'],

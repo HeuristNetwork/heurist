@@ -734,15 +734,6 @@ console.log(this.innerWidth);
                 _setLayout(true, false);
             }
 
-            /*
-            var r = true;
-            if(_keepTemplateValue!=document.getElementById("edTemplateBody").value){
-            r=confirm("Template was changed. Are you sure you wish to exit and lose all modifications?");
-            }
-            if (r==true){
-            _setLayout(true, false);
-            }
-            */
         }
     }
 
