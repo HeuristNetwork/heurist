@@ -313,7 +313,7 @@ if($is_csv){
             autoWidth: false,
             //initComplete: _onDataTableInitComplete,
             dom:'ip',
-            pageLength: 20,
+            pageLength: 500,
             ordering: true,
             processing: false,
             serverSide: false,
