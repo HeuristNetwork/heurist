@@ -349,7 +349,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
         if(position_to_element){
            if($.isPlainObject(position_to_element)){
-                options.position = position_to_element;
+                options.position = position_to_element.position;
            }else{
                 options.position = { my: "left top", at: "left bottom", of: $(position_to_element) };    
            } 

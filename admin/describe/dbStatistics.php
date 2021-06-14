@@ -111,6 +111,10 @@ if($is_csv){
     fputcsv($fd, $record_row, ',', '"');
 }else{
     $arr_databases = array();
+    
+    $arr_header = array("dbname","db_regid","cnt_recs", //"cnt_vals", 
+                    "db_version",
+                    "date_mod", "date_struct_mod","owner");
 }
 
 $i = 0;
@@ -118,12 +122,12 @@ foreach ($dbs as $db){
 
     //ID  Records     Files(MB)    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
 //error_log(substr($db, 4)); 
-    if(!hasTable($mysqli, 'sysIdentification',$db)) return;
+    if(!hasTable($mysqli, 'sysIdentification',$db)) continue;
 
     $record_row = array (substr($db, 4),
     mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1"),
     mysql__select_val("select count(*) from ".$db.".Records where (not rec_FlagTemporary)"),
-    0,//mysql__select_val("select count(*) from ".$db.".recDetails"),
+    //0,mysql__select_val("select count(*) from ".$db.".recDetails"),
     /* Removed Ian 10/12/16 to speed up - very slow on USyd server with very large # of DBs. See additional comment-outs below
     mysql__select_val("select count(*) from ".$db.".defRecTypes").",".
     mysql__select_val("select count(*) from ".$db.".defDetailTypes").",".
@@ -155,12 +159,14 @@ foreach ($dbs as $db){
         fputcsv($fd, $record_row, ',', '"');
     }else{
         $record_row[] = implode(' ', $owner);
-        $record_row[] = $sysadmin;
+        //$record_row[] = $sysadmin;
        
         $aitem_quote = function($n)
         {
             return is_numeric($n) ?$n :('"'.str_replace('"','\"',$n).'"');
         };        
+        
+        $record_row[] = $record_row[0]; //add dbname to the end
         
         $record_row = array_map($aitem_quote, $record_row);
         $arr_databases[] = implode(',',$record_row);//'"'.implode('","',  str_replace('"','',$record_row)   ).'"';
@@ -226,27 +232,13 @@ if($is_csv){
         <link rel="icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
-        <!-- YUI -->
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/yui/2.8.2r1/build/fonts/fonts-min.css" />
-        <script type="text/javascript" src="<?php echo PDIR;?>external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/yui/2.8.2r1/build/element/element-min.js"></script>
-
-        <!-- DATATABLE DEFS -->
-        <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
-        <!-- datatable Dependencies -->
-        <script type="text/javascript" src="<?php echo PDIR;?>external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
-        <!-- Source files -->
-        <script type="text/javascript" src="<?php echo PDIR;?>external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
-        <!-- END DATATABLE DEFS-->
-
-        <!-- TOOLTIP -->
-        <!-- <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/container/assets/container.css"> -->
-        <script src="<?php echo PDIR;?>external/yui/2.8.2r1/build/container/container-min.js"></script>
-
         <!-- jQuery UI -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
-        
+
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
+        <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
+
         <!-- CSS -->
         <?php include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
 
@@ -254,6 +246,7 @@ if($is_csv){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
 
     </head>
 
@@ -262,7 +255,10 @@ if($is_csv){
         <div id="page-inner">
             <?php echo "System admin: <a class='dotted-link' href='mailto:" .HEURIST_MAIL_TO_ADMIN. "'>" .HEURIST_MAIL_TO_ADMIN. "</a>"; ?>
             <?php if($is_delete_allowed) { /*&& $sysadmin*/?> <button id="deleteDatabases" onclick="deleteDatabases()">Delete selected databases</button><br><br> <?php } ?>
-            <div id="tabContainer"></div>
+            
+
+            <table style="width:98%" class="div_datatable display">
+            </table>
         </div>
 
         <?php
@@ -291,9 +287,11 @@ if($is_csv){
 
         <!-- Table generation script -->
         <script type="text/javascript">
+        
+        
             //v2
             var showTimer,hideTimer;
-            var arr = [
+            var dataSet = [
                 <?php
                     foreach ($arr_databases as $db) {
                         print '['.$db.'],'.PHP_EOL;
@@ -301,16 +299,22 @@ if($is_csv){
                 ?>
             ];
 
-            var myDataSource = new YAHOO.util.LocalDataSource(arr, {
-                responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
-                responseSchema : {
-                    fields: ["dbname","db_regid","cnt_recs", "cnt_vals", 
-//removed by Ian                    "cnt_rectype","cnt_fields", "cnt_terms", "cnt_groups", "cnt_users", 
-                    "db_version",
-//removed by Ian                    "size_db", "size_file", 
-                    "date_mod", "date_login","owner","deleteable"]
-            }});
-
+            
+        _dataTableParams = {
+            //scrollCollapse:true,
+            //scrollX: false,
+            //scrollY: true,
+            autoWidth: false,
+            //initComplete: _onDataTableInitComplete,
+            dom:'ip',
+            pageLength: 20,
+            ordering: true,
+            processing: false,
+            serverSide: false,
+            data: dataSet,
+            columns: null
+        };
+        
             function __format_date(d){
                 var val = parseInt(d);
                 if(val>0){
@@ -323,93 +327,58 @@ if($is_csv){
                 }
             }
             
+        _dataTableParams['columns'] = [
             
-            var myColumnDefs = [
-                { key: "dbname", label: "Name", sortable:true, className:'left', formatter: function(elLiner, oRecord, oColumn, oData) {
-                    elLiner.innerHTML = "<a href='../../?db="+oRecord.getData('dbname')+"' class='dotted-link' target='_blank'>"+oRecord.getData('dbname')+"</a>";
+                { title: "Name", sortable:true, searchable:true, className:'left'  //data: "dbname", 
+                ,render: function(data, type) {
+                    if (type === 'display') {
+                        return "<a href='../../?db="+data+"' class='dotted-link' target='_blank'>"+data+"</a>";
+                    }else{
+                        return '';    
+                    }
                 }},
-                { key: "db_regid", label: "Reg ID", sortable:true, className:'right'},
-                { key: "cnt_recs", label: "Records", sortable:true, className:'right'},
-                { key: "cnt_vals", label: "Files(MB)", sortable:true, className:'right'},
-                /* Removed to increase speed - see equivalent section commented out above
-                { key: "cnt_rectype", label: "RecTypes", sortable:true, className:'right'},
-                { key: "cnt_fields", label: "Fields", sortable:true, className:'right'},
-                { key: "cnt_terms", label: "Terms", sortable:true, className:'right'},
-                { key: "cnt_groups", label: "Groups", sortable:true, className:'right'},
-                { key: "cnt_users", label: "Users", sortable:true, className:'right'},
-                */
-                { key: "db_version", label: "DB Vsn", sortable:true, className:'right'},
-                /* removed by Ian
-                { key: "size_db", label: "DB (MB)", sortable:true, className:'right'},
-                { key: "size_file", label: "Files (MB)", sortable:true, className:'right'},
-                */
-                { key: "date_mod", label: "Data updated", sortable:true, 
-                    formatter: function(elLiner, oRecord, oColumn, oData) {
-                        elLiner.innerHTML = __format_date(oRecord.getData('date_mod'));
-                }},
-                { key: "date_login", label: "Structure modified", sortable:true,
-                    formatter: function(elLiner, oRecord, oColumn, oData) {
-                        elLiner.innerHTML = __format_date(oRecord.getData('date_login'));
-                }},
-                { key: "owner", label: "Owner", width:200, formatter: function(elLiner, oRecord, oColumn, oData){
-                    elLiner.innerHTML = "<div style='max-width:100px' class='three-lines' title='"+oRecord.getData('owner')+"'>"+oRecord.getData('owner')+"</div>";
-                }}
+                { title: "Reg ID", sortable:true, searchable:true, className:'right'}, //data: "db_regid", 
+                { title: "Records", sortable:true, searchable:false, className:'right'}, //data: "cnt_recs", 
+                //{ title: "Files(MB)", sortable:true, searching:false, className:'right'}, //data: "cnt_vals", 
+                { title: "DB Vsn", sortable:true, searchable:false, className:'right'},  //data: "db_version", 
+                { title: "Data updated", searchable:false, sortable:true,    //data: "date_mod", 
+                    render: function(data, type) {
+                        return (type === 'display')?__format_date(data):'';
+                    }},
+                { title: "Structure modified", searchable:false, sortable:true,   //data: "date_struct_mod", 
+                    render: function(data, type) {
+                        return (type === 'display')?__format_date(data):'';
+                    }},
+                { title: "Owner", searchable:false, width:200,  //data: "owner", 
+                    render: function(data, type) {
+                        if (type === 'display') {
+                            return "<div style='max-width:100px' class='three-lines' title='"+data+"'>"+data+"</div>";
+                        }else{
+                            return '';    
+                        }
+                    }}
                 <?php if($is_delete_allowed) { /*$sysadmin && */?>
-                    ,{ key: 'deleteable', label: 'Delete', className: 'right', formatter: function(elLiner, oRecord, oColumn, oData) {
-                        elLiner.innerHTML = '<input type=\"checkbox\" value=\"'+oRecord.getData('dbname')+'\">';
-                        
-                        $(elLiner).click(function(e){
-                                    var sel_cnt = getSelectedDatabases();
-                                    if(sel_cnt>25){
-                                        e.cancelBubble = true;
-                                        if (e.stopPropagation) e.stopPropagation();
-                                        e.preventDefault();
-                                        alert('Max 25 databases allowed to be deleted at one time.');
-                                    }
-                            });
+                    ,{ title: 'Delete', searchable:false, className: 'right',   //data: 'dbname', 
+                    render: function(data, type) {
+                        if (type === 'display') {
+                            return '<input type=\"checkbox\" value=\"'+data
+                                +'\" onchange="{_onSelectDeleteDb(event);return false;}"/>';
+                        }else{
+                            return '';    
+                        }
                     }}
                 <?php } ?>
             ];
 
-            var dt = new YAHOO.widget.DataTable("tabContainer", myColumnDefs, myDataSource);
-            var tt = new YAHOO.widget.Tooltip("myTooltip");
+            
+            _dataTable = $('.div_datatable').DataTable( _dataTableParams );        
+            $('.dataTables_filter').css({float:'left'});
+            var ele = $('.dataTables_filter').find('input');
+            ele.val(''); //attr('type','text').
+            window.hWin.HEURIST4.ui.disableAutoFill( ele );
+            
+            
 
-            dt.on('cellMouseoverEvent', function (oArgs) {
-                if (showTimer) {
-                    window.clearTimeout(showTimer);
-                    showTimer = 0;
-                }
-
-                var target = oArgs.target;
-                var column = this.getColumn(target);
-                if (column.key == 'dbname') {
-                    var record = this.getRecord(target);
-                    var description = record.getData('owner') || '';
-                    if(description!=''){
-                        var xy = [parseInt(oArgs.event.clientX,10) + 10 ,parseInt(oArgs.event.clientY,10) + 10 ];
-
-                        showTimer = window.setTimeout(function() {
-                            tt.setBody(description);
-                            tt.cfg.setProperty('xy',xy);
-                            tt.show();
-                            hideTimer = window.setTimeout(function() {
-                                tt.hide();
-                                },5000);
-                            },500);
-                    }
-                }
-            });
-            dt.on('cellMouseoutEvent', function (oArgs) {
-                if (showTimer) {
-                    window.clearTimeout(showTimer);
-                    showTimer = 0;
-                }
-                if (hideTimer) {
-                    window.clearTimeout(hideTimer);
-                    hideTimer = 0;
-                }
-                tt.hide();
-            });
         </script>
 
         <?php if($is_delete_allowed) { ?>
@@ -418,16 +387,26 @@ if($is_csv){
                 var databases = [];
                 var password;
 
+                function _onSelectDeleteDb(e){
+                        var sel_cnt = getSelectedDatabases();
+                        if(sel_cnt>25){ //25
+                            window.hWin.HEURIST4.util.stopEvent(e);
+                            $(e.target).prop('checked',false);
+                            window.hWin.HEURIST4.msg.showMsgDlg('Max 25 databases allowed to be deleted at one time.',
+                            null,null,{position: { my: "right top", at: "right-350 top+150", of: window }});
+                        }
+                }
+                
                 /**
                 * Returns the values of checkboxes that have been selected
                 */
                 function getSelectedDatabases() {
                     this.databases = [];
-                    var checkboxes = document.getElementsByTagName("input");
+                    var checkboxes = $('input[type="checkbox"]');
                     if(checkboxes.length > 0) {
                         for(var i=0; i<checkboxes.length; i++) {
-                            if(checkboxes[i].checked) {
-                                this.databases.push(checkboxes[i].value);
+                            if($(checkboxes[i]).is(':checked')) {
+                                this.databases.push($(checkboxes[i]).val());
                             }
                         }
                     }
@@ -441,10 +420,12 @@ if($is_csv){
                     // Determine selected databases
                     getSelectedDatabases();
                     if(this.databases.length>25){
-                        alert("You selected "+this.databases.length+" databases to be deleted. Max 25 allowed at one time.");
+                        window.hWin.HEURIST4.msg.showMsgDlg("You selected "+this.databases.length+" databases to be deleted. Max 25 allowed at one time.",null,null,
+                        {position: { my: "left top", at: "left+150 top+150", of: window }});                        
                         return false;
                     }else if(this.databases.length == 0) {
-                        alert("Select at least one database to delete");
+                        window.hWin.HEURIST4.msg.showMsgFlash("Select at least one database to delete",null,null,
+                            {position: { my: "left top", at: "left+150 top+150", of: window }});                        
                         return false;
                     }
                     $("#div-pw").show();
