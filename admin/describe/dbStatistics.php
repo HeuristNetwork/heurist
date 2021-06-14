@@ -107,7 +107,7 @@ if($is_csv){
     if (false === $fd) {
         die('Failed to create temporary file');
     } 
-    $record_row = array('Name','Reg ID','Records','Files(MB)','DB Vsn','Data updated','Structure modified','Owner','eMail','Institution');
+    $record_row = array('Name','Reg ID','Records','DB Vsn','Data updated','Structure modified','Owner','eMail','Institution');
     fputcsv($fd, $record_row, ',', '"');
 }else{
     $arr_databases = array();
@@ -142,9 +142,9 @@ foreach ($dbs as $db){
     ." FROM information_schema.tables where table_schema='".$db."'").",".
     round( (dirsize(HEURIST_FILESTORE_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",".
     */
-    strtotime(mysql__select_val("select max(rec_Modified)  from ".$db.".Records")),
+    mysql__select_val("select max(rec_Modified)  from ".$db.".Records"),
     //mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps") );
-    strtotime(mysql__select_value($mysqli, "select max(rst_Modified) from ".$db.".defRecStructure")) );
+    mysql__select_value($mysqli, "select max(rst_Modified) from ".$db.".defRecStructure") );
 
     $owner = mysql__select_row($mysqli, "SELECT concat(ugr_FirstName,' ',ugr_LastName),ugr_eMail,ugr_Organisation ".
         "FROM ".$db.".sysUGrps where ugr_id=2");
@@ -156,9 +156,15 @@ foreach ($dbs as $db){
         $record_row[] = $owner[0];
         $record_row[] = $owner[1];
         $record_row[] = $owner[2];
+        
+        
         fputcsv($fd, $record_row, ',', '"');
     }else{
         $record_row[] = implode(' ', $owner);
+        
+        $record_row[4] = strtotime($record_row[4]); 
+        $record_row[4] = strtotime($record_row[5]); 
+        
         //$record_row[] = $sysadmin;
        
         $aitem_quote = function($n)
@@ -250,7 +256,7 @@ if($is_csv){
 
     </head>
 
-    <body class="popup yui-skin-sam">
+    <body class="popup">
         <div id="titleBanner" class="banner"><h2>Databases statistics</h2></div>
         <div id="page-inner">
             <?php echo "System admin: <a class='dotted-link' href='mailto:" .HEURIST_MAIL_TO_ADMIN. "'>" .HEURIST_MAIL_TO_ADMIN. "</a>"; ?>
@@ -314,18 +320,18 @@ if($is_csv){
             data: dataSet,
             columns: null
         };
-        
-            function __format_date(d){
-                var val = parseInt(d);
-                if(val>0){
-                    var epoch = new Date(0);
-                    epoch.setSeconds(val);
-                    return epoch.toISOString().replace('T', ' ').replace('.000Z','');                        
-                    redate;
-                }else{
-                    return '';
-                }
+    
+        function __format_date(d){
+            var val = parseInt(d);
+            if(val>0){
+                var epoch = new Date(0);
+                epoch.setSeconds(val);
+                return epoch.toISOString().replace('T', ' ').replace('.000Z','');                        
+                redate;
+            }else{
+                return '';
             }
+        }
             
         _dataTableParams['columns'] = [
             
