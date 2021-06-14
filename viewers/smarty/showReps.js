@@ -162,8 +162,6 @@ function ShowReps() {
         //aftert load show viewer only
         //_setLayout(true, false); it is called in _updateTemplatesList
         _onResize(this.innerWidth);
-console.log(this.innerWidth);        
-        
     }
 
     /**
@@ -475,20 +473,6 @@ console.log(this.innerWidth);
         $rec_select.change(function(event){
             _loadRecordTypeTreeView();
         });
-        /*$rec_select.hSelect.on({change: 
-        function(event, data){
-               var selval = data.item.value;
-               $('#rectype_selector').val(selval);    
-               
-                if(selval>0){
-                    var baseurl = window.hWin.HAPI4.baseURL + "common/php/recordTypeTree.php";
-                    var request = {db:window.hWin.HAPI4.database, mode:'list', 'for':'smarty', rty_id:selval};
-                    window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, __onRectypeTree);
-                }
-        
-         }
-         });
-        */
     }
 
 

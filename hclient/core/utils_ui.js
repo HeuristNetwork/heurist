@@ -1409,6 +1409,7 @@ window.hWin.HEURIST4.ui = {
                         
                         if($helper_div.length==0){
                             $helper_div = $('<div>').addClass('ui-helper-popup')
+                                            .css('position','initial')
                                             .hide().appendTo(options.container);
                             
                             if(is_popup){
