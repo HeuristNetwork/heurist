@@ -170,7 +170,12 @@ class ImportDefinitions {
             
             
             if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-                include HEURIST_DIR.'admin/structure/crosswalk/'.$tables[$idx].'Fields.inc';
+            
+                $flds = mysql__select_list2($mysqli, 'SHOW COLUMNS FROM '.$tables[$idx]);
+                $flds = '`'.implode('`,`', $flds).'`';
+
+                //include HEURIST_DIR.'admin/structure/crosswalk/'.$tables[$idx].'Fields.inc';
+                
                 $query = 'INSERT INTO `'.$tables[$idx]."` ($flds) VALUES ". $dataSet;
                 $this->mysqli->query($query);
                 if($this->mysqli->error && $this->mysqli->error!='') {
