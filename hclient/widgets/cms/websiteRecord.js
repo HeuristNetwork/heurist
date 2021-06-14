@@ -1835,7 +1835,7 @@ console.log( sheight );
                     var t_name = $(e.target).val();
                     selected_template  = t_name;
                     //$dlg.find('.template_author').html(templates[t_name]['author']);
-                    $dlg.find('.template_description').html(templates[t_name]['description']);
+                    $dlg.find('.template_description').html(templates[t_name]?templates[t_name]['description']:'');
                 });
                
            }
