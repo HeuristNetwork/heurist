@@ -942,18 +942,6 @@ $.widget( "heurist.manageEntity", {
                         click: function() { that._selectAndClose(); }}); 
         }
 		
-		// Add extra save button to new base field for a record, replaces the original checkbox
-		if(this.options.newFieldForRtyID > 0){
-            btn_array.splice(1, 0, {
-                text:window.hWin.HR('Create and customise new field'),
-                id:'btnSaveExt',
-                css:{'display':'none','float':'right',margin:'.5em .8em .5em .4em'},
-                class:'ui-button-action',
-                click: function() {
-                    that._saveEditAndClose();
-                }
-            });
-        }
 		
         return btn_array;         
     },

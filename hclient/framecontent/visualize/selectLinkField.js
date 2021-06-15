@@ -29,7 +29,8 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-$(document).ready(function() {
+function SelectLinkField() 
+{
 
         var rty_ID, target_ID;
 
@@ -44,121 +45,127 @@ $(document).ready(function() {
                             { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
 */                            
 	    
-        $('#btnSelect').click( editDetailType );
-    
+        $('#btnSelect').button().addClass('ui-button-action').click( _editDetailType );
 
         //rectype new field to be added to
         rty_ID = window.hWin.HEURIST4.util.getUrlParameter("source_ID", document.location.search);
         //rectype to be related (constraint for pointers and relmarker target rectype)
         target_ID = window.hWin.HEURIST4.util.getUrlParameter("target_ID", document.location.search);
 
-        var fidx = window.hWin.HEURIST4.rectypes.typedefs['commonNamesToIndex']['rty_Description'];
         
-        $('#source_rectype').text(window.hWin.HEURIST4.rectypes.names[rty_ID]);
-        $('#source_rectype_img').css('background-image', 'url("'+window.hWin.HAPI4.iconBaseURL+rty_ID+'")');
-        $('#source_rectype_desc').text( window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[fidx] );
-        $('#lt_add_new_field').text('Add new field to '+window.hWin.HEURIST4.rectypes.names[rty_ID]);
-        $('#lt_use_existing_field').text('Add existing field to '+window.hWin.HEURIST4.rectypes.names[rty_ID]);
-        
-        $('#t_resourse').change(updateUI);
-        $('#t_relmarker').change(updateUI);
-        $('#t_add_new_field').change(updateUI);
-        $('#t_use_existing_field').change(updateUI);
-        
-        
-        var rt_selector = $('#sel_target_rectype_id');
-        window.hWin.HEURIST4.ui.createRectypeSelect(rt_selector[0], null, 'Select target record type');
-        rt_selector.change(
-
-                function(){
-                    var sDialogTitle = 'Creating link from '+ window.hWin.HEURIST4.rectypes.names[rty_ID];
-                    target_ID = $(this).val();
-                    if(!target_ID){
-                        window.hWin.HEURIST4.util.setDisabled($('.ft_selfield'), true);                        
-                        window.hWin.HEURIST4.util.setDisabled($('#btnSelect'), true);
-                        $('#btnSelect').css('color','lightgray');
-                        $('.ft_selfield').css('color','lightgray');
-                        
-                    }else{
-                        
-                        //change title in parent dialog
-                        sDialogTitle = sDialogTitle + ' to '+  window.hWin.HEURIST4.rectypes.names[target_ID];                                             
-                        window.hWin.HEURIST4.util.setDisabled($('.ft_selfield'), false);                        
-                        $('.ft_selfield').css('color', $('#sel_target_rectype_id').css('color'));
-                        _getLinkFields();
-                        $('#sel_resource_fields').val('');
-                        $('#sel_relmarker_fields').val('');
-                        $('#t_resourse').prop('checked', true);
-                        updateUI();
-
-                        window.hWin.HEURIST4.util.setDisabled($('#btnSelect'), false);
-                        $('#btnSelect').css('color','black');
-                    }
-                    
-                    $(window.frameElement).parents('.ui-dialog').find('.ui-dialog-title').text(sDialogTitle);
-                    
-                    $('#target_rectype_desc').text( window.hWin.HEURIST4.rectypes.typedefs[target_ID].commonFields[fidx] );
-                }
-        );
-        //target rectype is already defined via parameter
-        if(target_ID){
-            rt_selector.val(target_ID); 
-            
-            $('#target_rectype').text(window.hWin.HEURIST4.rectypes.names[target_ID]);
-            $('#target_rectype_img').css('background-image', 'url("'+window.hWin.HAPI4.iconBaseURL+target_ID+'")');
-            $('#target_rectype_desc').text( window.hWin.HEURIST4.rectypes.typedefs[target_ID].commonFields[fidx] );
-            $('#target_rectype_div').css('display', 'inline-block');
-            rt_selector.hide(); 
-        } else {
-            $('#target_rectype_div').hide();
-            rt_selector.show(); 
-        }
-        rt_selector.change();
-
-        if(!window.hWin.HEURIST4.rectypes.typedefs[rty_ID]){
+        if(!$Db.rty(rty_ID)){
             window.hWin.HEURIST4.msg.showMsgErr('Parameter for record type "rty_ID" ( '
                 +rty_ID+' ) is not defined or invalid');
             window.close(false);
         }
+        
+        
+        $('#source_rectype').text($Db.rty(rty_ID,'rty_Name'));
+        $('#source_rectype_img').css('background-image', 'url("'+window.hWin.HAPI4.iconBaseURL+rty_ID+'")');
+        $('#source_rectype_desc').text( $Db.rty(rty_ID,'rty_Description') );
+        $('#lt_add_new_field').text('Add new field to '+$Db.rty(rty_ID,'rty_Name'));
+        $('#lt_use_existing_field').text('Add existing field to '+$Db.rty(rty_ID,'rty_Name'));
+        
+        $('#t_resourse').change(_updateUI);
+        $('#t_relmarker').change(_updateUI);
+        $('#t_add_new_field').change(_updateUI);
+        $('#t_use_existing_field').change(_updateUI);
+        
+        
+        var rt_selector = $('#sel_target_rectype_id');
+        var rt_selector2 = window.hWin.HEURIST4.ui.createRectypeSelect(rt_selector[0], null, 'Select target record type');
+        rt_selector2.change(
+
+                function(){
+                    var sDialogTitle = 'Creating link from '+ $Db.rty(rty_ID,'rty_Name');
+                    target_ID = $(this).val();
+                    if(target_ID>0){
+                        
+                        //change title in parent dialog
+                        sDialogTitle = sDialogTitle + ' to '+  $Db.rty(target_ID,'rty_Name');                                             
+                        window.hWin.HEURIST4.util.setDisabled($('.ft_selfield'), false);         
+                                       
+                        $('.ft_selfield').css('color', $('#sel_target_rectype_id').css('color'));
+                        $('#target_rectype_desc').text( $Db.rty(target_ID,'rty_Description') );
+
+                        _getLinkFields();
+                        $('#sel_resource_fields').val('');
+                        $('#sel_relmarker_fields').val('');
+                        $('#t_resourse').prop('checked', true);
+                        _updateUI();
+
+                        window.hWin.HEURIST4.util.setDisabled($('#btnSelect'), false);
+                        $('#btnSelect').css('color','black');
+                        
+                    }else{
+                        window.hWin.HEURIST4.util.setDisabled($('.ft_selfield'), true);                        
+                        window.hWin.HEURIST4.util.setDisabled($('#btnSelect'), true);
+                        //$('#btnSelect').css('color','lightgray');
+                        $('.ft_selfield').css('color','lightgray');
+                        $('#target_rectype_desc').text( '' );
+                    }
+                    
+                    $(window.frameElement).parents('.ui-dialog').find('.ui-dialog-title').text(sDialogTitle);
+                    
+                }
+        );
+        //target rectype is already defined via url parameter
+        if(target_ID>0){
+            rt_selector.val(target_ID); 
+            
+            $('#target_rectype').text( $Db.rty(target_ID,'rty_Name') );
+            $('#target_rectype_img').css('background-image', 'url("'+window.hWin.HAPI4.iconBaseURL+target_ID+'")');
+            $('#target_rectype_desc').text( $Db.rty(target_ID,'rty_Description') );
+            $('#target_rectype_div').css('display', 'inline-block');
+
+            $('#sel_target_rectype_id-button').hide();
+            rt_selector.hide(); 
+            
+        } else {
+            $('#target_rectype_div').hide();
+            $('#sel_target_rectype_id-button').show();
+            rt_selector.show(); 
+        }
+        rt_selector2.hSelect('refresh');
+        rt_selector2.change();
 
         
     //    
     function _getLinkFields(){    
         //find existing field types that already refer target_ID
-        var dty_ID, detailTypes = window.hWin.HEURIST4.detailtypes.typedefs;
-        var idx_Type = detailTypes['fieldNamesToIndex']['dty_Type'];
-        var idx_Ptr  = detailTypes['fieldNamesToIndex']['dty_PtrTargetRectypeIDs'];
-        var idx_Name = detailTypes['fieldNamesToIndex']['dty_Name'];
-        var idx_NameInRecType = window.hWin.HEURIST4.rectypes.typedefs['dtFieldNamesToIndex']['rst_DisplayName'];
+        var dty_ID;
 
         var aPointers = [], 
             aRelMarkers = [], 
             cnt_ptrs = 0, cnt_relmarkers = 0;
+            
+        var all_structs = $Db.rst_idx2();
 
-        for(dty_ID in detailTypes){
-            if(dty_ID>0){
-                var dty_Type = detailTypes[dty_ID].commonFields[idx_Type];
+        $Db.dty().each2(function(dty_ID, detailType){
+
+            
+                var dty_Type = detailType['dty_Type'];
                 if(dty_Type==='resource' || dty_Type==='relmarker'){
 
-                    var rts = detailTypes[dty_ID].commonFields[idx_Ptr].split(',');
-                    if(rts.indexOf(target_ID)>=0){
+                    var rts = detailType['dty_PtrTargetRectypeIDs'].split(',');
+                    if(window.hWin.HEURIST4.util.findArrayIndex(target_ID, rts)>=0){
 
                         //if this field type already in rectype
-                        var already_inuse = false;
-                        if(window.hWin.HEURIST4.rectypes.typedefs[rty_ID]['dtFields'][dty_ID]){
-                            already_inuse = true;
-                        }
-
-                        var option_item  = {key:dty_ID, title:detailTypes[dty_ID].commonFields[idx_Name], disabled:already_inuse};
+                        var already_inuse = all_structs[rty_ID].getById(dty_ID);
+                        
+                        var option_item  = {key:dty_ID, title:detailType['dty_Name'], disabled:already_inuse};
                         if(already_inuse){
-                            if (detailTypes[dty_ID].commonFields[idx_Name] == window.hWin.HEURIST4.rectypes.typedefs[rty_ID]['dtFields'][dty_ID][idx_NameInRecType])
+                            var rst_Name = $Db.rst(rty_ID,dty_ID,'rst_DisplayName');
+                            if (detailType['dty_Name'] == rst_Name)
                             { // field name and base field name are the same
                                 option_item.title = option_item.title +' (already connected)';
+                                option_item.disabled = true;
                             }
                             else {                            
                                 option_item.title = option_item.title
                                 +' (connected as "'
-                                +window.hWin.HEURIST4.rectypes.typedefs[rty_ID]['dtFields'][dty_ID][idx_NameInRecType]+'")';
+                                + window.hWin.HEURIST4.util.stripTags(rst_Name)+'")';
+                                option_item.disabled = true;
                             }
                         }
 
@@ -172,35 +179,23 @@ $(document).ready(function() {
                         
                     }
                 }
-            }
-        }
+            
+        });
 
-        // Complicated message removed by Ian 3/1/17 - they are just confusing
-        /*
-        if(aPointers.length==1){
-            aPointers[0].title  += ('.(No field types that refer to "'+window.hWin.HEURIST4.rectypes.names[target_ID]+'")');
-        }else if(cnt_ptrs==0){
-            aPointers[0].title  += ('. Other field types already in use in "'+window.hWin.HEURIST4.rectypes.names[rty_ID]+'")');
-        }
-        if(aRelMarkers.length==1){
-            aRelMarkers[0].title  += ('.(No field types that refer to "'+window.hWin.HEURIST4.rectypes.names[target_ID]+'")');
-        }else if(cnt_relmarkers==0){
-            aRelMarkers[0].title  += ('. Other field types already in use in "'+window.hWin.HEURIST4.rectypes.names[rty_ID]+'")');
-        }
-        */
-        
         if(aPointers.length==0) aPointers = [{key:0, title:'<none available>'}];
+        else aPointers.unshift({key:0, title:'select...'})
         if(aRelMarkers.length==0) aRelMarkers = [{key:0, title:'<none available>'}];
+        else aRelMarkers.unshift({key:0, title:'select...'})
         window.hWin.HEURIST4.ui.createSelector($('#sel_resource_fields')[0], aPointers);
         window.hWin.HEURIST4.ui.createSelector($('#sel_relmarker_fields')[0], aRelMarkers);
 
-        updateUI();        
+        _updateUI();        
     }
 
     //
     //
     //
-    function editDetailType(){
+    function _editDetailType(){
 
         var dt_type = $('input[name="ft_type"]:checked').val();
         var dty_ID = 0;
@@ -211,117 +206,119 @@ $(document).ready(function() {
             }else{
                 dty_ID = $('#sel_relmarker_fields').val();
             }
+            if(!(dty_ID>0)){
+                window.hWin.HEURIST4.msg.showMsgFlash('Select field to be added');
+                return;
+            }
+            
         }
 
         if(dty_ID>0){ //add already existing field type
 
-            addDetailToRtyStructure(String(dty_ID), 0);
+            _addDetailToRtyStructure(dty_ID, 0);
 
         }else{ //create new field type
+        
+            var popup_options = {
+                select_mode: 'manager',
+                edit_mode: 'editonly', //only edit form is visible, list is hidden
+                rec_ID: -1,
+                title: 'Define new ' + $Db.baseFieldType[dt_type]+ ' field for '+$Db.rty(rty_ID,'rty_Name'),
+                newFieldForRtyID: rty_ID,
+                newFieldType: dt_type,
+                newFieldResource: target_ID,
+                selectOnSave: true,
+                onselect: function(event, res){
+                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.selection)){
+                        var dty_ID = res.selection[0];
+                        _addDetailToRtyStructure(dty_ID, 0);
+                    }                    
+                }
+            };
+        
+            window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', popup_options);
 
-            var url = window.hWin.HAPI4.baseURL 
-            + "admin/structure/fields/editDetailType.html?db="
-            + window.hWin.HAPI4.database 
-            + '&dty_Type='+dt_type
-            + '&dty_PtrTargetRectypeIDs='+target_ID;
-
-            window.hWin.HEURIST4.msg.showDialog(url, 
-                {    "close-on-blur": false,
-                    "no-resize": false,
-                    title: 'Edit field type',
-                    height: 700,
-                    width: 840,
-                    callback: function(context) {
-
-                        if(!window.hWin.HEURIST4.util.isnull(context)){
-                            //refresh the local heurist
-                            if(context.detailtypes)
-                                window.hWin.HEURIST4.detailtypes = context.detailtypes;
-
-                            //new field type to be added
-                            var dty_ID = Math.abs(Number(context.result[0]));
-                            addDetailToRtyStructure(String(dty_ID), 0);
-                        }
-                    }
-            });
         }
-
-
     }
 
-    function addDetailToRtyStructure(dty_ID, insert_index){
+    //
+    //
+    //    
+    function _addDetailToRtyStructure(dty_ID, insert_index){
 
-        //create array to be send to server
-        var detTypes = window.hWin.HEURIST4.detailtypes.typedefs,
-        fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex,
-        rst = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-
-        var arrs = detTypes[dty_ID].commonFields;
-
-        var arr_target = new Array();
-        arr_target[rst.rst_DisplayName] = arrs[fi.dty_Name];
-        arr_target[rst.rst_DisplayHelpText] = arrs[fi.dty_HelpText];
-        arr_target[rst.rst_DisplayExtendedDescription] = arrs[fi.dty_ExtendedDescription];
-        arr_target[rst.rst_DefaultValue ] = "";
-        arr_target[rst.rst_RequirementType] = "optional";
-        arr_target[rst.rst_MaxValues] = "1";
-        arr_target[rst.rst_MinValues] = "0";
-        arr_target[rst.rst_DisplayWidth] = "0";
-        arr_target[rst.rst_DisplayHeight] = "0";
-        arr_target[rst.rst_RecordMatchOrder] = "0";
-        arr_target[rst.rst_DisplayOrder] = insert_index;
-        arr_target[rst.rst_DisplayDetailTypeGroupID] = "1";
-        arr_target[rst.rst_FilteredJsonTermIDTree] = null;
-        arr_target[rst.rst_PtrFilteredIDs] = null;
-        arr_target[rst.rst_TermIDTreeNonSelectableIDs] = null;
-        arr_target[rst.rst_CalcFunctionID] = null;
-        arr_target[rst.rst_Status] = "open";
-        arr_target[rst.rst_OrderForThumbnailGeneration] = null;
-        arr_target[rst.dty_TermIDTreeNonSelectableIDs] = null;
-        arr_target[rst.dty_FieldSetRectypeID] = null;
-        arr_target[rst.rst_NonOwnerVisibility] = "viewable";
-
-        window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[dty_ID] = arr_target;         
-
-        //create and fill the data structure
-        var orec = {rectype:{
-            colNames:{common:[], dtFields:window.hWin.HEURIST4.rectypes.typedefs.dtFieldNames},
-            defs: {}
-        }};
-        orec.rectype.defs[rty_ID] = {common:[], dtFields:{}};
-        orec.rectype.defs[rty_ID].dtFields[dty_ID] = arr_target;
-
-        var str = JSON.stringify(orec);
-
-
-        var updateResult = function(response){
-            var _structureWasUpdated = false;
-            
-            if(response.status == window.hWin.ResponseStatus.OK){
-
-                //update local structure
-                window.hWin.HEURIST4.rectypes = response.data.rectypes;
-                window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
-                _structureWasUpdated = true;
-                                    
-            }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-            }                                        
-            
-            window.close(_structureWasUpdated);
+        //rty_ID  source rectype id
+        
+        
+        var fields = {
+            rst_ID: dty_ID,
+            rst_RecTypeID: rty_ID,  
+            rst_DisplayOrder: insert_index,
+            rst_DetailTypeID: dty_ID,
+            //rst_Modified: "2020-03-16 15:31:23"
+            rst_DisplayName: $Db.dty(dty_ID,'dty_Name'),
+            rst_DisplayHelpText: $Db.dty(dty_ID,'dty_HelpText'),
+            rst_DisplayExtendedDescription: $Db.dty(dty_ID,'dty_ExtendedDescription'),
+            rst_RequirementType: 'optional',
+            //rst_Repeatability: 'single',
+            rst_MaxValues: 1,
+            rst_DisplayWidth: '0',  
+            /*
+            dty_Type: dtFields[fi['dty_Type']]
+            rst_DisplayHeight: "3"
+            rst_TermPreview: ""
+            rst_FilteredJsonTermIDTree: "497"
+            dty_TermIDTreeNonSelectableIDs: ""
+            rst_PtrFilteredIDs: ""
+            rst_PointerMode: "addorbrowse"
+            rst_PointerBrowseFilter: ""
+            rst_CreateChildIfRecPtr: "0"
+            rst_DefaultValue: ""
+            rst_SeparatorType: ""
+            rst_DisplayExtendedDescription: "Please provide an extended description for display on rollover ..."
+            rst_Status: "open"
+            rst_NonOwnerVisibility: "viewable"
+            rst_LocallyModified: "1"    
+            */
         };
+        
+        var request = {
+                'a'          : 'save',
+                'entity'     : 'defRecStructure',
+                'request_id' : window.hWin.HEURIST4.util.random(),
+                'fields'     : fields,
+                'isfull'     : false
+                };
 
-        var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php"; //saveRTS
-        var callback = updateResult;
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                
+                var _structureWasUpdated = false;
+                
+                if(response.status == window.hWin.ResponseStatus.OK){
 
-        var request = {method:'saveRTS', db:window.hWin.HAPI4.database, data:orec};
-        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
+                    //update local structure
+                    var recID = response.data[0];
+                    if(recID>0){
+                        fields[ 'rst_ID' ] = (''+recID);
+                        $Db.rst(rty_ID).addRecord(recID, fields); // update cached record
+                    }
+                    
+                    _structureWasUpdated = true;
+                                        
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }                                        
+                
+                window.close(_structureWasUpdated);
+                
+            });
+
     }
 
     //
     //
     //
-    function updateUI(){
+    function _updateUI(){
      
             var is_resource_selected = $('#t_resourse').is(':checked');
             var is_fields_available = false;
@@ -359,6 +356,9 @@ $(document).ready(function() {
             var clr = (is_add_new)?'lightgray':'none';   
             $('#sel_resource_fields').css('background', clr);
             $('#sel_relmarker_fields').css('background', clr);
+            
+            $('#sel_resource_fields')[0].selectedIndex = 0;
+            $('#sel_relmarker_fields')[0].selectedIndex = 0;
     }
     
-});  
+    };  

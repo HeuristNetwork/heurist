@@ -28,7 +28,7 @@
 
         <script type="text/javascript">
             
-            // Callback function on map initialization
+            // Callback function for initialization
             function onPageInit(success){
                 if(success){
                     //to parse and restore query

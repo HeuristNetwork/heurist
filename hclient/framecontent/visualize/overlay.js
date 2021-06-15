@@ -714,9 +714,6 @@ function removeOverlays() {
 //
 function _addNewLinkField(source_ID, target_ID){
     
-            window.hWin.HEUIRIST4.msg.showMsgWorkInProgress();
-            return;
-    
             var body = $(this.document).find('body');
             var dim = { h:480, w:700 };//Math.max(900, body.innerWidth()-10) };                
             
@@ -726,8 +723,8 @@ function _addNewLinkField(source_ID, target_ID){
             var dlg_title = '';
             
             if(settings.isDatabaseStructure){
-            
-                url = url + "admin/structure/fields/selectLinkField.html?&db="
+                
+                url = url + "hclient/framecontent/visualize/selectLinkField.php?&db="
                     + window.hWin.HAPI4.database
                     + '&source_ID='+source_ID;
                
@@ -769,7 +766,8 @@ function _addNewLinkField(source_ID, target_ID){
                             }
                             
                         }
-                    }
+                    },
+                    default_palette_class:'ui-heurist-design'
               });
                 
 }
