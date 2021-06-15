@@ -509,25 +509,6 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
                                     }
                             );
                             
-                            /* @todo - remove. we don't use HEURIST4.terms anymore
-                            window.hWin.HAPI4.SystemMgr.get_defs({terms:'all', mode:2}, function(response){
-                                if(response.status == window.hWin.ResponseStatus.OK){
-                                    
-                                    window.hWin.HEURIST4.terms = response.data.terms;  
-                                    
-                                    window.hWin.HAPI4.EntityMgr.refreshEntityData('trm',
-                                            function(){
-                                                window.close( { result:recIDs } );            
-                                            }
-                                    );
-                                    
-                                }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain term definitions, possible database corruption,'
-                                    +' please consult Heurist developers');
-                                }
-                            });
-                            */
-                            
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }

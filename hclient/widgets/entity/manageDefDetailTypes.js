@@ -264,42 +264,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
     },
     
-    
-    // 
-    // get recordset from HEURIST4.detailtypes - NOT USED
-    //
-/*    
-    _getRecordsetFromStructure: function(){
-        
-        var rdata = { 
-            entityName:'defDetailTypes',
-            total_count: 0,
-            fields:[],
-            records:{},
-            order:[] };
-
-        var detailtypes = window.hWin.HEURIST4.detailtypes;//get recordset from HEURIST4.detailtypes - NOT USED
-
-        rdata.fields = window.hWin.HEURIST4.util.cloneJSON(detailtypes.typedefs.commonFieldNames);
-        rdata.fields.unshift('dty_ID');
-
-
-        for (var r_id in detailtypes.typedefs)
-        {
-            if(r_id>0){
-                var dtype = window.hWin.HEURIST4.util.cloneJSON(detailtypes.typedefs[r_id].commonFields);
-                dtype.unshift(r_id);
-                rdata.records[r_id] = dtype;
-                rdata.order.push( r_id );
-            }
-        }
-        rdata.count = rdata.order.length;
-
-        return new hRecordSet(rdata);
-    },
-*/    
-
-
     visible_fields: ['dtyid','ccode','edit','name','type','usedin','status','description'], //'usedin','show','ccode','group',       
     //----------------------
     //

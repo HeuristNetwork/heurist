@@ -1724,14 +1724,15 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                     $trg_id = $this->rectypes_correspondence[$imp_id];
 
                     if($trg_rectypes==null){
-                        $trg_rectypes = dbs_GetRectypeStructures($this->system, null, 2);
+                        $trg_rectypes = dbs_GetRectypeStructures($this->system, null, 0); //only names
                     }
 
                     $sRectypes = $sRectypes."<tr><td>$imp_id</td><td>".$def_rts[$imp_id]['commonFields'][$idx_name]
                     ."</td><td>"
                     .$def_rts[$imp_id]['commonFields'][$idx_ccode]
                     ."</td><td>$trg_id</td><td>"
-                    .$trg_rectypes['typedefs'][$trg_id]['commonFields'][$idx_name]
+                    .@$trg_rectypes['names'][$trg_id]
+                    //.$trg_rectypes['typedefs'][$trg_id]['commonFields'][$idx_name]
                     ."</td>" //."<td>".$trg_rectypes['typedefs'][$trg_id]['commonFields'][$idx_titlemask_canonical]."</td>"
                     ."</tr>";
                 }
@@ -1746,14 +1747,15 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                 if(@$this->fields_correspondence_existed[$imp_id]) continue;
 
                 if($trg_detailtypes==null){
-                    $trg_detailtypes = dbs_GetDetailTypes($this->system, null, 2);
+                    $trg_detailtypes = dbs_GetDetailTypes($this->system, null, 0); //only name
                 }
 
                 $sFields = $sFields."<tr><td>$imp_id</td><td>".$def_dts[$imp_id]['commonFields'][$idx_name]
                 ."</td><td>"
                 .$def_dts[$imp_id]['commonFields'][$idx_ccode]
                 ."</td><td>$trg_id</td><td>"
-                .$trg_detailtypes['typedefs'][$trg_id]['commonFields'][$idx_name]."</td></tr>";
+                .@$trg_detailtypes['names'][$trg_id]."</td></tr>";
+                //.$trg_detailtypes['typedefs'][$trg_id]['commonFields'][$idx_name]."</td></tr>";
             }
 
         }
@@ -1792,7 +1794,9 @@ if($term_id==11 || $term_id==518 || $term_id==497){
         }
 
         if($need_updated_defs){
-            $resp['defs'] = array('rectypes'=>$trg_rectypes,'detailtypes'=>$trg_detailtypes,'terms'=>$trg_terms);
+            //2021-06-15 we don't use old format for defintions 
+            //$resp['defs'] = array('rectypes'=>$trg_rectypes,'detailtypes'=>$trg_detailtypes,'terms'=>$trg_terms);
+            
             $data = $this->system->getCurrentUserAndSysInfo(true);
             $resp['defs']['sysinfo'] = $data['sysinfo'];
 

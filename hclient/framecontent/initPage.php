@@ -286,8 +286,8 @@ _dout('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000
             _dout('ipage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
             _time_debug = new Date().getTime() / 1000;
 
-            if(!window.hWin.HEURIST4.rectypes){
-
+            if($.isEmptyObject(window.hWin.HAPI4.EntityMgr.getEntityData2('defRecTypes'))){
+                
                 if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && $.isFunction(onAboutInit)){
                     if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
                         onAboutInit();
@@ -300,31 +300,14 @@ _dout('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000
 
                 window.hWin.HAPI4.EntityMgr.refreshEntityData('all', function(success){
                     if(success){
-                        window.hWin.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
-                            if(response.status == window.hWin.ResponseStatus.OK){
-                                window.hWin.HEURIST4.rectypes = response.data.rectypes;
-                                window.hWin.HEURIST4.terms = response.data.terms;
-                                window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
 
-                                $Db.baseFieldType = window.hWin.HEURIST4.detailtypes.lookups;
-                            }else{
-
-                                if(response.message){
-                                    sMsg =  sMsg + '<br><br>' + response.message;
-                                }
-                                window.hWin.HEURIST4.msg.showMsgErr(sMsg);
-                                success = false;
-                            }
-
-                            _dout('ipage db struct  '+(new Date().getTime() / 1000 - _time_debug));
-                            _time_debug = new Date().getTime() / 1000;
+                        _dout('ipage db struct  '+(new Date().getTime() / 1000 - _time_debug));
+                        _time_debug = new Date().getTime() / 1000;
 
 
-                            if(!window.hWin.HEURIST4.util.isnull(onPageInit) && $.isFunction(onPageInit)){
-                                onPageInit(success);
-                            }
-
-                        });
+                        if(!window.hWin.HEURIST4.util.isnull(onPageInit) && $.isFunction(onPageInit)){
+                            onPageInit(success);
+                        }
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(sMsg);
                         if($.isFunction(onPageInit)){ onPageInit(success); }

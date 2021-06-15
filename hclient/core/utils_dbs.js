@@ -69,7 +69,24 @@ if (!window.hWin.HEURIST4.dbs)
 
 window.hWin.HEURIST4.dbs = {
     
-    baseFieldType: {},
+    baseFieldType: {
+            enum: 'Terms list',
+            float: 'Numeric',
+            date: 'Date / temporal',
+            file: 'File',
+            geo: 'Geospatial',
+            freetext: 'Text (single line)',
+            blocktext: 'Memo (multi-line)',
+            resource: 'Record pointer',
+            relmarker: 'Relationship marker',
+            separator: 'Heading (no data)',
+            calculated: 'Calculated (not yet impl.)',
+            // Note=> the following types are no longer deinable but may be required for backward compatibility
+            relationtype: 'Relationship type',
+            integer: 'Numeric - integer',
+            year: 'Year (no mm-dd)',
+            boolean: 'Boolean (T/F)'},
+    
     
     needUpdateRtyCount: -1,
     
