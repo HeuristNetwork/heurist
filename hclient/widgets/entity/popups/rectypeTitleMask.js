@@ -425,7 +425,9 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                 if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
                     data.node.setExpanded(!data.node.isExpanded());
                     //treediv.find('.fancytree-expander').hide();
-
+                    if(data.node.children[0].key==='term' && data.node.isExpanded()){ // if node is a term
+                        data.node.children[0].setSelected(true); // auto select 'term' option to add term name
+                    }
                 }else if( data.node.lazy) {
                     data.node.setExpanded( true );
                 }
