@@ -59,8 +59,6 @@ $is_subset = ($rty_ID>0 || $dty_ID>0 || $trm_ID>0);
 // admin/setup/dbcreate/coreDefinitionsHuNI.txt (get this from the admin interface lsiting in exchange format)
 // admin/setup/dbcreate/coreDefinitionsFAIMS.txt (get this from the admin interface lsiting in exchange format)
 
-// List of fields in the include files in admin/structure/crosswalk, used for getDBStructure and insertions
-// print statements at the end of getDBStructure/getDBStructureAsXXX.php, must match the include files
 
 print '<?xml version="1.0" encoding="UTF-8"?>';
 print "\n\n<hml_structure>";

@@ -163,7 +163,7 @@ foreach ($dbs as $db){
         $record_row[] = implode(' ', $owner);
         
         $record_row[4] = strtotime($record_row[4]); 
-        $record_row[4] = strtotime($record_row[5]); 
+        $record_row[5] = strtotime($record_row[5]); 
         
         //$record_row[] = $sysadmin;
        
@@ -312,7 +312,7 @@ if($is_csv){
             //scrollY: true,
             autoWidth: false,
             //initComplete: _onDataTableInitComplete,
-            dom:'ip',
+            dom:'fip',
             pageLength: 500,
             ordering: true,
             processing: false,
@@ -340,7 +340,7 @@ if($is_csv){
                     if (type === 'display') {
                         return "<a href='../../?db="+data+"' class='dotted-link' target='_blank'>"+data+"</a>";
                     }else{
-                        return '';    
+                        return data;    
                     }
                 }},
                 { title: "Reg ID", sortable:true, searchable:true, className:'right'}, //data: "db_regid", 
@@ -349,22 +349,22 @@ if($is_csv){
                 { title: "DB Vsn", sortable:true, searchable:false, className:'right'},  //data: "db_version", 
                 { title: "Data updated", searchable:false, sortable:true,    //data: "date_mod", 
                     render: function(data, type) {
-                        return (type === 'display')?__format_date(data):'';
+                        return (type === 'display')?__format_date(data):data;
                     }},
                 { title: "Structure modified", searchable:false, sortable:true,   //data: "date_struct_mod", 
                     render: function(data, type) {
-                        return (type === 'display')?__format_date(data):'';
+                        return (type === 'display')?__format_date(data):data;
                     }},
                 { title: "Owner", searchable:false, width:200,  //data: "owner", 
                     render: function(data, type) {
                         if (type === 'display') {
                             return "<div style='max-width:100px' class='three-lines' title='"+data+"'>"+data+"</div>";
                         }else{
-                            return '';    
+                            return data;    
                         }
                     }}
                 <?php if($is_delete_allowed) { /*$sysadmin && */?>
-                    ,{ title: 'Delete', searchable:false, className: 'right',   //data: 'dbname', 
+                    ,{ title: 'Delete', searchable:false, sortable:false, className: 'center',   //data: 'dbname', 
                     render: function(data, type) {
                         if (type === 'display') {
                             return '<input type=\"checkbox\" value=\"'+data
@@ -382,7 +382,7 @@ if($is_csv){
             var ele = $('.dataTables_filter').find('input');
             ele.val(''); //attr('type','text').
             window.hWin.HEURIST4.ui.disableAutoFill( ele );
-            
+            setTimeout(function(){ele.val(' ')},1000);
             
 
         </script>
