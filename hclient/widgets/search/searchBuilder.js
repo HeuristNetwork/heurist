@@ -806,8 +806,7 @@ $.widget( "heurist.searchBuilder", {
                                             codes[codes.length-1] = dtid.substr(2);                        
                                             tdata.splice(i, 0, 
                                                 {key:node.key, type:'resource',
-                                                title: node.title
-                                                       +'<span style="font-size:0.8em"> (record pointer)</span>',
+                                                title: node.title,
                                                 code:codes.join(':')});                                        
                                             node.title = ' fields'; //node.title + 
                                             node.extraClasses = 'green-triangle';
@@ -822,8 +821,7 @@ $.widget( "heurist.searchBuilder", {
                                             codes[codes.length-1] = dtid.substr(2);                        
                                             tdata.splice(i, 0, 
                                                 {key:node.key, type:'relmarker',
-                                                title: node.title
-                                                       +'<span style="font-size:0.8em"> (related record)</span>',
+                                                title: node.title,
                                                 code:codes.join(':')});                                        
                                             node.title = ' fields'; //node.title + 
                                             node.extraClasses = 'green-triangle';

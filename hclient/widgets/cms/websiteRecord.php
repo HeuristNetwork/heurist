@@ -386,6 +386,9 @@ if(!$isWebPage){
             
             
             .'<div id="main-host" style="position:absolute;bottom:4;right:10;" class=" header-element">'
+                 .'<div style="float:right;line-height:38px;padding:0 5px 0 0;">'
+                    .'&nbsp;&nbsp;<a href="#" onclick="performCaptcha();">report site</a>'
+                 . '</div>'
                  .(@$site_owner['ugr_eMail']?'<div style="float:right;line-height:38px;padding:0 5px;">'
                     .'&bull;&nbsp;&nbsp;<a href="mailto:'.@$site_owner['ugr_eMail'].'">site owner</a>'
                  .'</div>':'')    

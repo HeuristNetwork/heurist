@@ -197,7 +197,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             }
         });
 
-        this._on( this.element.find('input[type=radio]'), {
+        this._on( this.element.find('input[type=radio], input[type=checkbox]'), {
             change: function(event){
                 this.startSearch();
         }});
@@ -299,7 +299,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }        
 
         //by ids of recently selected
-        if(this.element.find('#rb_selected').is(':checked')){
+        if(this.element.find('#cb_selected').is(':checked')){
             var previously_selected_ids = window.hWin.HAPI4.get_prefs('recent_Records');
             if (previously_selected_ids && 
                 window.hWin.HEURIST4.util.isArrayNotEmpty(previously_selected_ids.split(',')))
@@ -307,8 +307,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 qstr = qstr + ' ids:' + previously_selected_ids;
                 qobj.push({"ids":previously_selected_ids});
             }
-
-            window.hWin.HAPI4.save_pref('rSearch_filter', 'rb_selected');
         }
 
         //exclude already children

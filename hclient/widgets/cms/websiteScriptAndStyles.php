@@ -509,6 +509,37 @@ $website_title -> #main-title>h2
   
 } //initHeaderElements
 
+//
+// load popup with simple math problem, success leads to the creation of the report email
+//
+function performCaptcha(){
+
+    var rand1 = Math.floor(Math.random() * 9) + 1; 
+    var rand2 = Math.floor(Math.random() * 9) + 1; 
+    var res = rand1 + rand2 + 1;
+
+    window.hWin.HEURIST4.msg.showPrompt(rand1 +" + "+ rand2 +" + 1 = <input id=\'dlg-prompt-value\' class=\'text ui-corner-all\'"
+        +" style=\'max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em\' autocomplete=\'off\'/>",
+        function(val){
+            if(res != val){ 
+                
+                window.hWin.HEURIST4.msg.showMsgFlash("Report Failed, Incorrect Answer", 2500); 
+            }else{
+
+                window.hWin.HEURIST4.msg.showMsgFlash("Preparing Email", 2500);
+
+                var url = window.location.href;
+                url = url.replace(/&/g, '%26');
+
+                var subject = "Heurist Website Content report for DB: " + window.hWin.HAPI4.database;
+                var body = "Content reported: " + url;
+                
+                var link = encodeURI("mailto:support@heuristnetwork.org?subject=" + subject + "&body=" + body);
+
+                window.location.href = link;
+            }
+        }, {title: "Captcha Test", yes: "Proceed", no: "Cancel"});
+}
 
 var gtag = null;//google log - DO NOT REMOVE
 
