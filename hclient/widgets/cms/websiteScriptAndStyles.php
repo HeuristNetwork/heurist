@@ -443,9 +443,9 @@ function onHapiInit(success){
             }
             
 <?php             
-if(isset($cutomTemplateNotFound)){
+if(isset($customTemplateNotFound)){
     print 'window.hWin.HEURIST4.msg.showMsgDlg("Custom website template '
-        .$cutomTemplateNotFound.' not found. Default template will be used");';
+        .$customTemplateNotFound.' not found. Default template will be used");';
 }?>
             
         }

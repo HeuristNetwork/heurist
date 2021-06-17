@@ -172,6 +172,8 @@ $websiteThumbnailPassword = "";
 // $websiteThumbnailXsize = 500;
 // $websiteThumbnailYsize = 300;
 
+$default_CMS_Template_Path = '';
+
 // system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
 // the configIni.php in the installation does not need to be configured. This allows unconfigured ConfigIni.php files
 // to exist in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.

@@ -74,8 +74,7 @@
     <link rel="shortcut icon" href="<?php echo $image_icon;?>">
     
     <?php
-        // add heurist/hclient/widgets/cms/ if you modify this file and copy to heurist root folder
-        include 'websiteScriptAndStyles.php';  
+        include $websiteScriptAndStyles_php;  
     ?>
     
     
