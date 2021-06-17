@@ -96,10 +96,10 @@ require_once (dirname(__FILE__).'/../../hsapi/dbaccess/utils_db.php');
             if (extension_loaded("xsl")) {print "xsl ok<br />";} else {print "xsl MISSING<br />";}
             if (extension_loaded("simpleXML")) {print "simpleXML ok<br />";} else {print "simpleXML MISSING<br />";}
             if (extension_loaded("xml")) {print "xml ok<br />";} else {print "xml MISSING<br />";}
-            if (extension_loaded("apache2handler")) {print "apache2handler ok<br />";} else {print "apache2handler MISSING<br />";}
+            //if (extension_loaded("apache2handler")) {print "apache2handler ok<br />";} else {print "apache2handler MISSING<br />";}
             if (extension_loaded("pcre")) {print "pcre ok<br />";} else {print "pcre MISSING<br />";}
             if (extension_loaded("filter")) {print "filter ok<br />";} else {print "filter MISSING<br />";}
-            if (extension_loaded("SPL")) {print "SPL ok<br />";} else {print "SPL MISSING<br />";}
+            //if (extension_loaded("SPL")) {print "SPL ok<br />";} else {print "SPL MISSING<br />";}
 
             if (extension_loaded("zip")) {print "zip ok<br />";} else {print "zip MISSING<br />";}
             // zip loads but unzip doesn't, but unzip is installed anyway (possibly with zip?)
