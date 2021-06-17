@@ -48,6 +48,10 @@ if(@$_REQUEST['db']){
     $isSystemInited = $system->init(@$_REQUEST['db']);
 }
 
+if(@$_REQUEST['debug_error']){
+    $system->addError(HEURIST_ERROR,'Test debug error message');
+}
+
 if(!$isSystemInited){
     include ERROR_REDIR;
     exit();

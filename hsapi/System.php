@@ -819,44 +819,56 @@ error_log(print_r($_REQUEST, true));
 
             $now = new DateTime('now', new DateTimeZone('UTC'));
             $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
-
-            //1. check if log file for previous day exists
-            $yesterday = $now->sub(new DateInterval('P1D'));
-            $arc_logfile = 'errors_'.$yesterday->format('Y-m-d').'.log';
-            
             $root_folder = HEURIST_FILESTORE_ROOT; //dirname(__FILE__).'/../../';
             
-            //if yesterday log file exists
-            if(file_exists($root_folder.$arc_logfile)){
-                //2. copy to log folder and email it
-                $archiveFolder = $root_folder."AAA_LOGS/";        
+            $archiveFolder = $root_folder."AAA_LOGS/";        
+            $logs_to_be_emailed = array();
+            $y1 = null;
+            $y2 = null;
 
-                fileCopy($root_folder.$arc_logfile, $archiveFolder.$arc_logfile);
-                unlink($root_folder.$arc_logfile);
-
-                if($this->send_email_on_error==1){
+            //1. check if log files for previous 30 days exist
+            for($i=1;$i<31;$i++){
+                $now = new DateTime('now', new DateTimeZone('UTC'));
+                $yesterday = $now->sub(new DateInterval('P'.sprintf('%02d', $i).'D')); 
+                $arc_logfile = 'errors_'.$yesterday->format('Y-m-d').'.log';
+                //if yesterday log file exists
+                if(file_exists($root_folder.$arc_logfile)){
+                    //2. copy to log archive folder
+                    fileCopy($root_folder.$arc_logfile, $archiveFolder.$arc_logfile);
+                    unlink($root_folder.$arc_logfile);
                     
-                    $msg = 'Error report '.HEURIST_SERVER_NAME.' for '.$yesterday->format('Y-m-d');
+                    $logs_to_be_emailed[] = $archiveFolder.$arc_logfile;
+                    
+                    $y2 = $yesterday->format('Y-m-d');
+                    if($y1==null) $y1 = $y2;
+                }                
+            }
 
-                    //send an email with attachment
-                    $email = new PHPMailer();
-                    $email->isHTML(true); 
-                    $email->SetFrom('bugs@HeuristNetwork.org', 'Bug reporter'); //'bugs@'.HEURIST_SERVER_NAME 
-                    $email->Subject   = $msg;
-                    $email->Body      = $msg;
-                    $email->AddAddress( HEURIST_MAIL_TO_BUG );        
-                    $email->addAttachment($archiveFolder.$arc_logfile);
+            if($this->send_email_on_error==1 && count($logs_to_be_emailed)>0){
+                
+                $msg = 'Error report '.HEURIST_SERVER_NAME.' for '.$y1.($y2==$y1?'':(' ~ '.$y2));
 
-                    try{
-                        $email->send();
-                    } catch (Exception $e) {
-                        error_log('Cannot send email. Please ask system administrator to verify that mailing is enabled on your server. '
-                         .$email->ErrorInfo);     
-                    }                    
-                    //$rv = sendEmail(HEURIST_MAIL_TO_BUG, $Title, $sMsg, null);
+                //send an email with attachment
+                $email = new PHPMailer();
+                $email->isHTML(true); 
+                $email->SetFrom('bugs@HeuristNetwork.org', 'Bug reporter'); //'bugs@'.HEURIST_SERVER_NAME 
+                $email->Subject   = $msg;
+                $email->Body      = $msg;
+                $email->AddAddress( HEURIST_MAIL_TO_BUG );        
+                foreach($logs_to_be_emailed as $log_file){
+                    $email->addAttachment( $log_file );    
                 }
 
+                try{
+                    $email->send();
+                } catch (Exception $e) {
+                    error_log('Cannot send email. Please ask system administrator to verify that mailing is enabled on your server. '
+                     .$email->ErrorInfo);     
+                }                    
+                //$rv = sendEmail(HEURIST_MAIL_TO_BUG, $Title, $sMsg, null);
             }
+
+            
 
             //3. wrtie error into current error log
             $Title = 'Heurist Error type: '.$status
