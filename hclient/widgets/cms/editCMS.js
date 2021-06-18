@@ -234,6 +234,7 @@ function editCMS( options ){
 
                             var page_recid = response.data.ids[0];
 
+                            //replace name of webpage to the provided one
                             var request = {a: 'replace',
                                 recIDs: page_recid,
                                 dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
@@ -255,6 +256,12 @@ function editCMS( options ){
                             +'(don\'t forget to change the title of the page which is generally a longer version of the menu label). You can also add new ones.</p>'
                             +'<p>The pages can be edited by navigating to the page in the preview above and clicking '
                             +'<b>Edit page content</b> (either the button on the left or the link on the right of the page)</p>');
+                            
+                        //add blog template
+                        if(response.data.page_id_for_blog>0){
+                            
+                            __addTemplate('blog', response.data.page_id_for_blog);
+                        }
 
                         _initWebSiteEditor( true, { q:"ids:"+response.data.ids.join(',') } );
                     }
@@ -268,6 +275,57 @@ function editCMS( options ){
         }else{
             _initWebSiteEditor( true );
         }
+    }
+    
+    function __addTemplate(template_name, affected_page_id){
+    
+
+        // 1. Shows dialog with list of templates 
+        var sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.html';
+        var sURL2 = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.js';
+
+        // 2. Loads template
+        var ele = $('<div>').attr('data-template-temp',1).appendTo($(this.document).find('body')).hide()
+        ele.load(sURL+'?t='+window.hWin.HEURIST4.util.random(),
+        function(){
+
+        var t_style = ele.find('style').text(); //style will be added to page css
+        
+        ele.on('oncomplete', function(event, data){
+            
+                var content = ele.html();
+
+                //replace content of blog webpage
+                var request = {a: 'replace',
+                    recIDs: affected_page_id,
+                    dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
+                    rVal: content};
+                window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                    if(response.status == hWin.ResponseStatus.OK){
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+                
+                ele.empty().remove(); //remove temp div
+        });
+                        
+        if(template_name=='blog'){
+            // 3. Execute template script to replace template variables, adds filters and smarty templates
+            try{
+                $.getScript(sURL2, function(){ //it will trigeer oncomplete
+                    //console.log('getScript');                
+                });
+            }catch(e){
+                alert('Error in template script');
+            }
+        }else{
+            //var widgetid = (template_name=='discover')?ele.find('div[data-heurist-app-id="heurist_SearchTree"]'):0;
+            //ele.trigger('oncomplete',{widgetid:widgetid});
+        }
+
+        }); //on template load
+        
     }
 
 
@@ -418,7 +476,7 @@ function editCMS( options ){
                                                     ,title:'Insert components from a template'})
                                             .click(function(){
                                                 var preview_frame = edit_dialog.find('#web_preview');
-                                                preview_frame[0].contentWindow.cmsEditing.addTemplate();
+                                                preview_frame[0].contentWindow.cmsEditing.selectAddTemplate();
                                             });
                                             /*
                                             edit_dialog.find('#btn_edit_page_record').button().click(function(){
