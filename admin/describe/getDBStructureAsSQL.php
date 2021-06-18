@@ -104,7 +104,7 @@ do_print_table('TERMS','defTerms');
 // ------------------------------------------------------------------------------------------
 // TERMS Links by reference   - export terms by reference ONLY
 
-do_print_table('TERMS REFERENCES','defTermsLinks');
+do_print_table('TERMS REFERENCES','defTermsLinks', ', defTerms where trl_TermID=trm_ID AND trl_ParentID!=trm_ParentTermID');
 
 // ------------------------------------------------------------------------------------------
 // RECORD TYPES (this will be repeated for each of the tables)
@@ -215,7 +215,7 @@ if($isHTML){
 //
 //
 //
-function do_print_table($desc, $tname)
+function do_print_table($desc, $tname, $where=null)
 {
     global $mysqli, $isHTML, $startToken, $endToken;
     
@@ -227,6 +227,11 @@ function do_print_table($desc, $tname)
     $flds = '`'.implode('`,`', $flds_names).'`';
     print "-- $flds \n";
     $query = "select $flds from $tname";
+    
+    if($where!=null){
+        $query = $query.$where;
+    }
+    
     $res = $mysqli->query($query);
     if($isHTML) print "<p>";
 
