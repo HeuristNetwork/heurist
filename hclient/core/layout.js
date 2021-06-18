@@ -765,7 +765,8 @@ console.log('Cardinal layout widget does not have proper options');
         
         $tabs.each(function(idx, tabctrl){
             var h = $(tabctrl).find('ul[role="tablist"]').height();
-            $(tabctrl).find('div[role="tabpanel"]').css({'top':h+4,'bottom':0,'width':'100%','position':'absolute'});
+            $(tabctrl).find('div[role="tabpanel"]').css({'top':h+4,'bottom':0,'position':'absolute',left:'2px',right:'4px'}); 
+            //,'width':'100%'
         });
     }
     
