@@ -1,7 +1,7 @@
--- Heurist Definitions Exchange File generated: 18 Jun 2021 @ 06:30
--- Installation = https://heuristplus.sydney.edu.au/h6-ao/
+-- Heurist Definitions Exchange File generated: 18 Jun 2021 @ 14:47
+-- Installation = https://heuristplus.sydney.edu.au/heurist/
 -- Database = Heurist_Core_Definitions
--- Program Version: 6.2.10
+-- Program Version: 6.2.11
 -- Database Version: 1.3.0
 
 -- RECORD TYPE GROUPS
