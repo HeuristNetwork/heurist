@@ -98,6 +98,7 @@ class System {
 
         //dbutils?
         if($this->init_db_connection()!==false){
+            
         
                 if($init_session_and_constants){
                 
@@ -115,6 +116,9 @@ class System {
                         if(!$this->initPathConstants()){
                             return false;
                         }
+                        
+                        $this->_executeScriptOncePerDay();
+                        
 
                         $this->login_verify( false ); //load user info from session
                         if($this->get_user_id()>0){
@@ -819,56 +823,7 @@ error_log(print_r($_REQUEST, true));
 
             $now = new DateTime('now', new DateTimeZone('UTC'));
             $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
-            $root_folder = HEURIST_FILESTORE_ROOT; //dirname(__FILE__).'/../../';
-            
-            $archiveFolder = $root_folder."AAA_LOGS/";        
-            $logs_to_be_emailed = array();
-            $y1 = null;
-            $y2 = null;
-
-            //1. check if log files for previous 30 days exist
-            for($i=1;$i<31;$i++){
-                $now = new DateTime('now', new DateTimeZone('UTC'));
-                $yesterday = $now->sub(new DateInterval('P'.sprintf('%02d', $i).'D')); 
-                $arc_logfile = 'errors_'.$yesterday->format('Y-m-d').'.log';
-                //if yesterday log file exists
-                if(file_exists($root_folder.$arc_logfile)){
-                    //2. copy to log archive folder
-                    fileCopy($root_folder.$arc_logfile, $archiveFolder.$arc_logfile);
-                    unlink($root_folder.$arc_logfile);
-                    
-                    $logs_to_be_emailed[] = $archiveFolder.$arc_logfile;
-                    
-                    $y2 = $yesterday->format('Y-m-d');
-                    if($y1==null) $y1 = $y2;
-                }                
-            }
-
-            if($this->send_email_on_error==1 && count($logs_to_be_emailed)>0){
-                
-                $msg = 'Error report '.HEURIST_SERVER_NAME.' for '.$y1.($y2==$y1?'':(' ~ '.$y2));
-
-                //send an email with attachment
-                $email = new PHPMailer();
-                $email->isHTML(true); 
-                $email->SetFrom('bugs@HeuristNetwork.org', 'Bug reporter'); //'bugs@'.HEURIST_SERVER_NAME 
-                $email->Subject   = $msg;
-                $email->Body      = $msg;
-                $email->AddAddress( HEURIST_MAIL_TO_BUG );        
-                foreach($logs_to_be_emailed as $log_file){
-                    $email->addAttachment( $log_file );    
-                }
-
-                try{
-                    $email->send();
-                } catch (Exception $e) {
-                    error_log('Cannot send email. Please ask system administrator to verify that mailing is enabled on your server. '
-                     .$email->ErrorInfo);     
-                }                    
-                //$rv = sendEmail(HEURIST_MAIL_TO_BUG, $Title, $sMsg, null);
-            }
-
-            
+            $root_folder = HEURIST_FILESTORE_ROOT;
 
             //3. wrtie error into current error log
             $Title = 'Heurist Error type: '.$status
@@ -1831,6 +1786,93 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         }else{
             header('Content-type: '.$content_type);
         }
+    }
+    
+    //
+    //
+    //
+    private function _executeScriptOncePerDay(){
+        
+            $now = new DateTime('now', new DateTimeZone('UTC'));
+            $flag_file = HEURIST_FILESTORE_ROOT.'flag_'.$now->format('Y-m-d');
+            
+            if(file_exists($flag_file)){
+                return;    
+            }else{
+                file_put_contents($flag_file,'1');
+                
+                //remove flag files for previous days
+                for($i=1;$i<10;$i++){
+                    $d = new DateTime('now', new DateTimeZone('UTC'));
+                    $yesterday = $d->sub(new DateInterval('P'.sprintf('%02d', $i).'D')); 
+                    $arc_flagfile = HEURIST_FILESTORE_ROOT.'flag_'.$yesterday->format('Y-m-d');
+                    //if yesterday log file exists
+                    if(file_exists($arc_flagfile)){
+                        unlink($arc_flagfile);
+                    }
+                }
+                
+                //add functions for other daily tasks
+                $this->_sendDailyErrorReport();
+            }
+    }
+            
+    //
+    //
+    //        
+    private function _sendDailyErrorReport(){
+        
+            $now = new DateTime('now', new DateTimeZone('UTC'));
+            $root_folder = HEURIST_FILESTORE_ROOT; //dirname(__FILE__).'/../../';
+            $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
+            $archiveFolder = $root_folder."AAA_LOGS/";        
+            $logs_to_be_emailed = array();
+            $y1 = null;
+            $y2 = null;
+
+            //1. check if log files for previous 30 days exist
+            for($i=1;$i<31;$i++){
+                $now = new DateTime('now', new DateTimeZone('UTC'));
+                $yesterday = $now->sub(new DateInterval('P'.sprintf('%02d', $i).'D')); 
+                $arc_logfile = 'errors_'.$yesterday->format('Y-m-d').'.log';
+                //if yesterday log file exists
+                if(file_exists($root_folder.$arc_logfile)){
+                    //2. copy to log archive folder
+                    fileCopy($root_folder.$arc_logfile, $archiveFolder.$arc_logfile);
+                    unlink($root_folder.$arc_logfile);
+                    
+                    $logs_to_be_emailed[] = $archiveFolder.$arc_logfile;
+                    
+                    $y2 = $yesterday->format('Y-m-d');
+                    if($y1==null) $y1 = $y2;
+                }                
+            }
+
+            if($this->send_email_on_error==1 && count($logs_to_be_emailed)>0){
+                
+                $msg = 'Error report '.HEURIST_SERVER_NAME.' for '.$y1.($y2==$y1?'':(' ~ '.$y2));
+
+                //send an email with attachment
+                $email = new PHPMailer();
+                $email->isHTML(true); 
+                $email->SetFrom('bugs@HeuristNetwork.org', 'Bug reporter'); //'bugs@'.HEURIST_SERVER_NAME 
+                $email->Subject   = $msg;
+                $email->Body      = $msg;
+                $email->AddAddress( HEURIST_MAIL_TO_BUG );        
+                foreach($logs_to_be_emailed as $log_file){
+                    $email->addAttachment( $log_file );    
+                }
+
+                try{
+                    $email->send();
+                } catch (Exception $e) {
+                    error_log('Cannot send email. Please ask system administrator to verify that mailing is enabled on your server. '
+                     .$email->ErrorInfo);     
+                }                    
+                //$rv = sendEmail(HEURIST_MAIL_TO_BUG, $Title, $sMsg, null);
+            }
+            
+        
     }
 }
 ?>
