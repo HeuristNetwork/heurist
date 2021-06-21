@@ -37,7 +37,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = false;
-        this.options.edit_height = 540;
+        this.options.edit_height = 572;
         this.options.height = 740;
 
         //for selection mode set some options
