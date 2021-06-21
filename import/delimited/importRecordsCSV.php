@@ -125,7 +125,7 @@ if(!$format) $format='csv';
                 padding-top:0.5em;
                 margin-left:2em;
                 position: absolute;
-                top: 180px;
+                top: 205px;
             }
         </style>
     </head>
@@ -394,7 +394,7 @@ if(!$format) $format='csv';
 <!-- STEP 3 matching and import -->
 <div style="width:100%; height:100%;display:none;overflow:auto" id="divStep3" class="selectmenu-parent">
 
-    <div class="ent_header" style="height:362;border:none;padding:5 6 0 6;min-width:970px">
+    <div class="ent_header" style="height:362;border:none;padding:5 6 0 6;min-width:970px;margin-bottom:10px;">
     
         <div style="position:absolute;left:0;right:6;padding-left:2em">
     
@@ -449,7 +449,7 @@ if(!$format) $format='csv';
         <img id="img_arrow3" src="../../hclient/assets/arrow.png" style="position:absolute;left:0px;display:none;z-index:2">        
         <img id="img_arrow4" src="../../hclient/assets/blackdot.png" width="2" style="position:absolute;left:0px;height:18px;display:none;z-index:2">        
         
-        <div style="padding:1em 0 1em 1em;position: absolute;top:130; width:97%; border:none;background:rgba(151, 244, 128, 0.83);" id="divheader">
+        <div style="padding:1em 0 1em 1em;position: absolute;top:145px;width:97%; border:none;background:rgba(151, 244, 128, 0.83);" id="divheader">
             <div style="float:left;font-weight:bold;text-align:center">WORKFLOW<br>instruction below</div>
             <div  id="divActionsMatching" class="action_buttons step3" style="padding-left: 120px">
                 
@@ -626,7 +626,7 @@ if(!$format) $format='csv';
         </div>
    
         
-        <table class="tbmain" style="width:99%;position:absolute;bottom:0" cellspacing="0" cellpadding="2">
+        <table class="tbmain" style="width:99%;position:absolute;bottom:0;top:309px;" cellspacing="0" cellpadding="2">
             <thead><tr> <!-- Table headings -->
                 <th style="width:75px;">Use&nbsp;<br/>value</th>
                 <th style="width:75px;">Unique&nbsp;<br/>values</th>
