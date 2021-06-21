@@ -123,6 +123,46 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
 
         
     },
+	
+    _saveEditAndClose: function( fields, afterAction, onErrorAction ){
+
+        var that = this;
+
+        if(!this.options.isdialog){
+            var fele = this.element.find('.ent_wrapper:first');
+            $(fele).off("mouseleave");
+        }
+
+        if(!fields){
+            fields = this._getValidatedValues();
+        }
+
+        if(!window.hWin.HEURIST4.util.isempty(fields['sys_SyncDefsWithDB'])){
+            
+            var z_key = fields['sys_SyncDefsWithDB'].split(',');
+
+            if(z_key.length != 4){
+
+                var btn = {};
+                btn[window.hWin.HR('OK')] = function(){
+                    var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                    $dlg.dialog('close');
+
+                    if(!that.options.isdialog){
+                        $(fele).on("mouseleave", function(){ that.defaultBeforeClose(); });
+                    }
+                };
+
+                window.hWin.HEURIST4.msg.showMsgDlg('Zotero web library key(s) requires 4 fields as specified in the help text.<br>'
+                        + 'Either UserID or GroupID needs to be blank (represented by ,,)', btn
+                        , {title:'Invalid Zotero Web Library Key', ok:'OK'});
+
+                return;
+            }
+        }
+        
+        this._super(fields, afterAction, onErrorAction);
+    },	
     
     _afterSaveEventHandler: function( recID, fields ){
         this._super( recID, fields );

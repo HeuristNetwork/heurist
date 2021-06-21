@@ -1093,7 +1093,7 @@ $.widget( "heurist.manageEntity", {
                 //2020-12-06 that._currentEditID=null; that.closeDialog();
                 //2020-12-06 return true;
                 sMsg = 'Click "Save data" to save the data entered, "Drop data changes" to abandon modifications.'
-                +'<br>Structure changes are saved automatically - they are not affecvted by your choice.';
+                +'<br>Structure changes are saved automatically - they are not affected by your choice.';
                 sBtnSave = 'Save data';
                 sBtnCancel = 'Drop data changes';
             }else{
@@ -1103,7 +1103,7 @@ $.widget( "heurist.manageEntity", {
             }
             
             var $dlg, buttons = {};
-            buttons[sBtnSave] = function(){ that._saveEditAndClose(null, 'close'); $dlg.dialog('close'); }; 
+            buttons[sBtnSave] = function(){ $dlg.dialog('close'); that._saveEditAndClose(null, 'close'); }; 
             buttons[sBtnCancel] = function(){ that._currentEditID=null; that.closeDialog(); $dlg.dialog('close'); };
             
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
