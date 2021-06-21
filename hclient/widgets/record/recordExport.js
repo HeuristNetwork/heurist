@@ -51,9 +51,11 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
             this.toolbar = $('<div class="ent_footer button-toolbar ui-heurist-header" style="height:20px"></div>').insertAfter(fele);    
             //append action buttons
             this.toolbar.empty();
+            this.element.find('.kml-buttons').empty();
             var btns = this._getActionButtons();
+
             for(var idx in btns){
-                this._defineActionButton2(btns[idx], this.toolbar);
+                this._defineActionButton2(btns[idx], (this.options.format!='kml' ? this.toolbar : this.element.find('.kml-buttons')));
             }
         }
         
