@@ -147,9 +147,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                         if(ele.length==1){
                             ele.attr('autocomplete','off')
                                 .attr('autocorrect','off')
-                                .attr('autocapitalize','none')
-                                .attr('placeholder',item.text());
-                            item.hide();
+                                .attr('autocapitalize','none');
                             //ele.value(item.text()).attr('data-heder',item.text());
                             //ele.on({focus:function(){ if(this.value==$(this).attr('data-heder')) this.value = '';}});
                         }
@@ -660,6 +658,9 @@ a{
     width: 800px;
     height: 480px;
     margin: 3% auto;  
+}
+.center-box.screen2{
+    height: 600px;
 }
 .center-box h1, .center-box h3, .center-box .header{
     color: #7B4C98;
