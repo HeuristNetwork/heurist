@@ -2442,9 +2442,9 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
             
             var pos = null;
             if(this.options.is_h6style && this.element.is(':visible')){
-                pos = { my: "left top", at: "left top", of: this.element};
+                pos = { my: "left top", at: "left top", of: this.element, collision:'none'};
             }else{
-                pos = { my: "center", at: "center", of: window};
+                pos = { my: "center", at: "center", of: window, collision:'none'};
             }
             
             //this.edit_dialog.callback_method  = callback;

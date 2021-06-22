@@ -1131,9 +1131,13 @@ window.hWin.HEURIST4.ui = {
                     var wmenu_div = wmenu.parent('div.ui-selectmenu-menu');
                     var pos = wmenu_div.position().top;
                     
-//console.log( '>>> ' + wmenu.parents('body').height() );
+/*
+console.log( '>>> ' + wmenu.parents('body').height() );
                     var parent_body = wmenu.parents('body');
+console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );                    
                     var bodyheight = parent_body.height()>0?parent_body.height():parent_body[0].clientHeight;
+*/                    
+                    var bodyheight = (window.hWin?window.hWin.innerHeight:window.innerHeight);
                     
                     if(bodyheight>0 && pos+wmenu.height()>bodyheight){
                         var newtop = bodyheight-wmenu.height()-5;

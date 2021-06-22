@@ -356,6 +356,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }else{
             options.position = { my: "center center", at: "center center", of: $(document) };    
         }
+        options.position.collision = 'none'; //FF fix
 
         $dlg.dialog(options);
         
@@ -764,7 +765,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if(options.container){
 
                 $dlg.dialog( 'option', 'position', 
-                    { my: "left top", at: "left top", of:options.container});
+                    { my: "left top", at: "left top", of:options.container, collision:'none'});
 
                 function __adjustOneResize(e){
                     var ele = e ?$(e.target) :options.container;
@@ -1205,6 +1206,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     options.position = { my: "left top", at: "left bottom", of: $(ext_options) };
            }
         }
+        if(!options.position){
+            options.position = { my: "center center", at: "center center", of: window };    
+        }
+        options.position.collision = 'none'; //FF fix
+        
 
         if(isPopupDlg){
 
@@ -1219,8 +1225,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if(window.hWin.HEURIST4.util.isempty(options.resizable)) options.resizable = true;
             if(false && options.resizable === true){
             options.resizeStop = function( event, ui ) {
-                    $dlg.css({overflow: 'none !important','width':'100%', 'height':$dlg.parent().height()
-                            - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height() - 20 });
+                
+console.log( $dlg.parent().height() );
+               var nh = $dlg.parent().height()
+                            - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height(); //-20
+console.log( nh );
+                    $dlg.css({overflow: 'none !important','width':'100%', 'height':nh });
                 };
             }
         }else if(!options.width){
