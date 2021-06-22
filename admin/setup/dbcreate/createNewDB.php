@@ -110,6 +110,8 @@ if(@$_REQUEST['db']){
                 
                 $(document).ready(function() {
 
+                    $('#div_options').hide();
+
                     if($("#createDBForm").length>0){
                         if(!window.hWin.HAPI4) window.hWin.HAPI4 = new hAPI(null); //init hapi without db
                         var prefs = window.hWin.HAPI4.get_prefs();
@@ -369,6 +371,28 @@ if($registrationRequired) //show user registration dialog at once
                 text-overflow: ellipsis;
             }
             */
+            #div_create .helper{
+                color: #00000099;
+                margin: 10px 0px;
+            }
+            #div_create .entry-box{   
+                padding: 5px 20px 20px;
+                margin:20px 0;
+
+
+            }
+            #createDBForm h3{
+                color: #7B4C98 !important;
+                font-weight: bold;
+                font-size: 1.17em !important;
+                
+                display: block;
+
+                margin-block-start: 1em !important;
+                margin-block-end: 1em !important;
+                
+                padding: 0 !important;
+            }
         </style>
     </head>
 
@@ -392,13 +416,15 @@ if($registrationRequired) //show user registration dialog at once
             </div>
 
             <div id="createDBForm" style="padding-top:5px;">
-
-                <h3 style="margin-left:40px" class="ui-heurist-title">Creating new database on server</h3>
+                
+                <!-- Heading
+                <h3 style="margin-left:40px;" class="ui-heurist-title">Creating new database on server</h3>
+                -->
 
                 <input type="hidden" id="url_template" name="url_template">
                 <input type="hidden" id="exemplar" name="exemplar">
 
-                <div style="margin-left:40px">
+                <div id="div_options" style="margin-left:40px">
                     <label for="rb1" class="labelBold ui-heurist-title">
                         <input type="radio" name="dbtype" value="0" id="rb1" checked 
                             onclick="{$('#registered_dbs').hide()}" style="vertical-align:-0.2em"/>
@@ -438,13 +464,15 @@ if($registrationRequired) //show user registration dialog at once
                     </div>
                 </div>
 
+                <!-- Dividing Line
                 <div style="border-bottom: 1px solid #7f9db9;"></div>
-                
+                -->
+
                 <div id="div_register_entered" style="display: none;">
                     <h3 style="margin:5px 0 10px 38px;color:darkgreen;">Registration information entered</h3>
                 </div>
 
-                <div id="div_create" style="margin-left:40px" >
+                <div id="div_create" style="margin-left:40px;width:525px;" >
 
                     <div id="div_need_password" style="display:none">
                         <h3 class="ui-heurist-title">Enter the password set by your system administrator for new database creation</h3>
@@ -453,27 +481,28 @@ if($registrationRequired) //show user registration dialog at once
                         </div>
                     </div>
 
-                    <h3 class="ui-heurist-title">Enter a name for the new database</h3>
-                    <div style="margin-top: 0px;">
-                        <!-- user name used as prefix -->
-                        <b> <!-- This is irrelevant to the user removed Ian 23/4/21 < ?= HEURIST_DB_PREFIX ?> -->
-                            <input type="text" maxlength="30" size="6" name="uname" id="uname"
-                                onkeypress="{onKeyPress(event)}"
-                                style="padding-left:3px; font-weight:bold;">
-                        </b>
-                        <b>_</b>
-                        <input type="text" maxlength="64" size="30" id="dbname" name="dbname"  onkeypress="{onKeyPress(event);}">
-                        <input id="btnCreateDb" value="Create Database" style="font-weight: bold;" class="ui-button-action" >
-                        <div class="heurist-helper3" style="padding-top:0em; max-width:500px">
-                            <i>optional &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; required</i><br>
+                    <div class="helper">       
+                        As creator of a database you becomes the database owner and can manage<br>the database and other database users.
+                    </div>
+                
+                    <div class="entry-box">
+                        <h3>Enter a name for the new database</h3>
+                        
+                        <div>
+                            hdb_<input type="text" id="uname"  name="uname" class="text ui-widget-content ui-corner-all" 
+                                    maxlength="30" size="6" onkeypress="{onKeyPress(event)}"/>
+                            _<input type="text" id="dbname"  name="dbname" class="text ui-widget-content ui-corner-all"
+                                    maxlength="64" size="30" onkeypress="{onKeyPress(event)}"/>
+
+                            <input class="ui-button-action" id="btnCreateDb" value="Create Database" >
                         </div>
-                        <div style="padding-top:1em; max-width:500px">
-                            No spaces or punctuation other than underscore. Database names are case-sensitive.
-                        </div> 
-                        <div class="heurist-helper3" style="padding-top:1em; max-width:500px">
-                            The user name prefix is editable, and may be left blank, but we suggest using a consistent prefix 
-                            for personal databases so that they are easily identified and appear together in the list of databases.
-                        </div>
+                        
+                    </div>
+                    
+                    <div class="helper">                
+                        Do not use punctuation except underscore, names are case sensitive.<br><br> 
+                        <i>The user name prefix is editable, and may be left blank, but we suggest using a consistent prefix for
+                           personal databases so that they are easily identified and appear together in the search for databases.</i>
                     </div>
 
                 </div>

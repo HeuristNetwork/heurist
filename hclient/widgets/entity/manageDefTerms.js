@@ -73,9 +73,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             if(this.options.isFrontUI &&
                 this.options.select_mode=='manager' && this.options.auxilary!='vocabulary'){
-                //window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, {});                   
-                $('<div>').addClass('coverall-div').css({'zIndex':60000, 
-                    'background-color':'#fff', opacity:1}).appendTo(this.element);
+                window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, {'background-color':'#fff', 'opacity':1});                   
+                /*$('<div>Loading Content...</div>').addClass('coverall-div').css({'zIndex':60000, 
+                    'background-color':'#fff', opacity:1}).appendTo(this.element);*/
             }
 
         }
