@@ -1228,7 +1228,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
         
         var $header = $('<h3 class="hasmenu2" grpid="'+domain
             +'" style="outline:none;margin:10px 0 0 0;background:none !important;'+sColor+'"><span class="ui-icon ui-icon-'+sIcon+'" '
-            + 'style="display:inline-block;padding:0 4px"></span><span style="display:inline-block;vertical-align:top;width:'+sWidth+'" class="truncate">'
+            + 'style="display:inline-block;padding:0 4px"></span><span style="display:inline-block;vertical-align:top;width:'+sWidth+'px" class="truncate">'
             + name+'</span>'+sInfo+'</h3>').addClass('tree-accordeon-header svs-header');
 
         if('dbs'!=domain){
@@ -1954,7 +1954,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                 var is_folder = ele.hasClass('fancytree-folder');
 
                 ele.find('.fancytree-title')
-                    .css({display: 'inline-block', width:container_width>0?(container_width-(is_folder?52:30)):'80%'})
+                    .css({display: 'inline-block', width:container_width>0?((container_width-(is_folder?52:30))+'px'):'80%'})
                     .addClass('truncate');
                 //'80%'
 

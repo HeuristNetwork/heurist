@@ -605,11 +605,11 @@ $.widget( "heurist.searchBuilder", {
                 var h = this.element.find('.btn-preview').is(':checked') ?'88px':'50px';
 
                 this.element.css({'font-size':'0.9em'});
-                this.pnl_Rectype.css({top:'35px'});
+                this.pnl_Rectype.css({top:'35px'}); //,height:'30px'
                 //var itop = 36+this.pnl_Rectype.height()+1;
                 this.pnl_Tree.css({top:35}); //, bottom:h
-                this.pnl_Items.css({top:115, bottom:h});
-                this.pnl_CoverAll.css({top:115, bottom:h});
+                this.pnl_Items.css({top:'85px', bottom:h});
+                this.pnl_CoverAll.css({top:'85px', bottom:h});
                 this.pnl_Result.css({bottom:'40px'});
                 var _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Filter builder</div>')
                     .insertBefore(this.pnl_Rectype);

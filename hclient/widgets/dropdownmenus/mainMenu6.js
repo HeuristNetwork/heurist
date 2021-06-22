@@ -795,7 +795,7 @@ $.widget( "heurist.mainMenu6", {
                 }
        
                 
-                if(explore_top+explore_height>that.element.innerHeight()){
+                if(that.element.innerHeight()>0 && explore_top+explore_height>that.element.innerHeight()){
                     explore_top = that.element.innerHeight() - explore_height;
                 }
                 that.menues_explore_popup.css({width:'800px',overflow:'hidden'});
@@ -842,9 +842,11 @@ $.widget( "heurist.mainMenu6", {
                         explore_top = menu_item.offset().top; //if called from menu
                     }
                 }
-                if(explore_top+explore_height>that.element.innerHeight()){
+                if(that.element.innerHeight()>0 && explore_top+explore_height>that.element.innerHeight()){
                     explore_top = that.element.innerHeight() - explore_height;
                 }
+                
+console.log(explore_top);
                 
                 that.menues_explore_popup.css({width:'850px', overflow:'hidden'});
                 
@@ -925,6 +927,8 @@ $.widget( "heurist.mainMenu6", {
                 explore_left = that.element.innerWidth() - that.menues_explore_popup.outerWidth();
             }
 
+            if(explore_top<0) explore_top = 0;            
+            
             that.menues_explore_popup.css({left:explore_left, top:explore_top, height:explore_height});
             
             //show menu section

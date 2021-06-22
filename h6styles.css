@@ -37,94 +37,94 @@ body.popup {
 
 .ui-icon-file-plus { 
     background-image: url(hclient/assets/v6/file-plus.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 .ui-icon-file-plus-black { 
     background-image: url(hclient/assets/v6/file-plus-000000.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 .ui-icon-file-plus-import { 
     background-image: url(hclient/assets/v6/file-plus-import.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 .ui-icon-file-plus-explore { 
     background-image: url(hclient/assets/v6/file-plus-305586.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 .ui-icon-entity-explore { 
     background-image: url(hclient/assets/v6/entity-305586.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 .ui-icon-magnify-explore { 
     background-image: url(hclient/assets/v6/filter-plus-305586.png) !important; /*magnify-305586*/
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 .ui-icon-lightning-explore { 
     background-image: url(hclient/assets/v6/lightning-305586.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 .ui-icon-filter-explore { 
     background-image: url(hclient/assets/v6/filter-305586.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 .ui-icon-filter-plus-explore { 
     background-image: url(hclient/assets/v6/filter-plus-305586.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 
 
 .ui-icon-entity { 
     background-image: url(hclient/assets/v6/entity-000000.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 .ui-icon-magnify-search { 
     background-image: url(hclient/assets/v6/filter-plus-000000.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 .ui-icon-database-search { 
     background-image: url(hclient/assets/v6/database-search.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 .ui-icon-filter { 
     background-image: url(hclient/assets/filter_icon.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 .ui-icon-filter-black { 
     background-image: url(hclient/assets/v6/filter-000000.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 .ui-icon-filter-plus { 
     background-image: url(hclient/assets/v6/filter-plus-000000.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
     background-size: contain;
 }
 .ui-button-action{
