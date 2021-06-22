@@ -1473,6 +1473,14 @@ prof =Profile
                 var idx, display_value = [];
                 if(entity_data[entityName]){
                    var ecfg = entity_configs[entityName];
+                   if(!ecfg){
+                          window.hWin.HAPI4.EntityMgr.getEntityConfig(entityName, function(){
+                                window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, recIDs, callback);
+                          });
+                          return;
+                   }
+                   
+                   
                    var edata = entity_data[entityName];
                    if(!$.isArray(recIDs)) recIDs = [recIDs];
                    for(idx in recIDs){
