@@ -96,7 +96,7 @@
                         "dty_Size":1000,
                         "rst_DisplayWidth":100,
                         "rst_DisplayName": "Description of the database/content up to 1Kb",
-                        "rst_DisplayHelpText": "(may reference a URL)"
+                        "rst_DisplayHelpText": "(or a URL to a stable website describing the project)"
                     }
                 }
         ]},
