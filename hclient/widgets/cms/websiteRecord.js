@@ -165,8 +165,6 @@ function hCmsEditing(_options) {
                     $('.mce-edit-area > iframe').height( sheight );
                     $('.tox-edit-area > iframe').height( sheight );
                     $('.tox-edit-area').height( sheight );
-                    
-console.log( sheight );                    
                 });
                 
                 editor.ui.registry.addButton('customHeuristMedia', {

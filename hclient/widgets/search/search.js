@@ -199,11 +199,11 @@ $.widget( "heurist.search", {
         if(this._is_publication || this.options.is_h6style){
             this.input_search.css({'height':'27px','min-height':'27px','padding':'2px 18px 2px 2px'}); //, 'width':'400'
             
-            var sTop = '-34px';
+            var sTop = '-37px';
             this.input_search_prompt2.addClass('ui-widget-content').css({border:'none',top:sTop});
             if(this._is_publication){
                 this.input_search.css({width:'auto'});
-                this.input_search_prompt2.css({height:(this.input_search.height()-3)+'px',
+                this.input_search_prompt2.css({height:(this.input_search.height()-5)+'px',
                                                width:(this.input_search.width()+5)+'px'});    
             }
         }else{

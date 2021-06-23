@@ -238,7 +238,7 @@ separate term and each of these values with comma or tab.
             
     </fieldset> 
     <div class="ent_footer" style="padding-left:5px;height:5em">
-        <div id="preparedInfo2" style="font-weight:bold;font-size:1.1em"></div>
+        <div id="preparedInfo2" style="font-weight:bold;font-size:1.1em;padding:4px"></div>
         <div id="btnImportData">Import</div>
     </div>
 </div>
