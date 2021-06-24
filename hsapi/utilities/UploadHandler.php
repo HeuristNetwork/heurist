@@ -259,7 +259,11 @@ $siz = get_php_bytes('upload_max_filesize');
 
     protected function get_server_url() {
         //$https = !empty($_SERVER['HTTPS']) && strcasecmp($_SERVER['HTTPS'], 'on') === 0;
-        $https =  (strpos($_SERVER['SERVER_PROTOCOL'],'HTTPS')===0);// (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+        //$https =  (strpos($_SERVER['SERVER_PROTOCOL'],'HTTPS')===0);
+        $https = (isset($_SERVER['HTTPS']) &&
+                    ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == 1) ||
+                    isset($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
+                    $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https');
         return
             ($https ? 'https://' : 'http://').
             (!empty($_SERVER['REMOTE_USER']) ? $_SERVER['REMOTE_USER'].'@' : '').
@@ -343,6 +347,7 @@ $siz = get_php_bytes('upload_max_filesize');
     }
 
     protected function set_additional_file_properties($file) {
+        //$file->deleteUrl2 = @$_SERVER['HTTPS'].'<>'.@$_SERVER['SERVER_PROTOCOL'].'<>'.@$_SERVER['HTTP_X_FORWARDED_PROTO'];
         $file->deleteUrl = $this->options['script_url']
             .$this->get_query_separator($this->options['script_url'])
             .$this->get_singular_param_name()

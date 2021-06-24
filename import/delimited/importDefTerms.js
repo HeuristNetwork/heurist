@@ -324,6 +324,8 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
 
                                 _parseddata = response.data;
                                 
+                                $('#csv_header').prop('checked', _parseddata && _parseddata.length>0 && _parseddata[0].length>1);
+                                
                                 if (!$('#csv_header').is(':checked')) {
                                     var firstline_without_quotes = false;
                                     var pos = content.indexOf($('#csv_enclosure').val()==2?'"':"'");
