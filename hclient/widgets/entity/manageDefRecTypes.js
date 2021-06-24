@@ -89,8 +89,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             //this.options.edit_mode = 'none'
         }
         
-        if(this.options.select_mode=='select_multi'){
-        //    this.options.width = 440;
+        if(this.options.select_mode=='select_multi' && this.options.edit_mode=='popup'){
+            this.options.width = 440;
         }
             
             
