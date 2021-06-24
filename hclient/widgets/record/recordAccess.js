@@ -36,6 +36,10 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     },
 
     _initControls:function(){
+
+        if(!window.hWin.HAPI4.currentUser){
+            return;
+        }
         
         var that = this;
         
@@ -43,6 +47,40 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             this.element.find('#hr_sel_record_scope').hide();
         }
         
+        that._fillAccessControls();
+        
+        
+        //window.hWin.HAPI4.addEventListener(this, 
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
+            function(e, data) { 
+                that._fillAccessControls();
+        });
+        
+        
+        
+        return this._super();
+        
+        //this._onRecordScopeChange();
+        //if(this.options.scope_types=='none'){
+        //    this._onRecordScopeChange();    
+        //}
+        
+    },
+    
+    
+    //
+    // events bound via _on are removed automatically
+    // revert other modifications here
+    _destroy: function() {
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS);
+        return this._super();
+    },
+    
+    //
+    //
+    //    
+    _fillAccessControls: function(){
+
         var fieldSelect = this.element.find('#sel_Ownership');
         window.hWin.HEURIST4.ui.createUserGroupsSelect(fieldSelect[0], null,  //take groups of current user
                 [{key:0, title:'Any logged-in user'},
@@ -51,17 +89,24 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                  ]);
               
               
-        fieldSelect.change(function(){
-            
-            if(fieldSelect.val()==0){
-                that.element.find('.access-hidden').hide();   
-                if(!that.element.find('#rb_Access-public').is(':checked'))
-                    that.element.find('#rb_Access-viewable').prop('checked', true); 
-            }else{
-                that.element.find('.access-hidden').show();    
+        this._off(fieldSelect,'change');
+        this._off( this.element.find('input[name="rb_Owner"]'),'change');
+        this._off( this.element.find('input[name="rb_Access"]'),'change');
+        
+              
+        this._on(fieldSelect,{change:
+            function(){
+                
+                if(fieldSelect.val()==0){
+                    this.element.find('.access-hidden').hide();   
+                    if(!this.element.find('#rb_Access-public').is(':checked'))
+                        this.element.find('#rb_Access-viewable').prop('checked', true); 
+                }else{
+                    this.element.find('.access-hidden').show();    
+                }
+                this._onRecordScopeChange();
+                
             }
-            that._onRecordScopeChange();
-            
         });
         
         //define group selector for edit
@@ -120,37 +165,30 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             }
         }
         
-        this.element.find('input[name="rb_Owner"]').change(function(){
+        this._on( this.element.find('input[name="rb_Owner"]'),{change:function(){
             
-            if(that.element.find('#rb_Owner-group').prop('checked')){
-                that.element.find('#sel_OwnerGroups').show();
+            if(this.element.find('#rb_Owner-group').prop('checked')){
+                this.element.find('#sel_OwnerGroups').show();
             }else{
-                that.element.find('#sel_OwnerGroups').hide();
+                this.element.find('#sel_OwnerGroups').hide();
             }
             
-            that._onRecordScopeChange();
+            this._onRecordScopeChange();
             
-        });
+        }});
         
-        this.element.find('input[name="rb_Access"]').change(function(){
+        this._on( this.element.find('input[name="rb_Access"]'), {change:function(){
             
-            if(that.element.find('#rb_Access-hidden').prop('checked')){ //was viewable-group
-                that.element.find('#div_AccessGroups').show();//css({display:'table-row'});
+            if(this.element.find('#rb_Access-hidden').prop('checked')){ //was viewable-group
+                this.element.find('#div_AccessGroups').show();//css({display:'table-row'});
             }else{
-                that.element.find('#div_AccessGroups').hide();
+                this.element.find('#div_AccessGroups').hide();
             }
             
-            that._adjustHeight();
+            this._adjustHeight();
            
-            that._onRecordScopeChange();
-        });
-        
-        return this._super();
-        
-        this._onRecordScopeChange();
-        //if(this.options.scope_types=='none'){
-        //    this._onRecordScopeChange();    
-        //}
+            this._onRecordScopeChange();
+        }});
         
     },
     

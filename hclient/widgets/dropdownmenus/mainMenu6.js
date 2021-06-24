@@ -264,7 +264,8 @@ $.widget( "heurist.mainMenu6", {
                 +' '+window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
                 +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
                 +' '+window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
-                +' '+window.hWin.HAPI4.Event.ON_CUSTOM_EVENT, 
+                +' '+window.hWin.HAPI4.Event.ON_CUSTOM_EVENT
+                +' '+window.hWin.HAPI4.Event.ON_CREDENTIALS, 
             function(e, data) {
                 
                 if(e.type == window.hWin.HAPI4.Event.ON_CUSTOM_EVENT){
@@ -307,7 +308,7 @@ $.widget( "heurist.mainMenu6", {
                     
                     that._refreshSubsetSign();                    
                     
-                }else if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){
+                }else if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE || e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS){
                     if(data && data.origin=='recordAdd'){
                         that._updateDefaultAddRectype( data.preferences );
                     }else{
@@ -434,7 +435,8 @@ $.widget( "heurist.mainMenu6", {
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
                 +' '+window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
                 +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
-                +' '+window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH);
+                +' '+window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
+                +' '+window.hWin.HAPI4.Event.ON_CREDENTIALS);
     },
     
     // 
