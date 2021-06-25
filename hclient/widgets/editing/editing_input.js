@@ -1276,6 +1276,17 @@ $.widget( "heurist.editing_input", {
                     }
                     
                     var isOpened = false;
+                    
+                    var rts = [];
+                    var ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
+                    
+                    for (var k=0; k<ptrset.length; k++) {
+                        var sname = $Db.rty(ptrset[k],'rty_Name');
+                        if(!window.hWin.HEURIST4.util.isempty(sname)){
+                            rts.push(sname);
+                        }
+                    }
+                    
                 
                     var __show_addlink_dialog = function(){
                             if(isOpened || that.is_disabled) return;
@@ -1303,11 +1314,20 @@ $.widget( "heurist.editing_input", {
                                         that.element.find('.rel_link').hide();//hide this button if there are links
                                         ele.on('remove', __onRelRemove);
                                     }
-                            }                            
+                            }    
+                            
+                            
+                            var rty_names = '';
+                            if(rts.length>0 && that.options.rectypeID>0){
+                                rty_names = $Db.rty(that.options.rectypeID,'rty_Name') 
+                                            + ' and ' + rts.join(', ');
+                            }else{
+                                rty_names = 'records';
+                            }
                             
                             var opts = {
                                 height:280, width:750, 
-                                title: 'Create relationship between records ( Field: "'
+                                title: 'Create relationship between '+rty_names+' ( Field: "'
                                     +$Db.dty(that.options.dtID, 'dty_Name')+'" )',
                                 relmarker_dty_ID: that.options.dtID,
                                 default_palette_class: 'ui-heurist-populate',
@@ -1323,7 +1343,6 @@ $.widget( "heurist.editing_input", {
                         
                             window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink', opts);
                     };
-                    
                     
                     var sRels = '';
                     if(that.options.recordset){
@@ -1459,11 +1478,19 @@ $.widget( "heurist.editing_input", {
                         .uniqueId();
                    $input = $inputdiv;
 
+                   if(rts.length>0){
+                        rty_names = '<div class="truncate" style="max-width:200px;display:inline-block;vertical-align:top">&nbsp;to '
+                                +rts.join(', ') +'</div>';
+                   }else{
+                        rty_names = '';
+                   }
+                   
                    
                    //define explicit add relationship button
                    var $btn_add_rel_dialog = $( "<button>", {title: "Click to add new relationship"})
                         .addClass("rel_link") //.css({display:'block'})
-                        .button({icons:{primary: "ui-icon-circle-plus"},label:'&nbsp;&nbsp;&nbsp;Add Relationship'});
+                        .button({icons:{primary: "ui-icon-circle-plus"},label:'&nbsp;&nbsp;&nbsp;Add Relationship'
+                                +rty_names});
                        
                    var rheader = that.element.find('.reverse-relation-header');     
                    if(rheader.length>0){
@@ -4520,7 +4547,7 @@ console.log('onpaste');
                                         + encodeURIComponent(that.newvalues[$input.attr('id')]
                                                     ?that.newvalues[$input.attr('id')]:$input.val());
                                     
-                                    window.hWin.HEURIST4.msg.showDialog(url, {height:550, width:750,
+                                    window.hWin.HEURIST4.msg.showDialog(url, {height:570, width:750,
                                         title: 'Temporal Object',
                                         //class:'ui-heurist-bg-light',
                                         callback: function(str){

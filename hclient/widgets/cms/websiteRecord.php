@@ -406,13 +406,22 @@ if(!$isWebPage){
 
 $home_page_record_id = $rec_id;
 
-if($custom_template){
+//$default_CMS_Template_Path
+
+$websiteScriptAndStyles_php = HEURIST_DIR.'hclient/widgets/cms/websiteScriptAndStyles.php';
+
+if($custom_template){ //from field of CMS main menu record
     
     if(substr( $custom_template, -4 ) !== '.php'){
             $custom_template = $custom_template.'.php';
     }
     
-    if(strpos($custom_template,'/')!==false){
+    if($default_CMS_Template_Path && file_exists($default_CMS_Template_Path)){
+        
+        $custom_template = $default_CMS_Template_Path.$custom_template;
+        
+    }else if(strpos($custom_template,'/')!==false){
+
         //otherwise this is relative to code directory
         $custom_template = HEURIST_DIR.$custom_template;
     }else{
@@ -427,12 +436,12 @@ if($custom_template){
         include ($custom_template);
         exit;
     }else{
-        $cutomTemplateNotFound = $custom_template;
+        $customTemplateNotFound = $custom_template;
     }
 }        
-if(file_exists(PDIR.'../cmsTemplate.php')){
+if($default_CMS_Template_Path && file_exists($default_CMS_Template_Path.'cmsTemplate.php')){
     //use server custom template
-    include '../cmsTemplate.php';
+    include $default_CMS_Template_Path.'cmsTemplate.php';
     
 }else{
     //use default template

@@ -22,7 +22,6 @@
 we may take data from 
 1) use_cache = false  from server on every search request (live data) 
 2) use_cache = true   from client cache - it loads once per heurist session (actually we force load)
-3) use_cache = true + use_structure - use HEURSIT4.rectypes
 */
 $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
    
@@ -63,7 +62,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(this.options.import_structure){ //for example https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Reference_Set
             if(this.options.select_mode=='manager') this.options.select_mode='select_single';
             this.options.use_cache = true;
-            this.options.use_structure = true; //use HEURIST4.rectypes for import structures    
+            this.options.use_structure = true; //use HEURIST4.remote.rectypes for import structures    
         }else{
             this.options.use_cache = true;
             this.options.use_structure = false
@@ -366,8 +365,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     
                     this.recordList.resultList('resetGroups');
                     
+                    //get rectypes from REMOTE database
                     window.hWin.HAPI4.SystemMgr.get_defs(
-                            {rectypes:'all', detailtypes:'all', mode:2, remote:this.options.import_structure.database_url}, function(response){
+                            {rectypes:'all', mode:2, remote:this.options.import_structure.database_url}, function(response){
                     
                             window.hWin.HEURIST4.msg.sendCoverallToBack();
                             
@@ -375,11 +375,15 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 
                                 window.hWin.HEURIST4.remote = {};
                                 window.hWin.HEURIST4.remote.rectypes = response.data.rectypes;
-                                window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
-                                //window.hWin.HEURIST4.remote.terms = response.data.terms;
                                 
                                 that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes, false ); //change to true to hide where rty_ShowInList=0
 
+                                window.hWin.HAPI4.SystemMgr.get_defs( //only basefield names
+                                    {detailtypes:'all', mode:0, remote:that.options.import_structure.database_url}, function(response){
+                                        if(response.status == window.hWin.ResponseStatus.OK){
+                                            window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
+                                        }
+                                    });
                                 
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -387,21 +391,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     });                    
                     
                 }else{
-                    /*
-                    if(!window.hWin.HEURIST4.rectypes.counts){
-                        window.hWin.HAPI4.EntityMgr.doRequest({a:'counts',entity:'defRecTypes',
-                                        mode: 'record_count',ugr_ID: window.hWin.HAPI4.user_id()}, 
-                            function(response){
-                                if(response.status == window.hWin.ResponseStatus.OK){
-                                    window.hWin.HEURIST4.rectypes.counts = response.data;
-                                }else{
-                                    window.hWin.HEURIST4.rectypes.counts = {};
-                                }
-                                that._loadData();
-                                
-                            });
-                            return;
-                    }*/
                     this._loadData();
                     
                     //take recordset from LOCAL HEURIST.rectypes format     
@@ -445,7 +434,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     },
 
     //
-    // get recordset from HEURIST4.rectypes
+    // get recordset from HEURIST4.rectypes - it is used for import structure only
     //
     getRecordsetFromStructure: function( rectypes, hideDisabled ){
         
@@ -458,17 +447,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
       
 
         if(!rectypes){
-            //by default take from local definitions
-            rectypes = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes);
+            //take from local definitions = NOT USED
+            rectypes = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes); //NOT USED
         }else{
-            //reload groups for remote rectypes            
-            //var ele = this.element.find('#input_search_group');   //rectype group
             rectypes = window.hWin.HEURIST4.util.cloneJSON(rectypes);
-            //this.searchForm.searchDefRecTypes('reloadGroupSelector', rectypes); //get remote groups
-            
-            //var ele = this.searchForm.find('#input_search_group');
-            //window.hWin.HEURIST4.ui.createRectypeGroupSelect(ele[0],
-            //                            [{key:'any',title:'any group'}], rectypes);
         }
 
         rdata.fields = rectypes.typedefs.commonFieldNames;
@@ -477,7 +459,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         var idx_ccode = 0;
         if(this.options.import_structure){
             rdata.fields.push('rty_ID_local');
-            idx_ccode = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_ConceptID;
+            idx_ccode = rectypes.typedefs.commonNamesToIndex.rty_ConceptID;
         }else{
             rdata.fields.push('rty_RecCount');
         }
@@ -1515,8 +1497,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                         var rty_ID = Number(response.data.id);
                         if(rty_ID>0){   
                             //refresh the local heurist
-                            //window.hWin.HEURIST4.rectypes = response.data.rectypes; //REMARKED
-                            
                             window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,rst',function(){
                                  window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
                             }); 

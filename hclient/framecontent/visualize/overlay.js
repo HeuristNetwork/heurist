@@ -723,8 +723,8 @@ function _addNewLinkField(source_ID, target_ID){
             var dlg_title = '';
             
             if(settings.isDatabaseStructure){
-            
-                url = url + "admin/structure/fields/selectLinkField.html?&db="
+                
+                url = url + "hclient/framecontent/visualize/selectLinkField.php?&db="
                     + window.hWin.HAPI4.database
                     + '&source_ID='+source_ID;
                
@@ -766,7 +766,8 @@ function _addNewLinkField(source_ID, target_ID){
                             }
                             
                         }
-                    }
+                    },
+                    default_palette_class:'ui-heurist-design'
               });
                 
 }

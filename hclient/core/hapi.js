@@ -784,33 +784,18 @@ prof =Profile
                 window.hWin.HAPI4.EntityMgr.refreshEntityData('all', function(success){
 
                     if(success){
-                        //get defintions in old format
-                        that.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
-                            
-                            window.hWin.HEURIST4.msg.sendCoverallToBack();
-                            
-                            if(response.status == window.hWin.ResponseStatus.OK){
-                                
-                                window.hWin.HEURIST4.rectypes = response.data.rectypes;
-                                window.hWin.HEURIST4.terms = response.data.terms;
-                                window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
-                                
-                                $Db.baseFieldType = window.hWin.HEURIST4.detailtypes.lookups;
-                                
-                                if (is_message==true) {
-                                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
-                                        'You may need to reload pages to see changes.');
-                                    $dlg.parent('.ui-dialog').css({top:150,left:150});    
-                                }      
-                                
-                                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
-                                res = true;
-                            }else{
-                                res = false;
-                            }
-                            
-                            if($.isFunction(callback)) callback.call(that, res);
-                        });
+                        
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+                        
+                        if (is_message==true) {
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
+                                'You may need to reload pages to see changes.');
+                            $dlg.parent('.ui-dialog').css({top:150,left:150});    
+                        }      
+                        
+                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+                        if($.isFunction(callback)) callback.call(that, true);
+                        
                     }else{
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         if($.isFunction(callback)) callback.call(that, false);
@@ -857,12 +842,6 @@ prof =Profile
                         if(response.defs){
                             if(response.defs.sysinfo) window.hWin.HAPI4.sysinfo = response.defs.sysinfo; //constants
                             
-                            //old way
-                            if(response.defs.rectypes) window.hWin.HEURIST4.rectypes = response.defs.rectypes;
-                            if(response.defs.detailtypes) window.hWin.HEURIST4.detailtypes = response.defs.detailtypes;
-                            if(response.defs.terms) window.hWin.HEURIST4.terms = response.defs.terms;
-                            
-                            //new way
                             if(response.defs.entities)
                             for(var entityName in response.defs.entities){
                                 window.hWin.HAPI4.EntityMgr.setEntityData(entityName,
@@ -1264,6 +1243,17 @@ prof =Profile
                     entity_data[entityName] = {};
                 }
             },
+            
+            //
+            // clear clinet side entity data for further refresh
+            //
+            emptyEntityData:function(entityName){
+                if(entityName){
+                    entity_data[entityName] = {};    
+                }else{
+                    entity_data = {};
+                }
+            },
 
             //
             //  find key and title fields
@@ -1465,17 +1455,6 @@ prof =Profile
             },
             
             //
-            // clear clinet side entity data for further refresh
-            //
-            emptyEntityData:function(entityName){
-                if(entityName){
-                    entity_data[entityName] = {};    
-                }else{
-                    entity_data = {};
-                }
-            },
-
-            //
             // generic request for entityScrud
             //
             doRequest:function(request, callback){
@@ -1494,6 +1473,14 @@ prof =Profile
                 var idx, display_value = [];
                 if(entity_data[entityName]){
                    var ecfg = entity_configs[entityName];
+                   if(!ecfg){
+                          window.hWin.HAPI4.EntityMgr.getEntityConfig(entityName, function(){
+                                window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, recIDs, callback);
+                          });
+                          return;
+                   }
+                   
+                   
                    var edata = entity_data[entityName];
                    if(!$.isArray(recIDs)) recIDs = [recIDs];
                    for(idx in recIDs){

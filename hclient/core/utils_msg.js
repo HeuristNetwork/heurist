@@ -235,8 +235,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if($dlg.length==0){
             $dlg = $('<div>',{id:'dialog-common-messages'})
                 .css({'min-wdith':'380px','max-width':'640px'}) //,padding:'1.5em 1em'
-                .appendTo( $('body') ); //
-                //$(window.hWin.document['body'])
+                .appendTo( $('body') );
         }
         return $dlg.removeClass('ui-heurist-border');
     },
@@ -258,7 +257,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         var $dlg = $( '#'+element_id );
         if($dlg.length==0){
             $dlg = $('<div>',{id:element_id})
-                .css({'padding':'2em','min-wdith':'380px'}).appendTo('body'); //,'max-width':'640px' //$(window.hWin.document)
+                .css({'padding':'2em','min-wdith':'380px',overflow:'hidden'}).appendTo('body');
             $dlg.removeClass('ui-heurist-border');
         }
         return $dlg;
@@ -350,13 +349,14 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
         if(position_to_element){
            if($.isPlainObject(position_to_element)){
-                options.position = position_to_element;
+                options.position = position_to_element.position;
            }else{
                 options.position = { my: "left top", at: "left bottom", of: $(position_to_element) };    
            } 
         }else{
             options.position = { my: "center center", at: "center center", of: $(document) };    
         }
+        options.position.collision = 'none'; //FF fix
 
         $dlg.dialog(options);
         
@@ -765,7 +765,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if(options.container){
 
                 $dlg.dialog( 'option', 'position', 
-                    { my: "left top", at: "left top", of:options.container});
+                    { my: "left top", at: "left top", of:options.container, collision:'none'});
 
                 function __adjustOneResize(e){
                     var ele = e ?$(e.target) :options.container;
@@ -1015,16 +1015,19 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     open: options.open,  //callback
                     beforeClose: options.beforeClose,
                     close: function(event, ui){
-                        
+
+                        var need_remove = true;                        
                         if($.isFunction(onCloseCalback)){
-                             onCloseCalback.call(this, event, ui);
+                             need_remove = onCloseCalback.call(this, event, ui);
                         }
                         
-                        element.parentNode.removeChild(element);
-                        element.style.display = "none";
-                        originalParentNode.appendChild(element);
+                        if(need_remove!==false){
+                            element.parentNode.removeChild(element);
+                            element.style.display = "none";
+                            originalParentNode.appendChild(element);
 
-                        $dlg.remove();
+                            $dlg.remove();
+                        }
                     }
             };
             if(options["position"]) opts["position"] = options["position"];
@@ -1203,6 +1206,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     options.position = { my: "left top", at: "left bottom", of: $(ext_options) };
            }
         }
+        if(!options.position){
+            options.position = { my: "center center", at: "center center", of: window };    
+        }
+        options.position.collision = 'none'; //FF fix
+        
 
         if(isPopupDlg){
 
@@ -1217,8 +1225,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if(window.hWin.HEURIST4.util.isempty(options.resizable)) options.resizable = true;
             if(false && options.resizable === true){
             options.resizeStop = function( event, ui ) {
-                    $dlg.css({overflow: 'none !important','width':'100%', 'height':$dlg.parent().height()
-                            - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height() - 20 });
+                
+console.log( $dlg.parent().height() );
+               var nh = $dlg.parent().height()
+                            - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height(); //-20
+console.log( nh );
+                    $dlg.css({overflow: 'none !important','width':'100%', 'height':nh });
                 };
             }
         }else if(!options.width){

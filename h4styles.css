@@ -80,7 +80,7 @@ a{
 
 /*  LAYOUT */
 .ui-layout-pane {
-    padding: 0 !important;
+    padding: 0px !important;
     border:none !important;
 }
 
@@ -126,12 +126,15 @@ a{
     width:16px;
     margin-left:12px;
 }
+
 /*
 #layout_panes{
     height: 100%;
     width: 100%;
+    position:absolute;
 }
 */
+
 
 .tab_ctrl{
     position: absolute;
@@ -154,9 +157,9 @@ a{
     /*
     height:100%;
     z-index:2;*/
-    bottom: 0;
+    bottom: 0px;
     position: absolute;
-    top: 0;
+    top: 0px;
     width: 99%;
 }
 
@@ -177,14 +180,14 @@ input.rec_URL {
     text-decoration: underline;
     cursor: pointer;
     border: 1px solid rgba(0, 0, 0, 0.2);
-    margin: 2px 0;
+    margin: 2px 0px;
     padding: 3px;
 }
 
 input.Temporal, .list_div {
     cursor: pointer;
     border: 1px solid rgba(0, 0, 0, 0.2);
-    margin: 2px 0;
+    margin: 2px 0px;
     padding: 3px;
 }
 
@@ -292,11 +295,11 @@ div.image_input{
 }
 img.image_input{
     position: absolute;
-    top: 0;
-    bottom: 0;
+    top: 0px;
+    bottom: 0px;
     margin: auto;
-    left: 0;
-    right: 0;
+    left: 0px;
+    right: 0px;
     max-width: 120px;
     max-height: 120px;
 }
@@ -352,7 +355,7 @@ input.text, select.text {
 optgroup {
     font-style: normal;
     font-weight:bold;
-    padding:0;
+    padding:0px;
     margin-top:5px;
     text-indent: 5px;
 }
@@ -591,8 +594,8 @@ div.recordDiv > .rec_action_link2{
 }
 .thumbs div.recordDiv > .rec_action_link2{
     position:absolute;
-    right:2;
-    top:6;
+    right:2px;
+    top:6px;
 }
 
 /*
@@ -666,9 +669,9 @@ div .selected_last{
     background-size: contain; /* 100% auto */
     position: absolute;
     text-align: center;
-    margin: 0;
-    left: 0;
-    right: 0;
+    margin: 0px;
+    left: 0px;
+    right: 0px;
     top: 22px;
     height: 96px;
     opacity: 0.5;
@@ -705,7 +708,7 @@ div .selected_last{
     height: 154px;
     width: 128px;
     overflow: visible;
-    padding: 0;
+    padding: 0px;
     position: relative;
 }
 
@@ -820,7 +823,7 @@ div.div-result-list-content.icons_list{
 }
 .icons_list .recordDiv .recordTitle > .item {
     /*max-width:110px;*/
-    padding: 12px 10 8 31px;
+    padding: 12px 10px 8px 31px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -885,7 +888,7 @@ div.div-result-list-content.icons_list{
 }
 .icons div.recordDiv.expanded .action-button{
     width: 58px;
-    padding: 0;
+    padding: 0px;
     margin: 2px;
 }
 .icons div.recordDiv.expanded .action-button .ui-button-text{
@@ -1065,7 +1068,7 @@ div.div-result-list-content.icons_list{
     height: 109px;
     width: 180px;
     overflow: visible;
-    padding: 0;
+    padding: 0px;
     position: relative;
 }
 .thumbs2 .recordDiv:hover {
@@ -1313,8 +1316,8 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     background:#71b5e9 url(bg_tags.gif) repeat-x;*/
 }
 .tagsCloud li{
-    margin:0;
-    padding:0;
+    margin:0px;
+    padding:0px;
     list-style:none;
     display:inline-block;
 }
@@ -1399,8 +1402,8 @@ Allow use of icon-large to be properly aligned
     overflow:hidden !important;
 }
 .fancytree-title{
-    margin:0 !important;
-    padding-right: 0 !important;
+    margin:0px !important;
+    padding-right: 0px !important;
     padding-right: 5px !important;
 }
 .fancytree-edit-input{
@@ -1424,16 +1427,16 @@ span.fancytree-checkbox{
 
 
 .tree-map{
-    padding:0;
+    padding:0px;
 }
 .tree-map .fancytree-checkbox{
-    margin-left:0;
+    margin-left:0px;
 }
 .tree-map .fancytree-expander{
     width:14px*;
 }
 .tree-map ul.fancytree-container ul{
-    padding: 0 0 0 8px !important;
+    padding: 0px 0px 0px 8px !important;
 }
 
 
@@ -1583,7 +1586,7 @@ ul > li > .fancytree-node > .svs-contextmenu2 {
     cursor: pointer;
     padding-top: 6px;
     position:absolute;
-    right:10;
+    right:10px;
 }
 div > .svs-contextmenu {
     display: none;
@@ -1603,13 +1606,13 @@ div > .svs-contextmenu {
                 position:absolute;
                 right:5px;
                 margin: 1px;
-                padding: 2 2 0 2;
+                padding: 2px 2px 0px 2px;
                 display:none;
                 color:black !important;
                 border-radius:2px;
             }
             span.fancytree-node{
-                min-width: 300px;
+                /*min-width: 300px;*/
                 padding:2px !important;
                 border: none !important;
                 display: block;
@@ -1621,9 +1624,9 @@ div > .svs-contextmenu {
                 cursor:pointer;
                 position:absolute;
                 right:7px;
-                width: 16;
-                height: 16;
-                margin-top: -16;
+                width: 16px;
+                height: 16px;
+                margin-top: -16px;
                 display: none;
                 background-position: 0 0; 
                 background-image: url(external/jquery.fancytree/skin-themeroller/loading.gif);
@@ -1665,7 +1668,7 @@ background: #8ea9b9
 .popup_content_div{
     padding:10px;
     position:absolute;
-    top:0;
+    top:0px;
     left:0px;
     right:0px;
     bottom:1.5em
@@ -1673,7 +1676,7 @@ background: #8ea9b9
 .popup_buttons_div{
     position:absolute;
     bottom:0;left:0px;right:0px;
-    height:1.5em;
+    /*height:1.5em;*/
     text-align: right;
     padding: 4px;
 }
@@ -1691,7 +1694,7 @@ background: #8ea9b9
     padding-top: 0.5em;
 }
 .ent_wrapper.editor .text{
-    margin: 2px 0;
+    margin: 2px 0px;
     padding: 3px;    
 }
 .ent_wrapper.editor .heurist-helper1{
@@ -1708,7 +1711,7 @@ background: #8ea9b9
 
 
 .div-result-list-toolbar{
-    padding:0;
+    padding:0px;
     /*padding:0.2em 0.5em*/
 }
 /*
@@ -1738,7 +1741,7 @@ background: #8ea9b9
 .dialog-title-button{
     position:absolute;
     top: 50%;
-    margin: -10px 0 0 0;
+    margin: -10px 0px 0px 0px;
     padding: 1px;
     height: 20px;
     width: 20px;
@@ -1795,7 +1798,7 @@ background: #8ea9b9
     display: table-cell;
     color: #999999;
     vertical-align: top;
-    padding: 0 10px 0 0;
+    padding: 0px 10px 0px 0px;
     text-align: right;
     text-transform: none;
 }
@@ -1833,7 +1836,7 @@ background: #8ea9b9
     vertical-align:top;    
 }
 .detailRowHeader{
-    padding: 5px 0 5px 0;
+    padding: 5px 0px 5px 0px;
     width: 100%;
     border-top: 1px solid #7D9AAA;
     font-size: 11px;
@@ -1857,32 +1860,32 @@ background: #8ea9b9
 
 .ui-icon-filter { 
     background-image: url(hclient/assets/filter_icon24.png) !important; 
-    width: 22;
-    height: 22;
+    width: 22px;
+    height: 22px;
     /*margin-top: -0.8em !important;*/
     margin-left: -0.3em;
 }
 
 .ui-icon-filter-28 { 
     background-image: url(hclient/assets/filter_icon_28.png) !important; 
-    width: 28;
-    height: 28;
+    width: 28px;
+    height: 28px;
     margin-top: -0.5em !important;
     margin-left: -0.3em;
 }
 
 .ui-icon-addtodb-28{ 
     background-image: url(hclient/assets/add_to_db_28.png) !important; 
-    width: 28;
-    height: 28;
+    width: 28px;
+    height: 28px;
     margin-top: -0.5em !important;
     margin-left: -0.3em;
 }
 
 .ui-icon-gear-crossed{ 
     background-image: url(hclient/assets/gear_crossed.png) !important; 
-    width: 25;
-    height: 24;
+    width: 25px;
+    height: 24px;
 }
 
 
@@ -1890,38 +1893,38 @@ background: #8ea9b9
 
 .ui-icon-aa { 
     background-image: url(hclient/assets/Aa.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
 }
 
 .ui-icon-input-slider { 
     background-image: url(hclient/assets/input_slider.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
 }
 
 .ui-icon-input-dropdown { 
     background-image: url(hclient/assets/input_dropdown.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
 }
 
 .ui-icon-list-column { 
     background-image: url(hclient/assets/list_column.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
 }
 
 .ui-icon-list-inline { 
     background-image: url(hclient/assets/list_inline.png) !important; 
-    width: 18;
-    height: 18;
+    width: 18px;
+    height: 18px;
 }
 
 .ui-icon-up-down { 
     background-image: url(common/images/up-down-arrow.png) !important; 
-    width: 24;
-    height: 24;
+    width: 24px;
+    height: 24px;
 }
 
 .tooltip-inner{
@@ -1933,13 +1936,13 @@ background: #8ea9b9
 div.coverall-div, div.coverall-div-bare 
 {
     position: absolute;
-    left:0;
-    top: 0;
+    left:0px;
+    top: 0px;
     height:100%;
     width:100%;
     border: 0;
-    padding: 0;
-    margin: 0;
+    padding: 0px;
+    margin: 0px;
 }
 div.coverall-div {
     background-color: #000;
@@ -1956,7 +1959,7 @@ div.coverall-div {
     display: inline-block;
     min-width: 10px;
     padding: 3px;
-    margin:0 4px;
+    margin:0px 4px;
     /*7px; font-size: 12px;
     font-weight: bold;*/
     color: white;
@@ -2117,7 +2120,7 @@ body.popup h3 {
     height: auto;
     padding-bottom: 10px;
     padding-top: 10px;
-    margin: 10px 0 0 0;
+    margin: 10px 0px 0px 0px;
 }
 .separator_row {
     height: 1px;
@@ -2180,7 +2183,7 @@ input[type="file"] {
 }
 
 .tree-accordeon-header > .ui-accordion-header-icon{
-    left: 0 !important;
+    left: 0px !important;
     margin-top: -4px !important;
 }
 
@@ -2224,7 +2227,7 @@ input[type="file"] {
 .ui-menu-item  > div{  /*heurist*/
     font-weight: normal;
     line-height: 1.5;
-    min-height: 0;
+    min-height: 0px;
     padding: 2px 0.4em;
 } 
 .ui-menu .ui-menu-item{
@@ -2236,7 +2239,7 @@ input[type="file"] {
     /* padding: 3px 1em 3px .4em; */
     font-weight: normal;
     line-height: 1.5;
-    min-height: 0;
+    min-height: 0px;
     padding: 2px 1em;
     text-decoration: none;
 }
@@ -2320,7 +2323,7 @@ li.edit-form-tab > a{
     top: 1px; 
     border: 0;
     z-index: 2; 
-    padding: 0;
+    padding: 0px;
     /* color: #444; */ 
     text-decoration: none;
     background: transparent !important; 

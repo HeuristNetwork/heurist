@@ -45,6 +45,10 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     _toolbar: null,
 
     _initControls:function(){
+        
+        if(!window.hWin.HAPI4.currentUser){
+            return;
+        }
 
         if(this.options.RecTypeID>0){
 
@@ -189,12 +193,19 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             var that = this;
             //
             //$(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-                function(data) { 
-                    if(!data || data.type=='rtg' || data.type=='rty'){
+            //window.hWin.HAPI4.addEventListener(this, 
+            $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
+            +' '+window.hWin.HAPI4.Event.ON_CREDENTIALS, 
+                function(e, data) { 
+                    if(e.type==window.hWin.HAPI4.Event.ON_CREDENTIALS 
+                        || !data || data.type=='rtg' || data.type=='rty')
+                    {
                         that._fillSelectRecordTypes(that.options.currentRecType);    
                     }
             });
+            //window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_CREDENTIALS, 
+            //    function(data) { 
+            //});
 
         }
 
@@ -207,7 +218,10 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     // revert other modifications here
     _destroy: function() {
         //$(window.hWin.document).off(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
-        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);        
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
+                            +' '+window.hWin.HAPI4.Event.ON_CREDENTIALS);
+        //window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);        
+        //window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_CREDENTIALS);        
         return this._super();
     },
     

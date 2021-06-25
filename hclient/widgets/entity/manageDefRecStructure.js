@@ -63,7 +63,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         this.options.layout_mode = 'short';
         this.options.use_cache = true;
-        this.options.use_structure = false;
         
         //this.options.select_return_mode = 'recordset';
         this.options.edit_height = 640;
@@ -223,26 +222,20 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         if(this.options.use_cache){ //init list only once
 
-            if(this.options.use_structure){  //take fata from $Db
-                //take recordset from HEURIST4.rectypes format     
-                this._cachedRecordset = this._getRecordsetFromStructure();
-                
-            }else{
-                
-                //via entity data
-                this._cachedRecordset = $Db.rst(this.options.rty_ID);  //from  rst_Index
-                if(this._cachedRecordset==null){
-                    this._cachedRecordset = new hRecordSet({entityName:'defRecStructure',count:0,offset:0,order:[]});
-                }
-                /*from server
-                var that = this;
-                window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
-                    function(response){
-                        that._cachedRecordset = response;
-                        that.recordList.resultList('updateResultSet', response);
-                    });
-                */    
+            //via entity data
+            this._cachedRecordset = $Db.rst(this.options.rty_ID);  //from  rst_Index
+            if(this._cachedRecordset==null){
+                this._cachedRecordset = new hRecordSet({entityName:'defRecStructure',count:0,offset:0,order:[]});
             }
+            /*from server
+            var that = this;
+            window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
+                function(response){
+                    that._cachedRecordset = response;
+                    that.recordList.resultList('updateResultSet', response);
+                });
+            */    
+
             this.recordList.resultList('updateResultSet', this._cachedRecordset);
             this._initTreeView();
             this._showRecordEditorPreview( true );
@@ -274,66 +267,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         return true;
     },            
-    
-    //
-    // get recordset from HEURIST4.rectypes - NOT USED
-    //
-    _getRecordsetFromStructure: function(){
-        
-        var rdata = { 
-            entityName:'defRecStructure',
-            count: 0,
-            total_count: 0,
-            fields:[],
-            records:{},
-            order:[] };
-
-        var rectypes = window.hWin.HEURIST4.rectypes; //_getRecordsetFromStructure
-
-        rdata.fields = window.hWin.HEURIST4.util.cloneJSON(rectypes.typedefs.dtFieldNames);
-        //add fields to top
-        rdata.fields.unshift('rst_RecTypeID'); 
-        rdata.fields.unshift('rst_DetailTypeID'); 
-        rdata.fields.unshift('rst_ID'); //add as first
-        
-        //
-        // note rectypes.typedefs does not have real rst_ID 
-        // combination rty_ID(rst_RecTypeID) and dty_ID (rst_DetailTypeID) is unique
-        // we keep dty_ID as rst_ID
-        //
-        
-        if(this.options.rty_ID>0 && rectypes.typedefs[this.options.rty_ID]){
-            
-            var dtFields = window.hWin.HEURIST4.util.cloneJSON( rectypes.typedefs[this.options.rty_ID].dtFields );
-
-            for (var dty_ID in dtFields)
-            {
-                if(dty_ID>0){
-                    var field = dtFields[dty_ID];
-                    if(field){
-                        field.unshift(this.options.rty_ID); 
-                        field.unshift(dty_ID); 
-                        field.unshift(dty_ID); //rts_ID is dty_ID
-                        rdata.records[dty_ID] = field;
-                        rdata.order.push( dty_ID );
-                    }else{
-                        console.log('BROKEN RTS '+dty_ID);
-                    }
-                }
-            }
-            rdata.count = rdata.order.length;
-        
-        }
-/*
-dty_PtrTargetRectypeIDs ->rst_PtrFilteredIDs
-dty_JsonTermIDTree -> rst_FilteredJsonTermIDTree
-dty_TermIDTreeNonSelectableIDs
-        
-*/        
-
-        return new hRecordSet(rdata);
-        
-    },
     
     
     _initTreeView: function(){

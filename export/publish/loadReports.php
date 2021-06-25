@@ -232,6 +232,7 @@ exit();
             $fieldNames = "";
             $parameters = array("");
             $fieldNames = join(",",$colNames);
+            $rps_Title = '';
 
             foreach ($colNames as $colName) {
 
@@ -250,6 +251,10 @@ exit();
 
                     $parameters[0] = $parameters[0].$sys_usrReportSchedule_ColumnNames[$colName]; //take datatype from array
                     array_push($parameters, $val);
+                    
+                    if($colName=='rps_Title'){
+                        $rps_Title = $val;
+                    }
 
                 }
             }//for columns
@@ -257,27 +262,40 @@ exit();
             if($query!=""){
                 if($isInsert){
                     $query = "insert into usrReportSchedule (".$fieldNames.") values (".$query.")";
+                    $recID = -1;
                 }else{
                     $query = "update usrReportSchedule set ".$query." where rps_ID = $recID";
                 }
                 
-                //temporary alter the structure of table 2016-05-17 - remark it in one year
-                $res = $mysqli->query("SHOW FIELDS FROM usrReportSchedule where Field='rps_IntervalMinutes'");
-                $struct = $res->fetch_assoc();
-                if(strpos($struct['Type'],'tinyint')!==false){
-                    $mysqli->query('ALTER TABLE `usrReportSchedule` CHANGE COLUMN `rps_IntervalMinutes` `rps_IntervalMinutes` INT NULL DEFAULT NULL');
-                }
+                //check duplication
+                $rid = mysql__select_value($mysqli, 'SELECT rps_ID FROM usrReportSchedule WHERE rps_ID!='
+                    .$recID.' AND rps_Title="'.$rps_Title.'"');
+                if($rid>0){
+                    
+                    $ret = 'Duplicate entry. There is already report with the same name.';
+                    
+                }else{
+                
+                
+                
+                    //temporary alter the structure of table 2016-05-17 - remark it in one year
+                    $res = $mysqli->query("SHOW FIELDS FROM usrReportSchedule where Field='rps_IntervalMinutes'");
+                    $struct = $res->fetch_assoc();
+                    if(strpos($struct['Type'],'tinyint')!==false){
+                        $mysqli->query('ALTER TABLE `usrReportSchedule` CHANGE COLUMN `rps_IntervalMinutes` `rps_IntervalMinutes` INT NULL DEFAULT NULL');
+                    }
 
-                $rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
+                    $rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
 
-                if ($rows==0 || is_string($rows) ) {
-                    $oper = (($isInsert)?"inserting":"updating");
-                    $ret = "error $oper in updateReportSchedule - ".$rows.' '.$query; //$msqli->error;
-                } else {
-                    if($isInsert){
-                        $ret = -$mysqli->insert_id;                
-                    }else{
-                        $ret = $recID;;
+                    if ($rows==0 || is_string($rows) ) {
+                        $oper = (($isInsert)?"inserting":"updating");
+                        $ret = "error $oper in updateReportSchedule - ".$rows.' '.$query; //$msqli->error;
+                    } else {
+                        if($isInsert){
+                            $ret = -$mysqli->insert_id;                
+                        }else{
+                            $ret = $recID;;
+                        }
                     }
                 }
             }

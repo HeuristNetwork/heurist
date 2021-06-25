@@ -35,35 +35,6 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title></title>
 
-        <!-- yui layout -->
-        <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/container/assets/skins/sam/container.css">
-
-        <!-- Skin CSS files resize.css must load before layout.css -->
-        <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/assets/skins/sam/resize.css">
-        <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/assets/skins/sam/layout.css">
-        <!-- Utility Dependencies -->
-        <script src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-        <script src="../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
-        <script src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
-        <!-- Optional Animation Support
-        <script src="../../external/yui/2.8.2r1/build/animation/animation-min.js"></script> -->
-        <!-- Optional Resize Support -->
-        <script src="../../external/yui/2.8.2r1/build/resize/resize-min.js"></script>
-        <!-- Source file for the Layout Manager -->
-        <script src="../../external/yui/2.8.2r1/build/layout/layout-min.js"></script>
-
-        <!-- TREEVIEW DEFS -->
-        <!-- Required CSS -->
-        <link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/treeview/assets/skins/sam/treeview.css">
-        <!-- Optional dependency source file -->
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/animation/animation-min.js"></script>
-        <!-- Optional dependency source file to decode contents of yuiConfig markup attribute-->
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js" ></script>
-        <!-- TreeView source file -->
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/treeview/treeview-min.js" ></script>
-        <!-- END TREEVIEW DEFS-->
-        <!-- for yui simply dialog -->
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
 
         <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
         <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
@@ -71,9 +42,8 @@
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
         
-        
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/report.css">
+        <link rel="stylesheet" type="text/css" href="../../h4styles.css">
+        <link rel="stylesheet" type="text/css" href="../../h6styles.css">
 
         <link rel="stylesheet" href="../../external/codemirror-5.61.0/lib/codemirror.css">
         <script src="../../external/codemirror-5.61.0/lib/codemirror.js"></script>
@@ -83,16 +53,15 @@
         <script src="../../external/codemirror-5.61.0/mode/htmlmixed/htmlmixed.js"></script>
         <script src="../../external/codemirror-5.61.0/mode/smarty/smarty.js"></script>
         <script src="../../external/codemirror-5.61.0/mode/smartymixed/smartymixed.js"></script>
+        
+        <script type="text/javascript" src="../../external/jquery.fancytree/jquery.fancytree-all.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
+        
+        <script type="text/javascript" src="../../external/jquery.layout/jquery.layout-latest.js"></script>
 
         <style type="text/css">
-            /*display: none !important;
-            display: block;
-            */
-            .yui-skin-sam .yui-layout .yui-layout-hd {
-                background: none;
-                border: 1px solid #ff0000;
-                display: none;
-                height: 0px;
+            body{
+                margin:0px;
             }
             .linkadmin {
                 visibility: hidden;
@@ -113,12 +82,6 @@
                 visibility: visible;
             }
 
-            .insert-popup{
-                visibility:visible;
-            }
-            .insert-intree{
-                display:none;
-            }
             .ui-progressbar {
                 position: absolute;
                 right: 60px;
@@ -133,16 +96,97 @@
                 font-weight: bold;
                 text-shadow: 1px 1px 0 #fff;
             }
+            
+#editorcontainer {
+    background-color:#F2F2F2;
+    border-bottom:1px solid #CCC;
+}
+#editorcontainer h3 {
+    padding:5px;
+    margin:0px;
+    text-transform:none;
+    color:#000;
+}
+#templateCode {
+    border: 1px solid #7D9AAA;
+    bottom: 25px;
+    left: 5px;
+    position: absolute;
+    top: 0;
+    right: 258px;
+    top:30px;
+    margin-right:2px;
+}
+#templateTree {
+    bottom: 25px;
+    position: absolute;
+    right: 5px;
+    top: 30px;
+    width: 250px;
+    margin-left:2px;
+}
+#treeContainer {
+    background-color: #FFFFFF;
+    border: 1px solid #7D9AAA;
+    bottom: 0;
+    left: 0;
+    overflow: auto;
+    padding: 5px;
+    right: 0;
+    top: 120px;
+    position:absolute;
+}
+#templateTree label {
+    width:50px;
+    text-align:right;
+    display:inline-block;
+    margin-right:5px;
+}
+#rep_container {
+    position:absolute;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    padding-right:5px;
+    border-top:1px solid #CCC;
+    background-color:#FFF;
+    overflow-x:hidden;
+    overflow-y:auto;
+}
+#toolbardiv button{
+    width: 24px;
+    height: 24px;
+}
+#rep_list {
+    position: absolute;
+    right:10px;
+    top:-3px;
+    text-align: right;
+}
+ul#rep_list.menu > li:hover {
+    background-color: rgba(0, 0, 0, 0);
+    border-color: transparent;
+    color: #000;
+}
+ul#rep_list.menu li ul {
+    margin-left:-110px;
+    margin-top:-3px;
+}
+.wrap {
+    height:90%
+}
+.actionButtons {
+    bottom: 1px;
+    position: absolute;
+    right: 258px;
+    white-space:nowrap;
+}
+            
         </style>
         <script type="text/javascript">
-            var showReps, isEditorVisible=false, isInited=false, hSmarty = {};
+            var showReps, is_inited = false;
 
-            // inserts variable (false,false), repeat loop (true,false, or if test (false,true)
-            function insertVar(isloop, isif){
-                if(showReps){
-                    showReps.insertSelectedVars( null, isloop, isif );
-                }
-            }
             function onResize(){
                 if(window.showReps){
                        window.showReps.onResize(this.innerWidth);
@@ -156,7 +200,7 @@
         <script type="text/javascript" src="../../hclient/core/utils_dbs.js"></script>
     </head>
 
-    <body class="yui-skin-sam"  onresize="onResize()" style="cursor:progress;">
+    <body onresize="onResize()" style="cursor:progress;">
 
         <script type="text/javascript" src="../../viewers/smarty/showReps.js"></script>
 
@@ -167,10 +211,10 @@
 
         <iframe id="ifrmPrint" src="#" style="width:0; height:0;"></iframe>
 
-        <div id="insert-popup" style="display:none;">
+        <div id="insert-popup" style="display:none;overflow:hidden;">
             <div style="position:absolute;left:0;right:0;top:0px;bottom:0;padding:15px;overflow:auto;">
 
-                <table style="border: 0px;">
+                <table style="border: 0px;font-size:1em">
 
                     <tr>
                         <td colspan='2'>
@@ -191,7 +235,7 @@
                                 <option value="2">Field + function wrapper</option>
                             </select>
                         </td>
-                        <td><button onclick="window.hSmarty.insertVar(null, false, false )"
+                        <td><button id="btn_insert_var"
                             title="Inserts the value of the field in the output. Customise using the dropdowns.">
                             Insert field value</button>
                         </td>
@@ -200,9 +244,7 @@
                     <tr style="margin-top: 20px;">
                         <td>
                             <select id="selInsertModifiers" style="width:200px"
-                                title="Smarty functions which can reformat the data value (see Smarty documentation for additional functions)"
-                                onChange="{var sel = document.getElementById('selInsertModifiers');if(sel.selectedIndex>0){window.hSmarty.insertModifier(sel.value);sel.selectedIndex = 0;}}"
-                                >
+                                title="Smarty functions which can reformat the data value (see Smarty documentation for additional functions)">
                                 <option>choose function ...</option>
                                 <option>capitalize</option>
                                 <option>cat</option>
@@ -228,7 +270,7 @@
                             </select>
                         </td>
                         <td>
-                            <button onclick="window.hSmarty.insertVar(null,  false, true )"
+                            <button id="btn_insert_if"
                                 title="Inserts a test of whether the field is blank (or a specific value).">
                                 Test value (If ...)</button>
                         </td>
@@ -247,21 +289,20 @@
                         <td >
                             <div class="ins_isloop">Use these buttons to insert field<br/> or test within a repeat loop</div>
                         </td>
-                        <td><div class="ins_isloop"><button onclick="window.hSmarty.insertSelectedVarAsLoop(null)">
-                            Insert repeat</button></div>
+                        <td><div class="ins_isloop"><button id="btn_insert_loop">Insert repeat</button></div>
                         </td>
                     </tr>
 
                     <tr class="ins_isloop">
                         <td></td>
-                        <td><div class="ins_isloop"><button onclick="window.hSmarty.insertVar(null,  true, false )">
+                        <td><div class="ins_isloop"><button id="btn_insert_loop_var">
                             Insert field value</button></div>
                         </td>
                     </tr>
 
                     <tr class="ins_isloop">
                         <td></td>
-                        <td><div class="ins_isloop"><button onclick="window.hSmarty.insertVar(null,  true, true )">
+                        <td><div class="ins_isloop"><button id="btn_insert_loop_if">
                             Test value (If ...)</button></div>
                         </td>
                     </tr>
@@ -280,22 +321,6 @@
                         </td>
                     </tr>
 
-                    <!-- this section is moved above field tree
-                    <tr style="margin-top: 20px;">
-                    <td colspan="2">
-                    <select id="selInsertPattern" style="width:200px">
-                    <option value="1">Heading for record type</option>
-                    <option value="2">Simple table</option>
-                    <option value="3">Information on first element of a loop</option>
-                    <option value="4">Information on last element of a loop</option>
-                    <option value="99">Outer records loop</option>
-                    </select>
-                    <button onclick="window.hSmarty.insertPattern(Number(document.getElementById('selInsertPattern').value))">
-                    Insert pattern
-                    </button>
-                    </td>
-                    </tr>
-                    -->
                 </table>
 
                 <br />
@@ -303,18 +328,21 @@
                 by clicking "repeat" next to the name of the field, then place further field specifications
                 inside the {foreach}...{/foreach} loop that is inserted.
                 <span class="ins_isloop">Fields inserted within the loop should be inserted using the lower set of buttons.</span>
+                
             </div>
         </div>
 
+        <div id="layout_container"  class="ui-layout-container" style="min-height:1px;width:100%;height:100%;position:absolute;">
+        
         <!-- viewer -->
-        <div id="viewercontainer" style="padding:0">
+        <div id="viewercontainer" style="padding:0" class="ui-layout-center">
             <div id="progressbar_div" style="width:99%;height:36px;display:none;padding:5px">
                 <div id="progressbar">
                     <div class="progress-label">Loading data...</div>
                 </div>
-                <div id="progress_stop" style="float:right;">Stop</div>
+                <div id="progres    s_stop" style="float:right;">Stop</div>
             </div>
-            <div id="toolbardiv" style="width:100%;height:38px;padding:2px">
+            <div id="toolbardiv" style="width:100%;height:38px;padding:6px">
                 <div style="padding:5px;display:none;">
                     <select id="cbUseAllRecords1" onChange="setQueryMode(event)" style="width:90px">
                         <option value="all" selected="selected">All on page</option>
@@ -322,14 +350,14 @@
                         <option value="main">Query result</option>
                     </select>
                 </div>
-                <div style="padding:5px;display:inline-block;">
+                <div style="display:inline-block;vertical-align: bottom;">
                     <label style="width:100px;padding-left:0.5em;white-space:nowrap;">Select template:</label>
                     <select id="selTemplates" onChange="onSelectTemplate()" style="display:inline-block;width:200px;"></select>
 
                     <span id="recordCount"></span>
                 </div>
 
-                <div style="display:inline-block;padding:0.5em;font-size:9px">
+                <div style="display:inline-block;">
                     <button id="btnRepEdit" title="Edit the selected template">Edit</button>
                     <button id="btnRepNew" title="Create a new template">New</button>
                     <button id="btnRepDelete" title="Delete the selected template">Delete</button>
@@ -345,20 +373,22 @@
                 <li style="width:22px;"><button id="btnRepMenu2">Menu</button>
                 <ul id="toolMenuItems" style="zdisplay:block;">
                 </ul>
-                </li>
-                </ul>
+                </li> 
+                </ul> width:100%;height:100%;
                 -->
             </div>
             <div id="rep_container">
-                <iframe id="rep_container_frame" style="width:100%;height:100%;border:none"></iframe>
+            
+                <iframe id="rep_container_frame" style="border:none"></iframe>
+                <!-- -->
             </div>
         </div>
         
         <!-- editor -->
-        <div id="editorcontainer">
-            <h2>Template <span id="edTemplateName"></span></h2>
+        <div id="editorcontainer" class="ui-layout-north" style="display:none">
+            <h3>Template <span id="edTemplateName"></span></h3>
 
-            <div style="position:absolute;top:4px;right:4px;">
+            <div style="position:absolute;top:4px;right:20px;">
                 <button onClick="doEditor(2)" title="Save, Close and Execute the updated template">Save</button>
                 <button onClick="doEditor(1)">Save As</button>
                 <!--        <button onClick="doEditor(3)">Delete</button>
@@ -366,26 +396,21 @@
                 <button onClick="doEditor(0)">Close Editor</button>
             </div>
 
-            <div id="templateCode">
+            <div id="templateCode" style="border: 1px solid #7D9AAA;bottom: 25px;left: 5px;position: absolute;right: 275px;top: 30px;margin-right: 2px;">
                 <!-- PLAIN MODE <textarea id="edTemplateBody" name="edTemplateBody"></textarea>
                 <div id="editor"></div>-->
             </div>
-            <div id="templateTree">
-                <div>
-                    <a href="../../context_help/smarty_reports.html"
+            <div id="templateTree" style="bottom:25px;position: absolute;right: 5px;top: 30px;width: 270px;font-size:0.8em">
+                <div style="padding:5px">
+                    <a href="../../context_help/smarty_reports.html" class="heurist-helper3" style="float:right;padding-right:14px"
                         onClick="window.hWin.HEURIST4.msg.showDialog( this.href );return false;"
                         title="Read full documentation on the Smarty templating language">
                         <b>Help on using this function</b></a><br />
-                    <div style="margin-top: 10px;">
+                    <div style="margin:10px 0px;">
                         <label style="font-weight:bold;width:auto;">Select Type</label><select id="rectype_selector"></select>
                     </div>
-                    Position cursor in text on left <br/>
-                    before selecting actions below
-
-                    <!-- what does this do? -->
-                    <div style="float:right;display:none">in popup&nbsp;
-                        <input type="checkbox" checked="checked" onclick="insertMode(event)"/>&nbsp;
-                    </div>
+                    <span class="heurist-helper3">Position cursor in text on left <br/>
+                    before selecting actions below</span>
 
                     <div style="margin-top: 4px;">
 
@@ -396,14 +421,14 @@
                             <option value="4">Information on last element of a loop</option>
                             <option value="99">Outer records loop</option>
                         </select>
-                        <button onclick="window.hSmarty.insertPattern(Number(document.getElementById('selInsertPattern').value))">
+                        <button onclick="window.showReps.insertPattern(Number(document.getElementById('selInsertPattern').value))">
                             Insert pattern
                         </button>
                     </div>
                 </div>
 
-                <div id="treeContainer">
-                    <div id="varsTree" class="ygtv">Please select a record type from the pulldown above</div>
+                <div style="background-color: #FFFFFF;bottom: 0;left:0;overflow: auto;padding:2px;right:0px;top:120px;position: absolute;" class="rtt-tree">
+                    Please select a record type from the pulldown above
                 </div>
 
             </div>
@@ -441,6 +466,8 @@
             </div>
         </div>
 
+        </div>
+        
         <script type="text/javascript">
             //
             function onPrint()
@@ -498,11 +525,12 @@ console.log(e)
                 if(window.showReps.isNeedSelection()){
                     window.hWin.HEURIST4.msg.showMsgErr('You must select some records');
                 }else{
-                    var name=jQuery.trim(prompt("Please enter template name",""));
-                    if (!window.hWin.HEURIST4.util.isempty(name))
-                    {
-                        window.showReps.generateTemplate(name);
-                    }
+                    
+                    window.hWin.HEURIST4.msg.showPrompt('Please enter template name', function(tmp_name){
+                        if(!window.hWin.HEURIST4.util.isempty(tmp_name)){
+                            window.showReps.generateTemplate(tmp_name);
+                        }
+                    }, {title:'New template',yes:'Generate',no:"Cancel"});
                 }
             }
 
@@ -544,25 +572,16 @@ console.log(e)
                 window.showReps.setQueryMode(elem.value);
             }
 
-            function insertMode(event){
-                //$(".insert-popup").css("visibility",event.target.checked?"visible":"hidden")
-                //            $(".insert-intree").css("visibility",event.target.checked?"hidden":"visible")
-
-                if(event.target.checked){
-                    $(".insert-popup").show();
-                    $(".insert-intree").hide();
-                }else{
-                    $(".insert-popup").hide();
-                    $(".insert-intree").show();
-                }
-            }
-
             //
             //  starts initialization on load completion of this window
             function loadHandler(){
+                if(is_inited) return;
+                
+                is_inited = true;
+                
                 window.showReps = new ShowReps();
 
-                window.showReps.onResize(this.innerWidth);
+                //window.showReps.onResize(this.innerWidth);
 
                 $("#btnRepPrint2").button({text:false, icons: { primary: "ui-icon-print" }}).click(onPrint);
 
@@ -589,8 +608,6 @@ console.log(e)
                 }});
                 */
 
-                isInited = true;
-
                 $('button[id^="btnRep"]').hide();
 
                 if(window.hWin.HAPI4.has_access()){
@@ -607,30 +624,6 @@ console.log(e)
                 $('#btnRepPrint2').show();
                 $('#btnRepRefresh').show();
 
-                return;
-
-                //replaced with toolbar 2015-01-15
-
-                var s = '';
-
-                if(window.hWin.HAPI4.has_access()){
-
-                    s = s + '<li><a href="#" onClick="onExportTemplate()"  class="separator">Export Template</a></li>' +
-                    '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import Template</a></li>';
-
-                    if( window.hWin.HAPI4.is_member(window.hWin.HAPI4.sysinfo.db_managers_groupid) 
-                        || window.hWin.HAPI4.has_access(2)){
-                        s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li>';
-                    }
-                }
-                s = s + '<li><a href="#" onClick="onSelectTemplate()" '+ (window.hWin.HAPI4.has_access()?'class="separator"':'') +'>Refresh</a></li>';
-
-
-                //$('#btnRepPrint').button( {icon:'ui-icon-print'} );
-                //$('#btnRepMenu2').button( {icon:'ui-icon-gear'} );
-
-                var elem = document.getElementById('toolMenuItems');
-                elem.innerHTML = s;
             }//loadHandler
 
 

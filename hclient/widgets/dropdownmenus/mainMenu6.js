@@ -264,7 +264,8 @@ $.widget( "heurist.mainMenu6", {
                 +' '+window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
                 +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
                 +' '+window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
-                +' '+window.hWin.HAPI4.Event.ON_CUSTOM_EVENT, 
+                +' '+window.hWin.HAPI4.Event.ON_CUSTOM_EVENT
+                +' '+window.hWin.HAPI4.Event.ON_CREDENTIALS, 
             function(e, data) {
                 
                 if(e.type == window.hWin.HAPI4.Event.ON_CUSTOM_EVENT){
@@ -307,7 +308,7 @@ $.widget( "heurist.mainMenu6", {
                     
                     that._refreshSubsetSign();                    
                     
-                }else if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){
+                }else if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE || e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS){
                     if(data && data.origin=='recordAdd'){
                         that._updateDefaultAddRectype( data.preferences );
                     }else{
@@ -434,7 +435,8 @@ $.widget( "heurist.mainMenu6", {
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
                 +' '+window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
                 +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
-                +' '+window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH);
+                +' '+window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
+                +' '+window.hWin.HAPI4.Event.ON_CREDENTIALS);
     },
     
     // 
@@ -795,7 +797,7 @@ $.widget( "heurist.mainMenu6", {
                 }
        
                 
-                if(explore_top+explore_height>that.element.innerHeight()){
+                if(that.element.innerHeight()>0 && explore_top+explore_height>that.element.innerHeight()){
                     explore_top = that.element.innerHeight() - explore_height;
                 }
                 that.menues_explore_popup.css({width:'800px',overflow:'hidden'});
@@ -845,9 +847,11 @@ $.widget( "heurist.mainMenu6", {
                         explore_top = menu_item.offset().top; //if called from menu
                     }
                 }
-                if(explore_top+explore_height>that.element.innerHeight()){
+                if(that.element.innerHeight()>0 && explore_top+explore_height>that.element.innerHeight()){
                     explore_top = that.element.innerHeight() - explore_height;
                 }
+                
+console.log(explore_top);
                 
                 that.menues_explore_popup.css({width:'850px', overflow:'hidden'});
                 
@@ -928,6 +932,8 @@ $.widget( "heurist.mainMenu6", {
                 explore_left = that.element.innerWidth() - that.menues_explore_popup.outerWidth();
             }
 
+            if(explore_top<0) explore_top = 0;            
+            
             that.menues_explore_popup.css({left:explore_left, top:explore_top, height:explore_height});
             
             //show menu section

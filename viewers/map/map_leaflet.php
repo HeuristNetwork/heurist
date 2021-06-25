@@ -114,6 +114,9 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/vis/dist/vis.css" />
 <?php } ?>
 <style>
+    body{
+        margin:0px;
+    }
     
     .leaflet-div-icon {
         background: none;

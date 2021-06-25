@@ -74,7 +74,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             
             this.getRecordValue(this.options.target_ID, 'target');
 
-            if(this.options.source_AllowedTypes && this.options.relmarker_dty_ID>0){
+            if(this.options.source_AllowedTypes && this.options.relmarker_dty_ID>0){  //inward relation
                 
                 this.options.source_AllowedTypes = this.options.source_AllowedTypes.split(',');
                 
@@ -588,6 +588,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         dtFields['dty_Type'] = 'relationtype';
         dtFields['rst_PtrFilteredIDs'] = '';//dt['dty_PtrTargetRectypeIDs'];
         dtFields['rst_FilteredJsonTermIDTree'] = dt['dty_JsonTermIDTree'];
+        dtFields['rst_DefaultValue'] = $Db.rst(rectypeID, dtID, 'rst_DefaultValue');
         dtFields['dtID'] = dtID;
         
         var that = this;
@@ -606,6 +607,8 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             //show_header: false,
             //detailtype: 'relationtype',  //overwrite detail type from db (for example freetext instead of memo)
             dtFields:dtFields,
+            is_insert_mode: true,
+
             
             change: function(){
                 that._enableActionButton();

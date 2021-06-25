@@ -44,7 +44,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
         this.options.layout_mode = 'short';
         this.options.use_cache = true;
-        this.options.use_structure = false;
+
         //this.options.edit_mode = 'popup';
         
         //this.options.select_return_mode = 'recordset';
@@ -264,42 +264,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
     },
     
-    
-    // 
-    // get recordset from HEURIST4.detailtypes - NOT USED
-    //
-/*    
-    _getRecordsetFromStructure: function(){
-        
-        var rdata = { 
-            entityName:'defDetailTypes',
-            total_count: 0,
-            fields:[],
-            records:{},
-            order:[] };
-
-        var detailtypes = window.hWin.HEURIST4.detailtypes;//get recordset from HEURIST4.detailtypes - NOT USED
-
-        rdata.fields = window.hWin.HEURIST4.util.cloneJSON(detailtypes.typedefs.commonFieldNames);
-        rdata.fields.unshift('dty_ID');
-
-
-        for (var r_id in detailtypes.typedefs)
-        {
-            if(r_id>0){
-                var dtype = window.hWin.HEURIST4.util.cloneJSON(detailtypes.typedefs[r_id].commonFields);
-                dtype.unshift(r_id);
-                rdata.records[r_id] = dtype;
-                rdata.order.push( r_id );
-            }
-        }
-        rdata.count = rdata.order.length;
-
-        return new hRecordSet(rdata);
-    },
-*/    
-
-
     visible_fields: ['dtyid','ccode','edit','name','type','usedin','status','description'], //'usedin','show','ccode','group',       
     //----------------------
     //
@@ -682,6 +646,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
             if(this._currentEditID<=0){ // Check that a new field is being defined
 
+                if(this.options.newFieldType){
+                    
+                    
+                }else
                 if(this.options.newFieldForRtyID > 0){ // Ensure that the new field is for a specific rectype
                     var flavour_text = $('<h2 style="margin-block:0;margin-bottom:0.2em">Choose existing base field(s)</h2>'
                         + '<div class="heurist-helper2" style="font-size:0.95em">Rather than defining every field from scratch, you can pick some frequently used pre-defined fields from the existing Base fields.<br/>'
@@ -775,6 +743,25 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         var elements = this._editing.getInputs('dty_Type');
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(elements)){
             
+                if(this.options.newFieldType){
+
+                    var el = $(elements[0])[0];
+                    var _dty_Type = this.options.newFieldType;
+                    $(el).empty();
+                    window.hWin.HEURIST4.ui.addoption(el, _dty_Type,  $Db.baseFieldType[_dty_Type]);
+                    el.disabled = true;
+                    if($(el).hSelect("instance")!=undefined){
+                        $(el).hSelect("refresh"); 
+                    }
+                    this._onDataTypeChange(_dty_Type);
+                    
+                    
+                    if(this.options.newFieldResource>0){
+                        this._editing.setFieldValueByName('dty_PtrTargetRectypeIDs', this.options.newFieldResource, true);
+                    }
+                    
+            
+                }else
                 if(this._currentEditID>0)
                 {
                     //limit list and disable in case one option
@@ -1787,6 +1774,31 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 that.addEditRecord(id, true);
             });
         }
-    }
+    },
+    
+    //
+    //
+    //
+    _getEditDialogButtons: function(){
+
+            var btn_array = this._super();
+        
+            // Add extra save button to new base field for a record, replaces the original checkbox
+            if(this.options.newFieldForRtyID > 0 && !this.options.newFieldType){
+                var that = this;
+                
+                btn_array.splice(1, 0, {
+                    text:window.hWin.HR('Create and customise new field'),
+                    id:'btnSaveExt',
+                    css:{'display':'none','float':'right',margin:'.5em .8em .5em .4em'},
+                    class:'ui-button-action',
+                    click: function() {
+                        that._saveEditAndClose();
+                    }
+                });
+            }
+        
+            return btn_array;
+    }    
 
 });

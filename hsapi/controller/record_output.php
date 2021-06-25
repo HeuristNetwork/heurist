@@ -1322,7 +1322,11 @@ function usePercentageForCSVRows(array $rows, array $usePercentageColIndices = [
             $colIncrease = 0;
             for ($j = 0; $j < count($usePercentageColIndices); $j++) {
                 $colIndex = $usePercentageColIndices[$j];
-                $percentage = round(valueToNumeric($rows[$i][$colIndex + $colIncrease]) / $colTotal[$colIndex], 4) * 100;
+                if($colTotal[$colIndex]>0){
+                    $percentage = round(valueToNumeric($rows[$i][$colIndex + $colIncrease]) / $colTotal[$colIndex], 4) * 100;    
+                }else{
+                    $percentage = 0;
+                }
                 if ($colIndex + 1 > count($rows[$i]) - 1) {
                     $rows[$i][] = $percentage;
                 } else {

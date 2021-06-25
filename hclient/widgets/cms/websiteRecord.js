@@ -165,8 +165,6 @@ function hCmsEditing(_options) {
                     $('.mce-edit-area > iframe').height( sheight );
                     $('.tox-edit-area > iframe').height( sheight );
                     $('.tox-edit-area').height( sheight );
-                    
-console.log( sheight );                    
                 });
                 
                 editor.ui.registry.addButton('customHeuristMedia', {
@@ -909,7 +907,9 @@ console.log( sheight );
 
         var t_style = ele.find('style').text(); //style will be added to page css
         
-        ele.on('oncomplete', function(event, data){
+        ele.on('oncomplete', $.isFunction(callback)
+            ?callback
+            :function(event, data){
             
                 // 4. Adds to tinymce
                 var content = ele.html();
@@ -929,7 +929,7 @@ console.log( sheight );
         if(template_name=='blog'){
             // 3. Execute template script to replace template variables, adds filters and smarty templates
             try{
-                $.getScript(sURL2, function(){
+                $.getScript(sURL2, function(){ //it will trigeer oncomplete
                     //console.log('getScript');                
                 });
             }catch(e){
@@ -1775,7 +1775,7 @@ console.log( sheight );
     }
     
     //
-    //
+    //  Select template, then add it to current editor
     //
     function __insertTemplate(){
 
@@ -1835,7 +1835,7 @@ console.log( sheight );
                     var t_name = $(e.target).val();
                     selected_template  = t_name;
                     //$dlg.find('.template_author').html(templates[t_name]['author']);
-                    $dlg.find('.template_description').html(templates[t_name]['description']);
+                    $dlg.find('.template_description').html(templates[t_name]?templates[t_name]['description']:'');
                 });
                
            }
@@ -2118,8 +2118,12 @@ console.log( sheight );
             __addEditWidget(wid);
         },
 
-        addTemplate: function (wid) {
-            __addTemplate(wid);
+        selectAddTemplate: function () {
+            __insertTemplate();
+        },
+        
+        addTemplate: function ( template_name ) {
+            __addTemplate( template_name );
         },
 
         

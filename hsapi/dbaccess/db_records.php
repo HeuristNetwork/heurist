@@ -2070,8 +2070,9 @@
                     if($res['status']==HEURIST_OK){
                         $new_val = $res['result'];
                         
-                        $query = 'UPDATE recDetails set dtl_Value='.$new_val
-                        .' where dtl_RecID='.$new_id
+                        $query = 'UPDATE recDetails set dtl_Value="'
+                            .$mysqli->real_escape_string( $new_val )
+                            .'" where dtl_RecID='.$new_id
                         //.' and dtl_Value='.$id   //old record id
                         .' and dtl_DetailTypeID='.$dty_ID;
                       

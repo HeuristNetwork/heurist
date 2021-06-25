@@ -193,7 +193,6 @@ function drawLabel ( ctx, label, xPos, yPos, maxX) {
 var TemporalPopup = (function () {
 	//private members
 	var _className = "Applet";  // I know this is a singleton and the application object, but hey it matches the pattern.
-	var _tabView;
 	var _type2TabIndexMap = {};
 
 	function _init () {
@@ -234,35 +233,39 @@ var TemporalPopup = (function () {
 			that.curTemporal.setField("COM",that.originalInputString);
 		}
 		// set display
-		_tabView = new YAHOO.widget.TabView('display-div');
-
-		// set up temporal type to tab index mapping
-		var tabs = _tabView.getAttributeConfig("tabs").value;
-		for (var i=0; i < tabs.length; i++) {
-			var type = tabs[i].getAttributeConfig("contentEl").value.id;
-			_type2TabIndexMap[type] = i;
-		}
+        $('#display-div').tabs({beforeActivate: function( event, ui ) {
+            
+            var curType = ui.oldPanel.attr('id'),
+                newType = ui.newPanel.attr('id');
+            // grab all the data from the current tab using the
+            _updateTemporalFromUI(that.curTemporal, false);
+            that.curTemporal.setType(newType);
+            _updateUIFromTemporal(that.curTemporal, false); //do not dates
+            _updateGeorgianDate();
+            
+        }});
+        
+        // set up temporal type to tab index mapping
+        $.each($('#display-div').find('.display-tab'), function(i,item){
+            _type2TabIndexMap[$(item).attr('id')] = i;
+        });
 
 		// select the tab for the initial temporal's type and change the label to show the user this is where things started
-		_tabView.selectTab(_type2TabIndexMap[that.curTemporal.getType() ? that.curTemporal.getType():'s']);
-		var activeTab = _tabView.getAttributeConfig("activeTab").value;
-		activeTab.set("label", "<i>" + activeTab.get("label") + "</i>", false);
-		_updateUIFromTemporal(that.curTemporal, true);
-		_tabView.on('beforeActiveTabChange', function (ev) {
-			var curType = ev.prevValue._configs.contentEl.value.id,
-				newType = ev.newValue._configs.contentEl.value.id;
-			// grab all the data from the current tab using the
-			_updateTemporalFromUI(that.curTemporal, false);
-			that.curTemporal.setType(newType);
-			_updateUIFromTemporal(that.curTemporal, false); //do not dates
-            _updateGeorgianDate();
-			return;} );
+        _updateUIFromTemporal(that.curTemporal, true);
+        var active_idx = _type2TabIndexMap[ that.curTemporal.getType() ? that.curTemporal.getType():'s' ];
+        $('#display-div').tabs('option','active',active_idx);
+        
 		//dRangeDraw();
 
         _initJqCalendar(that.curTemporal);
 
         $(".withCalendarsPicker").change(_updateGeorgianDate);
         _updateGeorgianDate();
+        
+        
+        $('input[value="Save"]').addClass('ui-button-action').button();
+        $('input[value="Cancel"]').button();
+        
 
 	};
 
@@ -623,9 +626,7 @@ var TemporalPopup = (function () {
 			origTemporal : null,
 			curTemporal : null,
 			name : "App",
-			getTabView : function () {
-				return _tabView;
-			},
+			//getTabView : function () {return _tabView; },
 			close : function () {
 				try{
 					_updateTemporalFromUI(that.curTemporal, true);

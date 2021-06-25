@@ -49,7 +49,16 @@ $.widget( "heurist.recordListExt", {
 
         var that = this;
 
-        this.div_content = $('<div>').css({width:'100%', height:'100%'}).appendTo( this.element );
+        this.div_content = this.element;
+        if(this.div_content.parent('.tab_ctrl').length==0){
+            this.div_content.css({width:'100%', height:'100%'}); 
+        }
+        
+        //this.div_content = $('<div>').css({width:'100%', height:'100%'}).appendTo( this.element );
+        
+        if(this.options.css){
+            this.div_content.css( this.options.css );
+        }
         
         
         if(this.options.is_frame_based){

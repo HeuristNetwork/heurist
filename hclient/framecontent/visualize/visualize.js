@@ -772,7 +772,8 @@ function addLines(name, color, thickness) {
     if(name=='bottom-lines' && linetype != "stepped"){
          lines.attr("marker-mid", function(d) {
 
-            if(!(hide_empty && d.targetcount == 0)){ console.log("url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
+            if(!(hide_empty && d.targetcount == 0)){ 
+                //DEBUG console.log("url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
                 return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")"; //reference to marker id
             }
          });

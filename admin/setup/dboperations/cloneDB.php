@@ -304,7 +304,7 @@ if(@$_REQUEST['mode']=='2'){
         }
         ?>
         <p>The database will be created with the prefix <b><?=HEURIST_DB_PREFIX?></b>
-            (all databases created by this installation of the software will have the same prefix).</p>
+            (this is for internal reference only, it need not concern you).</p>
         <p>
             <label>No data (copy structure definitions only):&nbsp<input type='checkbox' name='nodata' value="1"/></label>
         </p>

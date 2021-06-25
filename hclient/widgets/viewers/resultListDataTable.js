@@ -53,6 +53,7 @@ $.widget( "heurist.resultListDataTable", {
 
         var that = this;
 
+        //this.element.css({'overflow':'hidden'});
         this.div_content = $('<div>').css({width:'100%', height:'100%'}).appendTo( this.element );
         
         this.options.dataTableParams = window.hWin.HEURIST4.util.isJSON(this.options.dataTableParams);

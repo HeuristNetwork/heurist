@@ -62,11 +62,12 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.2.10"; // sets current program version number, determined by Heurist development lead
+$version = "6.2.12"; // sets current program version number, determined by Heurist development lead
 $version_release = "stable"; // set whether this Heurist is a stable or alpha version
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// 6.2.12 22 June 2021 Add blog to new websites, new Zotero mapping, improve configuration of external lookup services, elimination of the use of yui, 
 // 6.2.10 06 June 2021 Various fixes and improvements to field trees, duplicatingg records increments increment fields, fix TinyMCE/new source editor interactions and various cosmetics, replace filter builder with new one in website search widget, better website error reporting
 // 6.2.9 31 May 2021 Improved workflow for new record type creation, import XML can read labels as well as concept codes, freeze image thumbnails open in record edit (not just rollover), boundign boxes via digitiser, further improvements to filter builder for relationship markers and missing values, facets for months for use in blogs, initial once-only filter for facet search display, insert templates (blog, discover) into web pages, web page source code editor with indents and syntax, revised crosstabs function (in progress), grouping and merging sheets on CSV export
 // 6.2.7 2 May 2021 Improved duplicates finder handles scale and field selections, reduce email notificatiosn with daily logfile, improved database deletion fucntions with zipping and mail to owner, additional filter builder options incl. file fields and relationship markers, tighten control on term moving and deletions and imporved automatic fixups, db ownership transfer, cleaner blog and website loading, better error trapping on directory permission error, interpreting non-iso dates in zotero synch
@@ -172,6 +173,8 @@ $websiteThumbnailUsername = "";
 $websiteThumbnailPassword = "";
 // $websiteThumbnailXsize = 500;
 // $websiteThumbnailYsize = 300;
+
+$default_CMS_Template_Path = '';
 
 // system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
 // the configIni.php in the installation does not need to be configured. This allows unconfigured ConfigIni.php files

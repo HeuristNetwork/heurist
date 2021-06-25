@@ -574,6 +574,8 @@ public static function importRecords($filename, $session_id, $is_cms_init=false,
     $rec_ids_details_empty = array();
     $resource_notfound = array();
     
+    $page_id_for_blog = 0; //for cms init find record with DT_EXTENDED_DESCRIPTION=='BLOG TEMPLATE'
+    
     $data = self::readDataFile( $filename );
     
     self::$system->defineConstant('DT_ORIGINAL_RECORD_ID');
@@ -729,6 +731,8 @@ EOD;
         self::$system->defineConstant('DT_PARENT_ENTITY');
         
         foreach($records as $record_src){
+            
+            $is_blog_record = false;
             
             if(!is_array($record_src) && $record_src>0){
                 //this is record id - record data in the separate file
@@ -1082,8 +1086,14 @@ EOD;
                     $new_values = $values;      
                 }
                 
-                if(count($new_values)>0)
+                if(count($new_values)>0){
                     $record['details'][$ftId] = $new_values; 
+                    
+                    if($is_cms_init && $dty_ID == DT_EXTENDED_DESCRIPTION && $new_values[0]=='BLOG TEMPLATE'){
+                        $is_blog_record = true;
+                    }
+                }
+                    
             }//for details
             
             
@@ -1116,6 +1126,10 @@ EOD;
             $new_rec_id  = intval($out['data']); //new record id
             $records_corr[$record_src['rec_ID']] = $new_rec_id; 
             $keep_rectypes[$new_rec_id] = $record['RecTypeID'];
+            
+            if($is_blog_record){
+                $page_id_for_blog = $new_rec_id;
+            }
             
             $execution_counter++;
         
@@ -1267,6 +1281,7 @@ EOD;
                              'count_ignored'=>$cnt_ignored, //rectype not found 
                              'cnt_exist'=>count($ids_exist), //such record already exists
                              'details_empty'=>$rec_ids_details_empty, 
+                             'page_id_for_blog'=>$page_id_for_blog,
                              'resource_notfound'=>$resource_notfound  ); //if value is H-ID-nnn
                 if(count($records_corr)<1000){
                     $res['ids'] = array_values($records_corr);    

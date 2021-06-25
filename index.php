@@ -266,8 +266,9 @@ $(document).on('focusin', function(e) {
 ?>
                 
                 var lt = window.hWin.HAPI4.sysinfo['layout'];
-                if(lt=='DigitalHarlem' || lt=='DigitalHarlem1935'){
-                    $('#layout_panes').css({'height':'100%'});
+                if(lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch'){
+                    $('#layout_panes').css({'height':'100%',width:'100%',position:'absolute'});
+                    $(window.hWin.document.body).css({'margin':'0px',overflow:'hidden'});
                 }
                 
                 //

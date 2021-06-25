@@ -98,6 +98,7 @@ class System {
 
         //dbutils?
         if($this->init_db_connection()!==false){
+            
         
                 if($init_session_and_constants){
                 
@@ -821,44 +822,7 @@ error_log(print_r($_REQUEST, true));
 
             $now = new DateTime('now', new DateTimeZone('UTC'));
             $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
-
-            //1. check if log file for previous day exists
-            $yesterday = $now->sub(new DateInterval('P1D'));
-            $arc_logfile = 'errors_'.$yesterday->format('Y-m-d').'.log';
-            
-            $root_folder = HEURIST_FILESTORE_ROOT; //dirname(__FILE__).'/../../';
-            
-            //if yesterday log file exists
-            if(file_exists($root_folder.$arc_logfile)){
-                //2. copy to log folder and email it
-                $archiveFolder = $root_folder."AAA_LOGS/";        
-
-                fileCopy($root_folder.$arc_logfile, $archiveFolder.$arc_logfile);
-                unlink($root_folder.$arc_logfile);
-
-                if($this->send_email_on_error==1){
-                    
-                    $msg = 'Error report '.HEURIST_SERVER_NAME.' for '.$yesterday->format('Y-m-d');
-
-                    //send an email with attachment
-                    $email = new PHPMailer();
-                    $email->isHTML(true); 
-                    $email->SetFrom('bugs@HeuristNetwork.org', 'Bug reporter'); //'bugs@'.HEURIST_SERVER_NAME 
-                    $email->Subject   = $msg;
-                    $email->Body      = $msg;
-                    $email->AddAddress( HEURIST_MAIL_TO_BUG );        
-                    $email->addAttachment($archiveFolder.$arc_logfile);
-
-                    try{
-                        $email->send();
-                    } catch (Exception $e) {
-                        error_log('Cannot send email. Please ask system administrator to verify that mailing is enabled on your server. '
-                         .$email->ErrorInfo);     
-                    }                    
-                    //$rv = sendEmail(HEURIST_MAIL_TO_BUG, $Title, $sMsg, null);
-                }
-
-            }
+            $root_folder = HEURIST_FILESTORE_ROOT;
 
             //3. wrtie error into current error log
             $Title = 'Heurist Error type: '.$status
@@ -1827,7 +1791,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             header('Content-type: '.$content_type);
         }
     }
-	
+
     //
     //
     //

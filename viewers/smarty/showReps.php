@@ -15,7 +15,7 @@
 */
 
 /**
-* showReps.php
+* showReps.php - executes smarty template file or text
 *
 * parameters
 * 'template' or 'template_body' - template file name or template value as a text

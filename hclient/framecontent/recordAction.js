@@ -416,14 +416,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         var ed_options = {
             recID: -1,
             dtID: dtID,
-            //rectypeID: rectypeID,
-            //rectypes: window.hWin.HEURIST4.rectypes,
             values: init_value,
             readonly: false,
 
             showclear_button: false,
-            //input_width: '350px',
-            //detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
             dtFields:dtFields
 
         };

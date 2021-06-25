@@ -1136,10 +1136,17 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
     //it adds context menu for evey group header 
     //
     _getAddContextMenu: function(groupID){
-        var arr_menu = [{title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" },
-            {title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-box" },
-            {title: "New RuleSet", cmd: "addSearch3", uiIcon: "ui-icon-shuffle" },
-            {title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" }];
+        
+        var arr_menu = [];
+        
+        if(this.options.filter_by_type<2){
+            arr_menu.push({title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" });
+            arr_menu.push({title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-box" });
+        }            
+        if(this.options.filter_by_type!=1){
+            arr_menu.push({title: "New RuleSet", cmd: "addSearch3", uiIcon: "ui-icon-shuffle" });
+        }
+        arr_menu.push({title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" });
 
         var that = this;
 
@@ -1221,7 +1228,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
         
         var $header = $('<h3 class="hasmenu2" grpid="'+domain
             +'" style="outline:none;margin:10px 0 0 0;background:none !important;'+sColor+'"><span class="ui-icon ui-icon-'+sIcon+'" '
-            + 'style="display:inline-block;padding:0 4px"></span><span style="display:inline-block;vertical-align:top;width:'+sWidth+'" class="truncate">'
+            + 'style="display:inline-block;padding:0 4px"></span><span style="display:inline-block;vertical-align:top;width:'+sWidth+'px" class="truncate">'
             + name+'</span>'+sInfo+'</h3>').addClass('tree-accordeon-header svs-header');
 
         if('dbs'!=domain){
@@ -1735,32 +1742,34 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                     return false;
                 }
             });
+            
+            
+            var arr_menu = []
+            if(that.options.filter_by_type<2){
+                    arr_menu.push({title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" });
+                    arr_menu.push({title: "New Faceted", cmd: "addSearch2", uiIcon: "ui-icon-box" });
+            }
+            if(that.options.filter_by_type!=1){
+                    arr_menu.push({title: "New RuleSet", cmd: "addSearch3", uiIcon: "ui-icon-shuffle" });
+            }
+            arr_menu.push({title: "Dupe", cmd: "copy", uiIcon: "ui-icon-copy" });
+            arr_menu.push({title: "Edit", cmd: "rename", uiIcon: "ui-icon-pencil" });
+            if(that.options.filter_by_type<2){
+                arr_menu.push({title: "----"});
+                arr_menu.push({title: "Get filter+rules", cmd: "query", uiIcon: "ui-icon-copy" });
+                arr_menu.push({title: "Embed", cmd: "embed", uiIcon: "ui-icon-globe" });
+            }
+            arr_menu.push({title: "----"});
+            arr_menu.push({title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" });
+            arr_menu.push({title: "Delete", cmd: "remove", uiIcon: "ui-icon-trash" });
 
             /*
             * Context menu (https://github.com/mar10/jquery-ui-contextmenu)
             */
             tree.contextmenu({
                 delegate: "li", //span.fancytree-node
-                menu: [
-                    {title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" }, //<kbd>[Ctrl+N]</kbd>
-                    {title: "New Faceted", cmd: "addSearch2", uiIcon: "ui-icon-box" },
-                    {title: "New RuleSet", cmd: "addSearch3", uiIcon: "ui-icon-shuffle" },
-                    {title: "Dupe", cmd: "copy", uiIcon: "ui-icon-copy" }, 
-                    {title: "Edit", cmd: "rename", uiIcon: "ui-icon-pencil" }, // <kbd>[F2]</kbd>
-                    {title: "----"},
-                    //{title: "Copy to clipboard", cmd: "copycb", uiIcon: "ui-icon-copy" }, 
-                    {title: "Get filter+rules", cmd: "query", uiIcon: "ui-icon-copy" }, 
-                    {title: "Embed", cmd: "embed", uiIcon: "ui-icon-globe" }, 
-                    {title: "----"},
-                    {title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" }, // <kbd>[Ctrl+Shift+N]</kbd>
-                    {title: "Delete", cmd: "remove", uiIcon: "ui-icon-trash" }  // <kbd>[Del]</kbd>
-                    /*
-                    {title: "----"},
-                    {title: "Cut", cmd: "cut", uiIcon: "ui-icon-scissors"}, // <kbd>Ctrl+X</kbd>
-                    {title: "Copy", cmd: "copy", uiIcon: "ui-icon-copy"},  // <kbd>Ctrl-C</kbd>
-                    {title: "Paste as child", cmd: "paste", uiIcon: "ui-icon-clipboard", disabled: true } //<kbd>Ctrl+V</kbd>
-                    */
-                ],
+                menu: arr_menu,
+
                 open: function(){
                     //prevent collapse heurist main menu 
                     if($.isFunction(that.options.menu_locked)){
@@ -1945,7 +1954,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                 var is_folder = ele.hasClass('fancytree-folder');
 
                 ele.find('.fancytree-title')
-                    .css({display: 'inline-block', width:container_width>0?(container_width-(is_folder?52:30)):'80%'})
+                    .css({display: 'inline-block', width:container_width>0?((container_width-(is_folder?52:30))+'px'):'80%'})
                     .addClass('truncate');
                 //'80%'
 
@@ -2433,9 +2442,9 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
             
             var pos = null;
             if(this.options.is_h6style && this.element.is(':visible')){
-                pos = { my: "left top", at: "left top", of: this.element};
+                pos = { my: "left top", at: "left top", of: this.element, collision:'none'};
             }else{
-                pos = { my: "center", at: "center", of: window};
+                pos = { my: "center", at: "center", of: window, collision:'none'};
             }
             
             //this.edit_dialog.callback_method  = callback;

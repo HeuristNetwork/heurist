@@ -31,7 +31,6 @@ Optgroup (group header in dropdown)  bg: #ECF1FB - can be changed to #95A7B7 (he
 Resource selector (in edit form)  bg: #F4F2F4 - can be changed to button light gray or pressed button (light blue)
 Select linked record button   bg:#f0ecf0 - can be changed to button light gray or pressed button (light blue)
 Scrollbar tracks and thumbs  rgba(0,0,0,0.3)/#bac4cb
-Admin section/smarty editor - use H3 styles from admin/global.css
 
 */
 require_once(dirname(__FILE__)."/../../hsapi/System.php");
