@@ -88,8 +88,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             //this.options.edit_mode = 'none'
         }
         
-        if(this.options.select_mode=='select_multi'){
-        //    this.options.width = 440;
+        if(this.options.select_mode=='select_multi' && this.options.edit_mode=='popup'){
+            this.options.width = 440;
         }
             
             
@@ -679,14 +679,16 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             rtIcon = window.hWin.HAPI4.iconBaseURL+recID; 
             recThumb = window.hWin.HAPI4.iconBaseURL+'thumb/th_'+recID; 
         }
+		
+        var random_id = window.hWin.HEURIST4.util.random(); // force php request to redo		
         
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);">'
+        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&'+random_id+'&quot;);">'
         +'</div>';
         
         //recordIcons 
         var html_icon = '<div class="item" style="vertical-align: middle;max-width:40px;min-width:40px;text-align:center">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-        +     '"  class="rt-icon" style="background-image: url(&quot;'+rtIcon+'&quot;);">'       //opacity:'+recOpacity+'
+        +     '"  class="rt-icon" style="background-image: url(&quot;'+rtIcon+'&'+random_id+'&quot;);">'       //opacity:'+recOpacity+'
         + '</div>';        
 
         var html = '';

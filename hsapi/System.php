@@ -116,9 +116,8 @@ class System {
                         if(!$this->initPathConstants()){
                             return false;
                         }
-                        
+						
                         $this->_executeScriptOncePerDay();
-                        
 
                         $this->login_verify( false ); //load user info from session
                         if($this->get_user_id()>0){
@@ -922,7 +921,7 @@ error_log(print_r($_REQUEST, true));
     * it always reload user info from database
     */
     public function getCurrentUserAndSysInfo( $include_reccount_and_dashboard_count=false ){
-        global $passwordForDatabaseCreation,$passwordForDatabaseDeletion,$passwordForReservedChanges,$passwordForServerFunctions;
+        global $passwordForDatabaseCreation,$passwordForDatabaseDeletion,$passwordForReservedChanges,$passwordForServerFunctions,$version_release;
    
         //current user reset - reload actual info from database
         $this->login_verify( true );
@@ -963,7 +962,7 @@ error_log(print_r($_REQUEST, true));
             
 
             //retrieve lastest code version (cached in localfile and refreshed from main index server daily)
-            $lastCode_VersionOnServer = $this->get_last_code_and_db_version();
+            $lastCode_VersionOnServer = $this->get_last_code_and_db_version($version_release == 'alpha' ? true : false);
 
             $res = array(
                 "currentUser"=>$this->current_User,
@@ -1661,25 +1660,30 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
     // check database version 
     // first check version in file lastAdviceSent, version stored in this file valid for 24 hrs
     //
-    private function get_last_code_and_db_version(){
+    private function get_last_code_and_db_version($isAlpha=false){
         
         $version_last_check = 'unknown';
         $need_check_main_server = true;
         
         $fname = HEURIST_FILESTORE_ROOT."lastAdviceSent.ini";
         
+        $release = ($isAlpha ? 'alpha' : 'stable');
+
         if (file_exists($fname)){
             //last check and version
-            list($date_last_check, $version_last_check) = explode("|", file_get_contents($fname));
+            list($date_last_check, $version_last_check, $release_last_check) = explode("|", file_get_contents($fname));
 
             //debug  $date_last_check = "2013-02-10";
-            if($date_last_check && strtotime($date_last_check)){
+            if($release_last_check && strncmp($release_last_check, $release, strlen($release)) == 0){
 
-                    $days =intval((time()-strtotime($date_last_check))/(3600*24)); //days since last check
+                if($date_last_check && strtotime($date_last_check)){
 
-                    if(intval($days)<1){
-                        $need_check_main_server = false;
-                    }
+                        $days =intval((time()-strtotime($date_last_check))/(3600*24)); //days since last check
+
+                        if(intval($days)<1){
+                            $need_check_main_server = false;
+                        }
+                }
             }
         }//file exitst
         
@@ -1709,7 +1713,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                 }
        
             }else{
-                $url = HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getCurrentVersion.php?db=".HEURIST_INDEX_DATABASE."&check=1";
+                $url = ($isAlpha ? HEURIST_MAIN_SERVER . '/h6-alpha/' : HEURIST_INDEX_BASE_URL) . "admin/setup/dbproperties/getCurrentVersion.php?db=".HEURIST_INDEX_DATABASE."&check=1";
                 $rawdata = loadRemoteURLContentSpecial($url); //it returns HEURIST_VERSION."|".HEURIST_DBVERSION
             }
             
@@ -1725,7 +1729,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                 }
             }
             
-            $version_in_session = date("Y-m-d").'|'.$version_last_check;
+            $version_in_session = date("Y-m-d").'|'.$version_last_check.'|'.$release;
             fileSave($version_in_session, $fname);
         }
         
@@ -1787,7 +1791,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             header('Content-type: '.$content_type);
         }
     }
-    
+
     //
     //
     //
@@ -1814,6 +1818,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                 
                 //add functions for other daily tasks
                 $this->_sendDailyErrorReport();
+                $this->_heuristVersionCheck();   // Check if different local and server versions are different
             }
     }
             
@@ -1874,5 +1879,71 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             
         
     }
+
+    //
+    // Send email to system admin about available Heurist updates, daily tasks 
+    //
+    private function _heuristVersionCheck(){
+
+        global $version_release; // get installed heurist version release
+
+        $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']==='on' ? "https" : "http") . "://".HEURIST_SERVER_NAME;
+
+        $local_ver = HEURIST_VERSION; // installed heurist version
+
+        $reg_exp = "/h\d+\-alpha/"; // back-up check for alpha version
+
+        if($version_release == 'alpha' || preg_match($reg_exp, $url) == true){ // check if installation is alpha
+
+            $server_ver = $this->get_last_code_and_db_version(true);
+        }else if($version_release == 'stable'){ // check if installation is stable
+
+            $server_ver = $this->get_last_code_and_db_version(false);
+        }else{ // unknown installation
+            
+            //$server_ver = $this->get_last_code_and_db_version(false);			
+			error_log("Cannot determine the Heurist version running on " . $url);
+            return;
+        }
+
+        $local_parts = explode('.', $local_ver);
+        $server_parts = explode('.', $server_ver);
+
+        for($i = 0; $i < count($server_parts); $i++){
+
+            if($server_parts[$i] == $local_parts[$i]){
+                continue;
+            }else if($server_parts[$i] > $local_parts[$i]){ // main release is newer than installed version, send email
+
+                $title = "Heurist version " . $local_ver . " at " . $url . " is behind Heurist home server";
+
+                $msg = "Heurist on the referenced server is running version " . $local_ver . " which can be upgraded to the newer " . $server_ver . ".<br><br>"
+                . "Please check for an update package at <a href='http://heuristnetwork.org/installation/'>http://heuristnetwork.org/installation/</a><br><br>"
+                . "Update packages reflect the alpha version and install in parallel with existing versions"
+                . " so you may test them before full adoption. We recommend use of the alpha package"
+                . " by any confident user, as they bring bug-fixes, cosmetic improvements and new"
+                . " features. They are safe to use and we will respond repidly to any reported bugs.";
+
+                $email = new PHPMailer(true);
+                $email->isHTML(true);
+                //$email->From('info@HeuristNetwork.org');
+                //$email->FromName('Update notification');
+                $email->SetFrom('info@HeuristNetwork.org', 'Update notification');
+                $email->Subject = $title;
+                $email->Body = $msg;
+                $email->AddAddress( HEURIST_MAIL_TO_ADMIN );
+
+                try{
+                    $email->send();
+                } catch (Exception $e) {
+                    error_log('Cannot send email. Please ask system administrator to verify that mailing is enabled on your server. ' . $e->getMessage());
+                }
+
+                return;
+            }else{ // main release is less than installed version, missed alpha or developemental version
+                return;
+            }
+        }
+    }	
 }
 ?>

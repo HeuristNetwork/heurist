@@ -113,7 +113,7 @@
 }
 #main-pagetitle{
     position: absolute;
-    padding: 15 0 5 10;
+    padding: 15px 0 5px 10px;
     top:150px;
     bottom: 0;
     left: 0;

@@ -431,6 +431,61 @@ $.widget( "heurist.searchBuilder", {
             }
     }
 
+    , refreshRectypeMenu: function(){
+        var that = this;
+
+        if(this.select_main_rectype){
+
+            var selected = (this.select_main_rectype.val() > 0) ? this.select_main_rectype.val() : -1;
+
+            this.select_main_rectype = null;        
+
+            this.select_main_rectype = window.hWin.HEURIST4.ui.createRectypeSelectNew( this.element.find("#opt_rectypes").get(0),
+            {
+                topOptions: [{key:'-1',title:'select record type to search...'},
+                             {key:'',title:'any record type'}],
+                useHtmlSelect: false,
+                showAllRectypes: true
+            });
+
+            this.select_main_rectype.hSelect({change: function(event, data){
+                            
+                if(that.select_additional_rectypes){
+                    //reset
+                    that.select_additional_rectypes.editing_input('setValue', '');
+                }
+                
+                if(that.select_main_rectype.val()<0){
+                    //AAA that.pnl_Items.hide();
+                    that.pnl_CoverAll 
+                        .css({ top:that.pnl_Items.css('top'),bottom:that.pnl_Items.css('bottom') })
+                        .show();
+                }else{
+                    //that.pnl_Items.show();
+                    that.pnl_CoverAll.hide();
+                    //load list of field types
+                    //that.adjustTreePanel();
+                    that._initTreeView([that.select_main_rectype.val()]);
+                }
+                
+                that.clearAll();
+
+            }});
+
+            if(this.select_main_rectype.find('option[value=' + selected + ']').length > 0){ console.log(selected);
+                this.select_main_rectype.val(selected);
+
+                if(this.select_main_rectype.hSelect("instance")!=undefined){
+                   this.select_main_rectype.hSelect("refresh"); 
+                }
+            }else{
+                this.pnl_CoverAll 
+                    .css({ top:this.pnl_Items.css('top'),bottom:this.pnl_Items.css('bottom') })
+                    .show();
+            }
+        }
+    }
+
     , _initControls: function(){
         
             var that = this;

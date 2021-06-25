@@ -54,8 +54,9 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         
         if(!this.options.isdialog){
             var fele = this.element.find('.ent_wrapper:first');
-            $(fele).on("mouseleave", function(){
-                that.defaultBeforeClose();
+            $(fele).on("mouseleave", function(e){ 
+                if($(e.target).is('button')){ return; } // for Lookup Config and Rectype Select popup
+                that.defaultBeforeClose(); 
             });
         }
             
