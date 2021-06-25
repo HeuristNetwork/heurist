@@ -46,8 +46,8 @@ $.widget( "heurist.recordLookupCfg", {
     _need_load_content:true,
     
     _current_cfg: null, // current set service details
-    _current_serivce: null, // current service, for editing
     _available_services:null, // list of available services
+    _isNewCfg: false,
 
 
     //controls
@@ -79,6 +79,8 @@ $.widget( "heurist.recordLookupCfg", {
         if(!this.options.service_config){
             this.options.service_config = {};    
         } 
+        
+console.log(this.options.service_config);        
         
         this.element.addClass('ui-heurist-design');
         
@@ -112,90 +114,6 @@ $.widget( "heurist.recordLookupCfg", {
         }
     },
     
-     
-    //  
-    // invoked from _init after loading of html content
-    //
-    _initControls:function(){
-        
-        var that = this;
-
-        //fill record type selector
-        this.selectRecordType = this.element.find('#sel_rectype').css({'list-style-type': 'none'});
-        this.selectRecordType = window.hWin.HEURIST4.ui.createRectypeSelectNew(this.selectRecordType.get(0),
-                            {topOptions:'select record type...'});
-        // hide default option
-        $(this.selectRecordType.find('option')[0]).attr('hidden', true);
-        this.selectMenuRefresh(this.selectRecordType);
-        // on change handler
-        this._on(this.selectRecordType, {
-            change: function(){
-
-                that.element.find('#btnSave').css({'opacity': '1', 'cursor': 'pointer'}).attr('disabled', false);
-
-                that._onRectypeChange();
-            }
-        });
-        
-        //fill service list
-        this.serviceList = this.element.find('#sel_service');
-        this._reloadServiceList();
-        // on selected handler
-        this.serviceList.selectable( {
-            selected: function( event, ui ) {
-                if($(ui.selected).is('li')){
-
-                    that.serviceList.find('li').removeClass('ui-state-active');
-                    that.serviceList.find('div').removeClass('ui-state-active');
-                    $(ui.selected).addClass('ui-state-active');
-                    
-                    //load configuration into right hand form
-                    var  service_name = $(ui.selected).attr('value');
-                    
-                    that.selectServiceType.val('');
-
-                    that._current_service = service_name;
-
-                    that._fillConfigForm( service_name );
-                }
-            }
-        });
-
-        //fill service types
-        this.selectServiceType = this.element.find('#sel_servicetype').css({'list-style-type': 'none'});
-        this._getServiceSelectmenu();
-        // on change handler
-        this._on(this.selectServiceType[0], {
-            change: function(event, ui){
-
-                var service = that.selectServiceType.val(); // selected service
-
-                that._changeService( service ); // setup
-            }
-        });
-
-        var ele = this.element.find('#inpt_label');
-        this._on(ele, {input: function(){
-
-            this.element.find('#btnSave').css({'opacity': '1', 'cursor': 'pointer'}).attr('disabled', false);
-        }});
-
-        ele = this.element.find('#btnAddService').button({ icon: "ui-icon-plus" }).css('left', '165px');
-        this._on(ele, {click: this._addNewService});
-
-        ele = this.element.find('#btnSave').button().css({'opacity': '0.8', 'cursor': 'default'}).attr('disabled', true);
-        this._on(ele, {click: this._applyConfig});            
-        
-        if(this.options.isdialog){
-            this.popupDialog();
-        }
-        
-        //show hide hints and helps according to current level
-        window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
-        
-        return true;
-    },
-
     //Called whenever the option() method is called
     //Overriding this is useful if you can defer processor-intensive changes for multiple option change
     //
@@ -330,6 +248,84 @@ $.widget( "heurist.recordLookupCfg", {
             this._as_dialog.dialog("close");
         }
     },
+    
+    
+    
+     
+    //  
+    // invoked from _init after loading of html content
+    //
+    _initControls:function(){
+        
+        var that = this;
+
+console.log('!!!!');        
+        //fill record type selector
+        this.selectRecordType = this.element.find('#sel_rectype').css({'list-style-type': 'none'});
+        this.selectRecordType = window.hWin.HEURIST4.ui.createRectypeSelectNew(this.selectRecordType.get(0),
+            {topOptions:'select record type'});
+        // on change handler
+        this._on(this.selectRecordType, { change: this._onRectypeChange });
+        
+        //fill service configuration list
+        this.serviceList = this.element.find('#sel_service');
+        this._reloadServiceList();
+        // on selected handler
+        this.serviceList.selectable( {
+            selected: function( event, ui ) {
+                if($(ui.selected).is('li')){
+                    
+                    if($(ui.selected).hasClass('unfinished')){
+                          window.hWin.HEURIST4.msg.showMsgFlash('Complete or discard unfinished one',700);
+                          return;  
+                    }
+
+                    that.serviceList.find('li').removeClass('ui-state-active');
+                    that.serviceList.find('div').removeClass('ui-state-active');
+                    $(ui.selected).addClass('ui-state-active');
+                    
+                    //load configuration into right hand form
+                    that._fillConfigForm( $(ui.selected).attr('data-service-id') );
+                }
+            }
+        });
+
+        //fill service types   (selector)
+        this.selectServiceType = this.element.find('#sel_servicetype').css({'list-style-type': 'none'});
+        this._getServiceSelectmenu();
+        // on change handler
+        this._on(this.selectServiceType[0], {
+            change: function(event, ui){
+                var service = that.selectServiceType.val(); // selected service
+                that._changeService( service ); // setup
+            }
+        });
+
+        var ele = this.element.find('#inpt_label');
+        this._on(ele, {input: this._updateStatus });
+
+        ele = this.element.find('#btnAddService').button({ icon: "ui-icon-plus" }).css('left', '165px');
+        this._on(ele, {click: this._addNewService});
+
+        this.btnSave = this.element.find('#btnSaveCfg').button();
+        this._on(this.btnSave, {click: this._applyConfig});            
+
+        this.btnDiscard = this.element.find('#btnDiscard').button().hide();
+        this._on(this.btnDiscard, {click: function(){this._removeConfig(null)}});            
+
+        this._updateStatus();
+        
+        if(this.options.isdialog){
+            this.popupDialog();
+        }
+        
+        //show hide hints and helps according to current level
+        window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
+        
+        return true;
+    },
+
+    
 
     //
     // Get list of available services
@@ -367,7 +363,6 @@ $.widget( "heurist.recordLookupCfg", {
         this.selectServiceType = $(this.selectServiceType);
         window.hWin.HEURIST4.ui.initHSelect(this.selectServiceType, false); // initial selectmenu
 
-        this.selectMenuRefresh(this.selectServiceType);
     },    
 
     //
@@ -375,80 +370,41 @@ $.widget( "heurist.recordLookupCfg", {
     //
     _addNewService: function(){
 
+        if(this._isNewCfg){
+            window.hWin.HEURIST4.msg.showMsgFlash('Complete or discard unfinished one',700);
+            return;
+        }
+        
         // empty all inputs
         this.serviceList.find('li').removeClass('ui-state-active');
-        this.selectServiceType.val('');
-        this.selectRecordType.val('');
-        this.element.find('#inpt_label').val('');
+        
 
         // empty control variables
-        this._current_cfg = null;
-        this._current_serivce = null;
-
-        // refresh dropdowns
-        this.selectMenuRefresh(this.selectServiceType);
-        this.selectMenuRefresh(this.selectRecordType);
-
-        this.element.find('#btnSave').css({'opacity': '0.8', 'cursor': 'default'}).attr('disabled', true);
-
-        this._fillConfigForm(null);
+        this._fillConfigForm('new');
+        
+        var ele = this._reloadServiceList_item( 'new', 'assign on right ...' );
+        ele.addClass('ui-state-active unfinished');
     },
-
+    
     //
     // fill in contents of right panel
     //    
-    _fillConfigForm: function( service_val ){
+    _fillConfigForm: function( service_id, cfg0 ){
+        
+        if(service_id && this.options.service_config[service_id]){
+            cfg0 = this.options.service_config[service_id];
+        }
 
-        if(!window.hWin.HEURIST4.util.isempty(service_val)){
+        if( cfg0 ){
 
-            var service_name = service_val.split("_");
-
-            var cfg0 = null;
-
-            $.each(this._available_services, function(i, srv){
-              if(srv.service==service_name[0]){
-                  cfg0 = srv;
-                  return false;
-              }
-            });
+            this._current_cfg = cfg0;
             
-            if(cfg0==null){
-                this.element.find('#service_config').hide();
-                this.element.find('#service_name').html('<span class="ui-icon ui-icon-arrowthick-1-w"/>Select a service to edit or click the assign button');
-                return;
-            }
-            
-            this.element.find('#service_config').show();
-            this.element.find('.service_details').show();
-            this.element.find('#btnSave').show();
-
-            if(window.hWin.HEURIST4.util.isempty(this.selectServiceType.val())){
-
-                this.selectServiceType.val(service_name[0]);
-                
-                this.selectMenuRefresh(this.selectServiceType);
-            }
-
-            if(this.options.service_config && service_name.length==1 && this.options.service_config[service_name[0]]){ 
-                
-                //already exists, old id
-                this._current_cfg = this.options.service_config[service_name[0]];
-            }else if(this.options.service_config && service_name.length==2 && this.options.service_config[service_val]){
-                
-                //already exists, new id
-                this._current_cfg = this.options.service_config[service_val];
-            }else{
-
-                //new configuration
-                this._current_cfg = window.hWin.HEURIST4.util.cloneJSON(cfg0);
-            }
-
             this.element.find('#service_name').html(cfg0.label);
-            this.element.find('#service_description').html('<strong>' + cfg0.service + '</strong>: ' + cfg0.description);
-            this.element.find('#inpt_label').val(this._current_cfg.label);
+            this.element.find('#service_description').html('<strong>' + cfg0.service_name + '</strong>: ' + cfg0.description);
+            this.element.find('#inpt_label').val(cfg0.label);
 
             //that._changeService( service_name[0] );
-
+            
             var tbl = this.element.find('#tbl_matches');
             tbl.empty();
 
@@ -458,27 +414,81 @@ $.widget( "heurist.recordLookupCfg", {
 
             var rty_ID = this._current_cfg.rty_ID>0 ?$Db.getLocalID('rty',this._current_cfg.rty_ID) :'';
             
+            //select service and type
+            if(cfg0.service_name) {
+                this.selectServiceType.val(cfg0.service_name);    
+console.log(this.selectServiceType.val()+'  '+cfg0.service_name);                
+            }
             this.selectRecordType.val( rty_ID );
-            this.selectMenuRefresh(this.selectRecordType);
             this._onRectypeChange();
         }else{
+            
+            this.selectServiceType.val('');
+            this.selectRecordType.val('');
+            this.element.find('#inpt_label').val('');
+            
+            if(service_id=='new'){
+                this._isNewCfg = true;
+                this._current_cfg = {};
+            }else{
+                this._current_cfg = null;
+            }
+            
 
-            if(!window.hWin.HEURIST4.util.isempty(this.selectServiceType.val()) && !window.hWin.HEURIST4.util.isempty(this._current_cfg)){
-                
-                this._fillConfigForm(this._current_cfg);
-            }else{ // no id and no service selected
+        }
+        
+        this._updateStatus();
+    },
+    
+    //
+    //
+    //
+    _updateStatus: function(){
 
-                this.element.find('#service_config').show();
+        if(this._current_cfg==null){
+            
+            this.element.find('#service_name').html('<span class="ui-icon ui-icon-arrowthick-1-w"/>Select a service to edit or click the assign button');
+            this.element.find('#service_config').hide();
+            
+        }else{
+            this.element.find('#service_config').show();
+            
+            if($.isEmptyObject(this._current_cfg) || this._isNewCfg){ //new cfg
                 this.element.find('#service_type').show();
-                
-                this.element.find('#service_name').html('<span class="ui-icon ui-icon-arrowthick-1-w"/>Select a service to edit or');
-                
+            }else{
+                this.element.find('#service_type').hide();  //hide service selector
+            } 
+            
+            if(this.selectServiceType.val()){
+                this.element.find('.service_details').show();
+            }else{
                 this.element.find('.service_details').hide();
-                this.element.find('#btnSave').hide();
-                
-                return;
+
             }
         }
+            
+                this.element.find('#btnSave').show();
+                this.element.find('#btnDiscard').show();
+
+                //this.element.find('#btnSave').hide();
+                //this.element.find('#btnCancel').hide();
+        
+        
+        // refresh dropdowns
+        this.selectMenuRefresh(this.selectServiceType);
+        this.selectMenuRefresh(this.selectRecordType);
+
+        
+        var mode = false;
+        
+        var ele = this.element.find('#btnSave');
+        window.hWin.HEURIST4.util.setDisabled(ele, mode);
+        if(mode){
+            ele.removeClass('ui-button-action');    
+        }else{
+            ele.addClass('ui-button-action');
+        }
+console.log(mode);           
     },
     
     //
@@ -494,27 +504,8 @@ $.widget( "heurist.recordLookupCfg", {
               return false;
           }
         });
-
-        this._current_cfg = cfg0;
-
-        // show containers and save button
-        this.element.find('#service_config').show();
-        this.element.find('.service_details').show();
-        this.element.find('#btnSave').show();
-        this.element.find('#btnSave').css({'opacity': '1', 'cursor': 'pointer'}).attr('disabled', false);
-
-        // set label and description
-        this.element.find('#service_name').html(cfg0.label);
-        this.element.find('#service_description').html(cfg0.description);
-
-        var tbl = this.element.find('#tbl_matches');
-        tbl.empty();
-
-        $.each(cfg0.fields, function(field, code){
-            $('<tr><td>'+field+'</td><td><select data-field="'+field+'"/></td></tr>').appendTo(tbl);
-        });
-
-        this._onRectypeChange();
+        
+        this._fillConfigForm(null, cfg0);
     },
 
     //
@@ -536,6 +527,7 @@ $.widget( "heurist.recordLookupCfg", {
                 if(!window.hWin.HEURIST4.util.isempty(that._current_cfg)){
                     
                     dty_ID = that._current_cfg.fields[field];
+                    
                 }else if(!window.hWin.HEURIST4.util.isempty(that.selectServiceType.val())){
                     
                     for(idx in that._available_services){
@@ -568,6 +560,14 @@ $.widget( "heurist.recordLookupCfg", {
             
         }
         
+        
+        if(this._isNewCfg && this._current_cfg.label){
+
+            var s = this._current_cfg.label + '<span class="ui-icon ui-icon-arrowthick-1-e"/> ' 
+                    +  (rty_ID>0?$Db.rty(rty_ID, 'rty_Name'):'select record type');
+            this.serviceList.find('li[data-service-id="new"]').html(s);
+        }
+        
     },
     
     //
@@ -577,6 +577,7 @@ $.widget( "heurist.recordLookupCfg", {
       
         var that = this;
 
+        this._off(this.serviceList.find('button'),'click');
         this.serviceList.empty(); // empty list
 
         for(idx in this.options.service_config){ // display all assigned services
@@ -586,15 +587,12 @@ $.widget( "heurist.recordLookupCfg", {
             if(window.hWin.HEURIST4.util.isempty(cfg)){
                 continue;
             }
+            
+            s = cfg.label + '<span class="ui-icon ui-icon-arrowthick-1-e"/> ' 
+                    + $Db.rty(cfg.rty_ID, 'rty_Name');
+            s = s + '<span data-service-id="'+idx+'" style="float:right;" class="ui-icon ui-icon-circle-b-close"/>';
 
-            var s = cfg.label + '<span class="ui-icon ui-icon-arrowthick-1-e"/> ' 
-                + $Db.rty(cfg.rty_ID, 'rty_Name');
-
-            s = s + '<button id="'+idx+'" style="float:right;">X</button>';
-
-            $('<li class="ui-widget-content" value="'+idx+'">'+s+'</li>')  
-                .css({margin: '5px 2px 2px', padding: '0.4em', cursor:'pointer', background:'#e0dfe0'}) 
-                .appendTo(this.serviceList);    
+            this._reloadServiceList_item( idx, s ); //add to list
         }
         
         this.serviceList.find('li').hover(function(event){ // service list hover event
@@ -610,9 +608,22 @@ $.widget( "heurist.recordLookupCfg", {
             ele.removeClass('ui-state-hover');
         });
 
-        this.serviceList.find('button').click(function(event){ // remove service button
-            that._removeConfig($(event.target).attr('id'));
-        }); 
+        var eles = this.serviceList.find('span[data-service-id]'); //.button({icon:'ui-icon-circle-b-close',showLabel:false})
+        this._on(eles,{'click':function(event)
+        { // remove service button
+                that._removeConfig($(event.target).attr('data-service-id'));
+        }}); 
+        
+        
+
+    },
+    
+    _reloadServiceList_item: function( service_id, s ){
+
+            return $('<li class="ui-widget-content" data-service-id="'+service_id+'">'+s+'</li>')  
+                .css({margin: '5px 2px 2px', padding: '0.4em', cursor:'pointer', background:'#e0dfe0'}) 
+                .appendTo(this.serviceList);    
+    
     },
     
     //
@@ -621,20 +632,10 @@ $.widget( "heurist.recordLookupCfg", {
     _applyConfig: function(){
         
         var rty_ID = this.selectRecordType.val();
-        var service = this.selectServiceType.val();
+        var service_name = this.selectServiceType.val();
         var label = this.element.find('#inpt_label').val();
 
-        var name = this._current_service;
-        var t_name = service + '_' + rty_ID;
-
-        if(window.hWin.HEURIST4.util.isempty(name)){ // is a new service
-            name = service + '_' + rty_ID;
-        }
-        if(window.hWin.HEURIST4.util.isempty(label)){ // set label to default, if none provided
-            label = service;
-        }
-
-        if(rty_ID>0 && !window.hWin.HEURIST4.util.isempty(service)){ // check if a service and table have been selected
+        if(rty_ID>0 && !window.hWin.HEURIST4.util.isempty(service_name)){ // check if a service and table have been selected
 
             var that = this;
             var tbl = this.element.find('#tbl_matches');
@@ -659,23 +660,31 @@ $.widget( "heurist.recordLookupCfg", {
                     this.options.service_config = {};    
                 } 
                 
+                var t_name = service_name + '_' + rty_ID;
+
+                if(window.hWin.HEURIST4.util.isempty(label)){ // set label to default, if none provided
+                    label = service_name;
+                }
+                
                 if(!window.hWin.HEURIST4.util.isempty(this._current_cfg)){ // save changes
 
-                    this._current_cfg.rty_ID = rty_ID;
-                    this._current_cfg.label = label;
-                    this._current_cfg.service = service;
-                    this._current_cfg.fields = fields;
-
-                    if(name != t_name){
-                        
-                        delete this.options.service_config[name];
-                        
-                        name = t_name;
+                    //if rectype has been changed - remove previous one                
+                    if(t_name != this._current_cfg.service_id && this.options.service_config[t_name]){
+                        delete this.options.service_config[t_name];
                     }
 
-                    this.options.service_config[name] = this._current_cfg;
+                
+                    this._current_cfg.service_id = t_name;
+                    this._current_cfg.rty_ID = rty_ID;
+                    this._current_cfg.label = label;
+                    this._current_cfg.service_name = service_name;
+                    this._current_cfg.fields = fields;
 
-                    this.element.find('#btnSave').css({'opacity': '0.8', 'cursor': 'default'}).attr('disabled', true);
+                    
+                    this.options.service_config[t_name] = this._current_cfg;
+
+                    this._isNewCfg = false;
+                    
                 }else{ // no service and no service information is available
 
                     window.hWin.HEURIST4.msg.showMsgErr('An unknown error has occurred with setting this service\'s details');
@@ -687,7 +696,7 @@ $.widget( "heurist.recordLookupCfg", {
                 window.hWin.HEURIST4.msg.showMsgFlash('Map at least one field listed', 3000);
             }
         }else{ 
-            window.hWin.HEURIST4.msg.showMsgFlash('Select a service and a record type to map', 3000);
+            window.hWin.HEURIST4.msg.showMsgFlash('Select a service and a record type to map', 2000);
         }
     },
     
@@ -696,43 +705,24 @@ $.widget( "heurist.recordLookupCfg", {
     //
     _removeConfig: function(service_id){
 
+        var is_del = false;
         if(window.hWin.HEURIST4.util.isempty(service_id)) { // check if a service was provided
-            return;
+            if(this._isNewCfg){
+                this._isNewCfg = false;
+                is_del = true;
+            }
         }
 
         if(this.options.service_config[service_id]!=null) { // normal method
-
             delete this.options.service_config[service_id]; // remove details
-
-            this._reloadServiceList(); // reload left panel
-            this._addNewService(); // reload right panel
-
-            return;
-        } else { // precautionary check
-
-            var service_info = service_id.split("_"); // if new id, contains both service name and rty_ID
-
-            var data = window.hWin.HEURIST4.util.isJSON(this.options.service_config); // get assigned service
-
-            if(!data) { // check if isJSON returned false
-                window.hWin.HEURIST4.msg.showMsgErr('No services have been saved');
-                return;
-            }
-
-            for (idx in data){
-                if (data[idx]['service'] == service_info[0] && data[idx]['rty_ID'] == service_info[1]){
-                    
-                    delete this.options.service_config[idx];
-
-                    this._reloadServiceList(); // reload left panel
-                    this._addNewService(); // reload right panel
-
-                    return;
-                }
-            }
+            is_del = true;
         }
 
-        window.hWin.HEURIST4.msg.showMsgErr('An unknown error occurred while trying to remove this service');
+        if(is_del){
+            this._reloadServiceList();
+            this._current_cfg = null;
+            this._updateStatus();
+        }
     },
 
     //
