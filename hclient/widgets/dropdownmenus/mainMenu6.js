@@ -821,6 +821,9 @@ $.widget( "heurist.mainMenu6", {
                     }  });    
                     
                     cont.addClass('save-filter-dialog');
+                }else{
+                    //refresh rectype dropdown
+                    cont.searchBuilder('refreshRectypeMenu');
                 }
                 
                 explore_top = 0;
