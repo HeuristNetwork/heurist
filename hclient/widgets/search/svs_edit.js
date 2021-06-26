@@ -236,6 +236,7 @@ function hSvsEdit(args) {
         
         if(!dlg_options) dlg_options = {};
         dlg_options['closeOnEscape'] = true;
+        dlg_options['isPopupDlg'] = true;
         dlg_options['width'] = 1200;
         dlg_options['height'] = 600;
         if(!dlg_options['title']) dlg_options['title'] = 'Ruleset Editor';

@@ -79,7 +79,8 @@ $.widget( "heurist.ruleBuilder", {
         this.select_reltype = $( "<select>" )
         .attr('title', 'The type of pointer or relationship which is followed to add entities to the current result set' )
         .addClass('text ui-corner-all ui-widget-content')
-        .appendTo( $('<div>').appendTo(this.element) ).hide();
+        .css({'visibility':'hidden'})
+        .appendTo( $('<div>').appendTo(this.element) );
 
         //create list/combobox of target record types
         this.select_target_rectype = $( "<select>" )
@@ -411,7 +412,7 @@ $.widget( "heurist.ruleBuilder", {
                 if(arr_field.terms){
                     is_not_relation = false;
                     //this.label_3.show();
-                    this.select_reltype.show();
+                    this.select_reltype.css({'visibility':'visible'});
                     this.select_reltype.prop('disabled', false);
                     var sel = window.hWin.HEURIST4.ui.createTermSelect(this.select_reltype.get(0),
                                 {vocab_id:arr_field.terms, topOptions:'Any relationship type'});
@@ -435,12 +436,12 @@ $.widget( "heurist.ruleBuilder", {
 
             if(is_not_relation){
                 //this.label_3.hide();
-                this.select_reltype.show();
+                this.select_reltype.css({'visibility':'visible'});
                 window.hWin.HEURIST4.ui.createSelector(this.select_reltype.get(0), [{key:'pointer', title:'pointer'}]);
                 this.select_reltype.prop('disabled', true);
             }
         }else{
-            this.select_reltype.hide();
+            this.select_reltype.css({'visibility':'hidden'});
         }
         if(is_not_selected){
             //show all constraints

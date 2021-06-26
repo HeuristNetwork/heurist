@@ -34,23 +34,30 @@ require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPage.php');
     }
     .rulebuilder>div{
         text-align:left;
-        display: inline-block;
+        display: table-cell;
         width:200px;
     }
     .rulebuilder>div>select{
         min-width:180px;
         max-width:180px;
     }
+    .rulebuilder_hdear>div{
+        min-width:180px;
+        width:205px;
+        font-weight:bold;
+        display:table-cell;
+    }
+    
 </style>
 </head>
 <body style="overflow:hidden">
     <div style="height:100%">
-        <div style="position:absolute;width:99%;top:0;font-size:0.8em;" class="rulebuilder">
-            <div style="width:230px;font-weight:bold">Starting point (entity type)</div>
-            <div style="width:195px;font-weight:bold">Relationship Field</div>
-            <div style="width:195px;font-weight:bold">Relationship Type</div>
-            <div style="width:195px;font-weight:bold">Target entity type</div>
-            <div style="font-weight:bold">Optional Filter (query) for target type</div>
+        <div style="position:absolute;width:99%;top:0;font-size:0.8em;text-align: left !important;display:table-row" class="rulebuilder_hdear">
+            <div style="width:230px;">Starting point (entity type)</div>
+            <div>Relationship Field</div>
+            <div style="width:195px;">Relationship Type</div>
+            <div>Target entity type</div>
+            <div>Optional Filter (query) for target type</div>
         </div>
 
         <div style="position:absolute;width:99%;top:2em;bottom:4em;overflow-y:auto" id="level1">

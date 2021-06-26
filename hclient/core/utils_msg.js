@@ -745,6 +745,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }else{
                 $dlg.attr('data-palette', null);
             }
+            
+            $dlg.parent().find('.ui-dialog-content').css({'overflow':'hidden'});
 
             if(options.noClose){
                 $dlg.parent().find('.ui-dialog-titlebar').find('.ui-icon-closethick').parent().hide();
@@ -1226,10 +1228,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if(false && options.resizable === true){
             options.resizeStop = function( event, ui ) {
                 
-console.log( $dlg.parent().height() );
+
                var nh = $dlg.parent().height()
                             - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height(); //-20
-console.log( nh );
+
                     $dlg.css({overflow: 'none !important','width':'100%', 'height':nh });
                 };
             }
