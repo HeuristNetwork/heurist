@@ -80,8 +80,6 @@ $.widget( "heurist.recordLookupCfg", {
             this.options.service_config = {};    
         } 
         
-console.log(this.options.service_config);        
-        
         this.element.addClass('ui-heurist-design');
         
         if(this.options.isdialog){  //show this widget as popup dialog
@@ -259,7 +257,6 @@ console.log(this.options.service_config);
         
         var that = this;
 
-console.log('!!!!');        
         //fill record type selector
         this.selectRecordType = this.element.find('#sel_rectype').css({'list-style-type': 'none'});
         this.selectRecordType = window.hWin.HEURIST4.ui.createRectypeSelectNew(this.selectRecordType.get(0),
@@ -383,7 +380,6 @@ console.log('!!!!');
         this._fillConfigForm('new');
         
         var ele = this._reloadServiceList_item( 'new', 'assign on right ...' );
-        ele.addClass('ui-state-active unfinished');
     },
     
     //
@@ -417,7 +413,6 @@ console.log('!!!!');
             //select service and type
             if(cfg0.service_name) {
                 this.selectServiceType.val(cfg0.service_name);    
-console.log(this.selectServiceType.val()+'  '+cfg0.service_name);                
             }
             this.selectRecordType.val( rty_ID );
             this._onRectypeChange();
@@ -444,6 +439,8 @@ console.log(this.selectServiceType.val()+'  '+cfg0.service_name);
     //
     //
     _updateStatus: function(){
+        
+        var is_modified = false;
 
         if(this._current_cfg==null){
             
@@ -455,8 +452,31 @@ console.log(this.selectServiceType.val()+'  '+cfg0.service_name);
             
             if($.isEmptyObject(this._current_cfg) || this._isNewCfg){ //new cfg
                 this.element.find('#service_type').show();
+                is_modified = true;
             }else{
                 this.element.find('#service_type').hide();  //hide service selector
+                
+                //verify if modified
+                is_modified =  (this._current_cfg.rty_ID != this.selectRecordType.val())
+                               || (this._current_cfg.label != this.element.find('#inpt_label').val());
+                if(!is_modified){
+
+                    var tbl = this.element.find('#tbl_matches');
+                    var fields = {};
+                    var that = this;
+                    $.each(tbl.find('select'), function(i, ele){ // get mapped fields
+                
+                        var field = $(ele).attr('data-field');
+                        var dty_ID = $(ele).val();
+                        
+                        if(that._current_cfg.fields[field]!=dty_ID){
+                               is_modified = true;
+                               return false; //break
+                        }
+
+                    });
+                    
+                }
             } 
             
             if(this.selectServiceType.val()){
@@ -467,28 +487,21 @@ console.log(this.selectServiceType.val()+'  '+cfg0.service_name);
             }
         }
             
-                this.element.find('#btnSave').show();
-                this.element.find('#btnDiscard').show();
-
-                //this.element.find('#btnSave').hide();
-                //this.element.find('#btnCancel').hide();
-        
-        
         // refresh dropdowns
         this.selectMenuRefresh(this.selectServiceType);
         this.selectMenuRefresh(this.selectRecordType);
 
+
+        this.btnSave.show();
+        this.btnDiscard.show();
+
         
-        var mode = false;
-        
-        var ele = this.element.find('#btnSave');
-        window.hWin.HEURIST4.util.setDisabled(ele, mode);
-        if(mode){
-            ele.removeClass('ui-button-action');    
+        window.hWin.HEURIST4.util.setDisabled(this.btnSave, !is_modified);
+        if(is_modified){
+            this.btnSave.addClass('ui-button-action');
         }else{
-            ele.addClass('ui-button-action');
+            this.btnSave.removeClass('ui-button-action');    
         }
-console.log(mode);           
     },
     
     //
@@ -517,8 +530,21 @@ console.log(mode);
         
         var tbl = this.element.find('#tbl_matches');
         
+        var that = this;
+        
+        
+        $.each(tbl.find('select'), function(i,selObj){
+
+            
+            if($(selObj).hSelect("instance")!=undefined){
+               that._off($(selObj).hSelect("instance"),'change');
+               $(selObj).hSelect("destroy"); 
+            }
+            $(selObj).empty();
+        });
+        
+        
         if(rty_ID>0){
-            var that = this;
             $.each(tbl.find('select'), function(i, ele){
                 
                 var field = $(ele).attr('data-field');
@@ -544,12 +570,17 @@ console.log(mode);
                     dty_ID = dty_ID>0 ?$Db.getLocalID('dty', dty_ID) :'';
                 }
                 
-                window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele, rty_ID, 
+                var sel = window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele, rty_ID, 
                     ['freetext','blocktext','enum','date','geo','float','year','integer','resource'], '...', 
                     {show_latlong:true, show_dt_name:true, selectedValue:dty_ID} );
+                    
+                that._on($(sel), {change:function(){that._updateStatus();}});
             });
-        }else{
             
+            
+            
+        }else{
+            /*
             $.each(tbl.find('select'), function(i,selObj){
 
                 if($(selObj).hSelect("instance")!=undefined){
@@ -557,6 +588,7 @@ console.log(mode);
                 }
                 $(selObj).empty();
             });
+            */
             
         }
         
@@ -590,7 +622,7 @@ console.log(mode);
             
             s = cfg.label + '<span class="ui-icon ui-icon-arrowthick-1-e"/> ' 
                     + $Db.rty(cfg.rty_ID, 'rty_Name');
-            s = s + '<span data-service-id="'+idx+'" style="float:right;" class="ui-icon ui-icon-circle-b-close"/>';
+            s = s + '<span data-service-id="'+idx+'" style="float:right;padding-top: 5px" class="ui-icon ui-icon-circle-b-close"/>';
 
             this._reloadServiceList_item( idx, s ); //add to list
         }
@@ -619,8 +651,13 @@ console.log(mode);
     },
     
     _reloadServiceList_item: function( service_id, s ){
+        
+            var s_active = '';
+            if(service_id=='new' || (this._current_cfg && this._current_cfg.service_id==service_id)){
+                s_active = ' ui-state-active';
+            }
 
-            return $('<li class="ui-widget-content" data-service-id="'+service_id+'">'+s+'</li>')  
+            return $('<li class="ui-widget-content'+s_active+'" data-service-id="'+service_id+'">'+s+'</li>')  
                 .css({margin: '5px 2px 2px', padding: '0.4em', cursor:'pointer', background:'#e0dfe0'}) 
                 .appendTo(this.serviceList);    
     
@@ -711,6 +748,7 @@ console.log(mode);
                 this._isNewCfg = false;
                 is_del = true;
             }
+            
         }
 
         if(this.options.service_config[service_id]!=null) { // normal method
@@ -722,7 +760,11 @@ console.log(mode);
             this._reloadServiceList();
             this._current_cfg = null;
             this._updateStatus();
+        }else if(this._current_cfg){
+            //reload
+            this._fillConfigForm(this._current_cfg.service_id);
         }
+        
     },
 
     //
