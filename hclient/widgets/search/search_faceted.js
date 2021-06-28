@@ -653,8 +653,13 @@ $.widget( "heurist.search_faceted", {
                         }else if(dtid==1  && that._use_multifield){ //for name
                             dtid = '1,18,231,304';
                         }
+                        
+                        if(dtid>0){
+                            key = "f:"+dtid;
+                        }else{
+                            key = dtid;
+                        }
 
-                        key = "f:"+dtid
                         val = "$X"+field['var']; 
                     }
                     curr_level = __checkEntry(curr_level, key, val);
@@ -1798,20 +1803,59 @@ $.widget( "heurist.search_faceted", {
                             is_first_level = true;
                         } 
                         
-                        //enumeration
-                        var dtID = field['id'];  
-                        var vocab_id = $Db.dty(dtID, 'dty_JsonTermIDTree');    
-                                              
-if(!(vocab_id>0)){
-    console.log('Field '+dtID+' not found!!!!');
-    console.log(field);
-    //search next facet
-    this._recalculateFacets( facet_index );
-    return;
-}
-                        var term = $Db.trm_TreeData(vocab_id, 'tree');                     
-                        term = {key: null, title: "all", children: term};
-                        //field.selectedvalue = {title:label, value:value, step:step};                    
+                        var dtID = field['id']; 
+                        var term; 
+                        if(dtID=='owner' || dtID=='addedby'){
+                                
+                                if(response.users){
+                                    
+                                    var users = [];
+                                    for(var id in response.users){
+                                        users.push({key:id, title:response.users[id]});
+                                    }
+                                    term = {key: null, title: "all", children:users};
+                                    
+                                }else{
+                                    var user_ids = [];
+                                    for (var j=0; j<response.data.length; j++){
+                                        user_ids.push(response.data[j][0]);
+                                    }
+                                    window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:user_ids},function(res){
+                                            if(res.status==window.hWin.ResponseStatus.OK){
+                                                   response.users = res.data;
+                                            }else{
+                                                   response.users = [];
+                                            }
+                                            that._redrawFacets( response, keep_cache );
+                                    });
+                                    return;
+                                }
+                            
+                        }else if(dtID=='access'){
+                            
+                            term = {key: null, title: "all",
+                                    children:[{title:'viewable', key:'viewable'},
+                                     {title:'hidden', key:'hidden'},
+                                     {title:'public', key:'public'},
+                                     {title:'pending', key:'pending'}]};
+                            
+                        }else{
+                        
+                            //enumeration
+                            var vocab_id = $Db.dty(dtID, 'dty_JsonTermIDTree');    
+                                                  
+    if(!(vocab_id>0)){
+        console.log('Field '+dtID+' not found!!!!');
+        console.log(field);
+        //search next facet
+        this._recalculateFacets( facet_index );
+        return;
+    }
+                            term = $Db.trm_TreeData(vocab_id, 'tree');                     
+                            term = {key: null, title: "all", children: term};
+                            //field.selectedvalue = {title:label, value:value, step:step};                    
+                            
+                        }
                         
                         //
                         // verify that term is in response - take count from response

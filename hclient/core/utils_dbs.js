@@ -313,7 +313,7 @@ window.hWin.HEURIST4.dbs = {
                         code:($recTypeId+_separator+'modified'), name:'Date modified'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('addedby')>=0 || $fieldtypes.indexOf('rec_AddedBy')>=0){
-                    $children.push({key:'rec_AddedBy', type:'freetext',
+                    $children.push({key:'rec_AddedBy', type:'enum',
                         title:('Creator'+($mode!=7?' <span style="font-size:0.7em">(User)</span>':'')), 
                         code:($recTypeId+_separator+'addedby'), name:'Creator (user)'});
                 }
@@ -329,7 +329,7 @@ window.hWin.HEURIST4.dbs = {
                         code:($recTypeId+_separator+'notes'), name:'Record Notes'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('owner')>=0 || $fieldtypes.indexOf('rec_OwnerUGrpID')>=0){
-                    $children.push({key:'rec_OwnerUGrpID', type:'freetext',
+                    $children.push({key:'rec_OwnerUGrpID', type:'enum',
                         title:('Owner'+($mode!=7?' <span style="font-size:0.7em">(User or Group)</span>':'')), 
                         code:($recTypeId+_separator+'owner'), name:'Record Owner'});
                 }
@@ -349,7 +349,7 @@ window.hWin.HEURIST4.dbs = {
                     var s = '<span style="font-style:italic">Generic Fields</span>';
                     $children = [
                         {title:s, folder:true, is_generic_fields:true, children:$children}];
-                    if($mode==5){ //for filter builder 
+                    if($fieldtypes.indexOf('anyfield')>=0){ //for filter builder 
                         $children.push({key:'anyfield', type:'freetext', //-16px -80px      -48px -80px open
                         title:"<span style='font-size:0.9em;font-style:italic;padding-left:22px'>ANY FIELD</span>", 
                         code:($recTypeId+_separator+'anyfield'), name:'Any field'});    
@@ -1957,6 +1957,10 @@ window.hWin.HEURIST4.dbs = {
                 rec_header = 'Constructed record title';
             }else if(dtid=='ids'){
                 rec_header = "IDs"; 
+            }else if(dtid=='typeid'){
+                rec_header = "type ID"; 
+            }else if(dtid=='typename'){
+                rec_header = "type name"; 
             }else if(dtid=='added'){
                 rec_header = "Added"; 
             }else if(dtid=='modified'){

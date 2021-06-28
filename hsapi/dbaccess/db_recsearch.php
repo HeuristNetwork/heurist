@@ -189,11 +189,37 @@ function recordSearchFacets($system, $params){
         $detail_link   = "";
         $details_where = "";
 
-        if($fieldid=="rectype"){
+        if($fieldid=="rectype" || $fieldid=="typeid"){
             $select_field = "r0.rec_RecTypeID";
+        }else if($fieldid=='typename'){
+            //@todo!!!!!
         }else if($fieldid=='recTitle' || $fieldid=='title'){
             $select_field = "r0.rec_Title";
             $dt_type = "freetext";
+        }else if($fieldid=='id' || $fieldid=='ids' || $fieldid=='recID'){
+            $select_field = "r0.rec_ID";
+            $dt_type = "integer";
+        }else if($fieldid=='owner'){
+            $select_field = "r0.rec_OwnerUGrpID";
+            $dt_type = "integer";
+        }else if($fieldid=='addedby'){
+            $select_field = "r0.rec_AddedByUGrpID";
+            $dt_type = "integer";
+        }else if($fieldid=='notes'){
+            $select_field = "r0.rec_ScratchPad";
+            $dt_type = "freetext";
+        }else if($fieldid=='url'){
+            $select_field = "r0.rec_URL";
+            $dt_type = "freetext";
+        }else if($fieldid=='tag'){
+            
+            $select_field = "tag_Text";
+            $detail_link   = ", usrTags, usrRecTagLinks ";
+            $details_where = " AND (rtl_TagID=tag_ID AND r0.rec_ID=rtl_RecID) ";
+            
+        }else if($fieldid=='access'){
+            $select_field = "r0.rec_NonOwnerVisibility";
+            //$dt_type = "freetext";
         }else if($fieldid=='recAdded' || $fieldid=='added'){
             $select_field = "r0.rec_Added";
         }else if($fieldid=='recModified' || $fieldid=='modified'){

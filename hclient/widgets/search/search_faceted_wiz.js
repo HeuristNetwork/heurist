@@ -1087,7 +1087,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 //window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
 
-                var allowed_fieldtypes = ['title','added','modified','enum','freetext',"year","date","integer","float","resource","relmarker"];
+                var allowed_fieldtypes = ['header_ext',
+                'enum','freetext',"year","date","integer","float","resource","relmarker"];
                 
                 var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes );
 /*                
@@ -1473,8 +1474,25 @@ $.widget( "heurist.search_faceted_wiz", {
                        harchy_fields.push("Modified"); 
                     }else if(dtid=='added'){
                        harchy_fields.push("Added"); 
+                    }else if(dtid=='ids'){
+                       harchy_fields.push("Record ID"); 
+                    }else if(dtid=='typeid'){
+                       harchy_fields.push("Type ID"); 
+                    }else if(dtid=='typename'){
+                       harchy_fields.push("Type Name"); 
+                    }else if(dtid=='addedby'){
+                       harchy_fields.push("Creator"); 
+                    }else if(dtid=='owner'){
+                       harchy_fields.push("Record Owner"); 
+                    }else if(dtid=='access'){
+                       harchy_fields.push("Record Visibility"); 
+                    }else if(dtid=='notes'){
+                       harchy_fields.push("Notes"); 
+                    }else if(dtid=='url'){
+                       harchy_fields.push("URL"); 
+                    }else if(dtid=='tag'){
+                       harchy_fields.push("Tags"); 
                     }
-
                     
                     var linktype = dtid.substr(0,2);                                
                     if(isNaN(Number(linktype))){
@@ -1581,9 +1599,9 @@ $.widget( "heurist.search_faceted_wiz", {
                         + window.hWin.HR("Order descending")+"</label>";
                    
                 }else if(facets[k].type=='enum' || facets[k].type=='relationtype'){
+                    
+                    if(facets[k].code.indexOf(':addedby')<0 && facets[k].code.indexOf(':owner')<0)
                     sContent = sContent 
-                        //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_1" name="facet_Type'
-                        //+idd+'" value="1" data-type="dropdown"/><label for="facetType'+idd+'_1">dropdown</label>';
                         +'<button label="dropdown" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="dropdown"/>';
                     
                     sGroupBy = '<label><input type="checkbox" name="facet_Group'
@@ -1595,9 +1613,12 @@ $.widget( "heurist.search_faceted_wiz", {
                     
                 }
                 
+                if(facets[k].code.indexOf(':ids')<0)
                 sContent = sContent
                         +'<button label="list" class="btnset_radio" data-idx="'+idd+'" data-value="3"/>'
-                        +'<button label="wrapped" class="btnset_radio" data-idx="'+idd+'" data-value="2"/>'
+                        +'<button label="wrapped" class="btnset_radio" data-idx="'+idd+'" data-value="2"/>';
+                        
+                sContent = sContent        
                         +'<button label="search" class="btnset_radio" data-idx="'+idd+'" data-value="0"/>'
                 //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_3" name="facet_Type'+idd+'" value="3"/><label for="facetType'+idd+'_3">list</label>'
                 //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_2" name="facet_Type'+idd+'" value="2"/><label for="facetType'+idd+'_2">wrapped</label>'

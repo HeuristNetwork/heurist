@@ -854,7 +854,8 @@ $.widget( "heurist.editing_input", {
             } 
 
         }
-        else if(this.detailType=='enum' || this.detailType=='relationtype' || this.detailType=='access' || this.detailType=='tag'){//--------------------------------------
+        // || this.options.dtID=='tag'
+        else if(this.detailType=='enum' || this.detailType=='relationtype'){//--------------------------------------
 
             var dwidth;
             if(this.configMode && this.configMode.entity!='records'){
@@ -870,7 +871,7 @@ $.widget( "heurist.editing_input", {
                 .val(value)
                 .appendTo( $inputdiv );
             
-            if(this.detailType=='access'){
+            if(this.options.dtID=='access'){
                 var sel_options = [
                     {key: '', title: ''}, 
                     {key: 'viewable', title: 'viewable'}, 
@@ -882,7 +883,7 @@ $.widget( "heurist.editing_input", {
                 window.hWin.HEURIST4.ui.createSelector($input.get(0), sel_options);
                 window.hWin.HEURIST4.ui.initHSelect($input, false);
             }
-            else if(this.detailType=='tag'){
+            else if(this.options.dtID=='tag'){
                 var groups = [];
                 var req = {};
                 req['a'] = 'search';

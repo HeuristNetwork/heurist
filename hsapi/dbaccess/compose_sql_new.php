@@ -1029,17 +1029,27 @@ class HPredicate {
             $sHeaderField = 'rec_ScratchPad';
             $ignoreApostrophe = (strpos($val, 'LIKE')==1);
             
-        }else if($this->pred_type=='addedby'){
+        }else if($this->pred_type=='addedby' || $this->field_id=='addedby'){
             
             $sHeaderField = 'rec_AddedByUGrpID';
             
-        }else if($this->pred_type=='owner'){
+        }else if($this->pred_type=='owner' || $this->field_id=='owner'){
             
             $sHeaderField = 'rec_OwnerUGrpID';
             
-        }else if($this->pred_type=='access'){
+        }else if($this->pred_type=='access' || $this->field_id=='access'){
             
             $sHeaderField = "rec_NonOwnerVisibility";
+            
+        }else if($this->pred_type=='rectype' || $this->field_id=='rectype' ||
+                 $this->pred_type=='typeid' || $this->field_id=='typeid'){
+
+            $sHeaderField = "rec_RecTypeID";
+
+        }else if($this->pred_type=='ids' || $this->field_id=='ids'){
+            
+            $sHeaderField = "rec_ID";
+
         }
             
           
@@ -1073,6 +1083,12 @@ class HPredicate {
                 $res = $res.'='.$this->field_id.')';
             }
 
+        
+        }else if($this->pred_type=='tag' || $this->field_id=='tag'){
+            // it is better to use kwd keyword instead of f:tag
+            
+            $res = "(r".$this->qlevel.".rec_ID IN ".$val.")"; 
+        
         }else if($this->pred_type=='count' || $this->pred_type=='cnt'){ //search for records where field occurs N times (repeatable values)
 
             $res = "(select count(dtl_ID) from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
@@ -1247,12 +1263,15 @@ class HPredicate {
         }else{
             $val = $this->getFieldValue();
 
-            if(!$this->field_list){
-                $val = "=0";
-            }else if ($p==0){
-                $cs_ids = getCommaSepIds($this->value);
-                if ($cs_ids && strpos($cs_ids, ',')>0) {  
-                    $top_query->fixed_sortorder = $cs_ids;
+            if(strpos($val,'between')===false){
+                
+                if(!$this->field_list){
+                    $val = "=0";
+                }else if ($p==0){
+                    $cs_ids = getCommaSepIds($this->value);
+                    if ($cs_ids && strpos($cs_ids, ',')>0) {  
+                        $top_query->fixed_sortorder = $cs_ids;
+                    }
                 }
             }
         }
@@ -1952,6 +1971,17 @@ class HPredicate {
             }
             //if put negate here is will accept any multivalue enum field
             //see negate for enum on level above $res = (($this->negate)?' not':'').$res;
+        }else
+        // it is better to use kwd keyword instead of f:tag
+        if($this->field_id=='tag'){
+            
+            if(intval($this->value)>0){
+                $res = '(SELECT rtl_RecID FROM usrRecTagLinks where rtl_TagID='.$this->value.')';
+            }else{
+                $res = '(SELECT rtl_RecID FROM usrRecTagLinks, usrTags where rtl_TagID=tag_ID AND tag_Text="'
+                        .$mysqli->real_escape_string($this->value).'")';
+            }
+        
         }else
         if ($this->field_type=='file'){        
             

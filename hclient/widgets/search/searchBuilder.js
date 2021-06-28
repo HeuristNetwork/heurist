@@ -472,7 +472,7 @@ $.widget( "heurist.searchBuilder", {
 
             }});
 
-            if(this.select_main_rectype.find('option[value=' + selected + ']').length > 0){ console.log(selected);
+            if(this.select_main_rectype.find('option[value=' + selected + ']').length > 0){ 
                 this.select_main_rectype.val(selected);
 
                 if(this.select_main_rectype.hSelect("instance")!=undefined){
@@ -808,7 +808,7 @@ $.widget( "heurist.searchBuilder", {
                 //window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
 
                 //'title','modified',
-                var allowed_fieldtypes = ['header_ext','enum','freetext','blocktext',
+                var allowed_fieldtypes = ['header_ext','anyfield','enum','freetext','blocktext',
                                 'geo','year','date','integer','float','resource','relmarker','relationtype','file'];
                       
 /*              

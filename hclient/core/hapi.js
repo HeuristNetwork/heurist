@@ -601,6 +601,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             sUserNames = $.extend(sUserNames, context.data);
                             
                             callback.call(this, {status:window.hWin.ResponseStatus.OK, data:sUserNames} );       
+                        }else{
+                            callback.call(this, {status:context.status} );       
                         }
                     });
                 }
