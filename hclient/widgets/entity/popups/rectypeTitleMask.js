@@ -377,7 +377,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
 
        
         //generate treedata from rectype structure
-        var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 3, this.options.rty_ID, ['all'] );
+        var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 3, this.options.rty_ID, ['all','parent_link'] );
 
         treedata[0].expanded = true; //first expanded
 
