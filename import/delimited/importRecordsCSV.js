@@ -1823,7 +1823,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         $('#divStep3 > .ent_header').height(h);
 
-        $('#divStep3 > .ent_content').css({top:h+5});
+        $('#divStep3 > .ent_content').css({top:(h+5+'px')});
         
         /* todo - check how it works with new layout
         //adjust position of footer with action buttons  

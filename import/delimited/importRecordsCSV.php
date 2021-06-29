@@ -122,10 +122,9 @@ if(!$format) $format='csv';
                 margin:0;
             }
             .step-ctrls{
-                padding-top:0.5em;
                 margin-left:2em;
                 position: absolute;
-                top: 205px;
+                top: 200px;
             }
         </style>
     </head>
@@ -524,11 +523,11 @@ if(!$format) $format='csv';
             Update existing records</label>
             <span style="padding-left: 200px;display:none;" id="presetMapping">Use mapping from other sessions: <select id="sel_presetMapping"></select></span>
         </div>
-        <div  id="divPrepareSetting" class="step4 step-ctrls" style="display:none;top:205px">
+        <div  id="divPrepareSetting" class="step4 step-ctrls" style="display:none;top:220px">
             <div class="heurist-helper1" id="divPrepareSettingHelp" style="display:block;">
             </div>
         </div>
-        <div  id="divImportSetting" class="step5 step-ctrls" style="display:none;top:205px;font-size:0.9em;">
+        <div  id="divImportSetting" class="step5 step-ctrls" style="display:none;top:220px;font-size:0.9em;">
             <div class="heurist-helper1" id="divImportSettingHelp" style="display:block;padding-bottom:1em">
                 You are now ready to update the database. This step applies the changes you have prepared and is not (easily) reversible.
             </div>
@@ -577,7 +576,7 @@ if(!$format) $format='csv';
         </div>
 <!-- end radiogroup setting divs -->     
 
-        <div id="divFieldMapping2" class="step4" style="display:none;position:absolute;bottom:32px">
+        <div id="divFieldMapping2" class="step4" style="display:none;position:absolute;bottom:36px">
             <table class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>
@@ -599,21 +598,21 @@ if(!$format) $format='csv';
                                                 <div id="btnShowErrors"></div>
                                             </div>
                                         </td>
-                                        <td width="50" align=left style="padding-left:30px">Existing:</td>
+                                        <td width="50" align=left style="width:120px">Existing:</td>
                                         <td width="50" id="mrr_cnt_update"></td>
                                         <td width="50" class="mrr_update">rows:</td>
                                         <td width="50" class="mrr_update" id="mrr_cnt_update_rows"></td>
                                         <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',false)">show</a></td>
                                         <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',true)">download</a></td>
                                     </tr>
-                                    <tr><td align=left style="padding-left:30px">New:</td>
+                                    <tr><td align=left>New:</td>
                                         <td width="50" id="mrr_cnt_insert"></td>
                                         <td width="50" class="mrr_insert">rows:</td>
                                         <td width="50" class="mrr_insert" id="mrr_cnt_insert_rows"></td>
                                         <td width="50" class="mrr_insert"><a href="#" onclick="importRecordsCSV.showRecords2('insert',false)">show</a></td>
                                         <td width="50" class="mrr_insert"><a href="#" onclick="importRecordsCSV.showRecords2('insert',true)">download</a></td>
                                     </tr>
-                                    <tr><td align=left style="padding-left:30px">Blank match fields:</td>
+                                    <tr><td align=left>Blank match fields:</td>
                                         <td width="50" id="mrr_cnt_ignore"></td>
                                         <td width="50" class="mrr_ignore">rows:</td>
                                         <td width="50" class="mrr_ignore" id="mrr_cnt_ignore_rows"></td>
@@ -626,7 +625,7 @@ if(!$format) $format='csv';
         </div>
    
         
-        <table class="tbmain" style="width:99%;position:absolute;bottom:0;top:309px;" cellspacing="0" cellpadding="2">
+        <table class="tbmain" style="width:99%;position:absolute;bottom:0px;" cellspacing="0" cellpadding="2">
             <thead><tr> <!-- Table headings -->
                 <th style="width:75px;">Use&nbsp;<br/>value</th>
                 <th style="width:75px;">Unique&nbsp;<br/>values</th>
@@ -644,14 +643,14 @@ if(!$format) $format='csv';
         </table>    
     </div>
     <!-- CONTENT : MAPPING TABLE COLUMNS TO HEURIST FIELDS  -->
-    <div class="ent_content" style="bottom:0;top:367;padding: 0em 0.5em;" id="divFieldMapping">
+    <div class="ent_content" style="bottom:0;top:339px;padding: 0em 0.5em;" id="divFieldMapping">
                 <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
                     <!-- <thead><tr>
                         <th style="width:75px;">Use&nbsp;<br/>value</th>
                         <th width="75px">Unique&nbsp;<br/>values</th>
                         <th width="300px">Column</th>
                         <th width="300px">Column to Field Mapping</th>
-                        <th></th></tr></thead> -->
+                        <th></th></tr></thead> -->                                 
                     <tbody>
                     
                     </tbody>
