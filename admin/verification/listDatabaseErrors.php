@@ -218,12 +218,21 @@ $trmDuplicates = @$lists2["trm_dupes"];
             h3.res-valid{
                 color: #6aa84f !important;        
             }
+            div.coverall-div{
+                color:#6A7C99;
+                font-size:14px;
+                line-height:25px;
+                margin:0
+            }			
         </style>
 
     </head>
 
 
     <body class="popup" style="overflow:auto">
+        <script>
+            window.hWin.HEURIST4.msg.bringCoverallToFront($('.popup')[0], {'background-color': "white", opacity: '1'});
+        </script>	
 
         <div class="banner">
             <h2>Check for invalid definitions and data (invalid pointers, terms, missing required, excess values etc.)</h2>
@@ -1788,7 +1797,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
         </div>
         <script>
-            /*
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+			/*
             var parent = $(window.parent.document);
             parent.find('#verification_output').css({width:'100%',height:'100%'}).show(); 
             parent.find('#in_porgress').hide();
