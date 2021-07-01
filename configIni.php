@@ -63,7 +63,6 @@ of the codebase and rename it to index.html
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
 $version = "6.2.13"; // sets current program version number, determined by Heurist development lead
-$version_release = "stable"; // set whether this Heurist is a stable or alpha version
 
 // dates below are the date of release of the given version, and list changes since last release
 

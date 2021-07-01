@@ -158,12 +158,12 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                 request['not:dty_DetailTypeGroupID'] = Math.abs(this.options.dtg_ID);
             }else{
         
-                sGroupTitle = '<h4 style="margin:0">';
+                sGroupTitle = '<h4 style="margin:0;padding-bottom:5px;">';
                 if(!this.element.find('#chb_show_all_groups').is(':checked') && this.options.dtg_ID>0){ //this.input_search_group.val()
                     var dtg_id = this.options.dtg_ID; //this.input_search_group.val();
                     request['dty_DetailTypeGroupID'] = dtg_id;
                     sGroupTitle += ($Db.dtg(dtg_id,'dtg_Name')
-                                        +'</h5><div class="heurist-helper3 truncate" style="font-size:0.7em">'
+                                        +'</h4><div class="heurist-helper3 truncate" style="font-size:0.7em">'
                                         +$Db.dtg(dtg_id,'dtg_Description')+'</div>');
                 }else{
                     sGroupTitle += 'Base field types</h4><div class="heurist-helper3" style="font-size:0.7em">All base field type groups</div>';

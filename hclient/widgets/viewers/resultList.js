@@ -852,9 +852,6 @@ $.widget( "heurist.resultList", {
         //!window.hWin.HEURIST4.util.isempty(this.div_content_header.html());
 
         if(has_content_header){ //table_header
-        
-            this.div_content_header
-                    .position({my:'left bottom', at:'left top', of:this.div_content});
                     
             //adjust columns width in header with columns width in div_content
             if(!this.options.list_mode_is_table){
@@ -878,9 +875,11 @@ $.widget( "heurist.resultList", {
         
         //move content down to leave space for header
         this.div_content.css({'top': top+'px'}); //'110px'});
-
-        
-        
+		
+		if(has_content_header){
+            this.div_content_header
+                    .position({my:'left bottom', at:'left top', of:this.div_content});
+        }
     },
     //
     // show hide pagination and info panel depend on width

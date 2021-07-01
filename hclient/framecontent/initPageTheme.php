@@ -447,6 +447,7 @@ span.fancytree-node:hover{
 .ui-heurist-explore .fancytree-active,
 .ui-heurist-explore .fancytree-node:hover
 {
+	margin: 0;
     background:<?php uout('explore_active', '#AFBFDA');?> !important;
 }
 /*

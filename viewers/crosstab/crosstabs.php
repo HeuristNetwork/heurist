@@ -141,7 +141,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                 </div>
                                                 <div id="rowIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
                                             </div>
-                                            <div style="height:2em">&nbsp;</div>
+                                            <div id="rowWarning" class="row d-flex align-items-center">&nbsp;</div>
                                             <div class="row d-flex align-items-center" id="columnVars">
                                                 <div class="fldheader col-4"><label for="cbColumns">Var 2 (columns)</label></div>
                                                 <div class="input-cell col-6 mt-1">
@@ -156,9 +156,9 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                 </div>
                                                 <div id="columnIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
                                             </div>
-                                            <div style="height:2em">&nbsp;</div>
+                                            <div id="columnWarning" class="row d-flex align-items-center">&nbsp;</div>
                                             <div class="row d-flex align-items-center" id="pageVars">
-                                                <div class="fldheader col-4"><label for="cbPages">Var3 (pages)</label></div>
+                                                <div class="fldheader col-4"><label for="cbPages">Var 3 (pages)</label></div>
                                                 <div class="input-cell col-6 mt-1">
                                                     <select id="cbPages" name="page" onchange="crosstabsAnalysis.resetIntervals(event)" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
                                                 </div>
@@ -171,6 +171,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                 </div>
                                                 <div id="pageIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
                                             </div>
+											<div id="pageWarning" class="row d-flex align-items-center">&nbsp;</div>
                                         </fieldset>
                                     </div>
                                 </div>
