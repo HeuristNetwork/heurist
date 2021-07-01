@@ -422,13 +422,13 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                     request['not:rty_RecTypeGroupID'] = Math.abs(this.options.rtg_ID);
                 }
             
-                var sGroupTitle = '<h4 style="margin:0">';
+                var sGroupTitle = '<h4 style="margin:0;padding-bottom:5px;">';
                 if(!this.element.find('#chb_show_all_groups').is(':checked') && this.options.rtg_ID>0){
                     this.input_search.parent().hide();
 
                     request['rty_RecTypeGroupID'] = this.options.rtg_ID;
                     sGroupTitle += ($Db.rtg(this.options.rtg_ID,'rtg_Name')
-                                        +'</h5><div class="heurist-helper3 truncate" style="font-size:0.7em">'
+                                        +'</h4><div class="heurist-helper3 truncate" style="font-size:0.7em">'
                                         +$Db.rtg(this.options.rtg_ID,'rtg_Description')+'</div>');
                 }else{
                     this.input_search.parent().show();
