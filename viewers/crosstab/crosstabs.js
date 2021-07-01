@@ -156,6 +156,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //createRectypeDetailSelect($('#cbRows').get(0), _selectedRtyID, allowedlist, ' ');
         //createRectypeDetailSelect($('#cbPages').get(0), _selectedRtyID, allowedlist, ' ');
 
+        $('#rowWarning, #columnWarning, #pageWarning')
+                .removeAttr("style")
+                .html('&nbsp;');
+
         var selObj = window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbColumns').get(0), _selectedRtyID, allowedlist, ' ', null );
         window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbRows').get(0), _selectedRtyID, allowedlist, ' ', null );
         window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbPages').get(0), _selectedRtyID, allowedlist, ' ', null );
@@ -594,13 +598,23 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         if(fields3[name].intervals.length<1){
             var errorMessage = 'There are no values for these fields in the current results set.';
-            createErrorMessage($('#errorContainer'), errorMessage);
-            $('#errorContainer').removeClass('d-none');
+            //createErrorMessage($('#errorContainer'), errorMessage);
+            //$('#errorContainer').removeClass('d-none');
 
             //Highlight area (animation)
             $('#'+name+'Vars').animate(
                 {backgroundColor : "#FFF3cd"}, 500
             );
+
+            //Display message beneath dropdown
+            $('#'+name+'Warning')
+                .animate( {backgroundColor : "#FFF3cd"}, 500 )
+                .css({
+                    'font-weight': 'bold',
+                    'font-size': 'smaller',
+                    'color': 'red'
+                })
+                .html(errorMessage);
 
             //Disable Button.
             $('#'+name+'Vars').find('button').prop('disabled', true);
@@ -617,6 +631,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
             var totalVars = 0;  //Holds number of fields that have no style
             //Remove previous error animation style
             $('#'+name+'Vars').removeAttr('style');
+
+            $('#'+name+'Warning')
+                .removeAttr("style")
+                .html('&nbsp;');
 
             //Check to see if all fields have no style and remove error message.
             $('#rowVars,#columnVars,#pageVars').each(function(i, ele){
