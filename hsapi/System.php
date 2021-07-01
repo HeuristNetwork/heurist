@@ -819,10 +819,11 @@ error_log(print_r($_REQUEST, true));
         if($status!=HEURIST_INVALID_REQUEST && $status!=HEURIST_NOT_FOUND && 
         $status!=HEURIST_REQUEST_DENIED && $status!=HEURIST_ACTION_BLOCKED){
 
+            
+            
 
             $now = new DateTime('now', new DateTimeZone('UTC'));
             $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
-            $root_folder = HEURIST_FILESTORE_ROOT;
 
             //3. wrtie error into current error log
             $Title = 'Heurist Error type: '.$status
@@ -837,7 +838,10 @@ error_log(print_r($_REQUEST, true));
                     .'Script: '.@$_SERVER['REQUEST_URI']."\n"
                     ."------------------\n";
 
-            fileAdd($Title.'  '.$sMsg, $root_folder.$curr_logfile);
+            if(defined('HEURIST_FILESTORE_ROOT')){
+                $root_folder = HEURIST_FILESTORE_ROOT;
+                fileAdd($Title.'  '.$sMsg, $root_folder.$curr_logfile);
+            }
 
             $message = 'Heurist was unable to process. '.$message;
             $sysmsg = 'This error has been emailed to the Heurist team (for servers maintained by the project - may not be enabled on personal servers). We apologise for any inconvenience';
@@ -1184,6 +1188,9 @@ error_log(print_r($_REQUEST, true));
     private function start_my_session($check_session_folder=true){
         
         global $defaultRootFileUploadPath;
+        
+        if(headers_sent()) return true;
+        
         //verify that session folder is writable
         if($check_session_folder && ini_get('session.save_handler')=='files'){
             $folder = session_save_path();
