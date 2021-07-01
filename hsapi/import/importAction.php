@@ -559,7 +559,7 @@ public static function assignRecordIds($params){
         if($res) $res->close();
         if(!$row_cnt){ //good name
         
-            $altquery = "alter table ".$import_table." add column ".$id_field." varchar(255) ";
+            $altquery = "alter table ".$import_table." add column ".$id_field." varchar(1000) ";
             if (!$mysqli->query($altquery)) {
                 mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
                 self::$system->addError(HEURIST_DB_ERROR, 'Cannot alter import session table; cannot add new index field', $mysqli->error);
@@ -619,6 +619,15 @@ public static function assignRecordIds($params){
         foreach($records as $imp_id => $ids){
 
             if($ids){
+                
+                if(strlen($ids)>1000){
+                    self::$system->addError(HEURIST_ERROR, 'Cannot update import table: set ID field. '
+                    .'Too many key values. The size of list of keys oversize key field length');
+                    self::$mysqli->rollback();
+                    if($keep_autocommit===true) self::$mysqli->autocommit(TRUE);
+                    return;
+                }
+                
                 //update
                 $updquery = "update ".$import_table." set ".$id_field."='".$ids
                 ."' where imp_id = ".$imp_id;
@@ -718,7 +727,7 @@ public static function assignRecordIds($params){
     }
     
     $imp_session['sequence'][$currentSeqIndex]['counts'] = array(
-                    $imp_session['validation']['count_update'],      //records to be updated
+                        $imp_session['validation']['count_update'],      //records to be updated
                     $imp_session['validation']['count_update_rows'], //rows in source
                     $imp_session['validation']['count_insert'], 
                     $imp_session['validation']['count_insert_rows'],

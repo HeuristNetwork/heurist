@@ -576,7 +576,7 @@ if(!$format) $format='csv';
         </div>
 <!-- end radiogroup setting divs -->     
 
-        <div id="divFieldMapping2" class="step4" style="display:none;position:absolute;bottom:36px">
+        <div id="divFieldMapping2" class="step4" style="display:none;position:absolute;bottom:31px">
             <table class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>
