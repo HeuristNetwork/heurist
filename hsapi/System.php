@@ -63,6 +63,8 @@ class System {
     private $current_User = null;
     private $system_settings = null;
     private $send_email_on_error = 1; //set to 1 to send email for all severe errors
+	
+    private $version_release = null;	
     
     /*
     
@@ -116,7 +118,11 @@ class System {
                         if(!$this->initPathConstants()){
                             return false;
                         }
-						
+                        
+
+                        // attempt to get release version
+                        $this->version_release = (preg_match("/h\d+\-alpha|alpha\//", HEURIST_BASE_URL) === 1) ? "alpha" : "stable";
+
                         $this->_executeScriptOncePerDay();
 
                         $this->login_verify( false ); //load user info from session
@@ -921,7 +927,7 @@ error_log(print_r($_REQUEST, true));
     * it always reload user info from database
     */
     public function getCurrentUserAndSysInfo( $include_reccount_and_dashboard_count=false ){
-        global $passwordForDatabaseCreation,$passwordForDatabaseDeletion,$passwordForReservedChanges,$passwordForServerFunctions,$version_release;
+        global $passwordForDatabaseCreation,$passwordForDatabaseDeletion,$passwordForReservedChanges,$passwordForServerFunctions;
    
         //current user reset - reload actual info from database
         $this->login_verify( true );
@@ -962,7 +968,7 @@ error_log(print_r($_REQUEST, true));
             
 
             //retrieve lastest code version (cached in localfile and refreshed from main index server daily)
-            $lastCode_VersionOnServer = $this->get_last_code_and_db_version($version_release == 'alpha' ? true : false);
+            $lastCode_VersionOnServer = $this->get_last_code_and_db_version($this->version_release == "alpha" ? true : false);
 
             $res = array(
                 "currentUser"=>$this->current_User,
@@ -1885,26 +1891,9 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
     //
     private function _heuristVersionCheck(){
 
-        global $version_release; // get installed heurist version release
-
-        $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']==='on' ? "https" : "http") . "://".HEURIST_SERVER_NAME;
-
         $local_ver = HEURIST_VERSION; // installed heurist version
 
-        $reg_exp = "/h\d+\-alpha/"; // back-up check for alpha version
-
-        if($version_release == 'alpha' || preg_match($reg_exp, $url) == true){ // check if installation is alpha
-
-            $server_ver = $this->get_last_code_and_db_version(true);
-        }else if($version_release == 'stable'){ // check if installation is stable
-
-            $server_ver = $this->get_last_code_and_db_version(false);
-        }else{ // unknown installation
-            
-            //$server_ver = $this->get_last_code_and_db_version(false);			
-			error_log("Cannot determine the Heurist version running on " . $url);
-            return;
-        }
+        $server_ver = $this->get_last_code_and_db_version($this->version_release == "alpha" ? true : false);
 
         $local_parts = explode('.', $local_ver);
         $server_parts = explode('.', $server_ver);
@@ -1915,7 +1904,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                 continue;
             }else if($server_parts[$i] > $local_parts[$i]){ // main release is newer than installed version, send email
 
-                $title = "Heurist version " . $local_ver . " at " . $url . " is behind Heurist home server";
+                $title = "Heurist version " . $local_ver . " at " . HEURIST_BASE_URL . " is behind Heurist home server";
 
                 $msg = "Heurist on the referenced server is running version " . $local_ver . " which can be upgraded to the newer " . $server_ver . ".<br><br>"
                 . "Please check for an update package at <a href='http://heuristnetwork.org/installation/'>http://heuristnetwork.org/installation/</a><br><br>"
@@ -1939,8 +1928,11 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                     error_log('Cannot send email. Please ask system administrator to verify that mailing is enabled on your server. ' . $e->getMessage());
                 }
 
+                if($email->ErrorInfo)
+
                 return;
-            }else{ // main release is less than installed version, missed alpha or developemental version
+
+            }else{ // main release is less than installed version, maybe missed alpha or developemental version
                 return;
             }
         }
