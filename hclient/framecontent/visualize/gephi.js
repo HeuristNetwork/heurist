@@ -1,6 +1,6 @@
 
 /**
-* filename: explanation
+* gephi.js: Functions to download the displayed nodes in GEPHI format
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -81,7 +81,8 @@ gexf += ' version="1.2">';
     for(var key in data.nodes) {
         var node = data.nodes[key];
         
-        var name = (node.name?node.name.replace(/&/g,'&amp;').replace(/"/g, '&quot;'):'')
+        //var name = (node.name?node.name.replace(/&/g,'&amp;').replace(/"/g, '&quot;'):'');
+        var name = window.hWin.HEURIST4.util.htmlEscape(node.name);
         var rectype = '';
         if(node.image && node.image.indexOf('&id=')){
              rectype = node.image.substring(node.image.indexOf('&id=')+4);
@@ -105,7 +106,8 @@ gexf += ' version="1.2">';
     gexf += '<edges>';
     for(var i = 0; i < data.links.length; i++) {
         var edge = data.links[i]; 
-        var name = (edge.relation.name?edge.relation.name.replace(/&/g,'&amp;').replace(/"/g,'&quot;'):'')
+        //var name = (edge.relation.name?edge.relation.name.replace(/&/g,'&amp;').replace(/"/g,'&quot;'):'')
+        var name = window.hWin.HEURIST4.util.htmlEscape(edge.relation.name);
         
         gexf += '<edge id="'+i+'" source="'+edge.source.id+'" target="'+edge.target.id+'" weight="'
                     +(edge.targetcount>0?edge.targetcount:1)+'">';
