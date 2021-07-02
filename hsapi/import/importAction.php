@@ -209,10 +209,21 @@ private static function findRecordIds($imp_session, $params){
 
                     
                     if($row[$fieldname]==null || trim($row[$fieldname])=='') {
-                        $keys_values_all[] = '';
-                        continue; //ignore empty values   
-                    }
-                    $fieldvalue = trim($row[$fieldname]);
+                        
+                        //$keys_values_all[] = '';
+                        //continue; //ignore empty values   
+                        
+                        if($field_type>0){
+                            array_push($select_query_match_where, 'NOT exists (select dtl_ID from recDetails '
+                                .' WHERE dtl_DetailTypeID='.$field_type
+                                .' AND rec_ID=dtl_RecID)');
+                            
+                            //$multivalue_selquery_from = '';
+                        }
+                        
+                        
+                    }else{
+                        $fieldvalue = trim($row[$fieldname]);
                     
                     
                         if($field_type=="url" || $field_type=="id"){  // || $field_type=="scratchpad"){
@@ -256,6 +267,7 @@ private static function findRecordIds($imp_session, $params){
                             }
                             
                         }
+                    }
                         $index++;
                 }//for all fields in match array
                 
@@ -409,7 +421,7 @@ private static function findRecordIds($imp_session, $params){
                             
                             $is_update = true;
                         }else{
-                            $new_id= 'Found:'.count($disamb); //Disambiguation!
+                            $new_id = 'Found:'.count($disamb); //Disambiguation!
                             $disambiguation[$keyvalue] = $disamb;
                             $disambiguation_lines[$keyvalue] = $imp_id;
                         }

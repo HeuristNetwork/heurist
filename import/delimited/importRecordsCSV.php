@@ -635,7 +635,7 @@ if(!$format) $format='csv';
                 <th style="text-align: left;padding-left: 16px;">
                     <a href="#" class="navigation" style="display: inline-block;"><span data-dest="0" class="ui-icon ui-icon-seek-first"/></a>
                     <a href="#" class="navigation" style="display:inline-block;"><span data-dest="-1" class="ui-icon ui-icon-triangle-1-w"/></a>
-                    <div style="display: inline-block;vertical-align: super;">Values in row <span id="current_row"></span></div>
+                    <div style="display: inline-block;">Values in row <span id="current_row"></span></div>
                     <a href="#" class="navigation" style="display: inline-block;"><span data-dest="1" class="ui-icon ui-icon-triangle-1-e"/></a>
                     <a href="#" class="navigation" style="display: inline-block;"><span data-dest="last" class="ui-icon ui-icon-seek-end"/></a>
                 </th></tr>
