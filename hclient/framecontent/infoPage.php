@@ -30,6 +30,8 @@ if(!isset($is_error)){
     $is_error = true;
 }
 
+$is_error_unknown = false;
+
 //variable message can be defined as global
 if(!isset($message)){
     if( @$_REQUEST['error'] ){
@@ -42,11 +44,23 @@ if(!isset($message)){
         if(isset($system)){
             $err = $system->getError();
             $message = @$err['message'];
+        }else{
+            $message = 'Heurist core engine is not initialized.';
+            $is_error_unknown = true;
         }
         
     }
     if(!$message){
         $message ='Unknown error.';
+        $is_error_unknown = true;
+    }
+            
+    if($is_error_unknown){
+        if(defined('CONTACT_HEURIST_TEAM')){
+            $message = $message.' Please '.CONTACT_SYSADMIN.' or '.CONTACT_HEURIST_TEAM; 
+        }else{
+            $message = $message.' Please contact Heurist team';
+        }
     }
 }
 ?>

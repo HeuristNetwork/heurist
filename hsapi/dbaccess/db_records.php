@@ -1779,7 +1779,7 @@
                             $tmp_file = image_CreateFromURL($record['URL']);
 
                             if(!is_a($tmp_file,'stdClass')){
-                                $err_msg = is_array($tmp_file) ?$tmp_file['error'] :'Unknown error '.$tmp_file;
+                                $err_msg = is_array($tmp_file) ?$tmp_file['error'] :('System message: '.$tmp_file);
                             }else{
                                 $entity = new DbRecUploadedFiles($system, null);
 

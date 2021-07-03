@@ -667,68 +667,69 @@ $.widget( "heurist.recordLookupCfg", {
     // save current service details
     //
     _applyConfig: function(){
-        
+
         var rty_ID = this.selectRecordType.val();
         var service_name = this.selectServiceType.val();
         var label = this.element.find('#inpt_label').val();
 
-        if(rty_ID>0 && !window.hWin.HEURIST4.util.isempty(service_name)){ // check if a service and table have been selected
+        if(window.hWin.HEURIST4.util.isempty(this._current_cfg)){
+
+            // no service and no service information is available
+            window.hWin.HEURIST4.msg.showMsgFlash('Select or define new service first');
+
+
+        }else if(rty_ID>0 && !window.hWin.HEURIST4.util.isempty(service_name)){ // check if a service and table have been selected
 
             var that = this;
             var tbl = this.element.find('#tbl_matches');
             var is_field_mapped = false;
 
             var fields = {};
-            
+
             $.each(tbl.find('select'), function(i, ele){ // get mapped fields
-                
+
                 var field = $(ele).attr('data-field');
                 var dty_ID = $(ele).val();
                 fields[field] = dty_ID; 
-                
+
                 if(dty_ID>0) is_field_mapped = true;
 
             });
-            
+
             if(is_field_mapped){
-                
+
                 this.options.service_config = window.hWin.HEURIST4.util.isJSON(this.options.service_config); // get existing assigned services
                 if(!this.options.service_config){
                     this.options.service_config = {};    
                 } 
-                
+
                 var t_name = service_name + '_' + rty_ID;
 
                 if(window.hWin.HEURIST4.util.isempty(label)){ // set label to default, if none provided
                     label = service_name;
                 }
-                
-                if(!window.hWin.HEURIST4.util.isempty(this._current_cfg)){ // save changes
 
-                    //if rectype has been changed - remove previous one                
-                    if(t_name != this._current_cfg.service_id && this.options.service_config[t_name]){
-                        delete this.options.service_config[t_name];
-                    }
+                // save changes
 
-                
-                    this._current_cfg.service_id = t_name;
-                    this._current_cfg.rty_ID = rty_ID;
-                    this._current_cfg.label = label;
-                    this._current_cfg.service_name = service_name;
-                    this._current_cfg.fields = fields;
-
-                    
-                    this.options.service_config[t_name] = this._current_cfg;
-
-                    this._isNewCfg = false;
-                    
-                }else{ // no service and no service information is available
-
-                    window.hWin.HEURIST4.msg.showMsgErr('An unknown error has occurred with setting this service\'s details');
+                //if rectype has been changed - remove previous one                
+                if(t_name != this._current_cfg.service_id && this.options.service_config[t_name]){
+                    delete this.options.service_config[t_name];
                 }
 
+
+                this._current_cfg.service_id = t_name;
+                this._current_cfg.rty_ID = rty_ID;
+                this._current_cfg.label = label;
+                this._current_cfg.service_name = service_name;
+                this._current_cfg.fields = fields;
+
+
+                this.options.service_config[t_name] = this._current_cfg;
+
+                this._isNewCfg = false;
+
                 this._reloadServiceList(); // reload left panel
-                
+
             }else{
                 window.hWin.HEURIST4.msg.showMsgFlash('Map at least one field listed', 3000);
             }
