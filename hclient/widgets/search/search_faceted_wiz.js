@@ -485,7 +485,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
                         $dlg.find("#svs_getCurrentFilter")
                         .button({'label':window.hWin.HR('Get current query')}) //{icons: {primary: "ui-icon-search"}, text:false}
-                        .css({'height':'16px','font-size':'0.8em'})
+                        .css({'height':'16px','font-size':'0.8em',width:'45px'})
                         .click(function( event ) {
                             var res = window.hWin.HEURIST4.util.hQueryStringify(window.hWin.HEURIST4.current_query_request);
                             if($dlg.find('#svs_Query').val().trim()!=''){
@@ -1039,8 +1039,10 @@ $.widget( "heurist.search_faceted_wiz", {
         var that = this;
 
         var url = window.hWin.HAPI4.baseURL+ "hclient/widgets/search/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
-        if(!Hul.isnull(ele_rules)){
+        if(ele_rules && !Hul.isempty(ele_rules.val())){
             url = url + '&rules=' + encodeURIComponent(ele_rules.val());
+        }else if (this.select_main_rectype.val()>0){
+            url = url + '&rty_ID=' + this.select_main_rectype.val();
         }
         
         if(this.options.menu_locked && $.isFunction(this.options.menu_locked)){
