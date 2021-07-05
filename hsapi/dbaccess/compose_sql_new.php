@@ -26,7 +26,7 @@ require_once (dirname(__FILE__).'/compose_sql.php');
 query is json array  { conjunction: [ {predicate} , {predicate}, .... ] }
 
 conjunction:  not, all (default)
-any        OR
+any        OR                                                                                           
 @todo  notall     NOT ( AND )
 @todo  notany     NOT ( OR )
 
@@ -714,7 +714,8 @@ class HPredicate {
     var $greaterthan = false;
 
     var $allowed = array('title','t','added','modified','url','notes','type','ids','id','count','cnt',
-            'f','field','geo','linked_to','linkedto','linkedfrom','related','related_to','relatedto','relatedfrom','links','plain',
+            'f','field','geo','lt','linked_to','linkedto','lf','linkedfrom',
+            'related','rt','related_to','relatedto','rf','relatedfrom','links','plain',
             'addedby','owner','access','tag','keyword','kwd');
     /*
     notes, n:        record heder notes (scratchpad)
@@ -758,20 +759,25 @@ class HPredicate {
             if(is_array($value) &&  count($value)>0 && 
                 !(is_numeric(@$value[0]) || is_string(@$value[0])) )
             { //subqueries
-                //special bahvior for related_to - extract reltypes
-                if(strtolower($this->pred_type)=='related_to'){
+                //special bahvior for relation - extract reltypes and record ids
+                $p_type = strtolower($this->pred_type);
+                if($p_type=='related_to' || $p_type=='rt' ||
+                   $p_type=='relatedfrom' || $p_type=='rf')
+                {
                     foreach($value as $idx=>$val){
-                        if(@$val['r']){
-                            $this->relation_types = prepareIds($val['r']);
+                        if($idx==='r' || @$val['r']){
+                            if(@$val['r']) $val = $val['r'];
+                            $this->relation_types = prepareIds($val);
                             array_splice($value, $idx, 1);
                             $this->value = $value;
                             break;
                         }
                     }
                     foreach($value as $idx=>$val){
-                        if(@$val['ids']){
-                            $this->value = $val['ids'];
-                            $value = array();
+                        if($idx==='ids' || @$val['ids']){
+                            if(@$val['ids']) $val = $val['ids'];
+                            $this->value = $val;
+                            $value = array(); //reset
                             break;
                         }
                     }    
@@ -895,11 +901,13 @@ class HPredicate {
                 
                 return $this->predicateKeywords();
 
+            case 'lt':
             case 'linked_to':
             case 'linkedto':
 
                 return $this->predicateLinkedTo();
 
+            case 'lf':
             case 'linkedfrom':
 
                 return $this->predicateLinkedFrom();
@@ -908,14 +916,16 @@ class HPredicate {
 
                 return $this->predicateRelated();
 
+            case 'rt':
             case 'related_to':
             case 'relatedto':
 
-                return $this->predicateRelatedTo();
+                return $this->predicateRelatedDirect(false);
 
+            case 'rf':
             case 'relatedfrom':
 
-                return $this->predicateRelatedFrom();
+                return $this->predicateRelatedDirect(true);
 
             case 'links':
 
@@ -986,7 +996,7 @@ class HPredicate {
             $this->field_type = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$this->field_id);
             
             if($this->field_type=='relmarker'){
-                return $this->predicateRelatedTo();    
+                return $this->predicateRelatedDirect(false);    
             }
         }else{
             $this->field_type = 'freetext';
@@ -1591,12 +1601,22 @@ class HPredicate {
     * 
     * "related_to:term_id": query for target record
     * 
-    * $this->field_id - relation type (term id)
+    * $this->field_id - relmarker field - it is not used (required for rule builder only)
+    * It takes relation type (term id) from value
+    * for example "rf":[{"t":4},{"r":"6590"}]
     */
-    function predicateRelatedTo(){
+    function predicateRelatedDirect($is_reverse){
 
         global $top_query, $params_global, $mysqli;
         $not_nested = (@$params_global['nested']===false);
+        
+        if($is_reverse){
+            $part1 = 'rl_TargetID';
+            $part2 = 'rl_SourceID';
+        }else{
+            $part1 = 'rl_SourceID';
+            $part2 = 'rl_TargetID';
+        }
         
 
         $this->field_type = "link";
@@ -1604,7 +1624,7 @@ class HPredicate {
         $rl = "rl".$p."x".$this->index_of_predicate;
         
         
-        if($this->isEmptyValue()){
+       if($this->isEmptyValue()){
             
             $rd = "rd".$this->qlevel;
             
@@ -1623,7 +1643,7 @@ class HPredicate {
                         $rty_constraints = 'IN ('.implode(',',$rty_constraints).')';
                     }
                     
-                    $rty_constraints = ', Records where rl_TargetID=rec_ID and rec_RecTypeID '.$rty_constraints.' AND ';
+                    $rty_constraints = ', Records where '.$part2.'=rec_ID and rec_RecTypeID '.$rty_constraints.' AND ';
                 }else{
                     $rty_constraints = ' where ';
                 }
@@ -1640,7 +1660,7 @@ class HPredicate {
                 }
                 
                 $where = "r$p.rec_ID ".(($this->negate)?'':'NOT')
-                    .' IN (select rl_SourceID from recLinks'
+                    ." IN (select $part1 from recLinks"
                                 .$rty_constraints
                                 .$reltypes.')';
             
@@ -1648,7 +1668,7 @@ class HPredicate {
                 //relmarker field not defined
                 //no relation at all or any relation with specified reltypes (term) and record types
                 $where = "r$p.rec_ID ".(($this->negate)?'':'NOT')
-                        ." IN (select rl_SourceID from recLinks where rl_RelationID IS NOT NULL)";
+                        ." IN (select $part1 from recLinks where rl_RelationID IS NOT NULL)";
             }
             
             return array("where"=>$where);
@@ -1680,10 +1700,12 @@ class HPredicate {
             }
 
             //search by relation type is disabled since it assigns field id instead  @todo fix
-            $where = "r$p.rec_ID=$rl.rl_SourceID AND $rl.rl_TargetID".$val;
+            $where = "r$p.rec_ID=$rl.$part1 AND $rl.$part2".$val;
             
             if(is_array($this->relation_types)&& count($this->relation_types)>0){
-                //(($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :)
+                
+                $this->relation_types = array_merge($this->relation_types, 
+                                getTermChildrenAll($mysqli, $this->relation_types));
                 
                 $where = $where . " AND ($rl.rl_RelationTypeID " .(count($this->relation_types)>1
                             ?' IN ('.implode(',',$this->relation_types).')'
@@ -1693,55 +1715,9 @@ class HPredicate {
             }else{
                 $where = $where . " AND $rl.rl_RelationID is not null";
             }
-            
-
             return array("from"=>"recLinks ".$rl, "where"=>$where);
         }
     }
-
-    /**
-    * find records that are target relation for specified records
-    */
-    function predicateRelatedFrom(){
-
-        global $top_query, $params_global;
-        $not_nested = (@$params_global['nested']===false);
-        
-        $this->field_type = "link";
-        $p = $this->qlevel; //parent level
-        $rl = "rl".$p."x".$this->index_of_predicate;
-
-        if($this->query){
-            $this->query->makeSQL();
-            if($this->query->where_clause && trim($this->query->where_clause)!=""){
-                if($not_nested){
-                    $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
-                    $top_query->top_limb->addTable($this->query->from_clause);
-                }else{
-                    $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
-                }
-            }else{
-                return null;
-            }
-
-        }else{
-            $val = $this->getFieldValue();
-
-            if(!$this->field_list){
-                $val = "=0";
-                //@todo  findAnyField query
-                //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
-            }
-        }
-
-        //search by relation type is disabled since it assigns field id instead  @todo fix
-        $where = "r$p.rec_ID=$rl.rl_TargetID AND ".
-        (($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :"$rl.rl_RelationID is not null")
-        ." AND $rl.rl_SourceID".$val;
-
-        return array("from"=>"recLinks ".$rl, "where"=>$where);
-    }
-
 
     /**
     * find records that any links (both pointers and relations) to specified records
