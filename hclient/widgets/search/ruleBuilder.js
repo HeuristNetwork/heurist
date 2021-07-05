@@ -584,7 +584,6 @@ $.widget( "heurist.ruleBuilder", {
                 var dty_ID = 0;
                 var trm_ID = 0;
                 
-console.log(query);                
                 
                 switch (link[0]) {
                     case 'links': linktype = 0; break;
@@ -634,7 +633,16 @@ console.log(query);
                 this.select_source_rectype.val(rt_source);
                 this._onSelectRectype();
 
-                this.select_fields.val( dt_ID + ((linktype==1 || linktype==3)?'r':'') );
+                
+                var sel_field = dt_ID;
+                if(linktype==1 || linktype==3){
+                    sel_field = sel_field + 'r';
+                    if(rt_target>0){
+                        sel_field = sel_field + rt_target;
+                    }
+                }
+                
+                this.select_fields.val( sel_field );
                 this._onSelectFieldtype();
 
                 if(isNaN(linktype) || linktype<0 || linktype>4){

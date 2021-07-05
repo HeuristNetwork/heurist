@@ -41,7 +41,6 @@ function onPageInit(success) //callback function of hAPI initialization
         } 
         else rules = decodeURIComponent(rules);
         
-console.log(first_level_rty_ID);          
         if(!(first_level_rty_ID>0)) first_level_rty_ID = null;
         
         //init toolbar buttons
@@ -140,7 +139,6 @@ function getRulesArray(){
         var subrule = $(value).ruleBuilder("getRules");
         if(!window.hWin.HEURIST4.util.isempty(subrule)) rules.push(subrule);
     });
-console.log(rules);    
     
     return rules;
     /*
