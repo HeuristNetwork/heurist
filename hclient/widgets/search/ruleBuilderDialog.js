@@ -18,15 +18,32 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/*
+//new format for rules
+
+"q":{"t":"5","lt:15":{"t":"10"}},"levels":[]
+
+{"t":"5","lt:15":{"t":"10","f:1":"Sidor"}}
+{"t":"5","lt:15":{"t":"10","plain":"Petia"}}
+
+*/
+var first_level_rty_ID = null;
+
 function onPageInit(success) //callback function of hAPI initialization
 {
     if(success)  //system is inited
     {
 
         var rules = window.hWin.HEURIST4.util.getUrlParameter('rules', window.location.search);
-        if(!rules) rules = '[]'
+        if(!rules){
+            rules = '[]';
+            first_level_rty_ID = window.hWin.HEURIST4.util.getUrlParameter('rty_ID', window.location.search);  
+        } 
         else rules = decodeURIComponent(rules);
-
+        
+console.log(first_level_rty_ID);          
+        if(!(first_level_rty_ID>0)) first_level_rty_ID = null;
+        
         //init toolbar buttons
         $('#btn_add_level1').attr('title', 'explanatory rollover' ).button().on('click', null, addLevel );
 
@@ -58,37 +75,41 @@ function onPageInit(success) //callback function of hAPI initialization
         if(!window.hWin.HEURIST4.util.isempty(rules)){
 
             if(!window.hWin.HEURIST4.util.isArray(rules)) rules = $.parseJSON(rules);
-            var i;
-            for(i=0; i<rules.length; i++){
+            
+            if(rules.length>0){
+                var i;
+                for(i=0; i<rules.length; i++){
 
-                $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add RuleSets builder for level 1
-                    rules: rules[i],
-                    onremove: function(event, data){
-                        $('#'+data.id).remove();    //remove this RuleSets builder
+                    $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add RuleSets builder for level 1
+                        rules: rules[i],
+                        onremove: function(event, data){
+                            $('#'+data.id).remove();    //remove this RuleSets builder
 
-                    }
-                }).insertBefore($('#div_add_level'));
+                        }
+                    }).insertBefore($('#div_add_level'));
 
+                }
+                return;
             }
-
-        }else{
-            addLevel(); //add first level by default
         }
-
-
-
+        
+        //add first level by default
+        addLevel();
     }
 }
 
 //
 // add first level (init ruleBuilder widget)
 //
-function addLevel(){
-    $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add RuleSets builder for level 1
-        onremove: function(event, data){
-            $('#'+data.id).remove();    //remove this RuleSets builder
-        }
+function addLevel(){    
+
+    $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,
+            recordtypes: first_level_rty_ID,
+            onremove: function(event, data){
+                $('#'+data.id).remove();
+            }
     }).insertBefore($('#div_add_level'));
+
 }
 
 //
@@ -119,6 +140,8 @@ function getRulesArray(){
         var subrule = $(value).ruleBuilder("getRules");
         if(!window.hWin.HEURIST4.util.isempty(subrule)) rules.push(subrule);
     });
+console.log(rules);    
+    
     return rules;
     /*
     var res = {};

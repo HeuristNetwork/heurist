@@ -44,9 +44,9 @@ $.widget( "heurist.ruleBuilder", {
     //
     _create: function() {
 
-        var that = this;
+       var that = this;
 
-        this.element.addClass('rulebuilder');
+       this.element.addClass('rulebuilder');
 
        if(this.options.level>1) {
             $('<div>')
@@ -57,17 +57,23 @@ $.widget( "heurist.ruleBuilder", {
        }
 
         //create list/combobox of source record types
-        var cont = $('<div>')
+       var cont = $('<div>')
             .css({'padding-top':(this.options.level==1?'10px':0),
                   'text-align':'left','width':'230px'}).appendTo(this.element);
 
-        this.select_source_rectype = $( "<select>" )
-        .attr('title', 'The starting point entity type for this rule. The result set will be expanded by following pointers/relationships from/to this type' )
-        .addClass('text ui-corner-all ui-widget-content')
-        .appendTo( cont );
+       this.select_source_rectype = $( "<select>" )
+            .attr('title', 'The starting point entity type for this rule. The result set will be expanded by following pointers/relationships from/to this type' )
+            .addClass('text ui-corner-all ui-widget-content')
+            .appendTo( cont );
 
-        window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), this.options.recordtypes, 
-                                                            (this.options.level==1?'select....':false), true );
+        
+       if(that.options.recordtypes && !$.isArray(that.options.recordtypes)){
+           that.options.recordtypes = that.options.recordtypes.split(',');
+       }
+             
+       window.hWin.HEURIST4.ui.createRectypeSelect(that.select_source_rectype.get(0), 
+                                                        that.options.recordtypes, 
+       (that.options.level==1 && (!that.options.recordtypes || that.options.recordtypes.length>1)?'select....':false), true );
 
         //create list/combobox of pointer/relmarker fields
         this.select_fields = $( "<select>" )
@@ -302,7 +308,7 @@ $.widget( "heurist.ruleBuilder", {
                         vocab_id = $Db.dty(dtyID, 'dty_JsonTermIDTree');
                     }
                     
-                    var key = (dtyID+'r');
+                    var key = (dtyID+'r'+rtyID);
                     
                     if(arr_reverse[key]){
                         //already exists - add rectype name
@@ -516,7 +522,10 @@ $.widget( "heurist.ruleBuilder", {
             rel_term_id = '';
         }
 
+        //1:2; link to/from
+        //3:4; relatiom to/from
         return [rt_source, dt_ID, rel_term_id, rt_target, filter, linktype];
+        
     },
 
     _getQuery: function(codes){
@@ -558,6 +567,59 @@ $.widget( "heurist.ruleBuilder", {
         if(this.options.rules){
 
             var codes = this.options.rules.codes;
+            
+            var query = window.hWin.HEURIST4.util.isJSON(this.options.rules.query);
+            
+            if(!codes && query){
+                    
+                // {"t":"5","lt:15":[{"t":"10"},{"plain":"Petia"}]}
+                //parse query
+                var keys = Object.keys(query);
+                var link = keys[1];
+                linkdata = query[link];
+                
+                link = link.split(':');
+                
+                var linktype = 0;
+                var dty_ID = 0;
+                var trm_ID = 0;
+                
+console.log(query);                
+                
+                switch (link[0]) {
+                    case 'links': linktype = 0; break;
+                    case 'lt': linktype = 1; break;
+                    case 'lf': linktype = 2; break;
+                    case 'rt': linktype = 3; break;
+                    case 'rf': linktype = 4; break;
+                }
+                
+                if(linktype>0){
+                    dty_ID = link[1];
+                }
+                
+                var rt_source = '';
+                var filter = [];
+                for(var i=0; i<linkdata.length; i++){
+                    if(linkdata[i]['t']){
+                        rt_source = linkdata[i]['t'];
+                    }else if(linkdata[i]['plain']){
+                        filter = linkdata[i]['plain'];
+                    }else if(linkdata[i]['r']){
+                        trm_ID = linkdata[i]['r'];
+                    }else{
+                        filter.push(linkdata[i]);
+                    }
+                }
+                if($.isArray(filter)){
+                    filter =  (filter.length==0)?'':JSON.stringify(filter);
+                }
+                
+                //0=source,1=dty_ID,2=vocab_id,3=target,4=filter,5=linktype
+                codes = [rt_source, dty_ID, trm_ID, query['t'], filter, linktype];
+                    
+            }
+            
             if(window.hWin.HEURIST4.util.isArray(codes) && codes.length==6){
 
                 var rt_source = codes[0];
@@ -578,7 +640,7 @@ $.widget( "heurist.ruleBuilder", {
                 if(isNaN(linktype) || linktype<0 || linktype>4){
                     linktype = 0;
                 }    
-                if(window.hWin.HEURIST4.util.isempty(rel_type)){
+                if(!(rel_type>0)){
                     if(linktype==1 || linktype==2){
                         rel_type = 'pointer';
                     }else{
@@ -587,7 +649,7 @@ $.widget( "heurist.ruleBuilder", {
                 }
                 
                 this.select_reltype.val(rel_type);
-console.log(rel_type);                
+             
                 if(this.select_reltype.hSelect("instance"))
                         this.select_reltype.hSelect('refresh');
                 this.select_target_rectype.val(rt_target);
@@ -617,7 +679,7 @@ console.log(rel_type);
     // 1. generate current query string and codes array
     // 2. recursion for all dependent rules
     //
-    getRules: function(){
+    getRulesOld: function(){
 
         // original rule array
         // rules:[ {query:query, codes:[], levels:[]}, ....  ]
@@ -634,7 +696,7 @@ console.log(rel_type);
             //loop all dependent
             $.each( this.element.children('.rulebuilder') , function( index, value ) {
 
-                var subrule = $(value).ruleBuilder("getRules");
+                var subrule = $(value).ruleBuilder("getRulesOld");
                 if(subrule!=null)  sub_rules.push(subrule);
 
             });
@@ -642,6 +704,81 @@ console.log(rel_type);
             this.options.rules = {query:query, codes:codes, levels:sub_rules};
             return this.options.rules;
         }
+    },
+
+    //
+    // get rules in json format
+    //     
+    getRules: function(){
+
+        // original rule array
+        // rules:[ {q:query, levels:[]}, ....  ]
+        
+        //1:2; link to/from
+        //3:4; relatiom to/from
+        //codes [rt_source, dt_ID, rel_term_id, rt_target, filter, linktype];
+
+        //refresh query
+        var codes = this._getCodes();
+        if(codes==null){
+            return null;
+        }else{
+            //var query = this._getQuery(codes);
+            
+            var rt_source = parseInt(codes[0]),
+                dty_ID    = parseInt(codes[1]),
+                trm_ID    = parseInt(codes[2]),
+                rt_target = parseInt(codes[3]),
+                filter = codes[4],
+                linktype = codes[5];
+
+            var link = '';
+            switch (linktype) {
+                case 0: link = 'links'; break;
+                case 1: link = 'lt'; break;
+                case 2: link = 'lf'; break;
+                case 3: link = 'rt'; break;
+                case 4: link = 'rf'; break;
+            }             
+            
+            if(linktype>0 && dty_ID>0){
+                link = link+':'+dty_ID;
+            }
+            var query = {"t":rt_target};
+            query[link] = [{"t":rt_source}];
+            
+            //additional filter
+            if(filter){
+                if(window.hWin.HEURIST4.util.isJSON(filter))
+                {
+                    if(!$.isArray(filter)){
+                        filter = [filter];
+                    }
+                    filter.unshift(query[link][0]);
+                    query[link] = filter;
+                }else{
+                    query[link].push({"plain":filter});        
+                }
+            }
+            
+            if(trm_ID>0 && linktype>2){ //relation type
+                query[link].push({"r":trm_ID});        
+            }
+
+            var sub_rules = [];
+
+            //loop all dependent
+            $.each( this.element.children('.rulebuilder') , function( index, value ) {
+
+                var subrule = $(value).ruleBuilder("getRules");
+                if(subrule!=null)  sub_rules.push(subrule);
+
+            });
+
+            this.options.rules = {query:query, levels:sub_rules};
+            return this.options.rules;
+        }
     }
+    
 
 });
