@@ -1755,7 +1755,8 @@ class HPredicate {
             }
         }
 
-        $where = "($rl.rl_RelationID is not null) AND ((r$p.rec_ID=$rl.rl_SourceID AND $rl.rl_TargetID".$val.") OR (r$p.rec_ID=$rl.rl_TargetID AND $rl.rl_SourceID".$val."))";
+        //($rl.rl_RelationID is not null) AND 
+        $where = "((r$p.rec_ID=$rl.rl_SourceID AND $rl.rl_TargetID".$val.") OR (r$p.rec_ID=$rl.rl_TargetID AND $rl.rl_SourceID".$val."))";
 
 
         return array("from"=>"recLinks ".$rl, "where"=>$where);
