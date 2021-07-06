@@ -103,7 +103,7 @@ $.widget( "heurist.ruleBuilder", {
         this.btn_cancel = $( "<button>", {text:'Cancel'} ).appendTo(this.element);*/
 
         //(this.options.level<3)?'12em':
-        this.div_btn2 =  $('<div>').css({'width':'auto'}).appendTo(this.element); //,'margin-left':'0.5em'
+        this.div_btn2 =  $('<div>').css({'width':'55px'}).appendTo(this.element); //,'margin-left':'0.5em'
 
         this.btn_edit = $( "<button>", {text:'Filter'})
         .attr('title', 'Create additional filter' )
@@ -220,7 +220,7 @@ $.widget( "heurist.ruleBuilder", {
         var rtyID, dtyID;
         var vocab_id;
         var arr_direct = {};
-        var arr_reverse = {};
+        var arr_reverse = [];
         var arr_rectypes = []; //all targets
         
         var all_structs = $Db.rst_idx2();
@@ -247,8 +247,9 @@ $.widget( "heurist.ruleBuilder", {
                     if(fieldtype=='relmarker'){
                         vocab_id = $Db.dty(dtyID, 'dty_JsonTermIDTree');
                     }    
-                    arr_direct[dtyID] = {key:dtyID, title: source_rt_name + ' >> ' + name, 
-                                    terms:vocab_id, rectypes:constraints};
+                    arr_direct[dtyID] = {key:dtyID, 
+                                title: (vocab_id>0?'>> ':'> ')+name,  //source_rt_name
+                                terms:vocab_id, rectypes:constraints};
                     
                     arr_rectypes = arr_rectypes.concat(constraints);
                     
@@ -265,6 +266,7 @@ $.widget( "heurist.ruleBuilder", {
                     
                     var key = (dtyID+'r'+rtyID);
                     
+                    /*
                     if(arr_reverse[key]){
                         //already exists - add rectype name
                         var title = arr_reverse[key].title;
@@ -278,12 +280,14 @@ $.widget( "heurist.ruleBuilder", {
                         }
                         arr_reverse[key].title = title;
                         arr_reverse[key].rectypes.push(rtyID);
-                    }else{
-                        arr_reverse[key] = {key:key, 
-                                    title:'<< '+rt_name + ' . ' + name, 
+                    }else{  */
+                    
+                    arr_reverse.push({key:key, 
+                                    title: (vocab_id>0?'<< ':'< ')+name
+                                        +' [in '+rt_name + ']', //<span style="font-size:smaller;font-style:italic"></span>'
                                     terms:vocab_id,
-                                    rectypes:[rtyID], isreverse:true, dtyID:dtyID };
-                    }
+                                    rectypes:[rtyID], isreverse:true, dtyID:dtyID });
+                    
                 }
             }
         });
@@ -295,26 +299,50 @@ $.widget( "heurist.ruleBuilder", {
         // relation than links
         this._arr_fields = arr_direct;
         
+        var has_pointer = false;
+        var has_relation = false;
+        var arr_options = [];
         var arr_link = [], arr_rels = [];
         for(var dtyID in arr_direct){
             var opt = {key:arr_direct[dtyID].key, title:arr_direct[dtyID].title};
             if(arr_direct[dtyID].terms>0){
+                has_relation = true;
                 arr_rels.push(opt);    
             }else{
+                has_pointer = true;
                 arr_link.push(opt); 
             }
-        }
-        for(var dtyID in arr_reverse){
-            var opt = {key:arr_reverse[dtyID].key, title:arr_reverse[dtyID].title};
-            if(arr_reverse[dtyID].terms>0){
-                arr_rels.push(opt);    
-            }else{
-                arr_link.push(opt); 
-            }
-            this._arr_fields[dtyID] = arr_reverse[dtyID];
+        }   
+        if(arr_link.length>0 || arr_rels.length>0){
+            arr_options.push({key:0, title:'Pointers > and Relationships >>', disabled:true, group:1}); //optgroup:true, 
+            arr_options = arr_options.concat(arr_link);
+            arr_options = arr_options.concat(arr_rels);
         }
         
-        var arr_options = [];
+        arr_link = [];
+        arr_rels = [];
+        
+        arr_reverse.sort(function(a,b){return a.dtyID<b.dtyID?-1:1})
+        
+        for(var i=1; i<arr_reverse.length; i++){
+            var item = arr_reverse[i];
+            var opt = {key:item.key, title:item.title};
+            if(item.terms>0){
+                has_relation = true;
+                arr_rels.push(opt);    
+            }else{
+                has_pointer = true;
+                arr_link.push(opt); 
+            }
+            this._arr_fields[item.key] = item;
+        }
+        if(arr_link.length>0 || arr_rels.length>0){
+            arr_options.push({key:0, title:'Referenced by', disabled:true, group:1}); //optgroup:true, 
+            arr_options = arr_options.concat(arr_link);
+            arr_options = arr_options.concat(arr_rels);
+        }
+        
+        /* OLD WAY
         if(arr_rels.length>0){
             arr_options.push({optgroup:true, key:0, title:'Relationships', disabled:true, group:1});
             arr_options = arr_options.concat(arr_rels);
@@ -323,13 +351,13 @@ $.widget( "heurist.ruleBuilder", {
             arr_options.push({optgroup:true, key:0, title:'Pointers', disabled:true, group:1});
             arr_options = arr_options.concat(arr_link);
         }
-        
+        */        
          //add any as a first element
-        if(arr_link.length>0 && arr_rels.length>0){
+        if(has_pointer && has_relation){
             arr_options.unshift({key:'', title:'Any pointer or relationship'});
-        }else if(arr_link.length>0){
+        }else if(has_pointer){
             arr_options.unshift({key:'', title:'Any pointer'});
-        }else if(arr_rels.length>0){
+        }else if(has_relation){
             arr_options.unshift({key:'', title:'Any relationship'});
         }
 
@@ -347,7 +375,9 @@ $.widget( "heurist.ruleBuilder", {
         this.select_fields.prop("selectedIndex",0);
         //this._on( $(this.select_fields.get(0)), { change: this._onSelectFieldtype });
         this._onSelectFieldtype();
-
+        
+        var sel = window.hWin.HEURIST4.ui.initHSelect(this.select_fields, false);
+        sel.hSelect( "widget" ).css('font-size','0.9em');
     },
 
     //
