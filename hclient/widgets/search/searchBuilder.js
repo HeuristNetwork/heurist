@@ -30,7 +30,11 @@ $.widget( "heurist.searchBuilder", {
         menu_locked: null,
         onsave: null,
         onClose: null,
-        beforeClose: null
+        beforeClose: null,
+        
+        rty_ID: null, //init with specified record type
+        input_element: null,  //fill result to this element, instead of search
+        is_for_rules: false
     },
 
     is_advanced: false,
@@ -91,25 +95,10 @@ $.widget( "heurist.searchBuilder", {
                         var pele = that.element.parents('div[role="dialog"]');
                         that.element.css({overflow: 'none !important', 'width':pele.width()-24 });
                 },
-    //@ remove            
-    /*            
-                beforeClose: function( event, ui ) {
-                    if(event && event.currentTarget){
-                        var that_dlg = this;
-                        if($( that_dlg ).dialog( 'option', 'modal' )){
-                            window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR("Discard changes?"),
-                                function(){ $( that_dlg ).dialog( "close" ); });
-                            return false;
-                        }
-                    }
-                },
-    */            
+         
                 buttons: [
-                    /*{text:window.hWin.HR('Preview'), id:'btnSave',
-                        click: function() {
-                            that._doSaveSearch()
-                    }},*/
-                    {text:window.hWin.HR('Filter'), id:'btnSearch',
+
+                    {text:window.hWin.HR(this.options.is_for_rules?'Apply':'Filter'), id:'btnSearch',
                         class:'ui-button-action', 
                         click: function() {
                             that._doSearch()
@@ -130,11 +119,7 @@ $.widget( "heurist.searchBuilder", {
         }
         
         this.element.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/searchBuilder.html", function(){
-        
             that._initControls();
-            //that.pnl_Tree    
-            //that.pnl_Items
-            //that.pnl_Result
         });
 
         
@@ -221,7 +206,8 @@ $.widget( "heurist.searchBuilder", {
         if(this.options.is_dialog){        
             var pos = this._dialog.dialog('option', 'position');
             if(pos && pos.of && !(pos.of instanceof Window)){
-                topPos = $(pos.of).offset().top+40;
+                var offset = $(pos.of).offset();
+                topPos = (offset?offset.top:0)+40;
             }
 
             //var dh =  this._dialog.dialog('option', 'height');
@@ -250,25 +236,11 @@ $.widget( "heurist.searchBuilder", {
         
         if(!(this.select_main_rectype.val()>0)){
             this.pnl_Tree.hide();
-            /*
-            //show all fields
-            this.pnl_Tree.find('.rty-selected').hide();
-            this.pnl_Tree.find('.rty-not-selected').show();
-            var iTop = this.pnl_Tree.find('#header_treeview').position().top+45;
-            var cont = this.element.find('#field_all_list');
-            cont.css('top',iTop);
-            
-            this.field_selector.hSelect('open');
-            
-            var menu = this.field_selector.hSelect( "menuWidget" );
-            menu.css({position:'absolute', width:'99%', top: 0, bottom:1, 'max-height':2000});                
-            */
         }else{
             this.select_field_for_id = ele_id;
             
             this.pnl_Tree.show();
-            //var iTop = this.pnl_Tree.find('#header_treeview').position().top+60;
-            //this.pnl_Tree.find('#field_treeview').css('top',iTop);
+
         }
 
         
@@ -314,6 +286,11 @@ $.widget( "heurist.searchBuilder", {
             
             this._off(this.element.parent('.ui-dialog'), 'mouseover mouseleave');
         }
+
+        if(this.select_main_rectype!=null && this.options.rty_ID>0){
+            this.refreshRectypeMenu();       
+        }
+        
         
         //window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg); 
     }
@@ -431,75 +408,90 @@ $.widget( "heurist.searchBuilder", {
             }
     }
 
+    //
+    //
+    //
     , refreshRectypeMenu: function(){
         var that = this;
 
+        var selected = -1;
+
         if(this.select_main_rectype){
+            selected = (this.select_main_rectype.val() > 0) ? this.select_main_rectype.val() : -1;
+            this._off(this.select_main_rectype,'change');
+            this.select_main_rectype.hSelect('destroy'); 
+            this.select_main_rectype = null;
+        }
 
-            var selected = (this.select_main_rectype.val() > 0) ? this.select_main_rectype.val() : -1;
-
-            this.select_main_rectype = null;        
-
-            this.select_main_rectype = window.hWin.HEURIST4.ui.createRectypeSelectNew( this.element.find("#opt_rectypes").get(0),
+        this.select_main_rectype = window.hWin.HEURIST4.ui.createRectypeSelectNew( this.element.find("#opt_rectypes").get(0),
             {
-                topOptions: [{key:'-1',title:'select record type to search...'},
-                             {key:'',title:'any record type'}],
+                topOptions: this.options.rty_ID>0?null
+                :[{key:'-1',title:'select record type to search...'},
+                    {key:'',title:'any record type'}],
+                rectypeList: this.options.rty_ID>0?[this.options.rty_ID]:null,
                 useHtmlSelect: false,
                 showAllRectypes: true
-            });
+        });
 
-            this.select_main_rectype.hSelect({change: function(event, data){
-                            
-                if(that.select_additional_rectypes){
-                    //reset
-                    that.select_additional_rectypes.editing_input('setValue', '');
-                }
-                
-                if(that.select_main_rectype.val()<0){
-                    //AAA that.pnl_Items.hide();
-                    that.pnl_CoverAll 
-                        .css({ top:that.pnl_Items.css('top'),bottom:that.pnl_Items.css('bottom') })
-                        .show();
-                }else{
-                    //that.pnl_Items.show();
-                    that.pnl_CoverAll.hide();
-                    //load list of field types
-                    //that.adjustTreePanel();
-                    that._initTreeView([that.select_main_rectype.val()]);
-                }
-                
-                that.clearAll();
+        
+        
+        function __onRectypeChange(){
 
-            }});
-
-            if(this.select_main_rectype.find('option[value=' + selected + ']').length > 0){ 
-                this.select_main_rectype.val(selected);
-
-                if(this.select_main_rectype.hSelect("instance")!=undefined){
-                   this.select_main_rectype.hSelect("refresh"); 
-                }
-            }else{
-                this.pnl_CoverAll 
-                    .css({ top:this.pnl_Items.css('top'),bottom:this.pnl_Items.css('bottom') })
-                    .show();
+            if(that.select_additional_rectypes){
+                //reset
+                that.select_additional_rectypes.editing_input('setValue', '');
             }
+
+            if(that.select_main_rectype.val()<0){
+                //AAA that.pnl_Items.hide();
+                that.pnl_CoverAll 
+                .css({ top:that.pnl_Items.css('top'),bottom:that.pnl_Items.css('bottom') })
+                .show();
+            }else{
+                //that.pnl_Items.show();
+                that.pnl_CoverAll.hide();
+                //load list of field types
+                //that.adjustTreePanel();
+                that._initTreeView([that.select_main_rectype.val()]);
+            }
+
+            that.clearAll();
+
+        }        
+
+        this._on(this.select_main_rectype, {change: __onRectypeChange});
+
+        if(this.options.rty_ID>0){
+            selected = this.options.rty_ID;
         }
+
+        if(this.select_main_rectype.find('option[value=' + selected + ']').length > 0){ 
+            this.select_main_rectype.val(selected);
+
+            if(this.select_main_rectype.hSelect('instance')!=undefined){
+                this.select_main_rectype.hSelect('refresh'); 
+                
+                if(this.options.rty_ID>0) __onRectypeChange();
+                //this.select_main_rectype.change();
+            }
+        }else{
+            this.pnl_CoverAll 
+            .css({ top:this.pnl_Items.css('top'),bottom:this.pnl_Items.css('bottom') })
+            .show();
+        }
+
+
     }
 
+    //
+    //
+    //
     , _initControls: function(){
         
             var that = this;
-
+            
             if(this.select_main_rectype==null){
                 
-                this.select_main_rectype = window.hWin.HEURIST4.ui.createRectypeSelectNew( this.element.find("#opt_rectypes").get(0),
-                {
-                    topOptions: [{key:'-1',title:'select record type to search...'},
-                                 {key:'',title:'any record type'}],
-                    useHtmlSelect: false,
-                    showAllRectypes: true
-                });
-
                 //additional rectypes                
                 this.select_additional_rectypes = this._createInputElement_RecordTypeSelector();
                 this.select_additional_rectypes.hide();
@@ -521,78 +513,6 @@ $.widget( "heurist.searchBuilder", {
                         }
                         //this.adjustTreePanel();
                     }}});
-                    
-                this.select_main_rectype.hSelect({change: function(event, data){
-                    
-                    if(that.select_additional_rectypes){
-                        //reset
-                        that.select_additional_rectypes.editing_input('setValue', '');
-                    }
-                    
-                    if(that.select_main_rectype.val()<0){
-                        //AAA that.pnl_Items.hide();
-                        that.pnl_CoverAll 
-                            .css({ top:that.pnl_Items.css('top'),bottom:that.pnl_Items.css('bottom') })
-                            .show();
-                    }else{
-                        //that.pnl_Items.show();
-                        that.pnl_CoverAll.hide();
-                        //load list of field types
-                        //that.adjustTreePanel();
-                        that._initTreeView([that.select_main_rectype.val()]);
-                    }
-                    
-                    that.clearAll();
-
-                }});
-                
-/*                        
-                var topOptions2 = [
-                        {key:'anyfield',title:window.hWin.HR('Any field')},
-                        {key:0,title:'Generic fields', group:1, disabled:true},
-                            {key:'title',title:'Title (constructed)', depth:1},
-                            {key:'added',title:'Date added', depth:1},
-                            {key:'modified',title:'Date modified', depth:1},
-                            {key:'addedby',title:'Creator (user)', depth:1},
-                            {key:'url',title:'URL', depth:1},
-                            {key:'notes',title:'Notes', depth:1},
-                            {key:'owner',title:'Owner (user or group)', depth:1},
-                            {key:'access',title:'Visibility', depth:1},
-                            {key:'tag',title:'Tags', depth:1}
-                        ];
-                        
-                var bottomOptions = null;
-                //[{key:'latitude',title:window.hWin.HR('geo: Latitude')},
-                //                     {key:'longitude',title:window.hWin.HR('geo: Longitude')}]; 
-
-                var allowed_fieldtypes = ['enum','freetext','blocktext',
-                                'geo','year','date','integer','float','resource','relmarker'];
-
-                this.field_selector = this.element.find('#field_selector');
-                
-                this.field_selector = window.hWin.HEURIST4.ui.createRectypeDetailSelect(
-                        this.field_selector[0], 
-                            null, allowed_fieldtypes, topOptions2, 
-                            {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions, 
-                                useIds: true, useHtmlSelect:false});                
-                this.field_selector.hide();                
-                
-                var menu = this.field_selector.hSelect( "menuWidget" );
-                menu.show().appendTo( this.element.find('#field_all_list' ) );                        
-
-                //menu.css({'width':'90%','max-height':null,height:'100%'});                
-                this._on(menu,{click:function(event){
-                    
-                    if ($(event.target).hasClass('ui-state-disabled')) return;
-                    
-                    var dty_ID = that.field_selector.val();
-                    
-                    var rty_ID = that.select_main_rectype.val();
-                        
-                    that.addFieldItem( 'any:'+dty_ID, [rty_ID , dty_ID] );
-
-                }});
-*/
             
                 this.pnl_Rectype  = this.element.find('#pnl_Rectype');
                 this.pnl_Tree  = this.element.find('#pnl_Tree');
@@ -629,6 +549,10 @@ $.widget( "heurist.searchBuilder", {
                                 
             }
             
+            
+            if(this.select_main_rectype==null || this.options.rty_ID>0){            
+                this.refreshRectypeMenu();
+            }
             
             /*                    
                 var rectypeIds = [this.select_main_rectype.val()];
@@ -1140,15 +1064,39 @@ $.widget( "heurist.searchBuilder", {
         var query = this.pnl_Result.text();
         
         if(query){
-        
-            var request = {};
-                request.q = query;
-                request.w  = 'a';
-                request.detail = 'ids';
-                request.source = this.element.attr('id');
-                request.search_realm = this.options.search_realm;
+            
+            if(this.options.input_element){
                 
-                window.hWin.HAPI4.SearchMgr.doSearch( this, request );
+                if(this.options.is_for_rules){
+                    //remove main t: and sortby:
+                    var filter = window.hWin.HEURIST4.util.isJSON(query);
+                    var res = [];
+                    //var keys = Object.keys(filter);
+                    for (var i=1; i<filter.length; i++){
+                        if(!filter[i]['sortby']){
+                            res.push(filter[i])    
+                        }
+                    }
+                    if(res.length>0){
+                        query = JSON.stringify(res);
+                    }else{
+                        query = '';
+                    }
+                }
+                
+                this.options.input_element.val(query);
+                
+            }else{
+        
+                var request = {};
+                    request.q = query;
+                    request.w  = 'a';
+                    request.detail = 'ids';
+                    request.source = this.element.attr('id');
+                    request.search_realm = this.options.search_realm;
+                    
+                    window.hWin.HAPI4.SearchMgr.doSearch( this, request );
+            }
             
             this.closeDialog();
         }else{

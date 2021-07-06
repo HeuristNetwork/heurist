@@ -105,6 +105,11 @@ $.widget( "heurist.ruleBuilder", {
         //(this.options.level<3)?'12em':
         this.div_btn2 =  $('<div>').css({'width':'auto'}).appendTo(this.element); //,'margin-left':'0.5em'
 
+        this.btn_edit = $( "<button>", {text:'Filter'})
+        .attr('title', 'Create additional filter' )
+        .css('font-size','0.8em')
+        .button({icons: { primary: "ui-icon-pencil" }, text:false}).appendTo(this.div_btn2);
+        
         this.btn_delete = $( "<button>", {text:'Delete'})
         .attr('title', 'Delete this step in the rule' )
         .css('font-size','0.8em')
@@ -118,35 +123,29 @@ $.widget( "heurist.ruleBuilder", {
             .button().appendTo(this.div_btn);
 
 
-
-
-        /* TODO: remove debu code
-        if(this.options.is_search_allowed){
-        this.debug_search = $( "<button>", {text:'Search'} ).appendTo(this.element);
-        this.debug_label = $( "<label>" ).css('padding-left','10px').appendTo(this.element);
-        this._on( this.debug_search, { click: this._debugSearch });
-        }*/
-
         //event handlers
         this._on( this.select_source_rectype, { change: this._onSelectRectype });
 
-        //this._on( this.select_target_rectype, { change: this._generateQuery });
-        //this._on( this.select_reltype, { change: this._generateQuery });
-
         this._on( this.btn_delete, {click: this._removeRule }); // function( event ){ this._trigger( "onremove", event, { id:this.element.attr('id') } ) } } );
+        this._on( this.btn_edit, {click: this._editFilter }); 
 
         if(this.options.level<3)
             this._on( this.btn_add_next_level, {click: function( event ){ this._addChildRule(null); }});
 
 
         this._initRules();
-
-        //this._onSelectRectype();
-        //this._refresh();
-
-
     }, //end _create
 
+    //
+    //
+    //
+    _editFilter: function(){
+            
+            showSearchBuilder({is_for_rules: true, 
+                                     rty_ID: this.select_target_rectype.val(),
+                              input_element: this.additional_filter});
+    },
+    
     //
     //
     //
@@ -189,44 +188,6 @@ $.widget( "heurist.ruleBuilder", {
 
     },
 
-    // Any time the widget is called with no arguments or with only an option hash,
-    // the widget is initialized; this includes when the widget is created.
-    _init: function() {
-
-    },
-    // TODO: remove big block of debug or old code
-    //Called whenever the option() method is called
-    //Overriding this is useful if you can defer processor-intensive changes for multiple option change
-    /*_setOptions: function( ) {
-    this._superApply( arguments );
-    },*/
-
-    /*
-    _setOption: function( key, value ) {
-    this._super( key, value );
-    if ( key === "recordtypes" ) {
-
-    window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), value, false, true);
-    this._onSelectRectype();
-    this._refresh();
-    }
-    },*/
-
-    /*
-    * private function
-    * show/hide buttons depends on current login status
-    */
-    _refresh: function(){
-
-        // TODO: remove big block of debug or old code
-        /*if(window.hWin.HAPI4.currentUser.ugr_ID>0){
-        $(this.element).find('.logged-in-only').css('visibility','visible');
-        }else{
-        $(this.element).find('.logged-in-only').css('visibility','hidden');
-        }*/
-        //if(this.debug_label)
-        //this.debug_label.html(this.options.queries.join(' OR '));
-    },
     //
     // custom, widget-specific, cleanup.
     _destroy: function() {
@@ -237,12 +198,6 @@ $.widget( "heurist.ruleBuilder", {
         this.select_fields.remove();
         this.select_reltype.remove();
         this.additional_filter.remove();
-
-        /*this.label_1.remove();
-        this.label_2.remove();
-        this.label_3.remove();
-        this.label_4.remove();
-        this.label_5.remove();*/
 
         if(this.debug_label) this.debug_label.remove();
         this.div_btn2.remove();
@@ -572,10 +527,10 @@ $.widget( "heurist.ruleBuilder", {
             
             if(!codes && query){
                     
-                // {"t":"5","lt:15":[{"t":"10"},{"plain":"Petia"}]}
+                // {"t":"5","lt:15":[{"t":"10"}],"plain":"Petia"}
                 //parse query
                 var keys = Object.keys(query);
-                var link = keys[1];
+                var link = keys[1]; //always second 
                 linkdata = query[link];
                 
                 link = link.split(':');
@@ -598,18 +553,26 @@ $.widget( "heurist.ruleBuilder", {
                 }
                 
                 var rt_source = '';
-                var filter = [];
                 for(var i=0; i<linkdata.length; i++){
                     if(linkdata[i]['t']){
                         rt_source = linkdata[i]['t'];
-                    }else if(linkdata[i]['plain']){
-                        filter = linkdata[i]['plain'];
                     }else if(linkdata[i]['r']){
                         trm_ID = linkdata[i]['r'];
-                    }else{
-                        filter.push(linkdata[i]);
                     }
                 }
+                //extract filter - since 3d element
+                var filter = [];
+                for(var i=2; i<keys.length; i++){
+                    if(keys[i]=='plain'){
+                        filter = query['plain'];
+                        break;
+                    }else{
+                        var token = {};
+                        token[keys[i]] = query[keys[i]];
+                        filter.push(token);
+                    }
+                }
+                
                 if($.isArray(filter)){
                     filter =  (filter.length==0)?'':JSON.stringify(filter);
                 }
@@ -757,15 +720,20 @@ $.widget( "heurist.ruleBuilder", {
             
             //additional filter
             if(filter){
+                
                 if(window.hWin.HEURIST4.util.isJSON(filter))
                 {
+                    filter = window.hWin.HEURIST4.util.isJSON(filter);
                     if(!$.isArray(filter)){
                         filter = [filter];
                     }
-                    filter.unshift(query[link][0]);
-                    query[link] = filter;
+                    for(var i=0; i<filter.length; i++){
+                        var key = Object.keys(filter[i]);
+                        query[key[0]] = filter[i][key[0]];    
+                    }
+                    
                 }else{
-                    query[link].push({"plain":filter});        
+                    query['plain'] = filter;
                 }
             }
             
