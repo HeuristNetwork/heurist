@@ -279,6 +279,8 @@ $.widget( "heurist.resultList", {
 
                     if(recset==null){
                         
+                        that._currentRecordset = recset;
+						
                         if(data.empty_remark){
                             that.div_content.html( data.empty_remark );
                         }else{
