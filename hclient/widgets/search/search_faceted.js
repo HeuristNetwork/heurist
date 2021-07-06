@@ -1257,7 +1257,10 @@ $.widget( "heurist.search_faceted", {
                                                  }
                                              }
                                              if(predicates.length>1){
-                                                 q.push({"any":predicates});
+												 
+                                                for(var i = 0; i < predicates.length; i++){
+                                                    q.push(predicates[i]);
+                                                }												 
                                                  isbranch_empty = false;
                                                  delete predicate[key];
                                                  continue;
