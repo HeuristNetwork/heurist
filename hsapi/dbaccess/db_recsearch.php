@@ -1425,21 +1425,29 @@ function recordSearch($system, $params)
     if ( @$params['topids'] ){ //if topids are defined we use them as starting point for following rule query
         // it is used for incremental client side only
 
-        //@todo - implement it in different way - substitute topids to query json as predicate ids:
-
-        $query_top = array();
-
-        if (strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'], 'bookmark') == 0) {
-            $query_top['from'] = 'FROM usrBookmarks TOPBKMK LEFT JOIN Records TOPBIBLIO ON bkm_recID=rec_ID ';
+        if ( @$params['is_json'] ){
+            
+            //second parameter is link - add ids
+            $keys = array_keys($params['q']);
+            array_push($params['q'][$keys[1]],array('ids'=>$params['topids']));
+            
         }else{
-            $query_top['from'] = 'FROM Records TOPBIBLIO LEFT JOIN usrBookmarks TOPBKMK ON bkm_recID=rec_ID and bkm_UGrpID='.$currUserID.' ';
-        }
-        $query_top['where'] = "(TOPBIBLIO.rec_ID in (".$params['topids']."))";
-        $query_top['sort'] =  '';
-        $query_top['limit'] =  '';
-        $query_top['offset'] =  '';
 
-        $params['parentquery'] = $query_top;  //parentquery parameter is used in  get_sql_query_clauses
+            $query_top = array();
+
+            if (strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'], 'bookmark') == 0) {
+                $query_top['from'] = 'FROM usrBookmarks TOPBKMK LEFT JOIN Records TOPBIBLIO ON bkm_recID=rec_ID ';
+            }else{
+                $query_top['from'] = 'FROM Records TOPBIBLIO LEFT JOIN usrBookmarks TOPBKMK ON bkm_recID=rec_ID and bkm_UGrpID='.$currUserID.' ';
+            }
+            $query_top['where'] = "(TOPBIBLIO.rec_ID in (".$params['topids']."))";
+            $query_top['sort'] =  '';
+            $query_top['limit'] =  '';
+            $query_top['offset'] =  '';
+
+            $params['parentquery'] = $query_top;  //parentquery parameter is used in  get_sql_query_clauses
+            
+        }
 
     }
     else if( @$params['rules'] ){ //special case - server side operation
@@ -1517,6 +1525,9 @@ function recordSearch($system, $params)
                     //$params3['detail'] = 'ids';  //no need in details for preliminary results  ???????
                 }
 
+                if(is_array($params3['q'])){
+                    $params3['is_json'] = true;
+                }else
                 //t:54 related_to:10 =>   {"t":"54","related":"10"}     
                 if(strpos($params3['q'],'related_to')>0){
 
