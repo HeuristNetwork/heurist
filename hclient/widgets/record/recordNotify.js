@@ -56,7 +56,7 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
                         $(item).html($(item).html().replace('reminder', "notification") );
                     });
                     that._reminderWidgetContainer.find('fieldset').last().hide(); //hide When
-                    
+                    that._reminderWidgetContainer.find('.ent_footer.editForm-toolbar').hide(); // hide Toolbar                    
                 }
         });
         
