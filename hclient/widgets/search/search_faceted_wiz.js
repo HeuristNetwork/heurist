@@ -1090,7 +1090,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 //window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
 
                 var allowed_fieldtypes = ['header_ext',
-                'enum','freetext',"year","date","integer","float","resource","relmarker"];
+                'enum','freetext','blocktext',"year","date","integer","float","resource","relmarker"];
                 
                 var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes );
 /*                
@@ -1571,7 +1571,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 var sMultiSel = '';
                 var sGroupBy = '';
-                if(facets[k].type=='freetext'){
+                if(facets[k].type=='freetext' || facets[k].type=='blocktext'){
                     sGroupBy =
                         '<label><input type="checkbox" name="facet_Group'+idd+'" value="firstchar"/>'
                         +'Group by first character</label>';
@@ -1615,11 +1615,11 @@ $.widget( "heurist.search_faceted_wiz", {
                     
                 }
                 
-                if(facets[k].code.indexOf(':ids')<0)
-                sContent = sContent
+                if(facets[k].code.indexOf(':ids')<0 && facets[k].type!='blocktext')
+                    sContent = sContent
                         +'<button label="list" class="btnset_radio" data-idx="'+idd+'" data-value="3"/>'
                         +'<button label="wrapped" class="btnset_radio" data-idx="'+idd+'" data-value="2"/>';
-                        
+				                        
                 sContent = sContent        
                         +'<button label="search" class="btnset_radio" data-idx="'+idd+'" data-value="0"/>'
                 //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_3" name="facet_Type'+idd+'" value="3"/><label for="facetType'+idd+'_3">list</label>'
