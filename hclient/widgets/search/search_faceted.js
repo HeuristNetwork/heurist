@@ -1241,30 +1241,60 @@ $.widget( "heurist.search_faceted", {
                                          
                                          facets[facet_index].selectedvalue = {value:val};
 
-                                         //search for ANY word
+                                         //search for words, ANDed by default check for OR and handle as needed
                                          if(search_all_words){
-                                             var values = val.split(' ');
-                                             var predicates = [];
-                                             for (var i=0; i<values.length; i++){
-                                                 var pre = {};
-                                                 if(window.hWin.HEURIST4.util.isempty(values[i])
+                                            var values = val.split(' ');
+                                            var predicates = [];
+                                            var hasOR = false;
+                                            for (var i=0; i<values.length; i++){
+                                                var pre = {};
+                                                if(window.hWin.HEURIST4.util.isempty(values[i])
                                                     || values[i].toLowerCase() == 'or' 
-                                                    || values[i].toLowerCase() == 'and'){
-                                                     
-                                                 }else{
-                                                     pre[key] = values[i];
-                                                     predicates.push(pre);
-                                                 }
-                                             }
-                                             if(predicates.length>1){
-												 
-                                                for(var i = 0; i < predicates.length; i++){
-                                                    q.push(predicates[i]);
-                                                }												 
-                                                 isbranch_empty = false;
-                                                 delete predicate[key];
-                                                 continue;
-                                             }
+                                                    || values[i].toLowerCase() == 'and'){ // Ignore the AND, follows default behaviour
+
+                                                    if(values[i].toLowerCase() == 'or' && values[i-1] && values[i+1]){ // check that both sides of the OR exist
+
+                                                        var or_pred = [];
+                                                        var j = i-1; // starting point
+
+                                                        for(; j < values.length; j++){
+
+                                                            var pre_temp = {};
+                                                            
+                                                            if(window.hWin.HEURIST4.util.isempty(values[j]) || values[j].toLowerCase() == 'and'){ // end of OR statement
+                                                                break;
+                                                            }else if(values[j].toLowerCase() != 'or'){
+                                                                pre_temp[key] = values[j];
+                                                                or_pred.push(pre_temp);
+                                                            }
+                                                        }                                                     
+
+                                                        if(or_pred.length > 1){ // add to query
+                                                            q.push({"any":or_pred});
+                                                            hasOR = true;
+                                                            i = j-1; // outter search's continuing point
+                                                        }
+                                                    }
+                                                }else{
+
+                                                    if(values[i+1] && values[i+1].toLowerCase() == "or"){ // Skip if predicate is part of an OR statement
+                                                        continue;
+                                                    }
+                                                    pre[key] = values[i];
+                                                    predicates.push(pre);
+                                                }
+                                            }
+                                            if(predicates.length>1 || hasOR){
+                                                if(predicates.length>=1){
+                                                    for(var i = 0; i < predicates.length; i++){
+                                                        q.push(predicates[i]);
+                                                    }
+                                                }
+                                                isbranch_empty = false;
+                                                delete predicate[key];
+                                                continue;
+                                            }                                             
+
                                          }
                                          
                                      }else{
