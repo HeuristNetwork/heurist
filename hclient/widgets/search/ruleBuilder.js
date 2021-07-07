@@ -284,7 +284,7 @@ $.widget( "heurist.ruleBuilder", {
                     
                     arr_reverse.push({key:key, 
                                     title: (vocab_id>0?'<< ':'< ')+name
-                                        +' [in '+rt_name + ']', //<span style="font-size:smaller;font-style:italic"></span>'
+                                        +' <span style="font-size:smaller;font-style:italic">[in '+rt_name + ']</span>', 
                                     terms:vocab_id,
                                     rectypes:[rtyID], isreverse:true, dtyID:dtyID });
                     
@@ -362,22 +362,24 @@ $.widget( "heurist.ruleBuilder", {
         }
 
         //fill field selector
-        if(this.select_fields)
-        this._off( this.select_fields, 'change');
-        this._on( this.select_fields, { change: this._onSelectFieldtype });
-        this.select_fields.prop('disabled', false);
         
         window.hWin.HEURIST4.ui.createSelector(this.select_fields.get(0), arr_options);
-        
-        //var sel = window.hWin.HEURIST4.ui.initHSelect(this.select_fields, false);
-        //sel.hSelect( "widget" ).css('font-size','0.9em');
+
+
+        this.select_fields.prop('disabled', false);
         
         this.select_fields.prop("selectedIndex",0);
-        //this._on( $(this.select_fields.get(0)), { change: this._onSelectFieldtype });
+        //this._on( this.select_fields, { change: this._onSelectFieldtype });
         this._onSelectFieldtype();
         
+        //this._on( this.select_fields, { change: this._onSelectFieldtype });
         var sel = window.hWin.HEURIST4.ui.initHSelect(this.select_fields, false);
-        sel.hSelect( "widget" ).css('font-size','0.9em');
+        sel.hSelect( "widget" ).css({'font-size':'0.9em','max-width':'200px'});
+        var that = this;
+        sel.hSelect({change: function( event, data ) {
+                        that.select_fields.val(data.item.value);//change value for underlaying html select
+                        that._onSelectFieldtype();
+                }});
     },
 
     //

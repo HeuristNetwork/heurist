@@ -2854,9 +2854,21 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
 hSelect - decendant of jquery.selectmenu
 */
 $.widget( "heurist.hSelect", $.ui.selectmenu, {
+    
+   _renderButtonItem: function( item ) {
+      var buttonItem = $( "<span>", {
+        "class": "ui-selectmenu-text"
+      })
+      //this._setText( buttonItem, item.label );
+      buttonItem.html(item.label).css({'min-height': '17px'});
+     
+      buttonItem.css( "background-color", item.value )
+     
+      return buttonItem;
+   },    
   _renderItem: function( ul, item ) {
     var li = $( "<li>" ),
-      wrapper = $( "<div>", { text: item.label } );
+      wrapper = $( "<div>", { html: item.label } ); 
 
     if ( item.disabled ) {
         li.addClass( "ui-state-disabled" );
