@@ -1488,6 +1488,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this.last_added_vocabulary = recID;
             this.selectVocabulary(recID, true);
             
+            this._loadData(); // update cached recset			
+			
             //this.selectRecordInRecordset([recID]);
         }
 
