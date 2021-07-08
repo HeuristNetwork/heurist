@@ -173,10 +173,10 @@ function hSearchMinimal() {
     //
     function _doApplyRules( originator, rules, rulesonly, search_realm ){
         
-        if(window.hWin.HAPI4.currentRecordset && window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.currentRecordset.getMainSet())){
+        if(window.hWin.HAPI4.currentRecordset && window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.currentRecordset.getOrder())){
         
             var request = { apply_rules:true, //do not inlude search in browser and search input
-                            q: 'ids:'+window.hWin.HAPI4.currentRecordset.getMainSet().join(','),
+                            q: 'ids:'+window.hWin.HAPI4.currentRecordset.getOrder().join(','),
                             rules: rules,
                             rulesonly: rulesonly,
                             search_realm: search_realm,
