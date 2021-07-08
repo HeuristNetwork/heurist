@@ -197,7 +197,7 @@ class DbSysGroups extends DbEntityBase
                     
             if($cnt>0){
                 $this->system->addError(HEURIST_REQUEST_DENIED, 
-                    'You are not an admin of group. Insufficient rights for this operation');
+                    'You are not an admin of group. Insufficient rights (logout/in to refresh) for this operation');
                 return false;
             }
         }

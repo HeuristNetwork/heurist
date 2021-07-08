@@ -212,7 +212,7 @@ class DbSysUsers extends DbEntityBase
             if($this->recordIDs[0]!=$ugrID || count($this->recordIDs)>1){
                 
                 $this->system->addError(HEURIST_REQUEST_DENIED, 
-                    'You are not admin and can\'t edit another user. Insufficient rights for this operation');
+                    'You are not admin and can\'t edit another user. Insufficient rights (logout/in to refresh) for this operation');
                 return false;
             }
         }
@@ -544,7 +544,7 @@ class DbSysUsers extends DbEntityBase
 
         if(!$ignore_permissions && !$this->system->is_admin()){ 
             $this->system->addError(HEURIST_REQUEST_DENIED, 
-                'You are not admin and can\'t add/edit other users. Insufficient rights for this operation');
+                'You are not admin and can\'t add/edit other users. Insufficient rights (logout/in to refresh) for this operation');
             return false;
         }
         
@@ -563,7 +563,7 @@ class DbSysUsers extends DbEntityBase
         /* @todo
         if(!$sytem_source->is_admin()){ 
             $this->system->addError(HEURIST_REQUEST_DENIED, 
-                'You are not admin in source database '.$sytem_source->dbname_full().'. Insufficient rights for this operation');
+                'You are not admin in source database '.$sytem_source->dbname_full().'. Insufficient rights (logout/in to refresh) for this operation');
             return false;
         }
         */

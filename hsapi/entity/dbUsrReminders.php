@@ -183,7 +183,7 @@ class DbUsrReminders extends DbEntityBase
                 (($cnt==1 && (!isset($this->records) || count($this->records)==1))
                     ? 'Reminder belongs'
                     : $cnt.' Reminders belong')
-                    .' to other user. Insufficient rights for this operation');
+                    .' to other user. Insufficient rights (logout/in to refresh) for this operation');
                 return false;
             }
         }

@@ -157,7 +157,7 @@ class DbUsrSavedSearches extends DbEntityBase
             if($cnt>0){
                 
                 $this->system->addError(HEURIST_REQUEST_DENIED, 
-                    'Insufficient rights for this operation');
+                    'Insufficient rights (logout/in to refresh) for this operation');
                 return false;
             }
         }

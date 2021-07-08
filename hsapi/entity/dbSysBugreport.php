@@ -53,7 +53,7 @@ class DbSysBugreport extends DbEntityBase
         
         if(!$this->system->has_access()){
              $this->system->addError(HEURIST_REQUEST_DENIED, 
-                    'You must be logged in for bug reporting. Insufficient rights for this operation');
+                    'You must be logged in for bug reporting. Insufficient rights (logout/in to refresh) for this operation');
              return false;
         }
         

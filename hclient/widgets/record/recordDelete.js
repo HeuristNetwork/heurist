@@ -372,7 +372,7 @@ function(){
                                         +' removed: '+response.data.rels_count);
                            }
                            if(response.data.noaccess>0){
-                               msg += ('<br><br>Not enough rights for '+response.data.noaccess+
+                               msg += ('<br><br>Not enough rights (logout/in to refresh) for '+response.data.noaccess+
                                         ' record' + (response.data.noaccess>1?'s':''));
                            }     
                             

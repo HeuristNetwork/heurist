@@ -138,7 +138,7 @@ class DbEntityBase
     public function files( $action ){
         
         if(!($this->system->get_user_id()>0)){
-            $this->system->addError(HEURIST_REQUEST_DENIED, 'Insufficient rights for this operation');
+            $this->system->addError(HEURIST_REQUEST_DENIED, 'Insufficient rights (logout/in to refresh) for this operation');
             return false;
         }
         

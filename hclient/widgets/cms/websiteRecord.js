@@ -611,7 +611,7 @@ function hCmsEditing(_options) {
                         window.hWin.HEURIST4.msg.showMsgErr( errMsg );
                     }else
                     if(response.data.noaccess==1){
-                        window.hWin.HEURIST4.msg.showMsgErr('It appears you have not enough rights to edit this record');
+                        window.hWin.HEURIST4.msg.showMsgErr('It appears you do not have enough rights (logout/in to refresh) to edit this record');
                         
                     }else{
 
@@ -1880,7 +1880,7 @@ function hCmsEditing(_options) {
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
                 if(response.status == hWin.ResponseStatus.OK){
                     if(response.data.noaccess==1){
-                        window.hWin.HEURIST4.msg.showMsgErr('It appears you have not enough rights to edit this record');
+                        window.hWin.HEURIST4.msg.showMsgErr('It appears you do not have enough rights (logout/in to refresh) to edit this record');
                     }else{
                         window.hWin.HEURIST4.msg.showMsgFlash('cleared');
                         //refresh

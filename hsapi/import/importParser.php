@@ -518,7 +518,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                     if($handle_wr) fclose($handle_wr);
                     
                     self::$system->addError(HEURIST_ERROR, 
-                        "Too many columns ".$len."  This probably indicates that you have selected the wrong separator type.");                
+                        "Too many columns ".$len."  This probably indicates that you have selected the wrong separator or end-of-line type.");                
                     return false;
                 }            
                 
