@@ -2023,6 +2023,20 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                 }, {mode:'hide'});// //highlight:false,
                 
             }
+
+            var hasVisibleNode = false;
+            this.treeviews[groupID].$container.find("li").each(function(idx, li_ele){
+                
+                if($(li_ele).css("display") != "none"){
+
+                    hasVisibleNode = true;
+                    return false;
+                }
+            });
+
+            if(!hasVisibleNode){
+                $(this.treeviews[groupID].$div[0].parentNode).find("#addlink"+groupID).show();
+            }			
         }  
     },
 
