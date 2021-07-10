@@ -131,7 +131,7 @@ class DbUsrBookmarks extends DbEntityBase
                 (($cnt==1 && (!isset($this->records) || count($this->records)==1))
                     ? 'Bookmark belongs'
                     : $cnt.' Bookmark belong')
-                    .' to other user. Insufficient rights for this operation'); // or workgroup you are not a member
+                    .' to other user. Insufficient rights (logout/in to refresh) for this operation'); // or workgroup you are not a member
                 return false;
             }
         }

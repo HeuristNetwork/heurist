@@ -68,7 +68,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
         <script>
             function setUploadEntireFolder(){
                 
-                var ele = $('.fileinput-button > input');
+                var ele = $('.fileupload-buttons > input');
                 if(ele.prop('webkitdirectory')){
                     ele.removeProp('webkitdirectory');
                     //ele.prop('onchage',null);                    
@@ -264,8 +264,8 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     <!-- The fileinput-button span is used to style the file input field as button -->
                     <span class="fileinput-button">
                         <span>Add files...</span>
-                        <input type="file" name="files[]" multiple webkitdirectory="true">
                     </span>
+                    <input type="file" name="files[]" multiple webkitdirectory="true" style="display:none;">
                     <button id="btnStart" type="submit" class="start" disabled>Start uploads</button>
                     <button id="btnCancel" type="reset" class="cancel">Cancel uploads</button>
                     <!-- Ian 17/6/16 It's quite confusing what these are for
@@ -505,7 +505,34 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     $(this).fileupload('option', 'done')
                     .call(this, $.Event('done'), {result: result});
                 });
-                
+            
+                $('.fileinput-button > span').on({
+                    "click": function(e){
+
+                        var ele = $('.fileupload-buttons > input');
+
+                        if(ele.prop('webkitdirectory')){
+                            
+                            var $dlg;
+
+                            var msg = "You are about to upload a folder, No individual files will be shown.<br/>"
+                                + "You can choose to upload individual files by unchecking the checkbox above.<br/>"
+                                + "Would you like to continue with the folder upload?";
+
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg,{
+                                "Yes": function(){
+                                    ele.click();
+                                    $dlg.dialog('close');
+                                },
+                                "No": function(){
+                                    $dlg.dialog('close');
+                                }
+                            },{ title: "Uploading folders", yes: "Yes", no: "No" }, { default_palette_class: 'ui-heurist-populate' });
+                        }else{
+                            ele.click();
+                        }
+                    }
+                });			
                 
                 /*
                 $('#upload_folder').change(function(){

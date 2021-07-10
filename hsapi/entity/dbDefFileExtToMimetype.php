@@ -141,7 +141,7 @@ class DbDefFileExtToMimetype extends DbEntityBase
             return true;            
         }else{
             $this->system->addError(HEURIST_REQUEST_DENIED, 
-                    'Insufficient rights. You have to be Administrator of group \'Database Managers\' for this operation');
+                    'Insufficient rights (logout/in to refresh). You have to be Administrator of group \'Database Managers\' for this operation');
             return false;            
         }
     }

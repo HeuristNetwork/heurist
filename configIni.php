@@ -62,10 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.2.13"; // sets current program version number, determined by Heurist development lead
+$version = "6.2.14"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// 6.2.14 =8 July 2021 Improivements to field selection trees in filters - additional record-level fields, layout and memo texts, better layout of rule builder dropdowns and auto selection of start point, fix html escapes in Gephi output, match missing fields correctly in csv import
 // 6.2.13 26 June 2021 Multiple allocation of lookup services to different recor types, fix for zero height div in website
 // 6.2.12 22 June 2021 Add blog to new websites, new Zotero mapping, improve configuration of external lookup services, elimination of the use of yui, 
 // 6.2.10 06 June 2021 Various fixes and improvements to field trees, duplicatingg records increments increment fields, fix TinyMCE/new source editor interactions and various cosmetics, replace filter builder with new one in website search widget, better website error reporting

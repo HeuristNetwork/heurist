@@ -941,7 +941,7 @@ function editCMS( options ){
                         $('<div><div class="edit-button" '
                             +'style="background:#f48642 !important;margin: 40px auto;width:200px;padding:10px;border-radius:4px;">'
                             +'<h2 style="display:inline-block;color:white">View-only mode</h2>'
-                            +'<span><br>Not enough rights</span></div></div>')
+                            +'<span><br>Not enough rights (logout/in to refresh)</span></div></div>')
                         .addClass('ui-front')
                         //.addClass('coverall-div-bare')
                         .css({top:'48px', left:'85px', position:'absolute', 

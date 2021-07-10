@@ -187,7 +187,7 @@ class DbUsrTags extends DbEntityBase
                 (($cnt==1 && (!isset($this->records) || count($this->records)==1))
                     ? 'Tag belongs'
                     : $cnt.' tags belong')
-                    .' to other user or workgroup you are not a member. Insufficient rights for this operation');
+                    .' to other user or workgroup you are not a member. Insufficient rights (logout/in to refresh) for this operation');
                 return false;
             }
         }

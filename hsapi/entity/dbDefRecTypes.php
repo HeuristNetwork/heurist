@@ -297,7 +297,7 @@ class DbDefRecTypes extends DbEntityBase
         if(!$this->system->is_admin() && (count($this->recordIDs)>0 || count($this->records)>0)){ //there are records to update/delete
             
             $this->system->addError(HEURIST_REQUEST_DENIED, 
-                    'You are not admin and can\'t edit record types. Insufficient rights for this operation');
+                    'You are not admin and can\'t edit record types. Insufficient rights (logout/in to refresh) for this operation');
                 return false;
         }
         

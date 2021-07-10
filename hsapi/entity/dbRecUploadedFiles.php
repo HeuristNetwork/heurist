@@ -297,7 +297,7 @@ class DbRecUploadedFiles extends DbEntityBase
                 (($cnt==1 && (!isset($this->records) || count($this->records)==1) )
                     ? 'File is'
                     : $cnt.' files are')
-                    .' uploaded by other user. Insufficient rights for this operation');
+                    .' uploaded by other user. Insufficient rights (logout/in to refresh) for this operation');
                 return false;
             }
         }

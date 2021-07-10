@@ -163,7 +163,7 @@ class DbDefDetailTypeGroups extends DbEntityBase
         if(!$this->system->is_admin() && (count($this->recordIDs)>0 || count($this->records)>0)){ //there are records to update/delete
             
             $this->system->addError(HEURIST_REQUEST_DENIED, 
-                    'You are not admin and can\'t edit field type groups. Insufficient rights for this operation '
+                    'You are not admin and can\'t edit field type groups. Insufficient rights (logout/in to refresh) for this operation '
                         .$this->system->get_user_id().'  '.print_r($this->system->getCurrentUser(), true));
             return false;
                 

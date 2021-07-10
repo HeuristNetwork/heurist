@@ -520,7 +520,7 @@
                     $system->addError(HEURIST_DB_ERROR, 'Cannot update record in database', $res);
                 }
             }else{
-                $system->addError(HEURIST_REQUEST_DENIED, 'Operation denied. Not enough rights');
+                $system->addError(HEURIST_REQUEST_DENIED, 'Operation denied. Not enough rights (logout/in to refresh)');
             }
 
         }  else {
