@@ -401,16 +401,13 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 
                 window.hWin.HEURIST4.filesWereUploaded = false;
                 
-                var sURL = window.hWin.HAPI4.baseURL + 'hsapi/utilities/fileUpload.php';
-//console.log(sURL);                
                 // Initialize the jQuery File Upload widget:
                 $('#fileupload').fileupload({
                     // Uncomment the following to send cross-domain cookies:
                     //xhrFields: {withCredentials: true},
                     
                     upload_thumb_dir: '<?=HEURIST_THUMB_DIR?>', 
-                    url: '<?=HEURIST_BASE_URL?>external/jquery-file-upload/server/php/',
-                    //url: sURL,                 
+                    url: '<?=HEURIST_BASE_URL?>hsapi/utilities/UploadHandlerInit.php', //was external/jquery-file-upload/server/php/
                     added: function(e, data){
       
                         //verify that all files are processed and show total size to be uploaded

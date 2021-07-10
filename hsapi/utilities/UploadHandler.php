@@ -22,10 +22,6 @@
     imagemagick_create_scaled_image
  
 */
-//Artem Osmakov - 
-define('HEURIST_ALLOWED_EXT2', 
-'jpg|jpeg|jfif|sid|png|gif|tif|tiff|bmp|rgb|doc|docx|odt|xsl|xslx|mp3|mp4|mpeg|avi|wmv|wmz|aif|aiff|ashx|pdf|mbtiles|'
-.'mid|midi|wms|wmd|qt|evo|cda|wav|csv|tsv|tab|txt|rtf|xml|xsl|xslt|hml|kml|kmz|shp|dbf|shx|svg|htm|html|xhtml|ppt|pptx|zip|gzip|tar|json');
 
 class UploadHandler
 {
@@ -488,7 +484,7 @@ $siz = get_php_bytes('upload_max_filesize');
         }
 
         //Artem Osmakov - limited set of file types
-        $this->options['accept_file_types'] = '/\.('.HEURIST_ALLOWED_EXT2.')$/i';
+        $this->options['accept_file_types'] = '/\.('.str_replace(',','|',HEURIST_ALLOWED_EXT).')$/i';
         
         if (!preg_match($this->options['accept_file_types'], $file->original_name)) {
             $file->error = $this->get_error_message('accept_file_types');
