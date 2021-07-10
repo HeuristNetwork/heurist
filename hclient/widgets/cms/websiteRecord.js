@@ -285,24 +285,24 @@ function hCmsEditing(_options) {
             .appendTo(main_content.parent());
 
         
-        $('<a href="#" id="btn_inline_editor">Edit page content</a>')
+        $('<a href="#" id="btn_inline_editor" style="background:white;">Edit page content</a>')
                 .appendTo(doc_body).addClass('ui-front cms-button') //was body > .ent_wrapper:first
                 .click( _editPageContent )
                 .show();
 
         //switch to direct edit OR save direct edit                        
-        $('<a href="#" id="btn_inline_editor3">source</a>')
+        $('<a href="#" id="btn_inline_editor3" style="background:white;">source</a>')
                 .appendTo(doc_body).addClass('ui-front cms-button')
                 .click( _editPageSource )
                 .show();
             
             
-                $('<a href="#" id="btn_inline_editor4"></a>') //edit page settings
+                $('<a href="#" id="btn_inline_editor4" style="background:white;"></a>') //edit page settings
                 .appendTo(doc_body).addClass('cms-button')
                 .click(_editPageRecord)
                 .show();
 
-        $('<a href="#" id="btn_inline_editor5">Cancel</a>')
+        $('<a href="#" id="btn_inline_editor5" style="background:white;">Cancel</a>')
             .appendTo(doc_body)
             .addClass('ui-front cms-button')
             .click(function (event) {
@@ -378,7 +378,13 @@ function hCmsEditing(_options) {
     // menu listener - init page switch - warns for  changes and hides editor
     //            
     function __iniLoadPageById( pageid ){                    
-     
+        
+        allow_close_dialog = false;
+       _onEditorExit(function(){
+            __hideEditor(pageid);
+       });
+        
+/*     
        var edited_content = __getEditorContent();
      
        var is_changed = (edited_content!=null);
@@ -386,9 +392,6 @@ function hCmsEditing(_options) {
            
            edited_content = edited_content.replace(/(\r\n|\n|\r|\&nbsp;)/gm, "");
        
-//console.log(edited_content);       
-//console.log(last_save_content.replace(/(\r\n|\n|\r|\&nbsp;)/gm, ""));       
-
            if(is_header_editor){
                 is_changed = is_changed && header_content_raw.replace(/(\r\n|\n|\r|\&nbsp;)/gm, "") != edited_content;
            }else if(is_footer_editor){
@@ -417,7 +420,7 @@ function hCmsEditing(_options) {
         }else{
             __hideEditor( pageid ); //hide current editor and loads new page
         }
-        
+*/        
     }
             
     //
@@ -525,6 +528,11 @@ function hCmsEditing(_options) {
     function __getEditorContent()
     {
         var newval = null;
+        if(_isDirectEditMode()){
+            
+            newval = codeEditor.getValue();
+            
+        }else
         if(tinymce && tinymce.activeEditor){
             newval = tinymce.activeEditor.getContent();
             var nodes = $.parseHTML(newval);
@@ -560,15 +568,7 @@ function hCmsEditing(_options) {
         
         window.hWin.HEURIST4.msg.bringCoverallToFront(doc_body.find('.ent_wrapper'));
 
-        var newval = '';
-        if(_isDirectEditMode()){
-           //save as is
-           //newval = $('.tinymce-body').val();
-           newval = codeEditor.getValue();
-            
-        }else{
-           newval = __getEditorContent(); 
-        }
+        var newval = __getEditorContent(); 
         
         //send data to server
         var request;
@@ -1975,13 +1975,26 @@ function hCmsEditing(_options) {
         
         is_header_editor = false;
 
+console.log('!!!');
+        //if direct edit is opened - warn for saving 
+        if(_isDirectEditMode()){
+            
+            allow_close_dialog = false;
+           _onEditorExit(function(){
+                __hideEditor();    
+                _editPageContent();
+           });
+            
+           return;
+        }
+        
         $('#btn_inline_editor').hide();
         $('#btn_inline_editor3').hide();
         $('#btn_inline_editor4').hide();
         $('#btn_inline_editor5').hide();
         $('#btn_inline_editor').text('Edit page content');
         $('#btn_inline_editor3').text('source');
-
+        
         main_content.parent().css('overflow-y','hidden');
         main_content.hide();
         $('#edit_mode').val(1).click();//to disable left panel
@@ -1992,14 +2005,7 @@ function hCmsEditing(_options) {
         $('.tinymce-body').show();
         tinymce.init(inlineEditorConfig);
 
-        /*setTimeout(function(){
-        $('.mce-tinymce').css({position:'absolute',
-        top:140,  //
-        bottom:20 //main_content.css('bottom')
-        });    
-        },500);*/
-
-        window.hWin.HEURIST4.util.stopEvent(event);
+        if(event) window.hWin.HEURIST4.util.stopEvent(event);
         return false;
                     
     }        
@@ -2018,13 +2024,14 @@ function hCmsEditing(_options) {
             $('#btn_inline_editor4').hide();
             $('#btn_inline_editor').text('wyswyg'); //change "Edit page content" to "wyswyg"
             $('#btn_inline_editor3').text('Save');  //change label from "source" to "Save"
-            $('#btn_inline_editor5').show();
+            $('#btn_inline_editor5').show();  //cancel direct edit
             
             main_content.parent().css('overflow-y','hidden');
             main_content.hide();
             
             original_editor_content = $('.tinymce-body').val();
 
+            last_save_content = original_editor_content;
             //$('.tinymce-body').show();
             _initCodeEditor(original_editor_content);
             
@@ -2038,17 +2045,24 @@ function hCmsEditing(_options) {
     //
     //
     function _onEditorExit( callback ){
-        
+
         if(!allow_close_dialog)
         {
 
             var edited_content = __getEditorContent();
 
             var is_changed = (edited_content!=null);
-            if(is_header_editor){
-                is_changed = is_changed && header_content_raw != edited_content;
-            }else{
-                is_changed = is_changed && last_save_content != edited_content;
+            if(is_changed){
+
+                edited_content = edited_content.replace(/(\r\n|\n|\r|\&nbsp;)/gm, "");
+
+                if(is_header_editor){
+                    is_changed = is_changed && header_content_raw.replace(/(\r\n|\n|\r|\&nbsp;)/gm, "") != edited_content;
+                }else if(is_footer_editor){
+                    is_changed = is_changed && footer_content_raw.replace(/(\r\n|\n|\r|\&nbsp;)/gm, "") != edited_content;
+                }else{
+                    is_changed = is_changed && last_save_content.replace(/(\r\n|\n|\r|\&nbsp;)/gm, "") != edited_content;
+                }
             }
 
             if( is_changed ){ //was_modified
@@ -2056,24 +2070,25 @@ function hCmsEditing(_options) {
                 var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
                     '<br>Web page content has been modified',
                     {'Save':function(){
-                            allow_close_dialog = true;
-                            __saveChanges( callback );
+                        __saveChanges( callback );
+                        allow_close_dialog = true;
+                        var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                        $dlg2.dialog('close');},
+                        'Cancel':function(){
                             var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
                             $dlg2.dialog('close');},
-                    'Cancel':function(){
-                            var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
-                            $dlg2.dialog('close');},
-                    'Abandon changes':function(){
+                        'Abandon changes':function(){
                             allow_close_dialog = true;
                             var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
                             $dlg2.dialog('close');
                             callback.call();
                     }},
                     'Content modified');
-                //$dlg2.parents('.ui-dialog').css('font-size','1.2em');    
+
+
                 return false;  //wait not close
             }
-            
+
         }
         callback.call(this, false);
         return true; //ok to close

@@ -275,8 +275,10 @@ $image_icon = __getFile($rec, DT_THUMBNAIL, (array_key_exists('embed', $_REQUEST
 $image_logo = __getFile($rec, DT_FILE_RESOURCE, null); 
 $image_altlogo = null;
 $image_altlogo_url = null;
+$title_alt = null;
 if(defined('DT_CMS_ALTLOGO')) $image_altlogo = __getFile($rec, DT_CMS_ALTLOGO, null); 
 if(defined('DT_CMS_ALTLOGO_URL')) $image_altlogo_url = __getValue($rec, DT_CMS_ALTLOGO_URL); 
+if(defined('DT_CMS_ALT_TITLE')) $title_alt = __getValue($rec, DT_CMS_ALT_TITLE); 
 $image_banner = null;
 if(defined('DT_CMS_BANNER')) $image_banner = __getFile($rec, DT_CMS_BANNER, null); 
 

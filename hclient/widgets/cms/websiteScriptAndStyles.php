@@ -460,7 +460,8 @@ function initHeaderElements(){
 /*
 $image_logo  -> #main-logo
 $image_altlogo -> #main-logo-alt
-$website_title -> #main-title>h2 
+$website_title -> #main-title>h2
+$title_alt -> #main-title-alt 
 */
   //main logo image
   if($('#main-logo').length>0){
@@ -481,7 +482,9 @@ $website_title -> #main-title>h2
       $('#main-logo-alt').hide();
   <?php } ?>
   }
-  
+  if($('#main-title-alt').length>0){
+      $('#main-title-alt').html('<?php print str_replace("'",'&#039;', $title_alt);?>');
+  }
   
   <?php if($website_title){  ?>
   
