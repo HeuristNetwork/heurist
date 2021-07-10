@@ -20,27 +20,27 @@
 */
 -->
 
-<div class="ui-heurist-admin ui-heurist-header" style="top:0px;">Admin</div>
-<div class="ui-heurist-design ui-heurist-header" style="top:36px;border-top:1px solid lightgray;">Design</div>
-<div class="ui-heurist-populate ui-heurist-header" style="top:72px;border-top:1px solid lightgray;">Populate</div>
+<div class="ui-heurist-admin ui-heurist-header slocale" style="top:0px;">Admin</div>
+<div class="ui-heurist-design ui-heurist-header slocale" style="top:36px;border-top:1px solid lightgray;">Design</div>
+<div class="ui-heurist-populate ui-heurist-header slocale" style="top:72px;border-top:1px solid lightgray;">Populate</div>
 <div class="ui-heurist-explore ui-heurist-header" style="top:108px;border-top:1px solid lightgray;">
-    Explore
+    <span class="slocale">Explore</span>
     <div><img data-src="gs_explore_cb.png" height="29"/></div>
 </div>
-<div class="ui-heurist-publish ui-heurist-header" style="top:174px;border-top:1px solid lightgray;">Publish</div>
+<div class="ui-heurist-publish ui-heurist-header slocale" style="top:174px;border-top:1px solid lightgray;">Publish</div>
 
 <div class="ui-heurist-quicklinks" 
     style="top:210px;left:0;right:0px;bottom:0px;overflow-y:auto;position:absolute;text-align:center;background:lightgray;color:black">
 
     <span style="display:block;margin:0;padding:12px 6px 0px 6px">
-        <span class="section-head"  data-pl="0">New</span>
+        <span class="section-head  slocale"  data-pl="0">add_new_record</span>
     </span>                                                              
     
     <ul style="border-bottom:1px gray solid;list-style-type:none;margin:0;padding:12px 30px 12px 0px">
 
         <li class="menu-explore" data-action-popup="recordAdd">
             <span class="ui-icon ui-icon-file-plus-black"/>
-            <span class="menu-text truncate" style="display:inline-block;max-width:105px;">Add record</span>
+            <span class="menu-text truncate slocale" style="display:inline-block;max-width:105px;">Add Record</span>
         </li>
 
         <span style="display:block;margin:0;padding:12px 6px 6px 0px">
@@ -50,22 +50,6 @@
         <li class="menu-explore" data-action-popup="nev_msg">
             <span class="ui-icon ui-icon-help"/></span>
         </li> 
-
-<!-- 05/5/21 TODO: Phasing out this section, delete if not requested by end of May 2021
-        <span style="display:block;margin:0;padding:12px 6px 6px 0px">
-            <span class="section-head" data-pl="17" style="padding-left:17px">Navigate</span>
-        </span>                                                              
-
-        <li class="menu-explore" data-action-popup="search_recent">
-            <span class="ui-icon ui-icon-clock-b"/><span class="menu-text">Recent</span>
-        </li>
-        <li class="menu-explore" data-action-popup="search_entity">
-            <span class="ui-icon ui-icon-entity"/><span class="menu-text">Entities</span>
-        </li>
-        <li class="menu-explore" data-action-popup="search_filters">
-            <span class="ui-icon ui-icon-filter-black"/><span class="menu-text">Saved filters</span>
-        </li>
--->
 
 <!-- Removed Ian 8 Jan 2021 to reduce clutter and focus on instant access to repetitive actions
         
@@ -88,7 +72,7 @@
     </ul>
     
     <span style="display:none;margin:0;padding:12px 6px">
-        <span class="section-head">Saved filters</span>
+        <span class="section-head slocale">Saved filters</span>
     </span>                                                              
     <ul style="display:none;list-style-type:none;margin:0;padding:0px 0px 12px 0px;position:absolute;bottom:0px;left:0px;right:30px;top:215px" 
             id="filter_by_groups">

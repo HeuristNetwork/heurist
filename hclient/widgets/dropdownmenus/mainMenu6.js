@@ -90,10 +90,13 @@ $.widget( "heurist.mainMenu6", {
         .addClass('mainMenu6')
         .css({position:'absolute',width:'91px',top:'2px',left:'0px',bottom:'4px', //91
                 cursor:'pointer','z-index':104})
-        .appendTo( this.element )
-        .load(
+        .appendTo( this.element );
+        
+        this.divMainMenu.load(
             window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu6.html',
             function(){ 
+                
+                window.hWin.HAPI4.HRA(that.divMainMenu);
 
                 that.divMainMenu.find('.menu-text').hide();
 
@@ -394,7 +397,8 @@ $.widget( "heurist.mainMenu6", {
             if(ele.length>0){
 
                 if(rty_ID>0 && $Db.rty(rty_ID,'rty_Name')){
-                    ele.find('.menu-text').css('margin-left',0).html('New&nbsp;&nbsp; [<i>'
+                    ele.find('.menu-text').css('margin-left',0).html(window.hWin.HR('add_new_record2')
+                            +'&nbsp;&nbsp; [<i>'
                             +window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_ID,'rty_Name'))+'</i>]');
                     ele.attr('data-id', rty_ID);
                     this._off(ele, 'click');
@@ -611,8 +615,6 @@ $.widget( "heurist.mainMenu6", {
         this._resetCloseTimers();
         
         this.divMainMenu.find('li.menu-explore').css('background','none');  
-//23-12        this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
-//23-12        this.menues['explore'].find('li.menu-explore > .menu-text').css('text-decoration', 'none');
         
         var ele, hasAction = false;
         
@@ -623,7 +625,6 @@ $.widget( "heurist.mainMenu6", {
             ele = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
             if(ele){
                 if(ele.parents('.ui-heurist-quicklinks').length>0) ele.css('background','aliceblue');
-//23-12                ele.find('.menu-text').css('text-decoration','underline');
                 hasAction = ele.attr('data-action-popup');
                 
                 if(hasAction=='search_recent' || hasAction=='nev_msg') {
@@ -1254,6 +1255,9 @@ console.log(explore_top);
         this.menues[section].load(
                 window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu6_'+section+'.html',
                 function(){ 
+                    
+                    window.hWin.HAPI4.HRA( that.menues[section] );
+                    
                     if(section=='explore'){
                         that._initSectionMenuExplore();                        
                     }else{
@@ -1342,7 +1346,7 @@ console.log(explore_top);
                     if(link!=null){
                     
                         $('<span class="ui-icon '+link.attr('data-icon')+'"/>'
-                         +'<span class="menu-text truncate" style="max-width: 109px;">'+link.text()+'</span>')
+                         +'<span class="menu-text truncate" style="max-width: 109px;">'+window.hWin.HR( action_id )+'</span>')
                         .appendTo(item);
                         
                         if(action_id=='menu-import-get-template'){
@@ -1351,7 +1355,7 @@ console.log(explore_top);
                             item.css({'font-size':'smaller', padding:'6px'})    
                         }
                         
-                        item.attr('title',link.attr('title'));
+                        item.attr('title',window.hWin.HR(action_id+'_hint')); //link.attr('title')
                         
                     }
                 }

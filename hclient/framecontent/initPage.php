@@ -336,10 +336,14 @@ _dout('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000
     function applyTheme(){
 
         var prefs = window.hWin.HAPI4.get_prefs();
+        /*
+console.log('>>>'+prefs['layout_language']);        
+        prefs['layout_language'] = 'ru';    
         if(!window.hWin.HR){
             //loads localization
             window.hWin.HR = window.hWin.HAPI4.setLocale(prefs['layout_language']);
         }
+        */
 
         /* unfortunately dynamic addition of theme and style is not applied properly.
         Browser takes some time on its parsing while we have already created some ui elements, need timeout.

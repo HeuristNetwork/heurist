@@ -88,7 +88,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             .insertBefore($dlg); // menu-text
             //'<span class="ui-icon ui-icon-gear" style="cursor:pointer;float:right;margin:0px 6px">Define parameters</span>                
 
-            this.closeBtn = $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:'Close'}) 
+            this.closeBtn = $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:window.hWin.HR('Close')}) 
             .css({'position':'absolute', 'right':'4px', 'top':'6px', height:24, width:24})
             .addClass('ui-fade-color')
             .insertBefore($dlg);
@@ -119,7 +119,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 .show(), {click:this.doAction});
 
 
-            this.expandBtn = $('<button>').button({icon:'ui-icon-gear',label:'Permission settings'})
+            this.expandBtn = $('<button>').button({icon:'ui-icon-gear',label: window.hWin.HR('Permission settings')})
             .addClass('ui-heurist-btn-header1')
             .css({position:'absolute',top:'43px',left:6}) 
             .insertBefore($dlg);
@@ -137,21 +137,22 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             .insertBefore($dlg);
 
 
-
             this.doExpand( this.options.isExpanded );
 
         }
 
         //add and init record type selector
         $('<div id="div_sel_rectype" style="padding: 0.2em;" class="input">'
-            +'<div class="header_narrow" style="padding: 0px 16px 0px 0px;"><label for="sel_recordtype">Type of record to add:</label></div>'
-            +'<select id="sel_recordtype" style="width:40ex;max-width:30em"></select>'
+            + '<div class="header_narrow" style="padding: 0px 16px 0px 0px;"><label for="sel_recordtype">'
+            + window.hWin.HR('Type of record to add') +':</label></div>'
+            + '<select id="sel_recordtype" style="width:40ex;max-width:30em"></select>'
 
             //+'<div id="btnAddRecord" style="font-size:0.9em;display:none;margin:0 30px"></div>'
             //+'<div id="btnAddRecordInNewWin" style="font-size:0.9em;display:none;"></div>'
             +'</div>').prependTo( $dlg ); //<hr style="margin:5px"/>
 
-        $('<div class="heurist-helper3" style="padding:10px 0;display:block">This settings will be applied and remembered when you select a record type from the list</div>')
+        $('<div class="heurist-helper3" style="padding:10px 0;display:block">'
+        + window.hWin.HR('add_record_settings_hint') +'</div>')
         .prependTo( $dlg );
 
 
@@ -252,7 +253,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             $dlg.css('bottom','40px').show(); //space to show button toolbar
             this.element.parent().width(500).height(450);
             //$icon.css('float','left').removeClass('ui-icon-gear').addClass('ui-icon-carat-2-w');
-            this._innerTitle.text('Record addition settings');
+            this._innerTitle.text(window.hWin.HR('Record addition settings'));
 
             this.element.find('#div_more_options').show();
             this.element.find('.add_record').hide()
@@ -267,7 +268,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             $dlg.css('bottom','2px').hide();
             this.element.parent().width(200).height('auto');
             //$icon.css('float','right').removeClass('ui-icon-carat-2-w').addClass('ui-icon-gear');
-            this._innerTitle.text('Add Record');
+            this._innerTitle.text(window.hWin.HR('Add Record'));
         }    
                 
         
@@ -294,7 +295,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 return true;
             }
         }else if ( showWarning ) {
-            window.hWin.HEURIST4.msg.showMsgFlash('Select record type for record to be added');            
+            window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Select record type for record to be added'));            
         }
         return false;
     },

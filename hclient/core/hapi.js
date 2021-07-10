@@ -26,8 +26,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     var _className = "HAPI",
     _version   = "0.4",
     _database = null, //same as public property  @toremove      
-    _region = 'en',
+    
+    _region = null, //current region
     _regional = null, //localization resources
+    
     _guestUser = {ugr_ID:0, ugr_FullName:'Guest' },
     _listeners = [];
     _is_callserver_in_progress = false;
@@ -77,17 +79,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         that.iconBaseURL = that.baseURL + 'hsapi/dbaccess/rt_icon.php?db='+_database+'&id=';
         that.database = _database;
 
-        //global variable defined in localization.js
-        if(!(typeof regional === 'undefined')){
-            _regional = regional;
-            /*todo
-            $.getScript(that.baseURL+'hclient/core/localization.js', function() {
-            _regional = regional;
-            });
-            */
-        }
+        // regional - global variable defined in localization.js
         if(!window.hWin.HR){
-            window.hWin.HR = that.setLocale('en');
+            var lang = window.hWin.HEURIST4.util.getUrlParameter('lang');
+            window.hWin.HR = that.setLocale(lang);
+            window.hWin.HRA = that.HRA;
         }
 
         if(typeof hLayout !== 'undefined' && $.isFunction(hLayout)){
@@ -1814,16 +1810,49 @@ prof =Profile
         * Returns function to string resouce according to current region setting
         */
         setLocale: function( region ){
+            
+            if(!region) region = 'en'; //default
+            
             if(_regional && _regional[region]){
+                //already loaded - switch region
                 _region = region;
+                _regional = regional[_region];
+            }else{
+                $.getScript(that.baseURL+'hclient/core/localization'
+                    +(region=='en'?'':('_'+region))+'.js', function() {
+                    _region = region;
+                    _regional = regional[_region];
+                });
             }
+            
             // function that returns string resouce according to current region setting
-            return function key(res){
-                if(_regional && _regional[_region] && _regional[_region][res]){
-                    return _regional[_region][res];
+            return function(res){
+                
+                if(window.hWin.HEURIST4.util.isempty(res)){
+                    return '';
+                }
+                var key = res.trim();
+                key = key.replaceAll('-','_');
+                
+                if(res=='menu-database-browse'){
+                    console.log(_regional[key]);
+                }
+
+                if(_regional && _regional[key]){
+                    return _regional[key];
                 }else{
                     return res;
                 }
+            }
+        },
+        
+        HRA: function(ele){
+            if(ele){
+                $.each($(ele).find('.slocale'),function(i,item){
+                    var s = $(item).text();
+                    //console.log(s+"=>"+window.hWin.HR(s))
+                    $(item).text(window.hWin.HR(s));
+                });
             }
         }
 
