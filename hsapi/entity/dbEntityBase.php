@@ -128,7 +128,16 @@ class DbEntityBase
     //
     // config getter
     //
-    public function config(){
+    public function config( $locale='en' ){
+
+        if(!@$this->config['locale']){
+            @$this->config['locale'] = 'en';
+        }
+        
+        if(@$this->config['locale']!=$locale){
+            $this->_readConfigLocale($locale);     
+        }
+        
         return $this->config;
     }
     
@@ -292,7 +301,7 @@ class DbEntityBase
                 $res = $this->delete();
 
             }else if(@$this->data['a'] == 'config'){ // return configuration
-                $res = $this->config();
+                $res = $this->config( @$this->data['locale'] );
             }else if(@$this->data['a'] == 'files'){ // working with settings/config files
             
                 // get list of files by extension
@@ -580,6 +589,74 @@ class DbEntityBase
            
         }else{
            $this->system->addError(HEURIST_SYSTEM_FATAL, 'Cannot find configuration for entity '.@$this->data['entity'].' in '.HEURIST_DIR.'hsapi/entity/');     
+        }
+    }
+
+    //
+    //
+    //    
+    private function _readConfigLocale( $locale='en' ){
+
+        $entity_file = HEURIST_DIR.'hsapi/entity/'.lcfirst(@$this->data['entity'])
+            .($locale=='en'?'':('_'.$locale)).'.json';
+        
+        if(file_exists($entity_file)){
+
+           $json = file_get_contents($entity_file);
+           $locale_config = json_decode($json, true);
+
+           $this->config['locale'] = $locale;
+           $this->config['entityTitle'] = $locale_config['entityTitle'];
+           $this->config['entityTitlePlural'] = $locale_config['entityTitlePlural'];
+           
+           $this->_fieldsSetLocale( $this->config['fields'], $locale_config['fields'] );
+        }
+    }
+
+    //
+    //
+    //
+    private function _getFieldByID($id, $fields){
+        foreach($fields as $field){
+            
+            if(@$field['dtID']==$id){
+                return $field;
+            }else if(is_array(@$field['children']) && count($field['children'])>0){
+                $res = $this->_getFieldByID($id, $field['children']);
+                if($res){
+                    return $res;
+                }
+            }
+        }
+        return null;
+    }
+    
+    //
+    // assign localized name and description for fields
+    //
+    private function _fieldsSetLocale( &$fields, $fields_locale ){
+        
+        foreach($fields as $idx=>$field){
+            
+            if(is_array(@$field['children']) && count($field['children'])>0){
+                
+                $fld_loc = $this->_getFieldByID($field['dtID'], $fields_locale);
+                if($fld_loc && @$fld_loc['groupHeader']){
+                    $fields[$idx]['groupHeader'] = $fld_loc['groupHeader'];    
+                }
+                
+                $this->_fieldsSetLocale($fields[$idx]['children'], $fields_locale);
+                
+            }else{
+                
+                $fld_loc = $this->_getFieldByID($field['dtID'], $fields_locale);
+                if($fld_loc && @$fld_loc['dtFields']){
+                    $fields[$idx]['dtFields']['rst_DisplayName'] = $fld_loc['dtFields']['rst_DisplayName'];    
+                    $fields[$idx]['dtFields']['rst_DisplayHelpText'] = $fld_loc['dtFields']['rst_DisplayHelpText'];    
+                }
+                
+                
+            }
         }
     }
     

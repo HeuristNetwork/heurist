@@ -1214,7 +1214,7 @@ prof =Profile
                     }
                     return entity_configs[entityName];
                 }else{
-                    _callserver('entityScrud', {a:'config', 'entity':entityName},
+                    _callserver('entityScrud', {a:'config', 'entity':entityName, 'locale':window.hWin.HAPI4.getLocale()},
                        function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
 
@@ -1806,6 +1806,12 @@ prof =Profile
         return /();
         }*/
 
+        //
+        // returns current locale - language code
+        //
+        getLocale: function(){
+            return _region;
+        },
         /**
         * Returns function to string resouce according to current region setting
         */

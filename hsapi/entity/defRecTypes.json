@@ -154,6 +154,7 @@
                 },
                 
                 {
+                "dtID": "group_1",
                 "groupHeader": "Additional information",
                 "groupTitleVisible": true,
                 "groupType": "accordion",

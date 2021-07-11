@@ -270,7 +270,7 @@ regional['ru'] = {
         menu_manage_structure_assql_hint: 'Список определений типов записи и полей в форме для использования SQL выражениях',
         
     //populate menu
-    'Upload files': 'Загрузить файлы',
+    'Upload Files': 'Загрузить файлы',
         menu_import_csv: 'Текст / CSV',
         menu_import_zotero: 'Zotero библиография',
         menu_import_xml: 'Heurist XML/JSon',
@@ -281,7 +281,7 @@ regional['ru'] = {
         menu_import_xml_hint: 'Import records from another database',
         menu_import_kml_hint: 'Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)',
         menu_import_get_template_hint: 'Get XML template that describes database structure', 
-    'Media files': 'Медиа файлы',
+    'Media Files': 'Медиа файлы',
         menu_files_upload: 'Загрузить медиа файлы',
         menu_files_index: 'Проиндексировать',
         menu_files_upload_hint: 'Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files',
