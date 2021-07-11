@@ -93,12 +93,12 @@ $.widget( "heurist.select_imagelib", {
                            }
         
                            var html_thumb = '<div class="recTypeThumb" style="top:0px !important;background-image: url(&quot;'
-                            +recThumb+'&quot;);opacity:1;height:'+that.options.size+' !important">'
+                            +recThumb+'&quot;);opacity:1;height:'+that.options.size+'px !important">'
                             +'</div>';
 
                             var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
-                                    + '" style="width:'+(that.options.size+4)+' !important;height:'
-                                    + (that.options.size+4)+' !important">'
+                                    + '" style="width:'+(that.options.size+4)+'px !important;height:'
+                                    + (that.options.size+4)+'px !important">'
                                     + html_thumb + '</div>';
                            
                            return html;  
