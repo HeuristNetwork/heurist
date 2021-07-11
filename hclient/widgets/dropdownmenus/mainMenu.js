@@ -546,7 +546,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             //profile menu header consists of two labels: Settings and Current user name
                 
             link = $('<a href="#">'
-            +(this.options.is_h6style?'':'<span style="display:inline-block;padding-right:20px">Settings</span>') 
+            +(this.options.is_h6style?'':'<span style="display:inline-block;padding-right:20px">'+window.hWin.HR('Settings')+'</span>') 
             +'<div class="ui-icon-user" style="display:inline-block;font-size:16px;width:16px;line-height:16px;vertical-align:bottom;"></div>'
             +'&nbsp;<div class="usrFullName" style="display:inline-block">'
             +window.hWin.HAPI4.currentUser.ugr_FullName
@@ -555,9 +555,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else if(name=='Help' && this.options.is_h6style){
             
             link = $('<a href="#">'
-            +(this.options.is_h6style?'':'<span style="display:inline-block;padding-right:20px">Settings</span>') 
+            +(this.options.is_h6style?'':'<span style="display:inline-block;padding-right:20px">'+window.hWin.HR('Settings')+'</span>') 
             +'<div class="ui-icon-circle-b-help" style="display:inline-block;font-size:16px;width:16px;line-height:16px;vertical-align:bottom;"></div>'
-            +'&nbsp;<div style="display:inline-block">Help'
+            +'&nbsp;<div style="display:inline-block">'+ window.hWin.HR(name)
             +'</div><div style="position:relative;" class="ui-icon ui-icon-carat-1-s"></div></a>');
             
         }else{
@@ -582,15 +582,19 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }
         
         // Load content for all menus except Database when user is logged out
+        var section = 'menu_'+name;            
 
-        this.menues['menu_'+name] = $('<ul>')
+        this.menues[section] = $('<ul>')
         .load(
             window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu'+name+'.html',
           function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
           
-            that.menues['menu_'+name].find('.list-menu-only').hide();
+          
+            window.hWin.HAPI4.HRA(that.menues[section]);
+          
+            that.menues[section].find('.list-menu-only').hide();
          
-            that.menues['menu_'+name].addClass('menu-or-popup')
+            that.menues[section].addClass('menu-or-popup')
             .css({'position':'absolute', 'padding':'5px'})
             .appendTo( that.document.find('body') )
             //.addClass('ui-menu-divider-heurist')
@@ -599,15 +603,22 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     return false; 
             }});
             
-            that.menues['menu_'+name].find('a').each(function(idx,item){
-                if($(item).attr('data-ext')!=1){
-                    var href = $(item).attr('href');
+            that.menues[section].find('a').each(function(idx,item){
+                item = $(item);
+                if(item.attr('data-ext')!=1){
+                    var href = item.attr('href');
                     if(href!='#' && !window.hWin.HEURIST4.util.isempty(href)){
-                        $(item).attr('href','#')
-                        $(item).attr('data-link', href);
+                        item.attr('href','#')
+                        item.attr('data-link', href);
                     }
                 }
+                //localization
+                if(item.attr('id').indexOf('menu-')==0){
+                    item.text(window.hWin.HR( item.attr('id') ));
+                    item.attr('title',window.hWin.HR(item.attr('id')+'_hint'));
+                }
             });
+            
             
 //            that._refresh();
             

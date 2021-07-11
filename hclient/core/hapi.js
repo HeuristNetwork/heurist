@@ -1847,7 +1847,11 @@ prof =Profile
                 if(_regional && _regional[key]){
                     return _regional[key];
                 }else{
-                    return res;
+                    if(key.indexOf('_')>0){
+                        return '';
+                    }else{
+                        return res;    
+                    }
                 }
             }
         },

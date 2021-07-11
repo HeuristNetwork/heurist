@@ -2947,7 +2947,7 @@ $.widget( "heurist.search_faceted", {
                 
                 $('<span style="padding:0.3em 1em;background:white;color:red;vertical-align:sub;font-size: 11px;font-weight: bold;"'
                   +' title="'+window.hWin.HAPI4.sysinfo.db_workset_count+' records"'
-                  +'>SUBSET ACTIVE n='+window.hWin.HAPI4.sysinfo.db_workset_count+'</span>')
+                  +'>'+window.hWin.HR('SUBSET ACTIVE')+' n='+window.hWin.HAPI4.sysinfo.db_workset_count+'</span>')
                     .appendTo(container);
             }
             this._adjustSearchDivTop();

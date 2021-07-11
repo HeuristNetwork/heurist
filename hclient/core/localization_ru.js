@@ -22,7 +22,6 @@ regional['ru'] = {
     'Import data': 'Импорт данных',
     'Files in situ': 'Из директории на сервере',
     'Report bug': 'Отчет об ошибке',
-    'Help': 'Помощь',
     'About': 'О системе...',
     'Confirmation':'Подтверждение',
     'Info':'Информация',
@@ -35,7 +34,6 @@ regional['ru'] = {
     'Log out' : 'Выйти',
     'Cancel': 'Отмена',
     'Save': 'Сохранить',
-    'Close': 'Закрыть',
     'Assign': 'Присвоить',
     'Add': 'Добавить',
     'Delete': 'Удалить',
@@ -171,18 +169,24 @@ regional['ru'] = {
     'length must be between': 'длина должна быть между',
     'required field': 'обязательное поле',
     
-    //main menu ========================  2021_07_08 =======================
+    //========================  2021_07_08 =======================
+
+    //common words
+    'Close': 'Закрыть',
+    'Settings': 'Настройки',
+    'Help': 'Помощь',
+    'records': 'записей',
+    
+    //main menu 
     'Admin': 'Админ',
     'Design': 'Дизайн',
     'Populate': 'Наполнение',
     'Explore': 'Искать',
     'Publish': 'Публикация',
     'Profile': 'Профиль',
-
         
     add_new_record: 'Новая запись', //header for New record
     add_new_record2: 'Ввод', // prefix before rectype name
-    'Add record': 'Добавить запись',
     
     //explore menu
     'Filters': 'Фильтры',
@@ -286,18 +290,6 @@ regional['ru'] = {
         menu_files_index: 'Проиндексировать',
         menu_files_upload_hint: 'Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files',
         menu_files_index_hint: 'Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)',
-    //record add dialog    
-    'Add Record': 'Добавить запись',
-    'Record addition settings': 'Настройки для новой записи',
-    'Permission settings': 'Настройки для записи',
-    'Save Settings': 'Сохранить настройки',
-    'Add Record in New Window': 'Добавить запись в новом окне',
-    'Type of record to add': 'Тип данных для новой записи',
-    'Get Parameters': 'Загрузить параметры',
-    'Select record type for record to be added': 'Выберите тип данных для новой записи',
-    'select record type': 'выберите тип данных',
-    add_record_settings_hint: 'Эти настройки будут применяться для новых записей',
-    
     
     //publish menu
     'Website': 'Веб сайт',
@@ -328,6 +320,54 @@ regional['ru'] = {
         menu_export_gephi_hint: 'Generate GEPHI for current set of search results (current query + expansion)',
     'Safeguard': 'Резервная копия',
         
+    //My profile menu
+    menu_profile_tags: 'Управления тегами',
+    menu_profile_reminders: 'Управление напоминаниями',
+    menu_profile_info: 'Мой профиль',
+    menu_profile_logout: 'Выход',
+    menu_profile_tags_hint: 'Удаление, модификация, переименование ваших личных и групповых тегов (ярлыков)',
+    menu_profile_reminders_hint: 'Просмотр и удаления автоматических сообщений/ссылок на ваши записи',
+    menu_profile_info_hint: 'Информация о вашем пользовательском профиле',
+    menu_profile_logout_hint: '',
+        
+    //HELP menu
+    HELP: 'ПОМОЩЬ',
+        menu_help_online: 'Документация',
+        menu_help_website: 'Heurist Network вебсайт',
+        menu_help_online_hint: 'Исчерпывающая помощь и документация по Heurist',
+        menu_help_website_hint: 'Heurist Network вебсайт - основной источник  информации, услуг и контактов', 
+    CONTACT: 'КОНТАКТЫ',
+        menu_help_bugreport: 'Отчет об ошибке / запрос новых функций',
+        menu_help_emailteam: 'Команда Heurist',
+        menu_help_emailadmin: 'Системны администратор',
+        menu_help_acknowledgements: 'Признательности',
+        menu_help_about: 'О приложении',
+        menu_help_bugreport_hint: 'Послать email to the Heurist team such as additional bug information, comments or new feature requests',
+        menu_help_emailteam_hint: '',
+        menu_help_emailadmin_hint: 'Послать email to the System Adminstrator for this installaton of Heurist - typically for probelms with this installation',
+        menu_help_acknowledgements_hint: '',
+        menu_help_about_hint: 'Версия, Авторы, Права, Лицензия',
+    
+    menu_subset_set: 'Подмножество',
+    menu_subset_set_hint: 'Сделать текущий поиск активным - все последующие поиски будут проходить в этом подмножестве записей',
+    'Click to revert to whole database': 'Нажмите чтобы сбросить подмножество и искать по всей базе',
+    'SUBSET ACTIVE': 'ПОДМНОЖЕСТВО',
+    'Current subset': 'Активно',
+    
+    //END main menu =================
+    
+    //record add dialog    
+    'Add Record': 'Добавить запись',
+    'Record addition settings': 'Настройки для новой записи',
+    'Permission settings': 'Настройки для записи',
+    'Save Settings': 'Сохранить настройки',
+    'Add Record in New Window': 'Добавить запись в новом окне',
+    'Type of record to add': 'Тип данных для новой записи',
+    'Get Parameters': 'Загрузить параметры',
+    'Select record type for record to be added': 'Выберите тип данных для новой записи',
+    'select record type': 'выберите тип данных',
+    add_record_settings_hint: 'Эти настройки будут применяться для новых записей',
+    
         
             'Upload/register new file': 'Загрузить или зарегистрировать файл',
             'Add File': 'Добавить файл',

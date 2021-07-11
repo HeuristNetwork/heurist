@@ -3320,17 +3320,18 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 if(this.options.show_menu){ 
                     if(false){ // IJ 2020-11-13 set subset is allowed from main menu only
                   s = s+'<span class="set_subset" '
-                      +'title="Make the current filter the active subset to which all subsequent actions are applied">Set</span>'
+                      +'title="'+ window.hWin.HR('menu_subset_set_hint')+'">Set</span>'
                       +'&nbsp;&nbsp;';
                       }
                   s = s
-                      +'<span class="ui-icon ui-icon-arrowrefresh-1-w clear_subset" style="font-size:1em;" title="Click to revert to whole database"></span>&nbsp;';
+                      +'<span class="ui-icon ui-icon-arrowrefresh-1-w clear_subset" style="font-size:1em;" '
+                      +'title="'+window.hWin.HR('Click to revert to whole database')+'"></span>&nbsp;';
                 }    
                 
                 $(s
                 +'<span style="padding:.4em 1em 0.3em;background:white;color:red;vertical-align:sub;font-size: 11px;font-weight: bold;"'
-                +' title="'+window.hWin.HAPI4.sysinfo.db_workset_count+' records"'
-                +'>SUBSET ACTIVE n='+window.hWin.HAPI4.sysinfo.db_workset_count+'</span></span>')
+                +' title="'+window.hWin.HAPI4.sysinfo.db_workset_count+' '+window.hWin.HR('records')+'"'
+                +'>'+window.hWin.HR('SUBSET ACTIVE')+' n='+window.hWin.HAPI4.sysinfo.db_workset_count+'</span></span>')
                     .appendTo(container);
                     
                 var w = container.find('span.subset-sign').width()+20;
@@ -3343,7 +3344,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             
                 if(false){ // IJ 2020-11-13 set subset is allowed from main menu only
                     $(s+'<span class="set_subset" '
-                    +'title="Make the current filter the active subset to which all subsequent actions are applied">Set subset</span></span>')
+                    +'title="'+window.hWin.HR('menu_subset_set_hint')+'">'+window.hWin.HR('menu_subset_set')+'</span></span>')
                     .appendTo(container);
                 }
             }

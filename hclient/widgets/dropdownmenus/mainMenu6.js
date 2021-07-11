@@ -1710,7 +1710,8 @@ console.log(explore_top);
                 if(ele.length==0){
                     ele = $('<span class="subset-info"><span '
 +'style="display:inline-block;color:red;font-size:smaller;padding-left:22px"></span>' //font-style:italic ;color:lightgray
-+'<span class="ui-icon ui-icon-arrowrefresh-1-w clear_subset" style="font-size:0.7em;color:black;" title="Click to revert to whole database">'+
++'<span class="ui-icon ui-icon-arrowrefresh-1-w clear_subset" style="font-size:0.7em;color:black;" '
++'title="'+window.hWin.HR('Click to revert to whole database')+'">'+
 '</span></span>')
                         .appendTo(container);
                         
@@ -1724,7 +1725,8 @@ console.log(explore_top);
                         }});
                 
                 }
-                ele.find('span:first').html('Current subset n&nbsp;&nbsp;=&nbsp;&nbsp;'+window.hWin.HAPI4.sysinfo.db_workset_count);
+                ele.find('span:first').html(window.hWin.HR('Current subset')
+                        +' n&nbsp;&nbsp;=&nbsp;&nbsp;'+window.hWin.HAPI4.sysinfo.db_workset_count);
                 ele.show();
                 
             }else if(ele.length>0){

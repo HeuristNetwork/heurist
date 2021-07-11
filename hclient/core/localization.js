@@ -25,7 +25,17 @@ regional['en'] = {
 
     //common words
     'Close': '',
+    'Settings': '',
+    'Help': '',
+    'records': '',
 
+    //main menu 
+    'Admin': '',
+    'Design': '',
+    'Populate': '',
+    'Explore': '',
+    'Publish': '',
+    'Profile': '',
     
     //explore menu
         'Filters': '',
@@ -126,19 +136,8 @@ regional['en'] = {
         menu_files_index: 'Index media files',
         menu_files_upload_hint: 'Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files',
         menu_files_index_hint: 'Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)',
-    //record add dialog    
-    'Add Record': '',
-    'Record addition settings': '',
-    'Permission settings': '',
-    'Save Settings': '',
-    'Add Record in New Window': '',
-    'Type of record to add': '',
-    'Get Parameters': '',
-    'Select record type for record to be added': '',
-    'select record type': '',
-    add_record_settings_hint: 'This settings will be applied and remembered when you select a record type from the list',
-
-    
+        
+        
     //publish menu
     'Website': '',
         menu_cms_create: 'Create',
@@ -171,7 +170,59 @@ regional['en'] = {
         
     'Safeguard':'',
 
+    //My profile menu
+    menu_profile_tags: 'Manage tags',
+    menu_profile_reminders: 'Manage reminders',
+    menu_profile_info: 'My user info',
+    menu_profile_logout: 'Log out',
+    menu_profile_tags_hint: 'Delete, combine, rename your personal and workgroup tags',
+    menu_profile_reminders_hint: 'View and delete automatic notification emails sent from the records you have bookmarked',
+    menu_profile_info_hint: 'User personal information',
+    menu_profile_logout_hint: '',
+        
+    //HELP menu
+    HELP: '',
+        menu_help_online: 'Online help',
+        menu_help_website: 'Heurist Network website',
+        menu_help_online_hint: 'Comprehensive online help for the Heurist system',
+        menu_help_website_hint: 'Heurist Network website - a source for a wide range of information, services and contacts', 
+    CONTACT: '',
+        menu_help_bugreport: 'Bug report/feature request',
+        menu_help_emailteam: 'Heurist Team',
+        menu_help_emailadmin: 'System Administrator',
+        menu_help_acknowledgements: 'Acknowledgements',
+        menu_help_about: 'About',
+        menu_help_bugreport_hint: 'Send email to the Heurist team such as additional bug information, comments or new feature requests',
+        menu_help_emailteam_hint: '',
+        menu_help_emailadmin_hint: 'Send an email to the System Adminstrator for this installaton of Heurist - typically for probelms with this installation',
+        menu_help_acknowledgements_hint: '',
+        menu_help_about_hint: 'Version, Credits, Copyright, License',
+    
+    
+    menu_subset_set: 'Set as subset',
+    menu_subset_set_hint: 'Make the current filter the active subset to which all subsequent actions are applied',
+    'Click to revert to whole database': '',
+    'SUBSET ACTIVE': '',
+    'Current subset': '',
+    
+    //END main menu =================
+    
+    //record add dialog    
+    'Add Record': '',
+    'Record addition settings': '',
+    'Permission settings': '',
+    'Save Settings': '',
+    'Add Record in New Window': '',
+    'Type of record to add': '',
+    'Get Parameters': '',
+    'Select record type for record to be added': '',
+    'select record type': '',
+    add_record_settings_hint: 'This settings will be applied and remembered when you select a record type from the list',
 
+//===================    
+    
+    
+    
 
     
     'Design database': 'Design database',

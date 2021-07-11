@@ -20,20 +20,18 @@
 */
 -->
 
-<li data-user-admin-status="0">HELP</li>
+<li data-user-admin-status="0" class="slocale">HELP</li>
 
 <li style="padding-left:5px;">
     <a href="https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Help_System&website" target="_blank" 
         id="menu-help-online"
-        data-logaction="hlp_Online"
-       title="Comprehensive online help for the Heurist system"> <!--  help/index.html -->
+        data-logaction="hlp_Online">
        Online help</a>
 </li>
 
 <li style="padding-left:5px;">
     <a href="https://HeuristNetwork.org" target="_blank"
-       data-logaction="hlp_Website"
-       title="Heurist Network website - a source for a wide range of information, services and contacts ">
+       data-logaction="hlp_Website" id="menu-help-website">
        Heurist Network website</a>
 </li>
 
@@ -48,44 +46,39 @@
 
 <li data-user-admin-status="0">-</li>
 
-<li data-user-admin-status="0">CONTACT</li>
+<li data-user-admin-status="0" class="slocale">CONTACT</li>
 
 <!-- export/email/formEmailRecordPopup.html?rectype=bugreport -->
 
-
 <li style="padding-left:5px;">
 <a href="#"  id="menu-help-bugreport"
-    data-user-admin-status="0"
-    title="Click to send a bug report or feature request to the Heurist development team">Bug report/feature request</a>
+    data-user-admin-status="0">Bug report/feature request</a>
 </li>
 
 <li class="admin-only" style="padding-left:5px;">
-    <a href="mailto:info@HeuristNetwork.org"
-        data-user-admin-status="0" data-ext="1"
-        title="Send email to the Heurist team such as additional bug information, comments or new feature requests">
+    <a href="mailto:info@HeuristNetwork.org" id="menu-help-emailteam"
+        data-user-admin-status="0" data-ext="1">
         Heurist Team</a>
 </li>
 
 <!-- TODO: send email to system admin rather than Heurist team -->
 <li class="admin-only" style="padding-left:5px;">
     <a href="mailto:info@HeuristNetwork.org"
-        data-user-admin-status="0" data-ext="1"
-        title="Send an email to the System Adminstrator for this installaton of Heurist - typically for probelsm with this installation">
+        data-user-admin-status="0" data-ext="1" id="menu-help-emailadmin">
         System Administrator</a>
 </li>
 
 <li style="padding-left:5px;">
-    <a href="#"
+    <a href="#" id="menu-help-acknowledgements"
         onclick="{ var contentURL = window.hWin.HAPI4.baseURL+'context_help/acknowledgementsHeurist.html';
                    window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Acknowledgements', {isPopupDlg:true, width:500, height:500});
-                   return false; }"
-        title="Acknowledgements">
+                   return false; }">
         Acknowledgements</a>
 </li>
  
 
 <li style="padding-left:5px;">
-    <a href="#"
+    <a href="#" id="menu-help-about"
         onclick="{ var contentURL = window.hWin.HAPI4.baseURL+'context_help/aboutHeurist.html';
                    window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'About', 
                    {isPopupDlg:true, width:500, height:390,
@@ -99,8 +92,7 @@
                     dlg.dialog('option',{height: 420, title:window.hWin.HR('About')});
                     dlg.dialog('open');
 */                    
-                    return false; }"
-        title="Version, Credits, Copyright, License">
+                    return false; }">
         About</a>
 </li>
 
