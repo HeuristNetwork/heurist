@@ -61,7 +61,7 @@ $.widget( "heurist.resultListMenu", {
         //this._initMenu('Layout');
         this.divMainMenuItems.menu();
 
-        this.divMainMenuItems.find('li').css({'padding':'0 3px 3px', 'width':'80px', 'text-align':'center'}); // center, place gap and setting width
+        this.divMainMenuItems.find('li').css({'padding':'0 3px 3px', 'width':'100px', 'text-align':'center'}); // center, place gap and setting width
         
         if(this.options.menu_class!=null){
              this.element.addClass( this.options.menu_class );   
@@ -251,12 +251,14 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
         if(name=='Reorder'){
             
-            this['btn_'+name].attr('title',
-            'Allows manual reordering of the current results and saving as a fixed list of ordered records');
+            this['btn_'+name].attr('title', window.hWin.HR('menu_reorder_hint'));
+            
             
             this._on( this['btn_'+name], {
                 click : function(){
-                       $(this.options.resultList).resultList('setOrderAndSaveAsFilter');
+                    if(!this.isResultSetEmpty()){
+                       $(this.options.resultList).resultList('setOrderAndSaveAsFilter'); 
+                    }
                 }
             });
             
@@ -288,7 +290,14 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                         $(this).show();    
                     }
                 });
-                
+
+                //localization                
+                that['menu_'+name].find('li[id^="menu-"]').each(function(){
+                    var menu_id = $(this).attr('id');
+                    var item = $(this).find('a');
+                    item.text(window.hWin.HR( menu_id ));
+                    item.attr('title',window.hWin.HR( menu_id+'_hint'));
+                });
                 
                 that['menu_'+name].find('li').css('padding-left',0);
                 
@@ -321,36 +330,16 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         //var action = ui.item.attr('id');
         if(action == "menu-search-quick"){  //H4
 
-            //hack $('#btn_search_assistant').click();
-            var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('search');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha10');
+            var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('search');
             if(widget){
                 widget.search('showSearchAssistant');
             }
 
-        }else if(action == "menu-search-advanced"){ //H3
-
-            //call vsn 3 search builder
-            var q = "",
-            that = this;
-            if(!Hul.isnull(this._query_request) && !Hul.isempty(this._query_request.q)){
-                q ="&q=" + encodeURIComponent(this._query_request.q);
-            }
-            var url = window.hWin.HAPI4.baseURL+ "search/queryBuilderPopup.php?db=" + window.hWin.HAPI4.database + q;
-
-            window.hWin.HEURIST4.msg.showDialog(url, {
-                title: window.hWin.HR('Advanced search builder'),
-                callback: function(res){
-                    if(!Hul.isempty(res)) {
-                        that.reloadSearch(res);
-                    }
-            }});
-
         }else if(action == "menu-search-save"){  //H4
 
-            var  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha13');
+            var  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
             if(widget){
                 widget.svs_list('editSavedSearch', 'saved'); //call public method editRules
-                //$(app.widget).search_links('editSavedSearch', null, null, 'saved'); //call method editSavedSearch - save current search
             }
 
         }else if(action == "menu-search-rulebuilder"){
@@ -358,7 +347,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             var  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha13');
             if(widget){
                 widget.svs_list('editSavedSearch', 'rules'); //call public method editRules
-                // $(app.widget).search_links('editRules', null); //call public method editRules
             }
 
 
@@ -385,7 +373,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             var opts = {
                 width:700,
                 groups: (action == "menu-selected-bookmark")?'personal':'all',
-                //(action == "menu-selected-wgtags")?'grouponly':'personal',
                 onClose:
                    function( context ){
                        if(context){
@@ -395,10 +382,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                    }
             };
             if(action == "menu-selected-bookmark"){
-                opts['title'] = 'Add bookmarks and tag records';
                 opts['modes'] = ['assign'];
-            }else if (action == "menu-selected-wgtags"){
-                opts['title'] = 'Add or Remove Workgroup Tag for Records';    
             }
             
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordTag', opts);
@@ -426,7 +410,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
             if(this.isResultSetEmpty()) return;
             
-            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds("Please select at least one record to delete");
+            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds( window.hWin.HR('resultList_select_record') );
             if(Hul.isempty(window.hWin.HAPI4.currentRecordsetSelection)) return;
             
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordDelete', {onClose:
@@ -608,7 +592,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             window.hWin.HEURIST4.msg.showMsgDlg(msg);
             return null;
         }else if (limit>0 && recIDs_list.length > limit) {
-            window.hWin.HEURIST4.msg.showMsgDlg("The number of selected records is above the limit in "+limit);
+            window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('resultList_select_record')+limit);
         }else{
             return recIDs_list;
         }
@@ -618,7 +602,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
     //-------------------------------------- EMAIL FORM -------------------------------
     openEmailForm: function() {
         // Selection check
-        var ids = this.getSelectionIds("Please select at least one record to e-mail");
+        var ids = this.getSelectionIds(window.hWin.HR('resultList_select_record'));
         if(Hul.isempty(ids)) {
             return;
         }
@@ -671,12 +655,14 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
         var recIDs_list = this.getSelectionIds(null);
         if(Hul.isempty(recIDs_list) || recIDs_list.length<2){
-            window.hWin.HEURIST4.msg.showMsgDlg("Please select at least two records to identify/merge duplicate records");
+            window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('resultList_select_record2'));
             return;
         }
 
         var that = this;
-        var url = window.hWin.HAPI4.baseURL + "admin/verification/combineDuplicateRecords.php?bib_ids="+recIDs_list.join(",")+"&db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.baseURL 
+                    + 'admin/verification/combineDuplicateRecords.php?bib_ids='
+                    + recIDs_list.join(",")+"&db=" + window.hWin.HAPI4.database;
 
         window.hWin.HEURIST4.msg.showDialog(url, {
             width:700, height:550,
@@ -693,8 +679,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
     isResultSetEmpty: function(){
         var recIDs_all = window.hWin.HAPI4.getSelection("all", true);
         if (Hul.isempty(recIDs_all)) {
-            window.hWin.HEURIST4.msg.showMsgDlg('No results found. '
-            +'Please modify search/filter to return at least one result record.');
+            window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('resultList_noresult'));
             return true;
         }else{
             return false;

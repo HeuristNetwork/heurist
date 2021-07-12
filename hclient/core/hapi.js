@@ -1838,7 +1838,9 @@ prof =Profile
                     return '';
                 }
                 var key = res.trim();
-                key = key.replaceAll('-','_');
+                if(key.indexOf('menu-')==0){
+                    key = key.replaceAll('-','_');
+                }
                 
                 if(res=='menu-database-browse'){
                     console.log(_regional[key]);
