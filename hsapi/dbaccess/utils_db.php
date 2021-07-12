@@ -798,7 +798,7 @@
     }
 
     //
-    //
+    // for strip accents
     //
     function my_strtr($inputStr, $from, $to, $encoding = 'UTF-8') {
         $inputStrLength = mb_strlen($inputStr, $encoding);

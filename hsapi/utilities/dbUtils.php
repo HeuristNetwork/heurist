@@ -667,7 +667,7 @@ class DbUtils {
                         }
                         
                         if(strtolower($table)=='usrrecpermissions'){
-                            $cnt = mysql__select_value($mysqli,'select count() from usrRecPermissions');
+                            $cnt = mysql__select_value($mysqli,'select count(*) from usrRecPermissions');
                             if(!($cnt>0)) continue;
                         }
                         
