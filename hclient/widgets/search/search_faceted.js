@@ -598,6 +598,17 @@ $.widget( "heurist.search_faceted", {
                                 return qarr[i][key];   
                             }else if(qarr[0][key]==val){ //already exists
                                 return qarr;
+                            }else if (i==0 && key=='t') {
+                                var rtids = qarr[0][key].split(',');
+                                var j = window.hWin.HEURIST4.util.findArrayIndex(val,rtids);
+                                if(j<0) {
+                                    rtids.push(val);
+                                    qarr[0][key] = rtids.join(',');
+                                    return qarr;
+                                }else{
+                                    return qarr; //already in list
+                                }
+                                
                             }
                         }
                     }
