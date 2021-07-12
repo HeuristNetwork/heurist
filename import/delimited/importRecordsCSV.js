@@ -2231,6 +2231,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         */
         
                 _showStep(0);
+                
+                var encoding = $('#csv_encoding').val();
+                if(encoding=='auto detect'){
+                    encoding = null;
+                }
         
                 var request = { action: step==2?'step2':'step1',
                                 csv_delimiter: $('#csv_delimiter').val(),
@@ -2238,7 +2243,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 csv_enclosure: $('#csv_enclosure').val(),
                                 csv_mvsep: $('#csv_mvsep').val(),
                                 csv_dateformat: $('#csv_dateformat').val(),
-                                csv_encoding: $('#csv_encoding').val(),
+                                csv_encoding: encoding,
                                 id: window.hWin.HEURIST4.util.random()
                                };
 

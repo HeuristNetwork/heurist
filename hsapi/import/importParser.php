@@ -133,13 +133,23 @@ public static function encodeAndGetPreview($upload_file_name, $params){
         return false;
     }
     
+    //encoding that is set by user
     $csv_encoding = @$params['csv_encoding'];
+    
+    //mb_detect_encoding($line, ['UTF-8','ISO-8859-1','WINDOWS-1252']);
     
     //detect encoding and convert entire file to UTF8 
     // WARNING: it checks header (first line) only. It may happen that file has non UTF characters in body
-    if( $csv_encoding!='UTF-8' || !mb_check_encoding( $line, 'UTF-8' ) ){
+    if( $csv_encoding!='UTF-8'){ //07-12 || !mb_check_encoding( $line, 'UTF-8' ) ){
 
-        //try to convert ONE line only - to check is it possible       
+        $content = file_get_contents($upload_file_name);
+    
+        if($csv_encoding==null || $csv_encoding==''){
+            //detect encoding automatically - IT DOES NOT WORK
+            $csv_encoding = mb_detect_encoding($content); //,['ISO-8859-1','ISO-8859-15','CP1251','CP1252','BIG-5','UTF-8']);
+        }
+    
+        /* try to convert ONE line only - to check is it possible       
         if($csv_encoding!='UTF-8'){
              $line = mb_convert_encoding( $line, 'UTF-8', $csv_encoding);
         }else{
@@ -150,9 +160,9 @@ public static function encodeAndGetPreview($upload_file_name, $params){
                 .'Please open it in any advanced editor and save with UTF-8 text encoding');
             return false;
         }
+        */
 
         //convert entire file
-        $content = file_get_contents($upload_file_name);
         if($csv_encoding!='UTF-8'){
             $content = mb_convert_encoding( $content, 'UTF-8', $csv_encoding);
         }else{
@@ -160,7 +170,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
         }
         if(!$content){
             self::$system->addError(HEURIST_ERROR, 'Your file can\'t be converted to UTF-8. '
-                .'Please open it in any advanced editor and save with UTF-8 text encoding');
+                .'Either select the appropriate encoding from the list or open it in any advanced editor and save with UTF-8 text encoding');
             return false;
         }
         

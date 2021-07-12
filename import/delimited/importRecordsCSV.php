@@ -191,6 +191,7 @@ if(!$format) $format='csv';
                     <div class="header" style="min-width: 50px;"><label>Encoding:</label></div>
                     <div class="input-cell">        
                         <select id="csv_encoding" class="text ui-widget-content ui-corner-all" style="width:120px;">
+<option>auto detect</option>
 <option>UTF-8</option>
 <option>UTF-16</option>
 <option>UTF-16BE</option>
