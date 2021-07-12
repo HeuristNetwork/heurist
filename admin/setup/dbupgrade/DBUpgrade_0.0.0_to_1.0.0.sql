@@ -149,7 +149,7 @@
 
   ALTER TABLE  `defDetailTypeGroups` ADD  `dtg_Modified` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table';
 
-  ALTER TABLE  `defDetailTypes` ADD  `dty_Modified` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table';
+  ALTER TABLE  `defDetailTypes` ADD  `dty_Modified` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table' AFTER dty_NonOwnerVisibility;
 
   ALTER TABLE  `defFileExtToMimetype` ADD  `fxm_Modified` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table';
 
@@ -171,9 +171,9 @@
 
   ALTER TABLE  `defURLPrefixes` ADD  `urp_Modified` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table';
 
-  ALTER TABLE  `recDetails` ADD  `dtl_Modified` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record detail, used to get last updated date for table';
+  ALTER TABLE  `recDetails` ADD  `dtl_Modified` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record detail, used to get last updated date for table' AFTER dtl_ValShortened;
 
-  Alter TABLE  `sysUGrps` ADD ugr_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table';
+  Alter TABLE  `sysUGrps` ADD ugr_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table' AFTER ugr_FlagJT;
 
   ALTER TABLE  `usrTags` ADD  `tag_Modified` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table';
 
@@ -197,7 +197,7 @@
   COMMENT 'Flags a definition element which has been modified relative to the original source';
 
   ALTER TABLE  `defDetailTypes` ADD  `dty_LocallyModified` TINYINT( 1 ) UNSIGNED NOT NULL DEFAULT  '0'
-  COMMENT 'Flags a definition element which has been modified relative to the original source';
+  COMMENT 'Flags a definition element which has been modified relative to the original source' AFTER dty_Modified;
 
 Alter table defDetailTypeGroups
   change dtg_Order dtg_Order tinyint(3) unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of detail type groups within pulldown lists';
