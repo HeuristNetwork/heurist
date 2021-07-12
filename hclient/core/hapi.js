@@ -1842,10 +1842,6 @@ prof =Profile
                     key = key.replaceAll('-','_');
                 }
                 
-                if(res=='menu-database-browse'){
-                    console.log(_regional[key]);
-                }
-
                 if(_regional && _regional[key]){
                     return _regional[key];
                 }else{

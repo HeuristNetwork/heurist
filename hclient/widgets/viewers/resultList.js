@@ -55,8 +55,9 @@ $.widget( "heurist.resultList", {
         //searchsource: null,
 
         emptyMessageURL: null, //url of page to be loaded on empty result set 
-        empty_remark:'No entries match the filter criteria (entries may exist but may not have been made visible to the public or to your user profile)', //html content for empty message
+        empty_remark: 'def', //html content for empty message
         pagesize: -1,
+        
         
         groupByMode: null, //[null|'none','tab','accordion'],
         groupByField:null,
@@ -149,6 +150,9 @@ $.widget( "heurist.resultList", {
             else{
                 this.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
             }
+        }
+        if(this.options.empty_remark=='def'){
+            this.options.empty_remark = window.hWin.HR('resultList_empty_remark');
         }
 
         this._is_publication  = this.element.parent().attr('data-heurist-app-id');
@@ -361,7 +365,7 @@ $.widget( "heurist.resultList", {
                                         }
                                         
                                         rdiv.find('.rec_expand_on_map').attr('data-loaded', data.map_layer_status);
-                                        rdiv.find('.rec_expand_on_map > .ui-button-text').text( s );
+                                        rdiv.find('.rec_expand_on_map > .ui-button-text').text( window.hWin.HR(s) );
                                     }
                                     
                                 }
@@ -462,7 +466,7 @@ $.widget( "heurist.resultList", {
             .html(
                 '<label style="padding:0 0.4em;">'
                 +'<input id="cb_selected_only" type="checkbox" style="vertical-align:-0.3em;"/>'
-                +'&nbsp;show selected only</label>'
+                +'&nbsp;'+window.hWin.HR('show selected only')+'</label>'
                 +'<div id="btn_select_and_close"></div>')
             .appendTo( this.div_header );
 
@@ -563,7 +567,7 @@ $.widget( "heurist.resultList", {
             });
         }
 
-        //------------------
+        //------------------ moved to menu
         this.reorder_button = $( '<button>' )
                 .button({icon: "ui-icon-signal", showLabel:false, label:window.hWin.HR('reorder')})
                 .css({'font-size':'0.93em','float':'right','margin':'2px '+right_padding+'px'})
@@ -661,7 +665,7 @@ $.widget( "heurist.resultList", {
         }    
         
         //
-        //
+        // deprecated
         if(this.options.show_savefilter){
             //special feature to save current filter
             //.css({position:'absolute',bottom:0,left:0,top:'2.8em'})
@@ -1502,8 +1506,8 @@ $.widget( "heurist.resultList", {
                 clr = 'blue';
                 visibility = 'public (viewable by anyone)';
             }
-
-            var hint = __getOwnerName(owner_id)+', '+visibility;
+            
+            var hint = __getOwnerName(owner_id)+', '+window.hWin.HR(visibility);
 
             // Displays oner group ID, green if hidden, gray if visible to others, red if public visibility
             html_owner =  '<span class="rec_owner logged-in-only" style="width:20px;padding-top:2px;display:inline-block;color:'
@@ -1513,7 +1517,7 @@ $.widget( "heurist.resultList", {
             html_owner =  html_owner + '<span class="ui-icon ui-icon-cancel" '
             +'style="color:darkgray;display:inline;font-size:1.3em;vertical-align: -1px"></span>'
                 +'<span class="ui-icon ui-icon-eye" style="font-size:0.8em;color:darkgray;display:inline;vertical-align:0px" title="'
-                + 'This record is not publicly visible - user must be logged in to see it'
+                + window.hWin.HR('resultList_private_record')
                 + '" ></span>';
                      
 
@@ -1566,14 +1570,14 @@ $.widget( "heurist.resultList", {
         //action button container
         + '<div class="action-button-container">' 
 
-        + '<div title="Click to edit record" '
+        + '<div title="'+window.hWin.HR('resultList_action_edit')+'" '
         + 'class="rec_edit_link action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false" data-key="edit">'
         + '<span class="ui-button-text">Edit</span>'
         + '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span>'
         + '</div>'
 
-        + '<div title="Click to edit record (opens in new tab)" '
+        + '<div title="'+window.hWin.HR('resultList_action_edit2')+'" '
         + ' class="rec_edit_link_ext action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only"'
         + ' role="button" aria-disabled="false" data-key="edit_ext">'
         + '<span class="ui-button-text">New tab</span>'
@@ -1582,7 +1586,7 @@ $.widget( "heurist.resultList", {
         
         /* Ian removed 5/2/2020. TODO: Need to replace with Select, Preview and Download buttons */
         + ((this.options.recordview_onselect===false || this.options.recordview_onselect==='none')
-          ?('<div title="Click to view record (opens in popup)" '
+          ?('<div title="'+window.hWin.HR('resultList_action_view')+'" '
         + 'class="rec_view_link action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
         + '<span class="ui-button-text">Preview</span>'
@@ -1604,7 +1608,7 @@ $.widget( "heurist.resultList", {
         // TODO: add an open-in-new-search icon to the display of a record in the results list
         + ((!this.options.show_url_as_link && fld('rec_URL'))
             ?
-        '<div title="Click to view external link (opens in new window)" '
+        '<div title="'+window.hWin.HR('resultList_action_view2')+'" '
         + 'class="rec_view_link_ext action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
         + '<span class="ui-button-text">Link</span>'
@@ -1615,32 +1619,32 @@ $.widget( "heurist.resultList", {
         + ((rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] ||
             rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_TLCMAP_DATASET'])
             ?
-        '<div title="Click to show/hide on map" '
+        '<div title="'+window.hWin.HR('resultList_action_map')+'" '
         + 'class="rec_expand_on_map action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
-        + '<span class="ui-button-text">Show data</span>'
+        + '<span class="ui-button-text">'+window.hWin.HR('Show data')+'</span>'
         + '<span class="ui-button-icon-primary ui-icon ui-icon-globe"/>'
         + '</div>'
-        +'<div title="Download dataset" '
+        +'<div title="'+window.hWin.HR('resultList_action_dataset')+'" '
         + 'class="rec_download action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
-        + '<span class="ui-button-text">Download</span>'
+        + '<span class="ui-button-text">'+window.hWin.HR('Download')+'</span>'
         + '<span class="ui-button-icon-primary ui-icon ui-icon-arrowstop-1-s"/>'
         + '</div>'
             :'')
         
         + ((rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'])
             ?
-        '<div title="Click to embed" '
+        '<div title="'+window.hWin.HR('resultList_action_embed')+'" '
         + 'class="rec_view_link_ext action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
-        + '<span class="ui-button-text">Embed</span>'
+        + '<span class="ui-button-text">'+window.hWin.HR('Embed')+'</span>'
         + '<span class="ui-button-icon-primary ui-icon ui-icon-globe"/>'
         + '</div>'
-        + '<div title="Click to delete" '
+        + '<div title="'+window.hWin.HR('resultList_action_delete')+'" '
         + 'class="rec_delete action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
-        + '<span class="ui-button-text">Delete</span>'
+        + '<span class="ui-button-text">'+window.hWin.HR('Delete')+'</span>'
         + '<span class="ui-button-icon-primary ui-icon ui-icon-trash"/>'
         + '</div>'
             :'')
@@ -1874,7 +1878,7 @@ $.widget( "heurist.resultList", {
         if (ispwdreminder){
             var pwd = $rdiv.attr('pwd');
             var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HEURIST4.util.htmlEscape(pwd),
-                    null, "Password reminder", 
+                    null, window.hWin.HR('Password reminder'), 
                 {my: "left top", at: "left bottom", of: $target, modal:false}
             );
             $dlg.addClass('password-reminder-popup'); //class all these popups on refresh
@@ -1960,7 +1964,7 @@ $.widget( "heurist.resultList", {
                         
                         window.hWin.HEURIST4.ui.showRecordActionDialog('recordDelete', {
                             hide_scope: true,
-                            title: 'Delete map document. Associated map layers and data sources retain',
+                            title: window.hWin.HR('resultList_action_delete_hint'),
                             onClose:
                            function( context ){
                                if(context){
@@ -2489,7 +2493,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         if(this.options.select_mode=='select_multi' && this._currentMultiSelection!=null && this._currentMultiSelection.length>0){
             sinfo = sinfo + " | Selected: "+this._currentMultiSelection.length;
             if(w>600){
-                sinfo = sinfo+' <a href="#">clear</a>';
+                sinfo = sinfo+' <a href="#">'+window.hWin.HR('Clear')+'</a>';
             }
         }
 /*
@@ -2759,12 +2763,12 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 
                 var s = '';
                 if(window.hWin.HAPI4.has_access()){
-                    s = '<p style="color:green">This warning is triggered if there are more than 10 records</p>'; // (edit here to change)
+                    s = '<p style="color:green">'+window.hWin.HR('resultList_view_content_hint1')+'</p>'; // (edit here to change)
                 }
                 
                 var $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                '<p>You have selected '+n
-                +' records. This display mode loads complete information for each record and will take a long time to load and display all of these data.</p>'
+                '<p>' + window.hWin.HR('resultList_view_content_hint2')+' '+n
+                + window.hWin.HR('resultList_view_content_hint3')+'</p>'
                 +s,
                 {'Proceed as is' :function(){ 
                     callback.call();
@@ -2779,7 +2783,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                     window.hWin.HAPI4.save_pref('rec_list_viewmode_'+that.options.entityName, 'list');
                     $__dlg.dialog( "close" );
                 }
-                }, {title:'Warning'});
+                }, {title:window.hWin.HR('Warning')});
 				
             return true;          
         }else{
@@ -3405,10 +3409,10 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         var that = this;    
             
         var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({element: $(this.sortResultListDlg)[0],
-            title:'Drag records up and down to position, then Save order to save as a fixed list in this order',
+            title: window.hWin.HR('menu_reorder_title'),
             height:500,
             buttons:[
-                {text:'Save Order', click: function(){
+                {text:window.hWin.HR('menu_reorder_save'), click: function(){
                     //get new order of records ids
                     var recordset = that.sortResultList.resultList('getRecordSet');
                     var new_rec_order = recordset.getOrder();
@@ -3439,7 +3443,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                         }
                     }
                 }},
-                {text:'Cancel', click: function(){$dlg.dialog( "close" );}}
+                {text:window.hWin.HR('Cancel'), click: function(){$dlg.dialog( "close" );}}
             ]
             });
                         
@@ -3522,7 +3526,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                         onmouseover: function(){
                             that._clearTimeouts();
                         },
-                        title:'Record Info'}                
+                        title:window.hWin.HR('Record Info')}                
                     
                 if(!(dlg.length>0)){
                     
