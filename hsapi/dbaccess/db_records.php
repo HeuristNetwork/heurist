@@ -1504,7 +1504,9 @@
             $new_title = trim($new_title);
             if($new_title!=''){
                 
-                if(strlen($new_title)>1023) $new_title = substr($new_title,0,1023);
+                if(mb_strlen($new_title)>1023){
+                    $new_title = mb_substr($new_title,0,1023);  
+                } 
                 
                 //$date_mod = date('Y-m-d H:i:s'); rec_Modified=?, 
                 
