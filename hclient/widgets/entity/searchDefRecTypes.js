@@ -27,6 +27,9 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         //this.widgetEventPrefix = 'searchDefRecTypes';
         
         this._super();
+        
+        
+        window.hWin.HRA(this.element);
 
         //hide all help divs except current mode
         var smode = this.options.select_mode; 
@@ -47,7 +50,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         }else{
             
             this.btn_add_record
-                    .button({label: window.hWin.HR("Add"), showLabel:true, 
+                    .button({label: window.hWin.HR('Add'), showLabel:true, 
                             icon:"ui-icon-plus"})
                     .addClass('ui-button-action')
                     .css({padding:'2px'})
@@ -103,8 +106,11 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         }
         
         this.element.find('#div_search_group').hide();
+
+        this.element.find('#inner_title').text( this.options.entity.entityTitlePlural );
         
         if( this.options.simpleSearch){
+            
             this.element.find('#input_sort_type_div').hide();
         }else{
             if(smode=='select_multi'){
@@ -120,9 +126,9 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                 
                 this.element.find('#inner_title')
                     .css('font-size','smaller')
-                    .text('Not finding the record type you require?');
+                    .text(window.hWin.HR('Not finding the record type you require?'));
                 this.btn_add_record
-                    .button({label: 'Define new record type'});
+                    .button({label: window.hWin.HR('Define new record type')});
                 
                 this.element.find('#div_search_group').show();
                 this.input_search_group = this.element.find('#input_search_group');   //rectype group
@@ -136,7 +142,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                 
                 this.btn_ui_config = this.element.find('#btn_ui_config')
                         //.css({'width':'6em'})
-                        .button({label: window.hWin.HR("Configure UI"), showLabel:false, 
+                        .button({label: window.hWin.HR('Configure'), showLabel:false, 
                                 icon:"ui-icon-gear", iconPosition:'end'});
                 if(this.btn_ui_config){
                     this._on( this.btn_ui_config, {
@@ -252,7 +258,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
 
         $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
             window:  window.hWin, //opener is top most heurist window
-            title: window.hWin.HR('Configure User Interface'),
+            title: window.hWin.HR('Configure Interface'),
             width: 260,
             height: 500,
             element:  popele[0],
@@ -260,7 +266,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             buttons: btns
         });
 
-
+        $dlg_pce.parent().addClass('ui-heurist-design');
 
     },
     
@@ -379,8 +385,10 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             if(!this.input_search) return;
             
             var request = {}
+            
+            var is_search_one_group = (!this.element.find('#chb_show_all_groups').is(':checked') && this.options.rtg_ID>0)
         
-            if(this.input_search.val()!=''){
+            if(!is_search_one_group && this.input_search.val()!=''){
                 var s = this.input_search.val();
                 if(window.hWin.HEURIST4.util.isNumber(s) && parseInt(s)>0){
                      request['rty_ID'] = s;   
@@ -423,7 +431,8 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                 }
             
                 var sGroupTitle = '<h4 style="margin:0;padding-bottom:5px;">';
-                if(!this.element.find('#chb_show_all_groups').is(':checked') && this.options.rtg_ID>0){
+                if(is_search_one_group)
+                {
                     this.input_search.parent().hide();
 
                     request['rty_RecTypeGroupID'] = this.options.rtg_ID;
@@ -432,7 +441,8 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                                         +$Db.rtg(this.options.rtg_ID,'rtg_Description')+'</div>');
                 }else{
                     this.input_search.parent().show();
-                    sGroupTitle += 'All Groups</h4><div class="heurist-helper3" style="font-size:0.7em">All record type groups</div>';
+                    sGroupTitle += window.hWin.HR('All Groups')+
+                        '</h4><div class="heurist-helper3" style="font-size:0.7em">'+window.hWin.HR('All record type groups')+'</div>';
                 }
                 this.element.find('#div_group_information').html(sGroupTitle);
         

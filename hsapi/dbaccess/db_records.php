@@ -109,7 +109,7 @@
         }
 
         if (!($rectype && dbs_GetRectypeByID($mysqli, $rectype)) ) {
-            return $system->addError(HEURIST_INVALID_REQUEST, "Record type not defined or wrong");
+            return $system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong');
         }
 
         // OWNER -----------

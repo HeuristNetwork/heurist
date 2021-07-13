@@ -369,9 +369,12 @@ function editTheme(current_value, callback){
                 };
 
                 $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                    'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
+                    window.hWin.HR('Warn_Lost_Data'),
                     buttons,
-                    {title:'Confirm',yes:'Save',no:'Ignore and close'});
+                    {title: window.hWin.HR('Confirm'),
+                       yes: window.hWin.HR('Save'),
+                        no: window.hWin.HR('Ignore and close')},
+                    {default_palette_class: 'ui-heurist-design'});
                 return false;   
             }
             return true;
@@ -380,5 +383,6 @@ function editTheme(current_value, callback){
         buttons: edit_buttons
     });                
 
+    edit_dialog.parent().addClass('ui-heurist-design');
                 
 }//end editTheme

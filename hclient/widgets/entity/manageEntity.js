@@ -1080,14 +1080,13 @@ $.widget( "heurist.manageEntity", {
             if(this.options.edit_structure){
                 //2020-12-06 that._currentEditID=null; that.closeDialog();
                 //2020-12-06 return true;
-                sMsg = 'Click "Save data" to save the data entered, "Drop data changes" to abandon modifications.'
-                +'<br>Structure changes are saved automatically - they are not affected by your choice.';
-                sBtnSave = 'Save data';
-                sBtnCancel = 'Drop data changes';
+                sMsg = window.hWin.HR('Warn_Lost_Data_On_Structure_Edit');
+                sBtnSave = window.hWin.HR('Save data');
+                sBtnCancel = window.hWin.HR('Drop data changes');
             }else{
-                sMsg = 'You have made changes to the data. Click "Save" otherwise all changes will be lost.';
-                sBtnSave = 'Save';
-                sBtnCancel = 'Ignore and close';
+                sMsg = window.hWin.HR('Warn_Lost_Data');
+                sBtnSave = window.hWin.HR('Save');
+                sBtnCancel = window.hWin.HR('Ignore and close');
             }
             
             var $dlg, buttons = {};
@@ -1097,7 +1096,8 @@ $.widget( "heurist.manageEntity", {
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                     sMsg,
                     buttons,
-                    {title:'Confirm',yes:sBtnSave,no:sBtnCancel});
+                    'Confirm',
+                    {default_palette_class: that.options.default_palette_class});
             return false;   
         }
         if($.isFunction(that.saveUiPreferences))that.saveUiPreferences();
@@ -1274,12 +1274,6 @@ $.widget( "heurist.manageEntity", {
                 
             }
         }
-/*        
-            if(this._editing.isModified()){
-                window.hWin.HEURIST4.msg.showMsgDlg('Data were modified. Ignore and load data for selected record',
-                function(){ that._initEditForm_step3(recID); },
-                'Confirm');
-*/        
         
     },
     
@@ -1674,27 +1668,28 @@ this._time_debug = fin_time;
                 
                 var that = this;
                 
-                var $mdlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                    'New '+this.options.entity.entityTitle+' requested with unsaved modifications in current '+this.options.entity.entityTitle+'.',
-                    //'You are about opening new edit form without saving data in current one. Save changes and start new edit?',
-                    //'Data were modified in edit form. Ignore modifications and start edit the new data',
-                        {
-                         'Save changes':function(){ 
+                var $mdlg;
+                var buttons = {};
+                buttons[window.hWin.HR('Save data')] = function(){ 
                             //save changes and go to next step
                             that._saveEditAndClose( null, callback );
                             $mdlg.dialog('close');
-                         },
-                         'Drop changes':function(){ 
+                         };
+                buttons[window.hWin.HR('Drop data changes')] = function(){ 
                             //drop changes load another record
                             callback.call(that);
                             //that._initEditForm_step2(recID);
                             $mdlg.dialog('close');
-                         },   
-                         'Cancel':function(){
+                         };
+                buttons[window.hWin.HR('Cancel')] = function(){
                             $mdlg.dialog('close');
-                         }   
-                        }
-                        ,{title:'Confirm'}); //,yes:'Save changes', no:'Cancel'
+                         };
+                
+                $mdlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                    'New '+this.options.entity.entityTitle+' requested with unsaved modifications in current '
+                        +this.options.entity.entityTitle+'.',
+                        buttons
+                        ,'Confirm');
             }else{
                 callback.call(this);
                 //this._initEditForm_step2(recID);            
@@ -1819,11 +1814,11 @@ this._time_debug = fin_time;
                         //show warning in case of modification
                         if(that._editing.isModified() && that._currentEditID!=null){
                             var $dlg, buttons = {};
-                            buttons['Save'] = function(){ 
+                            buttons[window.hWin.HR('Save')] = function(){ 
                                 that._saveEditAndClose(null, 'close'); 
                                 $dlg.dialog('close'); 
                             }; 
-                            buttons['Ignore and close'] = function(){ 
+                            buttons[window.hWin.HR('Ignore and close')] = function(){ 
                                     that._currentEditID = null; 
                                     //that.closeDialog(); 
                                     that._edit_dialog.dialog('close'); 
@@ -1831,9 +1826,10 @@ this._time_debug = fin_time;
                             };
                             
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                                    'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
-                                    buttons,
-                                    {title:'Confirm',yes:'Save',no:'Ignore and close'});
+                                'Warn_Lost_Data',
+                                buttons,
+                                'Confirm',
+                                {default_palette_class: that.options.default_palette_class });
                             return false;   
                         }
                         that.saveUiPreferences();

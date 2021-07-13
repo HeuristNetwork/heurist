@@ -63,6 +63,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     
 }else 
 if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
+    //download xml template for given db defintion
     
     if(@$_REQUEST['rty']) $s = 'rty='.$_REQUEST['rty'];
     else if(@$_REQUEST['dty']) $s = 'dty='.$_REQUEST['dty'];
@@ -72,9 +73,38 @@ if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
     return;
     
 }else if (@$_REQUEST['file'] || @$_REQUEST['thumb'] || @$_REQUEST['rurl']){
+    //download file, thumb or remote url
     header( 'Location: hsapi/controller/file_download.php?'.$_SERVER['QUERY_STRING'] );
     return;
+}else if (@$_REQUEST['asset']){ //only from context_help - download localized help or documentation
+    
+    $name = $_REQUEST['asset'];
+    //default ext is html
+    $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+    if(!$extension){
+        $name = $name . '.html';
+    }
+    
+    $locale = @$_REQUEST['lang']; //locale
+    $locale = ($locale && $locale!='en')?($locale.'/'):'';
+    
+    $asset = 'context_help/'.$locale.$name;
+    if(!file_exists($asset)){
+        //without locale - default is English
+        $asset = 'context_help/'.$name;   
+    }
+    
+    if(file_exists($asset)){
+        //download
+        header( 'Location: '.$asset );
+        return;
+    }else{
+        exit('Asset not found: '.$name);
+    }
+    
 }else if (@$_REQUEST['template']){
+    //execute smarty template
+    
     header( 'Location: viewers/smarty/showReps.php?'.$_SERVER['QUERY_STRING'] );
     return;    
     

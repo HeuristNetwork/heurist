@@ -345,7 +345,7 @@ console.log('>>>'+prefs['layout_language']);
         }
         */
         //DEBUG 
-        //window.hWin.HR = window.hWin.HAPI4.setLocale('ru');
+//window.hWin.HR = window.hWin.HAPI4.setLocale('ru');
 
         /* unfortunately dynamic addition of theme and style is not applied properly.
         Browser takes some time on its parsing while we have already created some ui elements, need timeout.

@@ -83,7 +83,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         if(!window.hWin.HR){
             var lang = window.hWin.HEURIST4.util.getUrlParameter('lang');
             window.hWin.HR = that.setLocale(lang);
-            window.hWin.HRA = that.HRA;
+            window.hWin.HRA = that.HRA; //localize all elements with class slocale for given element
+            window.hWin.HRes = that.HRes; //returns url or content for localized resource (help, documentation)
         }
 
         if(typeof hLayout !== 'undefined' && $.isFunction(hLayout)){
@@ -1845,7 +1846,7 @@ prof =Profile
                 if(_regional && _regional[key]){
                     return _regional[key];
                 }else{
-                    if(key.indexOf('_')>0){
+                    if(key.indexOf('menu_')==0){
                         return '';
                     }else{
                         return res;    
@@ -1854,15 +1855,53 @@ prof =Profile
             }
         },
         
+        //
+        //localize all elements with class slocale for given element
+        //
         HRA: function(ele){
             if(ele){
                 $.each($(ele).find('.slocale'),function(i,item){
                     var s = $(item).text();
                     //console.log(s+"=>"+window.hWin.HR(s))
-                    $(item).text(window.hWin.HR(s));
+                    $(item).html(window.hWin.HR(s));
+                });
+                
+                $(ele).find('[slocale-title]').each(function(){
+                    $(this).attr('title', window.hWin.HR($(this).attr('slocale-title')));
                 });
             }
-        }
+        },
+        
+        //
+        //returns url or loads content for localized resource (help, documentation)
+        // name - name of file (default html ext)
+        // ele - target element
+        //
+        HRes: function(name, ele){
+            
+            //window.hWin.HAPI4.getLocale()
+            var sURL = window.hWin.HAPI4.baseURL+'?lang='+_region+'&asset='+name;
+            if(ele){
+                ele.load(sURL);
+            }else{
+                return sURL;
+            }
+            
+            /*default extension is html
+            var ext = window.hWin.HEURIST4.util.getFileExtension(name);
+            if(window.hWin.HEURIST4.util.isempty(ext)){
+                name = name + '.html';
+            }
+            var sURL = '';
+            if(_region && _region!='en'){
+                sURL = sURL + _region + '/';
+                
+            }
+            resultListEmptyMsg.html;
+            */
+            
+        },
+
 
         /**
         *  @todo need to rewrite since it works with global currentRecordset
@@ -1876,7 +1915,7 @@ prof =Profile
         *
         *   @param needIds if it is true  it returns array of record ids
         */
-        , getSelection: function(selection, needIds){
+        getSelection: function(selection, needIds){
 
                 if (selection == "all") {
                     if(this.currentRecordset){

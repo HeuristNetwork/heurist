@@ -699,7 +699,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         var isTrash = false;//(recordset.fld(record, 'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
         
-        function __action_btn(action,icon,title,color){
+        function __action_btn(action, icon, title, color){
             if(!color) color = '#555555';            
             var sbg = '';
             if(isTrash && action!='delete' && action!='') {
@@ -733,21 +733,21 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                             +$Db.getConceptID('rty',recID,true)+'</div>');
                     break;
                 case 'addrec': 
-                    html += __action_btn('addrec','ui-icon-plus','Click to add new '+fld('rty_Name'));    
+                    html += __action_btn('addrec','ui-icon-plus',window.hWin.HR('Click to add new')+' '+fld('rty_Name'));    
                     break;
                 case 'filter':
-                    html += __action_btn('filter','ui-icon-search','Click to launch search for '+fld('rty_Name'));
+                    html += __action_btn('filter','ui-icon-search',window.hWin.HR('Click to launch search for')+' '+fld('rty_Name'));
                     break;
                 case 'count': 
                     html += fld2('rty_RecCount',40,null,'text-align:center  '); break;
                 case 'group': 
-                    html += __action_btn('group','ui-icon-carat-d','Change group');
+                    html += __action_btn('group','ui-icon-carat-d', 'Change group' );
                     break;                         
                 case 'icon': 
                     html += html_icon; 
                     break;
                 case 'edit':  
-                    html += __action_btn('edit','ui-icon-pencil','Click to edit record type');
+                    html += __action_btn('edit','ui-icon-pencil',window.hWin.HR('Click to edit record type'));
                     break;
 //                case 'editstr': 
 //                    html += __action_btn('editstr','ui-icon-pencil','Click to edit structure');
@@ -761,35 +761,35 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 case 'show': 
                 
                     if(recordset.fld(record, 'rty_ShowInLists')==1){
-                        html += __action_btn('hide_in_list','ui-icon-check-on','Click to hide in lists');    
+                        html += __action_btn('hide_in_list','ui-icon-check-on',window.hWin.HR('Click to hide in lists'));    
                     }else{
-                        html += __action_btn('show_in_list','ui-icon-check-off','Click to show in lists');
+                        html += __action_btn('show_in_list','ui-icon-check-off',window.hWin.HR('Click to show in lists'));
                         grayed = 'background:lightgray';
                     }
                     
                     break;
                 case 'duplicate': 
-                    html += __action_btn('duplicate','ui-icon-copy','Duplicate record type');
+                    html += __action_btn('duplicate','ui-icon-copy',window.hWin.HR('Duplicate record type'));
                     break;
                 case 'fields': 
-                    html += __action_btn('fields','ui-icon-circle-b-info','List of fields');
+                    html += __action_btn('fields','ui-icon-circle-b-info',window.hWin.HR('List of fields'));
                     break;
                 case 'status': 
                 
                     if(recordset.fld(record, 'rty_Status')=='reserved'){
-                        html += __action_btn('','ui-icon-lock','This is a reserved record type common to all Heurist databases. It cannot be deleted.','gray');
+                        html += __action_btn('','ui-icon-lock',window.hWin.HR('manageDefRectypes_reserved'),'gray');
                     }else{
                         if(recordset.fld(record,'rty_RecCount')>0){
-                            html += __action_btn('','ui-icon-trash-b','To allow deletion, use Explore > Entities to find and delete all records.');    
+                            html += __action_btn('','ui-icon-trash-b',window.hWin.HR('manageDefRectypes_hasrecs'));    
                         }else{
                             //var links = window.hWin.HAPI4.EntityMgr.getEntityData('rst_Links')
                             //var is_referenced = (links['refs'] && links['refs'][recID]);
                             var is_referenced = !window.hWin.HEURIST4.util.isnull(this.rst_links[recID]);
                                         //(this.rst_links.reverse[recID] || this.rst_links.rel_reverse[recID]); 
                             if(is_referenced){
-                                html += __action_btn('delete','ui-icon-trash-b','This record type is referenced. Click to show references');    
+                                html += __action_btn('delete','ui-icon-trash-b', window.hWin.HR('manageDefRectypes_referenced'));    
                             }else{
-                                html += __action_btn('delete','ui-icon-trash','Click to delete this record type');        
+                                html += __action_btn('delete','ui-icon-trash', window.hWin.HR('manageDefRectypes_hasrecs'));        
                             }
                         }
                     }    
@@ -889,11 +889,13 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     sList += ('<a href="#" data-dty_ID="'+res[i]+'">'+$Db.dty(res[i],'dty_Name')+'</a><br>');
                 }
                 
-                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                '<p>Record type <b>'+$Db.rty(action.recID,'rty_Name')+'</b> is referenced by the following fields:</p>'
-                + sList
-                +'<p>Please remove these fields altogether, or click the links above <br>to modify base field (will affect all record types which use it).</p>'
-                , null, {title:'Warning'},
+                var sMsg = window.hWin.HR('manageDefRectypes_delete_stop');
+                
+                sMsg = sMsg.replaceAll( '[rtyName]', $Db.rty(action.recID,'rty_Name'));
+                sMsg = sMsg.replaceAll( '[FieldList]', sList);
+                
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg
+                , null, {title: 'Warning'},
                 {default_palette_class:this.options.default_palette_class});        
                 
                 this._on($dlg.find('a[data-dty_ID]'),{click:function(e){
@@ -1032,7 +1034,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this.deleted_from_group_ID = 0;
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this record type?', function(){ that._deleteAndClose(true) }, 
+                'manageDefRectypes_delete_warn '
+                , function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'},
                 {default_palette_class:this.options.default_palette_class});        
         }
@@ -1110,7 +1113,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
                 $input.removeClass('text').attr('readonly','readonly');
 
-                var $btn_editmask = $( '<span>', {title: 'Edit Mask'})
+                var $btn_editmask = $( '<span>', {title: window.hWin.HR('Edit Title Mask')})
                 .addClass('smallicon ui-icon ui-icon-pencil')
                 .insertAfter( $input );
 
@@ -1148,8 +1151,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             +'padding: 10px 10px 5px;display: block;">' //width: 570px;
             +'<div class="input-cell"><span style="display:inline-block"><button></button></span>'
             +'<span class="heurist-helper3" style="display:inline-block;vertical-align: middle;padding-left: 20px;">'
-+'This will open a blank record of this type in structure modification mode.<br>'
-+'Tip: You can switch on structure modification mode at any time while entering data to make instant structural changes'            
+            + window.hWin.HR('manageDefRectypes_edit_fields_hint')
             +'</span>'
             +'</div></div>');
             
@@ -1158,7 +1160,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
             var btn = $s.find('button');
             var new_record_params = {RecTypeID: this._currentEditID};
-            btn.button({icon:'ui-icon-pencil',label:'Edit fields'})
+            btn.button({icon:'ui-icon-pencil',label: window.hWin.HR('manageDefRectypes_edit_fields')})
                             .css({'font-weight': 'bold','font-size':'12px'})
                             .addClass('ui-heurist-button')
                             .width(150)
@@ -1183,14 +1185,15 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
             edit_ele = this._editing.getFieldByName('rty_ID');
             $('<div style="display:block"><span style="margin-top: 15px;display: inline-block;font-size: 12px;">'
-            +'Define: </span><h1 style="display: inline-block;margin:10px;">'
+            + window.hWin.HR('Define')+': </span><h1 style="display: inline-block;margin:10px;">'
             +$Db.rty(this._currentEditID,'rty_Name')+'</h1></div>').insertBefore(edit_ele);            
         }
         
-        
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
         ele = $('<div style="position:absolute;right:6px;top:4px;"><label><input type="checkbox" '
-                        +(ishelp_on?'checked':'')+'/>explanations</label></div>').prependTo(this.editForm);
+                        + (ishelp_on?'checked':'')+'/>'
+                        + window.hWin.HR('explanations')
+                        + '</label></div>').prependTo(this.editForm);
         this._on( ele.find('input'), {change: function( event){
             var ishelp_on = $(event.target).is(':checked');
             this.usrPreferences['help_on'] = ishelp_on;
@@ -1231,17 +1234,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(recID<0 && is_proceed !== true){
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                    'Before defining new record (entity) types we suggest importing suitable '+
-                    'definitions from templates (Heurist databases registered in the Heurist clearinghouse). '+
-                    'Those with registration IDs less than 1000 are templates curated by the Heurist team. '
-                    +'<br><br>'
-    +'This is particularly important for BIBLIOGRAPHIC record types - the definitions in template #6 (Bibliographic definitions) are ' 
-    +'optimally normalised and ensure compatibility with bibliographic functions such as Zotero synchronisation, Harvard format and inter-database compatibility.'                
-                    +'<br><br>Use main menu:  Design > Browse templates'                
+                    'manageDefRectypes_new_hint'
                     , function(){
                         that.addEditRecord(recID, true); 
                         //that._super(recID); 
-                    }, {title:'Confirm',yes:'Continue',no:'Cancel'},
+                    }, {title: 'Confirm', yes:'Continue',no:'Cancel'},
                     {default_palette_class:this.options.default_palette_class});
         
         }else{
@@ -1509,7 +1506,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     _duplicateType: function (rectypeID) {
 
         window.hWin.HEURIST4.msg.showMsgDlg(
-        "Do you really want to duplicate record type # "+rectypeID+"?"
+        window.hWin.HR('manageDefRectypes_duplicate_warn')+$Db.rty(rectypeID,'rty_Name')+'?'
         , function(){ 
                 
         

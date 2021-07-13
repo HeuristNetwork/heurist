@@ -494,7 +494,9 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
             window.hWin.HEURIST4.collection.collectionSave();
         
-        }else if(action == "menu-subset-set"){
+        }
+/* moved to main menu
+        else if(action == "menu-subset-set"){
             
             if(!window.hWin.HAPI4.currentRecordset ||
                     window.hWin.HAPI4.currentRecordset.length()==0)
@@ -551,7 +553,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                 });
                 
         }
-
+*/
 
 
     },
@@ -589,10 +591,10 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         }
 
         if (recIDs_list.length == 0 && !Hul.isempty(msg)) {
-            window.hWin.HEURIST4.msg.showMsgDlg(msg);
+            window.hWin.HEURIST4.msg.showMsg(msg, {default_palette_class:'ui-heurist-explore'});
             return null;
         }else if (limit>0 && recIDs_list.length > limit) {
-            window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('resultList_select_record')+limit);
+            window.hWin.HEURIST4.msg.showMsg(window.hWin.HR('resultList_select_record')+limit, {default_palette_class:'ui-heurist-explore'});
         }else{
             return recIDs_list;
         }
@@ -602,7 +604,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
     //-------------------------------------- EMAIL FORM -------------------------------
     openEmailForm: function() {
         // Selection check
-        var ids = this.getSelectionIds(window.hWin.HR('resultList_select_record'));
+        var ids = this.getSelectionIds('resultList_select_record');
         if(Hul.isempty(ids)) {
             return;
         }
@@ -655,7 +657,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
         var recIDs_list = this.getSelectionIds(null);
         if(Hul.isempty(recIDs_list) || recIDs_list.length<2){
-            window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('resultList_select_record2'));
+            window.hWin.HEURIST4.msg.showMsg('resultList_select_record2',{default_palette_class:'ui-heurist-explore'});
             return;
         }
 
@@ -679,7 +681,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
     isResultSetEmpty: function(){
         var recIDs_all = window.hWin.HAPI4.getSelection("all", true);
         if (Hul.isempty(recIDs_all)) {
-            window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('resultList_noresult'));
+            window.hWin.HEURIST4.msg.showMsg('resultList_noresult', {default_palette_class:'ui-heurist-explore'});
             return true;
         }else{
             return false;

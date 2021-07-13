@@ -633,7 +633,7 @@ $.widget( "heurist.resultList", {
                 this.div_search_form = $('<div>').search({
                         is_h6style: this.options.is_h6style,
                         btn_visible_newrecord: false,
-                        search_button_label: 'Filter',
+                        search_button_label: window.hWin.HR('Filter'),
                         btn_entity_filter: false})
                     .css({  //display:'block','max-height':'55px','height':'55px',
                             padding:'15px 10px 0px 4px','border-bottom':'1px solid gray'}) //,width:'100%'
@@ -679,7 +679,7 @@ $.widget( "heurist.resultList", {
                 
             this.btn_search_save = $( "<button>", {
                 text: window.hWin.HR('Save Filter'),
-                title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree')
+                title: window.hWin.HR('save_filter_hint')
             })
             .css({'min-width': '80px','font-size':'0.8em', 'height': '21px', background: 'none'})
             .addClass(this.options.is_h6style?'ui-heurist-btn-header1':'ui-state-focus svs-header')
@@ -1248,18 +1248,15 @@ $.widget( "heurist.resultList", {
         }else
         if(this.options.entityName!='records'){
 
-            $('<div>').css('padding','10px')
-                .html('<h3 class="not-found" style="color:red;">Filter/s are active (see above)</h3><br />'
-                        + '<h3 class="not-found" style="color:teal">No entities match the filter criteria</h3>')
-                .appendTo(this.div_content);
+            window.hWin.HRes('resultListEmptyEntity', this.div_content);
             
         }else{
 
             var that = this;
-        
+            
             var $emptyres = $('<div>')
             .css('padding','1em')
-            .load(window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/resultListEmptyMsg.html',
+            .load(window.hWin.HRes('resultListEmptyMsg'),
                 function(){
                     $emptyres.find('.acc')
                     .accordion({collapsible:true,heightStyle:'content',
@@ -1300,11 +1297,11 @@ $.widget( "heurist.resultList", {
                                       rt = q[1];
                                   }
                             }
-                            if(rt>0 && $Db.rty(rt,'rty_Name')){
+                            if(rt>0 && $Db.rty(rt, 'rty_Name')){
                                 $('<span style="padding: 0 10px;font-weight:bold">('
                                         +$Db.rty(rt,'rty_Plural')+')</span>')
                                     .appendTo($emptyres.find('.not-found2'));
-                                $('<div>').button({label:'Add '+$Db.rty(rt,'rty_Name'), icon:'ui-icon-plusthick'})
+                                $('<div>').button({label:window.hWin.HR('Add')+' '+$Db.rty(rt,'rty_Name'), icon:'ui-icon-plusthick'})
                                     .click(function(){
                                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                                             {new_record_params:{RecTypeID:rt}});                                        
@@ -3411,6 +3408,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({element: $(this.sortResultListDlg)[0],
             title: window.hWin.HR('menu_reorder_title'),
             height:500,
+            default_palette_class:'ui-heurist-explore',
             buttons:[
                 {text:window.hWin.HR('menu_reorder_save'), click: function(){
                     //get new order of records ids

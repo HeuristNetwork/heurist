@@ -237,14 +237,6 @@ $.widget( "heurist.recordAction", {
             if(!options.beforeClose){
                     options.beforeClose = function(){
                         //show warning on close
-                        /*
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                                    'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
-                                    buttons,
-                                    {title:'Confirm',yes:'Save',no:'Ignore and close'});
-                            return false;   
-                        }
-                        */
                         //that.saveUiPreferences();
                         return true;
                     };

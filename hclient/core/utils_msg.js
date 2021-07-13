@@ -20,6 +20,7 @@ showMsgErr     -    loads into id=dialog-error-messages
 getMsgDlg      - creates and returns div (id=dialog-common-messages) that is base element for jquery ui dialog
 getPopupDlg    - creates and returns div (id=dialog-popup) similar to  dialog-common-messages - but without width limit
 
+showMsg        - NEW MAIN 
 showMsgDlg     - MAIN 
 showMsgWorkInProgress - shows standard work in progress message
 showPrompt    - show simple input value dialog with given prompt message
@@ -48,7 +49,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(typeof response === "string"){
             window.hWin.HEURIST4.msg.showMsgErr(null);
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr('Cannot parse server response: '+response.substr(0,255)+'...');
+            window.hWin.HEURIST4.msg.showMsgErr(window.hWin.HR('Error_Json_Parse')+': '+response.substr(0,255)+'...');
         }
     },
 
@@ -90,12 +91,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if(response.status==window.hWin.ResponseStatus.SYSTEM_FATAL
             || response.status==window.hWin.ResponseStatus.SYSTEM_CONFIG){
 
-                msg = msg + "<br><br>May result from a network outage, or because the system is not properly configured. "
-                +"If the problem persists, please report to your system administrator";
+                msg = msg + '<br><br>'+window.hWin.HR('Error_System_Config');
 
             }else if(response.status==window.hWin.ResponseStatus.INVALID_REQUEST){
 
-                msg = msg + "<br><br>The value, number and/or set of request parameters is not valid. Please email the Heurist development team ( info at HeuristNetwork dot org)";
+                msg = msg + '<br><br>' + window.hWin.HR('Error_Wrong_Request') 
+                    '<br><br>' + window.hWin.HR('Error_Report_Team');
 
             }else if(response.status==window.hWin.ResponseStatus.REQUEST_DENIED){
                 
@@ -119,9 +120,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 } 
                 
             }else if(response.status==window.hWin.ResponseStatus.DB_ERROR){
-                msg = msg + '<br><br>If this error occurs repeatedly, please contact '
-                +'your system administrator or email us (support at HeuristNetwork dot org)'
-                +' and describe the circumstances under which it occurs so that we/they can find a solution';
+                msg = msg + '<br><br>'+window.hWin.HR('Error_Report_Team');
             }else  if(response.status==window.hWin.ResponseStatus.ACTION_BLOCKED){
                 // No enough rights or action is blocked by constraints
                 
@@ -131,19 +130,19 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }
             
             if(request_code!=null){
-                msg = msg + '<br>Report this code to Heurist team: "'
+                msg = msg + '<br>'+window.hWin.HR('Error_Report_Code')+': "'
                     +(request_code.script+' '
                     +(window.hWin.HEURIST4.util.isempty(request_code.action)?'':request_code.action)).trim()+'"';
             }
         }
         
         if(window.hWin.HEURIST4.util.isempty(msg)){
-                msg = 'Error_Empty_Message';
+                msg = window.hWin.HR('Error_Empty_Message');
         }
         if(window.hWin.HEURIST4.util.isempty(dlg_title)){
                 dlg_title = 'Error_Title';
         }
-        dlg_title = window.hWin.HR(dlg_title);
+        dlg_title = $.isFunction(window.hWin.HR)?window.hWin.HR(dlg_title):'Heurist';
 
         var buttons = {};
         buttons[window.hWin.HR('OK')]  = function() {
@@ -154,6 +153,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                             $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
                     }
                 }; 
+                
+        if(!ext_options) ext_options = {};
+        //else if(!ext_options['default_palette_class']) 
+        ext_options['default_palette_class'] = 'ui-heurist-error';
+                
         window.hWin.HEURIST4.msg.showMsgDlg(msg, buttons, dlg_title, ext_options);
        
         return msg; 
@@ -1100,8 +1104,16 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     // MAIN method
     // buttons - callback function or objects of buttons for dialog option
     // title - either string for title, or object with labels {title:, yes: ,no, cancel, }
-    // ext_options:   default_palette_class, position
+    // ext_options:   
+    //  default_palette_class, 
+    //  position
+    //  container
+    //  isPopupDlg
     //
+    showMsg: function(message, options){
+        return window.hWin.HEURIST4.msg.showMsgDlg(message, null, null, options )
+    },
+    
     showMsgDlg: function(message, buttons, labels, ext_options){
 
         if(!$.isFunction(window.hWin.HR)){
@@ -1110,6 +1122,15 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
         
         if(!ext_options) ext_options = {};
+        
+        
+        if(ext_options['buttons']){
+            buttons = ext_options['buttons'];
+        }
+        if(ext_options['labels']){
+            labels = ext_options['labels'];
+        }
+        
         var isPopupDlg = (ext_options.isPopupDlg || ext_options.container);
 
         var $dlg = isPopupDlg  //show popup in specified container
@@ -1156,10 +1177,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         if($.isPlainObject(labels)){
             if(labels.title)  title = labels.title;
-            if(labels.yes)    lblYes = labels.yes;
-            if(labels.no)     lblNo = labels.no;
-            if(labels.ok)     lblOk = labels.ok;
-            if(labels.cancel) lblCancel = labels.cancel;
+            if(labels.yes)    lblYes = window.hWin.HR(labels.yes);
+            if(labels.no)     lblNo = window.hWin.HR(labels.no);
+            if(labels.ok)     lblOk = window.hWin.HR(labels.ok);
+            if(labels.cancel) lblCancel = window.hWin.HR(labels.cancel);
         }else if (labels!=''){
             title = labels;
         }
