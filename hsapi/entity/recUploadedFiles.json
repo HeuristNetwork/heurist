@@ -60,7 +60,7 @@
                     "dtFields":{
                         "dty_Type":"url",
                         "rst_DisplayName": "External URL:",
-                        "rst_DisplayHelpText": "URL of an external file, which may or may not be cached locally", 
+                        "rst_DisplayHelpText": "URL of an external file. This must DIRECTLY point to a renderable file or stream eg. image, video.<br/>For images, make sure you do not reference a web page which displays the file<br/>(the extension shown at the end of the URL can be misleading, the URL must load as the image alone<br/>without any page furniture or labelling).", 
                         "rst_DisplayWidth":80,
                         "rst_Display":"visible",
                         "dty_Size":1000

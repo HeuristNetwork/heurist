@@ -591,6 +591,59 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
     },
     
+    _saveEditAndClose: function(fields, afterAction, ignoreCheck=false){
+
+        var that = this;
+
+        if(this._previousURL && !ignoreCheck){
+
+            var invalid_img = false;
+
+            window.hWin.HAPI4.SystemMgr.get_url_content_type(this._previousURL, function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    if(response.data.extension == 'bin'){
+
+                        var btns = {};
+                        
+                        btns[window.hWin.HR('Re-Specify URL')] = function(){
+                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg.dialog('close');
+                        };
+                        btns[window.hWin.HR('Accept as is')] = function(){
+                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg.dialog('close');
+                            that._saveEditAndClose(fields, afterAction, true);
+                        };
+
+                        var labels = {};
+
+                        labels['title'] = 'Possible Invalid URL for an Image';
+                        labels['no'] = window.hWin.HR('Re-Specify URL');
+                        labels['yes'] = window.hWin.HR('Accept as is');
+
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                              "This file may not be able to render as an image or playable media.<br/>"
+                            + "You may have referenced a web page (e.g. htm or html) rather than an image or video.<br/>"
+                            + "The URL may appear to have a file extension, but you have most likely referenced a wrapper for the file.<br/>"
+                            + "You must reference the file directly.<br/>",
+                            btns, labels,
+                            {default_palette_class: 'ui-heurist-populate'}
+                        );
+
+                        invalid_img = true;
+                    }else{
+
+                        that._saveEditAndClose(fields, afterAction, true);
+                    }
+                }
+            });
+        }else{
+
+            this._super(fields, afterAction);
+        }
+
+    },	
     
     _afterSaveEventHandler: function( recID, fieldvalues ){
     
