@@ -281,7 +281,7 @@ $.widget( "heurist.recordLookupCfg", {
                     that.serviceList.find('li').removeClass('ui-state-active');
                     that.serviceList.find('div').removeClass('ui-state-active');
                     $(ui.selected).addClass('ui-state-active');
-                    
+
                     //load configuration into right hand form
                     that._fillConfigForm( $(ui.selected).attr('data-service-id') );
                 }
@@ -305,7 +305,7 @@ $.widget( "heurist.recordLookupCfg", {
         ele = this.element.find('#btnAddService').button({ icon: "ui-icon-plus" }).css('left', '165px');
         this._on(ele, {click: this._addNewService});
 
-        this.btnSave = this.element.find('#btnSaveCfg').button();
+        this.btnSave = this.element.find('#btnSaveCfg').button().css("margin-right", "10px");
         this._on(this.btnSave, {click: this._applyConfig});            
 
         this.btnDiscard = this.element.find('#btnDiscard').button().hide();
@@ -397,7 +397,7 @@ $.widget( "heurist.recordLookupCfg", {
             this._current_cfg = cfg0;
             
             this.element.find('#service_name').html(cfg0.label);
-            this.element.find('#service_description').html('<strong>' + cfg0.service_name + '</strong>: ' + cfg0.description);
+            this.element.find('#service_description').html('<strong>' + cfg0.service + '</strong>: ' + cfg0.description);
             this.element.find('#inpt_label').val(cfg0.label);
 
             //that._changeService( service_name[0] );
@@ -452,10 +452,13 @@ $.widget( "heurist.recordLookupCfg", {
             this.element.find('#service_config').show();
             
             if($.isEmptyObject(this._current_cfg) || this._isNewCfg){ //new cfg
+
                 this.element.find('#service_type').show();
                 is_modified = true;
             }else{
+
                 this.element.find('#service_type').hide();  //hide service selector
+                this.element.find('.service_details').show();
                 
                 //verify if modified
                 is_modified =  (this._current_cfg.rty_ID != this.selectRecordType.val())
@@ -478,13 +481,24 @@ $.widget( "heurist.recordLookupCfg", {
                     });
                     
                 }
-            } 
-            
-            if(this.selectServiceType.val()){
+            }
+
+            if(!$.isEmptyObject(this._current_cfg) || this.selectServiceType.val()){
+
                 this.element.find('.service_details').show();
             }else{
-                this.element.find('.service_details').hide();
 
+                this.element.find('.service_details').hide();
+            }
+
+            if(this.selectRecordType.val()){
+
+                this.element.find('#service_mapping').show();
+                this.btnSave.show();
+            }else{
+
+                this.element.find('#service_mapping').hide();
+                this.btnSave.hide();
             }
         }
             
@@ -492,8 +506,6 @@ $.widget( "heurist.recordLookupCfg", {
         this.selectMenuRefresh(this.selectServiceType);
         this.selectMenuRefresh(this.selectRecordType);
 
-
-        this.btnSave.show();
         this.btnDiscard.show();
 
         
@@ -578,19 +590,13 @@ $.widget( "heurist.recordLookupCfg", {
                 that._on($(sel), {change:function(){that._updateStatus();}});
             });
             
-            
+            this.element.find('#service_mapping').show();
+            this.btnSave.show();
             
         }else{
-            /*
-            $.each(tbl.find('select'), function(i,selObj){
-
-                if($(selObj).hSelect("instance")!=undefined){
-                   $(selObj).hSelect("destroy"); 
-                }
-                $(selObj).empty();
-            });
-            */
-            
+			
+            this.element.find('#service_mapping').hide();
+            this.btnSave.hide();
         }
         
         
@@ -780,4 +786,3 @@ $.widget( "heurist.recordLookupCfg", {
     },    
 
 });
-

@@ -829,8 +829,8 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
             else
             {
                 item.innerHTML = "<input type='checkbox' value='" + keywords[i][0] + "' id='" + keywords[i][0] + "_a'>"
-                                + "<label for='" + keywords[i][0] + "_a' style='user-select: none;'> " 
-                                + keywords[i][2] + " </label>&nbsp;&nbsp;<label style='user-select: none;'> [ " + keywords[i][1] + " ] </label>";
+                                + "<label for='" + keywords[i][0] + "_a' class='non-selectable'> " 
+                                + keywords[i][2] + " </label>&nbsp;&nbsp;<label class='non-selectable'> [ " + keywords[i][1] + " ] </label>";
                 if(this.assoc_selected && this.assoc_selected.length != 0)
                 {
                     if(this.assoc_selected.indexOf(keywords[i][0]) > -1){
@@ -1158,11 +1158,11 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
 
         if (set == 1)
         {
-            item.innerHTML = "<input type='checkbox' value='" + id + "' id='" + id + "' checked><label for='" + id + "' style='user-select: none;'> " + title + " </label>";
+            item.innerHTML = "<input type='checkbox' value='" + id + "' id='" + id + "' checked><label for='" + id + "' class='non-selectable'> " + title + " </label>";
         }
         else
         {
-            item.innerHTML = "<input type='checkbox' value='" + id + "' id='" + id + "'><label for='" + id + "' style='user-select: none;'> " + title + " </label>";
+            item.innerHTML = "<input type='checkbox' value='" + id + "' id='" + id + "'><label for='" + id + "' class='non-selectable'> " + title + " </label>";
         }
 
         $(item).find('#'+id).click(function(){ that.disableUpdateBtn(); });
