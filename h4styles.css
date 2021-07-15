@@ -1922,7 +1922,7 @@ background: #8ea9b9
 }
 
 .ui-icon-up-down { 
-    background-image: url(common/images/up-down-arrow.png) !important; 
+    background-image: url(hclient/assets/up-down-arrow.png) !important; 
     width: 24px;
     height: 24px;
 }
@@ -2129,7 +2129,7 @@ body.popup h3 {
 .dotted-link { border-bottom: 1px dotted #6A7C99;}
 
 .yellow_star{
-    background-image: url(common/images/star-yellow.png);
+    background-image: url(hclient/assets/star-yellow.png);
     display:block;
     height:14px;
 }

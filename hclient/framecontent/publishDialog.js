@@ -221,6 +221,7 @@ function hPublishDialog( _options )
         window.hWin.HEURIST4.msg.showDialog(options.url_schedule, 
         {   "close-on-blur": false,
             "no-resize": false,
+            default_palette_class: 'ui-heurist-publish',
             height: 480,
             width: dim.w*0.9,
             callback: null

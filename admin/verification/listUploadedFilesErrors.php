@@ -55,19 +55,6 @@ $mysqli = $system->get_mysqli();
                 line-height: 3ex;
             }
             A:link, A:visited {color: #6A7C99;}
-            /*
-            div#in_porgress{
-                background-color:#FFF;
-                background-image: url(../../common/images/loading-animation-white.gif);
-                background-repeat: no-repeat;
-                background-position:50%;
-                cursor: wait;
-                width:100%;
-                height:100%;
-                z-index:999999;
-                display:none;
-            }
-            */
         </style>
         <script>
             $(document).ready(function() {

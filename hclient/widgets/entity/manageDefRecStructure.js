@@ -2367,7 +2367,7 @@ console.log('No active tree node!!!!')
                             //show report
 
                             var link = '<a target="blank" href="'+window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database+'&q=ids:';
-                            var link2 = '"><img src="'+window.hWin.HAPI4.baseURL+'common/images/external_link_16x16.gif">&nbsp;';
+                            var link2 = '"><img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/external_link_16x16.gif">&nbsp;';
 
                             function __getlink(arr){
                                 return link+arr.join(',')+link2+arr.length; 

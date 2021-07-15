@@ -68,7 +68,7 @@
         <style>
         div#in_porgress{
             background-color:#FFF;
-            background-image: url(../../common/images/loading-animation-white.gif);
+            background-image: url(../../hclient/assets/loading-animation-white.gif);
             background-repeat: no-repeat;
             background-position:50%;
             cursor: wait;

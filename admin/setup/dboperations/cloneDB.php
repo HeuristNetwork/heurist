@@ -234,7 +234,7 @@ if(@$_REQUEST['mode']=='2'){
         <div class="banner"><h2>Clone <?php print ($isCloneTemplate?'Template ':'')?>Database</h2></div>
         <div id="page-inner" style="overflow:auto">
             <div id="loading" style="display:none;height:100%" class="loading">
-                <!-- <img alt="cloning ..." src="../../../common/images/mini-loading.gif" width="16" height="16" /> -->
+                <!-- <img alt="cloning ..." src="<?php echo HEURIST_BASE_URL.'hclient/assets/mini-loading.gif'?>" width="16" height="16" /> -->
                 <div id="divProgress" style="font-weight:bold;width:100%;">&nbsp; Cloning of database may take a few minutes for large databases.</div>
             </div>
       

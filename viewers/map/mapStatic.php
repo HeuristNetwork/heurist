@@ -48,7 +48,7 @@
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
         //$response = $system->getError();
-        header('Location: '.HEURIST_BASE_URL.'common/images/notfound.png');
+        header('Location: '.HEURIST_BASE_URL.'hclient/assets/notfound.png');
         exit();
     }
     
@@ -431,7 +431,7 @@
         }
 		//return $url;
 	}else{
-		header('Location: '.HEURIST_BASE_URL.'common/images/notfound.png');
+		header('Location: '.HEURIST_BASE_URL.'hclient/assets/notfound.png');
 		//print "noting found";
 	}
 ?>

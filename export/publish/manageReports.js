@@ -121,11 +121,13 @@ function ReportManager(_isFilterMode, _isWindowMode) {
                 title: "<div style='font-size:10;'>Status</div>", visible:true, sortable:true, className:'center', width:16,
                 render: function(data, type) {
                     if (type === 'display') {
+                        
                         if(data>0){
-                            var simg, shint;
+                            var simg, sfont='', shint='';
                             if(data==1){
                                 simg = 'url_error.png';
                                 shint = 'template file does not exsist';
+                                sfont = 'style="color:red"';
                             }else if(data==2){
                                 simg = 'url_warning.png';
                                 shint = 'output folder does not exsist';
@@ -133,7 +135,12 @@ function ReportManager(_isFilterMode, _isWindowMode) {
                                 simg = 'url_warning.png';
                                 shint = 'generated report is not created yet';
                             }
-                            return '<img src="../../common/images/'+simg+'" width="16" height="16" border="0" title="'+shint+'">';
+                            if(shint){
+                                return '<span class="ui-icon ui-icon-alert" '+sfont+' title="'+shint+'">';    
+                            }else{
+                                return '';
+                            }
+                            
                         }else{
                             return '';
                         }
@@ -148,7 +155,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
                 render: function(data, type) {
                     if (type === 'display') { //edit_record
                         return '<a href="#" onclick="window.reportManager.editReport('+data+');return false">'
-                        +'<img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit"></a>';
+                        +'<span class="ui-icon ui-icon-pencil" title="'+window.hWin.HR('Edit')+'">'
                     }else{
                         return '';    
             }}},
@@ -164,7 +171,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
                             +window.hWin.HAPI4.database+'&publish=1&id='
                             +data
                             +'" target="_blank">'
-                            +'<img src="../../common/images/lightning.png" width="16" height="16" border="0" title="Run report">'
+                            +'<span class="ui-icon ui-icon-refresh" title="'+window.hWin.HR('Run report')+'">'
                             +'</a>';
                         }
                     }else{
@@ -182,7 +189,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
                             +window.hWin.HAPI4.database+'&publish=3&id='
                             +data
                             +'" target="_blank">'
-                            +'<img src="../../common/images/external_link_16x16.gif" width="16" height="16" border="0" title="HTML link">'
+                            +'<img src="../../hclient/assets/external_link_16x16.gif" width="16" height="16" border="0" title="HTML link">'
                             +'</a>';
                         }
                     }else{
@@ -199,7 +206,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
                             return '<a href="../../viewers/smarty/updateReportOutput.php?db='
                             +window.hWin.HAPI4.database+'&publish=3&mode=js&id='
                             +data+'" target="_blank">'
-                            +'<img src="../../common/images/external_link_16x16.gif" width="16" height="16" border="0" title="JavaScript link"></a>';
+                            +'<img src="../../hclient/assets/external_link_16x16.gif" width="16" height="16" border="0" title="JavaScript link"></a>';
                         }
                     }else{
                         return '';    
@@ -222,7 +229,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
                     if (type === 'display') {
 return '<div align="center" data-id="'+data+'">'
 +'<a href="#" onclick="window.reportManager.deleteReport('+data+');return false;">'
-+'<img src="../../common/images/cross.png" border="0" title="Delete this Report"" /><\/a></div>';
++'<span class="ui-icon ui-icon-close" title="'+window.hWin.HR('Delete this Report')+'"></span><\/a></div>';
                     }else{
                         return '';    
                     }

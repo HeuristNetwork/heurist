@@ -478,14 +478,14 @@ class DbUtils {
         }else{
             $warnings[] = "Unable to create/copy smarty-templates folder to $database_folder";
         }
-
+/* removed 2021-07-15
         if(folderRecurseCopy( HEURIST_DIR."admin/setup/xsl-templates", $database_folder."xsl-templates" )){
             
             folderAddIndexHTML($database_folder."xsl-templates"); // index file to block directory browsing
         }else{
             $warnings[] = "Unable to create/copy xsl-templates folder to $database_folder";
         }
-
+*/
         if(folderRecurseCopy( HEURIST_DIR."documentation_and_templates", $database_folder."documentation_and_templates" )){
             
             folderAddIndexHTML($database_folder."documentation_and_templates"); // index file to block directory browsing
