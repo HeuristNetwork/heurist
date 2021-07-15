@@ -1390,7 +1390,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
         var $help_button = $(options.button);
 
         if(options.no_init!==true){ //do not init button    ui-icon-circle-b-info  carat-2-e
-            $help_button.button({icons:{primary:"ui-icon-circle-help"}, label:'Show context help', text:false});
+            $help_button.button({icons:{primary:"ui-icon-circle-help"}, label:window.hWin.HR('Show context help'), text:false});
         }
         
         var is_popup = false;
@@ -1416,6 +1416,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
                                             .hide().appendTo(options.container);
                             
                             if(is_popup){
+                                
                                 $helper_div.dialog({
                                             autoOpen: false, 
                                             //title: window.hWin.HR(options.title),
@@ -1423,6 +1424,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
                                             hide: oEffect
                                          });                 
                             }else{
+                                $helper_div.addClass('ui-helper-slideout');
                                 $helper_div.css('width','30%');
                                 /*
                                 _innerTitle = $('<div>').addClass('ui-heurist-header').appendTo($helper_div);  
@@ -1445,7 +1447,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
                         
                         if(is_popup){
                             
-                            if($helper_div.dialog( "isOpen" )){
+                            if($helper_div.dialog('instance') && $helper_div.dialog( 'isOpen' )){
                                 $helper_div.dialog( "close" );
                             }else{                        
                             
@@ -1465,7 +1467,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
                                     
                                     if(status=='error'){
                                         
-                                        window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help was not found',1000);
+                                        window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Sorry context help was not found'),1000);
                                         
                                     }else{
 
@@ -1478,7 +1480,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
                                             head.empty();
                                         }
                                         if(!options.title){
-                                            options.title = 'Heurist context help';                                      
+                                            options.title = window.hWin.HR('Heurist context help');
                                         }
                                     
                                         $helper_div.dialog('option','title', options.title);
@@ -1506,7 +1508,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
 
                                     if(status=='error'){
                                         
-                                        window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help was not found');
+                                        window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Sorry context help was not found'));
                                         __closeHelpDiv($helper_div);
                                         
                                     }else{
@@ -1522,7 +1524,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
                                             head.empty();
                                         }
                                         if(!options.title){
-                                            options.title = 'Heurist context help';                                      
+                                            options.title = window.hWin.HR('Heurist context help');                                    
                                         }
                                         
                                         //_innerTitle.find('span').text( options.title );

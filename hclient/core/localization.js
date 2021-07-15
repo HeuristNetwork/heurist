@@ -27,6 +27,7 @@ regional['en'] = {
     'Error': '',
     'records': '',
     'loading': '',
+    'preparing': '',
     'explanations': '',
     'Show data': '',
     'Actions': '',
@@ -38,6 +39,7 @@ regional['en'] = {
     'Add': '',
     'Assign': '',
     'Apply': '',
+    'Abort': '',
     'Define': '',
     'Edit': '',
     'Delete': '',
@@ -45,6 +47,7 @@ regional['en'] = {
     'Confirm': '',
     'Proceed': '',
     'Continue': '',
+    'Go': '',
     'Yes': '',
     'OK': '',
     'No': '',
@@ -55,6 +58,7 @@ regional['en'] = {
     'Manage': '',
     'Select': '',
     'Configure': '',
+    'Show context help': '',
     
     //main menu 
     'Admin': '',
@@ -400,7 +404,42 @@ regional['en'] = {
     'select record type': '',
     add_record_settings_hint: 'This settings will be applied and remembered when you select a record type from the list',
 
+    //record actions dialogs
+    'Processed records': '',
+    recordAction_select_lbl: 'Records scope:',
+    recordAction_select_hint: 'please select the records to be affected …',    
+        'All records': '',
+        'Selected results set (count=': '',
+        'Current results set (count=': '',
+        'only:': '',
+    'Add or Remove Tags for Records': '',
+        'Add tags': '',
+        'Remove tags': '',
+        'Bookmark': '',
+        recordTag_hint0: 'Select tags to be added to bookmarks for chosen URLs<br>',
+        recordTag_hint1: 'Select tags to be added to bookmarks for chosen record scope<br>',
+        recordTag_hint2: 'Select tags to be added or removed for chosen record scope<br>',
+        recordTag_hint3: 'Matching tags are shown as you type. Click on a listed tag to add it.<br>Unrecognised tags are added automatically as user-specific tags <br>(group tags must be added explicitly by a group administrator). Tags may contain spaces.',
+        'No tags were affected': '',
+        'Bookmarks added': '',
+        'Tags added': '',
+        'Tags removed': '',
+    'Unbookmark selected records': '',    
+        recordUnbookmark_hint: 'Select the scope of records with bookmarks to be removed.<br>'
+            +'Any personal tags for these records will be detached <br>'
+            +'These operation ONLY removes the bookmark from your resources, <br>'
+            +'it does not delete the record entries<br>',
+        'Remove Bookmarks': '',
+        'Bookmarks removed': '',
+    'Set Record Rating': '',
+        'Set Rating': '',
+        'Please specify rating value': '',
+        'Rating updated': '',
+        'No Rating': '',
+    'Delete Records': '',
+    
     //SERVER SIDE ERROR MESSAGES
+    'Record type not defined or wrong': '',
     
     //Client side error message
     Error_Title: 'Heurist',

@@ -382,7 +382,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                    }
             };
             if(action == "menu-selected-bookmark"){
-                opts['modes'] = ['assign'];
+                opts['modes'] = ['bookmark'];
             }
             
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordTag', opts);

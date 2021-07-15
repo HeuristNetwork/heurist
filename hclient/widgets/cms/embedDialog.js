@@ -317,10 +317,10 @@ $.widget( "heurist.embedDialog", {
 
             this._as_dialog.dialog("open");
             
-            var helpURL = (this.options.helpContent)
-                ?(window.hWin.HAPI4.baseURL+'context_help/'+this.options.helpContent+' #content'):null;
-            
-            window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);
+            if(this.options.helpContent){
+                var helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
+                window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);
+            }
         }
     },
     

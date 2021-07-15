@@ -27,13 +27,14 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
         modal:  true,
         init_scope: 'selected',
         title:  'Set Record Rating',
-        helpContent: 'recordRate.html'
+        helpContent: 'recordBookmark.html'
     },
 
     _initControls:function(){
         
         $('<table style="margin:auto;padding-top: 14px;font-size:1em">'
-                +'<tbody><tr><td><input type="radio" value="0" name="r" id="r0"></td><td><label for="r0">No Rating</label></td></tr>'
+                +'<tbody><tr><td><input type="radio" value="0" name="r" id="r0"></td><td><label for="r0">'
+                        +window.hWin.HR('No Rating')+'</label></td></tr>'
                 +'<tr><td><input type="radio" value="1" name="r" id="r1"></td><td><label for="r1" class="yellow_star" style="width:14px;"></label></td></tr>'
                 +'<tr><td><input type="radio" value="2" name="r" id="r2"></td><td><label for="r2" class="yellow_star" style="width:24px;"></label></td></tr>'
                 +'<tr><td><input type="radio" value="3" name="r" id="r3"></td><td><label for="r3" class="yellow_star" style="width:38px;"></label></td></tr>'
@@ -101,10 +102,8 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
                             that.closeDialog();
                             
                             window.hWin.HEURIST4.msg.showMsgFlash(
-                                response.data.processed + ' bookmarked record'
-                                + (response.data.processed>1?'s':'') +' processed<br><br>for '
-                                + response.data.updated  + ' bookmark'
-                                + (response.data.updated>1?'s':'') + ' the rating was updated',2000);
+                                window.hWin.HR('Processed records')+': '+response.data.processed+'<br>'
+                                +window.hWin.HR('Rating updated')+': '+response.data.updated, 2000);
                             
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);

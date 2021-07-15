@@ -1,0 +1,197 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+    <head>
+        <meta http-equiv="Expires" content="Fri, Jan 01 1900 00:00:00 GMT">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Cache-Control" content="no-cache">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta http-equiv="Lang" content="en">
+        <meta name="author" content="Ian Johnson">
+        <meta http-equiv="Reply-to" content="@.com">
+        <meta name="description" content="">
+        <meta name="keywords" content="">
+        <meta name="creation-date" content="01/01/2018">
+        <title>Меню Дизайн</title>
+        <link rel="stylesheet" type="text/css" href="../h4styles.css">
+    </head>
+    <body>
+        <div id="content" style="padding:10px">
+
+            <p>
+                Меню <b>Дизайн</b> предназначено для конфигурации структуры базы.<br><br>
+                New databases are pre-populated with a range of useful record (entity) types, fields and vocabularies which shortcuts basic setup. The existing entity types can be modified to fit your needs, including adding, deleting or modifying fields. You can add entirely new record types, or import suitable record types from any database that has been registered with the Heurist service. The menu also includes functions to register your database so others can borrow your structure (not data), change some basic settings and personal preferences and configure a toolbar of shortcuts.
+            </p>
+
+            <div style="min-height:500px;display:table">
+                <img src="context_help/assets/design-menu.png" style="display:table-cell;width:190px;padding:0px 25px 0 15px"/>
+                <div style="display:table-cell;vertical-align:top;">
+                    <h3>Design menu</h3>
+                    <p>
+                        Functions for modifying the structure of the database and various settings.
+                    </p>
+                    <ul>
+                        <li><b>Modify</b></li>
+                        <ul>
+                            <li><b>Record types</b> - add/edit the record (entity) types making up the database</li> 
+                            <li><b>Vocabularies</b> - add/edit vocabularies and the terms which comprise them</li> 
+                            <li><b>Base fields</b> - add/edit shared fields which can be reused in many record types</li> 
+                            <li><b>Browse templates</b> - borrow structural elements from other Heurist databases</li> 
+                            <li><b>Visualise</b> – visualise record types and relationships between them as a spider diagram</li>
+                        </ul> 
+
+                        <li><b>Setup</b></li>
+                        <ul>
+                            <li><b>My Preferences</b> – set personal preferences relating to the way this database operates</li> 
+                            <li><b>Properties</b> – set various parameters relating to how this database operates</li> 
+                            <li><b>Register</b> – register the database with a central index to make it findable</li> 
+                        </ul>
+
+                        <li><b>Download</b></li>
+                        <ul>
+                            <li><b>Structure (XML)</b> - export the complete structure of the database as XML</li>
+                            <li><b>Structure (Text)</b> - export structure as an SQL-like dump, primarily for internal use</li>
+                            <li><b>Refresh memory</b> - cleans up browser memory; may help fix minor interface problems</li> 
+                        </ul>
+                    </ul>        
+
+                </div>
+            </div>
+
+
+            <div style="min-height:375px; display:table-row">
+                <div  style="display:table-cell">
+                    <img src="context_help/assets/record-types.png" style="width:190px;padding:0px 15px;"/>
+                </div>
+                <div  style="display:table-cell;vertical-align:top">
+                    <h3>Record types</h3>
+                    <p>
+                        Record (entity) types are the core of designing an effective database. Each new database comes pre-populated with a lot of record types which crop up in most databases, eg. Person, and record types which need to be structured in a particular way for specific functions, eg. map documents, layers and data sources. Record types are divided into groups to reduce mental overload, adn the groups can be reordered by dragging. 
+                    </p><p>
+                        Record types you use all the time should be dragged over into a group near the top so that they appear at the top of dropdpown lists. You can create new groups to organise your concepts. You do not need to get rid of record types you don't require, jsut drag them over into a group towards the end of the list.
+                    </p><p>
+                        Before creating a brand new record type, look to see if you can find something suitable using Browse Templates or consider if you can re-use an existing one already defined in your database.However, don't change the general intent of an existing record. For instance, don't change a Media item record into a Document, even if most of your media items represent documents or a Person into an Animal, even though they may have a name, date of birth, sex etc.
+                    </p>
+                </div>
+            </div>
+
+
+            <div style="min-height:375px">
+                <img src="context_help/assets/vocabularies.png" style="float:left;width:190px;padding:0px 15px;"/>
+                <div>
+                    <h3>Vocabularies</h3>
+                    <p>
+                        Vocabularies organise a set of terms which can be used in the dropdown for one or many term list fields. Vocabularies can contain links to terms in other vocabularies to allow the construction of new vocabularies without repeating terms - for example, a vocabulary containing a few countries being studied from the full set of world countries which are pre-configured as a vocabulary in all new databases. Vocabularies can contain hierarchies of terms allowing broader/narrower definition of categories.
+                    </p><p>
+                        Like record types, vocabularies are organised into groups, which can be reordered, and vocabularies can be moved into a different group by drag and drop. Terms can also be moved between vocabularies with drag and drop, or can be nested below other terms or merged with other terms (in which case all records using the term will be re-assigned to the term with which it has been combined).
+                    </p><p>
+                        Terms are defined by five fields: a label (the term itself); a description (multi-line text); a standard code (for example Munsell Colour code, international country codes); a semantic URI (for use in linked data); and an image (allowing illustration of the terms for use by people less familiar with their meaning).
+                    </p>
+                </div>
+            </div>
+
+            <div style="min-height:375px">
+                <img src="context_help/assets/base-fields.png" style="float:left;width:190px;max-height:350px;padding:0px 15px;"/>
+                <div>
+                    <h3>Base fields</h3>
+                    <p>
+                        Base fields are fields which can be reused in many different record types. They are available when adding fields to a record type; the base field type, name, help text, vocabulary and target record types (where applicable) are automatically applied to the field in the record type, but name, help text, requirement and repeatability may be overidden with customised versions for the specific record type. A new base field is created automatically if one creates a field from scratch rather than using an existing base field.
+                    </p><p>
+                        One will not normally need to edit base fields directly, but this menu item allows direct access when required, for example if one wishes to change the default name or description.
+                    </p>
+                </div>
+            </div>        
+
+            <div style="min-height:350px">
+                <img src="context_help/assets/browse-templates.png" style="float:left;width:190px;padding:0px 15px;"/>
+                <div>
+                    <h3>Browse templates</h3>
+                    <p>
+                        Heurist has a sophisticated system to allow databases to import strucutre selectively from any registered database (databases are registered with Design > Setup > Register). This is a powerful way of sharing modeling work and promoting standardisation by encouragement rather than obligation. 
+                    </p><p>
+                        The function browses and selects a registered database, opens up a list of any record types not currently in the target database, displays the fields within a record type if required (base fields already in the target are shown in grey), and can then download the record type along with all connected record types, fields, vocabularies and terms required to create a coherent set of data structures for import.
+                    </p>
+                </div>
+            </div>
+
+            <div style="min-height:350px">
+                <img src="context_help/assets/visualise.png" style="float:left;width:190px;padding:0px 15px;"/>
+                <div>
+                    <h3>Visualise</h3>
+                    <p>
+                        The relationships between record (entity) types in the database can be visualised in the form of a spider diagram. The diagram also shows the number of records for each node (size of circular shaded area around node) and the number of connections (thickness of connecting lines). The connections include record pointer fields and relationship markers, but not free-floating relationships created by creating Relationship records directly (the creation of Relationship records directly is not recommended).
+                    </p><p>
+                        As a diagram of all record types would be far too complex, the record types to be represented are selected from a dropdown list. Gravity can be switched on to create a self-organising diagram, then switched off to allow dragging of nodes to clarify the diagram. Links can also be built between record types by dragging the link icon. 
+                    </p>
+                </div>
+            </div>
+
+            <div style="min-height:350px">
+                <img src="context_help/assets/my-preferences.png" style="float:left;width:190px;padding:0px 15px;"/>
+                <div>
+                    <h3>My Preferences</h3>
+                    <p>
+                        Personal preferences for this database can be set in the Preferences dialogue. These include startup search, number of records to display per page, the use of clustering on maps and complexity of the map controls. Personal preferences are specific to each database.
+                    </p><p>
+                        The Preferences dialogue also provides a bookmarklet which can be dragged to the browser toolbar and used to grab infromation from a web page and create a web bookmark record in the database. At this time the information which can be grabbed from secure https pages is limited to URL and title, but highlighted text will also be grabbed from non-secure http pages.
+                    </p>
+                </div>
+            </div>
+
+            <div style="min-height:350px">
+                <img src="context_help/assets/properties.png" style="float:left;width:190px;padding:0px 15px;"/>
+                <div>
+                    <h3>Properties</h3>
+                    <p>
+                        General behavioural parameters of the database can be set through the Properties function. This allows metadata for the database including a description, rights and a representative icon to display in lists, configuration of connections to Zotero libraries and mail servers, configuration of lookups to external reference sources, file types to be indexed and specific behaviours relating to place records, user registration and others.
+                    </p>
+                </div>
+            </div>
+
+            <div style="min-height:350px">
+                <img src="context_help/assets/register.png" style="float:left;width:190px;padding:0px 15px;"/>
+                <div>
+                    <h3>Register</h3>
+                    <p>
+                        Register the database with the central Heurist index database. This has several functions: it allows elements of the structure of the database to be imported into a new database promoting re-use and standarisation; it allows XML files exported from any registered database to be imported into any other database by reference to the structure of the source database.
+                    </p><p>
+                        Last but not least, it attributes a unique ID to the database and thence a unique ID (known as a 'concept code') to every record type, field, vocabulary and term which has been defined within the database. This is particularly useful in defining special behaviours which can operate across databases, in linking data across databases, and in providing a PID redirection system which can reference any element of any database.
+                    </p>
+                </div>
+            </div>
+
+            <div style="min-height:350px">
+                <img src="context_help/assets/shortcuts-bar.png" style="float:left;width:190px;padding:0px 15px;"/>
+                <div>
+                    <h3>Shortcuts bar</h3>
+                    <p>
+                        The shortcuts bar appears (optionally) below the page header bar, and can be used to provide quick access to frequently used functions. The dialogue allows addition of functions from a list of common functions, with a user-defined label and icon, and allows the bar to be displayed or hidden (hidden by default for new databases). The bar can also be modified from the gearwheel icon on the left of the bar itself.
+                    </p>
+                    <img src="context_help/assets/shortcuts-bar-example.png" style="float:left;width:425px;padding:0px 15px;"/>
+
+                </div>
+            </div>
+
+            <div style="min-height:350px">
+                <img src="context_help/assets/structure-xml.png" style="float:left;width:190px;padding:0px 15px;"/>
+                <div>
+                    <h3>Download > Structure (XML)</h3>
+                    <p>
+                        The complete structure of the database is downloaded in well documented XML. Record types, fields, vocabularies and terms are identified both by their names and by their concept codes. It is recommended to first register the database (Design > Setup > Register), as this means that the concept codes are unique across all databases and will be carried with the structural elements wherever the data is imported, even if re-exported and imported futher down the chain.
+                    </p>
+                </div>
+            </div>
+
+
+            <div style="min-height:350px">
+                <img src="context_help/assets/structure-text.png" style="float:left;width:190px;padding:0px 15px;"/>
+                <div>
+                    <h3>Download > Structure (Text)</h3>
+                    <p>
+                        This is a specialised legacy format based on SQL insert statements, used for transferring structure between databases. It is unlikely to be useful beyond this application.         
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </body>
+</html>

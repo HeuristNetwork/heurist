@@ -1,8 +1,6 @@
 <?php
-/* 
-THIS IS Heurist v.3. 
-It is not used anywhere. This code either should be removed or re-implemented wiht new libraries
-*/
+//@TODO - deprecated (Heurist v.3)
+//It is not used anywhere. This code either should be removed or re-implemented wiht new libraries
 
     /**
     * annotatedTemplate.php: Import record types via annotated templates  - load external descripton (from heuristnetwork.org) into frame

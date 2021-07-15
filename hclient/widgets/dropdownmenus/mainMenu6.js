@@ -1821,7 +1821,7 @@ console.log(explore_top);
                         
                     $('<div class="gs-box">')
                         .css({position:'absolute', left:10, right:10, top:180, bottom:10, 'min-width':400, overflow: 'auto'})
-                        .load(window.hWin.HAPI4.baseURL+'context_help/menu_'+section+'.html #content')
+                        .load( window.hWin.HRes('menu_'+section)+' #content' )
                         .appendTo( that.introductions[section] );
                 })
                 .css({left:'304px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'})  //,'z-index':104

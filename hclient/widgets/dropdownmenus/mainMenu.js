@@ -1176,7 +1176,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     options['title'] = dlg_title;
                 }           
                 if(!window.hWin.HEURIST4.util.isempty(dlg_help)){
-                    options['context_help'] = window.hWin.HAPI4.baseURL+'context_help/'+dlg_help+'.html #content';
+                    options['context_help'] = window.hWin.HRes(dlg_help)+' #content';
                 }
                 
                 //var position = { my: "center", at: "center", of: window.hWin };

@@ -1,4 +1,5 @@
 <?php
+//@TODO - deprecated (referenced from old h5 menu only)
 
     /**
     * listRectypeRelations.php  Lists all fields, either together or as separate relationships and simple fields listings

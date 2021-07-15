@@ -26,7 +26,7 @@ $.widget( "heurist.recordBookmark", $.heurist.recordAction, {
         width:  540,
         modal:  true,
         init_scope: 'selected',
-        title:  'Set Record Rating',
+        title:  'Unbookmark selected records',
         helpContent: 'recordBookmark.html'
     },
 
@@ -35,12 +35,9 @@ $.widget( "heurist.recordBookmark", $.heurist.recordAction, {
         this.element.find('#div_header')
             .css({'line-height':'21px'})
             .addClass('heurist-helper1')
-            .html('Select the scope of records with bookmarks to be removed.<br>'
-            +'Any personal tags for these records will be detached <br>'
-            +'These operation ONLY removes the bookmark from your resources, <br>'
-            +'it does not delete the record entries<br>');
+            .html(window.hWin.HR('recordUnbookmark_hint'));
         
-        this.element.parents('.ui-dialog').find('#btnDoAction').attr('label', top.HR('Remove Bookmarks'));
+        this.element.parents('.ui-dialog').find('#btnDoAction').attr('label', window.hWin.HR('Remove Bookmarks'));
         
         return this._super();
     },
@@ -88,10 +85,7 @@ $.widget( "heurist.recordBookmark", $.heurist.recordAction, {
                             that.closeDialog();
                             
                             window.hWin.HEURIST4.msg.showMsgFlash(
-                                //'For '+response.data.processed + ' processed record'
-                                //+ (response.data.processed>1?'s':'') +'<br><br> '
-                                + response.data.deleted  + ' bookmark'
-                                + (response.data.deleted>1?'s were':' was') + ' deleted',1000);
+                                window.hWin.HR('Bookmarks removed')+' '+response.data.deleted, 1000);
                             
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);

@@ -935,9 +935,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                 //help and tips buttons on dialog header
                 this._edit_dialog.addClass('manageRecords'); //need for special behaviour in applyCompetencyLevel
-                window.hWin.HEURIST4.ui.initDialogHintButtons(this._edit_dialog,
-                    null, //'prefs_'+this._entityName,
-                    window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
+                
+                if(this.options.helpContent){
+                    var helpURL = window.hWin.HRes( this.options.entity.helpContent )+' #content';
+                    window.hWin.HEURIST4.ui.initDialogHintButtons(this._edit_dialog, null, helpURL, false);    
+                }
         
                 this._toolbar = this._edit_dialog.parent().find('.ui-dialog-buttonpane'); //this.editFormPopup.parent();
         
@@ -3594,9 +3596,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         
         if(!this._as_dialog){
             this.element.addClass('manageRecords');                
-            window.hWin.HEURIST4.ui.initDialogHintButtons(this.element, 
-                '.ui-heurist-header2', //where to put button
-                window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
+            
+            if(this.options.entity.helpContent){
+                var helpURL = window.hWin.HRes( this.options.entity.helpContent )+' #content';
+                window.hWin.HEURIST4.ui.initDialogHintButtons(this.element, '.ui-heurist-header2', //where to put button
+                             helpURL);    
+            }
         }
         
         //need refresh layout to init overflows(scrollbars)        

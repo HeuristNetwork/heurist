@@ -255,6 +255,8 @@ class DbUsrBookmarks extends DbEntityBase
                     return false;
                 }
                 $res_bookmark_removed = $mysqli->affected_rows; 
+                
+                $mysqli->commit();
 
                 return array('processed'=>count($bkm_IDs),
                              'tag_detached'=>$res_tag_removed, 
@@ -265,6 +267,7 @@ class DbUsrBookmarks extends DbEntityBase
                     'None of the record(s) is/are bookmarked. Nothing to unbookmark');
                 return false;
             }
+            
             
         }else{
             //set rating

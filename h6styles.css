@@ -164,8 +164,10 @@ body.popup {
 }
 
 .ui-helper-popup{
-    position:absolute;
     display:none;    
+}
+.ui-helper-slideout{
+    position:absolute;
     top:36px;
     bottom:0px;
     right: 0px;
@@ -174,7 +176,7 @@ body.popup {
     border-left: 2px solid;
     background: white;
 }
-.ui-helper-popup #content{
+.ui-helper-slideout #content{
     padding-left: 20px;
 }
 

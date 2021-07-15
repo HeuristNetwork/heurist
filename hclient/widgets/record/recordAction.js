@@ -142,6 +142,9 @@ $.widget( "heurist.recordAction", {
     _initControls:function(){
         
         var that = this;
+        
+        this.element.find('label[for="sel_record_scope"]').text(window.hWin.HR('recordAction_select_lbl'));
+        
 
         this.selectRecordScope = this.element.find('#sel_record_scope');
         if(this.selectRecordScope.length>0){
@@ -257,7 +260,7 @@ $.widget( "heurist.recordAction", {
                 height: options['height'],
                 width:  options['width'],
                 modal:  (options['modal']!==false),
-                title: window.hWin.HEURIST4.util.isempty(options['title'])?'':options['title'], //title will be set in  initControls as soon as entity config is loaded
+                title: window.hWin.HEURIST4.util.isempty(options['title'])?'':window.hWin.HR(options['title']), //title will be set in  initControls as soon as entity config is loaded
                 position: options['position'],
                 beforeClose: options.beforeClose,
                 resizeStop: function( event, ui ) {//fix bug
@@ -300,10 +303,12 @@ $.widget( "heurist.recordAction", {
 
             if(this.options.supress_dialog_title) $dlg.parent().find('.ui-dialog-titlebar').hide();
             
-            var helpURL = (this.options.helpContent)
-                ?(window.hWin.HAPI4.baseURL+'context_help/'+this.options.helpContent+' #content'):null;
             
-            window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);
+            if(this.options.helpContent){
+                var helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
+                window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);    
+            }
+            
         }
     },
     
@@ -363,27 +368,27 @@ $.widget( "heurist.recordAction", {
 
         var opt, selScope = this.selectRecordScope.get(0);
 
-        window.hWin.HEURIST4.ui.addoption(selScope,'','please select the records to be affected …');
+        window.hWin.HEURIST4.ui.addoption(selScope,'',window.hWin.HR('recordAction_select_hint'));
         
         var is_initscope_empty = window.hWin.HEURIST4.util.isempty(scope_types);
         if(is_initscope_empty) scope_types = [];   
         
         if(scope_types.indexOf('all')>=0){
-            window.hWin.HEURIST4.ui.addoption(selScope,'all','All records');
+            window.hWin.HEURIST4.ui.addoption(selScope,'all',window.hWin.HR('All records'));
         }
         
         if ((is_initscope_empty || scope_types.indexOf('selected')>=0)
             && (this._currentRecordsetSelIds &&  this._currentRecordsetSelIds.length > 0)){
                 
             window.hWin.HEURIST4.ui.addoption(selScope,'selected',
-                'Selected results set (count=' + this._currentRecordsetSelIds.length+')');
+                window.hWin.HR('Selected results set (count=') + this._currentRecordsetSelIds.length+')');
         }
         
         if ((is_initscope_empty || scope_types.indexOf('current')>=0)
             && (this._currentRecordset &&  this._currentRecordset.length() > 0)){
                 
             window.hWin.HEURIST4.ui.addoption(selScope,'current',
-                'Current results set (count=' + this._currentRecordset.length()+')');
+                window.hWin.HR('Current results set (count=') + this._currentRecordset.length()+')');
         }
 
         var rectype_Ids = [];
@@ -400,7 +405,7 @@ $.widget( "heurist.recordAction", {
             if(rty>=0 && $Db.rty(rectype_Ids[rty],'rty_Plural')){
                 rty = rectype_Ids[rty];
                 window.hWin.HEURIST4.ui.addoption(selScope,rty,
-                        'only: '+$Db.rty(rty,'rty_Plural'));
+                        window.hWin.HR('only:')+' '+$Db.rty(rty,'rty_Plural'));
             }
         }
 
@@ -445,7 +450,7 @@ $.widget( "heurist.recordAction", {
         this.element.find('.ent_wrapper').hide();
         var progress_div = this.element.find('.progressbar_div').show();
         $('body').css('cursor','progress');
-        var btn_stop = progress_div.find('.progress_stop').button();
+        var btn_stop = progress_div.find('.progress_stop').button({label:window.hWin.HR('Abort')});
         
         this._on(btn_stop,{click: function() {
             
@@ -502,7 +507,7 @@ $.widget( "heurist.recordAction", {
                             pbar.progressbar( "value", val );
                             progressLabel.text(resp[0]+' of '+resp[1]);
                         }else{
-                            progressLabel.text('preparing...');
+                            progressLabel.text(window.hWin.HR('preparing')+'...');
                             pbar.progressbar( "value", 0 );
                         }
                     }

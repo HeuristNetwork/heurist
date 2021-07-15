@@ -1122,10 +1122,12 @@ $.widget( "heurist.manageEntity", {
             }
             
             if(false){
-                var helpURL = window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content';
-                window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
-                    null, //'prefs_'+this._entityName,
-                    helpURL, false);
+                if(this.options.entity.helpContent){
+                    var helpURL = window.hWin.HRes( this.options.entity.helpContent )+' #content';
+                    window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
+                        null, //'prefs_'+this._entityName,
+                        helpURL, false);
+                }
             }
         }
     },
@@ -1768,10 +1770,12 @@ this._time_debug = fin_time;
                 this.showEditFormDialog( true );
                     
                 //help and tips buttons on dialog header
-                var helpURL = window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content';
+                if(this.options.entity.helpContent){
+                    var helpURL = window.hWin.HRes( this.options.entity.helpContent )+' #content';
                     window.hWin.HEURIST4.ui.initDialogHintButtons(this.editFormPopup,
                      null,  //  'prefs_'+this._entityName,
                      helpURL, false);
+                }
                      
                 this._toolbar = this._edit_dialog.parent().find('.ui-dialog-buttonpane');
                      

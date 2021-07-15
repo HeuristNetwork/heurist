@@ -560,11 +560,11 @@ function save_report_output2($tpl_source){
             <html>
             <head>
                 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-                <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+                <link rel="stylesheet" type="text/css" href="../../h4styles.css">
             </head>
             <body style="margin: 25px;">
-            <h2>
-                The following file has been updated:  <?=$res_file?></h2><br />
+            <h3>
+                The following file has been updated:  <?=$res_file?></h3><br />
 
             <?php
             $rps_recid = @$gparams['rps_id'];
@@ -574,8 +574,8 @@ function save_report_output2($tpl_source){
                 ?>
 
                 <p style="font-size: 14px;">View the generated files by clicking the links below:<br /><br />
-                HTML: <a href="<?=$link?>" target="_blank" style="font-weight: bold;"><?=$link?></a><br />
-                Javascript: <a href="<?=$link?>&mode=js" target="_blank" style="font-weight: bold;"><?=$link?>&mode=js</a><br />
+                HTML: <a href="<?=$link?>" target="_blank" style="font-weight: bold;font-size: 0.9em;"><?=$link?></a><br />
+                Javascript: <a href="<?=$link?>&mode=js" target="_blank" style="font-weight: bold;font-size: 0.9em;"><?=$link?>&mode=js</a><br />
 
                 <?php
             }

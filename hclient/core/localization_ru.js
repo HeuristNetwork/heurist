@@ -172,6 +172,7 @@ regional['ru'] = {
     'Error': 'Ошибка',
     'records': 'записей',
     'loading': 'загрузка',
+    'preparing': 'подготовка',
     'explanations': 'объяснения',
     'Show data': 'Показать данные',
     'Actions': 'Операции',
@@ -183,6 +184,7 @@ regional['ru'] = {
     'Add': 'Добавить',
     'Assign': 'Присвоить',
     'Apply': 'Применить',
+    'Abort': 'Прервать',
     'Define': 'Определить',
     'Edit': 'Править',
     'Delete': 'Удалить',
@@ -190,6 +192,7 @@ regional['ru'] = {
     'Confirm': 'Подтверждение',
     'Proceed': 'Продолжить',
     'Continue': 'Продолжить',
+    'Go': 'Начать',
     'Yes': 'Да',
     'OK': 'OK',
     'No': 'Нет',
@@ -200,6 +203,10 @@ regional['ru'] = {
     'Manage': 'Управление',
     'Select': 'Выбор',
     'Configure': 'Конфигурация',
+    
+    'Show context help': 'Контекстная помощь',
+    'Heurist context help': 'Контекстная помощь',
+    'Sorry context help was not found': 'Помощь не найдена',
     
     //main menu 
     'Admin': 'Админ',
@@ -544,13 +551,40 @@ regional['ru'] = {
     add_record_settings_hint: 'Эти настройки будут применяться для новых записей',
     
         
-            'Upload/register new file': 'Загрузить или зарегистрировать файл',
-            'Add File': 'Добавить файл',
-            'Edit File': 'Редактировать файл',
-            'Personal Files':'Личные файлы',
-            'Delete selected files': 'Удалить отмеченные файлы',
-            
-            
+    //record actions dialogs
+    'Processed records': 'Обработано записей',
+    recordAction_select_lbl: 'Диапазон записей:',
+    recordAction_select_hint: 'выберите записи для операции …',    
+        'All records': 'Все записи',
+        'Selected results set (count=': 'Отмеченные записи (кол-во=',
+        'Current results set (count=': 'Текущий результат поиска (кол-во=',
+        'only:': 'только:',
+    'Add or Remove Tags for Records': 'Добавить или удалить теги для записей',
+        'Add tags': 'Присвоить теги',
+        'Remove tags': 'Удалить теги',
+        'Bookmark': 'Добавить в избранные',
+        recordTag_hint0: 'Определите теги с которыми выбранные URL будут добавлены в избранные<br>',
+        recordTag_hint1: 'Определите теги с которыми выбранные записи будут добавлены в избранное<br>',
+        recordTag_hint2: 'Определите теги чтобы добавить или убрать для выбранных записей<br>',
+        recordTag_hint3: 'Matching tags are shown as you type. Click on a listed tag to add it.<br>Unrecognised tags are added automatically as user-specific tags <br>(group tags must be added explicitly by a group administrator). Tags may contain spaces.',
+        'No tags were affected': 'Ни один тег не был изменен',
+        'Bookmarks added': 'Добавлено в избранные',
+        'Tags added': 'Присвоено тегов',
+        'Tags removed': 'Убрано тегов',
+    'Unbookmark selected records': 'Удалить выбранные записи из избранных',    
+        recordUnbookmark_hint: 'Выберите записи которые будут удалены из избранных.<br>'
+            +'Любые персональные теги будут убраны из этих записей<br>'
+            +'Эта операция удаляет только метку "избранности" и убирает теги из записей, <br>'
+            +'собственно записи не удаляются<br>',
+        'Remove Bookmarks': 'Отменить избранность',
+        'Bookmarks removed': 'Удалено из избранных',
+    'Set Record Rating': 'Рейтинг для избранных записей',
+        'Set Rating': 'Установить рейтинг',
+        'Please specify rating value': 'Пожалуйста определите значение рейтинга',
+        'Rating updated': 'Рейтинг изменен',
+        'No Rating': 'без рейтинга',
+    'Delete Records': 'Удаление записей',        
+        
     //SERVER SIDE MESSAGES
     'Record type not defined or wrong': 'Тип данных не определен или неверен',        
             
@@ -564,6 +598,14 @@ regional['ru'] = {
     Error_System_Config: 'May result from a network outage, or because the system is not properly configured. If the problem persists, please report to your system administrator',
     Error_Json_Parse: 'Невозможно разобрать ответ сервера',
 
+//----------------------
+            'Upload/register new file': 'Загрузить или зарегистрировать файл',
+            'Add File': 'Добавить файл',
+            'Edit File': 'Редактировать файл',
+            'Personal Files':'Личные файлы',
+            'Delete selected files': 'Удалить отмеченные файлы',
+    
+    
 };
 
 

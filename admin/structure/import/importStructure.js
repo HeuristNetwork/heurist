@@ -742,7 +742,7 @@ $.widget( "heurist.importStructure", {
 
             this._as_dialog.dialog("open");
 
-            var helpURL = window.hWin.HAPI4.baseURL+'context_help/importStructure.html #content'
+            var helpURL = window.hWin.HRes( 'importStructure.html' )+' #content';
 
             window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
                 null,
