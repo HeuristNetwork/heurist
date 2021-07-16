@@ -51,7 +51,7 @@ require_once (dirname(__FILE__).'/compose_sql_new.php');
 require_once (dirname(__FILE__).'/db_structure.php');
 require_once (dirname(__FILE__).'/db_searchfacets.php');
 
-require_once ( dirname(__FILE__).'/../../common/php/Temporal.php');
+require_once ( dirname(__FILE__).'/../utilities/Temporal.php');
 
 /**
 * Find minimal and maximal values for given detail type and record type
@@ -1751,10 +1751,22 @@ function recordSearch($system, $params)
 
     $res = $mysqli->query($query);
     if (!$res){
+        
+        $sMsg = '';
+        if($savedSearchName){
+            $sMsg = 'in saved filter '.$savedSearchName;    
+        }else{
+            $sMsg = 'in your query';
+        }
 
-
-        $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.
-            ' Search query error on saved search. Parameters:'.print_r($params, true).' Query '.$query, $mysqli->error);
+        $response = $system->addError(HEURIST_ACTION_BLOCKED, 
+        '<h4>Uninterpretable Heurist query/filter</h4>'
+        .'There is an error '.$sMsg.' syntax generating invalid SQL. Please check for misspelled keywords or incorrect syntax. See help for assistance.<br><br>'
+ 
+        .'If you think the filter is correct, please make a bug report (link under Help menu at top right) or email the Heurist team, including the text of your filter.');
+        
+        //$response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.
+        //    ' Search query error on saved search. Parameters:'.print_r($params, true).' Query '.$query, $mysqli->error);
     }else if($is_count_only){
 
         $total_count_rows = $res->fetch_row();
