@@ -59,7 +59,7 @@
     require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
     require_once (dirname(__FILE__).'/../structure/dbsTerms.php');
-    require_once (dirname(__FILE__).'/../../common/php/Temporal.php');
+    require_once (dirname(__FILE__).'/../utilities/Temporal.php');
     require_once (dirname(__FILE__).'/../../admin/verification/verifyValue.php');
 
     require_once (dirname(__FILE__).'/../dbaccess/recordsExport.php');

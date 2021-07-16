@@ -1,4 +1,5 @@
 <?php
+//@todo make it as static class
 //@todo move all image manipulation here 
 // from resizeImage, db_files, rt_icon, captcha
 //use Screen\Capture; //for micorweber

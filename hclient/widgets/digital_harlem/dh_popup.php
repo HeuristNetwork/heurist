@@ -26,7 +26,7 @@
     require_once (dirname(__FILE__).'/../../../hsapi/dbaccess/db_structure.php');
     require_once (dirname(__FILE__).'/../../../hsapi/dbaccess/utils_db.php');
 
-    require_once ( dirname(__FILE__).'/../../../common/php/Temporal.php');
+    require_once ( dirname(__FILE__).'/../../../hsapi/utilities/Temporal.php');
     
     
     $response = array();

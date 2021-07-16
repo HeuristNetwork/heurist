@@ -240,7 +240,7 @@ if($response!=null){
                 }else{
                     $file->ulf_ID = $ret;
                 }
-            }else if(!@$file->thumbnailUrl){ //if UploadHandler does not create thunb - creates it as image with extension
+            }else if(!@$file->thumbnailUrl){ //if UploadHandler does not create thumb - creates it as image with text (file extension)
                 
                 $thumb_file = HEURIST_SCRATCH_DIR.'thumbs/'.@$_REQUEST['newfilename'];
                 $img = image_CreateFromString($file->type?$file->type:'XXX!');

@@ -2835,9 +2835,9 @@ class RelatedToPredicate extends Predicate {
         if ($this->value) {
             $ids = prepareIds($this->value);
             $ids = "(" . implode(",",$ids) . ")";
-            return "(exists (select * from recLinks where (rl_RelationID is not null) '
-            .' and ((rl_TargetID=TOPBIBLIO.rec_ID and rl_SourceID in $ids) '
-            .'   or (rl_SourceID=TOPBIBLIO.rec_ID and rl_TargetID in $ids))  ))";
+            return "(exists (select * from recLinks where (rl_RelationID is not null) "
+            ." and ((rl_TargetID=TOPBIBLIO.rec_ID and rl_SourceID in $ids) "
+            ."   or (rl_SourceID=TOPBIBLIO.rec_ID and rl_TargetID in $ids))  ))";
         }
         else {
             /* just want something that has a relation */
@@ -2863,10 +2863,11 @@ class RelationsForPredicate extends Predicate {
         * Certainly not the most elegant way to do it, but the numbers don't lie.
         */
         $res = $mysqli->query("select group_concat( distinct rec_ID ) from Records, recLinks where (rl_RelationID=rec_ID or rl_TargetID=rec_ID or rl_SourceID=rec_ID)
+            and (rl_RelationID is not null)
             and (rl_SourceID in $ids or rl_TargetID in $ids) and rec_ID not in $ids");
         $ids = $res->fetch_row();
         $ids = $ids[0];
-
+        
         if (! $ids) return "0";
         else return "TOPBIBLIO.rec_ID in ($ids)";
     }

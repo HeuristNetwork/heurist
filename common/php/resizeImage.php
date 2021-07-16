@@ -1,4 +1,7 @@
 <?php
+// @todo - use resize methods from UploadHandler
+//         for remote url (not images) from utils_image.php
+//         unite with utils_image.php
 
 /*
 * Copyright (C) 2005-2020 University of Sydney
@@ -20,6 +23,8 @@
 * Thumbnail service
 * It loads thumbnail from recUploadedFiles.ulf_Thumbnail
 * Or creates new thumbnail and stores it in this field in case this is standard thumnail request
+* 
+* It is used in file_download.php only
 *
 * parameters
 * w, h or maxw, maxh - size of thumbnail, if they are omitted - it returns standard thumbnail 100x100
@@ -32,7 +37,7 @@
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2020 University of Sydney
 * @link        http://HeuristNetwork.org
-* @version     3.1.0
+* @version     4.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
@@ -422,7 +427,7 @@ if ($standard_thumb  &&  @$file) {
 // output to browser
 echo $resized;
 
-//
+/// 2019-03-06 never use thumbnail from database    
 // store to database 
 //
 function save_thumnail_indb($mysqli, $file_info, $resized){

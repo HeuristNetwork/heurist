@@ -1,7 +1,8 @@
 <?php
 
 /**
-*  file_download.php : Download (or proxy) files that are registered in Heurist database
+* file_download.php : Download (or proxy) files that are registered in Heurist database
+* Usually it is callled via redirection from index.php (if there is parameter file, thumb or url)
 *
 * db
 * thumb - obfuscated file id - returns existing thumbnail or resize image
@@ -19,7 +20,7 @@
 *           hsapi/utilities/UploadHandler.php create_scaled_image() 
 *           on time of uploading and after registration it is copied to our filethumbs folder
 *    for remote file - thumbnail is created on first request file_download.php?thumb=  it uses common/php/resizeImage.php
-*    if record has an rec_URL, the thumbnail is created with image_CreateFromURL
+*    if record has an rec_URL, the thumbnail is created with utils_image.image_CreateFromURL
 * 
 * 
 * @package     Heurist academic knowledge management system

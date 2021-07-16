@@ -33,12 +33,6 @@
 require_once(dirname(__FILE__).'/../../hsapi/utilities/titleMask.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');  //to delete temporary records
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php'); 
-require_once(dirname(__FILE__).'/../../common/php/imageLibrary.php');
-/* in imageLibrary we use 
-getRectypeIconURL    
-getRectypeThumbURL
-copy_IconAndThumb_FromLibrary
-*/
 
 
 $rtyColumnNames = array(
@@ -2100,4 +2094,132 @@ function deleteRelConstraint($srcID, $trgID, $trmID){
     }
     return $ret;
 }
+
+/**
+* Check the existense of file [databaseid-rectypeid.png]. If not found - creates stub image with text
+* return URL to icon file
+*
+* @param mixed $rectypeID
+*/
+function getRectypeIconURL($rectypeID){
+
+    $name = $rectypeID.".png";
+    $filename = HEURIST_ICON_DIR.$name;
+
+    if(!file_exists($filename)){
+        //create the stub image with text - rectypeID
+        $img = make_file_image($rectypeID, 16, 2);
+        imagepng($img, $filename);
+    }
+    return HEURIST_ICON_URL.$name;
+}
+
+/**
+* Check the existense of file [th_databaseid-rectypeid.png].
+* If not found - creates stub image with text
+*
+* return URL to thumbnail file
+*
+* @param mixed $rectypeID
+*/
+function getRectypeThumbURL($rectypeID){
+
+    $name = "th_".$rectypeID.".png";
+    $filename = HEURIST_ICON_DIR."thumb/".$name;
+
+    if(!file_exists($filename)){
+        //create the stub image with text - rectypeID
+        $img = make_file_image($rectypeID, 75, 48);
+        imagepng($img, $filename);
+    }
+    return HEURIST_ICON_URL."thumb/".$name;
+}
+
+/**
+* $rt_id - record type ID
+* $filename - from icon library
+* @param mixed $rt_id
+* @param mixed $filename
+*/
+function copy_IconAndThumb_FromLibrary($rt_id, $filename) {
+
+    $lib_dir1 = dirname(__FILE__).'/../../admin/setup/iconLibrary/16px/';
+    $lib_dir2 = dirname(__FILE__).'/../../admin/setup/iconLibrary/64px/';
+    
+    if(strpos($filename,'icons8-')===0){
+        $filename64 = substr($filename,0,strlen($filename)-6).'64.png';
+    }else{
+        $filename64 = $filename;
+    }
+    
+    // actually save the file
+    $res1 = copy($lib_dir1.$filename, HEURIST_ICON_DIR . $rt_id . '.png');
+    $res2 = copy($lib_dir2.$filename64, HEURIST_ICON_DIR . 'thumb/th_' .$rt_id.'.png');
+
+    return $res1 && $res2;
+    
+    //return false;
+}
+
+/**
+* Creates the image with text
+*
+* @param mixed $desc - text (may be multiline)
+* @param mixed $dim - dimension
+* @return resource
+*/
+function make_file_image($desc, $dim, $font) {
+    $desc = preg_replace('/\\s+/', ' ', $desc);
+
+    if(!$font) $font = 2;
+    $fw = imagefontwidth($font); $fh = imagefontheight($font);
+    $desc_lines = explode("\n", wordwrap($desc, intval(100/$fw)-1, "\n", false));
+    $longlines = false;
+    if (count($desc_lines) > intval(100/$fh)) {
+        $longlines = true;
+    } else {
+        foreach ($desc_lines as $line) {
+            if (strlen($line) >= intval(100/$fw)) {
+                $longlines = true;
+                break;
+            }
+        }
+    }
+    if ($longlines) {
+        $font = 1; $fw = imagefontwidth($font); $fh = imagefontheight($font);
+        $desc_lines = explode("\n", wordwrap($desc, intval(100/$fw)-1, "\n", true));
+    }
+
+    if(!$dim){
+        $dim = 100;
+    }
+
+
+    $im = imagecreate($dim, $dim);
+    $white = imagecolorallocate($im, 255, 255, 255);
+    $grey = imagecolorallocate($im, 160, 160, 160);
+    $black = imagecolorallocate($im, 0, 0, 0);
+    imagefilledrectangle($im, 0, 0, $dim, $dim, $white);
+
+    //imageline($im, 35, 25, 65, 75, $grey);
+    /*
+    imageline($im, 33, 25, 33, 71, $grey);
+    imageline($im, 33, 25, 62, 25, $grey);
+    imageline($im, 62, 25, 67, 30, $grey);
+    imageline($im, 67, 30, 62, 30, $grey);
+    imageline($im, 62, 30, 62, 25, $grey);
+    imageline($im, 67, 30, 67, 71, $grey);
+    imageline($im, 67, 71, 33, 71, $grey);
+    */
+
+    $y = intval(($dim - count($desc_lines)*$fh) / 2);
+    foreach ($desc_lines as $line) {
+        $x = intval(($dim - strlen($line)*$fw) / 2);
+        imagestring($im, $font, $x, $y, $line, $black);
+        $y += $fh;
+    }
+
+    return $im;
+}
+
 ?>

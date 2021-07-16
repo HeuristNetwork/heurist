@@ -2,6 +2,7 @@
 /**
 * manageReports.js
 * ReportManager object for listing and searching of scheduled report
+* @todo change to entity manager
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

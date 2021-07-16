@@ -3,7 +3,7 @@
 require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 require_once (dirname(__FILE__).'/../utilities/mapSimplify.php');
 require_once (dirname(__FILE__).'/../utilities/mapCoordConverter.php');
-require_once (dirname(__FILE__).'/../../common/php/Temporal.php');
+require_once (dirname(__FILE__).'/../utilities/Temporal.php');
 
 /**
 * recordsExport.php - produces output in json, geojson, xml, gephi formats

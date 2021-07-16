@@ -31,7 +31,7 @@
 */  
 
 require_once(dirname(__FILE__)."/../../hsapi/System.php");
-require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
+require_once(dirname(__FILE__).'/../../hsapi/utilities/Temporal.php');
 
 $system = new System();
 $inverses = null;
@@ -983,13 +983,6 @@ function print_public_details($bib) {
         
         foreach ($bds_temp as $bd) {
 
-            if ($bd['dty_ID'] == 603) { //DT_FULL_IMAG_URL
-                array_push($thumbs, array(
-                    'url' => $bd['val'],
-                    'thumb' => HEURIST_BASE_URL.'common/php/resizeImage.php?db='.HEURIST_DBNAME.'&file_url='.$bd['val']
-                ));
-            }
-
             if ($bd['dty_Type'] == 'enum') {
 
                 if(array_key_exists($bd['val'], $terms['termsByDomainLookup']['enum'])){
@@ -1114,58 +1107,7 @@ function print_public_details($bib) {
                         $bd['val'] = $bd['val'].'<br>'.htmlspecialchars($file_description);
                     }
                 }
-                
-/*                
-                $filedata = RecUploadedFiles::getFileInfo($bd['dtl_UploadedFileID']);
-                if($filedata){
 
-                    $filedata = $filedata['file'];
-                    $remoteSrc = $filedata['remoteSource'];
-
-                    if(strpos($filedata['mimeType'],'audio/')===0 || 
-                    strpos($filedata['mimeType'],'image/')===0 || 
-                    strpos($filedata['mimeType'],'video/')===0){
-
-                        //$filedata['URL'] = ;
-                        $filedata['playerURL'] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$filedata['nonce'].'&mode=tag';
-                    }
-
-                    //add to thumbnail list
-                    $isplayer = (array_key_exists('playerURL', $filedata) && $filedata['playerURL']);
-                    if (is_image($filedata) || $isplayer)
-                    {
-
-                        //$filedata standart thumb with 200px image
-                        if(!$is_map_popup && $filedata['URL']!=$filedata['remoteURL']){
-                            $filedata["thumbURL"] =
-                            HEURIST_BASE_URL."common/php/resizeImage.php?maxw=200&maxh=200&".
-                            (defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$filedata['nonce'];
-                            $thumb_size = 200;
-                        }else{
-                            $thumb_size = 100;
-                        }
-
-                        array_push($thumbs, array(
-                            'id' => $filedata['id'],
-                            'url' => $filedata['URL'],   //download
-                            'mediaType'=>$filedata['mediaType'], 
-                            'mimeType'=>$filedata['mimeType'], 
-                            'thumb_size'=>$thumb_size,
-                            'thumb' => $filedata['thumbURL'],
-                            'player' => $filedata['playerURL'],
-                            'nonce' => $filedata['nonce']
-                            //link to generate player html
-                            //$isplayer?$filedata['playerURL'].(($remoteSrc=='youtube' || $remoteSrc=='gdrive')?"":"&height=60%"):null  
-                        ));
-                    }
-
-                    if($filedata['URL']==$filedata['remoteURL']){ //remote resource
-                        $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($filedata['URL']).'">'.htmlspecialchars($filedata['URL']).'</a>';
-                    }else{
-                        $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($filedata['URL']).'">'.htmlspecialchars($filedata['origName']).'</a> '.($filedata['fileSize']>0?'[' .htmlspecialchars($filedata['fileSize']) . 'kB]':'');
-                    }
-                }
-*/
             } else {
                 if (preg_match('/^https?:/', $bd['val'])) {
                     if (strlen($bd['val']) > 100)

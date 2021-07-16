@@ -14,7 +14,7 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_rel_details_temp.php');
 
-require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
+require_once(dirname(__FILE__).'/../../hsapi/utilities/Temporal.php');
 require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 //require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 

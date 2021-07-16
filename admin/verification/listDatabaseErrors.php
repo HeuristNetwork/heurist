@@ -34,10 +34,10 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');
 require_once(dirname(__FILE__).'/../../hsapi/structure/dbsTerms.php');
+require_once(dirname(__FILE__).'/../../hsapi/utilities/Temporal.php');
 
 $mysqli = $system->get_mysqli();
 
-require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 require_once('verifyValue.php');
 require_once('verifyFieldTypes.php');
 

@@ -120,7 +120,6 @@ $.widget( "heurist.resultList", {
     current_page: 0,
     max_page: 0,
     count_total: null,  //total records in query - actual number can be less
-    hintDiv:null, // rollover for thumbnails
     _current_view_mode: null,
 
     _currentRecordset:null,
@@ -3133,19 +3132,6 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         }
 
         
-
-        /* show image on hover
-        var that = this;
-        $(".realThumb").hover( function(event){
-        var bg = $(event.target).css('background-image');
-        $("#thumbnail_rollover_img").css({'background-image': bg,
-        'background-size':'contain', 'background-repeat':'no-repeat', 'background-position': 'center' } );
-        that.hintDiv.showAt(event);
-        },
-        function(){ that.hintDiv.hide(); } );
-        */
-
-
         //hide edit link
         if(!window.hWin.HAPI4.has_access()){
             $(this.div_content).find('.logged-in-only').css('visibility','hidden');

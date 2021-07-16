@@ -30,7 +30,7 @@
 require_once(dirname(__FILE__).'/../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 
-require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
+require_once(dirname(__FILE__).'/../../hsapi/utilities/Temporal.php');
 
 require_once(dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 

@@ -25,7 +25,6 @@ $.widget( "heurist.resultListMenu", {
     options: {
         is_h6style: false,
         // callbacks
-        show_searchmenu:false,
         menu_class:null,
         resultList: null,  //reference to parent
         search_realm: null
@@ -48,7 +47,6 @@ $.widget( "heurist.resultListMenu", {
             //.css({'dispaly':'table-row'})
             .appendTo(this.element);
 
-        if(this.options.show_searchmenu) this._initMenu('Search');
         this._initMenu('Selected');
         this._initMenu('Collected');
         this._initMenu('Recode');
@@ -327,30 +325,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
         var that = this;
 
-        //var action = ui.item.attr('id');
-        if(action == "menu-search-quick"){  //H4
-
-            var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('search');
-            if(widget){
-                widget.search('showSearchAssistant');
-            }
-
-        }else if(action == "menu-search-save"){  //H4
-
-            var  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
-            if(widget){
-                widget.svs_list('editSavedSearch', 'saved'); //call public method editRules
-            }
-
-        }else if(action == "menu-search-rulebuilder"){
-
-            var  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha13');
-            if(widget){
-                widget.svs_list('editSavedSearch', 'rules'); //call public method editRules
-            }
-
-
-        }else if(action == "menu-selected-select-all"){
+        if(action == "menu-selected-select-all"){
 
             this.selectAll();
 
