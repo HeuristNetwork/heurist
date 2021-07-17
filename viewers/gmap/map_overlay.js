@@ -333,7 +333,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 2 dataset - points and links
                     if(!window.hWin.HEURIST4.util.isempty( doc['description']) ){
                         
-                        var ele = $(window.hWin.document.body).find('#dh_search_2');
+                        var ele = $(window.hWin.document.body).find('#dh_search_2').parents('.ui-layout-pane');
                         
                         window.hWin.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], 
                         {resizable:true, modal:false, width:ele.width(), height:ele.height()-100,

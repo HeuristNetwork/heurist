@@ -210,7 +210,7 @@ $.widget( "heurist.expertnation_nav", {
 
             //assign map for iframes
             $('.mapframe').prop('src', window.hWin.HAPI4.baseURL+
-                'viewers/map/map.php?ll='+window.hWin.HAPI4.sysinfo['layout']+'&db=ExpertNation&header=off&legend=off');
+                'viewers/gmap/map.php?ll='+window.hWin.HAPI4.sysinfo['layout']+'&db=ExpertNation&header=off&legend=off');
                 //'viewers/map/map_leaflet.php?ll='+window.hWin.HAPI4.sysinfo['layout']+'&db=ExpertNation&controls=none&nocluster=1');
 
         }
@@ -280,6 +280,7 @@ $.widget( "heurist.expertnation_nav", {
                 //precautionary trap, that is in case of old html web content referencing it.
                 //replace reference in webcontent (for map.php witnin iframe) to new server
                 content = content.replace('http://heurist.sydney.edu.au/h5-ao/',window.hWin.HAPI4.baseURL);
+                content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HAPI4.baseURL);
 
                 //add page content from database  
                 ele.html( content );    

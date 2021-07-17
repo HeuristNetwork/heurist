@@ -222,7 +222,7 @@ $.widget( "heurist.dh_maps", {
     },
     
 
-    loadMapDocument: function(recId){
+        loadMapDocument: function(recId){
         
         var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('heurist_Map');
         if(app && app.widget){
@@ -237,7 +237,7 @@ $.widget( "heurist.dh_maps", {
             }else{
                     if(!window.hWin.HEURIST4.util.isempty( doc['description']) ){
                         
-                        var ele = $(top.document.body).find('#dh_search_2');
+                        var ele = $(top.document.body).find('#dh_search_2').parents('.ui-layout-pane');
                         
                         window.hWin.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], 
                         {resizable:true, modal:false, width:ele.width(), height:ele.height()-100, 

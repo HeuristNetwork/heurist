@@ -327,6 +327,7 @@ $.widget( "heurist.dh_search", {
 
     _addSearchForm: function( content_id, name ) {
 
+        
         this._createFacetQueries( content_id );
 
         //var $d = $(document.createElement('div')).appendTo(this.element);
