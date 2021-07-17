@@ -67,9 +67,9 @@ $system->defineConstants();
 <link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
 <!-- Mapping -->
-<script type="text/javascript" src="<?php echo PDIR;?>viewers/map/map.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>viewers/map/map_overlay.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/map_bubble.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>viewers/gmap/map.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>viewers/gmap/map_overlay.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>viewers/gmap/map_bubble.js"></script>
 
 
 <style>
@@ -477,7 +477,7 @@ $system->defineConstants();
             query = query + '&mapdocument=' + mapping.map_control.getCurrentMapdocumentId();
         }
         
-        var url = window.hWin.HAPI4.baseURL+'viewers/map/map.php' + query;
+        var url = window.hWin.HAPI4.baseURL+'viewers/gmap/map.php' + query;
 
         //document.getElementById("linkTimeline").href = url;
 
@@ -492,7 +492,7 @@ $system->defineConstants();
         //encode
         query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
         query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
-        url = window.hWin.HAPI4.baseURL+'viewers/map/map.php' + query;
+        url = window.hWin.HAPI4.baseURL+'viewers/gmap/map.php' + query;
         if(mapping.map_control.getCurrentMapdocumentId()>0){
             url = url + '&mapdocument=' + mapping.map_control.getCurrentMapdocumentId();
         }

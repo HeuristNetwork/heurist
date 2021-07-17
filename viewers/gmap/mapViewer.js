@@ -35,7 +35,7 @@
 */
 var baseURL = '';
 if(window.hWin && window.hWin.HAPI4){
-    baseURL = window.hWin.HAPI4.baseURL+"viewers/map/mapStatic.php?width=300&height=300&db="+window.hWin.HAPI4.database;
+    baseURL = window.hWin.HAPI4.baseURL+"viewers/gmap/mapStatic.php?width=300&height=300&db="+window.hWin.HAPI4.database;
 }
 
 function MapViewer() {

@@ -1,8 +1,8 @@
 /**
 * app_timemap.js - load map + timeline into an iframe in the interface.
-* This widget acts as a wrapper for viewers/map/map.php or viewers/map/map_leaflet.php
+* This widget acts as a wrapper for viewers/gmap/map.php or viewers/map/map_leaflet.php
 * 
-* app_timemap -> map_leadlet.php -> mapping.js
+* app_timemap -> map_leaflet.php -> mapping.js
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -253,8 +253,13 @@ console.log(re);
                     this.options.mapdocument = mapdoc;    
                 }
                 
-                var url = window.hWin.HAPI4.baseURL + 'viewers/map/map'+
-                    (this.options.leaflet?'_leaflet':'')+'.php?db='+window.hWin.HAPI4.database;
+                var url;
+                if(this.options.leaflet){
+                    url = window.hWin.HAPI4.baseURL + 'viewers/map/map_leaflet.php?';
+                }else{
+                    url = window.hWin.HAPI4.baseURL + 'viewers/gmap/map.php?';
+                }
+                url = url + 'db=' + window.hWin.HAPI4.database;
 
                 if(this.options.layout_params){
             
@@ -450,7 +455,7 @@ console.log(re);
                 mapping.mapping('setFeatureSelection', this.options.selection, true);
                 
             }else{
-                mapping.showSelection(this.options.selection);  //see viewers/map/map.js
+                mapping.showSelection(this.options.selection);  //see viewers/gmap/map.js
             }
             
         }
@@ -582,7 +587,7 @@ console.log(re);
     , loadMapDocumentById: function(recId){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
-            mapping.map_control.loadMapDocumentById(recId);  //see viewers/map/map.js
+            mapping.map_control.loadMapDocumentById(recId);  //see viewers/gmap/map.js
         }
     }
 

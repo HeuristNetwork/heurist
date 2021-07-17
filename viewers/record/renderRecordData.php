@@ -478,9 +478,9 @@ if(!($is_map_popup || $without_header)){
     </head>
     <body class="popup" style="overflow-x: hidden;">
 
-        <script type="text/javascript" src="../../viewers/map/mapViewer.js"></script>
+        <script type="text/javascript" src="../../viewers/gmap/mapViewer.js"></script>
         <script>
-            baseURL = "<?=HEURIST_BASE_URL?>viewers/map/mapStatic.php?width=300&height=300&db=<?=HEURIST_DBNAME?>";
+            baseURL = "<?=HEURIST_BASE_URL?>viewers/gmap/mapStatic.php?width=300&height=300&db=<?=HEURIST_DBNAME?>";
         </script>
 
         <?php

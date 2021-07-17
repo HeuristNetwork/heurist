@@ -825,7 +825,7 @@ function smarty_function_wrap($params, &$smarty)
                         $res = '<a href="http://maps.google.com/maps?z=18&q='.$point->y().",".$point->x().'" target="_blank">'.$label."</a>";
                     }else{
                         $recid = $value['recid'];
-                        $url = HEURIST_BASE_URL."viewers/map/mapStatic.php?".$mapsize."&q=ids:".$recid."&db=".HEURIST_DBNAME; //"&t="+d;
+                        $url = HEURIST_BASE_URL."viewers/gmap/mapStatic.php?".$mapsize."&q=ids:".$recid."&db=".HEURIST_DBNAME; //"&t="+d;
                         return "<img src=\"".$url."\" ".$size."/>";
                     }
                 }
