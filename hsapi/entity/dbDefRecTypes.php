@@ -432,7 +432,7 @@ class DbDefRecTypes extends DbEntityBase
                         parent::renameEntityImage($icon_file_name, $rty_ID, 'icon');
                     }
                     
-                    //backward capability
+                    //backward capability - copy icon and thumb to rectype-icons
                     $this->copyIconIntoRectypeIcons($rty_ID);
                     
                 }

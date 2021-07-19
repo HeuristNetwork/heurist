@@ -805,7 +805,7 @@
 * @param mixed $dst
 * @param array $folders - zero level folders to copy
 */
-function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_files_in_root=true) {
+function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_files_in_root=true, $file_prefix='') {
     $res = false;
 
     $src =  $src . ((substr($src,-1)=='/')?'':'/');
@@ -832,7 +832,7 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
 
                     }
                     else if($copy_files_in_root && ($file_to_copy==null || $src.$file==$file_to_copy)){
-                        copy($src.$file,  $dst . '/' . $file);
+                        copy($src.$file,  $dst . '/' . $file_prefix . $file);
                         if($file_to_copy!=null) return false;
                     }
                 }

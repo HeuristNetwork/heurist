@@ -1575,13 +1575,14 @@ if($term_id==11 || $term_id==518 || $term_id==497){
     // Copy record type icon and thumbnail from source to destination database
     //
     private function copyRectypeIcon($source_RtyID, $target_RtyID, $thumb=""){
-        
-        $targetPath = HEURIST_ICON_DIR.$thumb.$target_RtyID.".png";
-        
+
+        //backward capabilities - rectype-icons        
+        $targetPath = HEURIST_ICON_DIR.$thumb.$target_RtyID.'.png';
+
         //check if the same server with target
         if(strpos($this->sourceIconURL, HEURIST_SERVER_URL)===0){ 
             
-            $filename = HEURIST_FILESTORE_ROOT.$this->source_db_name."/rectype-icons/".$thumb.$source_RtyID.".png";
+            $filename = HEURIST_FILESTORE_ROOT.$this->source_db_name.'/rectype-icons/'.$thumb.$source_RtyID.'.png';
             if(file_exists($filename)){
                 
                 if(file_exists($targetPath)){
@@ -1597,7 +1598,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
         
 
         }else{
-            $sourceURL = $this->sourceIconURL.$thumb.$source_RtyID.".png";
+            $sourceURL = $this->sourceIconURL.$thumb.$source_RtyID.'.png';
 
             //print "<br>sourcce=".$sourceURL;
             //print "<br>path=".$targetPath;
@@ -1605,8 +1606,30 @@ if($term_id==11 || $term_id==518 || $term_id==497){
             saveURLasFile($sourceURL, $targetPath); //see utils_file
         }
 
-        if($thumb==""){
-            $this->copyRectypeIcon($source_RtyID, $target_RtyID, "thumb/th_");
+        //new  entity/defRecTypes/  --------------------------------------------
+        $targetFolder = HEURIST_FILESTORE_DIR.'/entity/defRecTypes/';
+        $targetPath = $targetFolder.($thumb==''?'/icon/':'/thumbnail/').$target_RtyID.'.png';
+        
+        //check if the same server with target
+        if(strpos($this->sourceIconURL, HEURIST_SERVER_URL)===0){ 
+
+            $filename = HEURIST_FILESTORE_ROOT.$this->source_db_name.
+                    ($thumb==''?'/icon/':'/thumbnail/').$thumb.$source_RtyID.'.png';
+            if(file_exists($filename)){
+                if(file_exists($targetPath)){
+                    unlink($targetPath);
+                }
+                copy($filename, $targetPath);
+            }
+        }else{
+            $sourceURL = $this->sourceIconURL.$thumb.$source_RtyID.'.png';
+            saveURLasFile($sourceURL, $targetPath); //see utils_file
+        }
+
+                
+        //and thumbnail
+        if($thumb==''){
+            $this->copyRectypeIcon($source_RtyID, $target_RtyID, 'thumb/th_');
         }
     }
     

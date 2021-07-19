@@ -167,6 +167,7 @@ if($filename){ //download from scratch
             $filename = $path.$rec_id;
             
             
+            //backward capability - copy from old rectype-icons to new location - entity folder
             if($entity_name=='defRecTypes' && !file_exists($filename.'.png')){
                 
                 if($viewmode=='thumb'){
@@ -174,7 +175,6 @@ if($filename){ //download from scratch
                 }else{
                     $old_filename = HEURIST_ICON_DIR . $rec_id .'.png';
                 }
-                //copy from rectype-icons to new location - entity folder
                 if(file_exists($old_filename)){
                     
                     //recreate entity folder

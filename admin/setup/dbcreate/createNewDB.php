@@ -378,8 +378,7 @@ if($registrationRequired) //show user registration dialog at once
             #div_create .entry-box{   
                 padding: 5px 20px 20px;
                 margin:20px 0;
-
-
+                min-width: 520px;
             }
             #createDBForm h3{
                 color: #7B4C98 !important;

@@ -469,14 +469,14 @@ error_log(print_r($_REQUEST, true));
         $folders['hml-output']   = array('HML','used to write published records as hml files', true);
         $folders['html-output']  = array('HTML','used to write published records as generic html files', true);
         $folders['generated-reports'] = array(null,'used to write generated reports');
-        $folders['xsl-templates']     = array('XSL_TEMPLATES','', false, true);
         $folders['smarty-templates']  = array('SMARTY_TEMPLATES','', false, true);
-        $folders['entity']        = array(null,'used to store icons and images for users,groups,terms');
+        $folders['entity']        = array(null,'used to store icons and images for record types users,groups,terms');
         $folders['backup']        = array(null,'used to write files for user data dump');
         $folders['rectype-icons'] = array('ICON','used for record type icons and thumbnails', true, true); //todo move to entity
         $folders['settings']      = array('SETTING','', false, true);
         
         // do not create
+        $folders['xsl-templates'] = array('XSL_TEMPLATES','', false, true);
         $folders['documentation_and_templates'] = array('','', false, true);
         $folders['term-images']    = array('TERM_ICON','', true, true); //for digital harlem
         $folders['faims']    = array('',''); 
