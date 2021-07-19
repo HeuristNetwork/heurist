@@ -106,13 +106,6 @@ console.log('load google map api')
             
             function handleApiReady(){
                 
-                // Mapping data
-                //mapping = new hMappingDraw('map_digitizer', initial_wkt);
-                //is_geofilter = window.hWin.HEURIST4.util.getUrlParameter('geofilter', location.search);
-                //is_geofilter = (is_geofilter==1 || is_geofilter=='true');
-                //need_screenshot = window.hWin.HEURIST4.util.getUrlParameter('need_screenshot', location.search);
-                //need_screenshot = (need_screenshot==1 || need_screenshot=='true');
-                
                 var layout_params = {};
                 layout_params['notimeline'] = '1';
                 layout_params['nocluster'] = '1'

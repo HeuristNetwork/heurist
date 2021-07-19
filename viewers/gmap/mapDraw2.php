@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * Map digitizing tool
+    * Map digitizing tool (google map based)
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -26,7 +26,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 
         <!-- script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCan9ZqKPnKXuzdb2-pmES_FVW2XerN-eE&libraries=drawing,geometry"></script -->
 
-        <script type="text/javascript" src="mapDraw.js"></script>
+        <script type="text/javascript" src="mapDraw2.js"></script>
         <script type="text/javascript" src="mapLayer.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/vector3d.js"></script>

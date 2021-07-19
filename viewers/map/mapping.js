@@ -584,7 +584,7 @@ $.widget( "heurist.mapping", {
             window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data)){
                 
             var that = this;
-
+            
             var new_layer = L.geoJSON(geojson_data, {
                     default_style: null
                     , layer_name: dataset_name
@@ -675,8 +675,9 @@ $.widget( "heurist.mapping", {
             //apply layer ot default style and fill markercluster
             this.applyStyle( new_layer._leaflet_id, layer_style ?layer_style: this.setStyleDefaultValues() ); //{color: "#00b0f0"}
 
+            
             if(!preserveViewport){
-                   this.zoomToLayer(new_layer._leaflet_id);           
+                this.zoomToLayer(new_layer._leaflet_id);           
             }
             
             return new_layer._leaflet_id;
@@ -2346,7 +2347,7 @@ $.widget( "heurist.mapping", {
                 }
 
                 if(this.is_map_disabled){
-                   $('#map').hide();
+                   //$('#map').hide();
                    $('#map_empty_message').show();
                 }else{
                    $('#map_empty_message').hide();

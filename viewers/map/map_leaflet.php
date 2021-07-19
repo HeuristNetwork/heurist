@@ -287,7 +287,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         <!-- Map -->
         <div class="ui-layout-center">
                 <div id="map" style="width:100%; height:100%" class="ui-layout-content"><span id="map-loading">Mapping...</span></div>
-                <div id="map_empty_message" style="width:100%; height:100%;margin:7px;display: none;">There are no spatial objects to plot on map</div>
+                <div id="map_empty_message" style="margin:7px;display: none;position: absolute;left: 50px;top: 0px;z-index: 1000;">There are no spatial objects to plot on map</div>
             
         </div>
 
