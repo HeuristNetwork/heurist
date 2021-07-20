@@ -166,4 +166,26 @@ function image_CreateFromURL($siteURL){
         return array('error'=>'URL to generate snapshot '.$siteURL.' is not valid');
     }
 }
+
+/**
+* download image from given url
+*
+* @param mixed $remote_url
+* @return resource
+*/
+function get_remote_image($remote_url){
+
+    $img = null;
+    
+    $data = loadRemoteURLContent($remote_url, false); //from utils_file.php
+    if($data){
+        try{    
+            $img = imagecreatefromstring($data);
+        }catch(Exception  $e){
+            $img = false;
+        }
+    }
+
+    return $img;
+}
 ?>

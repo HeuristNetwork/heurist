@@ -2108,7 +2108,7 @@ $.widget( "heurist.editing_input", {
                 .hide();
 
 				/* Record Type help text for Record Editor */
-				$small_text = $('<br /><div class="smallText" style="display:inline-block;color:gray;font-size:smaller;">'
+				$small_text = $('<br /><div class="smallText" style="display:block;color:gray;font-size:smaller;">'
                     + 'Click image to freeze in place</div>')
                 .clone()
                 .prependTo( $inputdiv )
@@ -2180,7 +2180,10 @@ $.widget( "heurist.editing_input", {
                 /* Input element's hover handler */
                 function __showImagePreview(event){
 
-                    if(!window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src')) && isClicked == 0){
+                    var imgAvailable = !window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src'));
+                    var invalidURL = $inputdiv.find('div.smallText').text().includes("This file cannot be rendered");
+
+                    if((imgAvailable || invalidURL) && isClicked == 0){
                         if (hideTimer) {
                             window.clearTimeout(hideTimer);
                             hideTimer = 0;
@@ -3097,6 +3100,13 @@ console.log('onpaste');
                         $parentNode.find('.download_link').hide();
                         $parentNode.find('#player'+value.ulf_ID).hide();
                         
+                        $parentNode.find(".smallText").text("Click image to freeze in place").css({
+                            "font-size": "smaller", 
+                            "color": "grey", 
+                            "position": "", 
+                            "bottom": ""
+                        });						
+						
                         that._on($input, {mouseout:__hideImagePreview});
                         that._on($input_img, {mouseout:__hideImagePreview});
                         
@@ -3266,13 +3276,59 @@ console.log('onpaste');
                 window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title, 10);
                 
                 //url for thumb
-                ele.parent().find('.image_input > img').attr('src',
-                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
-                        value.ulf_ObfuscatedFileID);
-                        
-                this.newvalues[ele.attr('id')] = value;
-                 
-                ele.change();
+                if(!window.hWin.HEURIST4.util.isempty(value['ulf_ExternalFileReference'])){ // check if external source can be rendered
+
+                    window.hWin.HAPI4.SystemMgr.check_renderable_url(value['ulf_ExternalFileReference'], function(response){
+
+                        if(response.status == window.hWin.ResponseStatus.OK){
+
+                            if (response.data == "false") { // cannot be rendered
+
+                                ele.parent().find('.image_input > img').removeAttr('src'); // ensure no source image is shown
+
+                                ele.parent().find(".smallText").text("This file cannot be rendered").css({
+                                    "font-size": "larger", 
+                                    "color": "black", 
+                                    "position": "relative", 
+                                    "bottom": "60px"
+                                });
+
+                            } else { // can be rendered
+
+                                ele.parent().find('.image_input > img').attr('src',
+                                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+                                        value.ulf_ObfuscatedFileID);
+                                        
+                                ele.parent().find(".smallText").text("Click image to freeze in place").css({
+                                    "font-size": "smaller", 
+                                    "color": "grey", 
+                                    "position": "", 
+                                    "bottom": ""
+                                });
+
+                                that.newvalues[ele.attr('id')] = value;    
+                            }
+
+                            ele.change();
+                        }
+                    });
+                }else{ // local source
+
+                    ele.parent().find('.image_input > img').attr('src',
+                        window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+                            value.ulf_ObfuscatedFileID);
+
+                    ele.parent().find(".smallText").text("Click image to freeze in place").css({
+                        "font-size": "smaller", 
+                        "color": "grey", 
+                        "position": "", 
+                        "bottom": ""
+                    });
+                            
+                    this.newvalues[ele.attr('id')] = value;
+                     
+                    ele.change();
+                }
                 
             }else{
                  //call server for file details

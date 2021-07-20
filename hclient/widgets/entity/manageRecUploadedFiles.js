@@ -599,10 +599,10 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
             var invalid_img = false;
 
-            window.hWin.HAPI4.SystemMgr.get_url_content_type(this._previousURL, function(response){
+            window.hWin.HAPI4.SystemMgr.check_renderable_url(this._previousURL, function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    if(response.data.extension == 'bin'){
+                    if(response.data == 'false'){
 
                         var btns = {};
                         
@@ -618,12 +618,12 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                         var labels = {};
 
-                        labels['title'] = 'Possible Invalid URL for an Image';
+                        labels['title'] = 'Invalid URL for a Renderable';
                         labels['no'] = window.hWin.HR('Re-Specify URL');
                         labels['yes'] = window.hWin.HR('Accept as is');
 
                         window.hWin.HEURIST4.msg.showMsgDlg(
-                              "This file may not be able to render as an image or playable media.<br/>"
+                              "This file cannot be rendered as an image or playable media.<br/>"
                             + "You may have referenced a web page (e.g. htm or html) rather than an image or video.<br/>"
                             + "The URL may appear to have a file extension, but you have most likely referenced a wrapper for the file.<br/>"
                             + "You must reference the file directly.<br/>",
