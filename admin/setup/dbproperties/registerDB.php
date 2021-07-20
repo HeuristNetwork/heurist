@@ -426,12 +426,8 @@ function registerDatabase() {
                             if(window.hWin){
                                 window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
                                 window.hWin.HAPI4.SystemMgr.sys_info( function(){
-                                    window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document, 
-                                            function(){
-                                                window.open("<?=$edit_url?>",'_blank');    
-                                            }
-                                        );
-                                    }
+                                    window.open("<?=$edit_url?>",'_blank');
+                                }
                                 );
                             }
                         </script>
