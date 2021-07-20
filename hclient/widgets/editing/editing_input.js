@@ -651,7 +651,7 @@ $.widget( "heurist.editing_input", {
 
             
             if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
-            && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
+            //&& this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
             && this.options.dtID > 0)
             {
                 
@@ -2944,7 +2944,7 @@ console.log('onpaste');
         }//end if by detailType
 
         //----------------- color or symbology editor
-        if( this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']){
+        if( this.options.dtID > 0 && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']){
 
                 $input.attr('readonly','readonly');
                 
@@ -2994,7 +2994,8 @@ console.log('onpaste');
                 }
              
         }//end color/symbol editor
-        else if( this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']){
+        /*
+        else if( this.options.dtID>0 && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']){
             
                     var $btn_edit_switcher = $( '<span>calculate extent</span>', 
                     {title: 'Get image extent based on worldfile parameters and image width and height'})
@@ -3006,8 +3007,7 @@ console.log('onpaste');
                     this._on( $btn_edit_switcher, { click: function(){
                         calculateImageExtentFromWorldFile( that.options.editing );
                     }});
-            
-        }
+        }*/
 
 
 
