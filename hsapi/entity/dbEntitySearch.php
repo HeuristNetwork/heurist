@@ -451,6 +451,10 @@ class DbEntitySearch
                             $row = $calculatedFields($fields, $row); //adds values
                         }
                         
+                        foreach($row as $key=>$val){
+                            $row[$key] = mb_convert_encoding($val, 'UTF-8');
+                        }
+                        
                         $records[$row[0]] = $row;
                         $order[] = $row[0];
                     }

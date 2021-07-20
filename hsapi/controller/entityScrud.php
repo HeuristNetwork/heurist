@@ -50,6 +50,9 @@
             $res = entityExecute($system, $_REQUEST);
         }
     }
+
+    header("Access-Control-Allow-Origin: *");
+    header('Content-type: application/json;charset=UTF-8');
     
     if(@$_REQUEST['restapi']==1){
         if( is_bool($res) && !$res ){
@@ -58,9 +61,6 @@
             
         }else{
             $response = array("status"=>HEURIST_OK, "data"=> $res);
-            
-            header("Access-Control-Allow-Origin: *");
-            header('Content-type: application/json;charset=UTF-8');
             
             $req = $entity->getData();
             
@@ -82,6 +82,9 @@
         }else{
             $response = array("status"=>HEURIST_OK, "data"=> $res);
         }
+        
+        //if(mb_check_encoding($response))
+        
         print json_encode($response);
     }
 /*

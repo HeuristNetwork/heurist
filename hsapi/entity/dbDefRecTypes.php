@@ -180,7 +180,7 @@ class DbDefRecTypes extends DbEntityBase
         if(count($order)>0){
             $query = $query.' ORDER BY '.implode(',',$order);
         }
-
+        
         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
         $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
