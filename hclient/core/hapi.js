@@ -809,6 +809,11 @@ prof =Profile
                 _callserver('usr_info', request, callback);
             },
 
+            check_renderable_url: function(url, callback){
+                var request = {a:'check_renderable_url', url: url};
+                _callserver('usr_info', request, callback);
+            },
+
             get_sysimages: function(folders, callback){
                 var request = {a:'sysimages', folders: folders};
                 _callserver('usr_info', request, callback);

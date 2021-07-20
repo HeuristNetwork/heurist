@@ -45,6 +45,7 @@
 require_once (dirname(__FILE__)."/../../hsapi/System.php");
 require_once (dirname(__FILE__)."/../../hsapi/utilities/utils_mail.php");
 require_once (dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
+require_once (dirname(__FILE__)."/../../hsapi/utilities/utils_image.php");
 
 $system = new System();
 
@@ -492,25 +493,4 @@ function make_file_image2($desc) {
     return $im;
 }
 
-/**
-* download image from given url
-*
-* @param mixed $remote_url
-* @return resource
-*/
-function get_remote_image($remote_url){
-
-    $img = null;
-
-    $data = loadRemoteURLContent($remote_url, false); //from utils_file.php
-    if($data){
-        try{    
-            $img = imagecreatefromstring($data);
-        }catch(Exception  $e){
-            $img = false;
-        }
-    }
-
-    return $img;
-}
 ?>

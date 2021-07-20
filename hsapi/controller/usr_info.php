@@ -25,6 +25,7 @@
     require_once (dirname(__FILE__).'/../dbaccess/db_users.php');
     require_once (dirname(__FILE__).'/../dbaccess/db_svs.php');
     require_once (dirname(__FILE__).'/../utilities/utils_file.php');
+    require_once (dirname(__FILE__).'/../utilities/utils_image.php');	
 
     $response = array(); //"status"=>"fatal", "message"=>"OBLOM");
     $res = false;
@@ -302,6 +303,16 @@
                 
                 $res = recognizeMimeTypeFromURL($mysqli, $url);
                 
+            } else if ($action == "check_renderable_url") {
+
+                $url = @$_REQUEST['url'];
+                
+                $url = filter_var($url, FILTER_SANITIZE_URL);
+
+                $is_renderable = get_remote_image($url);
+
+                $res = (is_bool($is_renderable) ? "false" : "true");
+
             } else {
 
                 $system->addError(HEURIST_INVALID_REQUEST);
