@@ -23,64 +23,64 @@
 */
 ini_set('max_execution_time', 0);
 
-define('OWNER_REQUIRED',1);   
+//define('OWNER_REQUIRED',1);   
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
-$mysqli = $system->get_mysqli();
-?>
-<html>
-    <head>
-
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
-        <style type="text/css">
-            h3, h3 span {
-                display: inline-block;
-                padding:0 0 10px 0;
-            }
-            Table tr td {
-                line-height:2em;
-            }
-        </style>
-
-    </head>
-
-
-    <body class="popup">
-
-        <div class="banner">
-            <h2>List of databases without upload folder</h2>
-        </div>
-
-        <div><br/><br/>
-            
-        </div>
-        <hr>
-
-        <div id="page-inner">
-
-            <?php
-
+    $mysqli = $system->get_mysqli();
+    
     $counter = 0;
             
-    $dbs = mysql__getdatabases4($mysqli, true);            
+    $dbs = mysql__getdatabases4($mysqli, true);   
+    $inaccessible = array();
+    $missed = array();
+             
     foreach ($dbs as $db){
         
         //if($counter>50) break;
         $counter++;
         
         $dbName = substr($db,4);
-        $fpath = HEURIST_FILESTORE_ROOT . $dbName . '/';
-        if(!file_exists($fpath)){
-            print "<h2>".$db."</h2>";
+        $folder = HEURIST_FILESTORE_ROOT . $dbName . '/';
+        if(file_exists($folder) && is_dir($folder)){
+            if (!is_writable($folder)) {
+                array_push($inaccessible, $db);    
+            }
+        }else{
+            array_push($missed, $db);
         }
-            
     }//for
-            
-            ?>
-        </div>
+
+    if(count($missed)>0 || count($inaccessible)>0){
+        $rep = '<h2>List of databases with missing/inaccessible upload folder</h2><hr>';
+        if(count($missed)>0){
+            $rep .= '<h3>Missed</h3>';
+            foreach ($missed as $db){
+                $rep .= ($db.'<br>');
+            }
+        }    
+        if(count($inaccessible)>0){
+            $rep .= '<h3>Inaccessible</h3>';
+            foreach ($inaccessible as $db){
+                $rep .= ($db.'<br>');
+            }
+        }    
+    }
+    if(@$_REQUEST['mail']){
+        
+        $email_header = " <no-reply@".HEURIST_SERVER_NAME.">\r\nContent-Type: text/html;";
+        $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'List of databases with missing/inaccessible upload folder', 
+                                            $rep, $email_header);
+        exit();
+    }
+?>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+    </head>
+    <body class="popup">
+        <?php print $rep; ?>
     </body>
 </html>
