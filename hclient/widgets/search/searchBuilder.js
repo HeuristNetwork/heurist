@@ -748,24 +748,7 @@ $.widget( "heurist.searchBuilder", {
 */              
                 
                 var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes );
-/*                
-                //load definitions for given rectypes
-                window.hWin.HAPI4.SystemMgr.get_defs({rectypes: rectype,
-                    mode:5, //special node - returns data for treeview
-                    fieldtypes:allowed_fieldtypes},  //ART20150810 this.options.params.fieldtypes.join() },
-                    function(response){
 
-                        if($.isArray(response) || response.status == window.hWin.ResponseStatus.OK){
-
-                            //create unique identificator=code for each leaf fields - rt:ft:rt:ft....
-                            if($.isArray(response)){
-                                  treedata = response;
-                            }else 
-                            if(response.data.rectypes) {
-                                treedata = response.data.rectypes;
-                            }
-*/
-//console.log(treedata);
                             treedata[0].expanded = true; //first expanded
                             
                             //add additional entry for direct links (resource fields)

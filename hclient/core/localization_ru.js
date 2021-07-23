@@ -519,6 +519,7 @@ regional['ru'] = {
     manageDefRectypes_hasrecs: 'Прежде чем удалить, нужно удалить записи этого типа. Искать > Типы записей чтобы найти и удалить все записи',
     manageDefRectypes_delete: 'Удалить этот тип данных',
     manageDefRectypes_referenced: 'Этот тип данных используется в базовых полях. Нажмите чтобы посмотреть эти поля',
+    manageDefRectypes_longrequest: 'This is taking a long time, it is possible the database is not reachable at <url>, will keep trying for another <timeout - 5> seconds',
     'Filter by Group': 'Группа',
     'Show All': 'Все группы',
     'Sort by': 'Сорт',

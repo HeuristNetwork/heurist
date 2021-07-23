@@ -365,12 +365,52 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     
                     this.recordList.resultList('resetGroups');
                     
-                    //get rectypes from REMOTE database
-                    window.hWin.HAPI4.SystemMgr.get_defs(
-                            {rectypes:'all', mode:2, remote:this.options.import_structure.database_url}, function(response){
+                    var sMsg = window.hWin.HR('manageDefRectypes_longrequest');
+                    sMsg = sMsg.replaceAll( '[url]', this.options.import_structure.database_url); 
                     
+                    var _too_long = 0;
+                    var _too_long_dlg = null;
+                    
+                    var buttons = {};
+                    buttons[window.hWin.HR('Continue')]  = function() {
+                                //continue
+                                _too_long = setTimeout(__executionTooLong, 5000);
+                                _too_long_dlg.dialog('close')
+                    };
+                    buttons[window.hWin.HR('Abort')]  = function() {
+                                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                                _too_long = -1; //terminate
+                                _too_long_dlg.dialog('close');
+                    };
+                    
+                    function __executionTooLong(){
+                        _too_long = 0; 
+                        _too_long_dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
+                            buttons, 'Confirm',
+                            {default_palette_class:that.options.default_palette_class});                        
+                    }
+                    
+                    _too_long = setTimeout(__executionTooLong, 10000);
+                    
+                    
+                    //@todo - obtain rectypes and detailtypes in new format
+                    //get rectypes (in old format) from REMOTE database
+                    window.hWin.HAPI4.SystemMgr.get_defs(
+                            {rectypes:'all', mode:2, remote:this.options.import_structure.database_url}, function(response)
+                    {
                             window.hWin.HEURIST4.msg.sendCoverallToBack();
                             
+                            if(_too_long_dlg && _too_long_dlg.dialog('instance')){
+                                _too_long_dlg.dialog('close');
+                                _too_long_dlg = null;
+                            }
+                            if(_too_long>0){
+                                clearTimeout(_too_long);
+                            }else if(_too_long<0){ // && response.status != window.hWin.ResponseStatus.OK
+                                return; //terminated
+                            }
+                            _too_long = 0;
+                        
                             if(response.status == window.hWin.ResponseStatus.OK){
                                 
                                 window.hWin.HEURIST4.remote = {};

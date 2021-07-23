@@ -15,6 +15,21 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+There are 3 approaches for localization in proejct
+1) Context help (popups), long snippets of html (for example empty message for result list), explanatory messages, inline help texts 
+See /context_help folder. Localizations are in /ru, /fr …. subfolders
+2) Translations for database definitions. Need to provide translations for labels and help text per field. See for example /hsapi/entity/defRecTypes_ru.json
+3) Translations in js code and html snippets. 
+3.1) Text in js code to be localized should be wrapped in function window.hWin.HR(‘keyword’)
+3.2) Element in html snippet should have css class “slocale”. For example <span class=””slocale”>Keyword</locale>
+
+Text to be localized may be either plain text such as “Open”, “Close”, “Database manager” or (if text is long or could be ambiguated in different widgets) some keyword (for example resultList_viewmode or error_message_need_login).
+
+All these pairs are defined in localization.js. To translate to different language please copy localization.js tp localization_[lang code].js. and translate values for all pairs.
+*/        
+
+
 var regional = {};
 regional['en'] = {
     language: 'English',
@@ -374,6 +389,7 @@ regional['en'] = {
     manageDefRectypes_hasrecs: 'To allow deletion, use Explore > Entities to find and delete all records.',
     manageDefRectypes_delete: 'Click to delete this record type',
     manageDefRectypes_referenced: 'This record type is referenced. Click to show references',
+    manageDefRectypes_longrequest: 'This is taking a long time, it is possible the database is not reachable at [url], will keep trying for another 10 seconds',
     'Filter by Group': '',
     'Show All': '',
     'Sort by': '',

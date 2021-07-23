@@ -501,6 +501,8 @@ $.widget( "heurist.importStructure", {
             };
 
             this.panel_rty_list.empty();
+            
+            //open list of record types from other database
             window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', options);
 
         }
