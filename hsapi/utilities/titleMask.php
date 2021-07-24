@@ -280,7 +280,7 @@ private static function __get_forempty($rec_id, $rt){
     foreach($rdr as $dt_id => $detail){
         if( is_numeric($dt_id) && in_array($detail['dty_Type'], $allowed) && $detail['rst_RequirementType']!='forbidden'){
             $val = self::__get_field_value($dt_id, $rt, 0, $rec_id);
-            $val = trim(substr($val,0,40));
+            $val = trim(mb_substr($val,0,40));
             if($val){
                 array_push($title, $val);
                 $cnt++;
@@ -582,8 +582,8 @@ private static function __get_dt_field($rt, $search_fieldname, $mode, $result_fi
     $search_fieldname = mb_strtolower($search_fieldname, 'UTF-8');
     //$search_fieldname = strtolower($search_fieldname);
 
-    if(strpos($search_fieldname, 'parent entity')===0 
-        || strpos($search_fieldname, 'record parent')===0 
+    if(mb_strpos($search_fieldname, 'parent entity')===0 
+        || mb_strpos($search_fieldname, 'record parent')===0 
         || (defined('DT_PARENT_ENTITY') && $search_fieldname==DT_PARENT_ENTITY) 
         || $search_fieldname=='2-247'){ 
             
@@ -616,10 +616,10 @@ private static function __get_rt_id( $rt_search ){
     
         $query = 'SELECT rty_ID, rty_Name, rty_OriginatingDBID, rty_IDInOriginatingDB FROM defRecTypes where ';
         
-        if (strpos($rt_search,'-')>0){
-            $pos = strpos($rt_search,'-');
-            $query = $query . 'rty_OriginatingDBID ='.substr($rt_search,0,$pos)
-                .' AND rty_IDInOriginatingDB ='.substr($rt_search,$pos+1);
+        if (mb_strpos($rt_search,'-')>0){
+            $pos = mb_strpos($rt_search,'-');
+            $query = $query . 'rty_OriginatingDBID ='.mb_substr($rt_search,0,$pos)
+                .' AND rty_IDInOriginatingDB ='.mb_substr($rt_search,$pos+1);
         }else if($rt_search>0){
             $query = $query . 'rty_ID='.$rt_search;    
         }else{
@@ -690,7 +690,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
     $fullstop_ex = '/^([^.]+?)\\s*\\.\\s*(.+)$/';
     $fullstop_concat = '.';
     
-    if($mode==1 || strpos($field_name, '..')>0){ //convert to concept codes
+    if($mode==1 || mb_strpos($field_name, '..')>0){ //convert to concept codes
         $fullstop = '..';
         $fullstop_ex = '/^([^..]+?)\\s*\\..\\s*(..+)$/';
     }
@@ -699,7 +699,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
     }
     
     // Return the rec-detail-type ID for the given field in the given record type
-    if (strpos($field_name, $fullstop) === FALSE) {    // direct field name lookup
+    if (mb_strpos($field_name, $fullstop) === FALSE) {    // direct field name lookup
 
         if($mode==1 && self::$fields_correspondence!=null){
             $field_name = self::__replaceInCaseOfImport($field_name);
@@ -789,12 +789,12 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         $inner_rectype = 0;
         $inner_rectype_name = '';
         $inner_rectype_cc = '';
-        $pos = strpos($inner_field_name, $fullstop);
-        $pos2 = strpos($inner_field_name, "}");
+        $pos = mb_strpos($inner_field_name, $fullstop);
+        $pos2 = mb_strpos($inner_field_name, "}");
         if ( $pos>0 &&  $pos2>0 && $pos2 < $pos ) { 
-            $inner_rectype_search = substr($inner_field_name, 1, $pos-strlen($fullstop)); 
+            $inner_rectype_search = mb_substr($inner_field_name, 1, $pos-mb_strlen($fullstop)); 
             list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
-            $inner_field_name = substr($inner_field_name, $pos+strlen($fullstop)); 
+            $inner_field_name = mb_substr($inner_field_name, $pos+mb_strlen($fullstop)); 
         }
 
         if($mode==0){ //replace with values
@@ -827,14 +827,22 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 
         }else{ //convert  coded<->human
         
-            $inner_rec_type = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs'); //$rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
-            $inner_rec_type = explode(",", $inner_rec_type);
+            if($inner_rectype>0){
+                $inner_rec_type = array($inner_rectype);
+            }else{
+                $inner_rec_type = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs'); //$rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
+                $inner_rec_type = explode(",", $inner_rec_type);
+            }
             if(count($inner_rec_type)>0){ //constrained
                 $field_not_found = null;
                 foreach ($inner_rec_type as $rtID){
                     $rtid = intval($rtID);
                     if (!$rtid) continue;
-                    if($inner_rectype>0 && $inner_rectype!=$rtid) continue;
+                    if($inner_rectype>0){
+                        if($inner_rectype!=$rtid) continue; //skip  
+                    }else{
+                        list($rtid, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $rtid ); 
+                    } 
                     
                     $inner_rdt = self::__fill_field($inner_field_name, $rtid, $mode);
                     if(is_array($inner_rdt)){
@@ -911,7 +919,7 @@ if (! function_exists('array_str_replace')) {
             $match_offset = -1;
             for ($i=0; $i < count($search); ++$i) {
                 if($search[$i]==null || $search[$i]=='') continue;
-                $offset = strpos($subject, $search[$i]);
+                $offset = mb_strpos($subject, $search[$i]);
                 if ($offset === FALSE) continue;
                 if ($match_offset == -1  ||  $offset < $match_offset) {
                     $match_idx = $i;
@@ -920,8 +928,8 @@ if (! function_exists('array_str_replace')) {
             }
 
             if ($match_idx != -1) {
-                $val .= substr($subject, 0, $match_offset) . $replace[$match_idx];
-                $subject = substr($subject, $match_offset + strlen($search[$match_idx]));
+                $val .= mb_substr($subject, 0, $match_offset) . $replace[$match_idx];
+                $subject = mb_substr($subject, $match_offset + mb_strlen($search[$match_idx]));
             } else {    // no matches for any of the strings
                 $val .= $subject;
                 $subject = '';

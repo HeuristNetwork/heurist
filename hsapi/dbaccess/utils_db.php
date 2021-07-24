@@ -72,7 +72,10 @@
             $mysqli = mysqli_init();
             $mysqli -> options(MYSQLI_OPT_LOCAL_INFILE, 1);
             $mysqli -> real_connect($dbHost, $dbUsername, $dbPassword);
-            //$mysqli = new mysqli($dbHost, $dbUsername, $dbPassword);
+            //if (!$mysqli->set_charset("utf8mb4")) {
+            //    return array(HEURIST_SYSTEM_FATAL, 'Error loading character set utf8mb4', $mysqli->error);
+            //}       
+            
         } catch (Exception $e)  {
             //return array(HEURIST_SYSTEM_FATAL, "Could not connect to database server, MySQL error: " . mysqli_connect_error());
         }
@@ -82,7 +85,6 @@
         
         /* check connection */
         if (mysqli_connect_errno()) {
-
             return array(HEURIST_SYSTEM_FATAL, "Could not connect to database server, MySQL error: " . mysqli_connect_error());
         }
         return $mysqli;

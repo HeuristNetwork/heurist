@@ -142,7 +142,7 @@ class DbEntityBase
     }
     
     //
-    // working with config/setting 
+    // working with config/setting  see configEntity.js
     //
     public function files( $action ){
         

@@ -447,12 +447,9 @@ class DbEntitySearch
                     // load all records
                     while ($row = $res->fetch_row())// && (count($records)<$chunk_size) ) {  //3000 maxim allowed chunk
                     {
+                        
                         if($calculatedFields!=null){
                             $row = $calculatedFields($fields, $row); //adds values
-                        }
-                        
-                        foreach($row as $key=>$val){
-                            $row[$key] = mb_convert_encoding($val, 'UTF-8');
                         }
                         
                         $records[$row[0]] = $row;

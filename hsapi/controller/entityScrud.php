@@ -24,7 +24,6 @@
     */
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
     require_once ('entityScrudSrv.php');
 
     $response = array();
@@ -60,12 +59,10 @@
             $system->error_exit_api();
             
         }else{
-            $response = array("status"=>HEURIST_OK, "data"=> $res);
+            //$req = $entity->getData();
+            $req = array();
             
-            $req = $entity->getData();
-            
-            $response = $response['data'];
-            if(count($response)==0 && @$req['a'] == 'search'){
+            if(count($res)==0 && @$req['a'] == 'search'){
                 $code = 404;    
             }else if (@$req['a'] == 'save'){
                 $code = 201;
@@ -73,7 +70,8 @@
                 $code = 200;
             }
             http_response_code($code);    
-            print json_encode($response);
+        
+            print json_encode($res);
         }
     }else{
         
@@ -83,9 +81,14 @@
             $response = array("status"=>HEURIST_OK, "data"=> $res);
         }
         
-        //if(mb_check_encoding($response))
+        $res = json_encode($response); //JSON_INVALID_UTF8_IGNORE 
+        if(!$res){
+            $system->addError(HEURIST_SYSTEM_CONFIG, 'Your data definitions (names, descriptions) contain invalid characters. Or system can not convert them properly');
+            print json_encode( $system->getError() );
+        }else{
+            print $res;    
+        }
         
-        print json_encode($response);
     }
 /*
 Description Of Usual Server Responses:

@@ -107,6 +107,7 @@ class DbDefRecTypes extends DbEntityBase
                         
                         $mask_concept_codes = $row[$idx];
                         array_push($row, $mask_concept_codes); //keep
+                        //convert to human readable
                         $row[$idx] = TitleMask::execute($mask_concept_codes, $row[0], 2, null, _ERR_REP_SILENT);
                     }else{
                         array_push($row, '');
