@@ -309,9 +309,9 @@
                 
                 $url = filter_var($url, FILTER_SANITIZE_URL);
 
-                $is_renderable = get_remote_image($url);
+                $is_renderable = UtilsImage::getRemoteImage($url);
 
-                $res = (is_bool($is_renderable) ? "false" : "true");
+                $res = ($is_renderable==null || $is_renderable===false) ? "false" : "true";
 
             } else {
 

@@ -409,7 +409,7 @@ function hMapDocument( _options )
                 }
             } 
         }else{
-            layer_style = {rectypeIconUrl:window.hWin.HAPI4.iconBaseURL + _record['source_rectype'] };  //+ '.png'
+            layer_style = {rectypeIconUrl:window.hWin.HAPI4.iconBaseURL + _record['source_rectype'] };
         }
         
         return layer_style;

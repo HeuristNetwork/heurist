@@ -396,6 +396,7 @@ window.hWin.HEURIST4.dbs = {
                     var $new_pointer_fields = [];
 
                     // add details --------------------------------
+                    if($details)
                     $details.each2(function($dtID, $dtValue){
                         
                         //@TODO forbidden for import????

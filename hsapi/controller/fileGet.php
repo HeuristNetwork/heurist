@@ -1,8 +1,7 @@
 <?php
 /**
-* @todo move to controller?
-* Service 
-* For Entities (for recUploadFiles see file_download.php)
+* Service to get icons and thumbs for entities 
+* (for recUploadFiles see file_download.php)
 * 
 * fileGet.php - 1) get image for given entity, record ID, version and color 
 *               2) get or check file from code folders - tips, help, doc content
@@ -26,17 +25,6 @@
 
 require_once(dirname(__FILE__)."/../System.php");
 
-//secondary purpose - check file existance in code
-$path = @$_REQUEST['check'];
-if($path){
-  if(file_exists(HEURIST_DIR.$path)){
-        print 'ok';      
-  }else{
-        print '';
-  }
-  exit();
-}
-
 /*
 
 id - record id
@@ -49,7 +37,6 @@ version - thumb or thumbnail|icon|full (thumb is default)
 
 //main purpose - download entity images
 $db = @$_REQUEST['db'];
-$entity_name = @$_REQUEST['entity'];
 $filename = @$_REQUEST['file'];
 
 $error = null;
@@ -57,21 +44,11 @@ $error = null;
 if(!$db){
     $error = "Db parameter is not defined";
 }
-/*
-if(!$entity_name && !$filename){
-    $error = "Entity parameter is not defined";
-}else 
-if(!$filename){
-    $error = "File name not defined"; //to get file from scratch
-}else
-if(!$entity_name){
-    $error = "Entity is not defined";
-}else{
-*/
+
 $system = new System(); //without db connection and session - just paths
 $system->initPathConstants($db);
     
-if($filename){ //download from scratch
+if($filename){ //download from scratch (for csv import)
          
         $file_read = HEURIST_FILESTORE_DIR.'scratch/'.$filename;
 
@@ -130,16 +107,34 @@ if($filename){ //download from scratch
         download_file($file_read, null);
         
 }else{
+    
         
         $content_type = 'image/png';
 
-        $viewmode = @$_REQUEST['version'] ?$_REQUEST['version']:'thumb'; //icon, thumb, full
-        if($viewmode=='thumbnail') $viewmode='thumb';
+        $rec_id = @$_REQUEST['icon'];  
+        if($rec_id==null) $rec_id = @$_REQUEST['id'];  
         
-        $rec_id = @$_REQUEST['id'];  
+        //default - defRecTypes
+        $entity_name = @$_REQUEST['entity'];
+        if(!$entity_name) $entity_name = 'rty';
+        $entity_name = entityResolveName($entity_name);
+        
+        //icon, thumb, full
+        $viewmode = @$_REQUEST['version']; 
+        if(!$viewmode){
+            $viewmode = ($entity_name=='defRecTypes')?'icon':'thumbnail';   
+        }
+        if($viewmode=='thumb') $viewmode='thumbnail';
         
         $path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';
         
+        if($rec_id && substr($rec_id,0,4)=='term'){
+            //backward support - icons for Digital Harlem
+            $rec_id = substr($rec_id, 4);
+            $entity_name  = 'trm';
+            $viewmode = 'full';
+            $path = HEURIST_TERM_ICON_DIR;
+        }else
         if($entity_name=='sysDatabases' && $rec_id){
             
             $db_name = $rec_id;
@@ -150,57 +145,45 @@ if($filename){ //download from scratch
             $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/sysIdentification/';    
         } 
         
-        if (!($rec_id>0)) {
-            $filename = $rec_id;   
-            if($viewmode=='thumb'){ 
-                $filename = $path.'thumbnail/'.$rec_id;    
-            }else if($viewmode=='icon'){
-                $filename = $path.'icon/'.$rec_id;    
-            }
-        }else{
         
-            if($viewmode=='thumb'){
-                $path = $path.'thumbnail/';
-            }else if($viewmode=='icon'){
-                $path = $path.'icon/';
+        if($viewmode!='full'){
+            $path = $path.$viewmode.'/';
+        }
+        $filename = $path.$rec_id;
+        
+        //if file does not exist in entity folder
+        //backward capability - copy from old rectype-icons to new location - entity folder
+        if($entity_name=='defRecTypes' && !file_exists($filename.'.png')){
+            
+            if($viewmode=='thumbnail'){
+                $old_filename = HEURIST_ICON_DIR . 'thumb/th_' . $rec_id . '.png';
+            }else{
+                $old_filename = HEURIST_ICON_DIR . $rec_id .'.png';
             }
-            $filename = $path.$rec_id;
-            
-            
-            //backward capability - copy from old rectype-icons to new location - entity folder
-            if($entity_name=='defRecTypes' && !file_exists($filename.'.png')){
+            if(file_exists($old_filename)){
                 
-                if($viewmode=='thumb'){
-                    $old_filename = HEURIST_ICON_DIR . 'thumb/th_' . $rec_id . '.png';
+                //recreate entity folder
+                if(folderCreate($path, true)){
+                    copy($old_filename, $filename.'.png');
                 }else{
-                    $old_filename = HEURIST_ICON_DIR . $rec_id .'.png';
-                }
-                if(file_exists($old_filename)){
-                    
-                    //recreate entity folder
-                    if(folderCreate($path, true)){
-                        copy($old_filename, $filename.'.png');
-                    }else{
-                        error_log('CANT CREATE FOLDER '.$path);
-                    }
+                    error_log('CANT CREATE FOLDER '.$path);
                 }
             }
-            
-            $exts = array('png','jpg','jpeg','jfif','gif');
-            foreach ($exts as $ext){
-                if(file_exists($filename.'.'.$ext)){
-                    if($ext=='jpg' || $ext=='jfif'){
-                        $content_type = 'image/jpeg';
-                    }else{
-                        $content_type = 'image/'.$ext;    
-                    }
-                    $filename = $filename.'.'.$ext;
-                    break;
+        }
+        
+        $exts = array('png','jpg','jpeg','jfif','gif');
+        foreach ($exts as $ext){
+            if(file_exists($filename.'.'.$ext)){
+                if($ext=='jpg' || $ext=='jfif'){
+                    $content_type = 'image/jpeg';
+                }else{
+                    $content_type = 'image/'.$ext;    
                 }
+                $filename = $filename.'.'.$ext;
+                break;
             }
+        }
             
-        }   
-
         //entity id either not defined or requested file doesn't exist
         //editmode: empty gif (0) or add image gif (1) or default icon/thumb for entity (2), or (check)  'ok' if it exists or '' missing
         
@@ -209,21 +192,29 @@ if($filename){ //download from scratch
         // 2 - entity default icon or thumb
         // 1 - returns image with invitation "add image"
         // otherwise it returns empty image placeholder (100x100 or 16x16 for icons)
-        $default_mode = @$_REQUEST['def'] ?$_REQUEST['def']:2;
+        $default_mode = @$_REQUEST['def'];
+        if($default_mode=='check') $default_mode = 3;
+        else if($default_mode==null) $default_mode = 2;
 
                    
         if(file_exists($filename) && !is_dir($filename)){
-            if($default_mode=='check' || $default_mode==3){
+            if($default_mode==3){ //check
 
                 $response = array('status'=>HEURIST_OK, 'data'=>'ok');
                 header('Content-type: application/json;charset=UTF-8');
                 print json_encode($response);
 
             }else{
-                download_file($filename, $content_type);
+                
+                //color, bg, circle
+                if(@$_REQUEST['color']){
+                    UtilsImage::changeImageColor($filename, null, @$_REQUEST['color'], @$_REQUEST['circle'], @$_REQUEST['bg']);    
+                }else{
+                    download_file($filename, $content_type);    
+                }
             }
 
-        }else if($default_mode=='check' || $default_mode==3){
+        }else if($default_mode==3){ //check
             
                 $response = array('status'=>HEURIST_OK, 'data'=>'not found');
                 header('Content-type: application/json;charset=UTF-8');
@@ -236,6 +227,7 @@ if($filename){ //download from scratch
                 //at the moment we don't have full images that describe entity - only icons and thumbs
                 $filename = dirname(__FILE__).'/../../hclient/assets/'
                                 .$_REQUEST['entity'].(($viewmode=='icon')?'':'_thumb').'.png';    
+                //$filename = dirname(__FILE__).'/../../hclient/assets/cross-red.png';
                                 
                 if(file_exists($filename) && !is_dir($filename)){
                     download_file($filename, $content_type);

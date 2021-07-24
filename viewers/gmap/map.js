@@ -260,7 +260,7 @@ if(_mapdata.limit_warning){
                         
                         mapdata.options.items[i].options.icon =
                             window.hWin.HAPI4.iconBaseURL + iconId
-                                + 's.png&color='+new_color2
+                                + '&color='+new_color2 + '&bg='+encodeURIComponent('#ffffff')
                                 + ((mapdata.options.items[i].options.linkedRecIDs)?'&circle='+new_color2:'');
                     }
                     
@@ -1722,8 +1722,8 @@ console.log('tileloaded 2');
                             rectype: item.opts.rectype,
                             title: (item.opts.title+'+'),
                             //thumb: record.thumb_url,
-                            eventIconImage: item.opts.rectype + '.png',
-                            icon: window.hWin.HAPI4.iconBaseURL + item.opts.rectype + '.png',
+                            eventIconImage: item.opts.rectype,
+                            icon: window.hWin.HAPI4.iconBaseURL + item.opts.rectype,
 
                             start: item.opts.start,
                             end: item.opts.end,
@@ -1738,8 +1738,9 @@ console.log('tileloaded 2');
                             items_to_update.push(item);
 
                             //was itemdata
-                            itemdata.options.eventIconImage = item.opts.iconId + 's.png';   //it will have selected record (blue bg)
-                            itemdata.options.icon = window.hWin.HAPI4.iconBaseURL + itemdata.options.eventIconImage;
+                            itemdata.options.eventIconImage = item.opts.iconId;   //+ 's.png' it will have selected record (blue bg)
+                            itemdata.options.icon = window.hWin.HAPI4.iconBaseURL + itemdata.options.eventIconImage; 
+                                                                    //'&bg='+encodeURIComponent('#ffffff')
                             itemdata.options.color = "#FF0000";
                             itemdata.options.lineColor = "#FF0000";
 
@@ -1750,7 +1751,7 @@ console.log('tileloaded 2');
                         }else{ //clear selection
                             //item.opts.theme
                             //item.changeTheme(customTheme, true); - dont work
-                            var usual_icon = item.opts.iconId + 'm.png'; //it will have usual gray bg
+                            var usual_icon = item.opts.iconId; // + 'm.png'; //it will have usual gray bg
                             if(usual_icon != itemdata.options.eventIconImage){
 
                                 items_to_update.push(item);
@@ -1980,7 +1981,7 @@ console.log('tileloaded 2');
 
                 ed_html = bubble_header
             +   '<div style="display:inline-block;">'
-            +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+window.hWin.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
+            +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+window.hWin.HAPI4.iconBaseURL + rectypeID+'&quot;);">'
             +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
             +   '</div>'
             +  ((window.hWin.HAPI4.currentUser.ugr_ID>0)?

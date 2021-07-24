@@ -1441,7 +1441,7 @@ $.widget( "heurist.resultList", {
         var recTitle_strip2 = window.hWin.HEURIST4.util.stripTags(recTitle,'a, u, i, b, strong');
         var recIcon = fld('rec_Icon');
         if(!recIcon) recIcon = rectypeID;
-        recIcon = window.hWin.HAPI4.iconBaseURL + recIcon + '.png';
+        recIcon = window.hWin.HAPI4.iconBaseURL + recIcon;
 
 
         //get thumbnail if available for this record, or generic thumbnail for record type
@@ -1454,7 +1454,7 @@ $.widget( "heurist.resultList", {
             rectypeTitleClass = 'recordTitleInPlaceOfThumb';
             html_thumb = '<div class="recTypeThumb rectypeThumb" title="'
                 +recTitle_strip_all+'" style="background-image: url(&quot;'
-                + window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>';
+                + window.hWin.HAPI4.iconBaseURL  + rectypeID + '&version=thumb&quot;);"></div>';
         }
 
         // Show a key icon and popup if there is a password reminder string

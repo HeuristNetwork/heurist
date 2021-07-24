@@ -137,15 +137,24 @@ function hEditing(_options) {
         var recID = '';
         if(window.hWin.HEURIST4.util.isRecordSet(recdata)){
             //for edit mode
-                record = recdata.getFirstRecord();
                 //get record ID
-                var idx;
-                for (idx=0; idx<recstructure.length; idx++){
-                   if(recstructure[idx]['keyField']){
-                        recID = recdata.fld(record, recstructure[idx]['dtID']);
-                        break;
-                   }
+                //recID = recdata.getIds(1)[0];
+                record = recdata.getFirstRecord();
+                
+                function __findRecID(fields){
+                    var idx;
+                    for (idx=0; idx<fields.length; idx++){
+                       if(fields[idx].groupType){
+                           var _recID = __findRecID(fields[idx].children)
+                           if(_recID>0) return _recID;
+                       }else
+                       if(fields[idx]['keyField']){
+                           return recdata.fld(record, fields[idx]['dtID']);
+                       }
+                    }
+                    return '';
                 }
+                recID = __findRecID(recstructure);
         }
         
         

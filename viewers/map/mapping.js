@@ -689,43 +689,9 @@ $.widget( "heurist.mapping", {
         
     },
 
-            /*convert geojson_data to timeline format
-            this.main_layer.eachLayer(function(layer){
-
-            var feature = layer.feature;
-
-            if (feature.when && window.hWin.HEURIST4.util.isArrayNotEmpty(feature.when.timespans) ) {
-
-            for(k=0; k<feature.when.timespans.length; k++){
-            ts = feature.when.timespans[k];
-
-            iconImg = window.hWin.HAPI4.iconBaseURL + feature.properties.rec_RecTypeID + '.png';
-
-            titem = {
-            id: timeline_dataset_name+'-'+feature.properties.rec_ID+'-'+k, //unique id
-            group: timeline_dataset_name,
-            content: '<img src="'+iconImg 
-            +'"  align="absmiddle" style="padding-right:3px;" width="12" height="12"/>&nbsp;<span>'
-            +feature.properties.rec_Title+'</span>',
-            //'<span>'+recName+'</span>',
-            title: feature.properties.rec_Title,
-            start: ts[0],
-            recID:feature.properties.rec_ID
-            };
-
-            if(ts[3] && ts[0]!=ts[3]){
-            titem['end'] = ts[3];
-            }else{
-            titem['type'] = 'point';
-            //titem['title'] = singleFieldName+': '+ dres[0] + '. ' + titem['title'];
-            }
-
-            timeline_items.push(titem); 
-            }
-            }
-            });*/
-
-
+    //
+    //
+    //
     updateTimelineLayerName: function(layer_id, new_dataset_name){
 
         if(this.notimeline) return;
@@ -772,7 +738,7 @@ $.widget( "heurist.mapping", {
 
                 $.each(layer_data, function(idx, tdata){
 
-                    iconImg = window.hWin.HAPI4.iconBaseURL + tdata.rec_RecTypeID + '.png';
+                    iconImg = window.hWin.HAPI4.iconBaseURL + tdata.rec_RecTypeID;
 
                     ts = tdata.when;
 
@@ -1282,7 +1248,9 @@ $.widget( "heurist.mapping", {
                         
                         var fsize = markerStyle.iconSize;
                         setIcon = L.icon({
-                            iconUrl: (window.hWin.HAPI4.iconBaseURL + rty_ID + 's.png&color='+encodeURIComponent(markerStyle.color)),
+                            iconUrl: (window.hWin.HAPI4.iconBaseURL + rty_ID 
+                                + '&color='+encodeURIComponent(markerStyle.color)
+                                + '&bg='+encodeURIComponent('#ffffff')),
                             iconSize: [fsize, fsize]                        
                         });
                         that.myIconRectypes[rty_ID+markerStyle.color] = setIcon;

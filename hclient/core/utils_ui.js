@@ -567,7 +567,7 @@ window.hWin.HEURIST4.ui = {
                         var opt = window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
                         
                         if(useIcons){
-                            var icon = window.hWin.HAPI4.iconBaseURL + rectypeID + '.png';
+                            var icon = window.hWin.HAPI4.iconBaseURL + rectypeID;
                             $(opt).attr('icon-url', icon);
                         }
                         if(useCounts){
@@ -639,7 +639,7 @@ window.hWin.HEURIST4.ui = {
                         
                         
                         if(useIcons){
-                            var icon = window.hWin.HAPI4.iconBaseURL + rtyID + '.png';
+                            var icon = window.hWin.HAPI4.iconBaseURL + rtyID;
                             $(opt).attr('icon-url', icon);
                         }
                         if(useCounts){

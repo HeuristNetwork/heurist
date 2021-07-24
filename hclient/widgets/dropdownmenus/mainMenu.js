@@ -1105,10 +1105,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else 
         if(action == "menu-database-refresh"){
             that._refreshLists( true );
-        }else 
-        if(action == "menu-help-tipofday"){
-            showTipOfTheDay(false);
-            
         }else if(action == "menu-admin-server"){
             that._showAdminServer({entered_password:entered_password});
         }else

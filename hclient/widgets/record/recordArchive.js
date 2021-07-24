@@ -168,10 +168,10 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         recTitle = fld('rec_ID',30) + recTitle + arcMode + arcUser + arcDate; 
         
         
-        var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID + '.png';
+        var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
         
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
-                + window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>';
+                + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+arcID+'" rectype="'+rectypeID+'">'
             + html_thumb

@@ -485,7 +485,7 @@ XML;
         }else if($params['format']=='gephi'){ 
             
             $name   = htmlspecialchars($record['rec_Title']);                               
-            $image  = htmlspecialchars(HEURIST_ICON_SCRIPT.$rty_ID);
+            $image  = htmlspecialchars(HEURIST_RTY_ICON.$rty_ID);
             $recURL = htmlspecialchars(HEURIST_BASE_URL.'recID='.$recID.'&fmt=html&db='.HEURIST_DBNAME);                               
                                
             $gephi_node = <<<XML

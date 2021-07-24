@@ -936,7 +936,7 @@ $mysqli->commit();
             return false;
         }
         
-        $this->sourceIconURL = $remote_url.'hsapi/dbaccess/rt_icon.php?db='.$remote_dbname.'&id=';
+        $this->sourceIconURL = $remote_url.'hsapi/controller/fileGet.php?db='.$remote_dbname.'&id=';
         $this->source_db_name = $remote_dbname;
         
         return $defs; 

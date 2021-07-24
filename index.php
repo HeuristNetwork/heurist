@@ -19,6 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+//redirection
 if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)){
     
     $recid = 0;
@@ -76,6 +77,11 @@ if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
     //download file, thumb or remote url
     header( 'Location: hsapi/controller/file_download.php?'.$_SERVER['QUERY_STRING'] );
     return;
+}else if (array_key_exists('icon',$_REQUEST)){ 
+    //download entity icon or thumbnail
+    header( 'Location: hsapi/controller/fileGet.php?'.$_SERVER['QUERY_STRING'] );
+    return;
+
 }else if (@$_REQUEST['asset']){ //only from context_help - download localized help or documentation
     
     $name = $_REQUEST['asset'];
@@ -148,8 +154,6 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="hclient/core/layout.js"></script>
         <!-- array of possible layouts -->
         <script type="text/javascript" src="layout_default.js"></script>
-
-        <script type="text/javascript" src="hclient/widgets/dropdownmenus/help_tips.js"></script>
 
         <script type="text/javascript" src="hclient/core/temporalObjectLibrary.js"></script>
 
@@ -354,22 +358,15 @@ _time_debug = new Date().getTime() / 1000;
            //
            function onInitCompleted_PerformSearch(){
                
-                if(window.hWin.HAPI4.sysinfo['layout']=='H4Default'){
+                if(window.hWin.HAPI4.sysinfo['layout']=='H4Default'
+                    && window.hWin.HAPI4.sysinfo.db_total_records>0){
                     //switch to FAP tab if q parameter is defined
-                    if(window.hWin.HAPI4.sysinfo.db_total_records<1){
-                        showTipOfTheDay(false);   
-                    }else{
-                        
-                        window.hWin.HAPI4.LayoutMgr.putAppOnTopById('FAP');
-                        
-                        var active_tab = '<?php echo str_replace("'","\'",@$_REQUEST['tab']);?>';
-                        if(active_tab){
-                            window.hWin.HAPI4.LayoutMgr.putAppOnTop(active_tab);
-                        }
-                    }
+                    window.hWin.HAPI4.LayoutMgr.putAppOnTopById('FAP');
                     
-                }else if(window.hWin.HAPI4.sysinfo.db_total_records<1){
-                    //IJ request 2018-12-11 showTipOfTheDay(false);
+                    var active_tab = '<?php echo str_replace("'","\'",@$_REQUEST['tab']);?>';
+                    if(active_tab){
+                        window.hWin.HAPI4.LayoutMgr.putAppOnTop(active_tab);
+                    }
                 }
                
                 var lt = window.hWin.HAPI4.sysinfo['layout'];

@@ -856,16 +856,7 @@ function fileGetWidthHeight($filepath, $external_url, $mimeType){
             
         }else if($external_url){
 
-            //the same code as in resizeImage get_remote_image    
-            $data = loadRemoteURLContent($external_url, false); //from utils_file.php
-            if($data){
-                try{    
-                    $image = imagecreatefromstring($data);
-                }catch(Exception  $e){
-                    $image = false;
-                    $res = 'Cant get remote image';
-                }
-            }
+            $image = UtilsImage::getRemoteImage( $external_url );
         }
     
         if($image){

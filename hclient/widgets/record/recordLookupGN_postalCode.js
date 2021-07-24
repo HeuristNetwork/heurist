@@ -183,10 +183,10 @@ $.widget( "heurist.recordLookupGN_postalCode", $.heurist.recordAction, {
         
         recTitle = fld('postalcode',10) + recTitle + fld('adminName2',30)+fld('adminName1',30)+fld('countryCode',6); 
         
-        var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID + '.png';
+        var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
         
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
-                + window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>';
+                + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
                 
                 
 

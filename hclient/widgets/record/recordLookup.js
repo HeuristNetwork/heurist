@@ -166,10 +166,10 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
         
         recTitle = recTitle + fld('properties.LGA',15)+fld('properties.state',6)+fld('properties.description',80); 
         
-        var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID + '.png';
+        var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
         
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
-                + window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>';
+                + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
                 
                 
 

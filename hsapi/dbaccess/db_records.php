@@ -1778,7 +1778,7 @@
                     
                         if($dtl_Value=='generate_thumbnail_from_url' && @$record['URL']){
                             
-                            $tmp_file = image_CreateFromURL($record['URL']);
+                            $tmp_file = UtilsImage::makeURLScreenshot($record['URL']);
 
                             if(!is_a($tmp_file,'stdClass')){
                                 $err_msg = is_array($tmp_file) ?$tmp_file['error'] :('System message: '.$tmp_file);

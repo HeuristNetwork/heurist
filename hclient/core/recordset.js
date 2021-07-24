@@ -342,7 +342,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 //icon is set per map layer
                                 iconImg = iconMarker;    
                             }else{
-                                iconImg = window.hWin.HAPI4.iconBaseURL + iconId + '.png';
+                                iconImg = window.hWin.HAPI4.iconBaseURL + iconId;
                             }
                             
                             titem = {
@@ -449,12 +449,14 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             iconImg = iconMarker;    
                         }else{
                             //default icon of record type
-                            iconImgEvt = iconId + '.png';
-                            iconImg = window.hWin.HAPI4.iconBaseURL + iconId + 's.png&color='
-                                        +encodeURIComponent(pr_iconColor ?pr_iconColor:iconColor);
+                            iconImgEvt = iconId; // + '.png';
+                            iconImg = window.hWin.HAPI4.iconBaseURL + iconId + '&color='
+                                        + encodeURIComponent(pr_iconColor ?pr_iconColor:iconColor);
                                         
                             if(pr_fillColor){
                                 iconImg = iconImg + '&bg='+encodeURIComponent(pr_fillColor);
+                            }else{
+                                iconImg = iconImg + '&bg='+encodeURIComponent('#ffffff');
                             }
                         }
                         
@@ -560,30 +562,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         }
             
             
-        //loop for linkedPlaceRecId to change marker and assign reference to all records that has the same place
-        /*
-        if(aitems.length>0)
-        for(var placeID in linkedPlaceRecId){
-            if(placeID>0 && linkedPlaceRecId[placeID].length>1){
-                for(var idx=0; idx<linkedPlaceRecId[placeID].length; idx++){
-                    var recID = linkedPlaceRecId[placeID][idx];
-                    aitems[aitems_index[recID]].options.placeID = placeID;
-                    aitems[aitems_index[recID]].options.linkedRecIDs = linkedPlaceRecId[placeID];
-                    var iconId = aitems[aitems_index[recID]].options.iconId;
-
-                    if(typeof iconId=='string' && (iconId.indexOf('http:')==0 || iconId.indexOf('https:')==0)){
-                        //mapdata.options.items[i].options.icon = iconId;
-                    }else{
-                        var clr = encodeURIComponent(aitems[aitems_index[recID]].options.color);
-                        aitems[aitems_index[recID]].options.icon = 
-                            window.hWin.HAPI4.iconBaseURL + iconId
-                                + 's.png&color='+clr+'&circle='+clr;
-                    }
-                }
-            }
-        }*/
-      
-        
         var dataset = 
             {
                 id: dataset_name, 

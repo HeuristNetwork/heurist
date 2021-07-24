@@ -120,7 +120,7 @@ if(!$system->init(@$_REQUEST['db'])){
             $res = ImportParser::saveToTempFile( @$_REQUEST['data'] );  //save csv data in temp file
             
         }else if($action=='step1'){   
-            //file is uploaded with help fileupload widget and utilities/fileUpload.php
+            //file is uploaded with help fileupload widget and controller/fileUpload.php
             
             //encode and invoke parse_prepare with limit
             $res = ImportParser::encodeAndGetPreview( @$_REQUEST["upload_file_name"], $_REQUEST);  

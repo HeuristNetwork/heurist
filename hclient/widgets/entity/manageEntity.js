@@ -1354,7 +1354,7 @@ $.widget( "heurist.manageEntity", {
         window.hWin.HEURIST4.msg.sendCoverallToBack();
 
         var subset = null;
-        if(this.options.use_cache && this._cachedRecordset){
+        if(this.options.use_cache && this._cachedRecordset && this.recordList.resultList('instance')){
             subset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
             if(this.options.list_mode=='default'){
                 this.recordList.resultList('updateResultSet', subset, request);   

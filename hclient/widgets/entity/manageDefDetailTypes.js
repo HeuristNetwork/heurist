@@ -1757,7 +1757,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
             if((window.hWin.HEURIST4.util.isempty(s_title) || !s_all) && s_type=='any'){
                 
-                //$(this.element.find('.not-found')[0]).hide();
                 $(this.element.find('.div-result-list-content').find('div')[0])
                     .html("No base fields in this group.<br/><br/>Please drag base fields from other groups or add new<br/>base fields to this group.")
                     .css({

@@ -612,7 +612,7 @@ error_log(print_r($_REQUEST, true));
         }
             
 
-        define('HEURIST_ICON_SCRIPT', HEURIST_BASE_URL.'hsapi/dbaccess/rt_icon.php?db='.$dbname.'&id=');
+        define('HEURIST_RTY_ICON', HEURIST_BASE_URL.'?db='.$dbname.'&icon='); //redirected to hsapi/controller/fileGet.php
         
         return true;
     }

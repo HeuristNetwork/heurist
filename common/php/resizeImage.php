@@ -325,7 +325,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 
         if($type_media=='image'){ //$type_source=='generic' &&
             //@todo for image services (panoramio, flikr) take thumbnails directly
-            $img = get_remote_image($file['ulf_ExternalFileReference']);
+            $img = UtilsImage::getRemoteImage($file['ulf_ExternalFileReference']);
             
         }else if($type_source=='youtube' || $file['fxm_MimeType'] == 'video/youtube'){
             
@@ -336,7 +336,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
             
             $youtubeid = $matches[1];
             
-            $img = get_remote_image('http://img.youtube.com/vi/'.$youtubeid.'/default.jpg');
+            $img = UtilsImage::getRemoteImage('http://img.youtube.com/vi/'.$youtubeid.'/default.jpg');
             
             //$youtubeid = preg_replace('/^[^v]+v.(.{11}).*/' , '$1', $url);
             //$img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg"); //get thumbnail
@@ -347,7 +347,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
             $hash = json_decode(loadRemoteURLContent("http://vimeo.com/api/oembed.json?url=".rawurlencode($url), false), true);
             $thumb_url = @$hash['thumbnail_url'];
             if($thumb_url){
-                $img = get_remote_image($thumb_url);    
+                $img = UtilsImage::getRemoteImage($thumb_url);    
             }
             
             
@@ -357,7 +357,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
                 $vimeo_id = $matches[5];
                 $hash = unserialize(file_get_contents("http://vimeo.com/api/v2/video/$vimeo_id.php"));
                 $thumb_url = $hash[0]['thumbnail_medium']; 
-                $img = get_remote_image($thumb_url);
+                $img = UtilsImage::getRemoteImage($thumb_url);
             }
             */
             
@@ -372,7 +372,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 else if (array_key_exists('file_url', $_REQUEST))   //get thumbnail for any URL
 {
 
-    $img = get_remote_image($_REQUEST['file_url']);
+    $img = UtilsImage::getRemoteImage($_REQUEST['file_url']);
 
 }
 

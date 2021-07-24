@@ -127,7 +127,7 @@ $.widget( "heurist.resultListCollection", {
                        view_mode: 'list',
                        renderer:function( recordset, record ){
                            var recIcon = window.hWin.HAPI4.iconBaseURL +
-                              recordset.fld(record, 'rec_RecTypeID') + '.png';
+                                        recordset.fld(record, 'rec_RecTypeID');
                            var recTitle = recordset.fld(record, 'rec_Title'); 
                            var recTitle_strip2 = window.hWin.HEURIST4.util.stripTags(recTitle);
                            

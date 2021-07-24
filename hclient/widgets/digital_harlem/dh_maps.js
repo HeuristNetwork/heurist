@@ -179,7 +179,8 @@ $.widget( "heurist.dh_maps", {
         var html = '<div class="recordDiv smaller" id="rd'+recID+'" recid="'
             +recID+'" rectype="'+rectypeID+'" bkmk_id="'+bkm_ID
             +'">'
-        + '<div class="recTypeThumb" style="background-image: url(&quot;'+ window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>'
+        + '<div class="recTypeThumb" style="background-image: url(&quot;'+ window.hWin.HAPI4.iconBaseURL 
+            + rectypeID + '&version=thumb&quot;);"></div>'
         + html_thumb
         + '<div title="'+recTitle+'" class="recordTitle">'
         +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"+ recTitle + "</a>") :recTitle)

@@ -2534,7 +2534,7 @@ $.widget( "heurist.editing_input", {
          
                         //init upload widget
                         $input.fileupload({
-    url: window.hWin.HAPI4.baseURL +  'hsapi/utilities/fileUpload.php',
+    url: window.hWin.HAPI4.baseURL +  'hsapi/controller/fileUpload.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},
                 {name:'version', value:this.configMode.version},
@@ -3278,6 +3278,7 @@ console.log('onpaste');
                 //url for thumb
                 if(!window.hWin.HEURIST4.util.isempty(value['ulf_ExternalFileReference'])){ // check if external source can be rendered
 
+                    //@todo - replace to window.hWin.HAPI4.checkImage
                     window.hWin.HAPI4.SystemMgr.check_renderable_url(value['ulf_ExternalFileReference'], function(response){
 
                         if(response.status == window.hWin.ResponseStatus.OK){

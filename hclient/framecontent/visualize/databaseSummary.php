@@ -211,7 +211,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
 
                             //HAPI4.iconBaseURL
                             // Image
-                            $rectypeImg = "style='background-image:url(".HEURIST_ICON_SCRIPT.$rt_ID.")'";
+                            $rectypeImg = "style='background-image:url(".HEURIST_RTY_ICON.$rt_ID.")'";
                             $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
                             echo "<td align='center'>$img</td>";
 
@@ -254,7 +254,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                             echo "<td align='center'>$rt_ID</td>";
 
                             // Image
-                            $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
+                            $rectypeImg = "style='background-image:url(".HEURIST_RTY_ICON.$rt_ID.")'";
                             $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
                             echo "<td align='center'>$img</td>";
 
@@ -298,7 +298,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
 
                             // Image
                             $title = $row["title"];
-                            $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
+                            $rectypeImg = "style='background-image:url(".HEURIST_RTY_ICON.$rt_ID.")'";
                             $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
                             echo "<td align='center'>$img</td>";
 

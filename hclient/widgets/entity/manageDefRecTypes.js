@@ -689,16 +689,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 + window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'rty_Description'))+'</div>'
 
             
-            //Ian dwi
-//recTitle = recTitle + fld2('rty_ID','3.5em')+fld2('rty_ID_local','3.5em');
-            var rtIcon = this.options.import_structure.databaseURL
-                                + '/hsapi/dbaccess/rt_icon.php?db='
-                                + this.options.import_structure.database + '&id=';
+            //IJ dwi
+            var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon', 2, this.options.import_structure.database);
             rtIcon = '';
             
-            var html_icon = '<div class="recordIcons" style="min-width:16px;text-align:center;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+            
+            var html_icon = '<div class="recordIcons" style="min-width:16px;text-align:center;">'
             +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-            +     '"  class="rt-icon" style="background-image: url(&quot;'+rtIcon+'&quot;);">'       //opacity:'+recOpacity+'
+            +     '"  class="rt-icon" style="background-image: url(&quot;'+rtIcon+'&quot;);">'
             + '</div>';
             
             
@@ -717,7 +715,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
         if(this.is_new_icons){
             rtIcon = window.hWin.HAPI4.iconBaseURL+recID; 
-            recThumb = window.hWin.HAPI4.iconBaseURL+'thumb/th_'+recID; 
+            recThumb = window.hWin.HAPI4.iconBaseURL+recID+'&version=thumb'; 
         }
 		
         var random_id = window.hWin.HEURIST4.util.random(); // force php request to redo		
@@ -1300,11 +1298,13 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
             if(window.hWin.HEURIST4.util.isempty(s_title) || !s_all){
 
-                $(this.element.find('.not-found')[0]).hide();
-                $(this.element.find('.not-found')[1]).hide();
-                
-                $(this.element.find('.not-found')[0].parentNode)
+                var ele = this.element.find('.not-found');
+                if(ele.length>0){
+                    ele.hide();
+                    ele.parent()
                     .html("<div style='margin-top:1em;'>No record types in this group.<br/><br/>Please drag record types from other groups or add new<br/>record types to this group.</div>");
+                }
+                
             }
         }
     },	

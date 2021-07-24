@@ -22,7 +22,7 @@ require_once(dirname(__FILE__)."/../System.php");
 require_once(dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
 require_once(dirname(__FILE__).'/../utilities/utils_file.php');
 require_once(dirname(__FILE__).'/../utilities/utils_image.php');
-require_once('UploadHandler.php');
+require_once(dirname(__FILE__).'/../utilities/UploadHandler.php');
 
 $response = null;
 $system = new System();
@@ -243,7 +243,7 @@ if($response!=null){
             }else if(!@$file->thumbnailUrl){ //if UploadHandler does not create thumb - creates it as image with text (file extension)
                 
                 $thumb_file = HEURIST_SCRATCH_DIR.'thumbs/'.@$_REQUEST['newfilename'];
-                $img = image_CreateFromString($file->type?$file->type:'XXX!');
+                $img = UtilsImage::createFromString($file->type?$file->type:'XXX!');
                 imagepng($img, $thumb_file);//save into file
                 imagedestroy($img);
                 $res['files'][$idx] ->thumbnailUrl = HEURIST_FILESTORE_URL.'scratch/thumbs/'.@$_REQUEST['newfilename'];

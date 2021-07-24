@@ -408,6 +408,8 @@
     
     //
     // get list of files in folder as search result (record list)
+    // It is used to get 1) all cfg files for entity configuration
+    //                   2) browse for available icons in iconLibrary   
     //
     function folderContent($dirs, $exts) {
         
@@ -421,7 +423,7 @@
         foreach ($dirs as $dir) {
             
             if(strpos($dir, 'HEURIST_ICON_DIR')!==false){
-                //$folder = constant($dir);     @todo need better algorithm
+                //for browse available icons (see use_assets in entity config file)
                 $folder = str_replace('HEURIST_ICON_DIR/', HEURIST_ICON_DIR, $dir);
                 $url = str_replace('HEURIST_ICON_DIR/', HEURIST_ICON_URL, $dir);
             }else if (strpos($dir, HEURIST_FILESTORE_DIR)!==false) {    

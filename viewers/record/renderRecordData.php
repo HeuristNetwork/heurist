@@ -559,7 +559,7 @@ if ($bkm_ID>0 || $rec_id>0) {
                     $list = $list  //$id==$rec_id || $cnt>3
                         .'<div class="detailRow placeRow"'.($cnt>2?' style="display:none"':'').'>'
                             .'<div style="display:table-cell;padding-right:4px">'
-                                .'<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$bibInfo['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bibInfo['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>'
+                                .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bibInfo['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bibInfo['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>'
                         .'<div style="display: table-cell;vertical-align:top;max-width:490px;" class="truncate"><a href="#" '   
 .'oncontextmenu="return false;" onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
 .'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'
@@ -695,7 +695,7 @@ function print_header_line($bib) {
     ?>
         <h3 style="padding:10px 10px 0px 2px;margin:0;color: #DC8501;">
             <div <?="style='padding-left:20px;height:20px;background-repeat: no-repeat;background-image:url("
-                        .HEURIST_ICON_URL.$bib['rty_ID'].".png)' title='".htmlspecialchars($bib['rty_Description'])."'" ?> >
+                        .HEURIST_RTY_ICON.$bib['rty_ID'].")' title='".htmlspecialchars($bib['rty_Description'])."'" ?> >
                 Type&nbsp;<?= $bib['rty_ID'].': '.htmlspecialchars($bib['rty_Name'])." " ?>
             </div>
         </h3>
@@ -1406,7 +1406,7 @@ function print_relation_details($bib) {
         print '<div class=detail>';
             if (@$bd['RelatedRecID']) {
                 if(true || $is_map_popup){  
-                    print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_ICON_URL.$bd['RelatedRecID']['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
+                    print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
                 }
                 print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
                         .strip_tags($bd['RelatedRecID']['rec_Title'],ALLOWED_TAGS).'</a>';
@@ -1445,7 +1445,7 @@ function print_relation_details($bib) {
         print '<div class=detail>';
             if (@$bd['RelatedRecID']) {
                 if(true || $is_map_popup){  
-                    print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$bd['RelatedRecID']['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
+                    print '<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
                 }
                 print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
                     .strip_tags($bd['RelatedRecID']['rec_Title'],ALLOWED_TAGS).'</a>';
@@ -1523,7 +1523,7 @@ function print_linked_details($bib, $link_cnt)
             $link_cnt++;
             
                 print '<div style="display:table-cell;width:28px;height:21px;text-align: right;padding-right:4px">'
-                        .'<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>';
+                        .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$row['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>';
                         
                 print '<div style="display: table-cell;vertical-align:top;'
                 .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'

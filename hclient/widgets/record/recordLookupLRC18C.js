@@ -276,13 +276,12 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
 
         var recID = fld('rec_ID');
         var rectypeID = fld('rec_RecTypeID');
-        var recIcon = window.hWin.HAPI4.iconBaseURL + 1 + '.png';
+        var recIcon = window.hWin.HAPI4.iconBaseURL + '1';
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
-            + window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + 1 + '.png&quot;);"></div>';
+            + window.hWin.HAPI4.iconBaseURL + '1&version=thumb&quot;);"></div>';
         fld('properties.edition', 15)
 
         var html = '<div class="recordDiv" id="rd' + record[2] + '" recid="' + record[2] + '" rectype="' + 1 + '">'
-            + html_thumb
             + html_thumb
 
             + '<div class="recordIcons">'

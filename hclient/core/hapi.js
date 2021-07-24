@@ -75,8 +75,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             that.baseURL_pro = _baseURL;
         }
         
-        // TODO: This is actually a proto URL rather than a base URL. Rename.
-        that.iconBaseURL = that.baseURL + 'hsapi/dbaccess/rt_icon.php?db='+_database+'&id=';
+        // @TODO: rename to rtyIconURL 
+        that.iconBaseURL = that.baseURL + '?db='+_database+'&icon=';
         that.database = _database;
 
         // regional - global variable defined in localization.js
@@ -1943,19 +1943,21 @@ prof =Profile
         }
 
         //
-        //
+        //  returns url to entity image
+        // 
+        // version = thumb, icon
+        // def - if file not found return empty placeholder (0) or "add image" gif (1) 
+        //       2 - default icon/thumb for entity
+        //       3 - check existence
         //
         , getImageUrl: function(entityName, recID, version, def, database){
                 
-            //if file not found return empty gif (0) or add image gif (1) or default icon/thumb for entity (2)
-            if(!(def>=0||def<3)) def = 2;
-
-            return window.hWin.HAPI4.baseURL + 'hsapi/utilities/fileGet.php'
+            return window.hWin.HAPI4.baseURL //redirected to + 'hsapi/controller/fileGet.php'
                     +'?db='+ (database?database:window.hWin.HAPI4.database)
-                    +'&entity='+entityName
-                    +'&id='+recID
-                    +'&version='+version
-                    +'&def='+def;
+                    +(entityName?('&entity='+entityName):'') //rty by default
+                    +'&icon='+recID
+                    +(version?('&version='+version):'')
+                    +(def?('&def='+def):'');
         }
 
         //
@@ -1974,16 +1976,10 @@ prof =Profile
                             request, null, callback);
                             
             }else{
-
-                var request = {
-                        db:window.hWin.HAPI4.database,
-                        entity: entityName,
-                        id:recID,
-                        version: version,
-                        def: 'check'};
                 
-                window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + 'hsapi/utilities/fileGet.php', 
-                            request, null, callback);
+                var checkURL = window.hWin.HAPI4.getImageUrl(entityName, recID, version, 'check');
+                
+                window.hWin.HEURIST4.util.sendRequest(checkURL, null, null, callback);
                         
             }
         }

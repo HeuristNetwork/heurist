@@ -1,5 +1,6 @@
 <?php
 
+//USED only in deprecated Gmap
 //ARTEM:   @todo JJ made a lot of duplication - many methods already exist
 
 /**

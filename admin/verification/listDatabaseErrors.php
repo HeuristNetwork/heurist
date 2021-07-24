@@ -641,7 +641,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                     ?>
                     <tr>
                         <td><input type=checkbox name="recCB" value=<?= $row['dtl_RecID'] ?>></td>
-                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                         <td style="white-space: nowrap;"><a target=_new
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
@@ -694,7 +694,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                     foreach ($bibs as $row) {
                         ?>
                         <tr>
-                            <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                            <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                             <td style="white-space: nowrap;"><a target=_new
                                     href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?>
                                     <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
@@ -856,7 +856,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                     foreach ($bibs1 as $row) {
                         ?>
                         <tr>
-                            <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                            <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                             <td style="white-space: nowrap;"><a target=_new
                                     href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'><?= $row['rec_ID'] ?>
                                     <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
@@ -997,7 +997,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 ?>
                 <tr>
                     <td><input type=checkbox name="recCB6" value=<?= $row['dtl_RecID'] ?>></td>
-                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                     <td style="white-space: nowrap;"><a target=_new
                             href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                             <?= $row['dtl_RecID'] ?>
@@ -1147,7 +1147,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                     ?>
                     <tr>
                         <td></td>
-                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                         <td style="white-space: nowrap;"><a target=_new
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
@@ -1173,7 +1173,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                     ?>
                     <tr>
                         <td></td>
-                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                         <td style="white-space: nowrap;"><a target=_new
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
@@ -1229,7 +1229,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                             print '<input type=checkbox name="recCB5" value='.$row['dtl_RecID'].'>';
                         ?>
                     </td>
-                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" 
+                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" 
                                     src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                     <td style="white-space: nowrap;"><a target=_new
                             href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
@@ -1326,7 +1326,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 ?>
                 <tr>
                     <td><input type=checkbox name="recCB1" value=<?= $row['dtl_RecID'] ?>></td>
-                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                     <td style="white-space: nowrap;"><a target=_new
                             href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                             <?= $row['dtl_RecID'] ?>
@@ -1409,7 +1409,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                         <td style="width:50px;">
                             <a target=_new  title='Click to edit record'
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
-                                <img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" 
+                                <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" 
                                     title="<?php echo $row['rty_Name']?>" 
                                     src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;<?= $row['dtl_RecID'] ?>
                             </a>
@@ -1554,7 +1554,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                             <td>
                                 <input type=checkbox name="recCB2" value=<?= $row['dtl_RecID'] ?>>
                             </td>
-                            <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                            <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
 
                             <td style="white-space: nowrap;">
                                 <a target=_blank href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
@@ -1645,7 +1645,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                                 <a target=_new
                                     href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                     <?= $row['rec_ID'] ?>
-                                    <img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" title="<?php echo $row['rty_Name']?>" 
+                                    <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
                                         src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
                                     <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                                 </a>
@@ -1732,7 +1732,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                                     <a target=_new
                                         href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                         <?= $row['rec_ID'] ?>
-                                        <img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" title="<?php echo $row['rty_Name']?>" 
+                                        <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
                                             src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
                                         <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                                     </a>

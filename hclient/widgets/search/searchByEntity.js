@@ -317,7 +317,7 @@ console.log(data);
                     $('<li data-id="'+rty_ID+'" style="font-size:smaller;padding:4px 6px 2px 4px">'
                         +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
                             + '" class="rt-icon" style="vertical-align:bottom;background-image: url(&quot;'
-                            + window.hWin.HAPI4.iconBaseURL + rty_ID+ '.png&quot;);"/>'
+                            + window.hWin.HAPI4.iconBaseURL + rty_ID+ '&quot;);"/>'
                         +'<div class="menu-text truncate" style="max-width:130px;display:inline-block;">'
                         + $Db.rty(rty_ID,'rty_Name')+'</div>'
                         +'<span style="float:right;">'
@@ -327,7 +327,7 @@ console.log(data);
                 }else{
             
                     var btn = $('<div>').button({label:
-                    '<img src="'+window.hWin.HAPI4.iconBaseURL + rty_ID + '.png" height="12">'
+                    '<img src="'+window.hWin.HAPI4.iconBaseURL + rty_ID + '" height="12">'
                     +'<span class="truncate" style="max-width:100px;display:inline-block;margin-left:8px">'
                             + $Db.rty(rty_ID,'rty_Name') + '</span>'
                             + '<span style="float:right;padding:2px;font-size:0.8em;">['   

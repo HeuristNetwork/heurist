@@ -482,7 +482,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 + 'background-position: center; background-repeat: no-repeat;"'            
                 + ' data-icon="'+(layer_options.iconMarker
                         ?layer_options.iconMarker
-                        :(window.hWin.HAPI4.iconBaseURL + rectypeID + '.png'))
+                        :(window.hWin.HAPI4.iconBaseURL + rectypeID ))
                         +'"';
             } else if(layer_options.iconMarker){
                 icon_bg = 'url('+ layer_options.iconMarker + ');background-size: 18px 18px;"';
@@ -497,7 +497,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         if(icon_bg==null && Number.isInteger(rectypeID)){
                 var suffix = '.png';
                 if(bg_color){
-                    suffix = 'm.png&color='+encodeURIComponent(bg_color.replace(/ /g,''));            
+                    suffix = '&color='+encodeURIComponent(bg_color.replace(/ /g,''));            
                 }
                 icon_bg = 'url(\''+ window.hWin.HAPI4.iconBaseURL + rectypeID + suffix + '\');background-size: 18px 18px;"';
         }

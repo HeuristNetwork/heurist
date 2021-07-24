@@ -80,7 +80,7 @@ function hImportRecords(_max_upload_size) {
         }});
                 
                 uploadWidget.fileupload({
-        url: window.hWin.HAPI4.baseURL +  'hsapi/utilities/fileUpload.php', 
+        url: window.hWin.HAPI4.baseURL +  'hsapi/controller/fileUpload.php', 
         formData: [ {name:'db', value: window.hWin.HAPI4.database}, //{name:'DBGSESSID', value:'424533833945300001;d=1,p=0,c=0'},
                     {name:'max_file_size', value: _max_upload_size},
                     {name:'entity', value:'temp'}, //just place file into scratch folder
