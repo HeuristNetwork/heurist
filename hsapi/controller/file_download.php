@@ -58,18 +58,9 @@ if($db){
         if(!$force_recreate && file_exists($thumbfile)){
             downloadFile('image/png', $thumbfile);
         }else{
-            //recreate thumbnail
-            //@todo - change to the same script in h4  or use Imagic
-            $thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".$db."&ulf_ID=".$fileid;
-            if($force_recreate){
-                $thumb_url = $thumb_url.'&refresh=1';    
-            }
-            if(@$_REQUEST['offer_download']){
-                $thumb_url = $thumb_url.'&offer_download=1';        
-            }
-            
-            header("Location: ".$thumb_url);
-            exit();
+            //recreate thumbnail and output it
+            $system->init($db);
+            fileCreateThumbnail( $system, $fileid, true );
         }
     }else if(@$_REQUEST['file'] || @$_REQUEST['ulf_ID']) { //ulf_ID need for backward support of old downloadFile.php
 

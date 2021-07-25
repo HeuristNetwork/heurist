@@ -883,4 +883,155 @@ function fileGetWidthHeight($filepath, $external_url, $mimeType){
     $response = array('status'=>HEURIST_OK, 'data'=>$res);
     print json_encode($response);
 }
+
+/**
+* Recreate thumbnail for record uploaded file
+* 
+* @param mixed $system
+* @param mixed $fileid - ulf_ID or obfuscation IF
+* @param mixed $is_download - output thumbnail
+*/
+function fileCreateThumbnail( $system, $fileid, $is_download ){
+    
+    $img = null; //image to be resized
+    $file = fileGetFullInfo($system, $fileid, true);
+    $placeholder = '../../hclient/assets/100x100.gif';
+    $thumbnail_file = null;
+    
+    if($file!==false){
+        $file = $file[0];    
+    
+        $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$file['ulf_ObfuscatedFileID'].".png";    
+        
+        if(@$file['ulf_ExternalFileReference']==null || @$file['ulf_ExternalFileReference']==''){
+            
+            if (@$file['fullPath']){
+                $filename = $file['fullPath'];
+            }else if (@$file['ulf_FileName']) {
+                $filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
+            } else {
+                $filename = HEURIST_FILESTORE_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
+            }
+            $filename = str_replace('/../', '/', $filename);
+            
+            //add database media storage folder for relative paths
+            $filename = resolveFilePath($filename);
+        }
+        
+        
+        if (isset($filename) && file_exists($filename)){ //original file exists
+
+            $mimeExt = '';
+            if ($file['ulf_MimeExt']) {
+                $mimeExt = $file['ulf_MimeExt'];
+            } else {
+                preg_match('/\\.([^.]+)$/', $file["ulf_OrigFileName"], $matches);    //find the extention
+                $mimeExt = $matches[1];
+            }
+
+            //special case for pdf        
+            if($mimeExt=='application/pdf' || $mimeExt=='pdf'){
+                $resized = UtilsImage::getPdfThumbnail($filename, $thumbnail_file);
+            }else{
+                
+                //get real image type from exif
+                if (function_exists('exif_imagetype')) {
+                    switch(@exif_imagetype($filename)){
+                        case IMAGETYPE_JPEG:
+                            $mimeExt = 'jpg';
+                            break;
+                        case IMAGETYPE_PNG:
+                            $mimeExt = 'png';
+                            break;
+                        case IMAGETYPE_GIF:
+                            $mimeExt = 'gif';
+                            break;
+                    }
+                }
+                
+                $errorMsg = UtilsImage::checkMemoryForImage($filename, $mimeExt);
+                    
+                if($errorMsg){
+                    //database, record ID and name of bad image
+                    sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.HEURIST_DBNAME, 
+                            'File ID#'.$file['ulf_ID'].'  '.$filename.'. '.$errorMsg, null);
+                    
+                }else{
+                    
+                    //load content
+                    $img = UtilsImage::safeLoadImage($filename, $mimeExt);
+                    
+                    if($img===flase){
+                        //this is not an image
+                        $desc = '***' . strtoupper(preg_replace('/.*[.]/', '', $file['ulf_OrigFileName'])) . ' file';
+                        $img = UtilsImage::createFromString($desc); //from string
+                    }
+                    
+                }                    
+                
+            }
+            
+        }
+        else if(@$file['ulf_ExternalFileReference']){  //remote 
+        
+            if(@$file['fxm_MimeType'] && strpos($file['fxm_MimeType'], 'image/')===0){
+                //@todo for image services (flikr...) take thumbnails directly
+                $img = UtilsImage::getRemoteImage($file['ulf_ExternalFileReference']);
+            }else    
+            if( @$file['fxm_MimeType'] == 'video/youtube' 
+                || strpos($file['ulf_ExternalFileReference'], 'youtu.be')>0
+                || strpos($file['ulf_ExternalFileReference'], 'youtube.com')>0){ //match('http://(www.)?youtube|youtu\.be')
+                
+                //@todo - youtube changed the way of retrieving thumbs !!!!
+                $url = $file['ulf_ExternalFileReference'];
+                
+                preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/", $url, $matches);
+                
+                $youtubeid = $matches[1];
+                
+                $img = UtilsImage::getRemoteImage('http://img.youtube.com/vi/'.$youtubeid.'/default.jpg');
+                
+                //$youtubeid = preg_replace('/^[^v]+v.(.{11}).*/' , '$1', $url);
+                //$img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg"); //get thumbnail
+            }else if($file['fxm_MimeType'] == 'video/vimeo'){
+
+                $url = $file['ulf_ExternalFileReference'];
+
+                $hash = json_decode(loadRemoteURLContent("http://vimeo.com/api/oembed.json?url=".rawurlencode($url), false), true);
+                $thumb_url = @$hash['thumbnail_url'];
+                if($thumb_url){
+                    $img = UtilsImage::getRemoteImage($thumb_url);    
+                }
+                
+                //it works also - except regex is wrong for some vimeo urls
+                /*
+                if(preg_match('(https?:\/\/)?(www\.)?(player\.)?vimeo\.com\/([a-z]*\/)*([??0-9]{6,11})[?]?.*', $url, $matches)>0){
+                    $vimeo_id = $matches[5];
+                    $hash = unserialize(file_get_contents("http://vimeo.com/api/v2/video/$vimeo_id.php"));
+                    $thumb_url = $hash[0]['thumbnail_medium']; 
+                    $img = UtilsImage::getRemoteImage($thumb_url);
+                }
+                */
+                
+            }else{
+                // image placeholder
+                $placeholder = '../../hclient/assets/200x200-warn.gif';
+            }
+            
+        
+        }
+    }
+    
+    if(!$img){
+        if($is_download){
+            header('Location: '.$placeholder);
+        }
+    }else{
+        $resized = UtilsImage::resizeImage($img, $thumbnail_file);
+        if($is_download){
+            header('Content-type: image/png');
+            echo $resized;
+        }
+    }
+}
 ?>

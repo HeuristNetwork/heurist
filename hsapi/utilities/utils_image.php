@@ -312,7 +312,199 @@ class UtilsImage {
             
         }
     }
-    
 
+    /**
+    * Verifies the size of image - is it possible to load into allowed memory
+    * 
+    * @param mixed $filename
+    * @param mixed $mimeExt
+    */
+    public static function checkMemoryForImage($filename, $mimeExt){
+        
+        $errorMsg = null;
+        
+        //if img check memory to be allocated
+        switch($mimeExt) {
+            case 'image/jpeg':
+            case 'jpeg':
+            case 'jfif':
+            case 'jpg':
+            case 'image/gif':
+            case 'gif':
+            case 'image/png':
+            case 'png':
+            
+                $mem_limit = get_php_bytes('memory_limit');
+                
+                $imageInfo = getimagesize($filename); 
+                if(is_array($imageInfo)){
+                    if(array_key_exists('channels', $imageInfo) && array_key_exists('bits', $imageInfo)){
+                        $memoryNeeded = round(($imageInfo[0] * $imageInfo[1] * $imageInfo['bits'] * $imageInfo['channels'] / 8 + Pow(2,16)) * 1.65); 
+                    }else{ //width x height
+                        $memoryNeeded = round($imageInfo[0] * $imageInfo[1]*3);  
+                    } 
+                    $mem_usage = memory_get_usage();
+
+                    if ($mem_usage+$memoryNeeded > $mem_limit - 10485760){ // $mem_limit - 10485760){ // min($mem_limit, 41943040)){ //40M
+                    
+                        $errorMsg = 'It requires '.$memoryNeeded.
+                            ' bytes to be resized.  Available '.$mem_limit.' bytes.';
+                    }                
+                }
+                break;
+            default:
+                break;
+        }        
+        
+        return $errorMsg;
+        
+    }
+
+    
+    /**
+    * save load from file to image object
+    * 
+    * @param mixed $filename
+    * @param mixed $mimeExt
+    */
+    public static function safeLoadImage($filename, $mimeExt){
+     
+            $img = null;
+        
+            $errline_prev = 0;
+            
+            set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) {
+                global $errline_prev, $filename, $file;
+                
+                //it may report error several times with different messages - send for the first one
+                if($errline_prev!=$errline){
+                    
+                        $errline_prev=$errline;
+                        //database, record ID and name of bad image
+                        $res = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.HEURIST_DBNAME, 
+                        'File :'.$filename.' is corrupted. System message: '.$errstr, null);
+                        //ID#'.$file['ulf_ID'].'  
+                    
+                }
+                return false;
+            });//, E_WARNING);                
+            
+            switch($mimeExt) {
+                case 'image/jpeg':
+                case 'jpeg':
+                case 'jfif':
+                case 'jpg':
+                    $img = @imagecreatefromjpeg($filename);
+                    break;
+                case 'image/gif':
+                case 'gif':
+                    $img = @imagecreatefromgif($filename);
+                    break;
+                case 'image/png':
+                case 'png':
+                    $img = @imagecreatefrompng($filename);
+                    break;
+                default:
+                    $img = false; //not image
+                    break;
+            }
+            
+            restore_error_handler();
+        
+            return $img;
+    }
+    
+    
+    /**
+    * Resize image 
+    * saves into $thumbnail_file and returns its content
+    * 
+    * @param mixed $filename
+    */
+    public static function resizeImage($img, $thumbnail_file=null, $x = 200, $y = 200){
+
+        $no_enlarge = false;
+        // calculate image size
+        // note - we never change the aspect ratio of the image!
+        $orig_x = imagesx($img);
+        $orig_y = imagesy($img);
+
+        $rx = $x / $orig_x;
+        $ry = $y / $orig_y;
+
+        $scale = $rx ? $ry ? min($rx, $ry) : $rx : $ry;
+
+        if ($no_enlarge  &&  $scale > 1) {
+            $scale = 1;
+        }
+
+        $new_x = ceil($orig_x * $scale);
+        $new_y = ceil($orig_y * $scale);
+
+        $img_resized = imagecreatetruecolor($new_x, $new_y)  or die;
+        imagecopyresampled($img_resized, $img, 0, 0, 0, 0, $new_x, $new_y, $orig_x, $orig_y)  or die;
+
+        if ($thumbnail_file) {
+            $resized_file = $thumbnail_file;
+        }else{
+            $resized_file = tempnam(HEURIST_SCRATCHSPACE_DIR, 'resized');
+        }
+
+        imagepng($img_resized, $resized_file);//save into file
+        imagedestroy($img);
+        imagedestroy($img_resized);
+
+        $resized = file_get_contents($resized_file);
+
+        if($thumbnail_file==null){
+            unlink($resized_file);
+        }
+        
+        return $resized;   
+    }
+
+    /**
+    * Creates thumbnail from pdf file
+    * 
+    * @param mixed $filename
+    * @param mixed $thumbnail_file
+    */
+    public static function getPdfThumbnail( $filename, $thumbnail_file ){
+        
+            if(!extension_loaded('imagick')){
+                
+                $cmd = 'convert -thumbnail x200 -flatten '; //-background white -alpha remove 
+                $cmd .= ' '.escapeshellarg($filename.'[0]');
+                $cmd .= ' '.escapeshellarg($thumbnail_file);
+                exec($cmd, $output, $error);
+
+                if ($error) {
+                    error_log ('ERROR on pdf thumbnail creation: '.$filename.'  '.$cmd.'   '.implode('\n', $output));
+                    return null;
+                }
+                
+            }else{
+                //Imagic
+                try {
+                    
+                    $im =  new Imagick($filename.'[0]'); 
+                    $im->setImageFormat('png'); 
+                    $im->thumbnailImage(200,200);
+
+                    if(file_exists($thumbnail_file)){
+                            unlink($thumbnail_file);
+                    }
+                    $im->writeImage($thumbnail_file);
+                    
+                } catch(ImagickException $e) {
+                    error_log($e . ', From Database: ' . HEURIST_DBNAME);
+                    return null;
+                }
+
+            }
+            $resized = file_get_contents($thumbnail_file);
+            return $resized;
+    }
+    
 }
 ?>

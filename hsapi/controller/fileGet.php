@@ -126,8 +126,6 @@ if($filename){ //download from scratch (for csv import)
         }
         if($viewmode=='thumb') $viewmode='thumbnail';
         
-        $path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';
-        
         if($rec_id && substr($rec_id,0,4)=='term'){
             //backward support - icons for Digital Harlem
             $rec_id = substr($rec_id, 4);
@@ -143,6 +141,9 @@ if($filename){ //download from scratch (for csv import)
             }
             $rec_id = 1;    
             $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/sysIdentification/';    
+        }else{
+            
+            $path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';
         } 
         
         
