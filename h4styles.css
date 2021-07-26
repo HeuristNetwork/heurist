@@ -44,7 +44,7 @@ a{
 }
 
 .logo {
-    background-image: url("hclient/assets/h4logo_small.png");
+    background-image: url("hclient/assets/branding/h4logo_small.png");
     background-repeat: no-repeat !important;
     background-size: contain;
     width: 190px;

@@ -287,16 +287,68 @@ if (@$urls) {
 ?>
 	<title>Import Hyperlinks</title>
 
-	<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/global.css">
-  	<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/edit.css">
+    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css">
 
     <style type="text/css">
+        body{
+            font-family: Helvetica,Arial,sans-serif;
+            line-height: 2ex;
+        }
+    
+        .input-row {
+            border-bottom: 1px solid RGBA(255,255,255,0.5);
+            padding: 3px 0;
+        }    
+        .input-row input:not([type="submit"]) {
+            font-size: 11px;
+            background: none repeat scroll 0 0 #FFF;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            margin: 2px 0;
+            padding: 3px;
+        }        
+        
 		.input-header-cell {width:140px;min-width:140px;max-width:140px; vertical-align:baseline;}
 		.input-header-cell input[type="radio"]{float:left;min-width:35px}
 		.error {color:#C00; font-weight:bold;}
 		.words {color: #6A7C99;}
 		.similar_bm{text-align: left;width:100%;color: #6A7C99;}
 		.similar_bm label{text-align: left;}
+        
+        H2 {
+            color: #6A7C99;
+            font-size: 14px;
+            line-height: 25px;
+            margin: 0;
+        }        
+        A:link {
+            color: #2080C0;
+            text-decoration: none;
+        }        
+        P {
+            color: #333333;
+            font-size: 11px;
+            line-height: 21px;
+        }   
+        
+        .button, input[type="button"], input[type="submit"] {
+            text-transform: uppercase !important;
+            display: inline-block !important;
+            color: #666;
+            cursor: pointer !important;
+            font-weight: bold !important;
+            border: 1px solid RGBA(0,0,0,0.2) !important;
+            padding: 0 3px;
+            height: 20px !important;
+            line-height: 19px !important;
+            font: 10px arial,helvetica,clean,sans-serif;
+        }
+        .button, input[type="button"]:hover, input[type="submit"]:hover {
+            background-color: RGBA(0,0,0,0.1) !important;
+            border: 1px solid RGBA(0,0,0,0.4) !important;
+            box-shadow: 0 1px 2px RGBA(0,0,0,0.4) inset !important;
+            text-decoration: none !important;
+            color: #000 !important;
+        }
 	</style>
     
     <script type="text/javascript">

@@ -826,14 +826,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             .appendTo($intdiv);    
                         }
 
-                        /*
-                        var editbuttons = '<div class="saved-search-edit">'+
-                        '<img title="edit" src="' +window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif" '+
-                        'onclick="{top.HEURIST.search.savedSearchEdit('+sid+');}">';
-                        editbuttons += '<img  title="delete" src="'+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif" '+
-                        'onclick="{top.HEURIST.search.savedSearchDelete('+sid+');}"></div>';
-                        $intdiv.append(editbuttons);
-                        */
                     }
                 }
 

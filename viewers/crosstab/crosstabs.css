@@ -214,20 +214,6 @@ div .selected, div .selected:hover{
     padding-top:4px;
 }
 
-/*
-.showintervals{
-    width: 16px !important;
-    height: 16px !important;
-    background-image: url('../../common/images/blue-up-triangle.png');
-    background-repeat: no-repeat
-}
-*/
-/*
-.collapsed{
-    background-image: url('../../common/images/blue-down-triangle.png');
-}
-*/
-
 .crosstab-interval-edit{
     width: 16px !important;
     height: 16px !important;
@@ -258,7 +244,7 @@ div #inporgress{
     background:-webkit-gradient(linear, left top, left bottom, from(rgba(150, 150, 150, 0.2)), to(rgba(150, 150, 150, 0.5)));
 }
 div #inporgress-loading{
-    background-image: url('../../common/images/loading-animation-white.gif');
+    background-image: url('../../hclient/assets/loading-animation-white.gif');
     background-position:50%;
     background-repeat:no-repeat;
     position:absolute; top:0;right:0;bottom:0;left:0;

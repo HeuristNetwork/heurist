@@ -84,7 +84,7 @@ if($step=='2' && $projname && file_exists($arc_filename)){
         <div id="page-inner" style="top:15px; padding-left: 30px;padding-right:10px">
          
             <!-- TODO: This takes up too much space, but would be nice to include it:
-            <div style='background: url(../../common/images/logo_faims.png) center top no-repeat;height:120px;'>&nbsp;</div> -->
+            <div style='background: url(../../hclient/assets/branding/logo_faims.png) center top no-repeat;height:120px;'>&nbsp;</div> -->
 
 
             <div style="width: 900px;">

@@ -75,7 +75,7 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
 <div id="footer">
     <div class="copyright">
     License: <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">Creative Commons (CC BY-NC-SA 4.0)</a>. Design Damian Evans 2007, redeveloped Ian Johnson & Artem Osmakov 2015. <a href="http://heuristnetwork.org/" target="_blank">Powered by
-        <img src="hclient/assets/h4logo16_small.png" alt="Heurist Academic Knowledge Management System" align="absmiddle"></a>.<!--Admin log in/out <a href="login.php"> here</a>.--></div>
+        <img src="hclient/assets/branding/h4logo16_small.png" alt="Heurist Academic Knowledge Management System" align="absmiddle"></a>.<!--Admin log in/out <a href="login.php"> here</a>.--></div>
 </div>
 
 

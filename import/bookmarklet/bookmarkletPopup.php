@@ -62,7 +62,7 @@ init: function () {
 	var link = document.createElement('link');
 	link.rel = 'stylesheet';
 	link.type = 'text/css';
-	link.href = Heurist.uriBase +'common/css/bookmarklet-popup.css';
+	link.href = Heurist.uriBase +'import/bookmarklet/bookmarklet-popup.css';
 	document.getElementsByTagName('head')[0].appendChild(link);
 
 	// get record types
@@ -109,11 +109,11 @@ render: function() {
 	a.href = Heurist.uriBase;
 	if (document.all) {
 		i = document.createElement('img');
-		i.src = Heurist.uriBase +'hclient/assets/h4logo16.png';
+		i.src = Heurist.uriBase +'hclient/assets/branding/h4logo16.png';
 		a.appendChild(i);
 	}
 	else
-	a.innerHTML = '<img src="'+ Heurist.uriBase +'hclient/assets/h4logo16.png">';
+	a.innerHTML = '<img src="'+ Heurist.uriBase +'hclient/assets/branding/h4logo16.png">';
 	a.className='imglnk';
 	hdr.appendChild(a);
 	s = document.createTextNode('Heurist bookmarklet');

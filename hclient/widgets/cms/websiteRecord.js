@@ -1177,7 +1177,7 @@ function hCmsEditing(_options) {
                 + '" style="'+ widgetCss+'" '
                 + '>'
                 + '<div style="padding:10px;" class="widget-design-header"><img src="'
-                +window.hWin.HAPI4.baseURL+'hclient/assets/h4_icon_35x35.png" height="22" style="vertical-align:middle">&nbsp;<b>'
+                +window.hWin.HAPI4.baseURL+'hclient/assets/branding/h4_icon_35x35.png" height="22" style="vertical-align:middle">&nbsp;<b>'
                 +widget_title
                 + '</b><a href="#" class="edit" style="padding:0 10px" title="Click to edit">edit</a>&nbsp;&nbsp;'
                 + '<a href="#" class="remove">remove</a> '+sh+' </div>'//+widgetCss

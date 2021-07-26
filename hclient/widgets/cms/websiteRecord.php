@@ -402,7 +402,7 @@ if(!$isWebPage){
                         .'</a></div>'
             .'</div>'
             .'</div>';
-            //hclient/assets/h4_icon_16x16.png
+            //hclient/assets/branding/h4_icon_16x16.png
     }
 }
 

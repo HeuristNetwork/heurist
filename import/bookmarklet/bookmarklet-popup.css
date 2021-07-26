@@ -74,7 +74,7 @@ div.heurist {
 	-webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6) !important;
 	-moz-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6) !important;
 	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6) !important;
-	background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;
+	background:url("../../hclient/assets/bg_thumbnail.png") repeat-x scroll 0 bottom #F6F6F6 !important;
 	border:3px solid #FFFFFF !important;
 }
 div.heurist td {
@@ -89,7 +89,7 @@ div.heurist * {
 }
 div.heurist div.bookmarklet_header {
 	background-attachment:scroll!important;
-	background-image:url("../images/backgrounds/banner_bg.png")!important;
+	background-image:url("../../hclient/assets/bg_banner.png")!important;
 	background-position:0 bottom!important;
 	background-repeat:repeat-x!important;
 	color:#999999!important;
@@ -112,7 +112,7 @@ div.heurist div.bookmarklet_close {
 	-moz-box-shadow:0 1px 6px #000000!important;
 	-webkit-box-shadow:0 1px 6px #000000!important;
 	box-shadow:0 1px 6px #000000!important;
-	background:url("../images/white-cross.gif") no-repeat scroll center center rgba(0, 0, 0, 0.5)!important;
+	background:url("../../hclient/assets/white-cross.gif") no-repeat scroll center center rgba(0, 0, 0, 0.5)!important;
 	border:2px solid #FFFFFF !important;
 	cursor:pointer!important;
 	float:right!important;

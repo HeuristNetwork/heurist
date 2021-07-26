@@ -109,13 +109,13 @@ $record_renderer_url = HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db=
 	<link rel="icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
 	<link rel="shortcut icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
 
-	<link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
+    <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>h4styles.css">
 </head>
 
-<body <?php if (@$_REQUEST['popup']) { ?>style="width: 480px; height: 600px; background-color: transparent;" <?php } ?> class="popup">
+<body style="margin: 0px;<?php if (@$_REQUEST['popup']) { ?>width: 480px; height: 600px; background-color: transparent;<?php } ?>" class="popup">
 	<div><h2>Record details</h2></div>
 	<div>
-	<h3><?= htmlspecialchars($rec_title) ?></h3>
+	<!--<h3><?= htmlspecialchars($rec_title) ?></h3>-->
 	<iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?php echo $record_renderer_url;?>"></iframe>
 	</div>
 </body>
