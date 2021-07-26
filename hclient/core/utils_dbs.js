@@ -429,6 +429,11 @@ window.hWin.HEURIST4.dbs = {
                                     }                                           
                                     
                                 }else{
+									
+                                    if($res_dt['type']=='enum' && $mode==3){
+                                        $res_dt['title'] = "<span class='ui-icon ui-icon-menu' style='margin-right:2px;'>&nbsp;</span>" + $res_dt['title'];
+                                    }
+									
                                     $children.push($res_dt);
                                 }
                                 /*
