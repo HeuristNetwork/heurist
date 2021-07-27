@@ -1293,18 +1293,23 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         if(results!=null && results.count_total()==0){
             
-            var s_title = this.element.find('#input_search').val();
-            var s_all = this.element.find('#chb_show_all_groups').is(':checked');
+            if(this.options.select_mode=='manager'){
 
-            if(window.hWin.HEURIST4.util.isempty(s_title) || !s_all){
-
+                var s_all = this.element.find('#chb_show_all_groups').is(':checked');
                 var ele = this.element.find('.not-found');
-                if(ele.length>0){
-                    ele.hide();
-                    ele.parent()
-                    .html("<div style='margin-top:1em;'>No record types in this group.<br/><br/>Please drag record types from other groups or add new<br/>record types to this group.</div>");
+
+                if(ele.length > 0){
+
+                    if(!s_all){
+
+                        ele.hide();
+                        ele.parent()
+                            .html("<div style='margin-top:1em;'>No record types in this group.<br/><br/>Please drag record types from other groups or add new<br/>record types to this group.</div>");
+                    }else{
+
+                        $(ele[1]).text("No record types match the filter criteria");
+                    }
                 }
-                
             }
         }
     },	

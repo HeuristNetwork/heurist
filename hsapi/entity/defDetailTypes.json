@@ -13,7 +13,7 @@
         
         "entityTitle": "Base Field",
         "entityTitlePlural": "Base Fields",
-        "empty_remark": "<h3 style='color:red;'>Filter/s are active (see above)</h3><br>No fields in this group",
+        "empty_remark": "<h3 class='not-found' style='color:red;'>Filter/s are active (see above)</h3><br/><h3 class='not-found' style='color:teal'>No base fields match the filter criteria</h3>",
         
         "fields": [
                 {

@@ -1750,18 +1750,21 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         var results = this._super(event, request);
 
         if(results!=null && results.count_total()==0){
-            
-            var s_title = this.element.find('#input_search').val();
-            var s_all = this.element.find('#chb_show_all_groups').is(':checked');
-            var s_type = this.element.find('#input_search_type').val();
 
-            if((window.hWin.HEURIST4.util.isempty(s_title) || !s_all) && s_type=='any'){
+            if(this.options.select_mode=="manager"){
                 
-                $(this.element.find('.div-result-list-content').find('div')[0])
-                    .html("No base fields in this group.<br/><br/>Please drag base fields from other groups or add new<br/>base fields to this group.")
-                    .css({
-                        "margin-top": "1em"
-                    });
+                var s_title = this.element.find('#input_search').val();
+                var s_all = this.element.find('#chb_show_all_groups').is(':checked');
+                var s_type = this.element.find('#input_search_type').val();
+
+                var ele = this.element.find('.not-found');
+
+                if(window.hWin.HEURIST4.util.isempty(s_title) && !s_all && s_type=='any'){
+
+                    ele.hide();
+                    ele.parent()
+                        .html("<div style='margin-top:1em;'>No base fields in this group.<br/><br/>Please drag base fields from other groups or add new<br/>base fields to this group.</div>");
+                }
             }
         }
     },
