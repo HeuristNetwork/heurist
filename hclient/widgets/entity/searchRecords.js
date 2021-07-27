@@ -90,12 +90,13 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 
                 var rectypeID = rt_list[idx];
                 var name = $Db.rty(rectypeID,'rty_Name');
+                var label = (is_browse?'':window.hWin.HR('Add'))+' '+ name.trim();
                 if(!name) continue;
                 
                 $('<button>')
-                    .button({label: (is_browse?'':window.hWin.HR('Add'))+' '+ name.trim(), 
+                    .button({label: label, 
                              icon: is_browse?'ui-icon-search':"ui-icon-plus"})
-                    .attr('data-rtyid', rectypeID)
+                    .attr({'data-rtyid': rectypeID, 'title': label})
                     .css({'font-size':'11px',display:'inline-block',width:190,'text-align':'left','margin':'6px 0px 3px 8px'})
                     .addClass('truncate ui-button-action')
                     .click(function(e) {
