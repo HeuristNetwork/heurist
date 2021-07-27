@@ -139,26 +139,67 @@ function hMultiSelect(){
 				+ '<div class="tabs-desc no-overflow-item">'+ group['dtg_Description'] +'</div><hr style="margin-bottom:5.5px;"/><div class="field-group">';
 
 			$Db.dty().each2(function(dID, field){
-				var type;
 
 			    if(field['dty_DetailTypeGroupID'] == gID){
 			    	var type = getTypeName(field['dty_Type']);
 
-			        tab_page = tab_page + '<div class="field-container">';
-
-			        if(jQuery.inArray(dID, assigned_fields) === -1){
-				        tab_page = tab_page + '<input type="checkbox" data-id="'+ dID +'" style="margin-left: 10px;">';
-			        }
-			        else{
-			        	tab_page = tab_page + '<input type="checkbox" data-id="'+ dID +'" style="margin-left: 10px;" disabled>';		        	
-			        }
-
-			        tab_page = tab_page 
-			        	+ '<div class="field-item no-overflow-item" title="'+ field['dty_Name'] +'">'+ field['dty_Name'] +'</div>'
-			        	+ '<div class="field-item no-overflow-item" title="'+ type +'">'+ type +'</div>'
-			        	+ '<div class="field-item no-overflow-item" title="'+ field['dty_HelpText'] +'">'+ field['dty_HelpText'] +'</div></div>';
+			    	arr.push([dID, field['dty_Name'], type, field['dty_HelpText']]);
 			    }
 			});
+
+			arr.sort(function(a, b){
+
+				var min_len = Math.min(a[1].length, b[1].length);
+				var i = 0;
+
+				for(; i < min_len; i++){
+
+					var c = a[1][i].toUpperCase();
+	                var d = b[1][i].toUpperCase();
+
+	                if (c < d) {
+	                    return -1;
+	                }
+	                if (c > d) {
+	                    return 1;
+	                }
+	            }
+
+	            if(window.hWin.HEURIST4.util.isempty(a[1][i])){
+	            	return -1;
+	            }else if(window.hWin.HEURIST4.util.isempty(b[1][i])){
+	            	return 1;
+	            }else{ console.log(a[1], b[1]);
+	            	return 0;
+	            }
+
+                return 0;
+			});
+
+			/*
+			arr:
+				0 => ID
+				1 => Label/Name
+				2 => Type
+				3 => Help Text/Additional Info
+			*/
+			for(var i = 0; i < arr.length; i++){
+
+		        tab_page = tab_page + '<div class="field-container">';
+
+		        if(jQuery.inArray(arr[i][0], assigned_fields) === -1){
+			        tab_page = tab_page + '<input type="checkbox" data-id="'+ arr[i][0] +'">';
+		        }
+		        else{
+		        	tab_page = tab_page + '<input type="checkbox" data-id="'+ arr[i][0] +'" disabled>';		        	
+		        }
+
+		        tab_page = tab_page 
+		        	+ '<div class="field-item no-overflow-item" title="'+ arr[i][1] +'">'+ arr[i][1] +'</div>'
+		        	+ '<div class="field-item no-overflow-item" title="'+ arr[i][2] +'">'+ arr[i][2] +'</div>'
+		        	+ '<div class="field-item no-overflow-item" title="'+ arr[i][3] +'">'+ arr[i][3] +'</div></div>';
+
+			}
 
 			tab_page = tab_page + '</div></div>';
 
@@ -184,6 +225,14 @@ function hMultiSelect(){
 		}
 	}
 
+	function setupFieldSearch(){
+
+		var sel_search = $('#field-search');
+		sel_search.hide();
+		//window.hWin.HEURIST4.ui.createRectypeDetailSelect(sel_search[0], null, null, [{key:'', title:"Search available fields..."}], {useHtmlSelect: false});
+		// need to cycle through all record types
+	}
+
 	/*
 	 * Initialise function, called from within html
 	 *
@@ -199,6 +248,8 @@ function hMultiSelect(){
 			getAssignedFields(rtyID);
 
 			populateBaseFields();
+
+			setupFieldSearch();
 
 			$('.tabs').tabs();
 		}

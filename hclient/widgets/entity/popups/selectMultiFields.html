@@ -63,7 +63,7 @@
                 font-size: 1.2em;
                 padding-top: 5px;
             }
-            .tabs-panel{}          
+            .tabs-panel{}
             .field-group{
                 display: grid;
                 grid-template-columns: 100%;
@@ -72,7 +72,11 @@
             .field-container{
                 margin:5px 0;
                 display: grid;
-                grid-template-columns: 30px 200px 130px 800px;
+                grid-template-columns: 30px 200px 130px 705px;
+            }
+            .field-container input[type='checkbox']{
+                margin-top: 0;
+                margin-left: 10px;
             }
             .field-item{
                 font-size: 1.2em;
@@ -90,9 +94,10 @@
         </style>
     </head>
 
-    <body style="background: #DAD0E4;height: 100%;font-size:12px">
+    <body style="background:#DAD0E4;font-size:12px;width:99%;">
         <div>
-            <span style="font-size:1.2em;">Select base fields for insertion into the form - you can select from multiple tabs</span>
+            <span style="font-size:1.2em;margin-right:10px;">Select base fields for insertion into the form - you can select from multiple tabs</span>
+            <select id="field-search"></select>
         </div>
         <div class="tabs">
             <ul class="tabs-list">
