@@ -591,9 +591,11 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
     },
     
-    _saveEditAndClose: function(fields, afterAction, ignoreCheck=false){
+    _saveEditAndClose: function(fields, afterAction, ignoreCheck){
 
         var that = this;
+        
+        var ignoreCheck = true; //ARTEM 2021-07-27 - always ignore check for rendereability
 
         if(this._previousURL && !ignoreCheck){
 

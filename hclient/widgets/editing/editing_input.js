@@ -3283,9 +3283,14 @@ console.log('onpaste');
 
                         if(response.status == window.hWin.ResponseStatus.OK){
 
+                            ele.parent().find('.image_input > img').attr('src',
+                                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+                                        value.ulf_ObfuscatedFileID);
+                                        
+                            
                             if (response.data == "false") { // cannot be rendered
 
-                                ele.parent().find('.image_input > img').removeAttr('src'); // ensure no source image is shown
+                            //ele.parent().find('.image_input > img').removeAttr('src'); // ensure no source image is shown
 
                                 ele.parent().find(".smallText").text("This file cannot be rendered").css({
                                     "font-size": "larger", 
@@ -3296,10 +3301,6 @@ console.log('onpaste');
 
                             } else { // can be rendered
 
-                                ele.parent().find('.image_input > img').attr('src',
-                                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
-                                        value.ulf_ObfuscatedFileID);
-                                        
                                 ele.parent().find(".smallText").text("Click image to freeze in place").css({
                                     "font-size": "smaller", 
                                     "color": "grey", 

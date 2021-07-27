@@ -2,13 +2,13 @@
 
 
 
-// from resizeImage, db_files, rt_icon, captcha
 //use Screen\Capture; //for micorweber
 
 /* from db_files
 * getImageFromFile - return image object for given file
 * getPrevailBackgroundColor2  - not used
 * getPrevailBackgroundColor 
+* from captcha 
 */
 
     /**

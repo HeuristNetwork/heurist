@@ -961,7 +961,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                     //load content
                     $img = UtilsImage::safeLoadImage($filename, $mimeExt);
                     
-                    if($img===flase){
+                    if($img===false){
                         //this is not an image
                         $desc = '***' . strtoupper(preg_replace('/.*[.]/', '', $file['ulf_OrigFileName'])) . ' file';
                         $img = UtilsImage::createFromString($desc); //from string
