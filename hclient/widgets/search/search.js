@@ -175,7 +175,9 @@ $.widget( "heurist.search", {
         this.input_search = $( "<textarea>" )
         .css({//'margin-right':'0.2em', 
             'height':'41px', 
-            'max-height':'70px', 'resize':'none', 
+            'max-height':'70px', 
+			'max-width':'99%',
+			'resize':'none', 
             'padding':'0.4em',
             'min-height':'41px', 'line-height': '14px', 
             'min-width':'80px', 'width':'100%', 'padding-right':'28px' })  //was width:sz_input, 'max-width':sz_input,  
@@ -189,7 +191,7 @@ $.widget( "heurist.search", {
         this.input_search_prompt2 = $( "<span>" )
         .html('<span style="font-size:1em">'+window.hWin.HR("filter")
                 +'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye" style="font-size:1.8em;width: 1.7em;margin-top:1px"/>')
-        .css({ height:isNotFirefox?20:24, 'padding':'3px', 'margin':'2px', 'position':'relative', 'text-align':'left', display:'block'})
+        .css({ height:isNotFirefox?23:24, 'padding':'3px', 'margin':'2px', 'position':'relative', 'text-align':'left', display:'block'})
         .appendTo( this.div_search_input );
         this._on( this.input_search_prompt2, {click: function(){
                 this.input_search_prompt2.css({visibility:'hidden'});//hide();
@@ -205,6 +207,8 @@ $.widget( "heurist.search", {
                 this.input_search.css({width:'auto'});
                 this.input_search_prompt2.css({height:(this.input_search.height()-5)+'px',
                                                width:(this.input_search.width()+5)+'px'});    
+            }else{
+                this.input_search_prompt2.css({ width: '97%', 'left': '-2px' });
             }
         }else{
             this.input_search_prompt2.css({top:'-40px'}); //'background':'#F4F2F4',

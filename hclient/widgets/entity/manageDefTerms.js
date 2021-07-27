@@ -399,7 +399,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this._dropped = false;
 
                 this.options.recordList = {
-                    empty_remark: 'No terms in selected vocabulary. Add or import new ones',
+                    empty_remark: 'No terms in selected vocabulary.<br/><br/>Add or import new ones',
                     show_toolbar: false,
                     view_mode: 'list',
                     pagesize: 999999,

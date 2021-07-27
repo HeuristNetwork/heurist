@@ -393,6 +393,17 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             checkbox: true,
             selectMode: 3,  // hierarchical multi-selection
             source: treedata,
+            renderNode: function(event, data){
+
+                if(data.node.data.type=='enum'){
+                    // data.node.hideCheckbox = true; data.node.render(true); Stack Overflow (not the website)
+                    $($(data.node.li).find('.fancytree-checkbox')[0]).css({
+                        "visibility": "hidden",
+                        "width": 0,
+                        "margin-left": "1px"
+                    });
+                }
+            },			
             beforeSelect: function(event, data){
                 // A node is about to be selected: prevent this, for folder-nodes:
                 if( data.node.hasChildren() ){

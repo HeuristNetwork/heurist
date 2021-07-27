@@ -148,6 +148,7 @@ $.widget( "heurist.resultListMenu", {
             this.btn_Shared.show();
             this.btn_Reorder.show();
 
+            this['menu_Recode'].find('.logged-in-only:not([data-user-experience-level])').show();
             //$(this.element).find('.logged-in-only').show();//.css('visibility','visible');
         }else{
             //$(this.element).find('.logged-in-only').hide();//.css('visibility','hidden');
@@ -156,6 +157,8 @@ $.widget( "heurist.resultListMenu", {
             this.btn_Recode.hide();
             this.btn_Shared.hide();
             this.btn_Reorder.hide();
+			
+            this['menu_Recode'].find('.logged-in-only:not([data-user-experience-level])').hide();			
         }
     },
     //

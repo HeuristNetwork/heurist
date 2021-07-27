@@ -96,7 +96,16 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             this.input_search.parent().hide();
             this.element.find('#div_group_information').show();
             this.element.find('#div_show_already_in_db').hide();
-            this._on(this.element.find('#chb_show_all_groups'),  { change:this.startSearch });
+            this._on(this.element.find('#chb_show_all_groups'),  
+                { 
+                    change: function(){
+
+                        if(that.options.select_mode=='manager'){
+                            that.input_search.val('');
+                        }
+                        that.startSearch();
+                    }
+                });
             /*
             function(){
                 this.input_search_group.val(this.element.find('#chb_show_all_groups').is(':checked')
