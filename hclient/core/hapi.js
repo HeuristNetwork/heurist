@@ -827,15 +827,96 @@ prof =Profile
                 _callserver('usr_info', request, callback);
             },
             
+
+            //
+            // 1. verifies that given rty_IDs (concept codes) exist in this database
+            // 2. If rectype is missed - download from given db_ID (registration ID)
+            // 3. Show warning of info report
+            //
+            // rty_IDs - array of concept codes
+            // databaseID - registratiion ID of source database. If it is not defined, it takes #2 by default
+            // message - additional (context explanatory) message for final report, if false - without message
+            // returns false - if rty_IDs is not defined
+            //         true - all record types are in this database
+            //
+            checkPresenceOfRectype: function(rty_IDs, databaseID, message, callback){
+
+                if(!rty_IDs){
+                    if($.isFunction(callback)) callback.call();
+                    return false;
+                }else if(!$.isArray(rty_IDs)){
+                    rty_IDs = [rty_IDs];
+                }
+
+                //check what rectypes are missed in this database                  
+                var missed = [];
+                for(var i=0; i<rty_IDs.length; i++){
+                    var local_id = $Db.getLocalID('rty', rty_IDs[i]);
+                    if(!(local_id>0)){
+                        //not found
+                        missed.push( rty_IDs[i] );
+                    }
+                }
+                
+                //all record types are in this database
+                if(missed.length==0){
+                    if($.isFunction(callback)) callback.call();
+                    return true;
+                }
+                
+                //by default we take Heurist_Core_Definitions id#2
+                if(!(databaseID>0)) databaseID = 2;
+            
+                if(message==false){
+                
+                    window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed, callback);
+                    
+                }else{
+                    
+                    var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(message
+                        + '<br>'
+                        + window.hWin.HR('Click "Import" to get these definitions'),
+                        {'Import':function(){
+                            var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg2.dialog('close');
+
+                            window.hWin.HEURIST4.msg.bringCoverallToFront();
+                            window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Import definitions'), 10000);
+
+                            //import missed record types
+                            window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed,
+                                function(response){    
+                                    window.hWin.HEURIST4.msg.sendCoverallToBack(); 
+                                    var $dlg2 = window.hWin.HEURIST4.msg.getMsgFlashDlg();
+                                    if($dlg2.dialog('instance')) $dlg2.dialog('close');
+
+                                    if(response.status == window.hWin.ResponseStatus.OK){
+                                        if($.isFunction(callback)) callback.call();
+                                    }else{
+                                        window.hWin.HEURIST4.msg.showMsgErr(response);     
+                                    }
+                            });
+
+                            },
+                            'Cancel':function(){
+                                var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                                $dlg2.dialog('close');}
+                        },
+                        window.hWin.HR('Definitions required'));
+                }
+                return 0;
+            },
+            
+            
             //
             // imports database defintions 
             // databaseID - source database 
-            // definitionID - rectype id to be imported
+            // definitionID - rectype (array) id or concept code to be imported
             //
             import_definitions: function(databaseID, definitionID, callback){
              
                 var request = {databaseID:databaseID, 
-                    definitionID:definitionID,
+                    definitionID: definitionID, //array of id or concept codes
                     db:window.hWin.HAPI4.database, import:'rectype'};
                     
                 _callserver('sys_structure', request, function(response){

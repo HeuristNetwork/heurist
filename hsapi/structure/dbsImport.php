@@ -132,7 +132,7 @@ $time_debug2 = $time_debug;
         if(@$data['databaseID']>0){  //source database id
             $db_reg_id = $data['databaseID'];
         }
-        if(@$data['definitionID']>0){  //id in source database
+        if(@$data['definitionID']){  //id or concept code in source database
             $local_ids = $data['definitionID'];
             if(!is_array($local_ids)) $local_ids = array($local_ids);
         }
@@ -1770,7 +1770,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                 if(@$this->fields_correspondence_existed[$imp_id]) continue;
 
                 if($trg_detailtypes==null){
-                    $trg_detailtypes = dbs_GetDetailTypes($this->system, null, 0); //only name
+                    $trg_detailtypes = dbs_GetDetailTypes($this->system, null, 0); //only names
                 }
 
                 $sFields = $sFields."<tr><td>$imp_id</td><td>".$def_dts[$imp_id]['commonFields'][$idx_name]
@@ -1817,7 +1817,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
         }
 
         if($need_updated_defs){
-            //2021-06-15 we don't use old format for defintions 
+            //2021-06-15 we don't use old format for defintions anymore
             //$resp['defs'] = array('rectypes'=>$trg_rectypes,'detailtypes'=>$trg_detailtypes,'terms'=>$trg_terms);
             
             $data = $this->system->getCurrentUserAndSysInfo(true);

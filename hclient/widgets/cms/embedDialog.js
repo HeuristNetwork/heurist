@@ -73,8 +73,18 @@ $.widget( "heurist.embedDialog", {
         this.DT_CMS_PAGETYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETYPE'];
         
         if (!(this.RT_CMS_MENU>0 && this.DT_CMS_PAGETYPE>0)){
+            
+            window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('99-52',2,
+                'You will need record type '
+                +'99-52 (Web menu/page) with field 2-928 (Page type) which are available as part of Heurist_Core_Definitions. ',
+                    function(){
+                       that._init(); //call itself again
+                    }
+                );
+            
+/*            
             var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg('You will need record types '
-            +'99-52 (Web manu/page) with field 2-928 (Page type) which are available as part of Heurist_Core_Definitions. '
+            +'99-52 (Web menu/page) with field 2-928 (Page type) which are available as part of Heurist_Core_Definitions. '
             +'Click "Import" to get these definitions',
                         {'Import':function(){
                             var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
@@ -92,7 +102,7 @@ $.widget( "heurist.embedDialog", {
                                     if($dlg2.dialog('instance')) $dlg2.dialog('close');
 
                                     if(response.status == window.hWin.ResponseStatus.OK){
-                                        that._init(); //call itself again
+                                        
                                     }else{
                                         window.hWin.HEURIST4.msg.showMsgErr(response);     
                                     }
@@ -104,7 +114,7 @@ $.widget( "heurist.embedDialog", {
                                 $dlg2.dialog('close');}
                         },
                                 'Definitions required');
-            
+*/            
             return;
         }
         

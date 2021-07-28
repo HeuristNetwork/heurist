@@ -39,8 +39,16 @@ function editCMS( options ){
     DT_CMS_HEADER = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'];
 
     if(!(RT_CMS_HOME>0 && RT_CMS_MENU>0 && DT_CMS_TOP_MENU>0 && DT_CMS_MENU>0)){
-        var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg('You will need record types '
-            +'99-51 (Web home) and 99-52 (Web menu/content) which are available as part of Heurist_Core_Definitions. '
+        
+        window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('99-51',2,
+            'You will need record types '
+            +'99-51 (Web home) and 99-52 (Web menu/content) which are available as part of Heurist_Core_Definitions.',
+                function(){
+                   editCMS( options ); //call itself again 
+                }
+            );
+/*        
+        var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
             +'Click "Import" to get these definitions',
             {'Import':function(){
                 var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
@@ -70,7 +78,7 @@ function editCMS( options ){
                     $dlg2.dialog('close');}
             },
             'Definitions required');
-
+*/
 
 
         return;
