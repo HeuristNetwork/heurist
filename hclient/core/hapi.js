@@ -929,15 +929,10 @@ prof =Profile
                             
                             if(response.defs.entities)
                             for(var entityName in response.defs.entities){
+                                
+                                //refresh local definitions
                                 window.hWin.HAPI4.EntityMgr.setEntityData(entityName,
                                         new hRecordSet(response.defs.entities[entityName]));    
-                                //build rst index
-                                if(entityName=='defRecStructure'){
-                                    window.hWin.HAPI4.EntityMgr.createRstIndex();
-                                }else if(entityName=='defTerms'){
-                                    window.hWin.HAPI4.EntityMgr.setEntityData('trm_Links',
-                                        response.defs.entities[entityName]['trm_Links']);
-                                }
                             }
                         }
 
@@ -1454,22 +1449,10 @@ prof =Profile
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
 
+                            refreshEntityData()
+                            
                             for(var entityName in response.data){
-                                entity_data[entityName] = new hRecordSet(response.data[entityName]);    
-
-                                //build rst index
-                                if(entityName=='defRecStructure'){
-                                    window.hWin.HAPI4.EntityMgr.createRstIndex();
-                                }else if(entityName=='defTerms'){
-//console.log('HEREEE!!!!!');                                   
-                                    entity_data['trm_Links'] = response.data[entityName]['trm_Links'];
-                                }
-                                
-                                if(response.data[entityName]['config']){
-                                    entity_configs[entityName] = response.data[entityName]['config'];
-                                    //find key and title fields
-                                    window.hWin.HAPI4.EntityMgr.resolveFields(entityName);
-                                }
+                                window.hWin.HAPI4.SystemMgr.setEntityData(entityName, response.data)
                             }
 
                             if($.isFunction(callback)) callback(this, true);  
@@ -1535,8 +1518,33 @@ prof =Profile
                 return entity_data[entityName];     
             },
 
+            //
+            // data either recordset or response.data
+            //
             setEntityData: function(entityName, data){
-                entity_data[entityName] = data;
+                
+                if( window.hWin.HEURIST4.util.isRecordSet(data) ){
+                    
+                    entity_data[entityName] = data;    
+                }else{
+                    
+                    entity_data[entityName] = new hRecordSet(data[entityName]);    
+
+                    //build rst index
+                    if(entityName=='defRecStructure'){
+                        window.hWin.HAPI4.EntityMgr.createRstIndex();
+                    }else if(entityName=='defTerms'){
+//console.log('HEREEE!!!!!');                                   
+                        entity_data['trm_Links'] = data[entityName]['trm_Links'];
+                    }
+                    
+                    if(data[entityName]['config']){
+                        entity_configs[entityName] = data[entityName]['config'];
+                        //find key and title fields
+                        window.hWin.HAPI4.EntityMgr.resolveFields(entityName);
+                    }
+                }
+                
             },
             
             //
