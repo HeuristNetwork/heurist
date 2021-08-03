@@ -309,9 +309,15 @@
                 
                 $url = filter_var($url, FILTER_SANITIZE_URL);
 
-                $is_renderable = UtilsImage::getRemoteImage($url);
-
-                $res = ($is_renderable==null || $is_renderable===false) ? "false" : "true";
+				$rtn = recognizeMimeTypeFromURL($mysqli, $url);
+				
+                if ($rtn["extension"] == "bin") {
+                    $is_renderable = UtilsImage::getRemoteImage($url);
+                } else {
+                    $is_renderable = true;
+                }
+                
+				$res = ($is_renderable==null || $is_renderable===false) ? "false" : "true";
 
             } else {
 
