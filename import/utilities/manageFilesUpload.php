@@ -199,8 +199,8 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 // TODO: we should eliminate any duplicate extensions which might have been added by the user
 
                 if ($mediaFolders=="" || count($dirs) == 1) {
-                    print ("<p>If you wish to upload files to a directory other than the scratch space, define the folders on the database administration page <br />".
-                        "(in Database > Advanced Properties > Additional Folders for indexing), where you can also add additional file extensions.</p>");
+                    print ("<p>If you wish to upload files to a directory other than those in the dropdown, or to define additional file extensions,<br />".
+                        "go to Design > Properties</p>");
                 }else{
                     print "<p><b>Allowable extensions for upload:</b> $mediaExts</p>";
                 }
@@ -208,8 +208,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 //@todo change to entity dialog  
                 ?>
                 
-                <br/>
-                <p><a href='#' onclick="{window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification', 
+                 <p><a href='#' onclick="{window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification', 
                     {onClose:function(){
                         
                         //var mediaFolders = window.hWin.HAPI4.sysinfo['sys_MediaFolders'];
@@ -218,7 +217,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                         
                     }}); return false;}"
                     title='Open form to edit properties which determine the handling of files and directories in the database upload folders'>
-                    Click here to set media/upload folders</a>
+                    Design > Properties</a>
                 </p>                
                 <?php              
             } // Visit #1
