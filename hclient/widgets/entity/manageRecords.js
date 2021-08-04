@@ -2006,7 +2006,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             that.editRecordTypeAttributes();
                         } );
 
-                }, {title:'Data have been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
+                }, {title:'Data has been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
                 return;                           
         }
 
@@ -2054,7 +2054,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             that.editRecordType(is_inline);
                         } );
                     
-                }, {title:'Data have been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
+                }, {title:'Data has been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
                 return;                           
         }
         
@@ -3108,6 +3108,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     //
     onEditFormChange:function(changed_element){
         
+        var that = this;
+		
         var force_hide = (changed_element===true); //hide save buttons
         
         var mode = 'hidden';
@@ -3194,6 +3196,18 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             var dtId_Geo = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
                             var ele = that._editing.getFieldByName( dtId_Geo );
                             if(ele){
+								
+                                function templateimport_link() {
+                                    var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                                    $dlg.dialog( "close" );
+
+                                    that.closeEditDialog();
+                                    // Open Design->Browse Templates
+                                    window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-import');
+
+                                    return;
+                                }								
+								
                                 var mapdoc_extent = null;
                                 
                                 var vals = ele.editing_input('getValues');
@@ -3232,10 +3246,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 });
                             
                             }else{
-                                window.hWin.HEURIST4.msg.showMsgErr('<p>Map document record must have Bounding Box field! '
+                                var dlg = window.hWin.HEURIST4.msg.showMsgDlg('<p>Map document record must have Bounding Box field! '
                                     +'Please refresh record type structure.</p>'
-                                    +'<p>Go to Design Structure > Get from template > Heurist_Core_Definitions then check the Show All'
-                                    +' checkbox and download Heurist Map Document from the Spatial and Mapping section.</p>');
+                                    +'<p>Go to <span id="msg_link">Design > Browse Templates</span> > Heurist_Core_Definitions then check the Show All'
+                                    +' checkbox and download Heurist Map Document from the Spatial and Mapping section.</p>', null, 'Map Document Error');
+									
+                                dlg.find("#msg_link").on("click", templateimport_link).css({"text-decoration": "underline", "cursor": "pointer"});
                             }
                     }
                     

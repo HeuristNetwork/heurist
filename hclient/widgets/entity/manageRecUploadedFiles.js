@@ -337,7 +337,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 if( !window.hWin.HEURIST4.util.isempty(curr_url[0]) && curr_url[0]!=that._previousURL ){    
 
                     that._previousURL = curr_url[0];
-                    
+					
+                    that._requestMimeTypeByURL();
+					
+                    /* Cannot rely on retrieving the extension via a URL                
                     var ext = window.hWin.HEURIST4.util.getFileExtension(curr_url[0]);
                
                     //can't get ext from url
@@ -349,8 +352,6 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         }else{
                             that._requestMimeTypeByURL();    
                         }
-                        
-                        
                         
                         return;
                     }
@@ -364,6 +365,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     }
                     ele2.editing_input('showErrorMsg', ''); //hide
                     //that.onEditFormChange();
+                    */
                 }
                 
             });
@@ -409,6 +411,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 }
                 
                 ele2.editing_input('setValue', ext );
+                ele2.show();
                 that.onEditFormChange();
                 
                 if(ext=='bin'){
@@ -599,47 +602,39 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         if(this._previousURL && !ignoreCheck){
 
-            var invalid_img = false;
+            var ele = this._editing.getFieldByName('ulf_MimeExt');
+            var extension = ele.editing_input("getValues");
 
-            window.hWin.HAPI4.SystemMgr.check_renderable_url(this._previousURL, function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
+            if(!window.hWin.HEURIST4.util.isempty(extension) && extension[0] == "bin"){
 
-                    if(response.data == 'false'){
+                var btns = {};
 
-                        var btns = {};
-                        
-                        btns[window.hWin.HR('Re-Specify URL')] = function(){
-                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-                            $dlg.dialog('close');
-                        };
-                        btns[window.hWin.HR('Accept as is')] = function(){
-                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-                            $dlg.dialog('close');
-                            that._saveEditAndClose(fields, afterAction, true);
-                        };
+                btns[window.hWin.HR('Re-Specify URL')] = function(){
+                    var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                    $dlg.dialog('close');
+                };
+                btns[window.hWin.HR('Accept as is')] = function(){
+                    var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                    $dlg.dialog('close');
+                    that._saveEditAndClose(fields, afterAction, true);
+                };
 
-                        var labels = {};
+                var labels = {};
 
-                        labels['title'] = 'Invalid URL for a Renderable';
-                        labels['no'] = window.hWin.HR('Re-Specify URL');
-                        labels['yes'] = window.hWin.HR('Accept as is');
+                labels['title'] = 'Invalid URL for renderable media';
+                labels['no'] = window.hWin.HR('Re-Specify URL');
+                labels['yes'] = window.hWin.HR('Accept as is');
 
-                        window.hWin.HEURIST4.msg.showMsgDlg(
-                              "This file cannot be rendered as an image or playable media.<br/>"
-                            + "You may have referenced a web page (e.g. htm or html) rather than an image or video.<br/>"
-                            + "The URL may appear to have a file extension, but you have most likely referenced a wrapper for the file.<br/>"
-                            + "You must reference the file directly.<br/>",
-                            btns, labels,
-                            {default_palette_class: 'ui-heurist-populate'}
-                        );
-
-                        invalid_img = true;
-                    }else{
-
-                        that._saveEditAndClose(fields, afterAction, true);
-                    }
-                }
-            });
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                      "This file cannot be rendered as an image or playable media.<br/>"
+                    + "You may have referenced a web page (e.g. htm or html) rather than an image or video.<br/>"
+                    + "The URL may appear to have a file extension, but you have most likely referenced a wrapper for the file.<br/>"
+                    + "You must reference the file directly.<br/>",
+                    btns, labels,
+                    {default_palette_class: 'ui-heurist-populate'}
+                );
+            }
+				
         }else{
 
             this._super(fields, afterAction);
