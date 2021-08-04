@@ -425,8 +425,6 @@
             $needrefresh = false;
             $mimeType = null;
             
-            $url = strtolower($url);
-            
             if(strpos($url, 'soundcloud.com')!==false){
                 $mimeType  = 'audio/soundcloud';
                 $extension = 'soundcloud';

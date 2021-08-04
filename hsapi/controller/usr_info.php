@@ -303,16 +303,6 @@
                 
                 $res = recognizeMimeTypeFromURL($mysqli, $url);
                 
-            } else if ($action == "check_renderable_url") {
-
-                $url = @$_REQUEST['url'];
-                
-                $url = filter_var($url, FILTER_SANITIZE_URL);
-
-                $is_renderable = UtilsImage::getRemoteImage($url);
-
-                $res = ($is_renderable==null || $is_renderable===false) ? "false" : "true";
-
             } else {
 
                 $system->addError(HEURIST_INVALID_REQUEST);

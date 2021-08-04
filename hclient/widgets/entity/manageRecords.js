@@ -2006,7 +2006,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             that.editRecordTypeAttributes();
                         } );
 
-                }, {title:'Data have been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
+                }, {title:'Data has been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
                 return;                           
         }
 
@@ -2054,7 +2054,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             that.editRecordType(is_inline);
                         } );
                     
-                }, {title:'Data have been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
+                }, {title:'Data has been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
                 return;                           
         }
         

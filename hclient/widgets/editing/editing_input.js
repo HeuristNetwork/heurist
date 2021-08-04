@@ -3278,28 +3278,16 @@ console.log('onpaste');
                 //url for thumb
                 if(!window.hWin.HEURIST4.util.isempty(value['ulf_ExternalFileReference'])){ // check if external source can be rendered
 
-                    //@todo - replace to window.hWin.HAPI4.checkImage
-                    window.hWin.HAPI4.SystemMgr.check_renderable_url(value['ulf_ExternalFileReference'], function(response){
+                    window.hWin.HAPI4.checkImage("Records", value["ulf_ObfuscatedFileID"], null, function(response) {
 
-                        if(response.status == window.hWin.ResponseStatus.OK){
-
-                            ele.parent().find('.image_input > img').attr('src',
-                                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
-                                        value.ulf_ObfuscatedFileID);
-                                        
+                        if(response.data && response.status == window.hWin.ResponseStatus.OK) {
                             
-                            if (response.data == "false") { // cannot be rendered
+                            ele.parent().find('.image_input > img').attr('src',
+								window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+									value.ulf_ObfuscatedFileID);
 
-                            //ele.parent().find('.image_input > img').removeAttr('src'); // ensure no source image is shown
-
-                                ele.parent().find(".smallText").text("This file cannot be rendered").css({
-                                    "font-size": "larger", 
-                                    "color": "black", 
-                                    "position": "relative", 
-                                    "bottom": "60px"
-                                });
-
-                            } else { // can be rendered
+                            if($.isPlainObject(response.data) && response.data.width > 0 && response.data.height > 0) {
+                                
 
                                 ele.parent().find(".smallText").text("Click image to freeze in place").css({
                                     "font-size": "smaller", 
@@ -3308,11 +3296,20 @@ console.log('onpaste');
                                     "bottom": ""
                                 });
 
-                                that.newvalues[ele.attr('id')] = value;    
+                                that.newvalues[ele.attr('id')] = value;
+                            } else {
+                                
+                                ele.parent().find('.image_input > img').removeAttr('src');
+                                ele.parent().find(".smallText").text("This file cannot be rendered").css({
+                                    "font-size": "larger", 
+                                    "color": "black", 
+                                    "position": "relative", 
+                                    "bottom": "60px"
+                                });
                             }
-
                             ele.change();
                         }
+
                     });
                 }else{ // local source
 
