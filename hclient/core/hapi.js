@@ -932,7 +932,7 @@ prof =Profile
                                 
                                 //refresh local definitions
                                 window.hWin.HAPI4.EntityMgr.setEntityData(entityName,
-                                        new hRecordSet(response.defs.entities[entityName]));    
+                                                                response.defs.entities);
                             }
                         }
 
@@ -1449,10 +1449,8 @@ prof =Profile
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
 
-                            refreshEntityData()
-                            
                             for(var entityName in response.data){
-                                window.hWin.HAPI4.SystemMgr.setEntityData(entityName, response.data)
+                                window.hWin.HAPI4.EntityMgr.setEntityData(entityName, response.data)
                             }
 
                             if($.isFunction(callback)) callback(this, true);  
