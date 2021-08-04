@@ -2006,7 +2006,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
             
             this.treeviews[groupID].clearFilter();
             if(!(value>=0)) value = this.options.filter_by_type;
-            
+    
             if(value!=0){
                     
                 this.treeviews[groupID].filterNodes(function(node){
@@ -2387,6 +2387,8 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                 $("#addlink"+groupID).css('display', 'none');
                 
                 svs_ID = response.new_svs_ID;
+                
+                that._applyTreeViewFilter( groupID );
 
             }else if(node){ //edit is called from this widget only - otherwise we have to implement search node by svsID
                 //if group is changed move node to another tree
