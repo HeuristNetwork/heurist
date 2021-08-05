@@ -256,11 +256,13 @@ $.widget( "heurist.mapping", {
             }
             
         };
+        
+        is_ui_main = this.options.layout_params && this.options.layout_params['ui_main'];
 
         // Setting layout
         if(this.options.element_layout)
         {
-            layout_opts.center__minHeight = 30;
+            layout_opts.center__minHeight = 0;
             layout_opts.center__minWidth = 200;
             layout_opts.north__size = 0;//30;
             layout_opts.north__spacing_open = 0;
@@ -274,15 +276,23 @@ $.widget( "heurist.mapping", {
                 //if(mapping) mapping.setTimelineMinheight();
                 that._adjustLegendHeight();
             };
+            
+            if(is_ui_main){
+                
+                window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane',
+                                    ['east', (top ?  '85%' : window.innerWidth)]);
+                
+                layout_opts.north__size = 30;
+            }
 
             this.mylayout = $(this.options.element_layout).layout(layout_opts);
         }
+
         
         //2. INIT MAP
+        map_element_id = 'map';
         if(this.options.element_map && this.options.element_map.indexOf('#')==0){
             map_element_id = this.options.element_map.substr(1);
-        }else{
-            map_element_id = 'map';    
         }
         
         $('#'+map_element_id).css('padding',0); //reset padding otherwise layout set it to 10px
@@ -323,7 +333,7 @@ $.widget( "heurist.mapping", {
         this.map_legend = L.control.manager({ position: 'topright' }).addTo( this.nativemap );
         
         //content for legend
-        this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element});
+        this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element, is_ui_main:is_ui_main});
         
         this.updateLayout();
         
@@ -2003,6 +2013,7 @@ $.widget( "heurist.mapping", {
             this.markerClusterMaxSpider = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_spider', 5));
         }
         
+        
         //@todo deriveMapLocation
         
         //maxClusterRadius
@@ -2071,10 +2082,15 @@ $.widget( "heurist.mapping", {
         }
         
         if(this.options.element_layout){
-            if(__parseval(params['noheader'])){ //outdated
+            
+            var is_main_ui = params['ui_main']; //if true show separate toolbar for mp controls
+            
+            if(is_main_ui){
+                layout_opts.north__size = 30;
+            }else if(__parseval(params['noheader'])){ //outdated
                 layout_opts.north__size = 0;
             }
-            //$(this.mylayout).layout(layout_opts);
+            
             var mylayout = $(this.options.element_layout).layout(layout_opts);
             if(this.notimeline){
                 mylayout.hide('south');
@@ -2205,6 +2221,123 @@ $.widget( "heurist.mapping", {
                 }
                 
                 if(that['map_'+val] && !that['map_'+val]._map) that['map_'+val].addTo(that.nativemap);
+                
+                if(is_main_ui){
+                    var toolbar = $('#mapToolbarDiv');
+                    
+                    $('.leaflet-control').css({clear:'none','margin-top':'0px'});
+                    
+                    that._on(toolbar, {click:function(e){
+                        if(!$(e.target).hasClass('ui-icon-bookmark')){
+                            that.map_bookmark.collapse();    
+                        }
+                        if(!$(e.target).hasClass('ui-icon-print')){
+                            $('.browser-print-mode').hide();
+                        }
+                    }});
+                    
+                    if(val=='legend'){
+                        
+                        toolbar.find('.ui-icon-list').button()
+                            .on({click:function(){that.mapManager.toggle();}});
+                            
+                    }else if(val=='bookmark'){
+
+                        toolbar.find('.ui-icon-bookmark').attr('title','Bookmarks')
+                            .button()
+                            .on({click:function(){
+                                var ele = $('.bookmarks-container');
+                                if(ele.is(':visible')){
+                                    that.map_bookmark.collapse();    
+                                }else{
+                                    that.map_bookmark.expand();    
+                                    //ele.css({top: that.map_bookmark.position().y+10});
+                                    //left: $('a.ui-icon-bookmark').position().x});
+                                }
+                                
+                                //position({of:$('a.ui-icon-bookmark'),my:'top left', at:'bottom left' });
+                        }});
+                            
+                            
+                        var ele2 = that.map_bookmark.getContainer();
+                        $(ele2).css({'margin-top':'10px'});
+                        
+                        $(that.map_bookmark.getContainer()).css({border:'none',height:'1px !important', padding: '0px', background: 'none'});
+                        $('.bookmarks-header').hide();
+                        
+                    }else if(val=='print'){
+
+                        toolbar.find('.ui-icon-print').button()
+                            .attr('title', window.hWin.HR('Print map'))
+                            .on({click:function(){  
+                                $('.browser-print-mode').css('display','inline-block');
+                            }});
+                        
+                        $(that.map_print.getContainer()).css({border:'none',height:'0px !important',
+                                                width:'0px !important','margin-left':'200px'});
+                        $('.leaflet-browser-print').hide();
+                        
+                    }else if(val=='publish'){ //publish plugin
+
+                        $(that.map_publish.getContainer()).hide();
+
+                        that._on(
+                        toolbar.find('.ui-icon-globe').button()
+                            .attr('title', window.hWin.HR('Print map')),
+                            {click:function(){  
+                                window.hWin.HEURIST4.ui.showPublishDialog( {mode:'mapquery', mapwidget:this} );
+                            }});
+                        
+                            
+                    }else if(val=='addmapdoc'){ //addmapdoc plugin
+                        $(that.map_addmapdoc.getContainer()).hide();
+                        
+                        toolbar.find('#btn_add_mapdoc')
+                            .attr('title', window.hWin.HR('Create new map document'))
+                                .html('<span class="ui-icon ui-map-document" style="width:22px;margin:0px;height:22px">'
+                                +'<span class="ui-icon ui-icon-plus" style="position:absolute;right:0px;font-size:12px;color:white;text-shadow: 2px 2px gray;bottom:0px" />'
+                                +'</span>')                        
+                            .button()
+                            .on({click:function(){
+                                    that.mapManager.createNewMapDocument();
+                            }});
+                            
+                    }else  if(val=='geocoder'){
+
+                        $(that.map_geocoder.getContainer()).hide();
+
+                        toolbar.find('.ui-icon-search').button()
+                            .attr('title', window.hWin.HR('Search'))
+                            .on({click:function(){  
+                                $(that.map_geocoder.getContainer()).show();
+                                that.map_geocoder._expand();
+                            }});
+                        
+                        L.DomEvent.addListener(that.map_geocoder, 'collapse', 
+                            function(){
+                                $(that.map_geocoder.getContainer()).hide();
+                            }
+                            );
+                        
+
+                            
+                    }else  if(val=='zoom'){
+
+
+                        toolbar.find('.ui-icon-plus').button()
+                            .attr('title', window.hWin.HR('Zoom in'))
+                            .on({click:function(){  that.nativemap.zoomIn(); }});
+                        
+                        toolbar.find('.ui-icon-minus').button()
+                            .attr('title', window.hWin.HR('Zoom out'))
+                            .on({click:function(){  that.nativemap.zoomOut(); }});
+
+                        $(that.map_zoom.getContainer()).hide();
+                    }
+                    
+                }
+                
+                
             }else if(that['map_'+val]){
                 that['map_'+val].remove();
             }
@@ -2225,6 +2358,23 @@ $.widget( "heurist.mapping", {
         }
 
         __controls('help');
+        
+        
+        if(is_main_ui){
+            var toolbar = $('#mapToolbarDiv');
+            this._on(toolbar.find('#btn_layout_map').button({text:'Map'}),
+                {click:function(e){  
+                    this.nomap = !this.nomap;
+                    if(this.notimeline && this.nomap) this.notimeline = false;
+                    this._updatePanels()
+                }});
+            this._on(toolbar.find('#btn_layout_timeline').button({text:'Timeline'}),
+                {click:function(e){  
+                    this.notimeline = !this.notimeline;
+                    if(this.notimeline && this.nomap) this.nomap = false;
+                    this._updatePanels()
+                }});
+        }
         
             
         //   legend: [basemaps,search,mapdocs|onedoc,off,width]
@@ -2260,6 +2410,7 @@ $.widget( "heurist.mapping", {
         //this._updatePanels();
     },    
     
+    
     /**
     * show/hide panels map and timeline
     */
@@ -2268,12 +2419,29 @@ $.widget( "heurist.mapping", {
         var no_map_data = !this.isSomethingOnMap(), 
             no_time_data = (this.timeline_groups.length==0);
         
-        if(this.is_timeline_disabled!==(this.notimeline || no_time_data) ||
-           this.is_map_disabled!==(this.nomap || no_map_data))
-        {
+        var toolbar = $('#mapToolbarDiv');
+        if(this.nomap){
+            toolbar.find('#btn_layout_map').removeClass('ui-state-active');
+        }else{
+            toolbar.find('#btn_layout_map').addClass('ui-state-active').blur();
+        }
+        if(this.notimeline){
+            toolbar.find('#btn_layout_timeline').removeClass('ui-state-active');
+        }else{
+            toolbar.find('#btn_layout_timeline').addClass('ui-state-active').blur();
+        }
 
-            this.is_timeline_disabled = (this.notimeline || no_time_data);
-            this.is_map_disabled = (this.nomap || no_map_data);
+        var is_main_ui = this.options.layout_params && this.options.layout_params['ui_main'];
+
+        var new_1 = this.notimeline || (!is_main_ui && no_time_data);
+        var new_2 = this.nomap || (!is_main_ui && no_map_data);
+        
+        if(this.is_timeline_disabled!==new_1 || this.is_map_disabled!==new_2)        
+        {
+        //status has been changed - action
+
+            this.is_timeline_disabled = new_1;
+            this.is_map_disabled = new_2;
             
             if(this.options.element_layout){
             
@@ -2313,17 +2481,16 @@ $.widget( "heurist.mapping", {
                     mylayout.show('south');
                     mylayout.sizePane('south', layout_opts.south__size);    
                 }
-
-                if(this.is_map_disabled){
-                   //$('#map').hide();
-                   $('#map_empty_message').show();
-                }else{
-                   $('#map_empty_message').hide();
-                   $('#map').show();
-                }
-                
             }
-
+            
+        }
+        
+        if(no_map_data){
+           //$('#map').hide();
+           $('#map_empty_message').show();
+        }else{
+           $('#map_empty_message').hide();
+           $('#map').show();
         }
     },
     

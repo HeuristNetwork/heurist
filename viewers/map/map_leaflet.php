@@ -225,6 +225,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         //   basemap: name of initial basemap
         //   extent: fixed extent    
         layout_params = {};
+        layout_params['ui_main'] = __gp('ui_main'); //separate toolbar for map controls
         layout_params['nomap'] = __gp('nomap');
         layout_params['notimeline'] = __gp('notimeline');
         layout_params['nocluster'] = __gp('nocluster');
@@ -292,13 +293,21 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         </div>
 
         <!-- Toolbar -->
-        <div class="ui-layout-north" id="mapToolbarDiv" style="display: none; height: 30px; z-index:999;">
+        <div class="ui-layout-north" id="mapToolbarDiv" style="display: block; height: 30px; z-index:999;">
+            <div style="padding-top: 5px">
 
-            <span id="map-settingup-message" style="padding-left:1em;line-height:2em;color:red">
-                Setting up map ...
-            </span>
-
-            <div id="map_limit_warning" style="border-radius:6px;background-color: rgb(172, 231, 255);font-weight:bold; color:red; padding:8px; display:none;">
+            <button id="btn_layout_map" style="height: 22px;display:inline-block;margin-left: 10px;">Map</button>        
+            <button id="btn_layout_timeline" style="height: 22px;display:inline-block;">Timeline</button>        
+            
+            <a class="ui-icon ui-icon-plus" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>        
+            <a class="ui-icon ui-icon-minus" style="width: 22px; height: 22px;padding:0px;display:inline-block;"></a>        
+            
+            <a class="ui-icon ui-icon-bookmark" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>       <a class="ui-icon ui-icon-search" style="width: 22px; height: 22px;padding:0px;display:inline-block;"></a>            
+            
+            
+            <a class="ui-icon ui-icon-list" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>           <a id="btn_add_mapdoc" style="width: 22px; height:22px;top:-1px;padding:0px;display:inline-block;"></a>   
+            
+            <a class="ui-icon ui-icon-print" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>          <a class="ui-icon ui-icon-globe" style="width: 22px; height: 22px;padding:0px;display:inline-block;"></a>            
             </div>
         </div>
 

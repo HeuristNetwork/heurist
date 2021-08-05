@@ -125,7 +125,8 @@ function hMapManager( _options )
         container:null,  
         mapwidget:null,   
         visible_panels:null,
-        hasTempMap: false  //show hide this panel
+        hasTempMap: false,  //show hide this panel
+        is_ui_main: false   //if true - hide on collapse
     },
         
     mapDocuments = null, //hMapDocument for db map docs,  Note: mapdocument with index=0 is search results
@@ -243,6 +244,7 @@ function hMapManager( _options )
         //
     }
 
+    
     //
     //
     //    
@@ -889,9 +891,10 @@ function hMapManager( _options )
     
     function _onExpand(){
         isExpanded = true;
+        
         btn_expand.hide();
         btn_collapse.show();
-        options.container.css({'width':keepWidth,'overflow-y':'auto',padding:'4px'}).resizable( "enable" );
+        options.container.css({'width':keepWidth,'overflow-y':'auto',padding:'4px'}).resizable( "enable" ).show();
         that.updatePanelVisibility(); //refresh
         that.setHeight();
     }
@@ -903,6 +906,11 @@ function hMapManager( _options )
         btn_collapse.hide();
         options.container.css({'width':'22px','height':'22px','overflow-y':'hidden','overflow-x':'hidden',padding:'1px'})
             .resizable( "disable" );
+            
+        if(options.is_ui_main){
+            options.container.hide();
+        }
+            
         that.updatePanelVisibility();
     }
 
@@ -1229,6 +1237,18 @@ function hMapManager( _options )
 
             options.mapwidget.mapping('loadBaseMap', idx);
             options.container.find('input[data-mapindex="'+idx+'"]').attr('checked',true);
+        },
+        
+        //
+        //
+        //
+        toggle: function(){
+            
+            if(isExpanded){
+                _onCollapse();
+            }else{
+                _onExpand();
+            }
         }
         
     }
