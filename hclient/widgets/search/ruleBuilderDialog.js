@@ -79,13 +79,16 @@ function onPageInit(success) //callback function of hAPI initialization
                 var i;
                 for(i=0; i<rules.length; i++){
 
-                    $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add RuleSets builder for level 1
+                    var ele = $("<div>").addClass('level1')
+                            .uniqueId().insertBefore($('#div_add_level'));
+                    
+                    ele.ruleBuilder({level:1,     //add RuleSets builder for level 1
                         rules: rules[i],
                         onremove: function(event, data){
                             $('#'+data.id).remove();    //remove this RuleSets builder
 
                         }
-                    }).insertBefore($('#div_add_level'));
+                    })
 
                 }
                 return;
@@ -102,12 +105,16 @@ function onPageInit(success) //callback function of hAPI initialization
 //
 function addLevel(){    
 
-    $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,
+    //need to add to dom first otherwise it will not filed selectmenu-parent
+    var ele = $("<div>").addClass('level1')
+            .uniqueId().insertBefore($('#div_add_level'));
+    
+    ele.ruleBuilder({level:1,
             recordtypes: first_level_rty_ID,
             onremove: function(event, data){
                 $('#'+data.id).remove();
             }
-    }).insertBefore($('#div_add_level'));
+    });
 
 }
 

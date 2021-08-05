@@ -60,7 +60,7 @@ require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPage.php');
 </style>
 </head>
 <body style="overflow:hidden">
-    <div style="height:100%">
+    <div style="height:100%" class="selectmenu-parent">
         <div style="position:absolute;width:99%;top:0;font-size:0.8em;text-align: left !important;display:table-row" class="rulebuilder_hdear">
             <div style="width:230px;">Starting point (entity type)</div>
             <div>Relationship Field</div>

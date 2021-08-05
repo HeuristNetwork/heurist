@@ -323,7 +323,7 @@ function ShowReps() {
             
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                 
-console.log(response);                
+//console.log(response);                
                 if(!response || response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
                     _hideProgress();
                     //console.log(response+'  '+session_id);                   

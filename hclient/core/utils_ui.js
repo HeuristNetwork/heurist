@@ -1104,6 +1104,7 @@ window.hWin.HEURIST4.ui = {
                             parent_ele = selObj.parent();   
                         }
                     }
+                    
             }
             
             if(selObj.hSelect("instance")!=undefined){

@@ -362,7 +362,6 @@ $.widget( "heurist.ruleBuilder", {
         }
 
         //fill field selector
-        
         window.hWin.HEURIST4.ui.createSelector(this.select_fields.get(0), arr_options);
 
 
@@ -380,6 +379,7 @@ $.widget( "heurist.ruleBuilder", {
                         that.select_fields.val(data.item.value);//change value for underlaying html select
                         that._onSelectFieldtype();
                 }});
+        
     },
 
     //
