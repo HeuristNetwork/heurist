@@ -267,9 +267,9 @@ this._dout('refresh vis='+this.element.is(':visible'));
             if(newurl==null){
                 this._current_url = null;
                 if(this.options.is_frame_based){
-                    this.dosframe.attr('src', null);
+                    this.dosframe.attr('src', window.hWin.HRes('recordSelectMsg'));
                 }else{
-                    this.div_content.empty();
+                    this.div_content.load(window.hWin.HRes('recordSelectMsg'));
                 }
             }else{
                 newurl = window.hWin.HAPI4.baseURL +  newurl;
