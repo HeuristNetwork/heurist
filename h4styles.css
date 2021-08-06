@@ -2212,8 +2212,19 @@ input[type="file"] {
     bottom: 2px;*/
     padding: 0px !important;
 }
+
+.ui-tabs{
+    padding: 0px;
+}
+.ui-tabs .ui-tabs-nav{
+    padding: 0px;
+    border: none;
+}
 .ui-tabs .ui-tabs-nav li a {
-    padding: 0.2em 0.5em !important;
+    padding: 5px 10px 9px 10px !important;
+    font-size: 1.2em;
+    font-weight: bold;
+    /*was padding: 0.2em 0.5em !important; */
 }
 
 .ui-resizable-resizing {

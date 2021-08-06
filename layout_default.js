@@ -53,11 +53,11 @@ var cfg_widgets = [
     {id:'heurist_resultListCollection', name:'Records Collection', widgetname:'resultListCollection', script:'hclient/widgets/viewers/resultListCollection.js'},
 
     {id:'heurist_Map', name:'Map (old)', title:'Map and timeline', widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js'},  // map in iframe
-    {id:'heurist_Map2', name:'Map-Timeline', title:'Map and timeline',
+    {id:'heurist_Map2', name:'Map', title:'Map and timeline',
                 widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js'},  // map in iframe
     {id:'heurist_Frame', name:'Static Page', widgetname:'staticPage', script:'hclient/widgets/viewers/staticPage.js'},
 
-    {id:'heurist_Graph', name:'Network Diagram', widgetname:'connections', script:'hclient/widgets/viewers/connections.js'},
+    {id:'heurist_Graph', name:'Network', widgetname:'connections', script:'hclient/widgets/viewers/connections.js'},
 
     {id:'heurist_recordAddButton', name:'Add Record', widgetname:'recordAddButton', script:'hclient/widgets/record/recordAddButton.js'},
     
@@ -216,9 +216,10 @@ var cfg_layouts = [
                      show_savefilter:false, show_search_form:true, show_inner_header:true, 
                      show_url_as_link:true} }]},
         east:{size:'50%', Xminsize:300, dropable:false,
-            tabs:[{dockable:true, dragable:false, resizable:false, adjust_positions:true, //css:{'font-size':'0.95em'},
+            tabs:[{dockable:true, dragable:false, resizable:false, adjust_positions:true, 
+                        //css:{padding:'0px',width:'100%',height:'100%'},
                 apps:[
-                    {appid:'heurist_resultListExt', name: 'Record View', 
+                    {appid:'heurist_resultListExt', name: 'Record', 
                                 options:{url: 'viewers/record/renderRecordData.php?recID=[recID]&db=[dbname]', 
                                 is_single_selection:true, 'data-logaction':'open_Record',css:{overflow:'hidden'}}
                     },    // H3 record viewer
@@ -228,7 +229,7 @@ var cfg_layouts = [
                     {appid:'heurist_Map2', options:{'data-logaction':'open_MapTime', leaflet:true
                         , layout_params:{legend:'search,-basemaps,-mapdocs,250,off', ui_main:true} }}, 
                     
-                    {appid:'heurist_resultListExt', name: 'Custom Reports', options:{title:'Custom Reports', 
+                    {appid:'heurist_resultListExt', name: 'Report', options:{title:'Report', 
                                     url: 'viewers/smarty/showReps.html?db=[dbname]', 'data-logaction':'open_Reports',
                                     css:{overflow:'hidden'}}
                     },
@@ -237,7 +238,7 @@ var cfg_layouts = [
                                          isframe:true, 'data-logaction':'open_Export'}
                         ,css:{position:'absolute', top:0,left:0,bottom:0,right:0,'min-width':'75em'}},
                         
-                    {appid:'heurist_Graph',   options:{title:'Network Diagram',
+                    {appid:'heurist_Graph',   options:{title:'Network',
                                      url: 'hclient/framecontent/visualize/springDiagram.php?db=[dbname]',
                                      'data-logaction':'open_Network'}},
  
