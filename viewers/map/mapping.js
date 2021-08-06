@@ -2102,6 +2102,7 @@ $.widget( "heurist.mapping", {
         var controls = __splitval(params['controls']);
         controls.push('zoom'); //zoom is always visible
         controls.push('addmapdoc'); //add map doc is always visible for "non published" ui
+        controls.push('help');
         
         var that = this;
         function __controls(val){
@@ -2243,51 +2244,78 @@ $.widget( "heurist.mapping", {
                             
                     }else if(val=='bookmark'){
 
-                        toolbar.find('.ui-icon-bookmark').attr('title','Bookmarks')
-                            .button()
-                            .on({click:function(){
-                                var ele = $('.bookmarks-container');
-                                if(ele.is(':visible')){
-                                    that.map_bookmark.collapse();    
-                                }else{
-                                    that.map_bookmark.expand();    
-                                    //ele.css({top: that.map_bookmark.position().y+10});
-                                    //left: $('a.ui-icon-bookmark').position().x});
-                                }
+                        if(that.map_bookmark){
+                            
+                            toolbar.find('.ui-icon-bookmark').attr('title','Bookmarks')
+                                .button()
+                                .on({click:function(){
+                                    var ele = $('.bookmarks-container');
+                                    if(ele.is(':visible')){
+                                        that.map_bookmark.collapse();    
+                                    }else{
+                                        that.map_bookmark.expand();    
+                                        //ele.css({top: that.map_bookmark.position().y+10});
+                                        //left: $('a.ui-icon-bookmark').position().x});
+                                    }
+                                    
+                                    //position({of:$('a.ui-icon-bookmark'),my:'top left', at:'bottom left' });
+                            }});
                                 
-                                //position({of:$('a.ui-icon-bookmark'),my:'top left', at:'bottom left' });
-                        }});
+                                
+                            var ele2 = that.map_bookmark.getContainer();
+                            $(ele2).css({'margin-top':'10px'});
                             
-                            
-                        var ele2 = that.map_bookmark.getContainer();
-                        $(ele2).css({'margin-top':'10px'});
-                        
-                        $(that.map_bookmark.getContainer()).css({border:'none',height:'1px !important', padding: '0px', background: 'none'});
-                        $('.bookmarks-header').hide();
+                            $(that.map_bookmark.getContainer()).css({border:'none',height:'1px !important', padding: '0px', background: 'none'});
+                            $('.bookmarks-header').hide();
+                        }else{
+                            toolbar.find('.ui-icon-bookmark').hide();
+                        }
                         
                     }else if(val=='print'){
 
-                        toolbar.find('.ui-icon-print').button()
-                            .attr('title', window.hWin.HR('Print map'))
-                            .on({click:function(){  
-                                $('.browser-print-mode').css('display','inline-block');
-                            }});
-                        
-                        $(that.map_print.getContainer()).css({border:'none',height:'0px !important',
-                                                width:'0px !important','margin-left':'200px'});
-                        $('.leaflet-browser-print').hide();
+                        if(that.map_print){
+                            toolbar.find('.ui-icon-print').button()
+                                .attr('title', window.hWin.HR('Print map'))
+                                .on({click:function(){  
+                                    $('.browser-print-mode').css('display','inline-block');
+                                }});
+                            
+                            $(that.map_print.getContainer()).css({border:'none',height:'0px !important',
+                                                    width:'0px !important','margin-left':'200px'});
+                            $('.leaflet-browser-print').hide();
+                        }else{
+                            toolbar.find('.ui-icon-print').hide();
+                        }
                         
                     }else if(val=='publish'){ //publish plugin
 
-                        $(that.map_publish.getContainer()).hide();
-
-                        that._on(
-                        toolbar.find('.ui-icon-globe').button()
-                            .attr('title', window.hWin.HR('Print map')),
-                            {click:function(){  
-                                window.hWin.HEURIST4.ui.showPublishDialog( {mode:'mapquery', mapwidget:this} );
-                            }});
+                        if(that.map_publish){
+                            $(that.map_publish.getContainer()).hide();
+                            that._on(
+                            toolbar.find('.ui-icon-globe').button()
+                                .attr('title', window.hWin.HR('Print map')),
+                                {click:function(){  
+                                    window.hWin.HEURIST4.ui.showPublishDialog( {mode:'mapquery', mapwidget:this} );
+                                }});
+                        }else{
+                            toolbar.find('.ui-icon-globe').hide();
+                        }
                         
+                    }else if(val=='help'){ 
+
+                        if(that.map_help){
+                            $(that.map_help.getContainer()).hide();
+                            
+                            window.hWin.HEURIST4.ui.initHelper({ button:toolbar.find('.ui-icon-help').button(),
+                                url: window.hWin.HRes('mapping_overview.html #content'),
+                                position: { my: 'center center', at: 'center center', 
+                                    of: this.element }, no_init:true} ); //this.element
+                        
+                        }else{
+                            toolbar.find('.ui-icon-help').hide();
+                        }
+                        
+                            
                             
                     }else if(val=='addmapdoc'){ //addmapdoc plugin
                         $(that.map_addmapdoc.getContainer()).hide();
@@ -2304,22 +2332,24 @@ $.widget( "heurist.mapping", {
                             
                     }else  if(val=='geocoder'){
 
-                        $(that.map_geocoder.getContainer()).hide();
+                        if(that.map_geocoder){
+                            $(that.map_geocoder.getContainer()).hide();
 
-                        toolbar.find('.ui-icon-search').button()
-                            .attr('title', window.hWin.HR('Search'))
-                            .on({click:function(){  
-                                $(that.map_geocoder.getContainer()).show();
-                                that.map_geocoder._expand();
-                            }});
-                        
-                        L.DomEvent.addListener(that.map_geocoder, 'collapse', 
-                            function(){
-                                $(that.map_geocoder.getContainer()).hide();
-                            }
-                            );
-                        
-
+                            toolbar.find('.ui-icon-search').button()
+                                .attr('title', window.hWin.HR('Search'))
+                                .on({click:function(){  
+                                    $(that.map_geocoder.getContainer()).show();
+                                    that.map_geocoder._expand();
+                                }});
+                            
+                            L.DomEvent.addListener(that.map_geocoder, 'collapse', 
+                                function(){
+                                    $(that.map_geocoder.getContainer()).hide();
+                                }
+                                );
+                        }else{
+                            toolbar.find('.ui-icon-search').hide();
+                        }
                             
                     }else  if(val=='zoom'){
 
@@ -2448,6 +2478,10 @@ $.widget( "heurist.mapping", {
                 var layout_opts = {};
                 var tha, th;
                 if(this.is_timeline_disabled){
+                    
+                    //keep current timeline 
+//console.log($(this.options.element_layout).layout().panes.south.height());
+                    
                     //hide resize control
                     layout_opts.south__size = 0;
                     layout_opts.south__spacing_open = 0;

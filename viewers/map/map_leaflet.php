@@ -307,6 +307,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
             <a class="ui-icon ui-icon-list" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>           <a id="btn_add_mapdoc" style="width: 22px; height:22px;top:-1px;padding:0px;display:inline-block;"></a>   
             
             <a class="ui-icon ui-icon-print" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>          <a class="ui-icon ui-icon-globe" style="width: 22px; height: 22px;padding:0px;display:inline-block;"></a>            
+            <a class="ui-icon ui-icon-help" style="width: 22px; height: 22px;padding:0px;display:inline-block;"></a>            
             </div>
         </div>
 
