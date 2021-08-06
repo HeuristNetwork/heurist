@@ -282,7 +282,7 @@ $.widget( "heurist.mapping", {
                 window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane',
                                     ['east', (top ?  '85%' : window.innerWidth)]);
                 
-                layout_opts.north__size = 30;
+                layout_opts.north__size = 36;
             }
 
             this.mylayout = $(this.options.element_layout).layout(layout_opts);
@@ -2086,7 +2086,7 @@ $.widget( "heurist.mapping", {
             var is_main_ui = params['ui_main']; //if true show separate toolbar for mp controls
             
             if(is_main_ui){
-                layout_opts.north__size = 30;
+                layout_opts.north__size = 36;
             }else if(__parseval(params['noheader'])){ //outdated
                 layout_opts.north__size = 0;
             }

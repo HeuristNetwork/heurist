@@ -82,6 +82,7 @@ $.widget( "heurist.app_timemap", {
 
         this.mapframe = $( "<iframe>" )
         .attr('id', 'map-frame')
+        .css('padding','0px')
         .appendTo( this.framecontent );
           
         this.loadanimation(true);

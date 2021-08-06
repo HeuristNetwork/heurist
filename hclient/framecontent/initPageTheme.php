@@ -479,6 +479,14 @@ span.fancytree-node:hover{
 	margin: 0;
     background:<?php uout('explore_active', '#AFBFDA');?> !important;
 }
+.ui-heurist-explore .ui-tabs-tab.ui-state-active{
+    background:<?php uout('explore_fade_bg', '#D4DBEA');?> !important;
+}
+.ui-heurist-explore .ui-heurist-button.ui-state-active{
+    background:<?php uout('explore_bg', '#4477B9')?> !important;
+    color: #ffffff;
+}
+
 /*
 .ui-heurist-explore .fancytree-node:hover{
     border: 1px dotted blue !important;
