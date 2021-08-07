@@ -1901,6 +1901,11 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         $local_ver = HEURIST_VERSION; // installed heurist version
 
         $server_ver = $this->get_last_code_and_db_version($this->version_release == "alpha" ? true : false);
+		
+		if($server_ver == "unknown"){
+			error_log("Unable to retrieve Heurist server version, this maybe due to the main server being un-available. If this problem persists please contact the Heurist team.");
+			return;
+		}
 
         $local_parts = explode('.', $local_ver);
         $server_parts = explode('.', $server_ver);
