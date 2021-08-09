@@ -107,7 +107,7 @@ $.widget( "heurist.mainMenu6", {
                 });
                 
                 //explore menu in main(left) menu  -  quicklinks
-                that._on(that.divMainMenu.children('.ui-heurist-quicklinks').find('li.menu-explore'),
+                that._on(that.divMainMenu.children('.ui-heurist-quicklinks').find('li.menu-explore, div.menu-explore'),
                 {
                     mouseenter: that._expandMainMenuPanel,
                     mouseleave: that._collapseMainMenuPanel,
@@ -487,6 +487,7 @@ $.widget( "heurist.mainMenu6", {
             that.divMainMenu.find('.menu-text').hide();
             that.divMainMenu.find('ul').css({'padding-right':'30px'});
             that.divMainMenu.find('li.menu-explore').css({padding:'6px 2px 6px 30px',background:'none'});
+			that.divMainMenu.find('div.menu-explore').css({padding:'6px 2px 6px 30px',background:'none'});
             //that.divMainMenu.find('.menu-explore[data-action-popup="recordAdd"]').css({padding:'0px 2px 6px 30px'});
             that.divMainMenu.find('.ui-heurist-quicklinks').css({'text-align':'center'});
             
@@ -614,7 +615,7 @@ $.widget( "heurist.mainMenu6", {
         
         this._resetCloseTimers();
         
-        this.divMainMenu.find('li.menu-explore').css('background','none');  
+        this.divMainMenu.find('li.menu-explore, div.menu-explore').css('background','none');
         
         var ele, hasAction = false;
         
@@ -622,7 +623,7 @@ $.widget( "heurist.mainMenu6", {
             hasAction = false;
         }else{
 
-            ele = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
+            ele = $(e.target).is('li, div.menu-explore')?$(e.target):$(e.target).parents('li');
             if(ele){
                 if(ele.parents('.ui-heurist-quicklinks').length>0) ele.css('background','aliceblue');
                 hasAction = ele.attr('data-action-popup');
@@ -661,7 +662,7 @@ $.widget( "heurist.mainMenu6", {
         var menu_item;
         
         if(!action_name){
-            menu_item = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
+            menu_item = $(e.target).is('li, div.menu-explore')?$(e.target):$(e.target).parents('li');
             action_name = menu_item.attr('data-action-popup');
         }
         

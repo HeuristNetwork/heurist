@@ -184,7 +184,7 @@ body.popup {
     margin-left:0.5em;
     cursor: pointer;
 }
-.menu-explore{
+li.menu-explore{
     font-size:smaller;
     padding:6px 2px 6px 30px;
 }
