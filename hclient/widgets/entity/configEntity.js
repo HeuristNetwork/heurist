@@ -77,6 +77,10 @@ $.widget( "heurist.configEntity", {
         
         if(!this.options.useHTMLselect){
             window.hWin.HEURIST4.ui.initHSelect(this.sel_saved_settings, false);
+
+            if(this.options.configName=="datatable" && this.sel_saved_settings.hSelect("instance")!=undefined){
+                this.sel_saved_settings.hSelect("widget").css("width", "700px");
+            }
         }
             
 
@@ -239,7 +243,7 @@ $.widget( "heurist.configEntity", {
             //     +'<input class="inpt_save_setting_name text ui-widget-content ui-corner-all" style="max-width:30em"/>'
             //     + (this.options.saveOnExit?'':'&nbsp;&nbsp;<button class="btnSaveSettings">Save</button>'))
 
-            $('<div class="col-12"><label>Name settings to save for future use</label></div><div class="col-12 mb-1"><input class="inpt_save_setting_name text form-control"/></div>'
+            $('<div class="col-12"><label>Save settings as <input class="inpt_save_setting_name text form-control"/></label></div>'
             + (this.options.saveOnExit?'':'<div class="col-12 d-grid gap-2 mb-2"><button class="btn btn-success btnSaveSettings">Save</button></div>'))
             .appendTo(this.options.divSaveSettings);
             this.inpt_save_setting_name = this.options.divSaveSettings.find('.inpt_save_setting_name');        
