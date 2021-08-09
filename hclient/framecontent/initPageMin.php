@@ -68,7 +68,15 @@ function echo_flush($msg){
     //@ob_flush();
     //@flush();
 }
+
+//
+// For script progress messages to web browser
+//
 function echo_flush2($msg){
+    ob_start();
     print $msg;
+    ob_end_flush();
+    @ob_flush();
+    @flush();
 }
 ?>

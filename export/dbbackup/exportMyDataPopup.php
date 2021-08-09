@@ -157,7 +157,7 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
             set_time_limit(0); //no limit
             
             if(file_exists($folder)){
-                echo_flush("<br>Clear folder ".$folder."<br>");
+                echo_flush2("<br>Clear folder ".$folder."<br>");
                 //clean folder
                 $res = folderDelete2($folder, true);
                 if(!$res){
@@ -185,7 +185,7 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
             if(@$_REQUEST['include_docs']=='1'){
                 $folders_to_copy = $system->getSystemFolders( 1 );
 
-                echo_flush("<br><br>Exporting system folders<br>");
+                echo_flush2("<br><br>Exporting system folders<br>");
             }
             
             if(@$_REQUEST['includeresources']=='1'){
@@ -207,7 +207,7 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
            }
             
             if(@$_REQUEST['include_docs']=='1'){// 2016-10-25  
-                echo_flush('Copy context_help folder<br>');                
+                echo_flush2('Copy context_help folder<br>');                
                 folderRecurseCopy( HEURIST_DIR.'context_help/', $folder.'/context_help/', null);
             }
             
@@ -231,7 +231,7 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
             $_REQUEST['rev'] = 'no'; //do not include reverse pointers
             $_REQUEST['filename'] = $folder."/".HEURIST_DBNAME.".xml";
 
-            echo_flush("Exporting database as HML (Heurist Markup Language = XML)<br>(may take some time for large databases)<br>");
+            echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take some time for large databases)<br>");
 
             $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
             if (is_file($to_include)) {
@@ -259,12 +259,12 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
             
             // Export database definitions as readable text
 
-            echo_flush("Exporting database definitions as readable text<br>");
+            echo_flush2("Exporting database definitions as readable text<br>");
 
             $url = HEURIST_BASE_URL . "admin/describe/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
             saveURLasFile($url, $folder."/Database_Structure.txt");
 
-            echo_flush("Exporting database definitions as XML<br>");
+            echo_flush2("Exporting database definitions as XML<br>");
             
             $url = HEURIST_BASE_URL . "admin/describe/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
             saveURLasFile($url, $folder."/Database_Structure.xml");
@@ -272,7 +272,7 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
 
             if($system->is_admin()){
                 // Do an SQL dump of the whole database
-                echo_flush("Exporting SQL dump of the whole database<br>");
+                echo_flush2("Exporting SQL dump of the whole database<br>");
 
                 try{
                     $dump = new Mysqldump( HEURIST_DBNAME_FULL, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
