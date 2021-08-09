@@ -104,7 +104,7 @@ if (empty($shortsum_detiltype_id)) {
 
 $query = "SELECT rec_ID, rec_Title
           FROM Records
-          WHERE rec_RecTypeID = " . $note_rectype_id . " AND rec_Title NOT LIKE 'Heurist System Email Receipt%'";
+          WHERE rec_RecTypeID = " . $note_rectype_id . " AND rec_Title NOT LIKE 'Heurist System Email Receipt%' AND rec_Title <> ''";
 
 $notes_list = $mysqli->query($query);
 if (!$notes_list) { 
@@ -114,9 +114,10 @@ if (!$notes_list) {
 
 while($note = $notes_list->fetch_row()){
 
-    $has_notes = true;
+    if(empty($note[1])) {
+        continue;
+    }
 
-    $notes[$note[0]] = $note[1];
     $query = "SELECT dtl_Value
               FROM recDetails
               WHERE dtl_RecID = ". $note[0] ." AND dtl_DetailTypeID = " . $shortsum_detiltype_id;
@@ -128,14 +129,18 @@ while($note = $notes_list->fetch_row()){
         return;
     }
 
-    while($val = $note_val->fetch_row()){
-
+    if ($val = $note_val->fetch_row()){
+        if (empty($val[0])) {
+            continue;
+        }
         $notes[$note[0]] = array($note[1], $val[0]);
     }
+
+    $has_notes = true;
 }
 
-if(!$has_notes) {
-    print $_REQUEST['db']. " contains no Note records (2-3) to base the email body on.";
+if(!$has_notes || empty($notes)) {
+    print $_REQUEST['db']. " contains no valid Note records to base the email body on, any existing Note record must also contain a value in the short summary field to be used as the email's body";
     return;
 }
 ?>  
@@ -190,7 +195,7 @@ if(!$has_notes) {
                 display: inline-block;
 
                 width: 26%;
-                max-height: 120px;
+                max-height: 135px;
             }
 
             #authenContainer.fieldsets {
@@ -243,6 +248,10 @@ if(!$has_notes) {
                 min-width: 7em !important;
 
                 margin-left: 5px;
+            }
+
+            #recModifiedSel-button > .ui-selectmenu-text {
+                padding-right: 0px;
             }
 
             /* Active State CSS */

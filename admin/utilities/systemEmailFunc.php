@@ -1,7 +1,7 @@
 <?php 
 
 /**
-*  Related class 
+*  Related class for Heurist System Email (massEmailSystem.php)
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -525,12 +525,8 @@ class systemEmailExt {
 
 	public function exportDetailsToCSV(){
 
-		$email_body = $this->getEmailBody();
-
-		// Create and Save information in temporary file
-		$fd = fopen('php://temp/maxmemory:1048576', 'w');
-
-		$filename = "System_Email_Export.csv";
+		// Open descriptor to output buffer
+		$fd = fopen('php://output', 'wb');
 
 		if ($fd == null) {
 
@@ -538,8 +534,20 @@ class systemEmailExt {
 			return -4;
 		}
 
-		fputcsv($fd, array("User Email", "User Name", "Databases", "Database URLs", "Record Counts", "Last Modified Record", "request: {record_limit, lastmodification_period, lastmodification_unit, lastmodification_logic}, Email")); //, "Email"
+		// Construct initial headers
+		$filename = "Heurist_System_Email_Export.csv";
+		header('Content-Type: text/csv');
+		header('Content-Disposition: attachment; filename="' . $filename . '";');
+		header('Pragma: no-cache');
+		header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
+        // Add column headers
+		fputcsv($fd, array("User Email", "User Name", "Databases", "Database URLs", "Record Counts", "Last Modified Record", "request: {record_limit, lastmodification_period, lastmodification_unit, lastmodification_logic}, Email"));
+
+		// Get email template
+		$email_body = $this->getEmailBody();
+
+		// Add column data, row by row
 		foreach ($this->user_details as $email => $details) {
 			
 			$name = $details["first_name"] . " " . $details["last_name"];
@@ -550,6 +558,7 @@ class systemEmailExt {
 
 			$dbs = $details["db_list"];
 
+			// Raw listed information to Array
 			foreach ($dbs as $db) {
 				$db_url_arr[] = HEURIST_BASE_URL . "?db=" . $db;
 
@@ -559,47 +568,25 @@ class systemEmailExt {
 				$record_mod_arr[] = $row[1];
 			}
 
-			// Then transform from array into readable list
+			// Array to Readable List
 			$db_listed = $this->createListFromArray($dbs);
 			$db_url_listed = $this->createListFromArray($db_url_arr);
 			$records_listed = $this->createListFromArray($record_count_arr);
 			$lastmod_listed = $this->createListFromArray($record_mod_arr);
 
-			// Replace placeholders with information
+			// Construct email body and request
 			$replace_with = array($details["first_name"], $details["last_name"], $email, $db_listed, $db_url_listed, $records_listed, $lastmod_listed);
-
 			$body = str_ireplace($this->substitute_vals, $replace_with, $email_body);
 
 			$request = "request: {".$this->rec_count.", ".$this->rec_lastmod_period.", ".$this->rec_lastmod_unit.", ".$this->rec_lastmod_logic."}";
 
+			// Add row
 			fputcsv($fd, array($email, $name, implode(",", $dbs), implode(",", $db_url_arr), implode(",", $record_count_arr), implode(",", $record_mod_arr), $request, $body));
 		}
 
-		rewind($fd);
-		$content = stream_get_contents($fd);
+        // Close descriptor and exit
 		fclose($fd);
-
-		// Send information back in php request
-		$content_length = strlen($content);
-		if ($content_length < 0) {
-			$content_length = 0;
-		}
-
-		if (!isset($content) || $content_length == 0) {
-
-			$this->set_error("exportDetailsToCSV() Error: No data is available for CSV exporting");
-			return -1;
-		}
-
-		$content_length = $content_length + 3;
-
-		header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename='.$filename);
-        header('Content-Length: ' . $content_length);
-
-        echo "\xEF\xBB\xBF";	// UTF-8 Byte Order Mark
-
-        exit($content);
+        exit();
 	}
 
 	/*
