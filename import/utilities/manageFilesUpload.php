@@ -514,19 +514,26 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                             
                             var $dlg;
 
-                            var msg = "You are about to upload a folder, No individual files will be shown.<br/>"
-                                + "You can choose to upload individual files by unchecking the checkbox above.<br/>"
-                                + "Would you like to continue with the folder upload?";
+                            var msg = "You are about to upload a FOLDER (and sub-folders)<br/><br/>"
+                            
+                                + "THE BROWSER WILL NOT LIST ANY FILES as you navigate the tree of folders<br/>"
+                                + "(this is due to limitations on browser interactions)<br/><br/>"
+                                
+                                + "Use of this mode allows the folder names to be recorded on upload, which is an <br/>"
+                                + "advantage if you use a hierarchical structure of named folders for your media files.<br/><br/>"
+                                
+                                + "To upload files without folder name information, cancel this upload and clear the <br/>"
+                                + "'Upload directory ...' checkbox before clicking Add files";
 
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg,{
-                                "Yes": function(){
+                                "OK": function(){
                                     ele.click();
                                     $dlg.dialog('close');
                                 },
-                                "No": function(){
+                                "Cancel": function(){
                                     $dlg.dialog('close');
                                 }
-                            },{ title: "Uploading folders", yes: "Yes", no: "No" }, { default_palette_class: 'ui-heurist-populate' });
+                            },{ title: "Uploading FOLDER and sub-folders", yes: "OK", no: "Cancel" }, { default_palette_class: 'ui-heurist-populate' });
                         }else{
                             ele.click();
                         }
