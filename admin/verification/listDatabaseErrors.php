@@ -265,7 +265,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 <li class="invalid_chars"><a href="#invalid_chars" style="white-space: nowrap;padding-right:10px;color:black;">Invalid Characters</a></li>
                 <li class="title_mask"><a href="#title_mask" style="white-space: nowrap;padding-right:10px;color:black;">Title Masks</a></li>
             </ul>
-			
+
             <!-- Records with by non-existent users -->
             <div id="owner_ref" style="top:110px">  <!-- End of Owner References -->
             
@@ -1194,7 +1194,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 <span>
                     <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                         (show results as search)</a>
-                    <a target=_new href='#' id=selected_link style="display:<?php echo ($fix_as_suggested?'inline-block':'none');?>;"
+                    <a target=_new href='#' id=selected_link style="display:<?php echo ($fix_as_suggested?'inline-block':'none');?>"
                                 onClick="return open_selected_by_name('recCB5');">(show selected as search)</a>
                 </span>
 
@@ -1340,6 +1340,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
             print '</table>';
         }
         print '<br /></div>';       // End of Term Values
+        
+    $dtl_ids = array(); //temp
         ?>
 
             <!--  Records containing fields with terms not in the list of terms specified for the field   -->
@@ -1347,11 +1349,23 @@ $trmDuplicates = @$lists2["trm_dupes"];
             <div id="expected_terms" style="top:110px"> <!-- Start of Expected Terms -->
             <?php
 
-            $res = $mysqli->query('select dtl_ID, dtl_RecID, dty_Name, dtl_Value, dty_ID, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title, rec_RecTypeID, rty_Name, trm_Label
-                from Records, recDetails left join defTerms on dtl_Value=trm_ID, defDetailTypes, defRecTypes
-                where rec_ID = dtl_RecID and dty_ID = dtl_DetailTypeID and (dty_Type = "enum" or  dty_Type = "relmarker")
-                and dtl_Value is not null and rec_RecTypeID=rty_ID and rec_FlagTemporary!=1
-            order by dtl_DetailTypeID');
+            $bibs = array();
+            $ids = array();
+            $ids2 = array();
+            $same_name_suggestions = array();
+            $is_first = true;
+
+            $offset = 0;
+                                    
+            while(true){
+                
+                $is_finished = true;
+                
+                $res = $mysqli->query('select dtl_ID, dtl_RecID, dty_Name, dtl_Value, dty_ID, dty_JsonTermIDTree, rec_Title, rec_RecTypeID, '
+                    .'trm_Label from Records, recDetails left join defTerms on dtl_Value=trm_ID, defDetailTypes
+                    where rec_ID = dtl_RecID and dty_ID = dtl_DetailTypeID and (dty_Type = "enum" or  dty_Type = "relmarker")
+                    and dtl_Value is not null and rec_FlagTemporary!=1
+                order by dtl_DetailTypeID limit 10000 offset '.$offset);
             /*
             'select dtl_RecID, dty_Name, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title, dtl_Value, dty_ID
             from defDetailTypes
@@ -1359,12 +1373,9 @@ $trmDuplicates = @$lists2["trm_dupes"];
             left join Records on rec_ID = dtl_RecID
             where dty_Type = "enum" or  dty_Type = "relmarker"
             order by dtl_DetailTypeID'*/
-            $bibs = array();
-            $ids = array();
-            $ids2 = array();
-            $same_name_suggestions = array();
-            $is_first = true;
-            while ($row = $res->fetch_assoc()){ 
+                while ($row = $res->fetch_assoc()){ 
+                    
+                $is_finished = false;
                 //verify value
                 /*DEBUG                
                 $res = VerifyValue::getAllowedTerms($row['dty_JsonTermIDTree'], null, $row['dty_ID']);
@@ -1373,8 +1384,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 print ('<br>'.in_array($row['dtl_Value'], $res));                
                 */
                 if(  !in_array($row['dtl_ID'], $dtl_ids) &&  //already non existant
-                trim($row['dtl_Value'])!="" &&
-                !VerifyValue::isValidTerm($row['dty_JsonTermIDTree'], $row['dty_TermIDTreeNonSelectableIDs'], $row['dtl_Value'], $row['dty_ID'] ))
+                trim($row['dtl_Value'])!="" 
+    && !VerifyValue::isValidTerm($row['dty_JsonTermIDTree'],null, $row['dtl_Value'], $row['dty_ID'] )) 
                 {
                     //ok - term does not belong to required vocabullary
                     //check that this vocabulary already has term with the same label
@@ -1387,7 +1398,6 @@ $trmDuplicates = @$lists2["trm_dupes"];
                         $ids2[$row['dtl_RecID']] = 1;
                         continue;
                     }
-                    
                     
                     if($is_first){
                         $is_first = false;
@@ -1410,7 +1420,6 @@ $trmDuplicates = @$lists2["trm_dupes"];
                             <a target=_new  title='Click to edit record'
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" 
-                                    title="<?php echo $row['rty_Name']?>" 
                                     src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;<?= $row['dtl_RecID'] ?>
                             </a>
                         </td>
@@ -1425,6 +1434,13 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 }
 
             }//while 
+                
+                if($is_finished){
+                    break;
+                }
+                $offset = $offset + 10000;
+            }//limit by 1000
+            
             if (count($ids) == 0) {
                 print '<h3 class="res-valid">OK: All records have valid terms (terms are as specified for each field)</h3>';
                 echo '<script>$(".expected_terms").css("background-color", "#6AA84F");</script>';
@@ -1498,7 +1514,6 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 <br />
                 <br />
             </div>  <!-- End of Expected Terms -->
-
 
         <!--  single value fields containing excess values  -->
         <div id="single_value" style="top:110px">   <!-- Start of Single Value Fields -->
@@ -1775,7 +1790,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
         </div>
         -->
 
-        <?php
+        <?php   
+        
         print '<div id="invalid_chars" style="top:110px">';     /* Start of Invalid Char Section */
         include(dirname(__FILE__).'/cleanInvalidChars.php');
         print '<br /></div>';     /* End of Invalid Char Section */
