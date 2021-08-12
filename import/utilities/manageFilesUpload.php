@@ -524,16 +524,18 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                                 
                                 + "To upload files without folder name information, cancel this upload and clear the <br/>"
                                 + "'Upload directory ...' checkbox before clicking Add files";
-
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg,{
-                                "OK": function(){
+                                
+                            var buttons = {};
+                            buttons[window.hWin.HR('OK')] = function(){
                                     ele.click();
                                     $dlg.dialog('close');
-                                },
-                                "Cancel": function(){
+                                };
+                            buttons[window.hWin.HR('Cancel')] = function(){
                                     $dlg.dialog('close');
-                                }
-                            },{ title: "Uploading FOLDER and sub-folders", yes: "OK", no: "Cancel" }, { default_palette_class: 'ui-heurist-populate' });
+                                };
+
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, buttons,
+                            'Uploading FOLDER and sub-folders', { default_palette_class: 'ui-heurist-populate' });
                         }else{
                             ele.click();
                         }
