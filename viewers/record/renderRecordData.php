@@ -995,8 +995,13 @@ function print_public_details($bib) {
 
             }else if ($bd['dty_Type'] == 'relationtype') {
 
-                $term = $terms['termsByDomainLookup']['relation'][$bd['val']];
-                $bd['val'] = output_chunker(getTermFullLabel($terms, $term, 'relation', false));
+                $term = @$terms['termsByDomainLookup']['relation'][$bd['val']];
+                if($term){
+                    $bd['val'] = output_chunker(getTermFullLabel($terms, $term, 'relation', false));    
+                }else{
+                    $bd['val'] = 'Term '.$bd['val'].' not found';
+                }
+                
                 //$bd['val'] = output_chunker($terms['termsByDomainLookup']['relation'][$bd['val']][0]);
 
             }else if ($bd['dty_Type'] == 'date') {
