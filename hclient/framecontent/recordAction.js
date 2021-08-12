@@ -424,7 +424,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         };
 
-        $("<div>").attr('id',input_id).editing_input(ed_options).appendTo($fieldset);
+        var ele = $("<div>").attr('id',input_id).appendTo($fieldset);
+        ele.editing_input(ed_options);
     }
 
     //

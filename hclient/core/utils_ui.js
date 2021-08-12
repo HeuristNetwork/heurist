@@ -1082,29 +1082,36 @@ window.hWin.HEURIST4.ui = {
             
         }else{
             
-            var parent_ele = selObj.parents('.ui-dialog');
-            if(!parent_ele || parent_ele.length==0) {
-                
-                parent_ele = selObj.parents('.selectmenu-parent'); //add special class to some top most div 
-                
-                /*
-                var sel = $(selObj)[0];
-                if(sel.ownerDocument != document){ //inside iframe
-                
-                    var pwin = (sel.ownerDocument.parentWindow || sel.ownerDocument.defaultView);
-                    var parent_dlg_id = pwin.frameElement.getAttribute("parent-dlg-id");
-                    parent_ele = $('#'+parent_dlg_id).parent();    
-                }                
-                //parent dialog not found
-                if(parent_ele.length==0)
-                */
-                    if(!parent_ele || parent_ele.length==0) {
-                        parent_ele = $('.selectmenu-parent');
-                        if(!parent_ele || parent_ele.length==0) {                
-                            parent_ele = selObj.parent();   
-                        }
-                    }
+            var parent_ele = null;
+            if ( selObj[0].ownerDocument.location !== window.location ){
+                var win = selObj[0].ownerDocument.defaultView || selObj[0].ownerDocument.parentWindow;
+                parent_ele = $(win.frameElement).parents('.ui-dialog');
+            }
+            if(!parent_ele){
+                parent_ele = selObj.parents('.ui-dialog');
+                if(!parent_ele || parent_ele.length==0) {
                     
+                    parent_ele = selObj.parents('.selectmenu-parent'); //add special class to some top most div 
+                    
+                    /*
+                    var sel = $(selObj)[0];
+                    if(sel.ownerDocument != document){ //inside iframe
+                    
+                        var pwin = (sel.ownerDocument.parentWindow || sel.ownerDocument.defaultView);
+                        var parent_dlg_id = pwin.frameElement.getAttribute("parent-dlg-id");
+                        parent_ele = $('#'+parent_dlg_id).parent();    
+                    }                
+                    //parent dialog not found
+                    if(parent_ele.length==0)
+                    */
+                        if(!parent_ele || parent_ele.length==0) {
+                            parent_ele = $('.selectmenu-parent');
+                            if(!parent_ele || parent_ele.length==0) {                
+                                parent_ele = selObj.parent();   
+                            }
+                        }
+                        
+                }
             }
             
             if(selObj.hSelect("instance")!=undefined){
@@ -1114,7 +1121,7 @@ window.hWin.HEURIST4.ui = {
  //console.log(parent_ele);
             var menu = selObj.hSelect(       
               { style: 'dropdown',
-                position:(navigator.userAgent.indexOf('Firefox')<0)?{collision: "flip"}:{},
+                position: (navigator.userAgent.indexOf('Firefox')<0)?{collision: "flip"}:{},
                 appendTo: parent_ele,
                 /*positionOptions: {
                     collision: 'none',
@@ -1151,6 +1158,13 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
                         }
                         wmenu_div.css('top', newtop);
                     }
+                    
+                    if ( selObj[0].ownerDocument.location !== window.location ){
+                        var wbtn = $(event.target).hSelect('widget');
+                        wmenu_div.css('left', wbtn.position().left);    
+                    }
+                    
+                    
                     //calculate position
 //console.log(pos+'+'+wmenu.height()+'>'+bodyheight);
                 }
