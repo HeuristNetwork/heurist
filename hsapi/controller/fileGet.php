@@ -223,7 +223,7 @@ if($filename){ //download from scratch (for csv import)
         
         }else{
         
-            if($default_mode=='view' || $default_mode==2) //get entity default icon or thumb
+            if(@$_REQUEST['entity'] && ($default_mode=='view' || $default_mode==2)) //get entity default icon or thumb
             {
                 //at the moment we don't have full images that describe entity - only icons and thumbs
                 $filename = dirname(__FILE__).'/../../hclient/assets/'
