@@ -133,11 +133,11 @@ function hMapDocument( _options )
                         || resdata.fld(record, 'rec_RecTypeID')==RT_TLCMAP_DATASET)
                     { //ignore sources
                         var recID  = resdata.fld(record, 'rec_ID'),
-                        recName = resdata.fld(record, 'rec_Title');
+                        recName = record["d"][1][0]; // resdata.fld(record, 'rec_Title');
                         
                         var $res = {};  
                         $res['key'] = recID;
-                        $res['title'] = recName;
+                        $res['title'] = "<span style='font-style:italic;'>" + recName + "</span>";
                         $res['type'] = 'layer';
                         $res['mapdoc_id'] = mapdoc_id; //reference to parent mapdoc
                         
@@ -836,38 +836,40 @@ function hMapDocument( _options )
         selectLayerRecord: function(mapdoc_id, callback){
             
             var popup_options = {
-                            select_mode: 'select_single', //select_multi
-                            select_return_mode: 'recordset',
-                            edit_mode: 'popup',
-                            selectOnSave: true, //it means that select popup will be closed after add/edit is completed
-                            title: window.hWin.HR('Select or create a layer record'),
-                            rectype_set: [RT_MAP_LAYER, RT_TLCMAP_DATASET],
-                            parententity: 0,
+                select_mode: 'select_single', //select_multi
+                select_return_mode: 'recordset',
+                edit_mode: 'popup',
+                selectOnSave: true, //it means that select popup will be closed after add/edit is completed
+                title: window.hWin.HR('Select or create a layer record'),
+                rectype_set: [RT_MAP_LAYER, RT_TLCMAP_DATASET],
+                parententity: 0,
+                
+                onselect:function(event, data){
+                         if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                            var recordset = data.selection;
+                            var record = recordset.getFirstRecord();
+                            var targetID = recordset.fld(record,'rec_ID');
                             
-                            onselect:function(event, data){
-                                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                        var recordset = data.selection;
-                                        var record = recordset.getFirstRecord();
-                                        var targetID = recordset.fld(record,'rec_ID');
-                                        
-                                        var request = {a: 'add',
-                                                    recIDs: mapdoc_id,
-                                                    dtyID:  DT_MAP_LAYER,
-                                                    val:    targetID};
-                                        
-                                        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-                                                if(response.status == hWin.ResponseStatus.OK){
-                                                    //refresh treeview - add layer to mapdocument
-                                                    _addLayerRecord(mapdoc_id, targetID, callback);
-                                                }else{
-                                                    hWin.HEURIST4.msg.showMsgErr(response);
-                                                    if($.isFunction(callback)) callback.call(that);
-                                                }
-                                        });                                        
-                                     }else{
-                                        if($.isFunction(callback)) callback.call(that);
-                                     }
-                            }
+                            var request = {a: 'add',
+                                        recIDs: mapdoc_id,
+                                        dtyID:  DT_MAP_LAYER,
+                                        val:    targetID};
+                            
+                            window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                                    if(response.status == hWin.ResponseStatus.OK){
+                                        //refresh treeview - add layer to mapdocument
+                                        _addLayerRecord(mapdoc_id, targetID, null);
+                                    }else{
+                                        hWin.HEURIST4.msg.showMsgErr(response);
+                                    }
+                            });                             
+                         }
+                },
+
+                onClose:function(event){
+
+                    if($.isFunction(callback)) callback.call(that);
+                }
             };//popup_options
 
                     

@@ -107,6 +107,7 @@ $currfile = null;
 $mediaExts = null;
 $progress_divid = 0;
 $system_folders = $system->getSystemFolders();
+$failed_exts = array();
 
 ?>
 <html>
@@ -130,6 +131,11 @@ $system_folders = $system->getSystemFolders();
             function update_counts(divid, processed, added, total) {
                 document.getElementById("progress"+divid).innerHTML = (total==0)?"": (" <div style=\"color:green\"> Processed "
                     +processed+" of "+total+". Added records: "+added+"</div>");
+            }
+			
+            function sysIdentificationPopup() {
+                window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification');
+                return false; 
             }
         </script>
 
@@ -204,7 +210,7 @@ $system_folders = $system->getSystemFolders();
                 print "<p><b>Folders to scan :</b> $mediaFolders<p>";
                 print "<p><b>Extensions to scan:</b> $mediaExts<p>";
 ?>
-                <p><a href='#' onclick="{window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification'); return false;}"
+                <p><a href='#' onclick="sysIdentificationPopup();"
                     title='Open form to edit properties which determine the handling of files and directories in the database upload folders'>
                     Click here to set media folders (database file directory descendants scanned by default)</a>
                 </p>                
@@ -240,6 +246,17 @@ $system_folders = $system->getSystemFolders();
             set_time_limit(0); //no limit
 
             doHarvest($dirs);
+			
+            if(count($failed_exts) > 0) {
+    
+                $invalid_ext = implode(', ', $failed_exts);
+
+                print "<br/><div style='color: red;'>The following file types, which were encountered during media indexing, 
+                        are not currently being indexed as media files: $invalid_ext</div><br/><br/><div>You may wish to add some 
+                        of these types in the 
+                        <span onclick='sysIdentificationPopup();' style='text-decoration:underline;cursor:pointer;color:blue;'>Design > Properties</span> 
+                        function and run indexing again.</div><br/>";
+            }
 
             print "<div>Synchronisation completed</div>";
             print "<div style=\"color:green\">Total files processed: $rep_counter </div>";
@@ -375,7 +392,7 @@ $system_folders = $system->getSystemFolders();
         function doHarvestInDir($dir) {
 
             global $system, $rep_issues, $fieldhelper_to_heurist_map, $mediaExts, $progress_divid,
-            $geoDT, $fileDT, $titleDT, $startdateDT, $enddateDT, $descriptionDT;
+            $geoDT, $fileDT, $titleDT, $startdateDT, $enddateDT, $descriptionDT, $failed_exts;
 
             $rep_processed = 0;
             $rep_added = 0;
@@ -632,6 +649,7 @@ $system_folders = $system->getSystemFolders();
 
                             }else{
                                 $rep_ignored++;
+								$failed_exts[] = @$flleinfo['extension'];
                             }
 
                             $cnt_files++;

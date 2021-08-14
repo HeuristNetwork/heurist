@@ -487,7 +487,7 @@ $.widget( "heurist.mainMenu6", {
             that.divMainMenu.find('.menu-text').hide();
             that.divMainMenu.find('ul').css({'padding-right':'30px'});
             that.divMainMenu.find('li.menu-explore').css({padding:'6px 2px 6px 30px',background:'none'});
-			that.divMainMenu.find('div.menu-explore').css({padding:'6px 2px 6px 30px',background:'none'});
+            that.divMainMenu.find('div.menu-explore').css({padding:'6px 2px 6px 0px',background:'none'});
             //that.divMainMenu.find('.menu-explore[data-action-popup="recordAdd"]').css({padding:'0px 2px 6px 30px'});
             that.divMainMenu.find('.ui-heurist-quicklinks').css({'text-align':'center'});
             

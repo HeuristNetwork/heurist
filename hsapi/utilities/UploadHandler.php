@@ -1242,7 +1242,7 @@ $siz = get_php_bytes('upload_max_filesize');
         }
         if (count($failed_versions)) {
             $file->error = $this->get_error_message('image_resize')  //get text
-                    .' ('.implode($failed_versions,', ').')';
+                    .' ('.implode(', ', $failed_versions).')';
         }
         // Free memory:
         $this->destroy_image_object($file_path);

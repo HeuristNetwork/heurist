@@ -166,7 +166,8 @@ function hMapManager( _options )
             .appendTo(options.container);
         
         options.container.find('.ui-resizable-handle')
-            .append($('<span class="ui-icon ui-icon-carat-1-w" style="height:100%;color:gray;left:-3px;font-size:10px;">'));
+            .css({'border-right': '1px solid lightgray', 'width': '7px'})
+            .append($('<span class="ui-icon ui-icon-carat-1-w" style="height:100%;width:11px;color:gray;top:3px;left:-3px;font-size:10px;">'));
         
         mapDocuments = hMapDocument( { mapwidget:options.mapwidget } ); 
         
@@ -712,8 +713,12 @@ function hMapManager( _options )
                 var parent_span = ele.parents('span.fancytree-node');
                 
                 function __in_progress(){
+                    if(parent_span.find('.svs-contextmenu4').is(':visible')) {
+                        return true; 
+                    }
                     parent_span.find('.svs-contextmenu4').show();
                     parent_span.find('.svs-contextmenu3').hide();
+                    return false;
                 }
 
                 //timeout need to activate current node    
@@ -736,8 +741,8 @@ function hMapManager( _options )
                             
                         }else if(ele.hasClass('ui-icon-plus')){ //add new layer to map document
                         
-                            __in_progress();
-                            if(mapdoc_id>0){
+                            var in_progress = __in_progress();
+                            if(mapdoc_id>0 && !in_progress){
 
                                 mapDocuments.selectLayerRecord(mapdoc_id, function(data){
                                         parent_span.find('.svs-contextmenu4').hide();
