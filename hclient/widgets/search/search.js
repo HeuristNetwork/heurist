@@ -178,7 +178,7 @@ $.widget( "heurist.search", {
             'max-height':'70px', 
 			'max-width':'99%',
 			'resize':'none', 
-            'padding':'0.4em',
+            'padding':'2px 0px',
             'min-height':'41px', 'line-height': '14px', 
             'min-width':'80px', 'width':'100%', 'padding-right':'28px' })  //was width:sz_input, 'max-width':sz_input,  
         .addClass("text ui-widget-content ui-corner-all")
@@ -199,7 +199,7 @@ $.widget( "heurist.search", {
         }} );
         
         if(this._is_publication || this.options.is_h6style){
-            this.input_search.css({'height':'27px','min-height':'27px','padding':'2px 18px 2px 2px'}); //, 'width':'400'
+            this.input_search.css({'height':'27px','min-height':'27px','padding':'2px 0px'}); //, 'width':'400'
             
             var sTop = '-37px';
             this.input_search_prompt2.addClass('ui-widget-content').css({border:'none',top:sTop});
@@ -208,7 +208,7 @@ $.widget( "heurist.search", {
                 this.input_search_prompt2.css({height:(this.input_search.height()-5)+'px',
                                                width:(this.input_search.width()+5)+'px'});    
             }else{
-                this.input_search_prompt2.css({ width: '97%', 'left': '-2px' });
+                this.input_search_prompt2.css({ width:'97%', 'right: '0px', 'left': '0px' });
             }
         }else{
             this.input_search_prompt2.css({top:'-40px'}); //'background':'#F4F2F4',
@@ -301,7 +301,7 @@ $.widget( "heurist.search", {
             
             this.btn_saved_filters = 
             $('<span class="ui-main-color" '
-            +'style="font-size: 9px;position: relative;margin-left: -62px;min-width: 50px;cursor:pointer;">'
+            +'style="font-size: 9px;position: relative;margin-left: -50px;min-width: 50px;cursor:pointer;">'
                 +'<span style="display:inline-block;width:30px;margin-top: 4px;">saved filters</span>'
             +'<span class="ui-icon ui-icon-carat-1-s" style="font-size: inherit;height: 11px;display: inline-block;vertical-align: super;">'
             +'</span></span>')
