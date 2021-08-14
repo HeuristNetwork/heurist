@@ -535,6 +535,10 @@ error_log(print_r($_REQUEST, true));
 
         global $defaultRootFileUploadPath, $defaultRootFileUploadURL;
 
+        if(defined('HEURIST_FILESTORE_URL')){
+            return; //already defined
+        }
+        
         list($database_name_full, $dbname) = mysql__get_names($dbname);
         
         $upload_root = $this->getFileStoreRootFolder();
@@ -579,7 +583,7 @@ error_log(print_r($_REQUEST, true));
                                 .'may not have been mounted on the web server.</p>');
                 return false;
         }
-       
+        
         define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
         
         $folders = $this->getArrayOfSystemFolders();
