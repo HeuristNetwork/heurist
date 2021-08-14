@@ -90,6 +90,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 
                 var rectypeID = rt_list[idx];
                 var name = $Db.rty(rectypeID,'rty_Name');
+                if(window.hWin.HEURIST4.util.isObject(name)) continue;
                 var label = (is_browse?'':window.hWin.HR('Add'))+' '+ name.trim();
                 if(!name) continue;
                 
