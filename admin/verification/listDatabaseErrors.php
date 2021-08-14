@@ -340,6 +340,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 </div>
             <?php
             }
+if(true){//DEBUG            
             ?>
                 <br />
             </div>  <!-- End of Owner References -->
@@ -1356,6 +1357,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
             $is_first = true;
 
             $offset = 0;
+            $is_finished = false;
                                     
             while(true){
                 
@@ -1439,7 +1441,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                     break;
                 }
                 $offset = $offset + 10000;
-            }//limit by 1000
+            }//limit by 10000
             
             if (count($ids) == 0) {
                 print '<h3 class="res-valid">OK: All records have valid terms (terms are as specified for each field)</h3>';
@@ -1791,7 +1793,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
         -->
 
         <?php   
-        
+}//DEBUG        
         print '<div id="invalid_chars" style="top:110px">';     /* Start of Invalid Char Section */
         include(dirname(__FILE__).'/cleanInvalidChars.php');
         print '<br /></div>';     /* End of Invalid Char Section */

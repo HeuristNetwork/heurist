@@ -71,43 +71,59 @@ $is_not_found = true;
                 <?php
                 $now = date('Y-m-d H:i:s');
                 $prevInvalidRecId = 0;
+                $is_finished = true;
+                $offset = 0;
                 
-                $res = $mysqli->query('SELECT dtl_ID,dtl_RecID,dtl_Value,dty_Name '.
+                while(true){
+                
+                    $is_finished = true;
+
+                    $res = $mysqli->query('SELECT dtl_ID,dtl_RecID,dtl_Value,dty_Name '.
                     'FROM recDetails left join defDetailTypes on dtl_DetailTypeID = dty_ID  '.
-                    "WHERE dty_Type in ('freetext','blocktext') ORDER BY dtl_RecID");
-                if($res){
-                    while ($row = $res->fetch_assoc()) {
-                        $textDetail = $row;
-                
-                        if (! check_invalid_chars($textDetail['dtl_Value'])){
-                            if ($prevInvalidRecId < $textDetail['dtl_RecID']) {
-                                print "<tr><td><a target=_blank href='".HEURIST_BASE_URL."?fmt=edit&recID=".
-                                $textDetail['dtl_RecID'] . "&db=".HEURIST_DBNAME. "'> " . $textDetail['dtl_RecID']. "</a></td></tr>\n";
-                                $prevInvalidRecId = $textDetail['dtl_RecID'];
+                    "WHERE dty_Type in ('freetext','blocktext') ORDER BY dtl_RecID  limit 10000 offset ".$offset);
+                    if($res){
+                        while ($row = $res->fetch_assoc()) {
+                            
+                            $textDetail = $row;
+                            $is_finished = false;
+                    
+                            if (! check_invalid_chars($textDetail['dtl_Value'])){
+                                if ($prevInvalidRecId < $textDetail['dtl_RecID']) {
+                                    print "<tr><td><a target=_blank href='".HEURIST_BASE_URL."?fmt=edit&recID=".
+                                    $textDetail['dtl_RecID'] . "&db=".HEURIST_DBNAME. "'> " . $textDetail['dtl_RecID']. "</a></td></tr>\n";
+                                    $prevInvalidRecId = $textDetail['dtl_RecID'];
+                                    
+                                    mysql__insertupdate($mysqli, 'Records', 'rec_', 
+                                            array('rec_ID'=>$textDetail['dtl_RecID'], 'rec_Modified'=>$now) );
+                                    
+                                }
+                                print "<tr><td><pre>" . "Invalid characters found in ".$textDetail['dty_Name'] 
+                                            . " field :</pre></td></tr>\n";
+                                            
+                                $newText = str_replace($invalidChars ,$replacements,$textDetail['dtl_Value']);
                                 
-                                mysql__insertupdate($mysqli, 'Records', 'rec_', 
-                                        array('rec_ID'=>$textDetail['dtl_RecID'], 'rec_Modified'=>$now) );
+                                $res = mysql__insertupdate($mysqli, 'recDetails', 'dtl_', 
+                                            array('dtl_ID'=>$textDetail['dtl_ID'], 'dtl_Value'=>$newText) );
                                 
+                                
+                                if ($res>0) {
+                                    print "<tr><td><pre>" . "Updated to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
+                                }else{
+                                    print "<tr><td><pre>" . "Error ". res."while updating to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
+                                }
+                                
+                                $is_not_found = false;
                             }
-                            print "<tr><td><pre>" . "Invalid characters found in ".$textDetail['dty_Name'] 
-                                        . " field :</pre></td></tr>\n";
-                                        
-                            $newText = str_replace($invalidChars ,$replacements,$textDetail['dtl_Value']);
-                            
-                            $res = mysql__insertupdate($mysqli, 'recDetails', 'dtl_', 
-                                        array('dtl_ID'=>$textDetail['dtl_ID'], 'dtl_Value'=>$newText) );
-                            
-                            
-                            if ($res>0) {
-                                print "<tr><td><pre>" . "Updated to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
-                            }else{
-                                print "<tr><td><pre>" . "Error ". res."while updating to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
-                            }
-                            
-                            $is_not_found = false;
-                        }
+                        }//while
+//DEBUG error_log('offset '.$offset);                        
                     }
-                }
+                
+                    if($is_finished){
+                        break;
+                    }
+                    $offset = $offset + 10000;
+                }//limit by 10000
+                
 
                 function check_invalid_chars($text) {
                     global $invalidChars;
