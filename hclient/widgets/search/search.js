@@ -208,7 +208,7 @@ $.widget( "heurist.search", {
                 this.input_search_prompt2.css({height:(this.input_search.height()-5)+'px',
                                                width:(this.input_search.width()+5)+'px'});    
             }else{
-                this.input_search_prompt2.css({ width:'97%', 'right: '0px', 'left': '0px' });
+                this.input_search_prompt2.css({ width:'97%', right: '0px', left: '0px' });
             }
         }else{
             this.input_search_prompt2.css({top:'-40px'}); //'background':'#F4F2F4',
