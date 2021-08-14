@@ -405,6 +405,10 @@ function hEditing(_options) {
                     .addClass('heurist-helper3').appendTo(fieldContainer);
             }
             
+            if(fieldContainer && fieldContainer.find("div.optional").length > 0){
+                $('<div>').css({padding: '4px'}).addClass('optional_hint')
+                    .html('Fields missing? Turn on <u>optional fields</u> (checkbox at the top of page)').appendTo(fieldContainer);
+            }
         }//end of function
 
         $container.addClass(options.className);
@@ -431,12 +435,7 @@ function hEditing(_options) {
                 .html('There are hidden fields in this form. <span class="btn-modify_structure"'
                 +'  style="cursor:pointer;display:inline-block;color:#7D9AAA;">'
                 +'Modify structure</span> to enable them.').appendTo($div_hints);
-        }
-        if($container.find('div.optional').length>0 && recdata && recdata.entityName=='Records'){
-            $('<div>').css({padding: '4px'}).addClass('optional_hint')
-                .html('Fields missing? Turn on <u>optional fields</u> (checkbox at the top of page)').appendTo($div_hints);
-        }
-        
+        }        
     }
     
     //
