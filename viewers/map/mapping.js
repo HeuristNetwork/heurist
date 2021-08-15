@@ -2139,7 +2139,7 @@ $.widget( "heurist.mapping", {
                     if(val=='addmapdoc'){ //addmapdoc plugin
                         that.map_addmapdoc = L.control.addmapdoc({ position: 'topleft', mapwidget:that });
                     }else
-                    if(val=='help'){ //publish plugin
+                    if(val=='help' && $.isFunction(L.control.help)){ //publish plugin
                         that.map_help = L.control.help({ position: 'topleft', mapwidget:that });
                     }else
                     if(val=='draw') //draw plugin

@@ -137,7 +137,7 @@ class UploadHandler
             // Defines which files can be displayed inline when downloaded:
             'inline_file_types' => '/\.(gif|jpe?g|png)$/i',
             // Defines which files (based on their names) are accepted for upload:
-            'accept_file_types' => '/.+$/i',
+            'accept_file_types' => '/\.('.str_replace(',','|',HEURIST_ALLOWED_EXT).')$/i', //  '/.+$/i',
             // The php.ini settings upload_max_filesize and post_max_size
             // take precedence over the following max_file_size setting:
             'max_file_size' => null,
@@ -484,7 +484,13 @@ $siz = get_php_bytes('upload_max_filesize');
         }
 
         //Artem Osmakov - limited set of file types
-        $this->options['accept_file_types'] = '/\.('.str_replace(',','|',HEURIST_ALLOWED_EXT).')$/i';
+        /*
+        if($this->options['acceptFileTypes']){
+            $this->options['accept_file_types'] = $this->options['acceptFileTypes'];    
+        }else{
+            $this->options['accept_file_types'] = '/\.('.str_replace(',','|',HEURIST_ALLOWED_EXT).')$/i';    
+        }
+        */
         
         if (!preg_match($this->options['accept_file_types'], $file->original_name)) {
             $file->error = $this->get_error_message('accept_file_types');
@@ -1242,7 +1248,7 @@ $siz = get_php_bytes('upload_max_filesize');
         }
         if (count($failed_versions)) {
             $file->error = $this->get_error_message('image_resize')  //get text
-                    .' ('.implode($failed_versions,', ').')';
+                    .' ('.implode(', ', $failed_versions).')';
         }
         // Free memory:
         $this->destroy_image_object($file_path);

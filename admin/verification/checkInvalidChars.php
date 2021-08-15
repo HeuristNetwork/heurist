@@ -30,6 +30,12 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+$invalidChars = array(chr(0),chr(1),chr(2),chr(3),chr(4),chr(5),chr(6),chr(7),chr(8),chr(11),chr(12),chr(14),chr(15),chr(16),chr(17),chr(18),chr(19),chr(20),chr(21),chr(22),chr(23),chr(24),chr(25),chr(26),chr(27),chr(28),chr(29),chr(30),chr(31)); // invalid chars that need to be stripped from the data.
+$replacements = array("?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?"," ","?","?","?","?","?");
+
+$is_included = !defined('HEURIST_FILESTORE_URL');
+
+if(!$is_included){
 
 define('MANAGER_REQUIRED',1);   
 define('PDIR','../../');  //need for proper path to js and css    
@@ -39,18 +45,6 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 $mysqli = $system->get_mysqli();
 
 
-$invalidChars = array(chr(0),chr(1),chr(2),chr(3),chr(4),chr(5),chr(6),chr(7),chr(8),chr(11),chr(12),chr(14),chr(15),chr(16),chr(17),chr(18),chr(19),chr(20),chr(21),chr(22),chr(23),chr(24),chr(25),chr(26),chr(27),chr(28),chr(29),chr(30),chr(31)); // invalid chars that need to be stripped from the data.
-$replacements = array("?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?"," ","?","?","?","?","?");
-$textDetails = array();
-$res = $mysqli->query("SELECT dtl_ID,dtl_RecID,dtl_Value,dty_Name ".
-    "FROM recDetails left join defDetailTypes on dtl_DetailTypeID = dty_ID  ".
-    "WHERE dty_Type in ('freetext','blocktext') ORDER BY dtl_RecID");
-if($res){
-    while ($row = $res->fetch_assoc()) {
-        array_push($textDetails, $row);
-    }
-    $res->close();
-}
 ?>
 <html>
     <head>
@@ -60,6 +54,7 @@ if($res){
     </head>
 
     <body class="popup">
+<?php } ?>    
         <div class="banner"><h2>Check Invalid Characters</h2></div>
         <div id="page-inner" style="overflow:auto;padding-left: 6px;">
             <div>
@@ -83,22 +78,35 @@ if($res){
                 }
 
                 $prevInvalidRecId = 0;
-                foreach ($textDetails as $textDetail) {
-                    if (! check($textDetail['dtl_Value'])){
-                        if ($prevInvalidRecId < $textDetail['dtl_RecID']) {
-                            print "<tr><td style='padding-top:16px'><a target=_blank href='".HEURIST_BASE_URL."?fmt=edit&recID=".
-                            $textDetail['dtl_RecID'] . "&db=".HEURIST_DBNAME. "'>Record ID:" . $textDetail['dtl_RecID']. "</a></td></tr>\n";
-                            $prevInvalidRecId = $textDetail['dtl_RecID'];
+                
+                
+                $res = $mysqli->query("SELECT dtl_ID,dtl_RecID,dtl_Value,dty_Name ".
+                    "FROM recDetails left join defDetailTypes on dtl_DetailTypeID = dty_ID  ".
+                    "WHERE dty_Type in ('freetext','blocktext') ORDER BY dtl_RecID");
+                if($res){
+                    while ($row = $res->fetch_assoc()) {
+                        $textDetail = $row;
+                        
+                        if (! check($textDetail['dtl_Value'])){
+                            if ($prevInvalidRecId < $textDetail['dtl_RecID']) {
+                                print "<tr><td style='padding-top:16px'><a target=_blank href='".HEURIST_BASE_URL."?fmt=edit&recID=".
+                                $textDetail['dtl_RecID'] . "&db=".HEURIST_DBNAME. "'>Record ID:" . $textDetail['dtl_RecID']. "</a></td></tr>\n";
+                                $prevInvalidRecId = $textDetail['dtl_RecID'];
+                            }
+                            print "<tr><td>" . "Invalid characters found in ".$textDetail['dty_Name'] . " field :</td></tr>\n";
+                            print "<tr><td>" . "<b>Corrected text : </b>".htmlspecialchars( str_replace($invalidChars ,$replacements,$textDetail['dtl_Value'])) . "</td></tr>\n";
+                            print "<tr><td>" . "<b>Invalid text : </b>". htmlspecialchars($textDetail['dtl_Value']) . "</td></tr>\n";
                         }
-                        print "<tr><td>" . "Invalid characters found in ".$textDetail['dty_Name'] . " field :</td></tr>\n";
-                        print "<tr><td>" . "<b>Corrected text : </b>".htmlspecialchars( str_replace($invalidChars ,$replacements,$textDetail['dtl_Value'])) . "</td></tr>\n";
-                        print "<tr><td>" . "<b>Invalid text : </b>". htmlspecialchars($textDetail['dtl_Value']) . "</td></tr>\n";
+                        
                     }
-                }
+                    $res->close();
+                }               
                 ?>
             </table>
 
             <p>[end of check]</p>
         </div>
+<?php if(!$is_included){ ?>
     </body>
 </html>
+<?php } ?>

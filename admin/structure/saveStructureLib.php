@@ -1423,7 +1423,7 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
 
         $inverse_termid_old = null;
         if(!$isInsert){//find inverse term id
-            $res = $ext_db->query("select trm_InverseTermId from defTerms where trmID=".$trmID);
+            $res = $ext_db->query("select trm_InverseTermId from defTerms where trm_ID=".$trmID);
             if($res){
                 if ( $row = $res->fetch_row() ) {
                     $inverse_termid_old = $row[0];

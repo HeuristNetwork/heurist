@@ -1771,7 +1771,7 @@ function hCmsEditing(_options) {
            }  //end open event
         });
         
-        
+        $dlg.css({"padding": "0.5em", "overflow": "auto"});
     }
     
     //

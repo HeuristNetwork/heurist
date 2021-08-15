@@ -395,10 +395,67 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
         <script src="../../external/jquery-file-upload/js/jquery.fileupload-jquery-ui.js"></script>
 
         <script type="text/javascript">
+
+            function closeCheck(event){
+                
+                if($(event.target).is('span, a')) { return false; }
+
+                var files = $('tbody.files').find('a[data-gallery]');
+
+                if(files.length > 0){
+
+                    var msg = "You have uploaded " + (files.length/2) + " new media files.<br/><br/>"
+                            + "They will not be visible as records in the database until you create media<br/>records using Index media files.";
+
+                    var btns = {};
+                    btns[window.hWin.HR('Index Media Files')] = function(){
+                        
+                        // Close popup
+                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                        $dlg.dialog('close');
+
+                        // Unbind mouseleave
+                        $(document).off('mouseleave');
+                        
+                        // Close Upload media window
+                        $('#btnCancel').click();
+                        if($(event.target).is('button')) {
+                            setTimeout(function(){ window.close(); }, 100);
+                        } else { console.log($(event.target)); }
+
+                        // Open Index media files window
+                        setTimeout(function(){ $(parent.document).find('li[data-action="menu-files-index"]').click(); }, 500);
+                    };
+                    btns[window.hWin.HR('Exit without Indexing')] = function(){
+                        
+                        // Close popup
+                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                        $dlg.dialog('close');
+
+                        // Unbind mouseleave
+                        $(document).off('mouseleave');                        
+
+                        // Close Upload media window
+                        if($(event.target).is('button')) {
+                            $('#btnCancel').click(); 
+                            setTimeout(function(){ window.close(); }, 100);
+                        } else { console.log($(event.target)); }
+                    }
+
+                    window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title:'Indexing Uploaded Media Files', 
+                        yes:window.hWin.HR('Index Media Files'), no:window.hWin.HR('Exit without Indexing')});
+                } else if ($(event.target).is('button')){
+                        $('#btnCancel').click(); 
+                        setTimeout(function(){ window.close(); }, 100);
+                }
+            }
+
             $(function () {
                 'use strict';
                 
                 window.hWin.HEURIST4.filesWereUploaded = false;
+				
+                $(document).on("mouseleave", closeCheck);
                 
                 // Initialize the jQuery File Upload widget:
                 $('#fileupload').fileupload({
@@ -468,8 +525,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                         .button({icons:{primary: 'ui-icon-check'}})
                         .click( function(e){ 
                             e.preventDefault();
-                            $('#btnCancel').click(); 
-                            setTimeout(function(){ window.close(); }, 500);
+                            closeCheck(e);
                             return false; });
                 
                 // Enable iframe cross-domain access via redirect option:
@@ -524,16 +580,18 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                                 
                                 + "To upload files without folder name information, cancel this upload and clear the <br/>"
                                 + "'Upload directory ...' checkbox before clicking Add files";
-
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg,{
-                                "OK": function(){
+                                
+                            var buttons = {};
+                            buttons[window.hWin.HR('OK')] = function(){
                                     ele.click();
                                     $dlg.dialog('close');
-                                },
-                                "Cancel": function(){
+                                };
+                            buttons[window.hWin.HR('Cancel')] = function(){
                                     $dlg.dialog('close');
-                                }
-                            },{ title: "Uploading FOLDER and sub-folders", yes: "OK", no: "Cancel" }, { default_palette_class: 'ui-heurist-populate' });
+                                };
+
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, buttons,
+                            'Uploading FOLDER and sub-folders', { default_palette_class: 'ui-heurist-populate' });
                         }else{
                             ele.click();
                         }

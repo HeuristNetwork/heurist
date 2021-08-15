@@ -974,7 +974,11 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
         }
         else if(@$file['ulf_ExternalFileReference']){  //remote 
         
-            if(@$file['fxm_MimeType'] && strpos($file['fxm_MimeType'], 'image/')===0){
+            if(@$file['fxm_MimeType'] == '_tiled'){
+                
+                $img = UtilsImage::createFromString('tiled images stack'); //from string
+        
+            }else if(@$file['fxm_MimeType'] && strpos($file['fxm_MimeType'], 'image/')===0){
                 //@todo for image services (flikr...) take thumbnails directly
                 $img = UtilsImage::getRemoteImage($file['ulf_ExternalFileReference']);
             }else    

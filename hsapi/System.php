@@ -472,10 +472,11 @@ error_log(print_r($_REQUEST, true));
         $folders['smarty-templates']  = array('SMARTY_TEMPLATES','', false, true);
         $folders['entity']        = array(null,'used to store icons and images for record types users,groups,terms');
         $folders['backup']        = array(null,'used to write files for user data dump');
-        $folders['rectype-icons'] = array('ICON','used for record type icons and thumbnails', true, true); //todo move to entity
+        $folders['rectype-icons'] = array('ICON','used for record type icons and thumbnails', true, true); //todo deprecated/remove
         $folders['settings']      = array('SETTING','', false, true);
+        $folders['uploaded_tilestacks'] = array('TILESTACKS','used to store uploaded map tiles', true, false);
         
-        // do not create
+        // do not create (if name is empty)
         $folders['xsl-templates'] = array('XSL_TEMPLATES','', false, true);
         $folders['documentation_and_templates'] = array('','', false, true);
         $folders['term-images']    = array('TERM_ICON','', true, true); //for digital harlem
@@ -535,6 +536,10 @@ error_log(print_r($_REQUEST, true));
 
         global $defaultRootFileUploadPath, $defaultRootFileUploadURL;
 
+        if(defined('HEURIST_FILESTORE_URL')){
+            return; //already defined
+        }
+        
         list($database_name_full, $dbname) = mysql__get_names($dbname);
         
         $upload_root = $this->getFileStoreRootFolder();
@@ -579,7 +584,7 @@ error_log(print_r($_REQUEST, true));
                                 .'may not have been mounted on the web server.</p>');
                 return false;
         }
-       
+        
         define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
         
         $folders = $this->getArrayOfSystemFolders();

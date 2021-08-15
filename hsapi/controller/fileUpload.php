@@ -41,6 +41,7 @@ if($system->init(@$_REQUEST['db'])){
     $is_autodect_csv = (@$_REQUEST['autodect']==1);
     $recID = @$_REQUEST['recID'];
     $registerAtOnce = (@$_REQUEST['registerAtOnce']==1);
+    $tiledImageStack = (@$_REQUEST['tiledImageStack']==1); //unzip archive and copy to uploaded_tilestacks
     
     if ( !$system->has_access() ) { //not logged in
             $response = $system->addError(HEURIST_REQUEST_DENIED);
@@ -108,7 +109,7 @@ if($response!=null){
         //$response = $system->addError(HEURIST_INVALID_REQUEST, "'entity' parameter is not defined");
             
     }else
-    if($entity_name=="terms"){//for terms from old term management - upload term image
+    if($entity_name=="terms"){//DEPRECATED - for terms from old term management - upload term image
 
         $options = array(
                 'upload_dir' => HEURIST_FILESTORE_DIR.'term-images/',
@@ -233,7 +234,7 @@ if($response!=null){
             if($registerAtOnce==1){
             
                 $entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
-                $ret = $entity->registerFile($file, null); //it returns ulf_ID
+                $ret = $entity->registerFile($file, null, true, $tiledImageStack); //it returns ulf_ID
                 
                 if( is_bool($ret) && !$ret ){
                     $response = $system->getError();

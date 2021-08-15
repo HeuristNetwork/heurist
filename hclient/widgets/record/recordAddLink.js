@@ -505,10 +505,9 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             }    
         };
 
-        $("<div>").attr('id',party+'_record')
-                    //.css({'padding-left':'130px'})
-                    .editing_input(ed_options).appendTo($fieldset)
-                    .find('input').css({'font-weight':'bold'});        
+        var ele = $("<div>").attr('id',party+'_record').appendTo($fieldset);
+        ele.editing_input(ed_options);
+        ele.find('input').css({'font-weight':'bold'});        
     },
   
     //
@@ -562,9 +561,9 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             }    
         };
 
-        $("<div>").attr('id','target_record')      //.css({'padding-left':'130px'})
-                    .editing_input(ed_options).appendTo($fieldset)
-                    .find('input').css({'font-weight':'bold'});
+        var ele = $("<div>").attr('id','target_record').appendTo($fieldset)
+        ele.editing_input(ed_options);
+        ele.find('input').css({'font-weight':'bold'});
     },
 
     

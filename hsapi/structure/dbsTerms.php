@@ -288,6 +288,10 @@ class DbsTerms
                     if($mode==1){ //tree
                         $res[$parent_id][$trm_ID] = array(); 
                     }else if($mode==3){
+                        if(in_array($trm_ID,$res)){
+                            error_log('!!!! Recursive tree for term '.$trm_ID);
+                            return $res;
+                        }
                         array_push($res, $trm_ID);
                     }else{
                         array_push($res, strtolower($this->getTermLabel($trm_ID)));
