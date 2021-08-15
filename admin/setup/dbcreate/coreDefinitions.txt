@@ -1,22 +1,23 @@
--- Heurist Definitions Exchange File generated: 18 Jun 2021 @ 14:47
--- Installation = https://heuristplus.sydney.edu.au/heurist/
+-- Heurist Definitions Exchange File generated: 15 Aug 2021 @ 19:53
+-- Installation = https://heuristplus.sydney.edu.au/h6-ao/
 -- Database = Heurist_Core_Definitions
--- Program Version: 6.2.11
+-- Program Version: 6.2.14
 -- Database Version: 1.3.0
 
 -- RECORD TYPE GROUPS
 -- `rtg_ID`,`rtg_Name`,`rtg_Domain`,`rtg_Order`,`rtg_Description`,`rtg_Modified`
 
->>StartData>> ('4','System Internals','functionalgroup','009','Record types used by the Heurist system for specific workflows and functions','2021-03-12 01:19:17'),
-('8','Mapping','functionalgroup','008','Record types required to build interactive maps','2021-03-12 01:23:29'),
-('9','Events and timelines','functionalgroup','005','Record types designed to handle events and timelines','2021-03-12 01:24:44'),
-('11','Bibliography','functionalgroup','007','The commonest standard bibliographic record types that support a well structured bibliography','2021-03-12 01:23:29'),
-('14','People and organisations','functionalgroup','001','Record types associated with individuals, groups and formal organisations/institutions','2021-03-12 01:19:56'),
-('15','Documents, interviews','functionalgroup','003','Record types associated with texts, interviews and so forth','2021-03-12 01:20:20'),
-('16','Trash','functionalgroup','010','Drag record types here to hide them, use dustbin icon on a record type to delete permanently','2021-03-12 01:19:17'),
-('20','Media','functionalgroup','002','','2021-03-12 01:19:17'),
-('21','Place, features','functionalgroup','004','','2021-03-12 01:20:20'),
-('22','Administrative','functionalgroup','006','','2021-03-12 01:24:44'),
+>>StartData>> ('4','System Internals','functionalgroup','010','Record types used by the Heurist system for specific workflows and functions','2021-06-30 16:46:34'),
+('8','Mapping','functionalgroup','009','Record types required to build interactive maps','2021-06-30 16:46:34'),
+('9','Events and timelines','functionalgroup','006','Record types designed to handle events and timelines','2021-06-30 16:46:34'),
+('11','Bibliography','functionalgroup','008','The commonest standard bibliographic record types that support a well structured bibliography','2021-06-30 16:46:34'),
+('14','People and organisations','functionalgroup','002','Record types associated with individuals, groups and formal organisations/institutions','2021-06-30 16:46:34'),
+('15','Documents, interviews','functionalgroup','004','Record types associated with texts, interviews and so forth','2021-06-30 16:46:34'),
+('16','Trash','functionalgroup','011','Drag record types here to hide them, use dustbin icon on a record type to delete permanently','2021-06-30 16:46:34'),
+('20','Media','functionalgroup','003','','2021-06-30 16:46:34'),
+('21','Place, features','functionalgroup','005','','2021-06-30 16:46:34'),
+('22','Administrative','functionalgroup','007','','2021-06-30 16:46:34'),
+('23','My record types','functionalgroup','001','Drag the record types you need into this group','2021-06-30 17:01:28'),
 >>EndData>>
 
  
@@ -52,16 +53,17 @@
 
 -- `vcg_ID`,`vcg_Name`,`vcg_Domain`,`vcg_Order`,`vcg_Description`,`vcg_Modified`
 
->>StartData>> ('2','Semantic web','enum','007','','2021-04-23 21:13:19'),
-('3','Places and organisations','enum','003','','2021-04-23 21:10:09'),
-('4','People and events','enum','002','','2021-04-23 21:10:09'),
-('5','Bibliographic, copyright','enum','004','','2021-04-23 21:10:09'),
-('7','Flags','enum','006','','2021-04-23 21:13:19'),
-('8','System','enum','009','Vocabularies used by the system for various functions','2021-04-23 21:10:09'),
-('9','RELATIONSHIPS','relation','008','','2021-04-23 21:13:19'),
-('12','Trash','enum','010','Drag vocabularies here to hide them, use dustbin icon on a vocabulary to delete \npermanently','2021-04-23 21:10:09'),
-('16','Landscape','enum','005','','2021-04-23 21:13:19'),
-('17','Categories / classifications','enum','001','A group of vocabularies used to categorise or classify records','2021-04-23 21:10:09'),
+>>StartData>> ('2','Semantic web','enum','008','','2021-06-30 17:00:30'),
+('3','Places and organisations','enum','004','','2021-06-30 17:00:30'),
+('4','People and events','enum','003','','2021-06-30 17:00:30'),
+('5','Bibliographic, copyright','enum','005','','2021-06-30 17:00:30'),
+('7','Flags','enum','007','','2021-06-30 17:00:30'),
+('8','System','enum','010','Vocabularies used by the system for various functions','2021-06-30 17:00:30'),
+('9','RELATIONSHIPS','relation','009','','2021-06-30 17:00:30'),
+('12','Trash','enum','011','Drag vocabularies here to hide them, use dustbin icon on a vocabulary to delete \npermanently','2021-06-30 17:00:30'),
+('16','Landscape','enum','006','','2021-06-30 17:00:30'),
+('17','Categories / classifications','enum','002','A group of vocabularies used to categorise or classify records','2021-06-30 17:00:30'),
+('18','My vocabularies','enum','001','','2021-06-30 17:00:49'),
 >>EndData>>
 
  
@@ -1989,7 +1991,7 @@
 ('31','Image tiling scheme','Please document the nature of this detail type (field)) ...','enum','Image tiling scheme','Please provide an extended description for display on rollover ...','','open','2','Map image layer tiling schema','31','101','0','3341','','','0','1','viewable','2018-09-25 16:52:11','1',''),
 ('32','Minimum zoom level','Please document the nature of this detail type (field)) ...','integer','Minimum tiled image zoom level (1 - 19)','Please provide an extended description for display on rollover ...','','open','2','Minimum zoom level','32','101','0','','','','0','1','viewable','2018-09-25 16:52:12','1',''),
 ('33','Maximum zoom level','Please document the nature of this detail type (field)) ...','integer','Maximum tiled image zoom level (1 - 19)','Please provide an extended description for display on rollover ...','','open','2','Maximum zoom level','33','101','0','','','','0','1','viewable','2018-09-25 16:52:12','1',''),
-('34','Service URL','Please document the nature of this detail type (field)) ...','freetext','The base service URL, may include fields for replacement with eg. record ID','Please provide an extended description for display on rollover ...','','open','2','Service URL','34','99','0','','','','0','0','viewable','2018-09-25 16:50:33','1',''),
+('34','Service URL','Please document the nature of this detail type (field)) ...','file','The base service URL, may include fields for replacement with eg. record ID','Please provide an extended description for display on rollover ...','','open','2','Service URL','34','99','0','','','','0','0','viewable','2021-08-14 00:08:03','1',''),
 ('35','Copyright information','Please document the nature of this detail type (field)) ...','blocktext','Copyright statement or a URI leading to a copyright statement. Consider using Creative Commons categories.','Can be used with Creative Commons license types','','approved','2','Copyright information','35','116','0','','','','','1','viewable','2020-11-22 23:18:49','0',''),
 ('36','Original ID','Please document the nature of this detail type (field)) ...','freetext','The original ID of the record in a source spreadsheet or database from which these data were imported','Used to retain a reference to an original data set where a given record is imported from. This detail type is essential when imports complex relational data into Heurist','','reserved','2','Original ID','36','116','0','','','','','0','viewable','2020-11-22 23:19:46','0',''),
 ('37','Unique public identifier','Please document the nature of this detail type (field)) ...','freetext','A public identifier such as the NLA party identifier (Australia) or other national/international system','','','approved','2','Unique public identifier','37','116','0','','','','','1','viewable','2020-11-22 23:21:29','0',''),
