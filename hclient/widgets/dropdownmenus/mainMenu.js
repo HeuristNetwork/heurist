@@ -1699,7 +1699,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         if(!(RT_CMS_HOME>0)){
             window.hWin.HEURIST4.msg.showMsgDlg('This function is still in development. You will need record types '
                 +'99-51, 99-52 and 99-53 which will be made available as part of Heurist_Reference_Set. '
-                +'You may contact ian.johnson@sydney.edu.au if you want to test out this function prior to release in mid July 2019.');
+                +'You may contact support@HeuristNetwork.org if you want to test out this function prior to release.');
             return;
         }
         

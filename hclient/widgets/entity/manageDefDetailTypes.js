@@ -1541,7 +1541,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             if(fields!=null){
                 var dt_type = fields['dty_Type'];
                 if(window.hWin.HEURIST4.util.isempty(dt_type)){ //actually it is already checked in _getValidatedValues
-                    window.hWin.HEURIST4.msg.showMsgDlg('Field "Data type" is requirted');
+                    window.hWin.HEURIST4.msg.showMsgDlg('Field "Data type" is required');
                     fields = null;
                 }else
                 
