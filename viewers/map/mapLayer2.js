@@ -108,6 +108,16 @@ function hMapLayer2( _options ) {
     function _addTiledImage() {
 
         var layer_url = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
+        
+        if(window.hWin.HEURIST4.util.isempty(layer_url)) {
+            
+            var file_id = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
+         
+            if(file_id){
+console.log(file_id);                
+                layer_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&file='+file_id[0];
+            }
+        }
 
         // Source is a directory that contains folders in the following format: zoom / x / y eg. 12/2055/4833.png
         if(!window.hWin.HEURIST4.util.isempty(layer_url)) {

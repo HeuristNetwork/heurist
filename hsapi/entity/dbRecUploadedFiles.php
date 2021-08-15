@@ -473,6 +473,10 @@ class DbRecUploadedFiles extends DbEntityBase
                     $file2['ulf_ID'] = $ulf_ID;
                     $file2['ulf_ObfuscatedFileID'] = $nonce;
                     
+                    if($record['ulf_OrigFileName'] == '_tiled'){
+                        $file2['ulf_ExternalFileReference'] = HEURIST_TILESTACKS_URL.$ulf_ID.'/';
+                        $file2['ulf_FilePath'] = '';
+                    }else
                     if(!@$record['ulf_ExternalFileReference'] && !@$record['ulf_FileName']){
                         if($record['ulf_MimeExt']=='mbtiles'){
                             $this->records[$rec_idx]['ulf_FileName'] = 'ulf_'.$ulf_ID.'.mbtiles'; 
@@ -499,31 +503,66 @@ class DbRecUploadedFiles extends DbEntityBase
                     
                     //copy temp file from scratch to fileupload folder
                     $tmp_name = $this->records[$rec_idx]['ulf_TempFile'];
-                    $new_name = $this->records[$rec_idx]['ulf_FileName']; 
                     
-                    if( copy($tmp_name, HEURIST_FILES_DIR.$new_name) ) 
-                    {
-                        //remove temp file
-                        unlink($tmp_name);
+                    
+                    if($record['ulf_OrigFileName'] == '_tiled'){
                         
-                        //copy thumbnail
-                        if(@$record['ulf_TempFileThumb']){
-                            $thumb_name = HEURIST_SCRATCH_DIR.'thumbs/'.$record['ulf_TempFileThumb'];
-                            if(file_exists($thumb_name)){
-                                $new_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
-                                copy($thumb_name, $new_name);
-                                //remove temp file
-                                unlink($thumb_name);
-                            }
+                        //create destination folder
+                        $dest = HEURIST_TILESTACKS_DIR.$ulf_ID.'/';
+                        
+                        $warn = folderCreate2($dest, '');
+                        
+                        //unzip archive to HEURIST_TILESTACKS_DIR
+                        if(unzipArchive($tmp_name, $dest)){
+                            //remove temp file
+                            unlink($tmp_name);
+                            
+                            /* @todo
+                            //detect mimetype and summary size of stack images
+                            $file2 = array();
+                            $file2['ulf_ID'] = $ulf_ID;
+                            $file2['ulf_FileSizeKB'] = 999;
+                            $file2['ulf_MimeExt'] = 'png';
+            
+                            mysql__insertupdate($this->system->get_mysqli(), $this->config['tableName'], 'ulf', $file2);
+                            */
+                            
+                            
+                        }else{
+                            $this->system->addError(HEURIST_INVALID_REQUEST,
+                                 'Can\'t extract tiled images stack. It couldn\'t be saved to upload path definied for db = '
+                                . $this->system->dbname().' ('.$dest
+                                .'). Please ask your system administrator to correct the path and/or permissions for this directory');
                         }
                         
                     }else{
-                        $this->system->addError(HEURIST_INVALID_REQUEST,
-                             "Upload file: $new_name couldn't be saved to upload path definied for db = "
-                            . $this->system->dbname().' ('.HEURIST_FILES_DIR
-                            .'). Please ask your system administrator to correct the path and/or permissions for this directory');
-                    }                    
-
+                        
+                        $new_name = $this->records[$rec_idx]['ulf_FileName']; 
+                        
+                        if( copy($tmp_name, HEURIST_FILES_DIR.$new_name) ) 
+                        {
+                            //remove temp file
+                            unlink($tmp_name);
+                            
+                            //copy thumbnail
+                            if(@$record['ulf_TempFileThumb']){
+                                $thumb_name = HEURIST_SCRATCH_DIR.'thumbs/'.$record['ulf_TempFileThumb'];
+                                if(file_exists($thumb_name)){
+                                    $new_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
+                                    copy($thumb_name, $new_name);
+                                    //remove temp file
+                                    unlink($thumb_name);
+                                }
+                            }
+                            
+                        }else{
+                            $this->system->addError(HEURIST_INVALID_REQUEST,
+                                 "Upload file: $new_name couldn't be saved to upload path definied for db = "
+                                . $this->system->dbname().' ('.HEURIST_FILES_DIR
+                                .'). Please ask your system administrator to correct the path and/or permissions for this directory');
+                        }                    
+                    }
+                        
             }
             
         }//after save loop
@@ -766,7 +805,7 @@ class DbRecUploadedFiles extends DbEntityBase
     * @param mixed $needclean - remove file from temp lcoation after reg
     * @returns record or false
     */
-    public function registerFile($file, $newname, $needclean = true){
+    public function registerFile($file, $newname, $needclean = true, $tiledImageStack=false){
         
        $this->records = null; //reset 
         
@@ -774,8 +813,10 @@ class DbRecUploadedFiles extends DbEntityBase
                     
        if($fields!==false){             
            
-                //$tmp_name = $fields['ulf_TempFile'];
-                //unset($fields['ulf_TempFile']);
+                if($tiledImageStack){
+                    //special case for tiled images stack
+                    $fields['ulf_OrigFileName'] = '_tiled';
+                }
            
                 $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
                 

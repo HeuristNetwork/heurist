@@ -734,8 +734,8 @@ $.widget( "heurist.editing_input", {
                               });
       
                 }
-
-
+                
+                
                 var isCMS_content = (( 
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']) &&
@@ -2321,9 +2321,13 @@ $.widget( "heurist.editing_input", {
                         */
                         //.button({icons:{primary: icon_for_button},text:false});
                          
+                        var isTiledImage = this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
+                            && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE'];
+                         
                         var popup_options = {
                             isdialog: true,
                             select_mode: 'select_single',
+                            additionMode: isTiledImage?'tiled':'any',  //AAAA
                             edit_addrecordfirst: true, //show editor at once
                             select_return_mode:select_return_mode, //ids or recordset(for files)
                             filter_group_selected:null,
@@ -2532,8 +2536,9 @@ $.widget( "heurist.editing_input", {
                               }
                           });
          
-                        //init upload widget
-                        $input.fileupload({
+         
+         
+        var fileupload_opts = {
     url: window.hWin.HAPI4.baseURL +  'hsapi/controller/fileUpload.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},
@@ -2618,7 +2623,20 @@ $.widget( "heurist.editing_input", {
         //$('#progress .bar').css('width',progress + '%');
         $progress_bar.progressbar( "value", progress );        
     }                            
-                        });
+                        };        
+        
+    var isTiledImage = that.configMode.tiledImageStack ||
+                        (that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
+                        && that.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
+    if(isTiledImage){
+        fileupload_opts['formData'].push({name:'tiledImageStack', value:1});
+        fileupload_opts['acceptFileTypes'] = /(\.|\/)(zip)$/i;
+        
+        $input.attr('accept','.zip, application/zip');
+    }                
+       
+                        //init upload widget
+                        $input.fileupload( fileupload_opts );
                 
                         //init click handlers
                         //this._on( $btn_fileselect_dialog, { click: function(){ $input_img.click(); } } );

@@ -132,8 +132,14 @@ function hMapDocument( _options )
                     if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER
                         || resdata.fld(record, 'rec_RecTypeID')==RT_TLCMAP_DATASET)
                     { //ignore sources
-                        var recID  = resdata.fld(record, 'rec_ID'),
-                        recName = record["d"][1][0]; // resdata.fld(record, 'rec_Title');
+                        var recID  = resdata.fld(record, 'rec_ID'), recName = '';
+                        if(record['d'] && record['d'][1]){
+                            recName = record['d'][1][0];
+                        }else{
+                            recName = resdata.fld(record, 'rec_Title');
+                            //console.log(record);
+                            //continue;
+                        }
                         
                         var $res = {};  
                         $res['key'] = recID;

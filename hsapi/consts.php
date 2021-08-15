@@ -210,7 +210,7 @@ $rtDefines = array(
     'RT_PERSON' => array(2, 10),
 
     // see also spatial data types below
-    'RT_IMAGE_SOURCE' => array(2, 11), //TODO : change RT_TILED_IMAGE
+    'RT_IMAGE_SOURCE' => array(3, 1018),
     'RT_TILED_IMAGE_SOURCE' => array(2, 11), // added Ian 23/10/14 for consistency
 
     // Record types added by SW and SH for their extensions, no longer in core definitions, now in DB 4 Heurist ToolExtensions
