@@ -405,7 +405,7 @@ function hEditing(_options) {
                     .addClass('heurist-helper3').appendTo(fieldContainer);
             }
             
-            if(fieldContainer && fieldContainer.find("div.optional").length > 0){
+            if(fieldContainer && fieldContainer.find('div.optional').length > 0 && fieldContainer.find('div.required, div.recommended').length == 0){
                 $('<div>').css({padding: '4px'}).addClass('optional_hint')
                     .html('Fields missing? Turn on <u>optional fields</u> (checkbox at the top of page)').appendTo(fieldContainer);
             }
