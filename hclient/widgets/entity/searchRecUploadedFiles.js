@@ -165,9 +165,11 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         
             var domain = this.currentDomain();
             
-            
+            if(this.options.additionMode=='tiled'){
+                
+                request['ulf_OrigFileName'] = '_tiled';                        
 
-            if(domain=='external'){
+            }else if(domain=='external'){
 
                 this.input_search.parent().hide();
                 this.input_search_path.parent().hide();
@@ -183,7 +185,8 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     request['ulf_ExternalFileReference'] = '-NULL';                        
                 }
                 
-            }else{
+            }
+            else{
                 
                 this.input_search_url.parent().hide();
                 this.input_search.parent().show();

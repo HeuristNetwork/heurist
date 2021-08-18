@@ -362,7 +362,9 @@ class DbRecUploadedFiles extends DbEntityBase
             $isinsert = ($rec_ID<1);
         
             if(@$record['ulf_ExternalFileReference']){
-                $this->records[$idx]['ulf_OrigFileName'] = '_remote';
+                if(strpos(@$this->records[$idx]['ulf_OrigFileName'],'_tiled')!==0){
+                    $this->records[$idx]['ulf_OrigFileName'] = '_remote';
+                }
             }else if(@$record['ulf_FileUpload']){
                 
                 $fields_for_reg = $this->getFileInfoForReg($record['ulf_FileUpload'], null);            
@@ -399,7 +401,10 @@ class DbRecUploadedFiles extends DbEntityBase
                 $fileExtension = mysql__select_value($this->system->get_mysqli(), 
                     'select fxm_Extension from defFileExtToMimetype where fxm_Mimetype="'.addslashes($mimeType).'"');
 
-                if($fileExtension==null && $this->records[$idx]['ulf_OrigFileName'] != '_remote'){
+                if($fileExtension==null && 
+                    $this->records[$idx]['ulf_OrigFileName'] != '_remote' && 
+                    strpos($this->records[$idx]['ulf_OrigFileName'],'_tiled')!==0)
+                {
                     //mimetype not found - try to get extension from name
                     $extension = strtolower(pathinfo($this->records[$idx]['ulf_OrigFileName'], PATHINFO_EXTENSION));
                     if($extension){
@@ -473,8 +478,10 @@ class DbRecUploadedFiles extends DbEntityBase
                     $file2['ulf_ID'] = $ulf_ID;
                     $file2['ulf_ObfuscatedFileID'] = $nonce;
                     
-                    if($record['ulf_OrigFileName'] == '_tiled'){
-                        $file2['ulf_ExternalFileReference'] = HEURIST_TILESTACKS_URL.$ulf_ID.'/';
+                    if(strpos($record['ulf_OrigFileName'],'_tiled')===0){
+                        if(!@$record['ulf_ExternalFileReference']){
+                            $file2['ulf_ExternalFileReference'] = $ulf_ID.'/'; //HEURIST_TILESTACKS_URL.
+                        }
                         $file2['ulf_FilePath'] = '';
                     }else
                     if(!@$record['ulf_ExternalFileReference'] && !@$record['ulf_FileName']){
@@ -505,8 +512,8 @@ class DbRecUploadedFiles extends DbEntityBase
                     $tmp_name = $this->records[$rec_idx]['ulf_TempFile'];
                     
                     
-                    if($record['ulf_OrigFileName'] == '_tiled'){
-                        
+                    if(strpos($record['ulf_OrigFileName'],'_tiled')===0)
+                    {
                         //create destination folder
                         $dest = HEURIST_TILESTACKS_DIR.$ulf_ID.'/';
                         
@@ -815,7 +822,7 @@ class DbRecUploadedFiles extends DbEntityBase
            
                 if($tiledImageStack){
                     //special case for tiled images stack
-                    $fields['ulf_OrigFileName'] = '_tiled';
+                    $fields['ulf_OrigFileName'] = '_tiled@'.substr($fields['ulf_OrigFileName'],0,-4);
                 }
            
                 $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
@@ -839,8 +846,17 @@ class DbRecUploadedFiles extends DbEntityBase
     * @param mixed $generate_thumbmail
     */
     public function registerURL($url, $generate_thumbmail = false){
+/*
+       $this->records = null; //reset 
+       
+       $fields['ulf_OrigFileName'] = '_remote';
+       $fields['ulf_ExternalFileReference'] = $url;
 
- 
+       $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
+                
+       $this->setData($fileinfo);
+       return $this->save();   //copies temp from scratch to file_upload it returns ulf_ID
+*/ 
     }   
 
     

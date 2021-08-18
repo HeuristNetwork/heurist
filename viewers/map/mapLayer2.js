@@ -105,20 +105,32 @@ function hMapLayer2( _options ) {
     //
     // add tiled image
     //
-    function _addTiledImage() {
+    function _addTiledImage( layer_url ) {
 
-        var layer_url = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
-        
-        if(window.hWin.HEURIST4.util.isempty(layer_url)) {
+        if(window.hWin.HEURIST4.util.isempty(layer_url)){
             
-            var file_id = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
-         
-            if(file_id){
-console.log(file_id);                
-                layer_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&file='+file_id[0];
-            }
+             //obfuscated file id
+             var file_info = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
+             
+             if($.isArray(file_info)){
+             
+                 var url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&mode=url&file='+
+                            file_info[0];
+                            
+                 window.hWin.HEURIST4.util.sendRequest(url, {}, null, 
+                    function (response) {
+                        if(response.status == window.hWin.ResponseStatus.OK && response.data){
+                            _addTiledImage( response.data );
+                        }
+                    });
+                 return;                           
+                 
+             }else{
+                 //backward capability - value contains url to tiled image stack
+                 layer_url = file_info;
+             }
         }
-
+        
         // Source is a directory that contains folders in the following format: zoom / x / y eg. 12/2055/4833.png
         if(!window.hWin.HEURIST4.util.isempty(layer_url)) {
 
@@ -187,10 +199,10 @@ console.log(file_id);
     function _addImage(){
 
          //obfuscated file id
-         var imageFile = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
+         var file_info = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
          
          var image_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&file='+
-                    imageFile[0];
+                    file_info[0];
                     
          var worldFileData = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']);
          

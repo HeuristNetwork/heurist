@@ -3136,17 +3136,21 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             }
                       }
                       
-                }else if(changed_element.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE'] && 
+                }else if(changed_element.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL'] && 
                             changed_element.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
 
                       var val = changed_element.getValues();
                       if(val && val.length>0 && !window.hWin.HEURIST4.util.isempty(val[0])){
                           
-                            this._editing.setFieldValueByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL'], 
-                                                    val[0]['ulf_ExternalFileReference']);
-                            
-                            //this._editing.setFieldValueByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_MIME_TYPE'], 
-                            //'image/'+val[0]['ulf_MimeExt']);
+                            var mimetype = val[0]['ulf_MimeExt'];
+                            if(mimetype=='image/jpg') mimetype=='image/jpeg';
+                            var ele = this._editing.getInputs( window.hWin.HAPI4.sysinfo['dbconst']['DT_MIME_TYPE'] );
+                            if(ele.length>0){
+                                ele = $(ele[0]);
+                                var idx = ele.find('option:contains("'+mimetype+'")').index();
+                                ele[0].selectedIndex = idx;
+                                if( ele.hSelect('instance')!==undefined) ele.hSelect('refresh');
+                            }
                       } 
                       
                 }else if(changed_element.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE'])

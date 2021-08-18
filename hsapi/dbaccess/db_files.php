@@ -612,7 +612,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     
     if($is_local){
         
-    }else if($external_url){
+    }else if($external_url && strpos($originalFileName,'_tiled')!==0){
         $filepath = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
         saveURLasFile($external_url, $filepath);
     }
@@ -623,7 +623,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     $zip = new ZipArchive();
     if (!$zip->open($file_zip_full, ZIPARCHIVE::CREATE)) {
         $system->error_exit_api("Cannot create zip $file_zip_full");
-    }else{
+    }else if(strpos($originalFileName,'_tiled')!==0) {
         $zip->addFile($filepath, $originalFileName);
     }
 
@@ -838,8 +838,14 @@ function youtube_id_from_url($url) {
 //
 //
 //
-function fileGetWidthHeight($filepath, $external_url, $mimeType){
+function fileGetWidthHeight($fileinfo){
 
+    
+    $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
+    $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
+    $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
+    $originalFileName = $fileinfo['ulf_OrigFileName'];
+    
     $type_media = null;
     $ext = null;
     if($mimeType && strpos($mimeType, '/')!=false){
@@ -848,7 +854,7 @@ function fileGetWidthHeight($filepath, $external_url, $mimeType){
 
     $image = null;
     
-    if($type_media=='image'){
+    if(strpos($originalFileName,'_tiled')!==0 && $type_media=='image'){
     
         if(file_exists($filepath)){
             
@@ -878,6 +884,7 @@ function fileGetWidthHeight($filepath, $external_url, $mimeType){
     }else{
         $res = 'Resource is not an image';
     }
+    
 
     header('Content-type: application/json;charset=UTF-8');
     $response = array('status'=>HEURIST_OK, 'data'=>$res);
@@ -974,7 +981,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
         }
         else if(@$file['ulf_ExternalFileReference']){  //remote 
         
-            if(@$file['fxm_MimeType'] == '_tiled'){
+            if(@$file['ulf_OrigFileName'] && strpos($file['ulf_OrigFileName'],'_tiled')===0){
                 
                 $img = UtilsImage::createFromString('tiled images stack'); //from string
         

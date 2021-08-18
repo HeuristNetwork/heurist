@@ -1537,7 +1537,10 @@ function recordSearch($system, $params)
 
                     $params3['q'] = str_replace('relatedfrom','related',$params3['q']);
                 }
-
+                                                          
+                if($needCompleteInformation){
+                    $params3['detail'] = 'complete';
+                }                        
                 //DEBUg error_log(print_r($params3,true));                    
 
                 $response = recordSearch($system, $params3);

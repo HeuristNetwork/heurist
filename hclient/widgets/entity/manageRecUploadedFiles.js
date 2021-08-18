@@ -94,13 +94,24 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         // init search header
         this.editForm.css('padding-top',20);
         this.searchForm.searchRecUploadedFiles(this.options);
-        var iheight = 7.4;
+
+        if(this._additionMode=='tiled'){
+            
+            this.searchForm.hide();
+            this.recordList.css({'top':'0px'});
+            
+        }else{
         
-        if(this.options.edit_mode=='inline'){            
-            iheight = iheight + 8;
+            var iheight = 7.4;
+            
+            if(this.options.edit_mode=='inline'){            
+                iheight = iheight + 8;
+            }
+            this.searchForm.css({'height':iheight+'em', padding:'10px', 'min-width': '730px'});
+            this.recordList.css({'top':iheight+2+'em'});
+        
         }
-        this.searchForm.css({'height':iheight+'em', padding:'10px', 'min-width': '730px'});
-        this.recordList.css({'top':iheight+2+'em'});
+        
         //init viewer 
         var that = this;
         
@@ -185,7 +196,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'hidden';
                 this.options.entity.fields[i_descr].dtFields['rst_Display'] = 'hidden';
                 
-                this.options.entity.fields[i_mime_ext].dtFields['rst_Display'] = 'hidden';  //temp till ext will be defined
+                this.options.entity.fields[i_mime_ext].dtFields['rst_Display'] = 'hidden'; //temp till ext will be defined
                 this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'hidden'; //readonly fxm_MimeType
             
                 this._edit_dialog.dialog('option','height',350);
@@ -372,8 +383,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 if( !window.hWin.HEURIST4.util.isempty(curr_url[0]) && curr_url[0]!=that._previousURL ){    
 
                     that._previousURL = curr_url[0];
-					
-                    that._requestMimeTypeByURL();
+                    
+                    that._requestMimeTypeByURL();    
 					
                     /* Cannot rely on retrieving the extension via a URL                
                     var ext = window.hWin.HEURIST4.util.getFileExtension(curr_url[0]);
@@ -424,6 +435,18 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     
     
     _requestMimeTypeByURL:function(){
+        
+        if(this._additionMode=='tiled'){
+            //special case for tiled image stack            
+            var ele2 = this._editing.getFieldByName('ulf_MimeExt');
+            if(this._previousURL){
+                ele2.show();
+            }else{
+                ele2.hide();
+            }
+            return;               
+        }
+
   
         var that = this;
         
@@ -487,8 +510,6 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
         }
         
-        //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
-        
         var recID   = fld('ulf_ID');
         
         var rectype = fld('ulf_ExternalFileReference')?'external':'local';
@@ -497,7 +518,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         var recTitle;
         var recTitleHint;
         if(rectype=='external'){
-            recTitle = fld2('ulf_ExternalFileReference','auto');//,'20em'
+            var val = fld('ulf_OrigFileName');
+            if(val.indexOf('_tiled@')==0){
+                val = val.substr(7);
+                recTitle = '<div class="item" style="width:auto">'+val+'</div>';
+            }
+            if(!recTitle){
+                recTitle = fld2('ulf_ExternalFileReference','auto');//,'20em'
+            }
             recTitleHint = recID+' : '+fld('ulf_ExternalFileReference');
         }else{
             recTitleHint = recID+' : '+fld('ulf_OrigFileName') + ' @ ' + fld('ulf_FilePath');
@@ -664,16 +692,32 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 labels['yes'] = window.hWin.HR('Accept as is');
 
                 window.hWin.HEURIST4.msg.showMsgDlg(
-                      "This file cannot be rendered as an image or playable media.<br/>"
-                    + "You may have referenced a web page (e.g. htm or html) rather than an image or video.<br/>"
-                    + "The URL may appear to have a file extension, but you have most likely referenced a wrapper for the file.<br/>"
-                    + "You must reference the file directly.<br/>",
+                      'This file cannot be rendered as an image or playable media.<br/>'
+                    + 'You may have referenced a web page (e.g. htm or html) rather than an image or video.<br/>'
+                    + 'The URL may appear to have a file extension, but you have most likely referenced a wrapper for the file.<br/>'
+                    + 'You must reference the file directly.<br/>',
                     btns, labels,
                     {default_palette_class: 'ui-heurist-populate'}
                 );
             }
 				
         }else{
+            
+            if(this._additionMode=='tiled'){
+                //check mime type
+                var ele = this._editing.getFieldByName('ulf_MimeExt');
+                var extension = ele.editing_input("getValues");
+                if(!extension || !extension[0] || 
+                    extension[0].match(/(gif|jpg|jpeg|png)?/i)[0]=='')
+                {
+                    window.hWin.HEURIST4.msg.showMsgDlg(  
+                        'You have to define the correct image type for tile image stack',
+                        btns, labels,
+                        {default_palette_class: 'ui-heurist-populate'});
+                    return;
+                }
+                this._editing.setFieldValueByName2('ulf_OrigFileName','_tiled',false);
+            }
 
             this._super(fields, afterAction);
         }

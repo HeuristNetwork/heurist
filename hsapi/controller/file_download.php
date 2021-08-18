@@ -50,11 +50,12 @@ if($db){
     
     $fileid = @$_REQUEST['thumb'];
     if($fileid){ 
-        $system->initPathConstants($db);
-
         $force_recreate = (@$_REQUEST['refresh']==1);
 
+        $system->initPathConstants($db);
+
         $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
+        
         if(!$force_recreate && file_exists($thumbfile)){
             downloadFile('image/png', $thumbfile);
         }else{
@@ -62,6 +63,7 @@ if($db){
             $system->init($db);
             fileCreateThumbnail( $system, $fileid, true );
         }
+
     }else if(@$_REQUEST['file'] || @$_REQUEST['ulf_ID']) { //ulf_ID need for backward support of old downloadFile.php
 
         $fileid = @$_REQUEST['file']? $_REQUEST['file'] :@$_REQUEST['ulf_ID'];
@@ -107,7 +109,7 @@ if($db){
             $originalFileName = $fileinfo['ulf_OrigFileName'];
             $fileSize = $fileinfo['ulf_FileSizeKB'];
             $fileExt = $fileinfo['ulf_MimeExt'];
-
+            
             if( @$_REQUEST['mode']=='tag'){
                 
                 print fileGetPlayerTag($fileid, $mimeType, $params, $external_url);
@@ -115,11 +117,11 @@ if($db){
             else  //just download file from heurist server or redirect to original remote url
             {
 
-                $filepath = resolveFilePath($filepath);
+                $filepath = resolveFilePath( $fileinfo );
                 
                 if( @$_REQUEST['mode']=='size'){ //get width and height for image file
 
-                    fileGetWidthHeight($filepath, $external_url, $mimeType);
+                    fileGetWidthHeight($fileinfo);
 
                 }else if(@$_REQUEST['metadata']){//download zip file: registered file and file with links to html and xml
                 
@@ -145,8 +147,33 @@ if($db){
                     //see db_files
                     downloadFile($mimeType, $filepath, @$_REQUEST['embedplayer']==1?null:$originalFileName);
                 }else if($external_url){
-//DEBUG error_log('External '.$external_url);        
-                    if(strpos($external_url,'http://')==0 || $_REQUEST['download']){
+//DEBUG error_log('External '.$external_url);
+
+                    if(@$_REQUEST['mode']=='url'){
+           
+                        //if it does not start with http - this is relative path             
+                        if(!(strpos($external_url,'http://')===0 || strpos($external_url,'https://')===0)){
+                            $external_url = HEURIST_TILESTACKS_URL.$external_url;                 
+                        }                        
+                        
+                        header('Content-type: application/json;charset=UTF-8');
+                        $response = array('status'=>HEURIST_OK, 'data'=>$external_url);
+                        print json_encode($response);
+                        
+                    }else
+                    if(strpos($originalFileName,'_tiled')===0){
+                        
+                        $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
+                        
+                        if(file_exists($thumbfile)){
+                            downloadFile('image/png', $thumbfile);
+                        }else{
+                            fileCreateThumbnail( $system, $fileid, true );
+                        }
+                        
+                        
+                    }else
+                    if(strpos($external_url,'http')==0 || $_REQUEST['download']){
                         
                         if($fileExt){
                             $finfo = pathinfo($originalFileName);

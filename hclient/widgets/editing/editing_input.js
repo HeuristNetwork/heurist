@@ -2322,7 +2322,7 @@ $.widget( "heurist.editing_input", {
                         //.button({icons:{primary: icon_for_button},text:false});
                          
                         var isTiledImage = this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
-                            && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE'];
+                            && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL'];
                          
                         var popup_options = {
                             isdialog: true,
@@ -2344,6 +2344,7 @@ $.widget( "heurist.editing_input", {
                                         var newvalue = {ulf_ID: recordset.fld(record,'ulf_ID'),
                                                         ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
                                                         ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
+                                                        ulf_MimeExt: recordset.fld(record,'fxm_MimeType'),
                                                         ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID')};
                                         
                                         that.newvalues[$input.attr('id')] = newvalue;
@@ -2627,7 +2628,7 @@ $.widget( "heurist.editing_input", {
         
     var isTiledImage = that.configMode.tiledImageStack ||
                         (that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
-                        && that.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
+                        && that.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
     if(isTiledImage){
         fileupload_opts['formData'].push({name:'tiledImageStack', value:1});
         fileupload_opts['acceptFileTypes'] = /(\.|\/)(zip)$/i;
