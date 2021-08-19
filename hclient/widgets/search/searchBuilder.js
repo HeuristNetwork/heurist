@@ -805,7 +805,7 @@ $.widget( "heurist.searchBuilder", {
                             }
 
                             //setTimeout(function(){
-                            treediv.addClass('tree-facets hidden_checkboxes').fancytree({
+                            treediv.addClass('tree-filter hidden_checkboxes').fancytree({
                                 //extensions: ["filter"],
                                 //            extensions: ["select"],
                                 checkbox: true,

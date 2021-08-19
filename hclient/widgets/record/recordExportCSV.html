@@ -16,11 +16,13 @@
     <div class="export-field-tree-container">
     <div class="header" style="padding: 0 16px 0 16px;display: inline-block;vertical-align:top"><label>Select fields to export:</label></div>
     
-    <div class="detailRow rtt-tree" style="display: inline-block;outline: none;margin-top: -8px;"
-                id="rectype_tree">
+    <div style="display: inline-block;outline: none;">
+        <label id="selectAll_container"><input type="checkbox" id="selectAll" style="vertical-align: 0px;">Select All Visible Options</label>
+
+		<div class="detailRow rtt-tree" id="rectype_tree"></div>
     </div>
 </div>
-    <div class="export-advanced-button" style="font-weight: bold;margin-bottom: 1em;cursor: pointer;text-decoration: underline;color: #6A7C99;">Advanced</div>
+    <div class="export-advanced-button" style="font-weight: bold;margin-bottom: 1em;padding-left: 16px;cursor: pointer;text-decoration: underline;color: #6A7C99;">Advanced</div>
     <div class="export-advanced-container" style="padding: 10px 16px;">
         <div style="margin-bottom: 10px">
             <label><input type="checkbox" id="chkJoinRecTypes"/> Join record types into a single file</label>

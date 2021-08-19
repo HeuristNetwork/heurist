@@ -234,7 +234,9 @@ $.widget( "heurist.search_faceted_wiz", {
 
         header.html("<label>"+window.hWin.HR("Select fields that act as facet")+
             "</label><br><br><label for='fsw_showreverse'><input type='checkbox' id='fsw_showreverse' style='vertical-align: middle;' />&nbsp;"+
-            window.hWin.HR("Show linked-from record types (reverse pointers, indicated as &lt;&lt;)")+"</label>");
+            window.hWin.HR("Show linked-from record types (reverse pointers, indicated as &lt;&lt;)")+"</label><br><br>"+
+            "<label id='selectAll_container' style='font-size: 11px;position: relative;top: 10px;left: 20px;'>"+
+            "<input type='checkbox' id='selectAll'>Select All Visible Options</label>");
 
         //$("<label>").text(window.hWin.HR("Select fields that act as facet")).appendTo(header);
         //$("<checkbox>").text(window.hWin.HR("Show linked-from record types (reverse pointers)")).appendTo(header);
@@ -277,6 +279,24 @@ $.widget( "heurist.search_faceted_wiz", {
                     .css({'opacity':0.5, background:'#f38989'}).show()
                 , {click:this._refresh_FacetsPreviewReal});
         
+        this._on($(this.step2).find('#selectAll'), {
+            click: function(e){
+                var treediv = that.element.find('#field_treeview');
+
+                var check_status = $(e.target).is(":checked");
+
+                if(!treediv.is(':empty') && treediv.fancytree("instance")){
+                    var tree = treediv.fancytree("getTree");
+                    tree.visit(function(node){
+                        if(!node.hasChildren() && node.data.type != "relmarker" && node.data.type != "resource" 
+                            && (node.getLevel()==2 || (!window.hWin.HEURIST4.util.isempty(node.span) && $(node.span.parentNode.parentNode).is(":visible")))
+                        ){    
+                            node.setSelected(check_status);
+                        }
+                    });
+                }
+            }
+        });
         
         this._refresh();
 
