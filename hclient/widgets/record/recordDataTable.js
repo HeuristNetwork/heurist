@@ -74,7 +74,27 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
         if(this.options.initial_cfg){
             this.setSettings(this.options.initial_cfg);
         }
-        
+
+        this._on(this.element.find('#selectAll'), {
+            click: function(e){
+
+                var treediv = that.element.find('.rtt-tree');
+
+                var check_status = $(e.target).is(":checked");
+
+                if(!treediv.is(':empty') && treediv.fancytree("instance")){
+                    var tree = treediv.fancytree("getTree");
+                    tree.visit(function(node){
+                        if(!node.hasChildren() && node.data.type != "relmarker" && node.data.type != "resource" 
+                            && (node.getLevel()==2 || (!window.hWin.HEURIST4.util.isempty(node.span) && $(node.span.parentNode.parentNode).is(":visible")))
+                        ){    
+                            node.setSelected(check_status);
+                        }
+                    });
+                }
+            }
+        });
+        this.element.find('#selectAll_container').hide();
     },
 
     //

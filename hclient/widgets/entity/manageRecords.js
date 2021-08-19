@@ -2824,9 +2824,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     first_set.css('border-bottom','1px solid #A4B4CB');
                 }
             }
-            
-            
-            
+
+            // Add a divider between the popup controls and the first set of input, 
+            // if the first set is not contained within a group and there are groups below these loose inputs
+            var first_child = $(this.editForm[0].childNodes[0]);
+            if (this.editForm[0].childNodes.length > 2 && first_child.is("fieldset") && first_child.children("div:visible").length != 0){
+                first_child.css('border-top', '1px solid #A4B4CB');
+            }
             
             //special case for bookmarklet addition - some values are already assigned 
             if(that._isInsert){

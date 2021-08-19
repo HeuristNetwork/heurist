@@ -107,8 +107,24 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         this.element.find('.export-to-bottom-button').on('click', function () {
             $('.ent_content').scrollTop($('.ent_content')[0].scrollHeight);
         });
-        
-        
+
+        this.element.find('#selectAll').on("click", function(e){
+            var treediv = that.element.find('.rtt-tree');
+
+            var check_status = $(e.target).is(":checked");
+
+            if(!treediv.is(':empty') && treediv.fancytree("instance")){
+                var tree = treediv.fancytree("getTree");
+                tree.visit(function(node){
+                    if(!node.hasChildren() && node.data.type != "relmarker" && node.data.type != "resource" 
+                        && (node.getLevel()==2 || (!window.hWin.HEURIST4.util.isempty(node.span) && $(node.span.parentNode.parentNode).is(":visible")))
+                    ){    
+                        node.setSelected(check_status);
+                    }
+                });
+            }
+        });
+        this.element.find('#selectAll_container').css("padding-left", "21px").hide();
 
         return true;
     },
@@ -489,8 +505,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         
         if(rtyID==''){
             $('.rtt-tree').parent().hide();
+            this.element.find('#selectAll_container').hide();
         }else{
             $('.rtt-tree').parent().show();
+            this.element.find('#selectAll_container').show();
             if(rtyID>0){
                 this.selectedFields = [];
             }
@@ -548,6 +566,12 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                         return false;
                     }
                 },
+                renderNode: function(event, data){
+                    
+                    if(data.node.data.type == "enum") { // || data.node.data.type == "relmarker"
+                        $(data.node.span.childNodes[1]).hide()
+                    }
+                },
                 lazyLoad: function(event, data){
                     var node = data.node;
                     var parentcode = node.data.code; 
@@ -587,13 +611,22 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     }
                 },
                 click: function(e, data){
-                   if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
-                       data.node.setExpanded(!data.node.isExpanded());
-                       //treediv.find('.fancytree-expander').hide();
-                       
-                   }else if( data.node.lazy) {
-                       data.node.setExpanded( true );
-                   }
+                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
+                        
+                        data.node.setExpanded(!data.node.isExpanded());
+
+                        if(data.node.isExpanded()){
+                            for(var i=0; i<data.node.children.length; i++){
+                                var node = data.node.children[i];
+                                if(node.key=='rec_ID' || node.key=='rec_Title'){
+                                    node.setSelected(true);
+                                }
+                            }
+                        }
+
+                    }else if(data.node.lazy) {
+                        data.node.setExpanded(true);
+                    }
                 },
                 dblclick: function(e, data) {
                     data.node.toggleSelected();

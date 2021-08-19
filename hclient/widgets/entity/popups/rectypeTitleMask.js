@@ -54,12 +54,12 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
     //        
     _initControls: function() {
         
+        var that = this;
         
         if(!(this.options.rty_ID>0)){
             window.hWin.HEURIST4.msg.showMsgDlg('Record type ID is not defined');
             return;
         }
-        
         
         //init tree
         this._loadRecordTypeTreeView();
@@ -71,11 +71,30 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         btn = this.element.find('#btnTestMask').button();
         this._on(btn, {click: this._doTest});
 
+        this._on(this.element.find('#selectAll'), {click: 
+            function(e){
+
+                var treediv = that.element.find('.rtt-tree');
+
+                var check_status = $(e.target).is(":checked");
+
+                if(!treediv.is(':empty') && treediv.fancytree("instance")){
+                    var tree = treediv.fancytree("getTree");
+                    tree.visit(function(node){ 
+
+                        if(!node.hasChildren() && node.data.type != "relmarker" && node.data.type != "resource" 
+                            && (node.getLevel()==1 || (!window.hWin.HEURIST4.util.isempty(node.span) && $(node.span.parentNode.parentNode).is(":visible")))
+                        ){    
+                            node.setSelected(check_status);
+                        }
+                    });
+                }
+            }
+        });
 
         this.element.find('#rty_TitleMask').val(this.options.rty_TitleMask);
         
         //load list of records
-        var that = this;
         var request = request = {q: 't:'+this.options.rty_ID, w: 'all', detail:'header', limit:100 };
          
         window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset )
@@ -393,23 +412,28 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             checkbox: true,
             selectMode: 3,  // hierarchical multi-selection
             source: treedata,
-            renderNode: function(event, data){
-
-                if(data.node.data.type=='enum'){
-                    // data.node.hideCheckbox = true; data.node.render(true); Stack Overflow (not the website)
-                    $($(data.node.li).find('.fancytree-checkbox')[0]).css({
-                        "visibility": "hidden",
-                        "width": 0,
-                        "margin-left": "1px"
-                    });
-                }
-            },			
             beforeSelect: function(event, data){
                 // A node is about to be selected: prevent this, for folder-nodes:
                 if( data.node.hasChildren() ){
+
+                    if(data.node.isExpanded()){
+                        for(var i = 0; i < data.node.children.length; i++){
+                            let node = data.node.children[i];
+
+                            if(node.key == 'term'){ // if node is a term
+                                node.setSelected(true); // auto select 'term' option to add term name
+                            }
+                        }
+                    }
                     return false;
                 }
             },
+            renderNode: function(event, data){
+                
+                if(data.node.data.type == "enum") { // hide blue arrow for certain types || data.node.data.type == "relmarker"
+                    $(data.node.span.childNodes[1]).hide()
+                }
+            },            
             lazyLoad: function(event, data){
                 var node = data.node;
                 var parentcode = node.data.code; 
@@ -435,9 +459,15 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             click: function(e, data){
                 if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
                     data.node.setExpanded(!data.node.isExpanded());
-                    //treediv.find('.fancytree-expander').hide();
-                    if(data.node.children[0].key==='term' && data.node.isExpanded()){ // if node is a term
-                        data.node.children[0].setSelected(true); // auto select 'term' option to add term name
+                    
+                    if(data.node.isExpanded()){
+                        for(var i = 0; i < data.node.children.length; i++){
+                            let node = data.node.children[i];
+
+                            if(node.key == 'term'){ // if node is a term
+                                node.setSelected(true); // auto select 'term' option to add term name
+                            }
+                        }
                     }
                 }else if( data.node.lazy) {
                     data.node.setExpanded( true );
@@ -453,7 +483,6 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                 }
             }
         });
-
     },
     
     //

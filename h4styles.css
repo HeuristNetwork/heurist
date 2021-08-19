@@ -1425,7 +1425,8 @@ span.fancytree-checkbox{
 }
 
 
-
+/* FancyTree */
+/* Map */
 .tree-map{
     padding:0px;
 }
@@ -1439,42 +1440,55 @@ span.fancytree-checkbox{
     padding: 0px 0px 0px 8px !important;
 }
 
-
+/* CMS */
 .tree-cms > ul > li > .fancytree-node > .fancytree-title{
     font-weight: bold;
 }
 
-.tree-facets.hidden_checkboxes span.fancytree-checkbox
+/* CSV Export, Facet Filter Builder and Record Title Mask */
+.tree-csv span:not(.fancytree-has-children) span.fancytree-expander,
+.tree-facets span:not(.fancytree-has-children) span.fancytree-expander {  /* Hide expander for nodes without children */
+    visibility: hidden;
+}
+.tree-csv .fancytree-has-children span.fancytree-checkbox,
+.tree-facets .fancytree-has-children span.fancytree-checkbox {  /* Change checkbox to blue arrow */
+    background-position: 0px -176px;    /* Empty Blue Arrow */
+}
+.tree-csv .fancytree-has-children.fancytree-partsel span.fancytree-checkbox,
+.tree-facets .fancytree-has-children.fancytree-partsel span.fancytree-checkbox,
+.tree-csv .fancytree-has-children.fancytree-selected span.fancytree-checkbox,
+.tree-facets .fancytree-has-children.fancytree-selected span.fancytree-checkbox {   /* Change checkbox to blue arrow */
+    background-position: -64px -176px;    /* Filled Blue Arrow */
+}
+.tree-csv span.fancytree-icon,
+.tree-facets span.fancytree-icon {  /* Hide icon */
+    display: none;
+}
+
+/* Filter Builder */
+.tree-filter.hidden_checkboxes span.fancytree-checkbox
 {
     display:none;
 }
-.tree-facets .fancytree-has-children span.fancytree-checkbox
+.tree-filter .fancytree-has-children span.fancytree-checkbox
 {
     background-position: 0px -176px; /* blue arrow */
     display:inline-block;
 }
-.tree-facets .fancytree-has-children.green-triangle span.fancytree-checkbox
+.tree-filter .fancytree-has-children.green-triangle span.fancytree-checkbox
 {
     background-position: -16px -128px; /* green triangle */
     display:inline-block;
 }
-
-.tree-facets .fancytree-has-children.fancytree-partsel span.fancytree-checkbox
+.tree-filter .fancytree-has-children.fancytree-partsel span.fancytree-checkbox
 {
     background-position: -64px -176px;
 }
-.tree-facets .fancytree-has-children.fancytree-selected span.fancytree-checkbox:hover
+.tree-filter .fancytree-has-children.fancytree-selected span.fancytree-checkbox:hover
 {
     background-position: -64px -48px;
 }
-
-.tree-csv .fancytree-has-children span.fancytree-icon {
-    margin-left: 3px;
-    background-position: 0px -176px;
-    display: inline-block;
-}
-
-.tree-csv .fancytree-expander, .tree-facets .fancytree-expander{
+.tree-filter .fancytree-expander{
     display:none;
 }
 
@@ -1483,7 +1497,6 @@ span.fancytree-checkbox{
     color: #999999;
     font-weight: bold !important;
 }
-
 .tree-rts .required, a.required{
     color:#CC0000 !important;
 }
@@ -1494,14 +1507,14 @@ span.fancytree-checkbox{
     color:black !important;
     text-decoration: line-through;
 }
-.forbidden > label{
-    color:black !important;
-    text-decoration: line-through;
-}
 .tree-rts .optional, a.optional, .optional{
     color:black !important;
 }
 
+.forbidden > label{
+    color:black !important;
+    text-decoration: line-through;
+}
 
 /* indent for folders 
 ul.fancytree-container ul{
