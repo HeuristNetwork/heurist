@@ -473,7 +473,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             window.hWin.HEURIST4.collection.collectionSave();
         
         }
-/* moved to main menu
+//@todo? move to main menu
         else if(action == "menu-subset-set"){
             
             if(!window.hWin.HAPI4.currentRecordset ||
@@ -531,7 +531,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                 });
                 
         }
-*/
+
 
 
     },
