@@ -509,7 +509,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                     var parentcode = node.data.code; 
                     var rectypes = node.data.rt_ids;
 
-                    if(parentcode.split(":").length<4){
+                    if(parentcode.split(":").length<4){  //limit with 2 levels
                     
                         var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
                                                             rectypes, ['header_ext','all'], parentcode );
@@ -519,7 +519,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                             data.result = res[0].children;
                         }
                     }else{
-                        data.result = {};
+                        data.result = [];
                     }                            
                         
                     return data;                       

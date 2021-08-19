@@ -125,7 +125,15 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             var that = this;
             //restore selection
             that.selectedFields = settings.fields; 
+
+            that._assignSelectedFields(null);
+
+            // Set advanced options.
+            if (settings.hasOwnProperty('advanced_options') && settings.advanced_options) {
+                that._setFieldAdvancedOptions(settings.advanced_options);
+            }
             
+            /*
             var tree = that.element.find('.rtt-tree').fancytree("getTree");           
             tree.visit(function(node){
                 node.setSelected(false);
@@ -140,6 +148,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     that._setFieldAdvancedOptions(settings.advanced_options);
                 }
             },1000);
+            */
             
             that.element.find('#delimiterSelect').val(settings.csv_delimiter);
             that.element.find('#quoteSelect').val(settings.csv_enclosure);
@@ -157,13 +166,40 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     //
     // assign selected fields in tree
     //
-    _assignSelectedFields: function(){
-
-        if(this.selectedFields && this.selectedFields.length>0){
+    _assignSelectedFields: function(rnode){
         
-            var tree = this.element.find('.rtt-tree').fancytree("getTree");
             var that = this;
+            var tree = that.element.find('.rtt-tree').fancytree("getTree");           
 
+            if(rnode==null){
+                rnode = tree.getRootNode();  
+                rnode.setExpanded(true);
+            } 
+            
+            rnode.visit(function(node){
+                        node.setSelected(false);
+                        var has_child = node.hasChildren();
+                        if(has_child===undefined){
+                            node.setExpanded(true);
+                            setTimeout(function(){
+                                    that._assignSelectedFields( node );
+                            },500);
+
+                        }else{
+                            if(that.selectedFields && that.selectedFields.length>0 && has_child===false){
+                                    for(var i=0; i<that.selectedFields.length; i++){
+                                        if(that.selectedFields[i]==node.data.code){
+                                            node.setSelected(true);
+                                            break;
+                                        }
+                                    }
+                            }
+                        }
+                });
+            
+            
+/*
+        if(this.selectedFields && this.selectedFields.length>0){
             tree.visit(function(node){
                     if(!window.hWin.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
                         //find it among facets
@@ -176,6 +212,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     }
                 });
         }
+*/                
     },
     
     //    
@@ -516,19 +553,25 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     var parentcode = node.data.code; 
                     var rectypes = node.data.rt_ids;
                     
-                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
-                                                        rectypes, ['header_ext','all'], parentcode );
-                    if(res.length>1){
-                        data.result = res;
+                    if(parentcode.split(":").length<5){  //limit with 3 levels
+                    
+                        var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
+                                                            rectypes, ['header_ext','all'], parentcode );
+                        if(res.length>1){
+                            data.result = res;
+                        }else{
+                            data.result = res[0].children;
+                        }
+                        
                     }else{
-                        data.result = res[0].children;
-                    }
+                        data.result = [];
+                    }                            
                     
                     return data;                                                   
                 },
                 loadChildren: function(e, data){
                     setTimeout(function(){
-                        //that._assignSelectedFields();
+                        //that._assignSelectedFields( data.node );
                     },500);
                 },
                 select: function(e, data) {

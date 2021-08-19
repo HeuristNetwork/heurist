@@ -327,7 +327,7 @@ function output_CSV($system, $data, $params){
     $sumColIndices = [];
     $percentageColIndices = [];
     
-    $has_advanced = false;
+    $has_advanced = $isJoinTable;
     $need_check_memory = true;
 
     if (isset($params['prefs']['advanced_options']) || is_array($params['prefs']['advanced_options'])) {

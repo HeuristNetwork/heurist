@@ -42,6 +42,7 @@ $.widget( "heurist.configEntity", {
         
         useHTMLselect: false,
         //createNewFromSelect: false
+        is_vertical_layout: false
     },
     
     sel_saved_settings: null,
@@ -61,12 +62,16 @@ $.widget( "heurist.configEntity", {
     _init: function() {
         var that = this;
 
+        var st = '';
+        if(!this.options.is_vertical_layout){
+            st = ' style="display:table-cell"';
+        }
 
-        $('<div class="col-3"><label for="sel_saved_settings">'
+        $('<div'+st+'><label for="sel_saved_settings">'
             +(this.options.loadSettingLabel?this.options.loadSettingLabel:'Saved settings:')+'</label></div>'
-            +'<div class="col-6"><select class="sel_saved_settings text ui-widget-content ui-corner-all" style="width:100%;"></select></div>'
+            +'<div'+st+'><select class="sel_saved_settings text ui-widget-content ui-corner-all"></select></div>'
             + ((this.options.showButtons)?
-            ('<div class="btn-action-div col-3 p-0"><span class="btn-action btn-rename"/>'
+            ('<div class="btn-action-div"'+st+'>&nbsp;&nbsp;<span class="btn-action btn-rename"/>'
             +'<span class="btn-action btn-openedit"/>'
             +'<span class="btn-action btn-remove"/></div></div>'):'') )
             //('<span class="ui-icon ui-icon-pencil" style="font-size:smaller;cursor:pointer"></span>'
@@ -78,8 +83,9 @@ $.widget( "heurist.configEntity", {
         if(!this.options.useHTMLselect){
             window.hWin.HEURIST4.ui.initHSelect(this.sel_saved_settings, false);
 
-            if(this.options.configName=="datatable" && this.sel_saved_settings.hSelect("instance")!=undefined){
-                this.sel_saved_settings.hSelect("widget").css("width", "700px");
+            if(this.sel_saved_settings.hSelect("instance")!=undefined){
+                var w = (this.options.configName=="datatable")?226:302;
+                this.sel_saved_settings.hSelect("widget").css("width", w+'px');
             }
         }
             
@@ -243,8 +249,8 @@ $.widget( "heurist.configEntity", {
             //     +'<input class="inpt_save_setting_name text ui-widget-content ui-corner-all" style="max-width:30em"/>'
             //     + (this.options.saveOnExit?'':'&nbsp;&nbsp;<button class="btnSaveSettings">Save</button>'))
 
-            $('<div class="col-12"><label>Save settings as <input class="inpt_save_setting_name text form-control"/></label></div>'
-            + (this.options.saveOnExit?'':'<div class="col-12 d-grid gap-2 mb-2"><button class="btn btn-success btnSaveSettings">Save</button></div>'))
+            $('<div style="display:table-cell"><label>Save settings as <input class="inpt_save_setting_name text form-control"/></label></div>'
+            + (this.options.saveOnExit?'':'<div style="display:table-cell">&nbsp;<button class="btn btn-success btnSaveSettings">Save</button></div>'))
             .appendTo(this.options.divSaveSettings);
             this.inpt_save_setting_name = this.options.divSaveSettings.find('.inpt_save_setting_name');        
             

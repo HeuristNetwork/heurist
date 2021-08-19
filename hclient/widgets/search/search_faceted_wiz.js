@@ -1119,12 +1119,18 @@ $.widget( "heurist.search_faceted_wiz", {
                                     var parentcode = node.data.code; 
                                     var rectypes = node.data.rt_ids;
                                     
-                                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, allowed_fieldtypes, parentcode );
-                                    if(res.length>1){
-                                        data.result = res;
+                                    if(parentcode.split(":").length<5){  //limit with 3 levels
+                                    
+                                        var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, allowed_fieldtypes, parentcode );
+                                        if(res.length>1){
+                                            data.result = res;
+                                        }else{
+                                            data.result = res[0].children;
+                                        }
+                                    
                                     }else{
-                                        data.result = res[0].children;
-                                    }
+                                        data.result = [];
+                                    }                            
                                     
                                     return data;                                                   
                                     /* from server
