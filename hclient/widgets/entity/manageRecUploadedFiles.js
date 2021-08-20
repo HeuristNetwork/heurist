@@ -521,7 +521,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             var val = fld('ulf_OrigFileName');
             if(val.indexOf('_tiled@')==0){
                 val = val.substr(7);
-                recTitle = '<div class="item" style="width:auto">'+val+'</div>';
+                if(!window.hWin.HEURIST4.util.isempty(val)){
+                    recTitle = '<div class="item" style="width:auto">'+val+'</div>';    
+                }
             }
             if(!recTitle){
                 recTitle = fld2('ulf_ExternalFileReference','auto');//,'20em'

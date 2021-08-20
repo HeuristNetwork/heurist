@@ -1,7 +1,7 @@
 <?php
 
 /**
-* listUploadedFilesErrors.php: Lists orphaned and missed files, broken paths
+* Lists orphaned and missed files, broken paths
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

@@ -845,18 +845,20 @@ class DbRecUploadedFiles extends DbEntityBase
     * @param mixed $url
     * @param mixed $generate_thumbmail
     */
-    public function registerURL($url, $generate_thumbmail = false){
-/*
+    public function registerURL($url, $tiledImageStack=false){
+        
        $this->records = null; //reset 
        
-       $fields['ulf_OrigFileName'] = '_remote';
+       $fields['ulf_OrigFileName'] = $tiledImageStack?'_tiled@':'_remote';
        $fields['ulf_ExternalFileReference'] = $url;
+       $fields['ulf_MimeExt'] = $tiledImageStack?'png': recognizeMimeTypeFromURL($this->system->get_mysqli(), $url);
+       $fields['ulf_UploaderUGrpID'] = 2; 
 
        $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
                 
        $this->setData($fileinfo);
-       return $this->save();   //copies temp from scratch to file_upload it returns ulf_ID
-*/ 
+       return $this->save();
+       
     }   
 
     
