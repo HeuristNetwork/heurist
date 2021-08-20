@@ -54,7 +54,7 @@ function hMapLayer( _options ) {
 
         if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
             
-            _map_overlay = _addTiledImage();
+            _map_overlay = _addTiledImage( null );
             
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
 
@@ -69,14 +69,34 @@ function hMapLayer( _options ) {
     //
     // add tiled image
     //
-    function _addTiledImage() {
+    function _addTiledImage( layer_url ) {
     
-        var imageLayer = null;
+        if(window.hWin.HEURIST4.util.isempty(layer_url)){
+            //obfuscated file id
+            var file_info = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
 
-        var sourceURL = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
+            if($.isArray(file_info)){
+
+                var url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&mode=url&file='+
+                file_info[0];
+                window.hWin.HEURIST4.util.sendRequest(url, {}, null, 
+                    function (response) {
+                        if(response.status == window.hWin.ResponseStatus.OK && response.data){
+                            _addTiledImage( response.data );
+                        }
+                });
+                return;                           
+
+            }else{
+                //backward capability - value contains url to tiled image stack
+                layer_url = file_info;
+            }
+        }
+        
+        var imageLayer = null;
         
         // Source is a directory that contains folders in the following format: zoom / x / y eg. 12/2055/4833.png
-        if(sourceURL !== undefined) {
+        if(!window.hWin.HEURIST4.util.isempty(layer_url)){
 
             var tilingSchema = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_LAYER_SCHEMA']);
             var mimeType = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MIME_TYPE']);
@@ -103,7 +123,7 @@ function hMapLayer( _options ) {
                     }
 
 
-                    var res = sourceURL + __tileToQuadKey(a.x,a.y,b) 
+                    var res = layer_url + __tileToQuadKey(a.x,a.y,b) 
                     + (ccode2=='2-540'? ".png" : ".gif");
                     return res;
                 };
@@ -115,7 +135,7 @@ function hMapLayer( _options ) {
                     //console.log(zoom);
 
                     var bound = Math.pow(2, zoom);
-                    var tile_url = sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
+                    var tile_url = layer_url + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
                     + (ccode2=='2-540'? ".png" : ".gif");
                     //console.log("URL: " + tile_url);
                

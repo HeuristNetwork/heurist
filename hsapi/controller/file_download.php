@@ -117,7 +117,7 @@ if($db){
             else  //just download file from heurist server or redirect to original remote url
             {
 
-                $filepath = resolveFilePath( $fileinfo );
+                $filepath = resolveFilePath( $filepath );
                 
                 if( @$_REQUEST['mode']=='size'){ //get width and height for image file
 
@@ -193,7 +193,7 @@ if($db){
                     
                 }else{
 //DEBUG
-                    error_log('File not found '.$filepath);
+                    error_log('File not found '.print_r($filepath,true));
                 }
             }
         }else{

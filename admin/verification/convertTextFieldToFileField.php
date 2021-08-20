@@ -96,7 +96,7 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
     print '<div>';
     $k = 1;
     
-    $databases = array('hdb_osmak_9a');
+    //$databases = array('hdb_osmak_9a');
     //$entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
     
     foreach ($databases as $idx=>$db_name){
@@ -151,7 +151,10 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
                 
             }//while recDeetails
             
-            print $db_name.'  dty_ID='.$dty_ID.'  count='.$m.'<br>';
+            if($m>0){
+                print $db_name.'  dty_ID='.$dty_ID.'  count='.$m.'<br>';    
+            }
+            
         }        
     }//foreach
     print '</div><br>[end operation]';

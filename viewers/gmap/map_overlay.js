@@ -898,6 +898,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 preserveViewport: is_mapdoc,
                 map: map,
                 status_changed: function(){
+                    //console.log(fileURL);
                     //console.log('status: '+kmlLayer.getStatus());
                 }
             });

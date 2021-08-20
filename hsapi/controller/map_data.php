@@ -30,8 +30,9 @@ $recordQuery = "SELECT * FROM Records r INNER JOIN defRecTypes d ON r.rec_RecTyp
 $recordWhere = '(not r.rec_FlagTemporary) and ((not r.rec_NonOwnerVisibility="hidden") or '
 . 'rec_OwnerUGrpID = 0 )';
 
-$detailQuery = "SELECT dtl_DetailTypeID, dtl_Value, rf.ulf_ObfuscatedFileID, ST_asWKT(dtl_Geo) as dtl_Geo "
-."FROM recDetails rd LEFT JOIN recUploadedFiles rf on rf.ulf_ID=rd.dtl_UploadedFileID WHERE rd.dtl_RecID=";
+$detailQuery = 'SELECT dtl_DetailTypeID, dtl_Value, '
+.'rf.ulf_ObfuscatedFileID, rf.ulf_ExternalFileReference, ST_asWKT(dtl_Geo) as dtl_Geo '
+.'FROM recDetails rd LEFT JOIN recUploadedFiles rf on rf.ulf_ID=rd.dtl_UploadedFileID WHERE rd.dtl_RecID=';
 
 
 /**
@@ -42,7 +43,7 @@ $detailQuery = "SELECT dtl_DetailTypeID, dtl_Value, rf.ulf_ObfuscatedFileID, ST_
 * @return mixed Image URL
 */
 function getFileURL($system, $fileID) {
-    return HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&file=".$fileID;
+    return HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&download=1&file=".$fileID;
 }
 
 /**
@@ -183,6 +184,8 @@ function getRecordDetails($system, $record) {
             $value = $detail["dtl_Value"];
             $fileID = $detail["ulf_ObfuscatedFileID"];
             $geo_value = $detail["dtl_Geo"];
+            $fileID = $detail["ulf_ObfuscatedFileID"];
+            $external_url = $detail['ulf_ExternalFileReference'];
 
             /* GENERAL */
             if($type == DT_NAME) {
@@ -203,7 +206,18 @@ function getRecordDetails($system, $record) {
                 /* SOURCE */
             }else if(defined('DT_SERVICE_URL') && $type == DT_SERVICE_URL) {
                 // Source URL
-                $record->sourceURL = $value;
+                
+                if($fileID){
+
+                    if(!(strpos($external_url,'http://')===0 || strpos($external_url,'https://')===0)){
+                        $external_url = HEURIST_TILESTACKS_URL.$external_url;                 
+                    }   
+                    
+                    $record->sourceURL = $external_url;
+                    
+                }else{
+                    $record->sourceURL = $value;    
+                }
 
             }else if(defined('DT_DATA_SOURCE') && $type == DT_DATA_SOURCE) {
                 // Data source
