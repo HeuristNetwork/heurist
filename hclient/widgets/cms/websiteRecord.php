@@ -273,14 +273,12 @@ if(!($rec['rec_RecTypeID']==RT_CMS_HOME || $isWebPage)){
 
 $image_icon = __getFile($rec, DT_THUMBNAIL, (array_key_exists('embed', $_REQUEST)?PDIR:HEURIST_BASE_URL).'favicon.ico');
 $image_logo = __getFile($rec, DT_FILE_RESOURCE, null); 
-$image_altlogo = null;
-$image_altlogo_url = null;
-$title_alt = null;
-if(defined('DT_CMS_ALTLOGO')) $image_altlogo = __getFile($rec, DT_CMS_ALTLOGO, null); 
-if(defined('DT_CMS_ALTLOGO_URL')) $image_altlogo_url = __getValue($rec, DT_CMS_ALTLOGO_URL); 
-if(defined('DT_CMS_ALT_TITLE')) $title_alt = __getValue($rec, DT_CMS_ALT_TITLE); 
-$image_banner = null;
-if(defined('DT_CMS_BANNER')) $image_banner = __getFile($rec, DT_CMS_BANNER, null); 
+
+$image_altlogo = __getFile($rec, '2-926', null);  //DT_CMS_ALTLOGO
+$image_altlogo_url = __getValue($rec, '2-943'); //DT_CMS_ALTLOGO_URL
+$title_alt = __getValue($rec, '3-1009');  //DT_CMS_ALT_TITLE
+$title_alt2 = __getValue($rec, '2-1052');
+$image_banner = __getFile($rec, '99-951', null); //DT_CMS_BANNER
 
 $image_logo = $image_logo?'<img style="max-height:80px;max-width:270px;" src="'.$image_logo.'">'
             :('<div style="text-align:center;display:block;width:250px;padding: 20px 10px;background:white;">'
@@ -315,6 +313,10 @@ $site_colors = __getValue($rec, DT_SYMBOLOGY);
 //
 function __getFile(&$rec, $id, $def){
     
+    if(is_string($id) && strpos($id,'-')){
+        $id = ConceptCode::getDetailTypeLocalID($id);
+    }
+    
     $file = @$rec['details'][$id];
     
     if(is_array($file)){
@@ -331,6 +333,10 @@ function __getFile(&$rec, $id, $def){
 // returns first value
 //
 function __getValue(&$menu_rec, $id){
+    
+    if(is_string($id) && strpos($id,'-')){
+        $id = ConceptCode::getDetailTypeLocalID($id);
+    }
     
     $val = @$menu_rec['details'][$id];
     

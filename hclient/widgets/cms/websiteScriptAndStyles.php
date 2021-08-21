@@ -462,6 +462,7 @@ $image_logo  -> #main-logo
 $image_altlogo -> #main-logo-alt
 $website_title -> #main-title>h2
 $title_alt -> #main-title-alt 
+$title_alt2 -> #main-title-alt2 
 */
   //main logo image
   if($('#main-logo').length>0){
@@ -484,6 +485,9 @@ $title_alt -> #main-title-alt
   }
   if($('#main-title-alt').length>0){
       $('#main-title-alt').html('<?php print str_replace("'",'&#039;', $title_alt);?>');
+  }
+  if($('#main-title-alt2').length>0){
+      $('#main-title-alt2').html('<?php print str_replace("'",'&#039;', $title_alt2);?>');
   }
   
   <?php if($website_title){  ?>

@@ -301,6 +301,10 @@ function hCmsEditing(_options) {
                 .appendTo(doc_body).addClass('cms-button')
                 .click(_editPageRecord)
                 .show();
+                
+console.log( $('a[id^="btn_inline_editor"]').length );                
+        $('a[id^="btn_inline_editor"]').hide(); //21-08-21                 
+                
 
         $('<a href="#" id="btn_inline_editor5" style="background:white;">Cancel</a>')
             .appendTo(doc_body)
@@ -659,6 +663,8 @@ function hCmsEditing(_options) {
             $('#btn_inline_editor').text('Edit page content');
             $('#btn_inline_editor3').text('source');
             
+            $('a[id^="btn_inline_editor"]').hide(); //21-08-21
+            
             if(is_header_editor){
                 
                 
@@ -777,6 +783,8 @@ function hCmsEditing(_options) {
             }
             
         }
+        
+        $('a[id^="btn_inline_editor"]').hide(); //21-08-21
     }    
     
     //
@@ -1975,7 +1983,6 @@ function hCmsEditing(_options) {
         
         is_header_editor = false;
 
-console.log('!!!');
         //if direct edit is opened - warn for saving 
         if(_isDirectEditMode()){
             
@@ -2016,15 +2023,20 @@ console.log('!!!');
     function _editPageSource( event ){
         
         if(_isDirectEditMode()){
+            //exit
             //save changes
-            __saveChanges( true );
+            allow_close_dialog = false;
+           _onEditorExit(function(){
+                __hideEditor();    
+           });
+           //__saveChanges( true );
         }else{
             //switch to direct editor
             
             $('#btn_inline_editor4').hide();
             $('#btn_inline_editor').text('wyswyg'); //change "Edit page content" to "wyswyg"
             $('#btn_inline_editor3').text('Save');  //change label from "source" to "Save"
-            $('#btn_inline_editor5').show();  //cancel direct edit
+            $('#btn_inline_editor5').hide(); //21-08-21 .show();  //cancel direct edit
             
             main_content.parent().css('overflow-y','hidden');
             main_content.hide();
@@ -2109,6 +2121,7 @@ console.log('!!!');
             _editPageContent();
         },
 
+        //start - stop edit page source
         editPageSource: function(){
             _editPageSource();
         },

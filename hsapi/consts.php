@@ -192,7 +192,7 @@ define("HEURIST_UNITED_TERMS", true);
 // used in Uploadhandler.php
 define('HEURIST_ALLOWED_EXT', 
 'jpg,jpeg,jfif,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,aif,aiff,ashx,pdf,mbtiles,'
-.'mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,kmz,shp,dbf,shx,svg,htm,html,xhtml,ppt,pptx,zip,gzip,tar,json');
+.'mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslx,xslt,hml,kml,kmz,shp,dbf,shx,svg,htm,html,xhtml,ppt,pptx,zip,gzip,tar,json');
 
 
 /** RECORD TYPE DEFINITIONS */
@@ -383,11 +383,11 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_TARGET' => array(99, 949),
     'DT_CMS_HEADER' => array(2, 929),
     'DT_CMS_CSS' => array(99, 946),
-    'DT_CMS_BANNER' => array(99, 951),
     'DT_CMS_PAGETITLE' => array(99, 952),   //show page title above content
-    'DT_CMS_ALTLOGO' => array(2, 926),  
-    'DT_CMS_ALTLOGO_URL' => array(2, 943),  
-    'DT_CMS_ALT_TITLE' => array(3, 1009),
+    //'DT_CMS_BANNER' => array(99, 951),
+    //'DT_CMS_ALTLOGO' => array(2, 926),  
+    //'DT_CMS_ALTLOGO_URL' => array(2, 943),  
+    //'DT_CMS_ALT_TITLE' => array(3, 1009),
     'DT_CMS_SCRIPT' => array(2, 927),
     'DT_CMS_PAGETYPE' => array(2, 928), //menu (2-6253) or standalone (2-6254)
     'DT_CMS_EXTFILES' => array(2, 939),
