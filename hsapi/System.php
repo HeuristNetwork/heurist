@@ -830,23 +830,21 @@ error_log(print_r($_REQUEST, true));
         if($status!=HEURIST_INVALID_REQUEST && $status!=HEURIST_NOT_FOUND && 
         $status!=HEURIST_REQUEST_DENIED && $status!=HEURIST_ACTION_BLOCKED){
 
-            
-            
 
             $now = new DateTime('now', new DateTimeZone('UTC'));
             $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
 
-            //3. wrtie error into current error log
-            $Title = 'Heurist Error type: '.$status
-                    .' User: '.$this->get_user_id()
+            //3. write error into current error log
+            $Title = 'db: '.$this->dbname()
+                    .'\nerr-type: '.$status
+                    .'\nuser: '.$this->get_user_id()
                     .' '.@$this->current_User['ugr_FullName']
-                    .' <'.@$this->current_User['ugr_eMail'].'>'
-                    .' Database: '.$this->dbname();
+                    .' <'.@$this->current_User['ugr_eMail'].'>';
 
-            $sMsg = 'Message: '.$message."\n"
+            $sMsg = '\nMessage: '.$message."\n"
                     .($sysmsg?'System message: '.$sysmsg."\n":'')
-                    .'Request: '.substr(print_r($_REQUEST, true),0,2000)."\n"
                     .'Script: '.@$_SERVER['REQUEST_URI']."\n"
+                    .'Request: '.substr(print_r($_REQUEST, true),0,2000)."\n\n"
                     ."------------------\n";
 
             if(defined('HEURIST_FILESTORE_ROOT')){
@@ -855,7 +853,7 @@ error_log(print_r($_REQUEST, true));
             }
 
             $message = 'Heurist was unable to process. '.$message;
-            $sysmsg = 'This error has been emailed to the Heurist team (for servers maintained by the project - may not be enabled on personal servers). We apologise for any inconvenience';
+            $sysmsg = 'This warning has been emailed to the Heurist team (for servers maintained by the project - may not be enabled on other servers). As we cannot always review all automated reports, please contact us if this error is causing you a problem, this will help us identify important issues. We apologise for any inconvenience';
 
             //$root_folder.$curr_logfile."\n".
             error_log($Title.'  '.$sMsg);     
