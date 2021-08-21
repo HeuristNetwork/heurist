@@ -110,7 +110,8 @@ L.Control.Help = L.Control.extend({
         
         window.hWin.HEURIST4.ui.initHelper({ button:container,
                 url:window.hWin.HAPI4.baseURL+'context_help/mapping_overview.html #content',
-                position:{ my: "center center", at: "center center", of: $(window.hWin.document).find('body') }, no_init:true} );
+                position:{ my: "center center", at: "center center", 
+                of: $(window.parent.document) }, no_init:true} ); 
         
         /*L.DomEvent
             .on(container, 'click', this._onClick, this);*/

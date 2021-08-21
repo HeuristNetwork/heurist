@@ -2309,7 +2309,8 @@ $.widget( "heurist.mapping", {
                             window.hWin.HEURIST4.ui.initHelper({ button:toolbar.find('.ui-icon-help').button(),
                                 url: window.hWin.HRes('mapping_overview.html #content'),
                                 position: { my: 'center center', at: 'center center', 
-                                    of: this.element }, no_init:true} ); //this.element
+                                    of: $(window.parent.document).find('#map-frame').parent() } 
+                                    , no_init:true} ); //this.element
                         
                         }else{
                             toolbar.find('.ui-icon-help').hide();
