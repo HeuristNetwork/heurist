@@ -1233,7 +1233,7 @@ function print_public_details($bib) {
             $url = (@$thumb['external_url'] && strpos($thumb['external_url'],'http://')!==0) 
                         ?$thumb['external_url']            //direct for https
                         :(HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['nonce']);
-            $download_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&download=1&file='.$thumb['nonce'];
+            $download_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&debug=3&download=1&file='.$thumb['nonce'];
 
             if($thumb['player'] && !$is_map_popup){
 

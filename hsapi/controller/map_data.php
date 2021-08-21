@@ -43,7 +43,7 @@ $detailQuery = 'SELECT dtl_DetailTypeID, dtl_Value, '
 * @return mixed Image URL
 */
 function getFileURL($system, $fileID) {
-    return HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&download=1&file=".$fileID;
+    return HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&download=1&debug=4&file=".$fileID;
 }
 
 /**

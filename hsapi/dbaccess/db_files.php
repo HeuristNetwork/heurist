@@ -144,7 +144,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
 
     //@todo use prepareIds() and prepareStrIds
     if(is_string($file_ids)){
-        $file_ids = explode(",", $file_ids);
+        $file_ids = explode(',', $file_ids);
     }else if(!is_array($file_ids)){
         $file_ids = array($file_ids);
     }
@@ -152,7 +152,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
     if(count($file_ids)>0){
 
         if(is_numeric($file_ids[0])){
-            $query = "ulf_ID in (".implode(",", $file_ids).")";
+            $query = "ulf_ID in (".implode(',', $file_ids).")";
         }else{
             $query = "ulf_ObfuscatedFileID in ('".implode("','", $file_ids)."')";
         }

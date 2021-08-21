@@ -2115,7 +2115,7 @@ $.widget( "heurist.editing_input", {
                 .hide();
 
                 /* urls for downloading and loading the thumbnail */
-                var dwnld_link = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&download=1&file='+f_nonce;
+                var dwnld_link = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&debug=1&download=1&file='+f_nonce;
                 var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+f_nonce+'&mode=tag&origin=recview'; 
 
                 /* Anchors (download and show thumbnail) container */
@@ -2136,7 +2136,7 @@ $.widget( "heurist.editing_input", {
                     var val = that.newvalues[$input.attr('id')];
                     var n_id = val['ulf_ID'];
                     var n_nonce = val['ulf_ObfuscatedFileID'];
-                    var n_dwnld_link = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&download=1&file='+n_nonce;
+                    var n_dwnld_link = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&debug=2&download=1&file='+n_nonce;
                     var n_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+n_nonce+'&mode=tag&origin=recview';
 
                     if(window.hWin.HEURIST4.util.isempty(val) || !(val.ulf_ID >0)){
