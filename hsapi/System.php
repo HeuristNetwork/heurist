@@ -1880,12 +1880,20 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                 $email->isHTML(true); 
                 $email->SetFrom('bugs@HeuristNetwork.org', 'Bug reporter'); //'bugs@'.HEURIST_SERVER_NAME 
                 $email->Subject   = $msg;
-                $email->Body      = $msg;
-                $email->AddAddress( HEURIST_MAIL_TO_BUG );        
-                foreach($logs_to_be_emailed as $log_file){
-                    $email->addAttachment( $log_file );    
+                    $email->AddAddress( HEURIST_MAIL_TO_BUG );        
+                
+                if(true){
+                    foreach($logs_to_be_emailed as $log_file){
+                        $msg = $msg.'<br>'.file_get_contents($log_file);
+                    }
+                }else{
+                    foreach($logs_to_be_emailed as $log_file){
+                        $email->addAttachment( $log_file );    
+                    }
                 }
-
+                $email->Body      = $msg;
+                
+                //SEND 
                 try{
                     $email->send();
                 } catch (Exception $e) {
