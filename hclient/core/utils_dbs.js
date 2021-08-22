@@ -28,6 +28,8 @@ getTermValue - returns label and code for term by id
 
 getTermByCode - returns term by code in given vocab
 
+getTermByLabel
+
 getTermVocab - returns vocabulary for given term - real vocabulary (not by reference)
 
 trm_InVocab - returns true if term belongs to vocabulary (including by reference)
@@ -1568,6 +1570,48 @@ window.hWin.HEURIST4.dbs = {
             return recset.getSubSetByIds(trm_ids);
         }
         
+    },
+    
+    //
+    // check direct children only by id or label
+    //
+    trm_IsChild: function(parent_id, trm_id)
+    {
+        
+        var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+        var children = t_idx[parent_id] ?t_idx[parent_id]:[];
+
+        if(trm_id>0){
+            return (window.hWin.HEURIST4.util.findArrayIndex(trm_id, children)>=0);
+        }
+        
+        return false;
+        
+    },
+
+    //
+    // Check first level (direct children) only
+    //
+    trm_HasChildWithLabel: function(parent_id, trm_label){
+
+        var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+        var children = t_idx[parent_id] ?t_idx[parent_id]:[];
+        
+        if(!window.hWin.HEURIST4.util.isempty(trm_label))
+        {
+           var recset = window.hWin.HAPI4.EntityMgr.getEntityData('defTerms');        
+           trm_label = trm_label.toLowerCase();
+           
+           for(var i=0; i<children.length;i++){  
+                var recID = children[i];
+                if(recset.fld(recID, 'trm_Label').toLowerCase()==trm_label)
+                {
+                   return true; 
+                }
+           }
+        }
+        
+        return false;
     },
     
     //

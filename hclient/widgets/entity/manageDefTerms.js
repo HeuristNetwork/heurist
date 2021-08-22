@@ -1508,12 +1508,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 var parent_id = $Db.trm(recID, 'trm_ParentTermID');                
                 if(parent_id>0){
-                    var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
-                    if(!t_idx[parent_id]) t_idx[parent_id] = []; 
-
-                    //to avoid duplication                    
-                    if(window.hWin.HEURIST4.util.findArrayIndex(recID, t_idx[parent_id])<0){
-                        t_idx[parent_id].push(recID);    
+                    
+                    if(!$Db.trm_IsChild(parent_id, recID)){
+                        //add - to avoid duplication                    
+                        t_idx[parent_id].push(recID);        
                     }
                 }else{
                     //this.options.trm_VocabularyGroupID = $Db.trm(recID,'trm_VocabularyGroupID');
@@ -1772,6 +1770,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             var vocab_id = $Db.getTermVocab(trm_ID); //real vocabulary
             
+            //real vocabulary is different from current - this is reference
             var isRef = (this.options.trm_VocabularyID!=vocab_id); //current vocabulary 
             if (isRef) {
                 var parents = $Db.trm(trm_ID, 'trm_Parents');
@@ -1804,7 +1803,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     //1. check that selected terms are already in this vocabulary
                     var trm_ids = $Db.trm_TreeData(new_parent_id, 'set'); //ids
                     if(window.hWin.HEURIST4.util.findArrayIndex(trm_ID, trm_ids)>=0){
-                        window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
+                        window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Reference':'Term')
                             + ' <b>"'+$Db.trm(trm_ID, 'trm_Label')
                             +'"</b> is already in vocabulary <b>"'+$Db.trm(new_parent_id,'trm_Label')+'"</b>',null,'Duplication',
                             {default_palette_class:this.options.default_palette_class}); 
@@ -1814,7 +1813,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     var trm_labels = $Db.trm_TreeData(new_parent_id, 'labels'); //labels in lowcase
                     var lbl = $Db.trm(trm_ID, 'trm_Label');
                     if(trm_labels.indexOf(lbl.toLowerCase())>=0){
-                        window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
+                        window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Reference':'Term')
                             + ' with name <b>"'+lbl
                             +'"</b> is already in vocabulary <b>"'+$Db.trm(new_parent_id,'trm_Label')+'"</b>'
                             +'<p>To make this move, edit the term so that it is different from any in the top level '
@@ -1844,20 +1843,23 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 if(no_check!==true){    
                     //1. check that selected terms are already in this vocabulary
                     var trm_ids = $Db.trm_TreeData(new_parent_id, 'set'); //ids
-                    if(window.hWin.HEURIST4.util.findArrayIndex(trm_ID, trm_ids)>=0){
-                        window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
+                    
+                    if(isRef && window.hWin.HEURIST4.util.findArrayIndex(trm_ID, trm_ids)>=0){
+                        window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Reference':'Term')
                             + ' <b>"'+$Db.trm(trm_ID, 'trm_Label')
                             +'"</b> is already in vocabulary <b>"'+$Db.trm(new_parent_id,'trm_Label')+'"</b>',null,'Duplication',
                             {default_palette_class:this.options.default_palette_class}); 
                         return;
                     }
                     //2. check there is not term with the same name
-                    var trm_labels = $Db.trm_TreeData(new_parent_id, 'labels'); //labels in lowcase
                     var lbl = $Db.trm(trm_ID, 'trm_Label');
-                    if(trm_labels.indexOf(lbl.toLowerCase())>=0){
-                        window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
+                    if($Db.trm_HasChildWithLabel(new_parent_id, lbl))                    
+                    {
+                    //var trm_labels = $Db.trm_TreeData(new_parent_id, 'labels'); //labels in lowcase
+                    //if(trm_labels.indexOf(lbl.toLowerCase())>=0){
+                        window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Reference':'Term')
                             + ' with name <b>"'+lbl
-                            +'"</b> is already in vocabulary <b>"'+$Db.trm(new_parent_id,'trm_Label')+'"</b>'
+                            +'"</b> is already among children of <b>"'+$Db.trm(new_parent_id,'trm_Label')+'"</b>'
                             +'<p>To make this move, edit the term so that it is different from any in the top level '
                             +'of the vocabulary to which you wish to move it. Once moved, you can merge within '
                             +'the vocabulary or reposition the term and edit it appropriately.</p>'
