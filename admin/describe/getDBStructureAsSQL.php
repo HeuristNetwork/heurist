@@ -253,11 +253,11 @@ function do_print_table($desc, $tname, $where=null)
                 $val = htmlspecialchars($mysqli->real_escape_string($val));
             }else if(strpos($fld,'OriginatingDBID')!==false){
                 if(!($val>0)){
-                    $val = HEURIST_DBID;
+                    $val = HEURIST_DBID; //if local - show this db reg id
                 }
             }else if(strpos($fld,'IDInOriginatingDB')!==false){
                 if(HEURIST_DBID>0 && !($val>0)){
-                    $val = $val[$id_field];
+                    $val = $row[$id_field];
                 }
             }
             $vals[] = $val;   
