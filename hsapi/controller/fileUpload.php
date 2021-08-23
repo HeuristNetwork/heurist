@@ -31,8 +31,9 @@ $content_length = (int)@$_SERVER['CONTENT_LENGTH'];
             
 $post_max_size = get_php_bytes('post_max_size');
 if ($post_max_size && ($content_length > $post_max_size)) {
-    $error = 'The uploaded file exceeds the post_max_size directive in php.ini';
-    $response = $system->addError(HEURIST_INVALID_REQUEST, $error);                
+    $error = 'The uploaded file exceeds the maximum size ('. ini_get('post_max_size') .'Bytes) set for this server (post_max_size in php.ini)';
+    $response = $system->addError(HEURIST_INVALID_REQUEST, $error);
+    $response['message'] = $error . '<br><br>If you need to upload larger files please contact the system administrator ' . HEURIST_MAIL_TO_ADMIN;
 }else
 if($system->init(@$_REQUEST['db'])){
 
@@ -220,13 +221,18 @@ if($response!=null){
 
     foreach($res['files'] as $idx=>$file){
         if(@$file->error){
-            $sMsg = "Sorry, file was not processed due to the following reported error: ".$file->error.".\n\n";
-            
-            if(strpos($file->error, 'ownership permissions')==false){
+            $sMsg = "Sorry, file was not processed due to the following reported error:\n".$file->error.".\n\n"; // Error Log
+
+            if(strpos($file->error, 'ownership permissions')==false && strpos($file->error, 'post_max_size')==false){
                 $sMsg = $sMsg.' The most likely cause is that the file extension ('. ($file->type?$file->type:'XXX!') .') is not currently enabled for the upload function, jquery UploadHandler. Please use the bug report link above to request addition of this file type.';
             }
-            
+
             $response = $system->addError(HEURIST_UNKNOWN_ERROR, $sMsg, null);
+
+            if(strpos($file->error, 'post_max_size')!=false){
+                $sMsg .= $sMsg . '<br><br>If you need to upload larger files please contact the system administrator ' . HEURIST_MAIL_TO_ADMIN;
+            }
+            $response['message'] = nl2br($sMsg);
 
             break;            
         }else if($entity_name=="recUploadedFiles"){ //register at once
