@@ -180,6 +180,7 @@ $.widget( "heurist.mapping", {
     //current status
     is_timeline_disabled:0,
     is_map_disabled:0, 
+    timeline_height: 0,
     
     selected_rec_ids:[],
 
@@ -2469,7 +2470,14 @@ $.widget( "heurist.mapping", {
         
         if(this.is_timeline_disabled!==new_1 || this.is_map_disabled!==new_2)        
         {
-        //status has been changed - action
+            //status has been changed - action
+            if(this.options.element_layout){
+                if(!this.is_timeline_disabled && !this.is_map_disabled){
+                    this.timeline_height = $(this.options.element_layout).find('.ui-layout-south').height() + 7;
+                    //this.timeline_height = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['south','layoutHeight']
+                    //    , $(this.options.element_layout) );
+                }
+            }
 
             this.is_timeline_disabled = new_1;
             this.is_map_disabled = new_2;
@@ -2499,7 +2507,7 @@ $.widget( "heurist.mapping", {
                         layout_opts.south__spacing_open = 0;
                         layout_opts.south__spacing_closed = 0;
                     }else{
-                        layout_opts.south__size = th>200?200:th;
+                        layout_opts.south__size = this.timeline_height>30?this.timeline_height:(th>200?200:th);
                         
                         //show resize control when both map and timeline are visible
                         layout_opts.south__spacing_open = 7;
@@ -2517,7 +2525,11 @@ $.widget( "heurist.mapping", {
                     mylayout.sizePane('south', layout_opts.south__size);    
                 }
             }
-            
+          
+          
+            //refresh map
+            if(!this.is_map_disabled) this.invalidateSize();
+              
         }
         
         if(no_map_data){
