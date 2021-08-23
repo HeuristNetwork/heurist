@@ -216,7 +216,7 @@ var cfg_layouts = [
                      show_savefilter:false, show_search_form:true, show_inner_header:true, 
                      show_url_as_link:true} }]},
         east:{size:'50%', Xminsize:300, dropable:false,
-            tabs:[{dockable:true, dragable:false, resizable:false, adjust_positions:true, 
+            tabs:[{dockable:true, dragable:false, resizable:false, adjust_positions:true, keep_width:true,
                         //css:{padding:'0px',width:'100%',height:'100%'},
                 apps:[
                     {appid:'heurist_resultListExt', name: 'Record', 

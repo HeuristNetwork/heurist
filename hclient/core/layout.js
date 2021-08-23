@@ -631,7 +631,8 @@ function hLayout(args) {
                     
                     return;
                     
-                }else if (lpane.apps && lpane.apps[0].appid == 'heurist_Cardinals') {
+                }
+                else if (lpane.apps && lpane.apps[0].appid == 'heurist_Cardinals') {
 
                     //outdated - config now in body of widget div
                     $pane.find('div.widget-design-header:first').remove(); //remove configuration div with header
@@ -737,13 +738,21 @@ console.log('Cardinal layout widget does not have proper options');
 
                     //init all tabs on current pane
                     var containment_sel = '.ui-layout-'+pos+' > .ui-layout-content';
-                    var $tabs = $( containment_sel+' > .tab_ctrl' ).tabs({
+                    var $tabs = $container.find( containment_sel+' > .tab_ctrl' ).tabs({
                         activate: function(event ,ui){                 
                             var action_id = $(ui.newTab[0]).attr('data-logaction');
                             if(action_id && window.hWin && window.hWin.HAPI4){
                                 window.hWin.HAPI4.SystemMgr.user_log(action_id);
                             }
-                            //console.log(ui.newTab.index());
+
+                            if($(this).attr('data-keep-width')==1){
+                                var w = $(ui.oldTab[0]).parents('.ui-layout-pane').width();
+                                $(ui.oldTab[0]).attr('data-width', w);
+                                w = $(ui.newTab[0]).attr('data-width');
+                                if(w>0){
+                                   window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', w], $container);
+                                }
+                            }
                         }}
                     );
                 
@@ -1034,23 +1043,27 @@ console.log('Cardinal layout widget does not have proper options');
         //create
         $tab_ctrl = appCreatePanel($pane_content, tabcfg, false);
         $tab_ctrl.addClass('tab_ctrl').css('border', 'none');
-        if(tabcfg && tabcfg.layout_id){
-            $tab_ctrl.attr('layout_id', tabcfg.layout_id);
-        }
-        
-
-        if(tabcfg.dockable){
-            $tab_ctrl.addClass('dockable');
-        }
-
         var $ul = $(document.createElement('ul')).appendTo($tab_ctrl);
         
-        if(tabcfg.sortable){
-            $ul.addClass('sortable_tab_ul')  //@todo .css({'border':'none', 'background':'red'})
+        
+        if(tabcfg) {
+            if(tabcfg.layout_id){
+                $tab_ctrl.attr('layout_id', tabcfg.layout_id);
+            }
+            if(tabcfg.keep_width){
+                $tab_ctrl.attr('data-keep-width', 1);
+            }
+            if(tabcfg.dockable){
+                $tab_ctrl.addClass('dockable');
+            }
+            if(tabcfg.sortable){
+                $ul.addClass('sortable_tab_ul')  //@todo .css({'border':'none', 'background':'red'})
+            }
+            if(tabcfg.adjust_positions){
+                $tab_ctrl.addClass('tab_ctrl_adjust');
+            }
         }
-        if(tabcfg.adjust_positions){
-            $tab_ctrl.addClass('tab_ctrl_adjust');
-        }
+
         
         /*
         if(tabcfg.css){
