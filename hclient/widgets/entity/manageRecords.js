@@ -715,7 +715,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                     + 'the title mask or several fields of which one will always be filled in.<br/><br/>'
                                     + 'Please define the title mask before exiting.', 
                                 function(){ that.editRecordTypeTitle(); that.closeEditDialog(); },
-                                {title:'Default title mask', yes:'OK', no:'Cancel'});
+                                {title:'Default title mask', yes:'OK', no:'Cancel'},
+                                {default_palette_class: 'ui-heurist-design'});
 
                             return;
                         }
@@ -751,7 +752,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 };
                                 window.hWin.HEURIST4.msg.showMsgDlg('You need to define fields to make this record type usable.', 
                                     btns, 
-                                    {title:'No fields defined', no:window.hWin.HR('Continue editing'), yes:window.hWin.HR('Exit with no fields')}); 
+                                    {title:'No fields defined', no:window.hWin.HR('Continue editing'), yes:window.hWin.HR('Exit with no fields')},
+                                    {default_palette_class: 'ui-heurist-design'}); 
                             }
                             else{
 								checkTitleMask();

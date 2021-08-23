@@ -632,6 +632,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 title:'Select primary record type and dependencies',
                 height: 640,
                 width: 900,
+                default_palette_class: 'ui-heurist-populate',
                 element: document.getElementById('divSelectPrimaryRecType'),
                 buttons: buttons,
                 open:function(){
@@ -2953,21 +2954,42 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             return;
         }
 
-        //do we have field to match?
-        var haveMapping = false; 
+        //do we have field to match? Also check if both Longitude and Latitude columns are needed
+        var haveMapping = false, hasLongitude = false, hasLatitude = false;
         var field_mapping = {};
+        var geo_col = null;
         var ele = $("input[id^='cbsa_dt_']");
 
         $.each(ele, function(idx, item){
             var item = $(item);
             if(item.is(':checked')){ // && item.val()!=key_idx){
+
                 var field_type_id = $('#sa_dt_'+item.val()).val();
                 if(field_type_id){
                     field_mapping[item.val()] = field_type_id;
                     if(item.val()!=key_idx) haveMapping = true;
                 }
+
+                var field_type_name = $('#sa_dt_'+item.val()+' option:selected').text();
+                if(field_type_name.indexOf('[X / Longitude]') >= 0){
+                    hasLongitude = true;
+                } else if(field_type_name.indexOf('[Y / Latitude]') >= 0){
+                    hasLatitude = true;
+                }
+
+                if(field_type_name.indexOf('[Geospatial]') >= 0){
+                    geo_col = $(item.parents('tr').find('td')[2]).text();
+                }
             }
         });
+
+        if(hasLongitude != hasLatitude){
+            window.hWin.HEURIST4.msg.showMsgErr(
+                'You must map both X/Longitude and Y/Latitude if the coordinates are in separate columns,<br>'
+                +'or else a single Geospatial field if the they are in WKT format in a single column.');
+
+            return;
+        }
 
         if(!haveMapping){
             window.hWin.HEURIST4.msg.showMsgErr(
@@ -3113,6 +3135,17 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             $('.step3 > .normal').hide();
                             $('.step3 > .skip_step').hide();
                             $('.step3 > .need_resolve').show();
+                        }else if(res['geo_invalid']>0){
+
+                            var col = window.hWin.HEURIST4.util.isempty(geo_col) ? 'A column' : 'The column "' + geo_col + '"';
+
+                            window.hWin.HEURIST4.msg.showMsgErr(col + ' contains invalid geospatial data, this data needs to formatted in WKT (Well-known text).<br><br>'
+                            +' If this field contains separate longitude and latitude data, please separate them into two different columns<br>'
+                            +'(one for Longitude and the other for Latitude).');
+
+                            $('.step3 > .normal').hide();
+                            $('.step3 > .skip_step').hide();
+
                         }else{
                             $('#prepareErrors').css('display','none');
                             _showStep(5);

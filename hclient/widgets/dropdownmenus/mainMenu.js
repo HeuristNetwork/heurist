@@ -1297,7 +1297,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
                     $dlg.dialog({
                         autoOpen: true,
-                        height: 400,
+                        height: 435,
                         width: 600,
                         modal: true,
                         resizable: false,

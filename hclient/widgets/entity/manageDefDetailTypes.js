@@ -683,10 +683,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 
                         window.hWin.HEURIST4.msg.showDialog(sURL, {
                             "close-on-blur": false,
-                            title: 'Insert base fields',
+                            title: 'Insert Base Fields',
                             window: window.hWin,
-                            height: '712px',
-                            width: '1080px',
+                            height: '735px',
+                            width: '1020px',
 							padding: 0,
                             default_palette_class: 'ui-heurist-design',
                             callback: function(context) {

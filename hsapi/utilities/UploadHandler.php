@@ -38,7 +38,6 @@ class UploadHandler
         6 => 'Missing a temporary folder',
         7 => 'Failed to write file to disk',
         8 => 'A PHP extension stopped the file upload',
-        'post_max_size' => 'The uploaded file exceeds the post_max_size directive in php.ini',
         'max_file_size' => 'File is too big',
         'min_file_size' => 'File is too small',
         'accept_file_types' => 'Filetype not allowed',
@@ -210,7 +209,9 @@ class UploadHandler
                     'max_height' => 600
                 ),
                 */
-        
+
+        $this->error_messages['post_max_size'] = 'The uploaded file exceeds the maximum size ('. ini_get('post_max_size') .'Bytes) set for this server (post_max_size in php.ini)';
+
         if ($options) {
             $this->options = $options + $this->options;
         }

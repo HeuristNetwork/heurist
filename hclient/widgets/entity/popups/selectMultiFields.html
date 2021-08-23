@@ -45,6 +45,10 @@
                 multiSelectObj = new hMultiSelect();
 
                 multiSelectObj.init(); // initialise popup's JS
+
+                multiSelectObj.setupElements();
+
+                multiSelectObj.setupStyling();
             });
         </script> 
 
@@ -52,9 +56,11 @@
             .tabs{
                 padding: 0;
                 border: none;
+
+                background-color: #C9BFD4;
             }
             .tabs-list{
-                background:#C9BFD4;
+                background-color: #C9BFD4;
             }
             .tabs-text{
                 font-size:1.2em;
@@ -72,7 +78,7 @@
             .field-container{
                 margin:5px 0;
                 display: grid;
-                grid-template-columns: 30px 200px 130px 705px;
+                grid-template-columns: 30px 200px 130px 635px;
             }
             .field-container input[type='checkbox']{
                 margin-top: 0;
@@ -91,19 +97,52 @@
                 -ms-user-select: none;
                 user-select: none;
             }
+            .sub-text{
+                color: grey;
+
+                font-style: italic;
+
+                margin: 5px 0;
+            }
+
+            .field_search_container{
+                position: absolute;
+
+                top: 6px;
+                right: 5px;
+
+                font-size: 1.2em;
+            }
+
+            #field_result{
+                background: #F4F2F4;
+                border: 1px solid rgba(0, 0, 0, 0.2);
+
+                z-index:999999999;
+                overflow-y:auto;
+
+                height:auto;
+                max-height:400px;
+
+                padding:4px;
+                margin: 2px 0px;
+
+                cursor:pointer;
+            }
         </style>
     </head>
 
-    <body style="background:#DAD0E4;font-size:12px;width:99%;">
-        <div>
+    <body class="multi-base-fields" style="background:#DAD0E4;font-size:12px;width:99%;">
+        <div style="margin-bottom: 10px;">
             <span style="font-size:1.2em;margin-right:10px;">Select base fields for insertion into the form - you can select from multiple tabs</span>
             <select id="field-search"></select>
+            <div class="field_search_container">Search for Field: <input type="text" id="field_search" style="width: 300px;"></div>
         </div>
         <div class="tabs">
             <ul class="tabs-list">
             </ul>
         </div>
-        <div>
+        <div id="action-btns">
             <span id="btnClose"></span>
             <span id="btnAddSelected"></span>
         </div>

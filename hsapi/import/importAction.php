@@ -787,7 +787,8 @@ public static function validateImport($params) {
     }
 
     //add result of validation to session
-    $imp_session['validation'] = array( "count_update"=>0,
+    $imp_session['validation'] = array( 
+        "count_update"=>0,
         "count_insert"=>0,       //records to be inserted
         "count_update_rows"=>0,
         "count_insert_rows"=>0,  //row that are source of insertion
@@ -796,8 +797,9 @@ public static function validateImport($params) {
         "error"=>array(),
         "count_warning"=>0, 
         "warning"=>array(),
-        'utm_warning'=>0,
-         );
+        "utm_warning"=>0,
+        "geo_invalid"=>0
+    );
 
     //get rectype to import
     $recordType = @$params['sa_rectype'];
@@ -1402,7 +1404,43 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                             && (abs($bbox['minx'])>180) && (abs($bbox['miny'])>90)
                             && (abs($bbox['maxx'])>180) && (abs($bbox['maxy'])>90);
                         if (!$allOutWGS) break;
+                    }else{
+                        
+                        $valid_geo = false;
+                        $coords = explode(",", $wkt);
+
+                        if(count($coords) == 2){
+
+                            $x = ltrim($coords[0]);
+                            $y = ltrim($coords[1]);
+
+                            if(is_numeric($x) && is_numeric($y)){
+
+                                $constructed_geo = "POINT(" . $x . " " . $y . ")";
+                                $geo_len = strlen($constructed_geo);
+                                $test_geom = geoPHP::load($constructed_geo, 'wkt');
+
+                                if($test_geom!=null && !$test_geom->isEmpty()){
+
+                                    $update_col = "ALTER TABLE $import_table MODIFY ".implode(',', $geo_fields)." varchar($geo_len)";
+
+                                    if($mysqli->query($update_col)){
+
+                                        $query = "UPDATE $import_table SET ".implode(',', $geo_fields)." = '" . $constructed_geo . "' WHERE imp_ID = '1'";
+
+                                        if($mysqli->query($query)){ 
+                                            $valid_geo = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if(!$valid_geo){
+                            $imp_session['validation']['geo_invalid'] = 1;
+                        }
                     }
+
                     $allInteger = $allOutWGS;
                 }
             }else{ //lat long fields
