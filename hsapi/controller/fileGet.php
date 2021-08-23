@@ -167,7 +167,7 @@ if($filename){ //download from scratch (for csv import)
                 if(folderCreate($path, true)){
                     copy($old_filename, $filename.'.png');
                 }else{
-                    error_log('CANT CREATE FOLDER '.$path);
+                    //error_log('CANT CREATE FOLDER '.$path);
                 }
             }
         }
