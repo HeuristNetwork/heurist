@@ -848,21 +848,26 @@ window.hWin.HEURIST4.ui = {
 
                     if(allowedlist==null || allowedlist.indexOf(field_type)>=0)
                     {
-                        
+
                         var name = detail['rst_DisplayName'];
-                        
+
+                        if(addLatLongForGeo && field_type=="geo"){
+
+                            arrterm.push([ dtyID, name + ' ['+$Db.baseFieldType[ field_type ]+']', (field_reqtype=="required") ]);
+                            arrterm.push([ dtyID+'_long', name+' [X / Longitude]', false ]);
+                            arrterm.push([ dtyID+'_lat', name+' [Y / Latitude]', false ]);
+
+                            return;
+                        }
+
                         if(showDetailType){
                             name = name + ' ['+$Db.baseFieldType[ field_type ]+']';
                         }
 
                         if(!window.hWin.HEURIST4.util.isnull(name)){
-                                arrterm.push([dtyID, name, (field_reqtype=="required") ]);    
+                            arrterm.push([ dtyID, name, (field_reqtype=="required") ]);    
                         }
                     }
-                    if(addLatLongForGeo && field_type=="geo"){
-                        arrterm.push([ dtyID+'_long', name+' [longitude]', false ]);
-                        arrterm.push([ dtyID+'_lat', name+' [latitude]', false ]);
-                    } 
                 }
             });
 
