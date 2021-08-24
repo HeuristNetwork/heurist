@@ -936,6 +936,9 @@ error_log(print_r($_REQUEST, true));
     public function getCurrentUserAndSysInfo( $include_reccount_and_dashboard_count=false ){
         global $passwordForDatabaseCreation,$passwordForDatabaseDeletion,$passwordForReservedChanges,$passwordForServerFunctions;
    
+        
+        try{
+            
         //current user reset - reload actual info from database
         $this->login_verify( true );
 
@@ -1039,6 +1042,12 @@ error_log(print_r($_REQUEST, true));
                     'host_url'=>$host_url
             );
 
+        }
+        
+        
+        }catch($e){
+            $this->addError(HEURIST_ERROR, 'Unable to retrieve Heurist system information', $e->getMessage());
+            $res = false;
         }
 
         return $res;
