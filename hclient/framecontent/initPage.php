@@ -153,7 +153,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     
     <?php
 }else{
-//    <script type="text/javascript" src="https://code.jquery.com/jquery-migrate-1.4.1.min.js"></script>
+//    <script type="text/javascript" src="https://code.jquery.com/jquery-migrate-3.3.2.js"></script>
 //    <script src="https://code.jquery.com/jquery-3.5.1.js" crossorigin="anonymous"></script>
     ?>
     <script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
@@ -251,6 +251,7 @@ _dout('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000
 
             }).fail(function(error) {
                 // one or more scripts failed to load
+                console.log('Can not load localization.js');
                 onHapiInit(false);
 
             }).always(function() {

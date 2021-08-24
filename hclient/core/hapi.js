@@ -158,7 +158,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             cache: false,
             xhrFields: {
                   withCredentials: true
-            },            
+            }, 
+/* DEPRECATED                       
             error: function( jqXHR, textStatus, errorThrown ) {
                 
                 _is_callserver_in_progress = false;
@@ -180,7 +181,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 }
                 //message:'Error connecting server '+textStatus});
             },
-            success: function( response, textStatus, jqXHR ){
+*/            
+            done: function( response, textStatus, jqXHR ){
 
                 _is_callserver_in_progress = false;
                 

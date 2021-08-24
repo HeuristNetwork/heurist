@@ -829,6 +829,7 @@ window.hWin.HEURIST4.util = {
             type: "POST",
             data: request,
             cache: false,
+/* DEPRECATED            
             error: function(jqXHR, textStatus, errorThrown ) {
                 if(callback){
                     
@@ -851,7 +852,8 @@ window.hWin.HEURIST4.util = {
                     }
                 }
             },
-            success: function( response, textStatus, jqXHR ){
+*/            
+            done: function( response, textStatus, jqXHR ){
                 if(callback){
                     if(caller){
 

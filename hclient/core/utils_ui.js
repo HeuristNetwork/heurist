@@ -2768,9 +2768,9 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
             url: url,
             type: "GET",
             cache: false,
-            error: function(jqXHR, textStatus, errorThrown ) {
+            fail: function(jqXHR, textStatus, errorThrown ) {
             },
-            success: function( response, textStatus, jqXHR ){
+            done: function( response, textStatus, jqXHR ){
                 var obj = jqXHR.responseText;
                 if (obj){
                     var  elem = container.querySelector('#player'+id);
