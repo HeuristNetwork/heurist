@@ -398,8 +398,17 @@ class DbRecUploadedFiles extends DbEntityBase
                 */
             }
             if(strpos($mimeType,'/')>0){ //this is mimetype - find extension
-                $fileExtension = mysql__select_value($this->system->get_mysqli(), 
-                    'select fxm_Extension from defFileExtToMimetype where fxm_Mimetype="'.addslashes($mimeType).'"');
+            
+                $mysqli = $this->system->get_mysqli();
+            
+                $query = 'select fxm_Extension from defFileExtToMimetype where fxm_Mimetype="'.
+                $mysqli->real_escape_string($mimeType).'"';
+            
+                if($mimeType=='application/x-zip-compressed'){
+                    $query = $query.' OR fxm_Mimetype="application/zip"'; //backward capability
+                }
+            
+                $fileExtension = mysql__select_value($mysqli, $query);
 
                 if($fileExtension==null && 
                     $this->records[$idx]['ulf_OrigFileName'] != '_remote' && 
@@ -408,7 +417,7 @@ class DbRecUploadedFiles extends DbEntityBase
                     //mimetype not found - try to get extension from name
                     $extension = strtolower(pathinfo($this->records[$idx]['ulf_OrigFileName'], PATHINFO_EXTENSION));
                     if($extension){
-                        $fileExtension = mysql__select_value($this->system->get_mysqli(), 
+                        $fileExtension = mysql__select_value($mysqli, 
                             'select fxm_Extension from defFileExtToMimetype where fxm_Extension="'.addslashes($extension).'"');
                         if($fileExtension==null){
                             //still not found
@@ -523,16 +532,30 @@ class DbRecUploadedFiles extends DbEntityBase
                         if(unzipArchive($tmp_name, $dest)){
                             //remove temp file
                             unlink($tmp_name);
-                            
-                            /* @todo
-                            //detect mimetype and summary size of stack images
+
                             $file2 = array();
+                            
+                            //detect 1) mimetype 2) summary size of stack images 3) copy first image as thumbnail
+                            $size = folderSize2($dest);
+                            
+                            //get first file from first folder
+                            $filename = folderFirstTileImage($dest);
+                            
+                            $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
+                            
+                            $mimeExt = UtilsImage::getImageType($filename);
+                            
+                            if($mimeExt){
+                                UtilsImage::createThumbnailFile($filename, $thumb_name);
+                                $file2['ulf_MimeExt'] = $mimeExt;    
+                            }else{
+                                $file2['ulf_MimeExt'] = 'png';
+                            }
+                            
                             $file2['ulf_ID'] = $ulf_ID;
-                            $file2['ulf_FileSizeKB'] = 999;
-                            $file2['ulf_MimeExt'] = 'png';
+                            $file2['ulf_FileSizeKB'] = $size/1024;
             
                             mysql__insertupdate($this->system->get_mysqli(), $this->config['tableName'], 'ulf', $file2);
-                            */
                             
                             
                         }else{

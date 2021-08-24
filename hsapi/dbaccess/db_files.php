@@ -942,19 +942,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             }else{
                 
                 //get real image type from exif
-                if (function_exists('exif_imagetype')) {
-                    switch(@exif_imagetype($filename)){
-                        case IMAGETYPE_JPEG:
-                            $mimeExt = 'jpg';
-                            break;
-                        case IMAGETYPE_PNG:
-                            $mimeExt = 'png';
-                            break;
-                        case IMAGETYPE_GIF:
-                            $mimeExt = 'gif';
-                            break;
-                    }
-                }
+                $mimeExt = UtilsImage::getImageType($filename);
                 
                 $errorMsg = UtilsImage::checkMemoryForImage($filename, $mimeExt);
                     

@@ -45,6 +45,8 @@
     folderContent  - get list of files in folder as search result (record list)
     folderSize
     folderTree
+    folderTreeToFancyTree - NOT USED
+    folderFirstTileImage - returns first file from first folder - for tiled image stack
     
     fileCopy
     fileSave
@@ -369,11 +371,11 @@
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
-                    if (filetype($dir."/".$object) == "dir") {
-                        folderDelete($dir."/".$object); //delte files
+                if ($object != '.' && $object != '..') {
+                    if (filetype($dir.'/'.$object) == 'dir') {
+                        folderDelete($dir.'/'.$object); //delte files
                     } else {
-                        unlink($dir."/".$object);
+                        unlink($dir.'/'.$object);
                     }
                 }
             }
@@ -476,11 +478,20 @@
     //
     //
     function folderSize2($dir){
+        
         $size = 0;
-        $arr = glob(rtrim($dir, '/').'/*', GLOB_NOSORT);
-        foreach ($arr as $each) {
-            $size += is_file($each) ? filesize($each) : folderSize($each);
+        
+        $dir = realpath($dir);
+        
+        if(file_exists($dir)){
+        
+            $arr = glob(rtrim($dir, '/').'/*', GLOB_NOSORT);
+            foreach ($arr as $each) {
+                $size += is_file($each) ? filesize($each) : folderSize($each);
+            }
+        
         }
+        
         return $size;        
     }
     
@@ -490,6 +501,9 @@
         $dir = rtrim(str_replace('\\', '/', $dir), '/');
 
         if (is_dir($dir) === true) {
+            
+            $dir = realpath($dir);
+            
             $totalSize = 0;
             $os        = strtoupper(substr(PHP_OS, 0, 3));
             // If on a Unix Host (Linux, Mac OS)
@@ -512,15 +526,41 @@
                 }
             }
             // If System calls did't work, use slower PHP 5
-            $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+            $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS));
             foreach ($files as $file) {
-                $totalSize += $file->getSize();
+                
+                if(!$file->isDir()){
+                    $totalSize += $file->getSize();    
+                }
             }
             return $totalSize;
         } else if (is_file($dir) === true) {
             return filesize($dir);
         }
     }    
+    
+    //
+    //
+    //
+    function folderFirstTileImage($dir){
+    
+        $dir = realpath($dir);
+        
+        $dirs = scandir($dir);
+        foreach ($dirs as $node) {
+            if (($node == '.' ) || ($node == '..' )) {
+                continue;
+            }
+            $file = $dir.'/'.$node;
+            if(is_dir($file)){
+                return folderFirstTileImage($file);    
+            }else{
+                return $file;    
+            }
+        }
+        
+        return null;
+    }
 
     
     /**
@@ -619,7 +659,7 @@
     }  
       
     //
-    //
+    //  NOT USED
     //
     function folderTreeToFancyTree($data, $lvl=0, $sysfolders=null){
         //for fancytree

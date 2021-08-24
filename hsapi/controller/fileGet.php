@@ -164,7 +164,7 @@ if($filename){ //download from scratch (for csv import)
             if(file_exists($old_filename)){
                 
                 //recreate entity folder
-                if(folderCreate($path, true)){
+                if(file_exists($path) || folderCreate($path, true)){
                     copy($old_filename, $filename.'.png');
                 }else{
                     //error_log('CANT CREATE FOLDER '.$path);

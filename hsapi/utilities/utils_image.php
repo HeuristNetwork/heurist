@@ -312,6 +312,30 @@ class UtilsImage {
             
         }
     }
+    
+    //
+    //
+    //
+    public static function getImageType($filename){
+        
+        $mimeExt = null;
+        
+                if (function_exists('exif_imagetype')) {
+                    switch(@exif_imagetype($filename)){
+                        case IMAGETYPE_JPEG:
+                            $mimeExt = 'jpg';
+                            break;
+                        case IMAGETYPE_PNG:
+                            $mimeExt = 'png';
+                            break;
+                        case IMAGETYPE_GIF:
+                            $mimeExt = 'gif';
+                            break;
+                    }
+                }
+                
+        return  $mimeExt;
+    }
 
     /**
     * Verifies the size of image - is it possible to load into allowed memory
@@ -414,6 +438,25 @@ class UtilsImage {
             return $img;
     }
     
+    //
+    // it works for images only
+    //
+    public static function createThumbnailFile($filename, $thumbnail_file){
+    
+        $mimeExt = UtilsImage::getImageType($filename);
+        
+        if($mimeExt){
+            $errorMsg = UtilsImage::checkMemoryForImage($filename, $mimeExt);
+            
+            if(!$errorMsg){
+                $img = UtilsImage::safeLoadImage($filename, $mimeExt);
+                if($img){
+                    UtilsImage::resizeImage($img, $thumbnail_file);
+                }
+            }
+        }
+    }
+
     
     /**
     * Resize image 
