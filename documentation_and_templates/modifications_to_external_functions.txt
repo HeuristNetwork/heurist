@@ -60,7 +60,7 @@ external/php/phpZotero.php (114-121) support proxy settings
             replace include_once to require_once in external/geoPHP/geoPHP.inc
             remove ext/geoPHP
             
-            Added explicite “require” for most common abstract classes into Smarty.class.php
+            Added explicite “require�? for most common abstract classes into Smarty.class.php
             require_once(SMARTY_SYSPLUGINS_DIR.'smarty_internal_data.php');
             require_once(SMARTY_SYSPLUGINS_DIR.'smarty_internal_compilebase.php');
 
