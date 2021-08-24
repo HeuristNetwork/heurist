@@ -853,7 +853,7 @@ window.hWin.HEURIST4.util = {
                 }
             },
 */            
-            done: function( response, textStatus, jqXHR ){
+            success: function( response, textStatus, jqXHR ){
                 if(callback){
                     if(caller){
 

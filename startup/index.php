@@ -26,6 +26,7 @@ if (!defined('PDIR')) define('PDIR','../');
 //$system = new System();
 //$system->defineConstants();
 ?>
+<!DOCTYPE html>
 <!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
 <html>
 <head>
@@ -867,7 +868,7 @@ a{
             
             
             <!-- SCREEN#8 Terms and conditions --> 
-            <div class="center-box screen8" style="width:1330;height:auto;margin:10px auto;">
+            <div class="center-box screen8" style="width:1330;height:auto;margin:10px;width:auto;">
                 <h1 style="display:none">Databases</h1>
                 <label>Filter: </label>
                 <input id="filter_database" class="text ui-widget-content ui-corner-all" value="" autocomplete="off"/>

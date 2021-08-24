@@ -2770,7 +2770,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
             cache: false,
             fail: function(jqXHR, textStatus, errorThrown ) {
             },
-            done: function( response, textStatus, jqXHR ){
+            success: function( response, textStatus, jqXHR ){
                 var obj = jqXHR.responseText;
                 if (obj){
                     var  elem = container.querySelector('#player'+id);

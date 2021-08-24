@@ -182,7 +182,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 //message:'Error connecting server '+textStatus});
             },
 */            
-            done: function( response, textStatus, jqXHR ){
+            success: function( response, textStatus, jqXHR ){
 
                 _is_callserver_in_progress = false;
                 

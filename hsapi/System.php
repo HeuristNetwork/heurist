@@ -1045,7 +1045,7 @@ error_log(print_r($_REQUEST, true));
         }
         
         
-        }catch($e){
+        }catch( Exception $e ){
             $this->addError(HEURIST_ERROR, 'Unable to retrieve Heurist system information', $e->getMessage());
             $res = false;
         }
