@@ -325,7 +325,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 
                 if(this._additionMode=='any'){
                                          //<div style="height:20px"/><div>
-                sAdditional_Controls += '<div class="header optional" style="vertical-align: top; display: table-cell;">'
+                sAdditional_Controls += '<div><div class="header optional" style="vertical-align: top; display: table-cell;">'
                     +'<label>Upload tiled image stack:</label></div><span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
                     +'<div class="input-cell" style="padding-bottom: 12px;"><div id="btn_upload_file_stack"></div>'
                     + sHelp                    

@@ -868,19 +868,46 @@ class DbRecUploadedFiles extends DbEntityBase
     * @param mixed $url
     * @param mixed $generate_thumbmail
     */
-    public function registerURL($url, $tiledImageStack=false){
+    public function registerURL($url, $tiledImageStack=false, $dtl_ID=0){
         
        $this->records = null; //reset 
        
        $fields['ulf_OrigFileName'] = $tiledImageStack?'_tiled@':'_remote';
        $fields['ulf_ExternalFileReference'] = $url;
-       $fields['ulf_MimeExt'] = $tiledImageStack?'png': recognizeMimeTypeFromURL($this->system->get_mysqli(), $url);
+       if($tiledImageStack){
+            $fields['ulf_MimeExt'] = 'png';
+       }else{
+           $ext = recognizeMimeTypeFromURL($this->system->get_mysqli(), $url);
+           if(@$ext['extension']){
+               $fields['ulf_MimeExt'] = $ext['extension'];
+           }else{
+               $fields['ulf_MimeExt'] = 'bin';
+           }
+       }
        $fields['ulf_UploaderUGrpID'] = 2; 
 
        $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
                 
        $this->setData($fileinfo);
-       return $this->save();
+       $ulf_ID = $this->save();
+       if($ulf_ID && is_array($ulf_ID)) $ulf_ID = $ulf_ID[0];
+       
+       if( $ulf_ID>0 && $dtl_ID>0 ){ //register in recDetails
+               
+               //update in recDetails
+               $query2 = 'update recDetails set dtl_Value=null, `dtl_UploadedFileID`='.$ulf_ID
+                                            .' where dtl_ID='.$dtl_ID;
+                                            
+               $this->system->get_mysqli()->query($query2);
+
+               //get full file info
+               $fileinfo = fileGetFullInfo($this->system, $ulf_ID);
+               if(count($fileinfo)>0){
+                    return $fileinfo[0];
+               }
+
+       }
+       return $ulf_ID;           
        
     }   
 

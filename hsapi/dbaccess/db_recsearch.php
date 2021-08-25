@@ -1968,6 +1968,12 @@ function recordSearch($system, $params)
 
                     $fieldtypes_in_res = array(); //reset
 
+                    // FIX on fly: get "file" field types  - @todo  remove on 2022-08-22
+                    $file_field_types = array();
+                    if(true){
+                        $file_field_types = mysql__select_list2($mysqli,'select dty_ID from defDetailTypes where dty_Type="file"');
+                        $ruf_entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
+                    }
 
                     $loop_cnt=1;                            
                     while ($offset<$res_count){   
@@ -2014,7 +2020,7 @@ function recordSearch($system, $params)
 
                             }
 
-                            $detail_query = 'select dtl_RecID,'
+                            $detail_query = 'select dtl_ID, dtl_RecID,'
                             .'dtl_DetailTypeID,'     // 0
                             .'dtl_Value,'            // 1
                             .'ST_asWKT(dtl_Geo),'    // 2
@@ -2039,6 +2045,7 @@ function recordSearch($system, $params)
                         }else{
 
                             while ($row = $res_det->fetch_row()) {
+                                $dtl_ID = array_shift($row);
                                 $recID = array_shift($row);
                                 if( !array_key_exists('d', $records[$recID]) ){
                                     $records[$recID]['d'] = array();
@@ -2046,14 +2053,35 @@ function recordSearch($system, $params)
                                     (defined('RT_CMS_MENU') && $records[$recID][4]==RT_CMS_MENU);
                                 }
                                 $dtyID = $row[0];
-
+                                
+                                
+                                // FIX on fly - @todo  remove on 2022-08-22
+                                if( (!($row[3]>0)) && in_array($dtyID,$file_field_types) ){
+                                    $fileinfo = $ruf_entity->registerURL($row[1], false, $dtl_ID);
+                                    
+                                    if($fileinfo && is_array($fileinfo) && count($fileinfo)>0){
+                                        
+                                        if($needCompleteInformation){
+                                            $row[3] = $fileinfo['ulf_ID'];
+                                            $row[4] = $fileinfo['ulf_OrigFileName'];
+                                            $row[5] = $fileinfo['ulf_ExternalFileReference'];
+                                            $row[6] = $fileinfo['ulf_ObfuscatedFileID'];
+                                            $row[7] = $fileinfo['ulf_MimeExt'];
+                                        }else{
+                                            $row[4] = $fileinfo['ulf_ObfuscatedFileID'];
+                                            $row[5] = '';
+                                        }
+                                    }
+                                    
+                                }
+                                                                
                                 $val = null;
 
                                 if($row[2]){ //GEO
                                     //dtl_Geo @todo convert to JSON
                                     $val = $row[1]; //geotype 
 
-                                    $linked_Place_ID = $row[3]; //linke place record id
+                                    $linked_Place_ID = $row[3]; //linked place record id
                                     if($linked_Place_ID>0){
                                         $val = $val.':'.$linked_Place_ID;      //reference to real geo record
                                     }
@@ -2518,12 +2546,22 @@ function recordSearchDetails($system, &$record, $need_details) {
                     break;
 
                 case "file":
+                
+                    $fileinfo = null;
 
-                    //$detailValue = get_uploaded_file_info($rd["dtl_UploadedFileID"], false);
-
-                    $fileinfo = fileGetFullInfo($system, $rd["dtl_UploadedFileID"]);
-                    if(is_array($fileinfo) && count($fileinfo)>0){
-                        $detailValue = array("file" => $fileinfo[0], "fileid"=>$fileinfo[0]["ulf_ObfuscatedFileID"]);
+                    if(!($rd['dtl_UploadedFileID']>0)){
+                         // FIX on fly - @todo  remove on 2022-08-22
+                         $ruf_entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
+                         $fileinfo = $ruf_entity->registerURL($rd['dtl_Value'], false, $rd['dtl_ID']);
+                    }else{
+                        $fileinfo = fileGetFullInfo($system, $rd["dtl_UploadedFileID"]);
+                        if(is_array($listpaths) && count($listpaths)>0){
+                            $fileinfo = $listpaths[0]; //
+                        }
+                    }
+                    
+                    if($fileinfo){
+                        $detailValue = array("file" => $fileinfo, "fileid"=>$fileinfo["ulf_ObfuscatedFileID"]);
                     }
 
                     break;

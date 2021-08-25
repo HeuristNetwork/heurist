@@ -1062,20 +1062,23 @@ function print_public_details($bib) {
                 }
 
             }
-            else if ($bd['dty_Type'] == 'file'  &&  $bd['dtl_UploadedFileID']) {
-
-                //find obfuscated id
-                /*$filedata = mysql__select_row_assoc($mysqli, 
-                    'select ulf_ObfuscatedFileID, '
-                        .'ulf_ExternalFileReference as remoteURL '
-                        .'ulf_OrigFileName as origName,'
-                        .'ulf_FileSizeKB as fileSize,'
-                        .'from recUploadedFiles where ulf_ID='.$bd['dtl_UploadedFileID']);*/
-                        
-                $listpaths = fileGetFullInfo($system, $bd['dtl_UploadedFileID']); //see db_files.php
-                if(is_array($listpaths) && count($listpaths)>0){
-
-                    $fileinfo = $listpaths[0]; //
+            else if ($bd['dty_Type'] == 'file') {
+                
+                $fileinfo = null;
+                
+                if(!($bd['dtl_UploadedFileID']>0)){
+                     // FIX on fly - @todo  remove on 2022-08-22
+                     $ruf_entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
+                     $fileinfo = $ruf_entity->registerURL($bd['val'], false, $bd['dtl_ID']);
+                }else{
+                    $listpaths = fileGetFullInfo($system, $bd['dtl_UploadedFileID']); //see db_files.php
+                    if(is_array($listpaths) && count($listpaths)>0){
+                        $fileinfo = $listpaths[0]; //
+                    }
+                }
+                
+                if($fileinfo){
+                    
                     $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
                     $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
                     $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType

@@ -299,8 +299,6 @@
                 
                 $url = @$_REQUEST['url'];
                 
-                $url = filter_var($url, FILTER_SANITIZE_URL);
-                
                 $res = recognizeMimeTypeFromURL($mysqli, $url);
                 
             } else {
