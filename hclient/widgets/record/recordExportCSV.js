@@ -566,12 +566,6 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                         return false;
                     }
                 },
-                renderNode: function(event, data){
-                    
-                    if(data.node.data.type == "enum") { // || data.node.data.type == "relmarker"
-                        $(data.node.span.childNodes[1]).hide()
-                    }
-                },
                 lazyLoad: function(event, data){
                     var node = data.node;
                     var parentcode = node.data.code; 

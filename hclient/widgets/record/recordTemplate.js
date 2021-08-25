@@ -196,6 +196,25 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
         
         $('.rtt-tree').parent().show();
         
+        var that = this;
+
+        this.element.find('#selectAll').on("click", function(e){
+            var treediv = that.element.find('.rtt-tree');
+
+            var check_status = $(e.target).is(":checked");
+
+            if(!treediv.is(':empty') && treediv.fancytree("instance")){
+                var tree = treediv.fancytree("getTree");
+                tree.visit(function(node){
+                    if(!node.hasChildren() && node.data.type != "relmarker" && node.data.type != "resource" 
+                        && (node.getLevel()==2 || (!window.hWin.HEURIST4.util.isempty(node.span) && $(node.span.parentNode.parentNode).is(":visible")))
+                    ){    
+                        node.setSelected(check_status);
+                    }
+                });
+            }
+        });
+        this.element.find('#selectAll_container').css({'position':'absolute', 'margin-left':'37px'});
     },
     
     //
