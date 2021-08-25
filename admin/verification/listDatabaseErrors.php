@@ -196,11 +196,9 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 */
             }
 
-
-
             $(document).ready(function() {
                 $('button').button();
-                $('#linkbar').tabs();
+                $('#linkbar').tabs('refresh');
             });
         </script>
 
@@ -217,23 +215,13 @@ $trmDuplicates = @$lists2["trm_dupes"];
             }
             h3.res-valid{
                 color: #6aa84f !important;        
-            }
-            div.coverall-div{
-                color:#6A7C99;
-                font-size:14px;
-                line-height:25px;
-                margin:0
-            }			
+            }		
         </style>
 
     </head>
 
 
     <body class="popup" style="overflow:auto">
-        <script>
-            window.hWin.HEURIST4.msg.bringCoverallToFront($('.popup')[0], {'background-color': "white", opacity: '1'});
-        </script>	
-
         <div class="banner">
             <h2>Check for invalid definitions and data (invalid pointers, terms, missing required, excess values etc.)</h2>
         </div>
@@ -246,28 +234,27 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
         <hr style="margin-top:15px">
         <div id="linkbar">
-            <ul>
-                <li class="owner_ref"><a href="#owner_ref" style="white-space:nowrap;padding-right:10px;color:black;">Record Owner/Creator</a></li>
-                <li class="dup_terms"><a href="#dup_terms" style="white-space:nowrap;padding-right:10px;color:black;">Invalid/Duplicate Terms</a></li>
-                <li class="field_type"><a href="#field_type" style="white-space: nowrap;padding-right:10px;color:black;">Field Types</a></li>
-                <li class="default_values"><a href="#default_values" style="white-space: nowrap;padding-right:10px;color:black;">Default Values</a></li>
-                <li class="pointer_targets"><a href="#pointer_targets" style="white-space: nowrap;padding-right:10px;color:black;">Pointer Targets</a></li>
-                <li class="target_types"><a href="#target_types" style="white-space: nowrap;padding-right:10px;color:black;">Target Types</a></li>
-                <li class="target_parent"><a href="#target_parent" style="white-space: nowrap;padding-right:10px;color:black;">Invalid Parents</a></li>
-                <li class="empty_fields"><a href="#empty_fields" style="white-space: nowrap;padding-right:10px;color:black;">Empty Fields</a></li>
-                <li class="date_values"><a href="#date_values" style="white-space: nowrap;padding-right:10px;color:black;">Date Values</a></li>
-                <li class="term_values"><a href="#term_values" style="white-space: nowrap;padding-right:10px;color:black;">Term Values</a></li>
-                <li class="expected_terms"><a href="#expected_terms" style="white-space: nowrap;padding-right:10px;color:black;">Expected Terms</a></li>
-                <li class="single_value"><a href="#single_value" style="white-space: nowrap;padding-right:10px;color:black;">Single Value Fields</a></li>
-                <li class="required_fields"><a href="#required_fields" style="white-space: nowrap;padding-right:10px;color:black;">Required Fields</a></li>
-                <li class="nonstandard_fields"><a href="#nonstandard_fields" style="white-space: nowrap;padding-right:10px;color:black;">Non-Standard Fields</a></li>
-                <!-- <a href="#origin_differences" style="white-space: nowrap;padding-right:10px">Differences with Core Definitions</a> -->
-                <li class="invalid_chars"><a href="#invalid_chars" style="white-space: nowrap;padding-right:10px;color:black;">Invalid Characters</a></li>
-                <li class="title_mask"><a href="#title_mask" style="white-space: nowrap;padding-right:10px;color:black;">Title Masks</a></li>
+            <ul id="links">
+                 <!--<a href="#origin_differences" style="white-space: nowrap;padding-right:10px">Differences with Core Definitions</a>-->
             </ul>
 
+            <script>
+                var tabs_obj = $("#linkbar").tabs({
+                    beforeActivate: function(e, ui){
+                        if(window.hWin.HEURIST4.util.isempty(ui.newPanel) || ui.newPanel.length == 0) {
+                            e.preventDefault();
+                        }
+                    }
+                });
+            </script>
+			
             <!-- Records with by non-existent users -->
-            <div id="owner_ref" style="top:110px">  <!-- End of Owner References -->
+            <div id="owner_ref" style="top:110px">  <!-- Start of Owner References -->
+            <script>
+                $('#links').append('<li class="owner_ref"><a href="#owner_ref" style="white-space:nowrap;padding-right:10px;color:black;">Record Owner/Creator</a></li>');
+                tabs_obj.tabs('refresh');
+                tabs_obj.tabs('option', 'active', 0);
+            </script>            
             
             <?php
             //            flush_buffers();
@@ -340,13 +327,17 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 </div>
             <?php
             }
-if(true){//DEBUG            
             ?>
                 <br />
             </div>  <!-- End of Owner References -->
 
         <!-- WRONG OR possible DUPLICATED TERMS -->
         <div id="dup_terms" style="top:110px">  <!-- Start of Duplicate Terms -->
+
+        <script>
+            $('#links').append('<li class="dup_terms"><a href="#dup_terms" style="white-space:nowrap;padding-right:10px;color:black;">Invalid/Duplicate Terms</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
         
         <?php
 
@@ -456,6 +447,12 @@ if(true){//DEBUG
         <!-- CHECK FOR FIELD TYPE ERRORS -->
 
         <div id="field_type" style="top:110px"> <!-- Start of Field Types -->
+
+        <script>
+            $('#links').append('<li class="field_type"><a href="#field_type" style="white-space: nowrap;padding-right:10px;color:black;">Field Types</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+
         <?php
 
         if ( ($dtysWithInvalidTerms && is_array($dtysWithInvalidTerms) && count($dtysWithInvalidTerms)>0) || 
@@ -538,8 +535,17 @@ if(true){//DEBUG
             echo '<script>$(".field_type").css("background-color", "#6AA84f");</script>';
         }
         print '<br /><br /></div>';   // End of Field Types
+        ?>
 
-        print '<div id="default_values" style="top:110px">';  // Start of Default Values
+        <div id="default_values" style="top:110px"> <!-- Start of Default Values -->
+        
+        <script>
+            $('#links').append('<li class="default_values"><a href="#default_values" style="white-space: nowrap;padding-right:10px;color:black;">Default Values</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+
+        <?php
+
         if($rtysWithInvalidDefaultValues && 
         is_array($rtysWithInvalidDefaultValues) && 
         count($rtysWithInvalidDefaultValues)>0){
@@ -570,8 +576,14 @@ if(true){//DEBUG
 
         <!-- Record pointers which point to non-existant records -->
 
+        <div id="pointer_targets" style="top:110px"> <!-- Start of Pointer Targets -->
+
+        <script>
+            $('#links').append('<li class="pointer_targets"><a href="#pointer_targets" style="white-space: nowrap;padding-right:10px;color:black;">Pointer Targets</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+
         <?php
-        print '<div id="pointer_targets" style="top:110px">';   // Start of Pointer Targets
 
         $wasdeleted = 0;
         if(@$_REQUEST['fixpointers']=="1"){
@@ -661,9 +673,17 @@ if(true){//DEBUG
             <?php
         }
         print '<br /></div>';   // End of Pointer Targets
+        ?>
 
-        //Record pointers which point to the wrong type of record
-        print '<div id="target_types" style="top:110px">';  // Start of Target Types
+        <!-- Record pointers which point to the wrong type of record -->
+        <div id="target_types" style="top:110px"> <!-- Start of Target Types -->
+
+        <script>
+            $('#links').append('<li class="target_types"><a href="#target_types" style="white-space: nowrap;padding-right:10px;color:black;">Target Types</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+
+        <?php
         
         $res = $mysqli->query('select dtl_RecID, dty_Name, dty_PtrTargetRectypeIDs, rec_ID, rec_Title, rty_Name, rec_RecTypeID
             from defDetailTypes
@@ -712,10 +732,17 @@ if(true){//DEBUG
             }
             
             print '<br /><br /></div>';   // End of Target Types
+            ?>
+            
+            <!-- Record pointers which point to the wrong type of record -->
+            <div id="target_parent" style="top:110px"> <!-- Start of Target Parents -->
 
-            //Record pointers which point to the wrong type of record
-            print '<div id="target_parent" style="top:110px">'; // Start of Target Parents
+            <script>
+                $('#links').append('<li class="target_parent"><a href="#target_parent" style="white-space: nowrap;padding-right:10px;color:black;">Invalid Parents</a></li>');
+                tabs_obj.tabs('refresh');
+            </script>
 
+            <?php
             if($system->defineConstant('DT_PARENT_ENTITY')){}
 
             $wasadded1 = 0;
@@ -929,10 +956,17 @@ if(true){//DEBUG
                 <?php
             }
             print '<br /></div>';   // End of Target Parents
+        ?>
+        <!-- Fields with EMPTY OR NULL values -->
 
-        // ----- Fields with EMPTY OR NULL values -------------------
+        <div id="empty_fields" style="top:110px"> <!-- Start of Empty Fields -->
 
-        print '<div id="empty_fields" style="top:110px">';  // Start of Empty Fields
+        <script>
+            $('#links').append('<li class="empty_fields"><a href="#empty_fields" style="white-space: nowrap;padding-right:10px;color:black;">Empty Fields</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+
+        <?php
 
         if(@$_REQUEST['fixempty']=="1"){
             $mysqli->query('SET SQL_SAFE_UPDATES=0');
@@ -1018,12 +1052,20 @@ if(true){//DEBUG
 
         }
         print '<br /></div>';   // End of Empty Fields
+        ?>
 		
-        // ----- Fields of type "Date" with  wrong values -------------------
-        //find all fields with faulty dates
+        <!-- Fields of type "Date" with  wrong values -->
+        <!-- find all fields with faulty dates -->
 
-        print '<div id="date_values" style="top:110px">';   // Start of Date Values
-            
+        <div id="date_values" style="top:110px">   <!-- Start of Date Values -->
+        
+        <script>
+            $('#links').append('<li class="date_values"><a href="#date_values" style="white-space: nowrap;padding-right:10px;color:black;">Date Values</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+
+        <?php
+
         $res = $mysqli->query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_RecTypeID, a.rec_Title, a.rec_Added
             from recDetails, defDetailTypes, Records a
             where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
@@ -1195,7 +1237,7 @@ if(true){//DEBUG
                 <span>
                     <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                         (show results as search)</a>
-                    <a target=_new href='#' id=selected_link style="display:<?php echo ($fix_as_suggested?'inline-block':'none');?>"
+                    <a target=_new href='#' id=selected_link style="display:<?php echo ($fix_as_suggested?'inline-block':'none');?>;"
                                 onClick="return open_selected_by_name('recCB5');">(show selected as search)</a>
                 </span>
 
@@ -1249,11 +1291,19 @@ if(true){//DEBUG
             print '</table>';
         }
         print '<br /></div>';   // End of Date Values
+        ?>
+
+        <!-- Records with term field values which do not exist in the database -->
         
-        //  Records with term field values which do not exist in the database--------------------
+        <div id="term_values" style="top:110px">   <!-- Start of Term Values -->
         
-        print '<div id="term_values" style="top:110px">';   // Start of Term Values
-        
+        <script>
+            $('#links').append('<li class="term_values"><a href="#term_values" style="white-space: nowrap;padding-right:10px;color:black;">Term Values</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+
+        <?php
+
         $wasdeleted = 0;
 
         //remove wrong term IDs
@@ -1341,14 +1391,20 @@ if(true){//DEBUG
             print '</table>';
         }
         print '<br /></div>';       // End of Term Values
-        
-    $dtl_ids = array(); //temp
         ?>
 
             <!--  Records containing fields with terms not in the list of terms specified for the field   -->
 
             <div id="expected_terms" style="top:110px"> <!-- Start of Expected Terms -->
+
+            <script>
+                $('#links').append('<li class="expected_terms"><a href="#expected_terms" style="white-space: nowrap;padding-right:10px;color:black;">Expected Terms</a></li>');
+                tabs_obj.tabs('refresh');
+            </script>
+
             <?php
+			
+            $dtl_ids = array(); //temp
 
             $bibs = array();
             $ids = array();
@@ -1519,6 +1575,12 @@ if(true){//DEBUG
 
         <!--  single value fields containing excess values  -->
         <div id="single_value" style="top:110px">   <!-- Start of Single Value Fields -->
+
+        <script>
+            $('#links').append('<li class="single_value"><a href="#single_value" style="white-space: nowrap;padding-right:10px;color:black;">Single Value Fields</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+
         <?php
 
         $res = $mysqli->query('select dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title, count(*)
@@ -1604,6 +1666,12 @@ if(true){//DEBUG
 
         <!--  records with missing required values  -->
         <div id="required_fields" style="top:110px">    <!-- Start of Required Fields -->
+
+        <script>
+            $('#links').append('<li class="required_fields"><a href="#required_fields" style="white-space: nowrap;padding-right:10px;color:black;">Required Fields</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+
         <?php
 
         $res = $mysqli->query(
@@ -1690,6 +1758,12 @@ if(true){//DEBUG
             
         <!--  Records with non-standard fields (not listed in recstructure)  -->
         <div id="nonstandard_fields" style="top:110px"> <!-- Start of Non-Standard Fields -->
+
+        <script>
+            $('#links').append('<li class="nonstandard_fields"><a href="#nonstandard_fields" style="white-space: nowrap;padding-right:10px;color:black;">Non-Standard Fields</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+
         <?php
 
         $query = "select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title, rty_Name
@@ -1792,13 +1866,26 @@ if(true){//DEBUG
         </div>
         -->
 
-        <?php   
-}//DEBUG        
-        print '<div id="invalid_chars" style="top:110px">';     /* Start of Invalid Char Section */
+        <div id="invalid_chars" style="top:110px"> <!-- Start of Invalid Char Section -->
+
+        <script>
+            $('#links').append('<li class="invalid_chars"><a href="#invalid_chars" style="white-space: nowrap;padding-right:10px;color:black;">Invalid Characters</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+
+        <?php
         include(dirname(__FILE__).'/cleanInvalidChars.php');
         print '<br /></div>';     /* End of Invalid Char Section */
+        ?>
 
-        print '<div id="title_mask" style="top:110px">';        /* Start of Title Mask Section */
+        <div id="title_mask" style="top:110px"> <!-- Start of Title Mask Section -->
+        
+        <script>
+            $('#links').append('<li class="title_mask"><a href="#title_mask" style="white-space: nowrap;padding-right:10px;color:black;">Title Masks</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+
+        <?php
         include(dirname(__FILE__).'/checkRectypeTitleMask.php');
         print '<br /><br /></div>';     /* End of Title Mask Section */
         ?>
@@ -1815,7 +1902,6 @@ if(true){//DEBUG
 
         </div>
         <script>
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
 			/*
             var parent = $(window.parent.document);
             parent.find('#verification_output').css({width:'100%',height:'100%'}).show(); 
