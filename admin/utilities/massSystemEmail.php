@@ -92,13 +92,13 @@ $current_db = "hdb_" . $_REQUEST['db'];
 $note_rectype_id = ConceptCode::getRecTypeLocalID("2-3");
 if (empty($note_rectype_id)) {
 
-    print "Unable to retrieve the id for the Note record type, ID => " . $note_rectype_id;
+    print "Unable to retrieve the id for the Notes record type";
 }
 
 $shortsum_detiltype_id = ConceptCode::getDetailTypeLocalID("2-3");
 if (empty($shortsum_detiltype_id)) {
 
-    print "Unable to retrieve the id for the short summary detail type, ID => " . $shortsum_detiltype_id;
+    print "Unable to retrieve the id for the short summary detail type";
     return;
 }
 
@@ -111,11 +111,13 @@ if (!$notes_list) {
     print "Either unable to retrieve Note records from the current database, Error => " . $mysqli->error. ", Query => " .$query; 
     return; 
 }
+
 while($note = $notes_list->fetch_row()){
 
     if(empty($note[1])) {
         continue;
     }
+
     $query = 'SELECT dtl_Value FROM recDetails WHERE dtl_RecID = '
             . $note[0] .' AND dtl_DetailTypeID = ' . $shortsum_detiltype_id;
 
@@ -310,8 +312,8 @@ if(!$has_notes || empty($notes)) {
 
             window.history.pushState({}, '', '<?php echo $_SERVER['PHP_SELF']; ?>');
 
-            var db_workgroups = <?php echo json_encode($db_workgroups); ?>;
-            var notes = "<?php echo json_encode($notes); ?>";
+            var db_workgroups = <?php echo json_encode($db_workgroups); ?>; // Object of Workgroups
+            var all_notes = <?php echo json_encode($notes); ?>; // Object of Notes records
 
             function exportCSV(isValid, err_text) {
 
@@ -561,7 +563,7 @@ if(!$has_notes || empty($notes)) {
                     {key:"null", title: "Select a notes record..."},
                 ];
 
-                $.each(notes, function(idx, value){
+                $.each(all_notes, function(idx, value){
 
                     var opt = {key: idx, title: value[0]};
 
@@ -583,7 +585,7 @@ if(!$has_notes || empty($notes)) {
                         if (emailDraft == null || emailDraft == "null") {
                             $("#emailContent").text("");
                         } else {
-                            $("#emailContent").text(notes[emailDraft][1]);
+                            $("#emailContent").text(all_notes[emailDraft][1]);
                         }
                     }
                 });
@@ -663,9 +665,10 @@ if(!$has_notes || empty($notes)) {
             <h2>Heurist System Email</h2>
             
             <label class="label">
-                This tool allows you to email all users on all Heurist databases available on this server. <br/><br/>
-                You choose which databases to include, who should receive this email, record count with last modification filtering, <br/>
-                and then selecting a note record that contains the email body. <br/>
+                This tool allows you to email all users / specified types of user on all / selected Heurist databases available on this server. <br/><br/>
+                The email to be sent should be created as a <strong>Notes</strong> record in the current database,<br>
+                including subject line, body text and fields to be substitued using ##....## notation.<br>
+                The body text can be edited in the preview field below.
             </label>
 
             <form id="emailOptions" action="massSystemEmail.php" method="POST" target="_blank" onsubmit="return validateForm(event);">
@@ -722,7 +725,7 @@ if(!$has_notes || empty($notes)) {
                             <label class="label non-selectable" style="margin-bottom: 5px;"> 
                                 Please select the Note record that contains the email outline (previewed on the right)<br/><br/>
                                 
-                                <select id="emailOutline"></select>
+                                <select id="emailOutline" name="emailId"></select>
                             </label>
 
                             <label class="label">

@@ -46,6 +46,7 @@ class systemEmailExt {
 
 	private $user_details; // list of user details and databases, indexed on user emails
 
+	public $email_subject; // email title/subject, from the name/title field from a notes record
 	public $email_body; // email body, from the short summary field from a notes record + final editing
 
 	public $rec_count; // number of records to include, default: 0
@@ -66,7 +67,7 @@ class systemEmailExt {
 	/*
 	 * Process the data received
 	 *
-	 * Param: $data => Passed Form Data
+	 * Param: $data => (int) Passed Form Data
 	 *
 	 * Return: VOID || Error Code
 	 */
@@ -111,7 +112,7 @@ class systemEmailExt {
 				$this->set_error("processFormData() Error: Provided workgroups are invalid, workgroups => " . implode(",", $this->workgroups));
 				return -1;
 			}
-		}
+		} 
 
 		if (isset($data["emailOutline"]) && is_string($data["emailOutline"])) { // Get Note record ID, ensure it is a number
 			$this->email_body = $data["emailOutline"];
@@ -136,6 +137,18 @@ class systemEmailExt {
 		$this->log = "";
 		$this->receipt = "";
 		$this->error_msg = "";
+
+		if (isset($data["emailId"]) && is_numeric($data["emailId"])) {
+			
+			$rtn = $this->getEmailSubject($data["emailId"]);
+
+			if ($rtn != 0) {
+
+				return -1;
+			}
+		} else {
+			$this->email_subject = null;
+		}
 
 		$rtn = $this->createRecordsList(); // save record counts and last modified record dates for each db
 
@@ -384,6 +397,48 @@ class systemEmailExt {
 	}
 
 	/*
+	 * Get email subject from Notes record
+	 * 
+	 * Param: $id => Record Id
+	 *
+	 * Return: VOID || Error Code
+	 */
+
+	private function getEmailSubject($id) {
+
+		global $system;
+		$mysqli = $system->get_mysqli();
+
+		$title_detiltype_id = ConceptCode::getDetailTypeLocalID("2-1");
+		if (empty($title_detiltype_id)) {
+
+		    $this->email_subject = null;
+		    return 0;
+		}
+
+	    $query = "SELECT dtl_Value
+	              FROM recDetails
+	              WHERE dtl_RecID = $id AND dtl_DetailTypeID = $title_detiltype_id";
+
+	    $note_val = $mysqli->query($query);
+	    if(!$note_val) {
+
+	        $this->set_error("Unable to retrieve details of note id => $id, Error => " . $mysqli->error);
+	        return -2;
+	    }
+
+	    if ($val = $note_val->fetch_row()){
+	        
+	        $this->email_subject = $val[0];
+	    } else {
+
+	    	$this->email_subject = null;
+	    }
+
+	    return 0; 
+	}
+
+	/*
 	 * Prepare email body for sending
 	 * 
 	 * Param: None
@@ -436,7 +491,7 @@ class systemEmailExt {
 
 			$body = str_ireplace($this->substitute_vals, $replace_with, $this->email_body);
 
-			$title = "Heurist system email for databases: " . $db_url_listed;
+			$title = (isset($this->email_subject) ? $this->email_subject : "Heurist system email for databases: " . $db_url_listed);
 
 			if (!empty($body)) { // Check if email body is valid, then send email
 
@@ -467,7 +522,7 @@ class systemEmailExt {
 						   . "<br/><br/>";
 			} else {
 
-				$this->set_error("constructEmails() Error: Unable to proceed as the email body is empty, Email Body Outline => " . $this->email_body);
+				$this->set_error("constructEmails() Error: Unable to proceed as the email body is empty");
 				return -1;
 			}
 
@@ -477,7 +532,7 @@ class systemEmailExt {
 					$this->set_error("constructEmails() Error: Email sending has stopped due to an error with the email system, Error => " . $this->error_msg);
 				}
 
-				$this->save_receipt($email_rtn, $this->email_body);
+				$this->save_receipt($email_rtn, $title, $this->email_body);
 
 				return $email_rtn;
 			}
@@ -485,7 +540,7 @@ class systemEmailExt {
 			$email->clearAddresses(); // ensure that the current email is gone
 		}
 
-		$this->save_receipt($email_rtn, $this->email_body);
+		$this->save_receipt($email_rtn, $title, $this->email_body);
 
 		return $email_rtn;
 	}
@@ -548,14 +603,18 @@ class systemEmailExt {
 			$records_listed = $this->createListFromArray($record_count_arr);
 			$lastmod_listed = $this->createListFromArray($record_mod_arr);
 
-			// Construct email body and request
+			// Construct email and request
 			$replace_with = array($details["first_name"], $details["last_name"], $email, $db_listed, $db_url_listed, $records_listed, $lastmod_listed);
+
 			$body = str_ireplace($this->substitute_vals, $replace_with, $this->email_body);
+			$title = (isset($this->email_subject) ? $this->email_subject : "Heurist system email for databases: " . $db_url_listed);
+
+			$email = $title . "\n\n" . $body;
 
 			$request = "request: {".$this->rec_count.", ".$this->rec_lastmod_period.", ".$this->rec_lastmod_unit.", ".$this->rec_lastmod_logic."}";
 
 			// Add row
-			fputcsv($fd, array($email, $name, implode(",", $dbs), implode(",", $db_url_arr), implode(",", $record_count_arr), implode(",", $record_mod_arr), $request, $body));
+			fputcsv($fd, array($email, $name, implode(",", $dbs), implode(",", $db_url_arr), implode(",", $record_count_arr), implode(",", $record_mod_arr), $request, $email));
 		}
 
         // Close descriptor and exit
@@ -620,14 +679,15 @@ class systemEmailExt {
 	 *	save_receipt() => prepare receipt value
 	 *		Param:
 	 *			$status => (int) 0 || < 0, whether the emails were all sent
-	 *			$email_body => (string) email template used
+	 *			$email_subect => (string) email subject used
+	 *			$email_body => (string) email body used
 	 *
 	 *	get_receipt() => get the value of receipt
 	 *
 	 *	export_receipt() => save receipt value into Note record, Titled: System Email Receipt [Current Date]
 	 */
 
-	private function save_receipt($status, $email_body) {
+	private function save_receipt($status, $email_subect, $email_body) {
 
 		$db = implode(", ", $this->databases);
 		$db_list = str_replace("hdb_", "", $db);
@@ -647,7 +707,8 @@ class systemEmailExt {
 					   . "&nbsp;&nbsp;Record Limit:$r_cnt <br/>"
 					   . "&nbsp;&nbsp;Last Modified Filter: $lm <br/>"
 					   . "}, <br/> Timestamp: " . date("Y-m-d H:i:s") . ", Status: " . $status_msg
-					   . ", <br/> Email Template: <br/>" . $email_body;
+					   . ", <br/> Email Subject: " . $email_subect
+					   . ", <br/> Email Body: <br/>" . $email_body;
 	}
 	public function get_receipt() {
 		return $this->receipt;
