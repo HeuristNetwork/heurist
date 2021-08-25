@@ -117,7 +117,7 @@ class systemEmailExt {
 			$this->email_body = $data["emailOutline"];
 		} else {
 
-			$this->set_error("processFormData() Error: No email body was provided";
+			$this->set_error("processFormData() Error: No email body was provided");
 			return -1;
 		}
 

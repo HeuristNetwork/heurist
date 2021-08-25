@@ -102,25 +102,22 @@ if (empty($shortsum_detiltype_id)) {
     return;
 }
 
-$query = "SELECT rec_ID, rec_Title
-          FROM Records
-          WHERE rec_RecTypeID = " . $note_rectype_id . " AND rec_Title NOT LIKE 'Heurist System Email Receipt%' AND rec_Title <> ''";
+$query = "SELECT rec_ID, rec_Title FROM Records WHERE rec_RecTypeID = " 
+            . $note_rectype_id 
+            . " AND rec_Title NOT LIKE 'Heurist System Email Receipt%' AND rec_Title <> ''";
 
 $notes_list = $mysqli->query($query);
 if (!$notes_list) { 
     print "Either unable to retrieve Note records from the current database, Error => " . $mysqli->error. ", Query => " .$query; 
     return; 
 }
-
 while($note = $notes_list->fetch_row()){
 
     if(empty($note[1])) {
         continue;
     }
-
-    $query = "SELECT dtl_Value
-              FROM recDetails
-              WHERE dtl_RecID = ". $note[0] ." AND dtl_DetailTypeID = " . $shortsum_detiltype_id;
+    $query = 'SELECT dtl_Value FROM recDetails WHERE dtl_RecID = '
+            . $note[0] .' AND dtl_DetailTypeID = ' . $shortsum_detiltype_id;
 
     $note_val = $mysqli->query($query);
     if(!$note_val) {
@@ -314,7 +311,7 @@ if(!$has_notes || empty($notes)) {
             window.history.pushState({}, '', '<?php echo $_SERVER['PHP_SELF']; ?>');
 
             var db_workgroups = <?php echo json_encode($db_workgroups); ?>;
-            var notes = <?php echo json_encode($notes); ?>;
+            var notes = "<?php echo json_encode($notes); ?>";
 
             function exportCSV(isValid, err_text) {
 
