@@ -231,7 +231,8 @@
             
             if (!$system->is_member(@$record['svs_UGrpID'])) { //was has_access
                 $system->addError(HEURIST_REQUEST_DENIED, 
-                    'Cannot update filter criteria. Current user must be member for group');
+                    'Cannot update filter ' .$record['svs_Name']. '.<br>You must be a member of the ' .$record['svs_UGrpID']. ' group to edit this filter.<br><br>'
+                    .'Please ask your database owner to add you to the group.');
             }else{
                 
                 if(is_array(@$record['svs_ID'])){
