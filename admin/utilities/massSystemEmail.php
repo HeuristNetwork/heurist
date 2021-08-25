@@ -32,7 +32,7 @@ if (@$_REQUEST["exportCSV"] == "true") {
 }
 
 if ( !isset($_REQUEST['db']) && $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions) ){
-	?>
+    ?>
     
     <h3> A Heurist database and Server Manager password are required to enter this function </h3>
 
@@ -58,7 +58,7 @@ $notes = array();
 
 $has_notes = false;
 
-$query = "SHOW databases WHERE `database` LIKE 'hdb_%'";
+$query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE `SCHEMATA`.`SCHEMA_NAME` LIKE 'hdb_%' ORDER BY `SCHEMATA`.`SCHEMA_NAME` COLLATE utf8_general_ci";
 
 $db_list = $mysqli->query($query);
 if (!$db_list) {  
@@ -75,7 +75,7 @@ while($db = $db_list->fetch_row()){
     $workgroup_list = $mysqli->query($query);
     if (!$workgroup_list) {
 
-        print "Unable to retrieve workgroups from db => " . $db . ", Error => " . $mysqli->error. ", Query => " .$query;
+        print "Unable to retrieve workgroups from db => " . $db[0] . ", Error => " . $mysqli->error. ", Query => " .$query;
         return;
     }
 
@@ -140,7 +140,17 @@ while($note = $notes_list->fetch_row()){
 }
 
 if(!$has_notes || empty($notes)) {
-    print $_REQUEST['db']. " contains no valid Note records to base the email body on, any existing Note record must also contain a value in the short summary field to be used as the email's body";
+    print "<br><br>This function sends bulk emails based on text in a selected Notes record<br><br>"
+    . "The Notes record to be used must contain a title field and a short summary field - the latter will be used as the email's body.<br><br>" 
+    . $_REQUEST['db'] . " contains no valid Notes records. Please create a Notes record with your text using ##...## markers for values to be inserted.<br><br>"
+    . "Placeholders that will be replaced with proper values (case insensitive):<br><br>"
+    . "##firstname## &rarr; User's First Name,<br>"
+    . "##lastname## &rarr; User's Last Name,<br>" 
+    . "##email## &rarr; User's Email,<br>" 
+    . "##database## &rarr; Database Name,<br>" 
+    . "##dburl## &rarr; Database URL,<br>" 
+    . "##record## &rarr; Record Count, and<br>" 
+    . "##lastmodified## &rarr; Date of the Last Modified Record<br>";
     return;
 }
 ?>  
@@ -174,7 +184,7 @@ if(!$has_notes || empty($notes)) {
                 border: 2px groove threedface;
 
                 margin: 10px 5px;
-                padding: 5px 10px;
+                padding: 5px 10px 15px;
             }
 
             .input-num {
@@ -182,7 +192,10 @@ if(!$has_notes || empty($notes)) {
             }
 
             #dbSelection.fieldsets {
-                max-width: 97.3%;
+                max-width: 85%;
+                max-height: 190px;
+
+                overflow-y: auto;
             }
 
             #userSelection.fieldsets {
@@ -202,10 +215,6 @@ if(!$has_notes || empty($notes)) {
                 display: inline-block;
         
                 border: 0;
-            }
-
-            #csvExport {
-                display: inline-block;
             }
 
             #dbSelection .label, 
@@ -263,6 +272,10 @@ if(!$has_notes || empty($notes)) {
             div.ui-state-active {
                 color: #000 !important;
                 background: #DDDDDD !important;
+            }
+
+            span.ui-selectmenu-text {
+                background-color: #f6f6f6 !important;
             }
 
             /* Misc */
@@ -358,7 +371,8 @@ if(!$has_notes || empty($notes)) {
 
                 if($userSel.val() == "null"){
 
-                    $("#userSel-button").addClass("invalid-input");
+                    //$("#userSel-button").addClass("invalid-input");
+                    $("#userSel").addClass("invalid-input");
                     isValid = false;
 
                     err_text += messages["user"];
@@ -366,7 +380,8 @@ if(!$has_notes || empty($notes)) {
 
                     var $group_selection = $("#wg-container").find("input").is(":checked");
 
-                    $("#userSel-button").removeClass("invalid-input");
+                    //$("#userSel-button").removeClass("invalid-input");
+                    $("#userSel").removeClass("invalid-input");
                     if(!$group_selection){
 
                         $("#userSelection").addClass("invalid-input");
@@ -377,18 +392,21 @@ if(!$has_notes || empty($notes)) {
                         $("#userSelection").removeClass("invalid-input");
                     }
                 } else {
-                    $("#userSel-button").removeClass("invalid-input");
+                    //$("#userSel-button").removeClass("invalid-input");
+                    $("#userSel").removeClass("invalid-input");
                     $("#userSelection").removeClass("invalid-input");
                 }
 
                 if($noteSel.val() == "null"){
 
-                    $("#emailOutline-button").addClass("invalid-input");
+                    //$("#emailOutline-button").addClass("invalid-input");
+                    $("#emailOutline").addClass("invalid-input");
                     isValid = false;
 
                     err_text += messages["note"];
                 } else {
-                    $("#emailOutline-button").removeClass("invalid-input");
+                    //$("#emailOutline-button").removeClass("invalid-input");
+                    $("#emailOutline").removeClass("invalid-input");
                 }
 
                 if($(e.target).attr("id")=="csvExport") { 
@@ -477,13 +495,23 @@ if(!$has_notes || empty($notes)) {
 
                     $db_selection.append(
                         "<label class='label non-selectable' for='"+ key +"'> " + name
-                      + "   <input type='checkbox' name='databases[]' value='"+ key +"' id='"+ key +"'>"
+                      + "   <input type='checkbox' class='dbListCB' name='databases[]' value='"+ key +"' id='"+ key +"'>"
                       + "</label>"
                     );
                 });
 
-                $db_selection.find("input[type='checkbox']").checkboxradio();
-                $db_selection.find("input[type='checkbox']").on("change", changeWorkgroupList);
+                $db_selection.find(".dbListCB")
+                    .checkboxradio()
+                    .on("change", changeWorkgroupList);
+
+                $db_selection.find("#allDBs")
+                    .on("click", function(e){
+
+                        var is_checked = $(e.target).is(":checked");
+
+                        $db_selection.find(".dbListCB").prop("checked", is_checked).checkboxradio('refresh');
+                    })
+                    .css("vertical-align", "middle");
             }
 
             function setupUserSelection() {
@@ -498,32 +526,31 @@ if(!$has_notes || empty($notes)) {
                     .appendTo($user_selection);
 
                 var options = [
-                    {key:"null", title:"Select user group..."},
-                    {key:"owner", title:"Database Owner/s"},
+                    //{key:"null", title:"Select user group..."},
+                    {key:"owner", title:"Database Owner/s", selected: true},
                     {key:"admin", title:"Administrators"},
                     {key:"user", title:"All Users"}
                 ];
 
                 window.hWin.HEURIST4.ui.createSelector(select.get(0), options);
-                window.hWin.HEURIST4.ui.initHSelect(select, false);
+                window.hWin.HEURIST4.ui.initHSelect(select, true);
 
                 if(select.hSelect("instance")!=undefined) {
-
                     select.hSelect("widget").css({"margin-top": "5px", "min-width": "13em"});
-
-                    select.hSelect({
-                        change: function(event, data) {
-                            
-                            var showWorkgroups = (data.item.value==='admin');
-
-                            if(data.item.value==='admin') {
-                                $("#wg-container").show();
-                            } else {
-                                $("#wg-container").hide();
-                            }
-                        }
-                    });
                 }
+
+                select.on({
+                    change: function(event) {
+                        
+                        var showWorkgroups = $(event.target).val()==='admin';
+
+                        if($(event.target).val()==='admin') {
+                            $("#wg-container").show();
+                        } else {
+                            $("#wg-container").hide();
+                        }
+                    }
+                });
 
                 $("<span id='wg-error' class='error-msg non-selectable' style='width: 234px;'></span>").appendTo($user_selection).hide();
                 $("<div style='float: right;' id='wg-container'></div>").appendTo($user_selection).hide();
@@ -534,7 +561,7 @@ if(!$has_notes || empty($notes)) {
                 var $note_selection = $("#emailOutline");
 
                 var options = [
-                    {key:"null", title: "Select a note..."},
+                    {key:"null", title: "Select a notes record..."},
                 ];
 
                 $.each(notes, function(idx, value){
@@ -545,47 +572,45 @@ if(!$has_notes || empty($notes)) {
                 });
 
                 window.hWin.HEURIST4.ui.createSelector($note_selection.get(0), options);
-                window.hWin.HEURIST4.ui.initHSelect($note_selection, false);
+                window.hWin.HEURIST4.ui.initHSelect($note_selection, true);
 
                 if($note_selection.hSelect("instance")!=undefined) {
-
                     $note_selection.hSelect("widget").css({"min-width": "20em"});
-
-                    $note_selection.hSelect({
-                        change: function(event, data) {
-
-                            var emailDraft = data.item.value;
-
-                            if (emailDraft == null || emailDraft == "null") {
-                                $("#emailContent").text("");
-                            } else {
-                                $("#emailContent").text(notes[emailDraft][1]);
-                            }
-                        }
-                    });
                 }
+
+                $note_selection.on({
+                    change: function(event) {
+
+                        var emailDraft = $(event.target).val();
+
+                        if (emailDraft == null || emailDraft == "null") {
+                            $("#emailContent").text("");
+                        } else {
+                            $("#emailContent").text(notes[emailDraft][1]);
+                        }
+                    }
+                });
             }            
 
             function setupOtherElements() {
 
                 var modifySel = $("#recModifiedSel");
-                window.hWin.HEURIST4.ui.initHSelect(modifySel.get(0), false);
+                window.hWin.HEURIST4.ui.initHSelect(modifySel.get(0), true);
 
-                if(modifySel.hSelect("instance")!=undefined){
+                modifySel.on({
+                    change: function(event, data){
 
-                    modifySel.hSelect({
-                        change: function(event, data){
-
-                            if(data.item.value==='ALL') {
-                                window.hWin.HEURIST4.util.setDisabled($("#recModified"), true);
-                                window.hWin.HEURIST4.util.setDisabled($("#recModifiedLogic-button"), true);
-                            } else {
-                                window.hWin.HEURIST4.util.setDisabled($("#recModified"), false);
-                                window.hWin.HEURIST4.util.setDisabled($("#recModifiedLogic-button"), false);
-                            }
+                        if($(event.target).val()==='ALL') {
+                            window.hWin.HEURIST4.util.setDisabled($("#recModified"), true);
+                            //window.hWin.HEURIST4.util.setDisabled($("#recModifiedLogic-button"), true);
+                            window.hWin.HEURIST4.util.setDisabled($("#recModifiedLogic"), true);
+                        } else {
+                            window.hWin.HEURIST4.util.setDisabled($("#recModified"), false);
+                            //window.hWin.HEURIST4.util.setDisabled($("#recModifiedLogic-button"), false);
+                            window.hWin.HEURIST4.util.setDisabled($("#recModifiedLogic"), false);
                         }
-                    });
-                }
+                    }
+                });
 
                 $("#recTotal").spinner({
                     spin: function(event, ui) {
@@ -608,7 +633,7 @@ if(!$has_notes || empty($notes)) {
                 });
 
                 var modifyLogic = $("#recModifiedLogic");
-                window.hWin.HEURIST4.ui.initHSelect(modifyLogic.get(0), false);
+                window.hWin.HEURIST4.ui.initHSelect(modifyLogic.get(0), true);
             }
 
             $(document).ready(function() {
@@ -622,11 +647,13 @@ if(!$has_notes || empty($notes)) {
                     window.hWin.HR = function(token){return token};
                 }
 
-                $("#csvExport").position({
-                    my: "left center",
-                    at: "right center",
-                    of: "#authenContainer"
-                });
+                $("#csvExport")
+                    .position({
+                        my: "left top",
+                        at: "right top",
+                        of: "#authenContainer"
+                    })
+                    .css('margin-top', '13px');
             });
 
         </script>
@@ -649,7 +676,7 @@ if(!$has_notes || empty($notes)) {
                 <div class="row">
 
                     <fieldset class="fieldsets" id="dbSelection">
-                        <legend>Select the Heurist Databases to pull Users from: </legend>
+                        <legend>Select the Heurist Databases to pull Users from: <label for="allDBs" class="non-selectable"><input type="checkbox" id="allDBs">Select All</label> </legend>
 
                     </fieldset>
 
@@ -698,11 +725,11 @@ if(!$has_notes || empty($notes)) {
                             <label class="label non-selectable" style="margin-bottom: 5px;"> 
                                 Please select the Note record that contains the email outline (previewed on the right)<br/><br/>
                                 
-                                <select id="emailOutline" name="emailOutline"></select>
+                                <select id="emailOutline"></select>
                             </label>
 
                             <label class="label">
-                                <br/><br/>and Listed below are the placeholders that will be replace with proper values (case insensitive): <br/><br/>
+                                <br/><br/>Placeholders that will be replace with proper values (case insensitive): <br/><br/>
 
                                 ##firstname## &rarr; User's First Name,<br/>
                                 ##lastname## &rarr; User's Last Name,<br/> 
@@ -718,7 +745,7 @@ if(!$has_notes || empty($notes)) {
                         
                         <div style="float: right;margin-left: 30px;">
                             <label class="label non-selectable" style="display: block;margin-bottom: 10px;">Email Preview:</label>
-                            <textarea id="emailContent" rows="15" cols="75" readonly="readonly"></textarea>
+                            <textarea id="emailContent" rows="15" cols="75" name="emailOutline"></textarea>
                         </div>
                     </fieldset>
 

@@ -46,7 +46,7 @@ class systemEmailExt {
 
 	private $user_details; // list of user details and databases, indexed on user emails
 
-	public $email_body_id; // record id for note record containing the email body
+	public $email_body; // email body, from the short summary field from a notes record + final editing
 
 	public $rec_count; // number of records to include, default: 0
 	
@@ -113,11 +113,11 @@ class systemEmailExt {
 			}
 		}
 
-		if (isset($data["emailOutline"]) && is_numeric($data["emailOutline"])) { // Get Note record ID, ensure it is a number
-			$this->email_body_id = $data["emailOutline"];
+		if (isset($data["emailOutline"]) && is_string($data["emailOutline"])) { // Get Note record ID, ensure it is a number
+			$this->email_body = $data["emailOutline"];
 		} else {
 
-			$this->set_error("processFormData() Error: No note id or an invalid one has been provided, data[emailOutline] => " . $data["emailOutline"]);
+			$this->set_error("processFormData() Error: No email body was provided";
 			return -1;
 		}
 
@@ -323,11 +323,11 @@ class systemEmailExt {
 			}
 
 			// Get newest record/last edited record, ignore system email receipt records
-		  	$query = "SELECT rec_Modified
-					  FROM " . $db . ".Records AS rec
+		  	$query = "SELECT max(rec_Modified)
+					  FROM $db.Records AS rec
 					  WHERE rec_Title IS NOT NULL 
-					  AND rec_Title != '' " . $lastmod_where .
-					 "AND rec_Title NOT LIKE 'Heurist System Email Receipt%'
+					  AND rec_Title != '' $lastmod_where
+					  AND rec_Title NOT LIKE 'Heurist System Email Receipt%'
 					  ORDER BY rec_Modified DESC
 					  LIMIT 1";
 
@@ -341,6 +341,40 @@ class systemEmailExt {
 		  	if ($row = $res->fetch_row()) { 
 		  		$date_obj = new DateTime($row[0]);
 		  		$date = $date_obj->format("Y-m-d");
+		  	} else {
+
+		  		$res->close();
+
+		  		// Get newest edit to definitions
+		  		$query = "SELECT max(newest)
+						  FROM (
+						   SELECT max(dty_Modified) AS newest FROM $db.defDetailTypes
+						   UNION ALL
+						   SELECT max(dtg_Modified) AS newest FROM $db.defDetailTypeGroups
+						   UNION ALL
+						   SELECT max(rst_Modified) AS newest FROM $db.defRecStructure
+						   UNION ALL
+						   SELECT max(rty_Modified) AS newest FROM $db.defRecTypes
+						   UNION ALL
+						   SELECT max(rtg_Modified) AS newest FROM $db.defRecTypeGroups
+						   UNION ALL
+						   SELECT max(trm_Modified) AS newest FROM $db.defTerms
+						   UNION ALL
+						   SELECT max(vcg_Modified) AS newest FROM $db.defVocabularyGroups
+						  ) as maximum";
+
+				$res = $mysqli->query($query);
+
+				if (!$res) {
+
+					$this->set_error("createRecordsList() Error: Unable to complete query for last modified definition, MySQLi Error => " .$mysqli->error. ", Query => " .$query);
+					return -2;
+				}
+
+				if ($row = $res->fetch_row()) {
+					$date_obj = new DateTime($row[0]);
+					$date = $date_obj->format("Y-m-d");
+				}
 		  	}
 
 		  	$this->records[$db] = array($count, $date); // save results
@@ -348,56 +382,6 @@ class systemEmailExt {
 
 		return 0;
 	}
-
-	/*
-	 * Retrieve the note record to be used as the email's body
-	 *
-	 * Param: None
-	 *
-	 * Return:
-	 *	String => Email Body
-	 *	, or Error Code
-	 */
-
-	private function getEmailBody($id=null) {
-
-		global $system;
-		$mysqli = $system->get_mysqli();
-
-		if (empty($id) || intval($id) <= 0) { // validate id
-
-			if (empty($this->email_body_id) || intval($this->email_body_id) <= 0) {
-
-				$this->set_error("getEmailBody() Error: Provided record ID is invalid for retrieving the email body from a Heurist note record");
-				return -1;
-			} else {
-				$id = $this->email_body_id;
-			}
-		}
-
-		// Get note record
-		$query = "SELECT dtl_Value
-				  FROM recDetails
-				  WHERE dtl_RecID = " . $id . " AND dtl_DetailTypeID = 
-				  (SELECT dty_ID
-				   FROM defDetailTypes
-				   WHERE dty_OriginatingDBID = 2 AND dty_IDInOriginatingDB = 3)";
-
-		$res = $mysqli->query($query);
-		if (!$res) {  
-
-			$this->set_error("getEmailBody() Error: Unable to complete query for email body (note record within the current Heurist DB), MySQLi Error => " .$mysqli->error. ", Query => " .$query);  
-			return -2;
-		}
-
-		if ($row = $res->fetch_row()){
-			return htmlspecialchars($row[0], ENT_COMPAT, "UTF-8");
-		} else {
-
-			$this->set_error("getEmailBody() Error: No Note record found of ID => " . $id . ", Query => " . $query);
-			return -1;
-		}
-	}	
 
 	/*
 	 * Prepare email body for sending
@@ -410,13 +394,6 @@ class systemEmailExt {
 	public function constructEmails() {
 
 		$email_rtn = 0;
-
-		// Get email body
-		$email_body = $this->getEmailBody();
-		if ($email_body <= -1) {
-
-			return $email_body;
-		}
 
 		// Initialise PHPMailer
 		$mailer = new PHPMailer(true);
@@ -457,7 +434,7 @@ class systemEmailExt {
 			// Replace placeholders with information
 			$replace_with = array($details["first_name"], $details["last_name"], $email, $db_listed, $db_url_listed, $records_listed, $lastmod_listed);
 
-			$body = str_ireplace($this->substitute_vals, $replace_with, $email_body);
+			$body = str_ireplace($this->substitute_vals, $replace_with, $this->email_body);
 
 			$title = "Heurist system email for databases: " . $db_url_listed;
 
@@ -490,7 +467,7 @@ class systemEmailExt {
 						   . "<br/><br/>";
 			} else {
 
-				$this->set_error("constructEmails() Error: Unable to proceed as the email body is empty, Email Body Outline => " . $email_body);
+				$this->set_error("constructEmails() Error: Unable to proceed as the email body is empty, Email Body Outline => " . $this->email_body);
 				return -1;
 			}
 
@@ -500,7 +477,7 @@ class systemEmailExt {
 					$this->set_error("constructEmails() Error: Email sending has stopped due to an error with the email system, Error => " . $this->error_msg);
 				}
 
-				$this->save_receipt($email_rtn, $email_body);
+				$this->save_receipt($email_rtn, $this->email_body);
 
 				return $email_rtn;
 			}
@@ -508,7 +485,7 @@ class systemEmailExt {
 			$email->clearAddresses(); // ensure that the current email is gone
 		}
 
-		$this->save_receipt($email_rtn, $email_body);
+		$this->save_receipt($email_rtn, $this->email_body);
 
 		return $email_rtn;
 	}
@@ -544,9 +521,6 @@ class systemEmailExt {
         // Add column headers
 		fputcsv($fd, array("User Email", "User Name", "Databases", "Database URLs", "Record Counts", "Last Modified Record", "request: {record_limit, lastmodification_period, lastmodification_unit, lastmodification_logic}, Email"));
 
-		// Get email template
-		$email_body = $this->getEmailBody();
-
 		// Add column data, row by row
 		foreach ($this->user_details as $email => $details) {
 			
@@ -576,7 +550,7 @@ class systemEmailExt {
 
 			// Construct email body and request
 			$replace_with = array($details["first_name"], $details["last_name"], $email, $db_listed, $db_url_listed, $records_listed, $lastmod_listed);
-			$body = str_ireplace($this->substitute_vals, $replace_with, $email_body);
+			$body = str_ireplace($this->substitute_vals, $replace_with, $this->email_body);
 
 			$request = "request: {".$this->rec_count.", ".$this->rec_lastmod_period.", ".$this->rec_lastmod_unit.", ".$this->rec_lastmod_logic."}";
 
@@ -658,9 +632,7 @@ class systemEmailExt {
 		$db = implode(", ", $this->databases);
 		$db_list = str_replace("hdb_", "", $db);
 		$u = $this->users;
-		$wg_list = implode(", ", $this->workgroups);
-		
-		$note_id = $this->email_body_id;
+		$wg_list = isset($this->workgroups) ? implode(", ", $this->workgroups) : "none";
 
 		$r_cnt = $this->rec_count;
 
@@ -672,7 +644,6 @@ class systemEmailExt {
 					   . "&nbsp;&nbsp;Databases: $db_list <br/>"
 					   . "&nbsp;&nbsp;User Type: $u <br/>"
 					   . "&nbsp;&nbsp;Workgroups: $wg_list <br/>"
-					   . "&nbsp;&nbsp;Note Rec ID: $note_id <br/>"
 					   . "&nbsp;&nbsp;Record Limit:$r_cnt <br/>"
 					   . "&nbsp;&nbsp;Last Modified Filter: $lm <br/>"
 					   . "}, <br/> Timestamp: " . date("Y-m-d H:i:s") . ", Status: " . $status_msg
