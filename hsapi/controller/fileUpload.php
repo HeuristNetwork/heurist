@@ -205,9 +205,16 @@ if($response!=null){
                 //'max_file_size' => 1024,
                 //'print_response ' => false
         );
-
+        
         allowWebAccessForForlder($entityDir.$version.'/');    
     
+    }
+
+    if(@$_REQUEST['acceptFileTypes']){
+        $options['accept_file_types'] = $_REQUEST['acceptFileTypes'];
+    }else{
+        $allowed_exts = mysql__select_list2($system->get_mysqli(), 'select fxm_Extension from defFileExtToMimetype');
+        $options['accept_file_types'] = implode('|', $allowed_exts);
     }
     
     $options['print_response'] = false;
@@ -222,12 +229,21 @@ if($response!=null){
     foreach($res['files'] as $idx=>$file){
         if(@$file->error){
             $sMsg = "Sorry, file was not processed due to the following reported error:\n".$file->error.".\n\n"; // Error Log
+            
+            if(strpos($file->error, 'Filetype not')===0){
+                
+                $response = $system->addError(HEURIST_ACTION_BLOCKED, $sMsg, null);
+                
+            }else{
+            
+                if(false && strpos($file->error, 'Filetype not')===false && 
+                   strpos($file->error, 'ownership permissions')===false && 
+                   strpos($file->error, 'post_max_size')===false){
+                    $sMsg = $sMsg.' The most likely cause is that the file extension ('. ($file->type?$file->type:'XXX!') .') is not currently enabled for the upload function, jquery UploadHandler. Please use the bug report link above to request addition of this file type.';
+                }
 
-            if(strpos($file->error, 'ownership permissions')==false && strpos($file->error, 'post_max_size')==false){
-                $sMsg = $sMsg.' The most likely cause is that the file extension ('. ($file->type?$file->type:'XXX!') .') is not currently enabled for the upload function, jquery UploadHandler. Please use the bug report link above to request addition of this file type.';
+                $response = $system->addError(HEURIST_UNKNOWN_ERROR, $sMsg, null);
             }
-
-            $response = $system->addError(HEURIST_UNKNOWN_ERROR, $sMsg, null);
 
             if(strpos($file->error, 'post_max_size')!=false){
                 $sMsg .= $sMsg . '<br><br>If you need to upload larger files please contact the system administrator ' . HEURIST_MAIL_TO_ADMIN;

@@ -2631,7 +2631,7 @@ $.widget( "heurist.editing_input", {
                         && that.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
     if(isTiledImage){
         fileupload_opts['formData'].push({name:'tiledImageStack', value:1});
-        fileupload_opts['acceptFileTypes'] = /(\.|\/)(zip)$/i;
+        fileupload_opts['formData'].push({name: 'acceptFileTypes', value:'zip'});
         
         $input.attr('accept','.zip, application/zip');
     }                

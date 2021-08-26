@@ -112,7 +112,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     $mediaFolders = HEURIST_FILESTORE_DIR.'uploaded_files/';
                     folderCreate( $mediaFolders, true );
                 }
-                $mediaExts = $system->get_system('sys_MediaExtensions');
+                $mediaExts = $system->get_system('sys_MediaExtensions'); //from preferences
                 if(!$mediaExts) $mediaExts = '';
                 
                 // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
@@ -194,15 +194,17 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 // The defined list of file extensions for FieldHelper indexing.
                 // For the moment keep this in as a restriction on file types which can be uploaded
                 // Unlike indexing, we add the user-defined set to the default set
-                $mediaExts = HEURIST_ALLOWED_EXT.','.$mediaExts; // default set to allow
-                $mediaExts = implode(',',array_unique(explode(',',$mediaExts)));
+                $allowed_exts = mysql__select_list2($system->get_mysqli(), 'select fxm_Extension from defFileExtToMimetype');
+                
+                //$mediaExts = HEURIST_ALLOWED_EXT.','.$mediaExts; // default set to allow
+               // $mediaExts = implode(',',array_unique(explode(',',$mediaExts)));
                 // TODO: we should eliminate any duplicate extensions which might have been added by the user
 
                 if ($mediaFolders=="" || count($dirs) == 1) {
                     print ("<p>If you wish to upload files to a directory other than those in the dropdown, or to define additional file extensions,<br />".
                         "go to Design > Properties</p>");
                 }else{
-                    print "<p><b>Allowable extensions for upload:</b> $mediaExts</p>";
+                    print "<p><b>Allowable extensions for upload:</b> $allowed_exts</p>";
                 }
                
 //@todo change to entity dialog  
@@ -461,8 +463,8 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 $('#fileupload').fileupload({
                     // Uncomment the following to send cross-domain cookies:
                     //xhrFields: {withCredentials: true},
-                    
-                    upload_thumb_dir: '<?=HEURIST_THUMB_DIR?>', 
+                    //formData: {name: 'acceptFileTypes', value:"<?=implode('|',$allowed_exts)?>" },
+                    //upload_thumb_dir: '<?=HEURIST_THUMB_DIR?>', 
                     url: '<?=HEURIST_BASE_URL?>hsapi/utilities/UploadHandlerInit.php', //was external/jquery-file-upload/server/php/
                     added: function(e, data){
       
@@ -544,6 +546,8 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     // Uncomment the following to send cross-domain cookies:
                     //xhrFields: {withCredentials: true},
                     url: $('#fileupload').fileupload('option', 'url'),
+                    data: {acceptFileTypes:"<?=implode('|',$allowed_exts)?>",
+                           folder: $('#upload_folder').val() },
                     dataType: 'json',
 
                     /*

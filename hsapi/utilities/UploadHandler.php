@@ -40,7 +40,8 @@ class UploadHandler
         8 => 'A PHP extension stopped the file upload',
         'max_file_size' => 'File is too big',
         'min_file_size' => 'File is too small',
-        'accept_file_types' => 'Filetype not allowed',
+        'except_file_types' => 'Filetype not allowed. It is in the list of types that are not allowed to upload to server',
+        'accept_file_types' => 'Filetype not listed among allowed mimetype. Open Manage File > Define mime types to add new file type',
         'max_number_of_files' => 'Maximum number of files exceeded',
         'max_width' => 'Image exceeds maximum width',
         'min_width' => 'Image requires a minimum width',
@@ -136,7 +137,8 @@ class UploadHandler
             // Defines which files can be displayed inline when downloaded:
             'inline_file_types' => '/\.(gif|jpe?g|png)$/i',
             // Defines which files (based on their names) are accepted for upload:
-            'accept_file_types' => '/\.('.str_replace(',','|',HEURIST_ALLOWED_EXT).')$/i', //  '/.+$/i',
+            'accept_file_types' => null, //'/\.('.str_replace(',','|',HEURIST_ALLOWED_EXT).')$/i', //  '/.+$/i',
+            
             // The php.ini settings upload_max_filesize and post_max_size
             // take precedence over the following max_file_size setting:
             'max_file_size' => null,
@@ -215,6 +217,17 @@ class UploadHandler
         if ($options) {
             $this->options = $options + $this->options;
         }
+        
+        //default value
+        if(@$this->options['accept_file_types']){
+            if(strpos($this->options['accept_file_types'],')$/i')===false){
+                $this->options['accept_file_types'] = '/\.('.$this->options['accept_file_types'].')$/i';
+            }
+        }else{
+            $this->options['accept_file_types'] = '/\.('.str_replace(',','|',HEURIST_ALLOWED_EXT).')$/i';
+        }
+        
+        
         if ($error_messages) {
             $this->error_messages = $error_messages + $this->error_messages;
         }
@@ -485,18 +498,16 @@ $siz = get_php_bytes('upload_max_filesize');
         }
 
         //Artem Osmakov - limited set of file types
-        /*
-        if($this->options['acceptFileTypes']){
-            $this->options['accept_file_types'] = $this->options['acceptFileTypes'];    
-        }else{
-            $this->options['accept_file_types'] = '/\.('.str_replace(',','|',HEURIST_ALLOWED_EXT).')$/i';    
+        if (preg_match('/\.(bat|exe|cmd|sh|php([0-9])?|pl|cgi|386|dll|com|torrent|js|app|jar|pif|vb|vbscript|wsf|asp|cer|csr|jsp|drv|sys|ade|adp|bas|chm|cpl|crt|csh|fxp|hlp|hta|inf|ins|isp|jse|htaccess|htpasswd|ksh|lnk|mdb|mde|mdt|mdw|msc|msi|msp|mst|ops|pcd|prg|reg|scr|sct|shb|shs|url|vbe|vbs|wsc|wsf|wsh)$/i'
+                    , $file->original_name)) {
+            $file->error = $this->get_error_message('except_file_types');
+            return false;
         }
-        */
-        
         if (!preg_match($this->options['accept_file_types'], $file->original_name)) {
             $file->error = $this->get_error_message('accept_file_types');
             return false;
         }
+        
         if ($uploaded_file && is_uploaded_file($uploaded_file)) {
             $file_size = $this->get_file_size($uploaded_file);
         } else {
