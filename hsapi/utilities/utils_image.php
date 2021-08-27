@@ -451,7 +451,7 @@ class UtilsImage {
             if(!$errorMsg){
                 $img = UtilsImage::safeLoadImage($filename, $mimeExt);
                 if($img){
-                    UtilsImage::resizeImage($img, $thumbnail_file);
+                    UtilsImage::resizeImageGD($img, $thumbnail_file);
                 }
             }
         }
@@ -485,11 +485,18 @@ class UtilsImage {
         $new_y = ceil($orig_y * $scale);
 
         $img_resized = imagecreatetruecolor($new_x, $new_y)  or die;
+        
+        // Handle transparency
+        imagecolortransparent($img_resized, imagecolorallocate($img_resized, 0, 0, 0));
+        imagealphablending($img_resized, false);
+        imagesavealpha($img_resized, true);
+        
         imagecopyresampled($img_resized, $img, 0, 0, 0, 0, $new_x, $new_y, $orig_x, $orig_y)  or die;
 
         if ($thumbnail_file) {
             $resized_file = $thumbnail_file;
         }else{
+            //?????
             $resized_file = tempnam(HEURIST_SCRATCHSPACE_DIR, 'resized');
         }
 
@@ -497,13 +504,12 @@ class UtilsImage {
         imagedestroy($img);
         imagedestroy($img_resized);
 
-        $resized = file_get_contents($resized_file);
-
         if($thumbnail_file==null){
+            //remove themp file
             unlink($resized_file);
         }
         
-        return $resized;   
+        return true;   
     }
 
     /**
@@ -523,7 +529,7 @@ class UtilsImage {
 
                 if ($error) {
                     error_log ('ERROR on pdf thumbnail creation: '.$filename.'  '.$cmd.'   '.implode('\n', $output));
-                    return null;
+                    return false;
                 }
                 
             }else{
@@ -541,13 +547,90 @@ class UtilsImage {
                     
                 } catch(ImagickException $e) {
                     error_log($e . ', From Database: ' . HEURIST_DBNAME);
-                    return null;
+                    return false;
                 }
 
             }
-            $resized = file_get_contents($thumbnail_file);
-            return $resized;
+            return true;
+            //$resized = file_get_contents($thumbnail_file);
+            //return $resized;
     }
+
+
+    /**
+    * creates scaled image with native GD php functions
+    * saves into $thumbnail_file and returns its content
+    * 
+    * @param mixed $filename
+    */
+    public static function resizeImageGD($src_img, $thumbnail_file=null, $max_width = 200, $max_height = 200){
+        
+        if (!function_exists('imagecreatetruecolor')) {
+            error_log('Function not found: imagecreatetruecolor');
+            return false;
+        }
+        
+        $write_func = 'imagepng';
+        $image_quality = 9;
+        /*
+        $image_oriented = false;
+        if (!empty($options['auto_orient']) && $this->gd_orient_image(
+                $file_path,
+                $src_img
+            )) {
+            $image_oriented = true;
+            $src_img = $this->gd_get_image_object(
+                $file_path,
+                $src_func
+            );
+        }*/
+        $img_width = imagesx($src_img);
+        $img_height = imagesy($src_img);
+        $scale = min(
+            $max_width / $img_width,
+            $max_height / $img_height
+        );
+        if ($scale >= 1) {
+            
+            //if ($image_oriented) {
+            //   return ($write_func!=null)?$write_func($src_img, $thumbnail_file, $image_quality):false;
+            //}
+            imagepng($src_img, $thumbnail_file);//save into file
+            imagedestroy($src_img);
+            return true;
+        }
+        
+        $new_width = $img_width * $scale;
+        $new_height = $img_height * $scale;
+        $dst_x = 0;
+        $dst_y = 0;
+        $new_img = imagecreatetruecolor($new_width, $new_height);
+                
+        // Handle transparency
+        imagecolortransparent($new_img, imagecolorallocate($new_img, 0, 0, 0));
+        imagealphablending($new_img, false);
+        imagesavealpha($new_img, true);
+        
+        $success = imagecopyresampled(
+            $new_img,
+            $src_img,
+            $dst_x,
+            $dst_y,
+            0,
+            0,
+            $new_width,
+            $new_height,
+            $img_width,
+            $img_height
+        ) && imagepng($new_img, $thumbnail_file, $image_quality);
+        
+        imagedestroy($src_img);
+        if($new_img) imagedestroy($new_img);
+        
+        return $success;
+    }
+
+
     
 }
 ?>

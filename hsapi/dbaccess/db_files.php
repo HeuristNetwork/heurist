@@ -938,7 +938,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
 
             //special case for pdf        
             if($mimeExt=='application/pdf' || $mimeExt=='pdf'){
-                $resized = UtilsImage::getPdfThumbnail($filename, $thumbnail_file);
+                UtilsImage::getPdfThumbnail($filename, $thumbnail_file);
             }else{
                 
                 //get real image type from exif
@@ -1026,10 +1026,14 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             header('Location: '.$placeholder);
         }
     }else{
-        $resized = UtilsImage::resizeImage($img, $thumbnail_file);
+        UtilsImage::resizeImage($img, $thumbnail_file);
         if($is_download){
-            header('Content-type: image/png');
-            echo $resized;
+            if(file_exists($thumbnail_file)){
+                header('Content-type: image/png');
+                echo file_get_contents($path);
+            }else{
+                header('Location: '.$placeholder);
+            }
         }
     }
 }
