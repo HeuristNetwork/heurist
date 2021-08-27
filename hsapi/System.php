@@ -288,7 +288,7 @@ error_log(print_r($_REQUEST, true));
     }
 
     /**
-    * bind Magic Number Constants to their local id
+    * bind Concept Number Constants to their local id
     * @param    string [$defString] define string
     * @param    int [$rtID] origin rectype id
     * @param    int [$dbID] origin database id
