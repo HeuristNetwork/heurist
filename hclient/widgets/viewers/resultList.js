@@ -260,7 +260,7 @@ $.widget( "heurist.resultList", {
                                 that.loadanimation(true);
                                 that._renderProgress();
                             }else{
-                                that._renderMessage('<div style="font-style:italic;">'+window.hWin.HR(data.message)+'</div>');
+                                that.renderMessage('<div style="font-style:italic;">'+window.hWin.HR(data.message)+'</div>');
                             }
 
                         }
@@ -1223,8 +1223,10 @@ $.widget( "heurist.resultList", {
     // Add message on div_content 
     // for search start and empty result
     //
-    _renderMessage: function(msg){
+    renderMessage: function(msg){
 
+        this.clearAllRecordDivs('');
+        
         var $emptyres = $('<div>')
         .css('padding','1em')
         .html(msg)

@@ -1753,19 +1753,25 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         if(results!=null && results.count_total()==0){
 
             if(this.options.select_mode=="manager"){
-                
+
                 var s_title = this.element.find('#input_search').val();
                 var s_all = this.element.find('#chb_show_all_groups').is(':checked');
                 var s_type = this.element.find('#input_search_type').val();
-
-                var ele = this.element.find('.not-found');
+                
+                var sMsg;
 
                 if(window.hWin.HEURIST4.util.isempty(s_title) && !s_all && s_type=='any'){
-
-                    ele.hide();
-                    ele.parent()
-                        .html("<div style='margin-top:1em;'>No base fields in this group.<br/><br/>Please drag base fields from other groups or add new<br/>base fields to this group.</div>");
+                    sMsg = '<div style="margin-top:1em;">There are no base fields defined  in this group.'
+                            +'<br/><br/>Please drag base fields from other groups or add new<br/>base fields to this group.</div>'
+                }else{
+                    sMsg = '<div style="padding: 10px">'
+                            +'<h3 class="not-found" style="color:red;">Filter/s are active (see above)</h3><br/>'
+                            +'<h3 class="not-found" style="color:teal">No entities match the filter criteria</h3>'
+                            +'</div>';
                 }
+                this.recordList.resultList('option','empty_remark', sMsg);
+                this.recordList.resultList('renderMessage', sMsg);
+                
             }
         }
     },

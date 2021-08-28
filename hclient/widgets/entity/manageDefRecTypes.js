@@ -210,6 +210,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
           
             this.recordList.resultList({ 
+                    empty_remark: 'There are no record types defined in this group',
                     show_toolbar: false,
                     list_mode_is_table: true,
                     rendererHeader:function(){ return that._recordListHeaderRenderer() },
@@ -234,7 +235,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     
                     
             if(this.options.isFrontUI) {
-                this._on( this.recordList, {        
+                this._on( this.recordList, { 
                         "resultlistondblclick": function(event, selected_recs){
                                     this.selectedRecords(selected_recs); //assign
                                     
@@ -1294,22 +1295,20 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(results!=null && results.count_total()==0){
             
             if(this.options.select_mode=='manager'){
-
+                
+                var sMsg;
                 var s_all = this.element.find('#chb_show_all_groups').is(':checked');
-                var ele = this.element.find('.not-found');
-
-                if(ele.length > 0){
-
-                    if(!s_all){
-
-                        ele.hide();
-                        ele.parent()
-                            .html("<div style='margin-top:1em;'>No record types in this group.<br/><br/>Please drag record types from other groups or add new<br/>record types to this group.</div>");
-                    }else{
-
-                        $(ele[1]).text("No record types match the filter criteria");
-                    }
+                if(!s_all){
+                    sMsg = '<div style="margin-top:1em;">There are no record types defined in this group.'
+                            +'<br/><br/>Please drag record types from other groups or add new<br/>record types to this group.</div>';   
+                }else{
+                    sMsg = '<div style="padding: 10px">'
+                            +'<h3 class="not-found" style="color:red;">Filter/s are active (see above)</h3><br/>'
+                            +'<h3 class="not-found" style="color:teal">No entities match the filter criteria</h3>'
+                            +'</div>';
                 }
+                this.recordList.resultList('option','empty_remark', sMsg);
+                this.recordList.resultList('renderMessage', sMsg);
             }
         }
     },	
