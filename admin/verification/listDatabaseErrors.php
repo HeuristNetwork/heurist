@@ -44,6 +44,9 @@ require_once('verifyFieldTypes.php');
 
 $system->defineConstant('DT_RELATION_TYPE');
 
+//use these two vars to disable any part of verification
+$active_all = true; //all part are active
+$active = array('expected_terms'); //if $active_all=false, active are included in this list
 
 if(@$_REQUEST['data']){
     $lists = json_decode($_REQUEST['data'], true);
@@ -247,7 +250,11 @@ $trmDuplicates = @$lists2["trm_dupes"];
                     }
                 });
             </script>
-			
+		
+<?php
+if($active_all || in_array('owner_ref', $active)) { 
+?>
+            ?>        	
             <!-- Records with by non-existent users -->
             <div id="owner_ref" style="top:110px">  <!-- Start of Owner References -->
             <script>
@@ -331,7 +338,14 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 <br />
             </div>  <!-- End of Owner References -->
 
+<?php 
+} //END owner_ref
+
+if($active_all || in_array('dup_terms', $active)) { 
+?> 
+        
         <!-- WRONG OR possible DUPLICATED TERMS -->
+        
         <div id="dup_terms" style="top:110px">  <!-- Start of Duplicate Terms -->
 
         <script>
@@ -443,7 +457,10 @@ $trmDuplicates = @$lists2["trm_dupes"];
         ?>  
             <br />      
         </div>      <!-- End of Duplicated Terms -->
-
+ <?php } 
+ 
+ if($active_all || in_array('field_type', $active)) { 
+ ?>        
         <!-- CHECK FOR FIELD TYPE ERRORS -->
 
         <div id="field_type" style="top:110px"> <!-- Start of Field Types -->
@@ -535,6 +552,9 @@ $trmDuplicates = @$lists2["trm_dupes"];
             echo '<script>$(".field_type").css("background-color", "#6AA84f");</script>';
         }
         print '<br /><br /></div>';   // End of Field Types
+ 
+} //END field_type 
+if($active_all || in_array('default_values', $active)) { 
         ?>
 
         <div id="default_values" style="top:110px"> <!-- Start of Default Values -->
@@ -570,6 +590,10 @@ $trmDuplicates = @$lists2["trm_dupes"];
             echo '<script>$(".default_values").css("background-color", "#6AA84F");</script>';
         }
         print '<br /><br /></div>';   // End of Default Vlaues
+        
+} //END default_values      
+
+if($active_all || in_array('pointer_targets', $active)) { 
         ?>
         
         <!-- CHECK DATA CONSISTENCY -->
@@ -673,6 +697,11 @@ $trmDuplicates = @$lists2["trm_dupes"];
             <?php
         }
         print '<br /></div>';   // End of Pointer Targets
+        
+} //END pointer_targets
+
+if($active_all || in_array('target_types', $active)) { 
+
         ?>
 
         <!-- Record pointers which point to the wrong type of record -->
@@ -732,6 +761,11 @@ $trmDuplicates = @$lists2["trm_dupes"];
             }
             
             print '<br /><br /></div>';   // End of Target Types
+            
+} //END target_types
+        
+if($active_all || in_array('target_parent', $active)) { 
+
             ?>
             
             <!-- Record pointers which point to the wrong type of record -->
@@ -956,6 +990,11 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 <?php
             }
             print '<br /></div>';   // End of Target Parents
+            
+} //END target_parent
+
+if($active_all || in_array('empty_fields', $active)) { 
+            
         ?>
         <!-- Fields with EMPTY OR NULL values -->
 
@@ -1052,6 +1091,11 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
         }
         print '<br /></div>';   // End of Empty Fields
+        
+} //END empty_fields    
+
+if($active_all || in_array('date_values', $active)) { 
+    
         ?>
 		
         <!-- Fields of type "Date" with  wrong values -->
@@ -1291,6 +1335,10 @@ $trmDuplicates = @$lists2["trm_dupes"];
             print '</table>';
         }
         print '<br /></div>';   // End of Date Values
+        
+} //END date_values    
+    
+if($active_all || in_array('term_values', $active)) { 
         ?>
 
         <!-- Records with term field values which do not exist in the database -->
@@ -1391,7 +1439,12 @@ $trmDuplicates = @$lists2["trm_dupes"];
             print '</table>';
         }
         print '<br /></div>';       // End of Term Values
+        
+} //END term_values        
+
+if($active_all || in_array('expected_terms', $active)) { 
         ?>
+        
 
             <!--  Records containing fields with terms not in the list of terms specified for the field   -->
 
@@ -1422,8 +1475,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 $res = $mysqli->query('select dtl_ID, dtl_RecID, dty_Name, dtl_Value, dty_ID, dty_JsonTermIDTree, rec_Title, rec_RecTypeID, '
                     .'trm_Label from Records, recDetails left join defTerms on dtl_Value=trm_ID, defDetailTypes
                     where rec_ID = dtl_RecID and dty_ID = dtl_DetailTypeID and (dty_Type = "enum" or  dty_Type = "relmarker")
-                    and dtl_Value is not null and rec_FlagTemporary!=1
-                order by dtl_DetailTypeID limit 10000 offset '.$offset);
+                    and dtl_Value is not null and rec_FlagTemporary!=1 
+                order by dtl_DetailTypeID limit 10000 offset '.$offset);  //  and dtl_RecID=62734
             /*
             'select dtl_RecID, dty_Name, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title, dtl_Value, dty_ID
             from defDetailTypes
@@ -1445,6 +1498,11 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 trim($row['dtl_Value'])!="" 
     && !VerifyValue::isValidTerm($row['dty_JsonTermIDTree'],null, $row['dtl_Value'], $row['dty_ID'] )) 
                 {
+                    $allowed_terms = VerifyValue::getAllowedTerms($row['dty_JsonTermIDTree'], null, $row['dty_ID']);
+                    
+print $row['dty_JsonTermIDTree'].' > '.$row['dtl_Value'].'<br>';                    
+print print_r($allowed_terms, true);                    
+                    
                     //ok - term does not belong to required vocabullary
                     //check that this vocabulary already has term with the same label
                     $existing_term_id = VerifyValue::hasVocabGivenLabel($row['dty_JsonTermIDTree'], $row['trm_Label']);
@@ -1573,6 +1631,12 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 <br />
             </div>  <!-- End of Expected Terms -->
 
+<?php
+} //END expected_terms
+
+if($active_all || in_array('single_value', $active)) { 
+?>            
+            
         <!--  single value fields containing excess values  -->
         <div id="single_value" style="top:110px">   <!-- Start of Single Value Fields -->
 
@@ -1662,6 +1726,13 @@ $trmDuplicates = @$lists2["trm_dupes"];
         ?>
             <br />
         </div>  <!-- End of Single Value Fields -->
+ 
+ 
+ <?php
+} //END single_value
+
+if($active_all || in_array('required_fields', $active)) { 
+?>            
 
 
         <!--  records with missing required values  -->
@@ -1754,7 +1825,12 @@ $trmDuplicates = @$lists2["trm_dupes"];
         ?>
             <br />
         </div>  <!-- End of Required Fields -->
-            
+ 
+<?php
+} //END required_fields
+
+if($active_all || in_array('nonstandard_fields', $active)) { 
+?>            
             
         <!--  Records with non-standard fields (not listed in recstructure)  -->
         <div id="nonstandard_fields" style="top:110px"> <!-- Start of Non-Standard Fields -->
@@ -1853,6 +1929,12 @@ $trmDuplicates = @$lists2["trm_dupes"];
             <br />
         </div> <!-- End of Non-Standard Fields -->
 
+<?php
+} //END nonstandard_fields
+
+if($active_all || in_array('invalid_chars', $active)) { 
+?>            
+        
         <!--
         <div id="origin_differences">
         <div>
@@ -1876,6 +1958,12 @@ $trmDuplicates = @$lists2["trm_dupes"];
         <?php
         include(dirname(__FILE__).'/cleanInvalidChars.php');
         print '<br /></div>';     /* End of Invalid Char Section */
+        
+        
+} //END invalid_chars
+
+if($active_all || in_array('title_mask', $active)) { 
+        
         ?>
 
         <div id="title_mask" style="top:110px"> <!-- Start of Title Mask Section -->
@@ -1888,9 +1976,14 @@ $trmDuplicates = @$lists2["trm_dupes"];
         <?php
         include(dirname(__FILE__).'/checkRectypeTitleMask.php');
         print '<br /><br /></div>';     /* End of Title Mask Section */
+        
+} //END title_mask
+        
         ?>
 
         </div>
+        
+        
         <hr/>            
 
         <div>
