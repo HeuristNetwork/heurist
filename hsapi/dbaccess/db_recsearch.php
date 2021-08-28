@@ -1989,7 +1989,7 @@ function recordSearch($system, $params)
                         //search for specific details
                         if($fieldtypes_ids!=null && $fieldtypes_ids!=''){
 
-                            $detail_query = 'select dtl_RecID,'
+                            $detail_query = 'select dtl_ID, dtl_RecID,'
                             .'dtl_DetailTypeID,'     // 0
                             .'dtl_Value,'            // 1
                             .'ST_asWKT(dtl_Geo), dtl_UploadedFileID, '
@@ -2002,7 +2002,7 @@ function recordSearch($system, $params)
 
                             if($find_places_for_geo){ //find location in linked Place records
                                 $detail_query = $detail_query . 'UNION  '
-                                .'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo), rl_TargetID, 0, 0 '
+                                .'SELECT dtl_ID, rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo), rl_TargetID, 0, 0 '
                                 .' FROM recDetails, recLinks, Records '
                                 .' WHERE dtl_DetailTypeID='. DT_GEO_OBJECT
                                 .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID in ('. join(',', $rectypes_as_place)
@@ -2555,8 +2555,8 @@ function recordSearchDetails($system, &$record, $need_details) {
                          $fileinfo = $ruf_entity->registerURL($rd['dtl_Value'], false, $rd['dtl_ID']);
                     }else{
                         $fileinfo = fileGetFullInfo($system, $rd["dtl_UploadedFileID"]);
-                        if(is_array($listpaths) && count($listpaths)>0){
-                            $fileinfo = $listpaths[0]; //
+                        if(is_array($fileinfo) && count($fileinfo)>0){
+                            $fileinfo = $fileinfo[0]; //
                         }
                     }
                     
