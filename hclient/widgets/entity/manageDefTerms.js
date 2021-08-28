@@ -1511,6 +1511,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     
                     if(!$Db.trm_IsChild(parent_id, recID)){
                         //add - to avoid duplication                    
+                        var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+                        if(!t_idx[parent_id]) t_idx[parent_id] = []; 
                         t_idx[parent_id].push(recID);        
                     }
                 }else{
