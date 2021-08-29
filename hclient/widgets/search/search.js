@@ -189,9 +189,10 @@ $.widget( "heurist.search", {
             
         //promt to be shown when input has complex search expression (json search)
         this.input_search_prompt2 = $( "<span>" )
-        .html('<span style="font-size:1em">'+window.hWin.HR("filter")
+        .html('<span style="font-size:1em;padding:3px;display:inline-block;">'+window.hWin.HR("filter")
                 +'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye" style="font-size:1.8em;width: 1.7em;margin-top:1px"/>')
-        .css({ height:isNotFirefox?23:24, 'padding':'3px', 'margin':'2px', 'position':'relative', 'text-align':'left', display:'block'})
+        .css({ height:isNotFirefox?28:24, 'margin':'1px '+(isNotFirefox?'4px':'7px')+' 1px 2px',
+                         'position':'relative', 'text-align':'left', display:'block'})
         .appendTo( this.div_search_input );
         this._on( this.input_search_prompt2, {click: function(){
                 this.input_search_prompt2.css({visibility:'hidden'});//hide();
@@ -201,17 +202,17 @@ $.widget( "heurist.search", {
         if(this._is_publication || this.options.is_h6style){
             this.input_search.css({'height':'27px','min-height':'27px','padding':'2px 0px'}); //, 'width':'400'
             
-            var sTop = '-37px';
+            var sTop = isNotFirefox?'-35px':'-28px';
             this.input_search_prompt2.addClass('ui-widget-content').css({border:'none',top:sTop});
             if(this._is_publication){
                 this.input_search.css({width:'auto'});
                 this.input_search_prompt2.css({height:(this.input_search.height()-5)+'px',
                                                width:(this.input_search.width()+5)+'px'});    
             }else{
-                this.input_search_prompt2.css({ width:'97%', right: '0px', left: '0px' });
+                //this.input_search_prompt2.css({ width:'97%', right: '0px', left: '0px' });
             }
         }else{
-            this.input_search_prompt2.css({top:'-40px'}); //'background':'#F4F2F4',
+            this.input_search_prompt2.css({top:'-35px'}); //'background':'#F4F2F4',
         }
         
         // AAAA
@@ -240,7 +241,7 @@ $.widget( "heurist.search", {
         if(!this._is_publication && this.options.is_h6style){
             var div_search_help_links = $('<div>')
                 //.css({position: 'absolute', top:'auto', 'font-size':'10px'})
-                .css({position: 'absolute',top:'82px','font-size':'10px'})
+                .css({position: 'absolute',top:'85px','font-size':'10px'})
                 .appendTo(this.div_search_input);
 
             var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
