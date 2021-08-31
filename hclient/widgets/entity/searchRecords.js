@@ -98,7 +98,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     .button({label: label, 
                              icon: is_browse?'ui-icon-search':"ui-icon-plus"})
                     .attr({'data-rtyid': rectypeID, 'title': label})
-                    .css({'font-size':'11px',display:'inline-block',width:190,'text-align':'left','margin':'6px 0px 3px 8px'})
+                    .css({'font-size':'10px',display:'inline-block',width:190,'text-align':'left','margin':'6px 0px 3px 8px','text-transform':'none'})
                     .addClass('truncate ui-button-action')
                     .click(function(e) {
                         
@@ -117,7 +117,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     $('<button>')
                         .button({label:window.hWin.HR("Filter by record type"), icon: "ui-icon-search", showLabel:false})
                         .attr('data-rtyid', rectypeID)
-                        .css({'font-size':'11px',display:'inline-block',width:20,'margin-right':10,'margin':'6px 0 3px 0'})
+                        .css({'font-size':'10px',display:'inline-block',width:20,'margin-right':10,'margin':'6px 0 3px 0','text-transform':'none'})
                         .click(function(e) {
                             var el = $(e.target);
                             el = el.is('button') ?el :el.parents('button');
