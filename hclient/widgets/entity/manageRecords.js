@@ -3269,12 +3269,19 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 });
                             
                             }else{
-                                var dlg = window.hWin.HEURIST4.msg.showMsgDlg('<p>Map document record must have Bounding Box field! '
-                                    +'Please refresh record type structure.</p>'
-                                    +'<p>Go to <span id="msg_link">Design > Browse Templates</span> > Heurist_Core_Definitions then check the Show All'
-                                    +' checkbox and download Heurist Map Document from the Spatial and Mapping section.</p>', null, 'Map Document Error');
-									
-                                dlg.find("#msg_link").on("click", templateimport_link).css({"text-decoration": "underline", "cursor": "pointer"});
+                                
+                                window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('3-1019', 2,
+                                                        'Map document record must have Bounding Box field!',
+                                        function(){
+                                            
+                                                that.saveQuickWithoutValidation( function(){ //save without validation
+                                                    that._editing.initEditForm(null, null); //clear edit form
+                                                    that._initEditForm_step3(that._currentEditID); //reload edit form                       
+                                                } );
+                                        },
+                                        true //force refresh
+                                    );
+                                
                             }
                     }
                     

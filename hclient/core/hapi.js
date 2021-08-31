@@ -836,7 +836,7 @@ prof =Profile
             // returns false - if rty_IDs is not defined
             //         true - all record types are in this database
             //
-            checkPresenceOfRectype: function(rty_IDs, databaseID, message, callback){
+            checkPresenceOfRectype: function(rty_IDs, databaseID, message, callback, force_refresh){
 
                 if(!rty_IDs){
                     if($.isFunction(callback)) callback.call();
@@ -847,11 +847,19 @@ prof =Profile
 
                 //check what rectypes are missed in this database                  
                 var missed = [];
-                for(var i=0; i<rty_IDs.length; i++){
-                    var local_id = $Db.getLocalID('rty', rty_IDs[i]);
-                    if(!(local_id>0)){
-                        //not found
-                        missed.push( rty_IDs[i] );
+                
+                if(force_refresh){
+                    
+                    missed = rty_IDs;
+                    
+                }else{                
+                
+                    for(var i=0; i<rty_IDs.length; i++){
+                        var local_id = $Db.getLocalID('rty', rty_IDs[i]);
+                        if(!(local_id>0)){
+                            //not found
+                            missed.push( rty_IDs[i] );
+                        }
                     }
                 }
                 
