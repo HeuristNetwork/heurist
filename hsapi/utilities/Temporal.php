@@ -201,7 +201,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
             
             //replace slashes or dots "/." to dashes "-"
             //reorder month and day
-            $value = correctDMYorder($value, false, $month_day_order);
+            $value = correctDMYorder($value, $month_day_order);
 
             try{   
                 $origHasSeconds = (substr_count($value,':')>1);

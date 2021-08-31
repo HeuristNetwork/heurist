@@ -198,10 +198,41 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 });        
                 */
             }
+			
+            function correctDates(){
+                var ids=get_selected_by_name('recCB5'); 
+
+                if(ids){
+                    $('#linkbar').hide();
+
+                    var format = $('input[type="radio"][name="date_format"]:checked').val();
+
+                    window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1&date_format='+format+'&recids='+ids,'_self')
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgDlg('Mark at least one record to correct');
+                }
+            }
 
             $(document).ready(function() {
                 $('button').button();
                 $('#linkbar').tabs('refresh');
+				
+                $('input[type="radio"][name="date_format"]').change(function(event){
+                    var ele = $(event.target);
+
+                    var dates = $('.new_date');
+
+                    dates.each(function(idx, element){
+
+                        var date_str = $(element).text();
+                        var parts = date_str.split('-');
+                        if(parts.length != 3){ 
+                            return; 
+                        }else{ 
+                            $(element).text(parts[0] +'-'+ parts[2] +'-'+ parts[1]); 
+                        }
+                    });
+                });
             });
         </script>
 
@@ -1051,7 +1082,7 @@ if($active_all || in_array('empty_fields', $active)) {
 
                 <div>To REMOVE empty fields, please click here:
                     <button
-                        onclick="{document.getElementById('page-inner').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixempty=1','_self')}">
+                        onclick="{document.getElementById('linkbar').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixempty=1','_self')}">
                         Remove all null values</button>
                 </div>
             </div>
@@ -1122,6 +1153,7 @@ if($active_all || in_array('date_values', $active)) {
         $ids  = array();
         $dtl_ids = array();
         $recids = @$_REQUEST['recids'];
+        $date_format = isset($_REQUEST['date_format']) ? $_REQUEST['date_format'] : 1;
         if($recids!=null){
             $recids = explode(',', $recids);
         }
@@ -1290,8 +1322,14 @@ if($active_all || in_array('date_values', $active)) {
                 ?>
                 <div>To fix faulty date values as suggested, mark desired records and please click here:
                     <button
-                        onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementById('page-inner').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1&recids='+ids,'_self')}else{ window.hWin.HEURIST4.msg.showMsgDlg('Mark at least one record to correct'); }}">
-                        Correct</button>
+                        onclick="correctDates();">
+                        Correct
+                    </button>
+
+                    <div style="display: inline-block;margin-left: 20px;"> Dates are in 
+                        <label><input type="radio" name="date_format" value="1" checked> dd/mm/yyyy (normal format)</label>
+                        <label><input type="radio" name="date_format" value="2"> mm/dd/yyyy (US format)</label>
+                    </div>
                 </div>
                 <?php 
                     }
