@@ -1584,7 +1584,8 @@ console.log('No active tree node!!!!')
             
             
             $('<span style="padding-left:40px;color:gray;cursor:pointer">ID: '
-                +this._currentEditID+' <span class="ui-icon ui-icon-circle-info"/></span>')
+                +this._currentEditID+' Code: '+$Db.getConceptID('dty', this._currentEditID)
+                +' <span class="ui-icon ui-icon-circle-info"/></span>')
                 .attr('title', baseFieldDetails)
                 .appendTo(bottom_div);
                 
