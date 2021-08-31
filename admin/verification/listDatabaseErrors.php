@@ -1536,10 +1536,6 @@ if($active_all || in_array('expected_terms', $active)) {
                 trim($row['dtl_Value'])!="" 
     && !VerifyValue::isValidTerm($row['dty_JsonTermIDTree'],null, $row['dtl_Value'], $row['dty_ID'] )) 
                 {
-                    $allowed_terms = VerifyValue::getAllowedTerms($row['dty_JsonTermIDTree'], null, $row['dty_ID']);
-                    
-print $row['dty_JsonTermIDTree'].' > '.$row['dtl_Value'].'<br>';                    
-print print_r($allowed_terms, true);                    
                     
                     //ok - term does not belong to required vocabullary
                     //check that this vocabulary already has term with the same label
