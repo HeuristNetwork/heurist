@@ -285,7 +285,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
 <?php
 if($active_all || in_array('owner_ref', $active)) { 
 ?>
-            ?>        	
+
             <!-- Records with by non-existent users -->
             <div id="owner_ref" style="top:110px">  <!-- Start of Owner References -->
             <script>
