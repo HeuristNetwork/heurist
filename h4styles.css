@@ -1475,11 +1475,22 @@ span.fancytree-checkbox{
     background-position: 0px -176px; /* blue arrow */
     display:inline-block;
 }
-.tree-filter .fancytree-has-children.green-triangle span.fancytree-checkbox
+.tree-filter .fancytree-has-children.triangle-checkbox span.fancytree-expander
 {
-    background-position: -16px -128px; /* green triangle */
-    display:inline-block;
+    display: inline-block;
+    visibility: hidden;
 }
+.tree-filter .fancytree-has-children.triangle-checkbox span.fancytree-checkbox
+{
+    background-position: 0px -80px; /* white triangle */
+    display: inline-block;
+}
+.tree-filter .fancytree-expanded.fancytree-has-children.triangle-checkbox span.fancytree-checkbox
+{
+    background-position: -32px -80px; /* black triangle  */
+    display: inline-block;
+}
+
 .tree-filter .fancytree-has-children.fancytree-partsel span.fancytree-checkbox
 {
     background-position: -64px -176px;

@@ -771,7 +771,7 @@ $.widget( "heurist.searchBuilder", {
                                                 title: node.title,
                                                 code:codes.join(':')});                                        
                                             node.title = ' fields'; //node.title + 
-                                            node.extraClasses = 'green-triangle';
+                                            node.extraClasses = 'triangle-checkbox';
                                             i++;                       
                                         }
                                     }else if(node.type=='relmarker'){
@@ -786,7 +786,7 @@ $.widget( "heurist.searchBuilder", {
                                                 title: node.title,
                                                 code:codes.join(':')});                                        
                                             node.title = ' fields'; //node.title + 
-                                            node.extraClasses = 'green-triangle';
+                                            node.extraClasses = 'triangle-checkbox';
                                             i++;                       
                                         }
                                         
@@ -815,6 +815,12 @@ $.widget( "heurist.searchBuilder", {
                                     // A node is about to be selected: prevent this, for folder-nodes:
                                     if( data.node.hasChildren() ){
                                         return false;
+                                    }
+                                },
+                                renderNode: function(event, data){
+                                    
+                                    if(data.node.data.is_generic_fields){
+                                        $(data.node.span.childNodes[3]).css('font-weight', 'normal');
                                     }
                                 },
                                 lazyLoad: function(event, data){
