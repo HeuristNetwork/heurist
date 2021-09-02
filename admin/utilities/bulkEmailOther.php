@@ -46,60 +46,73 @@ if(!$isSystemInited) {
 
 $mysqli = $system->get_mysqli();
 
-if(isset($_REQUEST['get_notes']) && isset($_REQUEST['recid'])){	/* Get the Short Summary field for the selected id, id is for Notes record */
+if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Title and Short Summary field for the selected id, id is for Email record */
 
-	$summary = "";
+	$email_title = "";
+	$email_body = "";
 	$id = $_REQUEST['recid'];
 
 	// Validate ID
 	if(!is_numeric($id)){
 
     $response = array("status"=>HEURIST_ERROR, "message"=>"An invalid record id was provided.<br>The Heurist team has been notified.", "request"=>$id);
-    $system->addError(HEURIST_ERROR, "Bulk Email Other: The record IDs for the Notes selector are invalid or are not being retrieved correctly.");
+    $system->addError(HEURIST_ERROR, "Bulk Email Other: The record IDs for the Email selector are invalid or are not being retrieved correctly. ");
     $rtn = json_encode($response);
 
     print $rtn;
     exit();
 	}
 
-	// Get short summary detail type id
+	// Get title/name and short summary detail type ids
+	$title_detailtype_id = ConceptCode::getDetailTypeLocalID("2-1");
 	$shortsum_detiltype_id = ConceptCode::getDetailTypeLocalID("2-3");
-	if (empty($shortsum_detiltype_id)) {
+	if (empty($title_detailtype_id) || empty($shortsum_detiltype_id)) {
+		$missing = "";
 
-    $response = array("status"=>HEURIST_ERROR, "message"=>"Unable to retrieve the local id of the short summary detail type.<br>The Heurist team has been notified.");
-    $system->addError(HEURIST_ERROR, "Bulk Email Other: Unable to retrieve the local id for the short summary detail type.");
+		if(empty($title_detailtype_id) || empty($shortsum_detiltype_id)){
+			$missing = "for both title and short summary detail types.";
+		}else{
+			$missing = empty($title_detailtype_id) ? "for the title detail type." : "for the short summary detail type.";
+		}
+
+    $response = array("status"=>HEURIST_ERROR, "message"=>"Unable to retrieve the local id $missing <br>The Heurist team has been notified.");
+    $system->addError(HEURIST_ERROR, "Bulk Email Other: Unable to retrieve the local id ". $missing);
     $rtn = json_encode($response);
 
     print $rtn;
     exit();
 	}
 
-  $query = "SELECT dtl_Value
+  $query = "SELECT dtl_Value, dtl_DetailTypeID
             FROM recDetails
-            WHERE dtl_RecID = $id AND dtl_DetailTypeID = $shortsum_detiltype_id";
+            WHERE dtl_RecID = $id AND dtl_DetailTypeID IN (".$shortsum_detiltype_id.", ".$title_detailtype_id.")";
 
-  $note_body = $mysqli->query($query);
-  if(!$note_body){
+  $detail_rtn = $mysqli->query($query);
+  if(!$detail_rtn){
 
-    $response = array("status"=>HEURIST_ERROR, "message"=>"Unable to retrieve the details of the Notes record ID => $id.<br>", "error_msg"=>$mysqli->error, "request"=>$id);
+    $response = array("status"=>HEURIST_ERROR, "message"=>"Unable to retrieve the details of the Email record ID => $id.<br>", "error_msg"=>$mysqli->error, "request"=>$id);
     $rtn = json_encode($response);
 
     print $rtn;
     exit();
   }
 
-  // Accept only the first return
-  if($note = $note_body->fetch_row()){
-
-  	$data = $note[0];
+  while($email_dtl = $detail_rtn->fetch_row()){
+  	if($email_dtl[1] == $shortsum_detiltype_id){
+  		$email_body = $email_dtl[0];
+  	}else if($email_dtl[1] == $title_detailtype_id){
+  		$email_title = $email_dtl[0];
+  	}
   }
+
+  $data = array($email_title, $email_body);
 
 	$response = array("status"=>HEURIST_OK, "data"=>$data, "request"=>$id);
 	$rtn = json_encode($response);
 
 	print $rtn;
 
-}else if(isset($_REQUEST['db_filtering'])) { /* Get a list of DBs based on the list of provided filters, first search gets all dbs */
+} else if(isset($_REQUEST['db_filtering'])) { /* Get a list of DBs based on the list of provided filters, first search gets all dbs */
 
 	$db_request = $_REQUEST['db_filtering'];
 	$dbs = array();

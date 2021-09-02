@@ -49,7 +49,7 @@ if ( !isset($_REQUEST['db']) && $system->verifyActionPassword(@$_REQUEST['pwd'],
         $rtn = sendSystemEmail($_REQUEST);
 
         if ($rtn["status"] == "ok") {
-            echo "<br><br><div>The emailing is complete, the receipt has been saved as a Notes Record<br><br>Record ID => ". $rtn["data"] ."<br>Record Title => ". $rtn["rec_Title"] ."</div>";
+            echo "<br><br><div>A receipt of the process has been saved as a Notes Record<br><br>Record ID => ". $rtn["data"] ."<br>Record Title => ". $rtn["rec_Title"] ."</div>";
         }
 
         //echo "<script>window.close();</script>";
@@ -60,43 +60,44 @@ if ( !isset($_REQUEST['db']) && $system->verifyActionPassword(@$_REQUEST['pwd'],
 
 $mysqli = $system->get_mysqli();
 
-$notes = array();
+$emails = array();
 
-$has_notes = false;
+$has_emails = false;
 
 $current_db = HEURIST_DB_PREFIX . $_REQUEST['db'];
 
-$note_rectype_id = ConceptCode::getRecTypeLocalID("2-3");
-if (empty($note_rectype_id)) {
+$email_rectype_id = ConceptCode::getRecTypeLocalID("2-9");
+if (empty($email_rectype_id)) {
 
-    print "Unable to retrieve the id for the Notes record type";
+    print "Unable to retrieve the id for the Email record type";
 }
 
 $query = "SELECT rec_ID, rec_Title FROM Records WHERE rec_RecTypeID = " 
-            . $note_rectype_id 
-            . " AND rec_Title NOT LIKE 'Heurist System Email Receipt%' AND rec_Title <> ''";
+            . $email_rectype_id 
+            . " AND rec_Title != '' AND rec_Title IS NOT NULL AND rec_FlagTemporary != 1";
 
-$notes_list = $mysqli->query($query);
-if (!$notes_list) { 
-    print "Either unable to retrieve Notes records from the current database, Error => " . $mysqli->error. ", Query => " .$query; 
+$email_list = $mysqli->query($query);
+if (!$email_list) { 
+    print "Either unable to retrieve Email records from the current database, Error => " . $mysqli->error. ", Query => " .$query; 
     return; 
 }
 
-while($note = $notes_list->fetch_row()){
+while($email = $email_list->fetch_row()){
 
-    if(empty($note[1])) {
+    if(empty($email[1])) {
         continue;
     }
 
-    $notes[$note[0]] = $note[1];
+    $emails[$email[0]] = $email[1];
 
-    $has_notes = true;
+    $has_emails = true;
 }
 
-if(!$has_notes || empty($notes)) {
-    print "<br><br>This function sends bulk emails based on text in a selected Notes record<br><br>"
-    . "The Notes record to be used must contain a title field and a short summary field - the latter will be used as the email's body.<br><br>" 
-    . $_REQUEST['db'] . " contains no valid Notes records. Please create a Notes record with your text using ##...## markers for values to be inserted.<br><br>"
+if(!$has_emails || empty($emails)) {
+    print "<br><br>This function sends bulk emails based on text in a selected Email record<br><br>"
+    . "The Email record to be used must contain a title field and a short summary field - the latter will be used as the email's body.<br><br>" 
+    . $_REQUEST['db'] . " contains no valid Email records.<br><br>"
+    . "<strong>Please create an Email record in the database containing the text<br>you want to send out, using ##...## markers for values to be inserted.<br><br>"
     . "Placeholders that will be replaced with proper values (case insensitive):<br><br>"
     . "##firstname## &rarr; User's First Name,<br>"
     . "##lastname## &rarr; User's Last Name,<br>" 
@@ -246,7 +247,7 @@ if(!$has_notes || empty($notes)) {
 
             window.history.pushState({}, '', '<?php echo $_SERVER['PHP_SELF']; ?>');
 
-            var all_notes = <?php echo json_encode($notes); ?>; // Object of Notes records
+            var all_emails = <?php echo json_encode($emails); ?>; // Object of Email records
 
             var current_db = "<?php echo $current_db ?>";
 
@@ -318,7 +319,7 @@ if(!$has_notes || empty($notes)) {
                     err_text += messages["invalid_count"];
                 }
 
-                if($lmPeriod.val() <= 0){
+                if($lmPeriod.val() <= 0 && !$lmPeriod.attr("disabled")){
 
                     isValid = false;
                     err_text += messages["invalid_period"];
@@ -344,12 +345,10 @@ if(!$has_notes || empty($notes)) {
             function setupDBSelection(dbs) {
 
                 var $db_selection = $("#dbSelection");
-                $db_selection.find(".dbListCB").off("change");
-                $db_selection.empty();
 
                 if(window.hWin.HEURIST4.util.isempty(dbs)){
-                    
                     window.hWin.HEURIST4.msg.showMsgFlash("There are no databases based on the filters");
+                    $("#filterMsg").hide().text("Filtering Databases...");
                     return;
                 }
 
@@ -387,6 +386,7 @@ if(!$has_notes || empty($notes)) {
                 $db_selection.find(".dbListCB").on("change", getUserCount);
 
                 $("#userCount").text("0");
+                $("#filterMsg").hide().text("Filtering Databases...");
             }
 
             function setupUserSelection() {
@@ -400,8 +400,8 @@ if(!$has_notes || empty($notes)) {
 
                 var options = [
                     {key:"owner", title:"Database Owner/s", selected: true},
-                    {key:"admin", title:"Administrators - Database Managers"},
-                    {key:"admins", title:"Administrators - All Workgroups"},
+                    {key:"manager", title:"Administrators - Database Managers"},
+                    {key:"admin", title:"Administrators - All Workgroups"},
                     {key:"user", title:"All Users"}
                 ];
 
@@ -417,37 +417,38 @@ if(!$has_notes || empty($notes)) {
                 select.on("change", getUserCount);
             }
 
-            function setupNoteSelection() {
+            function setupEmailSelection() {
 
-                var $note_selection = $("#emailOutline");
+                var $email_selection = $("#emailOutline");
 
                 var options = [
-                    {key:"null", title: "Select a notes record..."},
+                    {key:"null", title: "Select a email record..."},
                 ];
 
-                $.each(all_notes, function(idx, value){
+                $.each(all_emails, function(idx, value){
 
                     var opt = {key: idx, title: value};
 
                     options.push(opt);
                 });
 
-                window.hWin.HEURIST4.ui.createSelector($note_selection.get(0), options);
-                window.hWin.HEURIST4.ui.initHSelect($note_selection, true); // was false, but apparently the menu widget will not open
+                window.hWin.HEURIST4.ui.createSelector($email_selection.get(0), options);
+                window.hWin.HEURIST4.ui.initHSelect($email_selection, true); // was false, but apparently the menu widget will not open
 
-                if($note_selection.hSelect("instance")!=undefined) {
-                    $note_selection.hSelect("widget").css({"min-width": "20em"});
+                if($email_selection.hSelect("instance")!=undefined) {
+                    $email_selection.hSelect("widget").css({"min-width": "20em"});
                 }
 
-                $note_selection.on({
+                $email_selection.on({
                     change: function(event) {
 
                         var emailDraft = $(event.target).val();
 
                         if (emailDraft == null || emailDraft == "null") {
+                            $("#emailTitle").text("");
                             $("#emailBody").text("");
                         } else {
-                            getNoteDetails(emailDraft);
+                            getEmailDetails(emailDraft);
                         }
                     }
                 });
@@ -481,6 +482,11 @@ if(!$has_notes || empty($notes)) {
 
                 $("#btnApply").on({
                     click: function(event, data) {
+
+                        $("#dbSelection").find(".dbListCB").off("change");
+                        $("#dbSelection").empty();
+
+                        $("#filterMsg").show();
 
                         var data = {
                             db: current_db,
@@ -521,6 +527,14 @@ if(!$has_notes || empty($notes)) {
                                         var msg = response.message + '<br>' + (!window.hWin.HEURIST4.util.isempty(response.error_msg) ? response.error_msg : '');
                                         window.hWin.HEURIST4.msg.showMsgErr({message: msg, title: "Heurist"});
                                     }
+                                }
+                            },
+                            //always:
+                            complete: function(jqXHR, textStatus){
+                                if(textStatus == 'success'){
+                                    $("#filterMsg").text('Database Filtering is Completed, Loading List');
+                                }else{
+                                    $("#filterMsg").text('An error has occurred!');
                                 }
                             }
                         });
@@ -569,12 +583,12 @@ if(!$has_notes || empty($notes)) {
                 });
             }
 
-            function getNoteDetails(id) {
+            function getEmailDetails(id) {
 
                 $.ajax({
                     url: 'bulkEmailOther.php',
                     type: 'POST',
-                    data: {db: current_db, get_notes: true, recid: id},
+                    data: {db: current_db, get_email: true, recid: id},
                     dataType: 'json',
                     cache: false,
                     xhrFields: {
@@ -582,14 +596,15 @@ if(!$has_notes || empty($notes)) {
                     },
                     error: function(jqXHR, textStatus, errorThrown){
 
-                        window.hWin.HEURIST4.msg.showMsgErr("An error has occurred with retrieving the Notes record short summary field (email body)."
+                        window.hWin.HEURIST4.msg.showMsgErr("An error has occurred with retrieving the Email record short summary field (email body)."
                                 + "<br>Error Details: " + jqXHR.status + " => " + textStatus
                                 + "<br><br>Please contact the Heurist team if this problem persists");
                     },
                     success: function(response, textStatus, jqXHR){
                         
                         if(response.status == "ok"){
-                            $("#emailBody").text(response.data);
+                            $("#emailTitle").val(response.data[0]);
+                            $("#emailBody").text(response.data[1]);
                         } else {
 
                             if(window.hWin.HEURIST4.util.isempty(response.message)){
@@ -702,7 +717,7 @@ if(!$has_notes || empty($notes)) {
             $(document).ready(function() {
 
                 setupUserSelection();
-                setupNoteSelection();
+                setupEmailSelection();
                 setupOtherElements();
 
                 if(!window.hWin.HR){
@@ -739,7 +754,7 @@ if(!$has_notes || empty($notes)) {
             
             <label class="instruction">
                 This tool allows you to email all users / specified types of user on all / selected Heurist databases available on this server. <br/><br/>
-                The email to be sent should be created as a <strong>Notes</strong> record in the current database, including subject line, body text and fields to be substituted using ##....## notation. <br/><br/>
+                The email to be sent should be created as a <strong>Email</strong> record in the current database, including subject line, body text and fields to be substituted using ##....## notation. <br/><br/>
             </label>
 
             <form id="emailOptions" action="bulkEmailMain.php" method="POST" target="_blank">
@@ -777,6 +792,7 @@ if(!$has_notes || empty($notes)) {
 
                     <span style="margin-left: 15px;">
                         <button type="button" id="btnApply">Apply</button>
+                        <label id="filterMsg" style="display: none;">Filtering Databases...</label>
                     </span>
 
                 </div>
@@ -801,7 +817,7 @@ if(!$has_notes || empty($notes)) {
                     </div>
 
                     <div class="non-selectable" style="margin-bottom: 20px;"> 
-                        Notes record containing the email outline 
+                        Email record containing the email outline 
                         
                         <select id="emailOutline" name="emailId"></select>
                     </div>
