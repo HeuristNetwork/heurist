@@ -437,7 +437,23 @@ function hEditing(_options) {
                 .html('There are hidden fields in this form. <span class="btn-modify_structure"'
                 +'  style="cursor:pointer;display:inline-block;color:#7D9AAA;">'
                 +'Modify structure</span> to enable them.').appendTo($div_hints);
-        }        
+        }
+        if($container.find('ul[role="tablist"]').length>0 && recdata && recdata.entityName=='Records'){
+            var tab_groups = $container.find('ul[role="tablist"]');
+
+            $.each(tab_groups, function(idx, group){
+                var $tabs = $(group).find('a');
+                var i = 0, max_width = 0;
+
+                $tabs.css('width', 'auto');
+
+                for(; i < $tabs.length; i++){
+                    max_width = (max_width < $($tabs[i]).width()) ? $($tabs[i]).width() : max_width;
+                }
+                max_width += 15; // Add additional 'left padding'
+                $tabs.css('width', max_width+'px');
+            });
+        }
     }
     
     //
