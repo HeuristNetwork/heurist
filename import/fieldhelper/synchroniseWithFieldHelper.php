@@ -381,6 +381,19 @@ $failed_exts = array();
             $rep_issues = $rep_issues."<br/>Error save record for file:".$currfile.". ".$message;
         }
 
+        
+        function extendMediaExts($versions){
+            global $mediaExts;
+
+            if(count(array_intersect($versions,$mediaExts))>0){
+                foreach ($versions as $ext){
+                    if(!in_array($ext,$mediaExts)){
+                        array_push($mediaExts, $ext);
+                    }
+                }
+            }
+        }
+        
 
         /**
         *
@@ -393,6 +406,13 @@ $failed_exts = array();
 
             global $system, $rep_issues, $fieldhelper_to_heurist_map, $mediaExts, $progress_divid,
             $geoDT, $fileDT, $titleDT, $startdateDT, $enddateDT, $descriptionDT, $failed_exts;
+            
+            //add extension versions
+            extendMediaExts(array('jpg','jpeg','jfif','jpe'));
+            extendMediaExts(array('tif','tiff'));
+            extendMediaExts(array('mpg','mpeg'));
+            extendMediaExts(array('doc','docx'));
+            extendMediaExts(array('xls','xlsx'));
 
             $rep_processed = 0;
             $rep_added = 0;
@@ -649,7 +669,7 @@ $failed_exts = array();
 
                             }else{
                                 $rep_ignored++;
-								$failed_exts[] = @$flleinfo['extension'];
+//								$failed_exts[] = @$flleinfo['extension'];
                             }
 
                             $cnt_files++;
