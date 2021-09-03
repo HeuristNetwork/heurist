@@ -347,7 +347,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                             primary: "ui-icon-upload"
                     }})
                     .click(function(e) {
-                        that._uploadFileAndRegister();
+                        that._uploadFileAndRegister(false);
                     }); 
 
                 this._edit_dialog.find('#btn_upload_file_stack').css({'min-width':'9em','z-index':2})
@@ -668,7 +668,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                         "dty_Type":"file",
                         "rst_DisplayName":"File upload:",
                         "rst_FieldConfig":{"entity":"recUploadedFiles", "registerAtOnce":1, 
-                                        "tiledImageStack": (is_tiled || this._additionMode=='tiled')?1:0},
+                                        "tiledImageStack": (is_tiled===true || this._additionMode=='tiled')?1:0},
                         "dty_Role":"virtual",
                         "rst_Display":"hidden"
                     }
