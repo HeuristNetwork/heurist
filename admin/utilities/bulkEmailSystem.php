@@ -41,8 +41,7 @@ class systemEmailExt {
 
 	public $databases; // list of selected DBs
 
-	public $users; // user options => owner: DB Owners, admin: Workgroup Admins, user: All Users 
-	public $workgroups; // workgroup options => 1: DB Managers, 3: Other users, 4: Website filters, ...
+	public $users; // user options => owner: DB Owners, manager: DB Manager Admins, user: All Users, admin: All Admins
 
 	private $user_details; // list of user details and databases, indexed on user emails
 
@@ -58,10 +57,10 @@ class systemEmailExt {
 	private $records; // array of records+last modified information
 
 	private $log; // log of emails, to be placed within a note record within the databases, extended version of receipt
-	private $receipt; // receipt for all email transactions, is saved into current db as a note record with the Note's title (not rec_Title) set to "System Email Receipt"  
+	private $receipt; // receipt for all email transactions, is saved into current db as a note record with the Notes title (not rec_Title) set to "Heurist System Email Receipt"  
 	private $error_msg; // error message
 
-	private $user_options = array("owner", "admin", "admins", "user"); // available user options
+	private $user_options = array("owner", "admin", "manager", "user"); // available user options
 	private $substitute_vals = array("##firstname##", "##lastname##", "##email##", "##database##", "##dburl##", "##records##", "##lastmodified##"); // available email body substitutions
 
 	/*
@@ -128,7 +127,7 @@ class systemEmailExt {
 		$this->user_details = array();
 
 		$this->log = "";
-		$this->receipt = "";
+		$this->receipt = null;
 		$this->error_msg = "";
 
 		$rtn = $this->createRecordsList(); // save record counts and last modified record dates for each db
@@ -162,7 +161,6 @@ class systemEmailExt {
 
 		$dbs = $this->databases;
 		$users = $this->users;
-		$groups = @$this->workgroups;
 
 		$wg_count = 0;
 
@@ -173,9 +171,9 @@ class systemEmailExt {
 			// Create WHERE clause
 			if ($users == "owner") { // Owners
 				$where_clause = "WHERE ugr.ugr_ID = 2";
-			} else if ($users == "admin") { // Admins for workgroup Database Managers
+			} else if ($users == "manager") { // Admins for workgroup Database Managers
 				$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled = 'y' AND ugl.ugl_GroupID = 1";
- 			} else if ($users == "admins") { // Admins for ALL workgroups
+ 			} else if ($users == "admin") { // Admins for ALL workgroups
 
  				$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled = 'y' AND ugl.ugl_GroupID IN 
 						  		 (SELECT ugr_ID 
@@ -351,23 +349,26 @@ class systemEmailExt {
 
 	public function constructEmails() {
 
+		global $system;
+
 		$email_rtn = 0;
+		$user_cnt = 0;
 
         if (empty($this->email_body)) {
 			$this->set_error("The email body is missing, this needs to be provided at class initialisation.");
 			return -1;
         }
 
+        $cur_user = $system->getCurrentUser();
+
 		// Initialise PHPMailer
 		$mailer = new PHPMailer(true);
 		$mailer->CharSet = "UTF-8";
 		$mailer->Encoding = "base64";
         $mailer->isHTML(true);
-        $mailer->SetFrom(HEURIST_MAIL_TO_ADMIN, 'Heurist System Email');
+        $mailer->SetFrom(HEURIST_MAIL_TO_ADMIN, $cur_user["ugr_FullName"]);
 
 		foreach ($this->user_details as $email => $details) {
-
-			$email_rtn = 0;
 
 			$db_url_arr = array();
 			
@@ -440,6 +441,8 @@ class systemEmailExt {
 
 				return $email_rtn;
 			}
+
+			$user_cnt += 1;
 		}
 
 		$this->save_receipt($email_rtn, $title, $this->email_body);
@@ -571,20 +574,25 @@ class systemEmailExt {
 	 *	save_receipt() => prepare receipt value
 	 *		Param:
 	 *			$status => (int) 0 || < 0, whether the emails were all sent
-	 *			$email_subect => (string) email subject used
+	 *			$email_subject => (string) email subject used
 	 *			$email_body => (string) email body used
+	 *			$user_count => (int) count of users who have been emailed
 	 *
 	 *	get_receipt() => get the value of receipt
 	 *
 	 *	export_receipt() => save receipt value into Note record, Titled: System Email Receipt [Current Date]
 	 */
 
-	private function save_receipt($status, $email_subect, $email_body) {
+	private function save_receipt($status, $email_subject, $email_body, $user_count = 0) {
+
+		$max_size = 1024 * 64; // 64 KBytes
+		$max_chars = $max_size / 4 - 1;	// Max Characters, allow roughly 4 bytes per character (for encoded/special chars)
 
 		$db = implode(", ", $this->databases);
 		$db_list = str_replace(HEURIST_DB_PREFIX, "", $db);
 		$u = $this->users;
-		$wg_list = isset($this->workgroups) ? implode(", ", $this->workgroups) : "none";
+
+		$u_cnt = count($this->user_details);
 
 		$r_cnt = $this->rec_count;
 
@@ -592,15 +600,80 @@ class systemEmailExt {
 
 		$status_msg = $status==0 ? "Success" : "Failed, Error Message: " . $this->get_error();
 
-		$this->receipt = "Parameters: {<br/>"
-					   . "&nbsp;&nbsp;Databases: $db_list <br/>"
-					   . "&nbsp;&nbsp;User Type: $u <br/>"
-					   . "&nbsp;&nbsp;Workgroups: $wg_list <br/>"
-					   . "&nbsp;&nbsp;Record Limit:$r_cnt <br/>"
-					   . "&nbsp;&nbsp;Last Modified Filter: $lm <br/>"
-					   . "}, <br/> Timestamp: " . date("Y-m-d H:i:s") . ", Status: " . $status_msg
-					   . ", <br/> Email Subject: " . $email_subect
-					   . ", <br/> Email Body: <br/>" . $email_body;
+		$main = "Parameters: {<br/>"
+			   . "&nbsp;&nbsp;Databases: $db_list <br/>"
+			   . "&nbsp;&nbsp;User Type: $u <br/>"
+			   . "&nbsp;&nbsp;Number of Users to Email: $u_cnt <br/>"
+			   . "&nbsp;&nbsp;Number of Users Emailed: $user_count <br/>"
+			   . "&nbsp;&nbsp;Record Limit:$r_cnt <br/>"
+			   . "&nbsp;&nbsp;Last Modified Filter: $lm <br/>"
+			   . "}, <br/> Timestamp: " . date("Y-m-d H:i:s") . ", Status: " . $status_msg
+			   . ", <br/> Email Subject: " . $email_subject
+			   . ", <br/> Email Body: <br/>" . $email_body;
+	    $main_size = strlen($main);	// Main part in bytes
+
+		$user_list = "Users: {<br/>";
+		foreach ($this->user_details as $email => $details) {
+			$user_list .= "&nbsp;&nbsp;". $details["first_name"] ." ". $details["last_name"] .": ". $email ."<br/>";
+		}
+		$user_list .= "}";
+		$user_list_size = strlen($user_list); // User List part in bytes
+
+		// Check if Main and User List parts can be placed together or in different blocktext fields
+		if ($main_size+$user_list_size > $max_size) { // Save the text in chucks
+
+			$this->receipt = array();
+
+			if ($main_size < $max_size) {
+				$this->receipt[] = $main;
+			} else { // Save this part in chunks
+
+				$main_t = mb_convert_encoding($main, "UTF-8", "auto");
+				/*$main_s = mb_strlen($main_t);
+				while ($main_s) {
+					$this->receipt[] = mb_substr($main_t, 0, $max_chars, "UTF-8"); // Get chunk
+					
+					$main_t = mb_substr($main_t, $max_chars, $main_s, "UTF-8"); // Remove chunk from main string
+					
+					$main_s = mb_strlen($main_t); // Get length of new string
+				}*/
+
+				if ($main_t) {
+					$start = 0;
+					while ($start < mb_strlen($main_t)) {
+						$this->receipt[] = mb_substr($main_t, $start, $max_chars);
+						$start += $max_chars;
+					}
+				}
+
+			}
+			if ($user_list_size < $max_size) {
+				$this->receipt[] = $user_list;
+			} else { // Save this part in chunks
+
+				$user_list_t = mb_convert_encoding($user_list, "UTF-8", "auto");
+				/*$user_list_s = mb_strlen($user_list_t);
+				while ($user_list_s) {
+					$this->receipt[] = mb_substr($user_list_t, 0, $max_chars, "UTF-8"); // Get chunk
+					
+					$user_list_t = mb_substr($user_list_t, $max_chars, $user_list_s, "UTF-8"); // Remove chunk from main string
+					
+					$user_list_s = mb_strlen($user_list_t); // Get length of new string
+				}*/
+
+				if ($user_list_t) {
+					$start = 0;
+					while ($start < mb_strlen($user_list_t)) {
+						$this->receipt[] = mb_substr($user_list_t, $start, $max_chars);
+						$start += $max_chars;
+					}
+				}
+
+			}
+
+		} else { // Save together
+			$this->receipt = $main . "<br/>" . $user_list;
+		}
 	}
 	private function get_receipt() {
 		return $this->receipt;

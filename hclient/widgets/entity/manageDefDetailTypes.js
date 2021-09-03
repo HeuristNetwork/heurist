@@ -1118,6 +1118,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 rst_MaxValues: that._editing.getValue('rst_MaxValues')[0], 
                                 rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')[0] };
 
+                            if(ele.text().includes('Numeric') && !that._editing.getFieldByName('rst_DisplayWidth').is(':visible')){
+                                rst_fields['rst_DisplayWidth'] = 10;
+                            }
+
                             that._trigger( "onselect", null, {selection: [_dty_ID], rst_fields:rst_fields });
                             that.closeDialog( true ); //force without warning
 

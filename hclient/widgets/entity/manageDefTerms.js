@@ -1159,11 +1159,24 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             //change label            
             this._editing.getFieldByName('trm_Label').find('.header').text('Vocabulary Name');
 
-            //assign devault values
+            //assign default values
             ele = this._editing.getFieldByName('trm_VocabularyGroupID');
             if(this._currentEditID<0 && this.options.trm_VocabularyGroupID>0){
                 ele.editing_input('setValue', this.options.trm_VocabularyGroupID, true);
                 currentDomain = $Db.vcg( this.options.trm_VocabularyGroupID, 'vcg_Domain' );
+            }else if(this._currentEditID==-1 && window.hWin.HEURIST4.util.isempty(this.options.trm_VocabularyGroupID)){
+                // Select the first vocab group option, avoid default 'select...'
+                var first_id = $(ele.find('.input-div option')[1]).val();
+                if(!window.hWin.HEURIST4.util.isempty(first_id)){
+                    ele.editing_input('setValue', first_id, true);
+                    currentDomain = $Db.vcg(first_id, 'vcg_Domain');
+
+                    // Hide 'select...' option
+                    $(ele.find('.input-div option')[0]).attr('hidden', true);
+                    if($(ele.find('.input-div select')).hSelect('instance')!=undefined){
+                        $(ele.find('.input-div select')).hSelect('refresh');
+                    }
+                }
             }
 
             ele.show();
