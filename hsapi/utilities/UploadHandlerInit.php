@@ -27,8 +27,12 @@ error_reporting(E_ALL | E_STRICT);
 require_once(dirname(__FILE__)."/../System.php");
 
 
-$system = new System(); //to init folder const
-$system->initPathConstants(@$_REQUEST['db']);
+if(!@$_REQUEST['db']){
+        
+}else{
+    $system = new System(); //to init folder const
+    $system->initPathConstants(@$_REQUEST['db']);
+}
 
 $options = array();
 if(@$_REQUEST['acceptFileTypes']){
@@ -40,3 +44,4 @@ if(@$_REQUEST['acceptFileTypes']){
 
 require('UploadHandler.php');
 $upload_handler = new UploadHandler($options);
+

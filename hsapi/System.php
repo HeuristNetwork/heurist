@@ -544,6 +544,9 @@ error_log(print_r($_REQUEST, true));
         
         list($database_name_full, $dbname) = mysql__get_names($dbname);
         
+        
+        if(!$dbname) return;
+        
         $upload_root = $this->getFileStoreRootFolder();
 
         //path is defined in configIni

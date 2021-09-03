@@ -551,8 +551,9 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     // Uncomment the following to send cross-domain cookies:
                     //xhrFields: {withCredentials: true},
                     url: $('#fileupload').fileupload('option', 'url'),
-                    data: {acceptFileTypes:"<?=implode('|',$allowed_exts)?>",
-                           folder: $('#upload_folder').val() },
+                    data: { db: "<?php echo HEURIST_DBNAME; ?>",
+                            acceptFileTypes:"<?php echo implode('|',$allowed_exts);?>",
+                            folder: $('#upload_folder').val() },
                     dataType: 'json',
 
                     /*
