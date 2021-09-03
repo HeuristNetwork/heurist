@@ -259,6 +259,11 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     Upload directory and keep its structure on server side
                 </label>
                 <label style="font-size:smaller;font-style:italic"> To maintain the directory structure, you should use Chrome or FireFox</label>
+                
+                <label><input type="checkbox" checked=checked name="replace_edited_file" value="1">
+                    Replace existing files if they have been edited
+                </label>
+                
                 <br>
                 <br>
                 <div class="fileupload-buttons">
@@ -346,7 +351,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
             <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
             </p>
               {% if (file.error) { %}
-                <div><span class="error">Upload error</span> {%=file.error%}</div>
+                <div><span class="error">Upload cancelled</span> {%=file.error%}</div>
                 <span class="error_for_msg" style="display:none">{%=file.name%} {%=file.error%}</span>
               {% } %}
                 </td>

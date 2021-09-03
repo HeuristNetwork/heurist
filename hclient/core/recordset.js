@@ -606,7 +606,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         var localIds = window.hWin.HAPI4.sysinfo['dbconst'];
         var DT_SYMBOLOGY_POINTMARKER = localIds['DT_SYMBOLOGY_POINTMARKER']; //3-1091
         var DT_SYMBOLOGY_COLOR = localIds['DT_SYMBOLOGY_COLOR']; //3-1037;
-        var DT_BG_COLOR = localIds['DT_BG_COLOR']; //3-1037;
+        var DT_BG_COLOR = localIds['DT_BG_COLOR']; //3-551;
         var DT_OPACITY = localIds['DT_OPACITY']; //3-1090;
         var DT_SYMBOLOGY = localIds['DT_SYMBOLOGY']; //3-1092;
         

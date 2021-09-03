@@ -42,6 +42,7 @@ class UploadHandler
         'min_file_size' => 'File is too small',
         'except_file_types' => 'Filetype not allowed. It is in the list of types that are not allowed to to be uploaded to the server for security reasons. If you need to upload this file type please contact the server administrator',
         'accept_file_types' => 'Filetype not listed among allowed mimetypes. Open Manage File > Define mime types to add new file type',
+        'skip_same_name' => 'File with the same name and checksum already exists on the server side',
         'max_number_of_files' => 'Maximum number of files exceeded',
         'max_width' => 'Image exceeds maximum width',
         'min_width' => 'Image requires a minimum width',
@@ -51,7 +52,8 @@ class UploadHandler
         'abort' => 'File upload aborted',
         'image_resize' => 'Failed to resize image'
     );
-
+    
+    
     protected $image_objects = array();
 
     function __construct($options = null, $initialize = true, $error_messages = null) {
@@ -61,6 +63,7 @@ class UploadHandler
         $upload_thumb_url = @$_REQUEST['upload_thumb_url'];
         //get upload folder from parameters
         $upload_dir = @$_REQUEST['folder']; //defined in form
+        $replace_edited_file = (@$_REQUEST['replace_edited_file']==1); //defined in form
         
         if(!$upload_dir){
             if(@$_REQUEST['db']){
@@ -95,7 +98,8 @@ class UploadHandler
             'user_dirs' => false,
             'mkdir_mode' => 0755,
             'param_name' => 'files',
-            'unique_filename' => true, //generate unique name for every upload
+            'unique_filename' => false, //generate unique name for every upload
+            'replace_edited_file' => $replace_edited_file, //if unique_filename is false, overwrtie file with same name and different checksum
             'newfilename' => '', //rename file on server
             // Set the following option to 'POST', if your server does not support
             // DELETE requests. This is a parameter sent to the client:
@@ -595,25 +599,29 @@ $siz = get_php_bytes('upload_max_filesize');
         );
     }
 
+    //
+    //  $file_path - temp file
+    //
     protected function get_unique_filename($file_path, $name, $subfolder, $size, $type, $error,
             $index, $content_range) {
                 
         if($this->options['unique_filename']){ //Artem Osmakov assign uniqie name to uploaded file 
         
             while(is_dir($this->get_upload_path($name, $subfolder))) {
-                $name = $this->upcount_name($name);
+                $name = $this->upcount_name($name); //unique name for subfolder
             }
             // Keep an existing filename if this is part of a chunked upload:
             $uploaded_bytes = $this->fix_integer_overflow((int)$content_range[1]);
-            while(is_file($this->get_upload_path($name, $subfolder))) {
+            while(is_file($this->get_upload_path($name, $subfolder))) { //till: is file and exists
                 if ($uploaded_bytes === $this->get_file_size(
                         $this->get_upload_path($name, $subfolder))) {
                     break;
                 }
-                $name = $this->upcount_name($name);
+                $name = $this->upcount_name($name); //get name with counter
             }
         
         }
+        
         return $name;
     }
 
@@ -1268,7 +1276,7 @@ $siz = get_php_bytes('upload_max_filesize');
 
     // $uploaded_file - temp file
     // $name - new file name
-    // $folder_name - subfolder name relative to upload_dir
+    // $subfolder - subfolder name relative to upload_dir
     // $size
     // $type - mimetype
     protected function handle_file_upload($uploaded_file, $name, $original_name, $subfolder, $size, $type, $error,
@@ -1281,6 +1289,32 @@ $siz = get_php_bytes('upload_max_filesize');
         $file->type = $type;
         $file->original_name = $original_name;
         $file->subfolder = $subfolder;
+        
+        if(!$this->options['unique_filename']){
+            // Keep an existing filename if this is part of a chunked upload:
+            $uploaded_bytes = $this->fix_integer_overflow((int)$content_range[1]);
+            
+            $new_file_path = $this->get_upload_path($name, $subfolder);
+            
+            if(is_file($new_file_path) && $uploaded_bytes !== $this->get_file_size($new_file_path))
+            { //file with the same name exists
+                $old_md5 = 0;
+                $new_md5 = 0;
+                if($this->options['replace_edited_file']){
+                    //overwrtie file with same name and different checksum
+                    $old_md5 = md5_file($uploaded_file);
+                    $new_md5 = md5_file($new_file_path);
+                }  
+                if($old_md5==$new_md5){
+                    //skip 
+                    $file->error = $this->get_error_message('skip_same_name');
+                    return $file;
+                }
+            }
+        }
+        
+        
+        
         
         if ($this->validate($uploaded_file, $file, $error, $index)) {
             $this->handle_form_data($file, $index);
@@ -1628,7 +1662,7 @@ $siz = get_php_bytes('upload_max_filesize');
             $file_names = array($this->get_file_name_param());
         }
         $subfolder = $this->get_subfolder_param();
-        
+                                           
         $response = array();
         foreach($file_names as $file_name) {
             $file_path = $this->get_upload_path($file_name, $subfolder);
