@@ -430,7 +430,7 @@ class Query {
     var $fixed_sortorder = null;
 
 
-    function Query($search_domain, $text, $currUserID, $parentquery, $absoluteStrQuery = false) {
+    function __construct($search_domain, $text, $currUserID, $parentquery, $absoluteStrQuery = false) {
 
         $this->search_domain = $search_domain;
         $this->recVisibilityType = null;
@@ -616,7 +616,7 @@ class OrLimb {
     var $parent;
 
 
-    function OrLimb(&$parent, $text) {
+    function __construct(&$parent, $text) {
         $this->parent = &$parent;
         $this->absoluteStrQuery = $parent->absoluteStrQuery;
         $this->and_limbs = array();
@@ -686,7 +686,7 @@ class AndLimb {
     var $parent;
 
 
-    function AndLimb(&$parent, $text) {
+    function __construct(&$parent, $text) {
         $this->parent = &$parent;
         $this->absoluteStrQuery = false;
         if (preg_match('/^".*"$/',$text,$matches)) {
@@ -953,7 +953,7 @@ class SortPhrase {
 
     var $parent;
 
-    function SortPhrase(&$parent, $value) {
+    function __construct(&$parent, $value) {
         $this->parent = &$parent;
 
         $this->value = $value;
@@ -1095,7 +1095,7 @@ class Predicate {
 
     var $need_recursion = true;
     
-    function Predicate(&$parent, $value) {
+    function __construct(&$parent, $value) {
         $this->parent = &$parent;
 
         $this->value = $value;
@@ -1438,7 +1438,7 @@ class FieldPredicate extends Predicate {
     var $field_type_value;  //field type
     var $nests = null;
 
-    function FieldPredicate(&$parent, $type, $value) {
+    function __construct(&$parent, $type, $value) {
         $this->field_type = $type;
         parent::Predicate($parent, $value);
 
@@ -1944,7 +1944,7 @@ class FieldPredicate extends Predicate {
 class FieldCountPredicate extends Predicate {
     var $field_type;        //name of dt_id
 
-    function FieldCountPredicate(&$parent, $type, $value) {
+    function __construct(&$parent, $type, $value) {
         $this->field_type = $type;
         parent::Predicate($parent, $value);
 
@@ -2022,7 +2022,7 @@ where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$ft_compare.' )'.$match_pred . $not2;
 class TagPredicate extends Predicate {
     var $wg_value;
 
-    function TagPredicate(&$parent, $value) {
+    function __construct(&$parent, $value) {
         $this->parent = &$parent;
 
         $this->value = array();
@@ -2926,7 +2926,7 @@ class BeforePredicate extends Predicate {
 class DatePredicate extends Predicate {
     var $col;
 
-    function DatePredicate(&$parent, $col, $value) {
+    function __construct(&$parent, $col, $value) {
         $this->col = $col;
         parent::Predicate($parent, $value);
     }
@@ -2954,13 +2954,13 @@ class DatePredicate extends Predicate {
 }
 
 class DateAddedPredicate extends DatePredicate {
-    function DateAddedPredicate(&$parent, $value) {
+    function __construct(&$parent, $value) {
         parent::DatePredicate($parent, 'TOPBIBLIO.rec_Added', $value);
     }
 }
 
 class DateModifiedPredicate extends DatePredicate {
-    function DateModifiedPredicate(&$parent, $value) {
+    function __construct(&$parent, $value) {
         parent::DatePredicate($parent, 'TOPBIBLIO.rec_Modified', $value);
     }
 }

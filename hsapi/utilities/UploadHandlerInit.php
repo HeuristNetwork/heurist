@@ -27,9 +27,7 @@ error_reporting(E_ALL | E_STRICT);
 require_once(dirname(__FILE__)."/../System.php");
 
 
-if(!@$_REQUEST['db']){
-        
-}else{
+if(@$_REQUEST['db']){
     $system = new System(); //to init folder const
     $system->initPathConstants(@$_REQUEST['db']);
 }

@@ -282,7 +282,7 @@ class HQuery {
     var $fixed_sortorder = null;
 
 
-    function HQuery($level, $query_json, $search_domain=null, $currUserID=null) {
+    function __construct($level, $query_json, $search_domain=null, $currUserID=null) {
 
         $this->level = $level;
         $this->search_domain = $search_domain;
@@ -568,7 +568,7 @@ class HLimb {
     //besides  not,any
     //
 
-    function HLimb(&$parent, $conjunction, $query_json) {
+    function __construct(&$parent, $conjunction, $query_json) {
 
         $this->parent = &$parent;
         $this->conjunction = $conjunction;
@@ -740,7 +740,7 @@ class HPredicate {
     */
 
 
-    function HPredicate(&$parent, $key, $value, $index_of_predicate) {
+    function __construct(&$parent, $key, $value, $index_of_predicate) {
 
         $this->parent = &$parent;
         $this->qlevel = $this->parent->level; //
