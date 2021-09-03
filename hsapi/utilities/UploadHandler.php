@@ -844,12 +844,38 @@ $siz = get_php_bytes('upload_max_filesize');
     }
 
     //
+    //
+    //
+    protected function check_memory($file_path, $new_file_path, $type, $version) {
+    
+        $isTooBig = UtilsImage::checkMemoryForImage($file_path, $type);
+        
+        if($isTooBig){
+            if(empty($version)){
+                //do not read image 
+                if ($file_path !== $new_file_path) { //no resize
+                    //return 
+                    copy($file_path, $new_file_path);
+                }
+                //return true;
+            }else{
+                $img = UtilsImage::createFromString('Thumbnail not created. '.$isTooBig);
+                $res = imagepng($img, $new_file_path);
+                imagedestroy($img);
+                //return $res;
+            }
+            
+            return true;
+        }
+        return false;
+    }        
+    
+    //
     // creates scaled image with native GD php functions
     //
     protected function gd_create_scaled_image($file_name, $subfolder, $version, $options) {
         if (!function_exists('imagecreatetruecolor')) {
-            error_log('Function not found: imagecreatetruecolor');
-            return false;
+            return 'Function not found: imagecreatetruecolor';
         }
         
         list($file_path, $new_file_path) =
@@ -859,7 +885,7 @@ $siz = get_php_bytes('upload_max_filesize');
         if(@$options['scale_to_png']==true && strtolower($type)!='png'){ //Artem Osmakov: scale to png only
             $new_file_path = str_replace('.'.$type,'.png', $new_file_path);
         }
-            
+        
         $type = strtolower($type);
         $write_func = null;
         
@@ -884,8 +910,13 @@ $siz = get_php_bytes('upload_max_filesize');
                     $options['png_quality'] : 9;
                 break;
             default:
-                return false;
+                return 'Not supported image format ('.$type.')';
         }
+        
+        if($this->check_memory($file_path, $new_file_path, $type, $version)){
+            return true;
+        }
+        
         if(@$options['scale_to_png']==true){
                 $type = 'png';
                 $write_func = 'imagepng';
@@ -898,6 +929,7 @@ $siz = get_php_bytes('upload_max_filesize');
             $src_func,
             !empty($options['no_cache'])
         );
+        
         $image_oriented = false;
         if (!empty($options['auto_orient']) && $this->gd_orient_image(
                 $file_path,
@@ -909,6 +941,7 @@ $siz = get_php_bytes('upload_max_filesize');
                 $src_func
             );
         }
+        
         $max_width = $img_width = imagesx($src_img);
         $max_height = $img_height = imagesy($src_img);
         if (!empty($options['max_width'])) {
@@ -926,7 +959,7 @@ $siz = get_php_bytes('upload_max_filesize');
             if ($image_oriented) {
                 return ($write_func!=null)?$write_func($src_img, $new_file_path, $image_quality):false;
             }
-            if ($file_path !== $new_file_path) {
+            if ($file_path !== $new_file_path) { //no resize
                 return copy($file_path, $new_file_path);
             }
             return true;
@@ -1046,6 +1079,11 @@ $siz = get_php_bytes('upload_max_filesize');
         if(@$options['scale_to_png']==true && strtolower($type)!='png'){ //Artem Osmakov: scale to png only
             $new_file_path = str_replace('.'.$type,'.png', $new_file_path);
         }
+        
+        if($this->check_memory($file_path, $new_file_path, $type, $version)){
+            return true;
+        }
+        
             
         $image = $this->imagick_get_image_object(
             $file_path,
@@ -1244,7 +1282,9 @@ $siz = get_php_bytes('upload_max_filesize');
                 break;
             }
             
-            if ($this->create_scaled_image($file->name, $file->subfolder, $version, $options)) {
+            $res = $this->create_scaled_image($file->name, $file->subfolder, $version, $options);
+            
+            if ($res===true) {
                 if (!empty($version)) {
                     //Artem Osmakov: version extension can be differ
                     $type = substr(strrchr($file->name, '.'), 1);
@@ -1263,12 +1303,18 @@ $siz = get_php_bytes('upload_max_filesize');
                     $file->size = $this->get_file_size($file_path, true);
                 }
             } else {
-                $failed_versions[] = $version ? $version : 'original';
+                $failed_versions[$version ? $version : 'original'] = $res;
             }
         }
         if (count($failed_versions)) {
+            
+            $rep = array();
+            foreach ($failed_versions as $ver=>$msg){
+                $rep[] = $ver.' '.($msg!==false?(': '.$msg):'');    
+            }
+            
             $file->error = $this->get_error_message('image_resize')  //get text
-                    .' ('.implode(', ', $failed_versions).')';
+                    .' <br>'.implode('<br>', $rep);
         }
         // Free memory:
         $this->destroy_image_object($file_path);

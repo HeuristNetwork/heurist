@@ -371,8 +371,8 @@ class UtilsImage {
 
                     if ($mem_usage+$memoryNeeded > $mem_limit - 10485760){ // $mem_limit - 10485760){ // min($mem_limit, 41943040)){ //40M
                     
-                        $errorMsg = 'It requires '.$memoryNeeded.
-                            ' bytes to be resized.  Available '.$mem_limit.' bytes.';
+                        $errorMsg = 'It requires '.((int)($memoryNeeded/1024/1024)).
+                            ' Mb to be resized.  Available '.((int)($mem_limit/1024/1024)).' Mb';
                     }                
                 }
                 break;
@@ -448,7 +448,13 @@ class UtilsImage {
         if($mimeExt){
             $errorMsg = UtilsImage::checkMemoryForImage($filename, $mimeExt);
             
-            if(!$errorMsg){
+            if($errorMsg){
+            
+                $img = UtilsImage::createFromString($errorMsg);
+                imagepng($img, $thumbnail_file);                
+                imagedestroy($img);
+                
+            }else{
                 $img = UtilsImage::safeLoadImage($filename, $mimeExt);
                 if($img){
                     UtilsImage::resizeImageGD($img, $thumbnail_file);

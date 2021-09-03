@@ -229,7 +229,7 @@ if($response!=null){
     foreach($res['files'] as $idx=>$file){
         if(@$file->error){
             $sMsg = "Sorry, file was not processed due to the following reported error:\n".$file->error.".\n\n"; // Error Log
-            
+
             if(strpos($file->error, 'Filetype not')===0){
                 
                 $response = $system->addError(HEURIST_ACTION_BLOCKED, $sMsg, null);
@@ -251,7 +251,9 @@ if($response!=null){
             $response['message'] = nl2br($sMsg);
 
             break;            
-        }else if($entity_name=="recUploadedFiles"){ //register at once
+        }
+        
+        if($entity_name=="recUploadedFiles"){ //register at once
             
             if($registerAtOnce==1){
             

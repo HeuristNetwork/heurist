@@ -950,6 +950,8 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                     //database, record ID and name of bad image
                     sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.HEURIST_DBNAME, 
                             'File ID#'.$file['ulf_ID'].'  '.$filename.'. '.$errorMsg, null);
+                 
+                    $img = UtilsImage::createFromString('Thumbnail not created. '.$errorMsg);
                     
                 }else{
                     
@@ -1026,7 +1028,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             header('Location: '.$placeholder);
         }
     }else{
-        UtilsImage::resizeImage($img, $thumbnail_file);
+        UtilsImage::resizeImage($img, $thumbnail_file); //$img will be destroyed inside this function
         if($is_download){
             if(file_exists($thumbnail_file)){
                 header('Content-type: image/png');
