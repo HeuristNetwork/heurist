@@ -66,7 +66,7 @@
                             {"key":"date", "title":"Date / temporal"},
                             {"key":"geo", "title":"Geospatial"},
                             {"key":"file", "title":"File or media URL"},
-                            {"key":"resource", "title":"Record pointer / Foregin key"},
+                            {"key":"resource", "title":"Record pointer / Foreign key"},
                             {"key":"relmarker", "title":"Relationship marker"},
                             {"key":"none", "title":"Select..."}]                        
                     }
