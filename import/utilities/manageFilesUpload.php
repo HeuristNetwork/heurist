@@ -274,7 +274,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     </span>
                     <input type="file" name="files[]" multiple webkitdirectory="true" style="display:none;">
                     <button id="btnStart" type="submit" class="start" disabled>Start uploads</button>
-                    <button id="btnCancel" type="reset" class="cancel">Clear upload list</button>
+                    <button id="btnCancel" type="reset" class="cancel">Cancel uploads</button>
                     <!-- Ian 17/6/16 It's quite confusing what these are for
                     <button type="button" class="delete">Delete selected</button>
                     <input type="checkbox" class="toggle">
