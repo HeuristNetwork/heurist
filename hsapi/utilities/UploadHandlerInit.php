@@ -33,9 +33,13 @@ if(@$_REQUEST['db']){
 }
 
 $options = array();
-if(@$_REQUEST['acceptFileTypes']){
+if(@$_REQUEST['acceptFileTypes']!=null){
     $options['accept_file_types'] = $_REQUEST['acceptFileTypes'];   
 }
+if(@$_REQUEST['unique_filename']!=null){
+    $options['unique_filename'] = ($_REQUEST['unique_filename']!='0');   
+}
+
 //if(@$_REQUEST['upload_folder']){
 //    $options['upload_dir'] = $_REQUEST['upload_folder'];   
 //}

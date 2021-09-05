@@ -64,6 +64,7 @@ class UploadHandler
         //get upload folder from parameters
         $upload_dir = @$_REQUEST['folder']; //defined in form
         $replace_edited_file = (@$_REQUEST['replace_edited_file']==1); //defined in form
+        $unique_filename = (@$_REQUEST['unique_filename']!=='0'); //defined in form
         
         if(!$upload_dir){
             if(@$_REQUEST['db']){
@@ -98,7 +99,7 @@ class UploadHandler
             'user_dirs' => false,
             'mkdir_mode' => 0755,
             'param_name' => 'files',
-            'unique_filename' => false, //generate unique name for every upload
+            'unique_filename' => $unique_filename, //generate unique name for every upload
             'replace_edited_file' => $replace_edited_file, //if unique_filename is false, overwrtie file with same name and different checksum
             'newfilename' => '', //rename file on server
             // Set the following option to 'POST', if your server does not support
