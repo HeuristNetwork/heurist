@@ -4226,7 +4226,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
                 $('h2.step4').css('display','inline-block');
             
-                var rtyID = imp_session['sequence']['rectype'];
+                var rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
                 var counts = _getInsertUpdateCounts(currentSeqIndex);
                 
                 var to_be_inserted = counts[2];
@@ -4253,8 +4253,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     +($('#sa_insert').prop('checked')?'INSERT':'')
                     +($('#sa_insert').prop('checked')&&$('#sa_update').prop('checked')?'/':'')
                     +($('#sa_update').prop('checked')?'UPDATE':''));   
-                
-               
+
                 var shelp = 'Now select the columns which you wish to import into fields in the <b>'
                 + ($Db.rty(rtyID,'rty_Name')?$Db.rty(rtyID,'rty_Name'):'')
                 + '</b>  records which are '
