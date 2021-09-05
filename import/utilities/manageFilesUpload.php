@@ -94,6 +94,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
         <p>Members of the database managers group can upload multiple files and/or large files to the database scratch space. <br>
            Most commonly, files will be uploaded prior to importing data from them or running the in situ multimedia import.<br>
+           Files with the same path, name and checksum are not duplicated, changed files may be overwriten or added.<br>
            The function is restricted to database managers to reduce the risk of other users filling the database with unwanted material.<br>
         </p>
     
@@ -274,7 +275,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     </span>
                     <input type="file" name="files[]" multiple webkitdirectory="true" style="display:none;">
                     <button id="btnStart" type="submit" class="start" disabled>Start uploads</button>
-                    <button id="btnCancel" type="reset" class="cancel">Cancel uploads</button>
+                    <button id="btnCancel" type="reset" class="cancel">Clear upload list</button>
                     <!-- Ian 17/6/16 It's quite confusing what these are for
                     <button type="button" class="delete">Delete selected</button>
                     <input type="checkbox" class="toggle">
