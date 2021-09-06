@@ -1496,7 +1496,7 @@ console.log(explore_top);
 
             if(force_show || (that.containers[section] && !that.containers[section].is(':empty'))){
                 that.containers[section].show();    
-            }else{
+            }else if(that.introductions && that.introductions[section]){
                 that.introductions[section].show();    
             }
             

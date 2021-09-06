@@ -511,7 +511,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                         if(swarns!=''){
                             swarns = 'Attention. '
                                       +($(eles).length==1?'File was not':($(eles).length+' files were not'))
-                                      +' uploaded.<br> '+swarns;
+                                      +' uploaded.<br><div style="max-height:100px;overflow-y:auto">'+swarns+'</div>';
                             window.hWin.HEURIST4.msg.showMsgErr(swarns);    
                         }
 

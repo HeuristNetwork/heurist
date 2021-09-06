@@ -84,6 +84,10 @@ external/php/phpZotero.php (114-121) support proxy settings
         mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,shp,dbf,shx,htm,html,xhtml,ppt,pptx,zip,gzip,tar
         Also add to end of the invalid file type message: "Please ask Heurist team to add if required."
 
+        
+2021-09-06  ../external_h5/jquery-file-upload/js/jquery.fileupload-ui.js 
+        line 234. Added explanation about zerp file size due length of file name    
+        
 -----------------------------------------------------------------------------------------------------------------------------------
 
 /**
