@@ -279,8 +279,26 @@ function hCmsEditing(_options) {
         $('<textarea class="tinymce-body" style="position:absolute;left:0;right:2px;top:0;bottom:0;display:none"></textarea>')
             .appendTo(main_content.parent());
 
+        //codemirror controls
+        $('<div id="codemirror-controls" style="padding:2px 10px; position:absolute;left:0px;right:2px;top:0px;height:24px;display:none;background:white;border:1px solid gray">'
+            +'<button id="codemirror-save">Save</button><button id="codemirror-done" title="Save and Close">Done</button><button id="codemirror-cancel">Cancel</button>'
+            +'</div>')
+            .hide()
+            .appendTo(main_content.parent());
+            
+        $('#codemirror-save').button({icon:'ui-icon-download'}).css({height:'20px'}).click( function(){__saveChanges(false);} );
+        $('#codemirror-done').button({icon:'ui-icon-check'}).css({height:'20px'}).click( _editPageSource );
+        $('#codemirror-cancel').button({icon:'ui-icon-close'}).css({height:'20px'}).click( function (event) {
+                $('#btn_inline_editor5').click();
+                /*__hideEditor();
+                //restore original
+                $('.tinymce-body').val(original_editor_content);
+                window.hWin.HEURIST4.util.stopEvent(event);*/
+                return false;
+            } );
+            
         //codemirror container
-        $('<div id="codemirror-body" style="position:absolute;left:0;right:2px;top:0;bottom:0;display:none;border:lightblue 1px dotted"></div>')
+        $('<div id="codemirror-body" style="position:absolute;left:0px;right:2px;top:25px;bottom:0px;display:none;border:lightblue 1px dotted"></div>')
             .hide()
             .appendTo(main_content.parent());
 
@@ -302,7 +320,7 @@ function hCmsEditing(_options) {
                 .click(_editPageRecord)
                 .show();
                 
-console.log( $('a[id^="btn_inline_editor"]').length );                
+//console.log( $('a[id^="btn_inline_editor"]').length );                
         $('a[id^="btn_inline_editor"]').hide(); //21-08-21                 
                 
 
@@ -362,6 +380,7 @@ console.log( $('a[id^="btn_inline_editor"]').length );
         
         codeEditor.setValue(content);
         $('#codemirror-body').show();
+        $('#codemirror-controls').show();
 
         //autoformat
         setTimeout(function(){
@@ -723,6 +742,7 @@ console.log( $('a[id^="btn_inline_editor"]').length );
             was_modified = false;    
             $('.tinymce-body').hide();
             $('#codemirror-body').hide();
+            $('#codemirror-controls').hide();
             
             main_content.show();
             main_content.parent().css('overflow-y','auto');
@@ -756,8 +776,9 @@ console.log( $('a[id^="btn_inline_editor"]').length );
                 $('#btn_inline_editor5').css({position:'absolute',
                     top:tp,left:lp-340}).hide();
                     
-                $('textarea.tinymce-body').css('top',30);
-                $('#codemirror-body').css('top',30);
+                $('textarea.tinymce-body').css('top','30px');
+                $('#codemirror-body').css('top','55px');
+                $('#codemirror-controls').css('top','30px');
             
             }else{
                 
