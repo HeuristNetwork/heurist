@@ -831,7 +831,7 @@ function hCmsEditing(_options) {
                     var opts = ele.text(); 
                     ele.empty().append(
                 '<div style="padding:10px;" class="widget-design-header"><img src="'
-                +window.hWin.HAPI4.baseURL+'hclient/assets/heurist_logo_35x35.png" height="22" style="vertical-align:middle">&nbsp;<b>'
+                +window.hWin.HAPI4.baseURL+'hclient/assets/branding/heurist_logo_35x35.png" height="22" style="vertical-align:middle">&nbsp;<b>'
                 + ele.attr('data-heurist-app-id').substring(8)
                 + '</b><a href="#" class="edit" style="padding:0 10px" title="Click to edit">edit</a>&nbsp;&nbsp;'
                 + '<a href="#" class="remove">remove</a></div>'
