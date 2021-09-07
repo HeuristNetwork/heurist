@@ -271,11 +271,8 @@ div .progress-message {
 }
 
 .blankCheckboxes{
-    margin-left: 0em;
     display: inline-block;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    width: 49%;
+    padding: 5px 6px;
 }
 
 /* for chrome */
@@ -341,6 +338,10 @@ input[type=number]{
     }
 }
 
+.btn {
+    padding: .375rem .375rem;
+}
+
 .btn-check:active+.btn-outline-primary, 
 .btn-check:checked+.btn-outline-primary, 
 .btn-outline-primary.active, 
@@ -354,6 +355,8 @@ input[type=number]{
 .btn-outline-primary {
     color : #305486;
     border-color: #305486;
+
+    font-size: 14px;
 }
 
 .btn-check:active+.btn-outline-secondary, 
@@ -373,8 +376,8 @@ input[type=number]{
 
 .btn-outline-primary:hover {
     color: #fff;
-    background-color: #305486;
-    border-color: #305486;
+    background-color: #3054CD;
+    border-color: #3054CD;
 }
 
 .btn-outline-secondary:hover {
@@ -497,7 +500,6 @@ table.dataTable tfoot th, table.dataTable tfoot td {
 }
 
 .dataTables_wrapper .dataTables_filter {
-    float: left;
     text-align: left;
     margin-left: 1rem;
     margin-bottom: 1rem;
