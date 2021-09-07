@@ -524,6 +524,12 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                         return false;
                     }
                 },
+                renderNode: function(event, data){
+                    
+                    if(data.node.data.is_generic_fields) { // hide blue arrow for generic fields
+                        $(data.node.span.childNodes[1]).hide();
+                    }
+                },
                 lazyLoad: function(event, data){
                     var node = data.node;
                     var parentcode = node.data.code; 
@@ -569,13 +575,18 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                         }
                 },
                 click: function(e, data){
-                   if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
-                       data.node.setExpanded(!data.node.isExpanded());
-                       //treediv.find('.fancytree-expander').hide();
-                       
-                   }else if( data.node.lazy) {
-                       data.node.setExpanded( true );
-                   }
+
+                    var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+
+                    if(isExpander){
+                        return;
+                    }
+
+                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
+                        data.node.setExpanded(!data.node.isExpanded());
+                    }else if( data.node.lazy) {
+                        data.node.setExpanded( true );
+                    }
                 },
                 dblclick: function(e, data) {
                     data.node.toggleSelected();
@@ -591,4 +602,3 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
     },
     
 });
-

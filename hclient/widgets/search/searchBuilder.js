@@ -820,6 +820,7 @@ $.widget( "heurist.searchBuilder", {
                                 renderNode: function(event, data){
                                     
                                     if(data.node.data.is_generic_fields){
+                                        $(data.node.span.childNodes[1]).hide();
                                         $(data.node.span.childNodes[3]).css('font-weight', 'normal');
                                     }
                                 },
@@ -895,26 +896,26 @@ $.widget( "heurist.searchBuilder", {
                                     */
                                 },
                                 click: function(e, data){
-                                   e.stopPropagation(); 
-                                    
-                                   if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
-                                       data.node.setExpanded(!data.node.isExpanded());
-                                       //treediv.find('.fancytree-expander').hide();
-                                   }else if( data.node.lazy) {
-                                       data.node.setExpanded( true );
-                                   }else{
+
+                                    var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+
+                                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0 && !isExpander){
+                                        data.node.setExpanded(!data.node.isExpanded());
+                                    }else if( data.node.lazy && !isExpander) {
+                                        data.node.setExpanded( true );
+                                    }else{
                                         var code = data.node.data.code;
                                         var codes = code.split(':');
 
                                         var codes2 = code.split(':');
                                         codes2[0] = 'any';
                                         code = codes2.join(':');
-                                      
+
                                         //add or replace field in builderItem
                                         that.addFieldItem( code, codes, that.select_field_for_id);
                                         that.select_field_for_id = null;
                                         that.pnl_Tree.hide();
-                                   }
+                                    }
                                 },
                                 dblclick: function(e, data) {
                                     data.node.toggleSelected();
