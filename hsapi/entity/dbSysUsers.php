@@ -458,6 +458,19 @@ class DbSysUsers extends DbEntityBase
             return false;
         }
 
+        /* Check if selected user's account is enabled before proceeding */
+        $query = 'SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID = ' . $recID;
+        $res = $mysqli->query($query);
+        $row = $res->fetch_row();
+        
+        if($row == null){
+            $this->system->addError(HEURIST_DB_ERROR, 'Unable to retrieve user account status');
+            return false;
+        }else if($row[0] == 'n'){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'The selected user is not enabled. Please enable them to transfer database ownership to them.');
+            return false;
+        }
+
         /* Retrieve an un-used value for MAXINT, a temporary value used for swapping the two IDs */
         $query = 'SELECT max(ugr_ID)+1 FROM sysUGrps';
         $res = $mysqli->query($query);
@@ -479,8 +492,7 @@ class DbSysUsers extends DbEntityBase
             $return = false;
         }
 
-
-        /* Swapping IDs between DB Owner and Selected User, as all of these values are primary keys we need to ensure that everything completes correctly */
+        /* Swapping IDs between DB Owner and Selected User */
         $query = "UPDATE sysUGrps SET ugr_ID = " . $MAXINT . " WHERE ugr_ID = 2";
         $mysqli->query($query);
         if($mysqli->affected_rows <= 0){
