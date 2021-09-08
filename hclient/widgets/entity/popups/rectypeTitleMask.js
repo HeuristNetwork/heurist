@@ -430,8 +430,9 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             },
             renderNode: function(event, data){
                 
-                if(data.node.data.type == "enum") { // hide blue arrow for certain types || data.node.data.type == "relmarker"
-                    $(data.node.span.childNodes[1]).hide()
+                if(data.node.data.type == "enum") { // hide blue and expand arrows for terms
+                    $(data.node.span.childNodes[0]).css('visibility', 'hidden');
+                    $(data.node.span.childNodes[1]).hide();
                 }
             },            
             lazyLoad: function(event, data){
@@ -457,10 +458,17 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             select: function(e, data) {
             },
             click: function(e, data){
+
+                var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+                var setDefaults = !data.node.isExpanded();
+
                 if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
-                    data.node.setExpanded(!data.node.isExpanded());
                     
-                    if(data.node.isExpanded()){
+                    if(!isExpander){
+                        data.node.setExpanded(!data.node.isExpanded());
+                    }
+                
+                    if(setDefaults){
                         for(var i = 0; i < data.node.children.length; i++){
                             let node = data.node.children[i];
 
@@ -469,7 +477,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                             }
                         }
                     }
-                }else if( data.node.lazy) {
+                }else if( data.node.lazy && !isExpander) {
                     data.node.setExpanded( true );
                 }
             },
@@ -519,4 +527,3 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
     
 
 });
-

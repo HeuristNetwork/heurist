@@ -67,16 +67,29 @@ $.widget( "heurist.configEntity", {
             st = ' style="display:table-cell"';
         }
 
-        $('<div'+st+'><label for="sel_saved_settings">'
-            +(this.options.loadSettingLabel?this.options.loadSettingLabel:'Saved settings:')+'</label></div>'
-            +'<div'+st+'><select class="sel_saved_settings text ui-widget-content ui-corner-all"></select></div>'
-            + ((this.options.showButtons)?
-            ('<div class="btn-action-div"'+st+'>&nbsp;&nbsp;<span class="btn-action btn-rename"/>'
-            +'<span class="btn-action btn-openedit"/>'
-            +'<span class="btn-action btn-remove"/></div></div>'):'') )
-            //('<span class="ui-icon ui-icon-pencil" style="font-size:smaller;cursor:pointer"></span>'
-            //+'<span class="ui-icon ui-icon-delete" style="font-size:smaller;cursor:pointer"></span>'):'') )
-        .appendTo(this.element);
+        if(this.options.configName == "crosstabs"){
+
+            $('<div class="col-3 pe-0" style="text-align:right;"><label for="sel_saved_settings">'
+                +(this.options.loadSettingLabel?this.options.loadSettingLabel:'Saved settings:')+'</label></div>'
+                +'<div class="col-6"><select class="sel_saved_settings text ui-widget-content ui-corner-all" style="width:100%;"></select></div>'
+                + ((this.options.showButtons)?
+                ('<div class="btn-action-div col-2 p-0"><span class="btn-action btn-rename bg-warning saveEditButton"/>'
+                +'<span class="btn-action btn-openedit"/>'
+                +'<span style="margin: 2px;" class="btn-action btn-remove bg-danger saveRemoveButton"/></div></div>'):'') )
+            .appendTo(this.element);
+        }else{
+
+            $('<div'+st+'><label for="sel_saved_settings">'
+                +(this.options.loadSettingLabel?this.options.loadSettingLabel:'Saved settings:')+'</label></div>'
+                +'<div'+st+'><select class="sel_saved_settings text ui-widget-content ui-corner-all"></select></div>'
+                + ((this.options.showButtons)?
+                ('<div class="btn-action-div"'+st+'>&nbsp;&nbsp;<span class="btn-action btn-rename"/>'
+                +'<span class="btn-action btn-openedit"/>'
+                +'<span class="btn-action btn-remove"/></div></div>'):'') )
+                //('<span class="ui-icon ui-icon-pencil" style="font-size:smaller;cursor:pointer"></span>'
+                //+'<span class="ui-icon ui-icon-delete" style="font-size:smaller;cursor:pointer"></span>'):'') )
+            .appendTo(this.element);
+        }
 
         this.sel_saved_settings = this.element.find('.sel_saved_settings');
         
@@ -88,7 +101,6 @@ $.widget( "heurist.configEntity", {
                 this.sel_saved_settings.hSelect("widget").css("width", w+'px');
             }
         }
-            
 
         //
         // rename
@@ -245,13 +257,17 @@ $.widget( "heurist.configEntity", {
         //
         if(this.options.divSaveSettings){
 
-            // $('<div class="header" style="padding: 0 16px;width:20em;"><label>Name settings to save for future use</label></div>'
-            //     +'<input class="inpt_save_setting_name text ui-widget-content ui-corner-all" style="max-width:30em"/>'
-            //     + (this.options.saveOnExit?'':'&nbsp;&nbsp;<button class="btnSaveSettings">Save</button>'))
-
-            $('<div style="display:table-cell"><label>Save settings as <input class="inpt_save_setting_name text form-control"/></label></div>'
-            + (this.options.saveOnExit?'':'<div style="display:table-cell">&nbsp;<button class="btn btn-success btnSaveSettings">Save</button></div>'))
-            .appendTo(this.options.divSaveSettings);
+            if(this.options.configName == "crosstabs"){
+                $('<div class="col-3 pe-0" style="text-align:right;"><label>Save settings as </div> '
+                + '<div class="col-6"><input class="inpt_save_setting_name text form-control rounded-0" style="font-size: small;"/></label></div>'
+                + (this.options.saveOnExit?'':'<div class="col-3">'
+                + '<button class="btn btn-success btnSaveSettings p-2" style="font-size:10px;height:90%"><i class="ui-icon ui-icon-save"></i> Save </button></div>'))
+                .appendTo(this.options.divSaveSettings);
+            }else{
+                $('<div style="display:table-cell"><label>Save settings as <input class="inpt_save_setting_name text form-control"/></label></div>'
+                + (this.options.saveOnExit?'':'<div style="display:table-cell">&nbsp;<button class="btn btn-success btnSaveSettings">Save</button></div>'))
+                .appendTo(this.options.divSaveSettings);
+            }
             this.inpt_save_setting_name = this.options.divSaveSettings.find('.inpt_save_setting_name');        
             
             if(!this.options.saveOnExit){

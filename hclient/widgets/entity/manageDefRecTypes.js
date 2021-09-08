@@ -1396,6 +1396,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         if(this.it_was_insert){
             this.searchForm.searchDefRecTypes('startSearch'); //refresh
+
+            if(this.options.select_mode=='select_multi'){ // Select new rectype, for multi select
+                this.recordList.find('div[recid="'+ recID +'"]').click();
+            }
   
 /*            
             var rg_options = {
