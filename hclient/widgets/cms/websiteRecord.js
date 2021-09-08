@@ -287,7 +287,14 @@ function hCmsEditing(_options) {
             .appendTo(main_content.parent());
             
         $('#codemirror-save').button({icon:'ui-icon-download'}).css({height:'22px'}).click( function(){__saveChanges(false);} );
-        $('#codemirror-done').button({icon:'ui-icon-check'}).css({height:'22px'}).click( _editPageSource );
+        $('#codemirror-done').button({icon:'ui-icon-check'}).css({height:'22px'}).click( function(){
+            
+            allow_close_dialog = false;
+           _onEditorExit(function(){
+                __hideEditor();
+           });
+            
+        } );
         $('#codemirror-cancel').button({icon:'ui-icon-close'}).css({height:'22px'}).click( function (event) {
                 $('#btn_inline_editor5').click();
                 /*__hideEditor();
@@ -581,7 +588,7 @@ function hCmsEditing(_options) {
     //
     function _isDirectEditMode(){
         
-        return ($('#btn_inline_editor3').text()=='Save');
+        return $('#codemirror-body').is(':visible'); //($('#btn_inline_editor3').text()=='Save');
     }
          
     //
@@ -2005,7 +2012,7 @@ function hCmsEditing(_options) {
         is_header_editor = false;
 
         //if direct edit is opened - warn for saving 
-        if(_isDirectEditMode()){
+        if($('#codemirror-body').is(':visible')){
             
             allow_close_dialog = false;
            _onEditorExit(function(){
@@ -2043,12 +2050,13 @@ function hCmsEditing(_options) {
     //
     function _editPageSource( event ){
         
-        if(_isDirectEditMode()){
+        if($('.tox-tinymce').is(':visible')){ //$('#codemirror-body').
             //exit
             //save changes
             allow_close_dialog = false;
            _onEditorExit(function(){
-                __hideEditor();    
+                __hideEditor();
+                _editPageSource( event );   
            });
            //__saveChanges( true );
         }else{
