@@ -286,9 +286,9 @@ function hCmsEditing(_options) {
             .hide()
             .appendTo(main_content.parent());
             
-        $('#codemirror-save').button({icon:'ui-icon-download'}).css({height:'20px'}).click( function(){__saveChanges(false);} );
-        $('#codemirror-done').button({icon:'ui-icon-check'}).css({height:'20px'}).click( _editPageSource );
-        $('#codemirror-cancel').button({icon:'ui-icon-close'}).css({height:'20px'}).click( function (event) {
+        $('#codemirror-save').button({icon:'ui-icon-download'}).css({height:'22px'}).click( function(){__saveChanges(false);} );
+        $('#codemirror-done').button({icon:'ui-icon-check'}).css({height:'22px'}).click( _editPageSource );
+        $('#codemirror-cancel').button({icon:'ui-icon-close'}).css({height:'22px'}).click( function (event) {
                 $('#btn_inline_editor5').click();
                 /*__hideEditor();
                 //restore original
@@ -298,7 +298,7 @@ function hCmsEditing(_options) {
             } );
             
         //codemirror container
-        $('<div id="codemirror-body" style="position:absolute;left:0px;right:2px;top:25px;bottom:0px;display:none;border:lightblue 1px dotted"></div>')
+        $('<div id="codemirror-body" style="position:absolute;left:0px;right:2px;top:30px;bottom:0px;display:none;border:lightblue 1px dotted"></div>')
             .hide()
             .appendTo(main_content.parent());
 
@@ -777,7 +777,7 @@ function hCmsEditing(_options) {
                     top:tp,left:lp-340}).hide();
                     
                 $('textarea.tinymce-body').css('top','30px');
-                $('#codemirror-body').css('top','55px');
+                $('#codemirror-body').css('top','60px');
                 $('#codemirror-controls').css('top','30px');
             
             }else{
