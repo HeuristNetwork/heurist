@@ -1845,6 +1845,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         window.hWin.HEURIST4.ui.checkAndLogin( isforced, function(is_logged)
             { 
                 if(is_logged) {
+                    $(that.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
                     that._performInitialSearch();
                 } else if(that.options.login_inforced){
                     window.hWin.location  = window.HAPI4.baseURL
