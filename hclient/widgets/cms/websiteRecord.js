@@ -158,8 +158,6 @@ function hCmsEditing(_options) {
                         itop = $('.tox-toolbar-overlord').height();
                     }
                     
-                    
-                    
                     var sheight = $('.tinymce-body').height() - itop;
                     sheight = ($('.tinymce-body').height() - itop<=100)?'90%':(sheight+'px');
                     $('.mce-edit-area > iframe').height( sheight );
