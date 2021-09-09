@@ -429,12 +429,27 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                 }
             },
             renderNode: function(event, data){
-                
+
                 if(data.node.data.type == "enum") { // hide blue and expand arrows for terms
+
                     $(data.node.span.childNodes[0]).css('visibility', 'hidden');
                     $(data.node.span.childNodes[1]).hide();
+                }else{
+
+                    if(data.node.parent && data.node.parent.data.type == 'enum'){ // make term options inline and smaller
+                        $(data.node.li).css('display', 'inline-block');
+                        $(data.node.span.childNodes[0]).css('display', 'none');
+
+                        if(data.node.key == 'conceptid'){
+                            $(data.node.span.childNodes[3]).text('Con-ID');
+                        }else if(data.node.key == 'internalid'){
+                            $(data.node.span.childNodes[3]).text('Int-ID');
+                        }else if(data.node.key == 'term'){
+                            $(data.node.parent.ul).css({'transform': 'scale(0.75)', 'padding-left': '10px'});
+                        }
+                    }
                 }
-            },            
+            },
             lazyLoad: function(event, data){
                 var node = data.node;
                 var parentcode = node.data.code; 
