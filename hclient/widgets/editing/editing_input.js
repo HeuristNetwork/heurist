@@ -635,9 +635,12 @@ $.widget( "heurist.editing_input", {
 
         if(this.detailType=='blocktext'){//----------------------------------------------------
 
-            var dheight = this.f('rst_DisplayHeight');
+            var dheight = this.f('rst_DisplayHeight');  //max height 
             
-            $input = $( "<textarea>",{rows:dheight,})
+            var dheight = this.f('rst_DisplayHeight');  //max height 
+            //IJ 2021-09-09 - from now dheight is max height in lines - otherwise the height is auto
+            
+            $input = $( "<textarea>",{rows:2}) //min number of lines
             .uniqueId()
             .val(value)
             .addClass('text ui-widget-content ui-corner-all')
@@ -651,6 +654,18 @@ $.widget( "heurist.editing_input", {
             .change(function(){that.onChange();})
             .appendTo( $inputdiv );
 
+            //count number of lines
+            setTimeout(function(){
+                var lht = parseInt($input.css('lineHeight'),10);
+                if(!(lht>0)) lht = parseInt($input.css('font-size'))*1.3;
+                var cnt = ($input.prop('scrollHeight') / lht).toFixed();            
+    console.log(lht+'  '+cnt+'  '+dheight);            
+                if(cnt>dheight && dheight>2){
+                    $input.attr('rows', dheight);    
+                }else{
+                    $input.attr('rows', cnt);        
+                }
+            },1000);
             
             if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
             //&& this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
@@ -676,7 +691,7 @@ $.widget( "heurist.editing_input", {
                     
                             var eid = '#'+$input.attr('id')+'_editor';                    
                     
-                            $(eid).width(Math.max(710, $input.width())).height($input.height()+100).val($input.val()); 
+                            $(eid).width(Math.max(710, $input.width())).height($input.height()).val($input.val()); 
                             $editor.parent().css({display:'inline-block'});
                             //html($.parseHTML(   
                             
@@ -703,6 +718,7 @@ $.widget( "heurist.editing_input", {
                                     inline_styles: true,
                                     content_style: "body { font-size: 8pt; font-family: Helvetica,Arial,sans-serif; }",
                                     //width: nw, // '120ex', 
+                                    height: ($input.height()+110),
                                     setup:function(editor) {
                                         
                                         if(editor.ui){
