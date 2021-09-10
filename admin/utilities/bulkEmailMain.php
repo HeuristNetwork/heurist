@@ -94,10 +94,10 @@ while($email = $email_list->fetch_row()){
 }
 
 if(!$has_emails || empty($emails)) {
-    print "<br><br>This function sends bulk emails based on text in a selected Email record<br><br>"
+    print "<br><br>This function sends bulk emails based on text in a selected <strong>Email</strong> record<br><br>"
     . "The Email record to be used must contain a title field and a short summary field - the latter will be used as the email's body.<br><br>" 
     . $_REQUEST['db'] . " contains no valid Email records.<br><br>"
-    . "<strong>Please create an Email record in the database containing the text<br>you want to send out, using ##...## markers for values to be inserted.<br><br>"
+    . "<strong>Please create an Email record in the database containing the text<br>you want to send out, using ##...## markers for values to be inserted.</strong><br><br>"
     . "Placeholders that will be replaced with proper values (case insensitive):<br><br>"
     . "##firstname## &rarr; User's First Name,<br>"
     . "##lastname## &rarr; User's Last Name,<br>" 
