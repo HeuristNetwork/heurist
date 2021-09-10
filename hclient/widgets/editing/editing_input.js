@@ -635,11 +635,6 @@ $.widget( "heurist.editing_input", {
 
         if(this.detailType=='blocktext'){//----------------------------------------------------
 
-            var dheight = this.f('rst_DisplayHeight');  //max height 
-            
-            var dheight = this.f('rst_DisplayHeight');  //max height 
-            //IJ 2021-09-09 - from now dheight is max height in lines - otherwise the height is auto
-            
             $input = $( "<textarea>",{rows:2}) //min number of lines
             .uniqueId()
             .val(value)
@@ -654,18 +649,24 @@ $.widget( "heurist.editing_input", {
             .change(function(){that.onChange();})
             .appendTo( $inputdiv );
 
-            //count number of lines
-            setTimeout(function(){
+            //IJ 2021-09-09 - from now dheight is max height in lines - otherwise the height is auto
+            function __adjustTextareaHeight(){
+                $input.attr('rows', 2);
+                var dheight = that.f('rst_DisplayHeight');  //max height 
                 var lht = parseInt($input.css('lineHeight'),10);
                 if(!(lht>0)) lht = parseInt($input.css('font-size'))*1.3;
                 var cnt = ($input.prop('scrollHeight') / lht).toFixed();            
-    console.log(lht+'  '+cnt+'  '+dheight);            
-                if(cnt>dheight && dheight>2){
-                    $input.attr('rows', dheight);    
-                }else{
-                    $input.attr('rows', cnt);        
+                if(cnt>0){
+                    if(cnt>dheight && dheight>2){
+                        $input.attr('rows', dheight);    
+                    }else{
+                        $input.attr('rows', cnt);        
+                    }
                 }
-            },1000);
+            }
+            
+            //count number of lines
+            setTimeout(__adjustTextareaHeight, 1000);
             
             if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
             //&& this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
@@ -692,7 +693,7 @@ $.widget( "heurist.editing_input", {
                             var eid = '#'+$input.attr('id')+'_editor';                    
                     
                             $(eid).width(Math.max(710, $input.width())).height($input.height()).val($input.val()); 
-                            $editor.parent().css({display:'inline-block'});
+                            $(eid).parent().css({display:'inline-block'});
                             //html($.parseHTML(   
                             
                             $btn_edit_switcher.text('text');
@@ -738,11 +739,11 @@ $.widget( "heurist.editing_input", {
                                                   }
                                                 });                                        
                                         }
-                                        
+                                        /*
                                         editor.on('init', function(e) {
                                             $('.tox-edit-area').css({border:'1px solid blue'});
                                         });
-                                        
+                                        */
 
                                         editor.on('change', function(e) {
                                             
@@ -845,6 +846,7 @@ $.widget( "heurist.editing_input", {
                             //tinymce.remove('#'+$input.attr('id'));
                             tinymce.remove(eid);
                             $(eid).parent().hide();
+                            __adjustTextareaHeight();
                         }                        
                     }});
                     this._on( $btn_edit_switcher2, { click: function(){
@@ -885,6 +887,7 @@ $.widget( "heurist.editing_input", {
                                 $input.show();
                                 tinymce.remove(eid);
                                 $(eid).parent().hide();
+                                __adjustTextareaHeight();
                             }
                         }});
                 }
