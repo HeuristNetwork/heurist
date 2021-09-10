@@ -86,7 +86,7 @@ external/php/phpZotero.php (114-121) support proxy settings
 
         
 2021-09-06  ../external_h5/jquery-file-upload/js/jquery.fileupload-ui.js 
-        line 234. Added explanation about zerp file size due length of file name    
+        line 234. Added explanation about zero file size due length of file name    
         
 -----------------------------------------------------------------------------------------------------------------------------------
 
