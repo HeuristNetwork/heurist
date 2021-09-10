@@ -8,7 +8,7 @@
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     5
+* @version     6
 */
 
 /*
@@ -19,7 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-Updated 4 March 2019, Artem Osmakov, revised Ian Johnson
+Updated 4 March 2019, Artem Osmakov, revised Ian Johnson 23 Aug 2021
 
 External code libraries, not included in the Heurist git repository, are in the following directories simlinked from each instance of the Heurist code:
 
@@ -28,6 +28,13 @@ External code libraries, not included in the Heurist git repository, are in the 
 .../HEURIST_SUPPORT/help is simlinked as /help
 
 External libraries managed by composer (see composer.json) are in .../HEURIST_SUPPORT/vendors
+
+Note: The following libraries are accessed directly on the web via their URL. They also exist in HEURIST_SUPPORT/external-h5 so that Heurist can be run on a local machine with no internet access and in case the web versions should ever disappear.
+
+    Datatables 1.10.21
+    Fancytree 2.16.1
+    JQuery 1.12  version 2 and 3 are very different, large cost to upgrade
+    JQuery-file-upload 9.5.7
 
 See also /documentation_and_templates/modifications_to_external_functions.txt for specific changes that have been made to the source code of these functions (where unavoidable), and the reasons for modification.
 
