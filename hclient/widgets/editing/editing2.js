@@ -450,6 +450,11 @@ function hEditing(_options) {
                 for(; i < $tabs.length; i++){
                     max_width = (max_width < $($tabs[i]).width()) ? $($tabs[i]).width() : max_width;
                 }
+				
+                if(max_width == 0){
+                    return;
+                }
+				
                 max_width += 15; // Add additional 'left padding'
                 $tabs.css('width', max_width+'px');
             });

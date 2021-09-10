@@ -733,10 +733,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             var recset = $Db.rst(that._currentEditRecTypeID);
                             var hasField = false;
 
-                            recset.each2(function(id, f){
-                                if(f.rst_DefaultValue == 'tabs' || f.rst_DefaultValue == 'group'){ return; }
-                                hasField = true;
-                            });
+                            if(!window.hWin.HEURIST4.util.isempty(recset)){
+
+                                recset.each2(function(id, f){
+                                    if(f.rst_DefaultValue == 'tabs' || f.rst_DefaultValue == 'group'){ return; }
+                                    hasField = true;
+                                });
+                            }
 
                             if(!hasField){ // check if any fields have been added to rectype
 

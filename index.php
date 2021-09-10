@@ -248,10 +248,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.css" />
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.js"></script>
-        
-        <script src="external/tinymce/tinymce.min.js"></script>
-        <script src="external/tinymce/jquery.tinymce.min.js"></script>
-        
+
+        <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>     
         <!-- os, browser detector -->
         <script type="text/javascript" src="external/js/platform.js"></script>
         

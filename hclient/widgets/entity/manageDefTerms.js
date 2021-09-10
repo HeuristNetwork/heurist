@@ -1025,7 +1025,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             if(this.options.select_mode=='manager' && !(ref_lvl>0)){ //
 
                 html = html + '<div class="rec_action_link2" style="margin-left:1em;'
-                +'width:'+(sRef?20:62)+'px;height:20px;background:lightgray;display:inline-block;vertical-align:middle;">';
+                +'width:'+(sRef?20:
+                        ($Db.trm(recID, 'trm_ParentTermID')!=this.options.trm_VocabularyID?80:62))
+                +'px;height:20px;background:lightgray;display:inline-block;vertical-align:middle;">';
 
                 if(ref_lvl===0){
                     html = html 
@@ -1044,6 +1046,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     + this._defineActionButton({key:'add-child',label:'Add child', 
                         title:'', icon:'ui-icon-plus',class:'rec_actions_button'},
                         null,'icon_text');
+                        
+                    if($Db.trm(recID, 'trm_ParentTermID')!=this.options.trm_VocabularyID) {
+                        html = html + this._defineActionButton({key:'moveup',label:'Move to level up', 
+                        title:'', icon:'ui-icon-arrow-u',class:'rec_actions_button'},
+                        null,'icon_text')
+                    }    
+                        
                 }else{
                     html = html + ref_lvl;
                 }
@@ -1963,6 +1972,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             //this.options.trm_VocabularyGroupID = recID;
             this.addEditRecord(-1);        
             return true;
+        }else if(action=='moveup'){
+            //move term to level up
+            var parent_id = $Db.trm(recID, 'trm_ParentTermID');
+            parent_id = $Db.trm(parent_id, 'trm_ParentTermID');
+            if(parent_id>0)
+                this.changeVocabularyGroup({trm_ID:recID, trm_ParentTermID:parent_id}, true);            
+            
         }else if(action=='add-child'){
 
             this.options.trm_ParentTermID = recID;

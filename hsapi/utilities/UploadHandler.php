@@ -50,7 +50,8 @@ class UploadHandler
         'min_height' => 'Image requires a minimum height',
         'only_heurist' => 'Uploading is allowed to heurist file storage only',
         'abort' => 'File upload aborted',
-        'image_resize' => 'Failed to resize image'
+        'image_resize' => 'Failed to resize image',
+        'file_name_too_big' => 'The maximum length for a file name is 255 bytes.'
     );
     
     
@@ -64,6 +65,7 @@ class UploadHandler
         //get upload folder from parameters
         $upload_dir = @$_REQUEST['folder']; //defined in form
         $replace_edited_file = (@$_REQUEST['replace_edited_file']==1); //defined in form
+        $unique_filename = (@$_REQUEST['unique_filename']!=='0'); //defined in form
         
         if(!$upload_dir){
             if(@$_REQUEST['db']){
@@ -98,7 +100,7 @@ class UploadHandler
             'user_dirs' => false,
             'mkdir_mode' => 0755,
             'param_name' => 'files',
-            'unique_filename' => false, //generate unique name for every upload
+            'unique_filename' => $unique_filename, //generate unique name for every upload
             'replace_edited_file' => $replace_edited_file, //if unique_filename is false, overwrtie file with same name and different checksum
             'newfilename' => '', //rename file on server
             // Set the following option to 'POST', if your server does not support
@@ -1336,6 +1338,12 @@ $siz = get_php_bytes('upload_max_filesize');
         $file->original_name = $original_name;
         $file->subfolder = $subfolder;
         
+        //check max allowed file name - 255 bytes
+        if(strlen($file->name)>255){
+            $file->error = $this->get_error_message('file_name_too_big');
+            return $file;;
+        }
+            
         if(!$this->options['unique_filename']){
             // Keep an existing filename if this is part of a chunked upload:
             $uploaded_bytes = $this->fix_integer_overflow((int)$content_range[1]);
@@ -1380,7 +1388,7 @@ $siz = get_php_bytes('upload_max_filesize');
                         FILE_APPEND
                     );
                 } else {
-                    move_uploaded_file($uploaded_file, $file_path);
+                    $res = move_uploaded_file($uploaded_file, $file_path);
                 }
             } else {
                 // Non-multipart uploads (PUT method support)
@@ -1389,6 +1397,12 @@ $siz = get_php_bytes('upload_max_filesize');
                     fopen($this->options['input_stream'], 'r'),
                     $append_file ? FILE_APPEND : 0
                 );
+            }
+            
+            //file does not exist
+            if(!is_file($file_path)){
+                $file->error = 'File is not uploaded';//$this->get_error_message('skip_same_name');
+                return $file;
             }
 
             

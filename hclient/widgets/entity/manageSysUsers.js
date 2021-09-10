@@ -426,16 +426,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                     + '</div>&nbsp;&nbsp;';
                if(recID != 2){ //owner
-			   
-               /* New DB Owner needs to be enabled user */
-               /*
-					if (fld('ugr_Enabled')=='y'){	
-                        html = html
-                        + '<div title="Click to transfer DB Ownership" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="transferOwner" style="height:16px">'               
-                        +     '<span class="ui-button-icon-primary ui-icon ui-icon-transfer-e-w"></span><span class="ui-button-text"></span>'               
-                        + '</div>';
-                    }
-			   */
+
                     html = html      
                     + '<div title="Click to delete user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" style="height:16px">'
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
@@ -477,7 +468,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             request['ugl_GroupID'] = ugl_GroupID;
         }
         
-        
         request[this.options.entity.keyField] = arr_ids;
         window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
     },
@@ -509,7 +499,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         var btnTrOwner = this._toolbar.find('#btnTransferOwnership');
         
         if(this._currentEditID>0 && this._currentEditID!=2 && window.hWin.HAPI4.user_id()==2){
-            //add special button
+            //add ownershup transfer button
             if(btnTrOwner.length==0){
                 btnTrOwner = $('<button id="btnTransferOwnership">')
                         .appendTo(this._toolbar);
@@ -522,8 +512,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }else{
             if(btnTrOwner) btnTrOwner.hide();
         }
-        
-            
         
         if(!window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.currentUser['ugr_ID']==this._currentEditID){
             var input_ele = this._editing.getFieldByName('ugr_Enabled');
@@ -581,6 +569,19 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
     _transferDBOwner: function(unconditionally){
 
         if(this._currentEditID==null || this._currentEditID<1) return;
+
+        var isEnabled = this._editing.getValue('ugr_Enabled')[0];
+        var isModified = this._editing.isModified();
+
+        if(isModified){
+
+            window.hWin.HEURIST4.msg.showMsgDlg('Please save or revert any changes made to this user to transfer ownership');
+            return;
+        }else if(isEnabled == 'n'){
+            
+            window.hWin.HEURIST4.msg.showMsgDlg('Unable to transfer database ownership to an disabled account.<br>Please enable it to transfer ownership');
+            return;
+        }
 
         if(unconditionally===true){
             

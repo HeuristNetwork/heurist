@@ -30,6 +30,7 @@ $.widget( "heurist.recordListExt", {
         selection: null,  //list of selected record ids
         url:null,               //
         is_frame_based: true,
+        custom_css_for_frame: null,
         
         reload_for_recordset: false, //refresh every time recordset is changed - for smarty report from CMS
         search_realm: null,
@@ -169,6 +170,20 @@ this._dout('onLoadComplete refresh again');
         if($.isFunction(this.options.onLoadComplete)){
             this.options.onLoadComplete.call(this);
         }
+        
+        //add custom css to iframe
+        if(this.options.is_frame_based && this.options.custom_css_for_frame){
+            
+            var fdoc = this.dosframe[0].contentWindow.document;
+            
+            var style = document.createElement('style');
+            style.type = 'text/css'; 
+            style.innerHTML = this.options.custom_css_for_frame;
+            fdoc.getElementsByTagName('head')[0].appendChild(style);
+            
+        }
+        
+        
 //2020-03-08        
         //this._trigger( 'loadcomplete2', null, null );
     },
@@ -200,12 +215,14 @@ this._dout('update dataset '+request.q);
         this._superApply( arguments );
         //this._refresh();
     },
-    
+
+    //debug console output    
     _dout: function(msg){
-        return;
+        /*
         if(this.options.url  && this.options.url.indexOf('visual')>0){ //renderRecordData smarty
             console.log(msg);
         }
+        */
     },
     
     /*

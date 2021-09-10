@@ -1581,7 +1581,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
 
         if(!window.hWin.HAPI4.has_access()){
             // {status:window.hWin.ResponseStatus.REQUEST_DENIED} 
-            if(typeof showLoginDialog !== "undefined" && $.isFunction(showLoginDialog)){  // already loaded in index.php
+            if(typeof showLoginDialog !== 'undefined' && $.isFunction(showLoginDialog)){  // already loaded in index.php
                 //window.hWin.HEURIST4.msg.showMsgErr(top.HR('Session expired2'));
                 showLoginDialog(isforsed, callback);
             }else{
@@ -2424,7 +2424,13 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
     //
     showEditThemeDialog: function(current_value, needName, callback){
         //todo optionally load dynamically editTheme.js
-        editTheme(current_value, callback);
+        if(typeof editTheme !== 'undefined' && $.isFunction(editTheme)){
+            editTheme(current_value, callback);    
+        }else{
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editTheme.js', function(){
+                window.hWin.HEURIST4.ui.showEditThemeDialog(current_value, needName, callback);
+            }); 
+        }
     },
 
     //
@@ -2719,11 +2725,11 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
         
   },
 
-  //
-  //
+  //  NOT USED at the moment
+  //  interval function that call "cb" function after "ms" milliseconds of user idleness
+  //  it is used to verify credentials
   //
   onInactiveStart: function(ms, cb){
-      return; //DISABLED
       
       if(!window.hWin.HEURIST4.ui.wait_timeout){
           if(!isNaN(ms) && Number(ms)>0){

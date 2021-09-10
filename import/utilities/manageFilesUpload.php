@@ -238,6 +238,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
         
             <input type="hidden" name="upload_thumb_dir" value="<?php echo HEURIST_THUMB_DIR; ?>"/>
             <input type="hidden" name="upload_thumb_url" value="<?php echo (defined('HEURIST_THUMB_URL')?HEURIST_THUMB_URL:''); ?>"/>
+            <input type="hidden" name="unique_filename" value="0"/>
             
             <input type="hidden" name="db" value="<?php echo HEURIST_DBNAME; ?>"/>
             <div><label for="upload_folder" style="color:black;">Select target folder:</label>
@@ -510,7 +511,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                         if(swarns!=''){
                             swarns = 'Attention. '
                                       +($(eles).length==1?'File was not':($(eles).length+' files were not'))
-                                      +' uploaded.<br> '+swarns;
+                                      +' uploaded.<br><div style="max-height:100px;overflow-y:auto">'+swarns+'</div>';
                             window.hWin.HEURIST4.msg.showMsgErr(swarns);    
                         }
 
@@ -554,6 +555,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     url: $('#fileupload').fileupload('option', 'url'),
                     data: { db: "<?php echo HEURIST_DBNAME; ?>",
                             acceptFileTypes:"<?php echo implode('|',$allowed_exts);?>",
+                            unique_filename: 0,
                             folder: $('#upload_folder').val() },
                     dataType: 'json',
 

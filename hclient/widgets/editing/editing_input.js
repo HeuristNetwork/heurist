@@ -426,8 +426,10 @@ $.widget( "heurist.editing_input", {
 
                     if(that.detailType=='blocktext'){
                         var eid = '#'+input.attr('id')+'_editor';
+                        //tinymce.remove('#'+input.attr('id')); 
                         tinymce.remove(eid);
-                        $(eid).remove(); //remove editor element
+                        $(eid).parent().remove(); //remove editor element
+                        //$(eid).remove(); 
                         
                     }else if(that.detailType=='file'){
                         if($(input).fileupload('instance')!==undefined) $(input).fileupload('destroy');
@@ -633,9 +635,7 @@ $.widget( "heurist.editing_input", {
 
         if(this.detailType=='blocktext'){//----------------------------------------------------
 
-            var dheight = this.f('rst_DisplayHeight');
-            
-            $input = $( "<textarea>",{rows:dheight,})
+            $input = $( "<textarea>",{rows:2}) //min number of lines
             .uniqueId()
             .val(value)
             .addClass('text ui-widget-content ui-corner-all')
@@ -649,6 +649,24 @@ $.widget( "heurist.editing_input", {
             .change(function(){that.onChange();})
             .appendTo( $inputdiv );
 
+            //IJ 2021-09-09 - from now dheight is max height in lines - otherwise the height is auto
+            function __adjustTextareaHeight(){
+                $input.attr('rows', 2);
+                var dheight = that.f('rst_DisplayHeight');  //max height 
+                var lht = parseInt($input.css('lineHeight'),10);
+                if(!(lht>0)) lht = parseInt($input.css('font-size'))*1.3;
+                var cnt = ($input.prop('scrollHeight') / lht).toFixed();            
+                if(cnt>0){
+                    if(cnt>dheight && dheight>2){
+                        $input.attr('rows', dheight);    
+                    }else{
+                        $input.attr('rows', cnt);        
+                    }
+                }
+            }
+            
+            //count number of lines
+            setTimeout(__adjustTextareaHeight, 1000);
             
             if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
             //&& this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
@@ -657,12 +675,12 @@ $.widget( "heurist.editing_input", {
                 
                 var eid = $input.attr('id')+'_editor';
                 
-                $editor = $( "<div>")
+                $editor = $( "<textarea>")
                 .attr("id", eid)
-                .addClass('text ui-widget-content ui-corner-all')
-                .css({'overflow-x':'hidden','display':'inline-block'})
-                .appendTo( $inputdiv ).hide();
-                
+                //.addClass('text ui-widget-content ui-corner-all')
+                .css({'overflow':'auto',display:'flex',resize:'both'})
+                .appendTo( $('<div>').css({'display':'inline-block'}).appendTo($inputdiv) );
+                $editor.parent().hide();
                   
                 var $btn_edit_switcher = $( '<span>html</span>', {title: 'Show/hide Rich text editor'})
                     //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')      btn_add_term
@@ -671,41 +689,65 @@ $.widget( "heurist.editing_input", {
                     .appendTo( $inputdiv );
                                 
                 function __showEditor(is_manual){
-                    var eid = '#'+$input.attr('id')+'_editor';                    
                     
-                    $input.hide();
-                            $(eid).html($.parseHTML($input.val())).width($input.width()).height($input.height()).show();
-
+                            var eid = '#'+$input.attr('id')+'_editor';                    
+                    
+                            $(eid).width(Math.max(710, $input.width())).height($input.height()).val($input.val()); 
+                            $(eid).parent().css({display:'inline-block'});
+                            //html($.parseHTML(   
+                            
                             $btn_edit_switcher.text('text');
         
                             var nw = $input.css('min-width');
 
                             tinymce.init({
                                     //target: $editor, 
-                                    selector: (eid),
+                                    //selector: '#'+$input.attr('id'),
+                                    selector: eid,
+                                    menubar: false,
                                     inline: false,
                                     branding: false,
                                     elementpath: false,
-                                    statusbar: true,
-                                    resize: 'both',
-                                    menubar: false,
+                                    statusbar: true,        
+                                    resize: 'both', 
+                                    
                                     relative_urls : false,
                                     remove_script_host : false,
                                     convert_urls : true, 
-                                    width: nw, // '120ex',           
                                     
                                     entity_encoding:'raw',
-                                    setup:function(ed) {
-                                        ed.addButton('customHeuristMedia', {
-                                                icon: 'image',
-                                                text: 'Media',
-                                                onclick: function (_) {  //since v5 onAction in v4 onclick
-                                                    that._addHeuristMedia();
-                                                }
-                                            });
+                                    inline_styles: true,
+                                    content_style: "body { font-size: 8pt; font-family: Helvetica,Arial,sans-serif; }",
+                                    //width: nw, // '120ex', 
+                                    height: ($input.height()+110),
+                                    setup:function(editor) {
+                                        
+                                        if(editor.ui){
+                                            editor.ui.registry.addButton('customHeuristMedia', {
+                                                  icon: 'image',
+                                                  text: 'Media',
+                                                  onAction: function (_) {  //since v5 onAction in v4 onclick
+                                                        that._addHeuristMedia();
+                                                  }
+                                                });                                        
+                                        }else{
+                                            editor.addButton('customHeuristMedia', {
+                                                  icon: 'image',
+                                                  text: 'Media',
+                                                  onclick: function (_) {  //since v5 onAction in v4 onclick
+                                                        that._addHeuristMedia();
+                                                  }
+                                                });                                        
+                                        }
+                                        /*
+                                        editor.on('init', function(e) {
+                                            $('.tox-edit-area').css({border:'1px solid blue'});
+                                        });
+                                        */
 
-                                        ed.on('change', function(e) {
-                                            var newval = ed.getContent();
+                                        editor.on('change', function(e) {
+                                            
+                                            var newval = editor.getContent();
                                             var nodes = $.parseHTML(newval);
                                             if(nodes && nodes.length==1 &&  !(nodes[0].childElementCount>0) &&
                                                 (nodes[0].nodeName=='#text' || nodes[0].nodeName=='P'))
@@ -715,15 +757,16 @@ $.widget( "heurist.editing_input", {
                                             }else{
                                                 $input.val(newval);     
                                             }
-
+                                            
                                             //$input.val( ed.getContent() );
                                             that.onChange();
+                                            
                                         });
                                     },
-                                    plugins: [
-                                        'advlist autolink lists link image preview textcolor', //anchor charmap print 
+                                    plugins: [                                     //contextmenu, textcolor since v5 in core
+                                        'advlist autolink lists link image preview ', //anchor charmap print 
                                         'searchreplace visualblocks code fullscreen',
-                                        'media table contextmenu paste help'  //insertdatetime  wordcount
+                                        'media table paste help'  //insertdatetime  wordcount
                                       ],      
                                       //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
                                     toolbar: ['formatselect | bold italic forecolor | customHeuristMedia link | align | bullist numlist outdent indent | removeformat | help'],
@@ -732,7 +775,10 @@ $.widget( "heurist.editing_input", {
                                         //,'//www.tinymce.com/css/codepen.min.css'
                                         ]                    
                               });
-      
+                              
+                              
+                                                 $input.hide();
+
                 }
                 
                 
@@ -797,8 +843,10 @@ $.widget( "heurist.editing_input", {
                         }else{
                             $btn_edit_switcher.text('wyswyg');
                             $input.show();
+                            //tinymce.remove('#'+$input.attr('id'));
                             tinymce.remove(eid);
-                            $(eid).hide();
+                            $(eid).parent().hide();
+                            __adjustTextareaHeight();
                         }                        
                     }});
                     this._on( $btn_edit_switcher2, { click: function(){
@@ -838,7 +886,8 @@ $.widget( "heurist.editing_input", {
                                 $btn_edit_switcher.text('wyswyg');
                                 $input.show();
                                 tinymce.remove(eid);
-                                $(eid).hide();
+                                $(eid).parent().hide();
+                                __adjustTextareaHeight();
                             }
                         }});
                 }

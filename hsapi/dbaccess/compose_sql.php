@@ -1422,11 +1422,11 @@ class AnyPredicate extends Predicate {
         
         $not = ($this->parent->negate)? 'not ' : '';
         return $not . ' (exists (select rd.dtl_ID from recDetails rd '
-        . 'left join defDetailTypes on dtl_DetailTypeID=dty_ID '
+        . 'left join defDetailTypes on rd.dtl_DetailTypeID=dty_ID '
         . 'left join Records link on rd.dtl_Value=link.rec_ID '
         . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
         . '  and if(dty_Type != "resource", '
-        .'rd.dtl_Value like "%'.$val.'%", '
+        . 'if(dty_Type="enum", dtl_Value in (select trm_ID from defTerms where trm_Label like "%'.$val.'%" or trm_Code="'.$val.'"), rd.dtl_Value like "%'.$val.'%"), '
         .'link.rec_Title like "%'.$val.'%"))'
         .' or TOPBIBLIO.rec_Title like "%'.$val.'%") ';
     }
@@ -1440,7 +1440,7 @@ class FieldPredicate extends Predicate {
 
     function __construct(&$parent, $type, $value) {
         $this->field_type = $type;
-        parent::Predicate($parent, $value);
+        parent::__construct($parent, $value);
 
         if (strlen($value)>0 && $value[0] == '-') {    // DWIM: user wants a negate, we'll let them put it here
             $parent->negate = true;
@@ -1946,7 +1946,7 @@ class FieldCountPredicate extends Predicate {
 
     function __construct(&$parent, $type, $value) {
         $this->field_type = $type;
-        parent::Predicate($parent, $value);
+        parent::__construct($parent, $value);
 
         if ($value[0] == '-') {    // DWIM: user wants a negate, we'll let them put it here
             $parent->negate = true;
@@ -2928,7 +2928,7 @@ class DatePredicate extends Predicate {
 
     function __construct(&$parent, $col, $value) {
         $this->col = $col;
-        parent::Predicate($parent, $value);
+        parent::__construct($parent, $value);
     }
     
     
@@ -2955,13 +2955,13 @@ class DatePredicate extends Predicate {
 
 class DateAddedPredicate extends DatePredicate {
     function __construct(&$parent, $value) {
-        parent::DatePredicate($parent, 'TOPBIBLIO.rec_Added', $value);
+        parent::__construct($parent, 'TOPBIBLIO.rec_Added', $value);
     }
 }
 
 class DateModifiedPredicate extends DatePredicate {
     function __construct(&$parent, $value) {
-        parent::DatePredicate($parent, 'TOPBIBLIO.rec_Modified', $value);
+        parent::__construct($parent, 'TOPBIBLIO.rec_Modified', $value);
     }
 }
 

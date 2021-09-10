@@ -566,6 +566,12 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                         return false;
                     }
                 },
+                renderNode: function(event, data){
+                    
+                    if(data.node.data.is_generic_fields) { // hide blue arrow for generic fields
+                        $(data.node.span.childNodes[1]).hide();
+                    }
+                },
                 lazyLoad: function(event, data){
                     var node = data.node;
                     var parentcode = node.data.code; 
@@ -605,11 +611,17 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     }
                 },
                 click: function(e, data){
+
+                    var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+                    var setDefaults = !data.node.isExpanded();
+
                     if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
                         
-                        data.node.setExpanded(!data.node.isExpanded());
+                        if(!isExpander){
+                            data.node.setExpanded(!data.node.isExpanded());
+                        }
 
-                        if(data.node.isExpanded()){
+                        if(setDefaults){
                             for(var i=0; i<data.node.children.length; i++){
                                 var node = data.node.children[i];
                                 if(node.key=='rec_ID' || node.key=='rec_Title'){
@@ -618,7 +630,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                             }
                         }
 
-                    }else if(data.node.lazy) {
+                    }else if(data.node.lazy && !isExpander) {
                         data.node.setExpanded(true);
                     }
                 },
@@ -814,4 +826,3 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     }
 
 });
-

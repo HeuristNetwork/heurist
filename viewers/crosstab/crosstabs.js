@@ -73,26 +73,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         $('#btnPanels').find('button').button();
 
-
         query_main = _query?_query:'';
         query_domain =_query_domain?_query_domain:'all';
 
         //record type dropdown
         $recTypeSelector = window.hWin.HEURIST4.ui.createRectypeSelect( $('#cbRectypes').get(0), null,
                     window.hWin.HR('select record type'), false );
-        //Make width run to 100% of col
-        $('#cbRectypes-button').css('width', '100%');
+        $('#cbRectypes-button').css('width', '90%');
         $recTypeSelector.hSelect({ change: _onRectypeChange });
-        //$rec_select.change(_onRectypeChange);
+        $recTypeSelector.hSelect('refresh');
 
         $('.showintervals')
         .click(function( event ) {
-            /*var isVisible = showHideIntervals( $(this).attr('tt') );
-            if(isVisible){
-                $(this).removeClass('collapsed');
-            }else{
-                $(this).addClass('collapsed');
-            }*/
             var $modal = determineModalType( $(this).attr('tt') );
 
             $modal.modal('show');
@@ -113,21 +105,17 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //divLoadSettingsName: this.element
         divSaveSettings: $('#divSaveSettings'),  //element
         showButtons: true,
-        useHTMLselect: true
+        useHTMLselect: true,
+
+        loadSettingLabel: "Load settings "
       });
 
       configEntityWidget.configEntity( 'updateList', $recTypeSelector.val() );
 
       //Reconfigure save buttons
-      $('.inpt_save_setting_name').addClass('rounded-0')
-      $('span.btn-rename').addClass('bg-warning saveEditButton');
-      $('span.btn-remove').css('margin', '2px');
-      $('span.btn-remove').addClass('bg-danger saveRemoveButton');
       $('.btn-remove span:first-child').removeClass('ui-icon-delete');
       $('.btn-remove span:first-child').addClass('ui-icon-trash saveIconRemoveButton ');
       $('.btn-rename span:first-child').addClass('saveIconEditButton');
-      $('.btnSaveSettings').html('<i class="ui-icon ui-icon-save"></i> Save')
-
     }
 
     function _OnRowTypeChange(value) {
@@ -180,7 +168,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $("#btnPanels").show();
         }
 
-        //createRectypeDetailSelect($('#cbAggField').get(0), _selectedRtyID, ["integer", "float"], false);
         window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbAggField').get(0), _selectedRtyID, ["integer", "float"], false);
         _changeAggregationMode();
 
@@ -233,7 +220,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var $headerModal = $('#'+name+'Header');
         var $container = $('#'+name+'IntervalsBody');
         var $tooltip = $('#'+name+'Tooltip')
-        var $editButton = $('#'+name+'Vars').find('button');
+        var $editButton = $tooltip.find('button');
         var $errorContainer = $('#errorContainer');
 
         $headerModal.empty();
@@ -263,12 +250,19 @@ function CrosstabsAnalysis(_query, _query_domain) {
         fields3['row'] = allFields['row'];
         fields3['page'] = allFields['page'];
 
+        $('#aggSum').hide();
+        $('#aggAvg').hide();
+
         for(d=0;d<3;d++){
             if(d==0) name = 'column'; 
             if(d==1) name = 'row';
             if(d==2) name = 'page';
 
             $('#cb'+name[0].toUpperCase()+name.slice(1)+'s').val(fields3[name].field);
+
+            if(fields3[name].field && fields3[name].field > 0){
+                $('#'+name+'Tooltip').find('button').removeAttr('disabled');
+            }
 
             if(fields3[name].type=="enum" || fields3[name].type=="resource" || fields3[name].type=="relationtype"){
                 if(fields3[name].intervals.length > 0){
@@ -277,21 +271,21 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         __addeditInterval( name, j, false);
                     }
                 }
-            }
-            else if(fields3[name].type=="float" || fields3[name].type=="integer"){
+            }else if(fields3[name].type=="float" || fields3[name].type=="integer"){
                 if(fields3[name].intervals.length > 0){
                     minMax[0] = fields3[name].values[0];
                     minMax[1] = fields3[name].values[1];
                     keepCount = counts;
                     renderIntervals(name);
                 }
+                $('#aggSum').show();
+                $('#aggAvg').show();
             }
         
         }
 
         _doRetrieve();
         $('#bottomContainer').removeClass('d-none');
-
     }
 
     //
@@ -326,6 +320,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
     */
     function _resetIntervals(event){
         needServerRequest = true;
+
         var detailid = event.target.value;
         var name = $(event.target).attr('name');  //type
 
@@ -353,6 +348,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var detailtype = $Db.dty(detailid,'dty_Type');
         var detailname = $Db.rst(_selectedRtyID, detailid, 'rst_DisplayName');
 
+        $('#aggSum').hide();
+        $('#aggAvg').hide();
 
         fields3[name] = {field:detailid, fieldname:detailname, type:detailtype, values:[], intervals:[]}
 
@@ -363,6 +360,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }else if(detailtype=="float" || detailtype=="integer"){
             //get min and max for this detail in database
+
+            $('#aggSum').show();
+            $('#aggAvg').show();
 
             var baseurl = window.hWin.HAPI4.baseURL + "viewers/crosstab/crosstabs_srv.php";
             var request = { a:'minmax', rt:_selectedRtyID , dt:detailid, session: Math.round((new Date()).getTime()/1000) };
@@ -597,16 +597,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //$container.empty();
 
         if(fields3[name].intervals.length<1){
-            var errorMessage = 'There are no values for these fields in the current results set.';
-            //createErrorMessage($('#errorContainer'), errorMessage);
-            //$('#errorContainer').removeClass('d-none');
 
             //Highlight area (animation)
             $('#'+name+'Vars').animate(
                 {backgroundColor : "#FFF3cd"}, 500
             );
 
-            //Display message beneath dropdown
             $('#'+name+'Warning')
                 .animate( {backgroundColor : "#FFF3cd"}, 500 )
                 .css({
@@ -614,7 +610,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     'font-size': 'smaller',
                     'color': 'red'
                 })
-                .html(errorMessage);
+                .html('There are no values for these fields in the current results set')
 
             //Disable Button.
             $('#'+name+'Vars').find('button').prop('disabled', true);
@@ -626,10 +622,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
             return;
         }
 
-        if(fields3[name].values && fields3[name].values.length>0)
-        {
+
+        if(fields3[name].values && fields3[name].values.length>0){
             var totalVars = 0;  //Holds number of fields that have no style
             //Remove previous error animation style
+
             $('#'+name+'Vars').removeAttr('style');
 
             $('#'+name+'Warning')
@@ -825,7 +822,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             //.css({'max-width':'250px','width':'250px','display':'inline-block','padding-left':'1.5em'})
                             .appendTo($intdiv);    
                         }
-
                     }
                 }
 
@@ -1970,16 +1966,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
     * request to server for crosstab data
     */
     function _doRetrieve(){
-        /*
-        use `hdb_dos_3`;
-        select d1.dtl_Value as cls, d2.dtl_Value as rws, count(*) as cnt
-        from Records
-        left join recDetails d1 on d1.dtl_RecID=rec_ID and d1.dtl_DetailTypeID=85
-        left join recDetails d2 on d2.dtl_RecID=rec_ID and d2.dtl_DetailTypeID=81
-        where rec_RectypeID=15
-        group by d1.dtl_Value, d2.dtl_Value
-        order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
-        */
 
         if(needServerRequest){
 
@@ -2154,18 +2140,23 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         var date = new Date();
         var showZeroBlankText = "";
-        var topText = 'DB: '+window.hWin.HAPI4.database+ ',Date and time: ' + (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear());
+        var topText = 'DB: '+window.hWin.HAPI4.database+ ', ' + (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear());
 
-        $divres.append('<div></div>')
         $divres.append('<span>DB: <b>'+window.hWin.HAPI4.database+' </b></span>');
-        $divres.append('<span>Date and time: '+ (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear())+' </span>');
-        //$divres.append('<div>Type of analysis: Crosstab</div>');
-        //$divres.append('<div>Title (name) of saved analysis: '+ +'</div>');
-        //????? $divres.append('<div>Record type analysed: '++'</div>');
+        $divres.append('<span style="padding-left: 40px;"> '+ (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear())+' </span>');
+        
+        if(_currentRecordset != null){
+            $('<div id="dt_extra_container"></div>')
+            .appendTo($divres)
+            .css({
+                'display': 'inline-block',
+                'float': 'right'
+            });
+        }
+
         if(_currentRecordset!=null){
-            $divres.append('<span>N = '+ _currentRecordset['recordCount'] +' </span>');
-            $divres.append('<span>Query string: '+_currentRecordset['query_main'] +' </span>');
-            topText += ',N = '+ _currentRecordset['recordCount'] +  ',Query string: '+_currentRecordset['query_main'];
+            $divres.append('<span style="padding-left: 25px;">N = '+ _currentRecordset['recordCount'] +' </span>');
+            topText += ', N = '+ _currentRecordset['recordCount'] +  ',<br/>Query string: '+_currentRecordset['query_main'];
 
         }else{
             $divres.append('<span>Query string: q='+query_main+'&w='+query_domain +' </span>');
@@ -2185,11 +2176,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
             aggregationMode = "Counts";
         }
 
+        $divres.append('<span style="padding-left: 25px;">Displaying: <b>'+aggregationMode+'</b></span>');
 
+        if(_currentRecordset != null){
+            $divres.append('<br/><span>Query string: '+_currentRecordset['query_main'] +' </span>');
+        }
 
-        $divres.append('<span>Type of value displayed: <b>'+aggregationMode+'</b></span>');
-
-        $divres.append('<div></div>');
         //Type of value displayed (count, average, sum)
         
         if(fields3['page'].intervals.length <=0){
@@ -2198,8 +2190,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
             if(fields3['row'].intervals.length > 0 && fields3['column'].intervals.length > 0) tableTitle += fields3['row'].fieldname + ' and ' + fields3['column'].fieldname;
             tableTitle += ' ' + aggregationMode;
             //Append text box for user to enter table title.
-            $divres.append('<div class="p-2"><label class="me-2" for="tableTitle">Enter a table title:</label><input type="text" class="rounded-0" id="tableTitle"></input><button class="btn btn-success ms-2" id="titleSubmit"><i class="ui-icon ui-icon-circle-check"></i> Apply</button></div>');
-            $divres.append('<h2 class="crosstab-page" id="tableHeader">'+tableTitle+'</h2>');
+            $divres.append('<div class="p-2" id="titleInput"><input type="text" class="text form-control rounded-0" style="display: inline-block;width: 75%;" id="tableTitle">'
+                    + '<button class="btn btn-success ms-2 mb-2 p-1" style="font-size: 13px;" id="titleSubmit"><i class="ui-icon ui-icon-circle-check" /> Apply</button></div>');
+
+            $divres.append('<div class="p-2" id="titleDisplay"><h2 class="crosstab-page" style="display: inline-block;" id="tableHeader">'+tableTitle+'</h2>'
+                    + '<button class="btn btn-warning ms-2" id="titleEdit"><i class="ui-button-icon ui-icon ui-icon-pencil" /></button></div>');
+            
             $('#titleSubmit').click(function(){
                 var title = $('#tableTitle').val();
 
@@ -2209,8 +2205,20 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 else{
                     $('#tableHeader').html(title);
                 }
-                
+
+                $('#titleInput').hide();
+                $('#titleDisplay').show();
             });
+
+            $('#titleEdit').click(function(){
+
+                $('#tableTitle').val($('#tableHeader').html());
+
+                $('#titleInput').show();
+                $('#titleDisplay').hide();
+            });
+
+            $('#titleInput').hide();
         }
 
         if(plen<1){ //less than 1 page
@@ -2272,7 +2280,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         //Create datatable
         $(document).ready(function(){
-            $(".resultsTable").DataTable({
+            var $d_table = $(".resultsTable").DataTable({
                 "paging" : false,
                 "info" : false,
                 dom:"Bfrtip",
@@ -2382,19 +2390,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         },
                         footer: true
                     
-                    }, 
-
-                    /*
-                    {
-                        extend:'print',
-                        className: 'exportButtons',
-                        messageTop: topText,
-                        footer: true
-                    }
-                    */
-                ],
+                    },
+                ]
+            });
+            
+            // Replace search box above with seperate one 
+            // $('.dataTables_filter') => search box
+            if($('#dt_extra_container').length > 0){
+                $d_table.buttons().container().css('display', 'inline-block').appendTo($('#dt_extra_container'));
+                $('.dataTables_filter').css('display', 'inline-block').addClass('mt-1').appendTo($('#dt_extra_container'));
             }
-            );
         });
 
         //Create the pie chart
@@ -2978,9 +2983,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if(hasValues){ //grantotal!=0){
             $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
             $table.appendTo($divres);
-            
-            $divres.append('<div></div>');
-
 
         }else if (!supressBlankPage) {
             $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
@@ -3035,21 +3037,19 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $('#aggAvg').hide();
             $('#divAggField').hide();
 
-            $('#aggregationModeCount').prop('checked',true); //val("count");
-        }else{
-            //$('#aggSum').css('display','block');
-           //$('#aggAvg').css('display','block');
-            $('#divAggField').css('display','inline-block');
+            $('#aggregationModeCount').prop('checked',true); //"Count" option
+
+            // An error?
         }
+
         var aggMode = $("input:radio[name=aggregationMode]:checked").val();
         if ( aggMode == "count" ) {
 
             $('#cbAggField').attr('disabled','disabled');
-            //$('#divAggField').css('visibility','hidden');
             $('#divAggField').hide();
         }else{
+
             $('#cbAggField').removeAttr('disabled');
-            //$('#divAggField').css('visibility','visible');
             $('#divAggField').css('display','inline-block');
         }
 

@@ -1652,24 +1652,27 @@ prof =Profile
                 that.currentUser = _guestUser;
             }
 
-            if(that.currentUser['ugr_ID']>0){
-                var lt = window.hWin.HAPI4.sysinfo['layout'];
-                if(!(lt=='Beyond1914' ||  lt=='UAdelaide' ||
-                    lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){
+            if(false){ //disabled: verify credentials if user is idle
+            
+                if(that.currentUser['ugr_ID']>0){
+                    var lt = window.hWin.HAPI4.sysinfo['layout'];
+                    if(!(lt=='Beyond1914' ||  lt=='UAdelaide' ||
+                        lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){
 
-                    if(window.hWin.HEURIST4 && window.hWin.HEURIST4.ui)                        
-                    window.hWin.HEURIST4.ui.onInactiveStart(5000, function(){  //300000 5 minutes 
-                        //check that still logged in
-                        window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
-                            //ok we are still loggen in
-                            window.hWin.HEURIST4.ui.onInactiveReset(); //start again    
-                        }, 0);
-                        
-                    });
+                        if(window.hWin.HEURIST4 && window.hWin.HEURIST4.ui)                        
+                            window.hWin.HEURIST4.ui.onInactiveStart(5000, function(){  //300000 5 minutes 
+                                //check that still logged in
+                                window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
+                                    //ok we are still loggen in
+                                    window.hWin.HEURIST4.ui.onInactiveReset(); //start again    
+                                    }, 0);
+                        });
+                    }
+                }else{
+                    //terminate completely
+                    window.hWin.HEURIST4.ui.onInactiveReset( true );
                 }
-            }else{
-                //terminate completely
-                window.hWin.HEURIST4.ui.onInactiveReset( true );
+            
             }
             
             if(window.hWin.HEURIST4.dbs && isChanged){

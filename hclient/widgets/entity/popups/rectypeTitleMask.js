@@ -429,11 +429,27 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                 }
             },
             renderNode: function(event, data){
-                
-                if(data.node.data.type == "enum") { // hide blue arrow for certain types || data.node.data.type == "relmarker"
-                    $(data.node.span.childNodes[1]).hide()
+
+                if(data.node.data.type == "enum") { // hide blue and expand arrows for terms
+
+                    $(data.node.span.childNodes[0]).css('visibility', 'hidden');
+                    $(data.node.span.childNodes[1]).hide();
+                }else{
+
+                    if(data.node.parent && data.node.parent.data.type == 'enum'){ // make term options inline and smaller
+                        $(data.node.li).css('display', 'inline-block');
+                        $(data.node.span.childNodes[0]).css('display', 'none');
+
+                        if(data.node.key == 'conceptid'){
+                            $(data.node.span.childNodes[3]).text('Con-ID');
+                        }else if(data.node.key == 'internalid'){
+                            $(data.node.span.childNodes[3]).text('Int-ID');
+                        }else if(data.node.key == 'term'){
+                            $(data.node.parent.ul).css({'transform': 'scale(0.75)', 'padding-left': '10px'});
+                        }
+                    }
                 }
-            },            
+            },
             lazyLoad: function(event, data){
                 var node = data.node;
                 var parentcode = node.data.code; 
@@ -457,10 +473,17 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             select: function(e, data) {
             },
             click: function(e, data){
+
+                var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+                var setDefaults = !data.node.isExpanded();
+
                 if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
-                    data.node.setExpanded(!data.node.isExpanded());
                     
-                    if(data.node.isExpanded()){
+                    if(!isExpander){
+                        data.node.setExpanded(!data.node.isExpanded());
+                    }
+                
+                    if(setDefaults){
                         for(var i = 0; i < data.node.children.length; i++){
                             let node = data.node.children[i];
 
@@ -469,7 +492,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                             }
                         }
                     }
-                }else if( data.node.lazy) {
+                }else if( data.node.lazy && !isExpander) {
                     data.node.setExpanded( true );
                 }
             },
@@ -519,4 +542,3 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
     
 
 });
-
