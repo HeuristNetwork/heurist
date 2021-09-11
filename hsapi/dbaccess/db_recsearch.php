@@ -376,7 +376,7 @@ function recordSearchFacets($system, $params){
                 $select_field = 'SUBSTRING(trim('.$select_field.'), 1, 1)';    //group by first charcter                }
             }
 
-            if($params['needcount']==1){
+                        if($params['needcount']==1){
 
                 $select_clause = "SELECT $select_field as rng, count(DISTINCT r0.rec_ID) as cnt ";
                 if($grouporder_clause==""){
@@ -389,7 +389,7 @@ function recordSearchFacets($system, $params){
                 while(strpos($qclauses["from"], 'Records '.$tab.'_0')>0){
                     $tab = $tab.'_0';
                 }
-                $select_clause = "SELECT $select_field as rng, count(DISTINCT ".$tab.".rec_ID) as cnt ";
+                $select_clause = "SELECT $select_field as rng, count(".$tab.".rec_ID) as cnt ";
 
                 if($grouporder_clause==""){
                     $grouporder_clause = " GROUP BY $select_field ORDER BY $select_field";
