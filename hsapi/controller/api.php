@@ -2,7 +2,7 @@
   
   
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
-$requestParams = $_REQUEST;
+
 
 if(@$_REQUEST['method']){
     $method = $_REQUEST['method'];
@@ -58,7 +58,14 @@ if(count($requestUri)>0){
 }
 
 if(@$requestUri[1]!== 'api' || @$entities[@$requestUri[2]] == null){
-    exitWithError('API Not Found', 400);
+    
+    //try to detect entity as parameter
+    if(@$_REQUEST['ent']!=null && @$entities[$_REQUEST['ent']] != null){
+        $requestUri = array(0, 'api', $_REQUEST['ent'], @$_REQUEST['id']);
+    }else{
+        exitWithError('API Not Found', 400);    
+    }
+    
 }
 
 $method = getAction($method);
