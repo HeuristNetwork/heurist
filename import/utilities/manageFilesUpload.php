@@ -367,6 +367,9 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 <!-- another confuising control - presumably meant to be a selection checkbox for multiple removals
                 <input type="checkbox" name="delete" value="1" class="toggle">
                 -->
+              {% if (file.error && file.error.indexOf("already exists")>0) { %}
+                <div style="color:green;display:inline-block;font-weight:bold;">No change</div>
+              {% } %}
               {% if (!file.error) { %}
                 <div style="color:blue;display:inline-block;font-weight:bold;">Upload OK</div>
               {% } %}
@@ -503,15 +506,52 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
  
                         window.hWin.HEURIST4.util.setDisabled($('#btnFinished'), false);                    
                         
+                        var cntAlreadyExists = 0;
+                        var cntWarnMemtypes = 0;
+                        var cntOtherErrors = 0;
+                        
                         var swarns = '';
+                        var swarns_memtypes = '';
+                        var swarns_exists = '';
+                        
                         var eles = $.find('span.error_for_msg');
                         $(eles).each(function(idx,item){
-                            swarns = swarns + '<br>'+$(item).text();
+                            var s = $(item).text();
+                            
+                            if (s.indexOf('already exists')>0){
+                                var k = s.indexOf('File with the same name');
+                                swarns_exists = swarns_exists + '<br>' + '<br>'+s.substr(0,k);    
+                                cntAlreadyExists++;
+                            }else
+                            if (s.indexOf('allowed mimetypes')>0){
+                                var k = s.indexOf('Filetype not listed among');
+                                swarns_memtypes = swarns_memtypes + '<br>'+s.substr(0,k);    
+                                cntWarnMemtypes++;
+                            }else{
+                                swarns = swarns + '<br>'+s;    
+                                cntOtherErrors++;
+                            }
                         }); 
-                        if(swarns!=''){
-                            swarns = 'Attention. '
-                                      +($(eles).length==1?'File was not':($(eles).length+' files were not'))
-                                      +' uploaded.<br><div style="max-height:100px;overflow-y:auto">'+swarns+'</div>';
+
+                        if(cntAlreadyExists>0){            
+                            swarns_exists = '<h4 style="margin-bottom:0px">Already uploaded files: '+cntAlreadyExists+'</h4>'
+                                    +'<div style="line-height:0.8;max-height:100px;overflow-y:auto">'+swarns_exists+'</div>';
+                        }
+                        if(cntWarnMemtypes>0){
+                            swarns_memtypes = '<h4 style="margin-bottom:0px">Files with not allowed mimetypes were not uploaded: '+cntWarnMemtypes+'</h4>'
+                                    +'<div style="line-height:0.8;max-height:100px;overflow-y:auto">'+swarns_memtypes+'</div>';
+                        }
+                        if(cntOtherErrors>0){
+                            swarns = '<h4 style="margin-bottom:0px">Attention. '
+                                      +(cntOtherErrors==1?'File was not':(cntOtherErrors+' files were not'))
+                                      +' uploaded.</h4><div style="line-height:0.8;max-height:100px;overflow-y:auto">'+swarns+'</div>';
+                        }
+
+                        swarns = swarns_exists + swarns_memtypes + swarns;
+                        
+                        if(cntAlreadyExists>0 || cntWarnMemtypes>0){
+                            window.hWin.HEURIST4.msg.showMsgDlg(swarns);    
+                        }else if (swarns!='') {
                             window.hWin.HEURIST4.msg.showMsgErr(swarns);    
                         }
 
