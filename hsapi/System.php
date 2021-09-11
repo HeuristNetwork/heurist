@@ -1267,7 +1267,22 @@ error_log(print_r($_REQUEST, true));
                 //update cookie - to keep it alive for next 30 days
                 $time = time() + 30*24*60*60;
                 $session_id = $_COOKIE['heurist-sessionid'];
-                $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );
+                if (strnatcmp(phpversion(), '7.3') >= 0) {
+                    $cres = setcookie('heurist-sessionid', $session_id, [
+                        'expires' => $time,
+                        'path' => '/',
+                        'domain' => '',
+                        'secure' => $is_https,
+                        'httponly' => false,
+                        'samesite' => 'Lax'
+                    ]);
+                }else{
+                    //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax");
+                    $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );    
+                }
+                
+                
+                
                 if($cres==false){                    
                     error_log('CANNOT UPDATE COOKIE '.$session_id.'   '.$this->dbname_full);                
                 }
@@ -1545,7 +1560,19 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         //update cookie expire time
         $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
         $session_id = session_id();
-        $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );  //login
+        
+        if (strnatcmp(phpversion(), '7.3') >= 0) {
+            $cres = setcookie('heurist-sessionid', $session_id, [
+                'expires' => $time,
+                'path' => '/',
+                'domain' => '',
+                'secure' => $is_https,
+                'httponly' => false,
+                'samesite' => 'Lax'
+            ]);
+        }else{
+            $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );  //login
+        }
 
 //if($time==0)                    
 //error_log('login '.$session_type.'  '.$session_id);                
