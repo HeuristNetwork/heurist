@@ -41,6 +41,7 @@ $.widget( "heurist.mainMenu", {
     _current_query_string:'',
     
     _initial_search_already_executed: false,
+    _rendered_db_overview: false,
 
     // the widget's constructor
     _create: function() {
@@ -372,6 +373,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     */
     _refresh: function(){
 
+        var that = this;
+
         /*
         if(window.hWin.HAPI4.has_access()){
             $(this.element).find('.logged-in-only').show();
@@ -454,13 +457,13 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }
         */
         
-        $(this.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
-        
         /* var cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
         if(cms_record_id>0){
             window.hWin.HEURIST4.ui.showEditCMSDialog( cms_record_id );    
         }else*/
         
+        $(this.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
+
         if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0 && !this.options.is_h6style){
             this.btn_dashboard.show();  
         }else{
@@ -471,7 +474,18 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             this.doLogin();
         }else {
             this._performInitialSearch();
+
+            if(window.hWin.HAPI4.sysinfo['db_total_records']>0){
+                // Wait a bit for the main menu to be initialised
+                setTimeout(function(){
+                    if(!that._rendered_db_overview){
+                        $('.ui-menu6').mainMenu6('showDatabaseOverview');
+                        that._rendered_db_overview = true;
+                    }
+                }, 1000);
+            }
         }
+
         //that._dashboardVisibility( false );
     },
 
@@ -1845,14 +1859,28 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         window.hWin.HEURIST4.ui.checkAndLogin( isforced, function(is_logged)
             { 
                 if(is_logged) {
+
                     $(that.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
                     that._performInitialSearch();
+
+                    if(window.hWin.HAPI4.sysinfo['db_total_records']>0){
+                        // Wait a bit for the main menu to be initialised
+                        setTimeout(function(){
+                            $('.ui-menu6').mainMenu6('showDatabaseOverview');
+                            that._rendered_db_overview = true;
+                        }, 1000);
+                    }
                 } else if(that.options.login_inforced){
                     window.hWin.location  = window.HAPI4.baseURL
                 }
-                    
             }); 
+    },
 
+    //
+    // Check if the Database Overview has been rendered
+    //
+    hasOverviewRendered: function(){
+        return this._rendered_db_overview;
     },
     
     //

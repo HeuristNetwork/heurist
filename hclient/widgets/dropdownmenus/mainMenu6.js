@@ -142,9 +142,7 @@ $.widget( "heurist.mainMenu6", {
                 that._on(that.divMainMenu.find('.ui-heurist-header'),{
                     click: that._openSectionMenu
                 });
-
                 
-                //if(window.hWin.HAPI4.sysinfo['db_total_records']<1){
                 if(window.hWin.HEURIST4.util.getUrlParameter('welcome', window.hWin.location.search)){
                     //open explore by default, or "design" if db is empty
                     that._active_section = 'explore';
@@ -152,7 +150,6 @@ $.widget( "heurist.mainMenu6", {
                 }else{
                     that.switchContainer( 'explore' );
                 }
-                
 
                 //init menu items in ui-heurist-quicklinks
                 that._createListOfGroups(); //add list of groups for saved filters
@@ -287,7 +284,7 @@ $.widget( "heurist.mainMenu6", {
                         that.currentSearch = window.hWin.HEURIST4.util.cloneJSON(data);
                         that._updateSaveFilterButton(1);
 
-                        that.switchContainer('explore'); 
+                        that.switchContainer('explore');
                         that._mouseout_SectionMenu();
                         that._collapseMainMenuPanel(true, 1000);
                         
@@ -323,7 +320,6 @@ $.widget( "heurist.mainMenu6", {
                     that._updateDefaultAddRectype();
                 }
         });
-        
         
     }, //end _create
     
@@ -392,7 +388,7 @@ $.widget( "heurist.mainMenu6", {
             var rty_ID = prefs[0];
             //var ele = this.divMainMenu.find('.menu-explore[data-action-popup="recordAdd"]');
             
-            var ele = this.element.find('li[data-action-popup="recordAdd"]')
+            var ele = this.element.find('li[data-action-popup="recordAdd"]');
             
             if(ele.length>0){
 
@@ -1322,7 +1318,6 @@ console.log(explore_top);
             //init 
             this._switch_SvsList( 0 );
             //this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'));  
-            
             this._initSectionMenu( 'explore' );
     },
 
@@ -1516,6 +1511,10 @@ console.log(explore_top);
             if(that.containers[section].hasClass('ui-layout-container'))
                  that.containers[section].layout().resizeAll();
             that._switch_SvsList( 0 );
+
+            if(that.containers['explore'].find('div#db_overview').is(':visible')){
+                that.containers['explore'].find('div#db_overview').hide();
+            }
         }
 
     },
@@ -1770,7 +1769,6 @@ console.log(explore_top);
                 
             if(section=='design' && window.hWin.HEURIST4.util.getUrlParameter('welcome', window.hWin.location.search))
             {
-                
                 var ele = $('<div class="gs-box" style="margin:10px;width:500px;height:400px;">')
                     .appendTo(this.introductions[section]);
                 ele.load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/welcome.html',
@@ -1784,10 +1782,305 @@ console.log(explore_top);
                            $('.template-url').attr('href', window.hWin.HAPI4.baseURL
                                             +'documentation_and_templates/db_design_template.rtf');
                         });
-            }
-            
-            
+            }            
         }
+    },
+
+    //
+    // Landing Page when not loading the Welcome page
+    //
+    showDatabaseOverview: function(){
+
+        var that = this;
+
+        // Check that the mainMenu widget has been created
+        var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
+        if(!widget){
+            return;
+        }
+
+        // Move to explore section
+        if(this._active_section != 'explore'){
+            this.switchContainer('explore');
+        }
+
+        // Link to DB Properties
+        var $db_props = $('li[data-action="menu-database-properties"]');
+
+        function openDBProperties(){
+            window.hWin.HAPI4.SystemMgr.verify_credentials(function(e){
+                $db_props.click();
+                that.containers['explore'].find('div#db_overview').hide();
+            }, 1);
+        }
+
+        function changeFuncAccess(){
+            
+            $('textarea#description').css('font-family', 'Helvetica,Arial,sans-serif');
+            $('input#title, input#rights').css('color', 'gray');
+
+            // DB Logo container
+            var $thumb_container = $('div#db-thumb')
+            .css({
+                'display': 'block',
+                'margin-left': 'auto',
+                'margin-right': 'auto'
+            });
+
+            // Check if logged in user has access to DB Props
+            if(window.hWin.HAPI4.has_access(2)){ // Has access
+
+                $('input#title, input#owner, input#rights, textarea#description')
+                .css({'cursor': 'pointer', 'background': '#F4F2F4', 'resize': 'none', 'font-size': '15px'})
+                .on('click', openDBProperties);
+
+                $('#btnEdit')
+                .button({label: 'Edit Metadata'})
+                .addClass('ui-button-action')
+                .prop('disabled', false)
+                .css({
+                    'display': 'block',
+                    'margin-left': 'auto',
+                    'margin-right': 'auto',
+                    'margin-top': '10px'
+                })
+                .on('click', openDBProperties);
+
+                $thumb_container.on('click', openDBProperties);
+
+            }else{ // Has no access
+
+                $('input#title, input#owner, input#rights, textarea#description')
+                .css({'cursor': 'default', 'background': '#F4F2F4', 'resize': 'none'})
+                .off('click');
+
+                $('#btnEdit')
+                .hide()
+                .prop('disabled', true)
+                .off('click');
+
+                $thumb_container
+                .css('cursor', 'default')
+                .off('click');
+            }
+        }
+
+        function changeFieldsStyle() {
+
+            var name = $('input#title');
+            var ownership = $('input#owner');
+            var rights = $('input#rights');
+            var desc = $('textarea#description');
+
+            if(!window.hWin.HEURIST4.util.isempty(name.val()) && name.val() != 'Please enter a DB name ...'){
+                name.css({'background': 'white', 'border': 'none', 'color': 'black'});
+            }
+
+            if(!window.hWin.HEURIST4.util.isempty(ownership.val())){
+                ownership.css({'background': 'white', 'border': 'none'});
+            }
+
+            if(!window.hWin.HEURIST4.util.isempty(rights.val()) && rights.val() != 'Please define ownership and rights here ...'){
+                rights.css({'background': 'white', 'border': 'none', 'color': 'black'});
+            }
+
+            if(!window.hWin.HEURIST4.util.isempty(desc.val())){
+                desc.removeAttr('rows')
+                .css({
+                    'background': 'white', 
+                    'border': 'none', 
+                    'resize': 'none', 
+                    'height': '0px'
+                });
+
+                desc.css('height', desc[0].scrollHeight);
+            }else{
+                desc.attr('rows', '15');
+            }
+        }
+
+        // Check if the page already exists
+        if(widget.mainMenu('hasOverviewRendered')){
+
+            this.containers['explore'].find('div#db_overview').css('z-index', '10').show();
+
+            changeFuncAccess();
+            changeFieldsStyle();
+            return;
+        }
+
+        // Create main container
+        var $ele = $('<div id="db_overview" class="ent_wrapper" style="background: white;">')
+            .css('z-index', '10')
+            .appendTo(this.containers['explore']);
+        
+        // Load Content
+        $ele.load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/database_overview.html',
+            function(){
+
+                // Add DB Logo
+                var $thumb_container = $('div#db-thumb')
+                .css({
+                    'display': 'block',
+                    'margin-left': 'auto',
+                    'margin-right': 'auto'
+                });
+
+                var thumb_url = window.hWin.HAPI4.getImageUrl('sysIdentification', 1, 'thumb', 1);
+                var date = new Date();
+
+                thumb_url += '&ts=' + date.getTime();
+                $('<img src='+ thumb_url +' class="image_input"></img>').appendTo($thumb_container);
+
+                window.hWin.HAPI4.checkImage('sysIdentification', 1, 'thumb', 
+                    function(response){
+
+                        if(response.status != 'ok' || response.data != 'ok'){
+                            $thumb_container.find('img').remove();
+
+                            $thumb_container
+                            .text('No Logo')
+                            .css({
+                                'border': '1px solid gray', 
+                                'background': '#F4F2F4',
+                                'display': 'flex',
+                                'justify-content': 'center',
+                                'align-items': 'center',
+                                'width': 'fit-content',
+                                'color': 'gray'
+                            });
+                        }
+                    }
+                );
+
+                changeFuncAccess();
+
+                // Section headers within Content
+                $('div.mock-header')
+                .css({
+                    'font-weight': 'bold',
+                    'text-align': 'center',
+                    'padding': '10px 0px',
+                    'width': '85px',
+                    'display': 'inline-block',
+                    'color': 'white',
+                    'border': '1px solid lightgray',
+                    'cursor': 'pointer'
+                })
+                .on('click', function(e){
+                    var option = $(e.target).is('img') ? 'explore' : $(e.target).attr('id');
+
+                    $ele.hide();
+                    
+                    if(option != 'explore'){
+                        that.switchContainer(option[0].toLowerCase() + option.substr(1));
+                    }
+                });
+                // Add image to explore header
+                var $explore_img = $('img#explore-img');
+                $explore_img.attr('src', window.hWin.HAPI4.baseURL+'hclient/assets/v6/' + $explore_img.attr('data-src'));
+                // "New" and "Add record"
+                $('div.add-new')
+                .css({
+                    'background': 'lightgray',
+                    'display': 'inline-block',
+                    'margin-left': '10px',
+                    'padding': '10px',
+                    'cursor': 'pointer'
+                })
+                .on('click', function(){
+                    $('li.menu-explore[data-action-popup="recordAdd"]').mouseover();
+                });
+
+                // Explanation Text for each section
+                $('span.flavour-text')
+                .css({
+                    'display': 'inline-block',
+                    'margin-left': '10px'                    
+                });
+
+                // Commonly used entities/rectypes
+                var entity_container = $('ul#entity-usage').css({
+                    'list-style-type': 'none',
+                    'padding-left': '30px',
+                    'margin-top': '0px'
+                });
+
+                var options = {
+                    select_name: 'usage_select', 
+                    useCounts: true, 
+                    useGroups: false, 
+                    useHtmlSelect: true, 
+                    useIcons: true, 
+                    useIds: true, 
+                    ancor: null
+                };
+
+                var entities_usage = window.hWin.HEURIST4.ui.createRectypeSelectNew(null, options);
+
+                entities_usage.find('option').each(function(idx, item){
+
+                    if(idx == 6){
+                        return false;
+                    }
+
+                    var $opt = $(item);
+                    var count = $opt.attr('rt-count') >= 0 ? $opt.attr('rt-count') : '';
+
+                    $('<li data-id="'+$opt.attr('entity-id')+'" style="font-size:smaller;padding:4px 0px 2px 0px">'
+                        +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+                            + '" class="rt-icon" style="vertical-align:bottom;background-image: url(&quot;'+$opt.attr('icon-url')+ '&quot;);"/>'
+                        +'<div class="menu-text truncate" style="max-width:130px;display:inline-block;" title="Search for '+$opt.text()+' records">'
+                        +$opt.text()+'</div>'
+                        +'<span style="float:right;min-width:20px">'+count+'</span>'
+                       +'</li>')
+                    .appendTo(entity_container); 
+
+                });
+
+                entity_container.find('li[data-id]').on('click', function(e){
+                    var $ele = $(e.target).is('li') ? $(e.target) : $(e.target).parent('li');
+
+                    var rectype_id = $ele.attr('data-id');
+
+                    if(rectype_id > 0){
+
+                        var request = {
+                            q: 't:'+rectype_id,
+                            w: 'a',
+                            qname: $Db.rty(rectype_id, 'rty_Plural'),
+                            detail: 'ids'
+                        };
+
+                        window.hWin.HAPI4.SearchMgr.doSearch(this, request);
+
+                        that.switchContainer('explore');
+                    }
+                });
+
+                // Fill in System Identification info {DB Name, Owner, Copyright and Description}
+                window.hWin.HAPI4.EntityMgr.getEntityData('sysIdentification', false, function(response){
+                    
+                    if(!window.hWin.HEURIST4.util.isempty(response)){
+                    
+                        var record = response.getFirstRecord();
+
+                        var name = record[14];
+                        var ownership = record[15];
+                        var rights = record[16];
+                        var desc = record[17];
+
+                        $('#title').val(name);
+                        $('#owner').val(ownership);
+                        $('#rights').val(rights);
+                        $('#description').val(desc);
+
+                        changeFieldsStyle();
+                    }
+
+                });
+            }
+        );
     },
     
     //

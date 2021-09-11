@@ -1,0 +1,68 @@
+
+
+<div class="ui-heurist-header">
+	<span class="title">Database Overview</span>
+</div>
+
+<div class="ent_content" style="padding-top: 20px;">
+	<div style="display: inline-block;width: 20%;float: left;margin-left: 15px;">
+		<div class="image_input" id="db-thumb"></div>
+		<br>
+		<button id='btnEdit'>Edit Metadata</button>
+	</div>
+	
+	<div style="display: inline-block;width: 75%;">
+
+		<input class="text" type="text" placeholder="Database Title" id="title" style="width: 40%;margin-bottom: 15px;" readonly>
+		<br>
+		
+		<input class="text" type="text" placeholder="Database Owner" id="owner" style="width: 90%;margin-bottom: 15px;" readonly>
+		<br>
+		
+		<input class="text" type="text" placeholder="Database Copyright" id="rights" style="width: 90%;margin-bottom: 15px;" readonly>
+		<br>
+		
+		<textarea class="text" placeholder="Database Description" id="description" style="width: 90%;margin-bottom: 15px;" readonly></textarea>
+		<br>
+
+		<div style="display: inline-block;width: 50%;float: left;margin: 10px 0px 0px 10px;">
+			
+			<div style="margin-bottom: 15px;"> 
+				<div class="mock-header" id="design" style="background: #523365;">Design</div> 
+				<span class="flavour-text">set up the structure of your database</span>
+			</div>
+
+			<div style="margin-bottom: 15px;"> 
+				<div class="mock-header" id="explore" style="background: #305586;">Explore <div><img id="explore-img" data-src="gs_explore_cb.png" height="29" /></div> </div> 
+				<span class="flavour-text">set up filters, reports and visualisation<br>and analyse, and visualise your data</span>
+			</div>
+			
+			<div style="margin-bottom: 15px;"> 
+				<div class="mock-header" id="publish" style="background: #627E5D;">Publish</div> 
+				<span class="flavour-text">create and edit websites</span>
+			</div>
+			
+			<div style="margin-bottom: 15px;"> 
+				<div class="mock-header" id="populate" style="background: #307D96;">Populate</div> 
+				<div class="add-new">New <span class="ui-icon ui-icon-file-plus-black" style="margin-left: 10px" /></div> 
+				<span class="flavour-text">to add data</span>
+			</div>
+
+		</div>
+
+		<div style="display: inline-block;width: 40%;margin-top: 10px;">
+
+			<div style="display: inline-block;float: left;">Common<br>Entities</div>
+
+			<div style="display: inline-block;float: left;">
+
+				<ul id="entity-usage">
+					
+				</ul>
+
+			</div>
+
+		</div>
+
+	</div>
+</div>
