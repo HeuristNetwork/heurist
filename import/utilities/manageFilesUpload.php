@@ -363,7 +363,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 <td>
                 <button class="delete" data-type="{%=file.deleteType%}"
                 data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %}
-                data-xhr-fields='{"withCredentials":true}'{% } %}>Remove</button>
+                data-xhr-fields='{"withCredentials":true}'{% } %}>{%=file.error?'Clear':'Remove'%}</button>
                 <!-- another confuising control - presumably meant to be a selection checkbox for multiple removals
                 <input type="checkbox" name="delete" value="1" class="toggle">
                 -->
