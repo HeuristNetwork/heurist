@@ -69,11 +69,11 @@ $.widget( "heurist.configEntity", {
 
         if(this.options.configName == "crosstabs"){
 
-            $('<div class="col-3 pe-0" style="text-align:right;"><label for="sel_saved_settings">'
+            $('<div style="margin-left: 20px;"><label for="sel_saved_settings">'
                 +(this.options.loadSettingLabel?this.options.loadSettingLabel:'Saved settings:')+'</label></div>'
-                +'<div class="col-6"><select class="sel_saved_settings text ui-widget-content ui-corner-all" style="width:100%;"></select></div>'
+                +'<div style="margin-left: 10px;"><select class="sel_saved_settings text ui-widget-content ui-corner-all" style="width:100%;"></select></div>'
                 + ((this.options.showButtons)?
-                ('<div class="btn-action-div col-2 p-0"><span class="btn-action btn-rename bg-warning saveEditButton"/>'
+                ('<div class="btn-action-div" style="margin-left: 15px;"><span class="btn-action btn-rename bg-warning saveEditButton"/>'
                 +'<span class="btn-action btn-openedit"/>'
                 +'<span style="margin: 2px;" class="btn-action btn-remove bg-danger saveRemoveButton"/></div></div>'):'') )
             .appendTo(this.element);
@@ -258,10 +258,10 @@ $.widget( "heurist.configEntity", {
         if(this.options.divSaveSettings){
 
             if(this.options.configName == "crosstabs"){
-                $('<div class="col-3 pe-0" style="text-align:right;"><label>Save settings as </div> '
-                + '<div class="col-6"><input class="inpt_save_setting_name text form-control rounded-0" style="font-size: small;"/></label></div>'
-                + (this.options.saveOnExit?'':'<div class="col-3">'
-                + '<button class="btn btn-success btnSaveSettings p-2" style="font-size:10px;height:90%"><i class="ui-icon ui-icon-save"></i> Save </button></div>'))
+                $('<div><label>Save settings as </div> '
+                + '<div style="margin-left: 6px;"><input class="inpt_save_setting_name text form-control rounded-0" style="font-size: small;"/></label></div>'
+                + (this.options.saveOnExit?'':'<div style="margin-left: 20px;">'
+                + '<button class="btn btn-success btnSaveSettings" style="font-size:10px;"><i class="ui-icon ui-icon-save"></i> Save </button></div>'))
                 .appendTo(this.options.divSaveSettings);
             }else{
                 $('<div style="display:table-cell"><label>Save settings as <input class="inpt_save_setting_name text form-control"/></label></div>'

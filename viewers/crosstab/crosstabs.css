@@ -12,33 +12,26 @@ body {
 }
 
 /* INPUT FORM ----------------------------------   */
+
+#topContainer div {
+    display: inline-block;
+}
+
 fieldset {
     padding:2px; border:0; margin-top:10px;
 }
 
 fieldset > div{
-    display:table-row;
     padding-bottom:0.4em;
 }
 
-fieldset > div > .fldheader{
-    display:table-cell;
-    /*width:100px;
-    min-width:100px;
-    */
-    text-align:left;
-    /*
-    padding-top:0.4em;
-    padding-right:2em;
-    */
+div.align-items-center > div.fldheader{
+    text-align: right;
     font-weight: bold;
+    vertical-align: middle;
 }
 fieldset > div > .input-cell{
-    display:table-cell;
-    /*min-width:120px*/;
-    /*width:380px;*/
     padding-bottom:2px;
-    vertical-align: bottom;
 }
 .input-cell > input{
     margin-right: 0.4em;
@@ -54,28 +47,6 @@ input.text, select.text {
     margin-bottom:2px;
     padding: .2em;
 }
-
-/*
-.intervalDiv {
-    -moz-user-select: none;
-    user-select: none;
-    -webkit-user-select: none;
-    background:#EEE;
-    background:-moz-linear-gradient(center top, #FFFFFF, #EEEEEE) repeat scroll 0 0 transparent;
-    background:-webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#EEEEEE));
-}
-*/
-
-/*
-div.intervalDiv:hover {
-    -moz-box-shadow:0 1px 4px #000;
-    -webkit-box-shadow:0 1px 4px #000;
-    box-shadow:0 1px 4px #000;
-    z-index: 2;
-    background:-moz-linear-gradient(center top, #EFEFEF, #DDDDDD) repeat scroll 0 0 transparent;
-    background:-webkit-gradient(linear, left top, left bottom, from(#EFEFEF), to(#DDD));
-}
-*/
 
 H2 {
     color: #6A7C99;
@@ -93,14 +64,6 @@ h3 > #rec_add_link, div.intervalDiv > #rec_edit_link {
     top: 0.4em;
     right: 0.4em;
 }
-/*
-h3 > #rec_edit_link{
-    display: none;
-    height: 16px;
-    width: 16px;
-    float: right;
-}*/
-
 
 div .selected, div .selected:hover{
     background: -moz-linear-gradient(center top , #E6F8FD, #BEE4F8) repeat scroll 0 0 transparent;
@@ -110,12 +73,6 @@ div .selected, div .selected:hover{
 
 .intervalDiv .recordTitle {
     color: #666666;
-    /* position: absolute;
-    text-align: left;
-    overflow: hidden;
-
-    line-height: 12px;
-    */
 }
 
 /* LIST VIEW */
@@ -150,7 +107,7 @@ div .selected, div .selected:hover{
     text-overflow: ellipsis;
 }
 .list .intervalDiv .recordIcons {
-    display: table-cell;
+    display: inline-block;
     min-width: 50px;
 }
 
@@ -162,7 +119,6 @@ div .selected, div .selected:hover{
 }
 
 .crosstab-header0{
-    /*font-size: 200em;*/
     font-weight: bold;
     text-transform:uppercase;
     border-top :1px solid black;
@@ -275,6 +231,10 @@ div .progress-message {
     padding: 5px 6px;
 }
 
+.blankCheckboxes label{
+    vertical-align: middle;
+}
+
 /* for chrome */
 #changeValueBox::-webkit-outer-spin-button,
 #changeValueBox::-webkit-inner-spin-button{
@@ -356,7 +316,7 @@ input[type=number]{
     color : #305486;
     border-color: #305486;
 
-    font-size: 14px;
+    font-size: 11px;
 }
 
 .btn-check:active+.btn-outline-secondary, 

@@ -59,7 +59,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
     //     ['east', (top ? top.innerWidth : window.innerWidth)]); 
 
     window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane',
-        ['east', (top ?  '70%' : window.innerWidth)]);
+        ['east', (top ?  '60%' : window.innerWidth)]);
 </script>
 
 <link rel=stylesheet href="crosstabs.css" media="all">
@@ -78,102 +78,98 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                 <div class="col-12 col-mb-2 d-none" id="errorContainer"></div>
 
                 <!-- Top Container -->
-                <div class="col-12 mb-2" id="topContainer">
+                <div id="topContainer">
                     <div id="qform" class="disign-content" style="width:100%;">
-                        <div class="row">
+                        <div>
 
                             <!-- Left Side -->
-                            <div class="col-12 col-md-6 border border-dark bg-white">
+                            <div class="border border-dark bg-white" style="width: 50%;padding: 10px;float: left;height: 100%;">
                                 <fieldset>
                                     <!-- Dataset selection -->
-                                    <div class="row">
-                                        <div class="row align-items-center" style="width: 100%;" id="divLoadSettings">
+                                    <div>
+                                        <div class="align-items-center" style="width: 100%;" id="divLoadSettings">
 
                                         </div>
-                                        <div class="row mt-2 mb-2 align-items-center" id="divSaveSettings">
+                                        <div class="align-items-center" id="divSaveSettings" style="margin-top: 10px;">
 
                                         </div>
 
-                                        <div class="row">
-                                            <div class="col-12">
+                                        <div>
 
-                                                <fieldset id="shows" style="display:none;">
-                                                    <div class="row align-items-center">
-                                                        <div class="col-2 pe-0" style="text-align: right; font-size: 14px;">
-                                                            <label for="rbShowValue">Show</label>
-                                                        </div>
-
-                                                        <div class="input-cell col-10">
-                                                            <div class="checkboxValues">
-                                                                <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" style="margin-left: 0;" checked id="rbShowValue">
-                                                                <label class="btn btn-outline-primary" for="rbShowValue">Values</label>
-                                                            </div>
-
-                                                            <div class="checkboxValues">
-                                                                <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentRow">
-                                                                <label class="btn btn-outline-primary" for="rbShowPercentRow">Row %</label>
-                                                            </div>
-
-                                                            <div class="checkboxValues">
-                                                                <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentColumn">
-                                                                <label class="btn btn-outline-primary" for="rbShowPercentColumn">Column %</label>
-                                                            </div>
-
-                                                            <div class="checkboxValues">
-                                                                <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" checked id="rbShowTotals">
-                                                                <label class="btn btn-outline-primary" for="rbShowTotals">Totals</label>
-                                                            </div>
-                                                        </div>
+                                            <fieldset id="shows" style="display:none;">
+                                                <div class="align-items-center">
+                                                    <div style="font-size: 14px;margin-left: 42px;">
+                                                        <label for="rbShowValue">Show</label>
                                                     </div>
 
-                                                    <div class="row align-items-center">
-                                                        <div class="col-2 pe-0" style="text-align: right; font-size: 14px;">
-                                                            <label for="aggregationMode">Aggregates</label>
+                                                    <div class="input-cell">
+                                                        <div class="checkboxValues">
+                                                            <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" style="margin-left: 0;" checked id="rbShowValue">
+                                                            <label class="btn btn-outline-primary" for="rbShowValue">Values</label>
                                                         </div>
 
-                                                        <div class="input-cell col-10">
-                                                            <div class="crosstab-aggregation checkboxValues">
-                                                                <input type="radio" class="btn-check" checked value="count" id="aggregationModeCount" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">
-                                                                <label class="btn btn-outline-primary" for="aggregationModeCount">Counts</label>
-                                                            </div>
+                                                        <div class="checkboxValues">
+                                                            <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentRow">
+                                                            <label class="btn btn-outline-primary" for="rbShowPercentRow">Row %</label>
+                                                        </div>
 
-                                                            <div id="aggSum" class="crosstab-aggregation checkboxValues" style="display: none;">
-                                                                <input type="radio" class="btn-check" id="aggregationModeSum" value="sum" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">
-                                                                <label class="btn btn-outline-primary" for="aggregationModeSum">Sum</label>
-                                                            </div>
+                                                        <div class="checkboxValues">
+                                                            <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentColumn">
+                                                            <label class="btn btn-outline-primary" for="rbShowPercentColumn">Column %</label>
+                                                        </div>
 
-                                                            <div id="aggAvg" class="crosstab-aggregation checkboxValues" style="display: none;">
-                                                                <input type="radio" class="btn-check" id="aggregationModeAvg" value="avg" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">
-                                                                <label class="btn btn-outline-primary" for="aggregationModeAvg">Average</label>
-                                                            </div>
-
-                                                            <div id="divAggField" class="crosstab-aggregation" style="margin-top:10px;">of&nbsp;
-                                                                <select id="cbAggField" name="column" onchange="crosstabsAnalysis.changeAggregationMode()" class="text ui-widget-content ui-corner-all"></select>
-                                                            </div>
+                                                        <div class="checkboxValues">
+                                                            <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" checked id="rbShowTotals">
+                                                            <label class="btn btn-outline-primary" for="rbShowTotals">Totals</label>
                                                         </div>
                                                     </div>
+                                                </div>
 
-                                                    <div class="row">
-                                                        <div class="fldheader col-2 pe-0"></div>
-                                                        <div class="input-cell col-6">
-                                                            <div class="blankCheckboxes">
-                                                                <input type="checkbox" onchange="crosstabsAnalysis.doRender()" checked id="rbSupressZero">
-                                                                <label for="rbSupressZero">blank for zero values</label>
-                                                            </div>
+                                                <div class="align-items-center">
+                                                    <div style="font-size: 14px;">
+                                                        <label for="aggregationMode">Aggregates</label>
+                                                    </div>
+
+                                                    <div class="input-cell">
+                                                        <div class="crosstab-aggregation checkboxValues">
+                                                            <input type="radio" class="btn-check" checked value="count" id="aggregationModeCount" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">
+                                                            <label class="btn btn-outline-primary" for="aggregationModeCount">Counts</label>
+                                                        </div>
+
+                                                        <div id="aggSum" class="crosstab-aggregation checkboxValues" style="display: none;">
+                                                            <input type="radio" class="btn-check" id="aggregationModeSum" value="sum" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">
+                                                            <label class="btn btn-outline-primary" for="aggregationModeSum">Sum</label>
+                                                        </div>
+
+                                                        <div id="aggAvg" class="crosstab-aggregation checkboxValues" style="display: none;">
+                                                            <input type="radio" class="btn-check" id="aggregationModeAvg" value="avg" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">
+                                                            <label class="btn btn-outline-primary" for="aggregationModeAvg">Average</label>
+                                                        </div>
+
+                                                        <div id="divAggField" class="crosstab-aggregation" style="margin-top:10px;">of&nbsp;
+                                                            <select id="cbAggField" name="column" onchange="crosstabsAnalysis.changeAggregationMode()" class="text ui-widget-content ui-corner-all"></select>
                                                         </div>
                                                     </div>
-                                                    <div class="row">
-                                                        <div class="fldheader col-2 pe-0"></div>
-                                                        <div class="input-cell col-6">
-                                                            <div class="blankCheckboxes">
-                                                                <input type="checkbox" onchange="crosstabsAnalysis.doRender()" id="rbShowBlanks">
-                                                                <label for="rbShowBlanks">show blank rows/columns</label>
-                                                            </div>
+                                                </div>
+
+                                                <div style="margin-left: 80px;display: block;">
+                                                    <div class="input-cell">
+                                                        <div class="blankCheckboxes">
+                                                            <input type="checkbox" onchange="crosstabsAnalysis.doRender()" checked id="rbSupressZero">
+                                                            <label for="rbSupressZero">blank for zero values</label>
                                                         </div>
                                                     </div>
-                                                </fieldset>
+                                                </div>
+                                                <div style="margin-left: 80px;display: block;">
+                                                    <div class="input-cell">
+                                                        <div class="blankCheckboxes">
+                                                            <input type="checkbox" onchange="crosstabsAnalysis.doRender()" id="rbShowBlanks">
+                                                            <label for="rbShowBlanks">show blank rows/columns</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
 
-                                            </div>
                                         </div>
                                     </div>
                                 </fieldset>
@@ -181,105 +177,107 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                             <!-- End of Left Side -->
 
                             <!-- Right Side -->
-                            <div class="col-12 col-md-6 border border-dark bg-white">
-                                <div class="row">
-                                    <div class="col-12">
+                            <div class="border border-dark bg-white" style="width: 50%;padding: 10px;display: inline-block;height: 100%;">
 
-                                        <div class="col-12 mb-3" style="margin-top:1rem">
-                                            <div style="font-size: 0.9em;">
-                                                Choice of record type determines the list of fields avaiable but does not filter<br/>
-                                                the results - the analysis is based on all records in the result set
-                                            </div>
-                                        </div>
+                                <div style="font-size: 0.9em;">
+                                    Choice of record type determines the list of fields avaiable but does not filter the results - the analysis is based on all records in the result set
+                                </div>
 
-                                        <div class="col-12 mt-1 mb-1">
-                                            <div class="row">
-                                                <div class="pe-0" style="width: 23%;">
-                                                    <label>Show fields for</label>
-                                                </div>
+                                <div style="margin-top: 10px;">
+                                    <div style="margin-right: 10px;">
+                                        <label>Show fields for</label>
+                                    </div>
 
-                                                <div class="col-6 ps-0">
-                                                    <select id="cbRectypes" class="ui-widget-content ui-corner-all"></select>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <fieldset id="vars" style="display:none;">
-                                            <div class="row d-flex align-items-center" id="rowVars">
-                                                <div class="fldheader col-2 ms-4 me-2 pe-0">
-                                                    <label for="cbRows">Var 1 <span style="font-size: smaller;font-weight: normal;">(rows)</span></label>
-                                                </div>
-                                                <div class="col-4 mt-1 ps-0">
-                                                    <select id="cbRows" name="row" onchange="crosstabsAnalysis.resetIntervals(event); crosstabsAnalysis.OnRowTypeChange(this);" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
-                                                </div>
-                                                <div class="col-1 p-0">
-                                                    <span class="d-inline-block" id="rowTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals">
-                                                        <button type="button" tt='row' class="btn btn-warning showintervals" disabled>
-                                                            <span class="ui-icon ui-icon-pencil"></span>
-                                                        </button>
-                                                    </span>
-                                                </div>
-                                                <div id="rowIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
-                                            </div>
-                                            <div id="rowWarning" class="row d-flex align-items-center">&nbsp;</div>
-                                            
-                                            <div class="row d-flex align-items-center" id="columnVars">
-                                                <div class="fldheader col-2 ms-4 me-2 pe-0">
-                                                    <label for="cbColumns">Var 2 <span style="font-size: smaller;font-weight: normal;">(columns)</span></label>
-                                                </div>
-                                                <div class="col-4 mt-1 ps-0">
-                                                    <select id="cbColumns" name="column" onchange="crosstabsAnalysis.resetIntervals(event)" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
-                                                </div>
-                                                <div class="col-1 p-0">
-                                                    <span class="d-inline-block" id="columnTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals">
-                                                        <button type="button" tt="column" class="btn btn-warning showintervals" disabled>
-                                                            <span class="ui-icon ui-icon-pencil"></span>
-                                                        </button>
-                                                    </span>
-                                                </div>
-                                                <div id="columnIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
-                                            </div>
-                                            <div id="columnWarning" class="row d-flex align-items-center">&nbsp;</div>
-                                            
-                                            <div class="row d-flex align-items-center" id="pageVars">
-                                                <div class="fldheader col-2 ms-4 me-2 pe-0">
-                                                    <label for="cbPages">Var3 <span style="font-size: smaller;font-weight: normal;">(pages)</span></label>
-                                                </div>
-                                                <div class="col-4 mt-1 ps-0">
-                                                    <select id="cbPages" name="page" onchange="crosstabsAnalysis.resetIntervals(event)" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
-                                                </div>
-                                                <div class="col-1 p-0">
-                                                    <span class="d-inline-block" id="pageTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals">
-                                                        <button type="button" tt='page' class="btn btn-warning showintervals" disabled>
-                                                            <span class="ui-icon ui-icon-pencil"></span>
-                                                        </button>
-                                                    </span> 
-                                                </div>
-                                                <div id="pageIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
-                                            </div>
-                                            <div id="pageWarning" class="row d-flex align-items-center">&nbsp;</div>
-                                        </fieldset>
+                                    <div>
+                                        <select id="cbRectypes" class="ui-widget-content ui-corner-all"></select>
                                     </div>
                                 </div>
+
+                                <fieldset id="vars" style="display:none;">
+
+                                    <div id="row_container" style="margin-bottom: 10px;">
+                                        <div class="align-items-center" id="rowVars" style="margin-bottom: 5px;">
+
+                                            <div class="fldheader" style="margin: 0px 10px 0px 56px;">
+                                                <label for="cbRows">Var 1 <br><span style="font-size: smaller;font-weight: normal;">(rows)</span></label>
+                                            </div>
+                                            <div>
+                                                <select id="cbRows" name="row" onchange="crosstabsAnalysis.resetIntervals(event);" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
+                                            </div>
+
+                                            <div>
+                                                <span id="rowTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 10px;">
+                                                    <button type="button" tt='row' class="btn btn-warning showintervals" disabled>
+                                                        <span class="ui-icon ui-icon-pencil"></span>
+                                                    </button>
+                                                </span>
+                                            </div>
+
+                                        </div>
+                                        <div id="rowWarning" class="align-items-center">&nbsp;</div>
+                                    </div>
+                                    
+                                    <div id="column_container" style="margin-bottom: 10px;">
+                                        <div class="align-items-center" id="columnVars" style="margin-bottom: 5px;">
+
+                                            <div class="fldheader" style="margin: 0px 10px 0px 40px;">
+                                                <label for="cbColumns">Var 2 <br><span style="font-size: smaller;font-weight: normal;">(columns)</span></label>
+                                            </div>
+                                            <div>
+                                                <select id="cbColumns" name="column" onchange="crosstabsAnalysis.resetIntervals(event)" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
+                                            </div>
+
+                                            <div>
+                                                <span id="columnTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 10px;">
+                                                    <button type="button" tt="column" class="btn btn-warning showintervals" disabled>
+                                                        <span class="ui-icon ui-icon-pencil"></span>
+                                                    </button>
+                                                </span>
+                                            </div>
+
+                                        </div>
+                                        <div id="columnWarning" class="align-items-center">&nbsp;</div>
+                                    </div>
+                                    
+                                    <div id="page_container" style="margin-bottom: 10px;">
+                                        <div class="align-items-center" id="pageVars" style="margin-bottom: 5px;">
+
+                                            <div class="fldheader" style="margin: 0px 10px 0px 52px;">
+                                                <label for="cbPages">Var3 <br><span style="font-size: smaller;font-weight: normal;">(pages)</span></label>
+                                            </div>
+                                            <div>
+                                                <select id="cbPages" name="page" onchange="crosstabsAnalysis.resetIntervals(event)" class="text ui-widget-content ui-corner-all" style="width:100%"></select>
+                                            </div>
+
+                                            <div>
+                                                <span id="pageTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 10px;">
+                                                    <button type="button" tt='page' class="btn btn-warning showintervals" disabled>
+                                                        <span class="ui-icon ui-icon-pencil"></span>
+                                                    </button>
+                                                </span> 
+                                            </div>
+
+                                        </div>
+                                        <div id="pageWarning" class="align-items-center">&nbsp;</div>
+                                    </div>
+
+                                </fieldset>
+
                             </div>
                             <!-- End of Right Side -->
 
-                        </div>
-
-                        <div style="height:2em">&nbsp;</div>
-
-                        </div>
-                        
-                        <div style="text-align:center;padding-top:1em; padding-bottom:1em; display:none;" id="btnPanels">
-                            <button id="btnUpdate" onclick="crosstabsAnalysis.doRetrieve()" style="font-size:larger;font-weight:bold">Update results</button>
                         </div>
 
                     </div>
                 </div>
                 <!-- End of Top Container -->
 
+                <div style="text-align:center;padding-top:1em; padding-bottom:1em; display:none;" id="btnPanels">
+                    <button id="btnUpdate" onclick="crosstabsAnalysis.doRetrieve()" style="font-size:larger;font-weight:bold">Update results</button>
+                </div>
+
                 <!-- Bottom Container -->
-                <div class="col-12 mb-2 d-none" id="bottomContainer">
+                <div class="d-none" id="bottomContainer">
                     <!--Tab Bar for table and visualisation -->
                     <ul class="nav nav-tabs" id="tabs" role="tablist">
                         <li class="nav-item" role="presentation">
@@ -289,14 +287,16 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                             <button class="nav-link" id="pie-tab" data-bs-toggle="tab" data-bs-target="#pie" type="button" role="tab" aria-controls="pie" aria-selected="false">Pie Chart</button>
                         </li>
                     </ul>
+
                     <div class="tab-content" id="tabContent">
                         <!-- Datables goes here!!! -->
-                        <div class="tab-pane fade show active bg-white p-3 overflow-auto" id="table" role="tabpanel" aria-labelledby="table-tab">
+                        <div class="tab-pane fade show active bg-white overflow-auto" id="table" role="tabpanel" aria-labelledby="table-tab" style="padding: 10px;">
                             <div id="divres" class="output-content" style="display:none;">
                             </div>
                         </div>
+                        
                         <!--Pie Chart goes here!!! -->
-                        <div class="tab-pane fade d-flex justify-content-center bg-white p-3" id="pie" role="tabpanel" aria-labelledby="pie-tab">
+                        <div class="tab-pane fade d-flex justify-content-center bg-white" id="pie" role="tabpanel" aria-labelledby="pie-tab" style="padding: 10px;">
                             <div class="alert alert-info d-none" role="alert" id="pieMessage">
                                 <i class="ui-icon ui-icon-alert"></i>
                                 Graphs currently do not work for column and page selections. Only selection of a row variable will produce a result.
