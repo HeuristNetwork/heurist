@@ -348,8 +348,8 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 {% } %}
             </span>
             </td>
-            <td>
-            <p class="name">
+            <td style="{% if (file.error) { %}padding: 10px 0 10px 0; {% } %}">
+            <p class="name" style="{% if (file.error) { %}margin-bottom: 5px; {% } %}">
             <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
             </p>
               {% if (file.error) { %}
