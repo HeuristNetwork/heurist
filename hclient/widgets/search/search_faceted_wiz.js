@@ -1623,8 +1623,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 }else if(facets[k].type=='enum' || facets[k].type=='relationtype'){
                     
                     if(facets[k].code.indexOf(':addedby')<0 && facets[k].code.indexOf(':owner')<0)
-                    sContent = sContent 
-                        +'<button label="dropdown" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="dropdown"/>';
+                    //sContent = sContent 
+                        //+'<button label="dropdown" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="dropdown"/>';
                     
                     sGroupBy = '<label><input type="checkbox" name="facet_Group'
                                 +idd+'" value="firstlevel"/>Group by first level</label>';
@@ -1637,9 +1637,10 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 if(facets[k].code.indexOf(':ids')<0 && facets[k].type!='blocktext')
                     sContent = sContent
+                        +'<button label="dropdown" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="dropdown"/>'
                         +'<button label="list" class="btnset_radio" data-idx="'+idd+'" data-value="3"/>'
                         +'<button label="wrapped" class="btnset_radio" data-idx="'+idd+'" data-value="2"/>';
-				                        
+                                        
                 sContent = sContent        
                         +'<button label="search" class="btnset_radio" data-idx="'+idd+'" data-value="0"/>'
                 //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_3" name="facet_Type'+idd+'" value="3"/><label for="facetType'+idd+'_3">list</label>'
@@ -1691,7 +1692,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             }
                         }
                     }else{
-                        facets[k].isfacet = (facets[k].type=='freetext')?0:1;
+                        facets[k].isfacet = (facets[k].type=='freetext' || facets[k].type=='blocktext')?0:1;
                     }
                     
                     
@@ -1791,23 +1792,6 @@ $.widget( "heurist.search_faceted_wiz", {
             var that = this;
             listdiv.sortable({stop: function( event, ui ) { that._refresh_FacetsPreview() } });
             listdiv.disableSelection();
-
-
-            /*            
-            listdiv.find('input:radio[value="3"]')                                           
-                            .button({icons: { secondary: 'ui-icon-list-column' }});
-            listdiv.find('input:radio[value="2"]')
-                            .button({icons: { secondary: 'ui-icon-list-inline' }});
-            listdiv.find('input:radio[value="0"]')
-                            .button({icons: { secondary: 'ui-icon-search' }});
-            listdiv.find('input:radio[data-type="slider"]')
-                            .button({icons: { secondary: 'ui-icon-input-slider' }});
-            listdiv.find('input:radio[data-type="dropdown"]')
-                            .button({icons: { secondary: 'ui-icon-input-dropdown' }});
-                            
-            listdiv.find('input:radio').button({text:true});
-            listdiv.find('.ui-button-text').css({"min-width":"60px","font-size":'0.9em'});
-            */
             
             listdiv.find('button[data-value="3"]').button({icon: "ui-icon-list-column",iconPosition:'end',showLabel:true,label:'list'});
             listdiv.find('button[data-value="2"]').button({icon: "ui-icon-list-inline",iconPosition:'end',showLabel:true,label:'wrapped'});
@@ -1871,7 +1855,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(title!='') this.options.params.facets[k].title = title;
                 this.options.params.facets[k].help = listdiv.find('#facet_Help'+idd).val();
                 this.options.params.facets[k].isfacet = listdiv.find('button.ui-heurist-btn-header1[data-idx="'+idd+'"]').attr('data-value');
-                                
+
                 this.options.params.facets[k].orderby = null;    
                 if(listdiv.find('input[data-sort="count"][data-id="'+idd+'"]').is(':checked'))
                 {

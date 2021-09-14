@@ -177,6 +177,8 @@ $.widget( "heurist.search_faceted", {
 
     _date_range_dialog: null,
     _date_range_dialog_instance: null,
+
+    terms_drawn: 0, // for rendering terms
     
     // the widget's constructor
     _create: function() {
@@ -324,7 +326,7 @@ $.widget( "heurist.search_faceted", {
                           that._isInited = false;
                           that._recalculateFacets(-1);       
                           that.refreshSubsetSign();
-                          
+
                           if($.isFunction(that.options.params.callback_on_search_finish) && recset){
                               that.options.params.callback_on_search_finish.call(this, recset.count_total());
                           }
@@ -1133,10 +1135,7 @@ $.widget( "heurist.search_faceted", {
        //get empty query
        this._first_query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
        this._fillQueryWithValues( this._first_query );
-       
-
-       
-//console.log('start search with empty form '+this.options.params.search_on_reset);        
+            
         if(this.options.params.search_on_reset || 
            !window.hWin.HEURIST4.util.isempty(this.options.params.add_filter)){
             //search at once - even none facet value provided
@@ -1371,14 +1370,8 @@ $.widget( "heurist.search_faceted", {
     //
     ,doSearch: function(){
 
-//console.log('dosearchj');
-//console.log( this.options.params.q );
-
             var query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
             var isform_empty = this._fillQueryWithValues(query);
-
-//console.log('form is empty '+isform_empty);                
-//console.log( query );
             
             if(isform_empty && 
                 window.hWin.HEURIST4.util.isempty(this.options.params.add_filter) && 
@@ -1453,11 +1446,6 @@ $.widget( "heurist.search_faceted", {
 
             this._current_query.push(sort_clause);
 
-        
-//console.log( 'start search' );        
-//console.log( this._current_query );
-
-            
             var request = { q: this._current_query, 
                             w: this.options.params.domain, 
                             detail: 'ids', 
@@ -1675,15 +1663,11 @@ $.widget( "heurist.search_faceted", {
                 }                
                 
                 if(field['type']=='freetext'){
-                    if(field['isfacet']==this._FT_SELECT){ //backward support
-                        field['isfacet'] = this._FT_LIST;
-                        field['groupby'] = 'firstchar';
-                    }
                     if(!field['groupby']){
                         step_level = 1;
                     }
-                }else {
-                    step_level = 1; //always full value for this type of facet
+                }else{
+                    step_level = 1;
                 }
         
                 var fieldid = field['id'];
@@ -1693,9 +1677,6 @@ $.widget( "heurist.search_faceted", {
                     fieldid = '1,18,231,304';
                 }
 
-//console.log(query);                
-//console.log(count_query);                
-                
                 var request = {q: query, count_query:count_query, w: 'a', a:'getfacets',
                                      facet_index: i, 
                                      field:  fieldid,
@@ -1766,7 +1747,6 @@ $.widget( "heurist.search_faceted", {
                 }
         
                 if(response.status == window.hWin.ResponseStatus.OK){
-
                     
                     if(keep_cache && response.count_query){
                         response.count_query = window.hWin.HEURIST4.util.hashString(JSON.stringify(response.count_query));
@@ -1779,6 +1759,7 @@ $.widget( "heurist.search_faceted", {
                     
                     var j,i;
                     var $input_div = $(this.element).find("#fv_"+field['var']);
+                    var needsDropdown = false;
                     //$facet_values.css('background','none');
 
                     //create fasets container if it does not exists
@@ -1811,30 +1792,43 @@ $.widget( "heurist.search_faceted", {
                     function __drawToggler($facet_values, display_mode){
                         
                         $('<div class="bor-filter-expand bor-toggler">'
-                            +'<span class="bor-toggle-show-on" style="display:none"><span class="ui-icon ui-icon-circle-arrow-n"></span><span>&nbsp;show less&nbsp;</span><span class="ui-icon ui-icon-circle-arrow-n bor-toggler-second-arrow"></span></span>'
-                            +'<span class="bor-toggle-show-off"><span class="ui-icon ui-icon-circle-arrow-s"></span><span>&nbsp;show more&nbsp;</span><span class="ui-icon ui-icon-circle-arrow-s bor-toggler-second-arrow"></span></span>'
-                         +'</div>').click(function(event){ 
-                                            var ele = $(event.target).parents('div.bor-toggler');
-                                            var mode = ele.attr('data-mode');
-                                            if(mode=='on'){
-                                                ele.find('.bor-toggle-show-on').hide();
-                                                ele.find('.bor-toggle-show-off').show();
-                                                d_mode = 'none';
-                                                mode = 'off';
-                                            }else{
-                                                ele.find('.bor-toggle-show-on').show();
-                                                ele.find('.bor-toggle-show-off').hide();
-                                                d_mode = display_mode;
-                                                mode = 'on';
-                                            }
-                                            
-                                            ele.parent().find('div.in-viewport').css('display',d_mode);
-                                            ele.attr('data-mode', mode);
-                                       })
+                            +'<span class="bor-toggle-show-on" style="display:none;margin-bottom: 5px;"><span>&nbsp;less...&nbsp;</span></span>'
+                            +'<span class="bor-toggle-show-off" style="margin-bottom: 5px;"><span>&nbsp;more...&nbsp;</span></span>'
+                         +'</div>').click(function(event){
+                                if($(event.target).is('span[class^="ui-selectmenu"],select')){
+                                    return;
+                                }
+                                var ele = $(event.target).parents('div.bor-toggler');
+                                var mode = ele.attr('data-mode');
+                                if(mode=='on'){
+                                    ele.find('.bor-toggle-show-on').hide();
+                                    ele.find('.bor-toggle-show-off').show();
+
+                                    if(ele.parent().find('div span[class^="ui-selectmenu"]').length > 0){
+                                        ele.parent().find('div span[class^="ui-selectmenu"]').show();    
+                                    }else{
+                                        ele.parent().find('div select').show();
+                                    }
+                                    d_mode = 'none';
+                                    mode = 'off';
+                                }else{
+                                    ele.find('.bor-toggle-show-on').show();
+                                    ele.find('.bor-toggle-show-off').hide();
+                                    
+                                    if(ele.parent().find('div span[class^="ui-selectmenu"]').length > 0){
+                                        ele.parent().find('div span[class^="ui-selectmenu"]').hide();    
+                                    }else{
+                                        ele.parent().find('div select').hide();
+                                    }
+                                    d_mode = display_mode;
+                                    mode = 'on';
+                                }
+                                
+                                ele.parent().find('div.in-viewport').css('display',d_mode);
+                                ele.attr('data-mode', mode);
+                           })
                          .appendTo($facet_values)
-                    }
-                    
-                    
+                    }                    
                
                     var that = this;
                     
@@ -1910,63 +1904,12 @@ $.widget( "heurist.search_faceted", {
                                     if(response.data[j][0] == term.key){
                                         return {title:term.title, 
                                              value:term.key, count:parseInt(response.data[j][1])};
-                                        //var f_link = that._createFacetLink(facet_index, {title:term.title, value:term.key, count:response.data[j][1]} );
-                                        //return $("<div>").css({"display":"block","padding":"0 5px"}).append(f_link).appendTo($container);
                                     }
                                 }
                                 return null; //no entries
                         }
                         
-                        var terms_drawn = 0; //it counts all terms as plain list 
-                        
-                        //{key:null, title:window.hWin.HR('all'), children:termtree}
-                        //draw terms and all its parents    
-                        //2 - inline list, 3 - column list
-                        function __drawTerm(term, level, $container, field){
-                            
-                                //draw itslef - draw children
-                                if(term.value){
-                                    
-                                        if((field['isfacet']==that._FT_COLUMN) || (field['isfacet']==that._FT_LIST)){                          //LIST          
-                                            var display_mode = (field['isfacet']==that._FT_COLUMN)?'block':'inline-block';
-                                            f_link = that._createFacetLink( facet_index, 
-                                                term,
-                                                //{title:term.title, value:term.value, count:term.count}, 
-                                                display_mode );
-                                            
-                                            terms_drawn++;  //global
-                                            
-                                            var ditem = $("<div>").css({'display':(terms_drawn>that.options.params.viewport?'none':display_mode),
-                                                            'padding':"0 5px 0 "+(level*5)+"px"})
-                                                    .addClass('facet-item')        
-                                                    .append(f_link)
-                                                    .appendTo($container);
-                                         
-                                            if(terms_drawn>that.options.params.viewport){
-                                                 ditem.addClass('in-viewport');
-                                            }                    
-                                            
-                                        }else{
-                                        //SELECTOR/DROPDOWN
-                                            that._createOption( facet_index, level, {title:term.title, 
-                                                value:term.value, 
-                                                count:term.count} ).appendTo($container);
-                                        }
-                                }
-                                if(term.children){
-                                    //sort by count per level
-                                    if(field['orderby']=='count'){
-                                        term.children.sort(function(a, b){ 
-                                            return (Number(a.count)>Number(b.count))?-1:1;
-                                        });
-                                    }
-                                    
-                                    for (var k=0; k<term.children.length; k++){
-                                        __drawTerm(term.children[k], level+1, $container, field);
-                                    }
-                                                   
-                                }
-                        }//__drawTerm
+                        this.terms_drawn = 0; //it counts all terms as plain list 
                         
                         //
                         // returns counts for itself and children
@@ -2109,63 +2052,50 @@ $.widget( "heurist.search_faceted", {
                             $span.append(f_link).appendTo($facet_values);
                         }                        
 
-                        if (field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST) {
-                                __drawTerm(term, 0, $facet_values, field); //term is a tree for vocabulary
+                        if (field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST) { // List/Wrapped List
+
+                                this.__drawData(term, 0, $facet_values, facet_index, field); //term is a tree for vocabulary
                                 
                                 //show viewport collapse/exand control
-                                if(this.options.params.viewport<terms_drawn){
+                                if(this.options.params.viewport < this.terms_drawn){
                                     var d_mode = field['isfacet']==this._FT_COLUMN ? 'block':'inline-block'; 
                                     __drawToggler($facet_values, d_mode);
+
+                                    needsDropdown = field['isfacet'];
                                 }
                                 
                         }else{
-                            //as dropdown
+                            needsDropdown = true;
+                        }
+
+                        // Add dropdown 
+                        if(needsDropdown){
+                            
                             var w = that.element.width();
                             if(!(w>0) || w<200) w = 200;
-                            var $sel = $('<select>').css({"font-size": "0.6em !important", "width":(w-45)+'px' }); // was 30
-                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values) );
-                                
-                                that._createOption( facet_index, 0, {title:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
-                                __drawTerm(term, 0, $sel, field);
-                                
-                                if(field.selectedvalue && field.selectedvalue.value){
-                                    var $opt = $sel.find('option[facet_value="'+field.selectedvalue.value+'"]');
-                                    $opt.attr('selected',true);
-                                }
-                                
-                                //convert to jquery selectmenu
-                                selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
-                                selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
-                                
-                                $sel.change(function(event){ that._onTermSelect(event); });
-                        }
-                        
-                        
-                        //draw
-                            
-                        
-                        
-                        
-                        /*
-                        //create links for child terms                         
-                        for (i=0;i<term.children.length;i++){
-                            var cterm = term.children[i];
 
-                            //calc usage
-                            var cnt = 0;
-                            for (j=0; j<cterm.termssearch.length; j++){
-                                var usg = parseInt(terms_cnt[cterm.termssearch[j]]);
-                                if(usg>0){
-                                    cnt = cnt + usg;
-                                }
+                            var $sel = $('<select style="font-size: 0.6em !important;">').css('width', (w-45)+'px'); // was 30
+                            
+                            if(needsDropdown !== needsDropdown && $facet_values.find('span.bor-toggle-show-off').length > 0){
+                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values.find('span.bor-toggle-show-off')) );
+                            }else{
+                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values) );
                             }
-                            if(cnt>0){
-                                var f_link = this._createTermLink(facet_index, {id:cterm.id, title:cterm.title, query:cterm.termssearch.join(","), count:cnt});
-                                $("<div>").css({"display":"inline-block","min-width":"90px","padding":"0 3px"}).append(f_link).appendTo($facet_values);
+                            
+                            this._createOption( facet_index, 0, {title:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
+                            this.__drawData(term, 0, $sel, facet_index, field);
+                            
+                            if(field.selectedvalue && field.selectedvalue.value){
+                                var $opt = $sel.find('option[facet_value="'+field.selectedvalue.value+'"]');
+                                $opt.attr('selected',true);
                             }
+                            
+                            //convert to jquery selectmenu
+                            selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
+                            selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
+                            
+                            $sel.change(function(event){ that._onDropdownSelect(event); });
                         }
-                        */
-                        
                         
                     }else 
                     if(field['type']=="rectype"){  //@todo
@@ -2214,8 +2144,6 @@ $.widget( "heurist.search_faceted", {
                         var mmin  = cterm[0];
                         var mmax  = cterm[1];
                         var daymsec = 86400000; //24*60*60*1000;   1day
-                 
-//console.log(cterm[0]+'   '+cterm[1]);
                         
                         if(!(window.hWin.HEURIST4.util.isempty(mmin) || window.hWin.HEURIST4.util.isempty(mmax))){
                             
@@ -2408,9 +2336,7 @@ $.widget( "heurist.search_faceted", {
                                     }
                                 }
 
-                                var value = (min==max)?min :min + '<>' + max; //search in between
-                                
-//console.log('start search  '+value);                                
+                                var value = (min==max)?min :min + '<>' + max; //search in between                            
                                 
                                 if(window.hWin.HEURIST4.util.isempty(value)){
                                     value = '';
@@ -2507,9 +2433,6 @@ $.widget( "heurist.search_faceted", {
                                 flbl.css({cursor:'pointer'});
                                 that._on(flbl,{click: __showDateRangeDialog});
                             }
-                                
-//console.log(mmin, delta, field.mmin0);                                
-//console.log('recreate slider  '+facet_index);
 
                             var ele2 = $('<div><span class="ui-icon ui-icon-triangle-1-w-stop" '
                                 +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
@@ -2599,49 +2522,57 @@ $.widget( "heurist.search_faceted", {
                             response.data.sort(function(a, b){ return (a[0]>b[0]?-1:1);});
                         }
                         
-                        var display_mode = (field['isfacet']==this._FT_LIST || (field['groupby']=='firstchar' && step_level==0))
+                        var display_mode = (field['isfacet']==this._FT_LIST || field['isfacet']==this._FT_SELECT || (field['groupby']=='firstchar' && field['isfacet']==this._FT_LIST))
                                                         ?'inline-block':'block';
                         
-                        for (i=0;i<response.data.length;i++){
-                            var cterm = response.data[i];
+                        if(field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST){ // Listed/Wrapped
                             
-                            var title = cterm[0];
-                            
-                            //for enum get term label w/o code
-                            if(field['type']=='enum' && cterm[0]>0){
-                                title = $Db.getTermValue(cterm[0], false);    
-                            }else if( field['type']=='date' && field['groupby']=='month' ){
-                                
-                                var tDate = new TDate((new Date(cterm[0])).toISOString());
-                                title = tDate.toString('MMM yyyy');
+                            var display_mode = (field['isfacet'] == this._FT_COLUMN) ? 'block' : 'inline-block';
+
+                            this.__drawData(response.data, 0, $facet_values, facet_index, field);
+
+                            //show viewport collapse/exand control
+                            if(that.options.params.viewport < response.data.length){ // List is longer than allowed, add dropdown with all options
+                                var diff = response.data.length - this.options.params.viewport;
+                                __drawToggler($facet_values, display_mode);
+
+                                needsDropdown = field['isfacet'];
                             }
 
-                            var f_link = this._createFacetLink(facet_index, {title:title, value:cterm[2], count:cterm[1]}, display_mode);
-                            
-                            //@todo draw first level for groupby firs tchar always inline
-                            var step_level = (field['groupby']=='firstchar' && field['selectedvalue'])
-                                                ?field['selectedvalue'].step:0;
-                                                                                                      
-                            var ditem = $("<div>").css({'display':(i>this.options.params.viewport-1?'none':display_mode),"padding":"0 3px"})
-                                                .addClass('facet-item')
-                                                .append(f_link).appendTo($facet_values);
-                                                
-                            if(i>this.options.params.viewport-1){
-                                 ditem.addClass('in-viewport');
-                            }                    
-                            if(i>2000){  //was 250
-                                $("<div>").css({"display":"none","padding":"0 3px"})
-                                 .addClass('in-viewport')
-                                 .html('still more...( '+(response.data.length-i)+' results )').appendTo($facet_values);
-                                 break;       
-                            }
-                            
+                        }else{
+                            needsDropdown = true;
                         }
 
-                        //show viewport collapse/exand control
-                        if(this.options.params.viewport<response.data.length){
-                            var diff = response.data.length-this.options.params.viewport;   
-                            __drawToggler($facet_values, display_mode);
+                        if(needsDropdown){
+
+                            var w = that.element.width();
+                            if(!(w>0) || w<200) w = 200;
+                            w = w-45;
+
+                            var $sel = $('<select style="font-size: 1.1em !important;">'); // was 30
+
+                            if(needsDropdown !== true && $facet_values.find('span.bor-toggle-show-off').length > 0){
+                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values.find('span.bor-toggle-show-off')) );
+                            }else{
+                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values) );
+                            }
+                            
+                            this._createOption( facet_index, 0, {title:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
+                            this.__drawData(response.data, 0, $sel, facet_index, field);
+                            
+                            if(field.selectedvalue && field.selectedvalue.value){
+                                var $opt = $sel.find('option[facet_value="'+field.selectedvalue.value+'"]');
+                                $opt.attr('selected',true);
+                            }
+                            
+                            selObj = window.hWin.HEURIST4.ui.initHSelect($sel, true);
+                            
+                            $sel.change(function(event){ that._onDropdownSelect(event); });
+
+                            var sel_w = $sel.css('width', 'auto');
+                            if(sel_w > w){
+                                $sel.css('width', w+'px');
+                            }
                         }
                     }
 
@@ -2650,6 +2581,7 @@ $.widget( "heurist.search_faceted", {
                     }
 
                     //search next facet
+                    /*console.log(facet_index);*/
                     this._recalculateFacets( facet_index );
 
                 }else{
@@ -2657,7 +2589,102 @@ $.widget( "heurist.search_faceted", {
                 }
                 
                 
-    }            
+    }
+
+    //
+    //
+    //
+    , __drawData: function(data, level, $container, f_index, field) {
+
+        var display_mode = (field['isfacet'] == this._FT_COLUMN) ? 'block' : 'inline-block';
+        var isListOrColumn = (field['isfacet'] == this._FT_COLUMN) || (field['isfacet'] == this._FT_LIST);
+
+        //draw itslef - draw children
+        if(data.value){
+            
+                if(isListOrColumn && $container.not('select').length > 0){ // LIST
+
+                    var f_link = this._createFacetLink( f_index, 
+                        data,
+                        display_mode );
+                    
+                    this.terms_drawn++;  //global
+                    
+                    var ditem = $("<div>").css({'display':(this.terms_drawn>this.options.params.viewport?'none':display_mode),
+                                    'padding':"0 5px 0 "+(level*5)+"px"})
+                            .addClass('facet-item')        
+                            .append(f_link)
+                            .appendTo($container);
+                 
+                    if(this.terms_drawn>this.options.params.viewport){
+                         ditem.addClass('in-viewport');
+                    }                    
+                    
+                }else{
+                    // DROPDOWN
+                    this._createOption( f_index, level, {title:data.title, 
+                        value:data.value, 
+                        count:data.count} ).appendTo($container);
+                }
+        }else if(window.hWin.HEURIST4.util.isArrayNotEmpty(data)){
+
+            for(var i = 0; i < data.length; i++){
+
+                var value = data[i];
+
+                if(isListOrColumn && $container.not('select').length > 0){ // LIST
+                    
+                    var title = value[0];
+                    
+                    //for enum get term label w/o code
+                    if(field['type']=='enum' && value[0]>0){
+                        title = $Db.getTermValue(value[0], false);    
+                    }else if( field['type']=='date' && field['groupby']=='month' ){
+                        
+                        var tDate = new TDate((new Date(value[0])).toISOString());
+                        title = tDate.toString('MMM yyyy');
+                    }
+
+                    var f_link = this._createFacetLink(f_index, {title:title, value:value[2], count:value[1]}, display_mode);
+                    
+                    //@todo draw first level for groupby firs tchar always inline
+                    var step_level = (field['groupby']=='firstchar' && field['selectedvalue'])
+                                        ?field['selectedvalue'].step:0;
+                                                                                              
+                    var ditem = $("<div>").css({'display':(i>this.options.params.viewport-1?'none':display_mode),"padding":"0 3px"})
+                                        .addClass('facet-item')
+                                        .append(f_link).appendTo($container);
+                                        
+                    if(i>this.options.params.viewport-1){
+                         ditem.addClass('in-viewport');
+                    }                    
+                    if(i>2000){  //was 250
+                        $("<div>").css({"display":"none","padding":"0 3px"})
+                         .addClass('in-viewport')
+                         .html('still more...( '+(data.length-i)+' results )').appendTo($container);
+                         break;       
+                    }
+
+                }else{
+                    // DROPDOWN
+                    this._createOption(f_index, level, {title: value[0], value: value[2], count: value[1]}).appendTo($container);
+                }
+            }
+        }
+
+        if(data.children){
+            //sort by count per level
+            if(field['orderby']=='count'){
+                data.children.sort(function(a, b){ 
+                    return (Number(a.count)>Number(b.count))?-1:1;
+                });
+            }
+            
+            for (var k=0; k<data.children.length; k++){
+                this.__drawData(data.children[k], level+1, $container, f_index, field);
+            }
+        }
+    }
 
     ,_createOption : function(facet_index, indent, cterm){
         
@@ -2679,28 +2706,28 @@ $.widget( "heurist.search_faceted", {
         return f_link;
     }
     
-    , _onTermSelect: function(event){
+    , _onDropdownSelect: function(event){
         
-                var link = $(event.target).find( "option:selected" );
-                var facet_index = Number(link.attr('facet_index'));
-                var value = link.attr('facet_value');                  
-                var label = link.attr('facet_label');                  
-                var step = link.attr('step');
-                
-                var field = this.options.params.facets[facet_index];
-                
-                var prevvalue = field.selectedvalue?field.selectedvalue.value:null;
-                
-                if(window.hWin.HEURIST4.util.isempty(value)){
-                    value = '';
-                    field.selectedvalue = null;
-                }else{
-                    field.selectedvalue = {title:label, value:value, step:step};                    
-                }
-                
-                if(prevvalue!=value){
-                    this.doSearch();
-                }
+        var link = $(event.target).find( "option:selected" );
+        var facet_index = Number(link.attr('facet_index'));
+        var value = link.attr('facet_value');                  
+        var label = link.attr('facet_label');                  
+        var step = link.attr('step');
+        
+        var field = this.options.params.facets[facet_index];
+        
+        var prevvalue = field.selectedvalue?field.selectedvalue.value:null;
+        
+        if(window.hWin.HEURIST4.util.isempty(value)){
+            value = '';
+            field.selectedvalue = null;
+        }else{
+            field.selectedvalue = {title:label, value:value, step:step};                    
+        }
+        
+        if(prevvalue!=value){
+            this.doSearch();
+        }
     }
 
     // cterm - {title, value, count}
@@ -2772,7 +2799,7 @@ $.widget( "heurist.search_faceted", {
                     txt = cterm.count;
             }
             
-            if(txt!=''){
+            if(txt!=''){ // This is what is creating the listing
             
                 var dcount = $('<span>').addClass('badge').text(txt);
                 

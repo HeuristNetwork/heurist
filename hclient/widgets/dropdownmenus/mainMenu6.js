@@ -705,6 +705,10 @@ $.widget( "heurist.mainMenu6", {
         //delay before open explore section menu
         this._myTimeoutId3 = setTimeout(function(){
 
+            if(action_name == 'svsAddFaceted' && that.containers['explore'].find('div#db_overview').length > 0){
+                that.containers['explore'].find('div#db_overview').hide();
+            }
+
             if(cont.length==0){
                 //create new one
                 cont = $('<div id="'+action_name+'" class="explore-widgets">').appendTo(that.menues_explore_popup);
