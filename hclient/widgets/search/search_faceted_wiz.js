@@ -1591,18 +1591,23 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 var sMultiSel = '';
                 var sGroupBy = '';
+                var includeDropdown = true;
                 if(facets[k].type=='freetext' || facets[k].type=='blocktext'){
                     sGroupBy =
                         '<label><input type="checkbox" name="facet_Group'+idd+'" value="firstchar"/>'
                         +'Group by first character</label>';
                         //+'<label title="applicable for list and wrapped modes only">'
                         //+'<input type="checkbox" name="facet_MultiSel'+idd+'" value="1"/>multi-select</label>';
+						
+                    includeDropdown = facets[k].type != 'blocktext';
                    
                 }else if(facets[k].type=='float' || facets[k].type=='integer'){
                     sContent = sContent 
                         //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_1" name="facet_Type'
                         //+idd+'" value="1" data-type="slider"/><label for="facetType'+idd+'_1">slider</label>';
                         +'<button label="slider" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="slider"/>';
+						
+                    includeDropdown = false;
                     
                 }else if(facets[k].type=='date' || facets[k].type=='year'){
                     sContent = sContent 
@@ -1619,6 +1624,8 @@ $.widget( "heurist.search_faceted_wiz", {
                         +'<label><input type="checkbox" data-sort="desc" data-id="'
                         + idd+'" style="vertical-align: middle;margin-left:16px">'
                         + window.hWin.HR("Order descending")+"</label>";
+						
+                    includeDropdown = false;
                    
                 }else if(facets[k].type=='enum' || facets[k].type=='relationtype'){
                     
@@ -1635,9 +1642,12 @@ $.widget( "heurist.search_faceted_wiz", {
                     
                 }
                 
+                if(includeDropdown){
+                    sContent = sContent + '<button label="dropdown" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="dropdown"/>';
+                }
+				
                 if(facets[k].code.indexOf(':ids')<0 && facets[k].type!='blocktext')
                     sContent = sContent
-                        +'<button label="dropdown" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="dropdown"/>'
                         +'<button label="list" class="btnset_radio" data-idx="'+idd+'" data-value="3"/>'
                         +'<button label="wrapped" class="btnset_radio" data-idx="'+idd+'" data-value="2"/>';
                                         
