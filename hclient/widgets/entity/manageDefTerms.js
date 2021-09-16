@@ -1186,6 +1186,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         $(ele.find('.input-div select')).hSelect('refresh');
                     }
                 }
+				
+                if(this.options.reference_trm_manger.find('div').length > 0){
+                    var divs = this.options.reference_trm_manger.find('div');
+                    var $title_container = $(divs[divs.length-1]);
+
+                    if($title_container.find('span').length > 0){
+
+                        var label = $title_container.find('span').attr('title') + ' vocab';
+                        this._editing.setFieldValueByName('trm_Label', label, true);
+                    }
+                }
             }
 
             ele.show();

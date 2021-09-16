@@ -1194,7 +1194,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         //add attributes
         $recAttr['xmlns'] = 'http://heuristnetwork.org';
         $recAttr['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance';
-        $recAttr['xsi:schemaLocation'] = 'http://heuristnetwork.org reference/scheme_record.xsd';
+        $recAttr['xsi:schemaLocation'] = 'http://heuristnetwork.org/documentation_and_templates/scheme_record.xsd';
     }
 
     if(!$rectype_templates){
@@ -1815,7 +1815,7 @@ $hmlAttrs = array();
 
 $hmlAttrs['xmlns'] = 'http://heuristnetwork.org';
 $hmlAttrs['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance';
-$hmlAttrs['xsi:schemaLocation'] = 'http://heuristnetwork.org/reference/scheme_hml.xsd';
+$hmlAttrs['xsi:schemaLocation'] = 'http://heuristnetwork.org/documentation_and_templates/scheme_hml.xsd';
 
 if ($USEXINCLUDE) {
     $hmlAttrs['xmlns:xi'] = 'http://www.w3.org/2001/XInclude';

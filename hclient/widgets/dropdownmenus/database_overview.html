@@ -8,21 +8,25 @@
 	<div style="display: inline-block;width: 20%;float: left;margin-left: 15px;">
 		<div class="image_input" id="db-thumb"></div>
 		<br>
-		<button id='btnEdit'>Edit Metadata</button>
 	</div>
 	
 	<div style="display: inline-block;width: 75%;">
 
-		<input class="text" type="text" placeholder="Database Title" id="title" style="width: 40%;margin-bottom: 15px;" readonly>
+		<div style="margin-bottom: 15px;display: inline-block;">
+			<h3 id="title" style="display: inline-block;"></h3>
+		</div>
+		<button id="btnEdit" style="margin-left: 50px;">Edit Metadata</button>
 		<br>
 		
-		<input class="text" type="text" placeholder="Database Owner" id="owner" style="width: 90%;margin-bottom: 15px;" readonly>
-		<br>
+		<div style="margin-bottom: 15px;font-style: italic;padding: 5px;">
+			<span id="owner"></span>
+		</div>
 		
-		<input class="text" type="text" placeholder="Database Copyright" id="rights" style="width: 90%;margin-bottom: 15px;" readonly>
-		<br>
+		<div style="margin-bottom: 15px;font-style: italic;padding: 5px;">
+			<span id="rights"></span>
+		</div>
 		
-		<textarea class="text" placeholder="Database Description" id="description" style="width: 90%;margin-bottom: 15px;" readonly></textarea>
+		<div class="text" placeholder="Database Description" id="description" style="width: 90%;margin-bottom: 15px;padding: 5px;"></div>
 		<br>
 
 		<div style="display: inline-block;width: 50%;float: left;margin: 10px 0px 0px 10px;">

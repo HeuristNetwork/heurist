@@ -1991,6 +1991,26 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             +'Please check the set of records you are analysing ');
                 $('#cbRows').focus();
                 return;
+            }else{
+
+                // Check if row has data related to the column
+                var supressBlankRow = !$('#rbShowBlanks').is(':checked');
+                var isRowEmpty = true;
+
+                if(supressBlankRow){
+                    for(var i = 0; i < fields3.row.intervals.length; i++){
+                        if(!fields3.row.intervals[i].isempty){
+                            continue;
+                        }
+                        isRowEmpty = false;
+                    }
+
+                    if(isRowEmpty){
+                        window.hWin.HEURIST4.msg.showMsgDlg('The selected row has no related data with the selected column.<br><br>Please re-select either the row or column fields.'
+                            , null, 'Empty Set', {'data-palette': 'ui-heurist-explore'});
+                        return;
+                    }
+                }
             }
 
             $("#pmessage").html('Requesting...');

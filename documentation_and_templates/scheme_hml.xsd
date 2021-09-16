@@ -6,10 +6,10 @@ elementFormDefault="qualified">
 include these attributes to root element of your xml
 xmlns="http://heuristnetwork.org"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://heuristnetwork.org/reference/scheme_hml.xsd"
+xsi:schemaLocation="http://heuristnetwork.org/documentation_and_templates/scheme_hml.xsd"
 -->
 
-<xs:include schemaLocation="http://heuristnetwork.org/reference/scheme_record.xsd"/>
+<xs:include schemaLocation="http://heuristnetwork.org/documentation_and_templates/scheme_record.xsd"/>
 
 <xs:element name="hml">
   <xs:complexType>
