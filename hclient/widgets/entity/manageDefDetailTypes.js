@@ -1358,14 +1358,27 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             
         }
 
+        // Get field name to display in the inner header
+        var fieldname = '';
+
+        if(this._currentEditID > 0){
+            fieldname = $Db.dty(this._currentEditID, 'dty_Name');
+        }else{
+            fieldname = this._editing.getValue('dty_Name')[0];
+        }
+
+        if(window.hWin.HEURIST4.util.isempty(fieldname)){
+            fieldname = 'New Field'
+        }
+
         var that = this;
         window.hWin.HEURIST4.ui.showEntityDialog('defTerms', 
             {isdialog: true, 
                 //auxilary: vocab_id>0?'term':'vocabulary',
                 selection_on_init: vocab_id,  //selected vocabulary  
                 innerTitle: false,
-                innerCommonHeader: $('<div><span style="margin-left:260px">Field: <b>'
-                    +(this._currentEditID>0?$Db.dty(this._currentEditID,'dty_Name'):'New field')
+                innerCommonHeader: $('<div><span style="margin-left:260px" title="'+ fieldname +'">Field: <b>'
+                    + fieldname
                     +'</b></span> '
                     + (vocab_id>0?('<span style="margin-left:110px">This field uses vocabulary: <b>'+$Db.trm(vocab_id,'trm_Label')+'</b></span>')
                         :'. Addition of new vocabulary')
