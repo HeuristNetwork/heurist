@@ -43,6 +43,7 @@ class UploadHandler
         'except_file_types' => 'Filetype not allowed. It is in the list of types that are not allowed to to be uploaded to the server for security reasons. If you need to upload this file type please contact the server administrator',
         'accept_file_types' => 'Filetype not listed among allowed mimetypes. Open Manage File > Define mime types to add new file type',
         'skip_same_name' => 'File with the same name and checksum already exists on the server side',
+        'skip_same_name2' => 'File with the same name already exists on the server side',
         'max_number_of_files' => 'Maximum number of files exceeded',
         'max_width' => 'Image exceeds maximum width',
         'min_width' => 'Image requires a minimum width',
@@ -64,7 +65,7 @@ class UploadHandler
         $upload_thumb_url = @$_REQUEST['upload_thumb_url'];
         //get upload folder from parameters
         $upload_dir = @$_REQUEST['folder']; //defined in form
-        $replace_edited_file = (@$_REQUEST['replace_edited_file']==1); //defined in form
+        $replace_edited_file = @$_REQUEST['replace_edited_file']; //defined in form
         $unique_filename = (@$_REQUEST['unique_filename']!=='0'); //defined in form
         
         if(!$upload_dir){
@@ -100,8 +101,11 @@ class UploadHandler
             'user_dirs' => false,
             'mkdir_mode' => 0755,
             'param_name' => 'files',
-            'unique_filename' => $unique_filename, //generate unique name for every upload
-            'replace_edited_file' => $replace_edited_file, //if unique_filename is false, overwrtie file with same name and different checksum
+            'unique_filename' => $unique_filename, //generate unique name for every upload (by default)
+            'replace_edited_file' => $replace_edited_file, // if unique_filename is false, 
+                                                           // 1 - overwrtie if modified
+                                                           // 2 - create unique file if modified
+                                                           // 3 - ignore if already file with such name already exist
             'newfilename' => '', //rename file on server
             // Set the following option to 'POST', if your server does not support
             // DELETE requests. This is a parameter sent to the client:
@@ -1347,23 +1351,41 @@ $siz = get_php_bytes('upload_max_filesize');
         if(!$this->options['unique_filename']){
             // Keep an existing filename if this is part of a chunked upload:
             $uploaded_bytes = $this->fix_integer_overflow((int)$content_range[1]);
-            
+
             $new_file_path = $this->get_upload_path($name, $subfolder);
-            
+
             if(is_file($new_file_path) && $uploaded_bytes !== $this->get_file_size($new_file_path))
             { //file with the same name exists
-                $old_md5 = 0;
-                $new_md5 = 0;
-                if($this->options['replace_edited_file']){
-                    //overwrtie file with same name and different checksum
+
+                // 3 - ignore if already file with such name already exist
+                if($this->options['replace_edited_file']==3){
+
+                    $file->error = $this->get_error_message('skip_same_name2');
+                    return $file;
+
+                }else{
+                    $old_md5 = 0;
+                    $new_md5 = 0;
+
                     $old_md5 = md5_file($uploaded_file);
                     $new_md5 = md5_file($new_file_path);
+                    if($old_md5==$new_md5){
+                        //skip - this file is quite the same
+                        $file->error = $this->get_error_message('skip_same_name');
+                        return $file;
+                    }
+                    // 2 - create unique file if modified
+                    if($this->options['replace_edited_file']==2){
+                        
+                        $this->options['unique_filename'] = true;
+                        
+                        $file->name = $this->get_file_name($uploaded_file, $name, $subfolder, $size, $type, $error,
+                            $index, $content_range);
+                        
+                        $this->options['unique_filename'] = false;
+                    }
+                    // 1 - overwrtie if modified (with same name and different checksum)
                 }  
-                if($old_md5==$new_md5){
-                    //skip 
-                    $file->error = $this->get_error_message('skip_same_name');
-                    return $file;
-                }
             }
         }
         

@@ -261,9 +261,16 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     Upload directory and keep its structure on server side
                 </label>
                 <label style="font-size:smaller;font-style:italic"> To maintain the directory structure, you should use Chrome or FireFox</label>
-                
-                <label><input type="checkbox" checked=checked name="replace_edited_file" value="1">
-                    Replace existing files if they have been edited
+                 
+                <br><br> 
+                <label><input type="radio" checked=checked name="replace_edited_file" value="1">
+                    Replace existing file if file has been modified
+                </label><br>
+                <label><input type="radio" name="replace_edited_file" value="2">
+                    Create new file if file has been modified (1, 2, 3 … will be added)
+                </label><br>
+                <label><input type="radio" name="replace_edited_file" value="3">
+                    Ignore changes to files already uploaded
                 </label>
                 
                 <br>
