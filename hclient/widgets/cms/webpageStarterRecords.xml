@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<hml xmlns="http://heuristnetwork.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://heuristnetwork.org/reference/scheme_hml.xsd">
+<hml xmlns="http://heuristnetwork.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://heuristnetwork.org/documentation_and_templates/scheme_hml.xsd">
 <database id="2">Heurist_Core_Definitions</database>
 <query q="ids:65" db="Heurist_Core_Definitions" depth="0"/>
 <dateStamp>2021-09-10T12:22:21+00:00</dateStamp>

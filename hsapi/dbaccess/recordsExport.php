@@ -270,7 +270,7 @@ XML;
         
         fwrite($fd, '<?xml version="1.0" encoding="UTF-8" xmlns="http://heuristnetwork.org" '
         .'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
-        .'xsi:schemaLocation="http://heuristnetwork.org reference/scheme_record.xsd"?><hml><records>');     
+        .'xsi:schemaLocation="http://heuristnetwork.org/documentation_and_templates/scheme_record.xsd"?><hml><records>');     
 
         $dbID = self::$system->get_system('sys_dbRegisteredID');
         fwrite($fd, '<dbID>'.($dbID>0?$dbID:0).'</dbID>'."\n");
