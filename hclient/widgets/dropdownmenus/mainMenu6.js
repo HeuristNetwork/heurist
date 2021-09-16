@@ -1808,20 +1808,20 @@ console.log(explore_top);
             this.switchContainer('explore');
         }
 
-        // Link to DB Properties
-        var $db_props = $('li[data-action="menu-database-properties"]');
-
-        function openDBProperties(){
+        function openDBProperties(event){
+            if($(event.target).is('a')){
+                return;
+            }
             window.hWin.HAPI4.SystemMgr.verify_credentials(function(e){
-                $db_props.click();
-                that.containers['explore'].find('div#db_overview').hide();
+                window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification', {
+                    beforeClose: function(){
+                        that.showDatabaseOverview();
+                    }
+                });
             }, 1);
         }
 
         function changeFuncAccess(){
-            
-            $('textarea#description').css('font-family', 'Helvetica,Arial,sans-serif');
-            $('input#title, input#rights').css('color', 'gray');
 
             // DB Logo container
             var $thumb_container = $('div#db-thumb')
@@ -1829,24 +1829,33 @@ console.log(explore_top);
                 'display': 'block',
                 'margin-left': 'auto',
                 'margin-right': 'auto'
-            });
+            })
+            .off('click');
+
+            var $db_info = $('h3#title, span#owner, span#rights').off('click');
+            $('div#description, button#btnEdit').off('click');
 
             // Check if logged in user has access to DB Props
             if(window.hWin.HAPI4.has_access(2)){ // Has access
 
-                $('input#title, input#owner, input#rights, textarea#description')
-                .css({'cursor': 'pointer', 'background': '#F4F2F4', 'resize': 'none', 'font-size': '15px'})
+                $db_info
+                .parent()
+                .css({'cursor': 'pointer', 'resize': 'none'})
                 .on('click', openDBProperties);
 
-                $('#btnEdit')
+                $('div#description')
+                .css({'cursor': 'pointer', 'resize': 'none'})
+                .on('click', openDBProperties);
+
+                $('button#btnEdit')
                 .button({label: 'Edit Metadata'})
                 .addClass('ui-button-action')
                 .prop('disabled', false)
                 .css({
-                    'display': 'block',
-                    'margin-left': 'auto',
-                    'margin-right': 'auto',
-                    'margin-top': '10px'
+                    'display': 'inline-block'
+                    //'margin-left': 'auto',
+                    //'margin-right': 'auto',
+                    //'margin-top': '10px'
                 })
                 .on('click', openDBProperties);
 
@@ -1854,53 +1863,156 @@ console.log(explore_top);
 
             }else{ // Has no access
 
-                $('input#title, input#owner, input#rights, textarea#description')
-                .css({'cursor': 'default', 'background': '#F4F2F4', 'resize': 'none'})
-                .off('click');
+                $db_info
+                .css({'cursor': 'default', 'resize': 'none'});
 
-                $('#btnEdit')
+                $('button#btnEdit')
                 .hide()
-                .prop('disabled', true)
-                .off('click');
+                .prop('disabled', true);
 
                 $thumb_container
-                .css('cursor', 'default')
-                .off('click');
+                .css('cursor', 'default');
             }
         }
 
-        function changeFieldsStyle() {
+        function changeStyles(){
 
-            var name = $('input#title');
-            var ownership = $('input#owner');
-            var rights = $('input#rights');
-            var desc = $('textarea#description');
+            var title = $('h3#title');
+            var owner = $('span#owner');
+            var rights = $('span#rights');
+            var desc = $('div#description');
 
-            if(!window.hWin.HEURIST4.util.isempty(name.val()) && name.val() != 'Please enter a DB name ...'){
-                name.css({'background': 'white', 'border': 'none', 'color': 'black'});
-            }
-
-            if(!window.hWin.HEURIST4.util.isempty(ownership.val())){
-                ownership.css({'background': 'white', 'border': 'none'});
-            }
-
-            if(!window.hWin.HEURIST4.util.isempty(rights.val()) && rights.val() != 'Please define ownership and rights here ...'){
-                rights.css({'background': 'white', 'border': 'none', 'color': 'black'});
-            }
-
-            if(!window.hWin.HEURIST4.util.isempty(desc.val())){
-                desc.removeAttr('rows')
+            if(!window.hWin.HEURIST4.util.isempty(owner.html()) && owner.html() != 'Database Ownership'){
+                owner.parent()
                 .css({
-                    'background': 'white', 
+                    'background': 'white',
+                    'border': 'none',
+                    'width': 'auto'
+                });
+            }else{
+                owner.parent()
+                .css({
+                    'background': '#F4F2F4',
+                    'border': '1px solid gray',
+                    'width': '90%'
+                });
+            }
+
+            if(!window.hWin.HEURIST4.util.isempty(rights.html()) && rights.html() != 'Database Rights'){
+                rights.parent()
+                .css({
+                    'background': 'white',
+                    'border': 'none',
+                    'width': 'auto'
+                });
+            }else{
+                rights.parent()
+                .css({
+                    'background': '#F4F2F4',
+                    'border': '1px solid gray',
+                    'width': '90%'
+                });
+            }
+
+            if(!window.hWin.HEURIST4.util.isempty(desc.html()) && desc.html() != 'Database Description'){
+                desc
+                .css({
+                    'background': 'white',
                     'border': 'none', 
-                    'resize': 'none', 
-                    'height': '0px'
+                    'height': 'auto'
                 });
 
-                desc.css('height', desc[0].scrollHeight);
+                //desc.css('height', desc[0].scrollHeight);
             }else{
-                desc.attr('rows', '15');
+                desc
+                .css({
+                    'background': '#F4F2F4',
+                    'border': '1px solid gray',
+                    'height': '150px'
+                });
             }
+        }
+        
+        function updateDetails(){
+
+            // Add DB Logo
+            var $thumb_container = $('div#db-thumb')
+            .text('')
+            .css({
+                'display': 'block',
+                'margin-left': 'auto',
+                'margin-right': 'auto',
+                'border': 'none',
+                'background': 'none'
+            });
+
+            var thumb_url = window.hWin.HAPI4.getImageUrl('sysIdentification', 1, 'thumb', 1);
+            var date = new Date();
+
+            thumb_url += '&ts=' + date.getTime();
+            $('<img src='+ thumb_url +' class="image_input"></img>').appendTo($thumb_container);
+
+            window.hWin.HAPI4.checkImage('sysIdentification', 1, 'thumb', 
+                function(response){
+
+                    if(response.status != 'ok' || response.data != 'ok'){
+                        $thumb_container.find('img').remove();
+
+                        $thumb_container
+                        .text('No Logo')
+                        .css({
+                            'border': '1px solid gray', 
+                            'background': '#F4F2F4',
+                            'display': 'flex',
+                            'justify-content': 'center',
+                            'align-items': 'center',
+                            'width': 'fit-content',
+                            'color': 'gray'
+                        });
+                    }
+                }
+            );
+
+            // Fill in System Identification info {DB Name, Owner, Copyright and Description}
+            window.hWin.HAPI4.EntityMgr.getEntityData('sysIdentification', false, function(response){
+                
+                if(!window.hWin.HEURIST4.util.isempty(response)){
+                
+                    var record = response.getFirstRecord();
+
+                    var name = record[14];
+                    var ownership = record[15];
+                    var rights = record[16];
+                    var desc = record[17];
+
+                    if(!window.hWin.HEURIST4.util.isempty(name) && name != 'Please enter a DB name ...'){
+                        $('h3#title').text(name);
+                    }else{
+                        $('h3#title').text('Database Title');
+                    }
+
+                    if(!window.hWin.HEURIST4.util.isempty(ownership)){
+                        $('span#owner').html(ownership);
+                    }else{
+                        $('span#owner').html('Database Ownership');
+                    }
+
+                    if(!window.hWin.HEURIST4.util.isempty(rights) && rights != 'Please define ownership and rights here ...'){
+                        $('span#rights').html(rights);
+                    }else{
+                        $('span#rights').html('Database Rights');
+                    }
+
+                    if(!window.hWin.HEURIST4.util.isempty(desc)){
+                        $('div#description').html(desc);
+                    }else{
+                        $('div#description').html('Database Description');
+                    }
+                }
+
+                changeStyles();
+
+            });
         }
 
         // Check if the page already exists
@@ -1908,8 +2020,9 @@ console.log(explore_top);
 
             this.containers['explore'].find('div#db_overview').css('z-index', '10').show();
 
+            updateDetails();
             changeFuncAccess();
-            changeFieldsStyle();
+
             return;
         }
 
@@ -1921,43 +2034,6 @@ console.log(explore_top);
         // Load Content
         $ele.load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/database_overview.html',
             function(){
-
-                // Add DB Logo
-                var $thumb_container = $('div#db-thumb')
-                .css({
-                    'display': 'block',
-                    'margin-left': 'auto',
-                    'margin-right': 'auto'
-                });
-
-                var thumb_url = window.hWin.HAPI4.getImageUrl('sysIdentification', 1, 'thumb', 1);
-                var date = new Date();
-
-                thumb_url += '&ts=' + date.getTime();
-                $('<img src='+ thumb_url +' class="image_input"></img>').appendTo($thumb_container);
-
-                window.hWin.HAPI4.checkImage('sysIdentification', 1, 'thumb', 
-                    function(response){
-
-                        if(response.status != 'ok' || response.data != 'ok'){
-                            $thumb_container.find('img').remove();
-
-                            $thumb_container
-                            .text('No Logo')
-                            .css({
-                                'border': '1px solid gray', 
-                                'background': '#F4F2F4',
-                                'display': 'flex',
-                                'justify-content': 'center',
-                                'align-items': 'center',
-                                'width': 'fit-content',
-                                'color': 'gray'
-                            });
-                        }
-                    }
-                );
-
-                changeFuncAccess();
 
                 // Section headers within Content
                 $('div.mock-header')
@@ -2024,7 +2100,7 @@ console.log(explore_top);
 
                 entities_usage.find('option').each(function(idx, item){
 
-                    if(idx == 6){
+                    if(idx >= 11){ // Max of 10
                         return false;
                     }
 
@@ -2036,7 +2112,7 @@ console.log(explore_top);
                             + '" class="rt-icon" style="vertical-align:bottom;background-image: url(&quot;'+$opt.attr('icon-url')+ '&quot;);"/>'
                         +'<div class="menu-text truncate" style="max-width:130px;display:inline-block;" title="Search for '+$opt.text()+' records">'
                         +$opt.text()+'</div>'
-                        +'<span style="float:right;min-width:20px">'+count+'</span>'
+                        +'<span style="float:right;min-width:20px;margin-left:10px;">'+count+'</span>'
                        +'</li>')
                     .appendTo(entity_container); 
 
@@ -2062,27 +2138,8 @@ console.log(explore_top);
                     }
                 });
 
-                // Fill in System Identification info {DB Name, Owner, Copyright and Description}
-                window.hWin.HAPI4.EntityMgr.getEntityData('sysIdentification', false, function(response){
-                    
-                    if(!window.hWin.HEURIST4.util.isempty(response)){
-                    
-                        var record = response.getFirstRecord();
-
-                        var name = record[14];
-                        var ownership = record[15];
-                        var rights = record[16];
-                        var desc = record[17];
-
-                        $('#title').val(name);
-                        $('#owner').val(ownership);
-                        $('#rights').val(rights);
-                        $('#description').val(desc);
-
-                        changeFieldsStyle();
-                    }
-
-                });
+                updateDetails();
+                changeFuncAccess();
             }
         );
     },
