@@ -348,7 +348,7 @@ function editSymbology(current_value, mode_edit, callback){
 
 
 //
-// Not implemented
+// Get image dimension and calculate bounding box based on world file parameters
 //
 function calculateImageExtentFromWorldFile(_editing){
 

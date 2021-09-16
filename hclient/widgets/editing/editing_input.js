@@ -3062,7 +3062,7 @@ console.log('onpaste');
                 }
              
         }//end color/symbol editor
-        /*
+        
         else if( this.options.dtID>0 && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']){
             
                     var $btn_edit_switcher = $( '<span>calculate extent</span>', 
@@ -3075,7 +3075,7 @@ console.log('onpaste');
                     this._on( $btn_edit_switcher, { click: function(){
                         calculateImageExtentFromWorldFile( that.options.editing );
                     }});
-        }*/
+        }
 
 
 
