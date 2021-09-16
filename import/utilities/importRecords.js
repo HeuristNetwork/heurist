@@ -64,8 +64,24 @@ function hImportRecords(_max_upload_size) {
         $('#btn_ImportRt').click(_importDefinitions);
 
         $('#btn_ImportRecords').click(_importRecords);
+        
+        $('#sa_insert').click(_onUpdateModeSet);
+        $('#sa_update').click(_onUpdateModeSet);
 
         $('#btn_Close').click(function(){window.close()});
+        
+        $('#sel_UniqueIdField').change(function(event){
+
+            if(window.hWin.HEURIST4.util.isempty($(event.target).val())){
+                $('#sa_mode').hide();
+                $('#spanRecCount').parent().show();
+            }else{
+                $('#sa_mode').show();
+                $('#spanRecCount').parent().hide();
+            }
+            
+        });
+        
 
         //upload file to server and store intemp file
         
@@ -209,6 +225,8 @@ function hImportRecords(_max_upload_size) {
         var detailtypes = detailtypesInSource;
 
         var s = '', tsv = 'type\tsource id\tccode\tname in source\ttarget id\tname in target\n';
+        var sel_options = '<option value="">select...</option><option value="rec_ID">record ID</option>';
+        var sel_dty_ids = []; 
         var recCount = 0;
 
         var isAllRecognized = true;
@@ -284,9 +302,19 @@ function hImportRecords(_max_upload_size) {
                 if(!dt_source){
                     dt_source = '<span style="color:red">missed</span>';
                     sourceDtMissed++;
-                }else if(dt_source.indexOf('-')<0 || dt_source.indexOf('0000-')==0 ){
-                    cnt_local_dt++;
+                }else {
+                    
+                    if(dt_source.indexOf('-')<0 || dt_source.indexOf('0000-')==0 ){
+                        cnt_local_dt++;
+                    }
+                 
+                    if(sel_dty_ids.indexOf(dt_source)<0){
+                        sel_dty_ids.push(dt_source);
+                        sel_options = sel_options + 
+                                '<option value="'+dt_source+'">'+detailtype['name']+'</option>';
+                    }
                 }
+                
                 
                 if(afterSync && detailtype['code'] &&!(detailtype['target_dtyID']>0)){
                     //try to find again
@@ -325,7 +353,7 @@ function hImportRecords(_max_upload_size) {
                 tsv = tsv + 'detailtype\t'+(dtyID.indexOf('-')?'':dtyID)
                 +'\t'+detailtype['code']+'\t'
                 +detailtype['name']+'\t'+target_id;
-            }//for
+            }//for detailtypes
 
         $('#div_tsv').text(tsv);
         $('.tsv_download').click(function(event){
@@ -417,6 +445,7 @@ function hImportRecords(_max_upload_size) {
         }
 
         $('#spanRecCount').text(recCount);
+        $('#sel_UniqueIdField').html(sel_options);
 
         //no missing defintions
         if(s!=''){
@@ -508,6 +537,27 @@ function hImportRecords(_max_upload_size) {
                 session: session_id,
                 id: window.hWin.HEURIST4.util.random()
             };
+
+            if(!window.hWin.HEURIST4.util.isempty($('#sel_UniqueIdField').val())){
+            
+                request['unique_field_id'] = $('#sel_UniqueIdField').val();
+                request['allow_insert'] = $('#sa_insert').is(':checked')?1:0;
+                
+                if($('#sa_update').is(':checked')){
+                
+                    var update_mode = $("input[name='sa_upd']:checked"). val();
+   /*             
+    *   - 1 owerwrite current record completely  (Load new values, replacing all existing values for these records/fields)
+    *   - 2 Add new values without deletion of existing values (duplicates are ignored) 
+    *   - 3 Add new values only if field is empty (new values ignored for non-empty fields) 
+    *   - 4 Replace existing values with new values, retain existing value if no new value supplied
+    */
+                    request['update_mode'] = update_mode;
+                }else{
+                    request['update_mode'] = 0;
+                }
+                
+            }
             
             _showProgress( session_id, 2 );
             
@@ -524,7 +574,9 @@ function hImportRecords(_max_upload_size) {
                     if(response.status == window.hWin.ResponseStatus.OK){
                         _hideProgress(3);
                         
-                        var sMsg = response.data.count_imported+'  records have been imported.<br>'
+                        var sMsg = response.data.count_imported+'  records have been processed in total.<br>'
+                            +response.data.count_inserted+'  records have been inserted.<br>'
+                            +response.data.count_updated+'  records have been updated.<br>'
                             +(response.data.count_ignored>0
                               ?(response.data.count_ignored+'  records have been ignored - record type not determined.<br>')
                               :'')
@@ -665,6 +717,25 @@ function hImportRecords(_max_upload_size) {
         
         $("div[id^='divStep']").hide();
         $("#divStep"+(page>3?3:page)).show();
+    }
+    
+    //
+    //
+    //
+    function _onUpdateModeSet(){
+      
+        if(!$('#sa_insert').prop('checked') && !$('#sa_update').prop('checked'))
+        {
+            $('#sa_insert').prop('checked', true);
+            $('#sa_update').prop('checked', true);
+        }
+        
+        if($('#sa_update').is(':checked')){
+            $('#divUpdateSetting').show();
+        }else{
+            $('#divUpdateSetting').hide();
+        }
+        
     }
     
     //public members

@@ -189,8 +189,49 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
         <!-- STEP 2  - start donwload -->
         <div id="divStep2" style="display:none">
             <p id="st2_B" class="import-rem">All entity types are recognised and synched.</p>
-            <p>Importing <span id="spanRecCount"></span> items as new records.</p>
+            
+            <p>
+                <p>Importing <span id="spanRecCount"></span> items as new records. To identify duplicate records select ID field.</p>
+                
+                <span>Unique ID field identifying records: <select id="sel_UniqueIdField"></select></span>
+            
+                <span id="sa_mode" style="display:none;">
+                    <br><br>
+                    <label><input type="checkbox" checked="checked" id="sa_insert" class="text">&nbsp;
+                    Create new records</label>
+                    <label><input type="checkbox" checked="checked" id="sa_update" class="text">&nbsp;
+                    Update existing records</label>
+                    
+                    <div id="divUpdateSetting" style="top: 220px; line-height: 0px; font-size: 0.8em; display:block;">
+
+                        <input type="radio" checked="" name="sa_upd" id="sa_upd0" value="2" class="text">&nbsp;
+                        <label for="sa_upd0">Add new values without deletion of existing values (duplicates are ignored)</label><br>
+                        
+                        <input type="radio" name="sa_upd" id="sa_upd21" value="1" class="text">&nbsp;
+                        <label for="sa_upd21">Load new values, replacing all existing values for these records/fields</label><br>            
+                        
+                        <a href="#" style="margin: 0.3em;line-height: 17px;text-decoration:none" onclick="{$('#divImport3').show();$('#divImport3_marker').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');}">
+                            <span class="ui-icon ui-icon-triangle-1-s" id="divImport3_marker"></span>&nbsp;&nbsp;Other options
+                        </a>           
+                        
+                        <div style="padding-left: 60px; vertical-align: top;" id="divImport3">
+                        
+                            <input type="radio" name="sa_upd" id="sa_upd1" value="3" class="text">&nbsp;
+                            <label for="sa_upd1">Add new values only if field is empty (new values ignored for non-empty fields)</label><br>
+
+                            <input type="radio" name="sa_upd" id="sa_upd20" value="4" class="text">&nbsp;
+                            <label for="sa_upd20"> Replace existing values with new values, retain existing value if no new value supplied</label>
+                        
+                        </div>
+                               
+                    </div>                    
+                    
+                </span>
+                
+            </p>            
+            <!--
             <p>Note: no attempt is made to identify duplicate records - all items imported will create a new record. If you require duplicate record identification and replacement or merging, please <?php echo CONTACT_HEURIST_TEAM;?> for assistance (support at heuristnetwork dot org or use the bug report function)</p>
+            -->
             <br>
             <button id="btn_ImportRecords" class="ui-button-action">Import Records</button>
         </div>

@@ -160,7 +160,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
         $query = 'select ulf_ID, concat(ulf_FilePath,ulf_FileName) as fullPath, ulf_ExternalFileReference,'
         .'fxm_MimeType, ulf_Parameters, ulf_OrigFileName, ulf_FileSizeKB,'
         .' ulf_ObfuscatedFileID, ulf_Description, ulf_Added, ulf_MimeExt'
-        .($all_fields?', ulf_Thumbnail':'')
+        //.($all_fields?', ulf_Thumbnail':'') we don't store thumbnail in databae anymore
         .' from recUploadedFiles '
         .' left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt where '
         .$query;

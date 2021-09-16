@@ -223,7 +223,7 @@ function editCMS( options ){
             var request = { action: 'import_records',
                 filename: isWebPage?'webpageStarterRecords.xml':'websiteStarterRecords.xml',
                 is_cms_init: 1,
-                is_cms_public: (webpage_private===true)?0:1 ,
+                make_public: (webpage_private===true)?0:1 ,
                 //session: session_id,
                 id: window.hWin.HEURIST4.util.random()
             };

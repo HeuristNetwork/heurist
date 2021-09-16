@@ -256,13 +256,26 @@
     *                      ,,,
     *                     "t:11" => array("0" => "p POINT (-73.951172 40.805661)"));
     * 
+    * 
+    * @param mixed $update_mode 
+    *   - 0,1 owerwrite current record completely  (Load new values, replacing all existing values for these records/fields)
+    *   - 2 Add new values without deletion of existing values (duplicates are ignored) 
+    *   - 3 Add new values only if field is empty (new values ignored for non-empty fields) 
+    *   - 4 Replace existing values with new values, retain existing value if no new value supplied
+    * 
+    *  Add new values without deletion of existing values (duplicates are ignored)
+  Load new values, replacing all existing values for these records/fields
+  Other options
+  Add new values only if field is empty (new values ignored for non-empty fields)
+  Replace existing values with new values, retain existing value if no new value supplied
+    * 
     * returns
     * array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle);
     * or
     * error array
     *
     */
-    function recordSave($system, $record, $use_transaction=true, $suppress_parent_child=false){
+    function recordSave($system, $record, $use_transaction=true, $suppress_parent_child=false, $update_mode=0){
 
         //check capture for newsletter subscription
         if (@$record['Captcha'] && @$_SESSION["captcha_code"]){
@@ -324,11 +337,34 @@
             return $system->addError(HEURIST_INVALID_REQUEST, "Record type is wrong");
         }
 
+        $is_insert = ($recID<1);   
+        
         // recDetails data
         if ( @$record['details'] ) {
+            
             $detailValues = prepareDetails($system, $rectype, $record, ($modeImport<2 && $is_strict_validation), $recID);
             if(!$detailValues){
                 return $system->getError();
+            }
+            
+            //prepare header and details for special update modes
+            if(!$is_insert && $update_mode>1){ //if 0 or 1 - it overwrites current version of record completely
+                $detailValues = prepareRecordForUpdate($system, $record, $detailValues, $update_mode);
+                
+                if($update_mode!=1){ //1 - always overwrite
+                    $record_orig = recordSearchByID($system, $record['ID'], false);
+                    //keep previous header values if no new value supplied
+                    if( @$record['URL']==null || @$record['URL']=='' 
+                            || (@$record_orig['rec_URL'] && $update_mode==4)) //retain
+                    {
+                        $record['URL'] = @$record_orig['rec_URL'];
+                    }
+                    if(@$record['ScratchPad']==null || @$record['ScratchPad']=='' 
+                        || (@$record_orig['rec_ScratchPad'] && $update_mode==4))
+                    {
+                        $record['ScratchPad'] = @$record_orig['rec_ScratchPad'];
+                    }
+                }
             }
         }  else {
             return $system->addError(HEURIST_INVALID_REQUEST, "Details not defined");
@@ -337,8 +373,6 @@
         $system->defineConstant('RT_RELATION');
         $system->defineConstant('DT_PARENT_ENTITY');
 
-        $is_insert = ($recID<1);   
-            
         // if source of target of relationship record is temporal - relationship is temporal as well 
         if($record['RecTypeID']==RT_RELATION && @$record['FlagTemporary']!=1){
             $system->defineConstant('DT_PRIMARY_RESOURCE');
@@ -1531,6 +1565,122 @@
         return $new_title;
     }
 
+    /*
+    *   $record - new values for record
+    *   $detailValues -  array ready to insert (dtl_DetailTypeID=>, dtl_Value=>, dtl_Geo=>....)
+    *   $update_mode
+    *   - 2 Add new values without deletion of existing values (duplicates are ignored) 
+    *   - 3 Add new values only if field is empty (new values ignored for non-empty fields) 
+    *   - 4 Replace existing values with new values, retain existing value if no new value supplied
+    *
+    *   It finds original (existing) record in database and either add, replace or retain values
+    *   and returns modified  $detailValues
+    *
+    */
+    function prepareRecordForUpdate($system, $record, $detailValuesNew, $update_mode){
+        
+        /*
+        todo
+            $rec_url = sanitizeURL(@$record['URL']);
+            $rec_spad = @$record['ScratchPad'];
+            $rec_temp = (@$record['FlagTemporary']==1)?1:0;        
+        */
+
+        $detailValues = recordSearchDetailsRaw($system, $record['ID']);
+        $processed_dtyID = array();
+        
+        foreach($detailValuesNew as $idx=>$values){
+            
+            $dty_ID = $values['dtl_DetailTypeID'];
+            
+            if(in_array($dty_ID,$processed_dtyID)){
+                continue;
+            }
+            $processed_dtyID[] = $dty_ID;
+            
+            //find in original
+            $is_found = false;
+            foreach($detailValues as $idx2=>$val){
+                if($val['dtl_DetailTypeID']==$dty_ID){
+                    $is_found = true;
+                    break;
+                }
+            }
+            
+            if($is_found){  //exists
+                
+                if($update_mode==3){
+                    continue; //Add new values only if field is empty
+                }
+                
+                if($update_mode==4){
+                    //replace all fields of certain type with new value
+                    foreach($detailValues as $idx2=>$val){
+                        if($val['dtl_DetailTypeID']==$dty_ID){
+                            unset($detailValues[$idx2]);
+                        }
+                    }                
+                    foreach($detailValuesNew as $idx2=>$val){
+                        if($val['dtl_DetailTypeID']==$dty_ID){
+                            array_push($detailValues, $val);
+                        }
+                    }
+                    
+                }else{ //$update_mode==2  always add but prevent duplications
+
+                    $details_lc = array();
+                    foreach($detailValues as $idx2=>$val){
+                        if($val['dtl_DetailTypeID']==$dty_ID){
+                            if(@$val['dtl_Geo']){
+                                if(strlen(@$val['dtl_Geo'])<1000){
+                                    $details_lc[] = $val['dtl_Geo'];
+                                }
+                            }else if($val['dtl_Value'] && strlen($val['dtl_Value'])<200){
+                                $details_lc[] = trim_lower_accent($val['dtl_Value']);
+                            }
+                        }
+                    }                
+                
+                    foreach($detailValuesNew as $idx2=>$val){
+                        if($val['dtl_DetailTypeID']==$dty_ID){
+                            
+                            $need_add = false;
+                            
+                            if(@$val['dtl_UploadedFileID']>0){
+                                $need_add = true;
+                            }else if(@$val['dtl_Geo']){
+
+                                if(strlen($val['dtl_Geo'])>=1000 
+                                    || array_search($val['dtl_Geo'], $details_lc, true)===false){
+                                           $need_add = true;
+                                    }                                
+                                
+                            }else if(strlen($val['dtl_Value'])>=200 
+                                || array_search(trim_lower_accent($val['dtl_Value']), $details_lc, true)===false)
+                            {
+                                $need_add = true;
+                            }
+                            
+                            if($need_add){
+                                array_push($detailValues, $val);
+                            }
+                        }
+                    }
+                }
+                
+            }else{ //not exists
+                //add new values
+                foreach($detailValuesNew as $idx2=>$val){
+                    if($val['dtl_DetailTypeID']==$dty_ID){
+                        array_push($detailValues, $val);
+                    }
+                }
+            }
+        }//for
+        
+        return $detailValues;
+        
+    }
 
     //function doDetailInsertion($recID, $details, $rectype, $wg, &$nonces, &$retitleRecs, $modeImport)
     /**
@@ -1541,6 +1691,10 @@
     * @param mixed $rectype
     * @param mixed $details
     * @param mixed $is_strict - check mandatory fields, resources and terms ID
+    * 
+    * return details in format ready to insert to database
+    *       array('dtl_DetailTypeID'=>$dtyID,'dtl_Value'=>$value,'dtl_UploadedFileID'=>, 'dtl_Geo'=>)
+    * 
     */
     function prepareDetails($system, $rectype, $record, $is_strict, $recID)
     {
@@ -1839,7 +1993,7 @@
 
                     case "geo":
                     
-                        //note geoType can be not defined - detect it fron dtl_Geo
+                        //note geoType can be not defined - detect it from dtl_Geo
                         list($dtl_Value, $dtl_Geo) = prepareGeoValue($mysqli, $dtl_Value);
                         if($dtl_Value===false){
                             $err_msg = $geoValue; 

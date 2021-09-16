@@ -2611,6 +2611,18 @@ function recordSearchDetails($system, &$record, $need_details) {
 }
 
 //
+//
+//
+function recordSearchDetailsRaw($system, $rec_ID) {
+
+    $query =
+    "select dtl_ID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo) as dtl_Geo,dtl_UploadedFileID"
+    ." from recDetails where dtl_RecID = $rec_ID";
+    
+    return mysql__select_assoc($system->get_mysqli(), $query);
+}
+
+//
 // returns string with short description and links to record view and hml
 // $record - rec id or record array
 //

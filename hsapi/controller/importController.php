@@ -222,13 +222,11 @@ if(!$system->init(@$_REQUEST['db'])){
             //returns count of imported records
             if(@$_REQUEST['filename']!=null){
                 //filename - source hml or json file (in scratch), session - unique id for progress
-                $res = ImportHeurist::importRecords(@$_REQUEST['filename'], @$_REQUEST['session']
-                    , @$_REQUEST['is_cms_init']==1, @$_REQUEST['is_cms_public']!=0);
+                $res = ImportHeurist::importRecords(@$_REQUEST['filename'], @$_REQUEST);
+
             }else{
                 //direct import from another database (the same server)
-                $res = ImportHeurist::importRecordsFromDatabase(@$_REQUEST,
-                    @$_REQUEST['session'], @$_REQUEST['is_cms_public']!=0);
-                
+                $res = ImportHeurist::importRecordsFromDatabase(@$_REQUEST);
             }
             
         }else{

@@ -446,7 +446,7 @@ public static function importDefintions($filename, $session_id){
 /**
     Import records from another database on the same server
 */
-public static function importRecordsFromDatabase($params, $session_id){
+public static function importRecordsFromDatabase($params){
     
     self::initialize();
     
@@ -485,7 +485,17 @@ public static function importRecordsFromDatabase($params, $session_id){
 //2. import records
     if($filesize>0 && file_exists($heurist_path)){
         //read temp file, import records
-        $res = self::importRecords($heurist_path, $session_id, false, true, self::$system->get_user_id(), @$params['mapping'] );
+        
+        $params2 = array(
+            'session' => @$params['session'],
+            'is_cms_init' => 0,
+            'make_public' => (@$params['make_public']!=0),
+            'owner_id' => self::$system->get_user_id(),
+            'mapping_defs' => @$params['mapping']
+        );
+        
+        $res = self::importRecords($heurist_path, $params2);
+        
     
         if(@$params['tlcmapshot'] && $res!==false){
             //find map document among imported records
@@ -547,19 +557,44 @@ public static function saveMapDocumentSnapShot($rec_ID, $tlcmapshot){
 }
 
 /*
- $is_cms_init - if true this is a creation of set of records for website - it adds info text for webpage content
+    $params                                                                                                  1
+       session_id - progress session id
+       is_cms_init=if true this is a creation of set of records for website - it adds info text for webpage content
+       make_public=true
+       owner_id=1  - by defaul owner will be "Database managers" group
+       mapping_def=null - mapping detail fields for direct import from other database on the same server
+       
+       unique_field_id=0  id in source to maintain uniquiness of record
+       allow_insert=true  
+       update_mode = 0 (no update), 1 overwrite, 2 -add, 3 - add if empty, 4 - replace/retain
 
 returns array 
     ids
-    count_imported
+    count_imported (total)
+        count_inserted
+        count_updated
     count_ignored  - rectype not found 
     details_empt - details are empty
     resource_notfound
-
+    
 */
-public static function importRecords($filename, $session_id, $is_cms_init=false, $make_public=true, $owner_id=1, $mapping_defs=null){
-
+public static function importRecords($filename, $params){
+    
     self::initialize();
+    
+    $session_id  = @$params['session'];
+    $is_cms_init = (@$params['is_cms_init']===true || @$params['is_cms_init']==1);
+    $make_public = !(@$params['make_public']===false || @$_REQUEST['make_public']===0);
+    $owner_id = @$params['onwer_id']>0 ?$params['onwer-id'] :1;
+    $mapping_defs = $params['mapping_defs'];
+    
+    $unique_field_id = @$params['unique_field_id'];
+    $allow_insert = true;
+    $update_mode  = 1; //by default 1 - overwrite, if zero - no update allowed
+    if($unique_field_id){
+        $allow_insert = (@$params['allow_insert']==1 || @$params['allow_insert']===true);
+        $update_mode = @$params['update_mode'];
+    }
 
     $mysqli = self::$system->get_mysqli();
                        
@@ -569,6 +604,8 @@ public static function importRecords($filename, $session_id, $is_cms_init=false,
     
     $res = false;
     $cnt_imported = 0;
+    $cnt_inserted = 0;
+    $cnt_updated = 0;
     $cnt_ignored = 0;
     $ids_exist = array();
     $rec_ids_details_empty = array();
@@ -739,6 +776,13 @@ EOD;
                 //@todo
             }
             
+            $record_src_original_id = null;
+            if($record_src['rec_ID']){
+                $record_src_original_id = ((@$data['heurist']['database']['id']>0)
+                            ?$data['heurist']['database']['id']:'0').'-'
+                            .$record_src['rec_ID'];
+            }
+            
             $target_RecID = 0;
             
             if($dbsource_is_same){
@@ -763,13 +807,13 @@ EOD;
                     .' AND rec_RecTypeID='.$recTypeID.' AND dtl_DetailTypeID='.$keyDty_ID.' AND dtl_Value="'.$key_value.'"');
             
                     $target_RecID = intval($target_RecID);
-                    if($target_RecID>0){
+                    if($target_RecID>0){  
                         $ids_exist[] = $target_RecID;                
                         
                         $records_corr[$record_src['rec_ID']] = $target_RecID; 
                         $keep_rectypes[$target_RecID] = $recTypeID;
                         
-                        continue; 
+                        continue; //only insert allowed
                     }else{
                         $target_RecID = 0;
                     }
@@ -784,6 +828,60 @@ EOD;
                             ?$record_src['rec_RecTypeID']
                             :$record_src['rec_RecTypeConceptID']);
             }
+                            
+            if($mapping_defs==null && $unique_field_id){
+                    //detect insert, update or skip
+
+                    $query3 = null;
+                    
+                    if($unique_field_id!='rec_ID'){
+                        //this is detail field
+                        if($dbsource_is_same){
+                            $local_id = DbsImport::getLocalCode('detailtypes', $defs, $unique_field_id, false);
+                        }else{
+                            $local_id = DbsImport::getLocalCode('detailtypes', $importDef->getDefinitions('source'), $unique_field_id, false);                            
+                        }
+                            
+
+                        
+                        foreach($record_src['details'] as $dty_ID => $values){
+
+                            if(is_array($values) && @$values['dty_ID']>0){ //interpreatable format
+                                $dty_ID = $values['dty_ID'];
+                                $values = array($values['value']);
+                            }
+                            
+                            if($dty_ID==$local_id && is_array($values)){ 
+                                $record_src_original_id = array_shift($values);
+                                break;
+                            }              
+                        }
+                    }
+                    
+                    if($record_src_original_id){
+
+                        $query3 = 'select rec_ID from Records, recDetails where dtl_RecID=rec_ID '
+                                    .' AND dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID.' AND dtl_Value="'.$record_src_original_id.'"';
+                    
+                        $target_RecID = mysql__select_value($mysqli, $query3);
+
+                        $target_RecID = intval($target_RecID);
+                        if($target_RecID>0){  
+                            //already exists
+                            $ids_exist[] = $target_RecID;                
+                            $records_corr[$record_src['rec_ID']] = $target_RecID; 
+                            $keep_rectypes[$target_RecID] = $recTypeID;
+                            
+                            if(!($update_mode>0)) continue; //no update allowed
+                            
+                        }else{
+                            if(!$allow_insert) continue;
+                            $target_RecID = 0;
+                        }
+                        
+                    }
+                    
+            }
             
             if(!($recTypeID>0)) {
                 //skip this record - record type not found
@@ -797,7 +895,6 @@ EOD;
             $record['ID'] = $target_RecID; //0 - add new
             $record['RecTypeID'] = $recTypeID;
             
-            $record_src_original_id = null;
             
             //if($record['RecTypeID']<1){
             //    $this->system->addError(HEURIST_ERROR, 'Unable to get rectype in this database by ');
@@ -807,10 +904,6 @@ EOD;
                 $record_src['rec_ID'] = uniqid(); //''.microtime();
             }else {
                 
-                $record_src_original_id = ((@$data['heurist']['database']['id']>0)
-                        ?$data['heurist']['database']['id']:'0').'-'
-                        .$record_src['rec_ID'];
-
                 //in case source id is not numerics or more than MAX INT                
                 if((!ctype_digit($record_src['rec_ID'])) || strlen($record_src['rec_ID'])>9 ){  //4 957 948 868
                     $rec_id_low = strtolower($record_src['rec_ID']);
@@ -843,7 +936,8 @@ EOD;
                 //error_log('Details not defefined for source record '.$record_src['rec_ID']);
                 continue;
             }
-            
+
+
             foreach($record_src['details'] as $dty_ID => $values){
                 
                 if(is_array($values) && @$values['dty_ID']>0){ //interpreatable format
@@ -1105,13 +1199,11 @@ EOD;
                 $record['details'][DT_ORIGINAL_RECORD_ID][] = $record_src_original_id;
             }
             
-            
-            
             // note: we need to suppress creation of reverse 247 pointer for parent-child links
             
             //no transaction, suppress parent-child
             //DEBUG $out = array('status'=>HEURIST_OK, 'data'=>1);
-            $out = recordSave(self::$system, $record, false, true);  //see db_records.php
+            $out = recordSave(self::$system, $record, false, true, $update_mode);  //see db_records.php
 
             if ( @$out['status'] != HEURIST_OK ) {
 //error_log(print_r($record,true));                
@@ -1150,6 +1242,14 @@ EOD;
                 }
             }
             $cnt_imported++;
+            
+            if($target_RecID==0){
+                $cnt_inserted++;    
+            }else{
+                $cnt_updated++;    
+            }
+            
+            
         }//records
         
         if(!$is_rollback){    
@@ -1279,6 +1379,8 @@ EOD;
                 if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                 $res = array('count_imported'=>$cnt_imported, 
                              'count_ignored'=>$cnt_ignored, //rectype not found 
+                             'count_inserted'=>$cnt_inserted,
+                             'count_updated'=>$cnt_updated,
                              'cnt_exist'=>count($ids_exist), //such record already exists
                              'details_empty'=>$rec_ids_details_empty, 
                              'page_id_for_blog'=>$page_id_for_blog,
