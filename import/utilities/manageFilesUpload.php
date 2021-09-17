@@ -282,7 +282,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     </span>
                     <input type="file" name="files[]" multiple webkitdirectory="true" style="display:none;">
                     <button id="btnStart" type="submit" class="start" disabled>Start uploads</button>
-                    <button id="btnCancel" type="reset" class="cancel">Cancel uploads</button>
+                    <button id="btnCancel" type="reset" class="cancel">Clear upload list</button>
                     <!-- Ian 17/6/16 It's quite confusing what these are for
                     <button type="button" class="delete">Delete selected</button>
                     <input type="checkbox" class="toggle">
@@ -382,7 +382,8 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
               {% } %}
                 </td>
                 </tr>
-                {% } %}
+              {% } %}
+              {% $('#btnCancel').button('option','label','Clear list'); %}
         </script>
 
 
@@ -436,8 +437,9 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                         // Unbind mouseleave
                         $(document).off('mouseleave');
                         
-                        // Close Upload media window
+                        //Cancel possible uploads and reset form
                         $('#btnCancel').click();
+                        // Close Upload media window
                         if($(event.target).is('button')) {
                             setTimeout(function(){ window.close(); }, 100);
                         } else { console.log($(event.target)); }
@@ -456,7 +458,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
                         // Close Upload media window
                         if($(event.target).is('button')) {
-                            $('#btnCancel').click(); 
+                            $('#btnCancel').click();  //reset form
                             setTimeout(function(){ window.close(); }, 100);
                         } else { console.log($(event.target)); }
                     }
@@ -474,7 +476,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 
                 window.hWin.HEURIST4.filesWereUploaded = false;
 				
-                $(document).on("mouseleave", closeCheck);
+                //ART 2021-09-17 $(document).on("mouseleave", closeCheck);
                 
                 // Initialize the jQuery File Upload widget:
                 $('#fileupload').fileupload({
@@ -484,7 +486,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     //upload_thumb_dir: '<?=HEURIST_THUMB_DIR?>', 
                     url: '<?=HEURIST_BASE_URL?>hsapi/utilities/UploadHandlerInit.php', //was external/jquery-file-upload/server/php/
                     added: function(e, data){
-      
+                        
                         //verify that all files are processed and show total size to be uploaded
                         var ele = $('tbody.files');
                         var size = 0;
@@ -500,6 +502,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                         if(size>=0){
 
                             window.hWin.HEURIST4.util.setDisabled($('#btnStart'), false);                    
+                            window.hWin.HEURIST4.util.setDisabled($('#btnCancel'), false);                    
                             $('#btnStart').button('option','label','Start uploads '+window.hWin.HEURIST4.util.formatFileSize(size));
                         }
                   
@@ -566,14 +569,33 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 });
                 
                 $('#btnCancel').click(function(e){ 
+                    
+                    if($('#btnCancel').button('option','label')=='Clear list'){
+                        $('tbody.files').find('.template-download').remove();    
+                    }
                     window.hWin.HEURIST4.util.setDisabled($('#btnStart'), true);                    
+                    window.hWin.HEURIST4.util.setDisabled($('#btnCancel'), true);
+                    
+                    setTimeout(function(){
+                    window.hWin.HEURIST4.util.setDisabled($('#btnCancel'), 
+                        $('tbody.files').find('.template-download').length==0 
+                        && $('tbody.files').find('.template-upload').length==0  );                    
+                    },500);
+                        
                     $('#btnStart').button('option','label','Start uploads');
+                    
+                    if($('tbody.files').find('.template-download').length>0){
+                        $('#btnCancel').button('option','label','Clear list');
+                    }else{
+                        $('#btnCancel').button('option','label','Clear upload list');
+                    }
+                    
                 });
-                
                 $('#btnStart').click(function(e){ 
                     window.hWin.HEURIST4.util.setDisabled($('#btnStart'), true);                    
                     window.hWin.HEURIST4.util.setDisabled($('#btnFinished'), true);                    
                     $('#btnStart').button('option','label','Start uploads');
+                    $('#btnCancel').button('option','label','Cancel uploads');
                 });
                 
                 //cancel and close window
