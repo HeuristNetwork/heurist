@@ -93,15 +93,16 @@ use Shapefile\ShapefileReader;
             $dbf_file = null;
             $shx_file = null;
 
-            if(DT_SHAPE_FILE>0 && @$record['details'][DT_SHAPE_FILE]){
+            if(DT_ZIP_FILE>0 && @$record['details'][DT_ZIP_FILE]){
+                $shp_file = fileRetrievePath(array_shift($record['details'][DT_ZIP_FILE]),'shp',true);
+                $isZipArchive = true;
+                
+            }else if(DT_SHAPE_FILE>0 && @$record['details'][DT_SHAPE_FILE]){
                 
                 $shp_file = fileRetrievePath(array_shift($record['details'][DT_SHAPE_FILE]),'shp',false);
                 $dbf_file = fileRetrievePath(array_shift($record['details'][DT_DBF_FILE]),'dbf',false);
                 $shx_file = fileRetrievePath(array_shift($record['details'][DT_SHX_FILE]),'shx',false);
                 
-            }else if(DT_ZIP_FILE>0 && @$record['details'][DT_ZIP_FILE]){
-                $shp_file = fileRetrievePath(array_shift($record['details'][DT_ZIP_FILE]),'shp',true);
-                $isZipArchive = true;
             }else{
                 $shp_file = fileRetrievePath(array_shift($record['details'][DT_FILE_RESOURCE]),'shp',true);
                 $isZipArchive = true;
@@ -125,7 +126,7 @@ use Shapefile\ShapefileReader;
                         $dbf_file = substr($shp_file,0,strlen($shp_file)-3).'dbf';
                     }
                     if(!$shx_file){                       
-                        $shx_file = substr($shp_file,0,strlen($shp_file)-3).'dbf';
+                        $shx_file = substr($shp_file,0,strlen($shp_file)-3).'shx';
                     }
                     $zip->addFile($shp_file, basename($shp_file) );
                     if(file_exists($dbf_file)){
