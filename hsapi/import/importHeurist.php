@@ -1061,7 +1061,7 @@ EOD;
                             
                             $file_entity->setData($fileinfo);
                             $file_entity->setRecords(null); //reset
-                            $dtl_UploadedFileID = $file_entity->save();   //it returns ulf_ID
+                            $dtl_UploadedFileID = $file_entity->save();   //register remote url - it returns ulf_ID
                            
                        }else if(!$dbsource_is_same || !defined('HEURIST_DBID')) { //do not copy file for the same database
                        
@@ -1084,6 +1084,10 @@ EOD;
 
                             if(file_exists($tmp_file))
                                 $dtl_UploadedFileID = $file_entity->registerFile($tmp_file, null); //it returns ulf_ID
+                                
+                       }else if($dbsource_is_same) {
+                                               
+                           $dtl_UploadedFileID = array($value['ulf_ID']);
                        }
 
                        if($dtl_UploadedFileID!=null){
