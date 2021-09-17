@@ -547,10 +547,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             
             request['a'] = 'rectype_change';
             request['rtyID_new'] = rtyID;
-          
+            
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'You are about to convert '
-                + (request['rtyID']>0 ?('"'+$Db.rty(request['rtyID'],'rty_Name')+'"'):request['recIDs'].length)
+                + (request['rtyID']>0 ?('"'+$Db.rty(request['rtyID'],'rty_Name')+'"'):scope.length)
                 +' records from their original record (entity) type into "'
                 + $Db.rty(rtyID, 'rty_Name') 
                 + '" records.  This can result in invalid data for these records.<br><br>Are you sure?',
