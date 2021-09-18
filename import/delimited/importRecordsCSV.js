@@ -1699,7 +1699,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                       sRemain = sRemain +s;
             }
             
-            if(!isIDfield){
+            if(!isIDfield && !isIndex){
+                sAllFields = sAllFields + s;
+            }
+            
+            /*if(!isIDfield){  //variant: put index fields above first mapping key
                 if(isIndex){
                     var mf_idx = null;
                     for  (var j=0; j < imp_session['sequence'].length; j++) {
@@ -1730,7 +1734,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     //for streamlining version
                     sAllFields.push(s);
                 }
-            }
+            }*/
             
         }//for
         
@@ -1768,7 +1772,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         }else{
             //without sections and separators
-            $('#tblFieldMapping > tbody').html(sID_field+sAllFields.join(' ')
+            $('#tblFieldMapping > tbody').html(sID_field+sIndexes+sAllFields
                 +'<tr height="40" style="valign:bottom"><td class="subh" colspan="5">'
                 +'<a href="#" class="lnk_SelectAll" style="font-size:smaller">Select all/none</a></td></tr>');
             
@@ -1847,6 +1851,31 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             });
         
         }
+        
+            var is_all_checked = true;
+            $("input[id^='cbsa_dt_']").each(function(i,item){
+               var dt = $(item).attr('data-type');
+               if(!$(item).is(':checked') && (dt=='remain' || dt=='processed')){
+                   is_all_checked = false;
+                   return false
+               }
+            });
+            
+            $('.lnk_SelectAll').attr('data-checked',is_all_checked?1:0)
+                .text( is_all_checked?'Select none':'Select all');
+        
+            $('.lnk_SelectAll').click(function(e){
+                var cb = $(e.target);
+                var was_checked = (cb.attr('data-checked')==1);
+                $("input[id^='cbsa_dt_']").each(function(i,item){
+                    var dt = $(item).attr('data-type');
+                    if(dt=='remain' || dt=='processed')
+                        $(item).prop('checked',was_checked?0:1).change(); 
+                });
+                cb.attr('data-checked',(was_checked?0:1) );
+                cb.text(was_checked?'Select all':'Select none');
+            });
+        
         
     }    
 
