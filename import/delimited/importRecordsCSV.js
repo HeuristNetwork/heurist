@@ -29,6 +29,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     
     currentSeqIndex = -1,  
     
+    mode_display_separate = false,
+    
     UTMzone = 0,
 
     uniq_fieldnames = [],
@@ -1618,6 +1620,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         var sIndexes = "",
             sRemain = "",
             sProcessed = "", sID_field = '',
+            sAllFields = [],
             i = 0,
             len = (imp_session && imp_session['columns'])?imp_session['columns'].length:0;
 
@@ -1626,10 +1629,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                                     ?'Column to Field mapping (record match)'
                                                     :'Fields to update');
         var stype = (currentStep==3)?'mapping_keys':'mapping_flds'; //for matching and for import
-        var mapping_flds = imp_session['sequence'][currentSeqIndex][stype];  //field index=>field type id
+        var mapping_flds = imp_session['sequence'][currentSeqIndex][stype];  //field index=>dty_ID
         if(!mapping_flds) mapping_flds = {};
         
-        //all mapped fields - to place column in "processed" section
+        //var mapping_keys = imp_session['sequence'][currentSeqIndex]['mapping_keys'];  //field index=>dty_ID (detailtype id)
+        //if(!mapping_keys) mapping_keys = {};
+        
+        //all mapped fields - to place column in "processed" section - gather for all sequences
         var all_mapped = [];
         for  (i=0; i < imp_session['sequence'].length; i++) {
             for  (var fid in imp_session['sequence'][i][stype]) {
@@ -1637,6 +1643,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 if(all_mapped.indexOf(fid)<0) all_mapped.push(Number(fid));
             }
         }
+        
             
         var idx_id_fieldname = _getFieldIndexForIdentifier(currentSeqIndex);
         
@@ -1650,7 +1657,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     + '<td style="width:300px;">&nbsp;New column to hold Heurist record IDs</td><td>&nbsp;</td></tr>';
         }
         
-
+        
         for (i=0; i < len; i++) {
 
             var isIDfield = (i==idx_id_fieldname);
@@ -1666,18 +1673,21 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             s = s + '<td  width="75px" align="center">'+imp_session['uniqcnt'][i]+'</td>';
 
             // column names                 padding-left:15px;  <span style="max-width:290px"></span>
-            s = s + '<td style="width:300px;class="truncate">'+imp_session['columns'][i]+'</td>';
+            s = s + '<td style="width:300px;'+(isIndex?'color:#b36ae2;"':'')+'" class="truncate">'+imp_session['columns'][i]+'</td>';
 
             // mapping selector
-            s = s + '<td style="width:300px;">&nbsp;<span style="display:none;">'
+            s = s + '<td style="width:300px;">'
+                + (isIDfield && !mode_display_separate?'<span style="padding:4px 0px">Column to hold Heurist Record IDs</span>':'')
+                + '&nbsp;<span style="display:none;">'
                 + '<select id="sa_dt_'+i+'" style="width:280px; font-size: 1em;" data-field="'+i+'" '
                 //+ ' title="Only matchable fields - text, numeric, date, terms - are shown" '
                 + (isIndex||isIDfield?'class="indexes"':'')+'></select></span>';
             
+            
             s = s + '</td>';
 
             // cell for value
-            s = s + '<td id="impval'+i+'" style="text-align: left;padding-left: 16px;">&nbsp;</td></tr>';
+            s = s + '<td id="impval'+i+'" style="text-align: left;padding-left: 16px;" data-isindex="'+(isIndex?1:0)+'">&nbsp;</td></tr>';
 
             if(isIDfield){
                       sID_field = sID_field +s;
@@ -1688,37 +1698,83 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }else{
                       sRemain = sRemain +s;
             }
+            
+            if(!isIDfield){
+                if(isIndex){
+                    var mf_idx = null;
+                    for  (var j=0; j < imp_session['sequence'].length; j++) {
+                        var id_idx = _getFieldIndexForIdentifier(j);
+                        if(id_idx==i){
+                            //get mapping keys
+                            if(imp_session['sequence'][j]['mapping_keys']){
+                                //take first
+                                mf_idx = Object.keys(imp_session['sequence'][j]['mapping_keys'])[0];
+                                
+                                mf_idx = 'value="'+mf_idx+'"';
+                                
+                                for  (var k=0; k < sAllFields.length; k++) {
+                                    if(sAllFields[k].indexOf(mf_idx)>0){
+                                        sAllFields.splice(k, 0, s);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if(mf_idx==null){
+                        sAllFields.push(s);
+                    }
+                    
+                }else{
+                    //for streamlining version
+                    sAllFields.push(s);
+                }
+            }
+            
         }//for
         
-        if(sID_field!=''){
-            sID_field = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br /><b>Heurist ID</b></td></tr>'
-                +sID_field;
-        }
-        if(sIndexes!=''){
-            sIndexes = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br /><b>Heurist identifiers (record pointers)</b></td></tr>'
-                +sIndexes;
-        }
-        if(sRemain!=''){
-            sRemain = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br /><b>'
-            + ((currentStep==3) ?'Matching - not yet used'
-                                :'Not yet Imported')
-            +'</b>'
-            + ((currentStep==3)
-                ?''
-                :('<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (red in dropdown) if you plan to create new records</span>'
-                 +'<br><br><a href="#" class="lnk_SelectAll_remain" style="font-size:smaller">Select all/none</a>') )
-            +'</td></tr>'
-                +sRemain;
-        }
-        if(sProcessed!=''){
-            sProcessed = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br />'
-            +'<b>Already used</b>'
-             + ((currentStep==3)?'':'<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (red in dropdown) if you plan to create new records</span>')
-            +'<br><br><a href="#" class="lnk_SelectAll_processed" style="font-size:smaller">Select all/none</a></td></tr>'
-                +sProcessed;
-        }
+        if(mode_display_separate){
         
-        $('#tblFieldMapping > tbody').html(sID_field+sIndexes+sRemain+sProcessed);
+            if(sID_field!=''){
+                sID_field = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br /><b>Heurist ID</b></td></tr>'
+                    +sID_field;
+            }
+            if(sIndexes!=''){
+                sIndexes = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br /><b>Heurist identifiers (record pointers)</b></td></tr>'
+                    +sIndexes;
+            }
+            if(sRemain!=''){
+                sRemain = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br /><b>'
+                + ((currentStep==3) ?'Matching - not yet used'
+                                    :'Not yet Imported')
+                +'</b>'
+                + ((currentStep==3)
+                    ?''
+                    :('<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (red in dropdown) if you plan to create new records</span>'
+                     +'<br><br><a href="#" class="lnk_SelectAll_remain" style="font-size:smaller">Select all/none</a>') )
+                +'</td></tr>'
+                    +sRemain;
+            }
+            if(sProcessed!=''){
+                sProcessed = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br />'
+                +'<b>Already used</b>'
+                 + ((currentStep==3)?'':'<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (red in dropdown) if you plan to create new records</span>')
+                +'<br><br><a href="#" class="lnk_SelectAll_processed" style="font-size:smaller">Select all/none</a></td></tr>'
+                    +sProcessed;
+            }
+            
+            $('#tblFieldMapping > tbody').html(sID_field+sIndexes+sRemain+sProcessed);
+        
+        }else{
+            //without sections and separators
+            $('#tblFieldMapping > tbody').html(sID_field+sAllFields.join(' ')
+                +'<tr height="40" style="valign:bottom"><td class="subh" colspan="5">'
+                +'<a href="#" class="lnk_SelectAll" style="font-size:smaller">Select all/none</a></td></tr>');
+            
+            //make bootom line for sIndex
+            $('#tblFieldMapping > tbody > tr:first').find('td').css('border-bottom','1px solid lightgray');
+        }
         
         //init listeners
         $("input[id^='cbsa_dt_']").change(function(e){
@@ -1922,6 +1978,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             var $item = $(item);
             if($item.attr('id')==keyfield_sel){
                 var selObj = window.hWin.HEURIST4.ui.createSelector(item, [{key:'id',title:'Record ID'}] );  //the only option for current id field
+                if(!mode_display_separate){
+                    $(selObj).parent().hide();
+                }
                 selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, false);
             }else{
                 
@@ -2153,8 +2212,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 }
                             }
 
-                            if($("#impval"+(i-1)).length>0)
+                            if($("#impval"+(i-1)).length>0){
+                                
+                                if($("#impval"+(i-1)).attr('data-isindex')==1){
+                                    sval = '<span class="ui-icon ui-icon-arrowthick-1-e" style="color:#b36ae2"></span>&nbsp;' + sval;
+                                }
                                 $("#impval"+(i-1)).html(sval);
+                            }
+                                
                         }
 
                     

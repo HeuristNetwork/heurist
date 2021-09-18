@@ -731,7 +731,7 @@ public static function assignRecordIds($params){
         $imp_session['sequence'][$currentSeqIndex]['mapping_keys'] = array();
     }
     
-    if($match_mode!=2){
+    if($match_mode!=2 &&  @$params['mapping']){
         $imp_session['sequence'][$currentSeqIndex]['mapping_keys'] = @$params['mapping'];
         if(@$imp_session['validation']['mapping_keys_values']){ //id - mapping field values - required for multivalue key fields
             $imp_session['sequence'][$currentSeqIndex]['mapping_keys_values'] = $imp_session['validation']['mapping_keys_values'];
