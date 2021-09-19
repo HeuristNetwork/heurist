@@ -1184,7 +1184,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
 
             var menuwidget = menu.hSelect( "menuWidget" );
             menuwidget.css( {'background':'#F4F2F4','zIndex':9999999 }); //'padding':0,
-            menuwidget.addClass('heurist-selectmenu overflow').css({'max-height':'300px','font-size':'12px'});
+            menuwidget.addClass('heurist-selectmenu overflow').css({'max-height':'280px','font-size':'12px'});
             
             //menuwidget.find()
             

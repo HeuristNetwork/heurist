@@ -2539,7 +2539,7 @@ public static function performImport($params, $mode_output){
                                         $value = $geoType." ".$r_value;    
                                     }
                                 }else{
-                                    $value = null;
+                                    $value = null;   //wrong geo
                                 }
                                 
                             }
@@ -2634,6 +2634,12 @@ public static function performImport($params, $mode_output){
                                             }else{
                                                 $ulf_ID = null;
                                             }
+                                    }else{
+                                        //mimetype not registered
+                                        if(self::$rep_skipped<100)
+                                            self::$rep_skipped++;      
+                                            self::$rep_skipped_details[] = ($recordId>0?('record#'.$recordId):'new record')
+                                                    .': Impossible register external URL. Memtype is not defined or not registered in Database';
                                     }
                                 }
                                 
