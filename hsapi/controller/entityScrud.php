@@ -81,13 +81,43 @@
             $response = array("status"=>HEURIST_OK, "data"=> $res);
         }
         
-        $res = json_encode($response); //JSON_INVALID_UTF8_IGNORE 
-        if(!$res){
-            $system->addError(HEURIST_SYSTEM_CONFIG, 'Your data definitions (names, descriptions) contain invalid characters. Or system can not convert them properly');
-            print json_encode( $system->getError() );
+        if (strnatcmp(phpversion(), '7.3') >= 0) {
+
+            try{
+                        
+               $res = json_encode($response, JSON_THROW_ON_ERROR);
+               
+               print $res;    
+            
+            } catch (JsonException $e) {
+                
+                $res = json_encode($response, JSON_INVALID_UTF8_IGNORE );
+                
+                print $res;    
+                
+                /*
+                $system->addError(HEURIST_SYSTEM_CONFIG, 'Your data definitions (names, descriptions) contain invalid characters. '
+                .'Or system can not convert them properly. '.$e->getMessage());
+                print json_encode( $system->getError() );
+                */
+            }            
+            
         }else{
-            print $res;    
+            
+            $res = json_encode($response); //JSON_INVALID_UTF8_IGNORE 
+            if(!$res){
+                
+                //$stripped_of_invalid_utf8_chars_string = iconv('UTF-8', 'UTF-8//IGNORE', $orig_string);
+                
+                $system->addError(HEURIST_SYSTEM_CONFIG, 'Your data definitions (names, descriptions) contain invalid characters (non UTF-8). '
+                .'Or system can not convert them properly.');
+                print json_encode( $system->getError() );
+            }else{
+                print $res;    
+            }
+            
         }
+        
         
     }
 /*
