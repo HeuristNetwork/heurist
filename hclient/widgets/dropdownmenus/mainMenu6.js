@@ -853,8 +853,6 @@ $.widget( "heurist.mainMenu6", {
                     explore_top = that.element.innerHeight() - explore_height;
                 }
                 
-console.log(explore_top);
-                
                 that.menues_explore_popup.css({width:'850px', overflow:'hidden'});
                 
             }

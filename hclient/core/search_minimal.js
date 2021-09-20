@@ -175,7 +175,7 @@ function hSearchMinimal() {
         
         if(window.hWin.HAPI4.currentRecordset && window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.currentRecordset.getOrder())){
         
-            var request = { apply_rules:true, //do not inlude search in browser and search input
+            var request = { apply_rules:true, //do not include search in browser and search input
                             q: 'ids:'+window.hWin.HAPI4.currentRecordset.getOrder().join(','),
                             rules: rules,
                             rulesonly: rulesonly,

@@ -1156,7 +1156,9 @@ window.hWin.HEURIST4.dbs = {
         return usage;
     },
     
-    
+    //
+    //
+    //
     rst: function(rec_ID, dty_ID, fieldName, newValue){
         
         //fieldnames for backward capability
