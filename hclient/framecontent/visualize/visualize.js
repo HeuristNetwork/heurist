@@ -163,6 +163,18 @@ var svg;        // The SVG where the visualisation will be executed on
         }else{
             ele_warn.hide();
         }
+
+        $('#btnZoomIn').button({icons:{primary:'ui-icon-plus'},text:false}).click(
+            function(){
+                 zoomBtn(true);
+            }
+        );
+
+        $('#btnZoomOut').button({icons:{primary:'ui-icon-minus'},text:false}).click(
+            function(){
+                 zoomBtn(false);
+            }
+        );
  
         return this;
     };
@@ -253,7 +265,7 @@ feMerge.append("feMergeNode")
 
 var iconSize = 16; // The icon size
 var circleSize = 12; //iconSize * 0.75; // Circle around icon size
-var currentMode = 'infoboxes'; //or 'icons';
+var currentMode = 'infoboxes_full'; //or 'icons';
 var maxEntityRadius = 40;
 var maxLinkWidth = 25;
 
@@ -348,7 +360,7 @@ function getDataFromServer(){
     d3.json(url, function(error, json_data) {
         // Error check
         if(error) {
-            return alert("Error loading JSON data: " + error.message);
+            window.hWin.HEURIST4.msg.showMsgErr("Error loading JSON data: " + error.message);
         }
         
         settings.data = json_data; //all data
@@ -403,15 +415,6 @@ function visualizeData() {
     //define shadow filter
     _addDropShadowFilter();
     
-    /*Set up tooltip
-    var tip = d3.tip()
-        .attr('class', 'd3-tip')
-        .offset([-10, 0])
-        .html(function (d) {
-        return  d.name + "";
-    })
-    svg.call(tip);*/
-    
     // SVG data  
     this.data = settings.getData.call(this, settings.data);
     determineMaxCount(data);
@@ -430,40 +433,6 @@ function visualizeData() {
     addNodes();
     //addTitles();
     
-    // Circles
-    //addBackgroundCircles();
-    //addForegroundCircles();
-    //addIcons();
-    
-    // Labels
-    //addLabels("shadow", "#000");
-    //addLabels("namelabel", getSetting(setting_textcolor));
-    
-    /*
-    // Get everything into positon when gravity is off.
-    if(getSetting(setting_gravity) == "off") {
-        force.stop();
-        
-        for(var i=0; i<10; i++) {
-            force.tick();
-        }
-        
-        force.tick();
-        d3.selectAll(".node").attr("fixed", true);
-        
-    }else{
-        force.start();
-    }
-    */
-    
-    /*var gravity = getSetting(setting_gravity);
-    svg.selectAll(".node")
-       .attr("fixed", function(d, i) {
-            d.fixed = (gravity == "off");
-            return d.fixed;
-       }); 
-    d.fixed = true;*/
-    
     if(settings.isDatabaseStructure){
         
         var cnt_vis = data.nodes?data.nodes.length:0;
@@ -481,18 +450,6 @@ function visualizeData() {
         $('#lblShowRectypeSelector').text(sText);
 
     }
-    
-    $('#btnZoomIn').button({icons:{primary:'ui-icon-plus'},text:false}).click(
-        function(){
-             zoomBtn(true);
-        }
-    );
-
-    $('#btnZoomOut').button({icons:{primary:'ui-icon-minus'},text:false}).click(
-        function(){
-             zoomBtn(false);
-        }
-    );
 
     if(settings.isDatabaseStructure || isStandAlone){
         $('#embed-export').css('visibility','hidden');//hide();
@@ -582,7 +539,7 @@ function zoomed() {
         putSetting(setting_scale, scale);
         transform = transform + "scale("+scale+")";
     }
-            
+
     onZoom(transform);
 }  
 

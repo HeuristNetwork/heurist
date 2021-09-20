@@ -127,7 +127,7 @@ A:link {
         <!-- On Row Click -->
         <script>
             function onrowclick(rt_ID, innewtab){
-                var query = "w=all&ver=1&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
+                var query = "w=all&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
                 if(innewtab){
                     window.open(window.hWin.HAPI4.baseURL+"?"+query, "_blank");
                     return false;
@@ -228,99 +228,14 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                             echo "<td align='center'>" .$row["count"]. "</td>";
 
                             // Show
-                            if($row["count"]>0 && $count < 10) {  //this record type has records
+                            if($row["count"] > 0 && $count < 10) {  //this record type has records
                                 echo "<td align='center' class='show'><input type='checkbox' class='show-record' name='" .$title. "' checked='checked'></td>";
                                 $count++;
                             }else{
                                 echo "<td align='center' class='show'><input type='checkbox' class='show-record $first_grp' name='" .$title. "'></td>";
                             }
                             echo "</tr>";
-                        }                        
-                        
-/* OLD JJ code
-                        // Building query
-                        $query = "SELECT r.rec_RecTypeID as id, d.rty_Name as title, count(*) as count FROM Records r INNER JOIN defRecTypes d ON r.rec_RectypeID=d.rty_ID GROUP BY id ORDER BY count DESC, title ASC;";
-
-                        
-                        // Put record types & counts in the table
-                        $res = $system->get_mysqli()->query($query);
-                        $count = 0;
-                        while($row = $res->fetch_assoc()) { // each loop is a complete table row
-                            $rt_ID = $row["id"];
-                            $title = htmlspecialchars($row["title"]);
-
-                            // ID
-                            echo "<tr class='row'>";
-                            echo "<td align='center'>$rt_ID</td>";
-
-                            // Image
-                            $rectypeImg = "style='background-image:url(".HEURIST_RTY_ICON.$rt_ID.")'";
-                            $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
-                            echo "<td align='center'>$img</td>";
-
-                            // Type
-                            echo "<td style='padding-left: 5px; padding-right: 5px'>"
-                            ."<a href='#' title='Open search for this record type in current page' onclick='onrowclick($rt_ID, false)' class='dotted-link'>"
-                            .$title.
-                            "</a></td>";
-
-                            // Link
-                            echo "<td align='center'><a href='#' title='Open search for this record type in new page' onclick='onrowclick($rt_ID, true)' class='external-link'>&nbsp;</a></td>";
-
-                            // Count
-                            echo "<td align='center'>" .$row["count"]. "</td>";
-
-                            // Show
-                            if($count < 10) {
-                                echo "<td align='center' class='show'><input type='checkbox' class='show-record' name='" .$title. "' checked='checked'></td>";
-                            }else{
-                                echo "<td align='center' class='show'><input type='checkbox' class='show-record' name='" .$title. "'></td>";
-                            }
-                            echo "</tr>";
-                            $count++;
-
-                        }//end while
-
-                        // Empty space
-                        echo "<tr class='empty-row'><td class='empty-row'></tr>";
-
-                        // RETRIEVING RECORDS WITH NO CONNECTIONS
-                        $query = "SELECT rty_ID as id, rty_Name as title FROM defRecTypes WHERE rty_ID NOT IN (SELECT DISTINCT rec_recTypeID FROM Records) ORDER BY title ASC;";
-                        $res = $system->get_mysqli()->query($query);
-                        $count = 0;
-                        while($row = $res->fetch_assoc()) { // each loop is a complete table row
-                            echo "<tr>";
-
-                            // ID
-                            $rt_ID = $row["id"];
-                            $rectypeTitle = $row["title"];
-                            echo "<td align='center'>" .$rt_ID. "</td>";
-
-                            // Image
-                            $title = $row["title"];
-                            $rectypeImg = "style='background-image:url(".HEURIST_RTY_ICON.$rt_ID.")'";
-                            $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
-                            echo "<td align='center'>$img</td>";
-
-                            // Type
-                            echo "<td style='padding-left: 5px; padding-right: 5px'>"
-                            ."<a href='#' title='Open search for this record type in current page' onclick='onrowclick($rt_ID, false)' class='dotted-link'>"
-                            .$title.
-                            "</a></td>";
-
-                            // Link
-                            echo "<td align='center'><a href='#' title='Open search for this record type in new page' onclick='onrowclick($rt_ID, true)' class='external-link'>&nbsp;</a></td>";
-
-                            // Count
-                            echo "<td align='center'>0</td>";
-
-                            // Show
-                            echo "<td align='center' class='show'><input type='checkbox' class='show-record' name='" .$title. "'></td>";
-
-                            echo "</tr>";
-                            $count++;
-                        }//endwhile
-*/                        
+                        }                      
                         ?>
 
                     </table>
@@ -348,7 +263,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                 d3.json(url, function(error, json_data) {
                     // Error check
                     if(error) {
-                        return alert("Error loading JSON data: " + error.message);
+                        window.hWin.HEURIST4.msg.showMsgErr("Error loading JSON data: " + error.message);
                     }
 
                     // Data loaded successfully!
@@ -393,9 +308,11 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                     // Listen to 'show-record' checkbox changes
                     $(".show-record").change(function(e) {
                         // Update record field 'checked' value in localstorage
-                        var name = $(this).attr("name");
+                        var name = $(e.target).attr("name");
+
+                        var value = $(e.target).is(':checked') ? 1 : 0;
                         // Set 'checked' attribute and store it
-                        putSetting(name, $(this).prop('checked')?1:0);
+                        putSetting(name, value);
 
                         // Update visualisation
                         filterData();
@@ -491,7 +408,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                     var is_advanced = getSetting('setting_advanced');
                     
                     var supw = 0;
-                    if(width<645 || (is_advanced && width<1055)){
+                    if(width<645 || (is_advanced && width <= 1100)){
                          supw = 2;
                     }
                     

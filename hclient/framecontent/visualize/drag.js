@@ -64,6 +64,7 @@ function addNodes() {
 
         var  node = d3.select(this);
         
+        var icon_display = currentMode=='icons' ? 'initial' : 'none';
         
         //add infobox
         if(true || settings.isDatabaseStructure){
@@ -72,53 +73,54 @@ function addNodes() {
         
         //add outer circle
         node.append("circle")
-                    .attr("r", function(d) {
-                        return getEntityRadius(d.count);
-                    })
-                    .style('fill-opacity','0.5')
-                    .attr("class", "background")
-                    .attr("fill", entitycolor);        
+            .attr("r", function(d) {
+                return getEntityRadius(d.count);
+            })
+            .attr("class", "background icon-background")
+            .style({'fill-opacity': '0.5', 'display': icon_display})
+            .attr("fill", entitycolor);        
         
         //add internal circle
         node.append("circle")
             .attr("r", circleSize)
-            .attr("class", 'foreground')
-                    .style("stroke", "#ddd")
-                    .style("stroke-opacity", function(d) {
-                        if(d.selected == true) {
-                            return 1;
-                        }
-                        return .25;
-                    });
+            .attr("class", 'foreground icon-foreground')
+            .style({"stroke": "#ddd", 'display': icon_display})
+            .style("stroke-opacity", function(d) {
+                if(d.selected == true) {
+                    return 1;
+                }
+                return .25;
+            });
 
         //add icon
         node.append("svg:image")
-                  .attr("class", "icon") 
-                  .attr("xlink:href", function(d) {
-                        if(d.image){
-                            return d.image;
-                        }else{
-                            return '';
-                        }
-                  })
-                  .attr("x", -iconSize/2)
-                  .attr("y", -iconSize/2)
-                  .attr("height", iconSize)
-                  .attr("width", iconSize)
-        .on("mouseover", function(d) {
-            if(drag_link_source_id!=null){
-                drag_link_target_id = d.id;
-                drag_link_line.attr("stroke","#00ff00");  //green
-            }            
-        })
-        .on("mouseout", function(d) {
-            if(drag_link_source_id!=null){
-            setTimeout(function(){
-                drag_link_target_id = null;
-                if(drag_link_line) drag_link_line.attr("stroke","#ff0000");  //red
-            },200);
-            }            
-        });
+            .attr("class", "icon node-icon") 
+            .attr("xlink:href", function(d) {
+                if(d.image){
+                    return d.image;
+                }else{
+                    return '';
+                }
+            })
+            .attr("x", -iconSize/2)
+            .attr("y", -iconSize/2)
+            .attr("height", iconSize)
+            .attr("width", iconSize)
+            .on("mouseover", function(d) {
+                if(drag_link_source_id!=null){
+                    drag_link_target_id = d.id;
+                    drag_link_line.attr("stroke","#00ff00");  //green
+                }
+            })
+            .on("mouseout", function(d) {
+                if(drag_link_source_id!=null){
+                setTimeout(function(){
+                    drag_link_target_id = null;
+                    if(drag_link_line) drag_link_line.attr("stroke","#ff0000");  //red
+                },200);
+                }
+            })
+            .style('display', icon_display);
                            
         var gravity = getSetting(setting_gravity);
         

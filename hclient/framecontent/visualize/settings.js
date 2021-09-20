@@ -44,7 +44,7 @@ var setting_translatey    = "setting_translatey";
 var setting_scale         = "setting_scale"; 
 var setting_advanced      = "setting_advanced"; 
 
-//localStorage.clear();
+//sessionStorage.clear();
 /**
 * Returns the current displayed URL
 * 
@@ -54,11 +54,11 @@ function getURL() {
 }
 
 /**
- * Returns a setting from the localStorage
+ * Returns a setting from the sessionStorage
  * @param setting The setting to retrieve
  */
 function getSetting(key, defvalue) {
-    var value = localStorage.getItem(getURL()+key);
+    var value = sessionStorage.getItem(window.hWin.HAPI4.database+key);
     
     if (   //(isNaN(value) && $.isNumeric(defvalue)) ||   //!isNaN(parseFloat(n)) && isFinite(n)
         (window.hWin.HEURIST4.util.isnull(value) && !window.hWin.HEURIST4.util.isnull(defvalue))){
@@ -70,18 +70,18 @@ function getSetting(key, defvalue) {
 }
 
 /**
-* Stores a value in the localStorage
+* Stores a value in the sessionStorage
 */
 function putSetting(key, value) {
 //    if(key==setting_linecolor){
 //console.log('put '+key+'  '+value);        
 //    }
 
-    localStorage.setItem(getURL()+key, value);
+    sessionStorage.setItem(window.hWin.HAPI4.database+key, value);
 }
 
 /**
- * This function makes sure the default settings are stored in the localStorage.
+ * This function makes sure the default settings are stored in the sessionStorage.
  * @param settings The plugin settings object
  */
 function checkStoredSettings() {
@@ -133,6 +133,7 @@ function handleSettingsInUI() {
                     $('#setAdvancedMode').find('a').show();
                 }
               putSetting(setting_advanced, is_advanced); 
+              onVisualizeResize();
         }
     );
     
@@ -167,8 +168,8 @@ function handleSettingsInUI() {
         .click( function(){setGravity('off');} );
     $('#gravityMode1').button(/*{icon: 'ui-icon-gravity1' , showLabel:false}*/)
         .click( function(){setGravity('touch');} );
-    $('#gravityMode2').button(/*{icon: 'ui-icon-gravity2' , showLabel:false}*/)
-        .click( function(){setGravity('aggressive');} );
+    /*$('#gravityMode2').button(/*{icon: 'ui-icon-gravity2' , showLabel:false})
+        .click( function(){setGravity('aggressive');} );*/
     $("#setGravityMode").controlgroup();    
     
     //------------ NODES ----------
@@ -479,6 +480,7 @@ function changeViewMode(mode){
             d3.selectAll(".rect-info-full").style('display', 'none');
             d3.selectAll(".rect-info").style('display', 'initial');
             
+            d3.selectAll("circle.icon-background, circle.icon-foreground, image.node-icon").style('display', 'none');
         }else if(mode=='infoboxes_full'){
             
             currentMode = 'infoboxes_full';
@@ -488,17 +490,19 @@ function changeViewMode(mode){
             d3.selectAll(".rect-info-full").style('display', 'initial');
             d3.selectAll(".rect-info").style('display', 'none');
             
+            d3.selectAll("circle.icon-background, circle.icon-foreground, image.node-icon").style('display', 'none');
         }else{
             
             currentMode = 'icons';
             //d3.selectAll(".icon-mode").style('display', 'initial');
             d3.selectAll(".info-mode").style('display', 'none');
             d3.selectAll(".info-mode-full").style('display', 'none');
+
+            d3.selectAll("circle.icon-background, circle.icon-foreground, image.node-icon").style('display', 'initial');
         }
         var isLabelVisible = (currentMode != 'icons') || (getSetting(setting_labels)=='on');
         d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
-        
-        
+
         _syncUI();
     }
 }
