@@ -474,16 +474,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             this.doLogin();
         }else {
             this._performInitialSearch();
-
-            if(window.hWin.HAPI4.sysinfo['db_total_records']>0){
-                // Wait a bit for the main menu to be initialised
-                setTimeout(function(){
-                    if(!that._rendered_db_overview){
-                        $('.ui-menu6').mainMenu6('showDatabaseOverview');
-                        that._rendered_db_overview = true;
-                    }
-                }, 1000);
-            }
         }
 
         //that._dashboardVisibility( false );

@@ -2736,9 +2736,9 @@ function onTermSaveError(response){
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Terms in use'},
                 {default_palette_class: 'ui-heurist-design'});        
 
+            var url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&w=a&q=ids%3A' + res.records.join(',');
+            $dlg.find('a.records-list').attr('href', url);
             $dlg.find('a.records-list').on({click:function(e){
-                var request = {q:'ids:'+res.records.join(',')};
-                window.hWin.HAPI4.SearchMgr.doSearch(window.hWin.document, request);
                 $dlg.dialog('close');
             }});
 
