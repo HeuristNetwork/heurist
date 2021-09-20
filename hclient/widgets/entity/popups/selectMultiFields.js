@@ -223,7 +223,7 @@ function hMultiSelect(){
 			// Get all Base Fields belonging to this group
 			$Db.dty().each2(function(dID, field){
 
-			    if(field['dty_DetailTypeGroupID'] == gID){
+			    if(field['dty_DetailTypeGroupID'] == gID && (field['dty_ShowInLists'] != 0 || field['dty_Type'] == 'separator')){
 			    	var type = getTypeName(field['dty_Type']);
 
 			    	arr.push([dID, field['dty_Name'], type, field['dty_HelpText']]);
@@ -244,7 +244,7 @@ function hMultiSelect(){
 
 		        tab_page = tab_page + '<div class="field-container">';
 
-		        if(jQuery.inArray(arr[i][0], assigned_fields) === -1){
+		        if(!isInArray(arr[i][0], assigned_fields)){
 			        tab_page = tab_page + '<input type="checkbox" data-id="'+ arr[i][0] +'">';
 		        }
 		        else{
@@ -369,8 +369,6 @@ function hMultiSelect(){
 
 							var cb = $('.tabs').find('input[data-id="'+ id +'"]');
 
-							console.log(id, name, cb, e);
-
 							if(cb.length > 0) {
 								cb.prop('checked', true);
 
@@ -402,8 +400,6 @@ function hMultiSelect(){
 								var sel_name = $(e.target).text();
 
 								var cb = $('.tabs').find('input[data-id="'+ id +'"]');
-
-								console.log(id, name, sel_name, cb, e);
 
 								if(cb.length > 0) {
 									cb.prop('checked', true);
@@ -460,8 +456,12 @@ function hMultiSelect(){
 
 			var rty = rectypes[i][0];
 			var rtyName = rectypes[i][1];
-			
-			$Db.rst(rty).each2(function(dty_id, details){
+
+			var recset = $Db.rst(rty);
+
+			if(window.hWin.HEURIST4.util.isempty(recset)) { continue; }
+
+			recset.each2(function(dty_id, details){
 				var dtyName = $Db.dty(dty_id, "dty_Name");
 
 				if(!fieldnames[dtyName]) {
@@ -482,7 +482,20 @@ function hMultiSelect(){
 			var name = fields[j];
 
 			fieldnames[name].sort();
-		}		
+		}
+
+		$Db.dty().each2(function(dty_id, details){
+
+			var name = details['dty_Name'];
+
+			if(!isInArray(name, fields) && (details['dty_ShowInLists'] != 0 || details['dty_Type'] == 'separator')) {
+				fields.push(name);
+				fieldnames[name] = [];
+				field_ids[name] = dty_id;
+			}
+		});
+
+		fields.sort();
 	}
 
 	function _setupElements() {
@@ -520,7 +533,7 @@ function hMultiSelect(){
 		);
 
 		// Initialise Text Searching
-		$('#field_search').on('keyup', function(e) { searchBaseField(); });
+		$('#field_search').on({'keyup': searchBaseField});
 	}
 
 	function _setupStyling() {
@@ -550,8 +563,6 @@ function hMultiSelect(){
 		getAssignedFields(rtyID);
 
 		populateBaseFields();
-
-		//setupFieldSearch(rtyID);
 	}
 
 	var that = {
