@@ -934,6 +934,7 @@ if($active_all || in_array('target_parent', $active)) {
             }
             else
             {
+                echo '<script>$(".target_parent").css("background-color", "#E60000");</script>';
                 ?>
                 <br><h3>Parent records which are not correctly referenced by their child records (missing pointer to parent)</h3>
                 <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $prec_ids1) ?>'>
@@ -983,7 +984,7 @@ if($active_all || in_array('target_parent', $active)) {
             }
             else
             {
-                echo '<script>$(".target_types").css("background-color", "#E60000");</script>';
+                echo '<script>$(".target_parent").css("background-color", "#E60000");</script>';
                 ?>
                 <br><h3>Child records indicate a parent which does not identify them as their child. </h3>
                 <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $prec_ids2) ?>'>
