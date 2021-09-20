@@ -402,7 +402,7 @@ function correctDMYorder($value, $month_day_order=2){
                 if($m==13){
                     $is_ambguation = true;    
                 }else{
-                    $days_req = cal_days_in_month(CAL_GREGORIAN, $m, $y);        
+                    $days_req = cal_days_in_month(CAL_GREGORIAN, intval($m), intval($y));        
                     if($days_req+1==$d || $days_req+2==$d){
                          $is_ambguation = true;
                     }
