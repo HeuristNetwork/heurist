@@ -418,25 +418,28 @@ class DbDefTerms extends DbEntityBase
                         $parent_id = $this->records[$idx]['trm_ParentTermID']; //getTermTopMostParent($mysqli, $this->records[$idx]['trm_ParentTermID']);
                     }
 					
-                    $labels = $this->getLabelsAndCodes( $parent_id );
+                    if(@$this->records[$idx]['trm_Label'] || @$this->records[$idx]['trm_Code']){
                     
-                    if(is_array($labels)){
-                            foreach($labels as $id=>$vals){
-                                if($id!=@$this->records[$idx]['trm_ID'])
-                                {
-                                    if(strcasecmp($this->records[$idx]['trm_Label'],$vals['trm_Label'])==0){
-                                        $s2 = 'Duplicate label ('.$this->records[$idx]['trm_Label'].') ';
-                                        break;
-                                    }else if ($this->records[$idx]['trm_Code'] && 
-                                        strcasecmp($this->records[$idx]['trm_Code'],$vals['trm_Code'])==0)
+                        $labels = $this->getLabelsAndCodes( $parent_id );
+                        
+                        if(is_array($labels)){
+                                foreach($labels as $id=>$vals){
+                                    if($id!=@$this->records[$idx]['trm_ID'])
                                     {
-                                        $s2 = 'Duplicate code ('.$this->records[$idx]['trm_Code'].') ';
-                                        break;
+                                        if(@$this->records[$idx]['trm_Label'] && 
+                                            strcasecmp($this->records[$idx]['trm_Label'],$vals['trm_Label'])==0){
+                                            $s2 = 'Duplicate label ('.$this->records[$idx]['trm_Label'].') ';
+                                            break;
+                                        }else if (@$this->records[$idx]['trm_Code'] && 
+                                            strcasecmp($this->records[$idx]['trm_Code'],$vals['trm_Code'])==0)
+                                        {
+                                            $s2 = 'Duplicate code ('.$this->records[$idx]['trm_Code'].') ';
+                                            break;
+                                        }
                                     }
                                 }
-                            }
+                        }
                     }
-                    
                     
                     $s1 = 'Term';
                     $s3 = ' in the vocabulary';
