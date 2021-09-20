@@ -53,8 +53,6 @@ $.widget( "heurist.recordLookupGN_postalCode", $.heurist.recordAction, {
     // invoked from _init after loading of html content
     //
     _initControls: function(){
-
-        var that = this;
             
 /*
 "placename":"Manly",
@@ -70,14 +68,21 @@ $.widget( "heurist.recordLookupGN_postalCode", $.heurist.recordAction, {
 [{"type":"Feature","id":"857","properties":{"rec_ID":"857"....},"geometry":{"type":"Point","coordinates":[48.671137,46.998197]}},
 */   
 
+        var that = this;
+
         //fill countries dropdown
         var ele = this.element.find('#inpt_country');
         this._country_vocab_id = $Db.getLocalID('trm','2-509');
-        window.hWin.HEURIST4.ui.createTermSelect(ele.get(0), {vocab_id:this._country_vocab_id,topOptions:'select...'});
+        window.hWin.HEURIST4.ui.createTermSelect(ele.get(0), {vocab_id:this._country_vocab_id,topOptions:'select...',useHtmlSelect:false});
 
+        if(ele.hSelect('instance') != 'undefined'){
+            ele.hSelect('widget').css({'max-width':'30em'});
+        }
         
-        this.element.find('fieldset > div > .header').css({width:'80px','min-width':'80px'})
-        
+        this.element.find('#search_container > div > div > .header').css({width:'70px','min-width':'70px', display: 'inline-block'});
+
+        this.element.find('#btn_container').position({my: 'left center', at: 'right center', of: '#search_container'});
+
         this.options.resultList = $.extend(this.options.resultList, 
         {
                recordDivEvenClass: 'recordDiv_blue',
@@ -95,7 +100,7 @@ $.widget( "heurist.recordLookupGN_postalCode", $.heurist.recordAction, {
                //view_mode: this.options.view_mode?this.options.view_mode:null,
                
                pagesize:(this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
-               empty_remark: '<div style="padding:1em 0 1em 0">Nothing found</div>',
+               empty_remark: '<div style="padding:1em 0 1em 0">No Locations Found</div>',
                renderer: this._rendererResultList
                /*
                searchfull: function(arr_ids, pageno, callback){
@@ -260,15 +265,18 @@ console.log(res);
     _doSearch: function(){
         
         var sURL = 'http://api.geonames.org/postalCodeLookupJSON?username=osmakov';
-            
+        
 
-        if(this.element.find('#inpt_postalcode').val()==''){
-            window.hWin.HEURIST4.msg.showMsgFlash('Define postal code...', 500);
+        if(this.element.find('#inpt_postalcode').val()=='' && this.element.find('#inpt_placename').val()==''){
+            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a geoname or postal code...', 1000);
             return;
         }
         
         if(this.element.find('#inpt_postalcode').val()!=''){
             sURL = sURL + '&postalcode=' + this.element.find('#inpt_postalcode').val(); 
+        }
+        if(this.element.find('#inpt_placename').val()!=''){
+            sURL = sURL + '&placename=' + this.element.find('#inpt_placename').val();
         }
         if(this.element.find('#inpt_country').val()!=''){
             var _countryCode = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Code');
