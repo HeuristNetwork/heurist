@@ -1417,6 +1417,13 @@ console.log('No active tree node!!!!')
                 this._editing.setFocus();
                 
                 //this.editForm.position({my:'left top', at:'left bottom', of:ed_ele}).show();
+				
+                // Temporary Solution: Sometimes, after using the 'Add new base field' popup, the requirement type dropdown loads incorrectly
+                // The menu widget is loaded behind the record editor popup and lacks the populate highlight for the hover event on menu options
+                var requirement_sel = this._editing.getFieldByName('rst_RequirementType').find('select');
+                if(requirement_sel.hSelect('instance') != undefined){
+                    window.hWin.HEURIST4.ui.initHSelect(requirement_sel.get(0), false);
+                }
             }else{
                 this.previewEditor.hide();
             }
