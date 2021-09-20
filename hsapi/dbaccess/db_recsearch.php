@@ -1018,7 +1018,27 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
             $system->addError(HEURIST_ERROR, 'Can not find parent CMS Home record. It appears that menu items refers recursively');         
             return false;
         }
-        return recordSearchFindParent($system, $parents[0], $target_recTypeID, $allowedDetails, $level+1);
+        
+        $parent_ID = $parents[0];
+     
+        if(count($parents)>1 && defined('DT_CMS_PAGETYPE')){
+            $webpage = ConceptCode::getTermLocalID('2-6254');
+            foreach($parents as $rec_ID){
+                $isWebPage = false;
+                $rec = recordSearchByID($system, $rec_ID, array(DT_CMS_PAGETYPE), 'rec_ID,rec_RecTypeID');
+                if(@$rec['rec_RecTypeID']==RT_CMS_MENU && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
+                    //get term id by concept code
+                    $val = array_shift($rec['details'][DT_CMS_PAGETYPE]);
+                    $isWebPage = ($val==$webpage); //standalone
+                }
+                if(!$isWebPage){
+                    $parent_ID = $rec_ID;
+                    break;                    
+                }
+            }
+        }
+        
+        return recordSearchFindParent($system, $parent_id, $target_recTypeID, $allowedDetails, $level+1);
     }else{
         $system->addError(HEURIST_ERROR, 'Can not find parent CMS Home record');         
         return false;
@@ -1067,7 +1087,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $ids_only=false){
                     if(@$rec['rec_RecTypeID']==RT_CMS_MENU && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
                         //get term id by concept code
                         $val = array_shift($rec['details'][DT_CMS_PAGETYPE]);
-                        $isWebPage = ($val==ConceptCode::getTermLocalID('2-6254'));
+                        $isWebPage = ($val==ConceptCode::getTermLocalID('2-6254')); //standalone
                     }
                 }
 
