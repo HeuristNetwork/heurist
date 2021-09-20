@@ -1741,15 +1741,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         if(mode_display_separate){
         
             if(sID_field!=''){
-                sID_field = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br /><b>Heurist ID</b></td></tr>'
+                sID_field = '<tr height="40"><td class="subh" colspan="5"><br /><b>Heurist ID</b></td></tr>'
                     +sID_field;
             }
             if(sIndexes!=''){
-                sIndexes = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br /><b>Heurist identifiers (record pointers)</b></td></tr>'
+                sIndexes = '<tr height="40"><td class="subh" colspan="5"><br /><b>Heurist identifiers (record pointers)</b></td></tr>'
                     +sIndexes;
             }
             if(sRemain!=''){
-                sRemain = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br /><b>'
+                sRemain = '<tr height="40"><td class="subh" colspan="5"><br /><b>'
                 + ((currentStep==3) ?'Matching - not yet used'
                                     :'Not yet Imported')
                 +'</b>'
@@ -1761,7 +1761,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     +sRemain;
             }
             if(sProcessed!=''){
-                sProcessed = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br />'
+                sProcessed = '<tr height="40"><td class="subh" colspan="5"><br />'
                 +'<b>Already used</b>'
                  + ((currentStep==3)?'':'<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (red in dropdown) if you plan to create new records</span>')
                 +'<br><br><a href="#" class="lnk_SelectAll_processed" style="font-size:smaller">Select all/none</a></td></tr>'
@@ -1772,12 +1772,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         }else{
             //without sections and separators
-            $('#tblFieldMapping > tbody').html(sID_field+sIndexes+sAllFields
-                +'<tr height="40" style="valign:bottom"><td class="subh" colspan="5">'
+            $('#tblFieldMapping > tbody').html(
+                '<tr height="40" class="helper" style="display:none"><td class="subh" colspan="5" style="padding:0 20px">'
+                    +'<span style="background:rgba(151, 244, 128, 0.83)">MATCHING</span> Choose only the fields you need to match</td></tr>'
+                +sID_field+sIndexes+sAllFields
+                +'<tr height="40" style="border-bottom:1px solid lightgray"><td class="subh" colspan="5">'
                 +'<a href="#" class="lnk_SelectAll" style="font-size:smaller">Select all/none</a></td></tr>');
             
             //make bootom line for sIndex
-            $('#tblFieldMapping > tbody > tr:first').find('td').css('border-bottom','1px solid lightgray');
+            $('#tblFieldMapping > tbody > tr:first').next().find('td').css('border-bottom','1px solid lightgray');
         }
         
         //init listeners
@@ -2754,9 +2757,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             if($('#sa_match0').is(':checked')){ // normal matching
                 $("input[id^='cbsa_dt_']").show();
                 $("select[id^='sa_dt_']").css('visibility','visible');
+                $('tr.helper').show();//#divFieldRoles > .tbfields > tbody > 
             }else{
                 $("input[id^='cbsa_dt_']").hide();
                 $("select[id^='sa_dt_']").css('visibility','hidden');
+                $('tr.helper').hide();
             }
         
         
