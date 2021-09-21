@@ -724,16 +724,16 @@ XML;
             
             header('Content-Type: application/zip');
             header($contentDispositionField);
-            header('Content-Length: ' . filesize($file_zip_full));
-            readfile($file_zip_full);
-
+            header('Content-Length: ' . self::get_file_size($file_zip_full));
+            self::readfile($file_zip_full);
+                                     
             // remove the zip archive and temp files
             //unlink($file_zip_full); 
             //unlink($file_metadata_full);
             unlink($tmp_destination);   
             return true;
         }else{
-            $content = file_get_contents($tmp_destination);
+            //$content = file_get_contents($tmp_destination);
 
             if($params['format']=='json' || $params['format']=='geojson'){
                 header( 'Content-Type: application/json');    
@@ -744,19 +744,64 @@ XML;
             if(@$params['file']==1 || @$params['file']===true){
                 $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.'.$params['format'];
                 header('Content-Disposition: attachment; filename='.$filename);
-                header('Content-Length: ' . strlen($content));
+                header('Content-Length: ' . self::get_file_size($tmp_destination));
             }
             
             if(@$params['restapi']==1 && count($rt_counts)==0){
                 http_response_code(404);
             }
+            self::readfile($tmp_destination);
             unlink($tmp_destination);
             
-            exit($content);
+            return true;
+//            exit($content);
         }
     }
     
 }
+
+private static function readfile($file_path) {
+    $file_size = self::get_file_size($file_path);
+    $chunk_size = 10 * 1024 * 1024; // 10 MiB
+    if ($chunk_size && $file_size > $chunk_size) {
+        $handle = fopen($file_path, 'rb');
+        while (!feof($handle)) {
+            echo fread($handle, $chunk_size);
+            @ob_flush();
+            @flush();
+        }
+        fclose($handle);
+        return $file_size;
+    }
+    return readfile($file_path);
+}
+  
+  
+// Fix for overflowing signed 32 bit integers,
+// works for sizes up to 2^32-1 bytes (4 GiB - 1):
+private static function fix_integer_overflow($size) {
+    if ($size < 0) {
+        $size += 2.0 * (PHP_INT_MAX + 1);
+    }
+    return $size;
+}
+
+private static function get_file_size($file_path, $clear_stat_cache = false) {
+    if ($clear_stat_cache) {
+        if (version_compare(phpversion(), '5.3.0') >= 0) { //strnatcmp(phpversion(), '5.3.0') >= 0
+            clearstatcache(true, $file_path);
+        } else {
+            clearstatcache();
+        }
+    }
+    if(file_exists($file_path)){
+        return self::fix_integer_overflow(filesize($file_path));
+    }else{
+        return 0;
+    }
+}
+
+
 //------------------------
 
 /**

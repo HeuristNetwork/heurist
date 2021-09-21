@@ -292,7 +292,7 @@ $rtStructs = dbs_GetRectypeStructures($system, null, 2);
 $RTN = $rtStructs['names'];
 foreach ($rtStructs['typedefs'] as $rt_id => $def)
 {
-    if($rt_id>0) {
+    if($rt_id>0 && @$def['dtFields']) {
         foreach ($def['dtFields'] as $rst_DetailTypeID => $rdr){
             $RQS[$rt_id][$rst_DetailTypeID] = @$rdr[0];    
         }

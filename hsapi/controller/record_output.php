@@ -67,7 +67,7 @@
     $response = array();
 
     $system = new System();
-    
+
     //global variable to keep defs
     $defRecTypes = null;
     $defDetailtypes = null;
@@ -85,6 +85,9 @@
         //get error and response
         $system->error_exit_api(); //exit from script
     }
+
+    set_time_limit(0); //no limit
+
     
     if(!@$params['format']) $params['format'] = 'json';
     
