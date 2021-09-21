@@ -1032,7 +1032,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
         if($is_download){
             if(file_exists($thumbnail_file)){
                 header('Content-type: image/png');
-                echo file_get_contents($path);
+                echo file_get_contents($thumbnail_file);
             }else{
                 header('Location: '.$placeholder);
             }
