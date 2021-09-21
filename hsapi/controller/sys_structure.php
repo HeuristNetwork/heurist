@@ -95,7 +95,7 @@
         if($remoteURL!=null){
             
             //can not connect to registered database on the same server
-            $response = __getErrMsg($remoteURL, $response['code'], $response['message']);
+            $response = __getErrMsg($remoteURL, $response['status'], $response['message']);
             
         }
         
