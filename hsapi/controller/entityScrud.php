@@ -34,6 +34,7 @@
     
     $need_config = false;
     
+    
     //sanitizeRequest($_REQUEST);  it brokes json strings
     stripScriptTagInRequest($_REQUEST);
     
@@ -107,10 +108,27 @@
             $res = json_encode($response); //JSON_INVALID_UTF8_IGNORE 
             if(!$res){
                 
-                //$stripped_of_invalid_utf8_chars_string = iconv('UTF-8', 'UTF-8//IGNORE', $orig_string);
+                //
                 
-                $system->addError(HEURIST_SYSTEM_CONFIG, 'Your data definitions (names, descriptions) contain invalid characters (non UTF-8). '
-                .'Or system can not convert them properly.');
+                //find wrong value
+                $wrong_string = null;
+                try{
+                    array_walk_recursive($response, 'find_invalid_string');
+                    //$response = array_map('find_invalid_string', $response);
+                
+                }catch(Exception $exception) {
+                       $wrong_string = $exception->getMessage();
+                }
+                
+                $msg = 'Your data definitions (names, descriptions) contain invalid characters (non UTF-8). '
+                .'Or system can not convert them properly.';
+                
+                if($wrong_string){
+                    $msg = $msg . ' Invalid character in string: '.$wrong_string;
+                }
+                    
+                
+                $system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                 print json_encode( $system->getError() );
             }else{
                 print $res;    
@@ -118,6 +136,16 @@
             
         }
         
+        
+    }
+    
+    function find_invalid_string($val){
+        if(is_string($val)){
+            $stripped_val = iconv('UTF-8', 'UTF-8//IGNORE', $val);
+            if($stripped_val!=$val){
+                throw new Exception(mb_convert_encoding($val,'UTF-8'));    
+            }
+        }
         
     }
 /*
