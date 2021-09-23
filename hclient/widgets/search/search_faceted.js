@@ -2144,6 +2144,8 @@ $.widget( "heurist.search_faceted", {
                         var mmin  = cterm[0];
                         var mmax  = cterm[1];
                         var daymsec = 86400000; //24*60*60*1000;   1day
+
+                        var date_type = '';
                         
                         if(!(window.hWin.HEURIST4.util.isempty(mmin) || window.hWin.HEURIST4.util.isempty(mmax))){
                             
@@ -2168,10 +2170,13 @@ $.widget( "heurist.search_faceted", {
                                 
                                 if(delta>3*365*daymsec){ //3 years
                                     date_format = "yyyy";
+                                    date_type = "year";
                                 }else if(delta>365*daymsec){ //6 month
                                     date_format = "MMM yyyy";
+                                    date_type = "month";
                                 }else if(delta>daymsec){ //1 day
                                     date_format = "dd MMM yyyy";
+                                    date_type = "day";
                                 }
                                 
                             }else{
@@ -2251,6 +2256,127 @@ $.widget( "heurist.search_faceted", {
                                 }
                                 
                             }
+
+                            //
+                            // Create histogram above date slider, calls getDateHistogramData() in db_recsearch.php
+                            // lower -> min value, higher -> max value
+                            //
+                            function setupDateHistogram(lower, higher) {
+
+                                // Get dates in ms
+                                var t_min = new Date(lower);
+                                var t_max = new Date(higher);
+
+                                var ids = response.q.ids; // ids of all relavent records, string separated by commas
+
+                                if(!window.hWin.HEURIST4.util.isempty(ids)){
+
+                                    ids = ids.split(','); // transform into array
+
+                                    var request = {
+                                        a: 'gethistogramdata',  // Get histogram data
+                                        recids: ids,            // record/s of interest
+                                        dtyid: field['id'],     // detail type id
+                                        range: [t_min.toISOString(), t_max.toISOString()], // lowest and highest values in ISO format
+                                        format: date_type,        // year, month, day
+                                        interval: 25            // interval size
+                                    };
+                                    
+                                    var $slide_range = $('div#facet_range'+facet_index).parent().find('div.ui-slider-range');
+
+                                    window.HAPI4.RecordMgr.get_date_histogram_data(request, function(response){
+                                        
+                                        if(response.status == window.hWin.ResponseStatus.OK){
+                                            
+                                            var data = response.data;
+                                            
+                                            $slide_range.parent().parent().css('margin-top', '50px'); // Add space above slider
+
+                                            // Get available width
+                                            var slider_width = $slide_range.width();
+
+                                            // Max number of records
+                                            var count_max = $('div#facet_range'+facet_index).find('span.badge').text();
+
+                                            // Diagram's Container
+                                            var $diagram = $('<div id="facet_histo_'+facet_index+'">')
+                                            .css({
+                                                'height': '50px', 
+                                                'max-height': '50px', 
+                                                'width': slider_width+'px', 
+                                                'max-width': slider_width+'px', 
+                                                'display': 'flex',
+                                                'flex-direction': 'row'
+                                            })
+                                            .appendTo($slide_range.parent())
+                                            .position({my: 'bottom left', at: 'top left', of: $slide_range});
+
+                                            // Object doesn't exist
+                                            if($diagram.length == 0){
+                                                return;
+                                            }
+
+                                            var position = $diagram.position();
+
+                                            // Cautionary check before continuing
+                                            if(window.hWin.HEURIST4.util.isempty(position)){
+                                                return;
+                                            }
+
+                                            var left = position.left - 1;
+                                            var top = position.top - 32;
+
+                                            $diagram.css({
+                                                'top': top+'px', 
+                                                'max-width': $diagram.width()-4, 
+                                                'width': $diagram.width()-4,
+                                                'position': 'absolute'
+                                            });
+
+                                            // Column sizing
+                                            var col_width = $diagram.width() / data.length;
+                                            var col_gap = col_width * 0.25;
+                                            col_width -= col_gap;
+
+                                            if(col_width < 3) {
+                                                col_width = 3;
+                                                col_gap = 0;
+                                            }
+                                            if(data.length == 1){
+                                                col_gap = 0;
+                                                col_width = $diagram.width();
+                                            }
+
+                                            // Adding individual columns
+                                            for(var i = 0; i < data.length; i++){
+
+                                                var count = data[i][2];
+                                                var col_height = 0;
+
+                                                if(count > 0){
+                                                    col_height = 40 * (count / count_max);
+
+                                                    if(col_height <= 0){
+                                                        col_height = 1;
+                                                    }
+                                                }
+
+                                                var $column = $('<div id="histo_col_'+i+'">')
+                                                .css({
+                                                    'background-color': 'gray', 
+                                                    'width': col_width+'px', 
+                                                    'margin-right': col_gap+'px', 
+                                                    'display': 'inline-block', 
+                                                    'height': col_height+'px',
+                                                    'visibility': (col_height == 0) ? 'hidden' : 'visible',
+                                                    'margin-top': 'auto'
+                                                }).appendTo($diagram);
+                                            }
+                                            
+                                        }
+                                    });
+                                }
+                            }
                             
                             function __updateSliderLabel() {
                                       
@@ -2309,6 +2435,11 @@ $.widget( "heurist.search_faceted", {
                                     slider.slider( "values", 1, max);
                                 }
 
+                                if(field['type'] == 'date'){
+
+                                    setupDateHistogram(min, max);
+                                }
+
                                 __onSlideStartSearch(min, max);
                             }
                             
@@ -2326,7 +2457,7 @@ $.widget( "heurist.search_faceted", {
                                         var tDate = new TDate((new Date(min)).toISOString());
                                         min = tDate.toString();
                                         
-                                            tDate = new TDate((new Date(max)).toISOString());
+                                        tDate = new TDate((new Date(max)).toISOString());
                                         max = tDate.toString();
                                         
                                         //min = (new Date(min)).toISOString();
@@ -2473,11 +2604,15 @@ $.widget( "heurist.search_faceted", {
                             }                                    
                             if(mmax==field.mmax0){
                                 ele2.find('span.ui-icon-triangle-1-e-stop').css('visibility','hidden');
-                            }                                    
-                            
+                            }
                                  
                             //show initial values
                             __updateSliderLabel(mmin, mmax, sl_count);
+
+                            if(field['type'] == 'date'){
+                                //build histogram
+                                setupDateHistogram(mmin, mmax);
+                            }
                             
                         }
                         }

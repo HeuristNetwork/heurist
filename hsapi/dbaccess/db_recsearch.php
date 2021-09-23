@@ -484,6 +484,198 @@ function __assignFacetValue($params, $subs){
     return $params;
 }
 
+/*
+* Get an array of lower and upper limits plus a record count for each interval
+*
+* Input: 
+* 	$range (array) => (lowest date, highest date),
+*	$interval (int) => interval size (e.g. $interval = 3, ([1982, 1985], [1986, 1989], ...))
+*	$rec_ids (array) => record ids used for the count
+*	$dty_id (int) => id for detail/base field containing the date in each record from above
+*	$format (string) => default date format ("year", "month", "day")
+*
+* Output:
+*	Array => each index is the lower and upper limits for the interval plus the number of records that fit this interval
+*/
+function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $format="year", $forced=false){
+
+    $mysqli = $system->get_mysqli();
+
+    $date_int = null;
+    $intervals = array();
+    $count = 0;
+    $add_day = new DateInterval('P1D'); // Keep the class limits inclusive
+
+	// Validate Input
+    if($rec_ids == null){
+        return $system->addError(HEURIST_INVALID_REQUEST, "No record ids have been provided");
+    }else if(!is_array($rec_ids)){
+        $rec_ids = array(rec_ids);
+    }
+
+    if($dty_id == null || !is_numeric($dty_id)){
+        return $system->addError(HEURIST_INVALID_REQUEST, "An invalid detail type id has been provided");
+    }
+
+    if(is_array($interval) || intval($interval) == 0){
+        return $system->addError(HEURIST_INVALID_REQUEST, "An invalid interval has been provided");
+    }
+
+	// Process End Date
+    try{
+        $e_date = new DateTime($range[1]);
+        $e_date->setTime(0, 0);
+    }catch(Exception $e){
+        return $system->addError(HEURIST_INVALID_REQUEST, "An invalid starting date has been provided, " . $e->errorMessage());
+    }
+
+	// Process Starting Date
+    try{
+        $s_date = new DateTime($range[0]);
+        $s_date->setTime(0, 0);
+    }catch(Exception $e){
+        return $system->addError(HEURIST_INVALID_REQUEST, "An invalid ending date has been provided, " . $e->errorMessage());
+    }
+
+	// Get differences between Start and End Date
+    $diff = $s_date->diff($e_date, true);
+    $years = $diff->format('%y');
+    $months = $diff->format('%M');
+    $days = $diff->format('%d');
+
+    if($format=='year'){
+
+        if($months > 0 || $days > 0){ // Round up
+            $years += 1; 
+        }
+
+        $count = $years / $interval; // get the number of classes
+
+        $date_int = new DateInterval('P'.$interval.'Y');
+        $format = 'Y';
+
+        if($count < 5 && !$forced){ // move down to month
+            return getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, 'month', true); 
+        }
+        else if($count == 1){ // perfect
+            array_push($intervals, array($s_date->format($format), $e_date->format($format), count($rec_ids)));
+            return array("status"=>HEURIST_OK, "data"=>$intervals);
+        }
+
+        $count = ceil($count);
+
+    }else if($format == 'month'){
+
+		// Round up, +1 for any days and +12 for any years
+        if($days > 0){ 
+            $months += 1; 
+        }
+
+        if($years > 0){ 
+            $months += (12 * $years); 
+        }
+
+        $count = $months / $interval; // get the number of classes
+
+        $date_int = new DateInterval('P'.$interval.'M');
+        $format = 'd M Y';
+
+        if($count < 1 && !$forced){ // move down to days
+            return getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, 'day', true); 
+        }
+        else if($count == 1){ // perfect 
+            array_push($intervals, array($s_date->format($format), $e_date->format($format), count($rec_ids)));
+            return array("status"=>HEURIST_OK, "data"=>$intervals);
+        }else if($count > $interval && !$forced){ // move up in format
+            return getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, 'year', true);
+        }
+
+        $count = ceil($count);
+
+    }else{
+
+        $days = $diff->days; // get the difference purely in days
+
+        $count = $days / $interval; // get the number of classes
+
+        $date_int = new DateInterval('P'.$interval.'D');
+        $format = 'd M Y';
+
+        if($count > $interval && !$forced){ // move up to month
+            return getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, 'month', true);
+        }else if($count <= 1){ // perfect
+            array_push($intervals, array($s_date->format($format), $e_date->format($format), count($rec_ids)));
+            return array("status"=>HEURIST_OK, "data"=>$intervals);
+        }
+
+        $count = ceil($count);
+
+    }
+
+	// Create date intervals
+    for($i = 0; $i < $count; $i++){
+        $lower = new DateTime($s_date->format('d M Y'));
+        $upper = new DateTime($s_date->add($date_int)->format('d M Y'));
+
+        if($upper > $e_date){ // last class
+            array_push($intervals, array($lower->format($format), $e_date->format($format), 0));
+            break;
+        }else{ // add class
+            array_push($intervals, array($lower->format($format), $upper->format($format), 0));
+        }
+
+        $s_date->add($add_day);
+    }
+
+    // Get record dates
+    $sql = "SELECT cast(if(cast(getTemporalDateString(dtl_Value) as DATETIME) is null, concat(cast(getTemporalDateString(dtl_Value) as SIGNED), '-1-1'), getTemporalDateString(dtl_Value)) as DATETIME)
+            FROM recDetails
+            WHERE dtl_RecID IN (".implode(',', $rec_ids).") AND dtl_DetailTypeID = ".$dty_id." AND (NULLIF(dtl_Value, '') is not null) AND (cast(getTemporalDateString(dtl_Value) as DATETIME) is not null OR (cast(getTemporalDateString(dtl_Value) as SIGNED) is not null AND cast(getTemporalDateString(dtl_Value) as SIGNED) != 0))";
+
+    $res = $mysqli->query($sql);
+
+    if(!$res){
+        return $system->addError(HEURIST_DB_ERROR, "An SQL Error has Occurred => " . $mysqli->error);
+    }else{
+
+        while($row = $res->fetch_row()){ // cycle through all records
+
+            $detail_date = new DateTime($row[0]);
+            $detail_date->setTime(0,0);
+
+            for($k = 0; $k < count($intervals); $k++){ // cycle through classes, add to required count
+
+                if($format == 'Y'){ // need separate handle for years
+
+                    $lower = $intervals[$k][0];
+                    $upper = $intervals[$k][1];
+
+                    $rec_date = $detail_date->format($format);
+
+                    if($lower <= $rec_date && $rec_date <= $upper){
+                        $intervals[$k][2] += 1; 
+                        break;
+                    }
+
+                }else{
+
+                    $lower = new DateTime($intervals[$k][0]);
+                    $upper = new DateTime($intervals[$k][1]);
+
+                    if($lower <= $detail_date && $detail_date <= $upper){
+                        $intervals[$k][2] += 1;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return array("status"=>HEURIST_OK, "data"=>$intervals);
+    }
+
+    return $system->addError(HEURIST_UNKNOWN_ERROR, "An unknown error has occurred with attempting to retrieve the date data for DB => " . HEURIST_DBNAME . ", record ids => " . implode(',', $rec_ids));
+}
+
 /**
 * search all related (links and releationship) records for given set of records
 * it searches links recursively and adds found records into original array  $ids 

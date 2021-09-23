@@ -1258,6 +1258,14 @@ prof =Profile
                 if(request && !request.a) request.a = 'getfacets';
                 _callserver('record_search', request, callback);
             }
+			
+            //
+            // return the date intervals for the provided record type using the provided detail type
+            //
+            ,get_date_histogram_data: function(request, callback){
+                if(request && !request.a) request.a = 'gethistogramdata';
+                _callserver('record_search', request, callback);
+            }
 
             //@TODO get full info for particular record
             ,get: function(request, callback){
