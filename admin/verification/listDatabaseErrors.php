@@ -128,7 +128,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 //var link = document.getElementById('selected_link');
                 //if (link) return false;
                 if(ids){
-                    window.open('<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:' + ids, '_blank');
+                    window.open('<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:' + ids + '&nometadatadisplay=true', '_blank');
                 }
                 return false;
             }

@@ -742,20 +742,20 @@ if($step=="1"){  //first step - info about current status
     foreach ($cnt_report as $rty_ID=>$cnt){
         print '<tr><td>'.$rectypes['names'][$rty_ID]
             .'</td><td align="center">'.(count($cnt['added'])>0?'<a target="_blank" href="'
-                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt['added']).'">'
+                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt['added']).'&nometadatadisplay=true">'
                     .count($cnt['added']).'</a>':'0')
             .'</td><td align="center">'.(count($cnt['updated'])>0?'<a target="_blank" href="'
-                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt['updated']).'">'
+                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt['updated']).'&nometadatadisplay=true">'
                     .count($cnt['updated']).'</a>':'0').'</td></tr>';
                     
             
     }
     
     print '</table><div><br>Records added : '.(count($cnt_added)>0?'<a  target="_blank" href="'
-                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt_added).'">'
+                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt_added).'&nometadatadisplay=true">'
                     .count($cnt_added).'</a>':'0').'</div>';
     print '<div>Records updated : '.(count($cnt_updated)>0?'<a  target="_blank" href="'
-                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt_updated).'">'
+                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt_updated).'&nometadatadisplay=true">'
                     .count($cnt_updated).'</a>':'0').'</div>';
     
     $tot_erros = $cnt_ignored + $cnt_notmapped + $cnt_empty + $cnt_notfound;

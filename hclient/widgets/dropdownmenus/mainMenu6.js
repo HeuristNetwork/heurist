@@ -624,7 +624,7 @@ $.widget( "heurist.mainMenu6", {
                 if(ele.parents('.ui-heurist-quicklinks').length>0) ele.css('background','aliceblue');
                 hasAction = ele.attr('data-action-popup');
                 
-                if(hasAction=='search_recent' || hasAction=='nev_msg') {
+                if(hasAction=='search_recent') {
                     hasAction = false;   
                     return;
                 }
@@ -1286,21 +1286,8 @@ $.widget( "heurist.mainMenu6", {
             });
             this._updateDefaultAddRectype();
 
-            
-            this._on(this.element.find('li[data-action-popup="nev_msg"]'),{
-                click: function(){
-                    window.hWin.HEURIST4.msg.showMsgDlg('May 2021: We have removed the duplicate navigation icons which used to be here.<br />'
-                        + 'Please use the identical functions at the top of the Explore menu and/or add them to<br />'
-                        + 'the Shortcuts bar (Design > Setup > Shortcuts bar).<br /><br />'
-                        + 'If you find that you really miss them, please email '
-                        + '<a href="mailto:support@heuristnetwork.org" style="color:blue">support@heuristnetwork.org</a> and we<br />'
-                        + 'will reinstate them as a configurable option.');
-                }
-            });
-
             var exp_img = $(this.element.find('img[data-src="gs_explore_cb.png"]')[0]);
             exp_img.attr('src', window.hWin.HAPI4.baseURL+'hclient/assets/v6/' + exp_img.attr('data-src'));
-
 
             this._on(this.element.find('li[data-action-popup="search_recent"]'),{
                 click: function(){
@@ -1794,6 +1781,7 @@ $.widget( "heurist.mainMenu6", {
     showDatabaseOverview: function(){
 
         var that = this;
+        var editingProperties = false;
 
         // Check that the mainMenu widget has been created
         var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
@@ -1809,10 +1797,14 @@ $.widget( "heurist.mainMenu6", {
         function openDBProperties(event){
             if($(event.target).is('a')){
                 return;
+            }else if(editingProperties){
+                return;
             }
+            editingProperties = true;
             window.hWin.HAPI4.SystemMgr.verify_credentials(function(e){
                 window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification', {
                     beforeClose: function(){
+                        editingProperties = false;
                         that.showDatabaseOverview();
                     }
                 });
@@ -1830,16 +1822,18 @@ $.widget( "heurist.mainMenu6", {
             })
             .off('click');
 
-            var $db_info = $('h3#title, span#owner, span#rights').off('click');
+            $('#title_cont, #owner_cont, #rights_cont').off('click');
             $('div#description, button#btnEdit').off('click');
 
             // Check if logged in user has access to DB Props
-            if(window.hWin.HAPI4.has_access(2)){ // Has access
+            if(window.hWin.HAPI4.has_access(1)){ // Has access
 
-                $db_info
+                $('h3#title, span#owner, span#rights')
                 .parent()
                 .css({'cursor': 'pointer', 'resize': 'none'})
-                .on('click', openDBProperties);
+                
+                $('#title_cont, #owner_cont, #rights_cont')
+                .one('click', openDBProperties);
 
                 $('div#description')
                 .css({'cursor': 'pointer', 'resize': 'none'})
@@ -2048,6 +2042,10 @@ $.widget( "heurist.mainMenu6", {
                 .on('click', function(e){
                     var option = $(e.target).is('img') ? 'explore' : $(e.target).attr('id');
 
+                    if(window.hWin.HEURIST4.util.isempty(option)){
+                        option = $(e.target).parent().attr('id');
+                    }
+
                     $ele.hide();
                     
                     if(option != 'explore'){
@@ -2074,7 +2072,8 @@ $.widget( "heurist.mainMenu6", {
                 $('span.flavour-text')
                 .css({
                     'display': 'inline-block',
-                    'margin-left': '10px'                    
+                    'margin-left': '10px',
+                    'cursor': 'default'
                 });
 
                 // Commonly used entities/rectypes

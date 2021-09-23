@@ -244,7 +244,7 @@ class DbUsrTags extends DbEntityBase
                 .' or remove the tag in order to be able to delete the tag.<br><br>'
                 .'<a href="#" onclick="window.open(\''
                 . HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',', $recIDs_inuse)
-                .'\',\'_blank\')">Open records in search</a> to allow deletion or removal of this tag');
+                .'&nometadatadisplay=true\',\'_blank\')">Open records in search</a> to allow deletion or removal of this tag');
                 return false;
             }
         }

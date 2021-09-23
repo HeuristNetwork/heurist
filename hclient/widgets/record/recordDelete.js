@@ -326,10 +326,10 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                                     var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
 '<p>You are asking to delete '+scope.length+' records ('
 +'<a href="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&q=ids:'+scope.join(',')
-+'" target="_blank">see list</a>)'
++'&nometadatadisplay=true" target="_blank">see list</a>)'
 +' which are the target of record pointer fields in other'
 +' records (<a href="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                +'&q=ids:'+response.data.source_links+'" target="_blank">see list</a>). '
+                +'&q=ids:'+response.data.source_links+'&nometadatadisplay=true" target="_blank">see list</a>). '
 +'This will also delete child records of the records you are deleting (if any) which may, in rare circumstances, themselves be the targets of record'
 +' pointer fields from other records.</p>'
 

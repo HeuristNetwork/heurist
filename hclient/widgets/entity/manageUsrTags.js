@@ -950,7 +950,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             var ele = $('<div class="tagDiv2" style="display:inline-block;padding-right:4px">'
                          + '<a href="' + window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                          + '&q=tag:'+label
-                         + '" target="_blank">'+label+'</a>'
+                         + '&nometadatadisplay=true" target="_blank">'+label+'</a>'
             +'<span class="ui-icon ui-icon-circlesmall-close" recid="'+recID
             +'" style="display:inline-block;visibility:hidden;width:12px;vertical-align:middle"/></div>')
                          .appendTo(grp);

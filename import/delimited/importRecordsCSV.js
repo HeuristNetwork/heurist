@@ -3731,7 +3731,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 s = s + '<option value="-1">[create new record] None of these</option>';
                 s = s + '</select>&nbsp;'
                 + '<a href="#" onclick="{window.open(\''+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                + '&q=ids:' + recIds.join(',') + '\', \'_blank\');}">view records <span class="ui-icon ui-icon-extlink"></a></td></tr>';
+                + '&q=ids:' + recIds.join(',') + '&nometadatadisplay=true\', \'_blank\');}">view records <span class="ui-icon ui-icon-extlink"></a></td></tr>';
             }
             
             s = s + '</table><br><br><div id="csv_disambig" style="display:none">'+csv_output+'</div>'

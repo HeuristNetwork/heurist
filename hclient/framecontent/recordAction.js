@@ -547,10 +547,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             
             request['a'] = 'rectype_change';
             request['rtyID_new'] = rtyID;
-            
+          
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'You are about to convert '
-                + (request['rtyID']>0 ?('"'+$Db.rty(request['rtyID'],'rty_Name')+'"'):scope.length)
+                + (request['rtyID']>0 ?('"'+$Db.rty(request['rtyID'],'rty_Name')+'"'):request['recIDs'].length)
                 +' records from their original record (entity) type into "'
                 + $Db.rty(rtyID, 'rty_Name') 
                 + '" records.  This can result in invalid data for these records.<br><br>Are you sure?',
@@ -628,7 +628,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             tag_link = '<span><a href="'+
                             encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                 +'&q=tag:"'+response[key+'_tag']+'"')+
-                            '" target="_blank">view</a></span>';
+                            '&nometadatadisplay=true" target="_blank">view</a></span>';
                             
                         }else if(response[key+'_tag_error']){
                             tag_link = '<span>'+response[key+'_tag_error']['message']+'</span>';
@@ -638,7 +638,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             tag_link = '<span><a href="'+
                             encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                 +'&q=sortby:-m after:"5 minutes ago"')+
-                            '" target="_blank">view recent changes</a></span>';
+                            '&nometadatadisplay=true" target="_blank">view recent changes</a></span>';
                         }
                         
                         sResult = sResult + '<div style="padding:4px"><span>'+lbl+'</span><span>&nbsp;&nbsp;'

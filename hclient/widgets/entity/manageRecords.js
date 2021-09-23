@@ -1544,7 +1544,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     +window.hWin.HAPI4.baseURL + '?q='
                     +encodeURIComponent('{"related":{"ids":'+that._currentEditID+'}}')
                     +'&db='+window.hWin.HAPI4.database
-                    +'" target="_blank">more ('+(sRel_Ids.length-25)
+                    +'&nometadatadisplay=true" target="_blank">more ('+(sRel_Ids.length-25)
                     +'<span class="ui-icon ui-icon-extlink" style="font-size:0.8em;top:2px;right:2px"></span>'
                     +') </a></div>').appendTo(panel);
                 }
@@ -1578,7 +1578,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     +window.hWin.HAPI4.baseURL + '?q='
                     +encodeURIComponent('{"linked_to":{"ids":'+that._currentEditID+'}}')
                     +'&db='+window.hWin.HAPI4.database
-                    +'" target="_blank">more ('+(sLink_Ids.length-25)
+                    +'&nometadatadisplay=true" target="_blank">more ('+(sLink_Ids.length-25)
                     +'<span class="ui-icon ui-icon-extlink" style="font-size:0.8em;top:2px;right:2px"></span>'
                     +') </a></div>').appendTo(panel);
                 }
@@ -1900,7 +1900,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     grp = panel.find('div[data-id='+groupid+']').show();
                     $('<a href="'
                          + window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&q=tag:'+label
-                         + '" target="_blank" style="display:inline-block; padding-right:4px">'+label+'</a>')
+                         + '&nometadatadisplay=true" target="_blank" style="display:inline-block; padding-right:4px">'+label+'</a>')
                          .appendTo(grp);
                    
                    isnone = false;  
