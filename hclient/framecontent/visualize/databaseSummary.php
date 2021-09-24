@@ -127,7 +127,7 @@ A:link {
         <!-- On Row Click -->
         <script>
             function onrowclick(rt_ID, innewtab){
-                var query = "w=all&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
+                var query = "w=all&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID+'&nometadatadisplay=true';
                 if(innewtab){
                     window.open(window.hWin.HAPI4.baseURL+"?"+query, "_blank");
                     return false;

@@ -101,6 +101,10 @@
 
         $response = recordSearchFacets($system, $_REQUEST);
 
+    }else if(@$_REQUEST['a'] == 'gethistogramdata'){ // returns array of lower and upper limit plus a count for each interval
+
+        $response = getDateHistogramData($system, $_REQUEST['range'], $_REQUEST['interval'], @$_REQUEST['recids'], @$_REQUEST['dtyid'], @$_REQUEST['format']);
+
     }else if(@$_REQUEST['a'] == 'related'){
 
         $response = recordSearchRelated($system, $_REQUEST['ids'], @$_REQUEST['direction']);

@@ -1712,7 +1712,7 @@ function checkDtPtr($rty_IDs, $dty_ID){
             }
             $ret_message = $ret_message.'<br><br>'
             ."<a href='#' onclick='window.open(\""
-            .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",", $recIDs).'","_blank")\'>'
+            .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",", $recIDs).'&nometadatadisplay=true","_blank")\'>'
             .'Click here</a> to view all the records affected';
 
             if(count($links)<count($recIDs)){
@@ -1802,7 +1802,7 @@ function checkTerms($termID){
                         }
                         $ret_message = $ret_message.'<br><br>'
                         ."<a href='#' onclick='window.open(\""
-                        .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",", $recIDs).'","_blank")\'>'
+                        .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",", $recIDs).'&nometadatadisplay=true","_blank")\'>'
                         .'Click here</a> to view all the records affected';
 
                         if(count($links)<count($recIDs)){
@@ -1923,7 +1923,7 @@ function isTermInUse($trmID, $infield, $indetails){
                 }
                 $errMessage = $errMessage."<br><br>"
                 ."<a href='#' onclick='window.open(\""
-                .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",",$links)."\",\"_blank\")'>Click here</a> to view all the records affected";
+                .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",",$links)."&nometadatadisplay=true\",\"_blank\")'>Click here</a> to view all the records affected";
                 if(count($links)<$recCount){
                     $errMessage = $errMessage.' (limited to first 250)';    
                 }

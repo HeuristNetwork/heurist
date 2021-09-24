@@ -474,6 +474,15 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             this.doLogin();
         }else {
             this._performInitialSearch();
+
+            if(!window.hWin.HEURIST4.util.getUrlParameter('nometadatadisplay', window.hWin.location.search) 
+				&& window.hWin.HAPI4.sysinfo['db_total_records']>0){
+                // Wait a bit for the main menu to be initialised
+                setTimeout(function(){
+                    $('.ui-menu6').mainMenu6('showDatabaseOverview');
+                    that._rendered_db_overview = true;
+                }, 1000);
+            }
         }
 
         //that._dashboardVisibility( false );
@@ -1853,7 +1862,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     $(that.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
                     that._performInitialSearch();
 
-                    if(window.hWin.HAPI4.sysinfo['db_total_records']>0){
+					if(!window.hWin.HEURIST4.util.getUrlParameter('nometadatadisplay', window.hWin.location.search) 
+						&& window.hWin.HAPI4.sysinfo['db_total_records']>0){
                         // Wait a bit for the main menu to be initialised
                         setTimeout(function(){
                             $('.ui-menu6').mainMenu6('showDatabaseOverview');

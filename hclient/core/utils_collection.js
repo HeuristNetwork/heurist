@@ -91,7 +91,7 @@ if (!window.hWin.HEURIST4.collection)
 
                 if(true){
                     var url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"
-                    +window.hWin.HEURIST4.collection._collection.join(',');
+                    +window.hWin.HEURIST4.collection._collection.join(',')+'&nometadatadisplay=true';
 
                     if(url.length>2083){
                         window.hWin.HEURIST4.msg.showMsgDlg(

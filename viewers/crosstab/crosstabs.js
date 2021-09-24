@@ -590,7 +590,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         $modalDialogBody.empty();
 
-        if(fields3[name].intervals.length<1){
+        if(fields3[name].intervals.length < 1){
 
             //Highlight area (animation)
             $('#'+name+'_container').animate( {backgroundColor : "#FFF3cd"}, 500 );
@@ -607,10 +607,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
             //Disable Button.
             $('#'+name+'Vars').find('button').prop('disabled', true);
 
-            /*
-            $container.html('There are no values for these fields in the current results set');
-            $container.show();
-            */
             return;
         }
 
@@ -1991,18 +1987,20 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             +'Please check the set of records you are analysing ');
                 $('#cbRows').focus();
                 return;
-            }else{
+            }/*else{
 
                 // Check if row has data related to the column
-                var supressBlankRow = !$('#rbShowBlanks').is(':checked');
+                var supressBlankRow = $('#rbShowBlanks').is(':checked');
                 var isRowEmpty = true;
 
-                if(supressBlankRow){
+                if(!supressBlankRow && !window.hWin.HEURIST4.util.isempty($('#cbColumns').val())){
                     for(var i = 0; i < fields3.row.intervals.length; i++){
-                        if(!fields3.row.intervals[i].isempty){
-                            continue;
+                        if(fields3.row.intervals[i].isempty == false){ console.log('if', fields3.row.intervals[i], fields3.row.intervals[i].output, fields3.row.intervals[i].isempty);
+                            isRowEmpty = false;
+                            break;
+                        }else{
+                            console.log('else', fields3.row.intervals[i], fields3.row.intervals[i].output, fields3.row.intervals[i].isempty);
                         }
-                        isRowEmpty = false;
                     }
 
                     if(isRowEmpty){
@@ -2011,27 +2009,27 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         return;
                     }
                 }
-            }
+            }*/
 
             $("#pmessage").html('Requesting...');
             _setMode(1); //progress
 
-        var session_id = Math.round((new Date()).getTime()/1000);
+            var session_id = Math.round((new Date()).getTime()/1000);
 
-        var request = { a:'crosstab',
-                rt:_selectedRtyID ,
-                dt_row:fields3.row.field,
-                dt_rowtype:fields3.row.type,
-                session:session_id}
+            var request = { a:'crosstab',
+                    rt:_selectedRtyID ,
+                    dt_row:fields3.row.field,
+                    dt_rowtype:fields3.row.type,
+                    session:session_id}
 
-        if(_currentRecordset!=null){
-            request['recordset'] = _currentRecordset; //CSV
-        }else{
-            request['q'] = query_main;
-            request['w'] = query_domain;
-        }
+            if(_currentRecordset!=null){
+                request['recordset'] = _currentRecordset; //CSV
+            }else{
+                request['q'] = query_main;
+                request['w'] = query_domain;
+            }
 
-        params = '';
+            params = '';
 
             if(fields3.page.field>0){
 
@@ -2134,6 +2132,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
     * render crosstab data as set of tables
     */
     function _doRender(){
+
         //Destroy chart if exists
         if(Chart.getChart('pieResults')){
             Chart.getChart('pieResults').destroy();
@@ -2152,9 +2151,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $divres = $('#divres');
         $divres.hide();
         $divres.empty();
-
+        
         if(_isPopupMode){
-        $divres.append('<div style="text-align:center"><button onclick="crosstabsAnalysis.setMode(0)">Back to form</button>&nbsp;&nbsp;<button onclick="crosstabsAnalysis.doPrint()">Print</button></div>');
+            $divres.append('<div style="text-align:center"><button onclick="crosstabsAnalysis.setMode(0)">Back to form</button>&nbsp;&nbsp;<button onclick="crosstabsAnalysis.doPrint()">Print</button></div>');
         }else{
             $('#btnPrint').show();
         }
@@ -3075,10 +3074,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $("#inporgress").show();
             $("#divres").empty();
             $('#btnPrint').hide();
-        }else if(mode==2){
-            //$("#divres").show();
-        }else{
-            //$("#qform").show();
         }
     }
 

@@ -1535,7 +1535,7 @@ $.widget( "heurist.resultList", {
                     sCount = '<a href="'
                     + window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                     + '&q=' + encodeURIComponent(this.options.aggregate_link.replace('[ID]',recID))
-                    + '" target="_blank" title="Count of records which reference this record. Opens list in new tab">'+sCount+'</a>';
+                    + '&nometadatadisplay=true" target="_blank" title="Count of records which reference this record. Opens list in new tab">'+sCount+'</a>';
                 }
                 sCount = '<span style="margin-right:10px">'+sCount+'</span>';
             }

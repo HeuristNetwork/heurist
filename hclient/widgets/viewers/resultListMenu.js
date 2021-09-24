@@ -531,9 +531,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                 });
                 
         }
-
-
-
     },
 
     //
@@ -612,7 +609,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         if(this._selection!=null){
             var recIDs_list = this._selection.getIds();
             if (recIDs_list.length > 0) {
-                var url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recIDs_list.join(',');
+                var url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recIDs_list.join(',') + '&nometadatadisplay=true';
                 window.open(url, "_blank");
             }
         }

@@ -59,7 +59,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
     //     ['east', (top ? top.innerWidth : window.innerWidth)]); 
 
     window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane',
-        ['east', (top ?  '60%' : window.innerWidth)]);
+        ['east', (top ?  '55%' : window.innerWidth)]);
 </script>
 
 <link rel=stylesheet href="crosstabs.css" media="all">
@@ -79,11 +79,11 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
 
                 <!-- Top Container -->
                 <div id="topContainer">
-                    <div id="qform" class="disign-content" style="width:100%;">
+                    <div id="qform" class="disign-content" style="width:100%;min-width: 850px;">
                         <div>
 
                             <!-- Left Side -->
-                            <div class="border border-dark bg-white" style="width: 50%;padding: 10px;float: left;height: 100%;">
+                            <div class="border border-dark bg-white" style="width: 400px;padding: 7px;float: left;height: 92%;">
                                 <fieldset>
                                     <!-- Dataset selection -->
                                     <div>
@@ -125,7 +125,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                     </div>
                                                 </div>
 
-                                                <div class="align-items-center">
+                                                <div class="align-items-center" style="display: block;">
                                                     <div style="font-size: 14px;">
                                                         <label for="aggregationMode">Aggregates</label>
                                                     </div>
@@ -152,7 +152,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                     </div>
                                                 </div>
 
-                                                <div style="margin-left: 80px;display: block;">
+                                                <div>
                                                     <div class="input-cell">
                                                         <div class="blankCheckboxes">
                                                             <input type="checkbox" onchange="crosstabsAnalysis.doRender()" checked id="rbSupressZero">
@@ -160,7 +160,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div style="margin-left: 80px;display: block;">
+                                                <div>
                                                     <div class="input-cell">
                                                         <div class="blankCheckboxes">
                                                             <input type="checkbox" onchange="crosstabsAnalysis.doRender()" id="rbShowBlanks">
@@ -177,9 +177,9 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                             <!-- End of Left Side -->
 
                             <!-- Right Side -->
-                            <div class="border border-dark bg-white" style="width: 50%;padding: 10px;display: inline-block;height: 100%;">
+                            <div class="border border-dark bg-white" style="width: 48%;padding: 7px;display: inline-block;height: 92%;">
 
-                                <div style="font-size: 0.9em;">
+                                <div style="font-size: 0.8em;">
                                     Choice of record type determines the list of fields avaiable but does not filter the results - the analysis is based on all records in the result set
                                 </div>
 
@@ -198,7 +198,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                     <div id="row_container" style="margin-bottom: 10px;">
                                         <div class="align-items-center" id="rowVars" style="margin-bottom: 5px;">
 
-                                            <div class="fldheader" style="margin: 0px 10px 0px 56px;">
+                                            <div class="fldheader" style="margin: 0px 5px 0px 11px;">
                                                 <label for="cbRows">Var 1 <br><span style="font-size: smaller;font-weight: normal;">(rows)</span></label>
                                             </div>
                                             <div>
@@ -206,7 +206,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                             </div>
 
                                             <div>
-                                                <span id="rowTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 10px;">
+                                                <span id="rowTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 5px;">
                                                     <button type="button" tt='row' class="btn btn-warning showintervals" disabled>
                                                         <span class="ui-icon ui-icon-pencil"></span>
                                                     </button>
@@ -220,7 +220,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                     <div id="column_container" style="margin-bottom: 10px;">
                                         <div class="align-items-center" id="columnVars" style="margin-bottom: 5px;">
 
-                                            <div class="fldheader" style="margin: 0px 10px 0px 40px;">
+                                            <div class="fldheader" style="margin: 0px 5px 0px -5px;">
                                                 <label for="cbColumns">Var 2 <br><span style="font-size: smaller;font-weight: normal;">(columns)</span></label>
                                             </div>
                                             <div>
@@ -228,7 +228,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                             </div>
 
                                             <div>
-                                                <span id="columnTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 10px;">
+                                                <span id="columnTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 5px;">
                                                     <button type="button" tt="column" class="btn btn-warning showintervals" disabled>
                                                         <span class="ui-icon ui-icon-pencil"></span>
                                                     </button>
@@ -242,7 +242,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                     <div id="page_container" style="margin-bottom: 10px;">
                                         <div class="align-items-center" id="pageVars" style="margin-bottom: 5px;">
 
-                                            <div class="fldheader" style="margin: 0px 10px 0px 52px;">
+                                            <div class="fldheader" style="margin: 0px 5px 0px 7px;">
                                                 <label for="cbPages">Var3 <br><span style="font-size: smaller;font-weight: normal;">(pages)</span></label>
                                             </div>
                                             <div>
@@ -250,7 +250,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                             </div>
 
                                             <div>
-                                                <span id="pageTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 10px;">
+                                                <span id="pageTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 5px;">
                                                     <button type="button" tt='page' class="btn btn-warning showintervals" disabled>
                                                         <span class="ui-icon ui-icon-pencil"></span>
                                                     </button>
