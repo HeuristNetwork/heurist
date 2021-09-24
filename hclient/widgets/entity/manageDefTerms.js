@@ -89,6 +89,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this.options.edit_width = (this.options.auxilary=='term')?550:610;
 
         this._super();
+        
+        this.space_for_drop = $('<span class="space_for_drop heurist-helper3" '
+                    +'style="position:absolute;top:80px;text-align:center;width:100%;font-size: 0.8em;display:none">'
+                    +'drop here to move term to the top level</span>')
+                        .insertBefore(this.recordList);
 
         var that = this;
 
@@ -110,7 +115,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
 
         });
-
+        
+        
     },
 
     _destroy: function() {
@@ -118,6 +124,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         if(this.fields_list_div){
             this.fields_list_div.remove();
         }
+        if(this.space_for_drop) this.space_for_drop.remove();
 
         window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);     
 
@@ -194,7 +201,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 this.searchForm.css({'padding-top':this.options.isFrontUI?'6px':'4px', height:80});
                 this.recordList.css({ top:80});
-
 
                 this.options.recordList = {
                     empty_remark: 'No vocabularies in this group.<br/><br/>Please drag vocabulary from other groups or add new vocabulary to this group.',
@@ -397,7 +403,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this.rbMergeOnDnD = this.searchForm.find('#rbDnD_merge');
 
                 this._dropped = false;
-
+                
                 this.options.recordList = {
                     empty_remark: 'No terms in selected vocabulary.<br/><br/>Add or import new ones',
                     show_toolbar: false,
@@ -453,6 +459,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             containment: 'window',
                             scope: 'vocab_change',
 
+                            start: function(event,ui){
+                                if(that.space_for_drop){
+                                    that.space_for_drop.show();
+                                    that.recordList.css('top','100px');
+                                }
+                            },
                             drag: function(event,ui){
                                 //var trg = $(event.target);trg.hasClass('ui-droppable')
                                 if($('.ui-droppable.ui-drag-drop').is(':visible')){
@@ -460,8 +472,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 }else{
                                     $(ui.helper).css("cursor", 'not-allowed');
                                 }
-
+                                
                                 var ele = that.recordList.find('.div-result-list-content');
+                                
                                 var bot = ele.offset().top+ele.height();
                                 if(that.scrollInterval>0) clearInterval(that.scrollInterval);
                                 that.scrollInterval = 0;
@@ -469,9 +482,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 if(ui.offset.top>bot-20){
                                     //    console.log(bot);
                                     //    console.log(ui.position.top+'  '+ui.position.left);
-                                    that.scrollInterval = setInterval(function(){ ele[0].scrollTop += 20}, 50); 
-                                }else if(ui.offset.top<ele.offset().top+20){
-                                    that.scrollInterval = setInterval(function(){ ele[0].scrollTop -= 20}, 50); 
+                                    that.scrollInterval = setInterval(function(){ if(!that._dropped) ele[0].scrollTop += 20}, 50); 
+                                }else if(ui.offset.top<ele.offset().top+(that.space_for_drop.is(':visible')?-40:-20)) {
+                                    that.scrollInterval = setInterval(function(){ if(!that._dropped) ele[0].scrollTop -= 20}, 50); 
                                 }
 
                             }
@@ -489,7 +502,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 ?$(event.target)
                                 :$(event.target).parents('.recordDiv');
 
+                                if(that.space_for_drop){
+                                    that.space_for_drop.hide();
+                                    that.recordList.css('top','80px');                                
+                                }
                                 that._dropped = true;
+                                if(that.scrollInterval>0) clearInterval(that.scrollInterval);
+                                that.scrollInterval = 0;
                                 window.hWin.HEURIST4.util.stopEvent(event);
 
                                 var trm_ID = $(ui.draggable).parent().attr('recid');
@@ -506,12 +525,18 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         });
 
                         // move to root of vocabulary                                
-                        that.recordList.find('.div-result-list-content')
-                        .droppable({
+                        var _move_to_top = {
                             scope: 'vocab_change',
                             hoverClass: 'ui-drag-drop',
                             drop: function( event, ui ){
-
+                                
+                                if(that.space_for_drop){
+                                    that.space_for_drop.hide();
+                                    that.recordList.css('top','80px');                                
+                                }
+                                if(that.scrollInterval>0) clearInterval(that.scrollInterval);
+                                that.scrollInterval = 0;
+                                
                                 if (that._dropped) return;
 
                                 var trm_ID = $(ui.draggable).parent().attr('recid');
@@ -521,8 +546,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                         that.changeVocabularyGroup({ trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID }, true);
                                     }
                                 }
-                        }});
-
+                        }};
+                        that.recordList.find('.div-result-list-content').droppable(_move_to_top);
+                        if(that.space_for_drop){ that.space_for_drop.droppable(_move_to_top); }
 
                         //collapses 
                         if(window.hWin.HEURIST4.ui.collapsed_terms.length>0){
