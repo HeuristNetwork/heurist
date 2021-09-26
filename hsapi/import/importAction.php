@@ -602,7 +602,11 @@ public static function assignRecordIds($params){
     if($match_mode==2){   //skip matching - all as new
 
         if($is_existing_id_field){
-            $updquery = "update $import_table set $id_field=NULL where imp_id>0";
+            //$updquery = "update $import_table set $id_field=NULL where imp_id>0";
+            //$mysqli->query($updquery);
+            
+            $mysqli->query('SET @my_increment := 0');
+            $updquery = "UPDATE $import_table SET $id_field = @my_increment := @my_increment - 1";            
             $mysqli->query($updquery);
         }
         
@@ -961,7 +965,7 @@ public static function validateImport($params) {
 
             $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field." IS NULL"; 
             $cnt2 = mysql__select_value($mysqli, $select_query);
-            $cnt = $cnt + ($cnt2>0?intval(cnt2):0);
+            $cnt = $cnt + ($cnt2>0?intval($cnt2):0);
 
             if( $cnt>0 ){
                     $imp_session['validation']['count_insert'] = $cnt;
@@ -1389,6 +1393,14 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         
         // northing, easting
         $query = "select ".implode(',',$geo_fields)." from $import_table LIMIT 5";
+        
+        if(count($geo_fields)==1){
+            $query = $query . ' WHERE '.$geo_fields[0].' > ""';    
+        }
+        
+        $query = $query . ' LIMIT 5';
+        
+        
         $res = $mysqli->query($query);
         $allInteger = true;
         $allOutWGS = true;
@@ -2539,7 +2551,7 @@ public static function performImport($params, $mode_output){
                                         $value = $geoType." ".$r_value;    
                                     }
                                 }else{
-                                    $value = null;   //wrong geo
+                                    $value = null;   //wrong or not defined geo
                                 }
                                 
                             }
