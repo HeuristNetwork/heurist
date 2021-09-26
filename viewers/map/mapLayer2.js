@@ -1,5 +1,6 @@
 /**
-* filename: LEAFLET layers
+* LEAFLET layers
+* interface between heurist layer/datasource and leaflet layer
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

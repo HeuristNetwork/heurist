@@ -101,7 +101,9 @@ use Shapefile\ShapefileReader;
                 
                 $shp_file = fileRetrievePath(array_shift($record['details'][DT_SHAPE_FILE]),'shp',false);
                 $dbf_file = fileRetrievePath(array_shift($record['details'][DT_DBF_FILE]),'dbf',false);
-                $shx_file = fileRetrievePath(array_shift($record['details'][DT_SHX_FILE]),'shx',false);
+                if(@$record['details'][DT_SHX_FILE]){
+                    $shx_file = fileRetrievePath(array_shift($record['details'][DT_SHX_FILE]),'shx',false);
+                }
                 
             }else{
                 $shp_file = fileRetrievePath(array_shift($record['details'][DT_FILE_RESOURCE]),'shp',true);
@@ -168,10 +170,10 @@ use Shapefile\ShapefileReader;
                         if($shx_file && file_exists($shx_file)){
                             $files['shx'] = $shx_file;    
                         }
-                        $shapeFile = new ShapefileReader($files);
+                        $shapeFile = new ShapefileReader($files, array(Shapefile::OPTION_IGNORE_FILE_SHX=>true));
                     }else if(file_exists($shp_file)){
                         //if provide only shapefile, it finds other automatically
-                        $shapeFile = new ShapefileReader($shp_file);
+                        $shapeFile = new ShapefileReader($shp_file, array(Shapefile::OPTION_IGNORE_FILE_SHX=>true, Shapefile::OPTION_IGNORE_FILE_DBF=>true));
                     }else{
                         $system->error_exit_api('Cannot process shp file', HEURIST_ERROR);
                     }

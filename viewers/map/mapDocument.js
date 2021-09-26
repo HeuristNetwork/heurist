@@ -21,6 +21,24 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+* put your comment there...
+* 
+* 
+* @param _options
+
+  private 
+    _loadMapDocuments - loads all map document records
+    _getTreeData - converts mapdocument recordset (list of layers) to treeview data
+    _loadMapDocumentContent - loads all linked layer and datasources for mapdocument - store it in map_documents_content 
+    _openMapDocument - call _loadMapDocumentContent add layer to map
+    _addLayerRecord - add new layer to map_documents_content and on map
+    _getSymbology - returns symbology for layer (or if not defined it returns general mapdocument symbology)
+    _editSymbology - opens symbology editor for layer and then call layer.applyStyle
+    
+* 
+* @returns {Object}
+*/
 function hMapDocument( _options )
 {    
     var _className = "MapDocument",
@@ -112,7 +130,7 @@ function hMapDocument( _options )
     }
     
     //
-    // returns content of mapdocument in fancytree data format
+    // returns content of mapdocument (map_documents_content) in fancytree data format
     // converts recordset to treeview data
     //
     function _getTreeData( mapdoc_id ){

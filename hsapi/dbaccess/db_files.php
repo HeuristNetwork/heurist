@@ -446,6 +446,12 @@ function resolveFilePath($path){
                         if(file_exists($fpath)){
                             return $fpath;
                         }
+                    }else
+                    if(strpos($path, '/data/HEURIST_FILESTORE/')===0){ //for huma-num
+                        $fpath = str_replace('/data/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $path);
+                        if(file_exists($fpath)){
+                            return $fpath;
+                        }
                     }
                 }
             }
