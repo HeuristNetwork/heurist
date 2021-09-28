@@ -2379,3 +2379,7 @@ li.edit-form-tab > a{
 .ui-drag-drop{
     border: 2px solid blue !important;
 }
+
+.tox-tinymce-aux {
+    z-index: 999999!important;
+}

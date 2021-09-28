@@ -259,6 +259,13 @@ $.widget( "heurist.mainMenu6", {
         }
         
         //that.initHelpDiv();
+        
+        //fix bug for tinymce popups - it lost focus if it is called from dialog
+        $(window.hWin.document).on('focusin', function(e) {
+            if ($(e.target).closest(".tox-tinymce-aux").length) {
+                e.stopImmediatePropagation();
+            }
+        });
 
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
                 +' '+window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
