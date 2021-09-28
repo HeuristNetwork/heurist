@@ -458,6 +458,20 @@ function hEditing(_options) {
                 max_width += 15; // Add additional 'left padding'
                 $tabs.css('width', max_width+'px');
             });
+			
+			if($container.find('ul[role="tablist"]').length>1){
+                var groups = $container.children('div');
+
+                $.each(groups, function(idx, group){
+                    if(idx == 0){
+                        return;
+                    }
+
+                    if($(group).hasClass('ui-tabs') && $(groups[idx-1]).is('.ui-tabs, .ui-accordion')){
+                        $(group).css('margin-top', $(groups[idx-1]).hasClass('ui-tabs') ? '40px' : '20px');
+                    }
+                });
+            }
         }
     }
     

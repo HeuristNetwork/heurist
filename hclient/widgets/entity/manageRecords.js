@@ -2467,6 +2467,23 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
             
             var rectypeID = that._getField('rec_RecTypeID');
+			
+            var activeTabs = [];
+
+            if(this._currentEditRecTypeID == rectypeID){ // check that the previous record and current record are the same type
+                var $tab_groups = this.editForm.find('.ui-tabs');
+
+                if($tab_groups.length > 0){ // retain active tab between same record types
+
+                    $.each($tab_groups, function(idx, tab){
+
+                        var $tab_instance = $(tab).tabs('instance');
+                        if($tab_instance != undefined){ //
+                            activeTabs.push($tab_instance.options.active); // $tab.tabs('option', 'active'); keeps returning tabs object
+                        }
+                    });
+                }
+            }
             
             //pass structure and record details
             that._currentEditID = that._getField('rec_ID');;
@@ -2794,7 +2811,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             if(group_fields!=null){
                 fields[fields.length-1].children = group_fields;
             }
-                
+            
             that._editing.initEditForm(fields, that._currentEditRecordset, that._isInsert);
             
             that._editing.editStructureFlag(this.options.edit_structure===true);
@@ -2808,8 +2825,22 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 this.editForm.scrollTop(0);
             }
             this.editForm.scrollLeft(0);
-                
-            
+
+            if(activeTabs.length > 0){
+
+                var $tab_groups = this.editForm.find('.ui-tabs');
+
+                if($tab_groups.length > 0){ // retain active tab between same record types
+
+                    $.each($tab_groups, function(idx, tab){
+
+                        var $tab = $(tab);
+                        if($tab.tabs('instance') != undefined){ // set active tabs
+                            $tab.tabs('option', 'active', activeTabs[idx]);
+                        }
+                    });
+                }
+            }
             
             //show rec_URL 
             var ele = that._editing.getFieldByName('rec_URL');
