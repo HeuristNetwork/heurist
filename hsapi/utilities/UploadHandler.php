@@ -51,6 +51,7 @@ class UploadHandler
         'min_height' => 'Image requires a minimum height',
         'only_heurist' => 'Uploading is allowed to heurist file storage only',
         'abort' => 'File upload aborted',
+        'image_broken' => 'Image can not be read. Image is either broken or stated format differs',
         'image_resize' => 'Failed to resize image',
         'file_name_too_big' => 'The maximum length for a file name is 255 bytes.'
     );
@@ -936,6 +937,10 @@ $siz = get_php_bytes('upload_max_filesize');
             !empty($options['no_cache'])
         );
         
+        if(!$src_img){ //image is broken or extension does not fit to type
+            return $this->get_error_message('image_broken');
+        }
+        
         $image_oriented = false;
         if (!empty($options['auto_orient']) && $this->gd_orient_image(
                 $file_path,
@@ -1091,10 +1096,24 @@ $siz = get_php_bytes('upload_max_filesize');
         }
         
             
-        $image = $this->imagick_get_image_object(
-            $file_path,
-            !empty($options['crop']) || !empty($options['no_cache'])
-        );
+        $err_msg = '';
+        try{
+            
+            $image = $this->imagick_get_image_object(
+                $file_path,
+                !empty($options['crop']) || !empty($options['no_cache'])
+            );
+        
+        } catch (\Exception $e) {
+            
+            $image = null;
+            $err_msg = '. System mesage: '.$e->getMessage();
+        }
+        
+        if(!$image){
+            return $this->get_error_message('image_broken').$err_msg;
+        }
+        
         if ($image->getImageFormat() === 'GIF') {
             // Handle animated GIFs:
             $images = $image->coalesceImages();
@@ -1312,15 +1331,18 @@ $siz = get_php_bytes('upload_max_filesize');
                 $failed_versions[$version ? $version : 'original'] = $res;
             }
         }
-        if (count($failed_versions)) {
+        if (count($failed_versions)>0) {
             
-            $rep = array();
-            foreach ($failed_versions as $ver=>$msg){
-                $rep[] = $ver.' '.($msg!==false?(': '.$msg):'');    
+            if(@$failed_versions['original']){
+                $file->error = $failed_versions['original'];
+            }else{
+                $rep = array();
+                foreach ($failed_versions as $ver=>$msg){
+                    $rep[] = $ver.' '.($msg!==false?(': '.$msg):'');        
+                }
+                $file->error = $this->get_error_message('image_resize')  //get text
+                        .' <br>'.implode('<br>', $rep);
             }
-            
-            $file->error = $this->get_error_message('image_resize')  //get text
-                    .' <br>'.implode('<br>', $rep);
         }
         // Free memory:
         $this->destroy_image_object($file_path);
