@@ -517,9 +517,8 @@ $.widget( "heurist.mapping", {
                    detectRetina: true
                 }*/
                            
-        }else if(layer_options['MapTiler'])
+        }else if(layer_options['MapTiler'] && layer_url.indexOf('{q}')>0)
         {
-                
                 var MapTilerLayer = HeuristTilerLayer.extend({
                     getTileUrl: function (tilePoint) {
                         //this._adjustTilePoint(tilePoint);
@@ -532,6 +531,7 @@ $.widget( "heurist.mapping", {
                         
                         var bound = Math.pow(2, z);
                         var s = ''+z+'/'+x+'/'+(bound - y - 1); 
+                     
                         return s;
                     }
                 });    

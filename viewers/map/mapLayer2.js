@@ -146,6 +146,7 @@ function hMapLayer2( _options ) {
             
             var ccode1 = $Db.getConceptID('trm', tilingSchema);
             var ccode2 = $Db.getConceptID('trm', mimeType);
+            var ext = (ccode2 == '2-540'? ".png" : (ccode2 == '2-537'?'.jpg':".gif"));
             
             if(ccode1=='2-549'){ //virtual earth
                 
@@ -159,21 +160,21 @@ function hMapLayer2( _options ) {
 
                 layer_options['MapTiler'] = true;
 
-                if(layer_url.indexOf('{q}')<0){
+                if(layer_url.indexOf('{q}')<0 && layer_url.indexOf('{x}')<0){
                     layer_url = layer_url + '{q}'
-                                + (ccode2 == '2-540'? ".png" : ".gif");
+                                + ext;
                 }
                 
             }else{
                 
                 if(layer_url.indexOf('{x}')<0){
                     layer_url = layer_url + '/{z}/{x}/{y}'
-                                + (ccode2 == '2-540'? ".png" : ".gif");
+                                + ext;
                 }
                 
-                if(layer_url.indexOf('http://')===0){
+                if(layer_url.indexOf('http://')===0 && layer_url.indexOf('http://127.0.0.1')<0){
                     
-                    var mimetype = 'image/'+(ccode2 == '2-540'? "png" : "gif");
+                    var mimetype = 'image/'+ext;
                     
                     //load via proxy
                     layer_url = window.hWin.HAPI4.baseURL 
