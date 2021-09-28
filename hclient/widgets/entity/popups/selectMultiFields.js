@@ -223,7 +223,7 @@ function hMultiSelect(){
 			// Get all Base Fields belonging to this group
 			$Db.dty().each2(function(dID, field){
 
-			    if(field['dty_DetailTypeGroupID'] == gID && (field['dty_ShowInLists'] != 0 || field['dty_Type'] == 'separator')){
+			    if(field['dty_DetailTypeGroupID'] == gID){
 			    	var type = getTypeName(field['dty_Type']);
 
 			    	arr.push([dID, field['dty_Name'], type, field['dty_HelpText']]);
@@ -488,7 +488,7 @@ function hMultiSelect(){
 
 			var name = details['dty_Name'];
 
-			if(!isInArray(name, fields) && (details['dty_ShowInLists'] != 0 || details['dty_Type'] == 'separator')) {
+			if(!isInArray(name, fields)) {
 				fields.push(name);
 				fieldnames[name] = [];
 				field_ids[name] = dty_id;

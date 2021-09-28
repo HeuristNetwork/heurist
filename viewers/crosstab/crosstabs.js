@@ -2098,8 +2098,34 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     if(response.status == window.hWin.ResponseStatus.OK){
 
                         needServerRequest = false;
-                        records_resp = response.data;
-                        _doRender();
+                        records_resp = response.data; 
+
+                        var showBlanks = $('#rbShowBlanks').is(':checked');
+                        var rowVal = $('#cbRows').val();
+                        var colVal = $('#cbColumns').val();
+                        var hasData = false;
+
+                        if(!showBlanks && !window.hWin.HEURIST4.util.isempty(colVal) && !window.hWin.HEURIST4.util.isempty(rowVal)){
+                            for(var i = 1; i < records_resp.length; i++){ // idx 0 does not contain any relevant data, for this
+                                if(records_resp[i][0]!=null && records_resp[i][1]!=null){
+                                    hasData = true;
+                                    break;
+                                }
+                            }
+                        }else{
+                            hasData = true;
+                        }
+
+                        if(hasData){
+                            $("#pmessage").html('Requesting...');
+                            _setMode(1); //progress
+
+                            _doRender();
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+                                'The selected row and column have no related data to display.<br><br>Please re-select either the row or column fields.', null, 'Empty Set'
+                                );
+                        }
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -2163,7 +2189,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var topText = 'DB: '+window.hWin.HAPI4.database+ ', ' + (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear());
 
         $divres.append('<span>DB: <b>'+window.hWin.HAPI4.database+' </b></span>');
-        $divres.append('<span style="padding-left: 40px;"> '+ (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear())+' </span>');
+        $divres.append('<span style="padding-left: 20px;"> '+ (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear())+' </span>');
         
         if(_currentRecordset != null){
             $('<div id="dt_extra_container"></div>')
@@ -2175,7 +2201,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
         if(_currentRecordset!=null){
-            $divres.append('<span style="padding-left: 25px;">N = '+ _currentRecordset['recordCount'] +' </span>');
+            $divres.append('<span style="padding-left: 15px;">N = '+ _currentRecordset['recordCount'] +' </span>');
             topText += ', N = '+ _currentRecordset['recordCount'] +  ',<br/>Query string: '+_currentRecordset['query_main'];
 
         }else{
@@ -2191,7 +2217,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             aggregationMode = "Counts";
         }
 
-        $divres.append('<span style="padding-left: 25px;">Displaying: <b>'+aggregationMode+'</b></span>');
+        $divres.append('<span style="padding-left: 15px;">Displaying: <b>'+aggregationMode+'</b></span>');
 
         if(_currentRecordset != null){
             $divres.append('<br/><span>Query string: '+_currentRecordset['query_main'] +' </span>');

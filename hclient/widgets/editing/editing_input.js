@@ -1018,79 +1018,109 @@ $.widget( "heurist.editing_input", {
             else{
                 $input = this._recreateSelector($input, value);
 				
-                if($($input[0]).hSelect("instance")!=undefined){
-					$($($input[0]).hSelect("instance").bindings[1]).on('click', function(e){ // selectmenu click extra handler
+                if(this.options.recordset && this.options.recordset.entityName == 'Records' && $input.hSelect("instance")!=undefined){
+                    var tooltipDefined = false;
+                    $input.hSelect("widget").on({
+                        click: function(event, ui){ // selectmenu click extra handler
 
-						var trm_tooltip;
-						
-						$($($input[0]).hSelect("menuWidget")[0]).find('div').on({ // selectmenu's menu items
-							"mouseover": function(e){ // Retrieve information then display tooltip
+                            if(!tooltipDefined){
+                                var trm_tooltip;
 
-								var parent_container = $($input[0]).hSelect("menuWidget")[0];
+                                tooltipDefined = true;
 
-								var term_txt = $(e.target).text();
-								var vocab_id = that.f('rst_FilteredJsonTermIDTree');
-								var data = $Db.trm_TreeData(vocab_id, 'select');
-								
-								var details = "";
+                                $input.hSelect("menuWidget").find('div').on({ // selectmenu's menu items
+            						"mouseover": function(e){ // Retrieve information then display tooltip
 
-								for(var i=0; i<data.length; i++){
-									if(data[i].title == term_txt){
+            							var parent_container = $input.hSelect("menuWidget")[0];
 
-										var rec = $Db.trm(data[i].key);
+                                        console.log('showing tooltip');
+            							var term_txt = $(e.target).text();
+            							var vocab_id = that.f('rst_FilteredJsonTermIDTree');
+            							var data = $Db.trm_TreeData(vocab_id, 'select');
+            							
+            							var details = "";
 
-										if(!window.hWin.HEURIST4.util.isempty(rec.trm_Code)){
-											details += "<span style='text-align: center;'>Code &rArr; " + rec.trm_Code + "</span>";
-										}
+            							for(var i=0; i<data.length; i++){
+            								if(data[i].title == term_txt){
 
-										if(!window.hWin.HEURIST4.util.isempty(rec.trm_Description)){
+            									var rec = $Db.trm(data[i].key);
 
-											if(window.hWin.HEURIST4.util.isempty(details)){
-												details += "<span style='text-align: center;'>Code &rArr; N/A </span>";
-											}
+            									if(!window.hWin.HEURIST4.util.isempty(rec.trm_Code)){
+            										details += "<span style='text-align: center;'>Code &rArr; " + rec.trm_Code + "</span>";
+            									}
 
-											details += "<hr/><span>" + rec.trm_Description + "</span>";
-										}
-									}
-								}
+            									if(!window.hWin.HEURIST4.util.isempty(rec.trm_Description)){
 
-								if(window.hWin.HEURIST4.util.isempty(details)){
-									details = "No Description Provided";
-								}
+            										if(window.hWin.HEURIST4.util.isempty(details)){
+            											details += "<span style='text-align: center;'>Code &rArr; N/A </span>";
+            										}
 
-								trm_tooltip = $(parent_container).tooltip({
-									items: "div.ui-state-active",
-									position: { // Post it to the right of menu item
-										my: "left+15 center",
-										at: "right center",
-										collision: "none"
-									},
-									show: { // Add delay to show
-										delay: 2000,
-										duration: 0
-									},
-									content: function(){ // Provide text
-										return details;
-									},
-									open: function(event, ui){ // Add custom CSS
-										ui.tooltip.css({
-											"color": "white",
-											"width": "200px",
-											"background": "#307D96",
-											"font-size": "1.1em"
-										});
-									}
-								});
-							},
+            										details += "<hr/><span>" + rec.trm_Description + "</span>";
+            									}
+            								}
+            							}
 
-							"mouseleave": function(){ // Ensure tooltip closes
-								if(trm_tooltip.tooltip("instance")!=undefined){
-									trm_tooltip.tooltip("destroy");
-								}
-							}
-						});
-					});
-				}
+            							if(window.hWin.HEURIST4.util.isempty(details)){
+            								details = "No Description Provided";
+            							}
+
+            							trm_tooltip = $(parent_container).tooltip({
+            								items: "div.ui-state-active",
+            								position: { // Post it to the right of menu item
+            									my: "left+15 center",
+            									at: "right center",
+            									collision: "none"
+            								},
+            								show: { // Add delay to show
+            									delay: 2000,
+            									duration: 0
+            								},
+            								content: function(){ // Provide text
+            									return details;
+            								},
+            								open: function(event, ui){ // Add custom CSS
+            									ui.tooltip.css({
+            										"width": "200px",
+            										"background": "#E3F0F0",
+            										"font-size": "1.1em"
+            									});
+            								}
+            							});
+            						},
+
+            						"mouseleave": function(){ // Ensure tooltip closes
+            							if(trm_tooltip.tooltip("instance")!=undefined){
+            								trm_tooltip.tooltip("destroy");
+            							}
+            						}
+                                });
+                            }
+                        }
+                    });
+
+                    if(this.detailType=='enum'){ // show hierarchy for the selected term, not within the menuWidget
+                        $input.hSelect({
+                            select: function(event, ui){
+                                var term_id = ui.item.value;
+                                var crafted_label = ui.item.label;
+                                var trm_info = $Db.trm(term_id);
+
+                                while(1){ // keep looping until trm_info.trm_ParentTermID == 0
+
+                                    trm_info = $Db.trm(trm_info.trm_ParentTermID);
+
+                                    if(trm_info.trm_ParentTermID == 0){
+                                        break;
+                                    }else{
+                                        crafted_label = trm_info.trm_Label + ' > ' + crafted_label;
+                                    }
+                                }
+
+                                $input.hSelect('widget').find('span.ui-selectmenu-text').text(crafted_label);
+                            }
+                        });
+                    }
+                }
             }
             $input = $($input);
             

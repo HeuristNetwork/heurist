@@ -132,25 +132,23 @@ private static function readDataFile($filename, $type=null, $validate=true){
 //
 private static function hmlToJson($filename){
 
-    $xml_doc = simplexml_load_file($filename,'SimpleXMLElement',LIBXML_PARSEHUGE);
+    $xml_doc = simplexml_load_file($filename, 'SimpleXMLElement', LIBXML_PARSEHUGE);
+
     if($xml_doc==null || is_string($xml_doc)){
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that xml is corrupted.');
- 
- //$xml = explode("\n", $xmlstr);
+            
+        $errors = libxml_get_errors();
+
+        foreach ($errors as $error) {
+            error_log( display_xml_error($error, null) );
+        }
         
-    $errors = libxml_get_errors();
+        libxml_clear_errors();
 
-    foreach ($errors as $error) {
-        error_log( display_xml_error($error, null) );
-    }
-
-    //error_log(libxml_get_last_error());
-    
-    libxml_clear_errors();       
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that the xml file is corrupted.');
         return null;
     }
-    if($xml_doc==null || is_string($xml_doc) || !$xml_doc->database){
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that xml is corrupted. Element "database" is missing');
+    if(!$xml_doc->database){
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'The provided xml file is missing the "database" element,<br>this identifies the Heurist database this export originated from.');
         return null;
     }
     
@@ -171,11 +169,16 @@ private static function hmlToJson($filename){
     $fieldtypes = array();
     
     $xml_recs = $xml_doc->records;
+    $hasValidIdCount = 0;
     if($xml_recs)
     {
             foreach($xml_recs->children() as $xml_rec){
                 $rectype = $xml_rec->type->attributes();
                 $rectype_id = ''.$rectype['id']; //may be not defined
+
+                if(is_numeric($xml_rec->id)){ // Check record's id, checking if file is template
+                    $hasValidIdCount++;
+                }
                 
                 $record = array(
                     'rec_ID'=>''.$xml_rec->id,
@@ -286,7 +289,16 @@ private static function hmlToJson($filename){
 
                 
             }//records
-    }       
+    }else{
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot find any records within the provided xml file,<br>records need to be incased within "records" elements.');
+        return null;
+    }
+
+    if($hasValidIdCount == 0){
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'There are no valid record IDs within the provided xml file.<br>You may have accidentally uploaded the xml template file.');
+
+        return null;
+    }
     
     $json['heurist']['database']['url'] = $db_url;
     $json['heurist']['database']['rectypes'] = $rectypes; //need to download/sync rectypes

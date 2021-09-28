@@ -1855,7 +1855,8 @@ $.widget( "heurist.mainMenu6", {
 
             }else{ // Has no access
 
-                $db_info
+                $('h3#title, span#owner, span#rights')
+                .parent()
                 .css({'cursor': 'default', 'resize': 'none'});
 
                 $('button#btnEdit')

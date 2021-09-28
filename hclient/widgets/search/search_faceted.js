@@ -2075,25 +2075,27 @@ $.widget( "heurist.search_faceted", {
                             if(!(w>0) || w<200) w = 200;
 
                             var $sel = $('<select style="font-size: 0.6em !important;">').css('width', (w-45)+'px'); // was 30
-                            
-                            if(needsDropdown !== needsDropdown && $facet_values.find('span.bor-toggle-show-off').length > 0){
+
+                            if(needsDropdown !== true && $facet_values.find('span.bor-toggle-show-off').length > 0){
                                 $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values.find('span.bor-toggle-show-off')) );
+                                $sel.css('width', (w-66)+'px');
                             }else{
                                 $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values) );
                             }
-                            
+
                             this._createOption( facet_index, 0, {title:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
                             this.__drawData(term, 0, $sel, facet_index, field);
-                            
+
                             if(field.selectedvalue && field.selectedvalue.value){
                                 var $opt = $sel.find('option[facet_value="'+field.selectedvalue.value+'"]');
                                 $opt.attr('selected',true);
                             }
-                            
+
                             //convert to jquery selectmenu
                             selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
+                            selObj.hSelect( "widget" ).css("font-size", "1.2em");
                             selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
-                            
+
                             $sel.change(function(event){ that._onDropdownSelect(event); });
                         }
                         
@@ -2678,33 +2680,35 @@ $.widget( "heurist.search_faceted", {
                             needsDropdown = true;
                         }
 
+                        // Add dropdown 
                         if(needsDropdown){
 
                             var w = that.element.width();
                             if(!(w>0) || w<200) w = 200;
-                            w = w-45;
 
                             var $sel = $('<select style="font-size: 1.1em !important;">'); // was 30
 
                             if(needsDropdown !== true && $facet_values.find('span.bor-toggle-show-off').length > 0){
                                 $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values.find('span.bor-toggle-show-off')) );
+                                w = w-66;
                             }else{
                                 $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values) );
+                                w = w-45;
                             }
-                            
+
                             this._createOption( facet_index, 0, {title:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
                             this.__drawData(response.data, 0, $sel, facet_index, field);
-                            
+
                             if(field.selectedvalue && field.selectedvalue.value){
                                 var $opt = $sel.find('option[facet_value="'+field.selectedvalue.value+'"]');
                                 $opt.attr('selected',true);
                             }
-                            
+
                             selObj = window.hWin.HEURIST4.ui.initHSelect($sel, true);
-                            
+
                             $sel.change(function(event){ that._onDropdownSelect(event); });
 
-                            var sel_w = $sel.css('width', 'auto');
+                            var sel_w = $sel.css('width', 'auto').width();
                             if(sel_w > w){
                                 $sel.css('width', w+'px');
                             }
