@@ -691,15 +691,15 @@ $.widget( "heurist.editing_input", {
                 function __showEditor(is_manual){
                     
                             var eid = '#'+$input.attr('id')+'_editor';                    
-                    
+
+                            $(eid).parent().css({display:'inline-block'}); //.height($input.height()+100)
                             $(eid).width(Math.max(710, $input.width())).height($input.height()).val($input.val()); 
-                            $(eid).parent().css({display:'inline-block'});
                             //html($.parseHTML(   
                             
                             $btn_edit_switcher.text('text');
         
                             var nw = $input.css('min-width');
-
+                            
                             tinymce.init({
                                     //target: $editor, 
                                     //selector: '#'+$input.attr('id'),
@@ -896,7 +896,7 @@ $.widget( "heurist.editing_input", {
                 if( !isCMS_content && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_KML'] ) {
                     var nodes = $.parseHTML(value);
                     if(nodes && (nodes.length>1 || (nodes[0] && nodes[0].nodeName!='#text'))){ //if it has html show editor at once
-                             setTimeout(__showEditor,500); 
+                             setTimeout(__showEditor,1200); 
                     }
                 }
                 
