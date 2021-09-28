@@ -209,13 +209,29 @@ function hMapLayer2( _options ) {
          
          var image_extent = null; //window.hWin.HEURIST4.geo.parseWorldFile( worldFileData, image_width, image_height);
          
-         if(image_extent==null) image_extent = _getBoundingBox();
+         if(image_extent==null){
+            image_extent = _getBoundingBox();  //get wkt bbox from DT_GEO_OBJECT 
+         } 
          
-          
-         _nativelayer_id = options.mapwidget.mapping('addImageOverlay', 
+         
+         if(image_extent==null){
+             //error
+            _triggerLayerStatus( 'error' );
+            
+            if(!window.hWin.HEURIST4.util.isempty(response.message)){
+            var msg = 'Layer : '+dataset_name+'<br><br>'
+                +'Extent of image is not defined.';
+            }
+            window.hWin.HEURIST4.msg.showMsgErr(msg);
+         }else{
+             
+            _nativelayer_id = options.mapwidget.mapping('addImageOverlay', 
                                                         image_url, 
                                                         image_extent, 
                                                         _recordset.fld(_record, 'rec_Title') );
+          
+             
+         }
           
     }
 
