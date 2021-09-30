@@ -146,6 +146,7 @@ regional['en'] = {
         menu_structure_vocabterms: 'Vocabularies',
         menu_structure_fieldtypes: 'Base Fields',
         menu_structure_import: 'Browse templates',
+        menu_lookup_config: 'External lookups',
         menu_structure_summary: 'Visualise',
         menu_structure_refresh: 'Refresh memory',
     

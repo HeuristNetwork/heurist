@@ -282,6 +282,7 @@ regional['ru'] = {
         menu_structure_vocabterms: 'Словари',
         menu_structure_fieldtypes: 'Базовые поля',
         menu_structure_import: 'Импорт шаблонов',
+        menu_lookup_config: 'External lookups', // needs replacing
         menu_structure_summary: 'Визуализация',
         menu_structure_refresh: 'Перегрузить структуру',
     

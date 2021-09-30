@@ -1,7 +1,7 @@
 [{
     "service": "tlcmap",
     "rty_ID": "3-1009",
-    "label": "Lookup in AGHP",
+    "label": "AGHP lookup",
     "description": "Search for Australian Gazetteer of historic places",
     "dialog": "recordLookup",
     "fields":{
@@ -16,7 +16,7 @@
 {
     "service": "postalCodeSearch",
     "rty_ID": "",
-    "label": "Postal Codes (GeoNames)",
+    "label": "GeoNames",
     "description": "Returns a list of postal codes and places for the placename/postalcode query.",
     "dialog": "recordLookupGN_postalCode",
     "fields": {
@@ -36,7 +36,7 @@
 {
     "service": "MPCE",
     "rty_ID": "1268-53",
-    "label": "MPCE Classify Work",
+    "label": "MPCE Super Book (Work) predictive keywording",
     "dialog": "recordLookupMPCE",
     "description": "A project keyword classification toolkit for the Super Book (Work) Table.",
     "fields": {
@@ -50,7 +50,7 @@
   {
     "service": "ESTC",
     "rty_ID": "94",
-    "label": "Lookup ESTC",
+    "label": "ESTC lookup",
     "description": "",
     "dialog": "recordLookupLRC18C",
     "fields": {
