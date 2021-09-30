@@ -311,11 +311,14 @@ $.widget( "heurist.recordLookupCfg", {
             this.popupDialog();
         }else{
 
+            // add title/heading
             this.element.find('.ui-heurist-header').text(this.options.title);
 
+            // bottom bar buttons
             this.element.find('#btnSave').button().on('click', function() {that._closeHandler(true);} );
             this.element.find('#btnClose').button().on('click', function() {that._closeHandler();} );
 
+            // mouse leaves container
             this.element.find('.ent_wrapper:first').on('mouseleave', function(event) {
 
                 if($(event.target).is('div') && that._is_modified || that._services_modified){
@@ -331,19 +334,21 @@ $.widget( "heurist.recordLookupCfg", {
     },
 
     //
+    // Save and/or Close, check if any modifications or changes to services have been made 
     //
-    //
-    _closeHandler: function(isSave=false, isMouseLeave=false){ console.log(JSON.stringify(this.options.service_config));
+    _closeHandler: function(isSave=false, isMouseLeave=false){
 
         var that = this;
 
         var $dlg, buttons = {};
 
+        // fields for save request
         var fields = {
             'sys_ID': 1,
             'sys_ExternalReferenceLookups': JSON.stringify(this.options.service_config)
         };
 
+        // warning popup's buttons
         buttons['Save'] = function(){
             
             if(that._is_modified){
@@ -364,7 +369,7 @@ $.widget( "heurist.recordLookupCfg", {
                 'fields': fields
             };
 
-            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){ console.log(response);
+            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
@@ -384,6 +389,7 @@ $.widget( "heurist.recordLookupCfg", {
             that.element.empty().hide();
         };
 
+        // On Close, check if modified
         if(!isSave && (this._is_modified || this._services_modified)){
 
             var wording = this._is_modified ? 'current configuration' : 'available services';
@@ -402,7 +408,7 @@ $.widget( "heurist.recordLookupCfg", {
                     'fields': fields
                 };
 
-                window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){ console.log(response);
+                window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
 
                     if(response.status == window.hWin.ResponseStatus.OK){
 
@@ -539,7 +545,7 @@ $.widget( "heurist.recordLookupCfg", {
     },
     
     //
-    //
+    // set _is_modified flag
     //
     _updateStatus: function(){
         
