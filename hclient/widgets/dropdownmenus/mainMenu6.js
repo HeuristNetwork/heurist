@@ -1847,9 +1847,9 @@ $.widget( "heurist.mainMenu6", {
                 .on('click', openDBProperties);
 
                 $('button#btnEdit')
+                .prop('disabled', false)
                 .button({label: 'Edit Metadata'})
                 .addClass('ui-button-action')
-                .prop('disabled', false)
                 .css({
                     'display': 'inline-block'
                     //'margin-left': 'auto',
