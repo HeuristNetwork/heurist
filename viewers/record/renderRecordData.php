@@ -19,6 +19,7 @@
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
+* @author      Kinga Papay
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
@@ -667,11 +668,16 @@ function print_header_line($bib) {
     
     $rec_id = $bib['rec_ID'];
                     //(($is_production)?'':'padding-top:21px')
+
+    //get total number of linked-from records and display next to title in map popups
+    $linked_from_cnt = 0;
+    $linked_from_cnt = count_linked_from($bib, $linked_from_cnt);
+
     ?>
 
     <div class=HeaderRow style="margin-bottom:<?php echo $is_map_popup?5:15?>px;min-height:0px;">
         <h2 style="text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
-                <?= strip_tags($bib['rec_Title']) ?>
+                <?= strip_tags($bib['rec_Title']) ?> <?= $is_map_popup?$linked_from_cnt:'' ?>
         </h2>
     <?php 
 
@@ -1544,6 +1550,35 @@ function print_linked_details($bib, $link_cnt)
     return $link_cnt;
     
 }
+
+
+    //function to count total number of linked-from records
+    function count_linked_from($bib, $link_cnt)
+    {
+        global $system, $relRT, $ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure;
+
+
+        $query = 'SELECT rec_ID, rec_RecTypeID, rec_Title FROM recLinks, Records '
+            . 'where rl_TargetID = ' . $bib['rec_ID']
+            . ' AND (rl_RelationID IS NULL) AND rl_SourceID=rec_ID '
+            . ' and (rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR '
+            . ($system->has_access() ? 'NOT rec_NonOwnerVisibility = "hidden")' : 'rec_NonOwnerVisibility = "public")')
+            . ' ORDER BY rec_RecTypeID, rec_Title';
+
+        $mysqli = $system->get_mysqli();
+
+        $res = $mysqli->query($query);
+
+        if ($res == false || $res->num_rows <= 0) return $link_cnt;
+
+        while ($row = $res->fetch_assoc()) {
+
+            $link_cnt++;
+        }
+
+        return $link_cnt;
+    }
+
 
 //
 // functions below for WOOT and Comments are not used
