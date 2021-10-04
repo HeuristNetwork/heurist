@@ -140,13 +140,13 @@ function hMapLayer2( _options ) {
             var minZoom = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MINMUM_ZOOM_LEVEL']);
             var maxZoom = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM_LEVEL']);
 
-            var layer_options = {minZoom:minZoom , maxZoom:maxZoom};
-            
             var tileUrlFunc = null; 
             
             var ccode1 = $Db.getConceptID('trm', tilingSchema);
             var ccode2 = $Db.getConceptID('trm', mimeType);
             var ext = (ccode2 == '2-540'? ".png" : (ccode2 == '2-537'?'.jpg':".gif"));
+
+            var layer_options = {minZoom:minZoom , maxZoom:maxZoom, extension:ext};
             
             if(ccode1=='2-549'){ //virtual earth
                 

@@ -46,7 +46,6 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
       integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
       crossorigin=""></script>
-       
     <!-- link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" 
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>  /-->
     
@@ -54,7 +53,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <?php
 }
 ?>
-<script src="<?php echo PDIR;?>external/leaflet/geocoder/Control.Geocoder.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/leaflet/geocoder/Control.Geocoder.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/leaflet/leaflet-tileLayerPixelFilter.js"></script>
 
 <!-- leaflet plugins -->
 <script src="<?php echo PDIR;?>external/leaflet/leaflet-providers.js"></script>

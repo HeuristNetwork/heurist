@@ -474,12 +474,11 @@ $.widget( "heurist.mapping", {
     
         var new_layer;
 
-        var HeuristTilerLayer = L.TileLayer.extend({
-                    getBounds: function(){
-                        return this.options._extent;  
-                    }});
-
-    
+        var HeuristTilerLayer = HeuristTilerLayer = L.TileLayer.extend({
+                        getBounds: function(){
+                            return this.options._extent;  
+                        }});
+        
         if(layer_options['BingLayer'])
         {
                 var BingLayer = HeuristTilerLayer.extend({
@@ -545,7 +544,21 @@ $.widget( "heurist.mapping", {
             */
                 
         }else{
-            new_layer = new HeuristTilerLayer(layer_url, layer_options).addTo(this.nativemap);             
+            
+            if(layer_options['MapTiler'] && layer_options['extension']=='.jpg'){
+                layer_options['matchRGBA'] = [ 0,  0,  0, 0  ]; //replace that match
+                layer_options['missRGBA'] =  null; //replace that not match
+                layer_options['pixelCodes'] = [ [255, 255, 255] ]; //search for
+                layer_options['getBounds'] = function(){
+                            return this.options._extent;  
+                        };
+                        
+                new_layer = new L.tileLayerPixelFilter(layer_url, layer_options).addTo(this.nativemap);
+                
+            }else{
+                new_layer = new HeuristTilerLayer(layer_url, layer_options).addTo(this.nativemap);             
+            }
+    
         }
         
         this.all_layers[new_layer._leaflet_id] = new_layer;
