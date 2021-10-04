@@ -931,6 +931,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
             window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification', entity_dialog_options);
             
+        }else if(action == "menu-lookup-config"){
+
+            popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
+            popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['service_config'];
+            popup_dialog_options['title'] = "Lookup service configuration";
+
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordLookupCfg', popup_dialog_options);
+
         }else if(action == "menu-database-rollback"){
 
             window.hWin.HEURIST4.msg.showMsgDlg('Although rollback data has been recorded, '

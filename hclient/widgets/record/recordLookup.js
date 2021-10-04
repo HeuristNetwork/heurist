@@ -150,37 +150,40 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
     //
     //
     _rendererResultList: function(recordset, record){
-        
+
         function fld(fldname, width){
             var s = recordset.fld(record, fldname);
+
+            if(fldname == 'properties.LGA'){ 
+                s = s.lga; 
+            }
+
             s = s?s:'';
             if(width>0){
-                s = '<div style="display:inline-block;width:'+width+'ex" class="truncate">'+s+'</div>';
+                s = '<div style="display:inline-block;width:'+width+'ex" class="truncate" title="'+s+'">'+s+'</div>';
             }
             return s;
         }
-        
+
         var recID = fld('rec_ID');
         var rectypeID = fld('rec_RecTypeID');
         var recTitle = fld('properties.placename',40); 
-        
-        recTitle = recTitle + fld('properties.LGA',15)+fld('properties.state',6)+fld('properties.description',80); 
-        
+
+        recTitle = recTitle + fld('properties.LGA',25)+fld('properties.state',6)+fld('properties.description',80); 
+
         var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
-        
+
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                 + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
-                
-                
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
             + html_thumb
-            
+
                 + '<div class="recordIcons">'
                 +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
                 +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>' 
                 + '</div>'
-            
+
                 //+ '<div class="recordTitle" style="left:30px;right:2px">'
                     +  recTitle
                 //+ '</div>'

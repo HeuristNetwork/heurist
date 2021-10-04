@@ -101,20 +101,6 @@
                 }
         ]},
         {
-        "groupHeader": "External Lookup Reference",
-        "groupTitleVisible": true,
-        "groupType": "group",
-            "children":[
-                {
-                    "dtID": "sys_ExternalReferenceLookups",
-                    "dtFields":{
-                        "dty_Type":"freetext",
-                        "rst_DisplayName": "External reference lookups",
-                        "rst_DisplayHelpText": "Record type-function-field specifications for lookup to external reference sources such as GeoNames"
-                    }
-                }
-        ]},
-        {
         "groupHeader": "Synchronisation and Indexing",
         "groupTitleVisible": true,
         "groupType": "group",
