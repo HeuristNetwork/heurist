@@ -134,8 +134,8 @@ private static function hmlToJson($filename){
 
     $xml_doc = simplexml_load_file($filename, 'SimpleXMLElement', LIBXML_PARSEHUGE);
 
-    if($xml_doc==null || is_string($xml_doc)){
-            
+    if($xml_doc===false){
+
         $errors = libxml_get_errors();
 
         foreach ($errors as $error) {
@@ -144,11 +144,11 @@ private static function hmlToJson($filename){
         
         libxml_clear_errors();
 
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that the xml file is corrupted.');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that the xml is corrupted.', null, 'XML import error');
         return null;
     }
     if(!$xml_doc->database){
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'The provided xml file is missing the "database" element,<br>this identifies the Heurist database this export originated from.');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'The provided xml file is missing the "database" element,<br>this identifies the Heurist database this export originated from.', null, 'XML import error');
         return null;
     }
     
@@ -170,133 +170,135 @@ private static function hmlToJson($filename){
     
     $xml_recs = $xml_doc->records;
     $hasValidIdCount = 0;
+    $invalidIds = array();
     if($xml_recs)
     {
-            foreach($xml_recs->children() as $xml_rec){
-                $rectype = $xml_rec->type->attributes();
-                $rectype_id = ''.$rectype['id']; //may be not defined
+        foreach($xml_recs->children() as $xml_rec){
+			$rectype = $xml_rec->type->attributes();
+			$rectype_id = ''.$rectype['id']; //may be not defined
 
-                if(is_numeric($xml_rec->id)){ // Check record's id, checking if file is template
-                    $hasValidIdCount++;
-                }
-                
-                $record = array(
-                    'rec_ID'=>''.$xml_rec->id,
-                    'rec_RecTypeID'=>$rectype_id,
-                    'rec_RecTypeConceptID'=>''.$rectype['conceptID'],
-                    'rec_Title'=>''.$xml_rec->title,
-                    'rec_URL'=>''.$xml_rec->url,
-                    'rec_ScratchPad'=>''.$xml_rec->notes,
-                    'rec_OwnerUGrpID'=>0, //''.$xml_rec->workgroup->id,  
-                    'rec_NonOwnerVisibility'=>''.$xml_rec->visibility,
-                    'rec_Added'=>''.$xml_rec->added,
-                    'rec_Modified'=>''.$xml_rec->modified,
-                    'rec_AddedByUGrpID'=>0 //$xml_rec->workgroup->id
-                );
-                
-                //fill rectype array - it will be required to find missed rectypes
-                //if id is not defined we take concept code
-                $rt_idx = ($rectype_id>0)?$rectype_id: ''.$rectype['conceptID'];
-                if(!@$rectypes[$rt_idx]){
-                    $rectypes[$rt_idx] = array(
-                        'id'   => $rectype_id,
-                        'name'=>''.$xml_rec->type,
-                        'code'=>''.$rectype['conceptID'],
-                        'count'=>1
-                    );
-                }else{
-                    $rectypes[$rt_idx]['count']++;
-                }
-                
-                if($db_url==null){
-                    $db_url = ''.$xml_rec->citeAs; 
-                    if($db_url!='') $db_url = substr($db_url,0,strpos($db_url,'?'));
-                }
-                
-                foreach($xml_rec->children() as $xml_det){
-                    if ($xml_det->getName()=='detail')
-                    {   
-                       $dets = $xml_det->attributes();
-                       $fieldtype_id = ''.$dets['id'];
-                       $detail = ''.$xml_det;
-                       
-                       //field idx can be local id or concept code
-                       $field_idx = ($fieldtype_id > 0)?$fieldtype_id: ''.$dets['conceptID'];
-                       
-                       if(!@$fieldtypes[$field_idx]){
-                            $fieldtypes[$field_idx] = array(
-                                'id'   => $fieldtype_id,
-                                'name' => ''.$dets['name'],
-                                'code' => ''.$dets['conceptID']
-                            );
-                       }
-                       
-                       if($dets['isRecordPointer']=='true'){
-                           /*$detail = array(
-                            'id'=>$xml_det,
-                            'type'=>'',
-                            'title'=>''
-                           );*/
-                       }else if($xml_det->raw){
-                           $detail = ''.$xml_det->raw;
-                       }else if($dets['termID']){
-                           
-                           $trm_cCode = @$dets['termConceptID'];
-                           
-                           if($trm_cCode!=null && $trm_cCode!=''){
-                              
-                                $ids = explode('-', $trm_cCode);
-                                if ($ids && (count($ids) == 2) && is_numeric($ids[0]) && ($ids[0] > 0)){
-                                        $detail = ''.$dets['termID'];         
-                                } 
-                           }
-                           
-                       }else if($xml_det->geo){
-                           
-                           $geotype = @$GEO_TYPES[ ''.$xml_det->geo->type ];
-                           if(!$geotype) $geotype = ''.$xml_det->geo->type;
-                           
-                           $detail = array('geo'=>array(
-                            'type'=>$geotype,
-                            'wkt'=>''.$xml_det->geo->wkt
-                           ));
-                       }else if($xml_det->file){
-                           $detail = array('file'=>array(
-                            'ulf_ID'=>''.$xml_det->file->id,
-                            //'fullPath'=> null,
-                            'ulf_OrigFileName'=>''.$xml_det->file->origName,
-                            //'ulf_ExternalFileReference'=>$xml_det->file->url,
-                            'ulf_MimeExt'=>''.$xml_det->file->mimeType,
-                            'ulf_ObfuscatedFileID'=>''.$xml_det->file->nonce,
-                            'ulf_Description'=>''.$xml_det->file->description,
-                            'ulf_Added'=>''.$xml_det->file->date
-                           ),
-                           'fileid'=>''.$xml_det->file->nonce);
-                           
-                           $file_url = ''.$xml_det->file->url;
-                           if($file_url && ($db_url=='' || $db_url==null || strpos($file_url, $db_url)===false)){
-                                $detail['file']['ulf_ExternalFileReference'] = $file_url;
-                           }
-                       }
-                       
-                       //field idx can be local id or concept code
-                       if(!@$record['details'][$field_idx]) $record['details'][$field_idx] = array();
-                       $record['details'][$field_idx][] = $detail; 
-                    }
-                }
-                
-                $json['heurist']['records'][] = $record;
+			if(is_numeric($xml_rec->id) || is_numeric(trim($xml_rec->id))){ // Check record's id, checking if file is template
+				$hasValidIdCount++;
+			}else{
+				$invalidIds[] = $xml_rec->id;
+			}
+			
+			$record = array(
+				'rec_ID'=>''.$xml_rec->id,
+				'rec_RecTypeID'=>$rectype_id,
+				'rec_RecTypeConceptID'=>''.$rectype['conceptID'],
+				'rec_Title'=>''.$xml_rec->title,
+				'rec_URL'=>''.$xml_rec->url,
+				'rec_ScratchPad'=>''.$xml_rec->notes,
+				'rec_OwnerUGrpID'=>0, //''.$xml_rec->workgroup->id,  
+				'rec_NonOwnerVisibility'=>''.$xml_rec->visibility,
+				'rec_Added'=>''.$xml_rec->added,
+				'rec_Modified'=>''.$xml_rec->modified,
+				'rec_AddedByUGrpID'=>0 //$xml_rec->workgroup->id
+			);
+			
+			//fill rectype array - it will be required to find missed rectypes
+			//if id is not defined we take concept code
+			$rt_idx = ($rectype_id>0)?$rectype_id: ''.$rectype['conceptID'];
+			if(!@$rectypes[$rt_idx]){
+				$rectypes[$rt_idx] = array(
+					'id'   => $rectype_id,
+					'name'=>''.$xml_rec->type,
+					'code'=>''.$rectype['conceptID'],
+					'count'=>1
+				);
+			}else{
+				$rectypes[$rt_idx]['count']++;
+			}
+			
+			if($db_url==null){
+				$db_url = ''.$xml_rec->citeAs; 
+				if($db_url!='') $db_url = substr($db_url,0,strpos($db_url,'?'));
+			}
+			
+			foreach($xml_rec->children() as $xml_det){
+				if ($xml_det->getName()=='detail')
+				{   
+				   $dets = $xml_det->attributes();
+				   $fieldtype_id = ''.$dets['id'];
+				   $detail = ''.$xml_det;
+				   
+				   //field idx can be local id or concept code
+				   $field_idx = ($fieldtype_id > 0)?$fieldtype_id: ''.$dets['conceptID'];
+				   
+				   if(!@$fieldtypes[$field_idx]){
+						$fieldtypes[$field_idx] = array(
+							'id'   => $fieldtype_id,
+							'name' => ''.$dets['name'],
+							'code' => ''.$dets['conceptID']
+						);
+				   }
+				   
+				   if($dets['isRecordPointer']=='true'){
+					   /*$detail = array(
+						'id'=>$xml_det,
+						'type'=>'',
+						'title'=>''
+					   );*/
+				   }else if($xml_det->raw){
+					   $detail = ''.$xml_det->raw;
+				   }else if($dets['termID']){
+					   
+					   $trm_cCode = @$dets['termConceptID'];
+					   
+					   if($trm_cCode!=null && $trm_cCode!=''){
+						  
+							$ids = explode('-', $trm_cCode);
+							if ($ids && (count($ids) == 2) && is_numeric($ids[0]) && ($ids[0] > 0)){
+									$detail = ''.$dets['termID'];         
+							} 
+					   }
+					   
+				   }else if($xml_det->geo){
+					   
+					   $geotype = @$GEO_TYPES[ ''.$xml_det->geo->type ];
+					   if(!$geotype) $geotype = ''.$xml_det->geo->type;
+					   
+					   $detail = array('geo'=>array(
+						'type'=>$geotype,
+						'wkt'=>''.$xml_det->geo->wkt
+					   ));
+				   }else if($xml_det->file){
+					   $detail = array('file'=>array(
+						'ulf_ID'=>''.$xml_det->file->id,
+						//'fullPath'=> null,
+						'ulf_OrigFileName'=>''.$xml_det->file->origName,
+						//'ulf_ExternalFileReference'=>$xml_det->file->url,
+						'ulf_MimeExt'=>''.$xml_det->file->mimeType,
+						'ulf_ObfuscatedFileID'=>''.$xml_det->file->nonce,
+						'ulf_Description'=>''.$xml_det->file->description,
+						'ulf_Added'=>''.$xml_det->file->date
+					   ),
+					   'fileid'=>''.$xml_det->file->nonce);
+					   
+					   $file_url = ''.$xml_det->file->url;
+					   if($file_url && ($db_url=='' || $db_url==null || strpos($file_url, $db_url)===false)){
+							$detail['file']['ulf_ExternalFileReference'] = $file_url;
+					   }
+				   }
+				   
+				   //field idx can be local id or concept code
+				   if(!@$record['details'][$field_idx]) $record['details'][$field_idx] = array();
+				   $record['details'][$field_idx][] = $detail; 
+				}
+			}
+			
+			$json['heurist']['records'][] = $record;
 
-                
-            }//records
+        }//records
     }else{
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot find any records within the provided xml file,<br>records need to be incased within "records" elements.');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot find any records within the provided xml file,<br>records need to be incased within "records" elements.', null, 'XML import error');
         return null;
     }
 
     if($hasValidIdCount == 0){
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'There are no valid record IDs within the provided xml file.<br>You may have accidentally uploaded the xml template file.');
-
+        $extra_details = "<br><br>If this occurs when Heurist says it is doing an automatic update,<br>please advise the Heurist team (Bug Report in the Help menu at the top right) so that we can fix this problem.<br>" . (count($invalidIds) > 0) ? "The list of invalid ids: " . implode(',', $invalidIds) : "";
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'There are no valid record IDs within the provided xml file.<br>You may have accidentally uploaded the xml template file.' . $extra_details, null, 'XML import error');
         return null;
     }
     
