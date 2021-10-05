@@ -1026,16 +1026,15 @@ $.widget( "heurist.editing_input", {
                         click: function(event, ui){ // selectmenu click extra handler
 
                             if(!tooltipDefined){
-                                var trm_tooltip;
+            					var trm_tooltip;
 
                                 tooltipDefined = true;
-
-                                $input.hSelect("menuWidget").find('div').on({ // selectmenu's menu items
+            					
+            					$input.hSelect("menuWidget").find('div').on({ // selectmenu's menu items
             						"mouseover": function(e){ // Retrieve information then display tooltip
 
             							var parent_container = $input.hSelect("menuWidget")[0];
 
-                                        console.log('showing tooltip');
             							var term_txt = $(e.target).text();
             							var vocab_id = that.f('rst_FilteredJsonTermIDTree');
             							var data = $Db.trm_TreeData(vocab_id, 'select');
@@ -1095,7 +1094,7 @@ $.widget( "heurist.editing_input", {
             								trm_tooltip.tooltip("destroy");
             							}
             						}
-                                });
+            					});
                             }
                         }
                     });
@@ -1107,20 +1106,43 @@ $.widget( "heurist.editing_input", {
                                 var crafted_label = ui.item.label;
                                 var trm_info = $Db.trm(term_id);
 
-                                while(1){ // keep looping until trm_info.trm_ParentTermID == 0
+                                if(trm_info.trm_ParentTermID != 0){
+                                    
+                                    while(1){
 
-                                    trm_info = $Db.trm(trm_info.trm_ParentTermID);
+                                        trm_info = $Db.trm(trm_info.trm_ParentTermID);
 
-                                    if(trm_info.trm_ParentTermID == 0){
-                                        break;
-                                    }else{
-                                        crafted_label = trm_info.trm_Label + ' > ' + crafted_label;
+                                        if(trm_info.trm_ParentTermID == 0){
+                                            break;
+                                        }else{
+                                            crafted_label = trm_info.trm_Label + ' > ' + crafted_label;
+                                        }
                                     }
-                                }
 
-                                $input.hSelect('widget').find('span.ui-selectmenu-text').text(crafted_label);
+                                    $input.hSelect('widget').find('span.ui-selectmenu-text').text(crafted_label);
+                                }
                             }
                         });
+                    }
+
+                    // Craft initial label
+                    var trm_info = $Db.trm(value);
+                    var crafted_label = trm_info.trm_Label;
+
+                    if(trm_info.trm_ParentTermID != 0){
+
+                        while(1){
+
+                            trm_info = $Db.trm(trm_info.trm_ParentTermID);
+
+                            if(trm_info.trm_ParentTermID == 0){
+                                break;
+                            }else{
+                                crafted_label = trm_info.trm_Label + ' > ' + crafted_label;
+                            }
+                        }
+
+                        $input.hSelect('widget').find('span.ui-selectmenu-text').text(crafted_label);
                     }
                 }
             }
