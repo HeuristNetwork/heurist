@@ -142,119 +142,6 @@ if(!($is_map_popup || $without_header)){
                         +':'+(''+date.getMinutes()).padStart(2, "0")
                         +':'+(''+date.getSeconds()).padStart(2, "0");
             }
-            
-            // @to reimplement
-            //
-            function showPlayer(obj, id, url) {
-
-                var currentImg = obj;
-
-                if (currentImg.parentNode.className == "thumb_image"){  //thumb to player
-                    currentImg.style.display = 'none';
-                    currentImg.parentNode.className = "fullSize";
-                    //!!!! currentImg.parentNode.parentNode.style.width = '100%';
-                    
-                    //add content to player div
-        $.ajax({
-            url: url,
-            type: "GET",
-            //data: request,
-            //dataType: "json",
-            cache: false,
-            error: function(jqXHR, textStatus, errorThrown ) {
-            },
-            success: function( response, textStatus, jqXHR ){
-                        var obj = jqXHR.responseText;
-                        if (obj){
-                            var  elem = document.getElementById('player'+id);
-                            elem.innerHTML = obj;
-                            elem.style.display = 'block';
-
-                            //calculate width for data and image                             
-                            var player = elem;
-                            if($(player.parentNode.parentNode).hasClass('production')){
-                                
-                                var img = $(player).find('img');
-                                if(img.length>0){
-                                    
-                                    img = img[0];
-
-                                    function __onImgLoaded(){
-                                        
-                                        var w_img = $(img).width();
-                                        var w_win = window.innerWidth;
- 
-                                        if(w_win-w_img<600){
-                                            //draw image above data
-                                            player.parentNode.parentNode.style.float = 'none';
-                                            //$('#div_public_data').css('max-width', w_win-40);    
-                                        }else{
-                                            //draw on the right and reduce max width for data
-                                            player.parentNode.parentNode.style.float = 'right';
-                                            //$('#div_public_data').css('max-width', w_win-w_img-200);
-                                        }
-                                        
-                                    }
-                                    
-                                    if(img.complete){
-                                         __onImgLoaded();
-                                    }else{
-                                         img.addEventListener('load', __onImgLoaded)
-                                    }
-                                }
-                                
-                            }
-                            function __closePlayer(){
-                                hidePlayer( id );            
-                            }
-                            
-                            $(elem).find('img').click( __closePlayer );
-                            
-                            //show thumbnail link
-                            elem = document.getElementById('lnk'+id);
-                            elem.style.display = 'inline-block';
-                            elem.onclick = __closePlayer;
-                            //center parent of link
-                            //elem.parentNode.style.margin = '0 auto';
-                            //elem.parentNode.style.textAlign = 'left';
-                        }
-            }
-        });
-                    
-                }
-                else{
-                    hidePlayer( id );
-                }
-            }
-            function hidePlayer(id) {
-                //clear and hide player div
-                var  elem = document.getElementById('player'+id);
-                elem.innerHTML = '';
-                elem.style.display = 'none';
-                
-                //hide show tumbnail link
-                elem = document.getElementById('lnk'+id);
-                elem.style.display = 'none';
-                //elem.parentNode.style.margin = 0;
-                //elem.parentNode.style.textAlign = 'center';
-
-                //show thumbnail
-                elem = document.getElementById('img'+id);
-                elem.parentNode.className = "thumb_image";
-                //!!! elem.parentNode.parentNode.style.width = 'auto';
-                elem.style.display = 'inline-block';
-                
-                //restore
-                if($(elem.parentNode.parentNode).hasClass('production')){
-                    $(elem.parentNode.parentNode).css({'float':'right'});
-                    /* Remarked 2019-01-24
-                    var w_win = window.innerWidth;
-                    $('#div_public_data').css('max-width', w_win-250);    
-                    */
-                }
-                
-            }
-
 
             function start_roll_open() {
                 window.roll_open_id = setInterval(roll_open, 100);
@@ -364,7 +251,48 @@ if(!($is_map_popup || $without_header)){
                 if(event!=null && window.hWin && window.hWin.HAPI4){
                     window.hWin.HAPI4.save_pref('recordData_PrivateInfo', prefVal);    
                 }
-            }            
+            }
+			
+            function createRecordGroups(groups){
+
+                var $group_container = $('div#div_public_data');
+                var $data = $group_container.find('div[data-order]');
+
+                var $g_ele = null, $g_header = null;
+                var current_type = null;
+
+                if(groups == null || $data.length < 0 || $group_container.length < 0){
+                    return;
+                }else{
+                    $.each(groups, function(idx, group){
+
+                        var group_name = group[0];
+                        var order = group[1];
+
+                        var next_group = groups[Number(idx)+1];
+                        var key = (next_group == null) ? null : next_group[0];
+                        var next_order = (key == null) ? null : next_group[1];
+                        var $field_container = $('<fieldset>').attr('id', order);
+
+                        $.each($data, function(idx, detail){
+
+                            var $detail = $(detail);
+                            var detail_order = $detail.attr('data-order');
+                            if(detail_order < order){ // detail belongs in previous group
+                                return;
+                            }else if(detail_order > order && (next_order == null || detail_order < next_order)){
+                                $detail.appendTo($field_container);
+                            }else{ // detail belongs in next group
+                                return false;
+                            }
+                        });
+
+                        $('<h4>').css({'margin': '5px 0px 2px 0px', 'font-size': '1.1em'}).text(group_name).appendTo($group_container);
+
+                        $field_container.appendTo($group_container);
+                    });
+                }
+            }
 
             $(document).ready(function() {
                 showHidePrivateInfo(null);
@@ -1320,8 +1248,10 @@ function print_public_details($bib) {
     $prevLbl = null;
     foreach ($bds as $bd) {
         if (defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) continue;
-        
-        print '<div class="detailRow fieldRow" style="border:none 1px #00ff00;'   //width:100%;
+
+        $ele_id = ($bd['rst_DisplayOrder'] != '' || $bd['rst_DisplayOrder'] != null) ? 'data-order="' . $bd['rst_DisplayOrder'] . '"' : '';
+
+        print '<div class="detailRow fieldRow" '. ($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt) ? '' : $ele_id) .' style="border:none 1px #00ff00;'   //width:100%;
             .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none':'')
             .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
         .'</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'
@@ -1334,7 +1264,31 @@ function print_public_details($bib) {
     if($is_map_popup){
         //echo '<div class=detailRow><div class=detailType><a href="#" onClick="$(\'.fieldRow\').show();$(event.target).hide()">more</a></div><div class="detail"></div></div>';
     }else{
-        echo '<div class="detailRow fieldRow">&nbsp;</div>';    
+
+        $group_details = array();
+        $current_type = null;
+        $tabs_list = array();
+
+        $query = "SELECT rst_DisplayName, rst_DisplayOrder 
+                  FROM defRecStructure
+                  LEFT JOIN defDetailTypes ON rst_DetailTypeID = dty_ID
+                  WHERE rst_RecTypeID = ". $bib['rec_RecTypeID'] ." AND dty_Type = 'separator'
+                  ORDER BY rst_DisplayOrder";
+
+        $groups_res = $mysqli->query($query);
+
+        if($groups_res){
+
+            while ($group = $groups_res->fetch_row()) {
+                $group_details[] = array($group[0], $group[1]);
+            }
+
+            if(is_array($group_details) && count($group_details) > 0){
+                echo '<script>createRecordGroups(', json_encode($group_details, JSON_FORCE_OBJECT), ');</script>';
+            }
+        }
+
+        echo '<div class="detailRow fieldRow">&nbsp;</div>';
     }
     
     
