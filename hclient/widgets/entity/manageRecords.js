@@ -2770,18 +2770,24 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
             //sort by order
             s_fields.sort(function(a,b){ return a['rst_DisplayOrder']<b['rst_DisplayOrder']?-1:1});
-            
+
             var group_fields = null;
-            
+            var groupCount = 0, hasTabs = false;
+            var temp_group_details = [];
+
             for(var k=0; k<s_fields.length; k++){
-                
+
                 var dtFields = that._prepareFieldForEditor( s_fields[k] );
-                
+                var simpleDetails = {};
+
                 if(dtFields['dty_Type']=='separator'){
+
+                    groupCount++;
+
                     if(group_fields!=null){
                         fields[fields.length-1].children = group_fields;
                     }
-                    
+
                     var dtGroup = {
                         dtID: dtFields['dt_ID'],
                         groupHeader: dtFields['rst_DisplayName'],
@@ -2798,8 +2804,16 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     };
                     fields.push(dtGroup);
                     group_fields = [];
+
+                    if(!hasTabs){
+                        if(dtFields['rst_DefaultValue'] == 'tabs' || dtFields['rst_DefaultValue'] == 'tabs_new'){
+                            hasTabs = true;
+                        }else if(dtGroup['groupTitleVisible'] && dtGroup['dtID'] != 9999999){
+                            temp_group_details.push({rst_RecTypeID: that._currentEditRecTypeID, rst_DetailTypeID: dtGroup['dtID'], rst_DefaultValue: 'tabs'});
+                        }
+                    }
                 }else{
-                    
+
                     if(group_fields!=null){
                         group_fields.push({"dtID": dtFields['dt_ID'], "dtFields":dtFields});
                     }else{
@@ -2807,6 +2821,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     }
                 }
             }//for s_fields
+
             //add children to last group
             if(group_fields!=null){
                 fields[fields.length-1].children = group_fields;
@@ -2842,6 +2857,88 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 }
             }
             
+            var header_to_tabs_ignore = sessionStorage.getItem('header_to_tabs_ignore');
+
+            header_to_tabs_ignore = (header_to_tabs_ignore != null) ? JSON.parse(header_to_tabs_ignore) : {};
+
+            if(window.hWin.HAPI4.has_access(1) && !hasTabs && groupCount > 2
+                && this.options.edit_structure == undefined && this.options.rts_editor == undefined){
+
+                if(header_to_tabs_ignore[window.hWin.HAPI4.database] == null 
+                    || !header_to_tabs_ignore[window.hWin.HAPI4.database].includes(that._currentEditRecTypeID)){
+
+                    var $dlg;
+
+                    var btns = {};
+                    btns[window.hWin.HR('Convert to tabs')] = function(){
+                        $dlg.dialog('close');
+
+                        //Convert all groups to tabs
+                        var request = {
+                            'a': 'save',
+                            'entity': 'defRecStructure',
+                            'request_id': window.hWin.HEURIST4.util.random(),
+                            'fields': temp_group_details
+                        };
+
+                        // Update Database Definition
+                        window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+
+                            if(response.status == window.hWin.ResponseStatus.OK){
+
+                                for(var i = 0; i < temp_group_details.length; i++){ // Update Cache
+                                    $Db.rst(temp_group_details[i]['rst_RecTypeID'], temp_group_details[i]['rst_DetailTypeID'], 'rst_DefaultValue', 'tabs');
+                                }
+
+                                if(header_to_tabs_ignore[window.hWin.HAPI4.database] != null){ // add to list of ignore, to avoid calling on refresh
+                                    header_to_tabs_ignore[window.hWin.HAPI4.database].push(that._currentEditRecTypeID);
+                                }else{
+                                    header_to_tabs_ignore[window.hWin.HAPI4.database] = [that._currentEditRecTypeID];
+                                }
+
+                                sessionStorage.setItem('header_to_tabs_ignore', JSON.stringify(header_to_tabs_ignore));
+
+                                that._initEditForm_step4();
+
+                                return;
+
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                        });
+                    };
+                    btns[window.hWin.HR('Leave as-is')] = function(){
+                        $dlg.dialog('close');
+
+                        if(header_to_tabs_ignore[window.hWin.HAPI4.database] != null){
+                            header_to_tabs_ignore[window.hWin.HAPI4.database].push(that._currentEditRecTypeID);
+                        }else{
+                            header_to_tabs_ignore[window.hWin.HAPI4.database] = [that._currentEditRecTypeID];
+                        }
+
+                        sessionStorage.setItem('header_to_tabs_ignore', JSON.stringify(header_to_tabs_ignore));
+                    };
+
+                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                        'This form uses multiple sections, but none of them are Tab headers. We strongly<br>'
+                        + 'recommend the use of tabs for improved appearance and usability.<br><br>'
+                        + 'We can convert all headings to Tabs automatically. If you don\'t like the result you can<br>'
+                        + 'convert some or all of them back to simple headers, or you can split the tabs into two<br>'
+                        + 'or more groups by editing one of the tabs and converting it to Tab (start new group).<br><br>'
+                        + 'The data in the record will not be affected in any way.'
+                        , btns, {title: 'Improved form layout', yes: 'Convert to tabs', no: 'Leave as-is'}
+                    );
+                }
+    
+            }else if(header_to_tabs_ignore[window.hWin.HAPI4.database] != null 
+                && header_to_tabs_ignore[window.hWin.HAPI4.database].includes(that._currentEditRecTypeID)){
+
+                var idx = header_to_tabs_ignore[window.hWin.HAPI4.database].indexOf(that._currentEditID);
+                if(idx > -1){
+                    header_to_tabs_ignore[window.hWin.HAPI4.database].splice(idx, 1);
+                }
+            }
+
             //show rec_URL 
             var ele = that._editing.getFieldByName('rec_URL');
             var hasURLfield = ($Db.rty(rectypeID, 'rty_ShowURLOnEditForm')=='1');
