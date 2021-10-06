@@ -1127,22 +1127,24 @@ $.widget( "heurist.editing_input", {
 
                     // Craft initial label
                     var trm_info = $Db.trm(value);
-                    var crafted_label = trm_info.trm_Label;
+                    if(value && trm_info){
+                        var crafted_label = trm_info.trm_Label;
 
-                    if(trm_info.trm_ParentTermID != 0){
+                        if(trm_info.trm_ParentTermID != 0){
 
-                        while(1){
+                            while(1){
 
-                            trm_info = $Db.trm(trm_info.trm_ParentTermID);
+                                trm_info = $Db.trm(trm_info.trm_ParentTermID);
 
-                            if(trm_info.trm_ParentTermID == 0){
-                                break;
-                            }else{
-                                crafted_label = trm_info.trm_Label + ' > ' + crafted_label;
+                                if(trm_info.trm_ParentTermID == 0){
+                                    break;
+                                }else{
+                                    crafted_label = trm_info.trm_Label + ' > ' + crafted_label;
+                                }
                             }
-                        }
 
-                        $input.hSelect('widget').find('span.ui-selectmenu-text').text(crafted_label);
+                            $input.hSelect('widget').find('span.ui-selectmenu-text').text(crafted_label);
+                        }
                     }
                 }
             }
