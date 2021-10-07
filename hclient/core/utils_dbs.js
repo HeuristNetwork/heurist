@@ -266,16 +266,21 @@ window.hWin.HEURIST4.dbs = {
             
             //add default fields - RECORD TYPE HEADER
             if($mode==3){
-                
-                    $children.push({key:'rec_ID',title:'Record ID', code:'Record ID'});
-                    if($recursion_depth>0){
-                        $children.push({key:'rec_Title', type:'freetext',
-                            title:'Record Title', 
-                            code:'Record Title'});
-                    }
-                    $children.push({key:'rec_TypeID', title:'Record TypeID', code:'Record TypeID'});
-                    $children.push({key:'rec_TypeName', title:'Record TypeName', code:'Record TypeName'});
-                    $children.push({key:'rec_Modified', title:"Record Modified", code:'Record Modified'});
+
+                $children.push({key:'rec_ID',title:'Record ID', code:'Record ID'});
+                $children.push({key:'rec_TypeID', title:'Record TypeID', code:'Record TypeID'});
+                $children.push({key:'rec_TypeName', title:'Record TypeName', code:'Record TypeName'});
+                $children.push({key:'rec_Modified', title:"Record Modified", code:'Record Modified'});
+
+                var s = '<span style="font-style:italic">Generic Fields</span>';
+                $children = [
+                    {title:s, folder:true, is_generic_fields:true, children:$children}];
+
+                if($recursion_depth>0){ // keep record title separate from generic fields
+                    $children.push({key:'rec_Title', type:'freetext',
+                        title:'Record Title', 
+                        code:'Record Title'});
+                }
             }else
             if($recursion_depth==0 && $fieldtypes.length>0){    
                  //include record header fields

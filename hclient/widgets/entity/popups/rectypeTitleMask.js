@@ -398,8 +398,6 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         //generate treedata from rectype structure
         var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 3, this.options.rty_ID, ['all','parent_link'] );
 
-        treedata[0].expanded = true; //first expanded
-
         //load treeview
         var treediv = this.element.find('.rtt-tree');
         if(!treediv.is(':empty') && treediv.fancytree("instance")){
@@ -433,6 +431,8 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                 if(data.node.data.type == "enum") { // hide blue and expand arrows for terms
 
                     $(data.node.span.childNodes[0]).css('visibility', 'hidden');
+                    $(data.node.span.childNodes[1]).hide();
+                }else if(data.node.data.is_generic_fields){ // hide blue arrow for generic fields
                     $(data.node.span.childNodes[1]).hide();
                 }else{
 

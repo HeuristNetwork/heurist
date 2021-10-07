@@ -820,6 +820,7 @@ $.widget( "heurist.searchBuilder", {
                                 renderNode: function(event, data){
                                     
                                     if(data.node.data.is_generic_fields){
+                                        $(data.node.span.childNodes[0]).css('display', 'inline-block');
                                         $(data.node.span.childNodes[1]).hide();
                                         $(data.node.span.childNodes[3]).css('font-weight', 'normal');
                                     }
