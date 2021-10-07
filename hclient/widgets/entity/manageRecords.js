@@ -751,7 +751,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 btns[window.hWin.HR('Exit with no fields')] = function(){
                                     var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                                     $dlg.dialog('close');
-                                    checkTitleMask();
+                                    that.closeEditDialog();
                                 };
                                 window.hWin.HEURIST4.msg.showMsgDlg('You need to define fields to make this record type usable.', 
                                     btns, 
@@ -2772,7 +2772,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             s_fields.sort(function(a,b){ return a['rst_DisplayOrder']<b['rst_DisplayOrder']?-1:1});
 
             var group_fields = null;
-            var groupCount = 0, hasTabs = false;
+            var groupCount = 0, hasTabs = false, hasField = false;
             var temp_group_details = [];
 
             for(var k=0; k<s_fields.length; k++){
@@ -2813,6 +2813,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         }
                     }
                 }else{
+
+                    hasField = true;
 
                     if(group_fields!=null){
                         group_fields.push({"dtID": dtFields['dt_ID'], "dtFields":dtFields});
@@ -3071,8 +3073,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     nextButton: '<span style="font-size:2em;font-weight:900;line-height:5px">&#187;</span>', // Text displayed for next button.
                     prevButton: '<span style="font-size:2em;font-weight:900;line-height:5px">&#171;</span>' // Text displayed for previous button.
                 });
-            }     
-            
+            }
+
+            if(!hasField && window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false){ // open modify structure, if able when there are no fields
+                this.editRecordType(true);
+            }
+
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);
         }
