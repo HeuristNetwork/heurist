@@ -1631,6 +1631,16 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
                     
                 }
                 
+                if(popup_options && popup_options.edit_structure){
+                    //check that select record type is opened - resize and position this popup
+                    var ele = $('body').find('div[id^="heurist-dialog-DefRecTypes"]');
+                    if(ele.length>0){
+                        popup_options.forced_Width = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.6;
+                        popup_options.position = {my: "left top", at: "left top", of: ele };
+                    }
+    
+                }
+                
                 
                 popup_options = $.extend(popup_options, {
                     select_mode: 'manager',
@@ -2322,7 +2332,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
             var manage_dlg;
             
             if(!options.container){ //container not defined - add new one to body
-                
+            
                 manage_dlg = $('<div id="heurist-dialog-'+entityName+'-'+window.hWin.HEURIST4.util.random()+'">')
                     .appendTo( $('body') )
                     [widgetName]( options );

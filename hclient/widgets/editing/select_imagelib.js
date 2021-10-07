@@ -1,5 +1,5 @@
 /**
-* Widget to select image (thumba and icons) from image library
+* Widget to select image (thumbs and icons) from image library
 * Used in editing_input and as popup for selected records in rec_list
 * 
 * @package     Heurist academic knowledge management system

@@ -92,6 +92,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }else{
             this.options.width = 1200;                    
         }
+        
         this.options.editClassName = 'recordEditor';
 
         this.getUiPreferences();
@@ -584,7 +585,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //restore from preferences    
             if(this.options.edit_mode == 'editonly'){
                 this.getUiPreferences();
-                this.options['width']  = this.usrPreferences['width'];
+                if(this.options.forced_Width){
+                    this.options.width = this.options.forced_Width;
+                }else{
+                    this.options['width']  = this.usrPreferences['width'];    
+                }
                 this.options['height'] = this.usrPreferences['height'];
             }
         
@@ -3915,6 +3920,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             this.options.onInitEditForm.call();
         }
         
+                    
     },//END _afterInitEditForm
     
     //
@@ -4088,7 +4094,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             dheight = that._edit_dialog.dialog('option','height');
         } 
 
-        params.width = dwidth;
+        if(!(this.options.forced_Width>0)){
+            params.width = dwidth;    
+        }
         params.height = dheight;
         params.help_on = help_on;
         params.optfields = optfields;

@@ -93,7 +93,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 +'</div>';
             
         }else {
-            
+            //not used            
             this.options.layout_mode =                 
                 '<div style="display:none">'
                     +'<div class="ent_header searchForm"/>'     

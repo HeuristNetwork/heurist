@@ -1457,11 +1457,16 @@ prof =Profile
             // 
             refreshEntityData:function(entityNames, callback){
 
+var s_time = new Date().getTime() / 1000;
+                
                  //'multi':1,   
                 _callserver('entityScrud', {a:'structure', 'entity':entityNames, 'details':'full'},
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
 
+var fin_time = new Date().getTime() / 1000;
+//console.log('DEBUG refreshEntityData '+response.data+'  '+(fin_time-s_time));                    
+                            
                             for(var entityName in response.data){
                                 window.hWin.HAPI4.EntityMgr.setEntityData(entityName, response.data)
                             }
@@ -1492,9 +1497,14 @@ prof =Profile
                         det = 'full';   
                     }
 
+var s_time = new Date().getTime() / 1000;
+                    
                     _callserver('entityScrud', {a:'search', 'entity':entityName, 'details':det},
                        function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
+
+var fin_time = new Date().getTime() / 1000;
+//console.log('DEBUG getEntityData '+response.data.entityName+'  '+(fin_time-s_time));                    
                                 
                                 entity_data[response.data.entityName] = new hRecordSet(response.data);    
                                 

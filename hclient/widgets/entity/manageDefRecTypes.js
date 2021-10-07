@@ -1391,6 +1391,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 return;    
         }
         
+        //add to local definitions
         $Db.rty().setRecord(recID, fieldvalues);
         this._super( recID, fieldvalues );
         
@@ -1447,7 +1448,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 		
 		var that = this;
 		
-		//add 3 derault tabs 
+		//add 3 default tabs 
 		var k = 0;
 		$Db.dty().each(function(dty_ID, rec){
 		   if($Db.dty(dty_ID,'dty_Type')=='separator'){
@@ -1465,7 +1466,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 			   k++;
 			   if(k>2) return false;//break
 		   } 
-		});                        
+		});      
+        
+        window.hWin.HEURIST4.msg.bringCoverallToFront();
+        window.hWin.HEURIST4.msg.coverallKeep = true;
+        window.hWin.HEURIST4.msg.showMsgFlash('loading structure', false);
                     
 		var request = {};
 		request['a']        = 'action'; //batch action
@@ -1476,11 +1481,15 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 		
 		window.hWin.HAPI4.EntityMgr.doRequest(request, 
 			function(response){
+                
 				if(response.status == window.hWin.ResponseStatus.OK){
 					
+                    //@todo since it adds only separators - we may update local definitions without request for full update
+                    
 					//refresh local defs and show edit structure popup
 					window.hWin.HAPI4.EntityMgr.getEntityData('defRecStructure', true,
 					function(){
+                        //open edit structurre
 						that._onActionListener(null, {recID:rty_ID, action:'editstr'} );
 					});
 					

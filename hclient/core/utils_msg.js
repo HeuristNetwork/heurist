@@ -58,6 +58,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         var dlg_title = null;
         var show_login_dlg = false;
         
+        window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+        window.hWin.HEURIST4.msg.closeMsgFlash();
+        
         if(typeof response === "string"){
             msg = response;
         }else{
@@ -394,14 +397,15 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if (!(timeout>200)) {
                 timeout = 1000;
             }
-
-            
             setTimeout(window.hWin.HEURIST4.msg.closeMsgFlash, timeout);
             
         }
     },
     
     closeMsgFlash: function(){
+        
+        if(window.hWin.HEURIST4.msg.coverallKeep===true) return;
+        
         var $dlg = window.hWin.HEURIST4.msg.getMsgFlashDlg();
         if($dlg.dialog('instance')) $dlg.dialog('close');
         $dlg.parent().find('.ui-dialog-titlebar').show();
@@ -1095,7 +1099,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         $(window.hWin.HEURIST4.msg.coverall).show();
     },    
     
-    sendCoverallToBack: function() {
+    sendCoverallToBack: function(force_close) {
+        if(force_close===true) window.hWin.HEURIST4.msg.coverallKeep = false;
+        if(window.hWin.HEURIST4.msg.coverallKeep===true) return;
         $(window.hWin.HEURIST4.msg.coverall).hide();//.style.visibility = "hidden";
     },
   

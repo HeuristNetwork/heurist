@@ -1115,10 +1115,15 @@ $.widget( "heurist.manageEntity", {
             //init hint and help buttons on dialog titlebar
             this.setTitle(this.options.title);                                     
              
-            this._as_dialog.dialog("open");
+            this._as_dialog.dialog('open');
             
             if(this.options.entity.entityName=='records'){ //special case for help
                 this._as_dialog.addClass('manageRecords');
+                
+                if(this.options.edit_structure){
+                        window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+                        window.hWin.HEURIST4.msg.closeMsgFlash();
+                }
             }
             
             if(false){
