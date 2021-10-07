@@ -54,8 +54,8 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         
         if(!this.options.isdialog){
             var fele = this.element.find('.ent_wrapper:first');
-            $(fele).on("mouseleave", function(e){ 
-                if($(e.target).is('button')){ return; } // for Lookup Config and Rectype Select popup
+            $(fele).on("mouseleave", function(e){
+                if($(e.target).is('button')){ return; } // for Rectype Select popup
                 that.defaultBeforeClose(); 
             });
         }
@@ -130,6 +130,8 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                 return;
             }
         }
+
+        fields['sys_ExternalReferenceLookups'] = JSON.stringify(window.hWin.HAPI4.sysinfo['service_config']);
         
         this._super(fields, afterAction, onErrorAction);
     },	

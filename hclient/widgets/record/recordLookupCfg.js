@@ -315,14 +315,14 @@ $.widget( "heurist.recordLookupCfg", {
             this.element.find('.ui-heurist-header').text(this.options.title);
 
             // bottom bar buttons
-            this.element.find('#btnSave').button().on('click', function() {that._closeHandler(true);} );
-            this.element.find('#btnClose').button().on('click', function() {that._closeHandler();} );
+            this.element.find('#btnSave').button().on('click', function() {that._closeHandler(true, false, null);} );
+            this.element.find('#btnClose').button().on('click', function() {that._closeHandler(false, false, null);} );
 
             // mouse leaves container
             this.element.find('.ent_wrapper:first').on('mouseleave', function(event) {
 
                 if($(event.target).is('div') && that._is_modified || that._services_modified){
-                    that._closeHandler(false, true);
+                    that._closeHandler(false, true, $(event.target));
                 }
             } );
         }
@@ -339,9 +339,9 @@ $.widget( "heurist.recordLookupCfg", {
     _closeHandler: function(isSave=false, isMouseLeave=false){
 
         var that = this;
+        var hasChanges = (this._is_modified || this._services_modified);
 
         var $dlg, buttons = {};
-
         // fields for save request
         var fields = {
             'sys_ID': 1,
@@ -353,6 +353,7 @@ $.widget( "heurist.recordLookupCfg", {
             
             if(that._is_modified){
                 that._applyConfig();
+                fields['sys_ExternalReferenceLookups'] = JSON.stringify(that.options.service_config);
             }
 
             that._is_modified = false;
@@ -390,11 +391,12 @@ $.widget( "heurist.recordLookupCfg", {
         };
 
         // On Close, check if modified
-        if(!isSave && (this._is_modified || this._services_modified)){
+        if((isSave && hasChanges) || (trigger && !trigger.is('button') && hasChanges)){
 
             var wording = this._is_modified ? 'current configuration' : 'available services';
+            var label = this._is_modified ? 'Apply' : 'Save';
 
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg('You have made changes to the '+wording+'. Click "Save" otherwise all changes will be lost.', 
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg('You have made changes to the '+wording+'. Click "'+label+'" otherwise all changes will be lost.', 
                 buttons, {title: 'Unsaved Changes', yes: 'Save', no: 'Ignore and Close'});
         }else{
             if(isSave){
@@ -419,11 +421,8 @@ $.widget( "heurist.recordLookupCfg", {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });
-            }else{
-
-                if(!isMouseLeave){
-                    this.element.empty().hide();
-                }
+            }else if(!isMouseLeave){
+                this.element.empty().hide();
             }
         }
     },
