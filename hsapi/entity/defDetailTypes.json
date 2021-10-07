@@ -123,6 +123,62 @@
                         "rst_DefaultValue":100
                     }
                 },
+                {
+                    "dtID": "rst_PointerMode",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"Pointer mode:",
+                        "rst_DisplayHelpText": "", 
+                        "rst_DefaultValue":"addorbrowse",
+                        "rst_FieldConfig":[
+                            {"key":"addorbrowse", "title":"add or browse"},
+                            {"key":"addonly", "title":"add only"},
+                            {"key":"browseonly", "title":"browse only"}]
+                    }
+                },
+                {
+                    "dtID": "rst_PointerBrowseFilter",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"virtual",
+                        "rst_Display":"hidden",
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayName":"Filter browse list:",
+                        "rst_DisplayHelpText": "Filter and/or sort list of potential target records (eg. by type, by date)"
+                    }
+                },
+                {
+                    "dtID": "rst_CreateChildIfRecPtr",
+                    "dtFields":{
+                        "dty_Type":"boolean",
+                        "dty_Role":"virtual",
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"Child records:",
+                        "rst_DisplayHelpText": "New records created via this field become child records. Click &quot;i&quot; for further information.",
+                        "rst_FieldConfig":["1","0"]
+                    }
+                },
+                {  "dtID": "rst_DefaultValue",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"virtual",
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"Default Value:",
+                        "rst_DisplayHelpText": "Select or enter the default value to be inserted automatically into new records"
+                    }
+                },
+                {  "dtID": "rst_DefaultValue_resource",
+                    "dtFields":{
+                        "dty_Type":"resource",
+                        "dty_Role":"virtual",
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"Default Value:",
+                        "rst_DisplayHelpText": "Select record to be default resource/linked record",
+                        "rst_FieldConfig": {"entity":"records"}
+                    }
+                },
                 
                 {
                     "dtID": "dty_Mode_freetext",

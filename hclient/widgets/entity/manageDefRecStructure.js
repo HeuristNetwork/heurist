@@ -1032,8 +1032,15 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             */
         };
         
-        if($Db.dty(dty_ID,'dty_Type')=='separator'){
-            fields['rst_SeparatorType'] = 'tabs';    
+        var dty_type = $Db.dty(dty_ID,'dty_Type');
+        if(dty_type=='separator'){
+            fields['rst_SeparatorType'] = 'tabs';
+        }else if(dty_Type=='resource'){
+
+            fields['rst_PointerMode'] = rst_fields['rst_PointerMode'];
+            fields['rst_PointerBrowserFilter'] = rst_fields['rst_PointerBrowserFilter'];
+            fields['rst_CreateChildIfRecPtr'] = rst_fields['rst_CreateChildIfRecPtr'];
+            fields['rst_DefaultValue_resource'] = rst_fields['rst_DefaultValue_resource'];
         }
         
 /*            
@@ -1464,7 +1471,7 @@ console.log('No active tree node!!!!')
         //----------------
         var edit_ele = this._editing.getFieldByName('rst_CreateChildIfRecPtr');
 
-        var help_button = $('<span style="padding-left:20px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"/>')
+        var help_button = $('<span style="padding-left:40px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"/>')
                 .appendTo(edit_ele.find('.input-div'));
         window.hWin.HEURIST4.ui.initHelper( {button:help_button, title:'Creation of records as children', 
                     url:window.hWin.HAPI4.baseURL+'context_help/parent_child_instructions.html #content',

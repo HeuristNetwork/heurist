@@ -1585,7 +1585,70 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     }    
                     
                 }else if(!(dt_type=='resource' || dt_type=='relmarker')){
-                        fields['dty_PtrTargetRectypeIDs'] = '';
+                    fields['dty_PtrTargetRectypeIDs'] = '';
+                }else if(this._currentEditID < 0 && dt_type=='resource' && window.hWin.HAPI4.get_prefs_def('edit_rts_open_formlet_after_add', 0)==0){ // show customisation for new record pointer fields
+
+                    // Customisation options
+                    var pointer_mode = this._editing.getFieldByName('rst_PointerMode');
+                    var browser_filter = this._editing.getFieldByName('rst_PointerBrowseFilter');
+                    var child_rec = this._editing.getFieldByName('rst_CreateChildIfRecPtr');
+                    var resource_default = this._editing.getFieldByName('rst_DefaultValue_resource');
+                    var default_val = this._editing.getValue('rst_DefaultValue')[0];
+
+                    // Setup default value
+                    resource_default.editing_input('fset','rst_PtrFilteredIDs', fields['dty_PtrTargetRectypeIDs']);
+                    resource_default.editing_input('fset','rst_PointerMode', 'browseonly');
+                    this._editing.setFieldValueByName('rst_DefaultValue_resource', default_val, false);
+
+                    // Setup help button
+                    var help_button = $('<span style="padding-left:40px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"/>')
+                            .appendTo(child_rec.find('.input-div'));
+                    window.hWin.HEURIST4.ui.initHelper( {button:help_button, title:'Creation of records as children', 
+                                url:window.hWin.HAPI4.baseURL+'context_help/parent_child_instructions.html #content',
+                                no_init:true} );
+
+                    // Setup dialog element
+                    var $dlg;
+                    var $ele = $('<fieldset>')
+                        .append(pointer_mode.show())
+                        .append(browser_filter.show())
+                        .append(child_rec.show())
+                        .append(resource_default.show()).hide().appendTo(this.element);
+
+                    $ele.find('.heurist-helper1').show();
+
+                    var btns = {};
+                    btns['Apply'] = function(){ 
+                        $dlg.dialog('close'); 
+                        that_widget._saveEditAndClose(fields, afterAction, onErrorAction); 
+                    };
+
+                    $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({
+                        window:  window.hWin, //opener is top most heurist window
+                        element: $ele[0], 
+                        open: function(event){
+
+                            var sel = pointer_mode.find('select');
+
+                            // Reset mode selector
+                            if(sel.hSelect('instance')!=undefined){
+                                sel.hSelect('destroy');
+
+                                sel.hSelect();
+                                sel.hSelect('menuWidget').css('background', '#f2f2f2');
+                            }
+
+                            $(event.target).parent().find('.ui-dialog-buttonset > .ui-button.ui-corner-all.ui-widget').addClass('ui-button-action');
+                        },
+                        buttons: btns,
+                        title: 'Field customisation for new record pointer',
+                        resizable: false,
+                        width: 605,
+                        height: 302,
+                        default_palette_class: 'ui-heurist-design'
+                    });
+
+                    return;
                 }
             }
         }
@@ -1698,7 +1761,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         if(this.options.newFieldForRtyID>0){
             var rst_fields = {rst_RequirementType: this._editing.getValue('rst_RequirementType')[0], 
                               rst_MaxValues: this._editing.getValue('rst_MaxValues')[0], 
-                              rst_DisplayWidth: this._editing.getValue('rst_DisplayWidth')[0] };
+                              rst_DisplayWidth: this._editing.getValue('rst_DisplayWidth')[0],
+                              rst_PointerMode: this._editing.getValue('rst_PointerMode')[0],
+                              rst_PointerBrowseFilter: this._editing.getValue('rst_PointerBrowseFilter')[0],
+                              rst_CreateChildIfRecPtr: this._editing.getValue('rst_CreateChildIfRecPtr')[0],
+                              rst_DefaultValue_resource: this._editing.getValue('rst_DefaultValue_resource')[0]
+                          };
                               
             this._resultOnSelection = { rst_fields:rst_fields };
         }
