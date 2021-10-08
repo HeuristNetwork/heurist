@@ -1035,7 +1035,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         var dty_type = $Db.dty(dty_ID,'dty_Type');
         if(dty_type=='separator'){
             fields['rst_SeparatorType'] = 'tabs';
-        }else if(dty_Type=='resource'){
+        }else if(dty_type=='resource'){
 
             fields['rst_PointerMode'] = rst_fields['rst_PointerMode'];
             fields['rst_PointerBrowserFilter'] = rst_fields['rst_PointerBrowserFilter'];
