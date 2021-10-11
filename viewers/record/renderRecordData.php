@@ -669,7 +669,7 @@ function print_header_line($bib) {
     $rec_id = $bib['rec_ID'];
                     //(($is_production)?'':'padding-top:21px')
 
-    //get total number of linked-from records and display next to title in map popups
+    //get total number of linked-from records and display under title in map popups
     $linked_from_cnt = 0;
     $linked_from_cnt = count_linked_from($bib, $linked_from_cnt);
 
@@ -677,8 +677,9 @@ function print_header_line($bib) {
 
     <div class=HeaderRow style="margin-bottom:<?php echo $is_map_popup?5:15?>px;min-height:0px;">
         <h2 style="text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
-                <?= strip_tags($bib['rec_Title']) ?> <?= $is_map_popup?$linked_from_cnt:'' ?>
+                <?= strip_tags($bib['rec_Title']) ?>
         </h2>
+        <span> <?= $is_map_popup?"linked records = " . $linked_from_cnt:'' ?> </span>
     <?php 
 
         if($system->has_access()){ //is logged in
