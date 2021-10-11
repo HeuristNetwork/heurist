@@ -426,8 +426,8 @@ function visualizeData() {
 
     // Lines 
     addMarkerDefinitions(); //markers/arrows on lines
-    addLines("bottom-lines", getSetting(setting_linecolor, '#000'), 0);
-    addLines("top-lines", "rgba(255, 255, 255, 0.0)", 10); //tick transparent line to catch mouse over
+    addLines("bottom-lines", getSetting(setting_linecolor, '#000'), 2);
+    addLines("top-lines", "#FFF", 2); //small line that is visible for repeating fields
    
     // Nodes
     addNodes();
@@ -551,12 +551,12 @@ function onZoom( transform ){
     
     d3.selectAll(".bottom-lines").style("stroke-width", 
             function(d) { 
-                var w = getLineWidth(d.targetcount); //width for scale 1
+                var w = getLineWidth(d.targetcount)+2; //width for scale 1
                 return  (scale>1)?w:(w/scale);
             });
     d3.selectAll(".top-lines").style("stroke-width", 
             function(d) { 
-                var w = getLineWidth(d.targetcount)+8.5; //width for scale 1
+                var w = (getLineWidth(d.targetcount)+2)*0.2; //width for scale 1
                 return  (scale>1)?w:(w/scale);
             });
 
@@ -711,22 +711,22 @@ function addLines(name, color, thickness) {
                  return 'rgba(255, 255, 255, 0.0)'; //hidden
              }else if(d.targetcount == 0 && name === 'bottom-lines') {
                  return '#d9d8d6';
-             } else {
+             }else if($Db.rst(d.source.id, d.relation.id, 'rst_MaxValues') == 1 && name == 'top-lines'){
+                 return 'rgba(255, 255, 255, 0.0)'; // hide it
+             }else{
                  return color;
              }
          })
-         .style("stroke-dasharray", (function(d) {
-             if(d.targetcount == 0) {
-                return "3, 3"; 
-             } 
-         })) 
          .style("stroke-width", function(d) { 
              var w = getLineWidth(d.targetcount)+thickness; //width for scale 1
+             if (name === 'top-lines'){
+                 w = w * 0.2;
+             }
              return  (scale>1)?w:(w/scale);
          });
          
     // visible line, pointing from one node to another
-    if(name=='bottom-lines' && linetype != "stepped"){
+    if(name=='top-lines' && linetype != "stepped"){
          lines.attr("marker-mid", function(d) {
 
             if(!(hide_empty && d.targetcount == 0)){ 
@@ -736,20 +736,19 @@ function addLines(name, color, thickness) {
          });
     }
     
-    // mouseover and mouseout events for the invisible lines
-    if(name=='top-lines'){
-        lines.on("mouseover", function(d) {
-            //console.log(d.relation.id);  //field type id           
-            if(!(hide_empty && d.targetcount == 0)){
-                var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-                createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));
-            }
-        })
-        .on("mouseout", function(d) {
-            var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-            removeOverlay(selector, 0);
-        });
-    }
+    // mouseover and mouseout events for the lines
+    lines.on("mouseover", function(d) {
+
+         if(!(hide_empty && d.targetcount == 0)){
+             var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+             createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));
+         }
+    })
+    .on("mouseout", function(d) {
+
+		 var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+         removeOverlay(selector, 0);
+    });
 
     return lines;
 }
