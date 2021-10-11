@@ -610,6 +610,10 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     $(document).ready(function() {
         _showStep(8);
         _getDatabases( <?php echo (@$_REQUEST['list']==1)?'true':'false'; ?> );
+
+        <?php if(isset($_REQUEST['error']) && count($_REQUEST['error']) >= 1){ ?>
+            window.hWin.HEURIST4.msg.showMsgErr(<?php echo json_encode($_REQUEST['error']); ?>);
+        <?php } ?>
     });
 </script>
 <style>

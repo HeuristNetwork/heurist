@@ -53,6 +53,9 @@ if(@$_REQUEST['debug_error']){
 }
 
 if(!$isSystemInited){
+    if(count($system->getError()) > 0){
+        $_REQUEST['error'] = $system->getError();
+    }
     include ERROR_REDIR;
     exit();
 }
