@@ -2,6 +2,7 @@
 
 /**
 *  Email Users of any Heurist database located on this server, requires a Heurist Database + System Administrator password
+*  For server calls from main form
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
