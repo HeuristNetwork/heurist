@@ -38,6 +38,22 @@ if(!@$_REQUEST['field']){
 //Documentation    
 /* Documentation
 
+INITIALIZATION workflow:                                                                 
+1. websiteRecord.php - load parameters from CMS record including name of template (by default cmsTemplate.php)
+2. in template it has to include websiteScriptAndStyles.php with list of all heurist scripts and styles
+3. in websiteScriptAndStyles.php 
+    On client side
+    a. HAPI initialization, DB defintions load -> onHapiInit -> onPageInit
+    b. onPageInit: init LayoutMgr, init main menu in #main-menu element
+    c. loadPageContent(pageid): Loads content of page into #main-content and 
+       calls widget initialization width LayoutMgr.appInitFromContainer
+    d. If database configuration permits only:
+       After widgets initialization it loads javascript (field 2-927) and incapsulate 
+       this code into afterPageLoad function. The purpose of this script is additional 
+       configuration of widgets on page (that can not be set via cms editor) - mainly
+       addition of event listeners.
+
+
 Default layout for Heurist CMS web site consists of 3 divs with absolute positions
 .ent_wrapper
     .ent_header   #main_header
@@ -85,24 +101,6 @@ In this case website designer has to define at least one element with id #main-c
 Element with this name will be used as layout container for widget initialization.
 All other elements (#main-xxx) are optional.
 
-
-INITIALIZATION workflow:
-On server side:
-1. It loads Home page record 
-2. If there is DT_CMS_HEADER field, it sets header content from this field, 
-otherwise page html structure and cotent of #main-header is generated in websiteRecord.php
-
-On client side
-1. HAPI initialization, DB defintions load -> onHapiInit -> onPageInit
-2. onPageInit: init LayoutMgr, init main menu in #main-menu element
-3. loadPageContent(pageid): Loads content of page into #main-content and 
-   calls widget initialization width LayoutMgr.appInitFromContainer
-4. If database configuration permits only:
-   After widgets initialization it loads javascript (field 2-927) and incapsulate 
-   this code into afterPageLoad function. The purpose of this script is additional 
-   configuration of widgets on page (that can not be set via cms editor) - mainly
-   addition of event listeners.
-    
 */    
     
 if(!defined('PDIR')) {
@@ -447,7 +445,7 @@ if($custom_template){
         $customTemplateNotFound = $custom_template;
     }
 }        
-if($default_CMS_Template_Path && file_exists($default_CMS_Template_Path.'cmsTemplate.php')){
+if(false && $default_CMS_Template_Path && file_exists($default_CMS_Template_Path.'cmsTemplate.php')){
     //use server custom template
     include $default_CMS_Template_Path.'cmsTemplate.php';
     

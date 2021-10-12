@@ -99,9 +99,9 @@ class System {
         }
 
         //dbutils?
-        if($this->init_db_connection()!==false){
-            
-        
+        $connection_ok = $this->init_db_connection();
+        if($connection_ok!==false){
+                //connection OK
                 if($init_session_and_constants){
                 
                     if(!$this->start_my_session()){

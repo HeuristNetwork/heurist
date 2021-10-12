@@ -74,7 +74,7 @@
     <link rel="shortcut icon" href="<?php echo $image_icon;?>">
     
     <?php
-        include $websiteScriptAndStyles_php;  
+        include $websiteScriptAndStyles_php;  //include heurist scripts and styles
     ?>
     
     
@@ -197,7 +197,10 @@ if($isWebPage){
 
     if(!$edit_Available && $system->is_member(2)){
         print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$home_page_record_id.'" id="btn_editor" target="_blank" '
-        .'style="position:absolute;right:10px; top:5px;" class="cms-button">Heurist interface</a>';
+        .'style="position:absolute;right:70px; top:5px;" class="cms-button">Heurist interface</a>'
+        .'<a href="#" onclick="_openCMSeditor(event); return false;" '
+        .'style="position:absolute;right:10px; top:5px;" class="cms-button">CMS</a>';
+    
     }
     ?>  
         <div id="main-pagetitle" class="ui-heurist-bg-light">loading...</div>       

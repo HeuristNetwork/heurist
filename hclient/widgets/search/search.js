@@ -32,8 +32,9 @@ $.widget( "heurist.search", {
         search_domain_set: null, // comma separated list of allowed domains  a,b,c,r,s
 
         btn_visible_login:false, 
-        btn_visible_newrecord: true, // show add record button
-        btn_visible_save: false,     // save search popup button
+        btn_visible_newrecord: false, // show add record button
+        btn_visible_save: false,     // save search popup button  NOT USED
+        btn_visible_dbstructure: false, // NOT USED 
         btn_entity_filter: true,     // show buttons: filter by entity
         search_button_label: '',
         search_input_label: '',
@@ -127,9 +128,31 @@ $.widget( "heurist.search", {
         this.options.btn_entity_filter = this.options.btn_entity_filter && (window.hWin.HAPI4.get_prefs_def('entity_btn_on','1')=='1');
         
         if(this.options.btn_entity_filter){
-            this.div_entity_fiter   = $('<div>').searchByEntity({is_publication:this._is_publication})
-                .css({'height':'auto','font-size':'1em'})
-                .appendTo( this.element );
+            
+            function __initEntityFilter(){
+                
+                if($.isFunction($('body')['searchByEntity'])){ //OK! widget script js has been loaded            
+                    this.div_entity_fiter   = $('<div>').searchByEntity({is_publication:this._is_publication})
+                        .css({'height':'auto','font-size':'1em'})
+                        .appendTo( this.element );
+                }else{
+                    
+                    $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/search/searchByEntity.js', 
+                    function() {  //+'?t='+(new Date().getTime())
+                        if($.isFunction($('body')['searchByEntity'])){
+                            __initEntityFilter();
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr('Widget searchByEntity not loaded. Verify your configuration');
+                        }
+                    });
+                    
+                }
+            }
+            
+            __initEntityFilter();
+            
+
+            
         }         
         //------------------------------------------- filter inputs                        
 

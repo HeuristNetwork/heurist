@@ -1,6 +1,6 @@
 <!--
 /**
-* Content for popup form to configure and embed Heuist template into CMS page
+* Content for popup form to select element to be inserted into CMS page
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -18,26 +18,42 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 -->
+
 <div class="heurist-helper1" style="padding:5px;">
-    Template consists of one or more display widgets - they will be 
-    linked to operate together if on the same page.
-    <br>
-    To position template insert them in table cells or better via DIVs,
-    if you are familiar with CSS use "display" property.
+    Some help text
     <br>
     See 
     <a href="https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">website help</a>
 </div>
 
-<div  style="padding:5px;">
-    <p>Select template</p>
-    <select id="templates" class="text ui-widget-content ui-corner-all" style="min-width:335px;padding:4px;" size="5" title="">
-        <option value="def">Default</option>
-        <option value="discover">Discover (filters/results/map)</option>
-        <option value="blog">Blog</option>
-    </select>
+
+<div style="display: flex; gap: 5px; justify-content: flex-start; align-items: center;">
+
+<div style="width:300px">
+
+    <div  style="padding:5px;">
+        <p>Select Content</p>
+        <select id="contents" class="text ui-widget-content ui-corner-all" style="min-width:290px;padding:4px;" size="5" title="">
+        </select>
+    </div>
+
+    <div  style="padding:5px;">
+        <p>Select Element</p>
+        <select id="elements" class="text ui-widget-content ui-corner-all" style="min-width:290px;padding:4px;" size="7" title="">
+        </select>
+    </div>
+    
+    <div  style="padding:5px;">
+        <p>Select Group/Block</p>
+        <select id="groups" class="text ui-widget-content ui-corner-all" style="min-width:290px;padding:4px;" size="4" title="">
+        </select>
+    </div>
+
 </div>
-<div  style="padding:5px;">
-    <p class="template_author" style="padding:5px;border:1px solid gray; min-height:30px;display:none;"></p>
+
+<div style="width:220px">
+    <p style="padding:5px;border:1px solid gray; min-height:100px; min-width:100px;">Placeholder for image</p>
     <p class="template_description" style="padding:5px;border:1px solid gray; min-height:70px;"></p>
+</div>
+
 </div>

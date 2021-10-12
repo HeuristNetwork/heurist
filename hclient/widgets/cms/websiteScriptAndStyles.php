@@ -53,6 +53,8 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var page_first_not_empty = 0;
     var home_page_record_id=<?php echo $home_page_on_init; ?>;
     var init_page_record_id=<?php echo $open_page_on_init; ?>;
+    var current_page_id = 0;
+    var isCMS_active = false;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
 </script>
     
@@ -79,11 +81,23 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/recordListExt.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultListCollection.js"></script>
-<!-- -->
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css"/>
+
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS2.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/hLayoutMgr.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
     
+<?php
+if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')){
+?>
+    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/js/datatable/datatables.min.css"/>
+    <script type="text/javascript" src="<?php echo PDIR;?>external/js/datatable/datatables.min.js"></script>        
+<?php
+}else{
+?>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css"/>
 <?php 
+}
 
 if(is_array($external_files) && count($external_files)>0){
     foreach ($external_files as $ext_file){
@@ -130,7 +144,6 @@ if(!array_key_exists('embed', $_REQUEST)){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAccess.js"></script>
     
-    <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
     <!--
     <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce/jquery.tinymce.min.js"></script>
@@ -181,7 +194,9 @@ _time_debug = new Date().getTime() / 1000;
     
     $('#main-menu').hide();
     
-    //cfg_widgets is from layout_defaults.js 
+    hLayoutMgr();
+    
+    //cfg_widgets is from layout_defaults.js
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
     
     //reload website by click on logo, opens first page with content
@@ -219,7 +234,8 @@ _time_debug = new Date().getTime() / 1000;
                         use_next_level: true, 
                         orientation: 'horizontal',
                         toplevel_css: {background:'none'}, //bg_color 'rgba(112,146,190,0.7)'
-                        aftermenuselect: afterPageLoad,
+                        onmenuselect: loadPageContent,
+                        //aftermenuselect: afterPageLoad,
                         onInitComplete: __onInitComplete
                 }},
                 __onInitComplete
@@ -238,11 +254,13 @@ _time_debug = new Date().getTime() / 1000;
 }
 
 //
-//
+// Loads content of specified record to #main-content and inits all widgets 
 //
 function loadPageContent(pageid){
     if(pageid>0){
         //window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
+        current_page_id = pageid;
+        
         var page_target = $('#main-content');
         var page_footer = page_target.find('#page-footer');
         if(page_footer.length>0) page_footer.detach();
@@ -258,11 +276,46 @@ if($site_css!=null){
 }
 ?>          
         
-        //page_target will have header (webpageheading) and content  
+        function __loadPageContent(res){
+
+            if(!page_content[pageid]) page_content[pageid] = res;
+            
+            if(isCMS_active){
+                editCMS_instance2.startCMS({record_id:current_page_id, content:page_content[current_page_id], container:'#main-content'}); 
+            }else{
+                layoutMgr.layoutInit( res, page_target, supp_options );    
+            }
+            
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+            if(page_footer.length>0){
+                page_footer.appendTo( page_target );  
+                page_target.css({'min-height':page_target.parent().height()-page_footer.height()-10 });
+            } 
+
+            afterPageLoad( document, pageid ); //execute custom script and custom css
+        }        
+        
+        if(page_content[pageid]){
+            __loadPageContent( page_content[pageid] );
+        }else{
+            //var request = {recid:pageid, field:, db:window.hWin.HAPI4.database};
+            //window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, __loadPageContent);
+            
+            var surl = window.hWin.HAPI4.baseURL+'?db='
+                +window.hWin.HAPI4.database+'&field='+window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']+'&recid='+pageid;
+            $.get( surl, __loadPageContent);            
+                
+        }
+        
+        
+        return;
+        
+        //OLD VERSION page_target will have header (webpageheading) and content  
         page_target.empty().load(window.hWin.HAPI4.baseURL+'?db='
             +window.hWin.HAPI4.database+'&field=1&recid='+pageid,
             function(){
 
+                //init al widgets on this page in #main-content
                 window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content', supp_options );
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
 
@@ -271,7 +324,7 @@ if($site_css!=null){
                     page_target.css({'min-height':page_target.parent().height()-page_footer.height()-10 });
                 } 
 
-                afterPageLoad( document, pageid );
+                afterPageLoad( document, pageid ); //execute custom script and custom css
         });
 
     }
@@ -281,6 +334,7 @@ if($site_css!=null){
 }
 ?>
 <script>
+var page_content = {};
 var page_scripts = {}; //pageid:functionname   cache to avoid call server every time on page load 
 var page_styles = {};  //pageid:style elements 
 var previous_page_id = -1;
@@ -602,6 +656,27 @@ function performCaptcha(){
             }
         }, {title: "Captcha Test", yes: "Proceed", no: "Cancel"});
 }
+
+
+//
+//
+//
+function _openCMSeditor(event){
+    
+    if(isCMS_active){
+        //close
+        isCMS_active = false;
+        editCMS_instance2.closeCMS();
+    }else{
+        isCMS_active = true;
+        if(!editCMS_instance2) editCMS_instance2 = editCMS2();
+        editCMS_instance2.startCMS({record_id:current_page_id, content:page_content[current_page_id], container:'#main-content'}); //see editCMS2.js    
+    }
+    
+    $(event.target).html(isCMS_active?'Close CMS':'CMS');
+}
+
+
 
 var gtag = null;//google log - DO NOT REMOVE
 

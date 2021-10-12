@@ -28,7 +28,7 @@ require_once(dirname(__FILE__)."/../System.php");
 
 
 if(@$_REQUEST['db']){
-    $system = new System(); //to init folder const
+    $system = new System(); //to init folder const without actual coonection to db
     $system->initPathConstants(@$_REQUEST['db']);
 }
 

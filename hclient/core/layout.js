@@ -267,7 +267,7 @@ function hLayout(args) {
         
         var layout_opts =  {
             applyDefaultStyles: true,
-            maskContents:        true,
+            maskContents:       true,  //alows resize over iframe
             //togglerContent_open:    '<div class="ui-icon"></div>',
             //togglerContent_closed:  '<div class="ui-icon"></div>',
             //togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
