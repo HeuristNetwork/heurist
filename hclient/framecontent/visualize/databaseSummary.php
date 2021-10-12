@@ -181,7 +181,7 @@ A:link {
                         <?php
                         /** RETRIEVING RECORDS WITH CONNECTIONS */
                         // Building query
-                        $query = "SELECT d.rty_ID as id, rg.rtg_Name grp, d.rty_Name as title, count(r.rec_ID) as count 
+                        $query = "SELECT d.rty_ID as id, rg.rtg_Name grp, d.rty_Name as title, sum(if(r.rec_FlagTemporary!=1, 1, 0)) as count 
 FROM defRecTypes d LEFT OUTER JOIN Records r ON r.rec_RectypeID=d.rty_ID,
 defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID 
  GROUP BY id ORDER BY rtg_Order, title ASC";
@@ -229,10 +229,10 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
 
                             // Show
                             if($row["count"] > 0 && $count < 10) {  //this record type has records
-                                echo "<td align='center' class='show'><input type='checkbox' class='show-record' name='" .$title. "' checked='checked'></td>";
+                                echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record' name='" .$title. "' checked='true'></td>";
                                 $count++;
                             }else{
-                                echo "<td align='center' class='show'><input type='checkbox' class='show-record $first_grp' name='" .$title. "'></td>";
+                                echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record $first_grp' name='" .$title. "'></td>";
                             }
                             echo "</tr>";
                         }                      
@@ -274,6 +274,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                     // Set filtering settings in UI
                     var isfirst_time = false;
                     var at_least_one_marked = false;
+
                     <?php
                         if($count==0){ //reset setting for empty db (only once)
                     ?>

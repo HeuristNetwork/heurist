@@ -40,6 +40,7 @@ use PHPMailer\PHPMailer\Exception;
 class systemEmailExt {
 
 	public $databases; // list of selected DBs
+	public $invalid_dbs; // list of invalid DBs
 
 	public $users; // user options => owner: DB Owners, manager: DB Manager Admins, user: All Users, admin: All Admins
 
@@ -84,11 +85,17 @@ class systemEmailExt {
 		}
 
 		if (isset($data["databases"]) && is_array($data["databases"]) && count($data["databases"]) >= 1) { // Get list of Databases
-			$this->databases = $data["databases"];
+			$this->databases = $this->validateDatabases($data["databases"]);
 		} else {
 			// Here databases is not an array
 			$provided_dbs = is_array($data["databases"]) ? "" : "<br>databases => " . $data["databases"];
 			$this->set_error("No valid databases have been provided, these databases are required to retrieve a list of users, the last modified records and record count values." . $provided_dbs);
+			return -1;
+		}
+
+		if(!$this->databases || count($this->databases) == 0){
+			// No valid databases found
+			$this->set_error("All provided databases are broken or invalid, these databases are required to retrieve a list of users, the last modified records and a record count values.");
 			return -1;
 		}
 		
@@ -130,19 +137,56 @@ class systemEmailExt {
 		$this->receipt = null;
 		$this->error_msg = "";
 
+		$rtn = $this->createUserList(); // save user information; first and last name, email, and list of databases
+
+		if ($rtn != 0) {
+			return $rtn;
+		}else if(count($this->user_details) == 0){
+
+			$this->set_error("No users have been retrieved, no emails have been sent");
+			return -1;
+		}
+
 		$rtn = $this->createRecordsList(); // save record counts and last modified record dates for each db
 
 		if ($rtn != 0) {
 			return $rtn;
 		}
 
-		$rtn = $this->createUserList(); // save user information; first and last name, email, and list of databases
-
-		if ($rtn != 0) {
-			return $rtn;
-		}
 
 		return 0;
+	}
+
+	/*
+	 * Validate the list of database, ignore any invalid databases
+	 *
+	 * Param: $db_list => List of selected databases
+	 *
+	 * Return: 
+	 *	Array, List of valid databases
+	 */
+
+	private function validateDatabases($db_list) {
+
+		global $system;
+		$mysqli = $system->get_mysqli();
+
+		$valid_dbs = array();
+
+		foreach($db_list as $db){
+
+			// Required tables  are 'Records', 'recDetails', 'sysUGrps', and 'sysUsrGrpLinks'
+			$query = "SHOW TABLES IN ".$db." WHERE Tables_in_".$db." = 'Records' OR Tables_in_".$db." = 'recDetails' OR Tables_in_".$db." = 'sysUGrps' OR Tables_in_".$db." = 'sysUsrGrpLinks'";
+
+			$table_listing = $mysqli->query($query);
+			if (!$table_listing || mysqli_num_rows($table_listing) != 4) { // Skip, missing required tables
+				continue;
+			}else{
+				$valid_dbs[] = $db;
+			}
+		}
+
+		return $valid_dbs;
 	}
 
 	/*
@@ -199,8 +243,9 @@ class systemEmailExt {
 				$res = $mysqli->query($query);
 				if (!$res) {
 
-					$this->set_error("Query Error: Unable to retrieve the list of users to email<br>Error => " .$mysqli->error);  
-					return -2;
+					continue;
+					//$this->set_error("Query Error: Unable to retrieve the list of users to email<br>Error => " .$mysqli->error);  
+					//return -2;
 				}
 
 				while ($row = $res->fetch_row()) {
@@ -437,7 +482,7 @@ class systemEmailExt {
 					$this->set_error("phpMailer has stopped sending emails due to an error with the email system, Error => " . $this->error_msg);
 				}
 
-				$this->save_receipt($email_rtn, $title, $this->email_body);
+				$this->save_receipt($email_rtn, $this->email_subject, $this->email_body);
 
 				return $email_rtn;
 			}
@@ -445,7 +490,7 @@ class systemEmailExt {
 			$user_cnt += 1;
 		}
 
-		$this->save_receipt($email_rtn, $title, $this->email_body);
+		$this->save_receipt($email_rtn, $this->email_subject, $this->email_body);
 
 		return $email_rtn;
 	}

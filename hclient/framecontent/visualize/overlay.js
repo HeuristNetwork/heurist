@@ -43,7 +43,7 @@ function getRecordOverlayData(record) {
     
     // Header
     var header = {text: truncateText(record.name, maxLength), 
-                  count: record.count,  
+                  count: record.count, rtyid: record.id,  
                   size: "11px", style: "bold", height: 15, indent:false,
                                  enter: true, image:record.image}; 
     if(settings.showCounts) {
@@ -59,14 +59,14 @@ function getRecordOverlayData(record) {
         var map = {};
         for(var i = 0; i < data.links.length; i++) {
             var link = data.links[i];
-            //console.log(link);
+            var isRequired = ($Db.rst(link.source.id, link.relation.id, 'rst_RequirementType') == 'required') ? 'y' : 'n';
               
             // Does our record point to this link?
             if(link.source.id == record.id) {
-                //console.log(link.source.name + " -> " + link.target.name);
+
                 // New name?
                 if(!map.hasOwnProperty(link.relation.name)) {
-                    map[link.relation.name] = {};
+                    map[link.relation.name] = {require_type: isRequired, dtyid: link.relation.id};
                 }
                 
                 if(!settings.isDatabaseStructure){
@@ -86,9 +86,10 @@ function getRecordOverlayData(record) {
 
             // Is our record a relation?
             if(link.relation.id == record.id && link.relation.name == record.name) {
-                // New name?
+
+				// New name?
                 if(!map.hasOwnProperty(link.relation.name)) {
-                    map[link.relation.name] = {};
+                    map[link.relation.name] = {require_type: isRequired, dtyid: link.relation.id};
                 }
                
                 // Relation
@@ -111,6 +112,20 @@ function getRecordOverlayData(record) {
         for(key in map) {                                   
             array.push({text: truncateText(key, maxLength), size: "8px", xpos:xpos, multiline:true,
                     style:"italic", height: fontSize, indent:true, enter: true, subheader:1}); // Heading
+
+            if(map[key]['require_type'] != null){
+                details['require_type'] = map[key]['require_type'];
+                delete map[key]['require_type'];
+            }
+            if(map[key]['rtyid'] != null){
+                details['rtyid'] = map[key]['rtyid'];
+                delete map[key]['rtyid'];
+            }
+            if(map[key]['dtyid'] != null){
+                details['dtyid'] = map[key]['dtyid'];
+                delete map[key]['dtyid'];
+            }
+
             for(text in map[key]) {
                 array.push(map[key][text]);    
             }
@@ -172,6 +187,73 @@ function getRelationOverlayData(line) {
     }
 
     return array;
+}
+
+/**
+ * Get all record pointers (fields) that point towards a rectypes not shown yet
+ * 
+ * @param node_info current array of info 
+ */
+function addMissingFields(node_info){
+
+    // Setup basic info
+    var rty_id = node_info[0].rtyid; //record type id
+    var records = $Db.rst(rty_id); //list of fields
+
+    if(records == null){
+        return node_info;
+    }
+
+    var record = records.getRecords();
+    var order = records.getOrder(); //order and number of fields
+    var count = order.length;
+
+    //additional settings
+    var xpos = 10;
+    var maxLength = getSetting(setting_textlength);
+    var fontSize = getSetting(setting_fontsize, 12);
+
+    var new_fields = [];
+
+    for(var i = 0; i < count; i++){
+
+        var field = record[order[i]];
+        var alreadyListed = false;
+
+        // only record pointer or relamrkers
+        if($Db.dty(field['rst_DetailTypeID'], 'dty_Type') != 'resource' && $Db.dty(field['rst_DetailTypeID'], 'dty_Type') != 'relmarker'){
+            continue;
+        }
+
+        // check if field is already listed
+        for(var j = 1; j < node_info.length; j++){
+
+            if(node_info[j]['dtyid'] == field['rst_DetailTypeID']){
+
+                alreadyListed = true;
+                break;
+            }
+        }
+
+        if(alreadyListed){
+            continue;
+        }
+
+        // add new field
+        new_fields.push({text: truncateText(field['rst_DisplayName'], maxLength), size: "8px", xpos:xpos, multiline:true, 
+                        style:"italic", height: fontSize, indent:true, enter: true, subheader: 1, 
+                        require_type: (field['rst_RequirementType']=='required') ? 'y' : 'n', dtyid: field['rst_DetailTypeID']});
+    }
+
+    if(new_fields.length > 0){
+
+		// add divider between sets
+        node_info.push({text: '-----', size: '8px', xpos: xpos, multiline: true, style: 'italic', height: fontSize, indent: true, enter: true, subheader: 1, require_type: 'n', dtyid: null});
+
+        node_info = node_info.concat(new_fields);
+    }
+
+    return node_info;
 }
 
 var drag_link_source_id, drag_link_target_id, drag_link_line, drag_link_timer; 
@@ -255,13 +337,14 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 
     
     
-    // Draw a semi transparant rectangle       
+    // Draw a semi transparant rectangle
     var rect_full = overlay.append("rect")
                            .attr("class", "semi-transparant info-mode-full rect-info-full")              
                            .attr("x", 0)
                            .attr("y", 0)
                            .attr("rx", 6)
                            .attr("ry", 6)
+                           .attr("rtyid", info[0].rtyid)
                            .style('stroke','#ff0000')
                            .style("stroke-width", 0.5)
                            .style("filter", "url(#drop-shadow)");
@@ -272,6 +355,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                            .attr("y", 0)
                            .attr("rx", 6)
                            .attr("ry", 6)
+                           .attr("rtyid", info[0].rtyid)
                            .style('stroke','#ff0000')
                            .style("stroke-width", 0.5)
                            .style("filter", "url(#drop-shadow)");
@@ -290,6 +374,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
     // Adding text
     var text;
     if(type=='record'){ // Nodes
+
+        info = addMissingFields(info); // Add remaining record pointers/relmarkers
+
         text = overlay.selectAll("text")
                       .data(info)
                       .enter()
@@ -320,18 +407,51 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           }
                           return position; // Position calculation
                       })
-                      .attr("fill", function(d) { 
+                      .attr("fill", function(d) {
+                          if(d.subheader == 1){ 
+                              if(d.require_type == 'y'){
+                                return '#CC0000'; 
+                              }else{
+                                return '#000000';
+                              }
+                          }
                           return fontColor;
                       })
                       .attr("font-weight", function(d) {  // Font weight based on style property
                           return d.style;
+                      })
+                      .attr("rtyid", function(d) { // Record type id
+                          return d.rtyid;
+                      })
+                      .attr("dtyid", function(d) { // Detail type id
+                          return d.dtyid;
                       })
                       .style("font-style", function(d) {   // Font style based on style property
                           return d.style;
                       }, "important")
                       .style("font-size", function(d) {   // Font size based on size property
                           return fontSize;//d.size;
-                      }, "important");            
+                      }, "important");
+
+        // Display rectypes used by selected fields
+        overlay.selectAll("text.info-mode-full").on("click", function(event){
+
+            if(event.dtyid == null || event.dtyid == 0 || isNaN(event.dtyid)){
+                return;
+            }
+
+            var ids = $Db.dty(event.dtyid, 'dty_PtrTargetRectypeIDs');
+
+            if(ids.indexOf(',') != -1){
+
+                ids.split(',').forEach(function(id){
+                    $('#records').find('#'+id).prop('checked', true).change();
+                });
+            }else{
+                $('#records').find('#'+ids).prop('checked', true).change();
+            }
+        }).style('cursor', 'pointer');
+
     }else{ // link information, onhover
       
       position = 0;
