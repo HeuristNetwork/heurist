@@ -683,11 +683,6 @@ $.widget( "heurist.mainMenu6", {
         }else{
             this.menues_explore_popup
                     .removeClass('ui-heurist-populate record-addition').addClass('ui-heurist-explore');
-
-            if(action_name=='recordAddSettings'){
-                action_name = 'recordAdd';
-                expandRecordAddSetting = true;
-            }
         }      
 
         //menu section has several containers with particular widgets
@@ -712,7 +707,12 @@ $.widget( "heurist.mainMenu6", {
         //delay before open explore section menu
         this._myTimeoutId3 = setTimeout(function(){
 
-            if(action_name == 'svsAddFaceted' && that.containers['explore'].find('div#db_overview').length > 0){
+            that._current_explore_action = action_name;
+
+            if(action_name=='recordAddSettings'){
+                action_name = 'recordAdd';
+                expandRecordAddSetting = true;
+            }else if(action_name == 'svsAddFaceted' && that.containers['explore'].find('div#db_overview').length > 0){
                 that.containers['explore'].find('div#db_overview').hide();
             }
 
@@ -722,10 +722,7 @@ $.widget( "heurist.mainMenu6", {
             }else if( cont.is(':visible')){ // && action_name!='svs_list'
                 //return;
             }
-            
-            
-            that._current_explore_action = action_name;
-            
+
             //stop show animation and hide others
             that.menues_explore_popup.find('.explore-widgets').finish().hide();
             
@@ -1837,13 +1834,13 @@ $.widget( "heurist.mainMenu6", {
 
                 $('h3#title, span#owner, span#rights')
                 .parent()
-                .css({'cursor': 'pointer', 'resize': 'none'})
+                .css('cursor', 'pointer')
                 
                 $('#title_cont, #owner_cont, #rights_cont')
                 .one('click', openDBProperties);
 
                 $('div#description')
-                .css({'cursor': 'pointer', 'resize': 'none'})
+                .css({'cursor': 'pointer', 'white-space': 'pre-wrap'})
                 .on('click', openDBProperties);
 
                 $('button#btnEdit')
@@ -1852,9 +1849,6 @@ $.widget( "heurist.mainMenu6", {
                 .addClass('ui-button-action')
                 .css({
                     'display': 'inline-block'
-                    //'margin-left': 'auto',
-                    //'margin-right': 'auto',
-                    //'margin-top': '10px'
                 })
                 .on('click', openDBProperties);
 
@@ -1992,13 +1986,13 @@ $.widget( "heurist.mainMenu6", {
                     }
 
                     if(!window.hWin.HEURIST4.util.isempty(ownership)){
-                        $('span#owner').html(ownership);
+                        $('span#owner').html("Owner: " + ownership);
                     }else{
                         $('span#owner').html('Database Ownership');
                     }
 
                     if(!window.hWin.HEURIST4.util.isempty(rights) && rights != 'Please define ownership and rights here ...'){
-                        $('span#rights').html(rights);
+                        $('span#rights').html("Rights: " + rights);
                     }else{
                         $('span#rights').html('Database Rights');
                     }
