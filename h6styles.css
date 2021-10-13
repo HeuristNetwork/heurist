@@ -219,7 +219,7 @@ li.menu-explore{
     box-shadow: 0px 1px 3px #00000033;
     border: 1px solid #707070;
     border-radius: 4px;
-    padding: 5px 30px 10px;
+    padding: 5px 10px 10px 30px;
 }
 .entry-box {
     background: #EBEBEB 0% 0% no-repeat padding-box;

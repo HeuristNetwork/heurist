@@ -2142,16 +2142,16 @@ $.widget( "heurist.mainMenu6", {
             }
         );
     },
-    
+
     //
     //
     //
     _loadIntroductoryGuide: function(e){
         
         var section = this._active_section;
-        
+
         this._off(this.introductions[section].find('.gs-box'),'click');
-                
+        
         var that = this;
         this.introductions[section]
                 .load(window.hWin.HAPI4.baseURL+'startup/getting_started.html div.gs-box.ui-heurist-'+section,
@@ -2161,18 +2161,18 @@ $.widget( "heurist.mainMenu6", {
                         img = $(img);
                         img.attr('src',window.hWin.HAPI4.baseURL+'hclient/assets/v6/'+img.attr('data-src'));
                     });
-                    
+
                     that.introductions[section].find('div.gs-box.ui-heurist-'+section)
                     .prepend( '<span class="ui-heurist-title header" id="start-hints" style="padding-top:57px;font-weight:normal;padding-left:20px;cursor:pointer">'
                                 +'<span class="ui-icon ui-icon-help"/>&nbsp;Startup hints</span>' ).click(function(){ that._loadStartHints(null); });					
-					
+
                     that.introductions[section].find('.gs-box')
                         .css({position:'absolute', left:10, right:10, top:10, 'min-width':700, margin:0}) //,'padding-left':20
                         .show();
                     that.introductions[section].find('.gs-box > div:first').css('margin','23px 0');
                     that.introductions[section].find('.gs-box .ui-heurist-title.header')
                         .css({position:'absolute', left:160, top:40, right:400, 'max-width':'540px'});
-                        
+
                     $('<div class="gs-box">')
                         .css({position:'absolute', left:10, right:10, top:180, bottom:10, 'min-width':400, overflow: 'auto'})
                         .load( window.hWin.HRes('menu_'+section)+' #content' )
@@ -2182,11 +2182,6 @@ $.widget( "heurist.mainMenu6", {
                 .show();
                     
         this.containers[section].hide();
-        
-    },    
-  
-    closeContainer: function(section){
-        this.containers[section].empty().hide();
     },
     
     _loadStartHints: function(e){
@@ -2200,50 +2195,49 @@ $.widget( "heurist.mainMenu6", {
 
         this.introductions[section]
                 .load(window.hWin.HAPI4.baseURL+'startup/getting_started.html div.gs-box.ui-heurist-'+section,
-                    function(){
-                        // Display Section Img, hide link to YouTube video
-                        that.introductions[section].find('img').each(function(i,img){
-                            img = $(img);
-                            if(img.attr('data-src') == 'PresentationThumbnailIanJohnsonPlay-1.png'){
-                                $(img[0].parentNode.parentNode).hide();
-                                return;
-                            }
-                            img.attr('src',window.hWin.HAPI4.baseURL+'hclient/assets/v6/'+img.attr('data-src'));
-                        });
+                function(){
+                    // Display Section Img, hide link to YouTube video
+                    that.introductions[section].find('img').each(function(i,img){
+						img = $(img);
+						img.attr('src',window.hWin.HAPI4.baseURL+'hclient/assets/v6/'+img.attr('data-src'));
+                    });
 
-                        // Link to Menu Guide
-                        that.introductions[section].find('div.gs-box.ui-heurist-'+section)
-                        .prepend( '<span class="ui-heurist-title header" id="menu-guide" style="padding-top:57px;font-weight:normal;padding-left:20px;cursor:pointer">'
-                                    +'<span class="ui-icon ui-icon-help"/>&nbsp;Menu guide</span>' ).click(function(){ that._loadIntroductoryGuide(null); });
+                    // Link to Menu Guide
+                    that.introductions[section].find('div.gs-box.ui-heurist-'+section)
+                    .prepend( '<span class="ui-heurist-title header" id="menu-guide" style="padding-top:57px;font-weight:normal;padding-left:20px;cursor:pointer">'
+								+'<span class="ui-icon ui-icon-help"/>&nbsp;Menu guide</span>' ).click(function(){ that._loadIntroductoryGuide(null); });
 
-                        // Display Content
-                        that.introductions[section].find('.gs-box')
-                                .css({position:'absolute', left:10, right:10, top:10, 'min-width':700, margin:0}) //,'padding-left':20
-                                .show();
-                        that.introductions[section].find('.gs-box > div:first').css('margin','23px 0');
-                        
-                        that.introductions[section].find('.gs-box .ui-heurist-title.header')
-                                .css({position:'absolute', left:160, top:40, right:400, 'max-width':'540px'});
+                    // Display Content
+                    that.introductions[section].find('.gs-box')
+							.css({position:'absolute', left:10, right:10, top:10, 'min-width':700, margin:0}) //,'padding-left':20
+							.show();
+                    that.introductions[section].find('.gs-box > div:first').css('margin','23px 0');
 
-                        // Load Welcome Content
-                        $container = $('<div class="gs-box">')
-                            .css({position:'absolute', left:10, right:10, top:180, bottom:10, 'min-width':400, overflow: 'auto'})
-                            .load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/welcome.html', function(){
-                                
-                                // Bookmark Link
-                                var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
-                                $('.bookmark-url').html('<a href="#">'+url+'</a>').click(function(e){
-                                    window.hWin.HEURIST4.util.stopEvent(e);
-                                    window.hWin.HEURIST4.msg.showMsgFlash('Press Ctrl+D to bookmark this page',1000);
-                                    return false;
-                                });
-                            })
-                            .appendTo( that.introductions[section] );
-                    })
+                    that.introductions[section].find('.gs-box .ui-heurist-title.header')
+							.css({position:'absolute', left:160, top:40, right:400, 'max-width':'540px'});
+
+                    // Load Welcome Content
+                    $container = $('<div class="gs-box">')
+						.css({position:'absolute', left:10, right:10, top:180, bottom:10, 'min-width':400, overflow: 'auto'})
+						.load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/welcome.html', function(){
+							
+							// Bookmark Link
+							var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
+							$('.bookmark-url').html('<a href="#">'+url+'</a>').click(function(e){
+								window.hWin.HEURIST4.util.stopEvent(e);
+								window.hWin.HEURIST4.msg.showMsgFlash('Press Ctrl+D to bookmark this page',1000);
+								return false;
+							});
+						})
+						.appendTo( that.introductions[section] );
+                })
                 .css({left:'304px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'})  //,'z-index':104
                 .show();
 
         this.containers[section].hide();
+    },
+
+    closeContainer: function(section){
+        this.containers[section].empty().hide();
     }
-	
 });
