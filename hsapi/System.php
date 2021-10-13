@@ -849,12 +849,12 @@ error_log(print_r($_REQUEST, true));
 
             //3. write error into current error log
             $Title = 'db: '.$this->dbname()
-                    .'\nerr-type: '.$status
-                    .'\nuser: '.$this->get_user_id()
+                    ."\nerr-type: ".$status
+                    ."\nuser: ".$this->get_user_id()
                     .' '.@$this->current_User['ugr_FullName']
                     .' <'.@$this->current_User['ugr_eMail'].'>';
 
-            $sMsg = '\nMessage: '.$message."\n"
+            $sMsg = "\nMessage: ".$message."\n"
                     .($sysmsg?'System message: '.$sysmsg."\n":'')
                     .'Script: '.@$_SERVER['REQUEST_URI']."\n"
                     .'Request: '.substr(print_r($_REQUEST, true),0,2000)."\n\n"
