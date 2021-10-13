@@ -110,8 +110,8 @@ function getRecordOverlayData(record) {
         // Convert map to array
         var xpos = 10; //!!!!
         for(key in map) {                                   
-            array.push({text: truncateText(key, maxLength), size: "8px", xpos:xpos, multiline:true,
-                    style:"italic", height: fontSize, indent:true, enter: true, subheader:1}); // Heading
+            var details = {text: truncateText(key, maxLength), size: "8px", xpos:xpos, multiline:true,
+                    style:"italic", height: fontSize, indent:true, enter: true, subheader:1};
 
             if(map[key]['require_type'] != null){
                 details['require_type'] = map[key]['require_type'];
@@ -126,6 +126,7 @@ function getRecordOverlayData(record) {
                 delete map[key]['dtyid'];
             }
 
+            array.push(details); // Heading
             for(text in map[key]) {
                 array.push(map[key][text]);    
             }
