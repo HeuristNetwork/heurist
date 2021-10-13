@@ -268,7 +268,7 @@ window.hWin.HEURIST4.dbs = {
             if($mode==3){
 
                 $children.push({key:'rec_ID',title:'Record ID', code:'Record ID'});
-                $children.push({key:'rec_TypeID', title:'Record TypeID', code:'Record TypeID'});
+                $children.push({key:'rec_RecTypeID', title:'Record TypeID', code:'Record TypeID'});
                 $children.push({key:'rec_TypeName', title:'Record TypeName', code:'Record TypeName'});
                 $children.push({key:'rec_Modified', title:"Record Modified", code:'Record Modified'});
 
@@ -302,11 +302,11 @@ window.hWin.HEURIST4.dbs = {
                         code:($recTypeId+_separator+'title'), name:'Record title'});
                 }
                 
-                if(all_header_fields || $fieldtypes.indexOf('typeid')>=0 || $fieldtypes.indexOf('rec_TypeID')>=0){
-                    $children.push({key:'rec_TypeID', title:'Record TypeID', code:$recTypeId+_separator+'typeid'});
+                if(all_header_fields || $fieldtypes.indexOf('typeid')>=0 || $fieldtypes.indexOf('rec_RecTypeID')>=0){
+                    $children.push({key:'rec_RecTypeID', title:'Record TypeID', code:$recTypeId+_separator+'typeid', name: 'Record type id'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('typename')>=0 || $fieldtypes.indexOf('rec_TypeName')>=0){
-                    $children.push({key:'rec_TypeName', title:'Record TypeName', code:$recTypeId+_separator+'typename'});
+                    $children.push({key:'rec_TypeName', title:'Record TypeName', code:$recTypeId+_separator+'typename', name: 'Record type'});
                 }
                 
                 if(all_header_fields || $fieldtypes.indexOf('added')>=0 || $fieldtypes.indexOf('rec_Added')>=0){

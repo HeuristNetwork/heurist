@@ -305,14 +305,16 @@ this._dout('reload datatable '+this.options.serverSide);
                                     that.options.dataTableParams['ajax'] = queryURL 
                                         + '&recordsTotal='+rec_total_count
                                         + '&datatable='+datatable_id;
-                                    that._dataTable = that.div_datatable.DataTable( that.options.dataTableParams );        
+
+                                    that._dataTable = that.div_datatable.DataTable( that.options.dataTableParams );
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response, true);    
                                 }
                             }
-                        );                
-                        
+                        );
+
                     }else{
+
                         this.options.dataTableParams['processing'] = false;
                         this.options.dataTableParams['serverSide'] = false;                    
                         this.options.dataTableParams['ajax'] = queryURL + '&datatable=1&q=' + queryStr;
@@ -331,130 +333,112 @@ this._dout('reload datatable '+this.options.serverSide);
     //
     _onDataTableInitComplete:function(){
         
+        //adjust position for datatable controls    
+        this.div_content.find('.dataTables_length').css('padding','5 0 0 10');
+        var lele = this.div_content.find('.dataTables_filter').css('padding','5 10 0 0');
+        this.div_content.find('.dataTables_info').css({'padding-left':'10px','padding-right':'10px'});
+        //this.div_content.find('.dataTables_scroll').css({'padding-bottom':'10px'});
+        this.div_content.find('.dataTables_scrollBody').css({'width':'100%'});
+        this.div_content.find('.dataTables_wrapper').css('padding','0 8px');
+        this.div_content.find('.dataTable').css({'font-size':'inherit','width':'100%'});
         
-                    //adjust position for datatable controls    
-                    this.div_content.find('.dataTables_length').css('padding','5 0 0 10');
-                    var lele = this.div_content.find('.dataTables_filter').css('padding','5 10 0 0');
-                    this.div_content.find('.dataTables_info').css({'padding-left':'10px','padding-right':'10px'});
-                    //this.div_content.find('.dataTables_scroll').css({'padding-bottom':'10px'});
-                    this.div_content.find('.dataTables_scrollBody').css({'width':'100%'});
-                    this.div_content.find('.dataTables_wrapper').css('padding','0 8px');
-                    this.div_content.find('.dataTable').css({'font-size':'inherit','width':'100%'});
+        this.div_content.find('.dataTables_info').css('padding-top','11px');
+        this.div_content.find('.dataTables_paginate').css('padding-top','7px');
+        this.div_content.find('.paginate_button').css('padding','2px');
+        this.div_content.find('.dt-buttons').css('padding-top','7px');
+        this.div_content.find('.dt-button').css('padding','2px');
+        this.selConfigs = null;
                     
-                    this.div_content.find('.dataTables_info').css('padding-top','11px');
-                    this.div_content.find('.dataTables_paginate').css('padding-top','7px');
-                    this.div_content.find('.paginate_button').css('padding','2px');
-                    this.div_content.find('.dt-buttons').css('padding-top','7px');
-                    this.div_content.find('.dt-button').css('padding','2px');
-                    this.selConfigs = null;
-                    
-        //adjust column widths
-        /*
         var that = this;
-        this._dataTable.columns().every( function () {
-            
-            var column = this;
-            if(column.visible()){
-                var title = column.header();
-                var dataIdx = column.index( 'fromVisible', column.index() );
- 
-                var width  = that.options.dataTableParams['columns'][dataIdx]['width'];
-console.log(title);
-console.log(dataIdx+'  '+width+'  '+that.options.dataTableParams['columns'][dataIdx]['visible']);
-                if(!window.hWin.HEURIST4.util.isempty(width) && that.options.dataTableParams['columns'][dataIdx]['visible']){
-                    $(title).css({'max-width':width,width:width});   
-                }
-            }
-        } );                    
-        this.div_content.find('.dataTables_scrollBody th').each(function(idx,item){
-            //var column = that._dataTable.columns(idx);
-            //var dataIdx = column.index( 'fromVisible', idx );
-            var width  = that.options.dataTableParams['columns'][idx]['width'];
-console.log(idx+'  '+width+'  '+that.options.dataTableParams['columns'][idx]['visible']);
-            if(!window.hWin.HEURIST4.util.isempty(width) && that.options.dataTableParams['columns'][idx]['visible']){
-                $(item).css({'max-width':width,width:width});   
-            }
-        });*/
-                    
-                    
-          if(this.options.show_rt_filter || this.options.show_column_config){
-
-                var sel_container = this.div_content.find('div.selectors').css({float:'left',padding:'15px 10px','min-width':'200px'});
-          
-                if(this.options.show_rt_filter){
-                    
-                    //add record type selector - filter by record types
-                    var rectype_Ids = this.options.recordset.getRectypes();
-
-                    if(rectype_Ids.length>1){
-                        $('<label>Filter by:&nbsp;</label>').appendTo(sel_container)
-                        var selScope = $('<select>').appendTo(sel_container).css({'min-width':'12em'});
-                        
-                        var opt = window.hWin.HEURIST4.ui.addoption(selScope[0],'','select record type …');
-                        $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
-                    
-                        for (var rty in rectype_Ids){
-                            rty = rectype_Ids[rty];
-                            if(rty>0 && $Db.rty(rty,'rty_Plural') ){
-                                window.hWin.HEURIST4.ui.addoption(selScope[0],rty,
-                                        $Db.rty(rty,'rty_Plural') ); //'only: '+
-                            }
-                        }
-                        window.hWin.HEURIST4.ui.addoption(selScope[0],'', 'Any record type');
-                        
-                        this._on( selScope, {
-                            change: this._onRecordTypeFilter} );        
-
-                        
-                        window.hWin.HEURIST4.ui.initHSelect(selScope);
-                    }
-                }
-                
-                if(this.options.show_column_config){
-
-                    //$('<label>:&nbsp;&nbsp;Choose fields:&nbsp;</label>').appendTo(sel_container)
-                    //var selConfigs = $('<select>').appendTo(sel_container).css({'min-width':'15em'});
-                    
-                    if($.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
-                        this.selConfigs = $('<fieldset>').css({display:'inline-block'}).appendTo(sel_container);
-                        
-                        var that = this;
-                        
-                        this.selConfigs.configEntity({
-                            entityName: 'defRecTypes',
-                            configName: 'datatable',
-                            loadSettingLabel: 'Choose fields:',
-
-                            getSettings: null,
-                            setSettings: function( settings ){ //callback function to apply configuration
-                                    that._onApplyColumnDefinition( settings ); 
-                            }, 
-
-                            divSaveSettings: null,
-                            showButtons: true,
-                            buttons: {rename:'save as', openedit:'edit', remove:'delete'},
-                            openEditAction: function(is_new){ //overwrite default behaviour - open configuration popup
-                                    that._openColumnDefinition( is_new );
-                            }
-                        });
-                        
-                        this.selConfigs.find('div.header').css({padding: '7px 16px 3px 0', float: 'left'});
-                        this.selConfigs.find('span.btn-action-div').css({display: 'inline-block','padding-top':'10px'});
-                        this.selConfigs.configEntity('updateList', 'all', 
-                                that.options.initial_cfg?that.options.initial_cfg.cfg_name:null);
-                    }                    
-                    
-                    //add button to configure columns
-                    /*
-                    var btn_cfg = $('<button>').button({icon: "ui-icon-pencil", label:'Configure columns', text:false})
-                            .css({height:'20px'}).appendTo(sel_container);
-                    
-                    this._on( btn_cfg, {
-                            click: this._openColumnDefinition} );        
-                    */
-                }                            
-          }
         
+        // Add title to column headers (th)
+        var col_headers = $('div.dataTables_scrollHead th');
+        if(col_headers.length > 0){
+            $.each(col_headers, function(idx, header){
+                
+                var $ele = $(header);
+                $ele.attr('title', $ele.text());
+            });
+        }
+
+        if(this.options.show_rt_filter || this.options.show_column_config){
+
+            var sel_container = this.div_content.find('div.selectors').css({float:'left',padding:'15px 0px','min-width':'200px'});
+
+            if(this.options.show_rt_filter){
+                
+                //add record type selector - filter by record types
+                var rectype_Ids = this.options.recordset.getRectypes();
+
+                if(rectype_Ids.length>1){
+                    $('<label>Filter by:&nbsp;</label>').appendTo(sel_container)
+                    var selScope = $('<select>').appendTo(sel_container).css({'min-width':'12em'});
+                    
+                    var opt = window.hWin.HEURIST4.ui.addoption(selScope[0],'','select record type …');
+                    $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
+                
+                    for (var rty in rectype_Ids){
+                        rty = rectype_Ids[rty];
+                        if(rty>0 && $Db.rty(rty,'rty_Plural') ){
+                            window.hWin.HEURIST4.ui.addoption(selScope[0],rty,
+                                    $Db.rty(rty,'rty_Plural') ); //'only: '+
+                        }
+                    }
+                    window.hWin.HEURIST4.ui.addoption(selScope[0],'', 'Any record type');
+                    
+                    this._on( selScope, {
+                        change: this._onRecordTypeFilter} );        
+
+                    
+                    window.hWin.HEURIST4.ui.initHSelect(selScope);
+                }
+            }
+            
+            if(this.options.show_column_config){
+
+                //$('<label>:&nbsp;&nbsp;Choose fields:&nbsp;</label>').appendTo(sel_container)
+                //var selConfigs = $('<select>').appendTo(sel_container).css({'min-width':'15em'});
+                
+                if($.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
+                    this.selConfigs = $('<fieldset>').css({display:'inline-block'}).appendTo(sel_container);
+                    
+                    var that = this;
+                    
+                    this.selConfigs.configEntity({
+                        entityName: 'defRecTypes',
+                        configName: 'datatable',
+                        loadSettingLabel: 'Choose fields:',
+
+                        getSettings: null,
+                        setSettings: function( settings ){ //callback function to apply configuration
+                                that._onApplyColumnDefinition( settings ); 
+                        }, 
+
+                        divSaveSettings: null,
+                        showButtons: true,
+                        buttons: {rename:'save as', openedit:'edit', remove:'delete'},
+                        openEditAction: function(is_new){ //overwrite default behaviour - open configuration popup
+                                that._openColumnDefinition( is_new );
+                        }
+                    });
+                    
+                    this.selConfigs.find('div.header').css({padding: '7px 16px 3px 0', float: 'left'});
+                    this.selConfigs.find('span.btn-action-div').css({display: 'inline-block','padding-top':'10px'});
+                    this.selConfigs.configEntity('updateList', 'all', 
+                            that.options.initial_cfg?that.options.initial_cfg.cfg_name:null);
+                }                    
+                
+                //add button to configure columns
+                /*
+                var btn_cfg = $('<button>').button({icon: "ui-icon-pencil", label:'Configure columns', text:false})
+                        .css({height:'20px'}).appendTo(sel_container);
+                
+                this._on( btn_cfg, {
+                        click: this._openColumnDefinition} );        
+                */
+            }                            
+        }
+
     },
     
     //

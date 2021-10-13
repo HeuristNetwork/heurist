@@ -68,6 +68,8 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
         });
 
+        $(this.element.find('#divLoadSettings').find('div')[0]).addClass('header').css('padding', '0px 16px 0px 16px');
+
         this.element.find('#divLoadSettings').configEntity( 'updateList', this.selectRecordScope.val(), 
             this.options.initial_cfg?this.options.initial_cfg.cfg_name:null );    
 
