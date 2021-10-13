@@ -207,6 +207,22 @@ _time_debug = new Date().getTime() / 1000;
             loadPageContent( load_initially );
     });
     
+    //fix bug for tinymce popups - it lost focus if it is called from dialog
+    /*
+    $(window.hWin.document).on('focusin', function(e) {
+        if ($(e.target).closest(".tox-tinymce-aux").length) {
+            e.stopImmediatePropagation();
+        }
+    });
+    */
+
+    $(document).on('focusin', function(e) {
+        if ($(e.target).closest(".tox-tinymce-aux").length) {
+            e.stopImmediatePropagation();
+        }
+    });
+
+    
     setTimeout(function(){
         //init main menu in page header
         //add menu definitions to main-menu

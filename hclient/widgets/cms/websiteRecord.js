@@ -28,7 +28,12 @@ function onPageInit(success){
         return;
     }
     
-    
+    $(document).on('focusin', function(e) {
+        if ($(e.target).closest(".tox-tinymce-aux").length) {
+            e.stopImmediatePropagation();
+        }
+    });
+
     cmsEditing = new hCmsEditing();
     
 }   
