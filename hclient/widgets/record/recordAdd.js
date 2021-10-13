@@ -256,8 +256,10 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             this._innerTitle.text(window.hWin.HR('Record addition settings'));
 
             this.element.find('#div_more_options').show();
-            this.element.find('.add_record').hide()
-        
+            this.element.find('.add_record').hide();
+
+            var pref_rectype = window.hWin.HAPI4.get_prefs('record-add-defaults')[0];
+            this.element.find('#sel_recordtype').val(pref_rectype).hSelect('refresh');
         }else{
              //show record type list
             

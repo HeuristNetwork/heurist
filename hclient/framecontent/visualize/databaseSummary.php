@@ -409,7 +409,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                     var is_advanced = getSetting('setting_advanced');
                     
                     var supw = 0;
-                    if(width<645 || (is_advanced && width <= 1100)){
+                    if(width<645 || (is_advanced && width <= 1300)){
                          supw = 2;
                     }
                     
