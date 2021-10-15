@@ -73,6 +73,34 @@ The distribution version at HeuristNetwork.org/installation is updated approxima
 The installation and update scripts (see installation page) are very simple and have been proven over a decade - they should run on most Unix servers and have been designed specifically to restrict their activity to a single directory (/var/www/html/HEURIST) so that they do not mess with anything else installed on the server.
 Heurist can also be installed on a Windows server - Systemik Solutions are working on documentation, please contact us for information.
 
+Minimum Configuration
+---------------------
+
+Dual Core 5th Gen Intel Processor or newer
+3gb of RAM
+250mb disk space for Heurist Application files
+200mb Required LAMPP & Extensions
+Ubuntu 18.04.6 LTS
+HDD based storage for data
+
+Recommended Configuration
+--------------------------
+
+Quad Core 6th Gen Intel Processor or newer
+6gb of RAM
+250mb disk space for Heurist Application files
+200mb Required LAMPP & Extensions
+Ubuntu 20.04.2 LTS
+SSD based storage for data (increases page serving capacity & speed)
+
+Prerequisites & Dependencies
+-----------------------------
+
+L -Linux Kernel – Ubuntu 18/21 LTS
+A – Apache 2.4.41
+M – MYSQL Version 8.0.26
+P – PHP 7.4.22 ( Php Extensions should also be of the same version)
+
 Feedback / questions
 --------------------
 
