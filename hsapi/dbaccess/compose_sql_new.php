@@ -531,7 +531,12 @@ class HQuery {
                 case 'f': case 'field':
                     if($dty_ID!=null && !in_array($dty_ID, $sort_fields)) {
                     $sort_expr[] = 
+'ifnull((select dtl_Value from recDetails where dtl_RecID=r'.$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID
+.' ORDER BY dtl_Value limit 1), "~~")'.$scending.', r'.$this->level.'.rec_Title';                     
+                    
+/*OLD pre 2021-10-15                    
 'ifnull((select if(link.rec_ID is null, dtl_Value, link.rec_Title) from recDetails left join Records link on dtl_Value=link.rec_ID where dtl_RecID=r'.$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID.' ORDER BY link.rec_Title limit 1), "~~")'.$scending.', r'.$this->level.'.rec_Title';                    
+*/
                         $sort_fields[] = $dty_ID;   
                     }
                     
