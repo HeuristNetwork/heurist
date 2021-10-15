@@ -79,7 +79,8 @@ $.widget( "heurist.embedDialog", {
                 +'99-52 (Web menu/page) with field 2-928 (Page type) which are available as part of Heurist_Core_Definitions. ',
                     function(){
                        that._init(); //call itself again
-                    }
+                    }, 
+                    (!(this.DT_CMS_PAGETYPE>0))  //force_refresh
                 );
             
 /*            
