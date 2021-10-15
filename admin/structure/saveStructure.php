@@ -138,7 +138,7 @@ else
                     }
                 }
 
-                $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
+                //2021-10-15 no more need $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
 
                 break;
 
@@ -503,7 +503,7 @@ $output = gzencode(ob_get_contents(),6);
 ob_end_clean(); 
 
 header('Content-Encoding: gzip');
-header('Content-type: text/javascript; charset=utf-8');
+//header('Content-type: text/javascript; charset=utf-8');
 echo $output; 
 unset($output);
 ?>

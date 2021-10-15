@@ -34,6 +34,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
     selectedFields:null,
     
+    MAX_LEVEL:3,
+    
     _destroy: function() {
         this._super(); 
         
@@ -117,7 +119,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 var tree = treediv.fancytree("getTree");
                 tree.visit(function(node){
                     if(!node.hasChildren() && node.data.type != "relmarker" && node.data.type != "resource" 
-                        && (node.getLevel()==2 || (!window.hWin.HEURIST4.util.isempty(node.span) && $(node.span.parentNode.parentNode).is(":visible")))
+                        && (node.getLevel()==that.MAX_LEVEL || (!window.hWin.HEURIST4.util.isempty(node.span) && $(node.span.parentNode.parentNode).is(":visible")))
                     ){    
                         node.setSelected(check_status);
                     }
@@ -577,7 +579,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     var parentcode = node.data.code; 
                     var rectypes = node.data.rt_ids;
                     
-                    if(parentcode.split(":").length<5){  //limit with 3 levels
+                    if(parentcode.split(":").length< that.MAX_LEVEL*2+1){  //7 limit with 4 levels (till 2021-10-15 were 3 levels)
                     
                         var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
                                                             rectypes, ['header_ext','all'], parentcode );
