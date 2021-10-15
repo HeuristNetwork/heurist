@@ -771,6 +771,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
             $recDetailWasUpdated = false;
             $valuesToBeDeleted = array();
+            $keep_recID = $recID;
             $recID = 0;
             $get_next_row = true;
             
@@ -809,6 +810,10 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                     }
                    
                     if(!$row){ //end of loop
+                    
+                        if($recID==0){
+                            array_push($undefinedFieldsRecIDs, $keep_recID);    
+                        }
                         break;
                     }
                     
