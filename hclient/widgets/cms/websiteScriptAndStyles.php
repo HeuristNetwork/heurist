@@ -54,6 +54,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var home_page_record_id=<?php echo $home_page_on_init; ?>;
     var init_page_record_id=<?php echo $open_page_on_init; ?>;
     var current_page_id = 0;
+    var _IS_NEW_CMS_EDITOR = false;
     var isCMS_active = false;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
 </script>
@@ -243,17 +244,22 @@ _time_debug = new Date().getTime() / 1000;
             __onInitComplete();
             
         }else{
-            topmenu.attr('data-heurist-app-id','heurist_Navigation');
-            window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, topmenu.parent(),
-                {heurist_Navigation:{
+            var lopts = {heurist_Navigation:{
                         menu_recIDs: home_page_record_id, 
                         use_next_level: true, 
                         orientation: 'horizontal',
                         toplevel_css: {background:'none'}, //bg_color 'rgba(112,146,190,0.7)'
-                        onmenuselect: loadPageContent,
-                        //aftermenuselect: afterPageLoad,
                         onInitComplete: __onInitComplete
-                }},
+                };
+            
+            if(_IS_NEW_CMS_EDITOR){ 
+                lopts['onmenuselect'] = loadPageContent;
+            }else{
+                lopts['aftermenuselect'] = afterPageLoad;
+            }
+            
+            topmenu.attr('data-heurist-app-id','heurist_Navigation');
+            window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, topmenu.parent(),lopts},
                 __onInitComplete
                 );
             topmenu.show();
@@ -292,39 +298,40 @@ if($site_css!=null){
 }
 ?>          
         
-        function __loadPageContent(res){
-
-            if(!page_content[pageid]) page_content[pageid] = res;
-            
-            if(isCMS_active){
-                editCMS_instance2.startCMS({record_id:current_page_id, content:page_content[current_page_id], container:'#main-content'}); 
-            }else{
-                layoutMgr.layoutInit( res, page_target, supp_options );    
-            }
-            
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
-            if(page_footer.length>0){
-                page_footer.appendTo( page_target );  
-                page_target.css({'min-height':page_target.parent().height()-page_footer.height()-10 });
-            } 
-
-            afterPageLoad( document, pageid ); //execute custom script and custom css
-        }        
+        if(_IS_NEW_CMS_EDITOR){ 
         
-        if(page_content[pageid]){
-            __loadPageContent( page_content[pageid] );
-        }else{
-            //var request = {recid:pageid, field:, db:window.hWin.HAPI4.database};
-            //window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, __loadPageContent);
-            
-            var surl = window.hWin.HAPI4.baseURL+'?db='
-                +window.hWin.HAPI4.database+'&field='+window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']+'&recid='+pageid;
-            $.get( surl, __loadPageContent);            
+            function __loadPageContent(res){
+
+                if(!page_content[pageid]) page_content[pageid] = res;
                 
+                if(isCMS_active){
+                    editCMS_instance2.startCMS({record_id:current_page_id, content:page_content[current_page_id], container:'#main-content'}); 
+                }else{
+                    layoutMgr.layoutInit( res, page_target, supp_options );    
+                }
+                
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                if(page_footer.length>0){
+                    page_footer.appendTo( page_target );  
+                    page_target.css({'min-height':page_target.parent().height()-page_footer.height()-10 });
+                } 
+
+                afterPageLoad( document, pageid ); //execute custom script and custom css
+            }        
+            
+            if(page_content[pageid]){
+                __loadPageContent( page_content[pageid] );
+            }else{
+                //var request = {recid:pageid, field:, db:window.hWin.HAPI4.database};
+                //window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, __loadPageContent);
+                
+                var surl = window.hWin.HAPI4.baseURL+'?db='
+                    +window.hWin.HAPI4.database+'&field='+window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']+'&recid='+pageid;
+                $.get( surl, __loadPageContent);            
+                    
+            }
+            return;
         }
-        
-        
-        return;
         
         //OLD VERSION page_target will have header (webpageheading) and content  
         page_target.empty().load(window.hWin.HAPI4.baseURL+'?db='
@@ -678,6 +685,8 @@ function performCaptcha(){
 //
 //
 function _openCMSeditor(event){
+    
+    if(!_IS_NEW_CMS_EDITOR) return;
     
     if(isCMS_active){
         //close
