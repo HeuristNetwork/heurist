@@ -62,10 +62,13 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.2.18"; // sets current program version number, determined by Heurist development lead
+
+$version = "6.2.19"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// 6.2.19 15 Oct 2021 Improved error reporting, handling of non-transparent monochrome backgrounds on JPG tile images, improvemetns to definitions editing workflow, improvements to CSV import workflows, better display of length for memo texts in wysiwyg, new metadata display landing page, facet search date histograms (draft), dropdown at end of long list of facets, remember open tab in data entry, auto prompt to change simpel headers to tabs, heading breaks in Record View, separate menu entryt for assigning external lookup fucntions to record types, improved field selection trees with closed sections for record-level fields etc., display breaks in ordinary text fields in record view and metadata.
+// 6.2.18 20 Sep 2021 New Intro page showing database metadata and allowing edit, suppress duplicates or make copies of edited files in bulk upload of files and of records in XML file upload, cope better with long directory names on bulk uploads, cleaner source codd edit of website pages,  API fixes, record counts for facet search folliwing relationship markers, streamline CSV importer display of fields and shortcut option to create all new records without matching step.  
 // 6.2.17 30 Aug 2021 Uploading of tile stack images, convert 3-34 to from Text field to File field, added supplementart title 2 for websites, first draft bulk emailer
 // 6.2.15&16 20 Aug 2021 Ability to change filestore path not jsut via simlinks, web site editing and multibyute character fixes, final removal of yui code and move other old code to /shelved, improve some scary messages, standard check and download of missing record type, imporved file uploads and recognition incl. PDFs, bigger tabs on visualisation panel, improved Map tab - controls at top, turn map and timeline on separately, new functiosn for saving CSVs
 // 6.2.14 =8 July 2021 Improivements to field selection trees in filters - additional record-level fields, layout and memo texts, better layout of rule builder dropdowns and auto selection of start point, fix html escapes in Gephi output, match missing fields correctly in csv import
