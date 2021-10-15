@@ -146,6 +146,15 @@ $2 rm h5
 $2 rm heurist
 $2 ln -s /var/www/html/HEURIST/$1 heurist
 
+#delete version 0.8  of Plugin Browser Print Min .JS and install 1.0.6
+
+cd /var/www/html/HEURIST/heurist/external/leaflet/
+
+$2 rm leaflet.browser.print.min.js
+
+$2 wget -P /var/www/html/HEURIST/heurist/external/leaflet/ https://raw.githubusercontent.com/Igor-Vladyka/leaflet.browser.print/master/dist/leaflet.browser.print.min.js --no-check-certificate
+
+
 # ------------------------------------------------------------------------------------------
 
 echo -e "\n\n\n\n\n\n"

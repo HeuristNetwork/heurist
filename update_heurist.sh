@@ -92,6 +92,16 @@ $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h5 external
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/vendor vendor
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
 
+
+# Delete & update leafletbrowser print min js to latest to solve print bug issue
+cd /var/www/html/HEURIST/HEURIST_SUPPORT/external_h5/leaflet/
+
+$2 rm leaflet.browser.print.min.js
+
+$2 wget -P /var/www/html/HEURIST/HEURIST_SUPPORT/external_h5/leaflet/ https://raw.githubusercontent.com/Igor-Vladyka/leaflet.browser.print/master/dist/leaflet.browser.print.min.js --no-check-certificate
+
+
+
 echo "Heurist unpacked"
 
 # This installation of elastic search generated a number of security holes rated HIGH RISK
