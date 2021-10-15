@@ -695,6 +695,40 @@ $.widget( "heurist.search_faceted_wiz", {
         return $("<div>").editing_input(ed_options).insertAfter( this.step0.find('.main-rectype') );
     }
     
+    ,_createOrderSelect: function(){
+        
+            var topOptions2 = [
+                    {key:'', title:window.hWin.HR("select...")},
+                    {key:'t', title:window.hWin.HR("record title")},
+                    {key:'id', title:window.hWin.HR("record id")},
+                    {key:'rt', title:window.hWin.HR("record type")},
+                    {key:'u', title:window.hWin.HR("record URL")},
+                    {key:'m', title:window.hWin.HR("date modified")},
+                    {key:'a', title:window.hWin.HR("date added")},
+                    {key:'r', title:window.hWin.HR("personal rating")},
+                    {key:'p', title:window.hWin.HR("popularity")}];
+                    
+            var rty_ID = this.select_main_rectype.val();
+            var $dlg = this.step0.find("#facets_options");
+            
+            if(rty_ID>0){
+            
+                var allowed_fieldtypes = ['enum','freetext','blocktext','year','date','integer','float'];
+                //show field selector
+                
+                
+                window.hWin.HEURIST4.ui.createRectypeDetailSelect($dlg.find('.sa_sortby').get(0), rty_ID, 
+                            allowed_fieldtypes, topOptions2, 
+                            {useHtmlSelect:false});    //, selectedValue:'t'
+            
+            }else{
+                var selObj = $dlg.find('.sa_sortby').get(0);
+                window.hWin.HEURIST4.ui.createSelector(selObj, topOptions2); 
+                window.hWin.HEURIST4.ui.initHSelect(selObj, false); 
+            }
+        
+    }
+    
     
     , _showStep :function(newstep){
 
@@ -784,6 +818,8 @@ $.widget( "heurist.search_faceted_wiz", {
                         }
                         svs_name.focus();
                     }
+                    that._createOrderSelect();
+                    
                     that._resetFacets();
                 }});
 
@@ -822,6 +858,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     svs_ugrid.val(window.hWin.HAPI4.currentUser.ugr_ID);
             });
 
+            var sa_order = $dlg.find('.sa_sortby');
 
             if(isEdit){
                 
@@ -850,7 +887,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 svs_ugrid.val(svs[2]==window.hWin.HAPI4.currentUser.ugr_ID ?this.options.params.domain:svs[2]);
                 //svs_ugrid.parent().hide();
-                svs_ugrid.attr('disabled','disabled');;
+                svs_ugrid.attr('disabled','disabled');
                 
                 if(this.options.params.rectypes) {
 
@@ -864,6 +901,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     if(this.select_main_rectype.hSelect("instance")!=undefined){
                        this.select_main_rectype.hSelect("refresh"); 
                     }
+                    this._createOrderSelect();
                     
                     if(this.select_additional_rectypes.editing_input('instance')){
                         var initval = '';
@@ -905,15 +943,20 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_ExitButton').prop('checked', this.options.params.ui_exit_button!==false);
                 $dlg.find('#svs_ExitButtonLabel').val(this.options.params.ui_exit_button_label);
                 
+                
                 if(this.options.params.sort_order){
                     var s = this.options.params.sort_order;
                     if(s.indexOf('-')==0){
                         $dlg.find('.sa_sortasc').val(1);    
                         s = s.substr(1);
                     }
-                    $dlg.find('.sa_sortby').val(s)
+                    if(s.indexOf('f:')==0){
+                        s = s.substr(2);                        
+                    }
+                    
+                   sa_order.val(s)
                 }else{
-                    $dlg.find('.sa_sortby').val('')
+                   sa_order.val('')
                 }
                 
             }else{ //add new saved search
@@ -949,14 +992,20 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_ExitButton').prop('checked', true);
                 $dlg.find('#svs_ExitButtonLabel').val('');
                 
-                $dlg.find('.sa_sortby').val('')
+                sa_order.val('')
                 
                 this.select_main_rectype.val('');
                 if(this.select_main_rectype.hSelect('instance')){
                     this.select_main_rectype.hSelect('refresh');    
                 }
+                this._createOrderSelect();
+                
                 this.svs_MultiRtSearch.prop('checked',false).change();
                 
+            }
+            
+            if(sa_order.hSelect("instance")!=undefined){
+                sa_order.hSelect("refresh"); 
             }
             
             this._on(svs_rules_only,{change:function(e){
@@ -2035,6 +2084,9 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var s = $dlg.find('.sa_sortby').val();
         if(s!=''){
+            if(s>0){
+                s = 'f:'+s;
+            }
             this.options.params.sort_order = ($dlg.find('.sa_sortasc').val()==1?'-':'')+s;    
         }else{
             this.options.params.sort_order = null;
