@@ -651,7 +651,7 @@ window.hWin.HEURIST4.util = {
     //
     // Extract parameter from given URL or from current window.location.search
     //
-    getUrlParameter: function getUrlParameter(name, query){
+    getUrlParameter: function(name, query){
 
         if(!query){
             query = window.location.search;
@@ -671,6 +671,26 @@ window.hWin.HEURIST4.util = {
                 //console.log('cant decode '+name+'='+results[1]);
             }
         }
+    },
+    
+    
+    /**
+     * Get the URL parameters
+     * source: https://css-tricks.com/snippets/javascript/get-url-variables/
+     * @param  {String} url The URL
+     * @return {Object}     The URL parameters
+     */
+    getUrlParams: function (url) {
+        var params = {};
+        var parser = document.createElement('a');
+        parser.href = url;
+        var query = parser.search.substring(1);
+        var vars = query.split('&');
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split('=');
+            params[pair[0]] = decodeURIComponent(pair[1]);
+        }
+        return params;
     },
 
     isArrayNotEmpty: function (a){

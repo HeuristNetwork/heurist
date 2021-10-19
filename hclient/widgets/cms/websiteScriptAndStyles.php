@@ -185,7 +185,7 @@ if($edit_Available){
 //
 function onPageInit(success)
 {
-
+    
 //console.log('webpage onPageInit  '+(new Date().getTime() / 1000 - _time_debug));
 //console.log('webpage onPageInit  '+init_page_record_id);
 
@@ -244,13 +244,13 @@ _time_debug = new Date().getTime() / 1000;
             __onInitComplete();
             
         }else{
-            var lopts = {heurist_Navigation:{
+            var lopts = {
                         menu_recIDs: home_page_record_id, 
                         use_next_level: true, 
                         orientation: 'horizontal',
                         toplevel_css: {background:'none'}, //bg_color 'rgba(112,146,190,0.7)'
                         onInitComplete: __onInitComplete
-                };
+                        };
             
             if(_IS_NEW_CMS_EDITOR){ 
                 lopts['onmenuselect'] = loadPageContent;
@@ -258,11 +258,13 @@ _time_debug = new Date().getTime() / 1000;
                 lopts['aftermenuselect'] = afterPageLoad;
             }
             
+            lopts = {heurist_Navigation:lopts};
+            
             topmenu.attr('data-heurist-app-id','heurist_Navigation');
-            window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, topmenu.parent(),lopts},
-                __onInitComplete
-                );
+            window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, topmenu.parent(), lopts,
+                __onInitComplete);
             topmenu.show();
+            
         }
         
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
@@ -279,6 +281,7 @@ _time_debug = new Date().getTime() / 1000;
 // Loads content of specified record to #main-content and inits all widgets 
 //
 function loadPageContent(pageid){
+    
     if(pageid>0){
         //window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
         current_page_id = pageid;
@@ -476,14 +479,36 @@ function afterPageLoad(document, pageid){
     }
 
     if(!is_embed){    
-        var s = location.pathname;
-        while (s.substring(0, 2) === '//') s = s.substring(1);
+
+        var spath= location.pathname;
+        while (spath.substring(0, 2) === '//') spath = spath.substring(1);
         
-        s = s + '?db='
+        var params = window.hWin.HEURIST4.util.getUrlParams(location.href);
+        
+        params['db'] = window.hWin.HAPI4.database;
+        params['website'] = '';
+        params['id'] = home_page_record_id;
+        
+        if(pageid!=home_page_record_id){
+            params['pageid'] = pageid;
+        }
+
+        s = [];        
+        $.each(Object.keys(params),function(i,key){
+            var v = encodeURIComponent(params[key]);
+            if(v!='') v = '=' + v;
+            s.push(key + v);
+        });
+        s = spath + '?' + s.join('&'); 
+        
+/* OLD       
+        var s = spath + '?db='
                 +window.hWin.HAPI4.database+'&website&id='+home_page_record_id;
         if(pageid!=home_page_record_id){
                 s = s + '&pageid='+pageid;
         }
+*/        
+        //http://127.0.0.1/h6-ao/?db=osmak_9b&website&id=7&noticeID=789
 
         window.history.pushState("object or string", "Title", s);
         
