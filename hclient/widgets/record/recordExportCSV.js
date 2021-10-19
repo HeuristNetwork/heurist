@@ -176,6 +176,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             that.element.find('#cbIncludeTermHierarchy').prop('checked',(settings.include_term_hierarchy==1));
             that.element.find('#cbIncludeResourceTitles').prop('checked',(settings.include_resource_titles==1));
             that.element.find('#chkJoinRecTypes').prop('checked',(settings.join_record_types==1));
+            that.element.find('#cbIncludeMediaURL').prop('checked',(settings.include_file_url==1));
             
         }
     },
@@ -483,6 +484,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 'csv_header': this.element.find('#cbNamesAsFirstRow').is(':checked')?1:0,
                 'include_term_ids': this.element.find('#cbIncludeTermIDs').is(':checked')?1:0,
                 'include_term_codes': this.element.find('#cbIncludeTermCodes').is(':checked')?1:0,
+                'include_file_url': this.element.find('#cbIncludeMediaURL').is(':checked')?1:0,
                 'include_term_hierarchy': this.element.find('#cbIncludeTermHierarchy').is(':checked')?1:0,
                 'include_resource_titles': this.element.find('#cbIncludeResourceTitles').is(':checked')?1:0
                 };

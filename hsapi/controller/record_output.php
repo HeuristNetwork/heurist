@@ -300,6 +300,7 @@ function output_CSV($system, $data, $params){
     $include_term_codes = (@$params['prefs']['include_term_codes']==1);
     $include_resource_titles =  (@$params['prefs']['include_resource_titles']==1);
     $include_term_hierarchy = (@$params['prefs']['include_term_hierarchy']==1);
+    $include_file_url = (@$params['prefs']['include_file_url']==1);
 
     $fields = @$params['prefs']['fields'];
     $details = array();  //array of detail fields included into output
@@ -468,7 +469,7 @@ function output_CSV($system, $data, $params){
                         ];
                     }
 
-
+                    
                 }else{
                     array_push($headers[$rt], $field_name);                
                     $csvColIndex = count($headers[$rt]) - 1;
@@ -479,6 +480,15 @@ function output_CSV($system, $data, $params){
                     ];
                 }
 
+                if($field_type=='file' && $include_file_url){
+                        array_push($headers[$rt], $field_name.' URL' );
+                        $columnInfo[$rt][] = [
+                            'index' => count($headers[$rt]) - 1,
+                            'type' => 'file_url',
+                            'field_id' => $fieldFullID,
+                        ];
+                }
+                
                 //add title for resource fields
                 if($include_resource_titles && ($field_type=='resource' || $field_type=='relmarker')){
 
@@ -597,7 +607,7 @@ function output_CSV($system, $data, $params){
         }
 
         if(count(@$details[$rty_ID])>0){
-            //fills $record
+            //fils $record
             recordSearchDetails($system, $record, $details[$rty_ID]);
         }
         if(count(@$relmarker_details[$rty_ID])>0){
@@ -619,6 +629,7 @@ function output_CSV($system, $data, $params){
             $enum_label = array();
             $enum_code = array();
             $resource_titles = array();
+            $file_urls = array();
 
             $constr_rt_id = 0;
             if(strpos($dt_id,':')>0){ //for constrained resource fields
@@ -731,6 +742,9 @@ function output_CSV($system, $data, $params){
                         }else if($dt_type=='file'){
                             foreach($values as $val){
                                 $vals[] = $val['file']['ulf_ObfuscatedFileID'];
+                                if($include_file_url){
+                                    $file_urls[] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$val['file']['ulf_ObfuscatedFileID'];
+                                }
                             }                        
                         }else if($dt_type=='date'){
                             foreach($values as $val){
@@ -768,6 +782,8 @@ function output_CSV($system, $data, $params){
 
                         }else if($include_resource_titles && $dt_type=='resource'){
                             $resource_titles[] = '';
+                        }else if($include_file_url && $dt_type=='file'){
+                            $file_urls[] = '';
                         }
                     }
 
@@ -793,6 +809,8 @@ function output_CSV($system, $data, $params){
 
                 if (count($resource_titles)>0){
                     $record_row[] = implode($csv_mvsep,$resource_titles);    
+                }else if (count($file_urls)>0){
+                    $record_row[] = implode($csv_mvsep,$file_urls);    
                 }
             }
 
@@ -913,6 +931,7 @@ function output_HeaderOnly($system, $data, $params)
     $include_term_codes = (@$params['prefs']['include_term_codes']==1);
     $include_resource_titles =  (@$params['prefs']['include_resource_titles']==1);
     $include_term_hierarchy = (@$params['prefs']['include_term_hierarchy']==1);
+    $include_file_url = (@$params['prefs']['include_file_url']==1);
     
     $fields = @$params['prefs']['fields'];
     $details = array();  //array of detail fields included into output
@@ -1158,7 +1177,7 @@ function writeResults( $streams, $temp_name, $headers, $error_log ) {
         $content_len = $content_len+3;
         
         header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename='.$filename);
+        header('Content-Disposition: attachment; filename='.rawurlencode($filename));
         header('Content-Length: ' . $content_len);
         echo "\xEF\xBB\xBF"; // Byte Order Mark        
         exit($out);
