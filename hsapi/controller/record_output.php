@@ -743,7 +743,11 @@ function output_CSV($system, $data, $params){
                             foreach($values as $val){
                                 $vals[] = $val['file']['ulf_ObfuscatedFileID'];
                                 if($include_file_url){
-                                    $file_urls[] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$val['file']['ulf_ObfuscatedFileID'];
+                                    if(@$val['file']['ulf_ExternalFileReference']){
+                                        $file_urls[] = $val['file']['ulf_ExternalFileReference'];
+                                    }else{
+                                        $file_urls[] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$val['file']['ulf_ObfuscatedFileID'];    
+                                    }
                                 }
                             }                        
                         }else if($dt_type=='date'){
