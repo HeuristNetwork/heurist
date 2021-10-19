@@ -73,7 +73,10 @@ regional['en'] = {
     'Manage': '',
     'Select': '',
     'Configure': '',
+    
     'Show context help': '',
+    'Heurist context help': '',
+    'Sorry context help was not found': '',
     
     //main menu 
     'Admin': '',
@@ -118,6 +121,7 @@ regional['en'] = {
         menu_database_rollback_hint:'Selectively roll back the data in the database to a specific date and time',
         menu_database_register_hint:'Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases',
         menu_database_properties_hint:'Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database',
+    
     'Manage Users': '',
         menu_profile_groups: 'Workgroups',
         menu_profile_users: 'Users',
@@ -187,7 +191,6 @@ regional['en'] = {
         menu_files_upload_hint: 'Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files',
         menu_files_index_hint: 'Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)',
         
-        
     //publish menu
     'Website': '',
         menu_cms_create: 'Create',
@@ -247,7 +250,6 @@ regional['en'] = {
         menu_help_emailadmin_hint: 'Send an email to the System Adminstrator for this installaton of Heurist - typically for probelms with this installation',
         menu_help_acknowledgements_hint: '',
         menu_help_about_hint: 'Version, Credits, Copyright, License',
-    
     
     menu_subset_set: 'Set as subset',
     menu_subset_set_hint: 'Make the current filter the active subset to which all subsequent actions are applied',
@@ -320,6 +322,7 @@ regional['en'] = {
     menu_reorder_title: 'Drag records up and down to position, then Save order to save as a fixed list in this order',
     menu_reorder_save: 'Save Order',
     
+    //
     resultList_select_record: 'Please select at least one record for action',
     resultList_select_record2: 'Please select at least two records to identify/merge duplicate records',
     resultList_select_limit: 'The number of selected records is above the limit in ',
@@ -357,8 +360,6 @@ regional['en'] = {
     'Filtered Result': '',
     'Save Filter': '',
     save_filter_hint: 'Save the current filter and rules as a link in the navigation tree',
-     
-    
      
     //edit 
     Warn_Lost_Data: 'You have made changes to the data. Click "Save" otherwise all changes will be lost.',     
@@ -467,11 +468,8 @@ regional['en'] = {
     Error_System_Config: 'May result from a network outage, or because the system is not properly configured. If the problem persists, please report to your system administrator',
     Error_Json_Parse: 'Cannot parse server response',
     
+//---------------------- END OF TRANSLATION 2021-10-19
 //===================    
-    
-    
-    
-
     
     'Design database': 'Design database',
     'Import data': 'Import data',
