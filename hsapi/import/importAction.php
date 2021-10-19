@@ -2579,17 +2579,21 @@ public static function performImport($params, $mode_output){
                                     $is_url = true;
                                     $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'
                                                             .self::$mysqli->real_escape_string($r_value).'"';
-                                }else if(strpos($r_value,'/')!==false){
-                                    //relative path in database folder
-                                    $filename = HEURIST_FILESTORE_DIR.$r_value;
-                                    if(file_exists($filename)){
-                                        //this methods checks if file is already registered
-                                        $fres = fileRegister(self::$system, $filename); //see db_files.php
-                                    }
+                                }else{
                                     
-                                }else {
-                                    $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ObfuscatedFileID="'
-                                        .self::$mysqli->real_escape_string($r_value).'"';
+                                    $k = strpos($r_value,'uploaded_files/');
+                                    if($k===false) $k ==strpos($r_value,'file_uploads/');
+                                    
+                                    if($k===0 || $k===1){
+                                    //relative path in database folder
+                                        $filename = HEURIST_FILESTORE_DIR.$r_value;
+                                        if(file_exists($filename)){
+                                            //this methods checks if file is already registered
+                                            $fres = fileRegister(self::$system, $filename); //see db_files.php
+                                    }else {
+                                        $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ObfuscatedFileID="'
+                                            .self::$mysqli->real_escape_string($r_value).'"';
+                                    }
                                 }
                                 
                                 if($file_query){
