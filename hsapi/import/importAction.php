@@ -2563,11 +2563,14 @@ public static function performImport($params, $mode_output){
                                 
                             }else if($fieldtype_type=="file"){ 
                                 //value can be remote url 
-                                //obfuscation id (from same database)  (default)
-                                //ulf_ID (from same database)
+                                //obfuscation id (from the same database)  (default)
+                                //ulf_ID (from the same database)
+                                //relative path to current database file folder
 
                                 $ulf_ID = null;
                                 $is_url = false;
+                                $file_query = null;
+                                $fres = null;
                                 
                                 if(is_numeric($r_value) && intval($r_value)>0){ //ulf_UD
                                     $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE $ulf_ID='.$r_value;
@@ -2576,12 +2579,24 @@ public static function performImport($params, $mode_output){
                                     $is_url = true;
                                     $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'
                                                             .self::$mysqli->real_escape_string($r_value).'"';
+                                }else if(strpos($r_value,'/')!==false){
+                                    //relative path in database folder
+                                    $filename = HEURIST_FILESTORE_DIR.$r_value;
+                                    if(file_exists($filename)){
+                                        //this methods checks if file is already registered
+                                        $fres = fileRegister(self::$system, $filename); //see db_files.php
+                                    }
+                                    
                                 }else {
                                     $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ObfuscatedFileID="'
                                         .self::$mysqli->real_escape_string($r_value).'"';
                                 }
                                 
-                                $fres = mysql__select_value(self::$mysqli, $file_query);
+                                if($file_query){
+                                    $fres = mysql__select_value(self::$mysqli, $file_query);    
+                                }
+                                
+                                
                                 if($fres>0){
                                     $ulf_ID = $fres;
                                 }else if($is_url) {
