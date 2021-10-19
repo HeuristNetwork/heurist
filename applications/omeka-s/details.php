@@ -216,7 +216,7 @@ if(@$row[4]>0){ //pair already defined
     .'",'.$row[1].',115,'.$vocab.','.$ptr.')'; 
     
     $ret = $mysqli->query($query);
-        if(!ret){
+        if(!$ret){
             echo $mysqli->error;
             break; 
         }

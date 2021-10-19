@@ -40,7 +40,7 @@ if ($res){
 .'rty_RecTypeGroupID, rty_ShowURLOnEditForm ) '
 .' values ('.$row[0].',"'.$row[1].'","'.($row[2]==null?'':$row[2]).'","[2-1]",9,0)'; 
         $ret = $mysqli->query($query);
-        if(!ret){
+        if(!$ret){
             echo $mysqli->error;
             break; 
         }
