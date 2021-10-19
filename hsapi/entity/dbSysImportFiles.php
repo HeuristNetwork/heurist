@@ -176,7 +176,7 @@ class DbSysImportFiles extends DbEntityBase
             return false;
         }
         
-        $rec_ID = $this->data[$this->primaryField];
+        $rec_ID = @$this->data[$this->primaryField];
         $rec_ID = intval(@$rec_ID);
         if($rec_ID>0){        
             $where = " where sif_ID=".$rec_ID;

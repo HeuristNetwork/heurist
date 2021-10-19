@@ -576,6 +576,8 @@ public static function assignRecordIds($params){
                 mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
                 self::$system->addError(HEURIST_DB_ERROR, 'Cannot alter import session table; cannot add new index field', $mysqli->error);
                 return false;
+            }else{
+                $is_existing_id_field = true;
             }
         }else{
             $is_existing_id_field = true;
@@ -2590,6 +2592,7 @@ public static function performImport($params, $mode_output){
                                         if(file_exists($filename)){
                                             //this methods checks if file is already registered
                                             $fres = fileRegister(self::$system, $filename); //see db_files.php
+                                        }
                                     }else {
                                         $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ObfuscatedFileID="'
                                             .self::$mysqli->real_escape_string($r_value).'"';
