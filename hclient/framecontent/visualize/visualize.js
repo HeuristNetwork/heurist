@@ -443,9 +443,6 @@ function visualizeData() {
         }else{
             sText = 'Showing '+cnt_vis+' of '+cnt_tot;
         }
-        
-        $('#showRectypeSelector').button({label:'Select types to show', icons:{secondary:'ui-icon-carat-1-'
-            +($('#list_rectypes').is(':visible')?'n':'s')   }}).css({'padding':'1px 2px','margin-bottom': '4px'});
             
         $('#lblShowRectypeSelector').text(sText);
 
@@ -841,84 +838,211 @@ function updateCurvedLines(lines) {
 */
 function updateStraightLines(lines) {
     
-    var pairs = {};
+    var pairs = {}, rec_link_count = {};
     
     $(".icon_self").each(function() {
         $(this).remove();
     });
-
     
     // Calculate the straight points
     lines.attr("d", function(d) {
         
        var key = d.source.id+'_'+d.target.id,
-           indent = 30;
+           indent = 20;
        
-       if(pairs[d.target.id+'_'+d.source.id]){
-           key = d.target.id+'_'+d.source.id;
-       }else if(!pairs[key]){
-           indent = 0;
-       }
-       
-       if(indent>0){ // This controls how far apart lines will be when going to and from the same node
+        if(pairs[d.target.id+'_'+d.source.id]){
+            key = d.target.id+'_'+d.source.id;
+        }else if(!pairs[key]){
+            indent = 0;
+        }
 
-           if($('#expand-links').is(':Checked')){ // This is for the expanded option, displays all lines
-        
-                pairs[key] = pairs[key] + 20;
-           }else{ // This will hide all other lines, default behaviour
-        
-               return [''];
-           }
-       }else{
-        
-           pairs[key] = 1;
-       } 
+        if(indent>0){ // This controls how far apart lines will be when going to and from the same node
 
-       var R = pairs[key];
-       var pnt = [];
-       var target_x = d.target.x,
-           target_y = d.target.y;
+            if($('#expand-links').is(':Checked')){ // This is for the expanded option, displays all lines
+                pairs[key] = pairs[key] + indent;
+            }else{ // This will hide all other lines, default behaviour
+                return [''];
+            }
+        }else{
+            pairs[key] = 1;
+        } 
+
+        // To move the y down
+        if(rec_link_count[d.source.id] >= 0){
+            rec_link_count[d.source.id] += 2;
+        }else{
+            rec_link_count[d.source.id] = 0;
+        }
+
+        var R = pairs[key];
+        var pnt = [];
+
+        var s_x = d.source.x,
+            s_y = d.source.y,
+            t_x = d.target.x,
+            t_y = d.target.y;
+   
+        if(d.target.id==d.source.id){ // Self Linking Node
+
+            var target_x, target_y, dx, dy, dr, mx, my;
+
+            if(currentMode == 'infoboxes_full'){
+                var $detail = $('.id'+d.source.id).find('[dtyid="'+ d.relation.id +'"]');
+
+                var detail_y = Number($detail.attr('y')) / 2;
+                s_y = s_y + detail_y + rec_link_count[d.source.id];
+
+                // Affects Loop Size
+                target_x = s_x - 70;
+                target_y = s_y - 70;
+
+                dx = target_x - s_x;
+                dy = target_y - s_y;
+                dr = Math.sqrt(dx * dx + dy * dy)/1.5;
+                mx = s_x + dx;
+                my = s_y + dy;
            
-       if(d.target.id==d.source.id){ // Self Linking Node
-           // Affects Loop Size
-           target_x = d.source.x+70;
-           target_y = d.source.y-70;
+                pnt = [
+                    "M",s_x,s_y,
+                    "A",dr,dr,0,0,1,mx,my,
+                    "A",dr,dr,0,0,1,t_x,t_y
+                ];
+            }else{
+
+                // Affects Loop Size
+                target_x = s_x+70;
+                target_y = s_y-70;
+                
+                dx = target_x - s_x;
+                dy = target_y - s_y;
+                dr = Math.sqrt(dx * dx + dy * dy)/1.5;
+                mx = s_x + dx;
+                my = s_y + dy;
            
-           var dx = target_x - d.source.x,
-               dy = target_y - d.source.y,
-               dr = Math.sqrt(dx * dx + dy * dy)/1.5,
-               mx = d.source.x + dx,
-               my = d.source.y + dy;
-           
+                pnt = [
+                    "M",s_x,s_y,
+                    "A",dr,dr,0,0,1,mx,my,
+                    "L",s_x+35,s_y-35,
+                    "L",s_x,s_y
+                ];
+            }
+        }else{ // Node to Node Link
+
+            var dx, dy, tg, dx2, dy2, mdx, mdy;
+
+            if(currentMode == 'infoboxes_full'){
+
+                // Relevant svg Elements/Items
+                var $source_rect = $($('.id'+d.source.id).find('rect[rtyid="'+ d.source.id +'"]')[0]),
+                    $target_rect = $($('.id'+d.target.id).find('rect[rtyid="'+ d.target.id +'"]')[0]),
+                    $detail = $('.id'+d.source.id).find('[dtyid="'+ d.relation.id +'"]'),
+                    $rectype = $('.id'+d.target.id).find('text[rtyid="'+ d.target.id +'"]');
+
+                // Get the width for source and target rectangles
+                var source_width = Number($source_rect.attr('width')),
+                    target_width = Number($target_rect.attr('width'));
+
+                var icon_cnt = settings.isDatabaseStructure ? 4 : 3;
+
+                // Get detail's y location within the source object
+                var detail_y = Number($detail.attr('y')) / 2;
+                s_y = s_y + detail_y + rec_link_count[d.source.id];
+
+                // Left Side: x Point for starting and ending nodes
+                s_x -= iconSize;
+                t_x -= iconSize;
+                // Right Side: x Point for starting and ending nodes
+                var r_source_x = s_x + source_width;
+                var r_target_x = t_x + target_width;
+
+                // Differences between points (x coord)
+                var right_diff = (r_target_x - r_source_x > r_source_x - r_target_x) ? r_target_x - r_source_x : r_source_x - r_target_x;
+                var left_diff = (t_x - s_x > s_x - t_x) ? t_x - s_x : s_x - t_x;
+                // Highest and lowest points (y coord)
+                var h_lowest = (s_y < t_y) ? s_y : t_y;
+                var h_highest = (h_lowest == s_y) ? t_y : s_y;
+
+                var same_side = false;
+
+                if(r_source_x < t_x-iconSize){ // Right to Left Connection, Change source x location
+                    s_x = r_source_x;
+                }else if(s_x-iconSize > r_target_x){ // Left to Right Connection, Change target x location
+                    t_x = r_target_x;    
+                }else if((r_source_x > r_target_x || r_target_x > s_x-iconSize) && right_diff < left_diff){ 
+                // Right to Right Conneciton, Change source and target x location + add bigger bend
+
+                    s_x = r_source_x;
+                    t_x = r_target_x;
+
+                    R += (right_diff + iconSize); 
+
+                    same_side = 'right';
+                }else{ // Left to Left Connection, add bigger bend
+
+                    R -= (left_diff - iconSize);
+                    
+                    same_side = 'left';
+                }
+
+                dx = (t_x-s_x)/2;
+                dy = (t_y-s_y)/2;
+
+                tg = (dx!=0)?Math.atan(dy/dx):0;
+
+                dx2 = dx-R*Math.sin(tg);
+                dy2 = dy+R*Math.cos(tg);
+
+                if(same_side){
+
+                    // Determine x location, move away from source/target boxes
+                    if(same_side == 'right'){
+                        mdx = (s_x < t_x) ? t_x : s_x;
+                        mdx += right_diff + (iconSize * 2);
+
+                        if(Math.abs(right_diff) <= 50){
+                            mdx += 30;
+                        }
+                    }else if(same_side == 'left'){
+                        mdx = (s_x > t_x) ? t_x : s_x;
+                        mdx -= (left_diff * 2) - iconSize;
+
+                        if(Math.abs(left_diff) <= 50){
+                            mdx -= 30;
+                        }else if(Math.abs(mdx - s_x) > 50 || Math.abs(mdx - t_x) > 50){
+                            mdx += 30;
+                        }
+                    }
+
+                    // Increase y location, so it isn't floating off to the side or below source/target
+                    mdy = h_highest - ((h_highest - h_lowest) / 2);
+                }else{
+
+                    mdx = s_x + dx2;
+                    mdy = s_y + dy2;
+                }
+            }else{
+
+                dx = (t_x-s_x)/2;
+                dy = (t_y-s_y)/2;
+
+                tg = (dx!=0)?Math.atan(dy/dx):0;
+
+                dx2 = dx-R*Math.sin(tg);
+                dy2 = dy+R*Math.cos(tg);
+
+                mdx = s_x + dx2;
+                mdy = s_y + dy2;
+            }
+
             pnt = [
-              "M",d.source.x,d.source.y,
-              "A",dr,dr,0,0,1,mx,my,
-              //"A",dr,dr,0,0,1,target_x,target_y,
-              "L",d.source.x+50,d.source.y-50,
-              "L",d.source.x,d.source.y
-              //"A",dr,dr,0,0,1,d.source.x,d.source.y
+                "M", s_x, s_y,
+                "L", mdx, mdy,
+                "L", t_x, t_y 
             ];
-           
-       }else{ // Node to Node Link
-       
-           var dx = (target_x-d.source.x)/2;
-           var dy = (target_y-d.source.y)/2;
-
-           var tg = (dx!=0)?Math.atan(dy/dx):0;
-           
-           var dx2 = dx-R*Math.sin(tg);
-           var dy2 = dy+R*Math.cos(tg);
-      
-           pnt = [
-                  "M", d.source.x, d.source.y,
-                  "L", (d.source.x + dx-R*Math.sin(tg)), (d.source.y + dy+R*Math.cos(tg)),
-                  "L", target_x, target_y ];
-  
-       }
+        }
        
        return pnt.join(' '); 
     });
-    
 }
 
 function updateSteppedLines(lines, type){

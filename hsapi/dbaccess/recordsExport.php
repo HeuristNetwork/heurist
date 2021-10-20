@@ -326,6 +326,7 @@ XML;
     $need_record_details = ($params['format']!='gephi');
     $columns = array('0'=>array()); //for datatable
     $row_placeholder = array();
+    $need_rec_type = false;
     
     if(@$params['leaflet']){
         //for leaflet get only limited set of fields 
@@ -358,15 +359,20 @@ XML;
                 }
 
                 if($col_name=='rec_Tags'){
-                    $need_tags = true;           
+                    $need_tags = true;
                 }else if($rt_id==0){
-                     if(strpos($col_name,'rec_')===0){
-                         array_push($retrieve_fields, $col_name);    
-                     }else{
-                         array_push($need_record_details, $col_name);
-                     }
+                    if(strpos($col_name,'rec_')===0){
+                        array_push($retrieve_fields, $col_name);
+                    }else if(strpos($col_name, 'lt')===0 || strpos($col_name, 'rt')===0){
+                        array_push($need_record_details, substr($col_name, 2));
+                    }else{
+                        if($col_name === 'typename'){
+                            $need_rec_type = true;
+                        }else{
+                             array_push($need_record_details, $col_name);
+                        }
+                    }
                 }
-                
                 
                 if(!array_key_exists($rt_id, $columns)) {
                       $columns[$rt_id] = array();
@@ -470,7 +476,15 @@ XML;
         }else if($params['format']=='json'){ 
             
             if(@$params['datatable']>0){
-                
+
+                if($need_rec_type){ // Add record type to details
+
+                   $query = 'select rty_Name from defRecTypes where rty_ID = ' . $rty_ID . ' LIMIT 1';
+
+                   $type = mysql__select_value(self::$system->get_mysqli(), $query);
+                   $record['typename'] = $type;
+                }
+
                 $feature = self::_getJsonFlat( $record, $columns, $row_placeholder );
                 fwrite($fd, $comma.json_encode($feature));
                 
@@ -1191,10 +1205,9 @@ $columns:
 5: ["1", "38"]
 */
 private static function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
-    
-    
+
     $res = ($level==0)?$row_placeholder:array();
-    
+
     if($level==0){
         $rt_id = 0;
     }else{
@@ -1202,91 +1215,96 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
     }
 
     if(!array_key_exists($rt_id, $columns)) return null;
-    
+
     foreach($columns[$rt_id] as $column){
 
         $col_name = $column; //($rt_id>0 ?$rt_id.'.':'').   
-        
+
         if ($column=='rec_Tags'){
             $value = recordSearchPersonalTags(self::$system, $record['rec_ID']);
             $res[$col_name] = ($value==null)?'':implode(' | ', $value);
         }else if(strpos($column,'rec_')===0){
-            $res[$col_name] = $record[$column];       
+            $res[$col_name] = $record[$column];
+        }else if(strpos($column, 'typename')===0){
+            $res[$col_name] = $record[$column];
         }else{
             $res[$col_name] = ''; //placeholder
         }
     }
-    
-    
+
     if(self::$defDetailtypes==null){
         self::$defDetailtypes = dbs_GetDetailTypes(self::$system, null, 2);   
     }
     $idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
-    
+
     //convert details to proper JSON format
     if(@$record['details'] && is_array($record['details'])){
-        foreach ($record['details'] as $dty_ID=>$field_details) {
-        
-        if(!in_array($dty_ID, $columns[$rt_id])) continue;
-        
-        $col_name = $dty_ID; //($rt_id>0 ?$rt_id.'.':'').$dty_ID;
-        
-        $res[$col_name] = array();
-        $field_type = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
-        
-        foreach($field_details as $dtl_ID=>$field_value){ //for detail multivalues
-        
-            if($field_type=='resource'){
-                
-                //if multi constraints - search all details
-                $link_rec_ID =  $field_value['id'];
-                $record = recordSearchByID(self::$system, $link_rec_ID, true, null );
-                $field_value = self::_getJsonFlat( $record, $columns, null, $level+1 );
-                
-                if($field_value!=null){
-                    $rt_id_link = $record['rec_RecTypeID'];
-                    if(@$res[$rt_id_link]){
-                        foreach($field_value as $col=>$field){
-                            if(@$res[$rt_id_link][$col]==null || $res[$rt_id_link][$col]==''){
-                                $res[$rt_id_link][$col] = $field;
-                            }else{
-                                if(!is_array($res[$rt_id_link][$col])){
-                                    $res[$rt_id_link][$col] = array($res[$rt_id_link][$col]);
-                                }
-                                array_push($res[$rt_id_link][$col], $field);
-                            }    
-                        }
-                    }else{
-                        $res[$rt_id_link] = $field_value;    
-                    }
-                }
-                $field_value = $link_rec_ID;
-                
-            }else if ($field_type=='file'){
-                
-                $field_value = $field_value['file']['ulf_ObfuscatedFileID'];
-                
-            }else if ($field_type=='geo'){
 
-                $field_value = @$field_value['geo']['wkt'];
-                
-            //}else if ($field_type=='enum' || $field_type=='relationtype'){
+        foreach ($record['details'] as $dty_ID=>$field_details) {
+
+            $field_type = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
+
+            if($field_type=='resource' && in_array('lt'.$dty_ID, $columns[0]) !== false){ // account for resources, which expects 'lt' before the Id
+                $dty_ID = 'lt'.$dty_ID;
             }
-            
-            if($field_value!=null){
-                array_push($res[$col_name], $field_value);
-            }
-        } //for detail multivalues
-        
-        if(count($res[$col_name])==1){
-            $res[$col_name] = $res[$col_name][0];  
-        } 
-    } //for all details of record
+
+            if(!in_array($dty_ID, $columns[$rt_id])) continue;
+
+            $col_name = $dty_ID; //($rt_id>0 ?$rt_id.'.':'').$dty_ID;
+
+            $res[$col_name] = array();
+
+            foreach($field_details as $dtl_ID=>$field_value){ //for detail multivalues
+
+                if($field_type=='resource'){
+
+                    //if multi constraints - search all details
+                    $link_rec_Id =  $field_value['id'];
+                    $record = recordSearchByID(self::$system, $link_rec_Id, true, null );
+                    $field_value = self::_getJsonFlat( $record, $columns, null, $level+1 );
+
+                    if($field_value!=null){
+                        $rt_id_link = $record['rec_RecTypeID'];
+                        if(@$res[$rt_id_link]){
+                            foreach($field_value as $col=>$field){
+                                if(@$res[$rt_id_link][$col]==null || $res[$rt_id_link][$col]==''){
+                                    $res[$rt_id_link][$col] = $field;
+                                }else{
+                                    if(!is_array($res[$rt_id_link][$col])){
+                                        $res[$rt_id_link][$col] = array($res[$rt_id_link][$col]);
+                                    }
+                                    array_push($res[$rt_id_link][$col], $field);
+                                }    
+                            }
+                        }else{
+                            $res[$rt_id_link] = $field_value;    
+                        }
+                    }
+                    $field_value = $link_rec_Id;
+
+                }else if ($field_type=='file'){
+
+                    $field_value = $field_value['file']['ulf_ObfuscatedFileID'];
+
+                }else if ($field_type=='geo'){
+
+                    $field_value = @$field_value['geo']['wkt'];
+
+                //}else if ($field_type=='enum' || $field_type=='relationtype'){
+                }
+
+                if($field_value!=null){
+                    array_push($res[$col_name], $field_value);
+                }
+            } //for detail multivalues
+
+            if(count($res[$col_name])==1){
+                $res[$col_name] = $res[$col_name][0];  
+            } 
+        } //for all details of record
     }
 
     return $res;
-    
-    
 }
 
 //

@@ -478,9 +478,33 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     // Copy the images and the icons directories
     //TODO: Needs error report, trap error and warn or abort clone
     if($nodata){
-        DbUtils::databaseCreateFolders($targetdbname);
 
-// *** DO NOT FORGET TO ADD NEW DIRECTORIES TO CLONING FUNCTION **         
+		$warnings = array();
+        $warnings = DbUtils::databaseCreateFolders($targetdbname);
+
+        if(count($warnings) > 0){ // Catch if db root directory or any sub directory couldn't be created
+
+            DbUtils::databaseDrop(false, $targetdbname_full, false);
+
+            if(count($warnings) == 2 && $warnings['revert']){
+
+                sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database root folder', $warnings['message'], null);
+                if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
+                    sendEmail(HEURIST_MAIL_TO_ADMIN, 'Unable to create database root folder', $warnings['message'], null);
+                }
+            }else{
+
+                sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database sub directories', "Unable to create the sub directories within the database root directory,\nDatabase name: " . $targetdbname . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings: " . implode(",\n", $warnings), null);
+                if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
+                    sendEmail(HEURIST_MAIL_TO_ADMIN, "Unable to create the sub directories within the database root directory,\nDatabase name: " . $targetdbname . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings:\n" . implode(",\n", $warnings), null);
+                }
+            }
+
+            print '<br><strong>Sorry, we were not able to create all file directories required by the database.</strong><br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.';
+            return false;
+        }
+
+// *** DO NOT FORGET TO ADD NEW DIRECTORIES TO CLONING FUNCTION **
 
         folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/smarty-templates", 
                     HEURIST_FILESTORE_ROOT.$targetdbname."/smarty-templates" );

@@ -452,7 +452,7 @@ class DbUtils {
         if (folderCreate($database_folder, true)){
             folderAddIndexHTML( $database_folder ); //add index file to block directory browsing
         }else{
-            return array('Database root folder. Please check/create directory by hand. Please '.CONTACT_HEURIST_TEAM.' if needed');
+            return array('message'=>"Heurist was unable to create the required database root folder,\nDatabase name: " . $database_name . "\nServer url: " . HEURIST_BASE_URL, 'revert'=>true);
         }
 
         $warnings = array();

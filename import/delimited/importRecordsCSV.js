@@ -1677,7 +1677,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
             // mapping selector
             s = s + '<td style="width:300px;">'
-                + (isIDfield && !mode_display_separate?'<span style="padding:4px 0px">Column to hold Heurist Record IDs</span>':'')
+                + (isIDfield && !mode_display_separate?'<span style="padding:4px 0px">&lt; Column to hold Heurist Record IDs &gt;</span>':'')
                 + '&nbsp;<span style="display:none;">'
                 + '<select id="sa_dt_'+i+'" style="width:280px; font-size: 1em;" data-field="'+i+'" '
                 //+ ' title="Only matchable fields - text, numeric, date, terms - are shown" '
@@ -1774,13 +1774,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             //without sections and separators
             $('#tblFieldMapping > tbody').html(
                 '<tr height="40" class="helper" style="display:none"><td class="subh" colspan="5" style="padding:0 20px">'
-                    +'<span style="background:rgba(151, 244, 128, 0.83)">MATCHING</span> Choose only the fields you need to match</td></tr>'
+                    +'<span style="background:rgba(151, 244, 128, 0.83)">MATCHING</span> Choose only the fields you need to match &nbsp;&nbsp;'
+                    +'<span style="color:green;">Note: ONLY fields suitable for matching are shown in this step.</span>'
+                +'</td></tr>'
                 +sID_field+sIndexes+sAllFields
                 +'<tr height="40" style="border-bottom:1px solid lightgray"><td class="subh" colspan="5">'
                 +'<a href="#" class="lnk_SelectAll" style="font-size:smaller">Select all/none</a></td></tr>');
-            
-            //make bootom line for sIndex
-            $('#tblFieldMapping > tbody > tr:first').next().find('td').css('border-bottom','1px solid lightgray');
         }
         
         //init listeners
