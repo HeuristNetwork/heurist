@@ -588,13 +588,13 @@ error_log(print_r($_REQUEST, true));
                     .(($check==-1)
                     ?'does not exist (check setting in heuristConfigIni.php file)'
                     :'is not writeable by PHP (check permissions)')
-                    .'<br>On a multi-tier service, the file server may not have restarted correctly or '
-                    .'may not have been mounted on the web server.</p>';
+                    .'<br><br>On a multi-tier service, the file server may not have restarted correctly or '
+                    .'may not have been mounted on the web server.';
 
             // Error needs extra attention, send an email now to Heurist team/Bug report
             sendEmail(HEURIST_MAIL_TO_BUG, $title, $body, null);
 
-            $this->addError(HEURIST_SYSTEM_FATAL, $body);
+            $this->addError(HEURIST_SYSTEM_FATAL, $body, null, "Problem opening database");
             return false;
         }
         
