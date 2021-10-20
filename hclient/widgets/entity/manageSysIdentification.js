@@ -56,7 +56,12 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
             var fele = this.element.find('.ent_wrapper:first');
             $(fele).on("mouseleave", function(e){
                 if($(e.target).is('button')){ return; } // for Rectype Select popup
-                that.defaultBeforeClose(); 
+                
+                setTimeout(function(){ // Determine if user has switched tabs/minimised window
+                    if(document.hasFocus()){
+                        that.defaultBeforeClose();
+                    }
+                }, 200);
             });
         }
             
