@@ -303,10 +303,14 @@ window.hWin.HEURIST4.dbs = {
                 }
                 
                 if(all_header_fields || $fieldtypes.indexOf('typeid')>=0 || $fieldtypes.indexOf('rec_RecTypeID')>=0){
-                    $children.push({key:'rec_RecTypeID', title:'Record TypeID', code:$recTypeId+_separator+'typeid', name: 'Record type id'});
+                    $children.push({key:'rec_RecTypeID', 
+                        title:('Record TypeID'+($mode!=7?' <span style="font-size:0.7em">(Integer)</span>':'')), 
+                        code:$recTypeId+_separator+'typeid', name: 'Record type ID'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('typename')>=0 || $fieldtypes.indexOf('rec_TypeName')>=0){
-                    $children.push({key:'rec_TypeName', title:'Record TypeName', code:$recTypeId+_separator+'typename', name: 'Record type'});
+                    $children.push({key:'rec_TypeName', 
+                        title:('Record TypeName'+($mode!=7?' <span style="font-size:0.7em">(Text)</span>':'')), 
+                        code:$recTypeId+_separator+'typename', name: 'Record type'});
                 }
                 
                 if(all_header_fields || $fieldtypes.indexOf('added')>=0 || $fieldtypes.indexOf('rec_Added')>=0){

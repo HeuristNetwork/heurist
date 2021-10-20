@@ -269,8 +269,9 @@ that._dout('myOnShowEvent');
                         }else{
                             var ids = cols[i]['data'].split('.');
                             if(ids && ids.length>0){
-                                var dt = ids[ids.length-1];    
-                                if($Db.dty(dt,'dty_Type')=='enum'){
+                                var dt = ids[ids.length-1];
+                                var type = $Db.dty(dt,'dty_Type');
+                                if(type=='enum' || type=='relationtype'){
                                     cols[i]['render'] = function(data,type){
                                         if (type === 'display') {
                                             return (data>0)?$Db.trm(data,'trm_Label'):data;
@@ -351,12 +352,12 @@ this._dout('reload datatable '+this.options.serverSide);
                     
         var that = this;
         
-        // Add title to column headers (th)
-        var col_headers = $('div.dataTables_scrollHead th');
-        if(col_headers.length > 0){
-            $.each(col_headers, function(idx, header){
-                
-                var $ele = $(header);
+        // Add title to elements that will truncate
+        var cells = this.div_content.find('div.dataTables_scroll td.truncate, div.dataTables_scroll th.truncate');
+        if(cells.length > 0){
+            $.each(cells, function(idx, cell){
+
+                var $ele = $(cell);
                 $ele.attr('title', $ele.text());
             });
         }

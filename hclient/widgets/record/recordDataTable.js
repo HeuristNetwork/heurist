@@ -346,107 +346,69 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
     // mode_action true - returns columns for DataTable, false - returns codes of selected nodes
     //
     getSettings: function( mode_action ){
-            /*
-            var header_fields = {id:'rec_ID',title:'rec_Title',url:'rec_URL',modified:'rec_Modified',tags:'rec_Tags'};
-            function __removeLinkType(dtid){
-                if(header_fields[dtid]){
-                    dtid = header_fields[dtid];
-                }else{
-                    var linktype = dtid.substr(0,2); //remove link type lt ot rt  10:lt34
-                    if(isNaN(Number(linktype))){
-                        dtid = dtid.substr(2);
-                    }
-                }
-                return dtid;
+
+        //get selected fields from treeview
+        var selectedFields = false&&mode_action?{}:[];
+        var tree = this.element.find('.rtt-tree').fancytree("getTree");
+        var fieldIds = tree.getSelectedNodes(false);
+        var k, len = fieldIds.length;
+
+        if(len<1){
+            window.hWin.HEURIST4.msg.showMsgFlash('No fields selected. '
+                +'Please select at least one field in tree', 2000);
+            return false;
+        }
+
+        for (k=0;k<len;k++){
+            var node =  fieldIds[k];
+
+            if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
+
+            selectedFields.push(node.data.code);
+        }
+
+        var selectedCols = [];
+        var need_id = true, need_type = true;
+
+        this.element.find('div.rtt-list > div').each(function(idx,item){
+
+			var $item = $(item);
+            var isVisible = $item.find('input.columnVisibility').is(':checked');
+            var data_type = $item.attr('data-key');
+
+            if(data_type == 'ids'){
+                data_type = 'rec_ID';
+            }else if(data_type == 'typeid'){
+                data_type = 'rec_RecTypeID';
             }
-            function __addSelectedField(ids, lvl, constr_rt_id){
-                
-                if(ids.length < lvl) return;
-                
-                //take last two - these are rt:dt
-                var rtid = ids[ids.length-lvl-1];
-                var dtid = __removeLinkType(ids[ids.length-lvl]);
-                
-                if(!selectedFields[rtid]){
-                    selectedFields[rtid] = [];    
-                }
-                if(constr_rt_id>0){
-                    dtid = dtid+':'+constr_rt_id;
-                }
-                
-                //window.hWin.HEURIST4.util.findArrayIndex( dtid, selectedFields[rtid] )<0
-                if( selectedFields[rtid].indexOf( dtid )<0 ) {
-                    
-                    selectedFields[rtid].push(dtid);    
-                    
-                    //add resource field for parent recordtype
-                    __addSelectedField(ids, lvl+2, rtid);
-                }
+
+            var colopts = {
+                data: data_type,                 
+                title: $item.find('span').text(), 
+                visible:  isVisible
+            };
+            if(isVisible && $item.find('select.columnWidth').val()>0){
+                colopts['width'] = $item.find('select.columnWidth').val();
+                colopts['className'] = 'truncate width'+colopts['width'];
             }
-            */
-            //get selected fields from treeview
-            var selectedFields = false&&mode_action?{}:[];
-            var tree = this.element.find('.rtt-tree').fancytree("getTree");
-            var fieldIds = tree.getSelectedNodes(false);
-            var k, len = fieldIds.length;
-            
-            if(len<1){
-                window.hWin.HEURIST4.msg.showMsgFlash('No fields selected. '
-                    +'Please select at least one field in tree', 2000);
-                return false;
-            }
-            
-            
-            for (k=0;k<len;k++){
-                var node =  fieldIds[k];
-                
-                if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
-                
-                if(false && mode_action){
-                    var ids = node.data.code.split(":");
-                    __addSelectedField(ids, 1, 0);
-                }else{
-                    selectedFields.push(node.data.code);
-                }
-                
-                //DEBUG console.log( node.data.code );
-            }
-            
-            var selectedCols = [];
-            var need_id = true, need_type = true;
-            
-            this.element.find('div.rtt-list > div').each(function(idx,item){
-                var $item = $(item);
-                var isVisible = $item.find('input.columnVisibility').is(':checked');
-                var colopts = {
-                    data: $item.attr('data-key'),                 
-                    title: $item.find('span').text(), 
-                    visible:  isVisible
-                };
-                if(isVisible && $item.find('select.columnWidth').val()>0){
-                    colopts['width'] = $item.find('select.columnWidth').val();
-                    colopts['className'] = 'truncate width'+colopts['width'];
-                }
-                
-                selectedCols.push(colopts);
-                if(need_id && $item.attr('data-key')=='rec_ID') need_id = false;
-                if(need_type && $item.attr('data-key')=='rec_RecTypeID') need_type = false;
-            });
-            if(need_id){
-                selectedCols.push({data:'rec_RecTypeID',title:'Record type',visible:false});    
-            }
-            if(need_type){
-                selectedCols.push({data:'rec_ID',title:'ID',visible:false});    
-            }
-            if(selectedCols.length==2){
-                selectedCols = null;//.push({data:'rec_Title',title:'Title',visible:true});    
-            }
-            
-            //DEBUG 
-        //console.log( selectedFields )
+
+            selectedCols.push(colopts);
+            if(need_id && data_type == 'rec_ID') need_id = false;
+            if(need_type && (data_type=='rec_RecTypeID' || data_type=='typename')) need_type = false;
+        });
+
+        if(need_id){
+            selectedCols.push({data:'rec_ID',title:'ID', visible:false});
+        }
+        if(need_type){
+            selectedCols.push({data:'rec_RecTypeID',title:'Record type ID', visible:false});
+        }
+        if(selectedCols.length==2){
+            selectedCols = null;//.push({data:'rec_Title',title:'Title',visible:true});    
+        }
+
         //fields for treeview, columns for datatable
         return { rty_ID:this.selectRecordScope.val(), fields: selectedFields, columns: selectedCols };
-        
     },
 
     //
