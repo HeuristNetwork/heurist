@@ -427,24 +427,38 @@ function handleSettingsInUI() {
 }
 
 function initRecTypeSelector(){
-    
-    $('#showRectypeSelector').button(
-        {icons:{secondary:'ui-icon-carat-1-s'}}   //triangle-1-s
-    ).css({'padding':'4px 2px'})
-    .click(
-        function(){
-            var ele = $('#list_rectypes');
-            if(ele.is(':visible')){
-                ele.hide();     
-                $(this).button({icons:{secondary:'ui-icon-carat-1-s'}});
-            }else{
-                ele.show();     
-                $(this).button({icons:{secondary:'ui-icon-carat-1-n'}});
-            }
+
+    var layout_options = { 
+        applyDefaultStyles: true,
+        center:{
+            size: $('#main_content').width(),
+            contentSelector: '#main_content'
+        },
+        west:{
+            size:400,
+            maxWidth:400,
+            spacing_open:15,
+            spacing_closed:15,  
+            togglerAlign_open:'center',
+            togglerAlign_closed:'center',
+            initClosed:true, // hide on init
+            slidable:false,  // disable sliding
+            resizable:false, // disable resizing
+            contentSelector: '#list_rectypes',
+            onopen_start: function(){ 
+                $('#list_rectypes').show();
+            },
+            onclose_start: function(){ 
+                $('#list_rectypes').hide();
+            },
+            togglerContent_open:    '<div class="ui-icon ui-icon-carat-2-w"></div>',
+            togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-e"></div>'
         }
-    );
-    
-    $('#rectypeSelector').css('display','table-cell');     
+    };
+
+    $($('body.popup div.ent_wrapper')[0]).layout(layout_options);
+
+    $('#rectypeSelector').css('display','table-cell');
 }
 
 function _syncUI(){
@@ -503,7 +517,14 @@ function changeViewMode(mode){
         var isLabelVisible = (currentMode != 'icons') || (getSetting(setting_labels)=='on');
         d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
 
+        $.each(d3.selectAll("image.menu-open")[0], function(idx, ele){
+            var event = new MouseEvent("mouseup");
+            ele.dispatchEvent(event);
+        });
+
         _syncUI();
+
+        tick();
     }
 }
 

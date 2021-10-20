@@ -145,11 +145,11 @@ function preventMenu(event) {
 
 function closeRectypeSelector(){     
     if(settings.isDatabaseStructure){
-            var ele = $('#list_rectypes');
-            if(ele.is(':visible')){
-                ele.hide();     
-                $('#showRectypeSelector').button({icons:{secondary:'ui-icon-carat-1-s'}});
-            }
+		var ele = $('#list_rectypes');
+		if(ele.is(':visible')){
+			ele.hide();     
+			$('#showRectypeSelector').button({icons:{secondary:'ui-icon-carat-1-s'}});
+		}
     }
 }
 

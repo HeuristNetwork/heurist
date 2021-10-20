@@ -77,12 +77,6 @@ A:link {
                 text-decoration: none;
                 cursor: pointer;
             }
-            
-            #list_rectypes{
-                background: white;
-                z-index: 9999;
-                top: 5em !important;                
-            }
 
             #visualisation {
                 width: 100%;
@@ -105,6 +99,10 @@ A:link {
                 display:none;
             }
         </style>
+
+        <!-- Layouts -->
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.layout/jquery.layout-latest.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/layout.js"></script>
 
         <!-- D3 -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/d3/d3.js"></script>
@@ -160,95 +158,100 @@ A:link {
     <body class="popup" style="background-color: #FFF;">
     
         <div class="ent_wrapper">
-                <div id="list_rectypes" class="ent_wrapper" style="width:350px;display:none">
+
+            <div class="ui-layout-west">
+                <div id="list_rectypes" class="ent_wrapper" style="display:none;">
                     <div class="ent_header" style="display:none">
                         <h3 id="table-header">Record types (entities)</h3>
                         <button id="expand">Expand &#10142;</button>
                     </div>
                     <div class="ent_content_full" style="padding-left:10px; top:0">
-    
-                    <table id="records" class="records" cellpadding="4" cellspacing="1">
 
-                        <tr>
-                            <th width="40">ID</th>
-                            <th class="space">Icon</th>
-                            <th class="space" width="200">Record&nbsp;type</th>
-                            <th class="space">Link</th>
-                            <th class="space">Count</th>
-                            <th class="space show">Show <input type='checkbox' id="show-all"></th>
-                        </tr>
+                        <table id="records" class="records" cellpadding="4" cellspacing="1">
 
-                        <?php
-                        /** RETRIEVING RECORDS WITH CONNECTIONS */
-                        // Building query
-                        $query = "SELECT d.rty_ID as id, rg.rtg_Name grp, d.rty_Name as title, sum(if(r.rec_FlagTemporary!=1, 1, 0)) as count 
-FROM defRecTypes d LEFT OUTER JOIN Records r ON r.rec_RectypeID=d.rty_ID,
-defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID 
- GROUP BY id ORDER BY rtg_Order, title ASC";
-                        // Put record types & counts in the table
-                        $res = $system->get_mysqli()->query($query);
-                        $count = 0; 
-                        $grp_name = null;
-                        $first_grp  = 'first_grp';
-                        
-                        while($row = $res->fetch_assoc()) { // each loop is a complete table row
-                            $rt_ID = $row["id"];
-                            $title = htmlspecialchars($row["title"]);
-                        
-                            if($grp_name!=$row['grp']){
-                                if($grp_name!=null) $first_grp = '';
-                                $grp_name = $row['grp'];
-                                ?>
-                        <tr class="row">
-                            <td colspan="6" style="padding-left:10px"><h2><?php echo htmlspecialchars($row["grp"]);?></h2></td>
-                        </tr>
-                                <?php
-                            }
-                                
-                            // ID
-                            echo "<tr class='row'>";
-                            echo "<td align='center'>$rt_ID</td>";
+                            <tr>
+                                <th width="40">ID</th>
+                                <th class="space">Icon</th>
+                                <th class="space" width="200">Record&nbsp;type</th>
+                                <th class="space">Link</th>
+                                <th class="space">Count</th>
+                                <th class="space show">Show <input type='checkbox' id="show-all"></th>
+                            </tr>
 
-                            //HAPI4.iconBaseURL
-                            // Image
-                            $rectypeImg = "style='background-image:url(".HEURIST_RTY_ICON.$rt_ID.")'";
-                            $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
-                            echo "<td align='center'>$img</td>";
+                            <?php
+                            /** RETRIEVING RECORDS WITH CONNECTIONS */
+                            // Building query
+                            $query = "SELECT d.rty_ID as id, rg.rtg_Name grp, d.rty_Name as title, sum(if(r.rec_FlagTemporary!=1, 1, 0)) as count 
+                                      FROM defRecTypes d LEFT OUTER JOIN Records r ON r.rec_RectypeID=d.rty_ID,
+                                      defRecTypeGroups rg 
+                                      WHERE rg.rtg_ID=d.rty_RecTypeGroupID
+                                      GROUP BY id 
+                                      ORDER BY rtg_Order, title ASC";
+                            // Put record types & counts in the table
+                            $res = $system->get_mysqli()->query($query);
+                            $count = 0; 
+                            $grp_name = null;
+                            $first_grp  = 'first_grp';
+                            
+                            while($row = $res->fetch_assoc()) { // each loop is a complete table row
+                                $rt_ID = $row["id"];
+                                $title = htmlspecialchars($row["title"]);
+                            
+                                if($grp_name!=$row['grp']){
+                                    if($grp_name!=null) $first_grp = '';
+                                    $grp_name = $row['grp'];
+                                    ?>
+                            <tr class="row">
+                                <td colspan="6" style="padding-left:10px"><h2><?php echo htmlspecialchars($row["grp"]);?></h2></td>
+                            </tr>
+                                    <?php
+                                }
+                                    
+                                // ID
+                                echo "<tr class='row'>";
+                                echo "<td align='center'>$rt_ID</td>";
 
-                            // Type
-                            echo "<td style='padding-left: 5px; padding-right: 5px'>"
-                            ."<a href='#' title='Open search for this record type in current page' onclick='onrowclick($rt_ID, false)' class='dotted-link'>"
-                            .$title.
-                            "</a></td>";
+                                //HAPI4.iconBaseURL
+                                // Image
+                                $rectypeImg = "style='background-image:url(".HEURIST_RTY_ICON.$rt_ID.")'";
+                                $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
+                                echo "<td align='center'>$img</td>";
 
-                            // Link
-                            echo "<td align='center'><a href='#' title='Open search for this record type in new page' onclick='onrowclick($rt_ID, true)' class='external-link'>&nbsp;</a></td>";
+                                // Type
+                                echo "<td style='padding-left: 5px; padding-right: 5px'>"
+                                ."<a href='#' title='Open search for this record type in current page' onclick='onrowclick($rt_ID, false)' class='dotted-link'>"
+                                .$title.
+                                "</a></td>";
 
-                            // Count
-                            echo "<td align='center'>" .$row["count"]. "</td>";
+                                // Link
+                                echo "<td align='center'><a href='#' title='Open search for this record type in new page' onclick='onrowclick($rt_ID, true)' class='external-link'>&nbsp;</a></td>";
 
-                            // Show
-                            if($row["count"] > 0 && $count < 10) {  //this record type has records
-                                echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record' name='" .$title. "' checked='true'></td>";
-                                $count++;
-                            }else{
-                                echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record $first_grp' name='" .$title. "'></td>";
-                            }
-                            echo "</tr>";
-                        }                      
-                        ?>
+                                // Count
+                                echo "<td align='center'>" .$row["count"]. "</td>";
 
-                    </table>
-                        
-                       
+                                // Show
+                                if($row["count"] > 0 && $count < 10) {  //this record type has records
+                                    echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record' name='" .$title. "' checked='true'></td>";
+                                    $count++;
+                                }else{
+                                    echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record $first_grp' name='" .$title. "'></td>";
+                                }
+                                echo "</tr>";
+                            }                      
+                            ?>
+
+                        </table>
+
                     </div>
                 </div>
-                <div class="ent_wrapper" style="left:0px">
+            </div>
+
+            <div class="ui-layout-center">
+                <div id="main_content" class="ent_wrapper" style="left:0px">
                     <?php include dirname(__FILE__).'/visualize.html';?>
                 </div>
-        </div>    
-
-                    
+            </div>
+        </div>
 
         <script>
             $("#expand").click(function(e) {
