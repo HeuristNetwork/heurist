@@ -156,10 +156,9 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                             }else
                             if(strpos($dir, '/misc/heur-filestore/')===0){
                                 $dir = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $dir);
-                            /*}else
-                            if(strpos($dir, '/data/HEURIST_FILESTORE')===0){  //for huma-num
-                                $dir = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $dir);
-                            */    
+                            }else
+                            if(strpos($dir, '/data/HEURIST_FILESTORE/')===0){  //for huma-num
+                                $dir = str_replace('/data/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $dir);
                             }
                             $dir = str_replace('\\','/',$dir);     
                             if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
@@ -209,7 +208,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     print ("<p>If you wish to upload files to a directory other than those in the dropdown, or to define additional file extensions,<br />".
                         "go to Design > Properties</p>");
                 }else{
-                    print "<p><b>Allowable extensions for upload:</b> $allowed_exts</p>";
+                    print '<p><b>Allowable extensions for upload:</b>'.implode(', ',$allowed_exts).'</p>';
                 }
                
 //@todo change to entity dialog  
