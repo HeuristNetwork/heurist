@@ -39,22 +39,22 @@
 
 var cfg_widgets = [
 
-    {id:'heurist_Search', name:'Search', widgetname:'search', script:'hclient/widgets/search/search.js'},
-    {id:'heurist_SearchTree', name:'Saved searches', widgetname:'svs_list', script:'hclient/widgets/search/svs_list.js'},
+    {id:'heurist_Search', name:'Search', widgetname:'search', script:'hclient/widgets/search/search.js', minh:80, minw:150},
+    {id:'heurist_SearchTree', name:'Saved searches', widgetname:'svs_list', script:'hclient/widgets/search/svs_list.js', minh:300, minw:200},
     {id:'heurist_Navigation', name:'Navigation', widgetname:'navigation', script:'hclient/widgets/dropdownmenus/navigation.js'},
     {id:'heurist_Groups', name:'Groups'},{id:'heurist_Cardinals', name:'Cardinal layout'},
 
 
     {id:'heurist_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'hclient/widgets/dropdownmenus/mainMenu.js'},
     {id:'heurist_mainMenu6', name:'Main Side Menu', widgetname:'mainMenu6', script:'hclient/widgets/dropdownmenus/mainMenu6.js'},
-    {id:'heurist_resultList', name:'Search Result', widgetname:'resultList', script:'hclient/widgets/viewers/resultList.js'},
+    {id:'heurist_resultList', name:'Search Result', widgetname:'resultList', script:'hclient/widgets/viewers/resultList.js', minh:300, minw:150},
     {id:'heurist_resultListDataTable', name:'List View', widgetname:'resultListDataTable', script:'hclient/widgets/viewers/resultListDataTable.js'},
     {id:'heurist_resultListExt', name:'&nbsp;&nbsp;&nbsp;', widgetname:'recordListExt', script:'hclient/widgets/viewers/recordListExt.js'},
     {id:'heurist_resultListCollection', name:'Records Collection', widgetname:'resultListCollection', script:'hclient/widgets/viewers/resultListCollection.js'},
 
     {id:'heurist_Map', name:'Map (old)', title:'Map and timeline', widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js'},  // map in iframe
     {id:'heurist_Map2', name:'Map', title:'Map and timeline',
-                widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js'},  // map in iframe
+                widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js', minh:300, minw:300},  // map in iframe
     {id:'heurist_Frame', name:'Static Page', widgetname:'staticPage', script:'hclient/widgets/viewers/staticPage.js'},
 
     {id:'heurist_Graph', name:'Network', widgetname:'connections', script:'hclient/widgets/viewers/connections.js'},

@@ -286,6 +286,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         
         window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
             function (response) {
+                
                 if(response.status != window.hWin.ResponseStatus.OK || response.message){
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                     that.action_in_progress = false;

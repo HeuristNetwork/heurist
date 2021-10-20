@@ -17,6 +17,20 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+
+/*
+
+group:
+
+    if parent root, tab or pane - group is ent_wrapper
+
+widget:
+    has predefined min-height,min-width
+    if parent tab, flex or pane - has class ent_wrapper (absolute 100%)
+
+
+*/
+
 var editCMS_instance2 = null;
 
 //
@@ -28,9 +42,12 @@ function editCMS2(){
 
     var _lockDefaultEdit = false;
     
-    var _layout_treeview, 
-        _layout_content, //JSON to init
-        _layout_container;
+    var _panel_treePage,     // panel with treeview for current page 
+        _panel_treeWebSite,  // panel with tree menu - website structure
+        _panel_propertyView, // panel with selected element properties
+        
+        _layout_content,   // JSON config 
+        _layout_container; // main-content with CMS content
 
     var is_edit_widget_open; //??
         
@@ -63,19 +80,30 @@ function editCMS2(){
                 
                 new_ele.appendTo(body);
             
-                $('<div class="ui-layout-east"><div class="editStructure treeview_with_header" style="background:red">'      
-                
-                        +'<div style="padding:10px 20px 4px 0px;border-bottom:1px solid lightgray">' //instruction and close button
+                var east_panel = $('<div class="ui-layout-east">'      
+                        +'<div class="ent_wrapper editStructure">' 
+                        +'<div class="ent_header" style="padding:10px 20px 4px 0px;border-bottom:1px solid lightgray">' //instruction and close button
                             +'<span style="display:inline-block;width:32px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-e"/>'
                             
+                            /*
                             +'<span style="font-style:italic;display:inline-block">Drag to reposition<br>'
                             +'Select or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
+                            */
+                            
+                            +'<button style="float:right;margin-top:4px;" title="Show website/main menu strucuture" class="showTreeWebSite"/>'
                             //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
                         +'</div>'
-                        +'<div class="treeView" style="margin-left:-27px;margin-right:-10px;"/>' //treeview
+                        
+                        +'<div class="treeWebSite ent_content" style="padding:10px;display:none"/>' //treeview
+                        +'<div class="treePage ent_content" style="padding:10px;"/>' //treeview
+                        +'<div class="propertyView ent_content" style="padding:10px;display:none"/>' //edit properties
+                        
+                        +'<div class="ent_footer" style="text-align:center;border-top:1px solid lightgray;padding:2px">'
+                                +'<div class="btn-ok ui-button-action">Save Page</div>'
+                                +'<div class="btn-cancel">Discard</div>'
+                        +'</div>'
                 
                                              +'</div></div>').appendTo(body);
-            
             
             
                     var layout_opts =  {
@@ -121,6 +149,20 @@ function editCMS2(){
                     };
 
                     body.layout(layout_opts); //.addClass('ui-heurist-bg-light')
+
+                    east_panel.find('.btn-ok').button().click(_saveLayoutCfg)
+                    east_panel.find('.btn-cancel').button().click(
+                        function(){
+                            _startCMS({record_id:options.record_id, container:'#main-content', content:null});
+                        }
+                    );
+                    
+                    east_panel.find('.showTreeWebSite').button({icon:'ui-icon-menu'}).click(_showTreeWebSite);
+                    
+                    _panel_propertyView = body.find('.propertyView');
+                    _panel_treeWebSite = body.find('.propertyView');
+
+                    
         }
         
         
@@ -258,10 +300,11 @@ function editCMS2(){
         if(res===false){
             window.hWin.HEURIST4.msg.showMsgFlash('Old format. Edit in Heurist interface');
             //clear treeview
-            _initTreeView([]);
+            _initTreePage([]);
         }else{
             _layout_content = res;
-            _initTreeView(_layout_content);
+            _initTreePage(_layout_content);
+            
         }
         
     }
@@ -318,8 +361,8 @@ function editCMS2(){
                 editor.on('blur', function (e) {
                         var key = tinymce.activeEditor.id.substr(3);
                         //update in _layout_content
-                        var ele = layoutMgr.layoutContentFindElement(_layout_content, key);
-                        ele.content = tinymce.activeEditor.getContent();
+                        var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, key);
+                        l_cfg.content = tinymce.activeEditor.getContent();
                 });
            
                 editor.ui.registry.addButton('customHeuristMedia', {
@@ -387,11 +430,11 @@ function editCMS2(){
     //
     // converts layout JSON content to treeview data
     //
-    function _initTreeView( treeData ){
+    function _initTreePage( treeData ){
         
-        if(_layout_treeview){
+        if(_panel_treePage){
             
-            _layout_treeview.fancytree('getTree').reload(treeData);
+            _panel_treePage.fancytree('getTree').reload(treeData);
             
         }else{
         
@@ -467,16 +510,21 @@ function editCMS2(){
                 }
             }; */
 
-            _layout_treeview = body.find('.treeView').addClass('tree-rts')
+            _panel_treePage = body.find('.treePage').addClass('tree-rts')
                                 .fancytree(fancytree_options); //was recordList
 
         }
         
-            _layout_treeview.fancytree('getTree').visit(function(node){
+        
+        _panel_treePage.show();
+        _panel_propertyView.hide();
+        _panel_treeWebSite.hide();
+        
+        _panel_treePage.fancytree('getTree').visit(function(node){
                 node.setSelected(false); //reset
                 node.setExpanded(true);
             });            
-            _updateActionIcons(500);//it inits timyMCE also
+        _updateActionIcons(500);//it inits timyMCE also
         
     }
 
@@ -489,7 +537,7 @@ function editCMS2(){
         if(!(delay>0)) delay = 1;
 
         setTimeout(function(){
-            $.each( _layout_treeview.find('.fancytree-node'), function( idx, item ){
+            $.each( _panel_treePage.find('.fancytree-node'), function( idx, item ){
                 //var ele_ID = ele.parents('li:first').find('span[data-lid]').attr('data-lid');
                 var ele_ID = $(item).find('span[data-lid]').attr('data-lid');
 
@@ -506,11 +554,11 @@ function editCMS2(){
     function _defineActionIcons(item, ele_ID, style_pos){ 
            if($(item).find('.lid-actionmenu').length==0){
                
-               if(!$(item).hasClass('fancytree-hide')){
+               if(!$(item).hasClass('fancytree-hide')){       
                     $(item).css('display','block');   
                }
 
-               var node = _layout_treeview.fancytree('getTree').getNodeByKey(ele_ID);
+               var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
                
 
                if(node==null){
@@ -524,9 +572,10 @@ function editCMS2(){
                var actionspan = '<div class="lid-actionmenu mceNonEditable" '
                     +' style="'+style_pos+';display:none;color:black;background:#95A7B7 !important;'
                     +'font-size:9px;font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' + ele_ID
-                    + '<span data-action="drag" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Drag to reposition">'
-                    + (is_root?'':'<span class="ui-icon ui-icon-arrow-4" style="font-size:9px;font-weight:normal"/>Drag</span>'               
-                    + '<span data-action="edit" style="background:lightgray;padding:4px;font-size:9px;font-weight:normal" title="Edit properties">')
+                    + (is_root?'':
+                    ('<span data-action="drag" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Drag to reposition">'
+                    + '<span class="ui-icon ui-icon-arrow-4" style="font-size:9px;font-weight:normal"/>Drag</span>'))               
+                    + '<span data-action="edit" style="background:lightgray;padding:4px;font-size:9px;font-weight:normal" title="Edit properties">'
                     +'<span class="ui-icon ui-icon-pencil" style="font-size:9px;font-weight:normal"/>Edit</span>';               
                    
                //hide element for cardinal and delete for its panes                     
@@ -542,10 +591,10 @@ function editCMS2(){
                actionspan += '</div>';
                actionspan = $( actionspan );
                    
-               if($(item).hasClass('fancytree-node')){
+               if($(item).hasClass('fancytree-node')){   //in treeview
                    actionspan.appendTo(item);
-               }else{
-                   actionspan.insertAfter(item);
+               }else{ 
+                   actionspan.insertAfter(item); //in main-content
                    //actionspan.appendTo(body);    
                    //actionspan.position({ my: "left top", at: "left top", of: $(item) })
                }
@@ -669,7 +718,7 @@ function editCMS2(){
     //
     function _layoutRemoveElement(ele_id){
 
-        var tree = _layout_treeview.fancytree('getTree');
+        var tree = _panel_treePage.fancytree('getTree');
         var node = tree.getNodeByKey(ele_id);
         var parentnode = node.getParent();
         var parent_container, parent_children, parent_element;
@@ -684,15 +733,17 @@ function editCMS2(){
             //parent_container = _layout_container;
         }else{
             
+            /*
             if(parentnode.folder && parentnode.countChildren()==1){
                 window.hWin.HEURIST4.msg.showMsgFlash('It is not possible remove the last element in group. Remove the entire group');
                 return;    
             }
+            */
             
             //remove child
             parent_element = layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
             parent_children = parent_element.children;
-            parent_container = _layout_container.find('div[data-lid="'+parentnode.key+'"]');
+            parent_container = _layout_container.find('#hl-'+parentnode.key);//div[data-lid="
             
         }
 
@@ -729,11 +780,391 @@ function editCMS2(){
     //
     // Opens element/widget property editor 
     // 1. css properties
-    // 2. widget properties
+    // 2  flexbox properties
+    // 3. widget properties
     //
     function _layoutEditElement(ele_id){
+    
+        var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
+        var grp_ele = _layout_container.find('#hl-'+ele_id); //element in main-content
+        
+/*        
+    var editFields = [                
+        {"dtID": "name",
+            "dtFields":{
+                "dty_Type":"freetext",
+                "rst_DisplayName":"Name:",
+        }},
+        
+        {
+        "groupHeader": "Styles",
+        "groupTitleVisible": true,
+        "groupType": "accordion",
+            "children":[
+            {"dtID": "background",
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "rst_DisplayName": "Background Color:",
+                    "rst_DisplayHelpText": "Background color for element",
+                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
+                    "rst_DefaultValue": "#e0dfe0"
+            }},
+            {"dtID": "background-image",
+                "dtFields":{
+                    "dty_Type":"file",
+                    "rst_DisplayName": "Background Image:",
+                    "rst_DisplayHelpText": "Background image",
+                    "rst_DefaultValue": ""
+            }},
+            
+            {"dtID": "border-color",
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "rst_DisplayName": "Border Color:",
+                    "rst_DisplayHelpText": "Border color for element",
+                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
+                    "rst_DefaultValue": "#eeeeee"
+            }},
+            {"dtID": "border-width",
+                "dtFields":{
+                    "dty_Type":"integer",
+                    "rst_DisplayName": "Border width:",
+                    "rst_DisplayHelpText": "Border width in pixels"
+            }},
+            {"dtID": "border-radius",
+            "dtFields":{
+                "dty_Type":"integer",
+                "rst_DisplayName": "Corner radius:",
+                "rst_DisplayHelpText": "Value from 0 to 16",
+                "rst_DefaultValue": "0"
+            }}
+        ]}];
+*/        
+      
+        //1. show div with properties over treeview
+        _panel_treePage.hide();
+        _panel_propertyView.show();
+        var cont = _panel_propertyView;
+
+        //2. load content
+        cont.empty();
+        cont.load(window.hWin.HAPI4.baseURL
+            +'hclient/widgets/cms/editCMS_FlexLayout.html', function(){
+        
+        //3. assign values
+        
+        cont.find('input[data-type="element-name"]').val(l_cfg.name);
+        
+        var etype = l_cfg.type?l_cfg.type:(l_cfg.appid?'widget':'text');
+        
+        cont.find('h4').css({margin:0});
+        cont.find('.props').hide();
+        cont.find('.props.'+etype).show();
+        
+        var activePage = (etype=='group'?0:(etype=='widget'?1:2));
+        
+        cont.find('#properties_form').accordion({header:'h3',heightStyle:'content',active:activePage});
+        
+        if(!l_cfg.css) l_cfg.css = {display:'block'};
+        
+        var params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
+        for(var i=0; i<params.length; i++){
+            var prm = params[i];
+            if (l_cfg.css[prm]) cont.find('#'+prm).val(l_cfg.css[prm]);
+        }
+        
+        cont.find('[data-type="css"]').each(function(i,item){
+            var val = l_cfg.css[$(item).attr('name')];
+            if(val){
+                $(item).val($(item).attr('type')=='number'?parseInt(val):val);
+            }
+        });
+        //init color picker
+        cont.find('input[name$="-color"]').colorpicker({
+                        hideButton: false, //show button right to input
+                        showOn: "both"});//,val:value
+        cont.find('input[name$="-color"]').parent('.evo-cp-wrap').css({display:'inline-block',width:'100px'});
+        
+        //load and init widget properties
+        if(etype=='widget'){
+            cont.find('div.widget').empty().load(window.hWin.HAPI4.baseURL
+            +'hclient/widgets/cms/editCMS_WidgetCfg.html',
+                function(){ _widgetConfigInit(ele_id); }
+            );
+        }
+        
+        //
+        //
+        //
+        function __getCss(){
+            var css = {};
+            if(cont.find('#display').val()=='flex'){
+                css['display'] = 'flex';
+                
+                cont.find('.flex-select').each(function(i,item){
+                    if($(item).val()){
+                        css[$(item).attr('id')] = $(item).val();       
+                    }
+                });
+            }else{
+                css['display'] = 'block';
+            }
+            
+            //style - border
+            var val = cont.find('#border-style').val();
+            if(val!='none'){
+                
+                css['border-style'] = val;       
+                
+                cont.find('input[name^="border-"]').each(function(i,item){
+                    if($(item).val()){
+                        css[$(item).attr('name')] = $(item).val()
+                            +($(item).attr('type')=='number'?'px':'');       
+                    }
+                });
+                
+                if(!css['border-width']) css['border-width'] = '1px';
+                if(!css['border-color']) css['border-color'] = 'black';
+            }
+            
+            var ele = cont.find('input[name="margin"]');
+            if(ele.val()) css[ele.attr('name')] = ele.val()+'px';       
+            var ele = cont.find('input[name="padding"]');
+            if(ele.val()) css[ele.attr('name')] = ele.val()+'px';       
+            
+//console.log(css);            
+            return css;
+        }
+        
+        //4. listeners for flex    
+        cont.find('select').hSelect({change:function(event){
+            
+            var ele = $(event.target);
+            var name = ele.attr('id');
+            
+            if(name=='display'){
+                if(ele.val()=='flex'){
+                    cont.find('.flex-select').each(function(i,item){ $(item).parent().show(); })
+                }else{
+                    cont.find('.flex-select').each(function(i,item){ $(item).parent().hide(); })
+                }
+            }else if(name=='border-style'){
+                if(ele.val()=='none'){
+                    cont.find('input[name^="border-"]').each(function(i,item){ $(item).parent().hide(); })
+                }else{
+                    cont.find('input[name^="border-"]').each(function(i,item){ $(item).parent().show(); })
+                }
+            }
+            
+            var css = __getCss();
+            /*
+            css['border'] = '2px dotted gray';                
+            css['border-radius'] = '4px';
+            css['margin'] = '4px';
+            */
+            
+            if(l_cfg.css) css = $.extend(l_cfg.css, css);
+
+            grp_ele.removeAttr('style');
+            grp_ele.css(css);
+        }});
+
+        //initially hide-show        
+        if(cont.find('#display').val()=='flex'){
+            cont.find('.flex-select').each(function(i,item){ $(item).parent().show(); })
+        }else{
+            cont.find('.flex-select').each(function(i,item){ $(item).parent().hide(); })
+        }
+        if(cont.find('#border-style').val()=='none'){
+            cont.find('input[name^="border-"]').each(function(i,item){ $(item).parent().hide(); })
+        }else{
+            cont.find('input[name^="border-"]').each(function(i,item){ $(item).parent().show(); })
+        }
+        
+        //4a.add list of children with flex-grow and flex-basis
+        if(l_cfg.children && l_cfg.children.length>0){
+            var item_ele = cont.find('div[data-flexitem]');
+            var item_last = item_ele;
+            for(var i=0; i<l_cfg.children.length; i++){
+                
+                var child = l_cfg.children[i];
+                
+                var item = item_ele.clone().insertAfter(item_last);
+                item.attr('data-flexitem',i).show();
+                var lbl = item.find('.header_narrow');
+                lbl.text((i+1)+'. '+lbl.text());
+                
+                var val = child.css['flex'];
+                if(val){
+                    val = val.split(' '); //grow shrink basis
+                }else{
+                    val = [0,1,'auto'];
+                }
+                if(val[0]) item.find('input[data-type="flex-grow"]').val(val[0]);
+                if(val.length==3 && val[2]) item.find('input[data-type="flex-basis"]').val(val[2]);
+                
+                item.find('input').change(function(e){
+                    var item = $(e.target).parent();//('div[data-flexitem]');
+                    var k = item.attr('data-flexitem');
+                    
+                    if(!l_cfg.children[k].css) l_cfg.children[k].css = {};
+                    
+                    l_cfg.children[k].css['flex'] = item.find('input[data-type="flex-grow"]').val()
+                            +' 1 '+ item.find('input[data-type="flex-basis"]').val();
+                            
+                    /*l_cfg.children[k].css['border'] = '1px dotted gray';
+                    l_cfg.children[k].css['border-radius'] = '4px';
+                    l_cfg.children[k].css['margin'] = '4px';*/
+                            
+                    var child_ele = _layout_container.find('#hl-'+l_cfg.children[k].key);
+                    child_ele.removeAttr('style');
+                    child_ele.css(l_cfg.children[k].css);
+                });
+                
+                item_last = item;
+            }
+        }
+
+        //4b. listeners for styles (border,bg,margin)
+        cont.find('input[data-type="css"]').change(function(event){
+            var css = __getCss();
+            
+            if(l_cfg.css) css = $.extend(l_cfg.css, css);
+            
+            grp_ele.removeAttr('style');
+            grp_ele.css(css);
+        });
+        
+        //4c. button listeners
+        cont.find('.btn-ok').button().click(function(){
+            //5. save in layout cfg        
+            var css = __getCss();
+            l_cfg.css = $.extend(l_cfg.css, css);
+            
+            l_cfg.name = cont.find('input[data-type="element-name"]').val();
+            l_cfg.title = '<span data-lid="'+l_cfg.key+'">'+l_cfg.name+'</span>';
+            var ele_ID = ''+l_cfg.key;
+            var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
+            node.setTitle(l_cfg.title);
+            _defineActionIcons($(node.li).find('.fancytree-node'), ele_ID, 'position:absolute;right:8px;padding:2px;margin-top:0px;');
+            
+            
+            _panel_treePage.show();
+            cont.hide();
+        });
+        cont.find('.btn-cancel').button().click(function(){
+            //6. restore old settings 
+            if(!l_cfg.css) l_cfg.css = {};
+            grp_ele.css(l_cfg.css);
+            
+            _panel_treePage.show();
+            cont.hide();
+        });
+        
+                
+            });
+        
         
     }
+    
+    //
+    // Assign widget properties to UI
+    //
+    function _widgetConfigInit(ele_id){
+
+        var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
+        var grp_ele = _layout_container.find('#hl-'+ele_id); //element in main-content
+
+        var $dlg = _panel_propertyView;
+        
+        var widget_name = l_cfg.appid;
+        var opts = window.hWin.HEURIST4.util.isJSON(l_cfg.options);
+
+        $dlg.find('div[class^="heurist_"]').hide(); //hide all
+        $dlg.find('div.'+widget_name+'').show();
+        
+        if(opts!==false){
+
+                $dlg.find('input[name="search_realm"]').val(opts.search_realm);    
+            
+                if(widget_name=='heurist_Map'){
+                    
+                    if(opts.layout_params){
+                        $dlg.find("#use_timeline").prop('checked', !opts.layout_params.notimeline);    
+                        $dlg.find("#map_rollover").prop('checked', !opts.layout_params.map_rollover);    
+                        $dlg.find("#use_cluster").prop('checked', !opts.layout_params.nocluster);    
+                        $dlg.find("#editstyle").prop('checked', opts.layout_params.editstyle);    
+                        var ctrls = (opts.layout_params.controls)?opts.layout_params.controls.split(','):[];
+                        $dlg.find('input[name="controls"]').each(
+                            function(idx,item){$(item).prop('checked',ctrls.indexOf($(item).val())>=0);}
+                        );
+                        var legend = (opts.layout_params.legend)?opts.layout_params.legend.split(','):[];
+                        if(legend.length>0){
+                            
+                            $dlg.find('input[name="legend_exp2"]').prop('checked',legend.indexOf('off')<0);
+                            
+                            $.each(legend, function(i, val){
+                                if(parseInt(val)>0){
+                                    $dlg.find('input[name="legend_width"]').val(val);        
+                                }else if(val!='off'){
+                                    var is_exp = (val[0]!='-')
+                                    if (!is_exp) legend[i] = val.substring(1);
+                                    $dlg.find('input[name="legend_exp"][value="'+val+'"]').prop('checked',is_exp);
+                                }
+                            });
+                            $dlg.find('input[name="legend"]').each(
+                                function(idx,item){
+                                    $(item).prop('checked',legend.indexOf($(item).val())>=0);
+                                }
+                            );
+                        }
+                        if(opts.layout_params['template']){
+                            $dlg.find('select[name="map_template"]').attr('data-template', opts.layout_params['template']);        
+                        }
+                        if(opts.layout_params['basemap']){
+                            $dlg.find('input[name="map_basemap"]').val(opts.layout_params['basemap']);        
+                        }
+                        
+                    }
+                    if(opts['mapdocument']>0){
+                        $dlg.find('select[name="mapdocument"]').attr('data-mapdocument', opts['mapdocument']);        
+                    }
+
+                }
+                else{
+                
+                    $dlg.find('div.'+widget_name+' input').each(function(idx, item){
+                        item = $(item);
+                        if(item.attr('name')){
+                            if(item.attr('type')=='checkbox'){
+                                item.prop('checked', opts[item.attr('name')]===true || opts[item.attr('name')]=='true');
+                            }else if(item.attr('type')=='radio'){
+                                item.prop('checked', item.val()== String(opts[item.attr('name')]));
+                            }else {  //if(item.val()!=''){
+                                item.val( opts[item.attr('name')] );
+                            }
+                        }
+                    });
+                    $dlg.find('div.'+widget_name+' select').each(function(idx, item){
+                        item = $(item);
+                        item.val( opts[item.attr('name')] );
+                    });
+                    if(widget_name=='heurist_resultListExt'){
+                        if(opts['template']){
+                            $dlg.find('select[name="rep_template"]').attr('data-template', opts['template']);        
+                        }
+                    }else if(widget_name=='heurist_resultList'){
+                        if(opts['rendererExpandDetails']){
+                            $dlg.find('select[name="rendererExpandDetails"]').attr('data-template', opts['rendererExpandDetails']);        
+                        }
+                    }else if(widget_name=='heurist_resultListDataTable'){
+                        $dlg.find('#dataTableParams').val(opts['dataTableParams']);
+                    }
+                }
+                
+        }
+    }
+    
     
     //
     // Add text element or widget
@@ -752,7 +1183,7 @@ function editCMS2(){
             
             new_ele = {name:'TabControl', type:'tabs', css:{}, children:[ 
                 {name:'Tab 1', type:'group', css:{}, children:[ new_ele ]},
-                {name:'Tab 2', type:'group', css:{}, children:[ new_ele ]}
+                {name:'Tab 2', type:'group', css:{}, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]}
             ]};
         }else if(widget_id=='accordion'){    
             new_ele = {name:'Accordion', type:'accordion', css:{}, children:[ 
@@ -761,11 +1192,11 @@ function editCMS2(){
         }else if(widget_id=='cardinal'){    
             
             new_ele = {name:'Cardinal', type:'cardinal', children:[
-            {name:'Center', type:'center', children:[ new_ele ]},
-            {name:'North', type:'north', size:80, children:[ new_ele ]},
-            {name:'South', type:'south', size:80, children:[ new_ele ]},
-            {name:'West', type:'west', children:[ new_ele ]},
-            {name:'East', type:'east', children:[ new_ele ]}
+            {name:'Center', type:'center', children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
+            {name:'North', type:'north', size:80, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
+            {name:'South', type:'south', size:80, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
+            {name:'West', type:'west', children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
+            {name:'East', type:'east', children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]}
             ]};
           
         }else if(widget_id.indexOf('heurist_')===0){
@@ -773,20 +1204,75 @@ function editCMS2(){
             //btn_visible_newrecord, btn_entity_filter, search_button_label, search_input_label
             new_ele = {appid:widget_id, name:widget_name, css:{}, options:{}};
             
-        /*
+        }else if(widget_id=='group_2'){
+            
+            new_ele = {name:'2 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
+                children:[
+                    {name:'Column 1', type:'group', css:{flex:'1 1 auto'}, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
+                    {name:'Column 2', type:'group', css:{flex:'1 1 auto'}, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]}
+                ]
+            };
+            
         }else if(widget_id=='text_media'){
             
-            new_ele = {name:'Text and media', type:'text', css:{}, content:"<div></div>"};
+            new_ele = {name:'2 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
+                children:[
+                {name:'Column 1', type:'text', css:{flex:'0 1 auto'}, content:"<p><img src=\"https://heuristplus.sydney.edu.au/heurist/hclient/assets/v6/logo.png\" width=\"300\"</p>"},
+                {name:'Column 2', type:'text', css:{flex:'1 1 auto'}, content:"<p>Text. Click to edit</p>"}
+                ]
+            };
+            
+        }else if(widget_id=='text_banner'){
+
+            var imgs = [
+ 'https://images.unsplash.com/photo-1524623243236-187b50e18f9f?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1228&q=80',
+ 'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
+ 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1171&q=80',
+ 'https://images.unsplash.com/photo-1529998274859-64a3872a3706?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
+ 'https://images.unsplash.com/40/whtXWmDGTTuddi1ncK5v_IMG_0097.jpg?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1171&q=80'];
+ 
+            var k = Math.floor(Math.random() * 5);
+            
+            new_ele = {name:'2 columns', type:'group', 
+                    css:{display:'flex', 'justify-content':'center', 'align-items': 'center', 'min-height':'300px',
+                    'background-image': 'url('+imgs[k]+')', 'background-size':'auto',  'background-repeat': 'no-repeat'},
+                children:[
+                    new_ele
+                ]
+            };
+            
             
         }else if(widget_id=='text_2'){
             
-            new_ele = {name:'2 columns', type:'text', 
-                css:{display:'flex', 'justify-content':'center', 'align-items':'stretch', 'gap':'5px'}, 
-                content:'<div style="flex-basis:50%">Column 1</div><div style="flex-basis:50%">Column 2</div>'};
-        */
+            new_ele = {name:'2 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
+                children:[]
+            };
+            
+            var child = {name:'Column 1', type:'text', css:{flex:'1 1 auto'}, content:"<p>Column. Click to edit</p>"};
+            new_ele.children.push(child);
+            
+            child = window.hWin.HEURIST4.util.cloneJSON(child);
+            child.name = 'Column 2';
+            new_ele.children.push(child);
+            
+        }else if(widget_id=='text_3'){
+            
+            new_ele = {name:'3 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
+                children:[]
+            };
+            
+            var child = {name:'Column 1', type:'text', css:{flex:'1 1 auto'}, content:"<p>Column. Click to edit</p>"};
+            new_ele.children.push(child);
+            child = window.hWin.HEURIST4.util.cloneJSON(child);
+            child.name = 'Column 2';
+            new_ele.children.push(child);
+            child = window.hWin.HEURIST4.util.cloneJSON(child);
+            child.name = 'Column 3';
+            new_ele.children.push(child);
         }
         
-        var tree = _layout_treeview.fancytree('getTree');
+        
+        var tree = _panel_treePage.fancytree('getTree');
         var parentnode = tree.getNodeByKey(ele_id);
         var parent_container, parent_children, parent_element;
         
@@ -798,16 +1284,16 @@ function editCMS2(){
             /*
             if(parentnode.parent){
                 //insert after visible element
-                var ele = layoutMgr.layoutContentFindElement(_layout_content, parentnode.parent.key);
+                var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, parentnode.parent.key);
                 parent_container = body.find('div[data-lid="'+parentnode.parent.key+'"]');
-                parent_children = ele.children;
+                parent_children = l_cfg.children;
             }else{
                 parent_container = '#main-content';
                 parent_children = _layout_content;
             }
             */
             parent_element = layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
-            parent_container = _layout_container.find('div[data-lid="'+parentnode.key+'"]');
+            parent_container = _layout_container.find('#hl-'+parentnode.key); //div[data-lid="
             parent_children = parent_element.children;
             
         }else{
@@ -818,7 +1304,7 @@ function editCMS2(){
                 parent_children = _layout_content;
             }else{
                 parent_element = layoutMgr.layoutContentFindElement(_layout_content, parentnode.parent.key);
-                parent_container = _layout_container.find('div[data-lid="'+parentnode.parent.key+'"]');
+                parent_container = _layout_container.find('#hl-'+parentnode.parent.key);
                 parent_children = parent_element.children;
             }
         }
@@ -924,7 +1410,7 @@ function editCMS2(){
             heurist_resultListExt:{name:'Custom report', description:'Also use for single record view'},            
             heurist_resultListDataTable:{name:'Table format', description:'Result list as data table'},            
 
-            heurist_Map:{name:'Map and timeline', description:'Map and timeline widgets'},            
+            heurist_Map2:{name:'Map and timeline', description:'Map and timeline widgets'},            
             heurist_Graph:{name:'Network graph', description:'Visualization for records links and relationships'},            
         };
 
@@ -932,8 +1418,11 @@ function editCMS2(){
             text:{name:'Simple Text', description:'Simple text wiht header'},
             text_media:{name:'Text with media', description:'media and text '},
             text_2:{name:'Text in 2 columns', description:'2 columns layout'},
+            group_2:{name:'Groups as 2 columns', description:'2 columns layout'},
             text_3:{name:'Text in 3 columns', description:'3 columns layout'},
-            text_home_banner:{name:'Home banner', description:'Text over background image'},
+            text_banner:{name:'Text with banner', description:'Text over background image'},
+            tpl_discover: {name:'Discover (filters/results/map)', description:'3 columns layout'},
+            tpl_blog: {name:'Blog (filters/results/map)', description:''},
         }
 
         var buttons= [
@@ -1018,6 +1507,92 @@ function editCMS2(){
         });
 
     }
+      
+      
+    //
+    //
+    //
+    function _saveLayoutCfg(){
+        
+        if(!(options.record_id>0)) return;
+        
+        window.hWin.HEURIST4.msg.bringCoverallToFront();
+        
+        var newval = window.hWin.HEURIST4.util.cloneJSON(_layout_content);
+        
+        //remove keys and titles
+        function __cleanLayout(items){
+            
+            for(var i=0; i<items.length; i++){
+                items[i].key = null;
+                delete items[i].key;
+                items[i].title = null;
+                delete items[i].title;
+                if(items[i].children){
+                    __cleanLayout(items[i].children);    
+                }
+            }
+        }
+        __cleanLayout(newval);
+         
+        newval = JSON.stringify(newval);
+        
+        var request = {a: 'addreplace',
+                        recIDs: options.record_id,
+                        dtyID: DT_EXTENDED_DESCRIPTION,
+                        rVal: newval,
+                        needSplit: true};
+        
+        
+        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                if(response.status == hWin.ResponseStatus.OK){
+                    if(response.data.errors==1){
+                        var errs = response.data.errors_list;
+                        var errMsg = errs[Object.keys(errs)[0]];
+                        window.hWin.HEURIST4.msg.showMsgErr( errMsg );
+                    }else
+                    if(response.data.noaccess==1){
+                        window.hWin.HEURIST4.msg.showMsgErr('It appears you do not have enough rights (logout/in to refresh) to edit this record');
+                        
+                    }else{
+                        page_content[options.record_id] = newval; //update in cache
+/*                        
+                        window.hWin.HEURIST4.msg.showMsgFlash('saved');
+                        
+                        if(is_header_editor){
+                            header_content_raw = newval;
+                            
+                        }else if(is_footer_editor){
+                            footer_content_raw = newval;
+                            
+                        }else{
+                            last_save_content = newval;
+//console.log('was saved '+last_save_content);                        
+                            was_modified = true;     
+                        }
+*/                        
+                    }
+                    
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+        });         
+    }
+    
+    //
+    //
+    //
+    function _showTreeWebSite(){
+        /*
+        
+        _panel_treeWebSite.show();
+        _panel_treePage.hide();
+        _panel_propertyView.hide();
+        
+        */
+    }  
+      
         
     //public members
     var that = {

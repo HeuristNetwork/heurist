@@ -17,13 +17,13 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-var layoutMgr;
+var layoutMgr;  
 
 function hLayoutMgr(){
 
     var _className = "hLayoutMgr";
 
-    var pnl_counter =1;
+    var pnl_counter = 1;
 
     var body = $(this.document).find('body');
     
@@ -67,11 +67,15 @@ function hLayoutMgr(){
         var res = window.hWin.HEURIST4.util.isJSON(layout);
         
         if(res===false){
+            //if(layout==''){ layout = 'Add content here'}
+            
             layout = [{name:'Page', type:'group',
                     children:[
                         {name:'Content', type:'text', css:{}, content: layout}
                     ] 
                 }]; 
+        }else{
+            layout = res;    
         }
         
         for(var i=0; i<layout.length; i++){
@@ -118,8 +122,14 @@ function hLayoutMgr(){
         $d.attr('id','hl-'+layout.key).attr('data-lid', layout.key) 
                 .appendTo(container);
                 
-        if(isEditMode) $d.css('border','2px dotted gray');
+        if(isEditMode){
+            $d.css({'border':'2px dotted gray','border-radius':'4px','margin':'4px'});  
+        }
 
+        if(layout.css && !$.isEmptyObject(layout.css)){
+            $d.css(layout.css);
+        }
+        
         _layoutInit(layout.children, $d);
         
     }
@@ -130,7 +140,9 @@ function hLayoutMgr(){
             .addClass('tinymce-body editable')
             .appendTo(container);
             
-        if(isEditMode) $d.css('border','1px dotted gray');
+        if(isEditMode){
+            $d.css({'border':'1px dotted gray','border-radius':'4px','margin':'4px'});  
+        } 
             
         if(layout.css && !$.isEmptyObject(layout)){
             $d.css( layout.css );    
@@ -149,22 +161,48 @@ function hLayoutMgr(){
         .addClass('heurist-widget editable')
         .appendTo(container);
         
-        if(isEditMode) $d.css('border','2px dashed red');
-        
         if(!layout.css){
             layout.css  = {};    
-            layout.css['min-height'] = '100px';
+            layout.css['minHeight'] = '100px';
         } 
         layout.css['position'] = 'relative';
-        layout.css['height'] = '100%';
+        //layout.css['height'] = '100%';
         
+        //default min-height position depends on widget
+        var app = _getWidgetById(layout.appid);
+        if(app.minw>0 && !layout.css['minWidth']){
+            layout.css['minWidth'] = app.minw;
+        }
+        if(app.minh>0 && !layout.css['minHeight']){
+            layout.css['minHeight'] = app.minh;
+        }
 
+        if(isEditMode) {
+            $d.css('border','2px dashed red');
+        }
+        
         if(layout.css && !$.isEmptyObject(layout)){
+            
+            $d.removeAttr('style');
             $d.css( layout.css );    
         }
         
-        _layoutInitWidget(layout, container.find('div[data-lid='+layout.key+']'));
+        _layoutInitWidget(layout, container.find('#hl-'+layout.key));
 
+    }
+    
+    //
+    //
+    //
+    function _getWidgetById(id){
+
+        var i;
+        for(i=0; i<cfg_widgets.length; i++){
+            if(cfg_widgets[i].id==id){
+                return cfg_widgets[i];
+            }
+        }
+        return null;
     }
     
     //
@@ -172,22 +210,12 @@ function hLayoutMgr(){
     //
     function _layoutInitWidget(layout, container){
 
-        function __getWidgetById(id){
-
-            var i;
-            for(i=0; i<cfg_widgets.length; i++){
-                if(cfg_widgets[i].id==id){
-                    return cfg_widgets[i];
-                }
-            }
-            return null;
-        }
         
         //var layout = _layoutContentFindElement(_layout_cfg, container.attr('data-lid'));
 
-        var app = __getWidgetById(layout.appid); //find in app array
+        var app = _getWidgetById(layout.appid); //find in app array (appid is heurist_Search for example)
 
-        if (app && app.script && app.widgetname) {
+        if (app && app.script && app.widgetname) { //widgetname - function name to init widget
 
             if($.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded            
 

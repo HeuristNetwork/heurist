@@ -1,0 +1,175 @@
+<!--
+/**
+* Define flexbox layout within group
+* 
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+        <div class="heurist-helper1" style="padding:5px;">
+            Some help text
+            <br>
+            See 
+            <a href="https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">website help</a>
+        </div>
+
+
+        <fieldset style="font-size:0.8em;">
+                <div>
+                    <div class="header_narrow">Name:</div>
+                    <input data-type="element-name"/>
+                </div>
+        </fieldset>
+        
+        <div id="properties_form" style="font-size:0.8em;">
+            <h3 class="props group">Layout</h3>
+            <div class="props group">
+            <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+            
+                    <div>
+                        <div class="header_narrow" style="font-weight:bold">Type:</div>
+                        <select name="display" id="display">
+                            <option value="block" selected="">simple</option>
+                            <option value="flex">flex</option>
+                            <option value="fixed" disabled>fixed</option>
+                            <!-- <option value="inline-flex">inline-flex</option> -->
+                        </select>
+                    </div>
+            
+                    <div>
+                        <div class="header_narrow">Direction:</div>
+                        <select name="direction" class="flex-select" id="flex-direction">
+                            <option value="">row</option>
+                            <option value="column">column</option>
+                            <!-- <option value="row-reverse">row-reverse</option>-->
+                            <!-- <option value="column-reverse">column-reverse</option>-->
+                        </select>
+                    </div>
+                    <div>
+                        <div class="header_narrow">Wrap:</div>
+                        <select name="wrap" class="flex-select" id="flex-wrap">
+                            <option value="">nowrap</option>
+                            <option value="wrap">wrap</option>
+                            <!-- <option value="wrap-reverse">wrap-reverse</option> -->
+                        </select>
+                    </div>
+                    <div>
+                        <div class="header_narrow">Main axis alignment:</div>
+                        <select name="justify-content" class="flex-select" id="justify-content">
+                            <option value="">start</option>
+                            <option value="flex-end">end</option>
+                            <option value="center">center</option>
+                            <option value="space-between">space-between</option>
+                            <option value="space-around">space-around</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="header_narrow">Cross axis alignment:</div>
+                        <select name="align-items" class="flex-select" id="align-items">
+                            <option value="">stretch</option>
+                            <option value="flex-start">start</option>
+                            <option value="flex-end">end</option>
+                            <option value="center">center</option>
+                            <option value="baseline">baseline</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="header_narrow" title="Align lines within when there is extra space in the cross-axis">Align content:</div>
+                        <select name="align-content" class="flex-select" id="align-content">
+                            <option value="">stretch</option>
+                            <option value="flex-start">start</option>
+                            <option value="flex-end">end</option>
+                            <option value="center">center</option>
+                            <option value="space-between">space-between</option>
+                            <option value="space-around">space-around</option>
+                        </select>
+                    </div>
+                    
+                    <hr>
+                    <div data-flexitem="stub" style="display:none">
+                        <div class="header_narrow" title="Child item proportion and basis size">Item proportion:</div>
+                        <input data-type="flex-grow" type="number" min="0" value="" placeholder="0" style="width:30px"/>
+                        <label>&nbsp;Size:</label>
+                        <input data-type="flex-basis" type="text" value="" placeholder="auto" style="width:60px"/>                       
+                    </div>                    
+            </fieldset>
+            </div>
+            <h3 class="props widget">Widget properties</h3>
+            <div class="props widget">
+                
+            </div>
+            <h3>Styles</h3>
+            <div>
+                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <h4>Background</h4>
+                        <div>
+                            <div class="header_narrow">Color:</div>
+                            <select>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="header_narrow">Image:</div>
+                            <select>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="header_narrow">Position:</div>
+                            <select>
+                            </select>
+                        </div>
+                </fieldset>
+                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <div>
+                            <div class="header_narrow"><b>Border:</b></div>
+                            <select data-type="css" id="border-style" name="border-style">
+                                <option>none</option>
+                                <option>solid</option>
+                                <option>double</option>
+                                <option>dotted</option>
+                                <option>dashed</option>
+                                <option>inset</option>
+                                <option>outset</option>
+                                <option>groove</option>
+                                <option>ridge</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="header_narrow">Color:</div>
+                            <input data-type="css" name="border-color" type="text" value="" placeholder="black" style="width:60px"/>
+                        </div>
+                        <div>
+                            <div class="header_narrow">Size:</div>
+                            <input data-type="css" name="border-width" type="number" min="1" max="20" value="" placeholder="1" style="width:30px"/>
+                            <label>&nbsp;Corner:</label>
+                            <input data-type="css" name="border-radius"  type="number" min="0" max="40" value="" placeholder="0" style="width:30px"/>                       
+                        </div>
+                </fieldset>
+                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <div>
+                            <div class="header_narrow"><b>Margins</b></div>
+                            <label>&nbsp;Inner:</label>
+                            <input data-type="css" name="padding" type="number" min="0" value="" placeholder="0" style="width:30px"/>
+                            <label>&nbsp;Outer:</label>
+                            <input data-type="css" name="margin"  type="number" min="0" value="" placeholder="0" style="width:30px"/>                       
+                        </div>
+                </fieldset>
+            </div>
+        </div>
+        
+        <div style="text-align:center; padding: 2px;">
+            <div class="btn-ok">Save</div>
+            <div class="btn-cancel">Cancel</div>
+        </div>
+        
