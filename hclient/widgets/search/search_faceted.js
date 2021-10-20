@@ -2078,7 +2078,9 @@ $.widget( "heurist.search_faceted", {
 
                             if(needsDropdown !== true && $facet_values.find('span.bor-toggle-show-off').length > 0){
                                 $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values.find('span.bor-toggle-show-off')) );
-                                $sel.css('width', (w-66)+'px');
+                                $sel.css('width', ((w - 66) * 0.8)+'px');
+
+                                $facet_values.css('margin-bottom', '15px');
                             }else{
                                 $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values) );
                             }
@@ -2093,7 +2095,7 @@ $.widget( "heurist.search_faceted", {
 
                             //convert to jquery selectmenu
                             selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
-                            selObj.hSelect( "widget" ).css("font-size", "1.2em");
+                            selObj.hSelect( "widget" ).css({"font-size": "0.9em", "min-width": "8em"});
                             selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
 
                             $sel.change(function(event){ that._onDropdownSelect(event); });
@@ -2273,17 +2275,17 @@ $.widget( "heurist.search_faceted", {
 
                                 if(!window.hWin.HEURIST4.util.isempty(ids)){
 
-                                    ids = ids.split(','); // transform into array
+                                    var ids_arr = ids.split(','); // transform into array
 
                                     var request = {
                                         a: 'gethistogramdata',  // Get histogram data
-                                        recids: ids,            // record/s of interest
+                                        recids: ids_arr,            // record/s of interest
                                         dtyid: field['id'],     // detail type id
                                         range: [t_min.toISOString(), t_max.toISOString()], // lowest and highest values in ISO format
                                         format: date_type,        // year, month, day
                                         interval: 25            // interval size
                                     };
-                                    
+
                                     var $slide_range = $('div#facet_range'+facet_index).parent().find('div.ui-slider-range');
 
                                     window.HAPI4.RecordMgr.get_date_histogram_data(request, function(response){
@@ -2298,7 +2300,7 @@ $.widget( "heurist.search_faceted", {
                                             var slider_width = $slide_range.width();
 
                                             // Max number of records
-                                            var count_max = $('div#facet_range'+facet_index).find('span.badge').text();
+                                            var count_max = ids_arr.length;
 
                                             // Diagram's Container
                                             var $diagram = $('<div id="facet_histo_'+facet_index+'">')
@@ -2346,7 +2348,6 @@ $.widget( "heurist.search_faceted", {
                                             }
                                             if(data.length == 1){
                                                 col_gap = 0;
-                                                col_width = $diagram.width();
                                             }
 
                                             // Adding individual columns
@@ -2356,10 +2357,13 @@ $.widget( "heurist.search_faceted", {
                                                 var col_height = 0;
 
                                                 if(count > 0){
-                                                    col_height = 40 * (count / count_max);
+                                                    col_height = (50 * (count / count_max));
 
-                                                    if(col_height <= 0){
-                                                        col_height = 1;
+                                                    // Column heights limits
+                                                    if(col_height <= 4){
+                                                        col_height = 5;
+                                                    }else if(col_height > 50){
+                                                        col_height = 50;
                                                     }
                                                 }
 
@@ -2691,6 +2695,8 @@ $.widget( "heurist.search_faceted", {
                             if(needsDropdown !== true && $facet_values.find('span.bor-toggle-show-off').length > 0){
                                 $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values.find('span.bor-toggle-show-off')) );
                                 w = w-66;
+
+                                $facet_values.css('margin-bottom', '15px');
                             }else{
                                 $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values) );
                                 w = w-45;

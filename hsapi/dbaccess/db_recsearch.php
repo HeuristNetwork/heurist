@@ -484,20 +484,20 @@ function __assignFacetValue($params, $subs){
     return $params;
 }
 
-/*
-* Get an array of lower and upper limits plus a record count for each interval
-*
-* Input: 
-* 	$range (array) => (lowest date, highest date),
-*	$interval (int) => interval size (e.g. $interval = 3, ([1982, 1985], [1986, 1989], ...))
-*	$rec_ids (array) => record ids used for the count
-*	$dty_id (int) => id for detail/base field containing the date in each record from above
-*	$format (string) => default date format ("year", "month", "day")
-*
-* Output:
-*	Array => each index is the lower and upper limits for the interval plus the number of records that fit this interval
-*/
-function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $format="year", $forced=false){
+//
+// Get an array of lower and upper limits plus a record count for each interval
+//
+// @param: 
+//   $range (array) => (lowest date, highest date),
+//   $interval (int) => interval size (e.g. $interval = 3, ([1982, 1985], [1986, 1989], ...))
+//   $rec_ids (array) => record ids used for the count
+//   $dty_id (int) => id for detail/base field containing the date in each record from above
+//   $format (string) => default date format ("year", "month", "day")
+//
+// @return:
+//   Array => each index is the lower and upper limits for the interval plus the number of records that fit this interval
+//
+function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $format="year"){
 
     $mysqli = $system->get_mysqli();
 
@@ -506,11 +506,11 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     $count = 0;
     $add_day = new DateInterval('P1D'); // Keep the class limits inclusive
 
-	// Validate Input
+    // Validate Input
     if($rec_ids == null){
         return $system->addError(HEURIST_INVALID_REQUEST, "No record ids have been provided");
     }else if(!is_array($rec_ids)){
-        $rec_ids = array(rec_ids);
+        $rec_ids = array($rec_ids);
     }
 
     if($dty_id == null || !is_numeric($dty_id)){
@@ -521,7 +521,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
         return $system->addError(HEURIST_INVALID_REQUEST, "An invalid interval has been provided");
     }
 
-	// Process End Date
+    // Process End Date
     try{
         $e_date = new DateTime($range[1]);
         $e_date->setTime(0, 0);
@@ -529,7 +529,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
         return $system->addError(HEURIST_INVALID_REQUEST, "An invalid starting date has been provided, " . $e->errorMessage());
     }
 
-	// Process Starting Date
+    // Process Start Date
     try{
         $s_date = new DateTime($range[0]);
         $s_date->setTime(0, 0);
@@ -537,11 +537,16 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
         return $system->addError(HEURIST_INVALID_REQUEST, "An invalid ending date has been provided, " . $e->errorMessage());
     }
 
-	// Get differences between Start and End Date
+    // Get differences between Start and End Date
     $diff = $s_date->diff($e_date, true);
     $years = $diff->format('%y');
     $months = $diff->format('%M');
     $days = $diff->format('%d');
+
+    // Control variables
+    $org_interval = $interval;
+    $lower_level = false;
+    $in_count = 0;
 
     if($format=='year'){
 
@@ -549,24 +554,46 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
             $years += 1; 
         }
 
-        $count = $years / $interval; // get the number of classes
+        $count = $years / $interval; // get the init number of classes
 
-        $date_int = new DateInterval('P'.$interval.'Y');
         $format = 'Y';
 
-        if($count < 5 && !$forced){ // move down to month
-            return getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, 'month', true); 
+        if($count < 10){ // decrease interval size
+
+            while($count < 10){
+
+                $interval -= 5;
+                if($interval <= 1){
+                    $lower_level = true;
+                    break;
+                }
+                $count = $years / $interval;
+
+            }
+
+            if($lower_level){
+                return getDateHistogramData($system, $range, $org_interval, $rec_ids, $dty_id, 'month'); 
+            }
+        }else if($count > $interval){ // increase internal size
+
+            while($count > $org_interval){
+
+                $interval += 5;
+                $count = $years / $interval;
+            }
         }
-        else if($count == 1){ // perfect
+
+        if($count <= 1){
             array_push($intervals, array($s_date->format($format), $e_date->format($format), count($rec_ids)));
             return array("status"=>HEURIST_OK, "data"=>$intervals);
         }
 
+        $date_int = new DateInterval('P'.$interval.'Y');
         $count = ceil($count);
 
     }else if($format == 'month'){
 
-		// Round up, +1 for any days and +12 for any years
+        // Round up, +1 for any days and +12 for any years
         if($days > 0){ 
             $months += 1; 
         }
@@ -575,44 +602,91 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
             $months += (12 * $years); 
         }
 
-        $count = $months / $interval; // get the number of classes
+        $count = $months / $interval; // get the init number of classes
 
-        $date_int = new DateInterval('P'.$interval.'M');
         $format = 'd M Y';
 
-        if($count < 1 && !$forced){ // move down to days
-            return getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, 'day', true); 
-        }
-        else if($count == 1){ // perfect 
-            array_push($intervals, array($s_date->format($format), $e_date->format($format), count($rec_ids)));
-            return array("status"=>HEURIST_OK, "data"=>$intervals);
-        }else if($count > $interval && !$forced){ // move up in format
-            return getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, 'year', true);
+        if($count < 10){ // decrease interval size
+    
+            while($count < 10){
+
+                $interval -= 12;
+                if($interval <= 1){
+                    $lower_level = true;
+                    break;
+                }
+                $count = $months / $interval;
+            }
+
+            if($lower_level){
+                return getDateHistogramData($system, $range, $org_interval, $rec_ids, $dty_id, 'day'); 
+            }
+        }else if($count > $interval){ // increase internal size
+   
+            while($count > $org_interval){
+                $interval += 12;
+                $count = $months / $interval;
+
+                $in_count++;
+            }
+
+            if($in_count >= 10){
+                return getDateHistogramData($system, $range, $org_interval, $rec_ids, $dty_id, 'year'); 
+            }
         }
 
+        if($count <= 1){
+            array_push($intervals, array($s_date->format($format), $e_date->format($format), count($rec_ids)));
+            return array("status"=>HEURIST_OK, "data"=>$intervals);
+        }
+
+        $date_int = new DateInterval('P'.$interval.'M');
         $count = ceil($count);
 
     }else{
 
         $days = $diff->days; // get the difference purely in days
 
-        $count = $days / $interval; // get the number of classes
+        $count = $days / $interval; // get the init number of classes
 
-        $date_int = new DateInterval('P'.$interval.'D');
         $format = 'd M Y';
 
-        if($count > $interval && !$forced){ // move up to month
-            return getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, 'month', true);
-        }else if($count <= 1){ // perfect
+        if($count > $interval){ // increase internal size
+
+            while($count > $org_interval){
+                $interval += 30;
+                $count = $days / $interval;
+
+                $in_count++;
+            }
+
+            if($in_count >= 12){
+                return getDateHistogramData($system, $range, $org_interval, $rec_ids, $dty_id, 'month');
+            }
+        }else if($count < 10){ // decrease interval size
+   
+            while($interval - 30 > 1 && $count < 1){
+                
+                $interval  = $interval - 30;
+                if($interval <= 1){
+                    $interval = 1;
+                    break;
+                }
+                $count = $days / $interval;
+            }
+        }
+
+        if($count <= 1){
             array_push($intervals, array($s_date->format($format), $e_date->format($format), count($rec_ids)));
             return array("status"=>HEURIST_OK, "data"=>$intervals);
         }
 
+        $date_int = new DateInterval('P'.$interval.'D');
         $count = ceil($count);
 
     }
 
-	// Create date intervals
+    // Create date intervals (class limits)
     for($i = 0; $i < $count; $i++){
         $lower = new DateTime($s_date->format('d M Y'));
         $upper = new DateTime($s_date->add($date_int)->format('d M Y'));
