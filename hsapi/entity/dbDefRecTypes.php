@@ -87,7 +87,8 @@ class DbDefRecTypes extends DbEntityBase
 
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = 'rty_ID,rty_Name,rty_OrderInGroup,rty_Description,rty_TitleMask,rty_Plural,'
+            $this->data['details'] = 'rty_ID,rty_Name,rty_OrderInGroup,rty_Description,rty_TitleMask,'
+            .'IF((rty_Plural IS NULL OR rty_Plural=\'\'),rty_Name,rty_Plural) as rty_Plural,'
             .'rty_Status,rty_OriginatingDBID,rty_IDInOriginatingDB,rty_ShowInLists,rty_RecTypeGroupID,rty_ReferenceURL,'
             .'rty_ShowURLOnEditForm,rty_ShowDescriptionOnEditForm,rty_Modified';
 

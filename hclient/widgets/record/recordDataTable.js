@@ -287,10 +287,12 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                 $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
             }
             for (var rty in rectype_Ids){
-                    if(rty>=0 && $Db.rty(rectype_Ids[rty],'rty_Plural')){
+                    if(rty>=0 && $Db.rty(rectype_Ids[rty],'rty_Name')){
                         rty = rectype_Ids[rty];
-                        window.hWin.HEURIST4.ui.addoption(selScope,rty,
-                                $Db.rty(rty,'rty_Plural')); //'only: '+
+                        var name = $Db.rty(rty,'rty_Plural');
+console.log(name);                        
+                        if(!name) name = $Db.rty(rty,'rty_Name');
+                        window.hWin.HEURIST4.ui.addoption(selScope,rty,name); //'only: '+
                     }
             }
         }

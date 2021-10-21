@@ -380,9 +380,12 @@ this._dout('reload datatable '+this.options.serverSide);
                 
                     for (var rty in rectype_Ids){
                         rty = rectype_Ids[rty];
-                        if(rty>0 && $Db.rty(rty,'rty_Plural') ){
-                            window.hWin.HEURIST4.ui.addoption(selScope[0],rty,
-                                    $Db.rty(rty,'rty_Plural') ); //'only: '+
+                        if(rty>0 && $Db.rty(rty,'rty_Name') ){
+                            
+                            var name = $Db.rty(rty,'rty_Plural');
+                            if(!name) name = $Db.rty(rty,'rty_Name');
+                            
+                            window.hWin.HEURIST4.ui.addoption(selScope[0], rty, name ); //'only: '+
                         }
                     }
                     window.hWin.HEURIST4.ui.addoption(selScope[0],'', 'Any record type');

@@ -394,7 +394,7 @@ $.widget( "heurist.recordAction", {
         var rectype_Ids = [];
         if (!is_initscope_empty){
             for (var rty in scope_types)
-            if(rty>=0 && scope_types[rty]>0 && $Db.rty(scope_types[rty],'rty_Plural')){ 
+            if(rty>=0 && scope_types[rty]>0 && $Db.rty(scope_types[rty],'rty_Name')){ 
                 rectype_Ids.push(scope_types[rty]);
             }
         }else if(this._currentRecordset &&  this._currentRecordset.length() > 0){
@@ -402,10 +402,14 @@ $.widget( "heurist.recordAction", {
         }
         
         for (var rty in rectype_Ids){
-            if(rty>=0 && $Db.rty(rectype_Ids[rty],'rty_Plural')){
+            if(rty>=0){
                 rty = rectype_Ids[rty];
+                
+                var name = $Db.rty(rty,'rty_Plural');
+                if(!name) name = $Db.rty(rty,'rty_Name');
+                
                 window.hWin.HEURIST4.ui.addoption(selScope,rty,
-                        window.hWin.HR('only:')+' '+$Db.rty(rty,'rty_Plural'));
+                        window.hWin.HR('only:')+' '+name);
             }
         }
 
