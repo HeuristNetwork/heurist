@@ -592,7 +592,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         * 1 - main geo only (no links)
         * 2 - rec_Shape only (coordinates defined in field rec_Shape)
     */
-    function _toGeoJSON(filter_rt, geoType){
+    function _toGeoJSON(filter_rt, geoType, max_limit){
 
         var aitems = [], titems = [];
         var item, titem, shape, idx, 
@@ -816,6 +816,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 }
                 if(!feature['geometry']) continue;
                 res_geo.push(feature);
+                
+                if(max_limit>0 && res_geo.length>max_limit) break;
             }
         }//for records    
         
@@ -1854,8 +1856,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         * 1 - main geo only
         * 2 - rec_Shape only
         */
-        toGeoJSON: function(filter_rt, geoType){
-            return _toGeoJSON(filter_rt, geoType);
+        toGeoJSON: function(filter_rt, geoType, max_limit){
+            return _toGeoJSON(filter_rt, geoType, max_limit);
         },
         
         toTimemap: function(dataset_name, filter_rt, symbology, geoType){

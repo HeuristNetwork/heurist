@@ -355,7 +355,7 @@ function hMapLayer2( _options ) {
         var request = window.hWin.HEURIST4.util.parseHeuristQuery(query);
 
         if(request.q){
-
+            
             var server_request = {
                 q: request.q,
                 rules: request.rules,
@@ -365,6 +365,11 @@ function hMapLayer2( _options ) {
                 simplify: true, //simplify paths with more than 1000 vertices
                 zip: 1,
                 format:'geojson'};
+
+            var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+            if(MAXITEMS>0){
+                server_request['limit'] = MAXITEMS;
+            }
                 
             //dataset origination db can be different from map heurist instance    
             if(!window.hWin.HEURIST4.util.isempty(request.db) && request.db!=window.hWin.HAPI4.database){
@@ -428,8 +433,10 @@ function hMapLayer2( _options ) {
                     window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
         var layer_popup_template = _recordset.fld(options.rec_layer || _record, 
                     window.hWin.HAPI4.sysinfo['dbconst']['DT_POPUP_TEMPLATE']);
+                    
+        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
         
-        var data = options.recordset.toGeoJSON();
+        var data = options.recordset.toGeoJSON(null,0,MAXITEMS);
 
         var geojson_data = data['geojson'];
         var timeline_data = data['timeline'];   

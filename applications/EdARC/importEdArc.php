@@ -16,7 +16,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 require_once (dirname(__FILE__).'/../../hsapi/import/importParser.php');
 
 
-define('HEU_DB','hdb_Tuffery_EdArc');
+define('HEU_DB','hdb_Tuffery_EdARC');
 define('F_TABLE',0);
 define('F_FIELD',1);
 define('F_HELP',2);
@@ -39,9 +39,12 @@ $params = array('content'=>$content,
 
 $list = ImportParser::simpleCsvParser($params);
 
+define('MAX_RTY',95);
+
+
 //clear rectypes and details from previous import
-$mysqli->query('delete from defRecStructure where rst_RecTypeID>94');    
-$mysqli->query('delete from defRecTypes where rty_ID>94');    
+$mysqli->query('delete from defRecStructure where rst_RecTypeID>'.MAX_RTY);    
+$mysqli->query('delete from defRecTypes where rty_ID>'.MAX_RTY);    
 $mysqli->query('delete from defDetailTypes where dty_ID>1052');    
 $mysqli->query('delete from defTerms where trm_ID>6878');    
 
@@ -54,7 +57,7 @@ $dtg_ID = mysql__insertupdate($mysqli, 'defDetailTypeGroups', 'dtg', array('dtg_
 $vcg_ID = mysql__insertupdate($mysqli, 'defVocabularyGroups', 'vcg', array('vcg_Name'=>'EdArc','vcg_Description'=>'EdArc'));
 
 $curr_table = null;
-$rty_ID_cnt = 94;
+$rty_ID_cnt = MAX_RTY;
 $dty_ID_cnt = 1052;
 $rty_ID = 0;
 $order = 1;
@@ -75,7 +78,7 @@ foreach($list as $row){
             $order = 1;
             
             $rty_rec = mysql__select_value($mysqli, 'select rty_ID from defRecTypes where rty_Name="'.$row[F_TABLE].'"');
-            if($rty_rec>94){
+            if($rty_rec>MAX_RTY){
                 $rty_ID = $rty_rec;    
             }else{
                 if($rty_rec>0){ //avoid duplication

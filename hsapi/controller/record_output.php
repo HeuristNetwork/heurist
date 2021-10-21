@@ -94,7 +94,7 @@
     $search_params = array();
     $search_params['w'] = @$params['w'];
     
-    if(@$params['format']=='gephi'){
+    if(@$params['format']=='gephi' || @$params['format']=='geojson'){
         $search_params['limit'] = (@$params['limit']>0)?$params['limit']:null;
     }else
     if(!(@$params['offset'] || @$params['limit'])){
