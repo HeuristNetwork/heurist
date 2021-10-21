@@ -31,7 +31,7 @@
     
         recordUpdateTitle
         recordUpdateOwnerAccess
-        prepareDetails - validate records detail (need to combine with validators in fileParse)
+        _prepareDetails - validate records detail (need to combine with validators in fileParse)
     
     */
     require_once (dirname(__FILE__).'/../System.php');
@@ -242,7 +242,7 @@
 
     /**
     * Save record
-    *   1) prepareDetails
+    *   1) _prepareDetails
     *   2) add or update header
     *   3) remove old details, add new details
     *   4) recordUpdateTitle 
@@ -324,9 +324,15 @@
         //0 normal, 1 import, 2 - faims or zotero import (add without recstructure check)
         $modeImport = @$record['AddedByImport']?intval($record['AddedByImport']):0;
 
-        $is_strict_validation = true;
-        if(@$record['no_validation']){
-            $is_strict_validation = false;
+        $validation_mode = 2; //check everything
+        
+        if(@$record['no_validation']==='ignore_all'){
+            $validation_mode = 0; //no validation at all
+        }else if($modeImport==2 || @$record['no_validation']){
+            $validation_mode = 1; //don't validate resources
+        }
+        
+        if(@$record['no_validation']!=null){
             unset($record['no_validation']);
         }
         
@@ -342,7 +348,7 @@
         // recDetails data
         if ( @$record['details'] ) {
             
-            $detailValues = prepareDetails($system, $rectype, $record, ($modeImport<2 && $is_strict_validation), $recID);
+            $detailValues = _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $modeImport);
             if(!$detailValues){
                 return $system->getError();
             }
@@ -1684,19 +1690,20 @@
 
     //function doDetailInsertion($recID, $details, $rectype, $wg, &$nonces, &$retitleRecs, $modeImport)
     /**
+    * @todo make private
     * 
     * uses getHTMLPurifier, checkMaxLength
     * 
     * @param mixed $mysqli
     * @param mixed $rectype
     * @param mixed $details
-    * @param mixed $is_strict - check mandatory fields, resources and terms ID
+    * @param mixed $validation_mode - 0 (no validation at all), 1 - don't check resource, 2 - check everything
     * 
     * return details in format ready to insert to database
     *       array('dtl_DetailTypeID'=>$dtyID,'dtl_Value'=>$value,'dtl_UploadedFileID'=>, 'dtl_Geo'=>)
     * 
     */
-    function prepareDetails($system, $rectype, $record, $is_strict, $recID)
+    function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $modeImport)
     {
         global $terms;
 
@@ -1738,7 +1745,7 @@
         $det_types = mysql__select_assoc2($mysqli, $query);
 
         $det_required = array();
-        if($is_strict){
+        if($validation_mode>1){
             //load list of required details except relmarker
             $query = 'SELECT rst_DetailTypeID, IF((rst_DisplayName=\'\' OR rst_DisplayName IS NULL), dty_Name, rst_DisplayName) as rst_DisplayName '
             .'FROM defRecStructure, defDetailTypes WHERE '
@@ -1862,7 +1869,7 @@
                     case "enum":
                     case "relationtype":
 
-                        if($is_strict){
+                        if($validation_mode>1){
 
                             if(!$terms){
                                 $terms = new DbsTerms($system, dbs_GetTerms($system));
@@ -1893,7 +1900,7 @@
 
                     case "resource":
 
-                        if($is_strict){
+                        if($validation_mode>1){
                             //check if resource record exists
                             $rectype_tocheck = mysql__select_row($mysqli, 'select rec_RecTypeID, rec_Title '
                             .'from Records where rec_ID = '.$dtl_Value); //or dbs_GetRectypeByID from db_strucuture
@@ -1988,6 +1995,8 @@
                         
                         $dtl_Value = null;
                         $isValid = ($dtl_UploadedFileID>0);
+                        
+                        if($validation_mode==0 && !$isValid) $isValid = 'ignore';
 
                         break;
 
@@ -1997,7 +2006,7 @@
                         list($dtl_Value, $dtl_Geo) = prepareGeoValue($mysqli, $dtl_Value);
                         if($dtl_Value===false){
                             $err_msg = $geoValue; 
-                            $isValid = false;
+                            $isValid = ($validation_mode==0)?'ignore':false;
                         }else{
                             $isValid = true;    
                         }
@@ -2048,6 +2057,12 @@
 
         
                 if($isValid==='ignore') continue;
+                
+                //ignore all errors and skip empty values
+                if($validation_mode==0 && $isValid!==true){
+                    if(strlen(trim($dtl_Value))==0) continue;
+                    $isValid = true;
+                }
 
                 if($isValid == true){
 
@@ -2075,10 +2090,18 @@
                         
                         $dt_names = dbs_GetDtLookups();
                         
-                        $errorValues[$dtyID] = '<br><div>Field ID '.$dtyID.': "'
-                            .$field_name.'" ('.@$dt_names[$det_types[$dtyID]].')</div>';
+                        if($modeImport>0){
+                            $errorValues[$dtyID] = $field_name;
+                        }else{
+                            $errorValues[$dtyID] = '<br><div>Field ID '.$dtyID.': "'
+                                .$field_name.'" ('.@$dt_names[$det_types[$dtyID]].')</div>';
+                        }
                     }
-                    $errorValues[$dtyID] .= ('<div style="padding-left:20px">'.$err_msg.'</div>');
+                    if($modeImport>0){
+                        $errorValues[$dtyID] .= (' '.$err_msg);
+                    }else{
+                        $errorValues[$dtyID] .= ('<div style="padding-left:20px">'.$err_msg.'</div>');
+                    }
                     $cntErrors++;
                 }
 
@@ -2094,12 +2117,20 @@
         if ($cntErrors>0) {
 
             $ss = ($cntErrors>1?'s':'');    
+            /*
             array_push($errorValues,                                                        
             '<br><br>Please run Verify > Verify integrity to check for and fix data problems.<br>' 
             .'If the problem cannot be fixed, or re-occurs frequently, please '.CONTACT_HEURIST_TEAM);
+            */
             
-            $system->addError(HEURIST_ACTION_BLOCKED, 'Encountered invalid value'.$ss
-                                                        .' for Record#'.$recID.'<br>'.implode(' ',$errorValues), null);
+            if($modeImport>0){
+                $sMsg = implode(' ',$errorValues);   
+            }else{
+                $sMsg = 'Encountered invalid value'.$ss
+                        .' for Record#'.$recID.'<br>'.implode(' ',$errorValues);
+            }
+            
+            $system->addError(HEURIST_ACTION_BLOCKED, $sMsg, null);
 
         }else if (count($det_required)>0) {
 
@@ -2118,7 +2149,7 @@
 
         return $res;
 
-    } //END prepareDetails
+    } //END _prepareDetails
 
 
     //

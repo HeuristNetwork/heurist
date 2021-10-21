@@ -522,6 +522,10 @@ if(!$format) $format='csv';
             Create new records</label>
             <label><input type="checkbox" checked="checked" id="sa_update" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
             Update existing records</label>
+
+            <label><input type="checkbox" id="sa_ignore_errors" class="text">&nbsp;
+            Ignore validation. Add data "as is"</label>
+
             <span style="padding-left: 200px;display:none;" id="presetMapping">Use mapping from other sessions: <select id="sel_presetMapping"></select></span>
         </div>
         <div  id="divPrepareSetting" class="step4 step-ctrls" style="display:none;top:220px">

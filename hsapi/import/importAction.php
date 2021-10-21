@@ -1969,7 +1969,8 @@ private static function findOriginalRecord($recordId){
 //
 //
 private static function doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
-                                                                    $details, $id_field, $old_id_in_idfield, $mode_output){
+                                                                    $details, $id_field, $old_id_in_idfield, $mode_output,
+                                                                    $ignore_errors){
 
     //check permission beforehand
     if($recordId>0){
@@ -1990,7 +1991,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
     $record['ID'] = $recordId;
     $record['RecTypeID'] = $recordType;
     $record['AddedByImport'] = 1;
-    $record['no_validation'] = true;
+    $record['no_validation'] = $ignore_errors?'ignore_all':true; //if true - don't check resouces and enums
     $record['URL'] = @$details['URL'];
     $record['ScratchPad'] = @$details['ScratchPad'];
     $record['details'] = $details;
@@ -2034,7 +2035,10 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             if(self::$rep_skipped<100){        
 //error_log( 'IMPORT CSV: '.($recordId>0?('rec#'.$recordId):'new record').$out["message"].'  '.print_r(@$out["sysmsg"], true) );
 
+                $line_id = @$details['imp_id'][0];
+
                 self::$rep_skipped_details[] = ($recordId>0?('record#'.$recordId):'new record')
+                        .($line_id>0?('(line#'.$line_id.')'):'')
                         .': '.$out["message"];
             }
         }
@@ -2260,6 +2264,7 @@ public static function performImport($params, $mode_output){
 
     $ignore_insert = (@$params['ignore_insert']==1); //ignore new records
     $ignore_update = (@$params['ignore_update']==1); //ignore update records
+    $ignore_errors = (@$params['ignore_errors']==1); //ignore any errors in data - add data "as is"
 
     if($id_field){  //index field defined - add to list of columns
         $id_field_idx = count($field_types); //last one
@@ -2383,7 +2388,8 @@ public static function performImport($params, $mode_output){
                             //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
                             //import detail is sorted by rec_id -0 thus it is possible to assign the same recId for several imp_id
                             $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
-                                                        $details, $id_field, $prev_ismulti_id?$prev_recid_in_idfield:null, $mode_output);
+                                                        $details, $id_field, $prev_ismulti_id?$prev_recid_in_idfield:null, $mode_output,
+                                                        $ignore_errors);
                             
                             if($prev_recid_in_idfield!=null) $pairs[$prev_recid_in_idfield] = $new_id;//new_A                            
                             
@@ -2801,7 +2807,8 @@ public static function performImport($params, $mode_output){
                     if(!$ignore_insert){
                         
                         $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
-                                                    $details, $id_field, $ismulti_id?$recid_in_idfield:null, $mode_output);
+                                                    $details, $id_field, $ismulti_id?$recid_in_idfield:null, $mode_output,
+                                                    $ignore_errors);
                         if($recid_in_idfield!=null) $pairs[$recid_in_idfield] = $new_id;//new_A
 
                         $details = array();
@@ -2850,7 +2857,8 @@ public static function performImport($params, $mode_output){
             if($allow_operation){
             
                 $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
-                                                    $details, $id_field, $ismulti_id?$recid_in_idfield:null,  $mode_output);
+                                                    $details, $id_field, $ismulti_id?$recid_in_idfield:null,  $mode_output,
+                                                    $ignore_errors);
                 if($recid_in_idfield!=null) $pairs[$recid_in_idfield] = $new_id;//new_A
             
             }

@@ -3209,7 +3209,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 //console.log(res);                            
                             if(res['missed_required']==true){
                                 window.hWin.HEURIST4.msg.showMsgErr((res['count_warning']==1?'There is one row':('There are '+res['count_warning']+' rows'))
-                                +' missing values for fields set to Required.<br><br> '
+                                +' missing or wrong values for fields. Including Required fields.<br><br> '
                                 +' You may continue to import required data with missing or invalid values.'
                                 +' After import, you can find and correct these values using Verify > Verify integrity<br><br>'
                                 + 'Click "Show" button  for a list of rows with missing values');                            
@@ -3322,6 +3322,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             mapping   : field_mapping,
             ignore_insert: $('#sa_insert').prop('checked')?0:1,
             ignore_update: $('#sa_update').prop('checked')?0:1,
+            ignore_errors: $('#sa_ignore_errors').prop('checked')?1:0,
+            
             utm_zone  : UTMzone,
             recid_field: 'field_'+key_idx, //imp_session['columns'][key_idx]
             //0 - Retain existing values and append distinct new data as repeat values
