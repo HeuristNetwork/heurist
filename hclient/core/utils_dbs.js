@@ -360,20 +360,36 @@ window.hWin.HEURIST4.dbs = {
                     $grouped = [];
                     
                     if($is_parent_relmarker){
+                        var rt_id = window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION'];
+                        var dc = window.hWin.HAPI4.sysinfo['dbconst'];
+                        
                         var s = '<span style="font-style:italic">Relationship Fields</span>';
                         var $rl_children = [];
-                        $rl_children.push({key:'6', type:'reltype',
+                        $rl_children.push({type:'reltype',
                             title:'Relationship type', 
-                            code:('1'+_separator+'6'), name:'Relationship type'});
-                        $rl_children.push({key:'10', type:'date',
+                            code:(rt_id+_separator+'r.'+dc['DT_RELATION_TYPE']), name:'Relationship type'}); 
+                        $rl_children.push({type:'date',
                             title:'Relationship Start Date', 
-                            code:('1'+_separator+'10'), name:'Start Date'});
-                        
+                            code:(rt_id+_separator+'r.'+dc['DT_START_DATE']), name:'Start Date'});
+                        /*    
+                        $rl_children.push({type:'date',
+                            title:'Relationship End Date', 
+                            code:(rt_id+_separator+'r'+dc['DT_END_DATE']), name:'End Date'});
+                        $rl_children.push({type:'freetext',
+                            title:'Relationship Name', 
+                            code:(rt_id+_separator+'r'+dc['DT_NAME']), name:'Name'});
+                        $rl_children.push({type:'freetext',
+                            title:'Relationship Description', 
+                            code:(rt_id+_separator+'r'+dc['DT_SHORT_SUMMARY']), name:'Description'});
+                        $rl_children.push({type:'enum',
+                            title:'Relationship interpretation reference', 
+                            code:(rt_id+_separator+'r'+dc['DT_INTERPRETATION_REFERENCE']), name:'Interpretation Reference'});
+                        */
                         $grouped.push(
                             {title:s, folder:true, is_generic_fields:true, children:$rl_children});
                     }
                     
-                    var s = '<span style="font-style:italic">Generic Fields AAA</span>';
+                    var s = '<span style="font-style:italic">Generic Fields</span>';
                     $grouped.push(
                         {title:s, folder:true, is_generic_fields:true, children:$children});
                     if($fieldtypes.indexOf('anyfield')>=0){ //for filter builder 
@@ -2076,6 +2092,10 @@ window.hWin.HEURIST4.dbs = {
                     harchy_fields.push(rec_header);
                 
             }else{
+                
+                if(dtid.indexOf('r.')==0){
+                    dtid = dtid.substr(2);
+                }
 
                 var linktype = dtid.substr(0,2);                                
                 if(isNaN(Number(linktype))){

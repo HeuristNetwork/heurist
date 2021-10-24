@@ -222,18 +222,7 @@ $.widget( "heurist.searchBuilderItem", {
         }else{
             //this.label_token.hide();    
 
-            /*relationship fields
-            var topOptions3 = [
-                {key:0,title:'Relationship fields', group:1, disabled:true},
-                {key:'r',title:'Relationship type', depth:1},
-                {key:'r:10',title:'Start date', depth:1},
-                {key:'r:11',title:'End date', depth:1},
-                {key:'r:3',title:'Description', depth:1},
-                {key:'r:1',title:'Title', depth:1},
-                {key:'r:1',title:'Interpretation / commentary', depth:1}
-            ];
-            */
-            
+           
             var topOptions2 = [
                 {key:0,title:'Generic fields', group:1, disabled:true},
                 {key:'title',title:'Title (constructed)', depth:1},
@@ -383,10 +372,16 @@ $.widget( "heurist.searchBuilderItem", {
             
         };
 
-        if(this.options.dty_ID>0){ //numeric - base field
+        var dty_ID = this.options.dty_ID;
+        
+        if(dty_ID.indexOf('r.')==0){
+            dty_ID = dty_ID.substr(2);    
+        }
+        
+        if(dty_ID>0){ //numeric - base field
 
-            //console.log(this.options.rty_ID+'  '+this.options.dty_ID);            
-            field_type = $Db.dty(this.options.dty_ID,'dty_Type');
+            //console.log(this.options.rty_ID+'  '+dty_ID);            
+            field_type = $Db.dty(dty_ID,'dty_Type');
             if(field_type=='blocktext') field_type = 'freetext';
 
             if(this.options.rty_ID>0){
@@ -394,15 +389,15 @@ $.widget( "heurist.searchBuilderItem", {
             }else{
                 
                     var dtFields = {dty_Type:field_type, 
-                                    rst_DisplayName: $Db.dty(this.options.dty_ID,'dty_Name'),
-                                    rst_FilteredJsonTermIDTree: $Db.dty(this.options.dty_ID,'dty_JsonTermIDTree'),
-                                    rst_PtrFilteredIDs: $Db.dty(this.options.dty_ID,'dty_PtrTargetRectypeIDs'),
+                                    rst_DisplayName: $Db.dty(dty_ID,'dty_Name'),
+                                    rst_FilteredJsonTermIDTree: $Db.dty(dty_ID,'dty_JsonTermIDTree'),
+                                    rst_PtrFilteredIDs: $Db.dty(dty_ID,'dty_PtrTargetRectypeIDs'),
                                     rst_MaxValues:100};
                     
                     ed_options['dtFields'] = dtFields;
             }
             ed_options['detailtype'] = (field_type=='blocktext' || field_type=='file')?'freetext':field_type;
-            ed_options['dtID'] = this.options.dty_ID;
+            ed_options['dtID'] = dty_ID;
 
         }
         else{        
@@ -413,22 +408,22 @@ $.widget( "heurist.searchBuilderItem", {
                 field_type = 'freetext';
 
                 //create input element 
-                if(this.options.dty_ID=='added' ||
-                    this.options.dty_ID=='modified'){
+                if(dty_ID=='added' ||
+                    dty_ID=='modified'){
 
                     field_type = 'date';
 
-                }else if (this.options.dty_ID=='addedby' ||
-                    this.options.dty_ID=='owner' ||
-                    this.options.dty_ID=='user'){
+                }else if (dty_ID=='addedby' ||
+                    dty_ID=='owner' ||
+                    dty_ID=='user'){
                         //user selector
                         field_type = 'user';
 
-                }else  if (this.options.dty_ID=='access' || 
-                           this.options.dty_ID=='ids' || 
-                           this.options.dty_ID=='tag'){
+                }else  if (dty_ID=='access' || 
+                           dty_ID=='ids' || 
+                           dty_ID=='tag'){
                         
-                        field_type = this.options.dty_ID;
+                        field_type = dty_ID;
                 }
             }
             
@@ -511,7 +506,7 @@ Whole value = EQUAL
                 {key:'=',title:'whole value'}    //cs
             ];
 
-            if(field_type!='file' && (this.options.dty_ID>0 || this.options.dty_ID=='title')){
+            if(field_type!='file' && (dty_ID>0 || dty_ID=='title')){
                 eqopts = eqopts.concat([
                     {key:'@++',title:'all of the words'}, //full text
                     {key:'@',title:'any of the words'},  //full text
@@ -533,7 +528,7 @@ Whole value = EQUAL
             }
         }
 
-        if((this.options.dty_ID>0 || this.options.dty_ID=='notes' || this.options.dty_ID=='url')){  // && field_type!='relmarker'
+        if((dty_ID>0 || dty_ID=='notes' || dty_ID=='url')){  // && field_type!='relmarker'
             eqopts.push({key:'', title:'──────────', disabled:true});
             eqopts.push({key:'any', title:'any value (exists)'});
             eqopts.push({key:'NULL', title:'no data (missing)'});
@@ -597,8 +592,8 @@ Whole value = EQUAL
             ed_options['detailtype'] = 'relationtype';
             ed_options['dtID'] = 'r';
             var dtFields = {dty_Type:'relationtype', 
-                            rst_DisplayName: $Db.dty(this.options.dty_ID,'dty_Name'),
-                            rst_FilteredJsonTermIDTree: $Db.dty(this.options.dty_ID,'dty_JsonTermIDTree'),
+                            rst_DisplayName: $Db.dty(dty_ID,'dty_Name'),
+                            rst_FilteredJsonTermIDTree: $Db.dty(dty_ID,'dty_JsonTermIDTree'),
                             rst_DefaultValue: '',
                             rst_MaxValues:100};
             ed_options['dtFields'] = dtFields;
@@ -611,7 +606,7 @@ Whole value = EQUAL
 
             
             ed_options['detailtype'] = 'resource';
-            ed_options['dtID'] = this.options.dty_ID;
+            ed_options['dtID'] = dty_ID;
             ed_options['dtFields'] = null;
             
         } 
@@ -722,6 +717,9 @@ Whole value = EQUAL
             if (this._current_field_type=='geo') {
                 key = 'geo';    
             }else 
+            if(this.options.dty_ID.indexOf('r.')==0){
+                key = 'r:'+this.options.dty_ID.substr(2); 
+            }else    
             if(this.options.dty_ID>0){
                 key = 'f:'+this.options.dty_ID; 
             }else 

@@ -1160,7 +1160,8 @@ console.log(aCodes);
                             //key = 't:'+codes[k];    
                             if(codes[k]!=''){ //constrainded
                             
-                                if(codes[k]==1 && is_relationship) continue; //ignore t:1 for relationships
+                                if(codes[k]==window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION']
+                                         && is_relationship) continue; //ignore t:1 for relationships
                             
                                 var not_found = true;
                                 $.each(branch,function(m,item){
@@ -1246,15 +1247,16 @@ console.log(aCodes);
                     
                     //replace f: to r: for relationship record in rf and rt
                     if(value && is_relationship){
-                        var key = Object.keys(value)[0];
-                        if(key.indexOf('f:')==0){
+                        
+                        var dtid = codes[codes.length-1];
+                        if(dtid.indexOf('r.')==0){
                             //replace f to r for value
-                            var dtid = codes[codes.length-1];
+                            dtid = dtid.substr(2);
                             var nkey = 'r';
-                            if(dtid!=6) nkey = nkey + ':' +dtid;
+                            if(dtid!=window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']) nkey = 'r:'+dtid;
                             
                             var newvalue = {}
-                            newvalue[nkey] = value[key];
+                            newvalue[nkey] = value[Object.keys(value)[0]];
                             value = newvalue;
                         }
                     }
