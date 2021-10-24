@@ -222,6 +222,18 @@ $.widget( "heurist.searchBuilderItem", {
         }else{
             //this.label_token.hide();    
 
+            /*relationship fields
+            var topOptions3 = [
+                {key:0,title:'Relationship fields', group:1, disabled:true},
+                {key:'r',title:'Relationship type', depth:1},
+                {key:'r:10',title:'Start date', depth:1},
+                {key:'r:11',title:'End date', depth:1},
+                {key:'r:3',title:'Description', depth:1},
+                {key:'r:1',title:'Title', depth:1},
+                {key:'r:1',title:'Interpretation / commentary', depth:1}
+            ];
+            */
+            
             var topOptions2 = [
                 {key:0,title:'Generic fields', group:1, disabled:true},
                 {key:'title',title:'Title (constructed)', depth:1},

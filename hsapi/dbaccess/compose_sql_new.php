@@ -71,6 +71,10 @@ relatedfrom: relation type id (termid)    recordtype
 related_to:
 links: recordtype
 rel, r: - relation type (enum)
+    relf:  - field from relationship record  (for example relf:10 - start date)
+          
+    "rf:245":[{"t":4},{"r":6421}] - related from organization (4) with relation type 6421
+
 
 recordtype is added to link query  as first predicate
 
@@ -611,6 +615,12 @@ class HLimb {
         }
     }
 
+    
+    function setRelationPrefix($val){
+        foreach ($this->limbs as $ind=>$limb){
+            $res = $limb->setRelationPrefix($val);
+        }
+    }
     //
     // fills $tables and $where_clause
     //
@@ -702,9 +712,12 @@ class HPredicate {
     var $valid = false;
     var $query = null;
     
-    var $relation_types = null; //for related_to
-
-    var $field_list = false; //list of id values
+    //for related_to, related_from 
+    var $relation_types = null; 
+    var $relation_fields = null; // field in relationshio record: array(field_id=>value)
+    var $relation_prefix = ''; //prefix for recLinks
+    
+    var $field_list = false; //list of id values used in predicate IN (val1, val2, val3... )
     
     var $error_message = null;    
 
@@ -769,15 +782,52 @@ class HPredicate {
                 if($p_type=='related_to' || $p_type=='rt' ||
                    $p_type=='relatedfrom' || $p_type=='rf')
                 {
+                    
+                    $this->relation_fields = array();
+                    $this->value = array();
+                    
+                    
+                    // extract all with predicate type "r" - this is either relation type or other fields from relatinship record
+                    // "rf:245":[{"t":4},{"r":6421}] - related from organization (4) with relation type 6421
                     foreach($value as $idx=>$val){
-                        if($idx==='r' || @$val['r']){
+                        if($idx==='r' || @$val['r'])
+                        {
                             if(@$val['r']) $val = $val['r'];
                             $this->relation_types = prepareIds($val);
-                            array_splice($value, $idx, 1);
-                            $this->value = $value;
-                            break;
+                            
+                            //remove from array
+                            //array_splice($this->value, $idx, 1);
+                            //break;
+
+                        }else if(strpos($idx,'r')===0 || strpos(@array_keys($val)[0],'r')===0){ 
+                            //fields in relationship record
+                            //{"t":10,"rf:245":[{"t":4},{"r":6421},{"relf:10":">2010"}]}}
+                            if(strpos($idx,'r')===0){   //that's for {,,}
+                               $rel_field = str_replace('r:','f:',$idx);
+                               $this->relation_fields[$rel_field] = $val;       
+                            }else{
+                               $rel_field = array_keys($val)[0];  //that's for [{},{}]
+                               $this->relation_fields[str_replace('r:','f:',$rel_field)] = $val[$rel_field];       
+                               
+                            }
+                            //array_splice($this->value, $idx, 1);
+                        }else{
+                            $this->value[$idx] = $val;
                         }
                     }
+                    $value = $this->value;
+                    
+                    
+                    if(count($this->relation_fields)>0){
+                        $this->relation_fields = new HLimb($this->parent, 'all', $this->relation_fields);    
+                    }else{
+                        $this->relation_fields = null;
+                    }
+
+
+                    
+                    
+                    // related to particular records
                     foreach($value as $idx=>$val){
                         if($idx==='ids' || @$val['ids']){
                             if(@$val['ids']) $val = $val['ids'];
@@ -806,6 +856,10 @@ class HPredicate {
         }else{
             return getTopLevelQuery($parent->parent);
         }
+    }
+    
+    function setRelationPrefix($val){
+        $this->relation_prefix = $val;
     }
 
     function makeSQL(){
@@ -1136,11 +1190,18 @@ class HPredicate {
                 }
             }
 
+            if($this->relation_prefix){ //special case for search related records by values of relationship field
+                $recordID = $this->relation_prefix.'.rl_RelationID';
+            }else{
+                $recordID = 'r'.$this->qlevel.'.rec_ID';
+            }
+
+            
             //old $res = $p."dtl_DetailTypeID=".$this->field_id." AND ".$p."dtl_Value ".$val;
             if($this->fulltext){
                 $res = 'select dtl_RecID from recDetails where dtl_DetailTypeID';
             }else{
-                $res = "exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
+                $res = "exists (select dtl_ID from recDetails ".$p." where $recordID=".$p."dtl_RecID AND "
                 .$p.'dtl_DetailTypeID';
                 
                 if($this->negate && ($this->field_type=='enum' || $this->field_type=='relationtype')){
@@ -1163,7 +1224,7 @@ class HPredicate {
                 $list_ids = mysql__select_list2($mysqli, $res);
                 
                 if($list_ids && count($list_ids)>0){
-                    $res = 'r'.$this->qlevel.'.rec_ID'
+                    $res = $recordID
                         .(count($list_ids)>1
                             ?' IN ('.implode(',',$list_ids).')'
                             :'='.$list_ids[0]);
@@ -1174,7 +1235,8 @@ class HPredicate {
             }else{
                 $res = $res.' AND '.$field_name.$val.')';        
             }
-
+            
+            
         }
 
         return array("where"=>$res);  ///"from"=>"recDetails rd",
@@ -1604,11 +1666,14 @@ class HPredicate {
     /**
     * find records that are source relation for specified records
     * 
-    * "related_to:term_id": query for target record
+    * "related_to:field_id": query for target record
     * 
-    * $this->field_id - relmarker field - it is not used (required for rule builder only)
+    * $this->field_id - relmarker field - it is used to get constraintes (dty_JsonTermIDTree, dty_PtrTargetRectypeIDs)
     * It takes relation type (term id) from value
     * for example "rf":[{"t":4},{"r":"6590"}]
+    * 
+    * "rf":245 - related from record id 245
+    * {"rf:245":[{"t":4},{"r":6421}]}   related from organization(t:4) with reltype id 6421
     */
     function predicateRelatedDirect($is_reverse){
 
@@ -1627,7 +1692,10 @@ class HPredicate {
         $this->field_type = "link";
         $p = $this->qlevel;
         $rl = "rl".$p."x".$this->index_of_predicate;
-        
+       
+       
+       //{"t":10,"rf:245":[{"t":4},{"r":6421},{"relf:10":">2010"}]}}
+       //{"t":10,"rf:6421}
         
        if($this->isEmptyValue()){
             
@@ -1695,6 +1763,7 @@ class HPredicate {
                 }
 
             }else{
+                //related to/from lsit of record ids
                 $val = $this->getFieldValue();                
 
                 if(!$this->field_list){
@@ -1704,7 +1773,7 @@ class HPredicate {
                 }
             }
 
-            //search by relation type is disabled since it assigns field id instead  @todo fix
+            //compose where with recLinks ($rl) fields
             $where = "r$p.rec_ID=$rl.$part1 AND $rl.$part2".$val;
             
             if(is_array($this->relation_types)&& count($this->relation_types)>0){
@@ -1720,6 +1789,16 @@ class HPredicate {
             }else{
                 $where = $where . " AND $rl.rl_RelationID is not null";
             }
+            
+            if($this->relation_fields!=null){
+                $this->relation_fields->setRelationPrefix($rl);
+                $w2 = $this->relation_fields->makeSQL();
+//$res = array("from"=>$this->tables, "where"=>$where);                
+                if($w2 && trim($w2['where'])!=''){
+                    $where = $where . ' AND ' . $w2['where'];
+                }
+            }
+            
             return array("from"=>"recLinks ".$rl, "where"=>$where);
         }
     }

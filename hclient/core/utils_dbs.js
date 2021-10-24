@@ -258,7 +258,7 @@ window.hWin.HEURIST4.dbs = {
         
     //-------------------- internal functions    
         
-    function __getRecordTypeTree($recTypeId, $recursion_depth, $mode, $fieldtypes, $pointer_fields){
+    function __getRecordTypeTree($recTypeId, $recursion_depth, $mode, $fieldtypes, $pointer_fields, $is_parent_relmarker){
             
             var $res = {};
             var $children = [];
@@ -357,14 +357,32 @@ window.hWin.HEURIST4.dbs = {
                 }
                 
                 if(all_header_fields){
-                    var s = '<span style="font-style:italic">Generic Fields</span>';
-                    $children = [
-                        {title:s, folder:true, is_generic_fields:true, children:$children}];
+                    $grouped = [];
+                    
+                    if($is_parent_relmarker){
+                        var s = '<span style="font-style:italic">Relationship Fields</span>';
+                        var $rl_children = [];
+                        $rl_children.push({key:'6', type:'reltype',
+                            title:'Relationship type', 
+                            code:('1'+_separator+'6'), name:'Relationship type'});
+                        $rl_children.push({key:'10', type:'date',
+                            title:'Relationship Start Date', 
+                            code:('1'+_separator+'10'), name:'Start Date'});
+                        
+                        $grouped.push(
+                            {title:s, folder:true, is_generic_fields:true, children:$rl_children});
+                    }
+                    
+                    var s = '<span style="font-style:italic">Generic Fields AAA</span>';
+                    $grouped.push(
+                        {title:s, folder:true, is_generic_fields:true, children:$children});
                     if($fieldtypes.indexOf('anyfield')>=0){ //for filter builder 
-                        $children.push({key:'anyfield', type:'freetext', //-16px -80px      -48px -80px open
+                        $grouped.push({key:'anyfield', type:'freetext', //-16px -80px      -48px -80px open
                         title:"<span style='font-size:0.9em;font-style:italic;padding-left:22px'>ANY FIELD</span>", 
                         code:($recTypeId+_separator+'anyfield'), name:'Any field'});    
                     }
+                    
+                    $children = $grouped;
                 }
             }
 
@@ -868,7 +886,17 @@ window.hWin.HEURIST4.dbs = {
             //create hierarchy tree 
             for (var k=0; k<rectypeids.length; k++) {
                 var rectypeID = rectypeids[k];
-                var def = __getRecordTypeTree(rectypeID, 0, $mode, fieldtypes, null);
+                
+                var $is_parent_relmarker = false;
+                if(parentcode!=null){
+                    var codes = parentcode.split(_separator);
+                    if(codes.length>0){
+                        var lastcode = codes[codes.length-1];
+                        $is_parent_relmarker = (lastcode.indexOf('rt')==0 || lastcode.indexOf('rf')==0);
+                    }
+                }
+                
+                var def = __getRecordTypeTree(rectypeID, 0, $mode, fieldtypes, null, $is_parent_relmarker);
                 
                     if(def!==null) {
                         if(parentcode!=null){

@@ -831,7 +831,8 @@ $.widget( "heurist.searchBuilder", {
                                     var parentcode = node.data.code; 
                                     var rectypes = node.data.rt_ids;
                                     
-                                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, allowed_fieldtypes, parentcode );
+                                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, 
+                                                                                            allowed_fieldtypes, parentcode );
                                     if(res.length>1){
                                         data.result = res;
                                     }else{
@@ -1143,6 +1144,8 @@ console.log(aCodes);
             
             var value = ele.searchBuilderItem('getValues');
             var branch;
+            var is_relationship = false; //is current branch is relationship (rt,rf)
+            
             if(value!=null){
                 codes = code.split(':');
                 
@@ -1153,9 +1156,12 @@ console.log(aCodes);
                     //add new ones if not found
                     var key;
                     for(var k=1; k<codes.length-1; k++){
-                        if(k%2 == 0){ //rectype
+                        if(k%2 == 0){ //even element in codes is rectype
                             //key = 't:'+codes[k];    
-                            if(codes[k]!=''){ //unconstrainded
+                            if(codes[k]!=''){ //constrainded
+                            
+                                if(codes[k]==1 && is_relationship) continue; //ignore t:1 for relationships
+                            
                                 var not_found = true;
                                 $.each(branch,function(m,item){
                                    if(item['t']==codes[k]){
@@ -1175,9 +1181,12 @@ console.log(aCodes);
                                 }
                             }
                         }else{
+                            //odd element is field
+                            
                             var dtid = codes[k];
                             var linktype = dtid.substr(0,2);
                             var slink = '';
+                            
                             if(linktype=='rt'){
                                 slink = "related_to:";
                             }else if(linktype=='rf'){
@@ -1196,13 +1205,15 @@ console.log(aCodes);
                                 }else{
                                     key = 'f:'+dtid;    
                                 }*/
-                                key = 'f:'+dtid;
+                                key = 'f:'+dtid;    
                             }
                         
                             //find
                             var not_found = true;
                             $.each(branch, function(i,item){
                                 if(item[key]){
+                                    is_relationship = (linktype=='rt')||(linktype=='rf');
+                                    
                                     branch = item[key];
                                     not_found = false;
                                     return false;
@@ -1211,6 +1222,9 @@ console.log(aCodes);
 
                             //add new branch 
                             if(not_found){
+                                
+                                is_relationship = (linktype=='rt')||(linktype=='rf');
+                                
                                 var newbranch = {};
                                 newbranch[key] = [];
                                 branch.push(newbranch);
@@ -1228,7 +1242,25 @@ console.log(aCodes);
                         }
                         */
                     }//for
+                    
+                    
+                    //replace f: to r: for relationship record in rf and rt
+                    if(value && is_relationship){
+                        var key = Object.keys(value)[0];
+                        if(key.indexOf('f:')==0){
+                            //replace f to r for value
+                            var dtid = codes[codes.length-1];
+                            var nkey = 'r';
+                            if(dtid!=6) nkey = nkey + ':' +dtid;
+                            
+                            var newvalue = {}
+                            newvalue[nkey] = value[key];
+                            value = newvalue;
+                        }
+                    }
+                
                 }
+                
                 
                 branch.push(value);        
             }
