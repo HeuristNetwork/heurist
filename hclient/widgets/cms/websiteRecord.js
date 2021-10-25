@@ -478,10 +478,13 @@ function hCmsEditing(_options) {
                         if(pagetitle.length>0)
                         {
                             
-                            if(pageid==home_pageid){
-                                //pagetitle.empty().hide();
+                            if(pagetitle.length>0){
+                                //remove redundant webpageheadings
+                                $.each(pagetitle, function(i,item){
+                                   if(i>0) $(item.remove());
+                                });
                             } 
-                                  
+                             
                             if(pagetitle.attr('date-empty')==1){
                                 pagetitle.attr('date-empty',0);
                                 

@@ -83,7 +83,12 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/recordListExt.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultListCollection.js"></script>
 
+<!-- @todo load these scripts dynamically if edit mode is ON -->
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS2.js"></script>
+<!--
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SelectElement.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_WidgetCfg.js"></script>
+-->
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/hLayoutMgr.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
     
@@ -377,7 +382,14 @@ function afterPageLoad(document, pageid){
     var pagetitle = $('#main-content > h2.webpageheading');
     var title_container = $('#main-pagetitle');
     var show_page_title = false;
-
+    
+    if(pagetitle.length>0){
+        //remove redundant webpageheadings
+        $.each(pagetitle, function(i,item){
+           if(i>0) $(item.remove());
+        });
+    }
+    
     if(pagetitle.length>0  && title_container.length>0)  //&& pagetitle.parent().attr('id')=='main-content'
     {
         //move page title to header - visibility is set in websiteRecord
