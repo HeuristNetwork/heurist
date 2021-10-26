@@ -152,10 +152,18 @@ function hLayoutMgr(){
     }
     
     //
-    //
+    // layout - json configuration
+    // container - if not defined - it tries to find current one
     //
     function _layoutAddWidget(layout, container){
 
+        //remove previous one
+        var old_widget = container.find('#hl-'+layout.key);
+        if(old_widget.length>0){
+            old_widget.remove();
+        }
+        
+        //add new one
         $d = $(document.createElement('div'));
         $d.attr('id','hl-'+layout.key).attr('data-lid', layout.key)
         .addClass('heurist-widget editable')
@@ -167,6 +175,21 @@ function hLayoutMgr(){
         } 
         layout.css['position'] = 'relative';
         //layout.css['height'] = '100%';
+
+        //default values for various widgets
+        if(layout.appid=='heurist_Search'){
+            if(layout.css['display']!='flex'){
+                //layout.css['display'] = 'table';
+            }
+            if(!layout.css['width']){
+                //layout.css['width'] = '100%';
+            }
+        }else if(layout.appid=='heurist_Map'){
+            if(!layout.css['height']){
+                layout.css['height'] = '100%';
+            }
+        }
+
         
         //default min-height position depends on widget
         var app = _getWidgetById(layout.appid);
@@ -215,6 +238,14 @@ function hLayoutMgr(){
 
         var app = _getWidgetById(layout.appid); //find in app array (appid is heurist_Search for example)
 
+        if(!layout.options) layout.options = {};
+        
+        if(layout.appid=='heurist_Map'){
+            layout.options['leaflet'] = true;
+            layout.options['init_at_once'] = true;
+        }
+        
+        
         if (app && app.script && app.widgetname) { //widgetname - function name to init widget
 
             if($.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded            
@@ -450,6 +481,9 @@ function hLayoutMgr(){
             _layoutInitKey(layout, i);
         },
         
+        layoutAddWidget: function( layout, container ){
+            _layoutAddWidget(layout, container)            
+        },
         
         layoutContentFindElement: function(_layout_cfg, key){
             return _layoutContentFindElement(_layout_cfg, key);    

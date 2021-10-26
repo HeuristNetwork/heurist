@@ -54,7 +54,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var home_page_record_id=<?php echo $home_page_on_init; ?>;
     var init_page_record_id=<?php echo $open_page_on_init; ?>;
     var current_page_id = 0;
-    var _IS_NEW_CMS_EDITOR = false;
+    var _IS_NEW_CMS_EDITOR = true;
     var isCMS_active = false;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
 </script>
@@ -85,10 +85,8 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 
 <!-- @todo load these scripts dynamically if edit mode is ON -->
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS2.js"></script>
-<!--
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SelectElement.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_WidgetCfg.js"></script>
--->
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/hLayoutMgr.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
     

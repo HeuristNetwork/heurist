@@ -1445,7 +1445,7 @@ function hCmsEditing(_options) {
                    var dele = $dlg.find('div.'+val+'');
                    dele.show();
                    
-                   if(is_initial_set){
+                   if(is_initial_set){   //initial set for css
                        s = 'background:white;\nposition:relative;\n';
 
                        if(val=='heurist_resultListCollection'){
@@ -1783,7 +1783,8 @@ function hCmsEditing(_options) {
                         
 
                        
-                   }else if(val=='heurist_resultListExt' && 
+                   }
+                   else if(val=='heurist_resultListExt' && 
                     dele.find('select[name="rep_template"]').find('options').length==0){
                        
                         var $select3 = dele.find('select[name="rep_template"]'); 

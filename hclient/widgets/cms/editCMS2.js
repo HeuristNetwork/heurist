@@ -568,11 +568,13 @@ function editCMS2(){
                
                var is_folder = node.folder;  //$(item).hasClass('fancytree-folder'); 
                var is_root = node.getParent().isRootNode();
+               var is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
+                               node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
                
                var actionspan = '<div class="lid-actionmenu mceNonEditable" '
                     +' style="'+style_pos+';display:none;color:black;background:#95A7B7 !important;'
                     +'font-size:9px;font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' + ele_ID
-                    + (is_root?'':
+                    + (is_root || is_cardinal?'':
                     ('<span data-action="drag" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Drag to reposition">'
                     + '<span class="ui-icon ui-icon-arrow-4" style="font-size:9px;font-weight:normal"/>Drag</span>'))               
                     + '<span data-action="edit" style="background:lightgray;padding:4px;font-size:9px;font-weight:normal" title="Edit properties">'
@@ -582,7 +584,7 @@ function editCMS2(){
                if(node.data.type!='cardinal'){
                    actionspan += '<span data-action="element" style="background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new element/widget" style="font-size:9px;font-weight:normal"/>Element</span>';
                }
-               if(!(is_root || node.data.type=='north' || node.data.type=='east' || node.data.type=='west' || node.data.type=='east')){
+               if(!(is_root || is_cardinal)){
                    actionspan += ('<span data-action="delete" style="background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
                         +'Remove element from layout" style="font-size:9px;font-weight:normal"/>Delete</span>');
                }
@@ -619,8 +621,9 @@ function editCMS2(){
                         if(action=='element'){
                            
                            //add new element or widget
-                           //that.showBaseFieldEditor(-1, null);
-                           _selectElementType(ele_ID);
+                           editCMS_SelectElement(function(selected_element, selected_name){
+                                _layoutInsertElement(ele_ID, selected_element, selected_name);    
+                           })
                             
                         }else if(action=='edit'){
                             
@@ -785,9 +788,6 @@ function editCMS2(){
     //
     function _layoutEditElement(ele_id){
     
-        var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
-        var grp_ele = _layout_container.find('#hl-'+ele_id); //element in main-content
-        
 /*        
     var editFields = [                
         {"dtID": "name",
@@ -847,21 +847,24 @@ function editCMS2(){
         var cont = _panel_propertyView;
 
         //2. load content
-        cont.empty();
-        cont.load(window.hWin.HAPI4.baseURL
-            +'hclient/widgets/cms/editCMS_FlexLayout.html', function(){
+        function __onInitLayoutCfg(){
         
         //3. assign values
+        var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
+        var grp_ele = _layout_container.find('#hl-'+ele_id); //element in main-content
         
         cont.find('input[data-type="element-name"]').val(l_cfg.name);
         
-        var etype = l_cfg.type?l_cfg.type:(l_cfg.appid?'widget':'text');
+        var is_cardinal = (l_cfg.type=='north' || l_cfg.type=='south' || l_cfg.type=='cardinal' ||
+                           l_cfg.type=='east' || l_cfg.type=='west' || l_cfg.type=='center');
+        
+        var etype = is_cardinal?'cardinal':(l_cfg.type?l_cfg.type:(l_cfg.appid?'widget':'text'));
         
         cont.find('h4').css({margin:0});
         cont.find('.props').hide();
         cont.find('.props.'+etype).show();
         
-        var activePage = (etype=='group'?0:(etype=='widget'?1:2));
+        var activePage = (etype=='group'?0:(etype=='widget'?1:(is_cardinal?2:3)));
         
         cont.find('#properties_form').accordion({header:'h3',heightStyle:'content',active:activePage});
         
@@ -887,10 +890,27 @@ function editCMS2(){
         
         //load and init widget properties
         if(etype=='widget'){
-            cont.find('div.widget').empty().load(window.hWin.HAPI4.baseURL
-            +'hclient/widgets/cms/editCMS_WidgetCfg.html',
-                function(){ _widgetConfigInit(ele_id); }
-            );
+            
+            var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
+
+            function __openWidgetCfg(){
+                editCMS_WidgetCfg(l_cfg, null, function(new_cfg){
+                    //addign new option into 
+                    l_cfg.options = new_cfg;
+                    
+                    //recreate widget with new options
+                    var grp_ele = _layout_container.find('#hl-'+l_cfg.key); //element in main-content
+                    layoutMgr.layoutAddWidget(l_cfg, grp_ele.parent());
+                } );
+            }
+            
+            var container = cont.find('div.widget');
+            
+            $('<button>').button({label:top.HR('Configure')}).click(__openWidgetCfg).appendTo(container);
+            
+            __openWidgetCfg();
+            
+            
         }
         
         //
@@ -906,6 +926,8 @@ function editCMS2(){
                         css[$(item).attr('id')] = $(item).val();       
                     }
                 });
+            }else if(cont.find('#display').val()=='table'){
+                css['display'] = 'table';
             }else{
                 css['display'] = 'block';
             }
@@ -927,10 +949,34 @@ function editCMS2(){
                 if(!css['border-color']) css['border-color'] = 'black';
             }
             
-            var ele = cont.find('input[name="margin"]');
-            if(ele.val()) css[ele.attr('name')] = ele.val()+'px';       
-            var ele = cont.find('input[name="padding"]');
-            if(ele.val()) css[ele.attr('name')] = ele.val()+'px';       
+            function __setDim(name){
+                var ele = cont.find('input[name="'+name+'"]');
+                var val = ele.val();
+                if(val!='' || parseInt(val)>0){
+                    if(!(val.indexOf('%')>0 || val.indexOf('px')>0)){
+                        val = val + 'px';
+                    }
+                    css[name] = val;
+                }
+            }
+            
+            __setDim('margin');
+            __setDim('padding');
+            __setDim('width');
+            __setDim('height');
+            
+            if(l_cfg.css){
+                var old_css = l_cfg.css;
+                var params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
+                for(var i=0; i<params.length; i++){
+                    var prm = params[i];
+                    if (old_css[prm]){ //drop old value
+                        old_css[prm] = null;
+                        delete old_css[prm];
+                    };
+                }
+                css = $.extend(old_css, css);
+            }
             
 //console.log(css);            
             return css;
@@ -957,13 +1003,6 @@ function editCMS2(){
             }
             
             var css = __getCss();
-            /*
-            css['border'] = '2px dotted gray';                
-            css['border-radius'] = '4px';
-            css['margin'] = '4px';
-            */
-            
-            if(l_cfg.css) css = $.extend(l_cfg.css, css);
 
             grp_ele.removeAttr('style');
             grp_ele.css(css);
@@ -1028,9 +1067,6 @@ function editCMS2(){
         //4b. listeners for styles (border,bg,margin)
         cont.find('input[data-type="css"]').change(function(event){
             var css = __getCss();
-            
-            if(l_cfg.css) css = $.extend(l_cfg.css, css);
-            
             grp_ele.removeAttr('style');
             grp_ele.css(css);
         });
@@ -1039,15 +1075,15 @@ function editCMS2(){
         cont.find('.btn-ok').button().click(function(){
             //5. save in layout cfg        
             var css = __getCss();
-            l_cfg.css = $.extend(l_cfg.css, css);
+            l_cfg.css = css;
             
             l_cfg.name = cont.find('input[data-type="element-name"]').val();
             l_cfg.title = '<span data-lid="'+l_cfg.key+'">'+l_cfg.name+'</span>';
             var ele_ID = ''+l_cfg.key;
             var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
             node.setTitle(l_cfg.title);
-            _defineActionIcons($(node.li).find('.fancytree-node'), ele_ID, 'position:absolute;right:8px;padding:2px;margin-top:0px;');
-            
+            _defineActionIcons($(node.li).find('span.fancytree-node:first'), ele_ID, 'position:absolute;right:8px;padding:2px;margin-top:0px;');
+                                  
             
             _panel_treePage.show();
             cont.hide();
@@ -1062,109 +1098,15 @@ function editCMS2(){
         });
         
                 
-            });
+            };
         
+        
+        //
+        cont.empty();
+        cont.load(window.hWin.HAPI4.baseURL
+            +'hclient/widgets/cms/editCMS_FlexLayout.html', __onInitLayoutCfg);         
         
     }
-    
-    //
-    // Assign widget properties to UI
-    //
-    function _widgetConfigInit(ele_id){
-
-        var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
-        var grp_ele = _layout_container.find('#hl-'+ele_id); //element in main-content
-
-        var $dlg = _panel_propertyView;
-        
-        var widget_name = l_cfg.appid;
-        var opts = window.hWin.HEURIST4.util.isJSON(l_cfg.options);
-
-        $dlg.find('div[class^="heurist_"]').hide(); //hide all
-        $dlg.find('div.'+widget_name+'').show();
-        
-        if(opts!==false){
-
-                $dlg.find('input[name="search_realm"]').val(opts.search_realm);    
-            
-                if(widget_name=='heurist_Map'){
-                    
-                    if(opts.layout_params){
-                        $dlg.find("#use_timeline").prop('checked', !opts.layout_params.notimeline);    
-                        $dlg.find("#map_rollover").prop('checked', !opts.layout_params.map_rollover);    
-                        $dlg.find("#use_cluster").prop('checked', !opts.layout_params.nocluster);    
-                        $dlg.find("#editstyle").prop('checked', opts.layout_params.editstyle);    
-                        var ctrls = (opts.layout_params.controls)?opts.layout_params.controls.split(','):[];
-                        $dlg.find('input[name="controls"]').each(
-                            function(idx,item){$(item).prop('checked',ctrls.indexOf($(item).val())>=0);}
-                        );
-                        var legend = (opts.layout_params.legend)?opts.layout_params.legend.split(','):[];
-                        if(legend.length>0){
-                            
-                            $dlg.find('input[name="legend_exp2"]').prop('checked',legend.indexOf('off')<0);
-                            
-                            $.each(legend, function(i, val){
-                                if(parseInt(val)>0){
-                                    $dlg.find('input[name="legend_width"]').val(val);        
-                                }else if(val!='off'){
-                                    var is_exp = (val[0]!='-')
-                                    if (!is_exp) legend[i] = val.substring(1);
-                                    $dlg.find('input[name="legend_exp"][value="'+val+'"]').prop('checked',is_exp);
-                                }
-                            });
-                            $dlg.find('input[name="legend"]').each(
-                                function(idx,item){
-                                    $(item).prop('checked',legend.indexOf($(item).val())>=0);
-                                }
-                            );
-                        }
-                        if(opts.layout_params['template']){
-                            $dlg.find('select[name="map_template"]').attr('data-template', opts.layout_params['template']);        
-                        }
-                        if(opts.layout_params['basemap']){
-                            $dlg.find('input[name="map_basemap"]').val(opts.layout_params['basemap']);        
-                        }
-                        
-                    }
-                    if(opts['mapdocument']>0){
-                        $dlg.find('select[name="mapdocument"]').attr('data-mapdocument', opts['mapdocument']);        
-                    }
-
-                }
-                else{
-                
-                    $dlg.find('div.'+widget_name+' input').each(function(idx, item){
-                        item = $(item);
-                        if(item.attr('name')){
-                            if(item.attr('type')=='checkbox'){
-                                item.prop('checked', opts[item.attr('name')]===true || opts[item.attr('name')]=='true');
-                            }else if(item.attr('type')=='radio'){
-                                item.prop('checked', item.val()== String(opts[item.attr('name')]));
-                            }else {  //if(item.val()!=''){
-                                item.val( opts[item.attr('name')] );
-                            }
-                        }
-                    });
-                    $dlg.find('div.'+widget_name+' select').each(function(idx, item){
-                        item = $(item);
-                        item.val( opts[item.attr('name')] );
-                    });
-                    if(widget_name=='heurist_resultListExt'){
-                        if(opts['template']){
-                            $dlg.find('select[name="rep_template"]').attr('data-template', opts['template']);        
-                        }
-                    }else if(widget_name=='heurist_resultList'){
-                        if(opts['rendererExpandDetails']){
-                            $dlg.find('select[name="rendererExpandDetails"]').attr('data-template', opts['rendererExpandDetails']);        
-                        }
-                    }else if(widget_name=='heurist_resultListDataTable'){
-                        $dlg.find('#dataTableParams').val(opts['dataTableParams']);
-                    }
-                }
-                
-        }
-    }
-    
     
     //
     // Add text element or widget
@@ -1385,130 +1327,7 @@ function editCMS2(){
 */        
     }
 
-    //
-    //
-    //
-    function _selectElementType( insert_ele_id ){
-
-        var $dlg;
-
-        var selected_element = null, selected_name='';
-
-        var t_groups = {
-            group:{name:'Group', description:'Container for elements'},
-            accordion:{name:'Accordion', description:'Set of collapsable groups'},            
-            tabs:{name:'Tabs', description:'Tab/Page control. Each page may have group of elements'},            
-            cardinal:{name:'Cardinal', description:'Container for five groups or elements placed orthogonally'},                                                    
-        };
-
-        var t_elements = {
-            
-            heurist_Search:{name:'Filter', description:'Search field (with standard filter builder)'},
-            heurist_SearchTree:{name:'Saved filters', description:'Simple &amp; facet filters, selection or tree'},            
-
-            heurist_resultList:{name:'Standard filter result', description:'Switchable modes, action controls'},            
-            heurist_resultListExt:{name:'Custom report', description:'Also use for single record view'},            
-            heurist_resultListDataTable:{name:'Table format', description:'Result list as data table'},            
-
-            heurist_Map2:{name:'Map and timeline', description:'Map and timeline widgets'},            
-            heurist_Graph:{name:'Network graph', description:'Visualization for records links and relationships'},            
-        };
-
-        var t_contents = {
-            text:{name:'Simple Text', description:'Simple text wiht header'},
-            text_media:{name:'Text with media', description:'media and text '},
-            text_2:{name:'Text in 2 columns', description:'2 columns layout'},
-            group_2:{name:'Groups as 2 columns', description:'2 columns layout'},
-            text_3:{name:'Text in 3 columns', description:'3 columns layout'},
-            text_banner:{name:'Text with banner', description:'Text over background image'},
-            tpl_discover: {name:'Discover (filters/results/map)', description:'3 columns layout'},
-            tpl_blog: {name:'Blog (filters/results/map)', description:''},
-        }
-
-        var buttons= [
-            {text:window.hWin.HR('Cancel'), 
-                id:'btnCancel',
-                css:{'float':'right','margin-left':'30px','margin-right':'20px'}, 
-                click: function() { 
-                    $dlg.dialog( "close" );
-            }},
-            {text:window.hWin.HR('Insert'), 
-                id:'btnDoAction',
-                class:'ui-button-action',
-                disabled:'disabled',
-                css:{'float':'right'}, 
-                click: function() { 
-                    if(selected_element){
-                        _layoutInsertElement(insert_ele_id, selected_element, selected_name);
-                        $dlg.dialog( "close" );    
-                    }
-        }}];
-
-        $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
-            +"hclient/widgets/cms/editCMS_SelectElement.html?t="+(new Date().getTime()), 
-            buttons, 'Select Template to insert to your Web Page', 
-            {  container:'cms-add-widget-popup',
-                default_palette_class: 'ui-heurist-publish',
-                width: 600,
-                height: 600,
-                close: function(){
-                    $dlg.dialog('destroy');       
-                    $dlg.remove();
-                },
-                open: function(){
-                    is_edit_widget_open = true;
-
-                    //load list of groups and elements and init selector
-                    var  sel = $dlg.find('#groups');
-                    $.each(t_groups, function(key, item){
-                        window.hWin.HEURIST4.ui.addoption(sel[0], key, item.name);
-                    });
-                    sel = $dlg.find('#elements');
-                    $.each(t_elements, function(key, item){
-                        window.hWin.HEURIST4.ui.addoption(sel[0], key, item.name);
-                    });
-                    sel = $dlg.find('#contents');
-                    $.each(t_contents, function(key, item){
-                        window.hWin.HEURIST4.ui.addoption(sel[0], key, item.name);
-                    });
-                    
-                    
-                    
-                    $dlg.find('select').mouseover(function(e){
-                        window.hWin.HEURIST4.util.setDisabled( $dlg.parents('.ui-dialog').find('#btnDoAction'), false );
-                        var t_name = $(e.target).val();
-                        //selected_element  = t_name;
-                        var desc = '';
-                        if(t_contents[t_name]){
-                            desc = t_contents[t_name];    
-                        }else if (t_elements[t_name]) {
-                            desc = t_elements[t_name];
-                        }else if (t_groups[t_name]){
-                            desc = t_groups[t_name];                            
-                        }
-                        if(desc){
-                            desc = desc.description
-                        }
-                        $dlg.find('.template_description').html(desc);    
-                        
-                    });
-                    $dlg.find('select').change(function(e){
-                        window.hWin.HEURIST4.util.setDisabled( $dlg.parents('.ui-dialog').find('#btnDoAction'), false );
-                        var sel = e.target;
-                        var t_name = $(sel).val();
-                        selected_element  = t_name;
-                        selected_name = sel.options[sel.selectedIndex].text;
-                    });
-                    
-                    sel.val('text').change();
-                    selected_element = 'text';
-
-                }
-        });
-
-    }
-      
-      
+    
     //
     //
     //

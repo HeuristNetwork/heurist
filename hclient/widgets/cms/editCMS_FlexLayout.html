@@ -51,7 +51,7 @@
                     <div>
                         <div class="header_narrow">Direction:</div>
                         <select name="direction" class="flex-select" id="flex-direction">
-                            <option value="">row</option>
+                            <option value="">row</option> <!-- default -->
                             <option value="column">column</option>
                             <!-- <option value="row-reverse">row-reverse</option>-->
                             <!-- <option value="column-reverse">column-reverse</option>-->
@@ -60,7 +60,7 @@
                     <div>
                         <div class="header_narrow">Wrap:</div>
                         <select name="wrap" class="flex-select" id="flex-wrap">
-                            <option value="">nowrap</option>
+                            <option value="">nowrap</option> <!-- default -->
                             <option value="wrap">wrap</option>
                             <!-- <option value="wrap-reverse">wrap-reverse</option> -->
                         </select>
@@ -73,6 +73,7 @@
                             <option value="center">center</option>
                             <option value="space-between">space-between</option>
                             <option value="space-around">space-around</option>
+                            <option value="stretch">stretch</option>
                         </select>
                     </div>
                     <div>
@@ -109,6 +110,53 @@
             <h3 class="props widget">Widget properties</h3>
             <div class="props widget">
                 
+            </div>
+            <h3 class="props cardinal">Cardinal properties</h3>
+            <div class="props cardinal">
+                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <div>
+                            <div class="header_narrow"><b>North:</b></div>
+                            <select data-type="cardinal" id="initState" name="north.init">
+                                <option vaue="">initally open</option>
+                                <option value="Closed">initally closed</option>
+                                <option value="Hidden">hidden</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="header_narrow">Size</div>
+                            <input data-type="cardinal" name="north.size" type="number" min="10" value="" style="width:30px"/>
+                            <label>&nbsp;Resizeable:</label>
+                            <input data-type="cardinal" name="north.resizeable" type="checkbox" checked/>
+                        </div>
+                        <div>
+                            <div class="header_narrow">Min size:</div>
+                            <input data-type="cardinal" name="north.minWidth" type="number" min="0" max="20" value="" style="width:30px"/>
+                            <label>&nbsp;Max size:</label>
+                            <input data-type="cardinal" name="north.maxWidth"  type="number" min="0" max="40" value="" style="width:30px"/>                       
+                        </div>
+                </fieldset>
+                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <div>
+                            <div class="header_narrow"><b>South:</b></div>
+                            <select data-type="cardinal" id="initState" name="south.init">
+                                <option vaue="">initally open</option>
+                                <option value="Closed">initally closed</option>
+                                <option value="Hidden">hidden</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="header_narrow"></div>
+                            <input data-type="cardinal" name="south.size" type="number" min="10" value="" style="width:30px"/>
+                            <label>&nbsp;Resizeable:</label>
+                            <input data-type="cardinal" name="south.resizeable" type="checkbox" checked/>
+                        </div>
+                        <div>
+                            <div class="header_narrow">Min size:</div>
+                            <input data-type="cardinal" name="south.minWidth" type="number" min="0" max="20" value="" style="width:30px"/>
+                            <label>&nbsp;Max size:</label>
+                            <input data-type="cardinal" name="south.maxWidth"  type="number" min="0" max="40" value="" style="width:30px"/>                       
+                        </div>
+                </fieldset>
             </div>
             <h3>Styles</h3>
             <div>
@@ -163,6 +211,15 @@
                             <input data-type="css" name="padding" type="number" min="0" value="" placeholder="0" style="width:30px"/>
                             <label>&nbsp;Outer:</label>
                             <input data-type="css" name="margin"  type="number" min="0" value="" placeholder="0" style="width:30px"/>                       
+                        </div>
+                </fieldset>
+                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <div>
+                            <div class="header_narrow"><b>Dimensions</b></div>
+                            <label>&nbsp;Width:</label>
+                            <input data-type="css" name="width" type="text" min="0" placeholder="auto" style="width:30px"/>
+                            <label>&nbsp;Height:</label>
+                            <input data-type="css" name="height"  type="text" min="0" placeholder="auto" style="width:30px"/>                       
                         </div>
                 </fieldset>
             </div>
