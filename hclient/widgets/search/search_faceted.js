@@ -636,7 +636,10 @@ $.widget( "heurist.search_faceted", {
                     //first level can be multi rectype
                     //add recordtype
                     if(rtid>0 ||  rtid.indexOf(',')>0){  //AA!!  ||  rtid.indexOf(',')>0
-                        curr_level = __checkEntry(curr_level,"t",rtid);
+                    
+                        if(rtid!=1){ //not relationship 
+                            curr_level = __checkEntry(curr_level,"t",rtid);
+                        }
                     }
                     var linktype = dtid.substr(0,2);
                     var slink = null;
@@ -651,6 +654,8 @@ $.widget( "heurist.search_faceted", {
                         slink = "linked_to:";
                     }else if(linktype=='lf'){
                         slink = "linkedfrom:";
+                    }else{
+                        slink = null;
                     }
 
                     var key, val;                         
@@ -667,7 +672,9 @@ $.widget( "heurist.search_faceted", {
                             dtid = '1,18,231,304';
                         }
                         
-                        if(dtid>0){
+                        if(dtid.indexOf('r.')==0){
+                            key = "r:"+dtid.substr(2);
+                        }else if(dtid>0){
                             key = "f:"+dtid;
                         }else{
                             key = dtid;
@@ -1012,11 +1019,16 @@ $.widget( "heurist.search_faceted", {
                         rtid = rtid.split(',')[0];
                  }
                  
+                 var dty_ID = field['id'];
+                 if(dty_ID.indexOf('r.')==0){
+                    dty_ID = dty_ID.substr(2);    
+                 }
+                 
                  var ed_options = {
                                 varid: field['var'],  //content_id+"_"+
                                 recID: -1,
                                 rectypeID: rtid,
-                                dtID: field['id'],
+                                dtID: dty_ID,
                                 
                                 values: [''],
                                 readonly: false,
@@ -1030,7 +1042,7 @@ $.widget( "heurist.search_faceted", {
                                 is_faceted_search: true
                         };
                         
-                   if(isNaN(Number(field['id']))){
+                   if(isNaN(Number(dty_ID))){
                        ed_options['dtFields'] = {
                            dty_Type: field['type'],
                            rst_RequirementType: 'optional',
@@ -1647,12 +1659,17 @@ $.widget( "heurist.search_faceted", {
                 */
                 
                 
+                var fieldid = field['id'];
+                if(fieldid.indexOf('r.')==0){
+                    fieldid = fieldid.substr(2);    
+                }
+                
 
                 var step_level = field['selectedvalue']?field['selectedvalue'].step:0;
                 var vocabulary_id = null;
                 if(field['type']=='enum' && field['groupby']=='firstlevel'){
                     
-                    vocabulary_id = $Db.dty(field['id'], 'dty_JsonTermIDTree');    
+                    vocabulary_id = $Db.dty(fieldid, 'dty_JsonTermIDTree');    
 
                     //it does work for vocabularies only!
                     if(isNaN(Number(vocabulary_id)) || !(vocabulary_id>0)){
@@ -1670,7 +1687,7 @@ $.widget( "heurist.search_faceted", {
                     step_level = 1;
                 }
         
-                var fieldid = field['id'];
+                
                 if(fieldid==9 && that._use_multifield){
                     fieldid = '9,10,11';
                 }else if(fieldid==1  && that._use_multifield){
@@ -1831,6 +1848,11 @@ $.widget( "heurist.search_faceted", {
                     }                    
                
                     var that = this;
+
+                    var dty_ID = field['id']; 
+                    if(dty_ID.indexOf('r.')==0){
+                        dty_ID = dty_ID.substr(2);    
+                    }
                     
                     if(field['type']=='enum' && field['groupby']!='firstlevel'){
                         
@@ -1841,9 +1863,8 @@ $.widget( "heurist.search_faceted", {
                             is_first_level = true;
                         } 
                         
-                        var dtID = field['id']; 
                         var term; 
-                        if(dtID=='owner' || dtID=='addedby'){
+                        if(dty_ID=='owner' || dty_ID=='addedby'){
                                 
                                 if(response.users){
                                     
@@ -1869,7 +1890,7 @@ $.widget( "heurist.search_faceted", {
                                     return;
                                 }
                             
-                        }else if(dtID=='access'){
+                        }else if(dty_ID=='access'){
                             
                             term = {key: null, title: "all",
                                     children:[{title:'viewable', key:'viewable'},
@@ -1880,10 +1901,10 @@ $.widget( "heurist.search_faceted", {
                         }else{
                         
                             //enumeration
-                            var vocab_id = $Db.dty(dtID, 'dty_JsonTermIDTree');    
+                            var vocab_id = $Db.dty(dty_ID, 'dty_JsonTermIDTree');    
                                                   
     if(!(vocab_id>0)){
-        console.log('Field '+dtID+' not found!!!!');
+        console.log('Field '+dty_ID+' not found!!!!');
         console.log(field);
         //search next facet
         this._recalculateFacets( facet_index );
@@ -2277,10 +2298,15 @@ $.widget( "heurist.search_faceted", {
 
                                     var ids_arr = ids.split(','); // transform into array
 
+                                    var dty_ID = field['id']; 
+                                    if(dty_ID.indexOf('r.')==0){
+                                        dty_ID = dty_ID.substr(2);    
+                                    }
+                                    
                                     var request = {
                                         a: 'gethistogramdata',  // Get histogram data
                                         recids: ids_arr,            // record/s of interest
-                                        dtyid: field['id'],     // detail type id
+                                        dtyid: dty_ID,     // detail type id
                                         range: [t_min.toISOString(), t_max.toISOString()], // lowest and highest values in ISO format
                                         format: date_type,        // year, month, day
                                         interval: 25            // interval size
@@ -3026,11 +3052,16 @@ $.widget( "heurist.search_faceted", {
             rtid = rtid.split(',')[0];
         }
 
+        var dty_ID = field['id']; 
+        if(dty_ID.indexOf('r.')==0){
+            dty_ID = dty_ID.substr(2);    
+        }
+        
         var ed_options = {
             varid: field['var'],  //content_id+"_"+
             recID: -1,
             rectypeID: rtid,
-            dtID: field['id'],
+            dtID: dty_ID,
             
             values: [''],
             readonly: false,
@@ -3041,7 +3072,7 @@ $.widget( "heurist.search_faceted", {
             detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
         };
 
-        if(isNaN(Number(field['id']))){ //field id not defined
+        if(isNaN(Number(dty_ID))){ //field id not defined
             ed_options['dtFields'] = {
                 dty_Type: field['type'],
                 rst_RequirementType: 'optional',

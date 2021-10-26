@@ -371,20 +371,20 @@ window.hWin.HEURIST4.dbs = {
                         $rl_children.push({type:'date',
                             title:'Relationship Start Date', 
                             code:(rt_id+_separator+'r.'+dc['DT_START_DATE']), name:'Start Date'});
-                        /*    
+                            
                         $rl_children.push({type:'date',
                             title:'Relationship End Date', 
-                            code:(rt_id+_separator+'r'+dc['DT_END_DATE']), name:'End Date'});
+                            code:(rt_id+_separator+'r.'+dc['DT_END_DATE']), name:'End Date'});
                         $rl_children.push({type:'freetext',
                             title:'Relationship Name', 
-                            code:(rt_id+_separator+'r'+dc['DT_NAME']), name:'Name'});
+                            code:(rt_id+_separator+'r.'+dc['DT_NAME']), name:'Name'});
                         $rl_children.push({type:'freetext',
                             title:'Relationship Description', 
-                            code:(rt_id+_separator+'r'+dc['DT_SHORT_SUMMARY']), name:'Description'});
+                            code:(rt_id+_separator+'r.'+dc['DT_SHORT_SUMMARY']), name:'Description'});
                         $rl_children.push({type:'enum',
                             title:'Relationship interpretation reference', 
-                            code:(rt_id+_separator+'r'+dc['DT_INTERPRETATION_REFERENCE']), name:'Interpretation Reference'});
-                        */
+                            code:(rt_id+_separator+'r.'+dc['DT_INTERPRETATION_REFERENCE']), name:'Interpretation Reference'});
+                        
                         $grouped.push(
                             {title:s, folder:true, is_generic_fields:true, children:$rl_children});
                     }

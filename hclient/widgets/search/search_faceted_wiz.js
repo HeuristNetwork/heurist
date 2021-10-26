@@ -1565,6 +1565,10 @@ $.widget( "heurist.search_faceted_wiz", {
                        harchy_fields.push("Tags"); 
                     }
                     
+                    if(dtid.indexOf('r.')==0){
+                        dtid = dtid.substr(2);
+                    }
+                    
                     var linktype = dtid.substr(0,2);                                
                     if(isNaN(Number(linktype))){
                         dtid = dtid.substr(2);
