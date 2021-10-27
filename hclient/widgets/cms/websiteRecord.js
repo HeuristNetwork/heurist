@@ -1249,11 +1249,10 @@ function hCmsEditing(_options) {
             
             var widget_name = ele.attr('data-heurist-app-id');
             $dlg.find('#widgetName').val( widget_name ); //selector
-            if(ele  && ele[0].dataset)
-                var s = ele[0].dataset.mceStyle;
-                s = s.replace(/;/g, ";\n");
-                $dlg.find('#widgetCss').val( s );
-            
+            var s = ''
+            if(ele  && ele[0].dataset) s = ele[0].dataset.mceStyle;
+            s = s.replace(/;/g, ";\n");
+            $dlg.find('#widgetCss').val( s );
             
             var cfgele = ele.find('span.widget-options:first');
             if(cfgele.length==0) cfgele = ele.find('span'); //backward capability

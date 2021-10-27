@@ -29,7 +29,7 @@ function editCMS_SelectElement( callback ){
         group:{name:'Group', description:'Container for elements'},
         accordion:{name:'Accordion', description:'Set of collapsable groups'},            
         tabs:{name:'Tabs', description:'Tab/Page control. Each page may have group of elements'},            
-        cardinal:{name:'Cardinal', description:'Container for five groups or elements placed orthogonally'},                                                    
+        cardinal:{name:'Cardinal', description:'Container for five groups or elements placed orthogonally (N-S-E-W,-Center panels)'},                                                    
     };
 
     var t_elements = {

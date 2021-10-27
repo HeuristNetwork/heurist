@@ -1,4 +1,5 @@
 <?php
+ $_is_new_cms_editor = true;
 
     /**
     *  Injection of Heuirst core scripts, styles and scripts to init CMS website template 
@@ -54,7 +55,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var home_page_record_id=<?php echo $home_page_on_init; ?>;
     var init_page_record_id=<?php echo $open_page_on_init; ?>;
     var current_page_id = 0;
-    var _IS_NEW_CMS_EDITOR = true;
+    var _IS_NEW_CMS_EDITOR = <?php echo $_is_new_cms_editor; ?>;
     var isCMS_active = false;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
 </script>
@@ -83,14 +84,21 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/recordListExt.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultListCollection.js"></script>
 
+<script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
+
+<?php
+if($_is_new_cms_editor){
+?>
 <!-- @todo load these scripts dynamically if edit mode is ON -->
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS2.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SelectElement.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_WidgetCfg.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_ElementCfg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/hLayoutMgr.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
     
 <?php
+}
+    
 if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')){
 ?>
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/js/datatable/datatables.min.css"/>
@@ -159,6 +167,18 @@ if(!array_key_exists('embed', $_REQUEST)){
 <?php
 }
 
+if($_is_new_cms_editor || $edit_Available){
+?>
+    <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/util/formatting.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/xml/xml.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/javascript/javascript.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/css/css.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/htmlmixed/htmlmixed.js"></script>
+<?php
+}
+
 if($edit_Available){
 ?>
     <!--
@@ -168,15 +188,6 @@ if($edit_Available){
     <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js"></script>
     <script src="<?php echo PDIR;?>external/tinymce/jquery.tinymce.min.js"></script>
     -->
-    
-    <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
-    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.js"></script>
-    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/util/formatting.js"></script>
-    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/xml/xml.js"></script>
-    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/javascript/javascript.js"></script>
-    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/css/css.js"></script>
-    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/htmlmixed/htmlmixed.js"></script>
-    
     <script src="websiteRecord.js"></script>
     <?php
 }else{
@@ -723,17 +734,27 @@ function _openCMSeditor(event){
     
     if(!_IS_NEW_CMS_EDITOR) return;
     
+    var btn = $(event.target);
+    
     if(isCMS_active){
         //close
         isCMS_active = false;
         editCMS_instance2.closeCMS();
+        btn.show();
     }else{
         isCMS_active = true;
         if(!editCMS_instance2) editCMS_instance2 = editCMS2();
-        editCMS_instance2.startCMS({record_id:current_page_id, content:page_content[current_page_id], container:'#main-content'}); //see editCMS2.js    
+        editCMS_instance2.startCMS({record_id:current_page_id, 
+                                    content:page_content[current_page_id], 
+                                    container:'#main-content',
+                                    close: function(){
+                                        isCMS_active = false;
+                                        btn.show();
+                                    }}); //see editCMS2.js    
+        btn.hide();
     }
     
-    $(event.target).html(isCMS_active?'Close CMS':'CMS');
+    //$(event.target).html(isCMS_active?'Close CMS':'CMS');
 }
 
 

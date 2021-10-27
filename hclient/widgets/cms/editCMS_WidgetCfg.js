@@ -21,6 +21,7 @@
 //
 function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
 
+    var _className = 'editCMS_WidgetCfg';
     
     function _init(){
 

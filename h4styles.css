@@ -89,6 +89,9 @@ a{
     /* height: 100%; */
     /* width: 100%; */
 }
+.ui-layout-content2 {
+    padding: 0px !important;
+}
 
 /* fix overflow issue in menu   */
 .ui-selectmenu-menu > .ui-menu .ui-menu-item, .ui-selectmenu-menu > .ui-menu .ui-state-active{

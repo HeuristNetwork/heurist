@@ -32,6 +32,7 @@ widget:
 */
 
 var editCMS_instance2 = null;
+// layoutMgr - global variable defined in hLayoutMgr
 
 //
 // options: record_id, content, container
@@ -83,14 +84,15 @@ function editCMS2(){
                 var east_panel = $('<div class="ui-layout-east">'      
                         +'<div class="ent_wrapper editStructure">' 
                         +'<div class="ent_header" style="padding:10px 20px 4px 0px;border-bottom:1px solid lightgray">' //instruction and close button
-                            +'<span style="display:inline-block;width:32px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-e"/>'
+                            +'<span style="display:inline-block;width:32px;height:24px;font-size:29px;margin:0px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-e"/>'
                             
                             /*
                             +'<span style="font-style:italic;display:inline-block">Drag to reposition<br>'
                             +'Select or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
                             */
                             
-                            +'<button style="float:right;margin-top:4px;" title="Show website/main menu strucuture" class="showTreeWebSite"/>'
+                            +'<button style="float:right;" title="Exit/Close content editor" class="btnExitCMS"/>'
+                            +'<button style="float:right;" title="Show website/main menu strucuture" class="btnEditWebSite"/>'
                             //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
                         +'</div>'
                         
@@ -133,7 +135,7 @@ function editCMS2(){
                             onclose_end : function( ){ 
                                 var tog = body.find('.ui-layout-toggler-east');
                                 tog.addClass('prominent-cardinal-toggler');
-                                $('<span class="heurist-helper2" style="font-size:9px;">Move Delete</span>').appendTo(tog);
+                                $('<span class="heurist-helper2" style="font-size:9px;">Edit Content</span>').appendTo(tog);
                             },
                             togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-e"></div>',
                             togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-w"></div>',
@@ -157,7 +159,9 @@ function editCMS2(){
                         }
                     );
                     
-                    east_panel.find('.showTreeWebSite').button({icon:'ui-icon-menu'}).click(_showTreeWebSite);
+                    east_panel.find('.closeTreePanel').click(function(){ body.layout().close('east'); } );
+                    east_panel.find('.btnEditWebSite').button({icon:'ui-icon-menu'}).click(_showTreeWebSite);
+                    east_panel.find('.btnExitCMS').button({icon:'ui-icon-close'}).click(_closeCMS);
                     
                     _panel_propertyView = body.find('.propertyView');
                     _panel_treeWebSite = body.find('.propertyView');
@@ -287,6 +291,10 @@ function editCMS2(){
         //2. reload content
         layoutMgr.setEditMode(false);
         layoutMgr.layoutInit(_layout_content, _layout_container);
+        
+        if($.isFunction(options.close)){
+            options.close.call();
+        }
     }
     
     //
@@ -558,11 +566,11 @@ function editCMS2(){
                     $(item).css('display','block');   
                }
 
+               ele_ID = ''+ele_ID;
                var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
-               
 
                if(node==null){
-                   console.log('ONL '+ele_ID);
+                   console.log('DEBIG: ONLY '+ele_ID);
                    return;
                }
                
@@ -736,6 +744,7 @@ function editCMS2(){
             //parent_container = _layout_container;
         }else{
             
+            
             /*
             if(parentnode.folder && parentnode.countChildren()==1){
                 window.hWin.HEURIST4.msg.showMsgFlash('It is not possible remove the last element in group. Remove the entire group');
@@ -781,7 +790,7 @@ function editCMS2(){
     }
     
     //
-    // Opens element/widget property editor 
+    // Opens element/widget property editor  (editCMS_ElementCfg/WidgetCfg)
     // 1. css properties
     // 2  flexbox properties
     // 3. widget properties
@@ -844,268 +853,43 @@ function editCMS2(){
         //1. show div with properties over treeview
         _panel_treePage.hide();
         _panel_propertyView.show();
-        var cont = _panel_propertyView;
 
-        //2. load content
-        function __onInitLayoutCfg(){
+        var element_cfg = layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
         
-        //3. assign values
-        var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
-        var grp_ele = _layout_container.find('#hl-'+ele_id); //element in main-content
-        
-        cont.find('input[data-type="element-name"]').val(l_cfg.name);
-        
-        var is_cardinal = (l_cfg.type=='north' || l_cfg.type=='south' || l_cfg.type=='cardinal' ||
-                           l_cfg.type=='east' || l_cfg.type=='west' || l_cfg.type=='center');
-        
-        var etype = is_cardinal?'cardinal':(l_cfg.type?l_cfg.type:(l_cfg.appid?'widget':'text'));
-        
-        cont.find('h4').css({margin:0});
-        cont.find('.props').hide();
-        cont.find('.props.'+etype).show();
-        
-        var activePage = (etype=='group'?0:(etype=='widget'?1:(is_cardinal?2:3)));
-        
-        cont.find('#properties_form').accordion({header:'h3',heightStyle:'content',active:activePage});
-        
-        if(!l_cfg.css) l_cfg.css = {display:'block'};
-        
-        var params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
-        for(var i=0; i<params.length; i++){
-            var prm = params[i];
-            if (l_cfg.css[prm]) cont.find('#'+prm).val(l_cfg.css[prm]);
+        var is_cardinal = (element_cfg.type=='north' || element_cfg.type=='south' || 
+                element_cfg.type=='east' || element_cfg.type=='west' || element_cfg.type=='center');
+            
+        if(is_cardinal){
+             //find parent
+             var node = _panel_treePage.fancytree('getTree').getNodeByKey(''+ele_id);
+             var parentnode = node.getParent();
+             ele_id = parentnode.key;
+             element_cfg = layoutMgr.layoutContentFindElement(_layout_content, ele_id);
         }
         
-        cont.find('[data-type="css"]').each(function(i,item){
-            var val = l_cfg.css[$(item).attr('name')];
-            if(val){
-                $(item).val($(item).attr('type')=='number'?parseInt(val):val);
-            }
-        });
-        //init color picker
-        cont.find('input[name$="-color"]').colorpicker({
-                        hideButton: false, //show button right to input
-                        showOn: "both"});//,val:value
-        cont.find('input[name$="-color"]').parent('.evo-cp-wrap').css({display:'inline-block',width:'100px'});
-        
-        //load and init widget properties
-        if(etype=='widget'){
-            
-            var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
+        editCMS_ElementCfg(element_cfg, _layout_container, _panel_propertyView, function(new_cfg){
 
-            function __openWidgetCfg(){
-                editCMS_WidgetCfg(l_cfg, null, function(new_cfg){
-                    //addign new option into 
-                    l_cfg.options = new_cfg;
-                    
-                    //recreate widget with new options
-                    var grp_ele = _layout_container.find('#hl-'+l_cfg.key); //element in main-content
-                    layoutMgr.layoutAddWidget(l_cfg, grp_ele.parent());
+                    //save
+                    if(new_cfg){
+                        
+                        layoutMgr.layoutContentSaveElement(_layout_content, new_cfg);
+
+                        //update treeview                    
+                        var node = _panel_treePage.fancytree('getTree').getNodeByKey(''+new_cfg.key);
+                        node.setTitle(new_cfg.title);
+                        _defineActionIcons($(node.li).find('span.fancytree-node:first'), new_cfg.key, 
+                                    'position:absolute;right:8px;padding:2px;margin-top:0px;');
+                                    
+                        if(new_cfg.type=='cardinal'){
+                            //recreate cardinal layout
+                            layoutMgr.layoutInitCardinal(new_cfg, _layout_container);
+                        }
+                                    
+                    }
+                    //close
+                    _panel_treePage.show();
+                    _panel_propertyView.hide();
                 } );
-            }
-            
-            var container = cont.find('div.widget');
-            
-            $('<button>').button({label:top.HR('Configure')}).click(__openWidgetCfg).appendTo(container);
-            
-            __openWidgetCfg();
-            
-            
-        }
-        
-        //
-        //
-        //
-        function __getCss(){
-            var css = {};
-            if(cont.find('#display').val()=='flex'){
-                css['display'] = 'flex';
-                
-                cont.find('.flex-select').each(function(i,item){
-                    if($(item).val()){
-                        css[$(item).attr('id')] = $(item).val();       
-                    }
-                });
-            }else if(cont.find('#display').val()=='table'){
-                css['display'] = 'table';
-            }else{
-                css['display'] = 'block';
-            }
-            
-            //style - border
-            var val = cont.find('#border-style').val();
-            if(val!='none'){
-                
-                css['border-style'] = val;       
-                
-                cont.find('input[name^="border-"]').each(function(i,item){
-                    if($(item).val()){
-                        css[$(item).attr('name')] = $(item).val()
-                            +($(item).attr('type')=='number'?'px':'');       
-                    }
-                });
-                
-                if(!css['border-width']) css['border-width'] = '1px';
-                if(!css['border-color']) css['border-color'] = 'black';
-            }
-            
-            function __setDim(name){
-                var ele = cont.find('input[name="'+name+'"]');
-                var val = ele.val();
-                if(val!='' || parseInt(val)>0){
-                    if(!(val.indexOf('%')>0 || val.indexOf('px')>0)){
-                        val = val + 'px';
-                    }
-                    css[name] = val;
-                }
-            }
-            
-            __setDim('margin');
-            __setDim('padding');
-            __setDim('width');
-            __setDim('height');
-            
-            if(l_cfg.css){
-                var old_css = l_cfg.css;
-                var params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
-                for(var i=0; i<params.length; i++){
-                    var prm = params[i];
-                    if (old_css[prm]){ //drop old value
-                        old_css[prm] = null;
-                        delete old_css[prm];
-                    };
-                }
-                css = $.extend(old_css, css);
-            }
-            
-//console.log(css);            
-            return css;
-        }
-        
-        //4. listeners for flex    
-        cont.find('select').hSelect({change:function(event){
-            
-            var ele = $(event.target);
-            var name = ele.attr('id');
-            
-            if(name=='display'){
-                if(ele.val()=='flex'){
-                    cont.find('.flex-select').each(function(i,item){ $(item).parent().show(); })
-                }else{
-                    cont.find('.flex-select').each(function(i,item){ $(item).parent().hide(); })
-                }
-            }else if(name=='border-style'){
-                if(ele.val()=='none'){
-                    cont.find('input[name^="border-"]').each(function(i,item){ $(item).parent().hide(); })
-                }else{
-                    cont.find('input[name^="border-"]').each(function(i,item){ $(item).parent().show(); })
-                }
-            }
-            
-            var css = __getCss();
-
-            grp_ele.removeAttr('style');
-            grp_ele.css(css);
-        }});
-
-        //initially hide-show        
-        if(cont.find('#display').val()=='flex'){
-            cont.find('.flex-select').each(function(i,item){ $(item).parent().show(); })
-        }else{
-            cont.find('.flex-select').each(function(i,item){ $(item).parent().hide(); })
-        }
-        if(cont.find('#border-style').val()=='none'){
-            cont.find('input[name^="border-"]').each(function(i,item){ $(item).parent().hide(); })
-        }else{
-            cont.find('input[name^="border-"]').each(function(i,item){ $(item).parent().show(); })
-        }
-        
-        //4a.add list of children with flex-grow and flex-basis
-        if(l_cfg.children && l_cfg.children.length>0){
-            var item_ele = cont.find('div[data-flexitem]');
-            var item_last = item_ele;
-            for(var i=0; i<l_cfg.children.length; i++){
-                
-                var child = l_cfg.children[i];
-                
-                var item = item_ele.clone().insertAfter(item_last);
-                item.attr('data-flexitem',i).show();
-                var lbl = item.find('.header_narrow');
-                lbl.text((i+1)+'. '+lbl.text());
-                
-                var val = child.css['flex'];
-                if(val){
-                    val = val.split(' '); //grow shrink basis
-                }else{
-                    val = [0,1,'auto'];
-                }
-                if(val[0]) item.find('input[data-type="flex-grow"]').val(val[0]);
-                if(val.length==3 && val[2]) item.find('input[data-type="flex-basis"]').val(val[2]);
-                
-                item.find('input').change(function(e){
-                    var item = $(e.target).parent();//('div[data-flexitem]');
-                    var k = item.attr('data-flexitem');
-                    
-                    if(!l_cfg.children[k].css) l_cfg.children[k].css = {};
-                    
-                    l_cfg.children[k].css['flex'] = item.find('input[data-type="flex-grow"]').val()
-                            +' 1 '+ item.find('input[data-type="flex-basis"]').val();
-                            
-                    /*l_cfg.children[k].css['border'] = '1px dotted gray';
-                    l_cfg.children[k].css['border-radius'] = '4px';
-                    l_cfg.children[k].css['margin'] = '4px';*/
-                            
-                    var child_ele = _layout_container.find('#hl-'+l_cfg.children[k].key);
-                    child_ele.removeAttr('style');
-                    child_ele.css(l_cfg.children[k].css);
-                });
-                
-                item_last = item;
-            }
-        }
-
-        //4b. listeners for styles (border,bg,margin)
-        cont.find('input[data-type="css"]').change(function(event){
-            var css = __getCss();
-            grp_ele.removeAttr('style');
-            grp_ele.css(css);
-        });
-        
-        //4c. button listeners
-        cont.find('.btn-ok').button().click(function(){
-            //5. save in layout cfg        
-            var css = __getCss();
-            l_cfg.css = css;
-            
-            l_cfg.name = cont.find('input[data-type="element-name"]').val();
-            l_cfg.title = '<span data-lid="'+l_cfg.key+'">'+l_cfg.name+'</span>';
-            var ele_ID = ''+l_cfg.key;
-            var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
-            node.setTitle(l_cfg.title);
-            _defineActionIcons($(node.li).find('span.fancytree-node:first'), ele_ID, 'position:absolute;right:8px;padding:2px;margin-top:0px;');
-                                  
-            
-            _panel_treePage.show();
-            cont.hide();
-        });
-        cont.find('.btn-cancel').button().click(function(){
-            //6. restore old settings 
-            if(!l_cfg.css) l_cfg.css = {};
-            grp_ele.css(l_cfg.css);
-            
-            _panel_treePage.show();
-            cont.hide();
-        });
-        
-                
-            };
-        
-        
-        //
-        cont.empty();
-        cont.load(window.hWin.HAPI4.baseURL
-            +'hclient/widgets/cms/editCMS_FlexLayout.html', __onInitLayoutCfg);         
-        
     }
     
     //
@@ -1133,10 +917,10 @@ function editCMS2(){
             ]};
         }else if(widget_id=='cardinal'){    
             
-            new_ele = {name:'Cardinal', type:'cardinal', children:[
+            new_ele = {name:'Cardinal', type:'cardinal', css:{'min-height':'200px'}, children:[
             {name:'Center', type:'center', children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
-            {name:'North', type:'north', size:80, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
-            {name:'South', type:'south', size:80, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
+            {name:'North', type:'north', options:{size:80}, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
+            {name:'South', type:'south', options:{size:80}, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
             {name:'West', type:'west', children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
             {name:'East', type:'east', children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]}
             ]};

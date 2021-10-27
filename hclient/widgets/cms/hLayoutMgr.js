@@ -282,7 +282,7 @@ function hLayoutMgr(){
         
         if($d.length>0){
             container = $d.parent();            
-            $d.remove();
+            $d.remove(); //remove itself
         }
         
         //create parent div
@@ -304,30 +304,43 @@ function hLayoutMgr(){
             lpane = layout.children[i];
             var pos = lpane.type;
             
-            if(lpane.size){
-                layout_opts[pos+'__size'] = lpane.size;
-            }
-            if(Hul.isnull(lpane.resizable) || lpane.resizable ){
-                if(lpane.minsize){
-                    layout_opts[pos+'__minSize'] = lpane.minsize;
+            var opts = lpane.options;
+            if(!opts) opts = {};
+            
+            if(!$.isEmptyObject(opts)){
+            
+                if(opts.init){
+                    layout_opts[pos+'__initHidden'] = (opts.init=='hidden');
+                    layout_opts[pos+'__initClosed'] = (opts.init=='closed');
                 }
-            }else{
-                layout_opts[pos+'__spacing_open'] = 0;
+                
+                if(opts.size){
+                    layout_opts[pos+'__size'] = opts.size;
+                }
+                if(Hul.isnull(opts.resizable) || opts.resizable ){
+                    if(opts.minSize){
+                        layout_opts[pos+'__minSize'] = opts.minSize;
+                    }
+                    if(opts.maxSize){
+                        layout_opts[pos+'__maxSize'] = opts.maxSize;
+                    }
+                    layout_opts[pos+'__resizable'] = true;
+                }else{
+                    layout_opts[pos+'__spacing_open'] = 0;
+                    layout_opts[pos+'__resizable'] = false;
+                }
             }
             
             //create cardinal div
             $d = $(document.createElement('div'));
             $d.addClass('ui-layout-'+pos)
-              //.attr('id','hl-'+lpane.key)
-              //.attr('data-lid', lpane.key)
               .appendTo($parent);
 
               
             $d2 = $(document.createElement('div'));
             $d2.attr('id','hl-'+lpane.key)
               .attr('data-lid', lpane.key)
-              .addClass('layout-content')
-              //.addClass('ent_wrapper')
+              .addClass('ui-layout-content2')
               .appendTo($d);
               
               
@@ -341,6 +354,8 @@ function hLayoutMgr(){
     
     
         $parent.layout( layout_opts );
+        
+        //$parent.find('.ui-layout-content2').css('padding','0px !important');
     }
     
     //
@@ -453,6 +468,28 @@ function hLayoutMgr(){
         }
         return null; //not found
     }
+
+    //
+    // Replace element
+    //    
+    function _layoutContentSaveElement(content, new_cfg){
+            
+        var ele_id = new_cfg.key;
+        
+        for(var i=0; i<content.length; i++){
+            if(content[i].key == ele_id){
+                content[i] = new_cfg;
+                return true 
+            }else if(content[i].children && content[i].children.length>0){
+                if (_layoutContentSaveElement(content[i].children, new_cfg)){
+                    return true;
+                }
+            }
+        }
+
+        return false;            
+    }
+    
     
     //public members
     layoutMgr = {
@@ -473,6 +510,10 @@ function hLayoutMgr(){
             _layoutInitAccordion(layout, container);    
         },
         
+        layoutInitCardinal: function(layout, container) {
+            _layoutInitCardinal(layout, container);
+        },
+        
         layoutInit: function(layout, container, supp_options){
             return _layoutInit(layout, container, supp_options);
         },
@@ -487,6 +528,11 @@ function hLayoutMgr(){
         
         layoutContentFindElement: function(_layout_cfg, key){
             return _layoutContentFindElement(_layout_cfg, key);    
+        },
+
+        //replace element in layout
+        layoutContentSaveElement: function(_layout_cfg, new_cfg){
+            return _layoutContentSaveElement(_layout_cfg, new_cfg);    
         },
         
         setEditMode: function(newmode){
