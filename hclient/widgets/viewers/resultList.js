@@ -2691,7 +2691,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                     .appendTo( this.document.find('body') )
                     .menu({
                         select: function( event, ui ) {
-                            var page =  Number(ui.item.attr('recid')); 
+                            var page =  Number(ui.item.attr('id').substring(4)); 
                             that._renderPage(page);
                     }})
                     .hide();
@@ -2703,6 +2703,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
 
                     this._on( this.btn_page_menu, {
                         click: function() {
+                            //show menu with list of pages
                             $('.ui-menu').not('.horizontalmenu').not('.heurist-selectmenu').hide(); //hide other
                             var menu = $( this.menu_pages )
                             //.css('min-width', '80px')
