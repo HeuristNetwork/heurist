@@ -83,6 +83,8 @@ $system->defineConstant('DT_DATE');
 
 $rec_id = intval(@$_REQUEST['recID']);
 
+$already_linked_ids = array();
+
 // if we get a record id then see if there is a personal bookmark for it.
 if ($rec_id>0 && !@$_REQUEST['bkmk_id']) 
 {
@@ -849,7 +851,7 @@ function print_personal_details($bkmk) {
 // prints recDetails
 //
 function print_public_details($bib) {
-    global $system, $terms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT;
+    global $system, $terms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT, $already_linked_ids;
     
     $has_thumbs = false;
     
@@ -987,6 +989,8 @@ function print_public_details($bib) {
                             $bd['order_by_date'] = $row[0];    
                         }
                     }
+					
+					array_push($already_linked_ids, $rec_id);
                 }
 
             }
@@ -1446,7 +1450,7 @@ function print_relation_details($bib) {
 //
 function print_linked_details($bib, $link_cnt) 
 {
-    global $system, $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure;
+    global $system, $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure, $already_linked_ids;
     
     /* old version without recLinks
     $query = 'select * '.
@@ -1461,10 +1465,16 @@ function print_linked_details($bib, $link_cnt)
     ($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")').
     ' ORDER BY rec_RecTypeID, rec_Title';
     */
-    
+
+    $ignored_ids = '';
+    if(count($already_linked_ids) > 0){
+        $ignored_ids = ' AND rl_SourceID NOT IN ('.implode(',', $already_linked_ids).')';
+    }
+
     $query = 'SELECT rec_ID, rec_RecTypeID, rec_Title FROM recLinks, Records '
                 .'where rl_TargetID = '.$bib['rec_ID']
                 .' AND (rl_RelationID IS NULL) AND rl_SourceID=rec_ID '
+                .$ignored_ids
     .' and (rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '
     .($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")')
                 .' ORDER BY rec_RecTypeID, rec_Title';    
