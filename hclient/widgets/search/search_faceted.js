@@ -2597,9 +2597,14 @@ $.widget( "heurist.search_faceted", {
                                 that._on(flbl,{click: __showDateRangeDialog});
                             }
 
-                            var ele2 = $('<div><span class="ui-icon ui-icon-triangle-1-w-stop" '
+                            var ele2 = $('<div>'
+                            +'<span class="ui-icon ui-icon-triangle-1-w-stop" '
+                                +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
+                            +'<span class="ui-icon ui-icon-triangle-1-w" '
                                 +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
                             +'<div style="height:0.4em;margin:2px 0px 0px 2px;float:left;width:'+(w-62)+'px"/>'
+                            +'<span class="ui-icon ui-icon-triangle-1-e" '
+                                +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
                             +'<span class="ui-icon ui-icon-triangle-1-e-stop" '
                                 +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/></div>'
                             ).appendTo($facet_values);
@@ -2622,13 +2627,23 @@ $.widget( "heurist.search_faceted", {
                                     });
                                     
                             that._on( ele2.find('span.ui-icon-triangle-1-w-stop'),
-                                 {click: function(){
-                                     __onSlideStartSearch(field.mmin0, mmax);
-                                 }});
+                                {click: function(){
+                                    __onSlideStartSearch(field.mmin0, mmax);
+                                }});
+                            that._on( ele2.find('span.ui-icon-triangle-1-w'),
+                                {click: function(){
+                                    var diff = (field.mmin0 - mmin) / 2;
+                                    __onSlideStartSearch(mmin + diff, mmax);
+                                }});
+                            that._on( ele2.find('span.ui-icon-triangle-1-e'),
+                                {click: function(){
+                                    var diff = (field.mmax0 - mmax) / 2;
+                                    __onSlideStartSearch(mmin, mmax + diff);
+                                }});
                             that._on( ele2.find('span.ui-icon-triangle-1-e-stop'),
-                                 {click: function(){
-                                     __onSlideStartSearch(mmin, field.mmax0);
-                                 }});
+                                {click: function(){
+                                    __onSlideStartSearch(mmin, field.mmax0);
+                                }});
 
                                  
                             if(mmin==field.mmin0){
