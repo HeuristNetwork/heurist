@@ -19,7 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */	
 	
-    function sendEmail($email_to, $email_title, $email_text, $email_header, $is_utf8=false){
+    function sendEmail($email_to, $email_title, $email_text, $email_header, $is_utf8=false, $use_html=false){
 
         $res = "ok";
         
@@ -55,8 +55,16 @@
                 }
             }
 
+            if($use_html){
 
-            if($is_utf8){
+				$email_header = $email_header."\r\nContent-Type: text/html;";
+                if(!$is_utf8){
+                    $email_header = $email_header."\r\n";
+                }else{
+                    $email_header = $email_header." charset=utf-8\r\n";
+                    $email_title = '=?utf-8?B?'.base64_encode($email_title).'?=';
+                }
+            }else if($is_utf8){
                 $email_header = $email_header."\r\nContent-Type: text/plain; charset=utf-8\r\n";
                 $email_title = '=?utf-8?B?'.base64_encode($email_title).'?=';
             }
