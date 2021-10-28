@@ -1347,6 +1347,13 @@ function print_relation_details($bib) {
         
         $bd = fetch_relation_details($reln['dtl_RecID'], true);
 
+        // get title mask for display
+        $recTitle = $recTitle = mysql__select_value($mysqli,
+                "select rec_Title from Records where rec_ID = $recID");
+        if(!$recTitle){
+            $recTitle = $bd['RelatedRecID']['rec_Title'];
+        }
+
         // check related record
         if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
             continue;
@@ -1371,9 +1378,9 @@ function print_relation_details($bib) {
                     print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
                 }
                 print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
-                        .strip_tags($bd['RelatedRecID']['rec_Title'],ALLOWED_TAGS).'</a>';
+                        .strip_tags($recTitle,ALLOWED_TAGS).'</a>';
             } else {
-                print strip_tags($bd['rec_Title'],ALLOWED_TAGS);
+                print strip_tags($bd['Title'],ALLOWED_TAGS);
             }
             print '&nbsp;&nbsp;';
             if (@$bd['StartDate']) print htmlspecialchars(temporalToHumanReadableString($bd['StartDate']));
@@ -1386,6 +1393,13 @@ function print_relation_details($bib) {
     while ($reln = $to_res->fetch_assoc()) {
         
         $bd = fetch_relation_details($reln['dtl_RecID'], false);
+
+        // get title mask for display
+        $recTitle = $recTitle = mysql__select_value($mysqli,
+                "select rec_Title from Records where rec_ID = $recID");
+        if(!$recTitle){
+            $recTitle = $bd['RelatedRecID']['rec_Title'];
+        }
 
         // check related record
         if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
@@ -1410,7 +1424,7 @@ function print_relation_details($bib) {
                     print '<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
                 }
                 print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
-                    .strip_tags($bd['RelatedRecID']['rec_Title'],ALLOWED_TAGS).'</a>';
+                    .strip_tags($recTitle,ALLOWED_TAGS).'</a>';
             } else {
                 print strip_tags($bd['Title'],ALLOWED_TAGS);
             }
