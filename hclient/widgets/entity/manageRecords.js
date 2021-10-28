@@ -2183,7 +2183,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             function __onAddNewRecord( force_proceeed ){
                 
                 //if new record is relationship - show warning
-                if(force_proceeed!==true && 
+                if(force_proceeed!==true &&  that.options.edit_structure!==true &&
                     that.options.new_record_params['RecTypeID']==window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION']){
 
                     var params = window.hWin.HAPI4.get_prefs_def('prefs_'+that._entityName, that.defaultPrefs);
@@ -2209,7 +2209,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 }},
                                 {text:'Create relationship record', click: function(){ 
                                     $dlg.dialog( "close" );                    
-                                    __onAddNewRecord( true );
+                                    //__onAddNewRecord( true );
                                 }},
                                 {text:'Cancel', click: function(){ $dlg.dialog( "close" ); that.closeEditDialog(); }}
 
