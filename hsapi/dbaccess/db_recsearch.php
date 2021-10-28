@@ -147,6 +147,8 @@ function recordSearchFacets($system, $params){
     //for error message
     $savedSearchName = @$params['qname']?"Saved search: ".$params['qname']."<br>":"";
 
+    $missingIds = false;
+
     if(@$params['q'] && @$params['field']){
 
         $mysqli = $system->get_mysqli();
@@ -432,6 +434,10 @@ function recordSearchFacets($system, $params){
                 if((($dt_type=="integer" || $dt_type=="float") && $facet_type==_FT_SELECT)  || 
                 (($dt_type=="year" || $dt_type=="date") && $facet_groupby==null)  ){
                     $third_element = $row[2];          // slider - third parameter is MAX for range
+					
+                    if(!$missingIds && !array_key_exists('ids', $params['q']) && $row[2] != 0){ // For range's histogram
+                        $missingIds = true;
+                    }
                 }else if ($dt_type=="year" || $dt_type=="date") {
 
                     if($facet_groupby=='decade'){
@@ -455,6 +461,27 @@ function recordSearchFacets($system, $params){
                 //value, count, second value(max for range) or search value for firstchar
                 array_push($data, array($row[0], $row[1], $third_element ));
             }
+
+            if($missingIds){
+
+				$recid_query = "SELECT DISTINCT rec_ID " . $qclauses["from"] . $detail_link . " WHERE " . $qclauses["where"] . $details_where . $grouporder_clause;
+
+                $recid_res = $mysqli->query($recid_query);
+                if($recid_res){
+                    $recids = array();
+
+                    while($recid_row = $recid_res->fetch_row()){
+                        array_push($recids, $recid_row[0]);
+                    }
+
+                    if(count($recids) > 0){
+                        $params['q']['ids'] = implode(',', $recids);
+                    }
+
+                    $recid_res->close();
+                }
+            }
+
             $response = array("status"=>HEURIST_OK, "data"=> $data, "svs_id"=>@$params['svs_id'], 
                 "request_id"=>@$params['request_id'], //'dbg_query'=>$query,
                 "facet_index"=>@$params['facet_index'], 

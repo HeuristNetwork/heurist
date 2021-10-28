@@ -2312,7 +2312,7 @@ $.widget( "heurist.search_faceted", {
                                         interval: 25            // interval size
                                     };
 
-                                    var $slide_range = $('div#facet_range'+facet_index).parent().find('div.ui-slider-range');
+                                    var $slide_range = $facet_values.find('div.ui-slider-range');
 
                                     window.HAPI4.RecordMgr.get_date_histogram_data(request, function(response){
                                         
