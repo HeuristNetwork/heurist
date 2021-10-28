@@ -2029,7 +2029,7 @@ $.widget( "heurist.resultList", {
 
             this.div_content.find('.selected_last').removeClass('selected_last');
 
-            if(this.options.multiselect && event.ctrlKey){
+            if(this.options.multiselect && (event.ctrlKey || event.metaKey)){
 
                 if($rdiv.hasClass('selected')){
                     $rdiv.removeClass('selected');
