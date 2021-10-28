@@ -342,18 +342,12 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
 	FOR EACH ROW
 	begin
 -- 1 = record relationship
-    if @suppress_update_trigger is null then
-
-	    set @rec_id := last_insert_id(NEW.rec_ID);
-    --		if NEW.rec_RecTypeID = relRT then
-		if NEW.rec_RecTypeID = 1 then
+		if (NEW.rec_RecTypeID = 1) then
         begin
-            
             insert into recLinks (rl_SourceID, rl_TargetID, rl_RelationID)
             values (NEW.rec_ID, NEW.rec_ID, NEW.rec_ID);
         end;    
 		end if;
-    end if;
 	end$$
 
 

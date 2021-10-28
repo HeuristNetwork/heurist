@@ -2046,6 +2046,16 @@ function hCmsEditing(_options) {
         $('.tinymce-body').show();
         tinymce.init(inlineEditorConfig);
 
+        var tid = $('.tinymce-body').attr('id');
+        //first method document.getElementById(tid).scrollIntoView();
+        var y = document.getElementById(tid).offsetTop;
+        window.scrollTo(0, y);        
+        /* third method
+        $('html, body').animate({
+            scrollTop: $('.tinymce-body').offset().top + 'px'
+        }, 'fast');
+        */
+        
         if(event) window.hWin.HEURIST4.util.stopEvent(event);
         return false;
                     
