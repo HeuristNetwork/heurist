@@ -618,12 +618,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     $dlg.dialog( "option", "title", content.document.title );
                 }  
 
-                //init help button     
-                if(false && options["context_help"] && window.hWin.HEURIST4.ui){
-                    window.hWin.HEURIST4.ui.initDialogHintButtons($dlg, null, options["context_help"], true);
-                }
-
-
                 /*
                 content.confirm = function(txt){
                 var resConfirm = false,
@@ -917,7 +911,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                             url:options['context_help'],
                             position:{my:'right top', at:'right top', of:$container},
                             container: $container,
-                            is_open_at_once: true
+                            is_open_at_once: options['show_help_on_init']===false ? false : true
                     });
             }else{
                 //hide helper div

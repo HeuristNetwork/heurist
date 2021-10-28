@@ -428,6 +428,8 @@ function handleSettingsInUI() {
 
 function initRecTypeSelector(){
 
+    var hidePane = getSetting('startup_rectype_'+window.hWin.HAPI4.database) != 1;
+
     var layout_options = { 
         applyDefaultStyles: true,
         center:{
@@ -439,26 +441,35 @@ function initRecTypeSelector(){
             maxWidth:400,
             spacing_open:15,
             spacing_closed:15,  
-            togglerAlign_open:'center',
-            togglerAlign_closed:'center',
-            initClosed:true, // hide on init
+            togglerAlign_open:40, // button top value
+            togglerAlign_closed:40,
+            initClosed:true,
             slidable:false,  // disable sliding
             resizable:false, // disable resizing
             contentSelector: '#list_rectypes',
-            onopen_start: function(){ 
+            onopen_end: function(){ 
                 $('#list_rectypes').show();
+                $('#lblShowRectypeSelector').show();
             },
-            onclose_start: function(){ 
+            onclose_start: function(){
                 $('#list_rectypes').hide();
+                $('#lblShowRectypeSelector').hide();
             },
-            togglerContent_open:    '<div class="ui-icon ui-icon-carat-2-w"></div>',
-            togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-e"></div>'
+            togglerContent_open: '<div class="ui-icon ui-icon-carat-2-w" style="margin-left: 0px;font-size:20px;"></div>',
+            togglerContent_closed: '<div class="ui-icon ui-icon-carat-2-e" style="font-size:20px;"></div>'
         }
     };
 
-    $($('body.popup div.ent_wrapper')[0]).layout(layout_options);
 
-    $('#rectypeSelector').css('display','table-cell');
+    var layout = $($('body.popup div.ent_wrapper')[0]).layout(layout_options);
+    
+    if(!hidePane){ // initClosed option is inconsistent
+        setTimeout(function(){
+            layout.open('west');
+            $('#list_rectypes').show();
+            $('#lblShowRectypeSelector').show();
+        }, 1000);
+    }
 }
 
 function _syncUI(){
@@ -495,6 +506,8 @@ function changeViewMode(mode){
             d3.selectAll(".rect-info").style('display', 'initial');
             
             d3.selectAll("circle.icon-background, circle.icon-foreground, image.node-icon").style('display', 'none');
+
+            d3.selectAll("text.nodelabel.namelabel").attr("x", 10);
         }else if(mode=='infoboxes_full'){
             
             currentMode = 'infoboxes_full';
@@ -505,6 +518,8 @@ function changeViewMode(mode){
             d3.selectAll(".rect-info").style('display', 'none');
             
             d3.selectAll("circle.icon-background, circle.icon-foreground, image.node-icon").style('display', 'none');
+
+            d3.selectAll("text.nodelabel.namelabel").attr("x", 10);
         }else{
             
             currentMode = 'icons';
@@ -513,11 +528,14 @@ function changeViewMode(mode){
             d3.selectAll(".info-mode-full").style('display', 'none');
 
             d3.selectAll("circle.icon-background, circle.icon-foreground, image.node-icon").style('display', 'initial');
+
+            d3.selectAll("text.nodelabel.namelabel").attr("x", 27);
         }
         var isLabelVisible = (currentMode != 'icons') || (getSetting(setting_labels)=='on');
         d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
 
         $.each(d3.selectAll("image.menu-open")[0], function(idx, ele){
+
             var event = new MouseEvent("mouseup");
             ele.dispatchEvent(event);
         });

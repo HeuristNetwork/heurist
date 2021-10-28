@@ -133,7 +133,7 @@ var svg;        // The SVG where the visualisation will be executed on
             
             labels: true,
             fontsize: "8px",
-            textlength: 60,
+            textlength: 25,
             textcolor: "#000",
             
             formula: "linear",
@@ -319,7 +319,7 @@ function getLineWidth(count) {
 /** Calculates the marker width that should be used */
 function getMarkerWidth(count) {
     if(isNaN(count)) count = 0;
-    return 4 + getLineWidth(count)*2;
+    return 4 + getLineWidth(count)*10;
 }
 
 /** Calculates the entity raadius that should be used */
@@ -373,7 +373,6 @@ function getDataFromServer(){
 function filterData(json_data) {
     
         if(!json_data) json_data = settings.data; 
-    
         var names = [];
         $(".show-record").each(function() {
             var name = $(this).attr("name");
@@ -400,7 +399,7 @@ function filterData(json_data) {
                 var link = {source: map[d.source], target: map[d.target], relation: d.relation, targetcount: d.targetcount};
                 links.push(link);
             }
-        })
+        });
 
         var data_visible = {nodes: nodes, links: links};
         settings.getData = function(all_data) { return data_visible; }; 
@@ -549,12 +548,12 @@ function onZoom( transform ){
     d3.selectAll(".bottom-lines").style("stroke-width", 
             function(d) { 
                 var w = getLineWidth(d.targetcount)+2; //width for scale 1
-                return  (scale>1)?w:(w/scale);
+                return (scale>1)?w:(w/scale);
             });
     d3.selectAll(".top-lines").style("stroke-width", 
             function(d) { 
                 var w = (getLineWidth(d.targetcount)+2)*0.2; //width for scale 1
-                return  (scale>1)?w:(w/scale);
+                return (scale>1)?w:(w/scale);
             });
 
     updateOverlays();
@@ -625,48 +624,52 @@ function addForce() {
 * Adds marker definitions to a container
 */
 function addMarkerDefinitions() {
+
     var linetype = getSetting(setting_linetype, 'straight');
     var linelength = getSetting(setting_linelength, 200);
     var markercolor = getSetting(setting_markercolor, '#000');
-    
+
     var markers = d3.select("#container")
-                    .append("defs")
-                    .selectAll("marker")
-                    .data(data.links)
-                    .enter()
-                    .append("svg:marker")    
-                    .attr("id", function(d) {  //use this id to connect markers to the appropriate link
-                        return "marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-                    })
-                    .attr("markerWidth", function(d) {    
-                        return getMarkerWidth(d.targetcount);             
-                    })
-                    .attr("markerHeight", function(d) {
-                       return getMarkerWidth(d.targetcount);
-                    })
-                    .attr("refX", function(d) {
-                        // Move markers to display a pointer on a straight line
-                        if(linetype=="straight" && d.relation.pointer) {
-                            ++i;
-                           return linelength*0.5;
-                        }
-                        return -1;
-                    })
-                    .attr("refY", 0)
-                    .attr("viewBox", "0 -5 10 10")
-                    .attr("markerUnits", "userSpaceOnUse")
-                    .attr("orient", "auto")
-                    .attr("fill", markercolor)// color of arrows on links (Using the markercolor setting)
-                    //.attr("stroke", markercolor)
-                    //.attr("stroke-width", 2)
-                    .attr("opacity", "0.6")
-                    .append("path")                
-                    .attr("d",
-                        function(d) { 
-                            return d.relation.type=='resource' 
-                                            ?'M0,-5 L10,0 L0,5' 
-                                            :'M0,-5 L5,0 L0,5 M5,-5 L10,0 L5,5'});  //double arrow
-                                            
+                .append("defs")
+                .selectAll("marker")
+                .data(data.links)
+                .enter()
+                .append("svg:marker")
+                .attr("id", function(d) {  //use this id to connect markers to the appropriate link
+                    return "marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+                })
+                .attr("markerWidth", function(d) {
+                    var width = getMarkerWidth(d.targetcount);
+                    return width > 20 ? 20 : width;
+                })
+                .attr("markerHeight", function(d) {
+                    var height = getMarkerWidth(d.targetcount);
+                    return height > 20 ? 20 : height;
+                })
+                .attr("refX", function(d) {
+                    // Move markers to display a pointer on a straight line
+                    return -1;
+                })
+                .attr("refY", 0)
+                .attr("viewBox", function(d) {
+                    if(d.relation.type == 'resource'){
+                        return "-10 -10 20 20";
+                    }
+                    return "-15 -15 30 30";
+                })
+                .attr("markerUnits", "userSpaceOnUse")
+                .attr("orient", "auto")
+                .attr("fill", markercolor)// color of arrows on links (Using the markercolor setting)
+                .attr("opacity", "0.6")
+                .append("path")
+                .attr("d",
+                    function(d) { 
+                        return d.relation.type=='resource' 
+                                        ?'M0,-5 L-10,0 L0,5 M3,-4 L7.5,0 L3,4' // Single arrows, Larger Pointing: Parent to Child & Smaller Pointing: Child to Parent 
+                                        :'M2,-6 L7,0 L2,6 M7,-6 L12,0 L7,6 M-2,-6 L-7,0 L-2,6 M-7,-6 L-12,0 L-7,6'; // Double arrows back-2-back
+                    }
+                );
+
      return markers;
 /*     
 CROSS  M 3,3 L 7,7 M 3,7 L 7,3
@@ -702,49 +705,47 @@ function addLines(name, color, thickness) {
     // Adding shared attributes
     lines.attr("class", function(d) {
             return name + " link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-         })
-         .attr("stroke", function (d) {
-             if(hide_empty && d.targetcount == 0){
-                 return 'rgba(255, 255, 255, 0.0)'; //hidden
-             }else if(d.targetcount == 0 && name === 'bottom-lines') {
-                 return '#d9d8d6';
-             }else if($Db.rst(d.source.id, d.relation.id, 'rst_MaxValues') == 1 && name == 'top-lines'){
-                 return 'rgba(255, 255, 255, 0.0)'; // hide it
-             }else{
-                 return color;
+        })
+        .attr("stroke", function (d) {
+            if(hide_empty && d.targetcount == 0){
+                return 'rgba(255, 255, 255, 0.0)'; //hidden
+            }else if(d.targetcount == 0 && name === 'bottom-lines') {
+                return '#d9d8d6';
+            }else if($Db.rst(d.source.id, d.relation.id, 'rst_MaxValues') == 1 && name == 'top-lines') {
+                return 'rgba(255, 255, 255, 0.0)'; // hide it
+            }else{
+                return color;
+            }
+        })
+        .style("stroke-width", function(d) { 
+             var w = getLineWidth(d.targetcount)+2; //width for scale 1
+             if(name == 'top-lines'){
+                w = w*0.2;
              }
-         })
-         .style("stroke-width", function(d) { 
-             var w = getLineWidth(d.targetcount)+thickness; //width for scale 1
-             if (name === 'top-lines'){
-                 w = w * 0.2;
-             }
-             return  (scale>1)?w:(w/scale);
-         });
+             return (scale>1)?w:(w/scale);
+        });
          
     // visible line, pointing from one node to another
     if(name=='top-lines' && linetype != "stepped"){
-         lines.attr("marker-mid", function(d) {
+        lines.attr("marker-mid", function(d) {
 
             if(!(hide_empty && d.targetcount == 0)){ 
                 //DEBUG console.log("url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
                 return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")"; //reference to marker id
             }
-         });
+        });
     }
     
-    // mouseover and mouseout events for the lines
     lines.on("mouseover", function(d) {
-
-         if(!(hide_empty && d.targetcount == 0)){
-             var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-             createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));
-         }
+        //console.log(d.relation.id);  //field type id           
+        if(!(hide_empty && d.targetcount == 0)){
+            var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+            createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));
+        }
     })
     .on("mouseout", function(d) {
-
-		 var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-         removeOverlay(selector, 0);
+        var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+        removeOverlay(selector, 0);
     });
 
     return lines;
@@ -838,7 +839,10 @@ function updateCurvedLines(lines) {
 */
 function updateStraightLines(lines) {
     
-    var pairs = {}, rec_link_count = {};
+    var pairs = {}, full_pairs = {};
+    var isExpanded = $('#expand-links').is(':Checked');
+    var isFullMode = (currentMode == 'infoboxes_full');
+    var half_iconSize = (iconSize / 2);
     
     $(".icon_self").each(function() {
         $(this).remove();
@@ -847,9 +851,9 @@ function updateStraightLines(lines) {
     // Calculate the straight points
     lines.attr("d", function(d) {
         
-       var key = d.source.id+'_'+d.target.id,
-           indent = 20;
-       
+        var key = d.source.id+'_'+d.target.id;
+        var indent = 20;
+
         if(pairs[d.target.id+'_'+d.source.id]){
             key = d.target.id+'_'+d.source.id;
         }else if(!pairs[key]){
@@ -858,20 +862,18 @@ function updateStraightLines(lines) {
 
         if(indent>0){ // This controls how far apart lines will be when going to and from the same node
 
-            if($('#expand-links').is(':Checked')){ // This is for the expanded option, displays all lines
+            if(isExpanded){ // This is for the expanded option, displays all lines
                 pairs[key] = pairs[key] + indent;
             }else{ // This will hide all other lines, default behaviour
                 return [''];
             }
         }else{
             pairs[key] = 1;
-        } 
+        }
 
-        // To move the y down
-        if(rec_link_count[d.source.id] >= 0){
-            rec_link_count[d.source.id] += 2;
-        }else{
-            rec_link_count[d.source.id] = 0;
+        // Hide Self Linking Nodes by default
+        if(d.target.id==d.source.id){
+            return [''];
         }
 
         var R = pairs[key];
@@ -881,7 +883,7 @@ function updateStraightLines(lines) {
             s_y = d.source.y,
             t_x = d.target.x,
             t_y = d.target.y;
-   
+
         if(d.target.id==d.source.id){ // Self Linking Node
 
             var target_x, target_y, dx, dy, dr, mx, my;
@@ -889,8 +891,8 @@ function updateStraightLines(lines) {
             if(currentMode == 'infoboxes_full'){
                 var $detail = $('.id'+d.source.id).find('[dtyid="'+ d.relation.id +'"]');
 
-                var detail_y = Number($detail.attr('y')) / 2;
-                s_y = s_y + detail_y + rec_link_count[d.source.id];
+                var detail_y = $detail[0].getBBox().y;
+                s_y = s_y + detail_y - 3;
 
                 // Affects Loop Size
                 target_x = s_x - 70;
@@ -901,7 +903,7 @@ function updateStraightLines(lines) {
                 dr = Math.sqrt(dx * dx + dy * dy)/1.5;
                 mx = s_x + dx;
                 my = s_y + dy;
-           
+
                 pnt = [
                     "M",s_x,s_y,
                     "A",dr,dr,0,0,1,mx,my,
@@ -912,13 +914,13 @@ function updateStraightLines(lines) {
                 // Affects Loop Size
                 target_x = s_x+70;
                 target_y = s_y-70;
-                
+
                 dx = target_x - s_x;
                 dy = target_y - s_y;
                 dr = Math.sqrt(dx * dx + dy * dy)/1.5;
                 mx = s_x + dx;
                 my = s_y + dy;
-           
+
                 pnt = [
                     "M",s_x,s_y,
                     "A",dr,dr,0,0,1,mx,my,
@@ -942,84 +944,51 @@ function updateStraightLines(lines) {
                 var source_width = Number($source_rect.attr('width')),
                     target_width = Number($target_rect.attr('width'));
 
-                var icon_cnt = settings.isDatabaseStructure ? 4 : 3;
-
                 // Get detail's y location within the source object
-                var detail_y = Number($detail.attr('y')) / 2;
-                s_y = s_y + detail_y + rec_link_count[d.source.id];
+                var detail_y = $detail[0].getBBox().y;
+                s_y = s_y + detail_y - half_iconSize;
 
                 // Left Side: x Point for starting and ending nodes
-                s_x -= iconSize;
-                t_x -= iconSize;
+                s_x -= half_iconSize;
+                t_x -= half_iconSize;
                 // Right Side: x Point for starting and ending nodes
-                var r_source_x = s_x + source_width;
-                var r_target_x = t_x + target_width;
+                var r_source_x = s_x + source_width - half_iconSize;
+                var r_target_x = t_x + target_width - half_iconSize;
 
                 // Differences between points (x coord)
                 var right_diff = (r_target_x - r_source_x > r_source_x - r_target_x) ? r_target_x - r_source_x : r_source_x - r_target_x;
                 var left_diff = (t_x - s_x > s_x - t_x) ? t_x - s_x : s_x - t_x;
-                // Highest and lowest points (y coord)
-                var h_lowest = (s_y < t_y) ? s_y : t_y;
-                var h_highest = (h_lowest == s_y) ? t_y : s_y;
 
-                var same_side = false;
-
-                if(r_source_x < t_x-iconSize){ // Right to Left Connection, Change source x location
+                if(r_source_x < t_x+iconSize){ // Right to Left Connection, Change source x location
+                    
                     s_x = r_source_x;
+
+                    s_x += half_iconSize - 2;
+                    t_x -= half_iconSize;
                 }else if(s_x-iconSize > r_target_x){ // Left to Right Connection, Change target x location
-                    t_x = r_target_x;    
+                    t_x = r_target_x;
+
+                    s_x -= half_iconSize;
+                    t_x += half_iconSize - 2;
                 }else if((r_source_x > r_target_x || r_target_x > s_x-iconSize) && right_diff < left_diff){ 
-                // Right to Right Conneciton, Change source and target x location + add bigger bend
+                // Right to Right Conneciton, Change source and target x location
 
                     s_x = r_source_x;
                     t_x = r_target_x;
 
-                    R += (right_diff + iconSize); 
+                    s_x += half_iconSize - 2;
+                    t_x += half_iconSize - 2;
+                }else{ // Left to Left Connection                  
 
-                    same_side = 'right';
-                }else{ // Left to Left Connection, add bigger bend
-
-                    R -= (left_diff - iconSize);
-                    
-                    same_side = 'left';
+                    s_x -= half_iconSize;
+                    t_x -= half_iconSize;
                 }
 
                 dx = (t_x-s_x)/2;
                 dy = (t_y-s_y)/2;
 
-                tg = (dx!=0)?Math.atan(dy/dx):0;
-
-                dx2 = dx-R*Math.sin(tg);
-                dy2 = dy+R*Math.cos(tg);
-
-                if(same_side){
-
-                    // Determine x location, move away from source/target boxes
-                    if(same_side == 'right'){
-                        mdx = (s_x < t_x) ? t_x : s_x;
-                        mdx += right_diff + (iconSize * 2);
-
-                        if(Math.abs(right_diff) <= 50){
-                            mdx += 30;
-                        }
-                    }else if(same_side == 'left'){
-                        mdx = (s_x > t_x) ? t_x : s_x;
-                        mdx -= (left_diff * 2) - iconSize;
-
-                        if(Math.abs(left_diff) <= 50){
-                            mdx -= 30;
-                        }else if(Math.abs(mdx - s_x) > 50 || Math.abs(mdx - t_x) > 50){
-                            mdx += 30;
-                        }
-                    }
-
-                    // Increase y location, so it isn't floating off to the side or below source/target
-                    mdy = h_highest - ((h_highest - h_lowest) / 2);
-                }else{
-
-                    mdx = s_x + dx2;
-                    mdy = s_y + dy2;
-                }
+                mdx = s_x + dx;
+                mdy = s_y + dy;
             }else{
 
                 dx = (t_x-s_x)/2;
@@ -1040,9 +1009,10 @@ function updateStraightLines(lines) {
                 "L", t_x, t_y 
             ];
         }
-       
-       return pnt.join(' '); 
+
+        return pnt.join(' '); 
     });
+    
 }
 
 function updateSteppedLines(lines, type){
