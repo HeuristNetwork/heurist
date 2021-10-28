@@ -1194,6 +1194,12 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 }           
                 if(!window.hWin.HEURIST4.util.isempty(dlg_help)){
                     options['context_help'] = window.hWin.HRes(dlg_help)+' #content';
+
+                    if(action == 'menu-structure-summary'){
+                        options['show_help_on_init'] = false;
+                    }else{
+                        options['show_help_on_init'] = true;
+                    }
                 }
                 
                 //var position = { my: "center", at: "center", of: window.hWin };

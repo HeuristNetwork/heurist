@@ -23,20 +23,9 @@
 -->
 
 <!-- Network diagram HTML -->
-<div class="ent_header" style="height:9em;border:none;display:table-row">
-
-    <div id="divHint" style="display:none;font-weight:normal;padding:4px; margin-left:10px;">
-        <br>Choose entities in dropdown below. Entities can be dragged to position them. Drag background to reposition, mousewheel or +/- buttons to zoom.
-        <br>Layout is remembered across sessions if gravity is OFF (recommended). 
-        <br>Drag link icon to another node to create a linking field (record pointer or relationship marker).
-    </div>
-
-    <div id="rectypeSelector" class="toolbar-section" style="width:15ex;display:none;vertical-align:top;padding-left:14px;">
-        <label id="lblShowRectypeSelector"></label>
-    </div>
+<div class="ent_header" style="height:4em;border:none;display:table-row;top:5px;">
 
    <div id="toolbar" style="display:none;">
-
 
         <div id="setSelectMode" class="toolbar-section" style="min-width:40px">
             
@@ -61,11 +50,7 @@
             <div id="setGravityMode" style="padding-left:10px">
                 <label class="ui-controlgroup-label" style="border:none;background:none">gravity</label> 
                 <button id="gravityMode0" name="gravityMode" value="off">off</button>
-                <button id="gravityMode1" name="gravityMode" value="touch">on</button>
-<!-- 2017-02-02
-                <input type="radio" id="gravityMode2" name="gravityMode" value="aggressive">
-                <label for="gravityMode2">strong</label>
--->                
+                <button id="gravityMode1" name="gravityMode" value="touch">on</button>           
             </div>
         </div>
         
@@ -143,15 +128,15 @@
 
 </div>
 
-<div id="divSvg" class="ent_content_full" style="top:8em;">
-            <!-- SVG -->
-            <svg id="d3svg" class="fullscreen">
-                <text x="25" y="25" fill="black">Building graph ...</text>
-            </svg>  
-            
-            <div id="net_limit_warning" 
-                style="z-index:2000;position:absolute;top:0;right:0;border-radius:6px;background-color: rgb(172, 231, 255);font-weight:bold;color:red; padding:8px; display:none;">
-            </div>
+<div id="divSvg" class="ent_content_full" style="top:4.5em;">
+    <!-- SVG -->
+    <svg id="d3svg" class="fullscreen">
+        <text x="25" y="25" fill="black">Building graph ...</text>
+    </svg>  
+
+    <div id="net_limit_warning" 
+        style="z-index:2000;position:absolute;top:0;right:0;border-radius:6px;background-color: rgb(172, 231, 255);font-weight:bold;color:red; padding:8px; display:none;">
+    </div>
 </div>
 
 

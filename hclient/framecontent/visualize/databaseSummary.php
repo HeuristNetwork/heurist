@@ -160,6 +160,9 @@ A:link {
         <div class="ent_wrapper">
 
             <div class="ui-layout-west">
+
+                <div id="lblShowRectypeSelector" style="display:none;margin:10px;"></div>
+
                 <div id="list_rectypes" class="ent_wrapper" style="display:none;">
                     <div class="ent_header" style="display:none">
                         <h3 id="table-header">Record types (entities)</h3>
@@ -307,6 +310,10 @@ A:link {
                             $(this).prop("checked", true);
                             putSetting($(this).attr("name"), 1);
                         });
+
+                        putSetting('startup_rectype_'+window.hWin.HAPI4.database, 1);
+                    }else{
+                        putSetting('startup_rectype_'+window.hWin.HAPI4.database, 0);
                     }
                     
                     // Listen to 'show-record' checkbox changes
@@ -406,29 +413,22 @@ A:link {
             });
             
             function onVisualizeResize(){
-                
-                    var width = $(window).width();
-              
-                    var is_advanced = getSetting('setting_advanced');
-                    
-                    var supw = 0;
-                    if(width<645 || (is_advanced && width <= 1300)){
-                         supw = 2;
-                    }
-                    
-                    var dbkey = 'db'+window.hWin.HAPI4.database;
 
-                // For the moment - Jan 2017 - it is useful to show the hint at all times.
-                // for some reason it disappears after first display even though database is still empty, which was not the
-                // intention                           
-                //if(getSetting(dbkey)==null){ //new databse - show hint
-                    putSetting(dbkey, '1');
-                    $('#divSvg').css('top', 8+supw+'em');
-                    $('#divHint').show();
-                    /*}else{
-                        $('#divSvg').css('top', 5+supw+'em');
-                        $('#divHint').hide();
-                    }*/
+				/*
+                var width = $(window).width();
+
+                var is_advanced = getSetting('setting_advanced');
+
+                var supw = 0;
+                if(width<645 || (is_advanced && width <= 1440)){
+                     supw = 2;
+                }
+				*/
+                
+                var dbkey = 'db'+window.hWin.HAPI4.database;
+                putSetting(dbkey, '1');
+
+                //$('#divSvg').css('top', 8+supw+'em');
             }
 
         </script>

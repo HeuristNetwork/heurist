@@ -105,7 +105,7 @@ function onRecordNodeClick(event, data, node) {
         
         var dx = event.x - event.offsetX; 
         var dy = event.y - event.offsetY; 
-                    
+
         createOverlay(Math.round(nodePos.left-dx+r), Math.round(nodePos.top-dy+r), "record", "id"+recID, getRecordOverlayData(data));    }
     
     // Trigger selection
@@ -145,11 +145,7 @@ function preventMenu(event) {
 
 function closeRectypeSelector(){     
     if(settings.isDatabaseStructure){
-		var ele = $('#list_rectypes');
-		if(ele.is(':visible')){
-			ele.hide();     
-			$('#showRectypeSelector').button({icons:{secondary:'ui-icon-carat-1-s'}});
-		}
+        $($('body.popup div.ent_wrapper')[0]).layout().close('west');
     }
 }
 
@@ -253,35 +249,3 @@ function onMouseUp() {
     }
     svg.call(zoomBehaviour);
 }
-
-
-
-
-
-
-
-
-
-
-
-// Handle cursor changes
-/* JJ CODE
-$(document).ready(function(e) {
-    // Cursor
-    $(".mouse-icon").click(function(e) {
-        // Indicate the icon is selected
-        $(".mouse-icon").removeClass("selected");
-        $(this).addClass("selected"); 
-        
-        // Update cursor
-        var name = $(this).attr("id");
-        if(name == "selection") {
-            $("#d3svg").css("cursor", "crosshair");    
-        }else if(name == "overlay") {
-            $("#d3svg").css("cursor", "help");    
-        }else{
-            $("#d3svg").css("cursor", "default");
-        }
-    });    
-});
-*/
