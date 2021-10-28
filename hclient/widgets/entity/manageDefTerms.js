@@ -91,8 +91,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this._super();
         
         this.space_for_drop = $('<span class="space_for_drop heurist-helper3" '
-                    +'style="position:absolute;top:80px;text-align:center;width:100%;font-size: 0.8em;display:none">'
-                    +'drop here to move term to the top level</span>')
+                    +'style="position:absolute;top:80px;text-align:left;left:0;right:0;font-size: 0.8em;display:none;margin:5px;padding:5px;background:white">'
+                    +'<span class="ui-icon ui-icon-arrowthick-1-e"/>&nbsp;drop here to move term to top level&nbsp;<span class="ui-icon ui-icon-arrowthick-1-w"/></span>')
                         .insertBefore(this.recordList);
 
         var that = this;
@@ -364,7 +364,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     +'<div style="position:absolute;right:10px;top:8px;"><label>Find: </label>'
                     +'<input type="text" style="width:350px" class="find-term text ui-widget-content ui-corner-all"/></div>'
                     +'</div>'
-                    +'<div class="action-buttons" style="height:40px;background:white;padding:10px 8px;">'
+                    +'<div class="action-buttons" style="height:60px;background:white;padding:10px 8px;">'
                     +'<h4 style="display:inline-block;margin: 0 10px 0 0; vertical-align: middle;">Terms</h4>'
                     +'<div style="min-width:70px;text-align:right;float:right" id="btn_container"></div></div>')
                 .appendTo(this.searchForm);
@@ -462,7 +462,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             start: function(event,ui){
                                 if(that.space_for_drop){
                                     that.space_for_drop.show();
-                                    that.recordList.css('top','100px');
+                                    that.recordList.css('top','120px');
                                 }
                             },
                             drag: function(event,ui){
@@ -483,7 +483,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     //    console.log(bot);
                                     //    console.log(ui.position.top+'  '+ui.position.left);
                                     that.scrollInterval = setInterval(function(){ if(!that._dropped) ele[0].scrollTop += 20}, 50); 
-                                }else if(ui.offset.top<ele.offset().top+(that.space_for_drop.is(':visible')?-40:-20)) {
+                                }else if(ui.offset.top<ele.offset().top+(that.space_for_drop.is(':visible')?-60:-20)) {
                                     that.scrollInterval = setInterval(function(){ if(!that._dropped) ele[0].scrollTop -= 20}, 50); 
                                 }
 
