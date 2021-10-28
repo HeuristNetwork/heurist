@@ -83,6 +83,8 @@ $system->defineConstant('DT_DATE');
 
 $rec_id = intval(@$_REQUEST['recID']);
 
+$already_linked_ids = array();
+
 // if we get a record id then see if there is a personal bookmark for it.
 if ($rec_id>0 && !@$_REQUEST['bkmk_id']) 
 {
@@ -849,7 +851,7 @@ function print_personal_details($bkmk) {
 // prints recDetails
 //
 function print_public_details($bib) {
-    global $system, $terms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT;
+    global $system, $terms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT, $already_linked_ids;
     
     $has_thumbs = false;
     
@@ -987,6 +989,8 @@ function print_public_details($bib) {
                             $bd['order_by_date'] = $row[0];    
                         }
                     }
+					
+					array_push($already_linked_ids, $rec_id);
                 }
 
             }
@@ -1347,6 +1351,13 @@ function print_relation_details($bib) {
         
         $bd = fetch_relation_details($reln['dtl_RecID'], true);
 
+        // get title mask for display
+        $recTitle = $recTitle = mysql__select_value($mysqli,
+                "select rec_Title from Records where rec_ID = $recID");
+        if(!$recTitle){
+            $recTitle = $bd['RelatedRecID']['rec_Title'];
+        }
+
         // check related record
         if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
             continue;
@@ -1371,9 +1382,9 @@ function print_relation_details($bib) {
                     print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
                 }
                 print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
-                        .strip_tags($bd['RelatedRecID']['rec_Title'],ALLOWED_TAGS).'</a>';
+                        .strip_tags($recTitle,ALLOWED_TAGS).'</a>';
             } else {
-                print strip_tags($bd['rec_Title'],ALLOWED_TAGS);
+                print strip_tags($bd['Title'],ALLOWED_TAGS);
             }
             print '&nbsp;&nbsp;';
             if (@$bd['StartDate']) print htmlspecialchars(temporalToHumanReadableString($bd['StartDate']));
@@ -1386,6 +1397,13 @@ function print_relation_details($bib) {
     while ($reln = $to_res->fetch_assoc()) {
         
         $bd = fetch_relation_details($reln['dtl_RecID'], false);
+
+        // get title mask for display
+        $recTitle = $recTitle = mysql__select_value($mysqli,
+                "select rec_Title from Records where rec_ID = $recID");
+        if(!$recTitle){
+            $recTitle = $bd['RelatedRecID']['rec_Title'];
+        }
 
         // check related record
         if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
@@ -1410,7 +1428,7 @@ function print_relation_details($bib) {
                     print '<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
                 }
                 print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
-                    .strip_tags($bd['RelatedRecID']['rec_Title'],ALLOWED_TAGS).'</a>';
+                    .strip_tags($recTitle,ALLOWED_TAGS).'</a>';
             } else {
                 print strip_tags($bd['Title'],ALLOWED_TAGS);
             }
@@ -1432,7 +1450,7 @@ function print_relation_details($bib) {
 //
 function print_linked_details($bib, $link_cnt) 
 {
-    global $system, $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure;
+    global $system, $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure, $already_linked_ids;
     
     /* old version without recLinks
     $query = 'select * '.
@@ -1447,10 +1465,16 @@ function print_linked_details($bib, $link_cnt)
     ($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")').
     ' ORDER BY rec_RecTypeID, rec_Title';
     */
-    
+
+    $ignored_ids = '';
+    if(count($already_linked_ids) > 0){
+        $ignored_ids = ' AND rl_SourceID NOT IN ('.implode(',', $already_linked_ids).')';
+    }
+
     $query = 'SELECT rec_ID, rec_RecTypeID, rec_Title FROM recLinks, Records '
                 .'where rl_TargetID = '.$bib['rec_ID']
                 .' AND (rl_RelationID IS NULL) AND rl_SourceID=rec_ID '
+                .$ignored_ids
     .' and (rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '
     .($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")')
                 .' ORDER BY rec_RecTypeID, rec_Title';    

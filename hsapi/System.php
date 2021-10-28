@@ -581,20 +581,28 @@ error_log(print_r($_REQUEST, true));
         $check = folderExists(HEURIST_FILESTORE_DIR, true);
         if($check<0){
 
-            $title = "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR;
+            $title = "Cannot access filestore directory for the database ". $dbname ." on server " . HEURIST_SERVER_NAME;
 
-            $body = "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
-                    '</b><br/>The directory '
+            $body = "Cannot access filestore directory for the database <b>". $dbname . "</b> on the server " . HEURIST_SERVER_NAME .
+                    "<br/>The directory (" . HEURIST_FILESTORE_DIR . ")"
                     .(($check==-1)
-                    ?'does not exist (check setting in heuristConfigIni.php file)'
-                    :'is not writeable by PHP (check permissions)')
-                    .'<br><br>On a multi-tier service, the file server may not have restarted correctly or '
-                    .'may not have been mounted on the web server.';
+                    ?"does not exist (check setting in heuristConfigIni.php file)"
+                    :"is not writeable by PHP (check permissions)")
+                    ."<br><br>On a multi-tier service, the file server may not have restarted correctly or "
+                    ."may not have been mounted on the web server.";
 
             // Error needs extra attention, send an email now to Heurist team/Bug report
-            sendEmail(HEURIST_MAIL_TO_BUG, $title, $body, null);
+            sendEmail(HEURIST_MAIL_TO_BUG, $title, $body, null, true, true);
 
-            $this->addError(HEURIST_SYSTEM_FATAL, $body, null, "Problem opening database");
+            $usr_msg = "Cannot access filestore directory for the database <b>". $dbname .
+                       "</b><br/>The directory "
+                       .(($check==-1)
+                       ?"does not exist (check setting in heuristConfigIni.php file)"
+                       :"is not writeable by PHP (check permissions)")
+                       ."<br><br>On a multi-tier service, the file server may not have restarted correctly or "
+                       ."may not have been mounted on the web server.";
+
+            $this->addError(HEURIST_SYSTEM_FATAL, $usr_msg, null, "Problem opening database");
             return false;
         }
         

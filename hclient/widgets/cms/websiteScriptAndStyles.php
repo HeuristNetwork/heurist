@@ -510,9 +510,11 @@ function afterPageLoad(document, pageid){
         params['website'] = '';
         params['id'] = home_page_record_id;
         
+        /* IJ Oct 2021 - Hide page id in URL, and cause reloads to move back to website homepage
         if(pageid!=home_page_record_id){
             params['pageid'] = pageid;
         }
+        */
 
         s = [];        
         $.each(Object.keys(params),function(i,key){
