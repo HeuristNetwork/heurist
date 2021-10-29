@@ -21,7 +21,6 @@
     */
 $is_included = (defined('PDIR'));
     
-    
 if($is_included){
    
    $mode = 1; 
@@ -149,7 +148,7 @@ if($mode!=3){
                         }                                   
                         print '<br /></div>';
                     }else{
-                        echo "</body></html>";
+                        echo "</div></body></html>";
                     }                
                             
                 }
@@ -205,7 +204,4 @@ if($mode!=3){
                     
                     return true;
                 }
-            ?>
-        </div>
-    </body>
-</html>
+?>

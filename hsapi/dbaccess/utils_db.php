@@ -760,7 +760,7 @@
     }
 
     //
-    //
+    //  NEW_LIPOSUCTION_255 is used in recordDupes
     //
     function checkDatabaseFunctionsForDuplications($mysqli){
         
@@ -778,6 +778,53 @@
          return $res;
         
     }
+    
+    
+    //
+    //
+    //
+    function recreateRecLinks($system, $is_forced)
+    {
+        
+        $mysqli = $system->get_mysqli();
+        
+        $isok = true;
+        $is_table_exist = hasTable($mysqli, 'recLinks');    
+            
+        if($is_forced || !$is_table_exist){
+                //recreate cache
+                
+                include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to execute SQL script
+
+                if($is_table_exist){
+                    
+                    $query = "drop table IF EXISTS recLinks";
+                    if (!$mysqli->query($query)) {
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot drop table cache table: ' . $mysqli->error);
+                        $isok = false;
+                    }
+                    
+                }else{
+                    //recreate trigger if recLinks does not exist
+                    if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false))
+                    {
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot execute script addProceduresTriggers.sql');
+                        //$response = $system->getError();
+                        $isok = false;
+                    }
+                }
+                if($isok){
+                    if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/sqlCreateRecLinks.sql"))
+                    {
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot execute script sqlCreateRecLinks.sql');
+                        //$response = $system->getError();
+                        $isok = false;
+                    }
+                }
+        }
+        return $isok;
+    }
+
     
     
     

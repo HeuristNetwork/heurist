@@ -490,7 +490,7 @@ if($active_all || in_array('dup_terms', $active)) {
         </div>      <!-- End of Duplicated Terms -->
  <?php } 
  
- if($active_all || in_array('field_type', $active)) { 
+if($active_all || in_array('field_type', $active)) { 
  ?>        
         <!-- CHECK FOR FIELD TYPE ERRORS -->
 
@@ -585,6 +585,7 @@ if($active_all || in_array('dup_terms', $active)) {
         print '<br /><br /></div>';   // End of Field Types
  
 } //END field_type 
+
 if($active_all || in_array('default_values', $active)) { 
         ?>
 
@@ -1997,6 +1998,7 @@ if($active_all || in_array('invalid_chars', $active)) {
         
 } //END invalid_chars
 
+
 if($active_all || in_array('title_mask', $active)) { 
         
         ?>
@@ -2008,11 +2010,29 @@ if($active_all || in_array('title_mask', $active)) {
             tabs_obj.tabs('refresh');
         </script>
 
-        <?php
+        <?php        
         include(dirname(__FILE__).'/checkRectypeTitleMask.php');
-        print '<br /><br /></div>';     /* End of Title Mask Section */
+        print '<br /><br /></div>';     
         
 } //END title_mask
+
+if($active_all || in_array('relationship_cache', $active)) { 
+        
+        ?>
+
+        <div id="relationship_cache" style="top:110px"> <!-- Start of Relationship Cache Section -->
+        
+        <script>
+            $('#links').append('<li class="relationship_cache"><a href="#relationship_cache" style="white-space: nowrap;padding-right:10px;color:black;">Relationship Cache</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+
+        <?php
+        include(dirname(__FILE__).'/checkRecLinks.php');
+        print '<br /><br /></div>';     /* End of Relationship Cache */
+        
+} //END relationship_cache
+
         
         ?>
 
