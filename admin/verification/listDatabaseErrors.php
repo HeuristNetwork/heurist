@@ -46,7 +46,7 @@ $system->defineConstant('DT_RELATION_TYPE');
 
 //use these two vars to disable any part of verification
 $active_all = true; //all part are active
-$active = array('expected_terms'); //if $active_all=false, active are included in this list
+$active = array('defgroups'); //if $active_all=false, active are included in this list
 
 if(@$_REQUEST['data']){
     $lists = json_decode($_REQUEST['data'], true);
@@ -2033,6 +2033,99 @@ if($active_all || in_array('relationship_cache', $active)) {
         
 } //END relationship_cache
 
+if($active_all || in_array('defgroups', $active)) { 
+        ?>
+
+        <div id="defgroups" style="top:110px;"> <!-- Start of Definitions groups Section -->
+        
+        <script>
+            $('#links').append('<li class="defgroups"><a href="#defgroups" style="white-space: nowrap;padding-right:10px;color:black;">Definitions Groups</a></li>');
+            tabs_obj.tabs('refresh');
+        </script>
+        <div style="padding:10px">
+        <?php
+
+            $orphaned_entities = false;
+            
+            $cnt = mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID WHERE rtg_ID is null');
+            if($cnt>0){
+                
+                $orphaned_entities = true;
+                print '<div><h3 class="error">Found '.$cnt.' record types that are not belong any group</h3></div>';
+                
+                //find trash group
+                $trash_id = mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"');
+                if($trash_id>0){
+            
+                    $mysqli->query('update defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID set rty_RecTypeGroupID='.$trash_id.' WHERE rtg_ID is null');        
+                    
+                    $cnt2 = $mysqli->affected_rows;
+                    
+                    print '<div><h3 class="res-valid">'.$cnt2.' record types have been placed to "Trash" group</h3></div>';
+                }else{
+                    echo '<div><h3 class="error">Can not find record type "Trash" group. </h3></div>';                    
+                }
+            }else{
+                echo '<div><h3 class="res-valid">OK: All Record Types belong to existing groups</h3></div>';        
+            }
+
+            // fields types =========================
+            $cnt = mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID=dtg_ID WHERE dtg_ID is null');
+            if($cnt>0){
+                
+                $orphaned_entities = true;
+                print '<div><h3 class="error">Found '.$cnt.' base field types that are not belong any group</h3></div>';
+                
+                //find trash group
+                $trash_id = mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"');
+                if($trash_id>0){
+            
+                    $mysqli->query('update defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID=dtg_ID set dty_DetailTypeGroupID='.$trash_id.' WHERE dtg_ID is null');        
+                    
+                    $cnt2 = $mysqli->affected_rows;
+                    
+                    print '<div><h3 class="res-valid">'.$cnt2.' field types have been placed to "Trash" group</h3></div>';
+                }else{
+                    echo '<div><h3 class="error">Can not find field type "Trash" group.</h3></div>';                    
+                }
+            }else{
+                echo '<div><h3 class="res-valid">OK: All Base Field Types belong to existing groups</h3></div>';        
+            }
+
+            // vocabularies =========================
+            $cnt = mysql__select_value($mysqli, 'select count(trm_ID) from defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID WHERE trm_ParentTermID is null and vcg_ID is null');
+            if($cnt>0){
+                
+                $orphaned_entities = true;
+                print '<div><h3 class="error">Found '.$cnt.' vocabularies that are not belong any group</h3></div>';
+                
+                //find trash group
+                $trash_id = mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"');
+                if($trash_id>0){
+            
+                    $mysqli->query('update defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID set trm_VocabularyGroupID='.$trash_id.' WHERE trm_ParentTermID is null and vcg_ID is null');        
+                    
+                    $cnt2 = $mysqli->affected_rows;
+                    
+                    print '<div><h3 class="res-valid">'.$cnt2.' vocabularies have been placed to "Trash" group</h3></div>';
+                }else{
+                    echo '<div><h3 class="error">Can not vocabularies "Trash" group.</h3></div>';                    
+                }
+            }else{
+                echo '<div><h3 class="res-valid">OK: All Vocabularies belong to existing groups</h3></div>';        
+            }
+        
+        print '<br /><br /></div></div>';     /* End of def groups */
+        
+
+        if($orphaned_entities){
+            echo '<script>$(".defgroups").css("background-color", "#E60000");</script>';
+        }else{
+            echo '<script>$(".defgroups").css("background-color", "#6AA84F");</script>';        
+        }
+        
+        
+} //END groups check
         
         ?>
 

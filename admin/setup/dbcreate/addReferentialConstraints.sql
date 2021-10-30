@@ -45,6 +45,10 @@ ALTER TABLE defDetailTypes
   ADD CONSTRAINT fk_dty_DetailTypeGroupID_1 FOREIGN KEY (dty_DetailTypeGroupID) REFERENCES  defDetailTypeGroups (dtg_ID) ON DELETE RESTRICT,
   ADD CONSTRAINT fk_dty_DetailTypeGroupID_2 FOREIGN KEY (dty_DetailTypeGroupID) REFERENCES defDetailTypeGroups (dtg_ID) ON UPDATE CASCADE;
 
+ALTER TABLE defRecTypes
+  ADD CONSTRAINT fk_rty_RecTypeGroupID_1 FOREIGN KEY (rty_RecTypeGroupID) REFERENCES  defRecTypeGroups (rtg_ID) ON DELETE RESTRICT,
+  ADD CONSTRAINT fk_rty_RecTypeGroupID_2 FOREIGN KEY (rty_RecTypeGroupID) REFERENCES defRecTypeGroups (rtg_ID) ON UPDATE CASCADE;
+  
 -- ---------------------------------------------------------------------------
 
 -- Next may fail on term IDs pointed to by trm_InverseTermID. Use this query and set missining

@@ -1,5 +1,6 @@
 <?php
 $is_included = (defined('PDIR'));
+$cache_missed = false;
 
 if($is_included){
 
@@ -7,8 +8,6 @@ if($is_included){
     
 }else{
     require_once (dirname(__FILE__).'/../System.php');
-    
-    $cache_missed = false;
     
     $system = new System();
     if( ! $system->init(@$_REQUEST['db']) ){
@@ -49,6 +48,11 @@ if($is_included){
     if($is_ok){
         $mysqli = $system->get_mysqli();
         
+    
+        $is_table_exist = hasTable($mysqli, 'recLinks');    
+        
+        if($is_table_exist){
+    
         if(!defined('RT_RELATION')) $system->defineConstant('RT_RELATION');
 
         //count of relations 
@@ -78,21 +82,25 @@ if($is_included){
         $missed_links = mysql__select_value($mysqli, $query);
             
             
-    print '<div style="padding:5px">Total count of relationships:&nbsp;<b>'.$cnt_relationships.'</b>'
-            .($missed_relationships>0?'':'&nbsp;&nbsp;&nbsp;&nbsp;All relationships are in cache. Cache is OK.').'</div>';
-    
-    if($missed_relationships>0){
-        print '<div style="padding:5px;color:red">Missed relationships in cache:&nbsp;<b>'.$missed_relationships.'</b></div>';
-    }
-    
-    print '<br><div style="padding:5px">Total count of links/resources:&nbsp;<b>'.$cnt_links.'</b>'
-            .($missed_links>0?'':'&nbsp;&nbsp;&nbsp;&nbsp;All links are in cache. Cache is OK.').'</div>';
+        print '<div style="padding:5px">Total count of relationships:&nbsp;<b>'.$cnt_relationships.'</b>'
+                .($missed_relationships>0?'':'&nbsp;&nbsp;&nbsp;&nbsp;All relationships are in cache. Cache is OK.').'</div>';
+        
+        if($missed_relationships>0){
+            print '<div style="padding:5px;color:red">Missed relationships in cache:&nbsp;<b>'.$missed_relationships.'</b></div>';
+        }
+        
+        print '<br><div style="padding:5px">Total count of links/resources:&nbsp;<b>'.$cnt_links.'</b>'
+                .($missed_links>0?'':'&nbsp;&nbsp;&nbsp;&nbsp;All links are in cache. Cache is OK.').'</div>';
 
-    if($missed_links>0){
-        print '<div style="padding:5px;color:red">Missed links in cache:&nbsp;<b>'.$missed_links.'</b></div>';
-    }
+        if($missed_links>0){
+            print '<div style="padding:5px;color:red">Missed links in cache:&nbsp;<b>'.$missed_links.'</b></div>';
+        }
 
-        $cache_missed = ($missed_relationships>0 || $missed_links>0);
+        }else{
+            echo '<div><h3 class="error">Relationship cache is not found</h3></div>';        
+        }
+    
+        $cache_missed = ((!$is_table_exist) || $missed_relationships>0 || $missed_links>0);
 
         if($cache_missed){
             echo '<div><h3 class="error">Recreate Relationship cache to restore missed entries</h3></div>';        
