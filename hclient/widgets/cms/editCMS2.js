@@ -50,6 +50,8 @@ function editCMS2(){
         _layout_content,   // JSON config 
         _layout_container; // main-content with CMS content
 
+    var default_palette_class = 'ui-heurist-publish';
+        
     var is_edit_widget_open; //??
         
     var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
@@ -585,8 +587,8 @@ function editCMS2(){
                     + (is_root || is_cardinal?'':
                     ('<span data-action="drag" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Drag to reposition">'
                     + '<span class="ui-icon ui-icon-arrow-4" style="font-size:9px;font-weight:normal"/>Drag</span>'))               
-                    + '<span data-action="edit" style="background:lightgray;padding:4px;font-size:9px;font-weight:normal" title="Edit properties">'
-                    +'<span class="ui-icon ui-icon-pencil" style="font-size:9px;font-weight:normal"/>Edit</span>';               
+                    + '<span data-action="edit" style="background:lightgray;padding:4px;font-size:9px;font-weight:normal" title="Edit style and properties">'
+                    +'<span class="ui-icon ui-icon-pencil" style="font-size:9px;font-weight:normal"/>Style</span>';               
                    
                //hide element for cardinal and delete for its panes                     
                if(node.data.type!='cardinal'){
@@ -640,7 +642,10 @@ function editCMS2(){
 
                         }else if(action=='delete'){
                             //different actions for separator and field
-                            _layoutRemoveElement(ele_ID);
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+                                'Are you sure you wish to delete this element?', function(){ _layoutRemoveElement(ele_ID); }, 
+                                {title:'Warning',yes:'Proceed',no:'Cancel'},
+                                {default_palette_class: default_palette_class});        
                             
                         }
                     },100); 
@@ -677,7 +682,7 @@ function editCMS2(){
                                var ele = node.find('.lid-actionmenu'); //$(event.target).children('.lid-actionmenu');
                                ele.hide();//css('visibility','hidden');
                                //remove heighlight
-                               _layout_container.find('div[data-lid]').removeClass('ui-state-active');
+                               _layout_container.find('div[data-lid]').removeClass('cms-element-active');
                            }
                        }
                }               
@@ -710,9 +715,9 @@ function editCMS2(){
                        if(node){
                            //highlight in preview
                            var ele_ID = $(node).attr('data-lid');
-                           _layout_container.find('div[data-lid]').removeClass('ui-state-active');
+                           _layout_container.find('div[id^="hl-"]').removeClass('cms-element-active');
                            if(ele_ID>0)
-                           _layout_container.find('div[data-lid="'+ele_ID+'"]').addClass('ui-state-active');
+                           _layout_container.find('div#hl-'+ele_ID).addClass('cms-element-active');
                        }
                        
                    }
@@ -901,7 +906,9 @@ function editCMS2(){
     //
     function _layoutInsertElement(ele_id, widget_id, widget_name){
         
-        var new_ele = {name:'Text', type:'text', css:{}, content:"<p>Click to edit content</p>"};
+        //border: 1px dotted gray; border-radius: 4px;margin: 4px;
+        
+        var new_ele = {name:'Text', type:'text', css:{}, content:"<p>edit content here...</p>"};
         
         if(widget_id=='group'){
             new_ele = {name:'Group', type:'group', css:{}, children:[ new_ele ]};

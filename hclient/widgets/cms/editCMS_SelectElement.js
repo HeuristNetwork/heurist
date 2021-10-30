@@ -25,15 +25,22 @@ function editCMS_SelectElement( callback ){
 
     var selected_element = null, selected_name='';
 
-    var t_groups = {
-        group:{name:'Group', description:'Container for elements'},
-        accordion:{name:'Accordion', description:'Set of collapsable groups'},            
-        tabs:{name:'Tabs', description:'Tab/Page control. Each page may have group of elements'},            
-        cardinal:{name:'Cardinal', description:'Container for five groups or elements placed orthogonally (N-S-E-W,-Center panels)'},                                                    
-    };
+    var t_components = {
+        
+        text:{name:'Simple Text', description:'Simple text wiht header'},
+        
+    grp1:{name:'Content', description:'Content layouts or templates', is_header:true},
+        
+        text_media:{name:'Text with media', description:'media and text '},
+        text_2:{name:'Text in 2 columns', description:'2 columns layout'},
+        group_2:{name:'Groups as 2 columns', description:'2 columns layout'},
+        text_3:{name:'Text in 3 columns', description:'3 columns layout'},
+        text_banner:{name:'Text with banner', description:'Text over background image'},
+        tpl_discover: {name:'Discover (filters/results/map)', description:'3 columns layout'},
+        tpl_blog: {name:'Blog (filters/results/map)', description:''},
 
-    var t_elements = {
-
+    grp2:{name:'Widgets', description:'Heurist Widgets for dynamic content or interaction', is_header:true},
+        
         heurist_Search:{name:'Filter', description:'Search field (with standard filter builder)'},
         heurist_SearchTree:{name:'Saved filters', description:'Simple &amp; facet filters, selection or tree'},            
 
@@ -46,18 +53,16 @@ function editCMS_SelectElement( callback ){
         
         heurist_Navigation:{name:'Menu', description:'Navigation Menu'},            
         heurist_recordAddButton:{name:'Add Record', description:'Button to addition of new Heurist record'},
+        
+    grp3:{name:'Containers', description:'to be described....', is_header:true},
+
+        group:{name:'Group', description:'Container for elements'},
+        accordion:{name:'Accordion', description:'Set of collapsable groups'},            
+        tabs:{name:'Tabs', description:'Tab/Page control. Each page may have group of elements'},            
+        cardinal:{name:'Cardinal', description:'Container for five groups or elements placed orthogonally (N-S-E-W,-Center panels)'},                                                    
+        
     };
 
-    var t_contents = {
-        text:{name:'Simple Text', description:'Simple text wiht header'},
-        text_media:{name:'Text with media', description:'media and text '},
-        text_2:{name:'Text in 2 columns', description:'2 columns layout'},
-        group_2:{name:'Groups as 2 columns', description:'2 columns layout'},
-        text_3:{name:'Text in 3 columns', description:'3 columns layout'},
-        text_banner:{name:'Text with banner', description:'Text over background image'},
-        tpl_discover: {name:'Discover (filters/results/map)', description:'3 columns layout'},
-        tpl_blog: {name:'Blog (filters/results/map)', description:''},
-    }
 
     var buttons= [
         {text:window.hWin.HR('Cancel'), 
@@ -80,7 +85,7 @@ function editCMS_SelectElement( callback ){
 
     $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
         +"hclient/widgets/cms/editCMS_SelectElement.html?t="+(new Date().getTime()), 
-        buttons, 'Select Template to insert to your Web Page', 
+        buttons, 'Insert component into web page', 
         {  container:'cms-add-widget-popup',
             default_palette_class: 'ui-heurist-publish',
             width: 600,
@@ -93,32 +98,26 @@ function editCMS_SelectElement( callback ){
                 is_edit_widget_open = true;
 
                 //load list of groups and elements and init selector
-                var  sel = $dlg.find('#groups');
-                $.each(t_groups, function(key, item){
-                    window.hWin.HEURIST4.ui.addoption(sel[0], key, item.name);
-                });
-                sel = $dlg.find('#elements');
-                $.each(t_elements, function(key, item){
-                    window.hWin.HEURIST4.ui.addoption(sel[0], key, item.name);
-                });
-                sel = $dlg.find('#contents');
-                $.each(t_contents, function(key, item){
-                    window.hWin.HEURIST4.ui.addoption(sel[0], key, item.name);
+                var sel = $dlg.find('#components');
+                $.each(t_components, function(key, item){
+                    if(item.is_header){
+                            var grp = document.createElement("optgroup");
+                            grp.label =  item.name;
+                            sel[0].appendChild(grp);
+                    }else{
+                        window.hWin.HEURIST4.ui.addoption(sel[0], key, item.name);    
+                    }
+                    
+                    
                 });
 
-
-
-                $dlg.find('select').mouseover(function(e){
+                sel.mouseover(function(e){
                     window.hWin.HEURIST4.util.setDisabled( $dlg.parents('.ui-dialog').find('#btnDoAction'), false );
                     var t_name = $(e.target).val();
                     //selected_element  = t_name;
                     var desc = '';
-                    if(t_contents[t_name]){
-                        desc = t_contents[t_name];    
-                    }else if (t_elements[t_name]) {
-                        desc = t_elements[t_name];
-                    }else if (t_groups[t_name]){
-                        desc = t_groups[t_name];                            
+                    if(t_components[t_name]){
+                        desc = t_components[t_name];    
                     }
                     if(desc){
                         desc = desc.description
@@ -126,7 +125,7 @@ function editCMS_SelectElement( callback ){
                     $dlg.find('.template_description').html(desc);    
 
                 });
-                $dlg.find('select').change(function(e){
+                sel.change(function(e){
                     window.hWin.HEURIST4.util.setDisabled( $dlg.parents('.ui-dialog').find('#btnDoAction'), false );
                     var sel = e.target;
                     var t_name = $(sel).val();

@@ -96,6 +96,11 @@ if($_is_new_cms_editor){
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_ElementCfg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/hLayoutMgr.js"></script>
     
+<style>
+.tox-toolbar{
+    background-color: #b4eeff !important;
+}
+</style>     
 <?php
 }
     
@@ -510,11 +515,11 @@ function afterPageLoad(document, pageid){
         params['website'] = '';
         params['id'] = home_page_record_id;
         
-        /* IJ Oct 2021 - Hide page id in URL, and cause reloads to move back to website homepage
+        /* IJ Oct 2021 - Hide page id in URL, and cause reloads to move back to website homepage */
         if(pageid!=home_page_record_id){
             params['pageid'] = pageid;
         }
-        */
+        
 
         s = [];        
         $.each(Object.keys(params),function(i,key){
@@ -818,7 +823,6 @@ div.CodeMirror{
 .CodeMirror div.CodeMirror-cursor {
     visibility: visible;
 }
-
 
 <?php        
 }

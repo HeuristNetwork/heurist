@@ -123,7 +123,12 @@ function hLayoutMgr(){
                 .appendTo(container);
                 
         if(isEditMode){
-            $d.css({'border':'2px dotted gray','border-radius':'4px','margin':'4px'});  
+            //$d.css({'border':'2px dotted gray','border-radius':'4px','margin':'4px'});  
+        }
+        
+        if(!layout.css) layout.css = {};
+        if($.isEmptyObject(layout.css)){ //default
+            layout.css = {'border':'1px dotted gray','border-radius':'4px','margin':'4px'};
         }
 
         if(layout.css && !$.isEmptyObject(layout.css)){
@@ -141,8 +146,12 @@ function hLayoutMgr(){
             .appendTo(container);
             
         if(isEditMode){
-            $d.css({'border':'1px dotted gray','border-radius':'4px','margin':'4px'});  
+            //$d.css({'border':'1px dotted gray','border-radius':'4px','margin':'4px'});  
         } 
+        if(!layout.css) layout.css = {};
+        if($.isEmptyObject(layout.css)){ //default
+            layout.css = {'border':'1px dotted gray','border-radius':'4px','margin':'4px'};
+        }
             
         if(layout.css && !$.isEmptyObject(layout)){
             $d.css( layout.css );    
@@ -201,7 +210,7 @@ function hLayoutMgr(){
         }
 
         if(isEditMode) {
-            $d.css('border','2px dashed red');
+            //$d.css('border','2px dashed red');
         }
         
         if(layout.css && !$.isEmptyObject(layout)){
@@ -292,7 +301,7 @@ function hLayoutMgr(){
           .css({height:'100%',width:'100%'})
           .appendTo(container);
         
-        if(isEditMode) $parent.css('border','2px dashed green');
+        //if(isEditMode) $parent.css('border','2px dashed green');
         
         
         var layout_opts = {applyDefaultStyles: true, maskContents: true};
@@ -382,7 +391,7 @@ function hLayoutMgr(){
           .attr('data-lid', layout.key)
           .appendTo(container);
           
-        if(isEditMode) $d.css('border','2px dotted blue');
+        //if(isEditMode) $d.css('border','2px dotted blue');
           
         if($d.parent().hasClass('layout-content')){
             $d.addClass('ent_wrapper');    
@@ -432,7 +441,7 @@ function hLayoutMgr(){
               .attr('data-lid', layout.key)
               .appendTo(container);
        
-        if(isEditMode) $d.css('border','2px dotted blue');
+        //if(isEditMode) $d.css('border','2px dotted blue');
        
         //accordion panels    
         _layoutInit(layout.children, $d);
