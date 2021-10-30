@@ -2178,33 +2178,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         //this.options.trm_VocabularyGroupID = -1;
 
         else if(action=='expand'){
-
-            var is_collapsed = window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID)>=0;
-
-            $.each(this.recordList.find('div.recordDiv[data-parent]'),
-                function(i,item){
-                    item = $(item);
-                    if(item.attr('data-parent').indexOf(';'+recID+';')>=0){
-                        //if(item.is(':visible')){
-                        if(is_collapsed){
-                            item.show();
-                        }else{
-                            item.hide();
-                        }
-                    }
-            });
-
-            is_collapsed =!is_collapsed;
-
-            var ele = this.recordList.find('div.recordDiv[recID='+recID+']')
-            .find('span.ui-icon-triangle-1-'+(is_collapsed?'s':'e'));
-            if(is_collapsed){
-                window.hWin.HEURIST4.ui.collapsed_terms.push(recID);
-                ele.removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
-            }else{
-                window.hWin.HEURIST4.ui.collapsed_terms.splice(window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID), 1);
-                ele.removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');
-            }
+            
+            this._toogleTermsBranch(recID);
         }
 
         var is_resolved = this._super(event, keep_action);
@@ -2328,7 +2303,46 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
     },
 
+    //
+    // force_expand_collapse - 0 toggle, 1 expand, -1 collapse
+    //
+    _toogleTermsBranch: function(recID, force_expand_collapse)
+    {
+        var is_collapsed = window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID)>=0;
+        
+        if(force_expand_collapse==1) is_collapsed = true;
+        else if(force_expand_collapse==-1) is_collapsed = false;
 
+        //find all record divs with given parent and show them
+        $.each(this.recordList.find('div.recordDiv[data-parent]'),
+            function(i,item){
+                item = $(item);
+                if(item.attr('data-parent').indexOf(';'+recID+';')>=0){
+                    //if(item.is(':visible')){
+                    if(is_collapsed){
+                        item.show();
+                    }else{
+                        item.hide();
+                    }
+                }
+        });
+
+        is_collapsed =!is_collapsed;
+
+        var ele = this.recordList.find('div.recordDiv[recID='+recID+']')
+        .find('span.ui-icon-triangle-1-'+(is_collapsed?'s':'e'));
+        
+        var k = window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID);
+        
+        if(is_collapsed){
+            if(k<0) window.hWin.HEURIST4.ui.collapsed_terms.push(recID);
+            ele.removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
+        }else{
+            if(k>=0) window.hWin.HEURIST4.ui.collapsed_terms.splice(k, 1);
+            ele.removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');
+        }
+    },
+            
 
     //
     // show dropdown for field suggestions to be added
@@ -2345,6 +2359,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             .appendTo(this.element);
             this.fields_list_div.hide();
 
+            //click outside
             this._on( $(document), {click: function(event){
                 if($(event.target).parents('.list_div').length==0) { 
                     this.fields_list_div.hide(); 
@@ -2400,6 +2415,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 						.css({'padding-bottom':'5px'})
                         .text( s + term_name + (term_code?(' ('+term_code+')'):'') )
                         .click( function(event){
+                            //start search the particular term
+                            
                             window.hWin.HEURIST4.util.stopEvent(event);
 
                             var ele = $(event.target).hide();
@@ -2418,7 +2435,19 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 }
 
                                 if(trm_IDs.length>1){
-                                    setTimeout(function(){that.selectRecordInRecordset(trm_IDs[0]);},500);    
+                                    setTimeout(function(){
+                                        //find all parents and expand them in resultList
+                                        var trm_ID = trm_IDs[0];
+                                        var parents = $Db.trm(trm_ID, 'trm_Parents');
+                                        if(parents){
+                                            parents = parents.split(',');
+                                            $.each(parents, function(i, parent_ID){
+                                                that._toogleTermsBranch(parent_ID, 1);    
+                                            });
+                                        }
+                                        
+                                        that.selectRecordInRecordset(trm_IDs[0]);
+                                    },500);    
                                 }
 
 

@@ -512,6 +512,8 @@ $.widget( "heurist.manageEntity", {
         if(this.editForm) this.editForm.remove();
         if(this.editFormToolbar) this.editFormToolbar.remove();
 
+        this._off( $(document), 'click' );
+        
         this._selection = null;
     },
     
