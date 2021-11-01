@@ -1352,8 +1352,8 @@ function print_relation_details($bib) {
         $bd = fetch_relation_details($reln['dtl_RecID'], true);
 
         // get title mask for display
-        $recTitle = $recTitle = mysql__select_value($mysqli,
-                "select rec_Title from Records where rec_ID = $recID");
+        $recTitle = mysql__select_value($mysqli,
+                'select rec_Title from Records where rec_ID = '.$reln['dtl_RecID']);
         if(!$recTitle){
             $recTitle = $bd['RelatedRecID']['rec_Title'];
         }
@@ -1399,8 +1399,8 @@ function print_relation_details($bib) {
         $bd = fetch_relation_details($reln['dtl_RecID'], false);
 
         // get title mask for display
-        $recTitle = $recTitle = mysql__select_value($mysqli,
-                "select rec_Title from Records where rec_ID = $recID");
+        $recTitle = mysql__select_value($mysqli,
+                'select rec_Title from Records where rec_ID = '.$reln['dtl_RecID']);
         if(!$recTitle){
             $recTitle = $bd['RelatedRecID']['rec_Title'];
         }
