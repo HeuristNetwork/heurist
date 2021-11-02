@@ -435,6 +435,8 @@ class HQuery {
     //    
     function createSortClause() {
         
+        global $mysqli;
+        
         $sort_fields = array();
         $sort_expr = array();
         
@@ -533,15 +535,29 @@ class HQuery {
                     
                     break;
                 case 'f': case 'field':
-                    if($dty_ID!=null && !in_array($dty_ID, $sort_fields)) {
-                    $sort_expr[] = 
-'ifnull((select dtl_Value from recDetails where dtl_RecID=r'.$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID
-.' ORDER BY dtl_Value limit 1), "~~")'.$scending.', r'.$this->level.'.rec_Title';                     
+                    if($dty_ID>0 && !in_array($dty_ID, $sort_fields)) {
+                       
+                    $field_type = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dty_ID);
                     
-/*OLD pre 2021-10-15                    
-'ifnull((select if(link.rec_ID is null, dtl_Value, link.rec_Title) from recDetails left join Records link on dtl_Value=link.rec_ID where dtl_RecID=r'.$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID.' ORDER BY link.rec_Title limit 1), "~~")'.$scending.', r'.$this->level.'.rec_Title';                    
-*/
+                    if($field_type!=null){ //field type found
+                            
+                        $sortby = 'ifnull((select dtl_Value from recDetails where dtl_RecID=r'
+                                .$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID
+                                .' ORDER BY dtl_Value limit 1), "~~") ';          
+                        
+                        if($field_type=='float'){
+                            $sortby = 'CAST('.$sortby.' AS DECIMAL) ';       
+                        }else if ($field_type=='integer'){
+                            $sortby = 'CAST('.$sortby.' AS SIGNED) ';       
+                        }
+                        
+                        $sort_expr[] = $sortby . $scending . ', r'.$this->level . '.rec_Title';                     
                         $sort_fields[] = $dty_ID;   
+                        
+    /*OLD pre 2021-10-15                    
+    'ifnull((select if(link.rec_ID is null, dtl_Value, link.rec_Title) from recDetails left join Records link on dtl_Value=link.rec_ID where dtl_RecID=r'.$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID.' ORDER BY link.rec_Title limit 1), "~~")'.$scending.', r'.$this->level.'.rec_Title';                    
+    */
+                    }
                     }
                     
             }//switch
