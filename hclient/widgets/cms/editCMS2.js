@@ -33,6 +33,7 @@ widget:
 
 var editCMS_instance2 = null;
 // layoutMgr - global variable defined in hLayoutMgr
+// home_page_record_id
 
 //
 // options: record_id, content, container
@@ -46,6 +47,8 @@ function editCMS2(){
     var _panel_treePage,     // panel with treeview for current page 
         _panel_treeWebSite,  // panel with tree menu - website structure
         _panel_propertyView, // panel with selected element properties
+        _toolbar_WebSite,
+        _toolbar_Page,
         
         _layout_content,   // JSON config 
         _layout_container; // main-content with CMS content
@@ -53,6 +56,11 @@ function editCMS2(){
     var default_palette_class = 'ui-heurist-publish';
         
     var is_edit_widget_open; //??
+    var delay_onmove = 0;
+    
+    var current_edit_mode = 'page'; //or website
+    
+    var keep_expanded_nodes = []; //in_website_menu
         
     var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
     RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
@@ -86,26 +94,45 @@ function editCMS2(){
                 var east_panel = $('<div class="ui-layout-east">'      
                         +'<div class="ent_wrapper editStructure">' 
                         +'<div class="ent_header" style="padding:10px 20px 4px 0px;border-bottom:1px solid lightgray">' //instruction and close button
-                            +'<span style="display:inline-block;width:32px;height:24px;font-size:29px;margin:0px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-e"/>'
+                            +'<span style="display:inline-block;width:32px;height:24px;font-size:29px;margin:0px;cursor:pointer" class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-e"/>'
                             
                             /*
                             +'<span style="font-style:italic;display:inline-block">Drag to reposition<br>'
                             +'Select or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
                             */
                             
-                            +'<button style="float:right;" title="Exit/Close content editor" class="btnExitCMS"/>'
-                            +'<button style="float:right;" title="Show website/main menu strucuture" class="btnEditWebSite"/>'
-                            //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
+                            +'<div class="toolbarWebSite"  style="float:right;">'
+                            
+                                +'<button title="Edit website properties" class="btn-website-edit"/>'
+                                +'<button  title="Add top level menu" class="btn-website-addpage"/>'
+                                +'<span style="display:inline-block;width:20px">&nbsp;</span>'
+                                //+'<button title="Show website/main menu strucuture" class="btn-website-menu"/>'
+                                +'<button  title="Exit/Close content editor" class="bnt-cms-exit"/>'
+                            
+                            +'</div>'
+
+                            +'<div class="toolbarPage"  style="float:right;">'
+                            
+                                +'<button title="Save changes for current page" class="btn-page-save ui-button-action">Save Page</button>'
+                                +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
+                                +'<span style="display:inline-block;width:20px">&nbsp;</span>'
+                                +'<button title="Show website/main menu strucuture" class="bnt-website-menu"/>'
+                                +'<button  title="Exit/Close content editor" class="bnt-cms-exit"/>'
+                            
+                            +'</div>'
+                            
                         +'</div>'
                         
-                        +'<div class="treeWebSite ent_content" style="padding:10px;display:none"/>' //treeview
-                        +'<div class="treePage ent_content" style="padding:10px;"/>' //treeview
-                        +'<div class="propertyView ent_content" style="padding:10px;display:none"/>' //edit properties
+                        +'<div class="treeWebSite ent_content_full" style="padding:10px;display:none"/>' //treeview - edit website menu
+                        +'<div class="treePage ent_content_full" style="padding:10px;"/>' //treeview - edit page
+                        +'<div class="propertyView ent_content_full" style="padding:10px;display:none"/>' //edit properties for element
                         
+/*                        
                         +'<div class="ent_footer" style="text-align:center;border-top:1px solid lightgray;padding:2px">'
-                                +'<div class="btn-ok ui-button-action">Save Page</div>'
-                                +'<div class="btn-cancel">Discard</div>'
+                                +'<div class="btn-page-save ui-button-action">Save Page</div>'
+                                +'<div class="btn-page-restore">Discard</div>'
                         +'</div>'
+*/                        
                 
                                              +'</div></div>').appendTo(body);
             
@@ -154,19 +181,27 @@ function editCMS2(){
 
                     body.layout(layout_opts); //.addClass('ui-heurist-bg-light')
 
-                    east_panel.find('.btn-ok').button().click(_saveLayoutCfg)
-                    east_panel.find('.btn-cancel').button().click(
+                    east_panel.find('.btn-page-save').button().click(_saveLayoutCfg)
+                    east_panel.find('.btn-page-restore').button().click(
                         function(){
                             _startCMS({record_id:options.record_id, container:'#main-content', content:null});
                         }
                     );
                     
-                    east_panel.find('.closeTreePanel').click(function(){ body.layout().close('east'); } );
-                    east_panel.find('.btnEditWebSite').button({icon:'ui-icon-menu'}).click(_showTreeWebSite);
-                    east_panel.find('.btnExitCMS').button({icon:'ui-icon-close'}).click(_closeCMS);
+                    
+                    east_panel.find('.btn-website-edit').button({icon:'ui-icon-pencil'}).click(_editHomePageRecord);
+                    east_panel.find('.btn-website-addpage').button({icon:'ui-icon-plus'}).click(_addNewPage);
+                    
+                    east_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).click(_showWebSiteMenu);
+                    
+                    east_panel.find('.bnt-cms-hidepanel').click(function(){ body.layout().close('east'); } );
+                    east_panel.find('.bnt-cms-exit').button({icon:'ui-icon-close'}).click(_closeCMS);
                     
                     _panel_propertyView = body.find('.propertyView');
-                    _panel_treeWebSite = body.find('.propertyView');
+                    _panel_treeWebSite = body.find('.treeWebSite');
+                    
+                    _toolbar_WebSite = body.find('.toolbarWebSite');
+                    _toolbar_Page = body.find('.toolbarPage');
 
                     
         }
@@ -263,7 +298,8 @@ function editCMS2(){
         
         _layout_container = body.find(options.container);
         
-        if(options.content){
+        if(options.content)
+        {
            _layout_content = options.content;
            _initPage();
             
@@ -280,6 +316,38 @@ function editCMS2(){
             
         }
     }    
+    
+    
+    //
+    //
+    //
+    function _editHomePageRecord(record_id){
+
+            //edit menu item
+            window.hWin.HEURIST4.ui.openRecordEdit(home_page_record_id, null,
+                {selectOnSave:true, 
+                    edit_obstacle: false, 
+                    onClose: function(){ 
+                        //parent_span.find('.svs-contextmenu4').hide();
+                    },
+                    onselect:function(event, data){
+                        if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                            //reload entire site
+                            _refreshWebsite();
+                        }
+            }});
+    }
+    
+    //
+    //
+    //
+    function _addNewPage(){
+            _selectMenuRecord(home_page_record_id, function( page_id ){
+                //was_something_edited = true;
+                current_page_id = page_id;
+                _refreshMainMenu();
+            });
+    }
     
     //
     // 1. close control panel
@@ -300,9 +368,11 @@ function editCMS2(){
     }
     
     //
-    //
+    // load page structure into tree and init layout
     //
     function _initPage(){
+        
+        if(tinymce) tinymce.remove('.tinymce-body'); //detach
         
         layoutMgr.setEditMode(true);
         var res = layoutMgr.layoutInit(_layout_content, _layout_container);
@@ -317,6 +387,7 @@ function editCMS2(){
             
         }
         
+        _highlightCurrentPage();
     }
 
     //
@@ -324,7 +395,7 @@ function editCMS2(){
     // 2) init hover toolbar - DnD,Edit Properties,Insert Sibling
     //
     function _initTinyMCE(){
-        
+      
         tinymce.remove('.tinymce-body'); //detach
         _layout_container.find('.lid-actionmenu').remove();
 
@@ -364,8 +435,13 @@ function editCMS2(){
             setup:function(editor) {
 
                 editor.on('focus', function (e) {
-                    //='+editor.id.substr(3)+']
-                    _layout_container.find('.lid-actionmenu[data-lid]').hide();
+                    if(current_edit_mode=='page'){
+                        _layout_container.find('.lid-actionmenu[data-lid]').hide();
+                    }else{
+                        //prevent 
+                        //window.hWin.HEURIST4.util.stopEvent(e);
+                        //return false;
+                    }
                 });
                 
                 editor.on('blur', function (e) {
@@ -389,7 +465,7 @@ function editCMS2(){
         tinymce.init(inlineConfig);
         
         // find all dragable elements - text and widgets
-        _layout_container.find('div.editable').each(function(i,item){
+        _layout_container.find('div.editable').each(function(i, item){
             var ele_ID = $(item).attr('data-lid');
              //left:2px;top:2px;
             _defineActionIcons(item, ele_ID, 'position:absolute;padding:2px;z-index:2;');   //left:2px;top:2px;         
@@ -525,22 +601,53 @@ function editCMS2(){
 
         }
         
-        
-        _panel_treePage.show();
-        _panel_propertyView.hide();
-        _panel_treeWebSite.hide();
+        _switchMode(current_edit_mode, false);
         
         _panel_treePage.fancytree('getTree').visit(function(node){
                 node.setSelected(false); //reset
                 node.setExpanded(true);
             });            
-        _updateActionIcons(500);//it inits timyMCE also
+        _updateActionIcons(500);//it inits tinyMCE also
         
     }
 
+    //
+    //
+    //
+    function _switchMode( mode, init_tinymce )
+    {
+    
+        current_edit_mode = mode;
+        
+        if(mode=='page'){
+            _panel_treePage.show();
+            _panel_propertyView.hide();
+            _panel_treeWebSite.hide();
+
+            _toolbar_Page.show();
+            _toolbar_WebSite.hide();
+        
+            //_layout_container.find('div.editable').addClass('tinymce-body');
+            //tinymce.init({inline:true});
+            if(init_tinymce!==false) _initTinyMCE();
+            
+        }else{
+            _panel_treeWebSite.show();
+            _panel_treePage.hide();
+            _panel_propertyView.hide();
+            
+            _toolbar_Page.hide();
+            _toolbar_WebSite.show();
+            
+            if(tinymce) tinymce.remove('.tinymce-body');
+            //tinymce.init({inline:false});
+            //_layout_container.find('div.editable').removeClass('tinymce-body');
+        }
+        
+    }
     
     //
-    //add and init action icons
+    // add and init action icons for page structure treeview
     //
     function _updateActionIcons(delay){ 
         
@@ -560,6 +667,8 @@ function editCMS2(){
 
     //
     // for treeview on mouse over toolbar
+    // item - either fancytree node or div.editable in container
+    // ele_ID - element key 
     //
     function _defineActionIcons(item, ele_ID, style_pos){ 
            if($(item).find('.lid-actionmenu').length==0){
@@ -572,7 +681,7 @@ function editCMS2(){
                var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
 
                if(node==null){
-                   console.log('DEBIG: ONLY '+ele_ID);
+                   console.log('DEBUG: ONLY '+ele_ID);
                    return;
                }
                
@@ -602,8 +711,10 @@ function editCMS2(){
                
                actionspan += '</div>';
                actionspan = $( actionspan );
+               
+               var is_intreeview = $(item).hasClass('fancytree-node');
                    
-               if($(item).hasClass('fancytree-node')){   //in treeview
+               if(is_intreeview){   //in treeview
                    actionspan.appendTo(item);
                }else{ 
                    actionspan.insertAfter(item); //in main-content
@@ -625,6 +736,7 @@ function editCMS2(){
                         
 //console.log('selected '+ele_ID);                        
 //if(!(ele_ID>0)) return;
+                        _layout_container.find('.lid-actionmenu[data-lid='+ele_ID+']').hide();
 
                         var action = ele.attr('data-action');
                         if(!action) action = ele.parent().attr('data-action');
@@ -667,6 +779,7 @@ function editCMS2(){
                        if($(event.target).hasClass('editable')){
                           node =  $(event.target);
                           _layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-lid')+']').hide();
+                          _layout_container.find('div[data-lid]').removeClass('cms-element-active');
                        }else{
                        
                            if($(event.target).is('li')){
@@ -687,20 +800,76 @@ function editCMS2(){
                        }
                }               
                
-               $(item).hover(
+               $(item).hover ( // mousemove  mouseover
                    function(event){
+                       
+                       if (current_edit_mode != 'page') return;
+                       
                        var node;
-                       if($(event.target).hasClass('editable')){
-                          node =  $(event.target);
+                       
+                       if($(event.target).parents('div.lid-actionmenu').length>0){
+                              if(delay_onmove>0) clearTimeout(delay_onmove);
+                              delay_onmove = 0;
+                              return;
+                       }
+                       
+                       if( $(event.target).hasClass('editable') || $(event.target).parents('div.editable:first').length>0){
+                          //div.editable in container 
+                          
+                          if($(event.target).hasClass('editable')){
+//console.log('itself');                              
+                            node = $(event.target);
+                          }else{
+//console.log('parent');                              
+                            node = $(event.target).parents('div.editable:first');
+                          } 
+                          
+                          //tinymce is active - do not sow toolbar
+                          if(node.hasClass('mce-edit-focus')){
+                                return;   
+                          }
+                           
+                          //node =  $(event.target);
                           
                           _layout_container.find('.lid-actionmenu').hide(); //find other
                           var ele = _layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-lid')+']');
+                          
+                          var parent = node.parents('div.ui-layout-pane:first');
+                          if(parent.length==0 || parent.parents('div[data-lid]').length==0){
+                                parent = _layout_container;  
+                          }
+                          /*
 
-                          ele.show();
+                          var pos = window.hWin.HEURIST4.ui.getMousePos(event);
+                          var x = pos[0] - parent.offset().left - parseInt(parent.css('padding'));
+                          var y = pos[1] - parent.offset().top - parseInt(parent.css('padding'));
+                          
+                          var r = parent.offset().left+parent.width();
+//console.log(x+'+'+ele.width()+' pos='+pos[0]+'   r='+r +'  left='+parent.offset().left);                          
+                          if(x+220>r){
+                              x = r - 220; //ele.width();
+                          }
+                          if(ele.is(':visible')){
+                              
+                              if(delay_onmove>0) clearTimeout(delay_onmove);
+                              delay_onmove = 0;
+                              delay_onmove = setTimeout(function(){
+                                  ele.css({ top:y+'px', left:x+'px'});
+                              },500);
+                              
+                          }else{
+                              ele.css({ top:y+'px', left:x+'px'});    
+                              ele.show();      
+                          }
+                          */
+                          
                           var pos = node.position();
-                          ele.css({top:pos.top+'px',left:pos.left});
+//console.log(pos.top + '  ' + (pos.top+parent.offset().top));                          
+                          ele.css({top:(pos.top<0?0:pos.top)+2+'px',left:(pos.left<0?0:pos.left)+2+'px'});
+                          ele.show();
                           
                        }else {
+                           //treeview node
                        
                            if($(event.target).hasClass('fancytree-node')){
                               node =  $(event.target);
@@ -894,6 +1063,7 @@ function editCMS2(){
                     //close
                     _panel_treePage.show();
                     _panel_propertyView.hide();
+                    
                 } );
     }
     
@@ -1193,15 +1363,488 @@ function editCMS2(){
     //
     //
     //
-    function _showTreeWebSite(){
-        /*
+    function _showWebSiteMenu(){
         
-        _panel_treeWebSite.show();
-        _panel_treePage.hide();
-        _panel_propertyView.hide();
+        _switchMode('website');
         
-        */
+        //load website menu treeview
+        var tree_element = _panel_treeWebSite;
+        
+        //get treedata from main menu
+        var treedata = $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('getMenuContent','treeview');
+
+        if(tree_element.fancytree('instance')){
+            
+            var tree = tree_element.fancytree('getTree');
+
+            //keep_expanded_nodes
+            keep_expanded_nodes = [];
+            tree.visit(function(node){
+                    if(node.isExpanded()){
+                        keep_expanded_nodes.push(node.key)
+                    }});
+            
+            tree.reload(treedata);
+            
+            tree.visit(function(node){
+                    if(keep_expanded_nodes.indexOf(node.key)>=0){
+                        node.setExpanded(true);
+                    }
+                    node.setSelected((node.key==current_page_id));
+            });
+
+        }else{
+
+            function __defineActionIcons(item)
+            {
+                var item_li = $(item.li), 
+                menu_id = item.key, 
+
+                is_top = (item.data.parent_id==home_page_record_id);
+
+                if($(item).find('.svs-contextmenu3').length==0){
+
+                    var parent_span = item_li.children('span.fancytree-node');
+
+                    //add,edit menu,edit page,remove
+                    var actionspan = $('<div class="svs-contextmenu3" style="padding: 0px 20px 0px 0px;" data-parentid="'
+                        +item.data.parent_id+'" data-menuid="'+menu_id+'">'
+                        +'<span class="ui-icon ui-icon-structure" title="Edit page"></span>'
+                        +'<span class="ui-icon ui-icon-plus" title="Add new page/menu item"></span>'
+                        +'<span class="ui-icon ui-icon-pencil" title="Edit menu record"></span>'
+                        //+'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
+                        +'<span class="ui-icon ui-icon-trash" '
+                        +'" title="Remove menu entry from website"></span>'
+                        +'</div>').appendTo(parent_span);
+
+                    $('<div class="svs-contextmenu4"/>').appendTo(parent_span); //progress icon
+
+                    actionspan.find('.ui-icon').click(function(event){
+                        var ele = $(event.target);
+                        window.hWin.HEURIST4.util.stopEvent(event);
+                        
+                        var parent_span = ele.parents('span.fancytree-node');
+                        
+                        function __in_progress(){
+                            parent_span.find('.svs-contextmenu4').show();
+                            parent_span.find('.svs-contextmenu3').hide();
+                        }
+
+                        //timeout need to activate current node    
+                        setTimeout(function(){                         
+                            var ele2 = ele.parents('.svs-contextmenu3');
+                            var menuid = ele2.attr('data-menuid');
+                            var parent_id = ele2.attr('data-parentid');
+
+                            if(ele.hasClass('ui-icon-plus')){ //add new menu to 
+
+                                _selectMenuRecord(menuid, function(page_id){
+                                    //was_something_edited = true;
+                                    current_page_id = page_id;
+                                    _refreshMainMenu();
+                                });
+
+                            }else if(ele.hasClass('ui-icon-pencil')){ //edit menu record
+
+                                __in_progress();
+                                //edit menu item
+                                window.hWin.HEURIST4.ui.openRecordEdit(menuid, null,
+                                    {selectOnSave:true,
+                                        onClose: function(){ 
+                                            parent_span.find('.svs-contextmenu4').hide();
+                                        },
+                                        onselect:function(event, data){
+                                            if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                                
+                                                var recordset = data.selection;
+                                                var page_id = recordset.getOrder()[0];
+                                                page_content[page_id] = null; //remove from cache
+                                                
+                                                if(page_id == current_page_id){
+                                                    _refreshCurrentPage(current_page_id);
+                                                }
+                                            }
+                                }});
+
+                            }else if(ele.hasClass('ui-icon-structure')){
+                                //open page structure 
+                                if( menuid == current_page_id ){
+                                    _switchMode('page');
+                                        
+                                }else{
+                                    current_edit_mode = 'page'
+                                    _refreshCurrentPage( menu_id );
+                                }
+
+                            }else 
+                                if(ele.hasClass('ui-icon-trash')){    //remove menu entry
+
+                                    var menu_title = ele.parents('.fancytree-node').find('.fancytree-title')[0].innerText; // Get menu title
+
+                                    function __doRemove(){
+                                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                        var isDelete = $dlg.find('#del_menu').is(':checked');
+                                        $dlg.dialog( "close" );
+
+                                        var to_del = [];
+                                        if(remove_menu_records){
+                                            item.visit(function(node){
+                                                to_del.push(node.key);
+                                                },true);
+                                        }
+
+                                        if(!isDelete){ // Check if the menu and related records are to be deleted, or just removed
+                                            to_del = null;
+                                        }
+                                        
+                                        _removeMenuEntry(parent_id, menuid, to_del, function(){
+                                            item.remove();    
+                                            
+                                            _refreshMainMenu();
+                                        });
+                                    }
+
+                                    var buttons = {};
+                                    buttons[window.hWin.HR('Remove menu entry and sub-menus (if any)')]  = function() {
+                                        remove_menu_records = true;
+                                        __doRemove();
+                                    };
+                                    /*        
+                                    buttons[window.hWin.HR('No. Remove menu only and retain records')]  = function() {
+                                    remove_menu_records = false;
+                                    __doRemove();
+                                    };
+                                    */
+                                    buttons[window.hWin.HR('Cancel')]  = function() {
+                                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                                        $dlg.dialog( "close" );
+                                    };
+
+                                    window.hWin.HEURIST4.msg.showMsgDlg(
+                                        'This removes the menu entry from the website, as well as all sub-menus of this menu (if any).<br><br>'
+                                        + 'To avoid removing sub-menus, move them out of this menu before removing it.<br><br>'
+                                        + '<input type="checkbox" id="del_menu">'
+                                        + '<label for="del_menu" style="display: inline-flex;">If you want to delete the actual web pages from the database, not simply remove<br>'
+                                        + 'the menu entreis from this website, check this box. Note that this is not reversible.</label>', buttons,
+                                        'Remove "'+ menu_title +'" Menu');
+
+                                }
+
+                            },500);
+                    });
+
+                    //hide icons on mouse exit
+                    function _onmouseexit(event){
+                        var node;
+                        if($(event.target).is('li')){
+                            node = $(event.target).find('.fancytree-node');
+                        }else if($(event.target).hasClass('fancytree-node')){
+                            node =  $(event.target);
+                        }else{
+                            //hide icon for parent 
+                            node = $(event.target).parents('.fancytree-node');
+                            if(node) node = $(node[0]);
+                        }
+                        var ele = node.find('.svs-contextmenu3');
+                        ele.hide();
+                    }               
+
+                    $(parent_span).hover(
+                        function(event){
+                            var node;
+                            if($(event.target).hasClass('fancytree-node')){
+                                node =  $(event.target);
+                            }else{
+                                node = $(event.target).parents('.fancytree-node');
+                            }
+                            if(! ($(node).hasClass('fancytree-loading') || $(node).find('.svs-contextmenu4').is(':visible')) ){
+                                var ele = $(node).find('.svs-contextmenu3');
+                                ele.css({'display':'inline-block'});//.css('visibility','visible');
+                            }
+                        }
+                    );               
+                    $(parent_span).mouseleave(
+                        _onmouseexit
+                    );
+                }
+            } //end __defineActionIcons
+
+            var fancytree_options =
+            {
+                checkbox: false,
+                //titlesTabbable: false,     // Add all node titles to TAB chain
+                source: treedata,
+                quicksearch: false, //true,
+                selectMode: 1, //1:single, 2:multi, 3:multi-hier (default: 2)
+                renderNode: function(event, data) {
+                    
+                    if(true || data.has_access){
+                        var item = data.node;
+                        __defineActionIcons( item );
+                    }
+                },
+                extensions:["edit", "dnd"],
+                dnd:{
+                    preventVoidMoves: true,
+                    preventRecursiveMoves: true,
+                    autoExpandMS: 400,
+                    dragStart: function(node, data) {
+                        return data.has_access;
+                    },
+                    dragEnter: function(node, data) {
+                        //data.otherNode - dragging node
+                        //node - target node
+                        return true; //node.folder ?['over'] :["before", "after"];
+                    },
+                    dragDrop: function(node, data) {
+                        //data.otherNode - dragging node
+                        //node - target node
+                        var source_parent = data.otherNode.parent.key;//data.otherNode.data.parent_id;
+                        if(!(source_parent>0))
+                            source_parent = home_page_record_id;
+
+                        data.otherNode.moveTo(node, data.hitMode);
+
+                        var target_parent = data.otherNode.parent.key;
+                        if(!(target_parent>0))
+                            target_parent = home_page_record_id;
+                        data.otherNode.data.parent_id = target_parent;
+
+                        var request = {actions:[]};
+
+                        if(source_parent!=target_parent){
+                            //remove from source
+                            request.actions.push(
+                                {a: 'delete',
+                                    recIDs: source_parent,
+                                    dtyID: source_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
+                                    sVal:data.otherNode.key});
+
+                        }
+                        //return;
+                        //change order in target
+                        request.actions.push(
+                            {a: 'delete',
+                                recIDs: target_parent,
+                                dtyID: target_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU});
+
+                        for (var i=0; i<data.otherNode.parent.children.length; i++){
+
+                            var menu_node = data.otherNode.parent.children[i];
+                            request.actions.push(
+                                {a: 'add',
+                                    recIDs: target_parent,
+                                    dtyID: target_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
+                                    val:menu_node.key}                                                   
+                            );
+                        }                    
+
+                        //window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
+                        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                            //window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            if(response.status == hWin.ResponseStatus.OK){
+                                was_something_edited = true;
+                                window.hWin.HEURIST4.msg.showMsgFlash('saved');
+                                //reload main menu
+                                _refreshMainMenu();
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                        });                                        
+
+                    }
+                },
+                activate: function(event, data) { 
+                    //loads another page
+                    if(data.node.key>0){
+                          _refreshCurrentPage(data.node.key);
+                    }
+                },
+                edit:{
+                    triggerStart: ["clickActive", "dblclick", "f2", "mac+enter", "shift+click"],
+                    close: function(event, data){
+                        // Editor was removed
+                        if( data.save ) {
+                            // Since we started an async request, mark the node as preliminary
+                            $(data.node.span).addClass("pending");
+                        }
+                    },                                    
+                    save:function(event, data){
+                        if(''!=data.input.val()){
+                            var new_name = data.input.val();
+                            _renameEntry(data.node.key, new_name, function(){
+                                $(data.node.span).removeClass("pending");
+                                data.node.setTitle( new_name ); 
+                                __defineActionIcons( data.node );   
+                            });
+                        }else{
+                            $(data.node.span).removeClass("pending");    
+                        }
+                    }
+                }
+            };
+
+            tree_element.fancytree(fancytree_options).addClass('tree-cms');
+            
+            tree = tree_element.fancytree('getTree');
+            tree.visit(function(node){
+                node.setExpanded(true);
+            });            
+            
+        }        
+        
+        setTimeout(_highlightCurrentPage, 1000);
     }  
+    
+    function _highlightCurrentPage(){
+        
+         if( _panel_treeWebSite.fancytree('instance')){
+                var tree = _panel_treeWebSite.fancytree('getTree');
+                
+                tree.visit(function(node){
+                    if(node.key==current_page_id){
+                        $(node.li).find('.fancytree-title').css({'text-decoration':'underline'});    
+                    }else{
+                        $(node.li).find('.fancytree-title').css({'text-decoration':'none'});
+                    }
+                });            
+         }
+        
+
+            /*
+            var node = tree.getNodeByKey(''+current_page_id);
+            if(node){
+console.log('!!! '+current_page_id);                
+               node.setSelected(true); 
+               $(node.li).css({'color':'red'});
+            }
+            */        
+    }
+
+    //
+    // Select or create new menu item for website
+    //
+    // Opens record selector popup and adds selected menu given mapdoc or other menu
+    //
+    function _selectMenuRecord(parent_id, callback){
+
+        var popup_options = {
+            select_mode: 'select_single', //select_multi
+            select_return_mode: 'recordset',
+            edit_mode: 'popup',
+            selectOnSave: true, //it means that select popup will be closed after add/edit is completed
+            title: window.hWin.HR('Select or create a website menu record'),
+            rectype_set: RT_CMS_MENU,
+            parententity: 0,
+            default_palette_class: 'ui-heurist-publish',
+
+            onselect:function(event, data){
+                if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                    var recordset = data.selection;
+                    var record = recordset.getFirstRecord();
+                    var menu_id = recordset.fld(record,'rec_ID');
+
+                    _addMenuEntry(parent_id, menu_id, callback)
+                }
+            }
+        };//popup_options
+
+
+        var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_records', 
+            {width: null,  //null triggers default width within particular widget
+                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+
+        popup_options.width = Math.max(usrPreferences.width,710);
+        popup_options.height = usrPreferences.height;
+
+        window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
+    }
+
+    //
+    // Add new menu(page) menu_id to  parent_id
+    //
+    function _addMenuEntry(parent_id, menu_id, callback){
+
+        var request = {a: 'add',
+            recIDs: parent_id,
+            dtyID:  (parent_id==home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
+            val:    menu_id};
+
+        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+            if(response.status == hWin.ResponseStatus.OK){
+                //refresh treeview
+                if($.isFunction(callback)) callback.call( this, menu_id );
+            }else{
+                hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });                                        
+
+    }
+
+    //
+    //
+    //
+    function _removeMenuEntry(parent_id, menu_id, records_to_del, callback){
+
+        //delete detail from parent menu
+        var request = {a: 'delete',
+            recIDs: parent_id,
+            dtyID:  (parent_id==home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
+            sVal:   menu_id};
+
+        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+            if(response.status == hWin.ResponseStatus.OK){
+                if(records_to_del && records_to_del.length>0){
+
+                    //delete children 
+                    window.hWin.HAPI4.RecordMgr.remove({ids:records_to_del},
+                        function(response){
+                            if(response.status == hWin.ResponseStatus.OK){
+                                //refresh treeview
+                                if($.isFunction(callback)) callback.call();
+                            }else{
+                                hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                        }      
+                    );
+
+                }else{
+                    //refresh treeview
+                    if($.isFunction(callback)) callback.call();
+                }
+            }else{                                                     
+                hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });                                        
+
+    }
+
+    //
+    // refresh main menu and reload current page
+    //
+    function _refreshMainMenu(){
+        
+       initMainMenu( _refreshCurrentPage );
+    }
+
+    
+    //
+    // reload current (or given page)
+    //
+    function _refreshCurrentPage(page_id){
+        
+        if(!(page_id>0)) page_id = current_page_id;
+        
+        loadPageContent(page_id); //call global function from websiteScriptAndStyles
+        
+    }
+
+    //
+    // reload entire website 
+    //
+    function _refreshWebsite(){
+        
+    }
       
         
     //public members

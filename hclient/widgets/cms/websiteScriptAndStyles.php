@@ -258,31 +258,13 @@ _time_debug = new Date().getTime() / 1000;
         
         var topmenu = $('#main-menu');
         
-        if(topmenu.length==0){
+        if(topmenu.length==0){ //menu-less page
             
             __onInitComplete();
             
         }else{
-            var lopts = {
-                        menu_recIDs: home_page_record_id, 
-                        use_next_level: true, 
-                        orientation: 'horizontal',
-                        toplevel_css: {background:'none'}, //bg_color 'rgba(112,146,190,0.7)'
-                        onInitComplete: __onInitComplete
-                        };
             
-            if(_IS_NEW_CMS_EDITOR){ 
-                lopts['onmenuselect'] = loadPageContent;
-            }else{
-                lopts['aftermenuselect'] = afterPageLoad;
-            }
-            
-            lopts = {heurist_Navigation:lopts};
-            
-            topmenu.attr('data-heurist-app-id','heurist_Navigation');
-            window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, topmenu.parent(), lopts,
-                __onInitComplete);
-            topmenu.show();
+            initMainMenu( __onInitComplete );
             
         }
         
@@ -294,6 +276,35 @@ _time_debug = new Date().getTime() / 1000;
     },300);
     
     
+}
+
+//
+// afterInitMainMenu - loads intial page (usually this is home page
+//
+function initMainMenu( afterInitMainMenu ){
+    
+    var topmenu = $('#main-menu');
+
+    var lopts = {  
+                menu_recIDs: home_page_record_id, 
+                use_next_level: true, 
+                orientation: 'horizontal',
+                toplevel_css: {background:'none'}, //bg_color 'rgba(112,146,190,0.7)'
+                onInitComplete: afterInitMainMenu
+                };
+    
+    if(_IS_NEW_CMS_EDITOR){ 
+        lopts['onmenuselect'] = loadPageContent;
+    }else{
+        lopts['aftermenuselect'] = afterPageLoad;
+    }
+    
+    lopts = {heurist_Navigation:lopts};
+    
+    topmenu.attr('data-heurist-app-id','heurist_Navigation');
+    window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, topmenu.parent(), lopts);
+        //afterInitMainMenu);
+    topmenu.show();
 }
 
 //

@@ -1312,7 +1312,7 @@ window.hWin.HEURIST4.util = {
 
         document.addEventListener('copy', handler, true);
         document.execCommand('copy');
-    }          
+    }
     
 }//end util
 

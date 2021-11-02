@@ -139,10 +139,10 @@ function hLayoutMgr(){
         
     }
     function _layoutInitText(layout, container){
-
+        
         $d = $(document.createElement('div'));
         $d.attr('id','hl-'+layout.key).attr('data-lid', layout.key)
-            .addClass('tinymce-body editable')
+            .addClass('editable tinymce-body')
             .appendTo(container);
             
         if(isEditMode){
@@ -547,6 +547,7 @@ function hLayoutMgr(){
         setEditMode: function(newmode){
             isEditMode = newmode;            
         }
+        
         
     }
 }
