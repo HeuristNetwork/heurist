@@ -1774,7 +1774,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             //without sections and separators
             $('#tblFieldMapping > tbody').html(
                 '<tr height="40" class="helper" style="display:none"><td class="subh" colspan="5" style="padding:0 20px">'
-                    +'<span style="background:rgba(151, 244, 128, 0.83)">MATCHING</span> Choose only the fields you need to match &nbsp;&nbsp;'
+                    +'<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">MATCHING</span> Choose only the fields you need to match &nbsp;&nbsp;'
                     +'<span style="color:green;">Note: ONLY fields suitable for matching are shown in this step.</span>'
                 +'</td></tr>'
                 +sID_field+sIndexes+sAllFields
@@ -4437,7 +4437,26 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 container.find('.ent_content_full').css({right:1,width:'auto'});
             }
         }
-        
+
+        if(page == 5 && $('#sa_update').prop('checked')){
+            $('#divheader').css('background','rgba(200, 100, 200, 0.83)');
+
+            $('tr.helper').show().children().html(
+                '<span style="background:rgba(200, 100, 200, 0.83);display:inline-block;padding:3px;">UPDATE</span> Allocate <span style="color:purple;">purple fields</span> to '
+                +'<span style="color:purple;">record pointer fields</span> which connect to entities created in previous steps'
+            );
+        }else{
+            $('#divheader').css('background','rgba(151, 244, 128, 0.83)');
+
+            if(page != 3){
+                $('tr.helper').hide();
+            }else{
+                $('tr.helper').show().children().html(
+                    '<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">MATCHING</span> Choose only the fields you need to match &nbsp;&nbsp;'
+                    +'<span style="color:green;">Note: ONLY fields suitable for matching are shown in this step.</span>'
+                );
+            }
+        }
         
         $("div[id^='divStep']").hide();
         $("#divStep"+(page>2?3:page)).show();
