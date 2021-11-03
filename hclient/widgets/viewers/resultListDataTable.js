@@ -48,6 +48,8 @@ $.widget( "heurist.resultListDataTable", {
     
     selConfigs: null,
 
+    hidden_cols: null, // datatable columns ids that are set to hidden
+
     // the constructor
     _create: function() {
 
@@ -256,8 +258,9 @@ that._dout('myOnShowEvent');
                         }
                         
                     }
-                    
+
                     var cols = this.options.dataTableParams['columns'];
+                    hidden_cols = [];
                     for(var i=0;i<cols.length;i++){
                         if(typeof cols[i]['render']==='string'){
                             var fooName = cols[i]['render']
@@ -282,6 +285,10 @@ that._dout('myOnShowEvent');
                                 }
                             }
                         }
+
+                        if(cols[i]['visible'] === "false" || cols[i]['visible'] === false){
+                            hidden_cols.push(i);
+                        }
                     }
                     
 
@@ -292,7 +299,7 @@ this._dout('reload datatable '+this.options.serverSide);
                         this.options.dataTableParams['processing'] = true;
                         this.options.dataTableParams['serverSide'] = true;
                         
-                        
+                        //this.options.dataTableParams['dataSrc'] = function(json) { console.log(json); }; //server call response DEBUGGING
                         
                         var datatable_id = window.hWin.HEURIST4.util.random();
                         
@@ -349,8 +356,13 @@ this._dout('reload datatable '+this.options.serverSide);
         this.div_content.find('.dt-buttons').css('padding-top','7px');
         this.div_content.find('.dt-button').css('padding','2px');
         this.selConfigs = null;
-                    
+
         var that = this;
+		
+        // Ensure that columns set to hidden are hidden
+        if(hidden_cols.length > 0){
+            this._dataTable.columns(hidden_cols).visible(false);
+        }
         
         // Add title to elements that will truncate
         var cells = this.div_content.find('div.dataTables_scroll td.truncate, div.dataTables_scroll th.truncate');
