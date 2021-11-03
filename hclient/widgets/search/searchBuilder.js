@@ -390,6 +390,7 @@ $.widget( "heurist.searchBuilder", {
                             },
                             onchange: function(){
                                 that._doCompose();
+                                that.sortbySection.find('#sortby_header #sortby_values').text('record title');
                             },
                             onselect_field: function(){
                                 var id = this.element.attr('id');
@@ -532,6 +533,9 @@ $.widget( "heurist.searchBuilder", {
                         event.stopPropagation(); 
                 }});
 
+                // sortby accordion header
+                this.sortbySection = this.pnl_Items.find('#sortby_accordion').accordion({heightStyle: "content",active: false,collapsible: true});
+
                 //
                 //
                 this.btnAddSortItem = this.pnl_Items.find('.sort_field_add');
@@ -539,6 +543,7 @@ $.widget( "heurist.searchBuilder", {
                 this._on(this.btnAddSortItem, {click:function(event){
                     
                     that.addSortItem();
+					this.sortbySection.find('#sortby_header #sortby_values').text(this.sortbySection.find('#sortby_header #sortby_values').text() + ', record title');
                 }});
                 
                 this.search_conjunction = this.pnl_Items.find('.search_conjunction').find('select');
@@ -587,7 +592,7 @@ $.widget( "heurist.searchBuilder", {
                 this.pnl_Rectype.css({top:'35px'}); //,height:'30px'
                 //var itop = 36+this.pnl_Rectype.height()+1;
                 this.pnl_Tree.css({top:35}); //, bottom:h
-                this.pnl_Items.css({top:'85px', bottom:h});
+                this.pnl_Items.css({bottom:h});
                 this.pnl_CoverAll.css({top:'85px', bottom:h});
                 this.pnl_Result.css({bottom:'40px'});
                 var _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Filter builder</div>')
@@ -660,7 +665,8 @@ $.widget( "heurist.searchBuilder", {
     {
         this._doCompose();        
         
-        this.pnl_Items.children('div:not(.btn_field_add)').remove();
+        this.pnl_Items.children('div:not(.btn_field_add, #sortby_accordion)').remove();
+        this.sortbySection.find('#sortby_body').children('div:not(.btn_field_add)').remove();
         this.field_array = [];
         this.sort_array = [];
         this.adjustDimension();
@@ -1317,6 +1323,17 @@ console.log(aCodes);
             $($fields_headers[i]).text(conjunct);
         }
         
+        // Update accordion header
+        var sortby_header = '';
+        $.each(this.sort_array, function(i, ele){
+            var lbl = ele.searchBuilderSort('getLabel');
+            if(lbl != ''){
+                sortby_header += lbl + ', ';
+            }
+        });
+
+        sortby_header = sortby_header.substring(0, sortby_header.length - 2);
+        this.sortbySection.find('#sortby_header #sortby_values').text(sortby_header);
     }
 });
 

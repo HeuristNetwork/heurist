@@ -20,7 +20,7 @@
 */
 -->
 
-<div id="pnl_Rectype" style="position:absolute;left:0px;right:0px;top:0px;height:30x;border-bottom:1px gray solid; padding:10px">
+<div id="pnl_Rectype" style="position:absolute;left:0px;right:0px;top:0px;height:30x;border-bottom:1px gray solid;padding:20px 10px;">
     <h3 style="display:none; margin:0px;color:red;text-align:center" title="Actually there is not risk at all">
             FUNCTION UNDER DEVELOPMENT, TRIAL AT YOUR OWN RISK!
     </h3>
@@ -48,26 +48,32 @@
 -->
 
 
-<fieldset id="pnl_Items" style="position:absolute;left:0px;right:0;top:80px;bottom:0px;padding-top:10px;overflow-y: auto;">
+<fieldset id="pnl_Items" style="position:absolute;left:0px;right:0;top:106px;bottom:0px;padding-top:10px;overflow-y: auto;">
 
-   <div class="btn_field_add search_conjunction" style="visibility:hidden;height:28px;">
-        <span style="margin-left: 99px;color:#6A7C99;font-size:0.8em">
+    <div class="btn_field_add search_conjunction" style="visibility:hidden;height:28px;position: absolute;top: 52px;">
+        <span style="margin-left: 43px;color:#6A7C99;font-size:0.8em;">
             <select style="border:none">
                 <option value="all">AND</option>
                 <option value="any">OR</option>
-            </select></span>
-   </div>
-   
-   <div class="btn_field_add search_field_add" style="margin-left: 85px;color:#6A7C99;cursor:pointer;font-size:0.8em">
-        <span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 85px;"/> add field
-   </div>
-        
-   
-   <hr/>
-   
-   <div class="btn_field_add sort_field_add" style="color:#6A7C99;cursor:pointer;font-size:0.8em">
-        <br><span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 85px;"/> add sort
-   </div>
+            </select>
+        </span>
+    </div>
+
+    <div class="btn_field_add search_field_add" style="margin-left: 85px;color:#6A7C99;cursor:pointer;font-size:0.8em">
+        <span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 95px;"/> add field
+    </div>
+
+    <hr/>
+
+    <div id="sortby_accordion" style="font-size: unset;">
+        <h3 id="sortby_header" style="margin-left: 40px;">Sorted by: <span id="sortby_values">record title</span></h3>
+
+        <div id="sortby_body" style="width: 765px;background: none;border: none;">
+            <div class="btn_field_add sort_field_add" style="color:#6A7C99;cursor:pointer;font-size:0.8em">
+                <br><span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 95px;"/> add sort
+            </div>
+        </div>
+    </div>
    
 </fieldset>
 
@@ -79,12 +85,12 @@
 
 <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix popup_buttons_div" style="display:none;padding:13px">
 
-            <div class="ui-dialog-buttonset">
-                <label><input type="checkbox" class="btn-preview"/>preview filter</label>
-                <a href="#" style="color:white;margin-left:10px" class="btn-copy">copy</a>
-                <div style="margin-left:40px" class="btn-search ui-button-action">Filter</div>
-                <div class="btn-save">Preview</div>
-            </div>
+    <div class="ui-dialog-buttonset">
+        <label><input type="checkbox" class="btn-preview"/>preview filter</label>
+        <a href="#" style="color:white;margin-left:10px" class="btn-copy">copy</a>
+        <div style="margin-left:40px" class="btn-search ui-button-action">Filter</div>
+        <div class="btn-save">Preview</div>
+    </div>
 </div>
 
 <div id="pnl_Tree" class="ui-widget-content" style="position:absolute;left:0;width:350px;top:0;bottom:0px;border-right:1px gray solid;display:none;">
