@@ -2041,16 +2041,39 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                }
                
                if(!window.hWin.HEURIST4.util.isnull(selected_value)){
-                        var cbox = $("#cbsa_dt_"+field_idx);
-                        if(cbox.attr('data-type')!='processed'){                   
-                            $("#cbsa_dt_"+field_idx).prop('checked', true);
-                            $(item).parent().show(); //show selector
+                    $(item).val(dt_id);
+                    if(sel.hSelect("instance")!=undefined){
+                        sel.hSelect("refresh"); 
+                    }
+               }else{
+
+                    // Compare fieldnames with column names within CSV data
+                    var options = $item.find('option');
+                    var col_name = imp_session['columns'][idx];
+
+                    $.each(options, function(i, option){
+
+                        var rec_column_parts = option.text.split(' [');
+                        var rec_column = '';
+
+                        if(rec_column_parts.length > 2){
+                            for(var j = 0; j < rec_column_parts.length-1; j++){
+                                rec_column += rec_column_parts[j];
+                            }
+                        }else{
+                            rec_column = rec_column_parts[0];
                         }
-                        $(item).val(dt_id);
-                        if(sel.hSelect("instance")!=undefined){
-                           sel.hSelect("refresh"); 
+
+                        if(rec_column == col_name || rec_column.toLowerCase() == col_name.toLowerCase()){
+                            $item.val(option.value);
+
+                            if(sel.hSelect("instance") != undefined){
+                                sel.hSelect("refresh");
+                            }
+                            return false;
                         }
-               }
+                    });
+			   }
                
                $(sel).change(function(){
                     if(currentStep==5){
