@@ -1900,6 +1900,8 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
 
                 //send an email with attachment
                 $email = new PHPMailer();
+                $email->CharSet = 'UTF-8';
+                $email->Encoding = 'base64';
                 $email->isHTML(true); 
                 $email->SetFrom('bugs@HeuristNetwork.org', 'Bug reporter'); //'bugs@'.HEURIST_SERVER_NAME 
                 $email->Subject   = $msg;
