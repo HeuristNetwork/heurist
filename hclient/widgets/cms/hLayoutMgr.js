@@ -54,19 +54,20 @@ function hLayoutMgr(){
         
         container.empty();   
         
-        if(typeof layout === 'string'){
-            if(layout.indexOf('data-heurist-app-id')>0){ //old format
+        if(typeof layout === 'string' &&
+            layout.indexOf('data-heurist-app-id')>0){ //old format
             
                 container.html(layout);
             
                 window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content', supp_options );
                 return false;
-            }
+            
         }
         
         var res = window.hWin.HEURIST4.util.isJSON(layout);
         
         if(res===false){
+            //this is not json - HTML
             //if(layout==''){ layout = 'Add content here'}
             
             layout = [{name:'Page', type:'group',

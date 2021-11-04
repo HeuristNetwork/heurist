@@ -94,6 +94,7 @@ if($_is_new_cms_editor){
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SelectElement.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_WidgetCfg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_ElementCfg.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SiteMenu.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/hLayoutMgr.js"></script>
     
 <style>
@@ -198,6 +199,9 @@ if($edit_Available){
 }else{
 ?>    
 <script>
+function _dout(msg){
+    //console.log(msg);
+}
 //
 // init page for publication version  
 // for cms version see websiteRecord.js
@@ -205,8 +209,8 @@ if($edit_Available){
 function onPageInit(success)
 {
     
-//console.log('webpage onPageInit  '+(new Date().getTime() / 1000 - _time_debug));
-//console.log('webpage onPageInit  '+init_page_record_id);
+_dout('webpage onPageInit  '+(new Date().getTime() / 1000 - _time_debug));
+_dout('webpage onPageInit  '+init_page_record_id);
 
 _time_debug = new Date().getTime() / 1000;
         
@@ -319,7 +323,8 @@ function loadPageContent(pageid){
         var page_target = $('#main-content');
         var page_footer = page_target.find('#page-footer');
         if(page_footer.length>0) page_footer.detach();
-        //console.log('load page  '+pageid+'   '+page_footer.length);              
+        _dout('load page  '+pageid+'   '+page_footer.length);              
+        
         var supp_options = null;
         
 
@@ -590,7 +595,7 @@ function afterPageLoad(document, pageid){
     });
     
     //var ele = $('#mobilemenu');
-    //console.log('MOBILE '+ele.find('a.extern').length);
+    //_dout('MOBILE '+ele.find('a.extern').length);
     
 }
 
@@ -599,7 +604,7 @@ function afterPageLoad(document, pageid){
 //
 function onHapiInit(success){   
     
-//    console.log('webpage hapi inited  ');//+(new Date().getTime() / 1000 - _time_debug));
+    //_dout('webpage hapi inited  '+ (new Date().getTime() / 1000 - _time_debug));
     _time_debug = new Date().getTime() / 1000;
     
     if(!success){    
@@ -617,14 +622,14 @@ function onHapiInit(success){
         window.hWin.HEURIST4.msg.sendCoverallToBack();
         return;
     }
-
-    window.hWin.HAPI4.SystemMgr.get_defs_all(false, null, function(success){
-        
+    
+    function __init_completed(success){
         if(success){
+    _dout('get defs  '+ (new Date().getTime() / 1000 - _time_debug));
     _time_debug = new Date().getTime() / 1000;
+
             //substitute values in header
             initHeaderElements();
-            
             onPageInit(success);
             
             if(window.hWin.HAPI4.sysinfo.host_logo && $('#host_info').length>0){
@@ -645,7 +650,10 @@ if(isset($customTemplateNotFound)){
 }?>
             
         }
-    });
+    }
+
+    window.hWin.HAPI4.SystemMgr.get_defs_all(false, null, __init_completed);
+    //__init_completed(true);
 }
 
 
@@ -763,7 +771,7 @@ function _openCMSeditor(event){
         isCMS_active = true;
         if(!editCMS_instance2) editCMS_instance2 = editCMS2();
         editCMS_instance2.startCMS({record_id:current_page_id, 
-                                    content:page_content[current_page_id], 
+                                    content:page_content[current_page_id],  //html or json
                                     container:'#main-content',
                                     close: function(){
                                         isCMS_active = false;
@@ -797,7 +805,7 @@ $(document).ready(function() {
             $('body').find('#main-pagetitle').hide();
         }
 
-console.log('webpage doc ready ');
+_dout('webpage doc ready ');
 */
 //+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
         _time_debug = new Date().getTime() / 1000;

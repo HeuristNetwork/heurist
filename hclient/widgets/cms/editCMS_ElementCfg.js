@@ -32,6 +32,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
     
     function _init(){
 
+        /* not used as dialog
         var buttons= [
             {text:window.hWin.HR('Cancel'), 
                 id:'btnCancel',
@@ -49,6 +50,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                         main_callback.call(this, config);
                         $dlg.dialog( "close" );    
         }}];
+        */
         
         
         element = _layout_container.find('#hl-'+element_cfg.key); //element in main-content

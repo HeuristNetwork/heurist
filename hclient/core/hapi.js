@@ -766,7 +766,7 @@ prof =Profile
                 _callserver('usr_info', request, callback);
             }
             /**
-            *  Get the desired database structure definition
+            *  Get the desired database structure definition in old format - used to get rectypes from REMOTE database ONLY
             * request
             *   terms, rectypes, detailtypes :  list of desired ids,  OR 'all'
             *   mode: applied for rectypes  0 only names (default), 1 only strucuture, 2 - both, 3 - all,   4 - for faceted search(with type names)

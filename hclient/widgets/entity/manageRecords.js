@@ -3211,6 +3211,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             
                             var saved_record = that._currentEditRecordset.getFirstRecord();
                             that._currentEditRecordset.setFld(saved_record, 'rec_Title', rec_Title);
+                            var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+                            if(DT_NAME>0 && fields && fields[DT_NAME]){
+                                that._currentEditRecordset.setFld(saved_record, DT_NAME, fields[DT_NAME]);    
+                            }
+                            
 
                             //that._afterSaveEventHandler( recID, fields);
                             //

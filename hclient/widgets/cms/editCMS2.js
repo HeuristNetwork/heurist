@@ -58,14 +58,11 @@ function editCMS2(){
     var is_edit_widget_open; //??
     var delay_onmove = 0;
     
-    var current_edit_mode = 'page'; //or website
+    var current_edit_mode = 'page', //or website
+        _editCMS_SiteMenu = null;   
     
-    var keep_expanded_nodes = []; //in_website_menu
-        
     var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
-    RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
-    DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
-    DT_CMS_MENU  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
+    
     //     DT_CMS_THEME = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_THEME'],
     DT_NAME       = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
     DT_CMS_HEADER = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'],
@@ -333,7 +330,7 @@ function editCMS2(){
                     onselect:function(event, data){
                         if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                             //reload entire site
-                            _refreshWebsite();
+                            if(_editCMS_SiteMenu) _editCMS_SiteMenu._refreshWebsite();
                         }
             }});
     }
@@ -342,11 +339,9 @@ function editCMS2(){
     //
     //
     function _addNewPage(){
-            _selectMenuRecord(home_page_record_id, function( page_id ){
-                //was_something_edited = true;
-                current_page_id = page_id;
-                _refreshMainMenu();
-            });
+        if(_editCMS_SiteMenu) {
+            _editCMS_SiteMenu.selectMenuRecord(home_page_record_id);
+        }
     }
     
     //
@@ -387,7 +382,7 @@ function editCMS2(){
             
         }
         
-        _highlightCurrentPage();
+        if(_editCMS_SiteMenu) _editCMS_SiteMenu.highlightCurrentPage();
     }
 
     //
@@ -601,13 +596,7 @@ function editCMS2(){
 
         }
         
-        _switchMode(current_edit_mode, false);
-        
-        _panel_treePage.fancytree('getTree').visit(function(node){
-                node.setSelected(false); //reset
-                node.setExpanded(true);
-            });            
-        _updateActionIcons(500);//it inits tinyMCE also
+        _switchMode(current_edit_mode);//, false);
         
     }
 
@@ -629,7 +618,13 @@ function editCMS2(){
         
             //_layout_container.find('div.editable').addClass('tinymce-body');
             //tinymce.init({inline:true});
-            if(init_tinymce!==false) _initTinyMCE();
+            if(init_tinymce!==false){
+                _panel_treePage.fancytree('getTree').visit(function(node){
+                    node.setSelected(false); //reset
+                    node.setExpanded(true);
+                });            
+                _updateActionIcons(500);//it inits tinyMCE also
+            } //_initTinyMCE();
             
         }else{
             _panel_treeWebSite.show();
@@ -1074,6 +1069,7 @@ function editCMS2(){
     // 3. Add element to _layout_container
     // 4. Update treeview
     //
+    // @todo - store templates as json text 
     function _layoutInsertElement(ele_id, widget_id, widget_name){
         
         //border: 1px dotted gray; border-radius: 4px;margin: 4px;
@@ -1290,7 +1286,7 @@ function editCMS2(){
 
     
     //
-    //
+    //  Save page configuration _layout_content) into RT_CMS_MENU record 
     //
     function _saveLayoutCfg(){
         
@@ -1314,8 +1310,14 @@ function editCMS2(){
             }
         }
         __cleanLayout(newval);
-         
-        newval = JSON.stringify(newval);
+        
+        // if page consist one group and one text - save only content of this text
+        // it allows edit content in standard record edit
+        if(newval[0].children && newval[0].children.length==1 && newval[0].children[0].type=='text'){
+            newval = newval[0].children[0].content;
+        }else{
+            newval = JSON.stringify(newval);    
+        }
         
         var request = {a: 'addreplace',
                         recIDs: options.record_id,
@@ -1368,485 +1370,10 @@ function editCMS2(){
         _switchMode('website');
         
         //load website menu treeview
-        var tree_element = _panel_treeWebSite;
-        
-        //get treedata from main menu
-        var treedata = $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('getMenuContent','treeview');
-
-        if(tree_element.fancytree('instance')){
-            
-            var tree = tree_element.fancytree('getTree');
-
-            //keep_expanded_nodes
-            keep_expanded_nodes = [];
-            tree.visit(function(node){
-                    if(node.isExpanded()){
-                        keep_expanded_nodes.push(node.key)
-                    }});
-            
-            tree.reload(treedata);
-            
-            tree.visit(function(node){
-                    if(keep_expanded_nodes.indexOf(node.key)>=0){
-                        node.setExpanded(true);
-                    }
-                    node.setSelected((node.key==current_page_id));
-            });
-
-        }else{
-
-            function __defineActionIcons(item)
-            {
-                var item_li = $(item.li), 
-                menu_id = item.key, 
-
-                is_top = (item.data.parent_id==home_page_record_id);
-
-                if($(item).find('.svs-contextmenu3').length==0){
-
-                    var parent_span = item_li.children('span.fancytree-node');
-
-                    //add,edit menu,edit page,remove
-                    var actionspan = $('<div class="svs-contextmenu3" style="padding: 0px 20px 0px 0px;" data-parentid="'
-                        +item.data.parent_id+'" data-menuid="'+menu_id+'">'
-                        +'<span class="ui-icon ui-icon-structure" title="Edit page"></span>'
-                        +'<span class="ui-icon ui-icon-plus" title="Add new page/menu item"></span>'
-                        +'<span class="ui-icon ui-icon-pencil" title="Edit menu record"></span>'
-                        //+'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
-                        +'<span class="ui-icon ui-icon-trash" '
-                        +'" title="Remove menu entry from website"></span>'
-                        +'</div>').appendTo(parent_span);
-
-                    $('<div class="svs-contextmenu4"/>').appendTo(parent_span); //progress icon
-
-                    actionspan.find('.ui-icon').click(function(event){
-                        var ele = $(event.target);
-                        window.hWin.HEURIST4.util.stopEvent(event);
-                        
-                        var parent_span = ele.parents('span.fancytree-node');
-                        
-                        function __in_progress(){
-                            parent_span.find('.svs-contextmenu4').show();
-                            parent_span.find('.svs-contextmenu3').hide();
-                        }
-
-                        //timeout need to activate current node    
-                        setTimeout(function(){                         
-                            var ele2 = ele.parents('.svs-contextmenu3');
-                            var menuid = ele2.attr('data-menuid');
-                            var parent_id = ele2.attr('data-parentid');
-
-                            if(ele.hasClass('ui-icon-plus')){ //add new menu to 
-
-                                _selectMenuRecord(menuid, function(page_id){
-                                    //was_something_edited = true;
-                                    current_page_id = page_id;
-                                    _refreshMainMenu();
-                                });
-
-                            }else if(ele.hasClass('ui-icon-pencil')){ //edit menu record
-
-                                __in_progress();
-                                //edit menu item
-                                window.hWin.HEURIST4.ui.openRecordEdit(menuid, null,
-                                    {selectOnSave:true,
-                                        onClose: function(){ 
-                                            parent_span.find('.svs-contextmenu4').hide();
-                                        },
-                                        onselect:function(event, data){
-                                            if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                                
-                                                var recordset = data.selection;
-                                                var page_id = recordset.getOrder()[0];
-                                                page_content[page_id] = null; //remove from cache
-                                                
-                                                if(page_id == current_page_id){
-                                                    _refreshCurrentPage(current_page_id);
-                                                }
-                                            }
-                                }});
-
-                            }else if(ele.hasClass('ui-icon-structure')){
-                                //open page structure 
-                                if( menuid == current_page_id ){
-                                    _switchMode('page');
-                                        
-                                }else{
-                                    current_edit_mode = 'page'
-                                    _refreshCurrentPage( menu_id );
-                                }
-
-                            }else 
-                                if(ele.hasClass('ui-icon-trash')){    //remove menu entry
-
-                                    var menu_title = ele.parents('.fancytree-node').find('.fancytree-title')[0].innerText; // Get menu title
-
-                                    function __doRemove(){
-                                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-                                        var isDelete = $dlg.find('#del_menu').is(':checked');
-                                        $dlg.dialog( "close" );
-
-                                        var to_del = [];
-                                        if(remove_menu_records){
-                                            item.visit(function(node){
-                                                to_del.push(node.key);
-                                                },true);
-                                        }
-
-                                        if(!isDelete){ // Check if the menu and related records are to be deleted, or just removed
-                                            to_del = null;
-                                        }
-                                        
-                                        _removeMenuEntry(parent_id, menuid, to_del, function(){
-                                            item.remove();    
-                                            
-                                            _refreshMainMenu();
-                                        });
-                                    }
-
-                                    var buttons = {};
-                                    buttons[window.hWin.HR('Remove menu entry and sub-menus (if any)')]  = function() {
-                                        remove_menu_records = true;
-                                        __doRemove();
-                                    };
-                                    /*        
-                                    buttons[window.hWin.HR('No. Remove menu only and retain records')]  = function() {
-                                    remove_menu_records = false;
-                                    __doRemove();
-                                    };
-                                    */
-                                    buttons[window.hWin.HR('Cancel')]  = function() {
-                                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-                                        $dlg.dialog( "close" );
-                                    };
-
-                                    window.hWin.HEURIST4.msg.showMsgDlg(
-                                        'This removes the menu entry from the website, as well as all sub-menus of this menu (if any).<br><br>'
-                                        + 'To avoid removing sub-menus, move them out of this menu before removing it.<br><br>'
-                                        + '<input type="checkbox" id="del_menu">'
-                                        + '<label for="del_menu" style="display: inline-flex;">If you want to delete the actual web pages from the database, not simply remove<br>'
-                                        + 'the menu entreis from this website, check this box. Note that this is not reversible.</label>', buttons,
-                                        'Remove "'+ menu_title +'" Menu');
-
-                                }
-
-                            },500);
-                    });
-
-                    //hide icons on mouse exit
-                    function _onmouseexit(event){
-                        var node;
-                        if($(event.target).is('li')){
-                            node = $(event.target).find('.fancytree-node');
-                        }else if($(event.target).hasClass('fancytree-node')){
-                            node =  $(event.target);
-                        }else{
-                            //hide icon for parent 
-                            node = $(event.target).parents('.fancytree-node');
-                            if(node) node = $(node[0]);
-                        }
-                        var ele = node.find('.svs-contextmenu3');
-                        ele.hide();
-                    }               
-
-                    $(parent_span).hover(
-                        function(event){
-                            var node;
-                            if($(event.target).hasClass('fancytree-node')){
-                                node =  $(event.target);
-                            }else{
-                                node = $(event.target).parents('.fancytree-node');
-                            }
-                            if(! ($(node).hasClass('fancytree-loading') || $(node).find('.svs-contextmenu4').is(':visible')) ){
-                                var ele = $(node).find('.svs-contextmenu3');
-                                ele.css({'display':'inline-block'});//.css('visibility','visible');
-                            }
-                        }
-                    );               
-                    $(parent_span).mouseleave(
-                        _onmouseexit
-                    );
-                }
-            } //end __defineActionIcons
-
-            var fancytree_options =
-            {
-                checkbox: false,
-                //titlesTabbable: false,     // Add all node titles to TAB chain
-                source: treedata,
-                quicksearch: false, //true,
-                selectMode: 1, //1:single, 2:multi, 3:multi-hier (default: 2)
-                renderNode: function(event, data) {
-                    
-                    if(true || data.has_access){
-                        var item = data.node;
-                        __defineActionIcons( item );
-                    }
-                },
-                extensions:["edit", "dnd"],
-                dnd:{
-                    preventVoidMoves: true,
-                    preventRecursiveMoves: true,
-                    autoExpandMS: 400,
-                    dragStart: function(node, data) {
-                        return data.has_access;
-                    },
-                    dragEnter: function(node, data) {
-                        //data.otherNode - dragging node
-                        //node - target node
-                        return true; //node.folder ?['over'] :["before", "after"];
-                    },
-                    dragDrop: function(node, data) {
-                        //data.otherNode - dragging node
-                        //node - target node
-                        var source_parent = data.otherNode.parent.key;//data.otherNode.data.parent_id;
-                        if(!(source_parent>0))
-                            source_parent = home_page_record_id;
-
-                        data.otherNode.moveTo(node, data.hitMode);
-
-                        var target_parent = data.otherNode.parent.key;
-                        if(!(target_parent>0))
-                            target_parent = home_page_record_id;
-                        data.otherNode.data.parent_id = target_parent;
-
-                        var request = {actions:[]};
-
-                        if(source_parent!=target_parent){
-                            //remove from source
-                            request.actions.push(
-                                {a: 'delete',
-                                    recIDs: source_parent,
-                                    dtyID: source_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
-                                    sVal:data.otherNode.key});
-
-                        }
-                        //return;
-                        //change order in target
-                        request.actions.push(
-                            {a: 'delete',
-                                recIDs: target_parent,
-                                dtyID: target_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU});
-
-                        for (var i=0; i<data.otherNode.parent.children.length; i++){
-
-                            var menu_node = data.otherNode.parent.children[i];
-                            request.actions.push(
-                                {a: 'add',
-                                    recIDs: target_parent,
-                                    dtyID: target_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
-                                    val:menu_node.key}                                                   
-                            );
-                        }                    
-
-                        //window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
-                        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-                            //window.hWin.HEURIST4.msg.sendCoverallToBack();
-                            if(response.status == hWin.ResponseStatus.OK){
-                                was_something_edited = true;
-                                window.hWin.HEURIST4.msg.showMsgFlash('saved');
-                                //reload main menu
-                                _refreshMainMenu();
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgErr(response);
-                            }
-                        });                                        
-
-                    }
-                },
-                activate: function(event, data) { 
-                    //loads another page
-                    if(data.node.key>0){
-                          _refreshCurrentPage(data.node.key);
-                    }
-                },
-                edit:{
-                    triggerStart: ["clickActive", "dblclick", "f2", "mac+enter", "shift+click"],
-                    close: function(event, data){
-                        // Editor was removed
-                        if( data.save ) {
-                            // Since we started an async request, mark the node as preliminary
-                            $(data.node.span).addClass("pending");
-                        }
-                    },                                    
-                    save:function(event, data){
-                        if(''!=data.input.val()){
-                            var new_name = data.input.val();
-                            _renameEntry(data.node.key, new_name, function(){
-                                $(data.node.span).removeClass("pending");
-                                data.node.setTitle( new_name ); 
-                                __defineActionIcons( data.node );   
-                            });
-                        }else{
-                            $(data.node.span).removeClass("pending");    
-                        }
-                    }
-                }
-            };
-
-            tree_element.fancytree(fancytree_options).addClass('tree-cms');
-            
-            tree = tree_element.fancytree('getTree');
-            tree.visit(function(node){
-                node.setExpanded(true);
-            });            
-            
-        }        
-        
-        setTimeout(_highlightCurrentPage, 1000);
-    }  
-    
-    function _highlightCurrentPage(){
-        
-         if( _panel_treeWebSite.fancytree('instance')){
-                var tree = _panel_treeWebSite.fancytree('getTree');
-                
-                tree.visit(function(node){
-                    if(node.key==current_page_id){
-                        $(node.li).find('.fancytree-title').css({'text-decoration':'underline'});    
-                    }else{
-                        $(node.li).find('.fancytree-title').css({'text-decoration':'none'});
-                    }
-                });            
-         }
-        
-
-            /*
-            var node = tree.getNodeByKey(''+current_page_id);
-            if(node){
-console.log('!!! '+current_page_id);                
-               node.setSelected(true); 
-               $(node.li).css({'color':'red'});
-            }
-            */        
-    }
-
-    //
-    // Select or create new menu item for website
-    //
-    // Opens record selector popup and adds selected menu given mapdoc or other menu
-    //
-    function _selectMenuRecord(parent_id, callback){
-
-        var popup_options = {
-            select_mode: 'select_single', //select_multi
-            select_return_mode: 'recordset',
-            edit_mode: 'popup',
-            selectOnSave: true, //it means that select popup will be closed after add/edit is completed
-            title: window.hWin.HR('Select or create a website menu record'),
-            rectype_set: RT_CMS_MENU,
-            parententity: 0,
-            default_palette_class: 'ui-heurist-publish',
-
-            onselect:function(event, data){
-                if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                    var recordset = data.selection;
-                    var record = recordset.getFirstRecord();
-                    var menu_id = recordset.fld(record,'rec_ID');
-
-                    _addMenuEntry(parent_id, menu_id, callback)
-                }
-            }
-        };//popup_options
-
-
-        var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_records', 
-            {width: null,  //null triggers default width within particular widget
-                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
-
-        popup_options.width = Math.max(usrPreferences.width,710);
-        popup_options.height = usrPreferences.height;
-
-        window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
-    }
-
-    //
-    // Add new menu(page) menu_id to  parent_id
-    //
-    function _addMenuEntry(parent_id, menu_id, callback){
-
-        var request = {a: 'add',
-            recIDs: parent_id,
-            dtyID:  (parent_id==home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
-            val:    menu_id};
-
-        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-            if(response.status == hWin.ResponseStatus.OK){
-                //refresh treeview
-                if($.isFunction(callback)) callback.call( this, menu_id );
-            }else{
-                hWin.HEURIST4.msg.showMsgErr(response);
-            }
-        });                                        
-
-    }
-
-    //
-    //
-    //
-    function _removeMenuEntry(parent_id, menu_id, records_to_del, callback){
-
-        //delete detail from parent menu
-        var request = {a: 'delete',
-            recIDs: parent_id,
-            dtyID:  (parent_id==home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
-            sVal:   menu_id};
-
-        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-            if(response.status == hWin.ResponseStatus.OK){
-                if(records_to_del && records_to_del.length>0){
-
-                    //delete children 
-                    window.hWin.HAPI4.RecordMgr.remove({ids:records_to_del},
-                        function(response){
-                            if(response.status == hWin.ResponseStatus.OK){
-                                //refresh treeview
-                                if($.isFunction(callback)) callback.call();
-                            }else{
-                                hWin.HEURIST4.msg.showMsgErr(response);
-                            }
-                        }      
-                    );
-
-                }else{
-                    //refresh treeview
-                    if($.isFunction(callback)) callback.call();
-                }
-            }else{                                                     
-                hWin.HEURIST4.msg.showMsgErr(response);
-            }
-        });                                        
-
-    }
-
-    //
-    // refresh main menu and reload current page
-    //
-    function _refreshMainMenu(){
-        
-       initMainMenu( _refreshCurrentPage );
-    }
-
-    
-    //
-    // reload current (or given page)
-    //
-    function _refreshCurrentPage(page_id){
-        
-        if(!(page_id>0)) page_id = current_page_id;
-        
-        loadPageContent(page_id); //call global function from websiteScriptAndStyles
+        _editCMS_SiteMenu = editCMS_SiteMenu( _panel_treeWebSite, that );
         
     }
 
-    //
-    // reload entire website 
-    //
-    function _refreshWebsite(){
-        
-    }
-      
-        
     //public members
     var that = {
 
@@ -1868,6 +1395,10 @@ console.log('!!! '+current_page_id);
         
         closeCMS: function(){
             _closeCMS();            
+        },
+        
+        switchMode: function(mode){
+            _switchMode(mode);            
         }
     }
     

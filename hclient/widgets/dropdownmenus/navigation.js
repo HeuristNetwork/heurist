@@ -306,6 +306,7 @@ $.widget( "heurist.navigation", {
         
         //get either treedata or html for jquery menu
         var menu_content = this.getMenuContent(null, 0, this.options.menu_recIDs, 0);     
+        var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
         
         if(this.ids_recurred.length>0){
             var s = [];
@@ -313,7 +314,8 @@ $.widget( "heurist.navigation", {
                 s.push(this.ids_recurred[i]+' '
                     +this.menuData.fld(this.menuData.getById(this.ids_recurred[i]), DT_NAME));
             }
-            window.hWin.HEURIST4.msg.showMsgDlg('Some menu items are recursive references to a menu containing themselves. Such a structure is not permissible for obvious reasons.<p>'
+            window.hWin.HEURIST4.msg.showMsgDlg('Some menu items are recursive references to a menu containing themselves. '
+            +'Such a structure is not permissible for obvious reasons.<p>'
             +(s.join('<br>'))
             +'</p>Ask website author to fix this issue');
             /*+'<p>How to fix:<ul><li>Open in record editor</li>'
