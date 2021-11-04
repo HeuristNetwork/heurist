@@ -1774,7 +1774,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             //without sections and separators
             $('#tblFieldMapping > tbody').html(
                 '<tr height="40" class="helper" style="display:none"><td class="subh" colspan="5" style="padding:0 20px">'
-                    +'<span style="background:rgba(151, 244, 128, 0.83)">MATCHING</span> Choose only the fields you need to match &nbsp;&nbsp;'
+                    +'<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">MATCHING</span> Choose only the fields you need to match &nbsp;&nbsp;'
                     +'<span style="color:green;">Note: ONLY fields suitable for matching are shown in this step.</span>'
                 +'</td></tr>'
                 +sID_field+sIndexes+sAllFields
@@ -2041,16 +2041,39 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                }
                
                if(!window.hWin.HEURIST4.util.isnull(selected_value)){
-                        var cbox = $("#cbsa_dt_"+field_idx);
-                        if(cbox.attr('data-type')!='processed'){                   
-                            $("#cbsa_dt_"+field_idx).prop('checked', true);
-                            $(item).parent().show(); //show selector
+                    $(item).val(dt_id);
+                    if(sel.hSelect("instance")!=undefined){
+                        sel.hSelect("refresh"); 
+                    }
+               }else{
+
+                    // Compare fieldnames with column names within CSV data
+                    var options = $item.find('option');
+                    var col_name = imp_session['columns'][idx];
+
+                    $.each(options, function(i, option){
+
+                        var rec_column_parts = option.text.split(' [');
+                        var rec_column = '';
+
+                        if(rec_column_parts.length > 2){
+                            for(var j = 0; j < rec_column_parts.length-1; j++){
+                                rec_column += rec_column_parts[j];
+                            }
+                        }else{
+                            rec_column = rec_column_parts[0];
                         }
-                        $(item).val(dt_id);
-                        if(sel.hSelect("instance")!=undefined){
-                           sel.hSelect("refresh"); 
+
+                        if(rec_column == col_name || rec_column.toLowerCase() == col_name.toLowerCase()){
+                            $item.val(option.value);
+
+                            if(sel.hSelect("instance") != undefined){
+                                sel.hSelect("refresh");
+                            }
+                            return false;
                         }
-               }
+                    });
+			   }
                
                $(sel).change(function(){
                     if(currentStep==5){
@@ -4414,7 +4437,26 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 container.find('.ent_content_full').css({right:1,width:'auto'});
             }
         }
-        
+
+        if(page == 5 && $('#sa_update').prop('checked')){
+            $('#divheader').css('background','rgba(200, 100, 200, 0.83)');
+
+            $('tr.helper').show().children().html(
+                '<span style="background:rgba(200, 100, 200, 0.83);display:inline-block;padding:3px;">UPDATE</span> Allocate <span style="color:purple;">purple fields</span> to '
+                +'<span style="color:purple;">record pointer fields</span> which connect to entities created in previous steps'
+            );
+        }else{
+            $('#divheader').css('background','rgba(151, 244, 128, 0.83)');
+
+            if(page != 3){
+                $('tr.helper').hide();
+            }else{
+                $('tr.helper').show().children().html(
+                    '<span style="background:rgba(151, 244, 128, 0.83);display:inline-block;padding:3px;">MATCHING</span> Choose only the fields you need to match &nbsp;&nbsp;'
+                    +'<span style="color:green;">Note: ONLY fields suitable for matching are shown in this step.</span>'
+                );
+            }
+        }
         
         $("div[id^='divStep']").hide();
         $("#divStep"+(page>2?3:page)).show();

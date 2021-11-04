@@ -1150,6 +1150,7 @@ if($active_all || in_array('date_values', $active)) {
 
         $wassuggested = 0;
         $wascorrected = 0;
+        $manualfix = false;
         $ambigious = 0;
         $bibs = array();
         $ids  = array();
@@ -1228,18 +1229,20 @@ if($active_all || in_array('date_values', $active)) {
 
             if($autofix || !$was_fixed){
                 if($row['new_value']!=null && $row['new_value']!=''){
-                        if(@$row['is_ambig']){
-                            $ambigious++;    
-                            //$ids[$row['dtl_RecID']] = 1;
-                        }else{
-                            $wascorrected++;    
-                        }
+                    if(@$row['is_ambig']){
+                        $ambigious++;    
+                        //$ids[$row['dtl_RecID']] = 1;
+                    }else{
+                        $wascorrected++;    
+                    }
+                }else{
+                    $manualfix = true;
                 }
                 $ids[$row['dtl_RecID']] = 1;  //all record ids - to show as search result
                 
                 //autocorrection }else{
                 array_push($bibs, $row);
-                array_push($dtl_ids, $row['dtl_ID']); //not used
+                array_push($dtl_ids, $row['dtl_RecID']); // used for url length - to fix dates
             }
             
             $fix_as_suggested = $fix_as_suggested || 
@@ -1259,7 +1262,7 @@ if($active_all || in_array('date_values', $active)) {
                 <h3>Records with incorrect Date fields</h3>
                 <?php
                 if($wascorrected>0){
-                    print '<div style="margin-bottom:10px"><b>Auto-corrected dates</b> '
+                    print '<div style="margin:10px 0"><b>Auto-corrected dates</b> '
                             ."The following dates have been corrected as shown ($wascorrected)</div><table>";
                     
                     foreach ($bibs as $row) 
@@ -1285,7 +1288,7 @@ if($active_all || in_array('date_values', $active)) {
                 
                 
                 if($wassuggested>0){
-                    print '<div style="margin-bottom:10px"><b>Decades and year ranges</b> '
+                    print '<div style="margin:10px 0"><b>Decades and year ranges</b> '
                             ."we suggest using a date ranges for dates below</div><table>";
                     
                     foreach ($bibs as $row) 
@@ -1306,7 +1309,32 @@ if($active_all || in_array('date_values', $active)) {
                     <?php
                     }
                     print '</table>';                    
-                }                
+                }
+
+                if($manualfix){
+                    print '<div style="margin:10px 0"><b>Invalid dates</b> that needs to be fixed manually by a user</div><table>';
+
+                    foreach ($bibs as $row) {
+                        if(is_bool($row['is_ambig']) && $row['is_ambig']===true && ($row['new_value'] == null || $row['new_value'] == '')){
+                            ?>
+                            <tr>
+                                <td></td>
+                                <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                                <td style="white-space: nowrap;">
+                                    <a target="_new" href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                        <?= $row['dtl_RecID'] ?>
+                                        <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                    </a>
+                                </td>
+                                <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
+                                <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
+                            </tr>
+                            <?php
+                        }
+                    }
+
+                    print '</table>';
+                }
 
                 if($ambigious>0){
                     print "<div style='margin:10px 0'><b>$ambigious Suggestions</b> for date field corrections (gray color in the list)</div>";
@@ -1320,8 +1348,18 @@ if($active_all || in_array('date_values', $active)) {
                 </span>
 
                 <?php 
-                    if($fix_as_suggested){
+                    $fixdate_url = strlen('listDatabaseErrors.php?db=&fixdates=1&date_format=yyyy-mm-dd&recids=' . HEURIST_DBNAME . (count($dtl_ids) > 0) ? implode(',', $dtl_ids) : '');
+                    if(strlen($fixdate_url) > 2000){ // roughly a upper limit for the date fix url
                 ?>
+                    <div style="color: red;margin: 10px 0;">
+                        Note: You cannot correct more than a few fundred dates at a time due to URL length limitations.<br>
+                        If you have more dates to correct we recommend exporting as a CSV, reformatting in a spreadsheet and reimporting as replacements.
+                    </div>
+                <?php }
+
+                if($fix_as_suggested){
+                ?>
+
                 <div>To fix faulty date values as suggested, mark desired records and please click here:
                     <button
                         onclick="correctDates();">
@@ -1348,14 +1386,11 @@ if($active_all || in_array('date_values', $active)) {
             </tr>
             <?php
             foreach ($bibs as $row) 
-            if(is_bool($row['is_ambig']) && ($row['new_value']==null || $row['is_ambig']===true))
+            if(is_bool($row['is_ambig']) && $row['is_ambig']===true && $row['new_value'])
             {
                 ?>
-                <tr<?php echo (($row['new_value'])?' style="color:gray"':''); //if null - no auto fix   ?>>
-                    <td><?php if(true || $row['new_value']) 
-                            print '<input type=checkbox name="recCB5" value='.$row['dtl_RecID'].'>';
-                        ?>
-                    </td>
+                <tr style="color:gray">
+                    <td><?php print '<input type=checkbox name="recCB5" value='.$row['dtl_RecID'].'>'; ?></td>
                     <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" 
                                     src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                     <td style="white-space: nowrap;"><a target=_new
@@ -1365,10 +1400,7 @@ if($active_all || in_array('date_values', $active)) {
                         </a></td>
                     <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
                     <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
-                    <td><?php 
-                        echo ($row['new_value']!=null && $row['new_value']!=''
-                            ?('=>&nbsp;&nbsp;'.$row['new_value'])
-                            :'&lt;No auto-fix available, will be deleted if checked&gt;'); ?></td>
+                    <td class="new_date"><?php print '=>&nbsp;&nbsp;'.$row['new_value']; ?></td>
                 </tr>
                 <?php
             }

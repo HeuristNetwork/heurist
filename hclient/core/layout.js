@@ -755,6 +755,16 @@ console.log('Cardinal layout widget does not have proper options');
                             }
                         }}
                     );
+					
+                    if(pos == 'east'){ 
+                        // Prevent east pane's tabs from navigating with arrow keys
+                        $tabs.find('.ui-tabs-anchor').keydown(function(e){
+                            e.stopPropagation();
+                            e.preventDefault();
+
+							return false;
+                        });
+                    }
                 
                 }else{
                     $pane_content = $container.find('.ui-layout-'+pos);

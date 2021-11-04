@@ -183,8 +183,16 @@ $.widget( "heurist.searchBuilderSort", {
             key = '-'+key;
         }
         return key;
+    },
+
+    // Get label of selected value
+    getLabel: function(){
+
+        var label = this.select_fields.hSelect('widget').text();
+        if(label == 'select...' || label == ''){
+            return '';
+        }
+
+        return label;
     }
-
-
-
 });

@@ -530,7 +530,7 @@
                     sendEmail(HEURIST_MAIL_TO_ADMIN, 
                             'DATABASE ERROR :'.$system->dbname().' Cannot save details.',
                             ($syserror?'. System message:'.$syserror:'')."\n Record#: $recID \n"
-                            .print_r($values,true), null);
+                            .print_r($values,true), null, true);
                     
                     return $system->addError(HEURIST_DB_ERROR, 'Cannot save details.', $syserror);
                 }
