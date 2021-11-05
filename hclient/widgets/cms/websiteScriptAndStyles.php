@@ -202,13 +202,21 @@ if($edit_Available){
 function _dout(msg){
     //console.log(msg);
 }
+
+// global 
+var DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS;
 //
 // init page for publication version  
 // for cms version see websiteRecord.js
 //
 function onPageInit(success)
 {
-    
+
+DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
+DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
+DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'];
+
 _dout('webpage onPageInit  '+(new Date().getTime() / 1000 - _time_debug));
 _dout('webpage onPageInit  '+init_page_record_id);
 
@@ -338,14 +346,17 @@ if($site_css!=null){
         
         if(_IS_NEW_CMS_EDITOR){ 
         
-            function __loadPageContent(res){
+            function __loadPageContent(){
 
-                if(!page_content[pageid]) page_content[pageid] = res;
-                
                 if(isCMS_active){
-                    editCMS_instance2.startCMS({record_id:current_page_id, content:page_content[current_page_id], container:'#main-content'}); 
+                    editCMS_instance2.startCMS({record_id:current_page_id, container:'#main-content',
+                                    close: function(){
+                                        isCMS_active = false;
+                                        //btn.show();
+                                    }}); //see editCMS2.js    
+
                 }else{
-                    layoutMgr.layoutInit( res, page_target, supp_options );    
+                    layoutMgr.layoutInit( page_cache[pageid][DT_EXTENDED_DESCRIPTION], '#main-content', supp_options );    
                 }
                 
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -357,16 +368,42 @@ if($site_css!=null){
                 afterPageLoad( document, pageid ); //execute custom script and custom css
             }        
             
-            if(page_content[pageid]){
-                __loadPageContent( page_content[pageid] );
+            if(page_cache[pageid]){
+                __loadPageContent();
             }else{
                 //var request = {recid:pageid, field:, db:window.hWin.HAPI4.database};
                 //window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, __loadPageContent);
                 
-                var surl = window.hWin.HAPI4.baseURL+'?db='
-                    +window.hWin.HAPI4.database+'&field='+window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']+'&recid='+pageid;
-                $.get( surl, __loadPageContent);            
-                    
+                var server_request = {
+                    q: 'ids:'+pageid,
+                    restapi: 1,
+                    columns: 
+                    ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS],
+                    zip: 1,
+                    format:'json'};
+                
+                //perform search see record_output.php       
+                window.hWin.HAPI4.RecordMgr.search_new(server_request,
+                    function(response){
+console.log(response);                       
+                       if(window.hWin.HEURIST4.util.isJSON(response)) {
+                           var res = response['records'][0]['details'];
+                           var keys = Object.keys(res);
+                           for(var idx in keys){
+                               var key = keys[idx];
+                               res[key] = res[key][ Object.keys(res[key])[0] ];
+                           }
+                           //res[DT_NAME] = res[DT_NAME]
+                           //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS]
+console.log(res);                           
+                           page_cache[pageid] = res;
+                           __loadPageContent();
+                           
+                       }else {
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                       }
+                    });
+                
             }
             return;
         }
@@ -395,9 +432,7 @@ if($site_css!=null){
 }
 ?>
 <script>
-var page_content = {};
-var page_scripts = {}; //pageid:functionname   cache to avoid call server every time on page load 
-var page_styles = {};  //pageid:style elements 
+var page_cache = {};
 var previous_page_id = -1;
 
 var datatable_custom_render = null;
@@ -440,84 +475,61 @@ function afterPageLoad(document, pageid){
     
     
     //remove old style and custom style per page ===========================
-    if(previous_page_id>0 && page_styles[previous_page_id]){
-        //remove previous
-        var style = page_styles[previous_page_id];
-        //style.innerHTML = ''; 
-        document.getElementsByTagName('head')[0].removeChild(style);
-        //page_styles[previous_page_id] = null;
-    }
-    
-    var DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'];
-    if(DT_CMS_CSS>0 && page_styles[pageid] !== false)
-    {
-        if(!page_styles[pageid]){
-            //load css
-            var surl = window.hWin.HAPI4.baseURL+'?db='
-                +window.hWin.HAPI4.database+'&field='+DT_CMS_CSS+'&recid='+pageid;
-            
-            $.get( surl, function( data ) {
-                if(data==''){
-                    page_styles[pageid] = false;    
-                }else{
-                    var style = document.createElement('style');
-                    style.type = 'text/css'; 
-                    style.innerHTML = data;
-                    page_styles[pageid] = style;    
-                    document.getElementsByTagName('head')[0].appendChild(style);
-                }
-            });
-            
+    if(DT_CMS_CSS>0){
+        if(previous_page_id>0 && page_cache[previous_page_id] && page_cache[previous_page_id][DT_CMS_CSS]){
+            //remove previous
+            var style = page_cache[previous_page_id][DT_CMS_CSS];
+            //style.innerHTML = ''; 
+            document.getElementsByTagName('head')[0].removeChild(style);
         }
-        
-        if(!window.hWin.HEURIST4.util.isnull(page_styles[pageid]) && page_styles[pageid] !== false){
-            //add style to page        
-            document.getElementsByTagName('head')[0].appendChild(page_styles[pageid]);            
+    
+        if(page_cache[pageid][DT_CMS_CSS])
+        {
+            
+            if(typeof page_cache[pageid][DT_CMS_CSS]==='string'){
+                
+                var style = document.createElement('style');
+                style.type = 'text/css'; 
+                style.innerHTML = page_cache[pageid][DT_CMS_CSS];
+                page_cache[pageid][DT_CMS_CSS] = style;    
+                document.getElementsByTagName('head')[0].appendChild(style);
+                
+            }else{
+                //add style to page        
+                document.getElementsByTagName('head')[0].appendChild(page_cache[pageid][DT_CMS_CSS]);            
+            }
         }
     }
     previous_page_id = pageid;
     
     
     //execute custom javascript per loaded page =========================
-    var DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
-
-    if(DT_CMS_SCRIPT>0 && page_scripts[pageid] !== false){
+    if(DT_CMS_SCRIPT>0){
+        var func_name = 'afterPageLoad'+pageid;
+    
+        var script = page_cache[pageid][DT_CMS_SCRIPT];
+        if(script && script !== false){ //false means it is already inited
         
-        if(!page_scripts[pageid]){
+            //add script to header
             
-            var surl = window.hWin.HAPI4.baseURL+'?db='
-                +window.hWin.HAPI4.database+'&field='+DT_CMS_SCRIPT+'&recid='+pageid;
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.innerHTML = 'function '+func_name 
+            +'(document, pageid){\n'
+            //+' console.log("run script for '+pageid+'");\n'
+            +'try{\n' + data + '\n}catch(e){}}';
+            //s.src = "http://somedomain.com/somescript";
+            $("head").append(script);
             
-            $.get( surl, function( data ) {
-                if(data==''){
-                    page_scripts[pageid] = false;    
-                }else{
-                    var func_name = 'afterPageLoad'+pageid;
-                    var script = document.createElement('script');
-                    script.type = 'text/javascript';
-                    script.innerHTML = 'function '+func_name 
-                    +'(document, pageid){\n'
-                    //+' console.log("run script for '+pageid+'");\n'
-                    +'try{\n' + data + '\n}catch(e){}}';
-                    //s.src = "http://somedomain.com/somescript";
-                    $("head").append(script);
-                    page_scripts[pageid] = func_name;    
-                    window[func_name]( document, pageid );
-                }
-            });            
-                
-            page_scripts[pageid] = false;
-        }
-
-        //script may have event listener that is triggered on page exit
-        //disable it
-        $( "#main-content" ).off( "onexitpage");
-
-        if(page_scripts[pageid] !== false){
-            //execute custom script
-            window[page_scripts[pageid]]( document, pageid );    
         }
         
+        if($.isFunction(func_name)){
+            //script may have event listener that is triggered on page exit
+            //disable it
+            $( "#main-content" ).off( "onexitpage");
+            //execute the script
+            window[func_name]( document, pageid );
+        }
     }
 
     if(!is_embed){    
@@ -625,6 +637,7 @@ function onHapiInit(success){
     
     function __init_completed(success){
         if(success){
+            
     _dout('get defs  '+ (new Date().getTime() / 1000 - _time_debug));
     _time_debug = new Date().getTime() / 1000;
 
@@ -642,6 +655,8 @@ function onHapiInit(success){
                             +'" height="35" align="center"></a></div>')
                 .appendTo( $('#host_info') );
             }
+            setTimeout(function(){window.hWin.HAPI4.EntityMgr.refreshEntityData('rst,trm');},1000);
+    
             
 <?php             
 if(isset($customTemplateNotFound)){
@@ -652,8 +667,12 @@ if(isset($customTemplateNotFound)){
         }
     }
 
-    window.hWin.HAPI4.SystemMgr.get_defs_all(false, null, __init_completed);
+    window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,dty,rtg,dtg,vcg', __init_completed);
+
     //__init_completed(true);
+    //load definitions independently
+    //window.hWin.HAPI4.EntityMgr.refreshEntityData('all'); //rty,dty,rtg,dtg,vcg
+    //window.hWin.HAPI4.SystemMgr.get_defs_all(false, null, __init_completed);
 }
 
 
@@ -770,8 +789,8 @@ function _openCMSeditor(event){
     }else{
         isCMS_active = true;
         if(!editCMS_instance2) editCMS_instance2 = editCMS2();
-        editCMS_instance2.startCMS({record_id:current_page_id, 
-                                    content:page_content[current_page_id],  //html or json
+        editCMS_instance2.startCMS({record_id: current_page_id, 
+                                    //content: page_cache[current_page_id],  //html or json
                                     container:'#main-content',
                                     close: function(){
                                         isCMS_active = false;
@@ -877,10 +896,6 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
             
             $fields = array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET, //DT_CMS_CSS,
             DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU );
-        
-            //$TERM_NO = $Db.getLocalID('trm','2-531'),
-            //$TERM_NO_old = $Db.getLocalID('trm','99-5447');
-        
         
             foreach($menuitems as $page_id){
                 

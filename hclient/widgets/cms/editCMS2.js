@@ -32,8 +32,11 @@ widget:
 */
 
 var editCMS_instance2 = null;
+// global variables
 // layoutMgr - global variable defined in hLayoutMgr
+// page_cache
 // home_page_record_id
+// current_page_id
 
 //
 // options: record_id, content, container
@@ -187,7 +190,7 @@ function editCMS2(){
                     
                     
                     east_panel.find('.btn-website-edit').button({icon:'ui-icon-pencil'}).click(_editHomePageRecord);
-                    east_panel.find('.btn-website-addpage').button({icon:'ui-icon-plus'}).click(_addNewPage);
+                    east_panel.find('.btn-website-addpage').button({icon:'ui-icon-plus'}).click(_addNewRootMenu);
                     
                     east_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).click(_showWebSiteMenu);
                     
@@ -207,86 +210,6 @@ function editCMS2(){
         body.layout().show('east', true );
         
         //load content for current page from DT_EXTENDED_DESCRIPTION
-    /*    
-        _layout_content =  [{name:'Page', type:'group',
-            children:[
-                {name:'Text', type:'text', css:{}, content:"<p>Hello World!</p>"}, 
-                {name:'Text2', type:'text', css:{}, content:"<p>Goodbye Cruel World!</p>"}, 
-            ] 
-        }];
-
-
-        _layout_content =  [{name:'Cardinal', type:'cardinal',
-            children:[
-                {name:'Center', type:'center',
-                    children:[ {name:'Map', type:'text', css:{}, content:"<p>Center!</p>"} ]}, 
-                {name:'North', type:'north', size:80,
-                    children:[  {name:'Header', type:'text', css:{}, content:"<p>Header!</p>"} ]}, 
-                {name:'West', type:'west', 
-                    children:[ 
-                        {name:'Search', type:'text', css:{}, content:"<p>This is place for search widget!</p>"}
-                    ]},
-                {name:'East', type:'east', 
-                    children:[ 
-                        {name:'TabControl', type:'tabs',
-                               children:[ 
-                                    {name:'Tab1', type:'text', css:{}, content:"<p>Content for tab #1</p>"},
-                                    {name:'Accordion', type:'accordion', css:{}, 
-                                        children:[
-                                            {name:'Tab2.Acc1', type:'text', css:{}, content:"<p>Accordion panel 1</p>"}, 
-                                            {name:'Tab2.Acc2', type:'text', css:{}, content:"<p>Accordion panel 2</p>"}, 
-                                            {name:'Tab2.Acc3', type:'text', css:{}, content:"<p>Accordion panel 3</p>"}, 
-                                            {name:'Tab2.Acc4', type:'text', css:{}, content:"<p>Accordion panel 4</p>"}, 
-                                        ] 
-                                    },
-                                    {name:'Tab3', type:'group',
-                                        children:[
-                                            {name:'Tab3.Text1', type:'text', css:{}, content:"<p>Hello World on Tab3!</p>"}, 
-                                            {name:'Tab3.Text2', type:'text', css:{}, content:"<p>Goodbye Cruel World on Tab3!</p>"}, 
-                                        ] 
-                                    }
-                               ]}
-                    ]}
-            ] 
-        }];
-
-        _layout_content =  [{name:'Cardinal', type:'cardinal',
-            children:[
-                {name:'Center', type:'center',
-                    children:[ {appid:'heurist_resultList', name:'Results', css:{}, options:{}} ]}, 
-                {name:'North', type:'north', size:80,
-                    children:[ {appid:'heurist_Search', name:'Filter', css:{}, options:{}} ]}, 
-                {name:'West', type:'west', 
-                    children:[ 
-                        {name:'Search', type:'text', css:{}, content:"<p>This is place for search widget!</p>"}
-                    ]},
-                {name:'East', type:'east', 
-                    children:[ 
-                        {name:'TabControl', type:'tabs',
-                               children:[ 
-                                    {name:'Tab1', type:'text', css:{}, content:"<p>Content for tab #1</p>"},
-        
-        
-                                    {name:'Accordion', type:'accordion', css:{}, 
-                                        children:[
-                                            {name:'Tab2.Acc1', type:'text', css:{}, content:"<p>Accordion panel 1</p>"}, 
-                                            {name:'Tab2.Acc2', type:'text', css:{}, content:"<p>Accordion panel 2</p>"}, 
-                                            {name:'Tab2.Acc3', type:'text', css:{}, content:"<p>Accordion panel 3</p>"}, 
-                                            {name:'Tab2.Acc4', type:'text', css:{}, content:"<p>Accordion panel 4</p>"}, 
-                                        ] 
-                                    },
-                                    {name:'Tab3', type:'group',
-                                        children:[
-                                            {name:'Tab3.Text1', type:'text', css:{}, content:"<p>Hello World on Tab3!</p>"}, 
-                                            {name:'Tab3.Text2', type:'text', css:{}, content:"<p>Goodbye Cruel World on Tab3!</p>"}, 
-                                        ] 
-                                    }
-                               ]}
-                    ]}
-            ] 
-        }];
-    */
-        
         if(!options){
             options.record_id = 0;
             options.container = '#main-content';
@@ -297,11 +220,14 @@ function editCMS2(){
         
         if(options.content)
         {
-           _layout_content = options.content;
+           _layout_content = options.content[DT_EXTENDED_DESCRIPTION];
            _initPage();
             
         }else if (options.record_id>0 ){
-            //load by page_record_id
+            
+            _layout_content = page_cache[options.record_id][DT_EXTENDED_DESCRIPTION];
+            
+            /*load by page_record_id
                 var surl = window.hWin.HAPI4.baseURL+'?db='
                     +window.hWin.HAPI4.database+'&field='+DT_EXTENDED_DESCRIPTION+'&recid='+options.record_id;
                 $.get( surl,  
@@ -310,8 +236,9 @@ function editCMS2(){
                     _layout_content = res;
                     _initPage();
                 });
-            
+            */
         }
+        _initPage();
     }    
     
     
@@ -338,7 +265,7 @@ function editCMS2(){
     //
     //
     //
-    function _addNewPage(){
+    function _addNewRootMenu(){
         if(_editCMS_SiteMenu) {
             _editCMS_SiteMenu.selectMenuRecord(home_page_record_id);
         }
@@ -370,10 +297,10 @@ function editCMS2(){
         if(tinymce) tinymce.remove('.tinymce-body'); //detach
         
         layoutMgr.setEditMode(true);
-        var res = layoutMgr.layoutInit(_layout_content, _layout_container);
+        var res = layoutMgr.layoutInit(_layout_content, _layout_container, {page_name:page_cache[options.record_id][DT_NAME]});
         
         if(res===false){
-            window.hWin.HEURIST4.msg.showMsgFlash('Old format. Edit in Heurist interface');
+            window.hWin.HEURIST4.msg.showMsgFlash('Old format. Edit in Heurist interface', 3000);
             //clear treeview
             _initTreePage([]);
         }else{
@@ -1311,6 +1238,8 @@ function editCMS2(){
         }
         __cleanLayout(newval);
         
+        var newname = newval[0].name;
+        
         // if page consist one group and one text - save only content of this text
         // it allows edit content in standard record edit
         if(newval[0].children && newval[0].children.length==1 && newval[0].children[0].type=='text'){
@@ -1337,7 +1266,7 @@ function editCMS2(){
                         window.hWin.HEURIST4.msg.showMsgErr('It appears you do not have enough rights (logout/in to refresh) to edit this record');
                         
                     }else{
-                        page_content[options.record_id] = newval; //update in cache
+                        page_cache[options.record_id][DT_EXTENDED_DESCRIPTION] = newval; //update in cache
 /*                        
                         window.hWin.HEURIST4.msg.showMsgFlash('saved');
                         
@@ -1352,7 +1281,12 @@ function editCMS2(){
 //console.log('was saved '+last_save_content);                        
                             was_modified = true;     
                         }
-*/                        
+*/                       
+
+                        if(_editCMS_SiteMenu && newname!=page_cache[options.record_id][DT_NAME]) {
+                            _editCMS_SiteMenu.renameMenuEntry(options.record_id, newname);
+                        }
+
                     }
                     
                 }else{

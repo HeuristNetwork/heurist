@@ -54,6 +54,8 @@ function hLayoutMgr(){
         
         container.empty();   
         
+        
+        
         if(typeof layout === 'string' &&
             layout.indexOf('data-heurist-app-id')>0){ //old format
             
@@ -77,6 +79,11 @@ function hLayoutMgr(){
                 }]; 
         }else{
             layout = res;    
+        }
+        
+
+        if(supp_options && supp_options.page_name){
+            layout[0].name  = supp_options.page_name;
         }
         
         for(var i=0; i<layout.length; i++){
@@ -524,6 +531,9 @@ function hLayoutMgr(){
             _layoutInitCardinal(layout, container);
         },
         
+        //
+        //
+        //
         layoutInit: function(layout, container, supp_options){
             return _layoutInit(layout, container, supp_options);
         },

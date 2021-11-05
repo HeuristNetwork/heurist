@@ -195,6 +195,14 @@ error_log(print_r($_REQUEST, true));
         if(!defined($str)){
             $this->defineDTLocalMagic($str, $id[1], $id[0], $reset);
         }
+        
+        // Term constants
+        global $trmDefines;
+        foreach ($trmDefines as $str => $id)
+        if(!defined($str)){
+            $this->defineTermLocalMagic($str, $id[1], $id[0], $reset);
+        }
+        
     }
 
     //
@@ -207,10 +215,13 @@ error_log(print_r($_REQUEST, true));
         }else{
             global $rtDefines;
             global $dtDefines;
+            global $trmDefines;
             if(@$rtDefines[$const_name]){
                 $this->defineRTLocalMagic($const_name, $rtDefines[$const_name][1], $rtDefines[$const_name][0], $reset);
             }else if(@$dtDefines[$const_name]){
                 $this->defineDTLocalMagic($const_name, $dtDefines[$const_name][1], $dtDefines[$const_name][0], $reset);
+            }else if(@$trmDefines[$const_name]){
+                $this->defineTermLocalMagic($const_name, $trmDefines[$const_name][1], $trmDefines[$const_name][0], $reset);
             }
             return defined($const_name);
         }
@@ -284,6 +295,15 @@ error_log(print_r($_REQUEST, true));
             }
         }
 
+        // Term constants
+        global $trmDefines;
+        foreach ($trmDefines as $magicTermName => $id) {
+            if(defined($magicTermName)){
+                $res[$magicTermName] = constant ( $magicTermName );
+            }
+        }
+        
+        
         return $res;
     }
 
@@ -415,7 +435,26 @@ error_log(print_r($_REQUEST, true));
         return (@$DTIDs[$dbID][$dtID] ? $DTIDs[$dbID][$dtID] : null);
     }
 
-    //------------------------- END RT DT CONSTANTS --------------------
+    /**
+    * bind Magic Number Constants to their local id
+    * @param    string [$defString] define string
+    * @param    int [$trmID] origin term id
+    * @param    int [$dbID] origin database id
+    */
+    private function defineTermLocalMagic($defString, $trmID, $dbID, $reset=false) {
+        
+        $id = ConceptCode::getTermLocalID($dbID.'-'.$trmID);
+        
+        if ($id) {
+            //echo "\nTERM DEFINING \"" . $defString . "\" AS " . $id;
+            define($defString, $id);
+        } else {
+        }
+    }
+
+
+  
+    //------------------------- END RT DT and TERM CONSTANTS --------------------
 
     //
     //

@@ -396,5 +396,13 @@ $dtDefines = array('DT_NAME' => array(2, 1),
 
 ); //TODO: add email magic numbers
 
+
+$trmDefines = array(
+    'TRM_PAGETYPE' => array(2, 6254),
+    'TRM_NO' => array(2, 531),
+    'TRM_NO_OLD' => array(99, 5447)
+);
+
+
 //---------------------------------
 ?>

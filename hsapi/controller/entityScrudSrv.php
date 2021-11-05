@@ -79,7 +79,7 @@
     function entityRefreshDefs( $system, $entities, $need_config ){
         
         if($entities=='all' || $entities==null){
-            $entities = array('rtg','dtg','rty','dty','trm','vcg','rst');
+            $entities = array('rty','dty','rst','trm','rtg','dtg','vcg');  //
         }else if(!is_array($entities)){
             $entities = explode(',',$entities);
         }

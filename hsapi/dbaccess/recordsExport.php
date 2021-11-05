@@ -323,14 +323,14 @@ XML;
 
 
     //for gephi we don't need details
-    $need_record_details = ($params['format']!='gephi');
+    $retrieve_detail_fields = ($params['format']!='gephi');
     $columns = array('0'=>array()); //for datatable
     $row_placeholder = array();
     $need_rec_type = false;
     
     if(@$params['leaflet']){
         //for leaflet get only limited set of fields 
-        $retrieve_fields = 'rec_ID,rec_RecTypeID,rec_Title';
+        $retrieve_header_fields = 'rec_ID,rec_RecTypeID,rec_Title';
     }else if(@$params['datatable']>0){ 
 
         //for datatable convert  $params['columns'] to array
@@ -341,8 +341,8 @@ XML;
 5: ["1", "38"]
         */
         $need_tags = false;
-        $need_record_details = array();
-        $retrieve_fields = array(); //header fields
+        $retrieve_detail_fields = array();
+        $retrieve_header_fields = array(); //header fields
         
         if(is_array($params['columns'])){
             foreach($params['columns'] as $idx=>$column){
@@ -362,14 +362,14 @@ XML;
                     $need_tags = true;
                 }else if($rt_id==0){
                     if(strpos($col_name,'rec_')===0){
-                        array_push($retrieve_fields, $col_name);
+                        array_push($retrieve_header_fields, $col_name);
                     }else if(strpos($col_name, 'lt')===0 || strpos($col_name, 'rt')===0){
-                        array_push($need_record_details, substr($col_name, 2));
+                        array_push($retrieve_detail_fields, substr($col_name, 2));
                     }else{
                         if($col_name === 'typename'){
                             $need_rec_type = true;
                         }else{
-                             array_push($need_record_details, $col_name);
+                             array_push($retrieve_detail_fields, $col_name);
                         }
                     }
                 }
@@ -381,24 +381,43 @@ XML;
             }
         }
         
-        if(count($need_record_details)==0){
-            $need_record_details = false;
+        if(count($retrieve_detail_fields)==0){
+            $retrieve_detail_fields = false;
         }
         
         //always include rec_ID and rec_RecTypeID fields 
-        if(!in_array('rec_ID',$retrieve_fields)){
-            array_push($retrieve_fields,'rec_ID');
+        if(!in_array('rec_ID',$retrieve_header_fields)){
+            array_push($retrieve_header_fields,'rec_ID');
             array_push($columns['0'],'rec_ID');
         }
-        if(!in_array('rec_RecTypeID',$retrieve_fields)){
-            array_push($retrieve_fields,'rec_RecTypeID');
+        if(!in_array('rec_RecTypeID',$retrieve_header_fields)){
+            array_push($retrieve_header_fields,'rec_RecTypeID');
             array_push($columns['0'],'rec_RecTypeID');
         }
 
-        $retrieve_fields = implode(',', $retrieve_fields);
+        $retrieve_header_fields = implode(',', $retrieve_header_fields);
         
     }else{
-        $retrieve_fields = null;
+        
+        if(is_array($params['columns'])){
+            $retrieve_header_fields = array();
+            $retrieve_detail_fields = array();
+            foreach($params['columns'] as $idx=>$col_name){
+                if(strpos($col_name,'rec_')===0){
+                    array_push($retrieve_header_fields, $col_name);
+                }else if($col_name>0){
+                    array_push($retrieve_detail_fields, $col_name);
+                }
+        
+            }
+        }
+        
+        //header fields
+        $retrieve_header_fields = (count($retrieve_header_fields)>0)?implode(',', $retrieve_header_fields):null;
+        
+        //detail fields
+        $retrieve_detail_fields = (count($retrieve_detail_fields)>0)?$retrieve_detail_fields:true;
+        
     }
     
     //MAIN LOOP  ----------------------------------------
@@ -413,7 +432,7 @@ XML;
             $record = $records[$idx];
             $recID = $record['rec_ID'];
         }else{
-            $record = recordSearchByID(self::$system, $recID, $need_record_details, $retrieve_fields );
+            $record = recordSearchByID(self::$system, $recID, $retrieve_detail_fields, $retrieve_header_fields );
         }
         $idx++;
         

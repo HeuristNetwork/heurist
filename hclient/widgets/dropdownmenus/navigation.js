@@ -177,8 +177,8 @@ $.widget( "heurist.navigation", {
             DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],//show page title above content
             DT_THUMBNAIL = window.hWin.HAPI4.sysinfo['dbconst']['DT_THUMBNAIL'],
             
-            TERM_NO = $Db.getLocalID('trm','2-531'),
-            TERM_NO_old = $Db.getLocalID('trm','99-5447');
+            TERM_NO = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'], //$Db.getLocalID('trm','2-531'),
+            TERM_NO_old = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO_OLD']; //$Db.getLocalID('trm','99-5447');
 
         
         var res = '';

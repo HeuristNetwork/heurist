@@ -25,7 +25,7 @@
     *           zip  : 0|1  compress
     *           file : 0|1  output as file or ptintout
     *           defs : 0|1  include database definitions
-    *           resapi: 0|1  not include db description and heurist header
+    *           restapi: 0|1  not include db description and heurist header
     * 
     * prefs for geojson, json
     *   extended 0 as is (in heurist internal format), 1 - interpretable, 2 include concept code and labels

@@ -1465,7 +1465,7 @@ var s_time = new Date().getTime() / 1000;
                         if(response.status == window.hWin.ResponseStatus.OK){
 
 var fin_time = new Date().getTime() / 1000;
-//console.log('DEBUG refreshEntityData '+response.data+'  '+(fin_time-s_time));                    
+console.log('DEBUG refreshEntityData '+response.data+'  '+(fin_time-s_time));                    
                             
                             for(var entityName in response.data){
                                 window.hWin.HAPI4.EntityMgr.setEntityData(entityName, response.data)
