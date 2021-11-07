@@ -52,6 +52,7 @@ function editCMS2(){
         _panel_propertyView, // panel with selected element properties
         _toolbar_WebSite,
         _toolbar_Page,
+        _tabControl,
         
         _layout_content,   // JSON config 
         _layout_container; // main-content with CMS content
@@ -100,7 +101,6 @@ function editCMS2(){
                             +'<span style="font-style:italic;display:inline-block">Drag to reposition<br>'
                             +'Select or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
                             */
-                            
                             +'<div class="toolbarWebSite"  style="float:right;">'
                             
                                 +'<button title="Edit website properties" class="btn-website-edit"/>'
@@ -123,9 +123,14 @@ function editCMS2(){
                             
                         +'</div>'
                         
-                        +'<div class="treeWebSite ent_content_full" style="padding:10px;display:none"/>' //treeview - edit website menu
-                        +'<div class="treePage ent_content_full" style="padding:10px;"/>' //treeview - edit page
-                        +'<div class="propertyView ent_content_full" style="padding:10px;display:none"/>' //edit properties for element
+                        +'<div class="ent_content_full" id="tabsEditCMS" style="top:40px">'
+                            +'<ul><li><a href="#treeWebSite">Website menu</a></li><li><a href="#treePage">Page</a></li></ul>'
+                        
+                            +'<div id="treeWebSite" class="treeWebSite" style="padding:10px;"/>' //treeview - edit website menu
+                            +'<div id="treePage" class="treePage" style="padding:10px;"/>' //treeview - edit page
+                            +'<div class="propertyView" style="padding:10px;display:none"/>' //edit properties for element
+                        
+                        +'</div>'
                         
 /*                        
                         +'<div class="ent_footer" style="text-align:center;border-top:1px solid lightgray;padding:2px">'
@@ -202,8 +207,11 @@ function editCMS2(){
                     
                     _toolbar_WebSite = body.find('.toolbarWebSite');
                     _toolbar_Page = body.find('.toolbarPage');
-
                     
+                    _tabControl = body.find('#tabsEditCMS').tabs({activate: function( event, ui ){
+                        _switchMode();
+                        //ui.newTab
+                    }});
         }
         
         
@@ -297,7 +305,11 @@ function editCMS2(){
         if(tinymce) tinymce.remove('.tinymce-body'); //detach
         
         layoutMgr.setEditMode(true);
-        var res = layoutMgr.layoutInit(_layout_content, _layout_container, {page_name:page_cache[options.record_id][DT_NAME]});
+        
+        var opts = null;
+        if(page_cache[options.record_id]) opts = {page_name:page_cache[options.record_id][DT_NAME]};
+        
+        var res = layoutMgr.layoutInit(_layout_content, _layout_container, opts);
         
         if(res===false){
             window.hWin.HEURIST4.msg.showMsgFlash('Old format. Edit in Heurist interface', 3000);
@@ -464,59 +476,47 @@ function editCMS2(){
                         ///  that._saveEditAndClose(null, 'close'); //close editor on second click
                     }
                 }
-            },
-            activate: function(event, data) { 
-                //main entry point to start edit layout element/widget - open formlet or tinymce
-                /*if(data.node.key>0){
-
-                    that.selectedRecords([data.node.key]);
-                    if(!that._lockDefaultEdit){
-                    
-                        if(that.options.external_preview){
-                            that.options.external_preview.manageRecords('saveQuickWithoutValidation',
-                                function(){
-                                    that.previewEditor.manageRecords('setDisabledEditForm', true)
-                                    that._onActionListener(event, {action:'edit'}); //default action of selection            
-                                });
-                        }else{
-                            that.previewEditor.manageRecords('setDisabledEditForm', true)
-                            that._onActionListener(event, {action:'edit'}); //default action of selection            
-                        }
-                        
-                    }
-                }*/
             }
+            //,activate: function(event, data) { }
         };
 
-        /*
+        
         fancytree_options['extensions'] = ["dnd"]; //, "filter", "edit"
         fancytree_options['dnd'] = {
                 autoExpandMS: 400,
                 preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
                 preventVoidMoves: true, // Prevent moving nodes 'before self', etc.
                 dragStart: function(node, data) {
-                    return that._dragIsAllowed;
+
+//console.log(node.data.type);
+                    
+                    var is_root = node.getParent().isRootNode();
+                    var is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
+                               node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
+                    
+                    return !(is_root || is_cardinal);
                 },
                 dragEnter: function(node, data) {
-                    return (node.folder) ?true :["before", "after"];
+ //console.log('enter '+node.data.type);                   
+                    if(node.data.type=='cardinal'){
+                        return false;
+                    }else{
+                        return (node.folder) ?true :["before", "after"];
+                    }
                 },
                 dragDrop: function(node, data) {
+                    // data.otherNode - dragging node
+                    // node - target
+                    var is_root = node.getParent().isRootNode();
+                    var is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
+                               node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
+                    var hitMode = (is_root || is_cardinal)?'child' :data.hitMode;                    
                     
-                    data.otherNode.moveTo(node, data.hitMode);    
-                    //save treeview in database
-                    that._dragIsAllowed = false;
-                    
-                    if(that.options.external_preview){
-                        that.options.external_preview.manageRecords('saveQuickWithoutValidation',
-                               function(){ that._saveRtStructureTree() });
-                    }else{
-                        setTimeout(function(){
-                            that._saveRtStructureTree();
-                        },500);
-                    }
-                    
+                    data.otherNode.moveTo(node, hitMode);    
+                    //change layout content and redraw page
+                    _layoutChangeParent(data.otherNode.key);
                 }
-            }; */
+            };
 
             _panel_treePage = body.find('.treePage').addClass('tree-rts')
                                 .fancytree(fancytree_options); //was recordList
@@ -533,12 +533,28 @@ function editCMS2(){
     function _switchMode( mode, init_tinymce )
     {
     
+        if(!mode){
+            if(_tabControl.tabs('option','active')==0){
+                mode='website';           
+            }else{
+                mode='page';
+            }
+        }else{
+            var activePage = (mode=='page')?1:0;
+            if(_tabControl.tabs('option','active')!=activePage){
+                _tabControl.tabs({active:activePage});
+                return;    
+            }
+        }
+        
         current_edit_mode = mode;
         
         if(mode=='page'){
-            _panel_treePage.show();
+            
             _panel_propertyView.hide();
-            _panel_treeWebSite.hide();
+
+            //_panel_treePage.show();
+            //_panel_treeWebSite.hide();
 
             _toolbar_Page.show();
             _toolbar_WebSite.hide();
@@ -554,14 +570,23 @@ function editCMS2(){
             } //_initTinyMCE();
             
         }else{
-            _panel_treeWebSite.show();
-            _panel_treePage.hide();
+            
+                    
             _panel_propertyView.hide();
+
+            //_panel_treeWebSite.show();
+            //_panel_treePage.hide();
             
             _toolbar_Page.hide();
             _toolbar_WebSite.show();
             
             if(tinymce) tinymce.remove('.tinymce-body');
+            
+            //load website menu treeview
+            if(!_editCMS_SiteMenu)
+            _editCMS_SiteMenu = editCMS_SiteMenu( _panel_treeWebSite, that );
+            
+            
             //tinymce.init({inline:false});
             //_layout_container.find('div.editable').removeClass('tinymce-body');
         }
@@ -606,6 +631,7 @@ function editCMS2(){
                    console.log('DEBUG: ONLY '+ele_ID);
                    return;
                }
+               var is_intreeview = $(item).hasClass('fancytree-node');
                
                var is_folder = node.folder;  //$(item).hasClass('fancytree-folder'); 
                var is_root = node.getParent().isRootNode();
@@ -615,18 +641,19 @@ function editCMS2(){
                var actionspan = '<div class="lid-actionmenu mceNonEditable" '
                     +' style="'+style_pos+';display:none;color:black;background:#95A7B7 !important;'
                     +'font-size:9px;font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' + ele_ID
-                    + (is_root || is_cardinal?'':
-                    ('<span data-action="drag" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Drag to reposition">'
+                    + (is_intreeview?'':'<span class="ui-icon ui-icon-gear" style="font-size:12px;font-weight:normal"></span>')
+                    + (true || is_root || is_cardinal?'':
+                    ('<span data-action="drag" style="'+(is_intreeview?'':'display:block;')+'background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Drag to reposition">'
                     + '<span class="ui-icon ui-icon-arrow-4" style="font-size:9px;font-weight:normal"/>Drag</span>'))               
-                    + '<span data-action="edit" style="background:lightgray;padding:4px;font-size:9px;font-weight:normal" title="Edit style and properties">'
+                    + '<span data-action="edit" style="'+(is_intreeview?'':'display:block;')+'background:lightgray;padding:4px;font-size:9px;font-weight:normal" title="Edit style and properties">'
                     +'<span class="ui-icon ui-icon-pencil" style="font-size:9px;font-weight:normal"/>Style</span>';               
                    
                //hide element for cardinal and delete for its panes                     
                if(node.data.type!='cardinal'){
-                   actionspan += '<span data-action="element" style="background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new element/widget" style="font-size:9px;font-weight:normal"/>Element</span>';
+                   actionspan += '<span data-action="element" style="'+(is_intreeview?'':'display:block;')+'background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new element/widget" style="font-size:9px;font-weight:normal"/>Insert</span>';
                }
                if(!(is_root || is_cardinal)){
-                   actionspan += ('<span data-action="delete" style="background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
+                   actionspan += ('<span data-action="delete" style="'+(is_intreeview?'':'display:block;')+'background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
                         +'Remove element from layout" style="font-size:9px;font-weight:normal"/>Delete</span>');
                }
                
@@ -634,17 +661,24 @@ function editCMS2(){
                actionspan += '</div>';
                actionspan = $( actionspan );
                
-               var is_intreeview = $(item).hasClass('fancytree-node');
-                   
                if(is_intreeview){   //in treeview
                    actionspan.appendTo(item);
                }else{ 
-                   actionspan.insertAfter(item); //in main-content
+                    actionspan.insertAfter(item); //in main-content
+                    
+                    actionspan.find('span[data-action]').hide();
+                    actionspan.find('span.ui-icon-gear').click(function(event){
+                        var ele = $(event.target);
+                        window.hWin.HEURIST4.util.stopEvent(event);
+                        ele.hide();
+                        ele.parent().find('span[data-action]').show();
+                    });
+                    
                    //actionspan.appendTo(body);    
                    //actionspan.position({ my: "left top", at: "left top", of: $(item) })
                }
                    
-               actionspan.find('span').click(function(event){
+               actionspan.find('span[data-action]').click(function(event){
                     var ele = $(event.target);
                     
                     window.hWin.HEURIST4.util.stopEvent(event);
@@ -703,7 +737,7 @@ function editCMS2(){
                           _layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-lid')+']').hide();
                           _layout_container.find('div[data-lid]').removeClass('cms-element-active');
                        }else{
-                       
+                           //in tree
                            if($(event.target).is('li')){
                               node = $(event.target).find('.fancytree-node');
                            }else if($(event.target).hasClass('fancytree-node')){
@@ -735,7 +769,9 @@ function editCMS2(){
                               return;
                        }
                        
-                       if( $(event.target).hasClass('editable') || $(event.target).parents('div.editable:first').length>0){
+                       var is_in_page = ($(event.target).hasClass('editable') || $(event.target).parents('div.editable:first').length>0);
+                       
+                       if( is_in_page ){
                           //div.editable in container 
                           
                           if($(event.target).hasClass('editable')){
@@ -746,8 +782,8 @@ function editCMS2(){
                             node = $(event.target).parents('div.editable:first');
                           } 
                           
-                          //tinymce is active - do not sow toolbar
-                          if(node.hasClass('mce-edit-focus')){
+                          //tinymce is active - do not show toolbar
+                          if(_layout_container.find('div.mce-edit-focus').length>0){  //node.hasClass('mce-edit-focus')){
                                 return;   
                           }
                            
@@ -787,6 +823,8 @@ function editCMS2(){
                           
                           var pos = node.position();
 //console.log(pos.top + '  ' + (pos.top+parent.offset().top));                          
+                          ele.find('span[data-action]').hide();  
+                          ele.find('span.ui-icon-gear').show();  
                           ele.css({top:(pos.top<0?0:pos.top)+2+'px',left:(pos.left<0?0:pos.left)+2+'px'});
                           ele.show();
                           
@@ -803,12 +841,18 @@ function editCMS2(){
                                node.css('display','inline-block');//.css('visibility','visible');
                            }
                        }
+                       
                        if(node){
-                           //highlight in preview
+                           //highlight in preview/page
                            var ele_ID = $(node).attr('data-lid');
                            _layout_container.find('div[id^="hl-"]').removeClass('cms-element-active');
                            if(ele_ID>0)
                            _layout_container.find('div#hl-'+ele_ID).addClass('cms-element-active');
+                           //highlight in treeview
+                           if(is_in_page){
+                               node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
+                               node.setActive(true);
+                           }
                        }
                        
                    }
@@ -826,7 +870,7 @@ function editCMS2(){
     function _layoutRemoveElement(ele_id){
 
         var tree = _panel_treePage.fancytree('getTree');
-        var node = tree.getNodeByKey(ele_id);
+        var node = tree.getNodeByKey(''+ele_id);
         var parentnode = node.getParent();
         var parent_container, parent_children, parent_element;
         
@@ -883,6 +927,64 @@ function editCMS2(){
         
         _updateActionIcons(200); //it inits timyMCE also
         
+    }
+    
+    //
+    // Reflects changes in tree
+    //
+    function _layoutChangeParent(ele_id){
+
+        tinymce.remove('.tinymce-body'); //detach
+        _layout_container.find('.lid-actionmenu').remove();
+        
+        var affected_element = layoutMgr.layoutContentFindElement(_layout_content, ele_id);
+        
+
+        var oldparent = layoutMgr.layoutContentFindParent(_layout_content, ele_id);
+        var parent_children;
+        
+        //remove from old parent -----------
+        if(oldparent=='root'){
+            parent_children = _layout_content;
+        }else{
+            parent_children = oldparent.children;
+        }
+        var idx = -1;
+        for(var i=0; i<parent_children.length; i++){
+          if(parent_children[i].key==ele_id){
+              idx = i;
+              break;
+          }   
+        }        
+        parent_children.splice(idx, 1); //remove from children
+        
+        //add to new parent  ---------------
+        var tree = _panel_treePage.fancytree('getTree');
+        var node = tree.getNodeByKey(''+ele_id);
+        var prevnode = node.getPrevSibling();
+        var parentnode = node.getParent();
+        var parent_element = layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
+        parent_children = parent_element.children;
+        
+        if(prevnode==null){
+            idx = 0;
+        }else{
+            for(var i=0; i<parent_children.length; i++){
+              if(parent_children[i].key==prevnode.key){
+                  idx = i+1;
+                  break;
+              }   
+            }        
+        }
+        if(idx==parent_children.length){
+            parent_children.push(affected_element);
+        }else{
+            parent_children.splice(idx, 0, affected_element);    
+        }
+        
+        //redraw page
+        layoutMgr.layoutInit(_layout_content, _layout_container);
+        _updateActionIcons(200); //it inits timyMCE also
     }
     
     //
@@ -1001,10 +1103,10 @@ function editCMS2(){
         
         //border: 1px dotted gray; border-radius: 4px;margin: 4px;
         
-        var new_ele = {name:'Text', type:'text', css:{}, content:"<p>edit content here...</p>"};
+        var new_ele = {name:'Text', type:'text', css:{'border':'1px dotted gray','border-radius':'4px','margin':'4px'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"};
         
         if(widget_id=='group'){
-            new_ele = {name:'Group', type:'group', css:{}, children:[ new_ele ]};
+            new_ele = {name:'Group', type:'group', css:{'border':'1px dotted gray','border-radius':'4px','margin':'4px'}, children:[ new_ele ]};
         }else if(widget_id=='tabs'){
             
             new_ele = {name:'TabControl', type:'tabs', css:{}, children:[ 
@@ -1017,7 +1119,10 @@ function editCMS2(){
             ]};
         }else if(widget_id=='cardinal'){    
             
-            new_ele = {name:'Cardinal', type:'cardinal', css:{'min-height':'200px'}, children:[
+            new_ele = {name:'Cardinal', type:'cardinal', css:{position:'relative',
+                        'min-height':'300px','min-width':'300px',
+                        'height':'500px','width':'800px',flex:'0 1 auto'},  //,'width':'100%'
+            children:[
             {name:'Center', type:'center', children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
             {name:'North', type:'north', options:{size:80}, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
             {name:'South', type:'south', options:{size:80}, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
@@ -1044,7 +1149,7 @@ function editCMS2(){
             new_ele = {name:'2 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
                 children:[
                 {name:'Column 1', type:'text', css:{flex:'0 1 auto'}, content:"<p><img src=\"https://heuristplus.sydney.edu.au/heurist/hclient/assets/v6/logo.png\" width=\"300\"</p>"},
-                {name:'Column 2', type:'text', css:{flex:'1 1 auto'}, content:"<p>Text. Click to edit</p>"}
+                {name:'Column 2', type:'text', css:{flex:'1 1 auto'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"}
                 ]
             };
             
@@ -1074,7 +1179,7 @@ function editCMS2(){
                 children:[]
             };
             
-            var child = {name:'Column 1', type:'text', css:{flex:'1 1 auto'}, content:"<p>Column. Click to edit</p>"};
+            var child = {name:'Column 1', type:'text', css:{flex:'1 1 auto'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"};
             new_ele.children.push(child);
             
             child = window.hWin.HEURIST4.util.cloneJSON(child);
@@ -1087,7 +1192,7 @@ function editCMS2(){
                 children:[]
             };
             
-            var child = {name:'Column 1', type:'text', css:{flex:'1 1 auto'}, content:"<p>Column. Click to edit</p>"};
+            var child = {name:'Column 1', type:'text', css:{flex:'1 1 auto'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"};
             new_ele.children.push(child);
             child = window.hWin.HEURIST4.util.cloneJSON(child);
             child.name = 'Column 2';
@@ -1195,12 +1300,13 @@ function editCMS2(){
             //parentnode.addNode(new_ele, 'after');
         }
         
-        parentnode.visit(function(node){
-            node.setExpanded(true);
-        });
+        setTimeout(function(){
+            parentnode.visit(function(node){
+                node.setExpanded(true);
+            });
+            _updateActionIcons(200);
+        },300);
         
-        
-        _updateActionIcons(200);
 
 /*        
         [{name:'Layout', type:'group', //or cardinal
@@ -1300,12 +1406,7 @@ function editCMS2(){
     //
     //
     function _showWebSiteMenu(){
-        
         _switchMode('website');
-        
-        //load website menu treeview
-        _editCMS_SiteMenu = editCMS_SiteMenu( _panel_treeWebSite, that );
-        
     }
 
     //public members

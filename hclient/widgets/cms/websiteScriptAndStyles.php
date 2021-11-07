@@ -199,7 +199,7 @@ if($edit_Available){
 }else{
 ?>    
 <script>
-function _dout(msg){
+function _dout(msg){      
     //console.log(msg);
 }
 
@@ -352,6 +352,8 @@ if($site_css!=null){
                     editCMS_instance2.startCMS({record_id:current_page_id, container:'#main-content',
                                     close: function(){
                                         isCMS_active = false;
+                                        
+                                        $('#btnOpenCMSeditor').show();
                                         //btn.show();
                                     }}); //see editCMS2.js    
 

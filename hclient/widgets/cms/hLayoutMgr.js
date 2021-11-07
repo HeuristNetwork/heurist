@@ -136,7 +136,7 @@ function hLayoutMgr(){
         
         if(!layout.css) layout.css = {};
         if($.isEmptyObject(layout.css)){ //default
-            layout.css = {'border':'1px dotted gray','border-radius':'4px','margin':'4px'};
+            //AAA layout.css = {'border':'1px dotted gray','border-radius':'4px','margin':'4px'};
         }
 
         if(layout.css && !$.isEmptyObject(layout.css)){
@@ -153,12 +153,9 @@ function hLayoutMgr(){
             .addClass('editable tinymce-body')
             .appendTo(container);
             
-        if(isEditMode){
-            //$d.css({'border':'1px dotted gray','border-radius':'4px','margin':'4px'});  
-        } 
         if(!layout.css) layout.css = {};
         if($.isEmptyObject(layout.css)){ //default
-            layout.css = {'border':'1px dotted gray','border-radius':'4px','margin':'4px'};
+            //AAA layout.css = {'border':'1px dotted gray','border-radius':'4px','margin':'4px'};
         }
             
         if(layout.css && !$.isEmptyObject(layout)){
@@ -304,9 +301,13 @@ function hLayoutMgr(){
         
         //create parent div
         $parent = $(document.createElement('div'));
+        if( layout.css && !$.isEmptyObject(layout.css) ){
+            $parent.css( layout.css );
+        }
+        
         $parent.attr('id', key_id)
           .attr('data-lid', layout.key)
-          .css({height:'100%',width:'100%'})
+          //.css({height:'100%',width:'100%'})
           .appendTo(container);
         
         //if(isEditMode) $parent.css('border','2px dashed green');
@@ -487,6 +488,31 @@ function hLayoutMgr(){
     }
 
     //
+    // Find parent element
+    //
+    function _layoutContentFindParent(parent, ele_id){
+        
+        var children;
+        if($.isArray(parent)){
+            children = parent;
+            parent = 'root';
+        }else{
+            children = parent.children;    
+        }
+        
+        for(var i=0; i<children.length; i++){
+            if(children[i].key == ele_id){
+                return  parent;
+            }else if(children[i].children && children[i].children.length>0){
+                var res = _layoutContentFindParent(children[i], ele_id);    
+                if(res) return res;
+            }
+        }
+        return false; //not found
+    }
+    
+    
+    //
     // Replace element
     //    
     function _layoutContentSaveElement(content, new_cfg){
@@ -548,6 +574,10 @@ function hLayoutMgr(){
         
         layoutContentFindElement: function(_layout_cfg, key){
             return _layoutContentFindElement(_layout_cfg, key);    
+        },
+        
+        layoutContentFindParent: function(parent, ele_id){
+            return _layoutContentFindParent(parent, ele_id);
         },
 
         //replace element in layout

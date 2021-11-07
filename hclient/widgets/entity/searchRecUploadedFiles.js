@@ -123,6 +123,11 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this._on(this.input_sort_type,  { change:this.startSearch });
 
         
+        if(!window.hWin.HEURIST4.util.isempty(this.options.filter_types)){
+            this.input_search_type.val(this.options.filter_types);
+            this.element.find('#input_search_type_div').hide();
+        }        
+        
         if(this.options.select_mode=='manager'){
             this.element.find('#input_search_type_div').css('float','left');
         }

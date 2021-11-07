@@ -213,6 +213,25 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                 if(!css['border-width']) css['border-width'] = '1px';
                 if(!css['border-color']) css['border-color'] = 'black';
             }
+
+            //style - background
+            var val = cont.find('input[name="background"]').is(':checked');
+            if(val){
+                css['background'] = 'none';
+            }else{
+                val = cont.find('input[name^="background-color"]').val();
+                if(val) css['background-color'] = val;
+                
+                val = cont.find('input[name^="background-image"]').val();
+                if(val){
+                    css['background-image'] = val;  
+                    val = cont.find('select[name^="background-position"]').val();
+                    css['background-position'] = val;  
+                    val = cont.find('select[name^="background-repeat"]').val();
+                    css['background-repeat'] = val;  
+                } 
+            }
+
             
             function __setDim(name){
                 var ele = cont.find('input[name="'+name+'"]');
@@ -413,7 +432,12 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                 }
             });
 
-            //init color picker
+            //init file picker
+            cont.find('#btn-background-image').button()
+                    .css({'font-size':'0.7em'})
+                    .click(_selecHeuristMedia);
+            
+            //init color pickers
             cont.find('input[name$="-color"]').colorpicker({
                 hideButton: false, //show button right to input
                 showOn: "both"});//,val:value
@@ -542,6 +566,46 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                     //setTimeout(function(){;},200);
                 },500);
     }
+    
+    //
+    //
+    //
+    function _selecHeuristMedia(){
+
+        var popup_options = {
+            isdialog: true,
+            select_mode: 'select_single',
+            edit_addrecordfirst: false, //show editor atonce
+            selectOnSave: true,
+            select_return_mode:'recordset', //ids or recordset(for files)
+            filter_group_selected:null,
+            filter_types: 'image',
+            //filter_groups: this.configMode.filter_group,
+            onselect:function(event, data){
+
+                if(data){
+
+                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                        var recordset = data.selection;
+                        var record = recordset.getFirstRecord();
+
+                        //always add media as reference to production version of heurist code (not dev version)
+                        var sUrl = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
+                        +"&file="+recordset.fld(record,'ulf_ObfuscatedFileID');
+                        
+                        sUrl = 'url(\'' + sUrl + '\')';
+                        $container.find('input[name="background-image"]').val(sUrl);
+
+                    }
+
+                }//data
+
+            }
+        };//popup_options        
+
+        window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
+    }
+    
         
 
     //public members

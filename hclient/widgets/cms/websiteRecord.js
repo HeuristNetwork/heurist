@@ -21,6 +21,10 @@
 
 var cmsEditing;
 
+function _dout(msg){      
+    //console.log(msg);
+}
+
 function onPageInit(success){   
 
     if(!success){

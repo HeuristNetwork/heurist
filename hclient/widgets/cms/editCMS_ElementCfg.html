@@ -130,9 +130,9 @@
                         </div>
                         <div>
                             <div class="header_narrow">Min size:</div>
-                            <input data-type="cardinal" data-pane="north" name="minSize" type="number" min="0" max="20" value="" style="width:40px"/>
+                            <input data-type="cardinal" data-pane="north" name="minSize" type="number" min="0" value="" style="width:40px"/>
                             <label>&nbsp;Max size:</label>
-                            <input data-type="cardinal" data-pane="north" name="maxSize"  type="number" min="0" max="40" value="" style="width:40px"/>                       
+                            <input data-type="cardinal" data-pane="north" name="maxSize"  type="number" min="0" value="" style="width:40px"/>                       
                         </div>
                 </fieldset>
                 <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
@@ -152,29 +152,98 @@
                         </div>
                         <div>
                             <div class="header_narrow">Min size:</div>
-                            <input data-type="cardinal" data-pane="south" name="minSize" type="number" min="0" max="20" value="" style="width:40px"/>
+                            <input data-type="cardinal" data-pane="south" name="minSize" type="number" min="0" value="" style="width:40px"/>
                             <label>&nbsp;Max size:</label>
-                            <input data-type="cardinal" data-pane="south" name="maxSize"  type="number" min="0" max="40" value="" style="width:40px"/>                       
+                            <input data-type="cardinal" data-pane="south" name="maxSize"  type="number" min="0" value="" style="width:40px"/>                       
                         </div>
                 </fieldset>
+                
+                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <div>
+                            <div class="header_narrow"><b>West:</b></div>
+                            <select data-type="cardinal" data-pane="west" name="init">
+                                <option vaue="">initally open</option>
+                                <option value="closed">initally closed</option>
+                                <option value="hidden">hidden</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="header_narrow">Size</div>
+                            <input data-type="cardinal" data-pane="west" name="size" type="number" min="10" value="" style="width:40px"/>
+                            <label>&nbsp;Resizeable:</label>
+                            <input data-type="cardinal" data-pane="west" name="resizable" type="checkbox" checked/>
+                        </div>
+                        <div>
+                            <div class="header_narrow">Min size:</div>
+                            <input data-type="cardinal" data-pane="west" name="minSize" type="number" min="0" value="" style="width:40px"/>
+                            <label>&nbsp;Max size:</label>
+                            <input data-type="cardinal" data-pane="west" name="maxSize"  type="number" min="0" value="" style="width:40px"/>                       
+                        </div>
+                </fieldset>
+
+                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <div>
+                            <div class="header_narrow"><b>East:</b></div>
+                            <select data-type="cardinal" data-pane="east" name="init">
+                                <option vaue="">initally open</option>
+                                <option value="closed">initally closed</option>
+                                <option value="hidden">hidden</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="header_narrow">Size</div>
+                            <input data-type="cardinal" data-pane="east" name="size" type="number" min="10" value="" style="width:40px"/>
+                            <label>&nbsp;Resizeable:</label>
+                            <input data-type="cardinal" data-pane="east" name="resizable" type="checkbox" checked/>
+                        </div>
+                        <div>
+                            <div class="header_narrow">Min size:</div>
+                            <input data-type="cardinal" data-pane="east" name="minSize" type="number" min="0" value="" style="width:40px"/>
+                            <label>&nbsp;Max size:</label>
+                            <input data-type="cardinal" data-pane="east" name="maxSize"  type="number" min="0" value="" style="width:40px"/>                       
+                        </div>
+                </fieldset>
+
+                
             </div>
             <h3>Styles</h3>
             <div>
                 <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
-                        <h4>Background</h4>
+                        <div>
+                            <div class="header_narrow"><b>Background:</b></div>
+                            <input data-type="css" name="background" type="checkbox" value="none"/>
+                        </div>
                         <div>
                             <div class="header_narrow">Color:</div>
-                            <select>
-                            </select>
+                            <input data-type="css" name="background-color" type="text" value="" style="width:60px"/>
                         </div>
                         <div>
                             <div class="header_narrow">Image:</div>
-                            <select>
-                            </select>
+                            <div style="display: inline-block;">
+                                <input data-type="css" name="background-image" type="text" value="" style="width:120px"/>
+                                <button id="btn-background-image" title="select image">select</button>
+                            </div>
                         </div>
                         <div>
                             <div class="header_narrow">Position:</div>
-                            <select>
+                            <select data-type="css" name="background-position">
+                                <option>center</option>
+                                <option>left</option>
+                                <option>top</option>
+                                <option>right</option>
+                                <option>bottom</option>
+                                <option>top right</option>
+                                <option>top left</option>
+                                <option>bottom left</option>
+                                <option>bottom right</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="header_narrow">Repeat:</div>
+                            <select data-type="css" name="background-repeat">
+                                <option value="no-repeat">no repeat</option>
+                                <option value="repeat-y">verically</option>
+                                <option value="repeat-x">horizontally</option>
                             </select>
                         </div>
                 </fieldset>
