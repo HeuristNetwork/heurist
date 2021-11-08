@@ -326,12 +326,10 @@ function loadPageContent(pageid){
     
     if(pageid>0){
         //window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
-        current_page_id = pageid;
+        
         
         var page_target = $('#main-content');
-        var page_footer = page_target.find('#page-footer');
-        if(page_footer.length>0) page_footer.detach();
-        _dout('load page  '+pageid+'   '+page_footer.length);              
+        //_dout('load page  '+pageid+'   '+page_footer.length);              
         
         var supp_options = null;
         
@@ -348,21 +346,28 @@ if($site_css!=null){
         
             function __loadPageContent(){
 
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                
                 if(isCMS_active){
-                    editCMS_instance2.startCMS({record_id:current_page_id, container:'#main-content',
+                    if (! editCMS_instance2.startCMS({record_id:pageid, container:'#main-content',
                                     close: function(){
                                         isCMS_active = false;
-                                        
                                         $('#btnOpenCMSeditor').show();
-                                        //btn.show();
-                                    }}); //see editCMS2.js    
+                                    }})) //see editCMS2.js    
+                    {
+                        //page is not loaded (previous page has been modified and not saved
+                        return;
+                    }
 
                 }else{
                     layoutMgr.layoutInit( page_cache[pageid][DT_EXTENDED_DESCRIPTION], '#main-content', supp_options );    
                 }
                 
-                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                current_page_id = pageid;
+                
+                var page_footer = page_target.find('#page-footer');
                 if(page_footer.length>0){
+                    page_footer.detach();
                     page_footer.appendTo( page_target );  
                     page_target.css({'min-height':page_target.parent().height()-page_footer.height()-10 });
                 } 
@@ -387,7 +392,7 @@ if($site_css!=null){
                 //perform search see record_output.php       
                 window.hWin.HAPI4.RecordMgr.search_new(server_request,
                     function(response){
-console.log(response);                       
+//console.log(response);                       
                        if(window.hWin.HEURIST4.util.isJSON(response)) {
                            var res = response['records'][0]['details'];
                            var keys = Object.keys(res);
@@ -397,7 +402,7 @@ console.log(response);
                            }
                            //res[DT_NAME] = res[DT_NAME]
                            //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS]
-console.log(res);                           
+//console.log(res);                           
                            page_cache[pageid] = res;
                            __loadPageContent();
                            

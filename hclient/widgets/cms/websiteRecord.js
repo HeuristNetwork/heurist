@@ -939,12 +939,12 @@ function hCmsEditing(_options) {
     // 4. Adds to content
     // 5. Init edit/remove links
     //
-    function __addTemplate(template_name){
+    function __addTemplate(template_name, callback){
     
 
         // 1. Shows dialog with list of templates 
         var sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.html';
-        var sURL2 = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.js';
+        var sURL2 = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'_old.js';
 
         // 2. Loads template
         var ele = $('<div>').attr('data-template-temp',1).appendTo(doc_body).hide()
@@ -984,7 +984,7 @@ function hCmsEditing(_options) {
         }else{
             var widgetid = (template_name=='discover')?ele.find('div[data-heurist-app-id="heurist_SearchTree"]'):0;
             
-            ele.trigger('oncomplete',{widgetid:widgetid});
+            ele.trigger('oncomplete', { widgetid:widgetid } );
         }
 
         }); //on template load

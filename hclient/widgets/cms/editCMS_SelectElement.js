@@ -37,7 +37,7 @@ function editCMS_SelectElement( callback ){
         text_3:{name:'Text in 3 columns', description:'3 columns layout'},
         text_banner:{name:'Text with banner', description:'Text over background image'},
         tpl_discover: {name:'Discover (filters/results/map)', description:'3 columns layout'},
-        tpl_blog: {name:'Blog (filters/results/map)', description:''},
+        tpl_blog: {name:'Blog', description:''},
 
     grp2:{name:'Widgets', description:'Heurist Widgets for dynamic content or interaction', is_header:true},
         

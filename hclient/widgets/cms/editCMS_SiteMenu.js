@@ -196,6 +196,7 @@ title: "Overview"
                     //loads another page
                     if(data.node.key>0){
                           _refreshCurrentPage(data.node.key);
+                          data.node.setActive( false );                        
                     }
                 },
                 edit:{
@@ -285,43 +286,53 @@ title: "Overview"
 
                             }else if(ele.hasClass('ui-icon-pencil')){ //edit menu record
 
-                            
-                                __in_progress();
-                                //edit menu item
-                                window.hWin.HEURIST4.ui.openRecordEdit(menuid, null,
-                                    {selectOnSave:true,
-                                        onClose: function(){ 
-                                            parent_span.find('.svs-contextmenu4').hide();
-                                        },
-                                        onselect:function(event, data){
-                                            if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                                
-                                                var recordset = data.selection;
-                                                var page_id = recordset.getOrder()[0];
-                                                page_cache[page_id] = null; //remove from cache
-                                                
-                                                if(page_id == current_page_id){
-                                                    _refreshCurrentPage(current_page_id);
+                                function __editPageRecord(record_id){
+                                    __in_progress();
+                                    //edit menu item
+                                    window.hWin.HEURIST4.ui.openRecordEdit(record_id, null,
+                                        {selectOnSave:true,
+                                            onClose: function(){ 
+                                                parent_span.find('.svs-contextmenu4').hide();
+                                            },
+                                            onselect:function(event, data){
+                                                if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                                    
+                                                    var recordset = data.selection;
+                                                    var page_id = recordset.getOrder()[0];
+                                                    page_cache[page_id] = null; //remove from cache
+                                                    delete page_cache[page_id];
+                                                    
+                                                    if(page_id == current_page_id){
+                                                        _refreshCurrentPage(current_page_id);
+                                                    }
+                                                    
+                                                    var node = $container.fancytree('getTree').getNodeByKey(''+page_id);
+                                                    var old_name = node.title;
+                                                    var new_name = recordset.fld(recordset.getFirstRecord(), DT_NAME);
+                                                    if(old_name!=new_name){
+                                                        node.setTitle( new_name ); 
+                                                        _defineActionIcons( node );   
+                                                        if(page_cache[page_id]) page_cache[page_id][DT_NAME] = new_name;
+                                                        _refreshMainMenu( false ); //after Edit record
+                                                    }
                                                 }
-                                                
-                                                var node = $contaner.fancytree('getTree').getNodeByKey(''+page_id);
-                                                var old_name = node.title;
-                                                var new_name = recordset.fld(recordset.getFirstRecord(), DT_NAME);
-                                                if(old_name!=new_name){
-                                                    node.setTitle( new_name ); 
-                                                    _defineActionIcons( node );   
-                                                    page_cache[page_id][DT_NAME] = new_name;
-                                                    _refreshMainMenu( false ); //after Edit record
-                                                }
-                                            }
-                                }});
+                                    }});
+                                }
+                                
+                                if( (menuid == current_page_id)
+                                    && editCMS2.warningOnExit(function(){ __editPageRecord(menuid) }))
+                                {                                    
+                                     return;
+                                }else{
+                                     __editPageRecord(menuid);
+                                }
 
                             }else if(ele.hasClass('ui-icon-structure')){
 
                                 editCMS2.switchMode('page');
                                 //open page structure 
                                 if( menuid != current_page_id ){
-                                    _refreshCurrentPage( menu_id );
+                                    _refreshCurrentPage( menuid );
                                 }
 
                             }else 
@@ -343,9 +354,12 @@ title: "Overview"
                                             to_del = null;
                                         }
                                         
+                                        editCMS2.resetModified();
+                                        
                                         _removeMenuEntry(parent_id, menuid, to_del, function(){
                                             item.remove();    
                                             
+                                            //after deletion select home page
                                             current_page_id = home_page_record_id;
                                             _refreshMainMenu( false ); //after delete
                                         });
@@ -414,7 +428,7 @@ title: "Overview"
                     );               
                     $(parent_span).mouseleave(
                         _onmouseexit
-                    );
+                    );                                                  
                 }
     } //end _defineActionIcons
 
@@ -439,8 +453,8 @@ title: "Overview"
                         node.setTitle( newvalue ); 
                         _defineActionIcons( node );   
                     }
-                }
-                page_cache[rec_id][DT_NAME] = newvalue;
+                }                                w
+                if(page_cache[rec_id]) page_cache[rec_id][DT_NAME] = newvalue;
                 _refreshMainMenu( false ); //after Rename   
                 
                 
@@ -487,10 +501,11 @@ console.log('!!! '+current_page_id);
     //
     function _selectMenuRecord(parent_id, callback){
         
+        if(editCMS2.warningOnExit(function(){ _selectMenuRecord(parent_id, callback) })) return;
+        
         if(!callback){
-                callback = function(page_id){
-                        //was_something_edited = true;
-                        current_page_id = page_id;
+                callback = function(new_page_id){
+                        current_page_id = new_page_id;
                         _refreshMainMenu(); //after addition of new page
                 };
         }
@@ -548,7 +563,7 @@ console.log('!!! '+current_page_id);
     }
 
     //
-    //
+    // Update database
     //
     function _removeMenuEntry(parent_id, menu_id, records_to_del, callback){
 
@@ -634,6 +649,7 @@ console.log('!!! '+current_page_id);
             _highlightCurrentPage();
         },
         
+        // add new menu
         selectMenuRecord: function(parent_id, callback){
             _selectMenuRecord(parent_id, callback);
         },

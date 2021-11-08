@@ -486,6 +486,21 @@ function hLayoutMgr(){
         }
         return null; //not found
     }
+    
+    //
+    //
+    //
+    function _layoutContentFindWidget(content, widget_id){
+        for(var i=0; i<content.length; i++){
+            if(content[i].appid == widget_id){
+                return  content[i];
+            }else if(content[i].children && content[i].children.length>0){
+                var res = _layoutContentFindWidget(content[i].children, widget_id);    
+                if(res) return res;
+            }
+        }
+        return null; //not found
+    }
 
     //
     // Find parent element
@@ -510,7 +525,6 @@ function hLayoutMgr(){
         }
         return false; //not found
     }
-    
     
     //
     // Replace element
@@ -580,6 +594,11 @@ function hLayoutMgr(){
             return _layoutContentFindParent(parent, ele_id);
         },
 
+        layoutContentFindWidget: function(_layout_cfg, widget_id){
+            return _layoutContentFindWidget(_layout_cfg, widget_id);    
+        },
+        
+        
         //replace element in layout
         layoutContentSaveElement: function(_layout_cfg, new_cfg){
             return _layoutContentSaveElement(_layout_cfg, new_cfg);    
