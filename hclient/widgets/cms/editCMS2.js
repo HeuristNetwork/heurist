@@ -143,7 +143,7 @@ function editCMS2(){
                             togglerAlign_closed:16,   //top position   
                             togglerLength_closed:80,  //height of toggler button
                             initHidden: false, //!this.options.edit_structure,   //show structure list at once 
-                            initClosed: false, //!this.options.edit_structure && (this.usrPreferences.structure_closed!=0),
+                            initClosed: true, //!this.options.edit_structure && (this.usrPreferences.structure_closed!=0),
                             slidable:false,  //otherwise it will be over center and autoclose
                             contentSelector: '.editStructure',   
                             onopen_start : function( ){ 
@@ -736,6 +736,7 @@ function editCMS2(){
                         }else if(action=='edit'){
                             
                             //add new group/separator
+                            body.layout().open('east');
                             _layoutEditElement(ele_ID);
 
                         }else if(action=='delete'){

@@ -21,7 +21,7 @@ function _prepareTemplateBlog(ele_id, new_element_json, callback){
                 var svsID = response.data;
             
             
-console.log(svsID);
+//console.log(svsID);
                 
                 //replace search realm
                 var realm_id = 'sr'+window.hWin.HEURIST4.util.random();

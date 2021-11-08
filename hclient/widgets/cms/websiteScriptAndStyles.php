@@ -394,18 +394,23 @@ if($site_css!=null){
                     function(response){
 //console.log(response);                       
                        if(window.hWin.HEURIST4.util.isJSON(response)) {
-                           var res = response['records'][0]['details'];
-                           var keys = Object.keys(res);
-                           for(var idx in keys){
-                               var key = keys[idx];
-                               res[key] = res[key][ Object.keys(res[key])[0] ];
+                           if(response['records'] && response['records'].length>0){
+                               var res = response['records'][0]['details'];
+                               var keys = Object.keys(res);
+                               for(var idx in keys){
+                                   var key = keys[idx];
+                                   res[key] = res[key][ Object.keys(res[key])[0] ];
+                               }
+                               //res[DT_NAME] = res[DT_NAME]
+                               //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS]
+    //console.log(res);                           
+                               page_cache[pageid] = res;
+                               __loadPageContent();
+                           }else if(pageid!=home_page_record_id){
+                               loadPageContent(home_page_record_id);
+                           }else{
+                               window.hWin.HEURIST4.msg.showMsgErr('Web Page not found (record #'+pageid+')');
                            }
-                           //res[DT_NAME] = res[DT_NAME]
-                           //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS]
-//console.log(res);                           
-                           page_cache[pageid] = res;
-                           __loadPageContent();
-                           
                        }else {
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                        }
