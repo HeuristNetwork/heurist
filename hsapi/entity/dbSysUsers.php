@@ -560,7 +560,7 @@ class DbSysUsers extends DbEntityBase
             return false;
         }
         
-        if($this->data['transferOwner']){
+        if(@$this->data['transferOwner']){
             return $this->transferOwner();
         }
         
