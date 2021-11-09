@@ -323,6 +323,7 @@ XML;
 
 
     //for gephi we don't need details
+    $retrieve_header_fields = null;
     $retrieve_detail_fields = ($params['format']!='gephi');
     $columns = array('0'=>array()); //for datatable
     $row_placeholder = array();
@@ -399,9 +400,10 @@ XML;
         
     }else{
         
-        if(is_array($params['columns'])){
-            $retrieve_header_fields = array();
-            $retrieve_detail_fields = array();
+        $retrieve_header_fields = array();
+        $retrieve_detail_fields = array();
+        
+        if(@$params['columns'] && is_array(@$params['columns'])){
             foreach($params['columns'] as $idx=>$col_name){
                 if(strpos($col_name,'rec_')===0){
                     array_push($retrieve_header_fields, $col_name);
@@ -436,7 +438,7 @@ XML;
         }
         $idx++;
         
-        $rty_ID = $record['rec_RecTypeID'];
+        $rty_ID = @$record['rec_RecTypeID'];
         
         //change record type to layer, remove redundant fields
         if($is_tlc_export){
@@ -463,10 +465,12 @@ XML;
             }
         }
         
-        if(!@$rt_counts[$rty_ID]){
-            $rt_counts[$rty_ID] = 1;
-        }else{
-            $rt_counts[$rty_ID]++;
+        if($rty_ID>0){
+            if(!@$rt_counts[$rty_ID]){
+                $rt_counts[$rty_ID] = 1;
+            }else{
+                $rt_counts[$rty_ID]++;
+            }
         }
         
         if($params['format']=='geojson'){
@@ -496,7 +500,7 @@ XML;
             
             if(@$params['datatable']>0){
 
-                if($need_rec_type){ // Add record type to details
+                if($need_rec_type && $rty_ID>0){ // Add record type to details
 
                    $query = 'select rty_Name from defRecTypes where rty_ID = ' . $rty_ID . ' LIMIT 1';
 
