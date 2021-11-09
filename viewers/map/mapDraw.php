@@ -371,8 +371,9 @@ console.log('load google map api')
                     imageurl = null;
                 }
 
-                if(params && params['start_tool']){
+                if(params && params['start_tool']){ // Bounding Box for Bookmarks
                     initial_tool = params['start_tool'];
+                    window.hWin.HEURIST4.msg.showMsgDlg('Please digitise a bounding box with the rectangle tool.', null, 'Bookmark\'s Bounding Box');
                 }else{
                     initial_tool = null;
                 }                
