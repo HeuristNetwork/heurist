@@ -142,9 +142,9 @@ var svg;        // The SVG where the visualisation will be executed on
             gravity: "off",
             attraction: -3000,
             
-            translatex: 0,
-            translatey: 0,
-            scale: 0.5
+            translatex: 250,
+            translatey: 250,
+            scale: 1
         }, options );
  
         // Handle settings (settings.js)
@@ -470,9 +470,9 @@ function visualizeData() {
 function addContainer() {
 
     // Zoom settings, these affect adding/removing nodes as well
-    var scale = getSetting(setting_scale,1);
-    var translateX = getSetting(setting_translatex,0);
-    var translateY = getSetting(setting_translatey,0);
+    var scale = getSetting(setting_scale, 1);
+    var translateX = getSetting(setting_translatex, 250);
+    var translateY = getSetting(setting_translatey, 250);
     
     var s ='';
     if(isNaN(translateX) || isNaN(translateY) ||  translateX==null || translateY==null ||
@@ -482,7 +482,7 @@ function addContainer() {
         translateY = 0;
     }
     s = "translate("+translateX+", "+translateY+")";    
-    if(!(isNaN(scale) || scale==null || Math.abs(scale)==Infinity || scale < 0.09) ){
+    if(!(isNaN(scale) || scale==null || Math.abs(scale)==Infinity || scale < 0.9) ){
         s = s + "scale("+scale+")";
     }
 
@@ -495,7 +495,7 @@ function addContainer() {
     this.zoomBehaviour = d3.behavior.zoom()
                            .translate([translateX, translateY])
                            .scale(scale)
-                           .scaleExtent([0.05, 10]) //settings.isDatabaseStructure?[0.75,1.5]:
+                           .scaleExtent([0.9, 2]) //settings.isDatabaseStructure ? [0.75,1.5] : [0.05, 10]
                            .on("zoom", zoomed);
                     
     return container;
@@ -545,17 +545,6 @@ function onZoom( transform ){
     
     var scale = this.zoomBehaviour.scale();
     if(isNaN(scale) || !isFinite(scale) || scale==0) scale = 1;
-    
-    d3.selectAll(".bottom-lines").style("stroke-width", 
-            function(d) { 
-                var w = getLineWidth(d.targetcount)+2; //width for scale 1
-                return (scale>1)?w:(w/scale);
-            });
-    d3.selectAll(".top-lines").style("stroke-width", 
-            function(d) { 
-                var w = (getLineWidth(d.targetcount)+2)*0.2; //width for scale 1
-                return (scale>1)?w:(w/scale);
-            });
 
     updateOverlays();
 }
