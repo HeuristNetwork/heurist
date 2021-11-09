@@ -357,7 +357,7 @@ $page_footer = null;
 $is_page_footer_fixed = true;
 $page_footer_height = 0;
 
-if(!$isWebPage){
+if(!$isWebPage){  //not standalone web page
     
     $page_header_menu =     
             '<div class="widget-design-header" style="padding: 10px;"><img style="vertical-align: middle;" height="22" />'

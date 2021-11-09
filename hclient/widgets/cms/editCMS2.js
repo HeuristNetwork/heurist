@@ -267,7 +267,7 @@ function editCMS2(){
                 onselect:function(event, data){
                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                         //reload entire site
-                        if(_editCMS_SiteMenu) _editCMS_SiteMenu._refreshWebsite();
+                        if(_editCMS_SiteMenu) _editCMS_SiteMenu.refreshWebsite();
                     }
         }});
     }

@@ -185,7 +185,7 @@ if($_is_new_cms_editor || $edit_Available){
 <?php
 }
 
-if($edit_Available){
+if($edit_Available){  //old CMS editor
 ?>
     <!--
     <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
@@ -207,7 +207,8 @@ function _dout(msg){
 var DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS;
 //
 // init page for publication version  
-// for cms version see websiteRecord.js
+// for old cms version see websiteRecord.js
+// invoked from onHapiInit
 //
 function onPageInit(success)
 {
@@ -417,25 +418,27 @@ if($site_css!=null){
                     });
                 
             }
-            return;
+            
+        }else{
+            //OLD VERSION page_target will have header (with class .webpageheading) and content  
+            
+            page_target.empty().load(window.hWin.HAPI4.baseURL+'?db='
+                +window.hWin.HAPI4.database+'&field=1&recid='+pageid,
+                function(){
+
+                    //init al widgets on this page in #main-content
+                    window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content', supp_options );
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                    if(page_footer.length>0){
+                        page_footer.appendTo( page_target );  
+                        page_target.css({'min-height':page_target.parent().height()-page_footer.height()-10 });
+                    } 
+
+                    afterPageLoad( document, pageid ); //execute custom script and custom css
+            });
+            
         }
-        
-        //OLD VERSION page_target will have header (webpageheading) and content  
-        page_target.empty().load(window.hWin.HAPI4.baseURL+'?db='
-            +window.hWin.HAPI4.database+'&field=1&recid='+pageid,
-            function(){
-
-                //init al widgets on this page in #main-content
-                window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content', supp_options );
-                window.hWin.HEURIST4.msg.sendCoverallToBack();
-
-                if(page_footer.length>0){
-                    page_footer.appendTo( page_target );  
-                    page_target.css({'min-height':page_target.parent().height()-page_footer.height()-10 });
-                } 
-
-                afterPageLoad( document, pageid ); //execute custom script and custom css
-        });
 
     }
 }
@@ -519,8 +522,8 @@ function afterPageLoad(document, pageid){
     if(DT_CMS_SCRIPT>0){
         var func_name = 'afterPageLoad'+pageid;
     
-        var script = page_cache[pageid][DT_CMS_SCRIPT];
-        if(script && script !== false){ //false means it is already inited
+        var script_code = page_cache[pageid][DT_CMS_SCRIPT];
+        if(script_code && script_code !== false){ //false means it is already inited
         
             //add script to header
             
@@ -529,7 +532,7 @@ function afterPageLoad(document, pageid){
             script.innerHTML = 'function '+func_name 
             +'(document, pageid){\n'
             //+' console.log("run script for '+pageid+'");\n'
-            +'try{\n' + data + '\n}catch(e){}}';
+            +'try{\n' + script_code + '\n}catch(e){}}';
             //s.src = "http://somedomain.com/somescript";
             $("head").append(script);
             
@@ -544,7 +547,8 @@ function afterPageLoad(document, pageid){
         }
     }
 
-    if(!is_embed){    
+    if(!is_embed){ 
+        // add current page as url parameter in browser url
 
         var spath= location.pathname;
         while (spath.substring(0, 2) === '//') spath = spath.substring(1);
@@ -785,7 +789,7 @@ function performCaptcha(){
 
 
 //
-//
+//  open/hides side panel with NEW CMS editor controls  (see link #btnOpenCMSeditor in cmsTemplate.php)
 //
 function _openCMSeditor(event){
     
@@ -824,11 +828,11 @@ var gtag = null;//google log - DO NOT REMOVE
 $(document).ready(function() {
     
         var ele = $('body').find('#main-content');
-        window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
+        window.hWin.HEURIST4.msg.bringCoverallToFront(ele);//
         ele.show();
     
         $('body').find('#main-menu').hide(); //will be visible after menu init
-
+                
 /*          
         if(is_show_pagetitle){
             $('body').find('#main-pagetitle').show();

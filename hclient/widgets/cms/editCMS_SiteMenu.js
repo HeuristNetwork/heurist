@@ -630,7 +630,7 @@ console.log('!!! '+current_page_id);
     // reload entire website 
     //
     function _refreshWebsite(){
-        
+        location.reload();
     }
         
 
@@ -656,7 +656,12 @@ console.log('!!! '+current_page_id);
         
         renameMenuEntry: function (rec_id, newvalue, callback){
             _renameMenuEntry(rec_id, newvalue, callback);
+        },
+        
+        refreshWebsite: function(){
+            _refreshWebsite();
         }
+
     }
 
     _init();
