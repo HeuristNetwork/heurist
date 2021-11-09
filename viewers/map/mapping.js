@@ -281,7 +281,7 @@ $.widget( "heurist.mapping", {
             if(is_ui_main){
                 
                 window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane',
-                                    ['east', (top ?  '85%' : window.innerWidth)]);
+                                    ['east', (top ?  '75%' : window.innerWidth)]);
                 
                 layout_opts.north__size = 36;
             }

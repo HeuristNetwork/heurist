@@ -1507,9 +1507,9 @@ $.widget( "heurist.resultList", {
             
             var hint = __getOwnerName(owner_id)+', '+window.hWin.HR(visibility);
 
-            // Displays oner group ID, green if hidden, gray if visible to others, red if public visibility
+            // Displays owner group ID, green if hidden, gray if visible to others, red if public visibility
             html_owner =  '<span class="rec_owner logged-in-only" style="width:20px;padding-top:2px;display:inline-block;color:'
-                     + clr + '" title="' + hint + '"><b>' + (owner_id==0?'':owner_id) + '</b></span>';
+                     + clr + '" title="' + hint + '"><b>' + owner_id + '</b></span>';
             
             if(clr != 'blue')         
             html_owner =  html_owner + '<span class="ui-icon ui-icon-cancel" '
