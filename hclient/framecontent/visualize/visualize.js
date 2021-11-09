@@ -425,8 +425,9 @@ function visualizeData() {
 
     // Lines 
     addMarkerDefinitions(); //markers/arrows on lines
-    addLines("bottom-lines", getSetting(setting_linecolor, '#000'), 2);
-    addLines("top-lines", "#FFF", 2); //small line that is visible for repeating fields
+    addLines("bottom-lines", getSetting(setting_linecolor, '#000'), 2); // larger than top-line, shows connections
+    addLines("top-lines", "#FFF", 2); // small line that, if visible, shows if a field can have multiple values
+    addLines("rollover-line", "#FFF", 3); // invisible thicker line for rollover
    
     // Nodes
     addNodes();
@@ -707,7 +708,7 @@ function addLines(name, color, thickness) {
             return name + " link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
         })
         .attr("stroke", function (d) {
-            if(hide_empty && d.targetcount == 0){
+            if(hide_empty && d.targetcount == 0 || name === 'rollover-line'){
                 return 'rgba(255, 255, 255, 0.0)'; //hidden
             }else if(d.targetcount == 0 && name === 'bottom-lines') {
                 return '#d9d8d6';
@@ -718,11 +719,13 @@ function addLines(name, color, thickness) {
             }
         })
         .style("stroke-width", function(d) { 
-             var w = getLineWidth(d.targetcount)+2; //width for scale 1
-             if(name == 'top-lines'){
+            var w = getLineWidth(d.targetcount)+thickness; //width for scale 1
+            if(name == 'top-lines'){
                 w = w*0.2;
-             }
-             return (scale>1)?w:(w/scale);
+            }else if(name == 'rollover-line'){
+                w = w*3;
+            }
+            return (scale>1)?w:(w/scale);
         });
          
     // visible line, pointing from one node to another
@@ -736,17 +739,20 @@ function addLines(name, color, thickness) {
         });
     }
     
-    lines.on("mouseover", function(d) {
-        //console.log(d.relation.id);  //field type id           
-        if(!(hide_empty && d.targetcount == 0)){
+    if(name == 'rollover-line'){
+
+        lines.on("mouseover", function(d) {
+
+            if(!(hide_empty && d.targetcount == 0)){
+                var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+                createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));
+            }
+        })
+        .on("mouseout", function(d) {
             var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-            createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));
-        }
-    })
-    .on("mouseout", function(d) {
-        var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-        removeOverlay(selector, 0);
-    });
+            removeOverlay(selector, 0);
+        });
+    }
 
     return lines;
 }
@@ -755,21 +761,25 @@ function addLines(name, color, thickness) {
 * Updates the correct lines based on the linetype setting 
 */
 function tick() {
-    
-    //not used anymore 
+
+    //grab each set of lines
     var topLines = d3.selectAll(".top-lines"); 
     var bottomLines = d3.selectAll(".bottom-lines");
-    
+    var rolloverLines = d3.selectAll(".rollover-line");
+
     var linetype = getSetting(setting_linetype, 'straight');
     if(linetype == "curved") {
         updateCurvedLines(topLines);
-        updateCurvedLines(bottomLines);     
+        updateCurvedLines(bottomLines);
+        updateCurvedLines(rolloverLines);
     }else if(linetype == "stepped") {
         updateSteppedLines(topLines, 'top');
-        updateSteppedLines(bottomLines,'bottom'); //with marker
+        updateSteppedLines(bottomLines, 'bottom');
+        updateSteppedLines(rolloverLines, 'top');
     }else{
         updateStraightLines(topLines);
-        updateStraightLines(bottomLines);   
+        updateStraightLines(bottomLines);
+        updateStraightLines(rolloverLines);
     }
     
     // Update node locations
