@@ -1341,13 +1341,13 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
 // $menuitems - record ids
 // fills $result array recursively with record ids and returns full detail at the end
 //
-function recordSearchMenuItems($system, $menuitems, &$result, $ids_only=false){
+function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=false, $ids_only=false){
 
     $system->defineConstants();
 
     $menuitems = prepareIds($menuitems, true);
     $isRoot = (count($result)==0); //find any first CMS_HOME (non hidden)
-    if($isRoot){
+    if($isRoot && $find_root_menu){
         if(!($system->defineConstant('RT_CMS_HOME') &&
         $system->defineConstant('DT_CMS_MENU') && 
         $system->defineConstant('DT_CMS_TOP_MENU'))){
@@ -1358,7 +1358,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $ids_only=false){
         //if root record is menu - we have to find parent cms home
         if(count($menuitems)==1){
             if($menuitems[0]==0){
-                //find first home record
+                //find ANY first home record
                 $response = recordSearch($system, array('q'=>'t:'.RT_CMS_HOME, 'detail'=>'ids', 'w'=>'a'));
                 
                 if($response['status'] == HEURIST_OK  && count($response['data']['records'])>0){

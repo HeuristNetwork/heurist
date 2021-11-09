@@ -362,7 +362,7 @@ function editCMS( options ){
 
         if(window.hWin.HEURIST4.util.isnull(request))
         {
-            var request = {a:'cms_menu'};
+            var request = {a:'cms_menu', main_menu:1};
             if(home_page_record_id>0){
                 request['ids'] = home_page_record_id;
             }else{

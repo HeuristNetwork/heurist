@@ -300,6 +300,7 @@ function initMainMenu( afterInitMainMenu ){
 
     var lopts = {  
                 menu_recIDs: home_page_record_id, 
+                main_menu: true, //search for RT_CMS_HOME as root
                 use_next_level: true, 
                 orientation: 'horizontal',
                 toplevel_css: {background:'none'}, //bg_color 'rgba(112,146,190,0.7)'
@@ -828,7 +829,7 @@ var gtag = null;//google log - DO NOT REMOVE
 $(document).ready(function() {
     
         var ele = $('body').find('#main-content');
-        window.hWin.HEURIST4.msg.bringCoverallToFront(ele);//
+        window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
         ele.show();
     
         $('body').find('#main-menu').hide(); //will be visible after menu init
@@ -893,7 +894,7 @@ $mainmenu_content = null;
 
 $ids_was_added = array();
 $resids = array();
-$records = recordSearchMenuItems($system, array($home_page_on_init), $resids, true);
+$records = recordSearchMenuItems($system, array($home_page_on_init), $resids, true, true);
 if(is_array($records) && !@$records['status']){
 $mainmenu_content = _getMenuContent(0, array($home_page_on_init), 0);     
 $mainmenu_content = '<ul>'.$mainmenu_content.'</ul>';

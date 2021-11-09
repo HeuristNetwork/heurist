@@ -116,7 +116,7 @@
     }else if(@$_REQUEST['a'] == 'cms_menu'){  //retrieve all child cms entries for given menu entries
         
         $resids = array();
-        $response = recordSearchMenuItems($system, $_REQUEST['ids'], $resids);
+        $response = recordSearchMenuItems($system, $_REQUEST['ids'], $resids, (@$_REQUEST['main_menu']==1) );
         
     /* not implemented
     }else if(@$_REQUEST['a'] == 'map_document'){  //retrieve all layers and datasource records fro given map document

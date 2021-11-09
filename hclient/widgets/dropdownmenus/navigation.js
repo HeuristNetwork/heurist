@@ -22,9 +22,10 @@ $.widget( "heurist.navigation", {
 
     options: {
        menu_recIDs:[],  //top level menu records
+       main_menu: false, //search for RT_CMS_HOME as root
        orientation: 'horizontal', //vertical or treeview
        target: 'inline', // or popup 
-       use_next_level: true,  //if top level consists of the single entry use next level of menues
+       use_next_level: false,  //if top level consists of the single entry use next level of menues
        onmenuselect: null,   //for cms edit mode it performs special behavior
        aftermenuselect: null,
        toplevel_css:null,  //css for top level items
@@ -85,7 +86,7 @@ $.widget( "heurist.navigation", {
             this.element.fancytree(fancytree_options).addClass('tree-cms');
 
         }else{
-
+            
             this.divMainMenu = $("<div>").appendTo(this.element);
             
             // MAIN MENU-----------------------------------------------------
@@ -132,7 +133,7 @@ $.widget( "heurist.navigation", {
             id: window.hWin.HEURIST4.util.random(),
             source:this.element.attr('id') };
             */
-        var request = {ids:ids, a:'cms_menu'};
+        var request = {ids:ids, a:'cms_menu', main_menu: this.options.main_menu?1:0 };
         var that = this;
             
             

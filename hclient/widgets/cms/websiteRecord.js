@@ -254,6 +254,7 @@ function hCmsEditing(_options) {
                 LayoutMgr.appInitFromContainer( document, topmenu.parent(),
                     {heurist_Navigation:{menu_recIDs:home_pageid
                     , use_next_level:true
+                    , main_menu: true 
                     , orientation:'horizontal'
                     , onmenuselect:__iniLoadPageById    //load page on select menu item
                     //aftermenuselect: afterPageLoad,  //function in header websiteRecord.php
@@ -718,6 +719,7 @@ function hCmsEditing(_options) {
                 LayoutMgr.appInitFromContainer( null, main_header, //was document, "#main-header",
                     {heurist_Navigation:{menu_recIDs:home_pageid
                     , use_next_level:true
+                    , main_menu: true
                     , orientation:'horizontal'
                     , onmenuselect:__iniLoadPageById
                     //, toplevel_css:{background:bg_color}
