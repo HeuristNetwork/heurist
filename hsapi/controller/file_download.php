@@ -62,9 +62,11 @@ if($db){
             //recreate thumbnail and output it
             $system->init($db);
             fileCreateThumbnail( $system, $fileid, true );
+            $system->dbclose();
         }
 
-    }else if(@$_REQUEST['file'] || @$_REQUEST['ulf_ID']) { //ulf_ID need for backward support of old downloadFile.php
+    }
+    else if(@$_REQUEST['file'] || @$_REQUEST['ulf_ID']) { //ulf_ID need for backward support of old downloadFile.php
 
         $fileid = @$_REQUEST['file']? $_REQUEST['file'] :@$_REQUEST['ulf_ID'];
         $size = @$_REQUEST['size'];
@@ -95,7 +97,11 @@ if($db){
                 
         }    
         
-        $system->init($db);
+        if(!$system->init($db, true, false)){
+            exit;
+        }
+        
+        $system->initPathConstants($db);
 
         //find
         $listpaths = fileGetFullInfo($system, $fileid);
@@ -200,6 +206,8 @@ if($db){
 //DEBUG
             error_log('Filedata not found '.$fileid);
         }
+        
+        $system->dbclose();
 
     }
     else if (@$_REQUEST['rurl']){ //

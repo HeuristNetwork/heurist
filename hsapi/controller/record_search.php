@@ -157,6 +157,8 @@
         
         }
     }
+    
+    $system->dbclose();
 
 // Return the response object as JSON
 $system->setResponseHeader();

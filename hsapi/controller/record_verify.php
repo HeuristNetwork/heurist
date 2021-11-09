@@ -55,7 +55,7 @@
                 $response = RecordsDupes::findDupes( $_REQUEST );    
             }
 
-            
+            $system->dbclose();
             
             if( is_bool($response) && !$response ){
                 $response = $system->getError();

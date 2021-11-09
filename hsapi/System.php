@@ -102,6 +102,14 @@ class System {
         $connection_ok = $this->init_db_connection();
         if($connection_ok!==false){
                 //connection OK
+                
+                if($this->dbname_full){
+                        if(!defined('HEURIST_DBNAME')){ //init once for first system - preferable use methods 
+                            define('HEURIST_DBNAME', $this->dbname);
+                            define('HEURIST_DBNAME_FULL', $this->dbname_full);
+                        }
+                }
+                
                 if($init_session_and_constants){
                 
                     if(!$this->start_my_session()){
@@ -109,11 +117,6 @@ class System {
                     }
                     
                     if($this->dbname_full){
-                    
-                        if(!defined('HEURIST_DBNAME')){ //init once for first systrem - preferable use methods 
-                            define('HEURIST_DBNAME', $this->dbname);
-                            define('HEURIST_DBNAME_FULL', $this->dbname_full);
-                        }
 
                         if(!$this->initPathConstants()){
                             return false;
@@ -145,6 +148,8 @@ error_log(print_r($_REQUEST, true));
 */            
             $this->is_inited = true;
             return true;
+        }else{
+            return false;
         }
 
     }
@@ -175,6 +180,19 @@ error_log(print_r($_REQUEST, true));
         }
         return $res;
     }
+    
+    //
+    //
+    //
+    public function dbclose(){
+    
+        if($this->mysqli && isset($this->mysqli->server_info)){
+            $this->mysqli->close();  
+        } 
+        $this->mysqli = null;
+        
+    }
+
 
     //------------------------- RT DT CONSTANTS --------------------
     /**
@@ -816,6 +834,8 @@ error_log(print_r($_REQUEST, true));
     */
     public function error_exit( $message, $error_code=null) {
         
+        $this->dbclose();
+        
         header('Content-type: application/json;charset=UTF-8');
         if($message){
             if($error_code==null){
@@ -831,6 +851,8 @@ error_log(print_r($_REQUEST, true));
 
 
     public function error_exit_api( $message=null, $error_code=null) {
+        
+        $this->dbclose();
         
         header("Access-Control-Allow-Origin: *");
         header('Content-type: application/json;charset=UTF-8');

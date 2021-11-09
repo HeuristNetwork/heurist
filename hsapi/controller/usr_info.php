@@ -309,6 +309,7 @@
 
         }
         
+        $system->dbclose();
     }
     
     if(is_bool($res) && !$res){

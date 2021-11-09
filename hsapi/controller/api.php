@@ -123,7 +123,8 @@ if ($entities[$requestUri[2]]=='System') {
     }else if($requestUri[2]==='logout'){
         $system->doLogout();
     }
-
+    
+    $system->dbclose();
 }
 else
 {

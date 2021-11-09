@@ -290,6 +290,8 @@ error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());
             HEURIST_NOT_FOUND); 
     }
     
+    $system->dbclose();
+    
 //
 //
 //

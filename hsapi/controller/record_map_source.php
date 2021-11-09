@@ -43,13 +43,14 @@
     $parser_parms = array();
     
     $input_format = null;
+
+    if(!(@$params['recID']>0)){
+        $system->error_exit_api('recID parameter is not defined or has wrong value'); //exit from script
+    }
     
     if( ! $system->init(@$params['db']) ){
         //get error and response
         $system->error_exit_api(); //exit from script
-    }
-    if(!(@$params['recID']>0)){
-        $system->error_exit_api('recID parameter is not defined or has wrong value'); //exit from script
     }
     $system->defineConstants();
     
@@ -62,6 +63,7 @@
     //load record with details and 2 header fields
     $record = recordSearchByID($system, $params['recID'], true, "rec_ID, rec_RecTypeID");
     //array(DT_KML, DT_KML_FILE, DT_FILE_RESOURCE));
+    
     if (@$record['details'] &&
        (@$record['details'][DT_KML] || @$record['details'][DT_KML_FILE] || @$record['details'][DT_FILE_RESOURCE]))
     {
@@ -352,4 +354,6 @@
     }else{
         $system->error_exit_api('Database '.$params['db'].'. Record '.$params['recID'].' does not have data for KML/CSV snipppet or file');
     }
+    
+    $system->dbclose();
 ?>

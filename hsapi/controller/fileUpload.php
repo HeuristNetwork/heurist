@@ -297,6 +297,8 @@ if($response!=null){
     header('Content-type: application/json;charset=UTF-8');
     print json_encode($response);
 
+    $system->dbclose();
+    
 //------------
 //  NOT USED. verification of uploaded file integrated with UploadHandler
 //    

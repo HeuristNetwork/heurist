@@ -87,6 +87,8 @@ if( $system->init(@$_REQUEST['db']) ){
                 
             }
     
+    $system->dbclose();
+    
     $response = array("status"=>HEURIST_OK, 'data'=>$response, 'message'=>$invalid_mask );            
             
 }else{   

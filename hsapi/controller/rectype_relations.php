@@ -42,6 +42,8 @@
             $links = getLinks($system, $rectypes);
             $result->links = $links;
             
+            $system->dbclose();
+            
             // Returning result as JSON
             header('Content-type: application/json');
             print json_encode($result);

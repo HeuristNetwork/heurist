@@ -82,6 +82,8 @@
         }
         
         $dbRecDetails->removeSession();
+        
+        $system->dbclose();
     }
 
     

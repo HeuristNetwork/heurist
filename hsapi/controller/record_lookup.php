@@ -29,7 +29,11 @@
 
     $params = $_REQUEST;
 
-    if( !$system->init(@$params['db']) ){
+    if(!(@$params['service'])){
+        $system->error_exit_api('Service parameter is not defined or has wrong value'); //exit from script
+    }
+    
+    if( !$system->init(@$params['db']) ){  //@todo - we don't need db connection here - it is enough check the session
         //get error and response
         $system->error_exit_api(); //exit from script
     }else if ( $system->get_user_id()<1 ) {
@@ -37,10 +41,8 @@
         //$response = $system->addError(HEURIST_REQUEST_DENIED);
     }
 
-    if(!(@$params['service'])){
-        $system->error_exit_api('Service parameter is not defined or has wrong value'); //exit from script
-    }
-
+    $system->dbclose();
+    
     $url = $params['service'];
     $remote_data = loadRemoteURLContent($url, true);    
     if($remote_data===false){

@@ -49,6 +49,8 @@
         }else {
             $res = entityExecute($system, $_REQUEST);
         }
+        
+        $system->dbclose();
     }
 
     header("Access-Control-Allow-Origin: *");

@@ -101,6 +101,8 @@
                 $response = $system->addError(HEURIST_INVALID_REQUEST);
             }
         }
+        
+        $system->dbclose();
     }
     
 if($response==false){
