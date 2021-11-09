@@ -95,14 +95,26 @@ if($fh_data==null || is_string($fh_data)){
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Zotero synchronization</title>
-<!--
+
+        <!-- jQuery UI -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
--->        
+ 
+        <!-- Heurist -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
         <!-- CSS -->
         <?php include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
+
+        <style type="text/css">
+            .tbl-head > td {
+                padding-top: 10px;
+            }
+
+            .ui-accordion-header.ui-state-active .ui-icon {
+                background-image: url('<?php echo PDIR;?>external/jquery-ui-themes-1.12.1/themes/base/images/ui-icons_444444_256x240.png') !important;
+            }
+        </style>
 
         <script>
             function __showLoading(){
@@ -118,6 +130,18 @@ if($fh_data==null || is_string($fh_data)){
                         location.reload();
                     }}); 
                return false; 
+            }
+
+            function showMappingReport(){
+
+                var $report_ele = $('#mapping_report');
+                if($report_ele.is(':hidden')){
+                    $report_ele.show();
+                    $('.report-btn').text('Hide Report');
+                }else{
+                    $report_ele.hide();
+                    $('.report-btn').text('Show Report');
+                }
             }
         </script>
     </head>
@@ -148,8 +172,10 @@ if($fh_data==null || is_string($fh_data)){
         $api_Key = null;
         $mapping_dt = null;
         $mapping_rt = array();
-        $mapping_dt_errors = array();
-        $mapping_rt_errors = array();
+        $warning_count = 0;
+        $mapping_errors = array();
+        $transfer_errors = array();
+        $successful_rows = array();
         $mapping_rt_errors2 = array();
         $rep_errors_only = true;
 
@@ -213,8 +239,12 @@ $is_verbose = true;
 
 if($is_verbose){
     $rectypes = dbs_GetRectypeStructures($system, null, 2);
-    print '<table style="display:none" id="mapping_report">';
+    print '<div id="mapping_report" style="display: none;">';
 }
+
+$mapping_errors = [];
+$transfer_errors = [];
+$successful_rows = [];
 
 // 2) verify heurist codes in mapping and create mapping array
 foreach ($fh_data->children() as $f_gen){
@@ -228,13 +258,12 @@ foreach ($fh_data->children() as $f_gen){
 
                     $zType = strval($arr['zType']);
                     // find record type with such code (or concept code)
+                    $org_rt_id = strval($arr[H_ID]);
                     $rt_id = ConceptCode::getRecTypeLocalID($arr[H_ID]);
                     
-                    printMappingReport_rt($arr, $rt_id);                    
-                    
-                    if($rt_id == null){
-                        array_push($mapping_rt_errors, $arr[H_ID]."  ".$zType);
-                    }else{
+                    printMappingReport_rt($arr, $rt_id);
+
+                    if($rt_id != null){
 
                         $mapping_dt = array();
 
@@ -249,20 +278,21 @@ foreach ($fh_data->children() as $f_gen){
                                             $arr = $f_ctype->attributes();
                                             if(@$arr[H_ID])
                                             {
-                                                addMapping($arr, $zType, $rt_id); //, "creator");
+                                                addMapping($arr, $zType, $rt_id, $org_rt_id);
                                             }
                                         }
                                     }
 
                                 }else if(@$arr[H_ID])
                                 {
-                                    addMapping($arr, $zType, $rt_id);
+                                    addMapping($arr, $zType, $rt_id, $org_rt_id);
                                 }
                             }
                         }
 
                         if(count($mapping_dt)<1){
                             array_push($mapping_rt_errors2, $zType);
+                            $warning_count ++;
                         }else{
                             $mapping_dt["h3rectype"] = $rt_id;
                             $mapping_rt[$zType] = $mapping_dt;
@@ -275,9 +305,47 @@ foreach ($fh_data->children() as $f_gen){
     }
 }///foreach
 
+if($step=="1"){  // info about current status
+    // show mapping and transfer issues report, also show the success mappings+transfers
+    if(count($mapping_rt_errors2)>0 || count($mapping_errors)>0 || count($transfer_errors)>0){
+
+        if(count($mapping_errors)>0){
+            print "<strong>Data not mapped</strong><br>";
+            print "<em>The following data has not been mapped for transfer from Zotero to Heurist.<br>If you require these record types or fields to be mapped,<br>please email a list to the Heurist team (support at HeuristNetwork.org).</em><br>";
+            print "<br><table>".implode("",$mapping_errors)."</table><br>";
+        }
+        if(count($transfer_errors)>0){
+            print "<strong>Data not transfered</strong><br>";
+            print "<em>The following fields in Zotero have been mapped into the Heurist database but will<br>not be saved as the record type does not contain a field to hold them. If you fell that<br>any of these fields are needed, you may add the indicated base field to the record<br>type. Contact the Heurist team (support at HeuristNetwork.org) if you require help<br>with this.</em><br>";
+            print "<br><table>".implode("", $transfer_errors)."</table><br>";
+        }
+        if(count($mapping_rt_errors2)>0){
+            print "<p style='color:red'><br />No proper field mapping found for record types:";
+            print "<br><br>".implode("<br />",$mapping_rt_errors2).'</p>';
+        }
+
+        print "<p style='color: red;margin-top: 0px;'>Please import them from the Heurist_Reference_Set database (# 3) using Database > Structure > From Databases</p>";
+    }
+
+    if(count($successful_rows)>0){
+
+        print "<div id='success-accordion'><h3><strong>Data mapped for transfer</strong></h3>";
+        print "<div><table>".implode("", $successful_rows)."</table></div></div><br><br>";
+
+        // Make this section an accordion (jQuery UI)
+        print '<script> $("#success-accordion").accordion({collapsible: true, heightStyle: "content", active: false});';
+        print '$("#success-accordion").find(".ui-accordion-content").css({background: "none", border: "none"});';
+        print '$("#success-accordion").find(".ui-accordion-header").css({color: "black", "font-size": "larger", "padding-left": "0px"});';
+        print '</script>';
+    }
+}
+
+print '</div>';
+
 if($is_verbose){
-    print '</table><br><br>';
-    print 'Mapping check passed. <button class="h3button" onclick="{document.getElementById(\'mapping_report\').style.display=\'block\';}">Show report</button><br><br>';
+    print '<div>Mapping check completed. '.$warning_count.' warnings';
+    print '<button class="h3button report-btn" onclick="showMappingReport()" style="margin-left: 10px;">Show report</button>';
+    print '</div><br>';
 }
 
 
@@ -293,7 +361,6 @@ $zotero = new phpZotero($api_Key);
 
 print "<div><b>zotero has been initiated with api key [$api_Key]</b></div>";
 print '<br><a href="#" onclick="open_sysIdentification()">Click here to modify properties which determine Zotero connection</a><br><br>';
-
 
 /* test connection
 $items = $zotero->getItemsTop($group_ID,
@@ -331,7 +398,6 @@ if($step=="1"){  //first step - info about current status
         $msg = "<div class='ui-state-error' style='padding:20px'>Error. Cannot connect to Zotero API: returns response code: $code.<br /><br />";
         if($code==400 || $code==401 || $code==403){
             $msg = $msg."Please verify Zotero API key in Database > Properties - it may be incorrect or truncated.";
-
         }else if($code==404 ){
             $msg = $msg."Please verify Zotero User and Group ID in Database > Properties - values may be incorrect.";
         }else if($code==407 ){
@@ -349,44 +415,17 @@ if($step=="1"){  //first step - info about current status
         //it does not work anymore
         //intval(substr($items,strpos($items, "<zapi:totalResults>") + 19,strpos($items, "</zapi:totalResults>") - strpos($items, "<zapi:totalResults>") - 19));
         //Responses for multi-object read requests will include a custom HTTP header, Total-Results
+
         $totalitems = $zotero->getTotalCount();
 
         //print $items;
 
         print "<div>Count items in Zotero: $totalitems</div>";
         if($totalitems>0){
-            print "<div id='divStart2'><br /><br /><a href='syncZotero.php?step=2&cnt=".$totalitems."&db=".HEURIST_DBNAME.
-            "&lib_key=".$lib_key_idx."' onclick='__showLoading()'><button class='h3button'>Start</button></a></div>";
+            print "<div id='divStart2'><br><a href='syncZotero.php?step=2&cnt=".$totalitems."&db=".HEURIST_DBNAME.
+            "&lib_key=".$lib_key_idx."' onclick='__showLoading()'><button class='h3button'>Start</button></a></div><br><br>";
             print "<div id='divLoading' style='display:none;height:40px;background-color:#FFF; background-image: url(../../hclient/assets/loading-animation-white.gif);background-repeat: no-repeat;background-position:50%;'>loading...</div>";
         }
-
-
-
-        // 2) show mapping issues report
- if(count($mapping_rt_errors)>0 || count($mapping_rt_errors2)>0 || count($mapping_dt_errors)>0){
-
-            /* old version of message
-            print "<div style='color:red'><br />
-            The following record types required for Zotero synchronisation are not present in your database
-            Synchronisation requires bibliographic record types to be defined in the database (Zotero to Heurist type mappings are defined in the code at /import/biblio/zoteroMap.xml).";
-            */
-
-            if(count($mapping_rt_errors)>0){
-                print "<p style='color:red'>The following record types required for Zotero synchronisation are not present in your database:";
-                print "<br />".implode("<br />",$mapping_rt_errors).'</p>';
-            }
-            if(count($mapping_rt_errors2)>0){
-                print "<p style='color:red'><br />No proper field mapping found for record types:";
-                print "<br />".implode("<br />",$mapping_rt_errors2).'</p>';
-            }
-            if(count($mapping_dt_errors)>0){
-                print "<p style='color:red'><br />Issues with base field (detail) types:<br />".implode("<br />",$mapping_dt_errors).'</p>';
-            }
-
-            print "<p style='color:red'>Please import them from the Heurist_Reference_Set database (# 3) using Database > Structure > From Databases</p>";
-            print "</div>";
-        }
-
     }
 }else if ($step=='2'){ //second step - sync
 
@@ -868,40 +907,48 @@ if($step=="1"){  //first step - info about current status
 * @param mixed $arr - attributes
 * @param mixed $zType - zotero type
 */
-function addMapping($arr, $zType, $rt_id)
+function addMapping($arr, $zType, $rt_id, $org_rt_id)
 {
 
-    global $mapping_dt, $mapping_dt_errors;
+    global $mapping_dt, $mapping_errors, $warning_count;
 
     $dt_code = strval($arr[H_ID]);
     $resource_rt_id = null;
     $resource_dt_id = null;
+
+    $extra_info = array(); // [0] => Zotero rectype id, [1] => Zotero rectype name, [2] => field id, [3] => field name
+    array_push($extra_info, $org_rt_id, $zType, $dt_code, $arr['value']);
     
     //pointer mapping
     if(strpos($dt_code,".")>0){
 
-        $res = getResourceMapping($dt_code, $rt_id, $arr);
+        $res = getResourceMapping($dt_code, $rt_id, $arr, $extra_info);
         if(is_array($res)){
             $mapping_dt[strval($arr['value'])] = $res;
         }else{
-            //not found
-            array_push($mapping_dt_errors, $arr['value'].$res." in ".$zType);
+
+            // Resource, NOT FOUND
+            if(array_key_exists($dt_code, $mapping_errors)){
+
+                if(strpos($mapping_errors[$dt_code], $dt_err_str) === false){
+                    $mapping_errors[$dt_code] = str_replace("</td></tr>", "", $mapping_errors[$zType]).", ".$res."</td></tr>";
+                    $warning_count ++;
+                }
+            }else{
+                $mapping_errors[$dt_code] = "<tr><td colspan='3'><strong>".$zType." (".$org_rt_id."):</strong></td><td colspan='4'>".$res."</td></tr>";
+                $warning_count ++;
+            }
         }
 
     }else{
 
         $dt_id = ConceptCode::getDetailTypeLocalID($dt_code);
 
-        if($dt_id == null){
-            //not found
-            array_push($mapping_dt_errors, $arr['value']." detail type not found ".$dt_code." in ".$zType);
-        }else{
+        if($dt_id != null){
             $mapping_dt[strval($arr['value'])] = $dt_id;
         }
         
-        printMappingReport_dt($arr, $rt_id, $dt_id);
-        
-
+        printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info);        
     }
 }
 
@@ -909,69 +956,118 @@ function addMapping($arr, $zType, $rt_id)
 //
 //
 function printMappingReport_rt($arr, $rt_id){
-    global $rectypes, $is_verbose;
+    global $rectypes, $is_verbose, $mapping_errors, $successful_rows, $warning_count;
     
     if($is_verbose){
+
+        $table_class = (is_object($arr) && $rt_id != null) ? 'tbl-head' : 'tbl-row';
         
-            if(is_object($arr)){
-                $zType = strval($arr['zType']);
-                $code = $arr[H_ID];
-            }else{
-                $zType = '->';
-                $code = $arr;
-            }
-        
-        
-        
-        //' '.print_r($arr,true).
-        print '<tr><td colspan=2><b>'.$zType.'</b></td><td><b>'.$code.'</b></td>';
-        if($rt_id==null){
-            print '<td>NOT FOUND'.'</td><td></td>';
+        if(is_object($arr)){
+            $zType = strval($arr['zType']);
+            $code = $arr[H_ID];
         }else{
-            print '<td>'.$rectypes['names'][$rt_id].'</td><td>'.$rt_id.'</td>';                                   
+            $zType = '->';
+            $code = $arr;
         }
-        print '</tr>';
+
+        if($rt_id==null){ // NOT FOUND
+            
+            $rt_id = strval($code);
+            
+            if($zType == '->'){
+                return; // will get covered during resource field handling
+            }else{
+                $mapping_errors[$zType] = "<tr class='".$table_class."'><td colspan='3'><strong>".$zType." (".$rt_id."):</strong></td><td colspan='4'>no field mappings available</td></tr>";
+                $warning_count ++;
+            }
+        }else{
+            $successful_rows[] = "<tr class='".$table_class."'><td colspan='2'><strong>".$zType."</strong></td><td><strong>".$code."</strong></td>"
+                                ."<td><strong>&rArr;".$rectypes['names'][$rt_id]."</strong></td><td><strong>".$rt_id."</strong></td></tr>";
+        }
     }                    
 }
 
 //
 //
 //
-function printMappingReport_dt($arr, $rt_id, $dt_id){
-    global $rectypes, $is_verbose;
+function printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info){
+    global $rectypes, $is_verbose, $mapping_errors, $transfer_errors, $successful_rows, $warning_count;
     
     if($is_verbose){
         
-            if(is_object($arr)){
-                $label = $arr['value'];
-                $code = $arr[H_ID];
-            }else{
-                $label = '';
-                $code = $arr;
+        if(is_object($arr)){
+            $label = $arr['value'];
+            $code = $arr[H_ID];
+        }else if(is_array($arr)){
+            $label = $arr[3][0];
+            $code = $arr[2];
+        }else{
+            $label = '';
+            $code = $arr;
+
+            if(is_array($arr)){ error_log(print_r($arr, TRUE)); }
+        }
+
+        if($extra_info == null){
+            if(is_array($arr)){
+                $extra_info = $arr;
             }
-    
-            //&nbsp;&nbsp;&nbsp;
-            print '<tr><td></td><td>'.$label.'</td><td>'.$code.'</td>';
-            if($dt_id==null){
-                print '<td>NOT FOUND'.'</td><td></td>';
+        }
+
+        if(is_array($extra_info)){
+
+            if(is_empty($extra_info[0])){
+                $extra_info[0] = $rt_id;
+            }            
+            if($label == ''){
+                $dt_str = $extra_info[3][0]."(".$code.")";
             }else{
-                if(@$rectypes['typedefs'][$rt_id]['dtFields'][$dt_id]){
-                    print '<td>'.$rectypes['typedefs'][$rt_id]['dtFields'][$dt_id][0].'</td><td>'.$dt_id.'</td>';                                       
+                $dt_str = $label."(".$code.")";
+            }
+        }
+
+        if($dt_id==null){
+
+            if($extra_info != null){
+
+                if(array_key_exists($extra_info[1], $mapping_errors)){ // NOT FOUND
+
+                    if(strpos($mapping_errors[$extra_info[1]], $dt_str) === false){ // Check if field is already listed
+                        $mapping_errors[$extra_info[1]] = str_replace("</td></tr>", "", $mapping_errors[$extra_info[1]]).", ".$dt_str."</td></tr>";
+                        $warning_count ++;
+                    }
                 }else{
-//print print_r($rectypes['typedefs'][$rt_id]['dtFields'][$dt_id],true);                    
-//$is_verbose=false;
-                    print '<td>NOT FOUND IN RECORD TYPE STRUCTURE</td><td>'.$dt_id.'</td>';                                   
+                    $mapping_errors[$extra_info[1]] = "<tr class='tbl-row'><td colspan='3'><strong>".$extra_info[1]." (".$extra_info[0]."):</strong></td><td colspan='4'>unmapped fields: ".$dt_str."</td></tr>";
+                    $warning_count ++;
                 }
-                
             }
-            print '</tr>';
+        }else{
+            if(@$rectypes['typedefs'][$rt_id]['dtFields'][$dt_id]){
+                $successful_rows[] = "<tr class='tbl-row'><td></td><td>".$label."</td><td>".$code."</td><td>&rArr;".$rectypes['typedefs'][$rt_id]['dtFields'][$dt_id][0]."</td><td>".$dt_id."</td></tr>";
+            }else{ // NOT IN RECORD TYPE STRUCTURE
+
+                if($extra_info != null){
+
+                    if(array_key_exists($extra_info[1], $transfer_errors)){
+
+                        if(strpos($transfer_errors[$extra_info[1]], $dt_str) === false){
+                            $transfer_errors[$extra_info[1]] = str_replace("</td></tr>", "", $transfer_errors[$extra_info[1]]).", ".$dt_str."</td></tr>";
+                            $warning_count ++;
+                        }
+                    }else{
+                        $transfer_errors[$extra_info[1]] = "<tr class='tbl-row'><td colspan='3'><strong>".$extra_info[1]." (".$extra_info[0]."):</strong></td><td colspan='4'>".$dt_str."</td></tr>";
+                        $warning_count ++;
+                    }
+                }
+            }
+        }
     }
 }
 
 /*
 * parse resource mapping (recursive)
 */
-function getResourceMapping($dt_code, $rt_id, $arr=null){
+function getResourceMapping($dt_code, $rt_id, $arr=null, $extra_info=null){
 
     $arrdt = explode(".",$dt_code);
     if(count($arrdt)>2){
@@ -979,54 +1075,48 @@ function getResourceMapping($dt_code, $rt_id, $arr=null){
         $resource_rt_id = array_shift($arrdt); //$arrdt[1]; //resource record type
         $resource_dt_id = $arrdt[0];
     }else{
-        return "  wrong resource mapping ".$dt_code;
+        return "Invalid resource mapping for id: ".$dt_code;
     }
 
     $dt_id = ConceptCode::getDetailTypeLocalID($dt_code);
     
     if($arr!=null){
-        printMappingReport_dt($arr, $rt_id, $dt_id);    
+        printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info);    
     }else{
-        printMappingReport_dt($dt_code, $rt_id, $dt_id);            
+        printMappingReport_dt($dt_code, $rt_id, $dt_id, $extra_info);
     }
-    
-    
     
     if($dt_id == null){
-        return " detail type not found ".$dt_code;
+        return "Unable to find the detail type for id: ".$dt_code;
     }
-
 
     $res_rt_id = ConceptCode::getRecTypeLocalID($resource_rt_id);
     
     printMappingReport_rt($resource_rt_id, $res_rt_id);
-    
+
     if($res_rt_id == null){
-        return " resource record type not recognized: ".$resource_rt_id;
+        return "Resource record type not recognised for id: ".$resource_rt_id;
     }
 
     $res_dt_id = ConceptCode::getDetailTypeLocalID($resource_dt_id);
     
-        
-    
     if($res_dt_id == null){
-        printMappingReport_dt($resource_dt_id, $res_rt_id, $res_dt_id);
-        return " detail type for resource not recognized ".$resource_dt_id;
+        printMappingReport_dt($resource_dt_id, $res_rt_id, $res_dt_id, $extra_info);
+        return "Detail type for resource not recognised for id: ".$resource_dt_id;
     }
-
 
     if(count($arrdt)>1){
         // next level
-        $subres = getResourceMapping( implode(".",$arrdt), $res_rt_id );
+        $subres = getResourceMapping( implode(".",$arrdt), $res_rt_id, $extra_info );
         if(is_array($subres)){
             $res = array($dt_id, $res_rt_id, $subres);
         }else{
             return $subres;
         }
     }else{
+        //if($extra_info == null) error_log(print_r(debug_backtrace(), TRUE));
         //pointer detail type and detail type in resource record
-        printMappingReport_dt($resource_dt_id, $res_rt_id, $res_dt_id);
-        
+        printMappingReport_dt($resource_dt_id, $res_rt_id, $res_dt_id, $extra_info);
         $res = array($dt_id, $res_rt_id, $res_dt_id);
     }
 
