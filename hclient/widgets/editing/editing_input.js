@@ -2935,18 +2935,16 @@ console.log('onpaste');
 
                             + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px;">'
                             + '<label class="required">Bookmark Name:</label><input type="text" id="bkm_name"></div>'
-                    
-                            + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px 200px;">'
-                            + '<label class="required">Bookmark\'s Longitude:</label><input type="text" id="bkm_long" class="bkm_points" style="cursor:pointer;">'
-                            + '<span class="heurist-helper1" style="padding-left:5px">Min, Max Values</span></div>'
 
-                            + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px 200px;">'
-                            + '<label class="required">Bookmark\'s Latitude:</label><input type="text" id="bkm_lat" class="bkm_points" style="cursor:pointer;">'
-                            + '<span class="heurist-helper1" style="padding-left:5px">Min, Max Values</span></div>'                            
-                    
+                            + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px;">'
+                            + '<label class="required">Bottom left (X, Y):</label><input type="text" id="bkm_long" class="bkm_points" style="cursor:pointer;"></div>'
+
+                            + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px;">'
+                            + '<label class="required">Top right (X, Y):</label><input type="text" id="bkm_lat" class="bkm_points" style="cursor:pointer;"></div>'
+
                             + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px;">'
                             + '<label style="color:#6A7C99">Starting Date:</label><input type="text" id="bkm_sdate"></div>'
-                    
+
                             + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px;">'
                             + '<label style="color:#6A7C99">Ending Date:</label><input type="text" id="bkm_edate"></div>'
 

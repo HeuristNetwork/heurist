@@ -617,7 +617,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                         rect_full.attr("width", maxWidth+icons_cnt*iconSize-3);  
                         rect_info.attr("width", maxWidth+icons_cnt*iconSize-3);
 
-                        divider.attr("x2", maxWidth+icons_cnt*iconSize-3);
+                        if(divider != null) divider.attr("x2", maxWidth+icons_cnt*iconSize-3);
 
                         $(overlay.node()).find('.addLink, .editBtn, .close').show();
                     }else{
@@ -628,7 +628,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                         rect_full.attr("width", maxWidth);  
                         rect_info.attr("width", maxWidth);
 
-                        divider.attr("x2", maxWidth);
+                        if(divider != null) divider.attr("x2", maxWidth);
 
                         $(overlay.node()).find('.addLink, .editBtn, .close').hide();
                     }
@@ -790,15 +790,18 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 
         rect_info.style('display', 'none');
 
-        // Add line between rectype and fields here
-        divider = overlay.append("svg:line")
-                         .attr("x1", 0)
-                         .attr("y1", 23)
-                         .attr("x2", maxWidth)
-                         .attr("y2", 23)
-                         .attr("stroke", "red")
-                         .attr("stroke-width", "1")
-                         .attr("id", "line_divider");
+        if(info.length > 1){
+
+            // Add line between rectype and fields here
+            divider = overlay.append("svg:line")
+                             .attr("x1", 0)
+                             .attr("y1", 23)
+                             .attr("x2", maxWidth)
+                             .attr("y2", 23)
+                             .attr("stroke", "red")
+                             .attr("stroke-width", "1")
+                             .attr("id", "line_divider");
+        }
 
       }else if(currentMode=='icons'){
           

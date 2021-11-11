@@ -142,9 +142,9 @@ var svg;        // The SVG where the visualisation will be executed on
             gravity: "off",
             attraction: -3000,
             
-            translatex: 0,
-            translatey: 0,
-            scale: 0.5
+            translatex: 250,
+            translatey: 250,
+            scale: 1
         }, options );
  
         // Handle settings (settings.js)
@@ -425,8 +425,9 @@ function visualizeData() {
 
     // Lines 
     addMarkerDefinitions(); //markers/arrows on lines
-    addLines("bottom-lines", getSetting(setting_linecolor, '#000'), 2);
-    addLines("top-lines", "#FFF", 2); //small line that is visible for repeating fields
+    addLines("bottom-lines", getSetting(setting_linecolor, '#000'), 2); // larger than top-line, shows connections
+    addLines("top-lines", "#FFF", 2); // small line that, if visible, shows if a field can have multiple values
+    addLines("rollover-line", "#FFF", 3); // invisible thicker line for rollover
    
     // Nodes
     addNodes();
@@ -469,9 +470,9 @@ function visualizeData() {
 function addContainer() {
 
     // Zoom settings, these affect adding/removing nodes as well
-    var scale = getSetting(setting_scale,1);
-    var translateX = getSetting(setting_translatex,0);
-    var translateY = getSetting(setting_translatey,0);
+    var scale = getSetting(setting_scale, 1);
+    var translateX = getSetting(setting_translatex, 250);
+    var translateY = getSetting(setting_translatey, 250);
     
     var s ='';
     if(isNaN(translateX) || isNaN(translateY) ||  translateX==null || translateY==null ||
@@ -481,7 +482,7 @@ function addContainer() {
         translateY = 0;
     }
     s = "translate("+translateX+", "+translateY+")";    
-    if(!(isNaN(scale) || scale==null || Math.abs(scale)==Infinity || scale < 0.09) ){
+    if(!(isNaN(scale) || scale==null || Math.abs(scale)==Infinity || scale < 0.9) ){
         s = s + "scale("+scale+")";
     }
 
@@ -494,7 +495,7 @@ function addContainer() {
     this.zoomBehaviour = d3.behavior.zoom()
                            .translate([translateX, translateY])
                            .scale(scale)
-                           .scaleExtent([0.05, 10]) //settings.isDatabaseStructure?[0.75,1.5]:
+                           .scaleExtent([0.9, 2]) //settings.isDatabaseStructure ? [0.75,1.5] : [0.05, 10]
                            .on("zoom", zoomed);
                     
     return container;
@@ -544,17 +545,6 @@ function onZoom( transform ){
     
     var scale = this.zoomBehaviour.scale();
     if(isNaN(scale) || !isFinite(scale) || scale==0) scale = 1;
-    
-    d3.selectAll(".bottom-lines").style("stroke-width", 
-            function(d) { 
-                var w = getLineWidth(d.targetcount)+2; //width for scale 1
-                return (scale>1)?w:(w/scale);
-            });
-    d3.selectAll(".top-lines").style("stroke-width", 
-            function(d) { 
-                var w = (getLineWidth(d.targetcount)+2)*0.2; //width for scale 1
-                return (scale>1)?w:(w/scale);
-            });
 
     updateOverlays();
 }
@@ -707,7 +697,7 @@ function addLines(name, color, thickness) {
             return name + " link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
         })
         .attr("stroke", function (d) {
-            if(hide_empty && d.targetcount == 0){
+            if(hide_empty && d.targetcount == 0 || name === 'rollover-line'){
                 return 'rgba(255, 255, 255, 0.0)'; //hidden
             }else if(d.targetcount == 0 && name === 'bottom-lines') {
                 return '#d9d8d6';
@@ -718,11 +708,13 @@ function addLines(name, color, thickness) {
             }
         })
         .style("stroke-width", function(d) { 
-             var w = getLineWidth(d.targetcount)+2; //width for scale 1
-             if(name == 'top-lines'){
+            var w = getLineWidth(d.targetcount)+thickness; //width for scale 1
+            if(name == 'top-lines'){
                 w = w*0.2;
-             }
-             return (scale>1)?w:(w/scale);
+            }else if(name == 'rollover-line'){
+                w = w*3;
+            }
+            return (scale>1)?w:(w/scale);
         });
          
     // visible line, pointing from one node to another
@@ -736,17 +728,20 @@ function addLines(name, color, thickness) {
         });
     }
     
-    lines.on("mouseover", function(d) {
-        //console.log(d.relation.id);  //field type id           
-        if(!(hide_empty && d.targetcount == 0)){
+    if(name == 'rollover-line'){
+
+        lines.on("mouseover", function(d) {
+
+            if(!(hide_empty && d.targetcount == 0)){
+                var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+                createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));
+            }
+        })
+        .on("mouseout", function(d) {
             var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-            createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));
-        }
-    })
-    .on("mouseout", function(d) {
-        var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-        removeOverlay(selector, 0);
-    });
+            removeOverlay(selector, 0);
+        });
+    }
 
     return lines;
 }
@@ -755,21 +750,25 @@ function addLines(name, color, thickness) {
 * Updates the correct lines based on the linetype setting 
 */
 function tick() {
-    
-    //not used anymore 
+
+    //grab each set of lines
     var topLines = d3.selectAll(".top-lines"); 
     var bottomLines = d3.selectAll(".bottom-lines");
-    
+    var rolloverLines = d3.selectAll(".rollover-line");
+
     var linetype = getSetting(setting_linetype, 'straight');
     if(linetype == "curved") {
         updateCurvedLines(topLines);
-        updateCurvedLines(bottomLines);     
+        updateCurvedLines(bottomLines);
+        updateCurvedLines(rolloverLines);
     }else if(linetype == "stepped") {
         updateSteppedLines(topLines, 'top');
-        updateSteppedLines(bottomLines,'bottom'); //with marker
+        updateSteppedLines(bottomLines, 'bottom');
+        updateSteppedLines(rolloverLines, 'top');
     }else{
         updateStraightLines(topLines);
-        updateStraightLines(bottomLines);   
+        updateStraightLines(bottomLines);
+        updateStraightLines(rolloverLines);
     }
     
     // Update node locations
