@@ -24,6 +24,7 @@ $.widget( "heurist.resultList", {
 
     // default options
     options: {
+        widget_id: null, //user identificator to find this widget custom js script on web/CMS page
         is_h6style: false,
         view_mode: null, // 'list','icons','thumbs','thumbs3','horizontal','icons_list','record_content' 
         list_mode_is_table: false,
@@ -87,7 +88,7 @@ $.widget( "heurist.resultList", {
         droppable: null, //callback function to init dropable (see refreshPage)
 
         //events  
-        onselect: null,  //on select event 
+        onSelect: null,  //on select event 
 
         onPageRender: null, //event listner on complete of page render
 
@@ -141,6 +142,10 @@ $.widget( "heurist.resultList", {
     _create: function() {
 
         var that = this;
+        
+        if(this.options.widget_id){
+            this.element.attr('data-widgetid', this.options.widget_id);
+        }
 
         if(this.options.pagesize<50 || this.options.pagesize>5000){
             if(this.options.blog_result_list==true){
@@ -2306,15 +2311,24 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
     //
     triggerSelection: function(){
 
+        var selected_ids;
 
         if(this.options.eventbased){
-            var selected_ids = this.getSelected( true );
+            selected_ids = this.getSelected( true );
             $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                 {selection:selected_ids, source:this.element.attr('id'), search_realm:this.options.search_realm} );
         }else{
             var selected_recs = this.getSelected( false );
             this._trigger( "onselect", null, selected_recs );
         }
+        
+        if($.isFunction(this.options.onSelect)){
+            if(!this.options.eventbased){
+                selected_ids = this.getSelected( true );
+            }
+            this.options.onSelect.call(this, selected_ids);    
+        }
+        
     },
 
     /**

@@ -31,11 +31,9 @@ $.widget( "heurist.search", {
         search_domain: 'a', //current search domain all|bookmark|recently added|recently selected  or a|b|r|s
         search_domain_set: null, // comma separated list of allowed domains  a,b,c,r,s
 
-        btn_visible_login:false, 
         btn_visible_newrecord: false, // show add record button
-        btn_visible_save: false,     // save search popup button  NOT USED
-        btn_visible_dbstructure: false, // NOT USED 
-        btn_entity_filter: true,     // show buttons: filter by entity
+        btn_visible_save: false,      // save search popup button  NOT USED
+        btn_entity_filter: true,      // show buttons: filter by entity
         search_button_label: '',
         search_input_label: '',
         
@@ -76,53 +74,9 @@ $.widget( "heurist.search", {
             this.options.button_class = '';
         }
         
-        var sz_search = '500px',
-        sz_input = '350px',
-        sz_search_padding = '0';
-
-
-        var div_left_visible = (this.options.btn_visible_login || this.options.btn_visible_dbstructure);
-
-        if(false) //div_left_visible)
-        {
-
-            // database summary, login and register buttons in navigation panel
-            var div_left  = $('<div>')
-            .css({'height':'2em','width':0, 'padding':'1.8em','float':'left'})
-            .appendTo( this.element );
-
-            if(this.options.btn_visible_login){
-                // Login button if not already logged in
-                this.btn_login = $( "<button>" ) // login button
-                .css('width',(window.hWin.HAPI4.sysinfo.registration_allowed==1)?'80px':'160px')
-                .addClass('logged-out-only')
-                .addClass(this.options.button_class)
-                .appendTo(div_left)
-                .button({label: window.hWin.HR("Login"), icon:'ui-icon-key'})
-                .click( function(){ that._doLogin(); });
-
-                // Register button if the database permits user registration
-                if(window.hWin.HAPI4.sysinfo.registration_allowed==1){
-                    this.btn_register = $( "<button>", {
-                        label: window.hWin.HR("Register")
-                    })
-                    .css('width','80px')
-                    .addClass('logged-out-only')
-                    .addClass(this.options.button_class)
-                    .appendTo(div_left)
-                    .button()
-                    .click( function(){ that._doRegister(); });
-                } // register button
-                
-                div_left.css('width','200px');
-
-            } // not bypassing login
-
-        }else{ // lefthand - navigation - panel not visible
-            sz_search = '600px';
-            sz_input = '450px';
-            sz_search_padding = this.options.is_h6style?'5px':'20px';
-        }
+        var sz_search = '600px',
+        sz_input = '450px',
+        sz_search_padding = this.options.is_h6style?'5px':'20px';
 
         //------------------------------------------- filter by entities
         this.options.btn_entity_filter = this.options.btn_entity_filter && (window.hWin.HAPI4.get_prefs_def('entity_btn_on','1')=='1');

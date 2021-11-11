@@ -89,6 +89,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
             
 
             $dlg.find('input[name="search_realm"]').val(opts.search_realm);    
+            $dlg.find('input[name="widget_id"]').val(opts.widget_id);    
 
             if(widget_name=='heurist_Map'){
                 //special behaviour for map widget
@@ -642,10 +643,11 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                     }
                 }
 
-console.log(opts);          
+//console.log(opts);          
 
         opts['init_at_once'] = true;
         opts['search_realm'] = $dlg.find('input[name="search_realm"]').val();
+        opts['widget_id'] = $dlg.find('input[name="widget_id"]').val();    
 
         return opts;
     }//_getValues

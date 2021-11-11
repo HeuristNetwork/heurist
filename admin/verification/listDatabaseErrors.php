@@ -46,7 +46,7 @@ $system->defineConstant('DT_RELATION_TYPE');
 
 //use these two vars to disable any part of verification
 $active_all = true; //all part are active
-$active = array('defgroups'); //if $active_all=false, active are included in this list
+$active = array('relationship_cache','defgroups'); //if $active_all=false, active are included in this list
 
 if(@$_REQUEST['data']){
     $lists = json_decode($_REQUEST['data'], true);

@@ -233,6 +233,7 @@ $.widget( "heurist.mainMenu6", {
                     var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
                     widget.mainMenu('menuActionById','menu-cms-edit',{record_id:cms_record_id});
                 }else{
+                    //action 
                     var cmd = window.hWin.HEURIST4.util.getUrlParameter('cmd', window.hWin.location.search);
                     if(cmd){
                         var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');

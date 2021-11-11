@@ -583,8 +583,8 @@ function editCMS2(){
         if(mode=='page'){
             
             _panel_propertyView.hide();
-
-            //_panel_treePage.show();
+            _panel_treePage.show();
+            
             //_panel_treeWebSite.hide();
 
             _toolbar_Page.show();

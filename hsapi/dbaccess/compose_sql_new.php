@@ -1068,6 +1068,7 @@ class HPredicate {
             $this->field_type = 'link'; //integer without quotes
         }else if(intval($this->field_id)>0){
             //find field type - @todo from cache
+            
             $this->field_type = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$this->field_id);
             
             if($this->field_type=='relmarker'){

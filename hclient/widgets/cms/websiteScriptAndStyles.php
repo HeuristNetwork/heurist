@@ -539,7 +539,7 @@ function afterPageLoad(document, pageid){
             
         }
         
-        if($.isFunction(func_name)){
+        if($.isFunction(window[func_name])){  //window[func_name] && 
             //script may have event listener that is triggered on page exit
             //disable it
             $( "#main-content" ).off( "onexitpage");
