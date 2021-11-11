@@ -81,7 +81,11 @@ class ReportRecord {
     }
     
     //
-    // retuns array of all relationship records + related record
+    // retuns array of related record with additional header values
+    //                            recRelationType
+    //                            recRelationNotes
+    //                            recRelationStartDate
+    //                            recRelationEndDate
     //
     public function getRelatedRecords($rec, $smarty_obj=null){
         
@@ -125,6 +129,7 @@ class ReportRecord {
                         foreach ($rel_records as $key => $value){
                             if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
                                 
+                                
                                 $record = $this->getRecord($value['RelatedRecID']['rec_ID']);
                                                             
                                 
@@ -140,7 +145,6 @@ class ReportRecord {
                                 if(array_key_exists('EndDate', $value)){
                                     $record["recRelationEndDate"] = temporalToHumanReadableString($value['EndDate']);
                                 }
-                                
                                 
                                 array_push($res, $record);
                             }
@@ -197,7 +201,7 @@ class ReportRecord {
                 $from_query = 'SELECT rl_TargetID as linkID FROM recLinks '
                     .str_replace('linkID','rl_TargetID',$where).' rl_RelationID IS NULL AND rl_SourceID='.$rec_ID;
 
-               $from_records = mysql__select_list2($mysqli, $from_query);     
+               $to_records = mysql__select_list2($mysqli, $from_query);     
             }
 
             if($direction==null || $direction=='linkedto'){
@@ -206,7 +210,7 @@ class ReportRecord {
                     .str_replace('linkID','rl_SourceID',$where).' rl_RelationID IS NULL AND rl_TargetID='.$rec_ID;
 
                     
-                $to_records = mysql__select_list2($mysqli, $to_query);     
+                $from_records = mysql__select_list2($mysqli, $to_query);     
             }
             
             $res = array('linkedto'=>$to_records, 'linkedfrom'=>$from_records);
