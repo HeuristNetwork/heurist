@@ -225,6 +225,7 @@ $.widget( "heurist.ruleBuilder", {
         
         var all_structs = $Db.rst_idx2();
         for (rty_ID in all_structs){
+            
             var recset = all_structs[rty_ID];
             recset.each2(function(dtyID, record){
             
@@ -324,7 +325,7 @@ $.widget( "heurist.ruleBuilder", {
         
         arr_reverse.sort(function(a,b){return a.dtyID<b.dtyID?-1:1})
         
-        for(var i=1; i<arr_reverse.length; i++){
+        for(var i=0; i<arr_reverse.length; i++){
             var item = arr_reverse[i];
             var opt = {key:item.key, title:item.title};
             if(item.terms>0){
