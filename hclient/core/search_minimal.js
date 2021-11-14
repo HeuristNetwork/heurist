@@ -29,8 +29,7 @@ function hSearchMinimal() {
 
 
         _query_request = null,
-        _owner_doc = null,
-        _owner_element_id = null;
+        _owner_doc = null; //to trigger ON_REC_SEARCHSTART and ON_REC_SEARCHFINISH
          
          
          
@@ -41,12 +40,13 @@ function hSearchMinimal() {
     }
     
     //
-    // search with callback (without event trigger)
+    // standalone search with callback (without event trigger)
     //
     function _doSearchWithCallback( request, callback ){
         
         window.hWin.HAPI4.RecordMgr.search(request,
             function(response){
+
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
                     if(response.data  && response.data.memory_warning){
@@ -66,17 +66,19 @@ function hSearchMinimal() {
     // search with event triggers    
     function _doSearch( originator, request ){
         
+            var owner_element_id, owner_doc;
+        
             if(originator){
                 if(originator.document){
-                    _owner_doc = originator.document;
-                    _owner_element_id = originator.element.attr('id');
+                    owner_doc = originator.document;
+                    owner_element_id = originator.element.attr('id');
                 }else{
-                    _owner_doc = originator;
-                    _owner_element_id = 'main_doc';
+                    owner_doc = originator;
+                    owner_element_id = 'main_doc';
                 }
             }else{
-                _owner_doc = null;
-                _owner_element_id = null;
+                owner_doc = null;
+                owner_element_id = null;
             }
     
             if(request==null) return;
@@ -85,34 +87,42 @@ function hSearchMinimal() {
                 request.id = window.hWin.HEURIST4.util.random();
             }
             
-            request.source = _owner_element_id;
+            request.source = owner_element_id;
             request.limit = 100000; 
             request.needall = 1;
             request.detail = 'ids';
 
-            _query_request = request; //keep for search in current result
+            if(_query_request==null){
+                _query_request = {};
+                _owner_doc = {};
+            }
+            _query_request[request.id] = request; //keep for search in current result
+            _owner_doc[request.id] = owner_doc;
         
         
             //window.hWin.HEURIST4.current_query_request,  window.hWin.HAPI4.currentRecordset !!!!! @todo get rid these global vars 
             // they are used in old parts: smarty, diagram
             
             //clone - to use mainMenu.js
-            window.hWin.HEURIST4.current_query_request = jQuery.extend(true, {}, request); //the only place where this values is assigned - it is used in mainMenu.js
+            if(window.hWin.HEURIST4.util.isempty(request.search_realm)){
+                window.hWin.HEURIST4.current_query_request = jQuery.extend(true, {}, request); //the only place where this values is assigned - it is used in mainMenu.js
+            }
 
             window.hWin.HAPI4.currentRecordset = null;
-            if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){
+            if(!window.hWin.HEURIST4.util.isnull(owner_doc)){
                 
                 /*$(_owner_doc)[0].dispatchEvent(new CustomEvent("start_search", {
                   bubbles: true,
                   detail: 'some data'
                 }));*/
 
-                $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
+                $(owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
             }
 
-             
             //perform search
-            window.hWin.HAPI4.RecordMgr.search(request, _onSearchResult);
+            window.hWin.HAPI4.RecordMgr.search(request, function(response){
+                    _onSearchResult(response);   
+            });
         
     }
     
@@ -122,7 +132,10 @@ function hSearchMinimal() {
     function _onSearchResult(response){
 
             var recordset = null;
-            if(_query_request!=null && response.queryid==_query_request.id) {
+            if(_query_request!=null && _query_request[response.queryid]) {
+                
+                var qid = response.queryid;
+                var qr = window.hWin.HEURIST4.util.cloneJSON(_query_request[qid]);
 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
@@ -131,16 +144,28 @@ function hSearchMinimal() {
                         }
                         
                         recordset = new hRecordSet(response.data);
-                        
-                        recordset.setRequest( window.hWin.HEURIST4.util.cloneJSON(_query_request) );
+                        recordset.setRequest( qr  );
 
                 }else{
                     //erorr - trigger event with empty resultset
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
                 
-                window.hWin.HAPI4.currentRecordset = recordset;
-                _searchCompleted( false, recordset );
+                if(window.hWin.HEURIST4.util.isempty(qr.search_realm)){
+                    window.hWin.HAPI4.currentRecordset = recordset;
+                }
+                
+                if(!window.hWin.HEURIST4.util.isnull(_owner_doc[qid])){ 
+                    //global app event
+                    $(_owner_doc[qid]).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH,   //_searchCompleted
+                                {search_realm: qr.search_realm, 
+                                 recordset: recordset,      //result 
+                                 request: qr,
+                                 query: qr.q}); //orig query
+                }
+                
+                delete _query_request[qid];
+                delete _owner_doc[qid];
             }
             
     }
@@ -148,24 +173,10 @@ function hSearchMinimal() {
 
     /**
     * 
-    * 
     */
-    function _searchCompleted( is_terminate, recordset ){
-
-            if(_query_request!=null && is_terminate){
-                //change query id to arbitrary - it prevents further actions
-                _query_request.id = window.hWin.HEURIST4.util.random(); 
-            }
-            
-            if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){ 
-                
-                //global app event
-                $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH,   //_searchCompleted
-                            {search_realm:_query_request.search_realm, 
-                             recordset: recordset,      //result 
-                             request: _query_request,
-                             query: _query_request.q}); //orig query
-            }
+    function _searchTerminate(){
+        _query_request = null;
+        _owner_doc = null;
     }
 
     //
@@ -211,7 +222,7 @@ function hSearchMinimal() {
         },
         
         doStop: function(){
-            _searchCompleted( true );
+            _searchTerminate();
         }
         
     }
