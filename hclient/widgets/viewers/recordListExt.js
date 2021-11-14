@@ -24,6 +24,7 @@ $.widget( "heurist.recordListExt", {
 
     // default options
     options: {
+        widget_id: null, //user identificator to find this widget custom js script on web/CMS page
         title: '',
         is_single_selection: false, //work with the only record - reloads content on every selection event
         recordset: null,
@@ -48,6 +49,10 @@ $.widget( "heurist.recordListExt", {
     // the constructor
     _create: function() {
 
+        if(this.options.widget_id){
+            this.element.attr('data-widgetid', this.options.widget_id);
+        }
+        
         var that = this;
 
         this.div_content = this.element;
@@ -109,7 +114,7 @@ that._dout('search finised');
                         //that.option("selection",  null);
                         that.options.selection = null;
                     }else{
-                        var sel = window.hWin.HAPI4.getSelection(data.selection, true)
+                        var sel = window.hWin.HAPI4.getSelection(data.selection, true); //get ids
                         that.options.selection = sel;
                         //that.option("selection", sel);
                     }
@@ -214,6 +219,15 @@ this._dout('update dataset '+request.q);
         // _super and _superApply handle keeping the right this-context
         this._superApply( arguments );
         //this._refresh();
+    },
+    
+    _setOption:function(key, value){
+        if(key == 'selection'){
+            this.options.selection = value;
+            this._refresh();
+        }else{
+            this._superApply( arguments );
+        }
     },
 
     //debug console output    

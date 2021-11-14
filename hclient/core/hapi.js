@@ -142,12 +142,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
 
         //remove remark to debug 
-        request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
-        //DBGSESSID=425944380594800002;d=1,p=0,c=07
+        //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
 
         var url = that.baseURL+"hsapi/controller/"+action+".php"; //+(new Date().getTime());
         
-        
+
         var request_code = {script:action, action:request.a};
         //note jQuery ajax does not properly in the loop - success callback does not work often
         $.ajax({

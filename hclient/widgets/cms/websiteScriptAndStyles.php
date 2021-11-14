@@ -326,6 +326,18 @@ function initMainMenu( afterInitMainMenu ){
 //
 function loadPageContent(pageid){
     
+    /* @todo
+    var args = null; //arguments that will be passed to afterPageLoad
+    
+    if(typeof pageid==='string' && pageid.indexOf('-')>0){
+        args = pageid.split('-');
+        pageid = args[0];
+    }else{
+        args = [pageid];
+    }
+    */
+    
+    
     if(pageid>0){
         //window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
         
@@ -454,10 +466,18 @@ var previous_page_id = -1;
 var datatable_custom_render = null;
 //
 // Executes custom javascript defined in field DT_CMS_SCRIPT
-// it wraps this script into function afterPageLoad[RecID] and adds this script into head
+// it wraps this script into function afterPageLoad_[pageid](args) and adds this script into head
 // then it executes this function
+// args - are arguments to be passed to custom javascript function - first element of array is pageid
 //
-function afterPageLoad(document, pageid){
+function afterPageLoad(document, args){
+    
+    
+    if($.isArray(args)){
+        pageid = args[0];
+    }else{
+        pageid = args;
+    }
     
     //var pagetitle = $($(page_target).children()[0]);
     var pagetitle = $('#main-content > h2.webpageheading');
@@ -544,7 +564,7 @@ function afterPageLoad(document, pageid){
             //disable it
             $( "#main-content" ).off( "onexitpage");
             //execute the script
-            window[func_name]( document, pageid );
+            window[func_name]( document, args );
         }
     }
 
