@@ -692,7 +692,7 @@ function onHapiInit(success){
                             +'" height="35" align="center"></a></div>')
                 .appendTo( $('#host_info') );
             }
-            setTimeout(function(){window.hWin.HAPI4.EntityMgr.refreshEntityData('rst,trm');},1000);
+            //setTimeout(function(){window.hWin.HAPI4.EntityMgr.refreshEntityData('rst,trm');},1000);
     
             
 <?php             
@@ -704,12 +704,9 @@ if(isset($customTemplateNotFound)){
         }
     }
 
-    window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,dty,rtg,dtg,vcg', __init_completed);
+    //window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,dty,rtg,dtg,vcg', __init_completed);
+    window.hWin.HAPI4.EntityMgr.refreshEntityData('all', __init_completed);
 
-    //__init_completed(true);
-    //load definitions independently
-    //window.hWin.HAPI4.EntityMgr.refreshEntityData('all'); //rty,dty,rtg,dtg,vcg
-    //window.hWin.HAPI4.SystemMgr.get_defs_all(false, null, __init_completed);
 }
 
 

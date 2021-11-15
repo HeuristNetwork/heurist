@@ -2224,7 +2224,7 @@ class HPredicate {
         
         if($fld==null){
 
-            $mysqli->query('ALTER TABLE recDetails ADD FULLTEXT INDEX `dtl_Value_FullText` (`dtl_Value`) VISIBLE');            
+            $mysqli->query('ALTER TABLE recDetails ADD FULLTEXT INDEX `dtl_Value_FullText` (`dtl_Value`)'); // VISIBLE
           
 /*            
             $k=0;
