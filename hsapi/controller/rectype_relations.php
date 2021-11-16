@@ -64,7 +64,7 @@
         $rectypes = array();
         
         // Select all rectype ids, names and count the occurence in the Record table. The defRectypes table is used to retrieve all record types in a certain database an the Records table is used to determine the occurence.
-        $query = "SELECT d.rty_ID as id, d.rty_Name as name, COUNT(r.rec_RecTypeID) as count FROM defRecTypes d LEFT JOIN Records r ON d.rty_ID=r.rec_RecTypeID GROUP BY id";
+        $query = "SELECT d.rty_ID as id, d.rty_Name as name, sum(if(r.rec_FlagTemporary!=1, 1, 0)) as count FROM defRecTypes d LEFT JOIN Records r ON d.rty_ID=r.rec_RecTypeID GROUP BY id";
         $res = $system->get_mysqli()->query($query);
         while($row = $res->fetch_assoc()) {   
             $rectype = new stdClass();
@@ -93,10 +93,10 @@
         
         // Select all relation details that have "dty_PtrTargetRectypeIDs" defined.  The defRecStructure table is used to determine the structure of a record. The defDetailTypes and recDetails tabes are used to ultimately get access to the "dty.dty_PtrTargetRectypeIDs" field. This field stores a comma seperated links of record types where this record points to. 
         //COUNT(rd.dtl_ID) as count, 
-        $query = "SELECT rst_DetailTypeID as id, rst_DisplayName as name, dty.dty_Type as reltype, "
-        ."dty.dty_PtrTargetRectypeIDs as ids FROM defRecStructure rst INNER JOIN defDetailTypes dty ON rst.rst_DetailTypeID=dty.dty_ID "
+        $query = "SELECT rst_DetailTypeID as id, rst_DisplayName as name, dty.dty_Type as reltype, dty.dty_PtrTargetRectypeIDs as ids "
+        ."FROM defRecStructure rst INNER JOIN defDetailTypes dty ON rst.rst_DetailTypeID=dty.dty_ID "
         ."LEFT JOIN recDetails rd ON rd.dtl_DetailTypeID=rst.rst_DetailTypeID "
-        ."WHERE rst.rst_RectypeID=" .$rectype->id. " AND NOT (dty.dty_PtrTargetRectypeIDs IS NULL OR dty.dty_PtrTargetRectypeIDs='') "
+        ."WHERE rst.rst_RectypeID=" .$rectype->id. " AND rst.rst_RequirementType <> 'forbidden' AND NOT (dty.dty_PtrTargetRectypeIDs IS NULL OR dty.dty_PtrTargetRectypeIDs='') "
         ."GROUP BY rst.rst_DetailTypeID;";
         
         

@@ -40,8 +40,8 @@ function getRecordOverlayData(record) {
 
     var maxLength = getSetting(setting_textlength);
     var rectypeLength = 20;
-    var array = []; //console.log(record);
-    
+    var array = [];
+
     // Header
     var header = {text: truncateText(record.name, rectypeLength), 
                   count: record.count, rtyid: record.id,
@@ -50,28 +50,29 @@ function getRecordOverlayData(record) {
     if(settings.showCounts) {
         header.text += ", n=" + record.count;  
     }
-    array.push(header);    
+    array.push(header);
 
     var fontSize = getSetting(setting_fontsize, 12);
+    var xpos = 17;
 
     // Going through the current displayed data
-    var data = settings.getData.call(this, settings.data); 
+    var data = settings.getData.call(this, settings.data);
     if(data && data.links.length > 0) {
         var map = {};
         for(var i = 0; i < data.links.length; i++) {
             var link = data.links[i];
             var isRequired = ($Db.rst(link.source.id, link.relation.id, 'rst_RequirementType') == 'required') ? 'y' : 'n';
-              
+
             // Does our record point to this link?
             if(link.source.id == record.id) {
                 // New name?
                 if(!map.hasOwnProperty(link.relation.name)) {
                     map[link.relation.name] = {require_type: isRequired, dtyid: link.relation.id};
                 }
-                
+
                 if(!settings.isDatabaseStructure){
                     // Relation
-                    var relation = {text: "➜ " + truncateText(link.target.name, maxLength), size: "8px", height: 11, subheader:1, xpos:10, multiline:true};
+                    var relation = {text: "➜ " + truncateText(link.target.name, maxLength), size: "8px", height: 11, subheader:1, xpos:xpos, multiline:true};
                     if(settings.showCounts) {
                         relation.text += ", n=" + link.targetcount;                      
                     }
@@ -79,8 +80,7 @@ function getRecordOverlayData(record) {
                     // Add record relation to map
                     if(map[link.relation.name][relation.text] == undefined) {
                         map[link.relation.name][relation.text] = relation;
-                    }
-                
+                    }    
                 }
             }
 
@@ -92,7 +92,7 @@ function getRecordOverlayData(record) {
                 }
                
                 // Relation
-                var relation = {text: truncateText(link.source.name, maxLength) + " ↔ " + truncateText(link.target.name, maxLength), size: "8px", height: fontSize, xpos:10, multiline:true};
+                var relation = {text: truncateText(link.source.name, maxLength) + " ↔ " + truncateText(link.target.name, maxLength), size: "8px", height: fontSize, xpos:xpos, multiline:true};
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.relation.count
                 }
@@ -104,10 +104,7 @@ function getRecordOverlayData(record) {
             }
         }
 
-//console.log("Record overlay data", map);
-
         // Convert map to array
-        var xpos = 10; //!!!!
         for(key in map) {
             var details = {text: truncateText(key, maxLength), size: "8px", xpos:xpos, multiline:true,
                     style:"italic", height: fontSize, enter: true, subheader:1};
@@ -127,13 +124,12 @@ function getRecordOverlayData(record) {
 
             array.push(details); // Heading
             for(text in map[key]) {
-                array.push(map[key][text]);    
+                array.push(map[key][text]);
             }
-            //xpos = xpos + 10;
         }
     }
 
-    return array;                                                                                
+    return array;
 }
 
 /** get info about particular relation */
@@ -201,7 +197,7 @@ function addMissingFields(node_info){
     var records = $Db.rst(rty_id); //list of fields
 
     if(records == null){
-        return node_info;   
+        return node_info;
     }
 
     var record = records.getRecords();
@@ -209,7 +205,7 @@ function addMissingFields(node_info){
     var count = order.length;
 
     //additional settings
-    var xpos = 10;
+    var xpos = 17;
     var maxLength = getSetting(setting_textlength);
     var fontSize = getSetting(setting_fontsize, 12);
 
@@ -222,6 +218,10 @@ function addMissingFields(node_info){
 
         // only record pointer or relamrkers
         if($Db.dty(field['rst_DetailTypeID'], 'dty_Type') != 'resource' && $Db.dty(field['rst_DetailTypeID'], 'dty_Type') != 'relmarker'){
+            continue;
+        }
+        // only non-hidden fields
+        if(field['rst_RequirementType'] == 'forbidden'){
             continue;
         }
 
@@ -245,9 +245,7 @@ function addMissingFields(node_info){
     }
 
     if(new_fields.length > 0){
-        // add divider between sets
-        node_info.push({text: '-----', size: '8px', xpos: xpos, multiline: true, style: 'italic', height: fontSize, enter: true, subheader: 1, require_type: 'n', dtyid: null});
-
+        // add additional fields to original
         node_info = node_info.concat(new_fields);
     }
 
@@ -389,7 +387,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           // Multiline check
                           if(d.multiline) {
                               if(position == 16){
-                                position += 10;
+                                position += 3;
                               }
                               if(d.xpos>0){
                                 position = position + d.xpos;
@@ -590,7 +588,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
       if(widthTitle>maxWidth) maxWidth = widthTitle;
 
       var menuarrow_transform = "translate("+(maxWidth-iconSize)+",3)";
-      var divider;
+      var divider, field_dividers;
 
       var menuButton = overlay
                 .append("svg:image")
@@ -619,6 +617,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 
                         if(divider != null) divider.attr("x2", maxWidth+icons_cnt*iconSize-3);
 
+						if(field_dividers != null) field_dividers.attr("x2", maxWidth+icons_cnt*iconSize-3);
+
                         $(overlay.node()).find('.addLink, .editBtn, .close').show();
                     }else{
 
@@ -629,6 +629,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                         rect_info.attr("width", maxWidth);
 
                         if(divider != null) divider.attr("x2", maxWidth);
+
+						if(field_dividers) field_dividers.attr("x2", maxWidth);
 
                         $(overlay.node()).find('.addLink, .editBtn, .close').hide();
                     }
@@ -789,6 +791,33 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
       }else if(currentMode=='infoboxes_full'){
 
         rect_info.style('display', 'none');
+
+        if(info.length > 2){
+
+            var rectype_details = info.shift(); // ignore rectangle "title" (rectype name)
+            var last_field = info.pop(); // ignore last field
+            var position1 = 26, position2 = 26; // for y1 and y2 values
+
+            field_dividers = overlay.selectAll("line")
+                                    .data(info)
+                                    .enter()
+                                    .append("line")
+                                    .attr("X1", 0)
+                                    .attr("y1", function(d){
+                                        position1 += d.xpos;
+                                        return position1;
+                                    })
+                                    .attr("x2", maxWidth)
+                                    .attr("y2", function(d){
+                                        position2 += d.xpos
+                                        return position2;
+                                    })
+                                    .attr("stroke", "gray")
+                                    .attr("stroke-width", "1");
+
+            info.unshift(rectype_details); // re-add the shifted item
+            info.push(last_field); // re-add the pop'd item
+        }
 
         if(info.length > 1){
 

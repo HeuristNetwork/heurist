@@ -67,9 +67,7 @@ function addNodes() {
         var icon_display = currentMode=='icons' ? 'initial' : 'none';
         
         //add infobox
-        if(true || settings.isDatabaseStructure){
-            createOverlay(0, 0, "record", "id"+d.id, d, node);                  
-        }
+        createOverlay(0, 0, "record", "id"+d.id, d, node);
         
         //add outer circle
         node.append("circle")
