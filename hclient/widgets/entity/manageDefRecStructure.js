@@ -1013,6 +1013,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             //rst_Repeatability: 'single',
             rst_MaxValues: (rst_fields['rst_MaxValues']>=0) ?rst_fields['rst_MaxValues']:'1',  //0 repeatable
             rst_DisplayWidth: rst_fields['rst_DisplayWidth'] ?rst_fields['rst_DisplayWidth']:'100',  
+            rst_SemanticReferenceURL: rst_fields['rst_SemanticReferenceURL'] 
+                        ?rst_fields['rst_SemanticReferenceURL']
+                        :$Db.dty(dty_ID,'dty_SemanticReferenceURL'),  
             /*
             dty_Type: dtFields[fi['dty_Type']]
             rst_DisplayHeight: "3"

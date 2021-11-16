@@ -1037,7 +1037,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 .appendTo(this.element);
             this.fields_list_div.hide();
             
-            this._on( $(document), {click: function(event){
+            this._on( $(document), {click: function(event){  //click outside - hide list 
                if($(event.target).parents('.list_div').length==0) { 
                     this.fields_list_div.hide(); 
                };
@@ -1120,6 +1120,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                             if(ele.text().includes('Numeric') && !that._editing.getFieldByName('rst_DisplayWidth').is(':visible')){
                                 rst_fields['rst_DisplayWidth'] = 10;
+                            }
+
+                            var sematic_url = that._editing.getValue('dty_SemanticReferenceURL')[0];
+                            if(sematic_url){
+                                rst_fields['rst_SemanticReferenceURL'] = sematic_url;
                             }
 
                             that._trigger( "onselect", null, {selection: [_dty_ID], rst_fields:rst_fields });

@@ -104,7 +104,7 @@ class DbDefRecStructure extends DbEntityBase
             $this->data['details'] = 'rst_ID,rst_RecTypeID,rst_DetailTypeID,rst_DisplayName'
             .',if(rst_DisplayHelpText is not null and (dty_Type=\'separator\' OR CHAR_LENGTH(rst_DisplayHelpText)>0),rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText'
             .',rst_RequirementType, rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue, rst_MaxValues'
-            .',rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_NonOwnerVisibility, rst_Status';
+            .',rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_NonOwnerVisibility, rst_Status,rst_SemanticReferenceURL';
             //dty_Type, rst_FilteredJsonTermIDTree/dty_JsonTermIDTree, rst_PtrFilteredIDs/dty_PtrTargetRectypeIDs 
         
         }else if(@$this->data['details']=='full'){
@@ -136,7 +136,7 @@ class DbDefRecStructure extends DbEntityBase
             //here we check for an override in the recTypeStrucutre for Pointer types which is a subset of the detailType dty_PtrTargetRectypeIDs
             "dty_PtrTargetRectypeIDs as rst_PtrFilteredIDs",
             "rst_CreateChildIfRecPtr", "rst_PointerMode", "rst_PointerBrowseFilter",
-            "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified",
+            "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified","rst_SemanticReferenceURL",
             "dty_TermIDTreeNonSelectableIDs",
             "dty_FieldSetRectypeID",
             "dty_Type");
@@ -415,9 +415,13 @@ class DbDefRecStructure extends DbEntityBase
             'rst_RequirementType'=> in_array($dty_ID,$reqs)?'required':'recommended',
             'rst_MaxValues'=> 1,
             'rst_DisplayWidth'=>($dt[$di['dty_Type']]=='date')?20:100);
-            
-            if(@$newfields_values[$dty_ID]['rst_DefaultValue']){
-                $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['rst_DefaultValue'];
+
+
+            if(@$dt[$di['dty_SemanticReferenceURL']]){
+                $recvalues['rst_SemanticReferenceURL'] = $dt[$di['dty_SemanticReferenceURL']];
+            }
+            if(@$newfields_values[$dty_ID]['dty_DefaultValue']){
+                $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['dty_DefaultValue'];
             }
             
             $records[] = $recvalues;

@@ -257,7 +257,7 @@
                     "dtID": "dty_SemanticReferenceURL",
                     "dtFields":{
                         "dty_Type":"freetext",
-                        "dty_Size":255,
+                        "dty_Size":250,
                         "rst_DisplayWidth":80,
                         "rst_DisplayName": "Semantic/Reference URI:",
                         "rst_DisplayHelpText": "URI to a full description or ontological reference definition of the base field (optional)" 

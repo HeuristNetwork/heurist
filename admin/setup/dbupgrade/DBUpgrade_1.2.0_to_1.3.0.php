@@ -199,6 +199,23 @@ $query = "CREATE TABLE defVocabularyGroups (
             return false;
         }
         $report[] = 'defRecStructure: rst_DefaultValue '.($is_exists?'modified':'added');
+
+
+        if(hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
+            $report[] = 'defRecStructure: rst_SemanticReferenceURL already exists';
+        }else{
+            //alter table
+            $query = "ALTER TABLE `defRecStructure` ADD `rst_SemanticReferenceURL` VARCHAR( 250 ) NULL "
+            ." COMMENT 'The URI to a semantic definition or web page describing this field used within this record type' "
+            .' AFTER `rst_LocallyModified`';
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_SemanticReferenceURL', $mysqli->error);
+                return false;
+            }
+            $report[] = 'defRecStructure: rst_SemanticReferenceURL added';
+        }    
+
         
         //----------------------------        
         

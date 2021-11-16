@@ -1718,12 +1718,6 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             }
             
             updateDatabseToLatest4($this);
-            //updateDatabseToLatest3($this);
-            //updateDatabseToLatest2($this);
-            /*
-            $rep = updateDatabseToLatest($this);
-            if($rep===false){
-            }*/
             
             // it is required for main page only - so call this request on index.php
             //$this->system_settings['sys_RecordCount'] = mysql__select_value($mysqli, 'select count(*) from Records');

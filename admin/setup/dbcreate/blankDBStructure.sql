@@ -254,6 +254,7 @@ CREATE TABLE defRecStructure (
   rst_EntryMask Varchar(250) NULL COMMENT 'Data entry mask, use to control decimals on numeric values, content of text fields etc. for this record type - future implementation Aug 2017',
   rst_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   rst_LocallyModified tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
+  rst_SemanticReferenceURL VARCHAR( 250 ) NULL COMMENT 'The URI to a semantic definition or web page describing this field used within this record type',  
   PRIMARY KEY  (rst_ID),
   UNIQUE KEY rst_composite (rst_RecTypeID,rst_DetailTypeID),
   KEY rst_DetailTypeID (rst_DetailTypeID)

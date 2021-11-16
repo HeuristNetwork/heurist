@@ -355,6 +355,16 @@
                             "rst_Display":"hidden",
                             "rst_DefaultValue":"0"
                         }
+                    },
+                    {
+                        "dtID": "rst_SemanticReferenceURL",
+                        "dtFields":{
+                            "dty_Type":"freetext",
+                            "dty_Size":250,
+                            "rst_DisplayWidth":80,
+                            "rst_DisplayName": "Semantic/Reference URI:",
+                            "rst_DisplayHelpText": "The URI to a semantic definition or web page describing this field used within this record type" 
+                        }
                     }
                 ]}                
      ]

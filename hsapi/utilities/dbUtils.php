@@ -639,7 +639,6 @@ class DbUtils {
                 echo ("<br/><p>Warning: Could not open source database ".$db_source);
             }
         }else{
-            //updateDatabseToLatest(self::$system);
             
             if( !mysql__usedatabase($mysqli, $db_target) ){
                 $res = false;

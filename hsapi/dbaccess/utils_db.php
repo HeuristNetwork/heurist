@@ -1180,6 +1180,21 @@ error_log('UPDATED '.$session_id.'  '.$value);
                 $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_ExternalReferenceLookups` TEXT default NULL COMMENT 'Record type-function-field specifications for lookup to external reference sources such as GeoNames'";
                 $res = $mysqli->query($query);
             }
+
+            
+            if(hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
+                $report[] = 'defRecStructure: rst_SemanticReferenceURL already exists';
+            }else{
+                //alter table
+                $query = "ALTER TABLE `defRecStructure` ADD `rst_SemanticReferenceURL` VARCHAR( 250 ) NULL "
+                ." COMMENT 'The URI to a semantic definition or web page describing this field used within this record type' "
+                .' AFTER `rst_LocallyModified`';
+                $res = $mysqli->query($query);
+                if(!$res){
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_SemanticReferenceURL', $mysqli->error);
+                    return false;
+                }
+            }    
             
         }
     }  
