@@ -801,7 +801,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             field_dividers = overlay.selectAll("line")
                                     .data(info)
                                     .enter()
-                                    .append("line")
+                                    .append("svg:line")
+                                    .attr("class", "inner_divider")
                                     .attr("X1", 0)
                                     .attr("y1", function(d){
                                         position1 += d.xpos;
@@ -823,6 +824,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 
             // Add line between rectype and fields here
             divider = overlay.append("svg:line")
+                             .attr("class", "inner_divider")
                              .attr("x1", 0)
                              .attr("y1", 23)
                              .attr("x2", maxWidth)

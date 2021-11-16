@@ -44,7 +44,7 @@ var setting_translatey    = "setting_translatey";
 var setting_scale         = "setting_scale"; 
 var setting_advanced      = "setting_advanced"; 
 
-//sessionStorage.clear();
+//localStorage.clear();
 /**
 * Returns the current displayed URL
 * 
@@ -54,11 +54,11 @@ function getURL() {
 }
 
 /**
- * Returns a setting from the sessionStorage
+ * Returns a setting from the localStorage
  * @param setting The setting to retrieve
  */
 function getSetting(key, defvalue) {
-    var value = sessionStorage.getItem(window.hWin.HAPI4.database+key);
+    var value = localStorage.getItem(window.hWin.HAPI4.database+key);
     
     if (   //(isNaN(value) && $.isNumeric(defvalue)) ||   //!isNaN(parseFloat(n)) && isFinite(n)
         (window.hWin.HEURIST4.util.isnull(value) && !window.hWin.HEURIST4.util.isnull(defvalue))){
@@ -70,18 +70,18 @@ function getSetting(key, defvalue) {
 }
 
 /**
-* Stores a value in the sessionStorage
+* Stores a value in the localStorage
 */
 function putSetting(key, value) {
 //    if(key==setting_linecolor){
 //console.log('put '+key+'  '+value);        
 //    }
 
-    sessionStorage.setItem(window.hWin.HAPI4.database+key, value);
+    localStorage.setItem(window.hWin.HAPI4.database+key, value);
 }
 
 /**
- * This function makes sure the default settings are stored in the sessionStorage.
+ * This function makes sure the default settings are stored in the localStorage.
  * @param settings The plugin settings object
  */
 function checkStoredSettings() {
@@ -501,6 +501,8 @@ function changeViewMode(mode){
             //d3.selectAll(".icon-mode").style('display', 'none');
             d3.selectAll(".info-mode").style('display', 'initial');
             d3.selectAll(".info-mode-full").style('display', 'none');
+
+            d3.selectAll("line.inner_divider").style('display', 'none'); // hide inner line dividers
             
             d3.selectAll(".rect-info-full").style('display', 'none');
             d3.selectAll(".rect-info").style('display', 'initial');
@@ -513,7 +515,9 @@ function changeViewMode(mode){
             currentMode = 'infoboxes_full';
             d3.selectAll(".info-mode").style('display', 'initial');
             d3.selectAll(".info-mode-full").style('display', 'initial');
-            
+
+            d3.selectAll("line.inner_divider").style('display', 'initial');
+
             d3.selectAll(".rect-info-full").style('display', 'initial');
             d3.selectAll(".rect-info").style('display', 'none');
             
@@ -526,6 +530,8 @@ function changeViewMode(mode){
             //d3.selectAll(".icon-mode").style('display', 'initial');
             d3.selectAll(".info-mode").style('display', 'none');
             d3.selectAll(".info-mode-full").style('display', 'none');
+
+            d3.selectAll("line.inner_divider").style('display', 'none'); // hide inner line dividers
 
             d3.selectAll("circle.icon-background, circle.icon-foreground, image.node-icon").style('display', 'initial');
 
