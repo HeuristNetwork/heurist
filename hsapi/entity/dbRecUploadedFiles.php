@@ -799,7 +799,7 @@ class DbRecUploadedFiles extends DbEntityBase
             $data = substr($data, strpos($data, ',') + 1);
             $type = strtolower($type[1]); // jpg, png, gif
 
-            if (!in_array($type, [ 'jpg', 'jpeg', 'jfif', 'gif', 'png' ])) {
+            if (!in_array($type, [ 'jpg', 'jpeg', 'jpe', 'jfif', 'gif', 'png' ])) {
                 //throw new \Exception('invalid image type');
                 return false;
             }

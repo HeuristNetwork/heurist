@@ -274,6 +274,7 @@ function getImageFromFile($filename){
                     case 'jpeg':
                     case 'jfif':
                     case 'jpg':
+					case 'jpe':
                         $image = @imagecreatefromjpeg($filename);
                         break;
                     case 'gif':

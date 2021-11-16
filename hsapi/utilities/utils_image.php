@@ -353,6 +353,7 @@ class UtilsImage {
             case 'jpeg':
             case 'jfif':
             case 'jpg':
+			case 'jpe':
             case 'image/gif':
             case 'gif':
             case 'image/png':
@@ -418,6 +419,7 @@ class UtilsImage {
                 case 'jpeg':
                 case 'jfif':
                 case 'jpg':
+                case 'jpe':
                     $img = @imagecreatefromjpeg($filename);
                     break;
                 case 'image/gif':

@@ -172,10 +172,10 @@ if($filename){ //download from scratch (for csv import)
             }
         }
         
-        $exts = array('png','jpg','jpeg','jfif','gif');
+        $exts = array('png','jpg','jpeg','jpe','jfif','gif');
         foreach ($exts as $ext){
             if(file_exists($filename.'.'.$ext)){
-                if($ext=='jpg' || $ext=='jfif'){
+                if($ext=='jpg' || $ext=='jfif' || $ext=='jpe'){
                     $content_type = 'image/jpeg';
                 }else{
                     $content_type = 'image/'.$ext;    

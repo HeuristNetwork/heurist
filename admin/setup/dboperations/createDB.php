@@ -134,7 +134,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         $dblist = mysql__select_list2($mysqli, 'show databases');
         if (array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
             //$mysqli->query('drop database '.$database_name_full);
-                $system->addError(HEURIST_ERROR, 
+                $system->addError(HEURIST_ACTION_BLOCKED, 
                         'Database with name '.$database_name_full.' aready exists. Try different name');
                 print json_encode($system->getError());
                 exit();

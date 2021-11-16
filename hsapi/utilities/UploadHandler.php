@@ -643,7 +643,7 @@ $siz = get_php_bytes('upload_max_filesize');
                 function_exists('exif_imagetype')) {
             switch(@exif_imagetype($file_path)){
                 case IMAGETYPE_JPEG:
-                    $extensions = array('jpg', 'jfif', 'jpeg');
+                    $extensions = array('jpg', 'jfif', 'jpeg', 'jpe');
                     break;
                 case IMAGETYPE_PNG:
                     $extensions = array('png');
@@ -900,6 +900,7 @@ $siz = get_php_bytes('upload_max_filesize');
             case 'jpg':
             case 'jpeg':
             case 'jfif':
+            case 'jpe':
                 $src_func = 'imagecreatefromjpeg';
                 $write_func = 'imagejpeg';
                 $image_quality = isset($options['jpeg_quality']) ?
@@ -1177,6 +1178,7 @@ $siz = get_php_bytes('upload_max_filesize');
             case 'jpg':
             case 'jpeg':
             case 'jfif':
+            case 'jpe':
                 if (!empty($options['jpeg_quality'])) {
                     $image->setImageCompression(\imagick::COMPRESSION_JPEG);
                     $image->setImageCompressionQuality($options['jpeg_quality']);
@@ -1548,6 +1550,7 @@ $siz = get_php_bytes('upload_max_filesize');
             case 'jpeg':
             case 'jfif':
             case 'jpg':
+            case 'jpe':
                 return 'image/jpeg';
             case 'png':
                 return 'image/png';

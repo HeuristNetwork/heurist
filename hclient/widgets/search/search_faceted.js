@@ -2376,6 +2376,8 @@ $.widget( "heurist.search_faceted", {
                                                 col_gap = 0;
                                             }
 
+                                            var max_height = 0;
+
                                             // Adding individual columns
                                             for(var i = 0; i < data.length; i++){
 
@@ -2403,8 +2405,11 @@ $.widget( "heurist.search_faceted", {
                                                     'visibility': (col_height == 0) ? 'hidden' : 'visible',
                                                     'margin-top': 'auto'
                                                 }).appendTo($diagram);
+
+                                                if(max_height < col_height) max_height = col_height;
                                             }
-                                            
+
+                                            if(max_height != 0) $slide_range.parent().parent().css('margin-top', max_height + 5);
                                         }
                                     });
                                 }
