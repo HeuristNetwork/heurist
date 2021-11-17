@@ -289,7 +289,7 @@ class DbsTerms
                         $res[$parent_id][$trm_ID] = array(); 
                     }else if($mode==3){
                         if(in_array($trm_ID,$res)){ //already in set
-                            error_log('!!!! Recursive tree or duplication for term '.$trm_ID);
+                            //error_log('!!!! Recursive tree or duplication for term '.$trm_ID);
                         }else{
                             array_push($res, $trm_ID);    
                         }
