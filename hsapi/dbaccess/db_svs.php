@@ -189,16 +189,19 @@
                     'Cannot duplicate filter criteria. Current user must be member for group');
             }else{
                     //get new name
-                    $new_name = $row['svs_Name'].' (copy)';
+                    $new_name = $row['svs_Name'].' (copy)'; //$mysqli->real_escape_string(
             
                     $query = 'INSERT INTO `usrSavedSearches` '
                     .'(`svs_Name`,`svs_Added`,`svs_Modified`,`svs_Query`,`svs_UGrpID`,`svs_ExclusiveXSL`)'
-                    .' SELECT "'.$new_name.'",`svs_Added`,`svs_Modified`,`svs_Query`,`svs_UGrpID`,`svs_ExclusiveXSL` '
+                    .' SELECT ?,`svs_Added`,`svs_Modified`,`svs_Query`,`svs_UGrpID`,`svs_ExclusiveXSL` '
                     .' FROM usrSavedSearches WHERE svs_ID = '.$record['svs_ID'];                    
 
-                    $res = $mysqli->query($query);
                     
-                    if(!$res){
+                    $res= mysql__exec_param_query($mysqli, $query, array('s',$new_name));
+                    
+                    //$res = $mysqli->query($query);
+                    
+                    if($res!==true){
                         $system->addError(HEURIST_DB_ERROR, 'Cannot copy saved filter #'
                              .$record['svs_ID'].' in database', $mysqli->error);
                     }else{
@@ -221,9 +224,9 @@
     function svsSave($system, $record){
 
         if( !(@$record['svs_ID']>0) && !@$record['svs_Name']){
-            $system->addError(HEURIST_INVALID_REQUEST, "Name not defined"); //for new 
+            $system->addError(HEURIST_INVALID_REQUEST, 'Name not defined'); //for new 
         }else if(!(@$record['svs_ID']>0) && !@$record['svs_Query']){
-            $system->addError(HEURIST_INVALID_REQUEST, "Query not defined"); //for new 
+            $system->addError(HEURIST_INVALID_REQUEST, 'Query not defined'); //for new 
         }else{
             
             //refresh groups
@@ -245,7 +248,7 @@
                 
                 foreach($rec_IDs as $svs_ID){
                     $record['svs_ID'] = $svs_ID;                             
-                    $res = mysql__insertupdate($system->get_mysqli(), "usrSavedSearches", "svs", $record);
+                    $res = mysql__insertupdate($system->get_mysqli(), 'usrSavedSearches', 'svs', $record);
                     if(is_numeric($res)>0){
                         return $res; //returns affected record id
                     }else{
