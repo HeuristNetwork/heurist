@@ -33,6 +33,7 @@ class ReportRecord {
        $this->rtStructs = dbs_GetRectypeStructures($system, null, 2);
        $this->dtStructs = dbs_GetDetailTypes($system);
        $this->dtTerms = dbs_GetTerms($system);
+       $this->dtTerms = new DbsTerms($system, $this->dtTerms);
        
        $this->loaded_recs = array();
     }    
@@ -381,12 +382,13 @@ class ReportRecord {
 
 
                             foreach ($dtValue as $key => $value){
-                                if(array_key_exists($value, $this->dtTerms['termsByDomainLookup'][$domain])){
-                                    $term = $this->dtTerms['termsByDomainLookup'][$domain][$value];
+                                
+                                $term = $this->dtTerms->getTerm($value);
+                                if($term){
 
                                     //IJ wants to show terms for all parents
-                                    $term_full = getTermFullLabel($this->dtTerms, $term, $domain, false); //see db_structure.php
-
+                                    $term_full = $this->dtTerms->getTermLabel($value, true);
+                                    
                                     $res_id = $this->_add_term_val($res_id, $value);
                                     $res_cid = $this->_add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);
                                     $res_code = $this->_add_term_val($res_code, $term[ $fi['trm_Code'] ]);

@@ -59,7 +59,10 @@ $is_production = !$is_map_popup && $layout_name=='WebSearch';
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
 
 $rectypesStructure = dbs_GetRectypeStructures($system); //getAllRectypeStructures(); //get all rectype names
-$terms = dbs_GetTerms($system);//getTerms();
+
+$defTerms = dbs_GetTerms($system);
+$defTerms = new DbsTerms($system, $defTerms);
+
 
 $ACCESSABLE_OWNER_IDS = $system->get_user_group_ids();  //all groups current user is a member
 if(!is_array($ACCESSABLE_OWNER_IDS)) $ACCESSABLE_OWNER_IDS = array();
@@ -851,7 +854,7 @@ function print_personal_details($bkmk) {
 // prints recDetails
 //
 function print_public_details($bib) {
-    global $system, $terms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT, $already_linked_ids;
+    global $system, $defTerms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT, $already_linked_ids;
     
     $has_thumbs = false;
     
@@ -913,7 +916,10 @@ function print_public_details($bib) {
         
         foreach ($bds_temp as $bd) {
 
-            if ($bd['dty_Type'] == 'enum') {
+            if ($bd['dty_Type'] == 'enum' || $bd['dty_Type'] == 'relationtype') {
+                
+                $bd['val'] = output_chunker($defTerms->getTermLabel($bd['val'], true));
+/*                
 
                 if(array_key_exists($bd['val'], $terms['termsByDomainLookup']['enum'])){
                     $term = $terms['termsByDomainLookup']['enum'][$bd['val']];
@@ -931,8 +937,7 @@ function print_public_details($bib) {
                 }else{
                     $bd['val'] = 'Term '.$bd['val'].' not found';
                 }
-                
-                //$bd['val'] = output_chunker($terms['termsByDomainLookup']['relation'][$bd['val']][0]);
+*/                
 
             }else if ($bd['dty_Type'] == 'date') {
 
@@ -1013,8 +1018,8 @@ function print_public_details($bib) {
                     
                     $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
                     $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
-                    $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
-                    $params = $fileinfo['ulf_Parameters'];  //ulf_Parameters - not used anymore (for backward capability only)
+                    $mimeType = $fileinfo['fxm_MimeType'];  // fxm_MimeType
+                    $params = $fileinfo['ulf_Parameters'];  // special parameters for audio/video players and iiif
                     $originalFileName = $fileinfo['ulf_OrigFileName'];
                     $fileSize = $fileinfo['ulf_FileSizeKB'];
                     $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
@@ -1040,7 +1045,9 @@ function print_public_details($bib) {
                     ));
               
                     $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($external_url?$external_url:$file_URL).'">'
-                            .htmlspecialchars(($originalFileName && $originalFileName!='_remote')?$originalFileName:($external_url?$external_url:$file_URL)).'</a> '
+                            .htmlspecialchars(($originalFileName && $originalFileName!='_remote')
+                                        ?$originalFileName
+                                        :($external_url?$external_url:$file_URL)).'</a> '
                             .($fileSize>0?'[' .htmlspecialchars($fileSize) . 'kB]':'');
 
                     if($file_description!=null && $file_description!=''){
