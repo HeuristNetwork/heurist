@@ -785,7 +785,7 @@ function smarty_function_wrap($params, &$smarty)
                             
                 if($mode=="link") {
 
-                    $sname = (!$originalFileName || $originalFileName=='_remote')?$external_url:$originalFileName;
+                    $sname = (!$originalFileName || $originalFileName=='_remote' || $originalFileName=='_iiif')?$external_url:$originalFileName;
                     $sres = $sres."<a href='".$file_URL."' target='_blank' title='".$fileinfo['ulf_Description']."' $style>".$sname."</a>";
                     
                 }else 

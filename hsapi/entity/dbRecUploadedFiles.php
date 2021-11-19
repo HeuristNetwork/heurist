@@ -25,6 +25,18 @@ require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
+/**
+* some public methods
+* 
+    registerImage - saves encoded image data as file and register it
+    registerFile - uses getFileInfoForReg to get file info
+    registerURL - register url: retrieves MimeExt 
+* 
+*/
+    
+    
+
+
 
 class DbRecUploadedFiles extends DbEntityBase
 {
@@ -94,7 +106,7 @@ class DbRecUploadedFiles extends DbEntityBase
         if($pred!=null) array_push($where, $pred);
         
 
-        $value = @$this->data['ulf_Parameters'];
+        $value = @$this->data['fxm_MimeType']; 
         $needMimeType = !($value==null || $value=='any');
         if($needMimeType){
             array_push($where, "(fxm_MimeType like '$value%')");
@@ -360,14 +372,48 @@ class DbRecUploadedFiles extends DbEntityBase
 
             $rec_ID = intval(@$record[$this->primaryField]);
             $isinsert = ($rec_ID<1);
+            
+            $mimeType = strtolower($this->records[$idx]['ulf_MimeExt']);
         
             if(@$record['ulf_ExternalFileReference']){
-                if(strpos(@$this->records[$idx]['ulf_OrigFileName'],'_tiled')!==0){
-                    $this->records[$idx]['ulf_OrigFileName'] = '_remote';
+                
+                if(strpos(@$this->records[$idx]['ulf_OrigFileName'],'_tiled')!==0 &&
+                          @$this->records[$idx]['ulf_OrigFileName'] != '_iiif'){
+                    
+                    //check iiif
+                    if( strpos($record['ulf_ExternalFileReference'], 'iiif')!==false
+                       || strpos($record['ulf_ExternalFileReference'], 'manifest.json')!==false 
+                       || $mimeType=='json' || $mimeType=='application/json'){
+                           
+                       //verify that url points to iiif manifest
+                       $iiif_manifest = loadRemoteURLContent($record['ulf_ExternalFileReference']);
+                       $iiif_manifest = json_decode($iiif_manifest, true);
+                       if($iiif_manifest!==false && is_array($iiif_manifest) && @$iiif_manifest['@type']=='sc:Manifest'){
+                           //take label, description, thumbnail
+                           //@$iiif_manifest['label'];
+                           
+                           if(!@$record['ulf_Description'] && @$iiif_manifest['description']){
+                               $this->records[$idx]['ulf_Description'] = @$iiif_manifest['description']; 
+                           }
+                           if(@$iiif_manifest['thumbnail'] && @$iiif_manifest['thumbnail']['@id']){
+                               $this->records[$idx]['ulf_TempThumbUrl'] = @$iiif_manifest['thumbnail']['@id'];      
+                           }
+                    
+                           $this->records[$idx]['ulf_OrigFileName'] = '_iiif';  
+                           
+                           $mimeType = 'json';
+                           $this->records[$idx]['ulf_MimeExt'] = 'json';
+                       }
+                       
+                    }
+                    
+                    if(!$this->records[$idx]['ulf_OrigFileName']){
+                        $this->records[$idx]['ulf_OrigFileName'] = '_remote';    
+                    }
                 }
             }else if(@$record['ulf_FileUpload']){
                 
-                $fields_for_reg = $this->getFileInfoForReg($record['ulf_FileUpload'], null);            
+                $fields_for_reg = $this->getFileInfoForReg($record['ulf_FileUpload'], null); //thumbnail is created here           
                 if(is_array($fields_for_reg)){
                     $this->records[$idx] = array_merge($this->records[$idx], $fields_for_reg);
                 }
@@ -388,7 +434,6 @@ class DbRecUploadedFiles extends DbEntityBase
             }
             
             //change mimetype to extension
-            $mimeType = strtolower($this->records[$idx]['ulf_MimeExt']);
             if($mimeType==''){
                 $mimeType = 'dat';
                 $this->records[$idx]['ulf_MimeExt'] = 'dat';
@@ -511,6 +556,14 @@ class DbRecUploadedFiles extends DbEntityBase
                 }
             }
             
+            if($record['ulf_OrigFileName']=='_iiif' && @$record['ulf_TempThumbUrl']){
+
+                    $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
+                    $temp_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
+                    saveURLasFile($record['ulf_TempThumbUrl'], $temp_path);
+                    UtilsImage::createThumbnailFile($temp_path, $thumb_name);
+                        
+            }else
             //if there is file to be copied                        
             if(@$this->records[$rec_idx]['ulf_TempFile']){ 
                     
@@ -519,7 +572,6 @@ class DbRecUploadedFiles extends DbEntityBase
                     
                     //copy temp file from scratch to fileupload folder
                     $tmp_name = $this->records[$rec_idx]['ulf_TempFile'];
-                    
                     
                     if(strpos($record['ulf_OrigFileName'],'_tiled')===0)
                     {
@@ -689,11 +741,11 @@ class DbRecUploadedFiles extends DbEntityBase
     
     
     //
-    // 
+    //  get information for information for uploaded file
     //
     private function getFileInfoForReg($file, $newname){
         
-        if(!is_a($file,'stdClass')){
+        if(!is_a($file, 'stdClass')){
             
             $tmp_thumb = null;
             
@@ -764,7 +816,7 @@ class DbRecUploadedFiles extends DbEntityBase
                     $ret['ulf_TempFileThumb'] = $file->thumbnailName;
                 }
                 
-                //,'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt)); //backward capability            
+                //!!!!! ,'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt)); //backward capability            
                 
         }else{
         
@@ -786,7 +838,8 @@ class DbRecUploadedFiles extends DbEntityBase
        
         return $ret;
     }
-    
+
+
     /**
     * Save encoded image data as file and register it
     * 
@@ -863,7 +916,8 @@ class DbRecUploadedFiles extends DbEntityBase
     }
     
     /**
-    * @todo
+    * Register remote resource - used to fix flaw in database - detail type "file" has value but does not have registered
+    * It may happen when user converts text field to "file"
     * 
     * @param mixed $url
     * @param mixed $generate_thumbmail
@@ -872,7 +926,7 @@ class DbRecUploadedFiles extends DbEntityBase
         
        $this->records = null; //reset 
        
-       $fields['ulf_OrigFileName'] = $tiledImageStack?'_tiled@':'_remote';
+       $fields['ulf_OrigFileName'] = $tiledImageStack?'_tiled@':'_remote';  //or _iiif
        $fields['ulf_ExternalFileReference'] = $url;
        if($tiledImageStack){
             $fields['ulf_MimeExt'] = 'png';

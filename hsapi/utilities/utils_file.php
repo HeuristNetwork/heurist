@@ -1295,20 +1295,46 @@ function recognizeMimeTypeFromURL($mysqli, $url){
             }*/    
 
             $mimeType = loadRemoteURLContentType($url); 
+            
         }
         
         if($mimeType!=null && $mimeType!==false){
-            $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_MimeType="'
-                        .$mimeType.'"';
-            $f_extension = mysql__select_value($mysqli, $ext_query);
             
-            if($f_extension==null && $force_add!=null){
-                $mysqli->query('insert into defFileExtToMimetype ('
-    .'`fxm_Extension`,`fxm_MimeType`,`fxm_OpenNewWindow`,`fxm_IconFileName`,`fxm_FiletypeName`,`fxm_ImagePlaceholder`'
-                .') values '.$force_add);
-                $needrefresh = true;
-            }else{
-                $extension = $f_extension;
+            //remove charset section
+            if(strpos($mimeType,';')>0){
+                $parts = explode(';', $mimeType);
+                $k = 0;
+                while($k<count($parts)){
+                    if(strpos($parts[$k],'charset')!==false){
+                        array_splice($parts, $k, 1);
+                        //unset($parts[$k]);     
+                    }else{
+                        $k++;
+                    }
+                }//while
+                $mimeType = @$parts[0];
+            }
+            
+            if($mimeType){
+
+                if($mimeType == 'application/json'){
+                    $extension = 'json';
+                    $force_add = "('json','application/json', '0','','JSON','')";    
+                }
+            
+                $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_MimeType="'
+                            .$mimeType.'"';
+                $f_extension = mysql__select_value($mysqli, $ext_query);
+                
+                if($f_extension==null && $force_add!=null){
+                    $mysqli->query('insert into defFileExtToMimetype ('
+        .'`fxm_Extension`,`fxm_MimeType`,`fxm_OpenNewWindow`,`fxm_IconFileName`,`fxm_FiletypeName`,`fxm_ImagePlaceholder`'
+                    .') values '.$force_add);
+                    $needrefresh = true;
+                }else{
+                    $extension = $f_extension;
+                }
+                
             }
         }
         //if extension not found apply bin: application/octet-stream - generic mime type

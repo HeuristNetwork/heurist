@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <link rel="stylesheet" type="text/css" href="../../../external/mirador2/css/mirador-combined.min.css">
+  <title>Mirador Viewer</title>
+  <style type="text/css">
+    body { padding: 0; margin: 0; overflow: hidden; font-size: 70%; }
+    #viewer { background: #333 url(../../../external/mirador2/images/debut_dark.png) left top repeat; width: 100%; height: 100%; position: fixed; }
+  </style>
+  <script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="viewer"></div>
+  
+  <script src="../../../external/mirador2/mirador.js"></script>
+  <script type="text/javascript">    
+  
+    $(function() {
+        
+      var s  = window.location.href;
+      var manifest_uri = s.replace('hclient/widgets/viewers/mirador_viewer.html', '');
+        
+//console.log($.DEFAULT_SETTINGS);        
+        
+      Mirador({
+        "id": "viewer",
+        "layout": "1x1",
+        "data": [
+        {"manifestUri": manifest_uri}
+        ],
+        "windowSettings": {
+          sidePanel: false,
+          canvasControls: {
+            "annotations": {
+              "annotationLayer": true
+            },
+            "imageManipulation": {
+            "manipulationLayer": false
+            }
+          },
+          displayLayout: false,
+        },
+        "mainMenuSettings": {
+          show: false
+        },        
+        "windowObjects": [
+        {loadedManifest: manifest_uri}
+        ],
+        "annotationEndpoint": { "name":"Local Storage", "module": "LocalStorageEndpoint" }
+      });
+    });
+  </script>
+</body>
+</html>

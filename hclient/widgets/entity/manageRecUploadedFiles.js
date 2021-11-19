@@ -267,9 +267,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 'border-top': '1px solid lightgray',
                 margin: '10px'});
             this.editForm.append( this.mediaviewer );
-            this.mediaviewer.media_viewer({rec_Files:[[
-                    this._editing.getValue('ulf_ObfuscatedFileID')[0], 
-                    this._editing.getValue('fxm_MimeType')[0]]]}); //nonce + memtype
+            this.mediaviewer.media_viewer({rec_Files:[{
+                    id: this._editing.getValue('ulf_ObfuscatedFileID')[0], 
+                    filename: this._editing.getValue('ulf_OrigFileName')[0], 
+                    mimeType: this._editing.getValue('fxm_MimeType')[0]}]}); //nonce + memtype
                 
             
             //list of records that refer to this file    
@@ -538,6 +539,11 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             var val = fld('ulf_OrigFileName');
             if(val.indexOf('_tiled@')==0){
                 val = val.substr(7);
+                if(!window.hWin.HEURIST4.util.isempty(val)){
+                    recTitle = '<div class="item" style="width:auto">'+val+'</div>';    
+                }
+            }else if(val.indexOf('_iiif@')==0){
+                val = val.substr(6);
                 if(!window.hWin.HEURIST4.util.isempty(val)){
                     recTitle = '<div class="item" style="width:auto">'+val+'</div>';    
                 }

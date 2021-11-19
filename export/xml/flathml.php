@@ -1387,7 +1387,7 @@ function makeFileContentNode($file) {
     if (@$file['fxm_MimeType'] === "application/xml") { // && file_exists($filename)) {
 
         $fiilename = resolveFilePath($file['fullPath']);
-        if ($file['ulf_OrigFileName'] !== "_remote" && file_exists($fiilename)) {
+        if ( !s($file['ulf_OrigFileName'] == '_remote' || $file['ulf_OrigFileName'] == '_iiif') && file_exists($fiilename)) {
 
             $xml = simplexml_load_file( $fiilename );
             if (!$xml) {

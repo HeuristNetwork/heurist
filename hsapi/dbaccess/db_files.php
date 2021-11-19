@@ -581,8 +581,8 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
   
     $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
     $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
-    $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
-    $params = $fileinfo['ulf_Parameters'];  //ulf_Parameters - not used anymore (for backward capability only)
+    $mimeType = $fileinfo['fxm_MimeType'];  // fxm_MimeType
+    $params = $fileinfo['ulf_Parameters'];  // special parameters for audio/video players and iiif
     $originalFileName = $fileinfo['ulf_OrigFileName'];
     $fileSize = $fileinfo['ulf_FileSizeKB'];
     $fileExt = $fileinfo['ulf_MimeExt'];
@@ -653,14 +653,14 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
 
 //
 // output the appropriate html tag to view media content
-//
+// $params - array of special parameters for audio/video playback AND for IIIF 
 //
 function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null, $style=null){ 
 
     $result = '';    
     
-    $is_video = (strpos($mimeType,"video/")===0); // || strpos($params,"video")!==false
-    $is_audio = (strpos($mimeType,"audio/")===0); // || strpos($params,"audio")!==false
+    $is_video = (strpos($mimeType,"video/")===0); // || @$params['video']
+    $is_audio = (strpos($mimeType,"audio/")===0); // || @$params['audio']
     $is_image = (strpos($mimeType,"image/")===0);
     
     if($style==null) $style='';
@@ -770,6 +770,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
 
 //
 // get player url for youtube, vimeo, soundcloud
+// $params - parameters for playback    show_artwork,auto_play
 //
 function getPlayerURL($mimeType, $url, $params=null){
     

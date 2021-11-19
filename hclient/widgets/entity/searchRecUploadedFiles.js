@@ -208,8 +208,9 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     request['ulf_OrigFileName'] = this.input_search.val();    
                 }
             }
+            //it does not search actually for this field  - it searches for mimetype
             if(this.input_search_type.val()!='' && this.input_search_type.val()!='any'){
-                    request['ulf_Parameters'] = this.input_search_type.val();    
+                    request['fxm_MimeType'] = this.input_search_type.val();  
             }
             
             if(this.input_search_my.is(':checked')){

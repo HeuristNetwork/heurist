@@ -54,21 +54,67 @@ $.widget( "heurist.media_viewer", {
         
         if($.isArray(this.options.rec_Files))
         {
+            var has_fancybox = false;
+            var has_mirador = false;
 
             for (var idx in this.options.rec_Files){
                 if(idx>=0){  //skip first
                     var file = this.options.rec_Files[idx];
-
-                    var obf_recID = file[0];
-                    var mimeType = file[1]; //($.isArray(file) ?file[2] :file ) ;
+                    
+                    var obf_recID, mimeType, filename = null;
+                    
+                    if($.isPlainObject(file)){
+                        obf_recID = file.id;
+                        mimeType = file.mimeType;
+                        filename = file.filename;
+                    }else{
+                        obf_recID = file[0];
+                        mimeType = file[1]; //($.isArray(file) ?file[2] :file ) ;
+                    }
 
                     var fileURL = window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database //+ (needplayer?'&player=1':'')
                                  + '&file='+obf_recID;
+
+                    var thumbURL = window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database 
+                                 + '&thumb='+obf_recID
                     
-//console.log(mimeType);                    
+//console.log(mimeType);
+                    if(filename === '_iiif'){
+                        
+                        //thumbnail preview
+                        var $alink = $('<a>')
+                            .attr('data-id', obf_recID)
+                            .appendTo($("<div>").css({height:'auto','display':'inline-block','data-caption':title})
+                            .appendTo(this.mediacontent));
+                        
+                        $('<img>', {height:200, src: thumbURL, title:title})
+                            .attr('data-id', obf_recID)
+                            .appendTo($alink);
+                        
+                        this._on($alink,{click:function(e){
+                             
+      var obf_recID = $(e.target).attr('data-id');
+      var manifestURL = window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database
+                                 + '&file='+obf_recID;                            
+                                 
+      var url = window.hWin.HAPI4.baseURL + "hclient/widgets/viewers/mirador_viewer.html?db=" + window.hWin.HAPI4.database
+                                 + '&file='+obf_recID;                            
+
+      if(true){
+            window.hWin.HEURIST4.msg.showDialog(url,{dialogid:'mirador-viewer',
+                                resizable:false, draggable: false, maximize:true, //width:'100%',height:'100%',
+                                allowfullscreen:true,'padding-content':'0px'});   
+      }else{
+            window.open(url, '_blank');        
+      }
+      
+                        }});
+                        
+                        has_mirador = true;
+                        
+                    }else
                     if(mimeType && mimeType.indexOf('image')===0){
                         
-                        var thumbURL = window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + '&thumb='+obf_recID
 //                        var $alink = $("<a>",{href: fileURL, target:'_blank'})
                         var $alink = $("<a>",{href: fileURL, 'data-fancybox':'fb-images'})
                             .appendTo($("<div>").css({height:'auto','display':'inline-block','data-caption':title})
@@ -77,7 +123,10 @@ $.widget( "heurist.media_viewer", {
                             
                         $("<img>", {height:200, src: thumbURL, title:title}).appendTo($alink);
                         
-                    }else if(mimeType && mimeType=='application/pdf'){
+                        has_fancybox = true;
+                        
+                    }else 
+                    if(mimeType && mimeType=='application/pdf'){
 
                         var fileURL_forembed = window.hWin.HAPI4.baseURL
                                 + 'hsapi/controller/file_download.php?db=' 
@@ -102,7 +151,6 @@ $.widget( "heurist.media_viewer", {
                             .appendTo(this.mediacontent));
                         */    
                             
-                        var thumbURL = window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + '&thumb='+obf_recID
                         $("<img>", {height:200, src: thumbURL, title:title}).appendTo($alink);
                         
                     }else{
@@ -116,7 +164,7 @@ $.widget( "heurist.media_viewer", {
             this.mediacontent.show();
 
             
-            if($.fancybox && $.isFunction($.fancybox)){
+            if(has_fancybox && $.fancybox && $.isFunction($.fancybox)){
                     $.fancybox({parentEl:this.mediacontent.parent().attr('id'), 
                                 selector : 'a[data-fancybox="fb-images"]', 
                                 loop:true});

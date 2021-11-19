@@ -564,6 +564,15 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             $dosframe = $( "<iframe>").attr('parent-dlg-id', $dlg.attr('id'))
             .css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
+            
+            if(options['allowfullscreen']){
+                $dosframe.attr('allowfullscreen',true);
+                $dosframe.attr('webkitallowfullscreen',true);
+                $dosframe.attr('mozallowfullscreen',true);
+                
+                //$dosframe.css({position:'fixed', top:'0px', left:'0px'});
+            }
+            
             $dosframe.hide();
             /*
             //on close event listener - invoke callback function if defined
@@ -693,23 +702,28 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             //    options['callback']
             //(this.document.find('body').innerHeight()-20)
-            options.height = parseInt(options.height, 10);
-            if(isNaN(options.height) || options.height<50){
-                options.height = 480;
-            } 
-
-            //console.log('opener '+opener.innerHeight+'  '+opener.innerWidth);                        
-
-            if(options.height > opener.innerHeight-20){
-                options.height = opener.innerHeight-20;
+            if (!(typeof options.height==='string' && options.height.indexOf('%')>0)){
+                
+                options.height = parseInt(options.height, 10);
+                if(isNaN(options.height) || options.height<50){
+                    options.height = 480;
+                } 
+                //console.log('opener '+opener.innerHeight+'  '+opener.innerWidth);                        
+                if(options.height > opener.innerHeight-20){
+                    options.height = opener.innerHeight-20;
+                }
+            }            
+            
+            if (!(typeof options.width==='string' && options.width.indexOf('%')>0)){
+                options.width = parseInt(options.width, 10);
+                if(isNaN(options.width) || options.width<100){
+                    options.width = 640; 
+                } 
+                if(options.width > opener.innerWidth-20){
+                    options.width = opener.innerWidth-20;
+                }
             }
-            options.width = parseInt(options.width, 10);
-            if(isNaN(options.width) || options.width<100){
-                options.width = 640; 
-            } 
-            if(options.width > opener.innerWidth-20){
-                options.width = opener.innerWidth-20;
-            }
+            //var dim = {h:body.innerHeight(), w:body.innerWidth()};
 
             var opts = {
                 autoOpen: true,
@@ -736,9 +750,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             };
             $dlg.dialog(opts);
 
-            //$dlg.addClass('ui-heurist-bg-light');
-            //$dlg.parent().addClass('ui-dialog-heurist ui-heurist-explore');
-
             if($dlg.attr('data-palette'))
                 $dlg.parent().removeClass($dlg.attr('data-palette'));
             if(options.default_palette_class){
@@ -755,8 +766,23 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }
 
 
-            if(!window.hWin.HEURIST4.util.isempty(options['padding'])) //by default 2em
+            if(!window.hWin.HEURIST4.util.isempty(options['padding'])){ //by default 2em
                 $dlg.css('padding', options.padding);
+            }
+            if(!window.hWin.HEURIST4.util.isempty(options['padding-content'])){ 
+                $dlg.parent().find('.ui-dialog-content').css('padding', options['padding-content']);
+            }
+            
+            if(!options.is_h6style && options.maximize){
+                        function __maximizeOneResize(){
+                            var dialog_height = window.innerHeight;
+                            $dlg.dialog( 'option', 'height', dialog_height);
+                            var dialog_width = window.innerWidth;
+                            $dlg.dialog( 'option', 'width', '100%'); //dialog_width
+                        }
+                        //$(window).resize(__maximizeOneResize)
+                        __maximizeOneResize();
+            }            
 
         }
 

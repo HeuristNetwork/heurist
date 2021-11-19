@@ -100,7 +100,7 @@ if (!window.hWin.HEURIST4.collection)
                             , {default_palette_class:'ui-heurist-explore'});
 
                     }else{
-                        window.open(url, "_blank");    
+                        window.open(url, '_blank');    
                     }    
 
                 }else{

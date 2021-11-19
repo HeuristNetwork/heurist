@@ -2405,15 +2405,15 @@ function recordSearch($system, $params)
 
                                     if($needCompleteInformation){
 
-                                        $params = fileParseParameters($row[8]);//ulf_Parameters
+                                        $params = fileParseParameters($row[8]);//ulf_Parameters - @todo REMOVE
 
                                         $val = array('ulf_ID'=>$row[3],
                                             'ulf_OrigFileName'=>$row[4],
                                             'ulf_ExternalFileReference'=>$row[5],
                                             'ulf_ObfuscatedFileID'=>$row[6],
                                             'ulf_MimeExt'=>$row[7],
-                                            'mediaType'=>$params['mediaType'],
-                                            'remoteSource'=>$params['remoteSource']);
+                                            'mediaType'=>@$params['mediaType'],
+                                            'remoteSource'=>@$params['remoteSource']);
 
 
                                     }else{
@@ -2652,8 +2652,8 @@ function _createFlatRule(&$flat_rules, $r_tree, $parent_index){
 
 }
 
-//
-// backward capability - remove as soon as old uploadFileOrDefineURL get rid of use
+// @todo - ready to REMOVE
+// backward capability - remove as soon as old uploadFileOrDefineURL get rid of use 
 //
 function fileParseParameters($params){
     $res = array();

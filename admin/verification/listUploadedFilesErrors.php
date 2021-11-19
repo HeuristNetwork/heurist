@@ -194,7 +194,7 @@ $mysqli = $system->get_mysqli();
     
     //search for duplicated files (identical files in different folders)
     $query2 = 'SELECT ulf_OrigFileName, count(*) as cnt FROM recUploadedFiles ' 
-.' where ulf_OrigFileName is not null and ulf_OrigFileName<>"_remote" GROUP BY ulf_OrigFileName HAVING cnt>1';
+.' where ulf_OrigFileName is not null and ulf_OrigFileName<>"_remote" and ulf_OrigFileName<>"_iiif" GROUP BY ulf_OrigFileName HAVING cnt>1';
     $res2 = $mysqli->query($query2);
     
     if ($res2 && $res2->num_rows > 0) {
