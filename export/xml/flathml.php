@@ -1632,6 +1632,11 @@ function outputTemporalDetail($attrs, $value) {
         list($tag, $val) = explode("=", $prop);
         $properties[$tag] = $val;
     }
+
+    openTag('raw');
+    output( $temporalStr );
+    closeTag('raw');
+    
     openTag('temporal', array("version" => $properties['VER'], "type" => $typeDict[$properties['TYP']]));
     unset($properties['VER']);
     unset($properties['TYP']);
