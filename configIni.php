@@ -62,13 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-
-$version = "6.2.21"; // sets current program version number, determined by Heurist development lead
+$version = "6.2.22"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
-// 6.2.21 18 Nov 2021 
-// 6.2.20 28 Oct 2021 
+// 6.2.22 20 Nov 2021 Add semantic URI to defRecStructure table, rework structure visualisation, new CMS editor (currently in test mode), a lot of minor bug fixing, improved Zotero synch reporting, auto matching column to field names in CSV import
 // 6.2.19 15 Oct 2021 Improved error reporting, handling of non-transparent monochrome backgrounds on JPG tile images, improvemetns to definitions editing workflow, improvements to CSV import workflows, better display of length for memo texts in wysiwyg, new metadata display landing page, facet search date histograms (draft), dropdown at end of long list of facets, remember open tab in data entry, auto prompt to change simpel headers to tabs, heading breaks in Record View, separate menu entryt for assigning external lookup fucntions to record types, improved field selection trees with closed sections for record-level fields etc., display breaks in ordinary text fields in record view and metadata.
 // 6.2.18 20 Sep 2021 New Intro page showing database metadata and allowing edit, suppress duplicates or make copies of edited files in bulk upload of files and of records in XML file upload, cope better with long directory names on bulk uploads, cleaner source codd edit of website pages, API fixes, record counts for facet search folliwing relationship markers, streamline CSV importer display of fields and shortcut option to create all new records without matching step.
 // 6.2.17 30 Aug 2021 Uploading of tile stack images, convert 3-34 to from Text field to File field, added supplementart title 2 for websites, first draft bulk emailer
