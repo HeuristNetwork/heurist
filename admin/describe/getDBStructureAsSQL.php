@@ -223,6 +223,9 @@ function do_print_table($desc, $tname, $where=null)
     if($isHTML) print "<p>";
 
     $flds_list = mysql__select_assoc2($mysqli, 'SHOW COLUMNS FROM '.$tname);
+    if($tname=='defTermsLinks'){
+        array_shift($flds_list); //remove primary key field
+    }
     $flds_names = array_keys($flds_list);
     $flds = '`'.implode('`,`', $flds_names).'`';
     print "-- $flds \n";
@@ -237,7 +240,7 @@ function do_print_table($desc, $tname, $where=null)
 
     print "\n$startToken\n";
 
-    //get table prefix
+    //get table prefix             
     $id_field = $flds_names[0];
     $prefix = substr($id_field,0,3);
     
@@ -269,6 +272,7 @@ function do_print_table($desc, $tname, $where=null)
         }
                 //print_row($row, $tname); 
     }
+    
     $res->close();
     print "$endToken\n";
 

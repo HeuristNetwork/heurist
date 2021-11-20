@@ -170,10 +170,15 @@ class ImportDefinitions {
             
             
             if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            
+
                 $flds = mysql__select_list2($this->mysqli, 'SHOW COLUMNS FROM '.$tables[$idx]);
+                if($tables[$idx]=='defTermsLinks'){
+                    array_shift($flds); //remove primary key field
+                }                
+
                 $flds = '`'.implode('`,`', $flds).'`';
 
+                
                 $query = 'INSERT INTO `'.$tables[$idx]."` ($flds) VALUES ". $dataSet;
                 $this->mysqli->query($query);
                 if($this->mysqli->error && $this->mysqli->error!='') {
@@ -189,6 +194,7 @@ class ImportDefinitions {
                     return false;
                 }
             }            
+            
         }//for
 
         $this->mysqli->query("SET SESSION sql_mode=''");

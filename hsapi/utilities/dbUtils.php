@@ -413,21 +413,10 @@ class DbUtils {
 
             // echo_flush ('OK');
             // echo_flush ("<p>Add Referential Constraints ");
-
-            if($level<2 || execute_db_script(self::$system, $database_name_full, 
-                HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql",
-                'Cannot add referential constraints')){
-
-                // echo_flush ('OK');
-                // echo_flush ("<p>Add Procedures and Triggers ");
-
-                if($level<2 || execute_db_script(self::$system, $database_name_full, 
-                    HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql",
-                    'Cannot create procedures and triggers')){
-
-                    // echo_flush ('OK');
-                    return true;
-                }
+            if($level<2){
+                return true;
+            }else if(self::databaseCreateConstraintsAndTriggers($database_name)){
+                return true;    
             }
         }
         
@@ -435,7 +424,30 @@ class DbUtils {
         mysql__drop_database($mysqli, $database_name_full);
         return false;
     }
-    
+
+    //
+    //
+    //    
+    public static function databaseCreateConstraintsAndTriggers($database_name){
+
+        self::initialize();
+        list($database_name_full, $database_name) = mysql__get_names( $database_name );
+
+        if(execute_db_script(self::$system, $database_name_full, 
+                HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql",
+                'Cannot add referential constraints')){
+
+                if(execute_db_script(self::$system, $database_name_full, 
+                    HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql",
+                    'Cannot create procedures and triggers')){
+
+                    // echo_flush ('OK');
+                    return true;
+                }
+        }
+        return false;
+        
+    }
         
     //
     // create if not exists set of folders for given database

@@ -189,8 +189,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                 print json_encode($system->getError());
                 exit();
             }
-            
-            
+
             $warnings = DbUtils::databaseCreateFolders($database_name_full);
             
             if(!is_array($warnings)) $warnings = array();

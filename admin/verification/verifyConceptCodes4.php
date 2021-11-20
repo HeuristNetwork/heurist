@@ -61,9 +61,10 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
 
 $mysqli = $system->get_mysqli();
     
-    //1. find all database
+//find all database
+$databases = mysql__getdatabases4($mysqli, false);   
+/*    
     $query = 'show databases';
-
     $res = $mysqli->query($query);
     if (!$res) {  print $query.'  '.$mysqli->error;  return; }
     $databases = array();
@@ -73,8 +74,56 @@ $mysqli = $system->get_mysqli();
                 $databases[] = $row[0];
         }
     }
+*/
 
-      
+if(true){
+    
+    __updateDatabase();
+}else{
+    findMissedTermLinks();
+}
+
+//
+// updata database - add new fields
+// 
+function __updateDatabase(){
+    
+    global $mysqli, $databases; 
+
+
+    foreach ($databases as $idx=>$db_name){
+
+        mysql__usedatabase($mysqli, $db_name);
+        
+        if(hasTable($mysqli, 'defRecStructure')){
+            
+            if(hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
+                print $db_name.' already exists<br>';
+            }else{
+                //alter table
+                $query = "ALTER TABLE `defRecStructure` ADD `rst_SemanticReferenceURL` VARCHAR( 250 ) NULL "
+                ." COMMENT 'The URI to a semantic definition or web page describing this field used within this record type' "
+                .' AFTER `rst_LocallyModified`';
+                $res = $mysqli->query($query);
+                if(!$res){
+                    print $db_name.' Cannot modify defRecStructure to add rst_SemanticReferenceURL: '.$mysqli->error;
+                    return false;
+                }else{
+                    print $db_name.'<br>';
+                }
+            }    
+        }
+    }
+    print '[end report]';    
+}
+
+
+//------------------------------
+//
+//  
+function findMissedTermLinks() {
+    global $mysqli, $databases; 
+    
     $db2_with_links = array();
     $db2_with_terms = array();
     $db3_with_terms = array();
@@ -200,6 +249,7 @@ Show labels 3-1088  ( 2-6258 )  3-5084, 3-5085, 3-5086
 */    
     
     print '[end report]</div>';
+}     
     
 //
 //
