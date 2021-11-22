@@ -600,7 +600,7 @@ public static function importRecords($filename, $params){
     $is_cms_init = (@$params['is_cms_init']===true || @$params['is_cms_init']==1);
     $make_public = !(@$params['make_public']===false || @$_REQUEST['make_public']===0);
     $owner_id = @$params['onwer_id']>0 ?$params['onwer-id'] :1;
-    $mapping_defs = $params['mapping_defs'];
+    $mapping_defs = @$params['mapping_defs'];
     
     $unique_field_id = @$params['unique_field_id'];
     $allow_insert = true;
