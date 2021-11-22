@@ -91,8 +91,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this._super();
         
         this.space_for_drop = $('<span class="space_for_drop heurist-helper3" '
-                    +'style="position:absolute;top:80px;text-align:left;left:0;right:0;font-size: 0.8em;display:none;margin:5px;padding:5px;background:white">'
-                    +'<span class="ui-icon ui-icon-arrowthick-1-e"/>&nbsp;drop here to move term to top level&nbsp;<span class="ui-icon ui-icon-arrowthick-1-w"/></span>')
+                    +'style="position:absolute;top:80px;text-align:left;left:0;right:0;font-size: 0.8em;display:block;margin:0px;padding:5px 0 0 3px;background:white">'
+                    +'<span class="ui-icon ui-icon-arrowthick-1-e"/>&nbsp;top</span>') //drop here to move term to top level&nbsp;<span class="ui-icon ui-icon-arrowthick-1-w"/>
                         .insertBefore(this.recordList);
 
         var that = this;
@@ -200,7 +200,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
 
                 this.searchForm.css({'padding-top':this.options.isFrontUI?'6px':'4px', height:80});
-                this.recordList.css({ top:80});
+                this.recordList.css({ top: '80px' });
 
                 this.options.recordList = {
                     empty_remark: 'No vocabularies in this group.<br/><br/>Please drag vocabulary from other groups or add new vocabulary to this group.',
@@ -356,7 +356,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 //padding:'6px'
                 this.searchForm.css({'min-width': '470px', 'padding-top':this.options.isFrontUI?'6px':'4px', height:80})
                 .empty();                                     
-                this.recordList.css({'min-width': '315px', top:80});
+                this.recordList.css({'min-width': '315px', top:'104px'});
                 this.searchForm.parent().css({'overflow-x':'auto'});
 
                 $('<div style="vertical-align: middle;width: 100%;min-height: 32px; border-bottom: 1px solid gray; clear: both;">'
@@ -461,8 +461,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                             start: function(event,ui){
                                 if(that.space_for_drop){
-                                    that.space_for_drop.show();
-                                    that.recordList.css('top','120px');
+                                    //that.space_for_drop.show();
+                                    //that.recordList.css('top','120px');
                                 }
                             },
                             drag: function(event,ui){
@@ -503,8 +503,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 :$(event.target).parents('.recordDiv');
 
                                 if(that.space_for_drop){
-                                    that.space_for_drop.hide();
-                                    that.recordList.css('top','80px');                                
+                                    //that.space_for_drop.hide();
+                                    //that.recordList.css('top','80px');                                
                                 }
                                 that._dropped = true;
                                 if(that.scrollInterval>0) clearInterval(that.scrollInterval);
@@ -531,8 +531,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             drop: function( event, ui ){
                                 
                                 if(that.space_for_drop){
-                                    that.space_for_drop.hide();
-                                    that.recordList.css('top','80px');                                
+                                    //that.space_for_drop.hide();
+                                    //that.recordList.css('top','80px');                                
                                 }
                                 if(that.scrollInterval>0) clearInterval(that.scrollInterval);
                                 that.scrollInterval = 0;
