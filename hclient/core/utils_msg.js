@@ -782,7 +782,13 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         }
                         //$(window).resize(__maximizeOneResize)
                         __maximizeOneResize();
-            }            
+            }     
+            if(options.borderless){
+                $dlg.css('padding',0);
+                $dlg.parent() //s(".ui-dialog")
+                      .css("border", "0 none")
+                      .find(".ui-dialog-titlebar").remove();
+            }
 
         }
 

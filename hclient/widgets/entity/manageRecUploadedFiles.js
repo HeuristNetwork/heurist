@@ -267,7 +267,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 'border-top': '1px solid lightgray',
                 margin: '10px'});
             this.editForm.append( this.mediaviewer );
-            this.mediaviewer.media_viewer({rec_Files:[{
+            this.mediaviewer.mediaViewer({rec_Files:[{
                     id: this._editing.getValue('ulf_ObfuscatedFileID')[0], 
                     filename: this._editing.getValue('ulf_OrigFileName')[0], 
                     mimeType: this._editing.getValue('fxm_MimeType')[0]}]}); //nonce + memtype

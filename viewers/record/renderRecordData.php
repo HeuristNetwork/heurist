@@ -109,11 +109,20 @@ if(!($is_map_popup || $without_header)){
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>h4styles.css">
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
 
         <script type="text/javascript" src="../../hclient/core/hintDiv.js"></script> <!-- for mapviewer roolover -->
         <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
+        
+        <!--
+        <link rel="stylesheet" type="text/css" href="../../external/jquery.fancybox/jquery.fancybox.css" />
+        <script type="text/javascript" src="../../external/jquery.fancybox/jquery.fancybox.js"></script>
+        -->
+        <script type="text/javascript" src="../../hclient/widgets/viewers/mediaViewer.js"></script>
 
         <script type="text/javascript">
+        
+            var rec_Files = [];
         
             function zoomInOut(obj,thumb,url) {
                 var thumb = thumb;
@@ -301,6 +310,8 @@ if(!($is_map_popup || $without_header)){
 
             $(document).ready(function() {
                 showHidePrivateInfo(null);
+                
+                $('.thumbnail2').mediaViewer({rec_Files:rec_Files, showLink:true})
             });
             
             /*NOT USED
@@ -1019,7 +1030,7 @@ function print_public_details($bib) {
                     $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
                     $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
                     $mimeType = $fileinfo['fxm_MimeType'];  // fxm_MimeType
-                    $params = $fileinfo['ulf_Parameters'];  // special parameters for audio/video players and iiif
+                    $params = $fileinfo['ulf_Parameters'];  // not used anymore
                     $originalFileName = $fileinfo['ulf_OrigFileName'];
                     $fileSize = $fileinfo['ulf_FileSizeKB'];
                     $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
@@ -1035,6 +1046,7 @@ function print_public_details($bib) {
                         //'url' => $file_URL, //download
                         'external_url' => $external_url,      //external url
                         //'mediaType'=>$filedata['mediaType'], 
+                        'orig_name'=>$originalFileName,
                         'params'=>$params,
                         'mimeType'=>$mimeType, 
                         'file_size'=>$fileSize,
@@ -1142,6 +1154,15 @@ function print_public_details($bib) {
     }
     
     print '<div id="div_public_data">';
+
+    print '<script>';
+    foreach ($thumbs as $thumb) {
+        print 'rec_Files.push({id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
+        if($is_map_popup) break;
+    }
+    print '</script>';
+    print '<div class="thumbnail2" style="text-align:center"></div>';
+
     
     $hasAudioVideo = '';
     if($is_production){
@@ -1157,9 +1178,9 @@ function print_public_details($bib) {
     }else{
         print '<div class="thumbnail">';
     }
-        
         $has_thumbs = (count($thumbs)>0);        
-
+        
+    if(false) ///hide old thumbnails   
         foreach ($thumbs as $thumb) {
             
             $isAudioVideo = (strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0);

@@ -86,7 +86,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             window.hWin.HRA = that.HRA; //localize all elements with class slocale for given element
             window.hWin.HRes = that.HRes; //returns url or content for localized resource (help, documentation)
         }
-
+        
+        if(!$.isFunction(that.fancybox)){
+            that.fancybox = $.fn.fancybox; //to call from iframes
+        }    
+        
         if(typeof hLayout !== 'undefined' && $.isFunction(hLayout)){
             that.LayoutMgr = new hLayout();
         }

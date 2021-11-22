@@ -582,7 +582,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
     $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
     $mimeType = $fileinfo['fxm_MimeType'];  // fxm_MimeType
-    $params = $fileinfo['ulf_Parameters'];  // special parameters for audio/video players and iiif
+    $params = $fileinfo['ulf_Parameters'];  // not used anymore
     $originalFileName = $fileinfo['ulf_OrigFileName'];
     $fileSize = $fileinfo['ulf_FileSizeKB'];
     $fileExt = $fileinfo['ulf_MimeExt'];
@@ -676,7 +676,9 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
     if ( $is_video ) {
 
         if(($size==null || $size=='') && $style==''){
-            $size = 'width="640" height="360"';
+            //$size = '';
+            $size = 'width="640px" height="480px"';
+            //$style = 'style="width:640px !important; height:480px !important"';
         }
 
         if ($mimeType=='video/youtube' || $mimeType=='video/vimeo'
@@ -716,7 +718,8 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
         {
 
             if(($size==null || $size=='') && $style==''){
-                $size = 'width="640" height="166"';
+                $size = '';
+                //$style = 'style="width:80% !important; height:166px !important"';
             }
 
             $playerURL = getPlayerURL($mimeType, $external_url, $params);
@@ -748,12 +751,20 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
 
     }else if($mimeType=='application/pdf'){
         //error_log($filepath);                 
+        if(($size==null || $size=='') && $style==''){
+            $size = '';
+            $style = 'style="width:80% !important; height:90% !important"';
+        }
+        
         $result = '<embed width="100%" height="100%" name="plugin" src="'
         .$filepath.'&embedplayer=1'
         .'"'
         .($external_url?'':' data-id="'.$fileid.'"')
         .' type="application/pdf" internalinstanceid="9">';
 
+        
+//<object width="100%" height="100%" name="plugin" data="'+ fileURL_forembed+ '" type="application/pdf"></object>'        
+        
     }else{
         //not media - show thumb with download link
         $result = '<a href="'.$filepath.'" target="_blank"><img src="'.$thumb_url.'" '.$style.'/></a>';
@@ -765,6 +776,12 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
         print '<iframe '.$size.' src="'.$filepath.'" frameborder="0"></iframe>';                        
         */    
     }
+    
+    if($params['fancybox']){
+        $result = '<div style="width:80%;height:90%">'.$result.'</div>';    
+    }
+    
+    
     return $result;
 }           
 

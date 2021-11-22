@@ -78,7 +78,7 @@ if($db){
         
         if( @$_REQUEST['mode']=='page')     //return full page with embed player
         {
-                $url = HEURIST_BASE_URL.'?mode=tag&db='.HEURIST_DBNAME.'&file='.$fileid.'&size='.$size;
+                $url = HEURIST_BASE_URL.'?mode=tag&db='.$db.'&file='.$fileid.'&size='.$size;
             
                 ?>
                 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -111,12 +111,17 @@ if($db){
             $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
             $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
             $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
-            $params = $fileinfo['ulf_Parameters'];  //special parameters for audio/video players and iiif
+            $params = null; //$fileinfo['ulf_Parameters'];  //not used anymore 
             $originalFileName = $fileinfo['ulf_OrigFileName'];
             $fileSize = $fileinfo['ulf_FileSizeKB'];
             $fileExt = $fileinfo['ulf_MimeExt'];
             
             if( @$_REQUEST['mode']=='tag'){
+
+                //rquest may have special parameters for audio/video players
+                if(@$_REQUEST['fancybox']){
+                    $params = $_REQUEST['fancybox']; //returns player in wrapper
+                }
                 
                 print fileGetPlayerTag($fileid, $mimeType, $params, $external_url);
             }
@@ -145,6 +150,7 @@ if($db){
                             if(@$finfo['extension']){
                                 $originalFileName = $originalFileName.'.'.@$finfo['extension'];   
                             }else if($fileExt){
+                                if($fileExt=='jpe') $fileExt = 'jpg';
                                 $originalFileName = $originalFileName.'.'.$fileExt;   
                             }
                         }    
