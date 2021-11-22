@@ -18,8 +18,11 @@
 
         <h2>Searching</h2>
         <hr>
-        <h4>Basic, Quick, Advanced, and Faceted searches (filters)</h4>
+        <h4>Simple search strings (filters)</h4>
 
+        <p>
+        NOTE: This page describes simple filter strings similar to Google searches, which were used up to version 4 and are easy to enter manually. These are still supported for basic searching and can therefore be quite useful (some rarely used functions are also still only available this way). Version 5 and above use complex JSon filters which are hard to construct by hand and are therefore created by filter and rule builders.
+        </p>
         <p>
             <b>Basic search:</b> Words typed in the filter field are matched against any part of the record titles
             (only). This is very good for quickly retrieving records where
@@ -267,14 +270,14 @@
                         Search for records that have value <i>xxx</i> in <u>any</u> field. 
                         <span class="search_term">-field:<i>xxx</i>:</span> searches for records with value <i>xxx</i> in <u>no</u> fields.<span></span>
                         <br>                        
-                        Search for records that have <i>xxx</i> values in field <i>abc</i>. Also use 
+                        Search for records that have a count of <i>xxx</i> values in field <i>abc</i>. Also use 
                         <span class="search_term">fc:<i>abc</i>:<i>&gt;xxx</i></span> or 
                         <span class="search_term">fc:<i>abc</i>:<i>xxx&lt;&gt;yyy</i></span> for ranges.<span></span>
                         <br>                        
-                        <b>field</b> can be shortened to <b>f</b>. The field identifier <i>abc</i> may be the name of the field, for example
+                        <b>"field"</b> can be shortened to "<b>f</b>". The field identifier <i>abc</i> may be the name of the field, for example
                         <span class="search_term">field:"AuthorEditor":Hill</span>,
                         or the field's numerical identifier, <span class="search_term">field:196:Hill</span>.
-                        The numerical identifier is preferred, since the name must be the base field name which is often difficult to determine.
+                        <br>The numerical identifier is preferred, since the name must be the base field name which is often difficult to determine.
                         <br>
                         <b>=</b>, <b>&lt;</b> and <b>&gt;</b> operators may be used, e.g.
                         <span class="search_term">f:123=456</span>, <span class="search_term">f:"date added"&lt;yesterday</span>.

@@ -127,7 +127,7 @@
                         "dty_Size":1000,
                         "rst_DisplayWidth":100,
                         "rst_DisplayName": "Zotero web library key(s) and IDs for synchronisation",
-                        "rst_DisplayHelpText": "enter as Title,UserID,GroupID,Key (comma separated). Separate different libraries with a pipe symbol (|)<br />eg. My library,1958388,,YjUxZzcgq1fhCd9YyxgzzVNX | XYZ project,,274864,DuFHBTyVYVhuIhttUotyqBSjb<br /> Enter the UserID for a personal library (https://www.zotero.org/settings/keys)<br />or the Group ID for a group library (https://www.zotero.org/groups, Group Settings, ID is in URL).<br /> Use blank ( ,, ) for the ID which is not required. <br />Access key can be obtained at https://www.zotero.org/settings/keys <a href=\"context_help/zotero.html\" target=\"_blank\">Help on obtaining IDs and key</a>"
+                        "rst_DisplayHelpText": "PLEASE READ THE INSTRUCTIONS AND FOLLOW EXACTLY<br />Enter as Title,UserID,GroupID,Key (comma separated values. There should be one pair of adjacent commas  ,,). <br />Separate different libraries with a pipe symbol (|)<br />eg. My library,1958388,,YjUxZzcgq1fhCd9YyxgzzVNX | XYZ project,,274864,DuFHBTyVYVhuIhttUotyqBSjb<br /> EITHER enter the UserID for a personal library (obtain with https://www.zotero.org/settings/keys)<br />OR enter the ID for a group library (obtain with https://www.zotero.org/groups, select Group Settings, read ID from the URL).<br /> Use blank ( ,, ) for the ID which is not required DO NOT FORGET THIS. <br />Access key can be obtained at https://www.zotero.org/settings/keys <a href=\"context_help/zotero.html\" target=\"_blank\">Help on obtaining IDs and key</a>"
                     }
                 },
                 {
