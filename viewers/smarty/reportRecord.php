@@ -24,6 +24,7 @@ class ReportRecord {
        protected $rtStructs;
        protected $dtStructs;
        protected $dtTerms;
+       protected $dbsTerms;
        protected $system;
     
     function __construct() {
@@ -33,7 +34,7 @@ class ReportRecord {
        $this->rtStructs = dbs_GetRectypeStructures($system, null, 2);
        $this->dtStructs = dbs_GetDetailTypes($system);
        $this->dtTerms = dbs_GetTerms($system);
-       $this->dtTerms = new DbsTerms($system, $this->dtTerms);
+       $this->dbsTerms = new DbsTerms($system, $this->dtTerms);
        
        $this->loaded_recs = array();
     }    
@@ -383,11 +384,11 @@ class ReportRecord {
 
                             foreach ($dtValue as $key => $value){
                                 
-                                $term = $this->dtTerms->getTerm($value);
+                                $term = $this->dbsTerms->getTerm($value);
                                 if($term){
 
                                     //IJ wants to show terms for all parents
-                                    $term_full = $this->dtTerms->getTermLabel($value, true);
+                                    $term_full = $this->dbsTerms->getTermLabel($value, true);
                                     
                                     $res_id = $this->_add_term_val($res_id, $value);
                                     $res_cid = $this->_add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);
