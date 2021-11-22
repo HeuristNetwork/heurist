@@ -675,7 +675,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             if(style!='') style = 'style="'+style+'"'; //padding:0px 4px;
             
             if(value==null){
-                value = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+                value = recordset.fld(record, fldname);
             }
             return '<div class="item truncate" '+style+'>'+window.hWin.HEURIST4.util.htmlEscape(value)+'</div>';
         }
