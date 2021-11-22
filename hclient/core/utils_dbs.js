@@ -256,6 +256,8 @@ window.hWin.HEURIST4.dbs = {
         
         var _separator = ($mode==3)?'..':':';
         
+        var recTypesWithParentLink = [];
+        
     //-------------------- internal functions    
         
     function __getRecordTypeTree($recTypeId, $recursion_depth, $mode, $fieldtypes, $pointer_fields, $is_parent_relmarker){
@@ -434,16 +436,18 @@ window.hWin.HEURIST4.dbs = {
                             $ffr['rst_RequirementType'] = 'optional';
                                   
                             $details.addRecord(DT_PARENT_ENTITY, $ffr)
+                            
+                            recTypesWithParentLink.push($recTypeId);
                         }
                     }
                     
                     var $children_links = [];
                     var $new_pointer_fields = [];
-
+                    
                     // add details --------------------------------
                     if($details)
                     $details.each2(function($dtID, $dtValue){
-                        
+                    
                         //@TODO forbidden for import????
                         if($dtValue['rst_RequirementType']!='forbidden'){
 
@@ -535,7 +539,7 @@ window.hWin.HEURIST4.dbs = {
                         }//for
                     }
                     
-                    $details.removeRecord(DT_PARENT_ENTITY); //remove fake parent link
+                    
                 }
                 
                 if($mode==7 && $recursion_depth==0 && !parentcode){
@@ -929,6 +933,12 @@ window.hWin.HEURIST4.dbs = {
                             res.push( def );
                         }                    
                     }
+            }
+            
+            
+            for (var i=0; i<recTypesWithParentLink.lengthl; i++){
+                var $details = $Db.rst($recTypeId);
+                $details.removeRecord(DT_PARENT_ENTITY); //remove fake parent link    
             }
             
             if(rectypeids.length==1 && $mode==3){
