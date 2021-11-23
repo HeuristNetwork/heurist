@@ -107,7 +107,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         }
         
         this.element.find('.export-to-bottom-button').on('click', function () {
-            $('.ent_content').scrollTop($('.ent_content')[0].scrollHeight);
+            var container = $(this).parent();
+			container.scrollTop(container[0].scrollHeight);
         });
 
         this.element.find('#selectAll').on("click", function(e){
