@@ -1161,7 +1161,11 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         if($date_start==null){
             $date_start = $date_end;
         }
+        if($date_start) $date_start = removeLeadingYearZeroes($date_start,true,true);
+        if($date_end) $date_end = removeLeadingYearZeroes($date_end,true,true);
+        
         if($date_end==null) $date_end = '';
+        
         $timevalues[] = array($date_start, '', '', $date_end, '');
     }
 

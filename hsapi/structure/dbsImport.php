@@ -26,7 +26,7 @@ require_once('dbsTerms.php');
 require_once(dirname(__FILE__).'/../utilities/utils_file.php');
 require_once(dirname(__FILE__).'/../../admin/structure/saveStructureLib.php');
 
-define('_DBG', false);
+define('_DBG', false); //debug log output
 
 class DbsImport {
 

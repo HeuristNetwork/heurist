@@ -237,7 +237,12 @@ $.widget( "heurist.timeline", {
                     return av > bv ? 1 : av < bv ? -1 : 0;
                 }});
             this.vis_timeline.setGroups(groups);
-            this.vis_timeline.setItems(items);
+            try{
+                this.vis_timeline.setItems(items);    
+            }catch(err){
+                console.log(items);
+                console.log(err);
+            }
             
             
             //apply label settings
