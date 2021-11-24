@@ -476,11 +476,9 @@ if($step=="1"){  //first step - info about current status
     //$tmp_destination = HEURIST_SCRATCH_DIR.'zotero.xml';
     //$fd = fopen($tmp_destination, 'w');  //less than 1MB in memory otherwise as temp file 
 
-    print '<br>Starting Zotero Library Sync...<br>';
+    print '<br>Starting Zotero Library Sync for '. $totalitems .' records...<br>';
 
     while ($start<$totalitems){
-
-        print "<br>Processing records $start to ".($start+$fetch)."<br>";
 
         if($group_ID){
             $items = $zotero->getItemsTop($group_ID, array('format'=>'atom', 'content'=>'json', 'start'=>$start,
@@ -574,7 +572,6 @@ if($step=="1"){  //first step - info about current status
                         }
                     }
                 }
-                
 
                 $content = json_decode(strval(findXMLelement($entry, null, "content")));
 
@@ -588,8 +585,6 @@ if($step=="1"){  //first step - info about current status
                 $recordType = $mapping_dt["h3rectype"];
                 
                 $is_empty_zotero_entry = true;
-
-                print "Processing fields for ".($recId==null) ? "a new record" : "updating existing record &rArr; $recId"."...";
 
                 foreach ($content as $zkey => $value){
 
@@ -746,8 +741,6 @@ if($step=="1"){  //first step - info about current status
                     }
                 }//for fields in content
 
-                print "completed.<br>";
-
                 $new_recid = null;
                 
                 if($is_empty_zotero_entry){
@@ -758,8 +751,6 @@ if($step=="1"){  //first step - info about current status
                     //no one zotero key has proper mapping to heurist fields
                     array_push($arr_empty, $zotero_itemid);
                     $cnt_empty++;
-
-                    print "No valid fields were mapped for Zotero item $zotero_itemid, moving to next item<br>";
                 }else{
                     //DEBUG echo print_r($details, true);
                     $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, $is_echo);
@@ -772,13 +763,9 @@ if($step=="1"){  //first step - info about current status
                         if($recId==$new_recid){
                             $cnt_updated[]=$new_recid;
                             $cnt_report[$recordType]['updated'][] = $new_recid;
-
-                            print "Record $recId has been updated<br>";
                         }else{
                             $cnt_added[]=$new_recid;
                             $cnt_report[$recordType]['added'][] = $new_recid;
-
-                            print "New record has been created with id &rArr; $recId";
                         }
                     }
                 }
@@ -791,6 +778,7 @@ if($step=="1"){  //first step - info about current status
         $start = $start + $fetch;
 
     }// end of while loop
+    print 'Synching Completed, Printing Report<br>';
 
 //fclose($fd);        
     print '<table><tr><td>&nbsp;</td><td>added</td><td>updated</td></tr>';
