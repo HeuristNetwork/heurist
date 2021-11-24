@@ -1034,7 +1034,7 @@ $.widget( "heurist.search_faceted", {
                                 readonly: false,
                                 title:  (that.options.params.title_hierarchy?harchy:'')
                                         + "<span style='font-weight:bold'>" + field['title'] + "</span>",
-                                detailtype: field['type'],  //overwrite detail type from db (for example freetext instead of memo)
+                                detailtype: (field['type'] == 'blocktext') ? 'freetext' : field['type'],//overwrite detail type from db (for example freetext instead of memo)
                                 showclear_button: false,
                                 showedit_button: false,
                                 suppress_prompts: true,  //supress help, error and required features
