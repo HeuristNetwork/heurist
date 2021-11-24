@@ -2386,10 +2386,3 @@ li.edit-form-tab > a{
 .tox-tinymce-aux {
     z-index: 999999!important;
 }
-
-/*
-CMS styles
-*/
-.cms-element-active{
-    border: 2px dashed blue !important;
-}

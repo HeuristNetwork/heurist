@@ -182,6 +182,56 @@ if($_is_new_cms_editor || $edit_Available){
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/javascript/javascript.js"></script>
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/css/css.js"></script>
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/htmlmixed/htmlmixed.js"></script>
+    
+    <style>
+.cms-element-active{
+    -webkit-box-shadow: inset 0px 0px 38px 10px #6451f6, 0px 0px 8px 10px rgba(0,0,0,0);
+    box-shadow: inset 0px 0px 38px 10px #6451f6, 0px 0px 8px 10px rgba(0,0,0,0);
+}   
+.cms-element-overlay{
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(100, 81, 246, 0.3);
+} 
+
+.ui-heurist-publish .fancytree-active, .ui-heurist-publish .fancytree-node:hover {
+  background: rgba(100, 81, 246, 0.3) !important;
+}
+
+.ui-heurist-publish span.fancytree-node {
+    padding: 3px 0px !important;
+}
+
+/* use pseudo elmenent for overlay    
+  right: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+.image::before {
+  content: '';
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  background: rgba(100, 81, 246, 0.9);
+  border-radius: 10px;
+  -webkit-transition: all 0.7s ease-out;
+  transition: all 0.7s ease-out;
+}
+
+.image:hover::before {
+  visibility: visible;
+}    
+*/
+    
+    </style>
+    
 <?php
 }
 

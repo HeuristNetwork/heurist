@@ -75,11 +75,13 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
 
         cont.find('h4').css({margin:0});
         cont.find('.props').hide(); //hide all
+        $('.btn-widget').hide();
         cont.find('.props.'+etype).show(); //show required only
 
-        var activePage = (etype=='group'?0:(etype=='widget'?1:(etype=='cardinal'?2:3)));
+        var activePage = (etype=='group'?0:(etype=='widget'?2:(etype=='cardinal'?1:2)));
 
         cont.find('#properties_form').accordion({header:'h3',heightStyle:'content',active:activePage});
+        cont.find('h3').css({'font-size': '1.1em', 'font-weight': 'bold'});
 
         if(!l_cfg.css) l_cfg.css = {display:'block'};
 
@@ -101,16 +103,18 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                 } );
             }
 
-            var container = cont.find('div.widget');
-
-            $('<button>').button({label:top.HR('Configure')}).click(__openWidgetCfg).appendTo(container);
-
             
+            $('.btn-widget').button().css({'border-radius':'4px',display:'inline-block'}).click(__openWidgetCfg)
+            
+            //var container = cont.find('div.widget');
+            //$('<button>').button({label:top.HR('Configure')}).click(__openWidgetCfg).appendTo(container);
+            /*
             if(l_cfg.app!='heurist_Graph'){
                     __openWidgetCfg();
-            }
+            }*/
 
-        }else if(etype=='group' && l_cfg.children && l_cfg.children.length>0){
+        }else
+        if(etype=='group' && l_cfg.children && l_cfg.children.length>0){
 
             //4a.add list of children with flex-grow and flex-basis
                 var item_ele = cont.find('div[data-flexitem]');
@@ -307,7 +311,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         
         
         //4c. button listeners
-        cont.find('.btn-ok').button().click(function(){
+        cont.find('.btn-ok').button().css('border-radius','4px').click(function(){
             //5. save in layout cfg        
             var css = __getCss();
             l_cfg.css = css;
@@ -339,7 +343,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             
             main_callback.call(this, l_cfg);
         });
-        cont.find('.btn-cancel').button().click(function(){
+        cont.find('.btn-cancel').css('border-radius','4px').button().click(function(){
             //6. restore old settings 
             element.removeAttr('style');
             if(element_cfg.css) element.css(element_cfg.css);

@@ -151,6 +151,7 @@ function hLayoutMgr(){
         $d = $(document.createElement('div'));
         $d.attr('id','hl-'+layout.key).attr('data-lid', layout.key)
             .addClass('editable tinymce-body')
+            .addClass('cms-element')
             .appendTo(container);
             
         if(!layout.css) layout.css = {};
@@ -181,6 +182,7 @@ function hLayoutMgr(){
         $d = $(document.createElement('div'));
         $d.attr('id','hl-'+layout.key).attr('data-lid', layout.key)
         .addClass('heurist-widget editable')
+        .addClass('cms-element')
         .appendTo(container);
         
         if(!layout.css){

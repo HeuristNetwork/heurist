@@ -60,7 +60,7 @@ function editCMS2(){
     var default_palette_class = 'ui-heurist-publish';
         
     var page_was_modified = false;
-    var delay_onmove = 0;
+    var delay_onmove = 0, __timeout = 0;
     
     var current_edit_mode = 'page', //or website
         _editCMS_SiteMenu = null;   
@@ -76,6 +76,7 @@ function editCMS2(){
     var dim = {h:body.innerHeight(), w:body.innerWidth()};
     dim.h = (window.hWin?window.hWin.innerHeight:window.innerHeight);
     
+    var options;
     
     //
     // returns false if new page is not loaded (previous page has been modified and not saved
@@ -85,6 +86,8 @@ function editCMS2(){
         if (_warningOnExit( function(){_startCMS(_options);} )) return;                           
         
         options = _options;
+        options.editor_pos = 'west'; //or east
+            
         //
         // add edit layout - top most ent_wrapper becomes 
         //
@@ -96,12 +99,16 @@ function editCMS2(){
                 body.children().appendTo(new_ele);
                 
                 new_ele.appendTo(body);
-            
-                var east_panel = $('<div class="ui-layout-east">'      
+                
+                var editor_panel = $('<div class="ui-layout-'+options.editor_pos+'">'      
                         +'<div class="ent_wrapper editStructure" id="tabsEditCMS">' 
-                            +'<ul style="margin-left:40px"><li><a href="#treeWebSite">Website menu</a></li><li><a href="#treePage">Page</a></li></ul>'
-                            +'<span style="position:absolute;top:22px;width:32px;height:24px;font-size:29px;cursor:pointer" class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-e"/>'
-                            +'<button  title="Exit/Close content editor" class="bnt-cms-exit" style="position:absolute;top:15px;right:15px;"/>'
+                            +'<ul style="margin-'+(options.editor_pos=='west'?'right':'left')+':40px"><li><a href="#treeWebSite">Website menu</a></li><li><a href="#treePage">Page</a></li></ul>'
+                            
+                            +'<span style="position:absolute;top:22px;width:32px;height:24px;font-size:29px;cursor:pointer;'+(options.editor_pos=='west'?'right:5px':'')+'" '
+                            +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'"/>'
+                            
+                            +'<button  title="Exit/Close content editor" class="bnt-cms-exit" style="position:absolute;top:15px;right:'
+                                +(options.editor_pos=='west'?'50px':'15px')+'"/>'
                         
                             +'<div id="treeWebSite" style="top:43px" class="ent_wrapper">'
                                 +'<div class="toolbarWebSite ent_header" style="padding:10px">'
@@ -116,7 +123,7 @@ function editCMS2(){
                                 +'</div>'
                                 +'<div class="treeWebSite ent_content_full" style="padding:10px;"/>' //treeview - edit website menu
                             +'</div>'
-                            +'<div id="treePage" style="top:43px" class="ent_wrapper">'
+                            +'<div id="treePage" style="font-size:1.2em;top:43px" class="ent_wrapper">'
                                 +'<div class="toolbarPage ent_header" style="padding:10px">'
                                     +'<button title="Save changes for current page" class="btn-page-save ui-button-action">Save Page</button>'
                                     +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
@@ -132,7 +139,17 @@ function editCMS2(){
                         maskContents:       true,  //alows resize over iframe
                         //togglerContent_open:    '&nbsp;',
                         //togglerContent_closed:  '&nbsp;',
-                        east:{
+                        center:{
+                            minWidth:400,
+                            contentSelector: '.ent_wrapper', //@todo !!!! for particule template ent_wrapper can be missed
+                            //pane_name, pane_element, pane_state, pane_options, layout_name
+                            onresize_end : function(){
+                                //that.handleTabsResize();                            
+                            }    
+                        }
+                    };
+                    
+                    layout_opts[options.editor_pos] = {
                             size: 340, //@todo this.usrPreferences.structure_width,
                             maxWidth:800,
                             minWidth:340,
@@ -147,46 +164,37 @@ function editCMS2(){
                             slidable:false,  //otherwise it will be over center and autoclose
                             contentSelector: '.editStructure',   
                             onopen_start : function( ){ 
-                                var tog = body.find('.ui-layout-toggler-east');
+                                var tog = body.find('.ui-layout-toggler-'+options.editor_pos);
                                 tog.removeClass('prominent-cardinal-toggler');
                                 tog.find('.heurist-helper2').remove();
                             },
                             onclose_end : function( ){ 
-                                var tog = body.find('.ui-layout-toggler-east');
+                                var tog = body.find('.ui-layout-toggler-'+options.editor_pos);
                                 tog.addClass('prominent-cardinal-toggler');
                                 $('<span class="heurist-helper2" style="font-size:9px;">Edit Content</span>').appendTo(tog);
                             },
-                            togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-e"></div>',
-                            togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-w"></div>',
-                        },
-                        center:{
-                            minWidth:400,
-                            contentSelector: '.ent_wrapper', //@todo !!!! for particule template ent_wrapper can be missed
-                            //pane_name, pane_element, pane_state, pane_options, layout_name
-                            onresize_end : function(){
-                                //that.handleTabsResize();                            
-                            }    
-                        }
-                    };
+                            togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-'+(options.editor_pos=='west'?'w':'e')+'"></div>',
+                            togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'e':'w')+'"></div>',
+                        };
 
                     body.layout(layout_opts); //.addClass('ui-heurist-bg-light')
 
-                    east_panel.find('.btn-page-save').button().click(_saveLayoutCfg)
-                    east_panel.find('.btn-page-restore').button().click(
+                    editor_panel.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'10px'}).click(_saveLayoutCfg)
+                    editor_panel.find('.btn-page-restore').button().css({'border-radius':'4px'}).click(
                         function(){
                             _startCMS({record_id:options.record_id, container:'#main-content', content:null});
                         }
                     );
                     
                     
-                    east_panel.find('.btn-website-homepage').button({icon:'ui-icon-structure'}).click(_editHomePage);
-                    east_panel.find('.btn-website-edit').button({icon:'ui-icon-pencil'}).click(_editHomePageRecord);
-                    east_panel.find('.btn-website-addpage').button({icon:'ui-icon-plus'}).click(_addNewRootMenu);
+                    editor_panel.find('.btn-website-homepage').button({icon:'ui-icon-structure'}).click(_editHomePage);
+                    editor_panel.find('.btn-website-edit').button({icon:'ui-icon-pencil'}).click(_editHomePageRecord);
+                    editor_panel.find('.btn-website-addpage').button({icon:'ui-icon-plus'}).click(_addNewRootMenu);
                     
-                    east_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).click(_showWebSiteMenu);
+                    editor_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).click(_showWebSiteMenu);
                     
-                    east_panel.find('.bnt-cms-hidepanel').click(function(){ body.layout().close('east'); } );
-                    east_panel.find('.bnt-cms-exit').button({icon:'ui-icon-close'}).click(_closeCMS);
+                    editor_panel.find('.bnt-cms-hidepanel').click(function(){ body.layout().close(options.editor_pos); } );
+                    editor_panel.find('.bnt-cms-exit').button({icon:'ui-icon-close'}).click(_closeCMS);
                     
                     _panel_propertyView = body.find('.propertyView');
                     _panel_treeWebSite = body.find('.treeWebSite');
@@ -202,7 +210,7 @@ function editCMS2(){
         }
         
         
-        body.layout().show('east', true );
+        body.layout().show(options.editor_pos, true );
         
         //load content for current page from DT_EXTENDED_DESCRIPTION
         if(!options){
@@ -289,12 +297,21 @@ function editCMS2(){
         
         if(page_was_modified){
         
+            var $dlg;
+            var _buttons = [
+                {text:window.hWin.HR('Yes'), 
+                    click: function(){_saveLayoutCfg(callback);$dlg.dialog('close');}
+                },
+                {text:window.hWin.HR('Ignore'), 
+                    click: function(){page_was_modified = false; $dlg.dialog('close'); if($.isFunction(callback)) callback.call(this);}
+                },
+                {text:window.hWin.HR('Cancel'), 
+                    click: function(){$dlg.dialog('close');}
+                }
+            ];            
+            
             var sMsg = "Page has been modified. Click YES to save changes";
-            window.hWin.HEURIST4.msg.showMsgDlg(sMsg, function(){
-                
-                    _saveLayoutCfg(callback);
-
-            }, {title:'Page has been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:'Page has been modified'});   
 
             return true;     
         }else{
@@ -312,7 +329,7 @@ function editCMS2(){
         if(_warningOnExit( _closeCMS )) return;
         
         // 1. close control panel
-        body.layout().hide('east'); // .show('east', false );
+        body.layout().hide(options.editor_pos); // .show(options.editor_pos, false );
         
         //2. reload content
         layoutMgr.setEditMode(false);
@@ -330,7 +347,11 @@ function editCMS2(){
         
         if(tinymce) tinymce.remove('.tinymce-body'); //detach
         
-        layoutMgr.setEditMode(true);
+        if(layoutMgr){
+            layoutMgr.setEditMode(true);
+        }else {
+            return;
+        }
         
         var opts = null;
         if(page_cache[options.record_id]) opts = {page_name:page_cache[options.record_id][DT_NAME]};
@@ -397,6 +418,8 @@ function editCMS2(){
                 editor.on('focus', function (e) {
                     if(current_edit_mode=='page'){
                         _layout_container.find('.lid-actionmenu[data-lid]').hide();
+                        _layout_container.find('div[data-lid]').removeClass('cms-element-active');                        
+                        _layout_container.find('.cms-element-overlay').css('visibility','hidden');
                     }else{
                         //prevent 
                         //window.hWin.HEURIST4.util.stopEvent(e);
@@ -433,7 +456,7 @@ function editCMS2(){
         _layout_container.find('div.editable').each(function(i, item){
             var ele_ID = $(item).attr('data-lid');
              //left:2px;top:2px;
-            _defineActionIcons(item, ele_ID, 'position:absolute;padding:2px;z-index:2;');   //left:2px;top:2px;         
+            _defineActionIcons(item, ele_ID, 'position:absolute;z-index:2;');   //left:2px;top:2px;         
         });
         
     }    
@@ -585,8 +608,6 @@ function editCMS2(){
             _panel_propertyView.hide();
             _panel_treePage.show();
             
-            //_panel_treeWebSite.hide();
-
             _toolbar_Page.show();
             _toolbar_WebSite.hide();
         
@@ -609,6 +630,12 @@ function editCMS2(){
             
             _toolbar_Page.hide();
             _toolbar_WebSite.show();
+
+            //remove highlights
+            _layout_container.find('.lid-actionmenu[data-lid]').hide();
+            _layout_container.find('div[data-lid]').removeClass('cms-element-active');                        
+            _layout_container.find('.cms-element-overlay').css('visibility','hidden');            
+
             
             if(tinymce) tinymce.remove('.tinymce-body');
             
@@ -622,12 +649,12 @@ function editCMS2(){
         }
         
     }
-    
+
     //
     // add and init action icons for page structure treeview
     //
     function _updateActionIcons(delay){ 
-        
+
         if(!(delay>0)) delay = 1;
 
         setTimeout(function(){
@@ -635,11 +662,11 @@ function editCMS2(){
                 //var ele_ID = ele.parents('li:first').find('span[data-lid]').attr('data-lid');
                 var ele_ID = $(item).find('span[data-lid]').attr('data-lid');
 
-                _defineActionIcons(item, ele_ID, 'position:absolute;right:8px;padding:2px;margin-top:0px;');
+                _defineActionIcons(item, ele_ID, 'position:absolute;right:8px;margin-top:1px;');
             });
-            
+
             _initTinyMCE();
-        }, delay);
+            }, delay);
     }
 
     //
@@ -648,252 +675,300 @@ function editCMS2(){
     // ele_ID - element key 
     //
     function _defineActionIcons(item, ele_ID, style_pos){ 
-           if($(item).find('.lid-actionmenu').length==0){
-               
-               if(!$(item).hasClass('fancytree-hide')){       
-                    $(item).css('display','block');   
-               }
+        if($(item).find('.lid-actionmenu').length==0){ //no one defined
 
-               ele_ID = ''+ele_ID;
-               var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
+            if(!$(item).hasClass('fancytree-hide')){       
+                $(item).css('display','block');   
+            }
 
-               if(node==null){
-                   console.log('DEBUG: ONLY '+ele_ID);
-                   return;
-               }
-               var is_intreeview = $(item).hasClass('fancytree-node');
-               
-               var is_folder = node.folder;  //$(item).hasClass('fancytree-folder'); 
-               var is_root = node.getParent().isRootNode();
-               var is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
-                               node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
-               
-               var actionspan = '<div class="lid-actionmenu mceNonEditable" '
-                    +' style="'+style_pos+';display:none;color:black;background:#95A7B7 !important;'
-                    +'font-size:9px;font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' + ele_ID
-                    + (is_intreeview?'':'<span class="ui-icon ui-icon-gear" style="font-size:12px;font-weight:normal"></span>')
-                    + (true || is_root || is_cardinal?'':
-                    ('<span data-action="drag" style="'+(is_intreeview?'':'display:block;')+'background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Drag to reposition">'
-                    + '<span class="ui-icon ui-icon-arrow-4" style="font-size:9px;font-weight:normal"/>Drag</span>'))               
-                    + '<span data-action="edit" style="'+(is_intreeview?'':'display:block;')+'background:lightgray;padding:4px;font-size:9px;font-weight:normal" title="Edit style and properties">'
-                    +'<span class="ui-icon ui-icon-pencil" style="font-size:9px;font-weight:normal"/>Style</span>';               
-                   
-               //hide element for cardinal and delete for its panes                     
-               if(node.data.type!='cardinal'){
-                   actionspan += '<span data-action="element" style="'+(is_intreeview?'':'display:block;')+'background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new element/widget" style="font-size:9px;font-weight:normal"/>Insert</span>';
-               }
-               if(!(is_root || is_cardinal)){
-                   actionspan += ('<span data-action="delete" style="'+(is_intreeview?'':'display:block;')+'background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
-                        +'Remove element from layout" style="font-size:9px;font-weight:normal"/>Delete</span>');
-               }
-               
-               
-               actionspan += '</div>';
-               actionspan = $( actionspan );
-               
-               if(is_intreeview){   //in treeview
-                   actionspan.appendTo(item);
-               }else{ 
-                    actionspan.insertAfter(item); //in main-content
-                    
-                    actionspan.find('span[data-action]').hide();
-                    actionspan.find('span.ui-icon-gear').click(function(event){
-                        var ele = $(event.target);
-                        window.hWin.HEURIST4.util.stopEvent(event);
-                        ele.hide();
-                        ele.parent().find('span[data-action]').show();
-                    });
-                    
-                   //actionspan.appendTo(body);    
-                   //actionspan.position({ my: "left top", at: "left top", of: $(item) })
-               }
-                   
-               actionspan.find('span[data-action]').click(function(event){
+            ele_ID = ''+ele_ID;
+            var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
+
+            if(node==null){
+                console.log('DEBUG: ONLY '+ele_ID);
+                return;
+            }
+            var is_intreeview = $(item).hasClass('fancytree-node');
+
+            var is_folder = node.folder;  //$(item).hasClass('fancytree-folder'); 
+            var is_root = node.getParent().isRootNode();
+            var is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
+                node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
+
+            var actionspan = '<div class="lid-actionmenu mceNonEditable" '
+            +' style="'+style_pos+';display:none;color:black;background:#95A7B7 !important;'
+            +'font-size:'+(is_intreeview?'12px':'16px')+';font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' 
+            //+ ele_ID
+            + (is_intreeview?'':'<span class="ui-icon ui-icon-gear" style="width:20px"></span>')
+            + (true || is_root || is_cardinal?'':
+                ('<span data-action="drag" style="'+(is_intreeview?'':'display:block;')+'background:lightgreen;padding:4px" title="Drag to reposition">'
+                    + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"/>Drag</span>'))               
+            + '<span data-action="edit" style="'+(is_intreeview?'':'display:block;')+'background:lightgray;padding:4px" title="Edit style and properties">'
+            +'<span class="ui-icon ui-icon-pencil"/>Style</span>';               
+
+            //hide element for cardinal and delete for its panes                     
+            if(node.data.type!='cardinal'){
+                actionspan += '<span data-action="element" style="'+(is_intreeview?'':'display:block;')+'background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new element/widget"/>Insert</span>';
+            }
+            if(!(is_root || is_cardinal)){
+                actionspan += ('<span data-action="delete" style="'+(is_intreeview?'':'display:block;')+'background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
+                    +'Remove element from layout"/>Delete</span>');
+            }
+
+
+            actionspan += '</div>';
+            actionspan = $( actionspan );
+
+            if(is_intreeview){   //in treeview
+                actionspan.appendTo(item);
+            }else{ 
+
+                //$('<div>').addClass('cms-element-overlay').attr('data-lid',ele_ID).insertAfter(item);
+
+                actionspan.insertAfter(item); //in main-content
+
+                actionspan.find('span[data-action]').hide();
+                actionspan.find('span.ui-icon-gear').click(function(event){
                     var ele = $(event.target);
-                    
                     window.hWin.HEURIST4.util.stopEvent(event);
-                    
-                    _lockDefaultEdit = true;
-                    //timeout need to activate current node    
-                    setTimeout(function(){
-                        _lockDefaultEdit = false;
-                        
-                        var ele_ID = ele.parents('.lid-actionmenu').attr('data-lid');
-                        
-//console.log('selected '+ele_ID);                        
-//if(!(ele_ID>0)) return;
-                        _layout_container.find('.lid-actionmenu[data-lid='+ele_ID+']').hide();
+                    ele.hide();
+                    ele.parent().find('span[data-action]').show();
+                });
 
-                        var action = ele.attr('data-action');
-                        if(!action) action = ele.parent().attr('data-action');
-                        if(action=='element'){
-                           
-                           //add new element or widget
-                           editCMS_SelectElement(function(selected_element, selected_name){
-                                _layoutInsertElement(ele_ID, selected_element, selected_name);    
-                           })
-                            
-                        }else if(action=='edit'){
-                            
-                            //add new group/separator
-                            body.layout().open('east');
-                            _layoutEditElement(ele_ID);
+                //actionspan.appendTo(body);    
+                //actionspan.position({ my: "left top", at: "left top", of: $(item) })
+            }
 
-                        }else if(action=='delete'){
-                            //different actions for separator and field
-                            window.hWin.HEURIST4.msg.showMsgDlg(
-                                'Are you sure you wish to delete this element?', function(){ _layoutRemoveElement(ele_ID); }, 
-                                {title:'Warning',yes:'Proceed',no:'Cancel'},
-                                {default_palette_class: default_palette_class});        
-                            
-                        }
+            actionspan.find('span[data-action]').click(function(event){
+                var ele = $(event.target);
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+
+                _lockDefaultEdit = true;
+                //timeout need to activate current node    
+                setTimeout(function(){
+                    _lockDefaultEdit = false;
+
+                    var ele_ID = ele.parents('.lid-actionmenu').attr('data-lid');
+
+                    //console.log('selected '+ele_ID);                        
+                    //if(!(ele_ID>0)) return;
+                    _layout_container.find('.lid-actionmenu[data-lid='+ele_ID+']').hide();
+
+                    var action = ele.attr('data-action');
+                    if(!action) action = ele.parent().attr('data-action');
+                    if(action=='element'){
+
+                        //add new element or widget
+                        editCMS_SelectElement(function(selected_element, selected_name){
+                            _layoutInsertElement(ele_ID, selected_element, selected_name);    
+                        })
+
+                    }else if(action=='edit'){
+
+                        //add new group/separator
+                        body.layout().open(options.editor_pos);
+                        _layoutEditElement(ele_ID);
+
+                    }else if(action=='delete'){
+                        //different actions for separator and field
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                            'Are you sure you wish to delete this element?', function(){ _layoutRemoveElement(ele_ID); }, 
+                            {title:'Warning',yes:'Proceed',no:'Cancel'},
+                            {default_palette_class: default_palette_class});        
+
+                    }
                     },100); 
-                    
-                    return false;
-               });
-               
-               /*
-               $('<span class="ui-icon ui-icon-pencil"></span>')                                                                
-               .click(function(event){ 
-               //tree.contextmenu("open", $(event.target) ); 
-               
-               ).appendTo(actionspan);
-               */
 
-               //hide icons on mouse exit
-               function _onmouseexit(event){
-                       var node;
-                       if($(event.target).hasClass('editable')){
-                          node =  $(event.target);
-                          _layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-lid')+']').hide();
-                          _layout_container.find('div[data-lid]').removeClass('cms-element-active');
-                       }else{
-                           //in tree
-                           if($(event.target).is('li')){
-                              node = $(event.target).find('.fancytree-node');
-                           }else if($(event.target).hasClass('fancytree-node')){
-                              node =  $(event.target);
-                           }else{
-                              //hide icon for parent 
-                              node = $(event.target).parents('.fancytree-node:first');
-                              if(node) node = $(node[0]);
-                           }
-                           if(node){
-                               var ele = node.find('.lid-actionmenu'); //$(event.target).children('.lid-actionmenu');
-                               ele.hide();//css('visibility','hidden');
-                               //remove heighlight
-                               _layout_container.find('div[data-lid]').removeClass('cms-element-active');
-                           }
-                       }
-               }               
-               
-               $(item).hover ( // mousemove  mouseover
-                   function(event){
-                       
-                       if (current_edit_mode != 'page') return;
-                       
-                       var node;
-                       
-                       if($(event.target).parents('div.lid-actionmenu').length>0){
-                              if(delay_onmove>0) clearTimeout(delay_onmove);
-                              delay_onmove = 0;
-                              return;
-                       }
-                       
-                       var is_in_page = ($(event.target).hasClass('editable') || $(event.target).parents('div.editable:first').length>0);
-                       
-                       if( is_in_page ){
-                          //div.editable in container 
-                          
-                          if($(event.target).hasClass('editable')){
-//console.log('itself');                              
+                return false;
+            });
+
+            /*
+            $('<span class="ui-icon ui-icon-pencil"></span>')                                                                
+            .click(function(event){ 
+            //tree.contextmenu("open", $(event.target) ); 
+
+            ).appendTo(actionspan);
+            */
+
+            //hide gear icon and overlay on mouse exit
+            function _onmouseexit(event){
+                var node;
+                if($(event.target).hasClass('editable')){
+                    node =  $(event.target);
+                    _layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-lid')+']').hide();
+                    _layout_container.find('div[data-lid]').removeClass('cms-element-active');
+                    if(!_panel_propertyView.is(':visible'))
+                        _layout_container.find('.cms-element-overlay').css('visibility','hidden');
+                    /*
+                    if(__timeout==0){
+                    __timeout = setTimeout(function(){$('.cms-element-overlay').css('visibility','hidden');},500);  
+                    }
+                    */ 
+                }else{
+                    //in tree
+                    if($(event.target).is('li')){
+                        node = $(event.target).find('.fancytree-node');
+                    }else if($(event.target).hasClass('fancytree-node')){
+                        node =  $(event.target);
+                    }else{
+                        //hide icon for parent 
+                        node = $(event.target).parents('.fancytree-node:first');
+                        if(node) node = $(node[0]);
+                    }
+                    if(node){
+                        var ele = node.find('.lid-actionmenu'); //$(event.target).children('.lid-actionmenu');
+                        ele.hide();//css('visibility','hidden');
+                        //remove heighlight
+                        _layout_container.find('div[data-lid]').removeClass('cms-element-active');
+                        if(!_panel_propertyView.is(':visible'))
+                            _layout_container.find('.cms-element-overlay').css('visibility','hidden');
+                    }
+                }
+            }               
+
+            $(item).hover ( // mousemove  mouseover
+                function(event){
+
+                    if (current_edit_mode != 'page') return;
+
+                    var node;
+
+                    if(__timeout>0) clearTimeout(__timeout);
+                    __timeout = 0;
+
+                    if($(event.target).parents('div.lid-actionmenu').length>0){
+                        if(delay_onmove>0) clearTimeout(delay_onmove);
+                        delay_onmove = 0;
+                        return;
+                    }
+
+                    var is_in_page = ($(event.target).hasClass('editable') || $(event.target).parents('div.editable:first').length>0);
+
+                    if( is_in_page ){
+                        //div.editable in container 
+
+                        if($(event.target).hasClass('editable')){
+                            //console.log('itself');                              
                             node = $(event.target);
-                          }else{
-//console.log('parent');                              
+                        }else{
+                            //console.log('parent');                              
                             node = $(event.target).parents('div.editable:first');
-                          } 
-                          
-                          //tinymce is active - do not show toolbar
-                          if(_layout_container.find('div.mce-edit-focus').length>0){  //node.hasClass('mce-edit-focus')){
-                                return;   
-                          }
-                           
-                          //node =  $(event.target);
-                          
-                          _layout_container.find('.lid-actionmenu').hide(); //find other
-                          var ele = _layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-lid')+']');
-                          
-                          var parent = node.parents('div.ui-layout-pane:first');
-                          if(parent.length==0 || parent.parents('div[data-lid]').length==0){
-                                parent = _layout_container;  
-                          }
-                          /*
+                        } 
 
-                          var pos = window.hWin.HEURIST4.ui.getMousePos(event);
-                          var x = pos[0] - parent.offset().left - parseInt(parent.css('padding'));
-                          var y = pos[1] - parent.offset().top - parseInt(parent.css('padding'));
-                          
-                          var r = parent.offset().left+parent.width();
-//console.log(x+'+'+ele.width()+' pos='+pos[0]+'   r='+r +'  left='+parent.offset().left);                          
-                          if(x+220>r){
-                              x = r - 220; //ele.width();
-                          }
-                          if(ele.is(':visible')){
-                              
-                              if(delay_onmove>0) clearTimeout(delay_onmove);
-                              delay_onmove = 0;
-                              delay_onmove = setTimeout(function(){
-                                  ele.css({ top:y+'px', left:x+'px'});
-                              },500);
-                              
-                          }else{
-                              ele.css({ top:y+'px', left:x+'px'});    
-                              ele.show();      
-                          }
-                          */
-                          
-                          var pos = node.position();
-//console.log(pos.top + '  ' + (pos.top+parent.offset().top));                          
-                          ele.find('span[data-action]').hide();  
-                          ele.find('span.ui-icon-gear').show();  
-                          ele.css({top:(pos.top<0?0:pos.top)+2+'px',left:(pos.left<0?0:pos.left)+2+'px'});
-                          ele.show();
-                          
-                       }else {
-                           //treeview node
-                       
-                           if($(event.target).hasClass('fancytree-node')){
-                              node =  $(event.target);
-                           }else{
-                              node = $(event.target).parents('.fancytree-node:first');
-                           }
-                           if(node){
-                               node = $(node).find('.lid-actionmenu');
-                               node.css('display','inline-block');//.css('visibility','visible');
-                           }
-                       }
-                       
-                       if(node){
-                           //highlight in preview/page
-                           var ele_ID = $(node).attr('data-lid');
-                           _layout_container.find('div[id^="hl-"]').removeClass('cms-element-active');
-                           if(ele_ID>0)
-                           _layout_container.find('div#hl-'+ele_ID).addClass('cms-element-active');
-                           //highlight in treeview
-                           if(is_in_page){
-                               node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
-                               node.setActive(true);
-                           }
-                       }
-                       
-                   }
-               );               
-               $(item).mouseleave(
-                   _onmouseexit
-               );
-           }
+                        //tinymce is active - do not show toolbar
+                        if(_layout_container.find('div.mce-edit-focus').length>0){  //node.hasClass('mce-edit-focus')){
+                            return;   
+                        }
+
+                        //node =  $(event.target);
+
+                        _layout_container.find('.lid-actionmenu').hide(); //find other
+                        var ele = _layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-lid')+']');
+
+                        var parent = node.parents('div.ui-layout-pane:first');
+                        if(parent.length==0 || parent.parents('div[data-lid]').length==0){
+                            parent = _layout_container;  
+                        }
+                        /*
+
+                        var pos = window.hWin.HEURIST4.ui.getMousePos(event);
+                        var x = pos[0] - parent.offset().left - parseInt(parent.css('padding'));
+                        var y = pos[1] - parent.offset().top - parseInt(parent.css('padding'));
+
+                        var r = parent.offset().left+parent.width();
+                        //console.log(x+'+'+ele.width()+' pos='+pos[0]+'   r='+r +'  left='+parent.offset().left);                          
+                        if(x+220>r){
+                        x = r - 220; //ele.width();
+                        }
+                        if(ele.is(':visible')){
+
+                        if(delay_onmove>0) clearTimeout(delay_onmove);
+                        delay_onmove = 0;
+                        delay_onmove = setTimeout(function(){
+                        ele.css({ top:y+'px', left:x+'px'});
+                        },500);
+
+                        }else{
+                        ele.css({ top:y+'px', left:x+'px'});    
+                        ele.show();      
+                        }
+                        */
+
+                        var pos = node.position();
+                        //console.log(pos.top + '  ' + (pos.top+parent.offset().top));                          
+                        ele.find('span[data-action]').hide();  
+                        ele.find('span.ui-icon-gear').show();  
+                        ele.css({top:(pos.top<0?0:pos.top)+2+'px',left:(pos.left<0?0:pos.left)+2+'px'});
+                        ele.show();
+
+                    }else {
+                        //treeview node
+
+                        if($(event.target).hasClass('fancytree-node')){
+                            node =  $(event.target);
+                        }else{
+                            node = $(event.target).parents('.fancytree-node:first');
+                        }
+                        if(node){
+                            node = $(node).find('.lid-actionmenu');
+                            node.css('display','inline-block');//.css('visibility','visible');
+                        }
+                    }
+
+                    if(node){
+                        //highlight in preview/page
+                        var ele_ID = $(node).attr('data-lid');
+
+
+                        //highlight in treeview
+                        if(is_in_page){
+                            node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
+                            node.setActive(true);
+
+                            _layout_container.find('div[id^="hl-"]').removeClass('cms-element-active');
+                            _layout_container.find('div#hl-'+ele_ID).addClass('cms-element-active');
+
+                        }else                            
+                        { //separate overlay div - visible when mouse over tree
+                            _showOverlayForElement(ele_ID);
+                        }
+
+                    }
+
+                },
+                //mouseleave handler
+                _onmouseexit
+            );  
+
+            /*                            
+            $(item).mouseleave(
+
+            );
+            */
+        }
     }
-    
+
+    //
+    //
+    //
+    function _showOverlayForElement( ele_ID ){
+        if(ele_ID>0){
+            var cms_ele = _layout_container.find('div#hl-'+ele_ID);
+            var pos = cms_ele.offset(); //realtive to document
+            var pos2 = _layout_container.offset();
+            var overlay_ele = $('.cms-element-overlay');//_layout_container.find('.cms-element-overlay[data-lid="'+ele_ID+'"]')
+            if(overlay_ele.length==0){
+                overlay_ele = $('<div>').addClass('cms-element-overlay').appendTo(_layout_container); //attr('data-lid',ele_ID).insertAfter
+            }
+            overlay_ele.attr('data-lid',ele_ID)
+            .css({top:((pos.top-pos2.top)+'px'),
+                left:((pos.left-pos2.left)+'px'),width:cms_ele.width(),height:cms_ele.height()});
+            overlay_ele.css('visibility','visible');
+        }
+    }
+
+
     //
     // remove element
     // it prevents deletion of non-empty group
@@ -958,7 +1033,7 @@ function editCMS2(){
         
         page_was_modified = true;
         
-        _updateActionIcons(200); //it inits timyMCE also
+        _updateActionIcons(200); //it inits tinyMCE also
         
     }
     
@@ -1017,7 +1092,7 @@ function editCMS2(){
         
         //redraw page
         layoutMgr.layoutInit(_layout_content, _layout_container);
-        _updateActionIcons(200); //it inits timyMCE also
+        _updateActionIcons(200); //it inits tinyMCE also
         
         page_was_modified = true;
     }
@@ -1099,6 +1174,9 @@ function editCMS2(){
              ele_id = parentnode.key;
              element_cfg = layoutMgr.layoutContentFindElement(_layout_content, ele_id);
         }
+        
+        //show overlay for editing element
+        _showOverlayForElement( ele_id );
         
         editCMS_ElementCfg(element_cfg, _layout_container, _panel_propertyView, function(new_cfg){
 
