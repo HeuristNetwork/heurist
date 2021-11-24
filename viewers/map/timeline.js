@@ -171,6 +171,15 @@ $.widget( "heurist.timeline", {
         
         }    
         this.vis_timeline.setSelection(selection_vis);
+        
+        //scroll to first selected
+        if(selection_vis.length>0){
+            var tele = $(this.timeline_ele);
+            var rdiv = tele.find('.vis-item.vis-selected:first'); 
+            var spos2 = rdiv.position().top; //relative position of record div
+            tele.scrollTop( spos2 );
+        }
+        
     },
 
     //

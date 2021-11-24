@@ -1766,15 +1766,7 @@ $.widget( "heurist.resultList", {
                         this.div_content.scrollLeft( spos + offh );
                     }
                 }else{
-                    var spos = this.div_content.scrollTop();
-                    var spos2 = curr_sel.position().top;
-                    var offh = spos2 + curr_sel.height() - this.div_content.height() + 10;
-                   
-                    if(spos2 < 0){
-                        this.div_content.scrollTop(spos+spos2);
-                    }else if ( offh > 0 ) {
-                        this.div_content.scrollTop( spos + offh );
-                    }
+                    this.scrollToRecordDiv(curr_sel);
                 }
                 
                 window.hWin.HEURIST4.util.stopEvent(event);
@@ -2407,15 +2399,39 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                     }
                 });
                 if(recIDs_list.length==1){
-                    var rdiv = this.div_content.find('.recordDiv[recid='+recIDs_list[0]+']');
-                    if(rdiv.length>0 && rdiv.position()){
-                        this.div_content.scrollTop(rdiv.position().top);
-                    }
+                    this.scrollToRecordDiv(recIDs_list[0]);
                 }
 
             }
         }
 
+    },
+    
+    scrollToRecordDiv: function(selected){
+        
+        var rdiv;
+        if($(selected).is('div.recordDiv')){
+            rdiv = $(selected)
+        }else{
+            rdiv = this.div_content.find('.recordDiv[recid="'+selected+'"]');    
+        }
+        
+        if(rdiv && rdiv.length==1){
+        
+            var spos = this.div_content.scrollTop(); //current pos
+            var spos2 = rdiv.position().top; //relative position of record div
+            var offh = spos2 + rdiv.height() - this.div_content.height() + 10;
+           
+            if(spos2 < 0){
+                this.div_content.scrollTop(spos+spos2);
+            }else if ( offh > 0 )
+            {
+                var newpos = spos + offh;
+                if(newpos<0) newpos = 0;
+                
+                this.div_content.scrollTop( newpos );
+            }
+        }
     },
     
     //
