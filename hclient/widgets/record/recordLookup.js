@@ -266,7 +266,7 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
         }
 
         var that = this;
-        var request = {service:sURL};             
+        var request = {service:sURL, serviceType:'tlcmap'};             
         //loading as geojson  - see controller record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
             function(response){

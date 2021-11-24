@@ -501,12 +501,11 @@ function changeViewMode(mode){
             //d3.selectAll(".icon-mode").style('display', 'none');
             d3.selectAll(".info-mode").style('display', 'initial');
             d3.selectAll(".info-mode-full").style('display', 'none');
-
             d3.selectAll("line.inner_divider").style('display', 'none'); // hide inner line dividers
             
             d3.selectAll(".rect-info-full").style('display', 'none');
             d3.selectAll(".rect-info").style('display', 'initial');
-            
+
             d3.selectAll("circle.icon-background, circle.icon-foreground, image.node-icon").style('display', 'none');
 
             d3.selectAll("text.nodelabel.namelabel").attr("x", 10);
@@ -515,7 +514,6 @@ function changeViewMode(mode){
             currentMode = 'infoboxes_full';
             d3.selectAll(".info-mode").style('display', 'initial');
             d3.selectAll(".info-mode-full").style('display', 'initial');
-
             d3.selectAll("line.inner_divider").style('display', 'initial');
 
             d3.selectAll(".rect-info-full").style('display', 'initial');
@@ -530,12 +528,11 @@ function changeViewMode(mode){
             //d3.selectAll(".icon-mode").style('display', 'initial');
             d3.selectAll(".info-mode").style('display', 'none');
             d3.selectAll(".info-mode-full").style('display', 'none');
-
             d3.selectAll("line.inner_divider").style('display', 'none'); // hide inner line dividers
 
             d3.selectAll("circle.icon-background, circle.icon-foreground, image.node-icon").style('display', 'initial');
 
-            d3.selectAll("text.nodelabel.namelabel").attr("x", 27);
+            d3.selectAll("text.nodelabel.namelabel").attr("x", 29);
         }
         var isLabelVisible = (currentMode != 'icons') || (getSetting(setting_labels)=='on');
         d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');

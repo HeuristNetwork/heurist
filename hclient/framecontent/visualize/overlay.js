@@ -45,7 +45,7 @@ function getRecordOverlayData(record) {
     // Header
     var header = {text: truncateText(record.name, rectypeLength), 
                   count: record.count, rtyid: record.id,
-                  size: "9px", style: "bold", height: 15, enter: true, image:record.image}; 
+                  size: "9px", weight: "bold", height: 15, enter: true, image:record.image}; 
 
     if(settings.showCounts) {
         header.text += ", n=" + record.count;  
@@ -67,7 +67,7 @@ function getRecordOverlayData(record) {
             if(link.source.id == record.id) {
                 // New name?
                 if(!map.hasOwnProperty(link.relation.name)) {
-                    map[link.relation.name] = {require_type: isRequired, dtyid: link.relation.id};
+                    map[link.relation.name] = {require_type: isRequired, dtyid: link.relation.id, weight: (isRequired == 'y') ? 'bold' : 'normal'};
                 }
 
                 if(!settings.isDatabaseStructure){
@@ -80,7 +80,7 @@ function getRecordOverlayData(record) {
                     // Add record relation to map
                     if(map[link.relation.name][relation.text] == undefined) {
                         map[link.relation.name][relation.text] = relation;
-                    }    
+                    }
                 }
             }
 
@@ -88,7 +88,7 @@ function getRecordOverlayData(record) {
             if(link.relation.id == record.id && link.relation.name == record.name) {
                 // New name?
                 if(!map.hasOwnProperty(link.relation.name)) {
-                    map[link.relation.name] = {require_type: isRequired, dtyid: link.relation.id};
+                    map[link.relation.name] = {require_type: isRequired, dtyid: link.relation.id, weight: (isRequired == 'y') ? 'bold' : 'normal'};
                 }
                
                 // Relation
@@ -112,6 +112,10 @@ function getRecordOverlayData(record) {
             if(map[key]['require_type'] != null){
                 details['require_type'] = map[key]['require_type'];
                 delete map[key]['require_type'];
+            }
+            if(map[key]['weight'] != null){
+                details['weight'] = map[key]['weight'];
+                delete map[key]['weight'];
             }
             if(map[key]['rtyid'] != null){
                 details['rtyid'] = map[key]['rtyid'];
@@ -141,45 +145,57 @@ function getRelationOverlayData(line) {
     var header1 = truncateText(line.source.name, maxLength);
     var header2 = truncateText(line.target.name, maxLength);
     if(header1.length+header2.length > maxLength) {
-        array.push({text: header1 + " >", size: "11px", style: "bold", height: 15});
-        array.push({text: header2, size: "11px", style: "bold", height: 10, enter: true});
+        array.push({text: header1 + " >", size: "11px", style: "bold"});
+        array.push({text: header2, size: "11px", style: "bold", enter: true});
     }else{
-        array.push({text: header1+" > "+header2, size: "11px", style: "bold", height: 15, enter: true}); 
+        array.push({text: header1+" > "+header2, size: "11px", style: "bold", enter: true}); 
     }
 
     var data = settings.getData.call(this, settings.data);
     if(data && data.links.length > 0 && $('#expand-links').is(':not(:Checked)')){
 
-      for (var i = 0; i < data.links.length; i++){
-        var link = data.links[i];
+        for (var i = 0; i < data.links.length; i++){
+            var link = data.links[i];
 
-        // Show information for all links, with same source and target ids
-        if(link.source.id == line.source.id && link.target.id == line.target.id){
-          var relation = {type: link.relation.type, cnt: link.targetcount, 
-            text: truncateText(link.relation.name, maxLength) + ', n=' + link.targetcount, size: "20px", height: 20, dir: "to"};
+            // Show information for all links, with same source and target ids
+            if(link.source.id == line.source.id && link.target.id == line.target.id){
+                var relation = {type: link.relation.type, cnt: link.targetcount, 
+                        text: truncateText(link.relation.name, maxLength) + ', n=' + link.targetcount, size: "10px", dir: "to"};
 
-          array.push(relation);
-          continue;
+                array.push(relation);
+
+                if($Db.rst(link.source.id, link.relation.id, 'rst_MaxValues') != 1){
+                    array.push({text: 'single value', size: '9px', style: 'italic', subheader:1});
+                }else{
+                    array.push({text: 'multi value', size: '9px', style: 'italic', subheader:1});
+                }
+
+                continue;
+            }
+
+            // Reverse Links, information about links that are sourced from the target
+            if(link.source.id == line.target.id && link.target.id == line.source.id){
+                var relation = {type: link.relation.type, cnt: link.targetcount, 
+                        text: truncateText(link.relation.name, maxLength) + ', n=' + link.targetcount, size: "10px", dir: "from"};
+
+                array.push(relation);
+
+                if($Db.rst(link.target.id, link.relation.id, 'rst_MaxValues') != 1){
+                    array.push({text: 'single value', size: '9px', style: 'italic', subheader:1});
+                }else{
+                    array.push({text: 'multi value', size: '9px', style: 'italic', subheader:1});
+                }
+
+                continue;
+            }
         }
-
-        // Reverse Links, information about links that are sourced from the target
-        if(link.source.id == line.target.id && link.target.id == line.source.id){
-          var relation = {type: link.relation.type, cnt: link.targetcount, 
-            text: truncateText(link.relation.name, maxLength) + ', n=' + link.targetcount, size: "20px", height: 20, dir: "from"};
-
-          array.push(relation);
-          continue;
-        }
-        
-
-      }
     }else{
 
-      // Show information for this link only
-      var relation = {type: line.relation.type, cnt: line.targetcount, text: 
-              truncateText(line.relation.name, maxLength) + ", n=" + line.targetcount, size: "9px", height: 11, subheader:1};
+        // Show information for this link only
+        var relation = {type: line.relation.type, cnt: line.targetcount, text: 
+                truncateText(line.relation.name, maxLength) + ", n=" + line.targetcount, size: "10px", subheader:1};
 
-      array.push(relation);
+        array.push(relation);
     }
 
     return array;
@@ -240,7 +256,7 @@ function addMissingFields(node_info){
 
         // add new field
         new_fields.push({text: truncateText(field['rst_DisplayName'], maxLength), size: "8px", xpos:xpos, multiline:true, 
-                        style:"italic", height: fontSize, enter: true, subheader: 1, 
+                        weight: (field['rst_RequirementType']=='required') ? "bold" : "normal", style:"italic", height: fontSize, enter: true, subheader: 1, 
                         require_type: (field['rst_RequirementType']=='required') ? 'y' : 'n', dtyid: field['rst_DetailTypeID']});
     }
 
@@ -330,6 +346,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             }            
         });
     }
+
+    var outline_colour = (type == 'record') ? '#666' : '#ff0000';
     
     // Draw a semi transparant rectangle       
     var rect_full = overlay.append("rect")
@@ -339,8 +357,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                            .attr("rx", 6)
                            .attr("ry", 6)
                            .attr("rtyid", info[0].rtyid)
-                           .style('stroke','#ff0000')
-                           .style("stroke-width", 0.5);
+                           .style('stroke', outline_colour)
+                           .style("stroke-width", 0.75);
 
     var rect_info = overlay.append("rect")
                            .attr("class", "semi-transparant info-mode rect-info")              
@@ -349,8 +367,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                            .attr("rx", 6)
                            .attr("ry", 6)
                            .attr("rtyid", info[0].rtyid)
-                           .style('stroke','#ff0000')
-                           .style("stroke-width", 0.5);
+                           .style('stroke', outline_colour)
+                           .style("stroke-width", 0.75);
         
     /* TEXT SECTION */                
     var fontSize = getSetting(setting_fontsize, 12);
@@ -395,7 +413,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           }
                           return position; // Position calculation
                       })
-                      .attr("fill", function(d) {
+                      .attr("fill", function(d){
                         if(d.subheader == 1){ 
                             if(d.require_type == 'y'){
                                 return '#CC0000'; 
@@ -405,8 +423,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                         }
                         return fontColor;
                       })
-                      .attr("font-weight", function(d) {  // Font weight based on style property
-                          return d.style;
+                      .attr("font-weight", function(d) {  // Font weight based on weight property
+                          return d.weight;
                       })
                       .attr("rtyid", function(d) { // Record type id
                         return d.rtyid;
@@ -488,13 +506,22 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             .attr("class", 'info-mode')
             .attr("x", iconSize+2)
             .attr("y", function(d, i) { // calculate position
-                position = position + (iconSize*1.2);
+                if(info[k].subheader == 1){
+                    position = position + (iconSize*0.8);
+                }else{
+                    position = position + (iconSize*1.2);
+                }
                 return position;
             })
-            .attr("fill", fontColor)
+            .attr("fill", function(d){
+                if(info[k].subheader == 1){
+                    return 'gray';
+                }
+                return fontColor;
+            })
             .attr("font-weight", info[k].style)
             .style("font-style", info[k].style, "important")
-            .style("font-size", 10, "important");
+            .style("font-size", info[k].size, "important");
                     
                     
           text[0].push(linkline[0][0]);
@@ -617,7 +644,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 
                         if(divider != null) divider.attr("x2", maxWidth+icons_cnt*iconSize-3);
 
-						if(field_dividers != null) field_dividers.attr("x2", maxWidth+icons_cnt*iconSize-3);
+                        if(field_dividers != null) field_dividers.attr("x2", maxWidth+icons_cnt*iconSize-3);
 
                         $(overlay.node()).find('.addLink, .editBtn, .close').show();
                     }else{
@@ -630,7 +657,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 
                         if(divider != null) divider.attr("x2", maxWidth);
 
-						if(field_dividers) field_dividers.attr("x2", maxWidth);
+                        if(field_dividers) field_dividers.attr("x2", maxWidth);
 
                         $(overlay.node()).find('.addLink, .editBtn, .close').hide();
                     }
@@ -814,7 +841,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                                         return position2;
                                     })
                                     .attr("stroke", "gray")
-                                    .attr("stroke-width", "1");
+                                    .attr("stroke-width", 0.75);
 
             info.unshift(rectype_details); // re-add the shifted item
             info.push(last_field); // re-add the pop'd item
@@ -829,8 +856,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                              .attr("y1", 23)
                              .attr("x2", maxWidth)
                              .attr("y2", 23)
-                             .attr("stroke", "red")
-                             .attr("stroke-width", "1")
+                             .attr("stroke", "#666")
+                             .attr("stroke-width", 1.25)
                              .attr("id", "line_divider");
         }
 

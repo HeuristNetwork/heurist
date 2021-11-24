@@ -47,7 +47,7 @@
         "classifyNotes":""
     }
 },
-  {
+{
     "service": "ESTC",
     "rty_ID": "94",
     "label": "ESTC lookup",
@@ -56,5 +56,26 @@
     "fields": {
       "properties.edition": "1028"
     }
-  }
+},
+{
+    "service": "bnfLibrary",
+    "rty_ID": "",
+    "label": "BnF Library Lookup",
+    "dialog": "recordLookupBnFLibrary",
+    "description": "A proof of concept for searching via the BnF Library API (under development)",
+    "fields": {
+        "isbn": "",
+        "title": "",
+        "subject": "",
+        "description": "",
+        "creator": "",
+        "contributor": "",
+        "publisher": "",
+        "date": "",
+        "language": "",
+        "type": "",
+        "rights": "",
+        "biburl": "",
+    }
+}
 ]

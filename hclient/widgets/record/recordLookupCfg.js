@@ -247,6 +247,9 @@ $.widget( "heurist.recordLookupCfg", {
         
         var that = this;
 
+        // check that all assigned services contain valid details
+        this.updateOldConfigurations();
+
         //fill record type selector
         this.selectRecordType = this.element.find('#sel_rectype').css({'list-style-type': 'none'});
         this.selectRecordType = window.hWin.HEURIST4.ui.createRectypeSelectNew(this.selectRecordType.get(0),
@@ -264,8 +267,8 @@ $.widget( "heurist.recordLookupCfg", {
                 if($(ui.selected).is('li')){
                     
                     if($(ui.selected).hasClass('unfinished')){
-                          window.hWin.HEURIST4.msg.showMsgFlash('Complete or discard unfinished one',700);
-                          return;  
+                        window.hWin.HEURIST4.msg.showMsgFlash('Complete or discard unfinished one',700);
+                        return;  
                     }
 
                     that.serviceList.find('li').removeClass('ui-state-active');
@@ -321,7 +324,7 @@ $.widget( "heurist.recordLookupCfg", {
             // mouse leaves container
             this.element.find('.ent_wrapper:first').on('mouseleave', function(event) {
 
-                if($(event.target).is('div') && that._is_modified || that._services_modified){
+                if($(event.target).is('div') && (that._is_modified || that._services_modified)){
                     that._closeHandler(false, true, $(event.target));
                 }
             } );
@@ -333,56 +336,108 @@ $.widget( "heurist.recordLookupCfg", {
         return true;
     },
 
-    //
-    // Save and/or Close, check if any modifications or changes to services have been made 
-    //
-    _closeHandler: function(isSave=false, isMouseLeave=false){
+    updateOldConfigurations: function(){
 
         var that = this;
-        var hasChanges = (this._is_modified || this._services_modified);
+        var has_changes = false;
 
-        var $dlg, buttons = {};
-        // fields for save request
+        $.each(this.options.service_config, function(key, value){
+
+            // Check that the service property has been defined
+            if(that.options.service_config[key]['service'] == null){
+
+                // Likely has service_name instead
+                if(that.options.service_config[key]['service_name'] != null){
+                    that.options.service_config[key]['service'] = that.options.service_config[key]['service_name'];
+                    delete that.options.service_config[key]['service_name'];
+                }else{ // invalid configuration, missing a service name
+                    delete that.options.service_config[key];
+                }
+
+                has_changes = true;
+            }else if(that.options.service_config[key]['service_name'] != null){
+                delete that.options.service_config[key]['service_name'];
+
+                has_changes = true;
+            }
+
+            // Check that the service id (serviceName_rtyID) has been defined
+            if(value.service_id == null){
+                that.options.service_config[key]['service_id'] = that.options.service_config[key]['service'] + '_' + that.options.service_config[key]['rty_ID'];
+
+                has_changes = true;
+            }
+
+            // Ensure that the key is correct, otherwise there will be problems with updating (creating duplicates)
+            if(key.includes("_") === false){
+
+                var new_key = that.options.service_config[key]['service_id'];
+                that.options.service_config[new_key] = window.hWin.HEURIST4.util.cloneJSON(that.options.service_config[key]);
+
+                delete that.options.service_config[key];
+
+                has_changes = true;
+            }
+        });
+
+        // Update with new changes
+        if(has_changes){
+            this.saveConfigrations();            
+        }
+    },
+
+    saveConfigrations: function(){
+
+        var that = this;
+
         var fields = {
             'sys_ID': 1,
             'sys_ExternalReferenceLookups': JSON.stringify(this.options.service_config)
         };
 
-        // warning popup's buttons
+        // Update sysIdentification record
+        var request = {
+            'a': 'save',
+            'entity': 'sysIdentification',
+            'request_id': window.hWin.HEURIST4.util.random(),
+            'isfull': 0,
+            'fields': fields
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+
+            if(response.status == window.hWin.ResponseStatus.OK){
+                window.hWin.HAPI4.sysinfo['service_config'] = window.hWin.HEURIST4.util.cloneJSON(that.options.service_config); // update local copy
+
+                that._is_modified = false;
+                that._services_modified = false;
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
+    },
+
+    //
+    //
+    //
+    _closeHandler: function(isSave=false, isMouseLeave=false, trigger){
+
+        var that = this;
+
+        var hasChanges = (this._is_modified || this._services_modified);
+
+        var $dlg, buttons = {};
+
         buttons['Save'] = function(){
             
             if(that._is_modified){
                 that._applyConfig();
-                fields['sys_ExternalReferenceLookups'] = JSON.stringify(that.options.service_config);
             }
-
-            that._is_modified = false;
-            that._services_modified = false;
 
             $dlg.dialog('close');
 
             // Update sysIdentification record
-            var request = {
-                'a': 'save',
-                'entity': 'sysIdentification',
-                'request_id': window.hWin.HEURIST4.util.random(),
-                'isfull': 0,
-                'fields': fields
-            };
-
-            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
-
-                if(response.status == window.hWin.ResponseStatus.OK){
-
-                    window.hWin.HAPI4.sysinfo['service_config'] = window.hWin.HEURIST4.util.cloneJSON(that.options.service_config); // update local copy
-
-                    if(!isMouseLeave){
-                        that.element.empty().hide();
-                    }
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-            });
+            that.saveConfigrations();
         };
 
         buttons['Ignore and close'] = function(){ 
@@ -390,38 +445,17 @@ $.widget( "heurist.recordLookupCfg", {
             that.element.empty().hide();
         };
 
-        // On Close, check if modified
-        if((isSave && hasChanges) || (trigger && !trigger.is('button') && hasChanges)){
+        if(!isSave && trigger && !trigger.is('button') && hasChanges){
 
             var wording = this._is_modified ? 'current configuration' : 'available services';
-            var label = this._is_modified ? 'Apply' : 'Save';
+            var button = this._is_modified ? '"Apply"' : '"Save"'
 
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg('You have made changes to the '+wording+'. Click "'+label+'" otherwise all changes will be lost.', 
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg('You have made changes to the '+wording+'. Click '+button+' otherwise all changes will be lost.', 
                 buttons, {title: 'Unsaved Changes', yes: 'Save', no: 'Ignore and Close'});
         }else{
             if(isSave){
-
-                // Update sysIdentification record
-                var request = {
-                    'a': 'save',
-                    'entity': 'sysIdentification',
-                    'request_id': window.hWin.HEURIST4.util.random(),
-                    'isfull': 0,
-                    'fields': fields
-                };
-
-                window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
-
-                    if(response.status == window.hWin.ResponseStatus.OK){
-
-                        window.hWin.HAPI4.sysinfo['service_config'] = window.hWin.HEURIST4.util.cloneJSON(that.options.service_config); // update local copy
-
-                        that.element.empty().hide();
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
-            }else if(!isMouseLeave){
+                this.saveConfigrations();
+            }else{
                 this.element.empty().hide();
             }
         }
@@ -506,8 +540,6 @@ $.widget( "heurist.recordLookupCfg", {
             this.element.find('#service_name').html(cfg0.label);
             this.element.find('#service_description').html('<strong>' + cfg0.service + '</strong>: ' + cfg0.description);
             this.element.find('#inpt_label').val(cfg0.label);
-
-            //that._changeService( service_name[0] );
             
             var tbl = this.element.find('#tbl_matches');
             tbl.empty();
@@ -520,8 +552,9 @@ $.widget( "heurist.recordLookupCfg", {
             
             //select service and type
             if(cfg0.service_name) {
-                this.selectServiceType.val(cfg0.service_name);    
+                this.selectServiceType.val(cfg0.service);
             }
+
             this.selectRecordType.val( rty_ID );
             this._onRectypeChange();
         }else{
@@ -845,7 +878,7 @@ $.widget( "heurist.recordLookupCfg", {
                 this._current_cfg.service_id = t_name;
                 this._current_cfg.rty_ID = rty_ID;
                 this._current_cfg.label = label;
-                this._current_cfg.service_name = service_name;
+                this._current_cfg.service = service_name;
                 this._current_cfg.fields = fields;
 
                 this.options.service_config[t_name] = this._current_cfg;

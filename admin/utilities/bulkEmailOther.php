@@ -25,7 +25,7 @@ define('PDIR','../../');  //need for proper path to js and css
 require_once(dirname(__FILE__)."/../../hsapi/System.php");
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
 
-header("Access-Control-Allow-Origin: *");
+//header("Access-Control-Allow-Origin: *");
 header('Content-type: application/json;charset=UTF-8');
 
 $system = new System();
@@ -213,11 +213,11 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 		if($user_request == "owner"){ // Owners
 			$where_clause = "WHERE ugr.ugr_ID = 2";
-		}else if($user_request == "admin"){ // Admins for workgroup Database Managers
+		}else if($user_request == "manager"){ // Admins of Database Managers Workgroup
 
 			$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled = 'y' AND ugl.ugl_GroupID = 1";
 
-			}else if($user_request == "admins"){ // Admins for ALL workgroups
+			}else if($user_request == "admin"){ // Admins for ALL workgroups
 
 				$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled = 'y' AND ugl.ugl_GroupID IN 
 		  		 (SELECT ugr_ID 

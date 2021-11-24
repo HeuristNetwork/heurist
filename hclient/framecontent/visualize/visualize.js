@@ -424,21 +424,7 @@ function visualizeData() {
     force = addForce();
 
     // Markers
-    addMarkerDefinitions(); //markers/arrows on lines
-
-    d3.select("defs")
-      .append("svg:marker")
-      .attr("id", "blob")
-      .attr("markerWidth", 5)
-      .attr("markerHeight", 5)
-      .attr("refX", 5)
-      .attr("refY", 5)
-      .attr("viewBox", [0, 0, 20, 20])
-      .append("circle")
-      .attr("cx", 5)
-      .attr("cy", 5)
-      .attr("r", 5)
-      .style("fill", "darkgray");
+    addMarkerDefinitions(); // all marker/arrow types on lines
 
     // Lines 
     addLines("bottom-lines", getSetting(setting_linecolor, '#000'), 2); // larger than top-line, shows connections
@@ -633,62 +619,66 @@ function addForce() {
 */
 function addMarkerDefinitions() {
 
-    var linetype = getSetting(setting_linetype, 'straight');
-    var linelength = getSetting(setting_linelength, 200);
     var markercolor = getSetting(setting_markercolor, '#000');
 
-    var markers = d3.select("#container")
-                .append("defs")
-                .selectAll("marker")
-                .data(data.links)
-                .enter()
-                .append("svg:marker")
-                .attr("id", function(d) {  //use this id to connect markers to the appropriate link
-                    return "marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-                })
-                .attr("markerWidth", function(d) {    
-                    var width = getMarkerWidth(d.targetcount);
+    var markers = d3.select('#container').append('defs'); // create container
 
-                    return width > 20 ? 20 : width;
-                })
-                .attr("markerHeight", function(d) {
-                    var height = getMarkerWidth(d.targetcount);
+    markers.append('svg:marker') // Single arrow, pointing from field to rectype (for resources/pointers)
+           .attr('id', 'marker-ptr')
+           .attr("markerWidth", 20)
+           .attr("markerHeight", 20)
+           .attr("refX", -1)
+           .attr("refY", 0)
+           .attr("viewBox", [-10, -10, 20, 20])
+           .attr("markerUnits", "userSpaceOnUse")
+           .attr("orient", "auto")
+           .attr("fill", markercolor)
+           .attr("opacity", 0.6)
+           .append("path")                
+           .attr("d", 'M0,5 L10,0 L0,-5');
 
-                    return height > 20 ? 20 : height;
-                })
-                .attr("refX", function(d) {
-                    // Move markers to display a pointer on a straight line
-                    return -1;
-                })
-                .attr("refY", 0)
-                .attr("viewBox", function(d) {
-                    if(d.relation.type == 'resource'){
-                        return "-10 -10 20 20";
-                    }
-                    return "-5 -5 20 20";
-                })
-                .attr("markerUnits", "userSpaceOnUse")
-                .attr("orient", "auto")
-                .attr("fill", markercolor)// color of arrows on links (Using the markercolor setting)
-                .attr("opacity", "0.6")
-                .append("path")
-                .attr("d",
-                    function(d) { 
-                        return d.relation.type=='resource' 
-                                        ?'M0,5 L10,0 L0,-5' // Single arrows, M3,4 L-7.5,0 L3,-4 (Arrow pointing in opposite direction) 
-                                        :'M0,-6 L7,0 L0,6 M7,-6 L14,0 L7,6'; // Double arrows, M-2,-6 L-7,0 L-2,6 M-7,-6 L-12,0 L-7,6 (double arrow pointing opposite direction)
-                    }
-                );//double arrow
+    markers.append('svg:marker') // Double arrows, pointing opposite directions (for relmarkers)
+           .attr('id', 'marker-rel')
+           .attr("markerWidth", 20)
+           .attr("markerHeight", 20)
+           .attr("refX", -1)
+           .attr("refY", 0)
+           .attr("viewBox", [-10, -10, 20, 20])
+           .attr("markerUnits", "userSpaceOnUse")
+           .attr("orient", "auto")
+           .attr("fill", markercolor)
+           .attr("opacity", 0.6)
+           .append("path")                
+           .attr("d", 'M2,-5 L10,0 L2,5 M-2,-5 L-10,0 L-2,5');
 
-     return markers;
-/*     
-CROSS  M 3,3 L 7,7 M 3,7 L 7,3
+    markers.append("svg:marker") // Circle blob, for end of lines/extra connectors
+           .attr("id", "blob")
+           .attr("markerWidth", 5)
+           .attr("markerHeight", 5)
+           .attr("refX", 5)
+           .attr("refY", 5)
+           .attr("viewBox", [0, 0, 20, 20])
+           .append("circle")
+           .attr("cx", 5)
+           .attr("cy", 5)
+           .attr("r", 5)
+           .style("fill", "darkgray");
 
-    { id: 0, name: 'circle', path: 'M 0, 0  m -5, 0  a 5,5 0 1,0 10,0  a 5,5 0 1,0 -10,0', viewbox: '-6 -6 12 12' }
-  , { id: 1, name: 'square', path: 'M 0,0 m -5,-5 L 5,-5 L 5,5 L -5,5 Z', viewbox: '-5 -5 10 10' }
-  , { id: 2, name: 'arrow', path: 'M 0,0 m -5,-5 L 5,0 L -5,5 Z', viewbox: '-5 -5 10 10' }
-  , { id: 2, name: 'stub', path: 'M 0,0 m -1,-5 L 1,-5 L 1,5 L -1,5 Z', viewbox: '-1 -5 2 10' }     
-*/  
+    markers.append("svg:marker") // Smaller single arrow, pointing from rectype to field (for child pointers)
+           .attr("id", "marker-childptr")
+           .attr("markerWidth", 20)
+           .attr("markerHeight", 20)
+           .attr("refX", 20)
+           .attr("refY", 0)
+           .attr("viewBox", [-10, -10, 20, 20])
+           .attr("markerUnits", "userSpaceOnUse")
+           .attr("orient", "auto")
+           .attr("fill", markercolor)
+           .attr("opacity", 0.6)
+           .append("path")                
+           .attr("d", 'M3,4 L-5.5,0 L3,-4');
+
+    return markers;
 }
 
 /************************************ LINES **************************************/      
@@ -741,21 +731,32 @@ function addLines(name, color, thickness) {
          
     // visible line, pointing from one node to another
     if(name=='top-lines' && linetype != "stepped"){
-         lines.attr("marker-mid", function(d) {
-
-            if(!(hide_empty && d.targetcount == 0)){ 
-                //DEBUG console.log("url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
-                return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")"; //reference to marker id
+        lines.attr("marker-mid", function(d) {
+            if(!(hide_empty && d.targetcount == 0)){
+                // reference to marker id
+                if(d.relation.type == 'resource'){
+                    return "url(#marker-ptr)";
+                }else if(d.relation.type == 'relmarker' || d.relation.type == 'relationship'){
+                    return "url(#marker-rel)";
+                }else{
+                    return null;
+                }
             }
-         });
+        });
+
+        lines.attr("marker-end", function(d) { // For child pointers
+            if(!(hide_empty && d.targetcount == 0) && $Db.rst(d.source.id, d.relation.id, 'rst_CreateChildIfRecPtr') == 1){
+                return "url(#marker-childptr)"; //reference to marker id
+            }
+        });
     }
     
     if(name == 'rollover-lines'){
 
         lines.on("mouseover", function(d) {
-            //console.log(d.relation.id);  //field type id           
             if(!(hide_empty && d.targetcount == 0)){
                 var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+                //console.log(d3.selectAll("."+name+".link."+selector));
                 createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));
             }
         })
@@ -779,7 +780,7 @@ function tick() {
     var rolloverLines = d3.selectAll(".rollover-lines");
 
     // remove additional visible lines
-    $("#offset_container").empty();
+    $(".offset_line").remove();
 
     var linetype = getSetting(setting_linetype, 'straight');
     if(linetype == "curved") {
@@ -958,7 +959,7 @@ function updateStraightLines(lines, type) {
         }else{ // Node to Node Link
 
             var dx, dy, tg, dx2, dy2, mdx, mdy, s_x2, t_x2;
-            var sameSide = false;
+            var bottom_tar = false;
 
             if(currentMode == 'infoboxes_full'){
 
@@ -974,6 +975,9 @@ function updateStraightLines(lines, type) {
                 // Get detail's y location within the source object
                 var detail_y = $detail[0].getBBox().y;
                 s_y += detail_y - iconSize * 0.6;
+
+                // Get target's bottom y location
+                var b_target_y = t_y - iconSize + Number($target_rect.attr('height'));
 
                 // Left Side: x Point for starting and ending nodes
                 s_x -= iconSize;
@@ -1003,83 +1007,92 @@ function updateStraightLines(lines, type) {
 
                     s_x -= 7;
                     t_x += 7;
-                }else if((r_source_x > r_target_x || r_target_x > s_x) && right_diff < left_diff){ 
-                // Right to Right Conneciton, Change source and target x location
+                }else if(t_y < s_y){ // target is above source and was same side connectors
 
-                    s_x = r_source_x;
-                    t_x = r_target_x;
+                    t_x += (target_width / 2);
 
-                    s_x2 = s_x - 5;
-                    t_x2 = t_x;
+                    left_diff = (t_x - s_x > s_x - t_x) ? t_x - s_x : s_x - t_x;
+                    right_diff = (t_x - r_source_x > r_source_x - t_x) ? t_x - r_source_x : r_source_x - t_x;
 
-                    s_x += 7;
-                    t_x += 7;
+                    if(right_diff < left_diff){
 
-                    sameSide = 'right';
-                }else{ // Left to Left Connection                  
+                        s_x = r_source_x;
 
-                    s_x2 = s_x + 5;
-                    t_x2 = t_x;
+                        s_x2 = s_x - 5;
 
-                    s_x -= 7;
-                    t_x -= 7;
+                        s_x += 7;
+                    }else{
 
-                    sameSide = 'left';
+                        s_x2 = s_x + 5;
+                        s_x -= 7;
+                    }
+
+                    t_y = b_target_y;
+
+                    bottom_tar = true;
+                }else{ // target is below source and same side connectors
+
+                    var org_x = s_x; // backup source x
+
+                    if(right_diff < left_diff){ // right 2 right
+
+                        s_x = r_source_x;
+                        t_x = r_target_x;
+
+                        s_x2 = s_x - 5;
+                        t_x2 = t_x;
+
+                        s_x += 7;
+                        t_x += 7;
+                    }else{ // left 2 left
+
+                        s_x2 = s_x + 5;
+                        t_x2 = t_x;
+
+                        s_x -= 7;
+                        t_x -= 7;
+                    }
                 }
 
-                var g, extra_pnts;
-
+                var line, extra_pnts;
 
                 if(type == 'bottom-lines'){
 
-                    if(d3.select("#offset_container").empty()){
-                        g = d3.select("#container").append("svg:g").attr("id", "offset_container");
-                    }else{
-                        g = d3.select("#offset_container");
-                    }
+                    line = d3.select("#container").insert("svg:line", ".id"+d.source.id+" + *");
 
                     //add extra starting line
                     extra_pnts = [
                       "M",s_x, s_y,
                       "L",s_x2, s_y];
                     
-                    g.append("svg:line")
-                            .attr("class", "offset_line")
-                            .attr("stroke", "darkgray")
-                            .attr("stroke-linecap", "round")
-                            .style("stroke-width", "3px")
-                            .attr("x1", s_x)
-                            .attr("y1", s_y)
-                            .attr("x2", s_x2)
-                            .attr("y2", s_y)
-                            .attr("marker-end", "url(#blob)");
+                    line.attr("class", "offset_line")
+                        .attr("stroke", "darkgray")
+                        .attr("stroke-linecap", "round")
+                        .style("stroke-width", "3px")
+                        .attr("x1", s_x)
+                        .attr("y1", s_y)
+                        .attr("x2", s_x2)
+                        .attr("y2", s_y)
+                        .attr("marker-end", "url(#blob)");
                 }
 
-                if(sameSide && t_y < s_y){
+                if(!bottom_tar && type == 'bottom-lines'){
 
-                    // if, attach target point to bottom of target rectangle 
-                    if(sameSide == 'right'){
-                        t_x = t_x2 - (target_width / 2);
-                    }else{
-                        t_x = t_x2 + (target_width / 2);
-                    }
-                    t_y -= iconSize - Number($target_rect.attr('height'));
-                }else if(type == 'bottom-lines'){
+                    line = d3.select("#container").insert("svg:line", ".id"+d.target.id+" + *");
 
                     // else, add extra ending line
                     extra_pnts = [
                       "M",t_x, t_y,
                       "L",t_x2, t_y];
 
-                    g.append("svg:line")
-                            .attr("class", "offset_line")
-                            .attr("stroke", "darkgray")
-                            .attr("stroke-linecap", "round")
-                            .style("stroke-width", "3px")
-                            .attr("x1", t_x)
-                            .attr("y1", t_y)
-                            .attr("x2", t_x2)
-                            .attr("y2", t_y);
+                    line.attr("class", "offset_line")
+                        .attr("stroke", "darkgray")
+                        .attr("stroke-linecap", "round")
+                        .style("stroke-width", "3px")
+                        .attr("x1", t_x)
+                        .attr("y1", t_y)
+                        .attr("x2", t_x2)
+                        .attr("y2", t_y);
                 }
 
                 dx = (t_x-s_x)/2;
@@ -1150,7 +1163,9 @@ function updateSteppedLines(lines, type){
        
        var target_x = d.target.x,
            target_y = d.target.y;
-       var res = [];    
+       var res = [];
+
+       var marker_type = (d.relation.type == 'resource') ? 'url(#marker-ptr)' : 'url(#marker-rel)';
            
        if(d.target.id==d.source.id){ // Self Linking Node
            // Affects Loop Size
@@ -1172,8 +1187,9 @@ function updateSteppedLines(lines, type){
               //"A",dr,dr,0,0,1,d.source.x,d.source.y
             ];
             
-            if($.isFunction($(this).attr))
-            $(this).attr("marker-mid", "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
+            if($.isFunction($(this).attr)){
+                $(this).attr("marker-mid", marker_type);
+            }
            
        }else{  // Node to Node Link
       
@@ -1201,7 +1217,7 @@ function updateSteppedLines(lines, type){
                 g.append("svg:path")
                         .attr("d", pnt.join(' '))
                         //reference to marker id
-                        .attr("marker-end", "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
+                        .attr("marker-end", marker_type);
 
                 pnt = [
                   "M",(d.source.x + dx2 + dx + k), (d.source.y + dy2),
@@ -1211,7 +1227,7 @@ function updateSteppedLines(lines, type){
                         //.attr("class", "hidden_line_for_markers")
                         .attr("d", pnt.join(' '))
                         //reference to marker id
-                        .attr("marker-end", "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")");
+                        .attr("marker-end", marker_type);
 
            }
            dx = dx + k;
@@ -1221,61 +1237,6 @@ function updateSteppedLines(lines, type){
     });
     
 }
-
-function updateSteppedLines_OLD(lines){
-    var pairs = {};
-    
-    var mode = 0; //
-    
-    // Calculate the straight points
-    lines.attr("points", function(d) {
-        
-       var dx = (d.target.x-d.source.x)/(mode==1?1:2),
-           dy = (d.target.y-d.source.y)/(mode==1?1:2);
-       
-       var indent = ((Math.abs(dx)>Math.abs(dy))?dx:dy)/4;
-       
-       var key = d.source.id+'_'+d.target.id;
-       if(pairs[d.target.id+'_'+d.source.id]){
-           key = d.target.id+'_'+d.source.id;
-       }else if(!pairs[key]){
-           pairs[key] = 1-indent;
-       }
-       
-       pairs[key] = pairs[key]+indent;
-       var k = pairs[key];
-       
-       var target_x = d.target.x,
-           target_y = d.target.y;
-       if(d.target.id==d.source.id){
-           //link to itself
-           target_x = d.source.x+100;
-           target_y = d.source.y-100;
-       }
-       
-       var res = [d.source.x + "," + d.source.y];
-       
-       if(Math.abs(dx)>Math.abs(dy)) {
-           dx = dx + k;
-           res.push((d.source.x + dx) + ',' + (d.source.y));
-           res.push((d.source.x + dx) + ',' + (target_y));
-       }else{
-           dy = dy + k;
-           res.push((d.source.x) + ',' + (d.source.y+dy));
-           res.push((target_x) + ',' + (d.source.y+dy));
-       }
-
-       res.push(target_x + "," + target_y);
-       if(d.target.id==d.source.id){
-           res.push((d.source.x - dx) + ',' + target_y);
-           res.push(d.source.x  + ',' + d.source.y);
-       }
-       
-       return res.join(' ');
-    });
-    
-}
-
 
 /************************************************** NODE CHILDREN ********************************************/
 /**

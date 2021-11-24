@@ -1390,6 +1390,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     +'</div>'),
 
                 width: 1200, height:700,
+                vocab_type: (term_type == 'relmarker') ? 'relation' : 'enum',
                 onClose: function( context ){
                     if(context>0 && vocab_id=='add_new'){ //change vocabulary for new addition only 
                         that._editing.setFieldValueByName('dty_JsonTermIDTree', context);

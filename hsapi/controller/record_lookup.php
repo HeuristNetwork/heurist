@@ -49,43 +49,70 @@
         $system->error_exit_api('Cannot connect/load data from the service: '.$url, HEURIST_ERROR);    
     }
 
-    json_decode($remote_data);
-    if(json_last_error() == JSON_ERROR_NONE){
-    }else{
-/*        
-        $array = array_map("str_getcsv", explode("\n", $csv));
-        $json = json_encode($array);
-*/
-        $hasGeo = false;
-        $remote_data = str_getcsv($remote_data, "\n"); //parse the rows
-        if(is_array($remote_data) && count($remote_data)>1){
-            
-            $header = str_getcsv(array_shift($remote_data));
-            $id = 1;
-            foreach($remote_data as &$line){
-                $line = str_getcsv($line);  
-                foreach($header as $idx=>$key){
-                     $line[$key] = $line[$idx];
-                     unset($line[$idx]);
-                }
-                if(@$line['latitude'] && @$line['longitude']){
-                    $line = array('type'=>'Feature','id'=>$id, 'properties'=>$line,
-                        'geometry'=>array('type'=>'Point','coordinates'=>array($line['longitude'], $line['latitude'])));
-                    $hasGeo = true;
-                }
-            } 
-            
-            if(!$hasGeo){
-                $system->error_exit_api('Service did not return data in an appropriate format');
-            }
-        }else if(is_array($remote_data) && count($remote_data)==1){
-                $system->error_exit_api('No records match the search criteria', HEURIST_NOT_FOUND);
+    if(@$params['serviceType'] == 'geonames' || @$params['serviceType'] == 'tlcmap'){ // GeoName and TLCMap lookups
+
+        json_decode($remote_data);
+        if(json_last_error() == JSON_ERROR_NONE){
         }else{
-                $system->error_exit_api('Service did not return any data');
+    /*        
+            $array = array_map("str_getcsv", explode("\n", $csv));
+            $json = json_encode($array);
+    */
+            $hasGeo = false;
+            $remote_data = str_getcsv($remote_data, "\n"); //parse the rows
+            if(is_array($remote_data) && count($remote_data)>1){
+                
+                $header = str_getcsv(array_shift($remote_data));
+                $id = 1;
+                foreach($remote_data as &$line){
+                    $line = str_getcsv($line);  
+                    foreach($header as $idx=>$key){
+                         $line[$key] = $line[$idx];
+                         unset($line[$idx]);
+                    }
+                    if(@$line['latitude'] && @$line['longitude']){
+                        $line = array('type'=>'Feature','id'=>$id, 'properties'=>$line,
+                            'geometry'=>array('type'=>'Point','coordinates'=>array($line['longitude'], $line['latitude'])));
+                        $hasGeo = true;
+                    }
+                } 
+                
+                if(!$hasGeo){
+                    $system->error_exit_api('Service did not return data in an appropriate format');
+                }
+            }else if(is_array($remote_data) && count($remote_data)==1){
+                    $system->error_exit_api('No records match the search criteria', HEURIST_NOT_FOUND);
+            }else{
+                    $system->error_exit_api('Service did not return any data');
+            }
+    
+            $remote_data = json_encode($remote_data);
         }
-        
-        
-        $remote_data = json_encode($remote_data);
+    }else if(@$params['serviceType'] == 'bnflibrary'){ // BnF Library Search
+
+        $results = array();
+
+        // Create xml object
+        $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);         
+        // xml namespace urls: http://www.loc.gov/zing/srw/ (srw), http://www.openarchives.org/OAI/2.0/oai_dc/ (oai_dc), http://purl.org/dc/elements/1.1/ (dc)
+
+        // Retrieve records from results
+        $records = $xml_obj->children('http://www.loc.gov/zing/srw/', false)->records->record;
+
+        $nextStart = 0; // can be used to run the query again with a new start, startRecord
+
+        // Move each result's details into seperate array
+        foreach ($records as $key => $details) {
+            $nextStart = intval($details->recordPosition);
+            $results['result'][] = $details->recordData->children('http://www.openarchives.org/OAI/2.0/oai_dc/', false)->children('http://purl.org/dc/elements/1.1/', false);
+        }
+
+        // Add other details, can be used for more calls to retrieve all results (currently retrieves 500 records at max)
+        $results['numberOfRecords'] = intval($xml_obj->children('http://www.loc.gov/zing/srw/', false)->numberOfRecords);
+        $results['nextStart'] = $nextStart + 1;
+
+        // Encode to json for response to JavaScript
+        $remote_data = json_encode($results);
     }
 
     header('Content-Type: application/json');

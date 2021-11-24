@@ -289,7 +289,7 @@ console.log(res);
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
         
         var that = this;
-        var request = {service:sURL};             
+        var request = {service:sURL, serviceType:'geonames'};
         //loading as geojson  - see controller record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
             function(response){
