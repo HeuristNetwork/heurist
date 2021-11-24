@@ -47,6 +47,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     
     last_added_vocabulary: 0,
 
+    options:{
+        vocab_type:null // vocab type, enum or relation
+    },
+
     //
     //                                                  
     //    
@@ -619,6 +623,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     //initially selected vocabulary
                     rg_options['selection_on_init'] = this.options.selection_on_init;
                     this.options.selection_on_init = null;
+                }
+
+                if(this.options.vocab_type && rg_options['selection_on_init']=='add_new'){
+					// Pre-check the relation checkbox for definig new relmarker vocab
+                    rg_options['vocab_type'] = this.options.vocab_type;
                 }
 
                 this.recordList.uniqueId();
@@ -1212,7 +1221,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         $(ele.find('.input-div select')).hSelect('refresh');
                     }
                 }
-				
+
+                if(!window.hWin.HEURIST4.util.isempty(this.options.vocab_type)){
+                    currentDomain = this.options.vocab_type;
+                }
+
                 if(this.options.reference_trm_manger.find('div').length > 0){
                     var divs = this.options.reference_trm_manger.find('div');
                     var $title_container = $(divs[divs.length-1]);
