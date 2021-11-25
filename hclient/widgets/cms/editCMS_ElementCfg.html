@@ -101,7 +101,7 @@
                         <div class="header_narrow" title="Child item proportion and basis size">Item proportion:</div>
                         <input data-type="flex-grow" type="number" min="0" value="" placeholder="0" style="width:30px"/>
                         <label>&nbsp;Size:</label>
-                        <input data-type="flex-basis" type="text" value="" placeholder="auto" style="width:60px"/>                       
+                        <input data-type="flex-basis" type="text" value="" placeholder="auto" style="width:50px"/>                       
                     </div>                    
             </fieldset>
             </div>
@@ -217,7 +217,7 @@
                         </div>
                         <div>
                             <div class="header_narrow">Color:</div>
-                            <input data-type="css" name="background-color" type="text" value="" style="width:60px"/>
+                            <input data-type="css" name="background-color" type="text" value="" style="width:50px"/>
                         </div>
                         <div>
                             <div class="header_narrow">Image:</div>
@@ -266,32 +266,51 @@
                         </div>
                         <div>
                             <div class="header_narrow">Color:</div>
-                            <input data-type="css" name="border-color" type="text" value="" placeholder="black" style="width:60px"/>
+                            <input data-type="css" name="border-color" type="text" value="" placeholder="black" style="width:50px"/>
                         </div>
                         <div>
                             <div class="header_narrow">Size:</div>
-                            <input data-type="css" name="border-width" type="number" min="1" max="20" value="" placeholder="1" style="width:30px"/>
+                            <input data-type="css" name="border-width" type="number" min="1" max="20" value="" placeholder="1" style="width:50px"/>
                             <label>&nbsp;Corner:</label>
-                            <input data-type="css" name="border-radius"  type="number" min="0" max="40" value="" placeholder="0" style="width:30px"/>                       
+                            <input data-type="css" name="border-radius"  type="number" min="0" max="40" value="" placeholder="0" style="width:50px"/>                       
                         </div>
                 </fieldset>
                 <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
                         <div>
                             <div class="header_narrow"><b>Margins</b></div>
                             <label>&nbsp;Inner:</label>
-                            <input data-type="css" name="padding" type="number" min="0" value="" placeholder="0" style="width:30px"/>
+                            <input data-type="css" name="padding" type="number" min="0" value="" placeholder="0" style="width:50px"/>
                             <label>&nbsp;Outer:</label>
-                            <input data-type="css" name="margin"  type="number" min="0" value="" placeholder="0" style="width:30px"/>                       
+                            <input data-type="css" name="margin"  type="number" min="0" value="" placeholder="0" style="width:50px"/>                       
                         </div>
                 </fieldset>
                 <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
                         <div>
                             <div class="header_narrow"><b>Dimensions</b></div>
                             <label>&nbsp;Width:</label>
-                            <input data-type="css" name="width" type="text" min="0" placeholder="auto" style="width:30px"/>
+                            <input data-type="css" name="width" type="text" min="0" placeholder="auto" style="width:50px"/>
                             <label>&nbsp;Height:</label>
-                            <input data-type="css" name="height"  type="text" min="0" placeholder="auto" style="width:30px"/>                       
+                            <input data-type="css" name="height"  type="text" min="0" placeholder="auto" style="width:50px"/>                       
                         </div>
+                </fieldset>
+            </div>
+            <h3>Classes</h3>
+            <div>
+                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <div>
+                            <div class="header_narrow" style="vertical-align:top;"><b>Custom CSS classes:</b></div>
+                            <textarea name="elementClasses" rows="10" cols="30">
+                            </textarea>
+                            <div class="heurist-helper3">Defined in custom css field in page record</div>
+                        </div>
+                        <!--
+                        <div style="text-align:center;display: block;">
+                            <div class="header_narrow" style="vertical-align:top;"><b>Bootstrap classes:</b></div>
+                            <textarea name="elementBootstrap" rows="10" cols="30">
+                            </textarea>
+                            <div class="heurist-helper3">Use Grid, Typography and BG classes. Activate Bootstrap in home page record</div>
+                        </div>
+                        -->
                 </fieldset>
             </div>
             <h3>Edit source</h3>

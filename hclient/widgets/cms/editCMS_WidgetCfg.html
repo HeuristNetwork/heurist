@@ -31,18 +31,25 @@
 -->
 <fieldset style="padding:0;line-height:20px">
 
-    <div  class="heurist_Search">
+    <div  class="heurist_SearchInput">
         <!--<div class="header"><label>Show filter by entity buttons</label></div>-->
         <input name="btn_entity_filter" type="hidden" value="false"/>
         <input name="menu_entity_filter" type="hidden" value="false"/>
-        <input name="btn_visible_newrecord" type="hidden" value="false"/>
         <input name="isloginforced" type="hidden" value="false"/>
         <div class="header"><label>Filter button label</label></div>
         <input name="search_button_label" value=""/>
+    </div>    
+    <div  class="heurist_SearchInput">
+            <div class="header"><label>Label preceding filter field</label></div>
+            <input name="search_input_label" value=""/>
+        </div>
+    <div  class="heurist_SearchInput">
+            <div class="header"><label>Preliminary filter</label></div>
+            <input name="sup_filter" value=""/>
+            
     </div>
-    <div  class="heurist_Search">
-        <div class="header"><label>Label preceding filter field</label></div>
-        <input name="search_input_label" value=""/>
+    <div  class="heurist_SearchInput">
+        <label>Show filter builder button<input name="show_search_assistant" type="checkbox" value="false"/></label>
     </div>
 
     <!-- Filter tree -->    

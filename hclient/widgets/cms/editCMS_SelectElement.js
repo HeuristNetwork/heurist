@@ -41,7 +41,7 @@ function editCMS_SelectElement( callback ){
 
     grp2:{name:'Widgets', description:'Heurist Widgets for dynamic content or interaction', is_header:true},
         
-        heurist_Search:{name:'Filter', description:'Search field (with standard filter builder)'},
+        heurist_SearchInput:{name:'Filter', description:'Search field (with standard filter builder)'},
         heurist_SearchTree:{name:'Saved filters', description:'Simple &amp; facet filters, selection or tree'},            
 
         heurist_resultList:{name:'Standard filter result', description:'Switchable modes, action controls'},            
