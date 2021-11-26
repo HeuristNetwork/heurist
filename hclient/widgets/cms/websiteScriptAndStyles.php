@@ -186,19 +186,21 @@ if($_is_new_cms_editor || $edit_Available){
     
     <style>
 .cms-element-active{
-    -webkit-box-shadow: inset 0px 0px 38px 10px #6451f6, 0px 0px 8px 10px rgba(0,0,0,0);
-    box-shadow: inset 0px 0px 38px 10px #6451f6, 0px 0px 8px 10px rgba(0,0,0,0);
+    -webkit-box-shadow: inset 0px 0px 38px 10px rgb(201, 194, 249), 0px 0px 8px 10px rgba(0,0,0,0);
+    box-shadow: inset 10px 10px 124px 14px rgb(201, 194, 249), 0px 0px 8px 10px rgba(0,0,0,0);
+    
 }   
+/*     box-shadow: inset 0px 0px 38px 10px rgb(201, 194, 249), 0px 0px 8px 10px rgba(0,0,0,0); */
 .cms-element-overlay{
   visibility: hidden;
   position: absolute;
   top: 0;
   left: 0;
-  background: rgba(100, 81, 246, 0.3);
+  background: rgba(201, 194, 249, 0.5);
 } 
 
 .ui-heurist-publish .fancytree-active, .ui-heurist-publish .fancytree-node:hover {
-  background: rgba(100, 81, 246, 0.3) !important;
+  background: rgba(201, 194, 249, 1) !important;
 }
 
 .ui-heurist-publish span.fancytree-node {
