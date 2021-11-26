@@ -96,7 +96,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
 
                 if(opts.layout_params){
                     $dlg.find("#use_timeline").prop('checked', !opts.layout_params.notimeline);    
-                    $dlg.find("#map_rollover").prop('checked', !opts.layout_params.map_rollover);    
+                    $dlg.find("#map_rollover").prop('checked', opts.layout_params.map_rollover);    
                     $dlg.find("#use_cluster").prop('checked', !opts.layout_params.nocluster);    
                     $dlg.find("#editstyle").prop('checked', opts.layout_params.editstyle);    
 
@@ -127,6 +127,14 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                     if(opts.layout_params['template']){
                         $dlg.find('select[name="map_template"]').attr('data-template', opts.layout_params['template']);        
                     }
+                    var popup = 'standard';
+                    if(opts.layout_params['template']=='none'){
+                        popup = 'none';
+                    }else if(opts.layout_params['popup']) {
+                        popup = opts.layout_params['popup'];
+                    }
+                    $dlg.find('input[name="map_popup"][value="'+popup+'"]').prop('checked', true);        
+                    
                     if(opts.layout_params['basemap']){
                         $dlg.find('input[name="map_basemap"]').val(opts.layout_params['basemap']);        
                     }
@@ -479,7 +487,8 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                             var $select2 = $dlg.find('select[name="map_template"]'); 
 
                             window.hWin.HEURIST4.ui.createTemplateSelector( $select2
-                                ,[{key:'',title:'Standard map popup template'},{key:'none',title:'Disable popup'}], $select2.attr('data-template'));
+                                ,[{key:'',title:'Standard popup template'}], $select2.attr('data-template'));
+                                //,{key:'none',title:'Disable popup'}
 
 
 
@@ -544,7 +553,11 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
             $dlg.find('input[name="controls"]:checked').each(
                 function(idx,item){ctrls.push($(item).val());}
             );
-            if(ctrls.length>0) layout_params['controls'] = ctrls.join(',');
+            if(ctrls.length>0){
+                layout_params['controls'] = ctrls.join(',');    
+            }else{
+                layout_params['controls'] = 'none';
+            }
             if(ctrls.indexOf('legend')>=0){
                 ctrls = [];
                 $dlg.find('input[name="legend"]:checked').each(
@@ -563,11 +576,15 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                         layout_params['legend'] += (','+w);
                     }
                 } 
-
             }
+            
             layout_params['published'] = 1;
             layout_params['template'] = $dlg.find('select[name="map_template"]').val();
             layout_params['basemap'] = $dlg.find('input[name="map_basemap"]').val();
+            var popup = $dlg.find('input[name="map_popup"]:checked').val();
+            if(popup!='standard'){
+                layout_params['popup'] = popup;
+            }
 
             opts['layout_params'] = layout_params;
             opts['leaflet'] = true;
@@ -586,7 +603,8 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                         cont.find('#allowed_svsIDs').editing_input('getValues') );
                     cont.find('input[name="init_svsID"]').val( 
                         cont.find('#init_svsID').editing_input('getValues') );
-                }else if(widget_name=='heurist_Navigation'){
+                }else 
+                if(widget_name=='heurist_Navigation'){
                     var menu_recIDs = cont.find('#menu_recIDs').editing_input('getValues');
                     if(window.hWin.HEURIST4.util.isempty(menu_recIDs) || 
                         ($.isArray(menu_recIDs)&& (menu_recIDs.length==0||window.hWin.HEURIST4.util.isempty(menu_recIDs[0]))))
@@ -600,7 +618,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                 //find INPUT elements and fill opts with values
                 cont.find('input').each(function(idx, item){
                     item = $(item);
-                    if(item.attr('name')){
+                    if(item.attr('name') && item.attr('name').indexOf('map_')<0){
                         if(item.attr('type')=='checkbox'){
                             opts[item.attr('name')] = item.is(':checked');    
                         }else if(item.attr('type')=='radio'){

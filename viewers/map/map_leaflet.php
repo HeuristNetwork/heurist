@@ -187,7 +187,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     }
     
     .map_popup .detail, .map_popup .detail > a{
-        max-width: 200px;
+        max-width: 286px;
     }
     
     .v1 .browser-print-mode{
@@ -240,6 +240,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         layout_params['template'] = __gp('template'); //smarty template for popup info
         
         layout_params['published'] = __gp('published');
+        layout_params['popup'] = __gp('popup');
         layout_params['map_rollover'] = __gp('map_rollover');
         layout_params['style'] = window.hWin.HEURIST4.util.isJSON(__gp('style')); //default style
 

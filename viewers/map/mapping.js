@@ -33,7 +33,8 @@ Thematic mapping
 * 
 * notimeline - hide timeline (map only)
 * nomap - timeline only
-* map_rollover
+* map_rollover - show title of market as tooltip
+* map_popup_mode - show map info as standard map control, in popup dialog or supress (standard,dialog,none)
 * 
 * callback events:
 * onselect
@@ -120,6 +121,7 @@ $.widget( "heurist.mapping", {
         isPublished: false,
         
         map_rollover: false,
+        map_popup_mode: 'standard',
         
         zoomToPointInKM: 5
     },
@@ -1421,12 +1423,28 @@ $.widget( "heurist.mapping", {
     },
 
     //
-    //
+    //  highlight and show info popup
     //
     _onLayerSelect: function(layer, latlng){
 
             
             var  that = this;
+            
+            function __showPopup(content, latlng){
+                
+                if(that.options.map_popup_mode=='standard'){
+                    
+                    that.main_popup.setLatLng(latlng)
+                                .setContent(content)
+                                .openOn(that.nativemap);
+                                
+                } else if(that.options.map_popup_mode=='dialog'){
+                    
+                    window.hWin.HEURIST4.msg.showMsg(content);
+                    
+                }
+            }
+            
             
             if(layer.feature.properties.rec_ID>0){
                 
@@ -1464,25 +1482,43 @@ $.widget( "heurist.mapping", {
                                 + encodeURIComponent(layer.options.popup_template || that.mapPopUpTemplate);
                         
                     }else{
-                        popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
+                        
+                        popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='
                                 +layer.feature.properties.rec_ID
-                                +'&db='+db+'&ll='
-                                +window.hWin.HAPI4.sysinfo['layout'];
+                                +'&db='+db;
+                        
+                        if(that.options.map_popup_mode=='dialog'){
+                            popupURL = popupURL + '&ll=WebSearch';
+                        }else{
+                            popupURL = popupURL+'&mapPopup=1&ll='+window.hWin.HAPI4.sysinfo['layout'];    
+                        }
+                        
+                        
                     }  
                 }              
                 //open popup
                 if(popupURL){
-                    $.get(popupURL, function(responseTxt, statusTxt, xhr){
-                        if(statusTxt == "success"){
-                            that.main_popup.setLatLng(latlng)
-                            .setContent(responseTxt) //'<div style="width:99%;">'+responseTxt+'</div>')
-                            .openOn(that.nativemap);
-                        }
-                    });
+                    
+                    if(that.options.map_popup_mode=='dialog'){
+                        
+                            var opts = { 
+                                    is_h6style: true,
+                                    modal: false,
+                                    dialogid: 'recordview_popup',    
+                                    //onmouseover: function(){that._clearTimeouts();},
+                                    title:window.hWin.HR('Info')}                
+                        
+                            window.hWin.HEURIST4.msg.showDialog(popupURL, opts);
+                            
+                    }else if(that.options.map_popup_mode!='none'){
+                        $.get(popupURL, function(responseTxt, statusTxt, xhr){
+                            if(statusTxt == "success"){
+                                __showPopup(responseTxt, latlng);
+                            }
+                        });
+                    }
                 }else{
-                    that.main_popup.setLatLng(latlng)
-                            .setContent(info) //'<div style="width:99%;">'+responseTxt+'</div>')
-                            .openOn(that.nativemap);
+                    __showPopup(info, latlng);
                 }
         
             }else{
@@ -1499,9 +1535,7 @@ $.widget( "heurist.mapping", {
                     }
                     if(sText!=''){
                         sText = '<div class="map_popup">' + sText + '</div>';
-                        that.main_popup.setLatLng(latlng)
-                            .setContent(sText) 
-                            .openOn(that.nativemap);
+                        __showPopup(sText, latlng);
                     }
             }
         
@@ -2034,6 +2068,9 @@ $.widget( "heurist.mapping", {
         this.isMarkerClusterEnabled = !__parseval(params['nocluster']);
         this.options.isEditAllowed = !this.options.isPublished || __parseval(params['editstyle']);
         
+        this.options.map_popup_mode = params['popup']; //standard, none, in dialog
+        if(!this.options.map_popup_mode) this.options.map_popup_mode = 'standard';
+        
         this.options.map_rollover = __parseval(params['map_rollover']);
         this.options.default_style = window.hWin.HEURIST4.util.isJSON(params['style']);
 
@@ -2113,7 +2150,10 @@ $.widget( "heurist.mapping", {
         
     
         //map controls {all,none,zoom,bookmark,geocoder,print,publish,legend}
-        var controls = __splitval(params['controls']);
+        var controls = [];
+        if(params['controls']!='none'){
+            controls = __splitval(params['controls']);
+        }
         controls.push('zoom'); //zoom is always visible
         controls.push('addmapdoc'); //add map doc is always visible for "non published" ui
         controls.push('help');

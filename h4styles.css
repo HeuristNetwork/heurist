@@ -1855,7 +1855,12 @@ background: #8ea9b9
 .map_popup .detailType{
     text-align:left;
     line-height:14px;
-    width:125px;
+    width:280px;
+    display:block;
+    font-style:italic;
+}
+.map_popup .detail{
+    display:block;
 }
 .map_popup .detail, .map_popup .detail > a{
     min-width: 150px;

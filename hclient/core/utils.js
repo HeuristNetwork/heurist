@@ -402,6 +402,8 @@ window.hWin.HEURIST4.util = {
 
     mergeTwoHeuristQueries: function(query1, query2){
         
+        var sPlain1 = false, sPlain2 = false;
+        
         if(jQuery.type(query1) === "string"){
             var notJson = true;
             try{
@@ -417,6 +419,7 @@ window.hWin.HEURIST4.util = {
                 if(window.hWin.HEURIST4.util.isempty(query1)){
                     query1 = {};    
                 }else{
+                    sPlain1 = query1;
                     query1 = {plain: encodeURIComponent(query1)}; //query1.split('"').join('\\\"')};    
                 }
             }
@@ -437,23 +440,32 @@ window.hWin.HEURIST4.util = {
                 if(window.hWin.HEURIST4.util.isempty(query2)){
                     query2 = {};    
                 }else{
+                    sPlain2 = query2;
                     query2 = {plain: encodeURIComponent(query2)}; //query2.split('"').join('\\\"')};    
                 }
             }
         }
-        if(window.hWin.HEURIST4.util.isnull(query1) || $.isEmptyObject(query1)){
-            return query2;
+        
+        if(sPlain1!==false && sPlain1 !== false)
+        {
+            return sPlain1+' '+sPlain2;
+        }else{
+            if(window.hWin.HEURIST4.util.isnull(query1) || $.isEmptyObject(query1)){
+                return query2;
+            }
+            if(window.hWin.HEURIST4.util.isnull(query2) || $.isEmptyObject(query2)){
+                return query1;
+            }
+            if(!$.isArray(query1)){
+                query1 = [query1];
+            }
+            if(!$.isArray(query2)){
+                query2 = [query2];
+            }
+        
+            return query1.concat(query2)    
         }
-        if(window.hWin.HEURIST4.util.isnull(query2) || $.isEmptyObject(query2)){
-            return query1;
-        }
-        if(!$.isArray(query1)){
-            query1 = [query1];
-        }
-        if(!$.isArray(query2)){
-            query2 = [query2];
-        }
-        return query1.concat(query2)
+        
     },
     
     //

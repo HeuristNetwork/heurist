@@ -123,7 +123,7 @@ $.widget( "heurist.mediaViewer", {
                     }else
                     if(mimeType.indexOf('image')===0){
                         
-                        $alink.attr('href',fileURL).attr('data-myfancybox','fb-images');
+                        $alink.attr('href',external_url?external_url:fileURL).attr('data-myfancybox','fb-images');
                     }else 
                     if(false && mimeType=='application/pdf'){
 
