@@ -63,7 +63,9 @@ function editCMS2(){
     var delay_onmove = 0, __timeout = 0;
     
     var current_edit_mode = 'page', //or website
-        _editCMS_SiteMenu = null;   
+        _editCMS_SiteMenu = null; 
+        
+    var _keep_EditPanelWidth = 0;  
     
     var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
     
@@ -102,14 +104,11 @@ function editCMS2(){
                 
                 var editor_panel = $('<div class="ui-layout-'+options.editor_pos+'">'      
                         +'<div class="ent_wrapper editStructure" id="tabsEditCMS">' 
-                            +'<ul style="margin-'+(options.editor_pos=='west'?'right':'left')+':40px"><li><a href="#treeWebSite">Website menu</a></li><li><a href="#treePage">Page</a></li></ul>'
+                            +'<ul style="margin-'+(options.editor_pos=='west'?'right':'left')+':40px"><li><a href="#treeWebSite">Menu</a></li><li><a href="#treePage">Page</a></li></ul>'
                             
                             +'<span style="position:absolute;top:22px;width:32px;height:24px;font-size:29px;cursor:pointer;'+(options.editor_pos=='west'?'right:5px':'')+'" '
                             +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'"/>'
                             
-                            +'<button  title="Exit/Close content editor" class="bnt-cms-exit" style="position:absolute;top:15px;right:'
-                                +(options.editor_pos=='west'?'50px':'15px')+'"/>'
-                        
                             +'<div id="treeWebSite" style="top:43px" class="ent_wrapper">'
                                 +'<div class="toolbarWebSite ent_header" style="padding:10px">'
                                 
@@ -121,15 +120,18 @@ function editCMS2(){
                                         +'&nbsp;Drag menu items to re-order</span>'
                                 
                                 +'</div>'
-                                +'<div class="treeWebSite ent_content_full" style="padding:10px;"/>' //treeview - edit website menu
+                                +'<div class="treeWebSite ent_content_full" style="top:50px;padding:10px;"/>' //treeview - edit website menu
                             +'</div>'
                             +'<div id="treePage" style="font-size:1.2em;top:43px" class="ent_wrapper">'
-                                +'<div class="toolbarPage ent_header" style="padding:10px">'
-                                    +'<button title="Save changes for current page" class="btn-page-save ui-button-action">Save Page</button>'
+                                +'<div class="treePage ent_content" style="top:0px;padding:10px;"/>' //treeview - edit page
+                                +'<div class="propertyView ent_content" style="top:0px;padding:10px;display:none"/>' //edit properties for element
+                                
+                                +'<div class="toolbarPage ent_footer" style="padding:10px;font-size:0.9em">'
                                     +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
+                                    +'<button title="Save changes for current page" class="btn-page-save ui-button-action">Save</button>'
+                                    +'<button title="Exit/Close content editor" class="bnt-cms-exit">Close</button>'
+                        
                                 +'</div>'
-                                +'<div class="treePage ent_content_full" style="padding:10px;"/>' //treeview - edit page
-                                +'<div class="propertyView ent_content_full" style="padding:10px;display:none"/>' //edit properties for element
                             +'</div>'
                         +'</div></div>').appendTo(body);
             
@@ -150,9 +152,9 @@ function editCMS2(){
                     };
                     
                     layout_opts[options.editor_pos] = {
-                            size: 340, //@todo this.usrPreferences.structure_width,
+                            size: 230, //@todo this.usrPreferences.structure_width,
                             maxWidth:800,
-                            minWidth:340,
+                            minWidth:230,
                             spacing_open:6,
                             spacing_closed:40,  
                             togglerAlign_open:'center',
@@ -179,8 +181,8 @@ function editCMS2(){
 
                     body.layout(layout_opts); //.addClass('ui-heurist-bg-light')
 
-                    editor_panel.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'10px'}).click(_saveLayoutCfg)
-                    editor_panel.find('.btn-page-restore').button().css({'border-radius':'4px'}).click(
+                    editor_panel.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'5px'}).click(_saveLayoutCfg)
+                    editor_panel.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'}).click(
                         function(){
                             _startCMS({record_id:options.record_id, container:'#main-content', content:null});
                         }
@@ -194,7 +196,7 @@ function editCMS2(){
                     editor_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).click(_showWebSiteMenu);
                     
                     editor_panel.find('.bnt-cms-hidepanel').click(function(){ body.layout().close(options.editor_pos); } );
-                    editor_panel.find('.bnt-cms-exit').button({icon:'ui-icon-close'}).click(_closeCMS);
+                    editor_panel.find('.bnt-cms-exit').button().css({'border-radius':'4px'}).click(_closeCMS); //{icon:'ui-icon-close'}
                     
                     _panel_propertyView = body.find('.propertyView');
                     _panel_treeWebSite = body.find('.treeWebSite');
@@ -580,6 +582,18 @@ function editCMS2(){
         _switchMode(current_edit_mode);//, false);
         
     }
+    
+    function _hidePropertyView(){
+        
+        if(_keep_EditPanelWidth>0){
+            body.layout().sizePane('west', _keep_EditPanelWidth);    
+        }
+        _keep_EditPanelWidth = 0;
+
+        _panel_propertyView.hide();
+        _panel_treePage.show();
+
+    }
 
     //
     //
@@ -605,8 +619,7 @@ function editCMS2(){
         
         if(mode=='page'){
             
-            _panel_propertyView.hide();
-            _panel_treePage.show();
+            _hidePropertyView();
             
             _toolbar_Page.show();
             _toolbar_WebSite.hide();
@@ -623,10 +636,7 @@ function editCMS2(){
             
         }else{
                     
-            _panel_propertyView.hide();
-
-            //_panel_treeWebSite.show();
-            //_panel_treePage.hide();
+            _hidePropertyView();
             
             _toolbar_Page.hide();
             _toolbar_WebSite.show();
@@ -931,6 +941,7 @@ function editCMS2(){
 
                         }else                            
                         { //separate overlay div - visible when mouse over tree
+                            _panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
                             _showOverlayForElement(ele_ID);
                         }
 
@@ -1161,7 +1172,12 @@ function editCMS2(){
         //1. show div with properties over treeview
         _panel_treePage.hide();
         _panel_propertyView.show();
-
+        
+        if(body.layout().state['west']['outerWidth']<400){
+            _keep_EditPanelWidth = body.layout().state['west']['outerWidth'];
+            body.layout().sizePane('west', 400);    
+        }
+        
         var element_cfg = layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
         
         var is_cardinal = (element_cfg.type=='north' || element_cfg.type=='south' || 
@@ -1199,11 +1215,11 @@ function editCMS2(){
                         page_was_modified = true;            
                     }
                     //close
-                    _panel_treePage.show();
-                    _panel_propertyView.hide();
+                    _hidePropertyView();
                     
                 } );
     }
+    
     
     //
     // Add text element or widget
