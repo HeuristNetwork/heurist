@@ -287,6 +287,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CONTACT_INFO' => array(2, 17),
     'DT_GIVEN_NAMES' => array(2, 18),
     'DT_GENDER' => array(2, 20),
+    'DT_EMAIL' => array(2, 23),
     'DT_LOCATION' => array(2, 27), // TODO : change DT_PLACE_NAME with new update.
     'DT_GEO_OBJECT' => array(2, 28),
     'DT_MIME_TYPE' => array(2, 29),

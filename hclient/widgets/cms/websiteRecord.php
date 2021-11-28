@@ -396,7 +396,7 @@ if(!$isWebPage){  //not standalone web page
                     .'&nbsp;&nbsp;<a href="#" onclick="performCaptcha();">report site</a>'
                  . '</div>'
                  .(@$site_owner['ugr_eMail']?'<div style="float:right;line-height:38px;padding:0 5px;">'
-                    .'&bull;&nbsp;&nbsp;<a href="mailto:'.@$site_owner['ugr_eMail'].'">site owner</a>'
+                    .'&bull;&nbsp;&nbsp;<a href="mailto:'.@$site_owner['ugr_eMail'].'" target="_blank">site owner</a>'
                  .'</div>':'')    
                  .'<div id="host_info" style="float:right;line-height:38px;height:40px;margin-right: 0px;"></div>'
                  .'<div style="float:right;padding:0 5px;height:40px;line-height: 38px;">'

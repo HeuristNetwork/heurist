@@ -1,4 +1,13 @@
 <?php
+/*
+Add to httpd.conf
+
+RewriteEngine On
+#if URI starts with api/ redirect it to controller/api.php
+RewriteRule ^/heurist/api/(.*)$ /heurist/hsapi/controller/api.php
+
+*/
+
   
   
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));

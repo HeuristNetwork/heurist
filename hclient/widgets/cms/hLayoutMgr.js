@@ -28,6 +28,8 @@ function hLayoutMgr(){
     var body = $(this.document).find('body');
     
     var isEditMode = false;
+    
+    var _supp_options = null; //defined in layoutInit dynamic options with current status params
 
     //
     //
@@ -46,22 +48,20 @@ function hLayoutMgr(){
     
     //---------------------------------------
     //
-    // container - id or element
     // layout - JSON
+    // container - id or element
     //
-    function _layoutInit(layout, container, supp_options){
+    function _layoutInit(layout, container){
         container = $(container);
         
         container.empty();   
-        
-        
         
         if(typeof layout === 'string' &&
             layout.indexOf('data-heurist-app-id')>0){ //old format
             
                 container.html(layout);
             
-                window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content', supp_options );
+                window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content', _supp_options );
                 return false;
             
         }
@@ -82,8 +82,8 @@ function hLayoutMgr(){
         }
         
 
-        if(supp_options && supp_options.page_name){
-            layout[0].name  = supp_options.page_name;
+        if(_supp_options && _supp_options.page_name){
+            layout[0].name  = _supp_options.page_name;
         }
         
         for(var i=0; i<layout.length; i++){
@@ -259,6 +259,10 @@ function hLayoutMgr(){
         if(layout.appid=='heurist_Map'){
             layout.options['leaflet'] = true;
             layout.options['init_at_once'] = true;
+        }
+        
+        if(_supp_options){
+            layout.options = $.extend(layout.options, _supp_options);    
         }
         
         
@@ -490,7 +494,7 @@ function hLayoutMgr(){
     }
     
     //
-    //
+    // widget_id - id in cfg_widgets sushc as "heurist_SearchInput"
     //
     function _layoutContentFindWidget(content, widget_id){
         for(var i=0; i<content.length; i++){
@@ -574,10 +578,11 @@ function hLayoutMgr(){
         },
         
         //
-        //
+        // supp_options - parameters that refelect current status - for example page record id
         //
         layoutInit: function(layout, container, supp_options){
-            return _layoutInit(layout, container, supp_options);
+            _supp_options = supp_options;
+            return _layoutInit(layout, container);
         },
         
         layoutInitKey: function(layout, i){

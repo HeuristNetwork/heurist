@@ -398,7 +398,7 @@ function loadPageContent(pageid){
         var page_target = $('#main-content');
         //_dout('load page  '+pageid+'   '+page_footer.length);              
         
-        var supp_options = null;
+        var supp_options = {rec_ID:home_page_record_id};
         
 
 <?php        
@@ -853,7 +853,7 @@ function performCaptcha(){
                 
                 var link = encodeURI("mailto:support@heuristnetwork.org?subject=" + subject + "&body=" + body);
 
-                window.location.href = link;
+                window.open(link, '_blank');
             }
         }, {title: "Captcha Test", yes: "Proceed", no: "Cancel"});
 }

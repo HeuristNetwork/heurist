@@ -2599,8 +2599,6 @@ $.widget( "heurist.expertnation_nav", {
             $dd.empty();
             $('<img src="'+window.hWin.HAPI4.baseURL+'hsapi/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
         }
-
-
     },
 
     //

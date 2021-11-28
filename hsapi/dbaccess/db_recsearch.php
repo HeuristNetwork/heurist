@@ -1321,7 +1321,7 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
                 $rec = recordSearchByID($system, $rec_ID, array(DT_CMS_PAGETYPE), 'rec_ID,rec_RecTypeID');
                 if(@$rec['rec_RecTypeID']==RT_CMS_MENU && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
                     //get term id by concept code
-                    $val = array_shift($rec['details'][DT_CMS_PAGETYPE]);
+                    $val = recordGetField($rec, DT_CMS_PAGETYPE);
                     $isWebPage = ($val==$webpage); //standalone
                 }
                 if(!$isWebPage){
@@ -1379,7 +1379,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
                     $rec = recordSearchByID($system, $root_rec_id, array(DT_CMS_PAGETYPE), 'rec_ID,rec_RecTypeID');
                     if(@$rec['rec_RecTypeID']==RT_CMS_MENU && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
                         //get term id by concept code
-                        $val = array_shift($rec['details'][DT_CMS_PAGETYPE]);
+                        $val = recordGetField($rec, DT_CMS_PAGETYPE);
                         $isWebPage = ($val==ConceptCode::getTermLocalID('2-6254')); //standalone
                     }
                 }
@@ -2781,6 +2781,19 @@ function recordSearchByID($system, $id, $need_details = true, $fields = null)
         recordSearchDetails($system, $record, $need_details);
     }
     return $record;
+}
+
+//
+//
+//
+function recordGetField($record, $field_id){
+
+        $value = @$record['details'][$field_id];
+        if(is_array($value) && count($value)>0){
+            return array_shift($value);
+        }else{
+            return null;
+        }
 }
 
 //

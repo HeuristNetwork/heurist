@@ -53,6 +53,7 @@ function editCMS_SelectElement( callback ){
         
         heurist_Navigation:{name:'Menu', description:'Navigation Menu'},            
         heurist_recordAddButton:{name:'Add Record', description:'Button to addition of new Heurist record'},
+        heurist_emailForm:{name:'Email Us Form', description:'Form to send email to addrees specified in home page as site owner email'},
         
     grp3:{name:'Containers', description:'to be described....', is_header:true},
 

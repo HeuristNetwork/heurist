@@ -335,7 +335,7 @@ function editCMS2(){
         
         //2. reload content
         layoutMgr.setEditMode(false);
-        layoutMgr.layoutInit(_layout_content, _layout_container);
+        layoutMgr.layoutInit(_layout_content, _layout_container, {rec_ID:home_page_record_id});
         
         if($.isFunction(options.close)){
             options.close.call();
@@ -355,8 +355,9 @@ function editCMS2(){
             return;
         }
         
-        var opts = null;
+        var opts = {};
         if(page_cache[options.record_id]) opts = {page_name:page_cache[options.record_id][DT_NAME]};
+        opts.rec_ID = home_page_record_id;
         
         var res = layoutMgr.layoutInit(_layout_content, _layout_container, opts);
         
@@ -1039,7 +1040,7 @@ function editCMS2(){
         }else if(parent_element && parent_element.type=='tabs'){
             layoutMgr.layoutInitTabs(parent_element, parent_container)
         }else{
-            layoutMgr.layoutInit(parent_children, parent_container); 
+            layoutMgr.layoutInit(parent_children, parent_container, {rec_ID:home_page_record_id}); 
         }
         
         page_was_modified = true;
@@ -1102,7 +1103,7 @@ function editCMS2(){
         }
         
         //redraw page
-        layoutMgr.layoutInit(_layout_content, _layout_container);
+        layoutMgr.layoutInit(_layout_content, _layout_container, {rec_ID:home_page_record_id});
         _updateActionIcons(200); //it inits tinyMCE also
         
         page_was_modified = true;
@@ -1399,7 +1400,7 @@ function editCMS2(){
             layoutMgr.layoutInitTabs(parent_element, parent_container)
             //layoutMgr.layoutInit(_layout_content, _layout_container);    
         }else{
-            layoutMgr.layoutInit(parent_children, parent_container);
+            layoutMgr.layoutInit(parent_children, parent_container, {rec_ID:home_page_record_id});
         }   
 
 

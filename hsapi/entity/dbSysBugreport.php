@@ -69,6 +69,15 @@ class DbSysBugreport extends DbEntityBase
                 return false;    
         }
 
+        if(is_array($this->records) && count($this->records)==1){
+            $fields = $this->records[0];
+            if(@$fields['email'] && @$fields['content']){
+                 // this is response to emailForm widget 
+                 // it sends email to owner of database or to email specified in website_id record
+                 return $this->_prepareEmail($fields);
+            }
+        }
+        
         //validate permission for current user and set of records see $this->recordIDs
         if(!$this->_validatePermission()){
             return false;
@@ -87,6 +96,8 @@ class DbSysBugreport extends DbEntityBase
         
         $record = $this->records[0];
 
+        return false;
+        
         $toEmailAddress = HEURIST_MAIL_TO_BUG;
 
         if(!(isset($toEmailAddress) && $toEmailAddress)){
@@ -149,6 +160,14 @@ class DbSysBugreport extends DbEntityBase
             }
         }
         
+        
+        if($this->_sendEmail('support@HeuristNetwork.org', 'Bug reporter', $toEmailAddress, $bug_title, $message, $filename)){
+            return array(1); //fake rec id
+        }else{
+            return false;
+        }
+        
+        /*
         $message =  json_encode($message);
        
         //send an email with attachment
@@ -171,7 +190,119 @@ class DbSysBugreport extends DbEntityBase
                     , $email->ErrorInfo);
             return false;
         }
+        */
     }  
+    
+    //
+    //
+    //    
+    private function _sendEmail($email_from, $email_from_name, $email_to, $email_title, $email_text, $email_attachment){
+
+        if(!$email_from) $email_from = 'info@HeuristNetwork.org';
+        if(!$email_from_name) $email_from_name = 'Heurist system';
+        
+        $email_text =  json_encode($email_text);
+       
+        //send an email with attachment
+        $email = new PHPMailer();
+        $email->isHTML(true); 
+        $email->SetFrom($email_from, $email_from_name); //'bugs@'.HEURIST_SERVER_NAME 
+        $email->Subject   = $email_title;
+        $email->Body      = $email_text;
+        $email->AddAddress( $email_to );        
+        if($email_attachment!=null){
+            $email->addAttachment($email_attachment);// , 'new.jpg'); 
+        }
+       
+        try{
+            $email->send();
+            return true;
+        } catch (Exception $e) {
+            $this->system->addError(HEURIST_SYSTEM_CONFIG, 
+                    'Cannot send email. Please ask system administrator to verify that mailing is enabled on your server'
+                    , $email->ErrorInfo);
+            return false;
+        }
+        
+    }
+    
+    //
+    // this is response to emailForm widget 
+    // it sends email to owner of database or to email specified in website_id record
+    //
+    private function _prepareEmail($fields){
+    
+        //1. verify captcha
+        if (@$fields['captcha'] && @$_SESSION["captcha_code"]){
+            
+            $is_InValid = (@$_SESSION["captcha_code"] != @$fields['captcha']);
+            
+            if (@$_SESSION["captcha_code"]){
+                unset($_SESSION["captcha_code"]);
+            }
+            
+            if($is_InValid) {
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                   'Are you a bot? Please enter the correct answer to the challenge question');
+                return false;                                
+            }
+        }else {
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                    'Captcha is not defined. Please provide correct value');
+            return false;
+        }
+        
+        
+        //2. get email fields
+        $email_text = @$fields['content'];
+        if(!$email_text){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Email message is not defined.');
+            return false;
+        }
+        $email_from = @$fields['email']; 
+        if(!$email_from){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Email address is not defined.');
+            return false;
+        }
+        
+        
+        $email_title = null;
+        $email_from_name = @$fields['person']; 
+        $email_to = null;
+        
+        //3. get $email_to - either address from website_id record or current database owner
+        $rec_ID = $fields['website_id'];
+        if($rec_ID>0){
+            $this->system->defineConstant('DT_NAME');
+            $this->system->defineConstant('DT_EMAIL');
+            
+            $record = recordSearchByID($this->system, $rec_ID, array(DT_NAME, DT_EMAIL), 'rec_ID');
+            if($record){
+                $email_title = 'From website '.recordGetField($record, DT_NAME).'.';
+                $email_to = recordGetField($record, DT_EMAIL);
+            }
+        }
+        if(!$email_to){
+            $email_to = user_getDbOwner($this->system->get_mysqli(), 'ugr_eMail');
+        }
+        if(!$email_title){
+            $email_title = '"Contact us" form. ';
+        }
+        if($email_from_name){
+            $email_title = $email_title.'  From '.$email_from_name;
+        }
+        $email_text = 'From '.$email_from.' ( '.$email_from_name.' )<br>'.$email_text;
+    
+        $email_from = null;
+        $email_from_name = null;
+    
+        if($this->_sendEmail($email_from, $email_from_name, $email_to, $email_title, $email_text, null)){
+            return array(1); 
+        }else{
+            return false;
+        }
+        
+    }
             
     //
     //
