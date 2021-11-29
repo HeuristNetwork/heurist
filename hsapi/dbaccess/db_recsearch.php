@@ -1314,7 +1314,7 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
         
         $parent_ID = $parents[0];
      
-        if(count($parents)>1 && defined('DT_CMS_PAGETYPE')){
+        if(count($parents)>1 && defined('DT_CMS_PAGETYPE')){ //more that one parent
             $webpage = ConceptCode::getTermLocalID('2-6254');
             foreach($parents as $rec_ID){
                 $isWebPage = false;
@@ -1331,7 +1331,7 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
             }
         }
         
-        return recordSearchFindParent($system, $parent_id, $target_recTypeID, $allowedDetails, $level+1);
+        return recordSearchFindParent($system, $parent_ID, $target_recTypeID, $allowedDetails, $level+1);
     }else{
         $system->addError(HEURIST_ERROR, 'Can not find parent CMS Home record');         
         return false;
@@ -1343,17 +1343,9 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
 //
 function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=false, $ids_only=false){
 
-    $system->defineConstants();
-
     $menuitems = prepareIds($menuitems, true);
     $isRoot = (count($result)==0); //find any first CMS_HOME (non hidden)
     if($isRoot && $find_root_menu){
-        if(!($system->defineConstant('RT_CMS_HOME') &&
-        $system->defineConstant('DT_CMS_MENU') && 
-        $system->defineConstant('DT_CMS_TOP_MENU'))){
-
-            return $system->addError(HEURIST_ERROR, 'Required field type "Menu" not defined in this database');         
-        }
 
         //if root record is menu - we have to find parent cms home
         if(count($menuitems)==1){
@@ -1373,17 +1365,13 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
                 $isWebPage = false;
 
                 //check that this is single web page (for embed)
-                if($system->defineConstant('DT_CMS_PAGETYPE') && 
-                $system->defineConstant('RT_CMS_MENU'))
-                {
-                    $rec = recordSearchByID($system, $root_rec_id, array(DT_CMS_PAGETYPE), 'rec_ID,rec_RecTypeID');
-                    if(@$rec['rec_RecTypeID']==RT_CMS_MENU && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
-                        //get term id by concept code
-                        $val = recordGetField($rec, DT_CMS_PAGETYPE);
-                        $isWebPage = ($val==ConceptCode::getTermLocalID('2-6254')); //standalone
-                    }
+                $rec = recordSearchByID($system, $root_rec_id, array(DT_CMS_PAGETYPE), 'rec_ID,rec_RecTypeID');
+                if(@$rec['rec_RecTypeID']==RT_CMS_MENU && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
+                    //get term id by concept code
+                    $val = recordGetField($rec, DT_CMS_PAGETYPE);
+                    $isWebPage = ($val==ConceptCode::getTermLocalID('2-6254')); //standalone
                 }
-
+                
                 if($isWebPage){
                     return recordSearch($system, array('q'=>array('ids'=>$root_rec_id), 
                         'detail'=>array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET,DT_CMS_CSS,DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU,DT_THUMBNAIL), //'detail' 

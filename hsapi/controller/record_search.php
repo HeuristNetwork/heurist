@@ -115,8 +115,20 @@
         
     }else if(@$_REQUEST['a'] == 'cms_menu'){  //retrieve all child cms entries for given menu entries
         
-        $resids = array();
-        $response = recordSearchMenuItems($system, $_REQUEST['ids'], $resids, (@$_REQUEST['main_menu']==1) );
+        $system->defineConstants();
+        
+        if(!($system->defineConstant('RT_CMS_HOME') &&
+             $system->defineConstant('RT_CMS_MENU') &&
+             $system->defineConstant('DT_CMS_PAGETYPE') && 
+             $system->defineConstant('DT_CMS_MENU') && 
+             $system->defineConstant('DT_CMS_TOP_MENU'))){
+                
+            $response = $system->addError(HEURIST_ERROR, 'Required field type "Menu" not defined in this database');         
+        }else{
+            
+            $resids = array();
+            $response = recordSearchMenuItems($system, $_REQUEST['ids'], $resids, (@$_REQUEST['main_menu']==1) );
+        }
         
     /* not implemented
     }else if(@$_REQUEST['a'] == 'map_document'){  //retrieve all layers and datasource records fro given map document
