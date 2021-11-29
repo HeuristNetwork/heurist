@@ -14,8 +14,13 @@
     */
 
     /**
+    * 1) __updateDatabase - adds new field rst_SemanticReferenceURL
+    * 
+    * 2) findMissedTermLinks
     * Find db v1.2 with existing defTermLinks
     *      and v1.3 with individual selection of terms
+    * 
+    * 3) Find non UTF-9 characters in rty_TitleMask
     *
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @copyright   (C) 2005-2020 University of Sydney
@@ -77,6 +82,11 @@ $databases = mysql__getdatabases4($mysqli, false);
 */
 
 if(true){
+    //find non UTF-8 in rty_TitleMask
+       
+    __findWrongChars();   
+       
+}else if(false){
     
     __updateDatabase();
 }else{
@@ -312,4 +322,58 @@ function verifySpatialVocab($sName,$f_code,$v_code){
             }
         }
 } 
+
+//
+//
+//
+function __findWrongChars(){
+    
+    global $mysqli, $databases; 
+
+
+    print '[wrong characeters in rty_TitleMask]<br>';    
+    
+    foreach ($databases as $idx=>$db_name){
+
+        mysql__usedatabase($mysqli, $db_name);
+        
+        if(hasTable($mysqli, 'defRecTypes')){
+            
+            $list = mysql__select_assoc($mysqli, 'select rty_ID, rty_TitleMask from defRecTypes');
+
+            $isOK = true;
+            
+            $res = json_encode($response); //JSON_INVALID_UTF8_IGNORE 
+            if(true || !$res){
+
+                foreach($list as $id => $val){
+                    $wrong_string = null;
+                    try{
+                        find_invalid_string($val);
+                        
+                    }catch(Exception $exception) {
+                        $isOK = false;
+                        $wrong_string = $exception->getMessage();
+                        print '<div style="color:red">'.$db_name.' rtyID='.$id.'. invalid: '.$wrong_string.'</div>';
+                    }
+                }//foreach
+                
+            }            
+            if($isOK){
+                    print $db_name.' OK<br>';
+            }
+        }
+    }
+    print '[end report]';    
+}
+
+function find_invalid_string($val){
+    if(is_string($val)){
+        $stripped_val = iconv('UTF-8', 'UTF-8//IGNORE', $val);
+        if($stripped_val!=$val){
+            throw new Exception(mb_convert_encoding($val,'UTF-8'));    
+        }
+    }
+}
+
 ?>
