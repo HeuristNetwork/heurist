@@ -195,7 +195,7 @@ if($isWebPage){
 <?php        
     }//header
 
-    if(!$edit_Available && $system->is_member(1)){
+    if(!$edit_OldEditor && $system->is_member(1)){
         print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$home_page_record_id.'" id="btn_editor" target="_blank" '
         .'style="position:absolute;right:70px; top:5px;" class="cms-button">Heurist interface</a>'
         .'<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '

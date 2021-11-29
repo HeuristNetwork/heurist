@@ -2446,10 +2446,10 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
     //
     // show record action dialog
     // options 
-    // record_id
-    //  -1 create set of records for website
-    //  -2 create webpage record for embed
-    // field_id - to open editor of specific field for edit_input
+    //      record_id
+    //          -1 create set of records for website
+    //          -2 create webpage record for embed
+    //      field_id - to open editor of specific field for edit_input
     // callback
     // webpage_title  -title for new embed page
     //
@@ -2462,6 +2462,25 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
         editCMS(  options ); //see editCMS.js
     },
 
+    //
+    // show edit cms in new browser tab
+    //
+    showEditCMSwin: function( options ){
+        
+        var surl = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&website&pageid=';
+        //http://127.0.0.1/h6-ao/?db=osmak_9b&website&id=7&pageid=336#
+        
+        if( window.hWin.HEURIST4.util.isNumber( options ) ){
+            surl = surl + options;
+        }else{
+            surl = surl + options.record_id;
+        }
+        
+        surl = surl + '&edit=2';
+            
+        window.open(surl, '_blank');
+    },
+    
     //
     // show action dialog based on 
     //   recordAction widgets (see widget/records) or 

@@ -863,7 +863,7 @@ $.widget( "heurist.editing_input", {
                         //opened from cms editor
                         //$btn_edit_switcher.hide();
                     }else{
-                    
+                        //see manageRecords for event handler
                         div_prompt.find('span')
                             .css({cursor:'pointer','text-decoration':'underline'})
                             .attr('data-cms-edit', 1)
@@ -871,12 +871,6 @@ $.widget( "heurist.editing_input", {
                             .attr('title','Edit website content in the website editor');   
                             
                     }
-                    /*    
-                    this._on( $btn_edit_switcher, { click: function(){
-                        //save and close
-                        window.hWin.HEURIST4.ui.showEditCMSDialog( this.options.recID, this.options.dtID );    
-                    }});
-                    */
                 }else{
                     
                     this._on( $btn_edit_switcher, { click: function(){

@@ -457,11 +457,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }
         */
         
-        /* var cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
-        if(cms_record_id>0){
-            window.hWin.HEURIST4.ui.showEditCMSDialog( cms_record_id );    
-        }else*/
-        
         $(this.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
 
         if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0 && !this.options.is_h6style){

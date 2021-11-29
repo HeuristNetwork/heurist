@@ -195,8 +195,10 @@ if(!$hasAccess){
     exit();
 } 
 
-$edit_Available = (@$_REQUEST['edit']==1);
-$showWarnAboutPublic = !$edit_Available && ($rec['rec_NonOwnerVisibility'] != 'public');
+$edit_ActivateEditor = (@$_REQUEST['edit']==2); //use new CMS editor and open it once
+
+$edit_OldEditor = (@$_REQUEST['edit']==1);
+$showWarnAboutPublic = !$edit_OldEditor && ($rec['rec_NonOwnerVisibility'] != 'public');
 
 $hasAccess = ($system->is_admin() || $system->is_member($rec['rec_OwnerUGrpID']));
 

@@ -280,7 +280,8 @@ function editCMS( options ){
                 }
             });
 
-        }else{
+        }
+        else{
             _initWebSiteEditor( true );
         }
     }

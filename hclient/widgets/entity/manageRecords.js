@@ -3815,7 +3815,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         $(this.element).find('span[data-cms-edit="1"]').click(function(event){
             that._saveEditAndClose(null, function(){
                 that.closeEditDialog();
-                window.hWin.HEURIST4.ui.showEditCMSDialog( {record_id:that._currentEditID,  
+                window.hWin.HEURIST4.ui.showEditCMSwin( {record_id:that._currentEditID,  
                     field_id:$(event.target).attr('data-cms-field')} );
             });
         });

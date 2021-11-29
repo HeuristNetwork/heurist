@@ -44,7 +44,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     //PDIR.
     include dirname(__FILE__).'/../../framecontent/initPageCss.php'; 
     
-    if(true || !$edit_Available){ //creates new instance of heurist
+    if(true || !$edit_OldEditor){ //creates new instance of heurist
         print '<script>window.hWin = window;</script>';
     }
 ?>
@@ -56,7 +56,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var init_page_record_id=<?php echo $open_page_on_init; ?>;
     var current_page_id = 0;
     var _IS_NEW_CMS_EDITOR = <?php echo $_is_new_cms_editor; ?>;
-    var isCMS_active = false;
+    var isCMS_active = <?php echo $edit_ActivateEditor; ?>;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
 </script>
     
@@ -174,7 +174,7 @@ if(!array_key_exists('embed', $_REQUEST)){
 <?php
 }
 
-if($_is_new_cms_editor || $edit_Available){
+if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in websiteRecord.php - if true we use old CMS editor
 ?>
     <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.js"></script>
@@ -238,7 +238,7 @@ if($_is_new_cms_editor || $edit_Available){
 <?php
 }
 
-if($edit_Available){  //old CMS editor
+if($edit_OldEditor){  //old CMS editor
 ?>
     <!--
     <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
@@ -416,6 +416,9 @@ if($site_css!=null){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                 
                 if(isCMS_active){
+                    $('#btnOpenCMSeditor').hide();
+                    if(!editCMS_instance2) editCMS_instance2 = editCMS2();
+                    
                     if (! editCMS_instance2.startCMS({record_id:pageid, container:'#main-content',
                                     close: function(){
                                         isCMS_active = false;
@@ -929,7 +932,7 @@ _dout('webpage doc ready ');
 
 <style>
 <?php
-if(!$edit_Available){
+if(!$edit_OldEditor){
 ?>
 div.coverall-div {
     background-position: top;     
