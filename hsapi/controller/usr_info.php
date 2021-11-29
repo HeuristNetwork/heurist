@@ -61,7 +61,8 @@
             $res = array("currentUser"=>array('ugr_ID'=>0,'ugr_FullName'=>'Guest'));
         }
     
-    }else if($action=='usr_log'){
+    }
+    else if($action=='usr_log'){
         
         $system->initPathConstants(@$_REQUEST['db']);                                
         $system->user_LogActivity(@$_REQUEST['activity'], @$_REQUEST['suplementary'], @$_REQUEST['user']);

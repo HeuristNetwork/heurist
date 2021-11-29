@@ -1,7 +1,24 @@
 <?php
-
     /**
-    * Returns content of shp+dbf files as geojson or wkt output
+    * Converts shp+dbf files to geojson output or downloads zip archive based on Datasource record id
+    * 
+    * Reads file map source record (KML, CSV or DBF) and returns content 
+    * either as geojson (conversion), original file (acts as proxy) or zip archive 
+    * (with metadata). No functions
+    * Usage: viewers/map/mapLayer2.js - to load kml,csv,dbf source as geojson.
+    * 
+    * $_REQUEST parameters:
+    * recID   datasource record ID
+    * format  geojson - converts file to geojson, 
+    *         rawfile - return zipped original file with metadata 
+    *         n/a - works as proxy - it downloads original file with http header (mimetype, size)
+    * 
+    * metadata - 1 include text file with link to flathml for format=rawfile
+    * 
+    * When it generates geojson it simplifies path by removing extra points with given tolerance
+    * 
+    * @uses mapSimplify.php
+    * @uses ShapefileAutoloader.php
     * 
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -10,6 +27,7 @@
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
+
 
     /*
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance

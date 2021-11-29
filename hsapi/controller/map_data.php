@@ -12,6 +12,7 @@
 * @author      Jan Jaap de Groot  <jjedegroot@gmail.com>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
+* @deprecated  since Heurist 6.0
 */
 
 /*

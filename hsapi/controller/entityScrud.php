@@ -148,7 +148,6 @@
                 throw new Exception(mb_convert_encoding($val,'UTF-8'));    
             }
         }
-        
     }
 /*
 Description Of Usual Server Responses:

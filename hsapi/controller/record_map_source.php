@@ -1,13 +1,24 @@
 <?php
-
     /**
-    * Read file map source record (KML, CSV or DBF) and returns content either file snippet or entire file
+    * Converts kml,csv to geojson or downloads file based on Datasource record id
     * 
-    * params
-    * recID
-    * format = geojson converts file to geojson, 
-    *          rawfile - download as original file
-    * metadata - include text file with link to flathml
+    * Reads file map source record (KML, CSV or DBF) and returns content 
+    * either as geojson (conversion), original file (acts as proxy) or zip archive 
+    * (with metadata). No functions
+    * Usage: viewers/map/mapLayer2.js - to load kml,csv,dbf source as geojson.
+    * 
+    * $_REQUEST parameters:
+    * recID   datasource record ID
+    * format  geojson - converts file to geojson, 
+    *         rawfile - return zipped original file with metadata 
+    *         n/a - works as proxy - it downloads original file with http header (mimetype, size)
+    * 
+    * metadata - 1 include text file with link to flathml for format=rawfile
+    * 
+    * When it generates geojson it simplifies path by removing extra points with given tolerance
+    * 
+    * @uses mapSimplify.php
+    * @uses importParser.php
     * 
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -31,7 +42,7 @@
     
     require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
     require_once (dirname(__FILE__).'/../import/importParser.php'); //parse CSV, KML and save into import table
-    require_once(dirname(__FILE__).'/../utilities/mapSimplify.php');
+    require_once (dirname(__FILE__).'/../utilities/mapSimplify.php');
     require_once (dirname(__FILE__).'/../dbaccess/recordsExport.php');
     
     $response = array();
@@ -258,7 +269,7 @@
                                     
                                     if($json['type']=='LineString'){
 
-                                        simplifyCoordinates($json['coordinates']);
+                                        simplifyCoordinates($json['coordinates']); //see mapSimplify.php
 
                                     } else if($json['type']=='Polygon'){
                                         for($idx=0; $idx<count($json['coordinates']); $idx++){

@@ -1,7 +1,7 @@
 
 Directory:    /hserver/controller
 
-Overview:   All files in this folder are services. They are utilized in hapi.js to obtain various data (ajax) from server side.
+Overview:   All files in this folder are services. They are utilized in hapi.js to obtain various data (in json format) from server side.
 
 Notes:      Work process:
 
@@ -10,7 +10,17 @@ Notes:      Work process:
             3. call functions from   common/db_***.php
             4. json response
 
-Updated:     18 Oct 2015
+            
+            
+record_map_source.php - Converts kml,csv to geojson or downloads file (or zip) based on Datasource record id
+record_shp.php - Converts shp+dbf files to geojson output or downloads zip archive based on Datasource record id
+ 
+ 
+deprecated
+map_data.php
+sys_structure.php            
+            
+Updated:     29 Nov 2021
 
 ----------------------------------------------------------------------------------------------------------------
 
