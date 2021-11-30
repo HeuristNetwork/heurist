@@ -1,8 +1,13 @@
 <?php
 
 /**
-* Lookup third party web service to return data to client side recordLookup.js
+* Lookup third party web service to return data to client side recordLookups
 * It works as a proxy to avoid cross-origin issues
+* 
+* Currently supporting services:
+* GeoName
+* TLCMap
+* BnF Library
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -43,6 +48,7 @@
 
     $system->dbclose();
     
+	// Perform external lookup / API request
     $url = $params['service'];
     $remote_data = loadRemoteURLContent($url, true);    
     if($remote_data===false){
@@ -92,7 +98,7 @@
 
         $results = array();
 
-        // Create xml object
+        // Create xml object, BnF Library Search always returns as XML no matter the chosen record schema
         $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);         
         // xml namespace urls: http://www.loc.gov/zing/srw/ (srw), http://www.openarchives.org/OAI/2.0/oai_dc/ (oai_dc), http://purl.org/dc/elements/1.1/ (dc)
 
@@ -101,7 +107,7 @@
 
         $nextStart = 0; // can be used to run the query again with a new start, startRecord
 
-        // Move each result's details into seperate array
+        // Move each result's details into separate array
         foreach ($records as $key => $details) {
             $nextStart = intval($details->recordPosition);
             $results['result'][] = $details->recordData->children('http://www.openarchives.org/OAI/2.0/oai_dc/', false)->children('http://purl.org/dc/elements/1.1/', false);
@@ -115,6 +121,7 @@
         $remote_data = json_encode($results);
     }
 
+	// Return response
     header('Content-Type: application/json');
     //$json = json_encode($json);
     //header('Content-Type: application/vnd.geo+json');

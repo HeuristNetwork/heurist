@@ -1,5 +1,12 @@
 /**
 * recordLookupBnFLibrary.js - Searching the BnF Library's bibliographic records (Under Development)
+* 
+* This file:
+*   1) Loads the content of the corresponding html file (recordLookupBnFLibrary.html), and
+*   2) Performs an api call to the BnF Library's Search API using the User's input, displaying the results within a Heurist result list
+* 
+* NOTE: This external lookup does not return ANY ids for terms/vocabulary nor for resources (record pointers)/relationship markers,
+*        every detail is returned as a string, some returning multiple string values (often a French and English version).
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -166,6 +173,8 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
         var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;' + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
+		// Here we construct the details of the result row, 
+		// in this case it will show an isbn (if available), work title, work creator/s, and a url that links to the bib on the BnF site
         var recTitle = fld('isbn', 16) + fld('title', 60) + fld('creator', 60) + fld('url', 10); 
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
@@ -205,7 +214,8 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
 
             var map_flds = Object.keys(this.options.mapping.fields); // mapped fields
 
-            // Assign individual field values, here you would perform any additional processing for selected value (example. get ids for vocabulrary/terms)
+            // Assign individual field values, here you would perform any additional processing for selected value
+			// example. get ids for vocabulrary/terms using $Db.getTermByLabel(vocab_id, recset.fld(rec, 'field_name'));
             for(var k=0; k<map_flds.length; k++){
                 var dty_ID = this.options.mapping.fields[map_flds[k]];
                 var val = recset.fld(rec, map_flds[k]);
@@ -233,8 +243,8 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
 
         /**
          * recordSchema: XML structure for record details (changing this will require changes to the php code in record_lookup.php)
-         * maximumRecords: maximum number of records returned from the search (api default: 100)
-         * startRecord: starting point, complete searches in batches (api default: 1)
+         * maximumRecords: maximum number of records returned from the search (api default: 100, currently: 500)
+         * startRecord: starting point, for completing searches in batches (api default: 1, currently: 1)
          * query: encoded string enclosed in brackets (at minimum, the spaces MUST be encoded)
          */
 
@@ -254,13 +264,13 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
 
         /** 
          * Additional search fields can be found here [catalogue.bnf.fr/api/test.do], note: ONLY the bibliographic fields can be added here (fields starting with 'bib.')
-         * if you wish to query authority records (fields starting with 'aut.') a seperate query and additional php handling will need to be setup
+         * if you wish to query authority records (fields starting with 'aut.') a separate query and additional php handling will need to be setup
          * 
-         * each field name and search value are seperated by a relationship, common ones are: [all, any, adj]
-         * for this scenario we have placed an 'all' at every instance
+         * each field name and search value are separated by a relationship, common ones are: [all, any, adj]
+         * for this scenario we have placed an 'all' at every instance, this could be replaced with a dropdown in the input form
          * 
-         * also seperating each field query is a boolean logic [and, or, not]
-         * for this scenario we have used 'and'
+         * also separating each field query is a boolean logic [and, or, not]
+         * for this scenario we have used 'and', this could also be replaced with a dropdown within the input form
          */
 
         // any field
@@ -277,7 +287,7 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
             query += 'bib.title all "' + this.element.find('#inpt_title').val() + '"';
         }
 
-        // author field
+        // work creator field
         if(this.element.find('#inpt_author').val()!=''){
 
             if(query.length != 1){ // add combination logic (and, or, not)
@@ -326,7 +336,10 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
                 }else{ // No results
                     that.recordList.resultList('updateResultSet', null);
                 }
-            }
+            }else{ // just in case
+				window.hWin.HEURIST4.msg.showMsgErr("The system appears to have encountered an issue,<br>"
+					+ "please contact the Heurist team if this problem persists.");
+			}
         });
     },
     
@@ -344,9 +357,12 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
 
         json_data = window.hWin.HEURIST4.util.isJSON(json_data);
 
-        if (json_data) {
+		// Ensure data is in JSON format
+        if(json_data){
             
-            if(!json_data.result) return false;
+            if(!json_data.result) return false; // in hsapi/controller/record_lookup.php the results for this lookup are stored under data.result
+
+			is_wrong_data = false;
 
             var res_records = {}, res_orders = [];
 
@@ -367,7 +383,8 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
                 // Add current record details, field by field
                 for(var k=0; k<map_flds.length; k++){
 
-                    // Special handling for url + isbn (both listed as identifier in json)
+                    // Special handling for url & isbn (both listed as identifier in json results)
+					// Handling of other fields (example. those that return multiple values) can be done here
                     if(map_flds[k]=='biburl'){
                         if(record['identifier'] != null){
 
@@ -401,7 +418,7 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
                 res_records[recID] = values;    
             }
 
-            if(res_orders.length>0){
+            if(res_orders.length>0){ // mapped results, list out results
                 // Create the record set for the resultList
                 var res_recordset = new hRecordSet({
                     count: res_orders.length,
@@ -412,9 +429,10 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
                     order: res_orders,
                     mapenabled: true
                 });
-                this.recordList.resultList('updateResultSet', res_recordset);            
-                is_wrong_data = false;
-            }
+                this.recordList.resultList('updateResultSet', res_recordset);
+            }else{ // no results in the end, display empty message
+				this.recordList.resultList('updateResultSet', null);
+			}
         }
 
         if(is_wrong_data){
