@@ -426,6 +426,41 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         var ele = $("<div>").attr('id',input_id).appendTo($fieldset);
         ele.editing_input(ed_options);
+
+        // special case for selects, menuWidget needs to be moved down closer to the widget element
+        if(ele.find('select').length > 0){
+
+            var id = ele.find('select').attr('id');
+            var widget_ele, menu_parent;
+
+			// check that the select is supposed to be a hSelect/selectmenu
+            if(ele.find('select').hSelect('instance') != undefined){ 
+
+                widget_ele = selObj.hSelect('widget');
+                menu_parent = selObj.hSelect('menuWidget').parent();
+            }else if($('#'+id+'-button').length > 0){ // .hSelect('instance') and .selectmenu both return undefined, despite the select being a hSelect instance
+
+				if(parent.document && $('#'+id+'-menu', parent.document).length > 0){ // check if current menuWidget can be accessed
+
+					widget_ele = $('#'+id+'-button');
+					menu_parent = $('#'+id+'-menu', parent.document).parent();
+				}else{
+
+					$('#'+id+'-button').remove();
+					
+					var selObj = window.hWin.HEURIST4.ui.initHSelect(ele.find('select')[0], false);
+
+					widget_ele = selObj.hSelect('widget');
+					menu_parent = selObj.hSelect('menuWidget').parent();
+				}
+            }
+
+            if(widget_ele && menu_parent){
+				widget_ele.on("click", function(e){
+                    menu_parent.css('top', widget_ele.offset().top + 54);
+                });
+            }
+        }
     }
 
     //
