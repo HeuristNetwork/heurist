@@ -403,6 +403,17 @@ $.widget( "heurist.searchBuilder", {
 
                         ele.find('.field_header').text(conjunct).attr('title', 'Change value in dropdown above fields');
                     }
+
+                    if(this.field_array.length == 2){
+
+                        this.element.find('.search_conjunction').position({
+                            my: 'right center',
+                            at: 'right center',
+                            of: ele.find('.field_header')
+                        });
+
+                        this.element.find('.search_conjunction').css('left', 3);
+                    }
                 }
                 
                 this.adjustDimension();
@@ -907,9 +918,11 @@ $.widget( "heurist.searchBuilder", {
 
                                     var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
 
-                                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0 && !isExpander){
+                                    if(isExpander) return;
+
+                                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
                                         data.node.setExpanded(!data.node.isExpanded());
-                                    }else if( data.node.lazy && !isExpander) {
+                                    }else if( data.node.lazy){
                                         data.node.setExpanded( true );
                                     }else{
                                         var code = data.node.data.code;
