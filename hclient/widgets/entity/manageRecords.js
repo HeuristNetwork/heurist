@@ -3491,12 +3491,26 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
         var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'none' }; //#ecf1fb
-        
+
+        // Icon
+        var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+        var rt_icon = window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID;
+
         if( this.element.find('.chb_opt_fields').length==0 )
         {  //not inited yet
 
             $('<div style="display:table;min-width:575px;width:100%">'
-             +'<div style="display:table-cell;text-align:left;padding:20px 0px 5px 35px;">'
+             +'<div style="display:table-cell;text-align:left;padding:10px 0px 5px 15px;">'
+
+                +'<div style="padding-right:50px;display:inline-block" class="rt-info-header">'
+                    +'<img src="'+ph_gif
+                        +'" width=36 height=36 class="rt-icon" style="padding:2px;background-size: 28px 28px;vertical-align:middle;margin: 2px 10px 2px 4px;'
+                        +'background-image:url(\'' + rt_icon + '\');"/>'
+                    + '<span style="display:inline-block;vertical-align:middle;font-size:larger;font-weight:bold;max-width:150px;min-width:150px;" '
+                    + 'class="truncate" title="'+ $Db.rty(this._currentEditRecTypeID,'rty_Name') +'">'
+                        + $Db.rty(this._currentEditRecTypeID,'rty_Name')
+                    + '</span>'
+                +'</div>'
 
                 +'<div style="padding-right:50px;display:inline-block">'
                     +'<span class="btn-edit-rt2 btns-admin-only" style="font-size:larger"></span>'
@@ -3509,8 +3523,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     +'<label class="lbl_opt_fields"><input type="checkbox" class="chb_opt_fields" '
                         +(isfields_on?'checked':'')+'/>Optional fields</label>'
                 +'</div>'
-             
-                +'<div style="padding-right:50px;float:right">'
+
+                +'<div style="padding:10px 50px 0px 0px;float:right">'
                     +'<span class="btn-edit-rt btns-admin-only">Attributes</span>'
                     +'<span class="btn-edit-rt-titlemask btns-admin-only">Edit title mask</span>'
                     +'<span class="btn-edit-rt-template btns-admin-only">Template</span>'
@@ -3718,40 +3732,32 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             //this.editFormPopup.css('top',0);
             
         this.editHeader = this.element.find('.editHeader');
-            
-            
-        var sheader = '<div style="text-align:left;min-height:25px" class="edit-record-title">';  ///class="ui-heurist-header2" 
+
+        var sheader = '<div style="text-align:left;min-height:25px;display:inline-flex;align-items:center;" class="edit-record-title">';  ///class="ui-heurist-header2" 
         
         if(this.options.edit_structure){
             
             sheader = sheader  
-            +'<span style="display:inline-block;padding:5 10px 5px 0;vertical-align:middle">'
+            +'<span style="padding-right:10px;">'
             +'Modifying record structure for</span>'
-            +'<h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0">'
+            +'<h3 style="max-width:900px;margin:0;">'
             +$Db.rty(this._currentEditRecTypeID,'rty_Name')
             +'&nbsp;&nbsp;( '+this._currentEditRecTypeID+' / '+$Db.getConceptID('rty',this._currentEditRecTypeID)+' )'
             +'</h3>';
             
         }else{
             
-            //define header - rectype icon, retype name and record title
-            var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
-            sheader = sheader + '<img src="'+ph_gif
-                        + '" width=18 height=18 class="rt-icon" style="border-radius: 50%;padding:2px;background-color:white;'
-                        + 'background-size: 14px 14px;'
-                        + 'vertical-align:middle;margin: 2px 10px 2px 4px; background-image:url(\''
-                        + window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID + '\');"/>' 
-                        //+ 'm&color=rgb(255,255,255)\');"/>'
-                        //+ 's&color=rgb(0,0,0)&circle=rgb(255,255,255)\');"/>'  //draw black on white
+            //define header - retype name and record title
+            sheader = sheader
                     + '<span style="display:inline-block;vertical-align:middle">'
                         + $Db.rty(this._currentEditRecTypeID,'rty_Name')
                     + '</span>';
-                    
+
             if(!this._isInsert){
-                sheader = sheader + 
-                    '&nbsp;<span style="display:inline-block;padding:0 20px;vertical-align:middle">ID: '+this._currentEditID
-                    + '</span><h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0" class="truncate">'
-                    + window.hWin.HEURIST4.util.stripTags(this._getField('rec_Title'),'u, i, b, strong')+'</h3>';            
+                sheader = sheader
+                    + '&nbsp;<span style="padding:0 20px;">ID: '+this._currentEditID
+                    + '</span><h3 style="max-width:900px;margin:0;" class="truncate">'
+                    + window.hWin.HEURIST4.util.stripTags(this._getField('rec_Title'),'u, i, b, strong')+'</h3>';
             }
         }
         sheader = sheader + '</div>';
@@ -3863,6 +3869,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             }
             if(!this.options.edit_structure){
                 this.element.find('.btn-edit-rt2').hide();
+                this.element.find('.rt-info-header').hide();
             }
             
             //switch on optional fields and disable checckbox
@@ -3897,7 +3904,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }else{
 
             $(this.element).find('.separator-hidden').hide();
-            
+
+            this.element.find('.rt-info-header').show();
             this.element.find('.btn-edit-rt2').show();
             this.element.find('.btn-edit-rt-back').hide();
             this.element.find('.chb_opt_fields').attr('disabled', false);
