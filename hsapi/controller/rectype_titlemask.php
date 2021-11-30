@@ -58,7 +58,7 @@ if( $system->init(@$_REQUEST['db']) ){
                 }
                 
             }else 
-            if($check_mode==3){ //human readable
+            if($check_mode==3){ //to human readable
 
                 $res = TitleMask::execute($mask, $rectypeID, 2, null, _ERR_REP_MSG);
 
@@ -82,7 +82,7 @@ if( $system->init(@$_REQUEST['db']) ){
             }else{
                 
                 $recID = @$_REQUEST['rec_id'];
-                $new_title = TitleMask::execute($mask, $rectypeID, 0, $recID, _ERR_REP_WARN);
+                $new_title = TitleMask::execute($mask, $rectypeID, 3, $recID, _ERR_REP_WARN); //convert to coded and fill values
                 $response =  $new_title;
                 
             }

@@ -48,8 +48,11 @@ define('_ERR_REP_WARN', 0); // returns general message that titlemask is invalid
 define('_ERR_REP_MSG', 1);  // returns detailed error message
 define('_ERR_REP_SILENT', 2); // returns empty string
 
-define('_ERROR_MSG', "Invalid title constructor: please define the title mask for this record type via link at top of record structure editor");
-define('_EMPTY_MSG', "**** No data in title fields for this record ****");
+define('_ERROR_MSG', 'Invalid title mask: please define the title mask in record structure editor');
+define('_ERROR_MSG2', 'Error in title mask. Please look for syntax errors or special characters. ' 
+.'If the problem is not clear, please rebuild the mask one field at a time and let the Heurist team know which field causes the problem so we can fix it');
+
+define('_EMPTY_MSG', '**** No data in title fields for this record ****');
 
 //
 // static class
@@ -149,7 +152,7 @@ public static function fill($rec_id, $mask=null){
 *
 * @param mixed $mask - titlemask
 * @param mixed $rt - record type
-* @param mixed $mode - 0 value, 1 to coded, 2 - to human readable
+* @param mixed $mode - 0 get value from coded, 1 to coded, 2 - to human readable, 3 get value from human readable
 * @param mixed $rec_id - record id for value mode
 * @param mixed $rep_mode - output in case failure: 0 - general message(_ERR_REP_WARN), 1- detailed message, 2 - empty string (_ERR_REP_SILENT)
 * @return string
@@ -170,6 +173,18 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
         return ($rep_mode!=_ERR_REP_SILENT)?"Title mask is not defined": ($mode==0?self::__get_forempty($rec_id, $rt):"");
     }
 
+    if($mode==3){
+        //get value from human readable
+        //execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN)
+        $res = self::execute($mask, $rt, 1, $rec_id, _ERR_REP_MSG);
+        if (is_array($res)) {
+            return $res[0];
+        }else{
+            return self::execute($res, $rt, 0, $rec_id, _ERR_REP_MSG);
+        }
+    }
+    
+    
     //find inside brackets
     if (! preg_match_all('/\s*\\[\\[|\s*\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches))
         return $mask;    // nothing to do -- no substitutions
@@ -187,7 +202,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
         */
 
         if(!trim($matches[3][$i])) continue; //empty []
-
+        
         $value = self::__fill_field($matches[3][$i], $rt, $mode, $rec_id);
 
         if(is_array($value)){
@@ -692,7 +707,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
     
     if($mode==1 || mb_strpos($field_name, '..')>0){ //convert to concept codes
         $fullstop = '..';
-        $fullstop_ex = '/^([^..]+?)\\s*\\..\\s*(..+)$/';
+        $fullstop_ex = '/^([^..]+?)\\s*\\..\\s*(..+)$/'; //parsing
     }
     if($mode==2){ //convert to human readable codes
         $fullstop_concat = '..';
@@ -717,7 +732,38 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
     $parent_field_name = null;
     $inner_field_name = null;
 
-    if (preg_match($fullstop_ex, $field_name, $matches)) {
+    $matches = array();
+
+    // 
+    if($fullstop == '.'){
+        //preg_match does not split   A...term or A(s.)..term correctly
+        preg_match($fullstop_ex, $field_name, $matches);
+    }else{
+        //parse human readable with double fullstops
+        $matches = explode($fullstop, $field_name);
+        
+            if (count($matches)>0) {
+                // fix rare case when we have more than 2 fullstops
+                // in this case redundant fullstops are added to previous field
+                //  AAA...BBB  =>  AAA. and BB
+                $i = 1;
+                while ($i<count($matches)){
+                    while(mb_strpos($matches[$i],'.')===0){
+                        //move fullstop to the end of previous field
+                        $matches[$i-1] = $matches[$i-1].'.';
+                        $matches[$i] = mb_substr($matches[$i],1);
+                    }
+                    $i++;
+                }
+                //add full string to the begining
+                array_unshift($matches, $field_name);
+            }
+        
+    }
+    
+    
+    
+    if ($matches && count($matches)>1) {
         $parent_field_name = $matches[1];
 
 
