@@ -405,6 +405,7 @@ $.widget( "heurist.mainMenu6", {
                             +'&nbsp;&nbsp; [<i>'
                             +window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_ID,'rty_Name'))+'</i>]');
                     ele.attr('data-id', rty_ID);
+                    ele.attr('title', 'New ' + window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_ID,'rty_Name')) + ' record');
                     this._off(ele, 'click');
                     this._on(ele, {click: function(e){
                         var ele = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
