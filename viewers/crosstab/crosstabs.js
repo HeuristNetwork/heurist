@@ -375,8 +375,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             $container.show();
                         }else{
                             fields3[name].values = [val0, valmax];
-                            minMax[0] = fields3[name].values[0];    //Store min value in seperate array to save the copy as to use in the rendering.
-                            minMax[1] = fields3[name].values[1];    //Store min value in seperate array to save the copy as to use in the rendering.
+                            minMax[0] = fields3[name].values[0];    //Store min value in separate array to save the copy as to use in the rendering.
+                            minMax[1] = fields3[name].values[1];    //Store min value in separate array to save the copy as to use in the rendering.
                             calculateIntervals(name, null, true);
                             $('#bottomContainer').removeClass('d-none');
                         }
@@ -445,8 +445,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             $container.show();
                         }else{
                             fields3[name].values = [val0, valmax];
-                            minMax[0] = fields3[name].values[0];    //Store min value in seperate array to save the copy as to use in the rendering.
-                            minMax[1] = fields3[name].values[1];    //Store min value in seperate array to save the copy as to use in the rendering.
+                            minMax[0] = fields3[name].values[0];    //Store min value in separate array to save the copy as to use in the rendering.
+                            minMax[1] = fields3[name].values[1];    //Store min value in separate array to save the copy as to use in the rendering.
                             calculateIntervals(name, null, true);
                             $('#bottomContainer').removeClass('d-none');
                         }
@@ -1239,7 +1239,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 if(isOutlierMin){
                     var clickedMinOutlier = false;
                     var clickedMaxOutlier = false;
-                    //Creates seperate div for outliers min
+                    //Creates separate div for outliers min
                     var outlierNumber = Number($('#minOutlier'+name).val());
                     //Change array to incorporate outliers for min
                     for(t=0;t<fields3[name].intervals.length;t++){
@@ -1306,7 +1306,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     .appendTo($intRows);
                 }
                 else if(isOutlierMax){
-                    //Creates seperate div for outliers min
+                    //Creates separate div for outliers min
                     var outlierNumber = Number($('#maxOutlier'+name).val());
                     fields3[name].intervals[i].values[1] = outlierNumber;
                     fields3[name].intervals[i].name = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + outlierNumber.toFixed(decimalPlace);
@@ -2426,7 +2426,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 ]
             });
             
-            // Replace search box above with seperate one 
+            // Replace search box above with separate one 
             // $('.dataTables_filter') => search box
             if($('#dt_extra_container').length > 0){
                 $d_table.buttons().container().css('display', 'inline-block').appendTo($('#dt_extra_container'));

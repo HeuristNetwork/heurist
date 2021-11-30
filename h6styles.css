@@ -241,3 +241,32 @@ div.mainMenu6 > div.ui-heurist-header:hover{
 .ui-dialog .ui-dialog-content{
     padding: 1.5em 1em;
 }
+
+/* 
+    General styling for vertical text in jQuery Layout togglers, 
+    additional widths, margin-top, and font-size changes are use specific
+    margin-left and margin-right may need changing per situation
+*/
+.eastTogglerVertical {
+    transform: rotate(90deg);
+
+    margin-left: 30px;
+}
+
+.westTogglerVertical {
+    transform: rotate(-90deg);
+
+    margin-left: 8px;
+}
+
+.eastTogglerVertical, .westTogglerVertical {
+    transform-origin: top left;
+
+    display: inline-block;
+
+    font-size: 17px;
+}
+/* Space for toggler text */
+.togglerVertical{
+    height: 500px !important;
+}

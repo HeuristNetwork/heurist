@@ -422,7 +422,7 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
     },
 
     /*
-        Search for Editions of the Work within Heurist, displaying the results in a seperate popup
+        Search for Editions of the Work within Heurist, displaying the results in a separate popup
 
         Param: None
 

@@ -548,13 +548,13 @@ Whole value = EQUAL
 
             var cval = this.select_comparison.val();
             if(cval=='NULL' || cval=='any' ){
-                if(this._predicate_reltype_ele) this._predicate_reltype_ele.hide();
-                this._predicate_input_ele.hide();
-                this.select_conjunction.hide();
+                if(this._predicate_reltype_ele) this._predicate_reltype_ele.css('visibility', 'hidden');
+                this._predicate_input_ele.css('visibility', 'hidden');
+                this.select_conjunction.css('visibility', 'hidden');
                 this.cb_negate.hide();
             }else{
-                if(this._predicate_reltype_ele) this._predicate_reltype_ele.show();
-                this._predicate_input_ele.show();
+                if(this._predicate_reltype_ele) this._predicate_reltype_ele.css('visibility', 'visible');
+                this._predicate_input_ele.css('visibility', 'visible');
                 this._manageConjunction();
                 //this.cb_negate.show();
             }
@@ -618,7 +618,8 @@ Whole value = EQUAL
         //transfer conjunction to input element
         var ele = this._predicate_input_ele.find('.editint-inout-repeat-button')
                     .css({'margin-left':'22px','min-width':'16px'});
-        var ele = ele.parent();
+
+        ele = ele.parent();
         ele.css('min-width','44px');
         this.select_conjunction.appendTo(ele);
         this.select_conjunction.hide();
@@ -788,7 +789,7 @@ Whole value = EQUAL
             }
             this.select_conjunction.hide();
         }else{
-            this.select_conjunction.show();    
+            this.select_conjunction.css('visibility', 'visible');
             
             var is_any = (this.select_conjunction.val()=='any');
             

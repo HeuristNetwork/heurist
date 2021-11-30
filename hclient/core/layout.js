@@ -317,11 +317,13 @@ function hLayout(args) {
                       return 'abort';
                   }
                   var tog = $container.find('.ui-layout-toggler-east');
-                  tog.removeClass('prominent-cardinal-toggler');
+                  tog.removeClass('prominent-cardinal-toggler togglerVertical');
+                  tog.find('.heurist-helper2.eastTogglerVertical').remove();
               },
               onclose_end : function(){ 
                    var tog = $container.find('.ui-layout-toggler-east');
-                   tog.addClass('prominent-cardinal-toggler');
+                   tog.addClass('prominent-cardinal-toggler togglerVertical');
+                   $('<span class="heurist-helper2 eastTogglerVertical" style="font-size:17px;width:75px;margin-top:30px;">Visualisation</span>').appendTo(tog);
               }
             },
             tips: {
@@ -471,7 +473,7 @@ function hLayout(args) {
         //tog.addClass('ui-heurist-btn-header1');
         
         var togc = tog.find('.content-closed'); togc.empty();
-        $('<div>').addClass('ui-icon ui-icon-triangle-1-'+closed).appendTo(togc);
+        $('<div>').addClass('ui-icon ui-icon-carat-2-'+closed).appendTo(togc);
         
         togc = tog.find('.content-open'); togc.empty();
         $('<div>').addClass('ui-icon ui-icon-triangle-1-'+opened).appendTo(togc);

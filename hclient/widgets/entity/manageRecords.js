@@ -392,7 +392,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         var that = this;
                       
-        var rst_fields = $Db.rst(that._currentEditRecTypeID, dtId);
+        var rst_fields = (dtId != null) ? $Db.rst(that._currentEditRecTypeID, dtId) : null;
         if(rst_fields){
             
             var sep_id = $(div_ele).attr('separator-dtid');
@@ -1049,13 +1049,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         contentSelector: '.editStructure',   
                         onopen_start : function( ){ 
                             var tog = that.element.find('.ui-layout-toggler-west');
-                            tog.removeClass('prominent-cardinal-toggler');
-                            tog.find('.heurist-helper2').remove();
+                            tog.removeClass('prominent-cardinal-toggler togglerVertical');
+                            tog.find('.heurist-helper2.westTogglerVertical').remove();
                         },
                         onclose_end : function( ){ 
                             var tog = that.element.find('.ui-layout-toggler-west');
-                            tog.addClass('prominent-cardinal-toggler');
-                            $('<span class="heurist-helper2" style="font-size:9px;">Move Delete</span>').appendTo(tog);
+                            tog.addClass('prominent-cardinal-toggler togglerVertical');
+                            $('<span class="heurist-helper2 westTogglerVertical" style="font-size:17px;width:200px;margin-top:225px;">Navigate / Move / Delete</span>').appendTo(tog);
                         },
                         togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
                         togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-e"></div>',
@@ -2075,9 +2075,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var isClosed = (!this.options.edit_structure && this.usrPreferences.structure_closed!=0);
             this.editFormPopup.layout().show('west', !isClosed ); 
             if(isClosed){
-                        var tog = that.editFormPopup.find('.ui-layout-toggler-west');
-                        tog.addClass('prominent-cardinal-toggler');
-                        $('<span class="heurist-helper2" style="font-size:9px;">Move Delete</span>').appendTo(tog);
+                var tog = that.editFormPopup.find('.ui-layout-toggler-west');
+                tog.addClass('prominent-cardinal-toggler togglerVertical');
+                $('<span class="heurist-helper2 westTogglerVertical" style="font-size:17px;width:200px;margin-top:325px;">Navigate / Move / Delete</span>').appendTo(tog);
             }
                 
         }
@@ -2951,18 +2951,20 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             var hasURLfield = ($Db.rty(rectypeID, 'rty_ShowURLOnEditForm')=='1');
             if(hasURLfield){
                 ele.show();
-            }
-            
-            // special case  - show separator between parent record field and other fields
-            // in case there is no header
-            if(hasURLfield || window.hWin.HEURIST4.util.findArrayIndex(DT_PARENT_ENTITY, field_in_recset)>=0){
-            //if(that.options.parententity>0){
+
+                // special case  - show separator between parent record field and other fields
+                // in case there is no header
                 var first_set = that.editForm.find('fieldset:first');
                 first_set.show();
                 var next_ele = first_set.next().next();
                 if(!next_ele.hasClass('separator')){
                     first_set.css('border-bottom','1px solid #A4B4CB');
                 }
+            }
+
+            // display record title field and move child record field (if present) to the top of form
+            if(!that.options.edit_structure){
+                that.showExtraRecordInfo();
             }
 
             // Add a divider between the popup controls and the first set of input, 
@@ -3491,12 +3493,26 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
         var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'none' }; //#ecf1fb
-        
+
+        // Icon
+        var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+        var rt_icon = window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID;
+
         if( this.element.find('.chb_opt_fields').length==0 )
         {  //not inited yet
 
             $('<div style="display:table;min-width:575px;width:100%">'
-             +'<div style="display:table-cell;text-align:left;padding:20px 0px 5px 35px;">'
+             +'<div style="display:table-cell;text-align:left;padding:10px 0px 5px 15px;">'
+
+                +'<div style="padding-right:50px;display:inline-block" class="rt-info-header">'
+                    +'<img src="'+ph_gif
+                        +'" width=36 height=36 class="rt-icon" style="padding:2px;background-size: 28px 28px;vertical-align:middle;margin: 2px 10px 2px 4px;'
+                        +'background-image:url(\'' + rt_icon + '\');"/>'
+                    + '<span style="display:inline-block;vertical-align:middle;font-size:larger;font-weight:bold;max-width:150px;min-width:150px;" '
+                    + 'class="truncate" title="'+ $Db.rty(this._currentEditRecTypeID,'rty_Name') +'">'
+                        + $Db.rty(this._currentEditRecTypeID,'rty_Name')
+                    + '</span>'
+                +'</div>'
 
                 +'<div style="padding-right:50px;display:inline-block">'
                     +'<span class="btn-edit-rt2 btns-admin-only" style="font-size:larger"></span>'
@@ -3509,8 +3525,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     +'<label class="lbl_opt_fields"><input type="checkbox" class="chb_opt_fields" '
                         +(isfields_on?'checked':'')+'/>Optional fields</label>'
                 +'</div>'
-             
-                +'<div style="padding-right:50px;float:right">'
+
+                +'<div style="padding:10px 50px 0px 0px;float:right">'
                     +'<span class="btn-edit-rt btns-admin-only">Attributes</span>'
                     +'<span class="btn-edit-rt-titlemask btns-admin-only">Edit title mask</span>'
                     +'<span class="btn-edit-rt-template btns-admin-only">Template</span>'
@@ -3718,40 +3734,32 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             //this.editFormPopup.css('top',0);
             
         this.editHeader = this.element.find('.editHeader');
-            
-            
-        var sheader = '<div style="text-align:left;min-height:25px" class="edit-record-title">';  ///class="ui-heurist-header2" 
+
+        var sheader = '<div style="text-align:left;min-height:25px;display:inline-flex;align-items:center;" class="edit-record-title">';  ///class="ui-heurist-header2" 
         
         if(this.options.edit_structure){
             
             sheader = sheader  
-            +'<span style="display:inline-block;padding:5 10px 5px 0;vertical-align:middle">'
+            +'<span style="padding-right:10px;">'
             +'Modifying record structure for</span>'
-            +'<h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0">'
+            +'<h3 style="max-width:900px;margin:0;">'
             +$Db.rty(this._currentEditRecTypeID,'rty_Name')
             +'&nbsp;&nbsp;( '+this._currentEditRecTypeID+' / '+$Db.getConceptID('rty',this._currentEditRecTypeID)+' )'
             +'</h3>';
             
         }else{
             
-            //define header - rectype icon, retype name and record title
-            var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
-            sheader = sheader + '<img src="'+ph_gif
-                        + '" width=18 height=18 class="rt-icon" style="border-radius: 50%;padding:2px;background-color:white;'
-                        + 'background-size: 14px 14px;'
-                        + 'vertical-align:middle;margin: 2px 10px 2px 4px; background-image:url(\''
-                        + window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID + '\');"/>' 
-                        //+ 'm&color=rgb(255,255,255)\');"/>'
-                        //+ 's&color=rgb(0,0,0)&circle=rgb(255,255,255)\');"/>'  //draw black on white
+            //define header - retype name and record title
+            sheader = sheader
                     + '<span style="display:inline-block;vertical-align:middle">'
                         + $Db.rty(this._currentEditRecTypeID,'rty_Name')
                     + '</span>';
-                    
+
             if(!this._isInsert){
-                sheader = sheader + 
-                    '&nbsp;<span style="display:inline-block;padding:0 20px;vertical-align:middle">ID: '+this._currentEditID
-                    + '</span><h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0" class="truncate">'
-                    + window.hWin.HEURIST4.util.stripTags(this._getField('rec_Title'),'u, i, b, strong')+'</h3>';            
+                sheader = sheader
+                    + '&nbsp;<span style="padding:0 20px;">ID: '+this._currentEditID
+                    + '</span><h3 style="max-width:900px;margin:0;" class="truncate">'
+                    + window.hWin.HEURIST4.util.stripTags(this._getField('rec_Title'),'u, i, b, strong')+'</h3>';
             }
         }
         sheader = sheader + '</div>';
@@ -3863,6 +3871,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             }
             if(!this.options.edit_structure){
                 this.element.find('.btn-edit-rt2').hide();
+                this.element.find('.rt-info-header').hide();
             }
             
             //switch on optional fields and disable checckbox
@@ -3897,7 +3906,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }else{
 
             $(this.element).find('.separator-hidden').hide();
-            
+
+            this.element.find('.rt-info-header').show();
             this.element.find('.btn-edit-rt2').show();
             this.element.find('.btn-edit-rt-back').hide();
             this.element.find('.chb_opt_fields').attr('disabled', false);
@@ -4116,7 +4126,70 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);
         
         return true;
+    },
+    
+    /**
+	 * Display the record title field (cannot be edited here),
+	 * and, if applicable, the child record fields at the top of the form
+	 */
+
+    showExtraRecordInfo: function(){ console.log('called now');
+
+        var that = this;
+        var parententity = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
+
+        // add new separate fieldset at the start w/ darker background
+        var top_fieldset = $('<fieldset>').css('background-color', '#d1e7e7').insertBefore(this.editForm.find('fieldset:first'));
+
+        // Display record title and (if available) child record fields to top of form
+        ele = this._editing.getFieldByName('rec_Title').show().editing_input('setDisabled', true);
+
+        // remove opacity change and set background to white
+        var cur_styling = ele.find('input').attr('style');
+        ele.find('input').attr('style', cur_styling + 'background-color: white !important;opacity:1;');
+
+        // change label to required version, and add help icon
+        var $helper_icon = $('<span>')
+                            .addClass('ui-icon ui-icon-circle-help')
+                            .css('color', '#307d96')
+                            .attr('title', 'A title constructed from one or more fields, which is used to identify records when displayed in search results.');
+        ele.find('div.header').addClass('required').after($helper_icon);
+
+        // add gear icon that opens title mask editor
+        if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false){
+
+            var $gear_icon = $('<span>')
+                              .addClass('ui-icon ui-icon-gear')
+                              .css({'color': 'rgb(125, 154, 170)', 'margin': '0px 2px 3px'})
+                              .attr('title', 'Open Title Mask Editor')
+                              .click(function(e) { that.editRecordTypeTitle(); });
+
+            ele.find('span.editint-inout-repeat-button').replaceWith($gear_icon);
+            ele.find('span.btn_input_clear').remove();
+        }
+
+        // keep the record title field inline with other visible fields
+        if(this.options.rts_editor){
+            this._createRtsEditButton(null, ele);
+        }
+
+        // move rec_title field to new fieldset
+        top_fieldset.append(ele);
+
+        // check for child record field, move to new fieldset if any
+        var childrec_field = this.editForm.find('div[data-dtid="'+parententity+'"]');
+        if(childrec_field.length == 1){
+
+            childrec_field.find('div.link-div').css('background', 'white');
+
+            // get help info and remove it so it doesn't appear when help is shown
+            var help_text = childrec_field.find('div.heurist-helper1').text();
+            childrec_field.find('div.heurist-helper1').text('');
+
+            // add helper icon
+            childrec_field.find('div.header').addClass('required').after($helper_icon.clone().css('vertical-align', 'super').attr('title', help_text));
+
+            top_fieldset.append(childrec_field);
+        }
     }
-    
-    
 });

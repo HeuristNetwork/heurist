@@ -1100,7 +1100,7 @@ $.widget( "heurist.editing_input", {
                                 var crafted_label = ui.item.label;
                                 var trm_info = $Db.trm(term_id);
 
-                                if(trm_info.trm_ParentTermID != 0){
+                                if(term_id && trm_info && trm_info.trm_ParentTermID != 0){
                                     
                                     while(1){
 
