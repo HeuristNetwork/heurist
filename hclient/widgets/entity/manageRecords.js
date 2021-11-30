@@ -392,7 +392,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         var that = this;
                       
-        var rst_fields = $Db.rst(that._currentEditRecTypeID, dtId);
+        var rst_fields = (dtId != null) ? $Db.rst(that._currentEditRecTypeID, dtId) : null;
         if(rst_fields){
             
             var sep_id = $(div_ele).attr('separator-dtid');
@@ -2951,18 +2951,20 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             var hasURLfield = ($Db.rty(rectypeID, 'rty_ShowURLOnEditForm')=='1');
             if(hasURLfield){
                 ele.show();
-            }
-            
-            // special case  - show separator between parent record field and other fields
-            // in case there is no header
-            if(hasURLfield || window.hWin.HEURIST4.util.findArrayIndex(DT_PARENT_ENTITY, field_in_recset)>=0){
-            //if(that.options.parententity>0){
+
+                // special case  - show separator between parent record field and other fields
+                // in case there is no header
                 var first_set = that.editForm.find('fieldset:first');
                 first_set.show();
                 var next_ele = first_set.next().next();
                 if(!next_ele.hasClass('separator')){
                     first_set.css('border-bottom','1px solid #A4B4CB');
                 }
+            }
+
+            // display record title field and move child record field (if present) to the top of form
+            if(!that.options.edit_structure){
+                that.showExtraRecordInfo();
             }
 
             // Add a divider between the popup controls and the first set of input, 
@@ -4124,7 +4126,70 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);
         
         return true;
+    },
+    
+    /**
+	 * Display the record title field (cannot be edited here),
+	 * and, if applicable, the child record fields at the top of the form
+	 */
+
+    showExtraRecordInfo: function(){ console.log('called now');
+
+        var that = this;
+        var parententity = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
+
+        // add new separate fieldset at the start w/ darker background
+        var top_fieldset = $('<fieldset>').css('background-color', '#d1e7e7').insertBefore(this.editForm.find('fieldset:first'));
+
+        // Display record title and (if available) child record fields to top of form
+        ele = this._editing.getFieldByName('rec_Title').show().editing_input('setDisabled', true);
+
+        // remove opacity change and set background to white
+        var cur_styling = ele.find('input').attr('style');
+        ele.find('input').attr('style', cur_styling + 'background-color: white !important;opacity:1;');
+
+        // change label to required version, and add help icon
+        var $helper_icon = $('<span>')
+                            .addClass('ui-icon ui-icon-circle-help')
+                            .css('color', '#307d96')
+                            .attr('title', 'A title constructed from one or more fields, which is used to identify records when displayed in search results.');
+        ele.find('div.header').addClass('required').after($helper_icon);
+
+        // add gear icon that opens title mask editor
+        if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false){
+
+            var $gear_icon = $('<span>')
+                              .addClass('ui-icon ui-icon-gear')
+                              .css({'color': 'rgb(125, 154, 170)', 'margin': '0px 2px 3px'})
+                              .attr('title', 'Open Title Mask Editor')
+                              .click(function(e) { that.editRecordTypeTitle(); });
+
+            ele.find('span.editint-inout-repeat-button').replaceWith($gear_icon);
+            ele.find('span.btn_input_clear').remove();
+        }
+
+        // keep the record title field inline with other visible fields
+        if(this.options.rts_editor){
+            this._createRtsEditButton(null, ele);
+        }
+
+        // move rec_title field to new fieldset
+        top_fieldset.append(ele);
+
+        // check for child record field, move to new fieldset if any
+        var childrec_field = this.editForm.find('div[data-dtid="'+parententity+'"]');
+        if(childrec_field.length == 1){
+
+            childrec_field.find('div.link-div').css('background', 'white');
+
+            // get help info and remove it so it doesn't appear when help is shown
+            var help_text = childrec_field.find('div.heurist-helper1').text();
+            childrec_field.find('div.heurist-helper1').text('');
+
+            // add helper icon
+            childrec_field.find('div.header').addClass('required').after($helper_icon.clone().css('vertical-align', 'super').attr('title', help_text));
+
+            top_fieldset.append(childrec_field);
+        }
     }
-    
-    
 });
