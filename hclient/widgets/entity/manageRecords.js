@@ -1049,13 +1049,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         contentSelector: '.editStructure',   
                         onopen_start : function( ){ 
                             var tog = that.element.find('.ui-layout-toggler-west');
-                            tog.removeClass('prominent-cardinal-toggler');
-                            tog.find('.heurist-helper2').remove();
+                            tog.removeClass('prominent-cardinal-toggler togglerVertical');
+                            tog.find('.heurist-helper2.westTogglerVertical').remove();
                         },
                         onclose_end : function( ){ 
                             var tog = that.element.find('.ui-layout-toggler-west');
-                            tog.addClass('prominent-cardinal-toggler');
-                            $('<span class="heurist-helper2" style="font-size:9px;">Move Delete</span>').appendTo(tog);
+                            tog.addClass('prominent-cardinal-toggler togglerVertical');
+                            $('<span class="heurist-helper2 westTogglerVertical" style="font-size:17px;width:200px;margin-top:225px;">Navigate / Move / Delete</span>').appendTo(tog);
                         },
                         togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
                         togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-e"></div>',
@@ -2075,9 +2075,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var isClosed = (!this.options.edit_structure && this.usrPreferences.structure_closed!=0);
             this.editFormPopup.layout().show('west', !isClosed ); 
             if(isClosed){
-                        var tog = that.editFormPopup.find('.ui-layout-toggler-west');
-                        tog.addClass('prominent-cardinal-toggler');
-                        $('<span class="heurist-helper2" style="font-size:9px;">Move Delete</span>').appendTo(tog);
+                var tog = that.editFormPopup.find('.ui-layout-toggler-west');
+                tog.addClass('prominent-cardinal-toggler togglerVertical');
+                $('<span class="heurist-helper2 westTogglerVertical" style="font-size:17px;width:200px;margin-top:325px;">Navigate / Move / Delete</span>').appendTo(tog);
             }
                 
         }
