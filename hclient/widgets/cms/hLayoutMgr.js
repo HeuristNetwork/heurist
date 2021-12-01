@@ -57,7 +57,7 @@ function hLayoutMgr(){
         container.empty();   
         
         if(typeof layout === 'string' &&
-            layout.indexOf('data-heurist-app-id')>0){ //old format
+            layout.indexOf('data-heurist-app-id')>0){ //old format with some widgets
             
                 container.html(layout);
             

@@ -33,10 +33,10 @@ widget:
 
 var editCMS_instance2 = null;
 // global variables
-// layoutMgr - global variable defined in hLayoutMgr
-// page_cache
-// home_page_record_id
-// current_page_id
+//  layoutMgr - global variable defined in hLayoutMgr
+//  page_cache
+//  home_page_record_id
+//  current_page_id
 
 //
 // options: record_id, content, container

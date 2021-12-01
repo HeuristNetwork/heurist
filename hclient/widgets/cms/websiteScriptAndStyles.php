@@ -56,7 +56,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var init_page_record_id=<?php echo $open_page_on_init; ?>;
     var current_page_id = 0;
     var _IS_NEW_CMS_EDITOR = <?php echo $_is_new_cms_editor; ?>;
-    var isCMS_active = <?php echo $edit_ActivateEditor; ?>;
+    var isCMS_active = <?php echo $edit_ActivateEditor?$edit_ActivateEditor:'false'; ?>;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
 </script>
     
@@ -476,7 +476,7 @@ if($site_css!=null){
     //console.log(res);                           
                                page_cache[pageid] = res;
                                __loadPageContent();
-                           }else if(pageid!=home_page_record_id){
+                           }else if(pageid!=home_page_record_id){ //load home page by default
                                loadPageContent(home_page_record_id);
                            }else{
                                window.hWin.HEURIST4.msg.showMsgErr('Web Page not found (record #'+pageid+')');

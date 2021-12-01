@@ -94,6 +94,8 @@ function hCmsEditing(_options) {
     var LayoutMgr = new hLayout(); //to avoid interferene with  window.hWin.HAPI4.LayoutMgr  
     
     var codeEditor = null; //codemirror
+    
+    var is_current_page_in_new_format = false;            
 
     
     // define tinymce configuration
@@ -473,7 +475,9 @@ function hCmsEditing(_options) {
 
             //main_content = doc_body.find('#main-content'); DEBUG
             //main_content.html('LOADED '+pageid);return; DEBUG
-
+            
+            is_current_page_in_new_format = false;            
+            
             main_content.empty();
             main_content.load(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                 +'&field=1&recid='+pageid, function()
@@ -516,7 +520,18 @@ function hCmsEditing(_options) {
                             main_header.height(show_page_title?180:144);
                             doc_body.find('#main-content-container').css({top:show_page_title?190:152});
                         }
-                        
+
+                        var content = main_content.text();
+                        var res = window.hWin.HEURIST4.util.isJSON(content);
+//console.log(res);
+                        if(res){
+                            is_current_page_in_new_format = true;
+                            if(!layoutMgr) hLayoutMgr();
+                            layoutMgr.setEditMode(false);
+                            layoutMgr.layoutInit(res, main_content, {rec_ID:home_page_record_id});
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            return;
+                        }
                         
                         //assign content to editor
                         $('.tinymce-body').val(main_content.html());
@@ -2021,6 +2036,12 @@ function hCmsEditing(_options) {
     //
     function _editPageContent(event){
         
+        
+        if(is_current_page_in_new_format){
+            window.hWin.HEURIST4.msg.showMsgFlash('Page is in new format. Click "View website" and then "CMS" link to open new editor',3000);
+            return;
+        }
+        
         is_header_editor = false;
 
         //if direct edit is opened - warn for saving 
@@ -2071,6 +2092,12 @@ function hCmsEditing(_options) {
     // direct edit 
     //
     function _editPageSource( event ){
+        
+        if(is_current_page_in_new_format){
+            window.hWin.HEURIST4.msg.showMsgFlash('Page is in new format. Click "View website" and then "CMS" link to open new editor',3000);
+            return;
+        }
+        
         
         if($('.tox-tinymce').is(':visible')){ //$('#codemirror-body').
             //exit
