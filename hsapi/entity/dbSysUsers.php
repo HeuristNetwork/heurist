@@ -332,7 +332,7 @@ class DbSysUsers extends DbEntityBase
                     if($is_new && $this->system->get_user_id()<1){ //this is independent registration of new user
                         $rv = user_EmailAboutNewUser($this->system, $ugr_ID);
                     }else if($is_new || $is_approvement){ //this is approvement or registration FOR user
-                        $rv = user_EmailApproval($this->system, $ugr_ID, $this->records[$idx]['tmp_password'], $is_approvement);
+                        $rv = user_EmailApproval($this->system, $ugr_ID, @$this->records[$idx]['tmp_password'], $is_approvement);
                         
                         user_SyncCommonCredentials($this->system,  $ugr_ID, $is_approvement);
                     }

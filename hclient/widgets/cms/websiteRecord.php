@@ -306,7 +306,11 @@ if($external_files!=null){
 $site_css = __getValue($rec, DT_CMS_CSS);
 
 //color scheme for website
-$site_colors = __getValue($rec, DT_SYMBOLOGY);
+if($system->defineConstant('DT_SYMBOLOGY')){
+    $site_colors = __getValue($rec, DT_SYMBOLOGY);
+}else{
+    $site_colors = '';
+}
 
 //
 // returns link to uploaded file
