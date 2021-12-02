@@ -673,6 +673,7 @@ class DbDefTerms extends DbEntityBase
                                         foreach($labels as $id=>$vals2)
                                         {
                                             if($id!=$trm_ID){
+                                                $sMsg = null;
                                                 if(strcasecmp($vals['trm_Label'],$vals2['trm_Label'])==0){
                                                     $sMsg = 'Term with label <b>'.$vals['trm_Label'];
                                                 }else if ($vals['trm_Code'] && strcasecmp($vals['trm_Code'],$vals2['trm_Code'])==0){
@@ -690,13 +691,14 @@ class DbDefTerms extends DbEntityBase
                                 }
 
                             }
-                            //3. term can not be removed if it is real children (not reference)
+                            //3. term can not be removed if it has real children (not reference)
                             if($old_parent>0){
-                                // can not delete term if it is real parent
+                                // can not delete term if it is a real parent
                                 $parent_id = mysql__select_value($mysqli, 
                                             'SELECT trm_ParentTermID FROM defTerms where trm_ID='.$trm_ID);
                                 if($parent_id == $old_parent){
-                                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Term can not be orphaned');
+                                    $this->system->addError(HEURIST_ACTION_BLOCKED,
+                                         'Term can not be orphaned. ('.$old_parent.')');
                                     $ret =false;
                                     break;
                                 }
