@@ -70,10 +70,10 @@ class DbSysBugreport extends DbEntityBase
         }
 
         if(is_array($this->records) && count($this->records)==1){
+            //SPECIAL CASE - this is response to emailForm widget 
+            // it sends email to owner of database or to email specified in website_id record
             $fields = $this->records[0];
             if(@$fields['email'] && @$fields['content']){
-                 // this is response to emailForm widget 
-                 // it sends email to owner of database or to email specified in website_id record
                  return $this->_prepareEmail($fields);
             }
         }
@@ -96,7 +96,6 @@ class DbSysBugreport extends DbEntityBase
         
         $record = $this->records[0];
 
-        return false;
         
         $toEmailAddress = HEURIST_MAIL_TO_BUG;
 
@@ -105,6 +104,8 @@ class DbSysBugreport extends DbEntityBase
                     'The owner of this instance of Heurist has not defined either the info nor system emails');
              return false;
         }
+        
+        $sMessage = '';
         
         $message = array();
         $message["rectype"] = '2-253';
@@ -119,11 +120,17 @@ class DbSysBugreport extends DbEntityBase
             $bug_descr = str_replace("\n","&#13;",$bug_descr);
             $bug_descr = str_replace("\"","\\\"",$bug_descr);
             $message['type:2-3'] = $bug_descr;
+            
+            $sMessage = '<p>'.str_replace("\n",'<br>', $record['2-3']).'</p>';
         }
 
         $repro_steps = $record['2-4'];
         $repro_steps = explode("\n", $repro_steps);  //split on line break
         $message['type:2-4'] = $repro_steps;
+        
+        if(count($repro_steps)>0){
+            $sMessage = $sMessage.'<p>Reproduction steps:<br>'.implode('<br>',$repro_steps).'</p>';
+        }
 
         //add current system information into message
         $ext_info = array();
@@ -137,6 +144,7 @@ class DbSysBugreport extends DbEntityBase
                                                       .$this->system->get_system('sys_dbSubSubVersion'));
         array_push($ext_info, "   Heurist database: ". HEURIST_DBNAME_FULL);
         
+        
         $user = $this->system->getCurrentUser();
         if($user){
             $user = user_getByField($this->system->get_mysqli(), 'ugr_ID', $user['ugr_ID']);
@@ -144,6 +152,7 @@ class DbSysBugreport extends DbEntityBase
             array_push($ext_info, "   Heurist user: ".@$user['ugr_Name'].' ('.@$user['ugr_eMail'].')');
         }
         $message['type:2-51'] = $ext_info;  //DT_BUG_REPORT_EXTRA_INFO;
+        $sMessage = $sMessage.'<p>'.implode('<br>',$ext_info).'</p>';
         
         $filename = null;
         $attachment_temp_name = @$record['2-38'];
@@ -160,8 +169,10 @@ class DbSysBugreport extends DbEntityBase
             }
         }
         
-        
-        if($this->_sendEmail('support@HeuristNetwork.org', 'Bug reporter', $toEmailAddress, $bug_title, $message, $filename)){
+        if($this->_sendEmail('support@HeuristNetwork.org', 'Bug reporter', $toEmailAddress, 
+                $bug_title, 
+                (true?$sMessage:$message),  //since 02 Dec 2021 we sent human readable message
+                $filename)){
             return array(1); //fake rec id
         }else{
             return false;
@@ -201,7 +212,9 @@ class DbSysBugreport extends DbEntityBase
         if(!$email_from) $email_from = 'info@HeuristNetwork.org';
         if(!$email_from_name) $email_from_name = 'Heurist system';
         
-        $email_text =  json_encode($email_text);
+        if(is_array($email_text)){
+            $email_text =  json_encode($email_text);    
+        }
        
         //send an email with attachment
         $email = new PHPMailer();
