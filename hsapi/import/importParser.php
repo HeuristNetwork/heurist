@@ -382,7 +382,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                                 if ($flen>500 || strpos($field, '\\r')!==false) {
                                     $field_sizes[$k] = 'memo';
                                 }else if(@$field_sizes[$k]>0){
-                                    $field_sizes[$k] = max($field_sizes[$k], $flen);
+                                    $field_sizes[$k] = max($field_sizes[$k], $flen); //select max
                                 }else{
                                     $field_sizes[$k] = $flen;
                                 }
@@ -390,7 +390,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                         }
 
                         //Remove any spaces at start/end of fields (including potential memos) & any redundant spaces in field that is not multi-line
-                        if(@$field_sizes[$k]!='memo'){
+                        if(@$field_sizes[$k]!=='memo'){
 
                             $field = trim(preg_replace('/([\s])\1+/', ' ', $field)); 
 
@@ -402,10 +402,15 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                             }
 
                             $check_keyfield_K = ($check_keyfield && @$keyfields['field_'.$k]!=null);
-                            //check integer value
-                            if(@$int_fields[$k] || $check_keyfield_K){
-                                self::prepareIntegerField($field, $k, $check_keyfield_K, $err_keyfields, $int_fields);
-                            }                 
+                            if($check_keyfield_K || @$int_fields[$k]){
+                                //check integer value
+                                if(@$int_fields[$k]){
+                                    self::prepareIntegerField($field, $k, $check_keyfield_K, $err_keyfields, $int_fields);
+                                }
+                                if($check_keyfield_K){
+                                    $field_sizes[$k] = max($field_sizes[$k], 9);
+                                }                 
+                            }
                             if(@$num_fields[$k] && !is_numeric($field)){
                                 $num_fields[$k]=null;
                             }
@@ -577,7 +582,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                             }
                         }
                         
-                        if(@$field_sizes[$k] != 'memo'){
+                        if(@$field_sizes[$k] !== 'memo'){
 
                             //Convert dates to standardised format.  //'field_'.
                             if($check_datefield && @$datefields[$k]!=null && $field!=""){
@@ -587,9 +592,16 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                             
                             $check_keyfield_K =  ($check_keyfield && @$keyfields['field_'.$k]!=null);
                             //check integer value
-                            if(@$int_fields[$k] || $check_keyfield_K){
-                                self::prepareIntegerField($field, $k, $check_keyfield_K, $err_keyfields, $int_fields);
+                            if($check_keyfield_K || @$int_fields[$k]){
+                                //check integer value
+                                if(@$int_fields[$k]){
+                                    self::prepareIntegerField($field, $k, $check_keyfield_K, $err_keyfields, $int_fields);
+                                }
+                                if($check_keyfield_K){ //key field can not be size less than 6
+                                    $field_sizes[$k] = max($field_sizes[$k], 9);
+                                }                 
                             }
+
                             if(@$num_fields[$k] && !is_numeric($field)){
                                 $num_fields[$k]=null;
                             }
@@ -742,10 +754,14 @@ private static function prepareDateField($field, $csv_dateformat){
 }
 
 //
-//
+// $field - value
 //
 private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err_keyfields, &$int_fields){
 
+    if($field==''){
+        $field=0; //workaround empty values for key fields    
+    } 
+    
     $values = explode('|', $field);
     foreach($values as $value){
         if($value=='')continue;
@@ -763,7 +779,7 @@ private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err
             //exclude from array of fields with integer values
             if(@$int_fields[$k]) $int_fields[$k]=null;
 
-        }else if(intval($value)<1 || intval($value)>2147483646){ //max int value in mysql
+        }else if(intval($value)<0 || intval($value)>2147483646){ //max int value in mysql
 
             if($check_keyfield_K){
                 if(is_array(@$err_keyfields[$k])){  //out of range
