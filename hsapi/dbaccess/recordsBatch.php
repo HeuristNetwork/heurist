@@ -1006,8 +1006,8 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 if(array_search($rectype_ID, $rtyRequired)!==FALSE){ //this is required field
                     if(!$isDeleteAll){
                         //find total count
-                        $total_cnt = mysql__select_value($mysqli, "select count(*) from recDetails where ".
-                            " where dtl_RecID = $recID and dtl_DetailTypeID = $dtyID");
+                        $total_cnt = mysql__select_value($mysqli, "SELECT count(*) FROM recDetails ".
+                            " WHERE dtl_RecID = $recID AND dtl_DetailTypeID = $dtyID");
                         
                     }
                     if($isDeleteAll || ($total_cnt == count($valuesToBeDeleted))){
