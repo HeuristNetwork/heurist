@@ -1364,15 +1364,18 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
                 $root_rec_id = $menuitems[0];
                 $isWebPage = false;
 
-                //check that this is single web page (for embed)
-                $rec = recordSearchByID($system, $root_rec_id, array(DT_CMS_PAGETYPE), 'rec_ID,rec_RecTypeID');
-                if(@$rec['rec_RecTypeID']==RT_CMS_MENU && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
-                    //get term id by concept code
-                    $val = recordGetField($rec, DT_CMS_PAGETYPE);
-                    $isWebPage = ($val==ConceptCode::getTermLocalID('2-6254')); //standalone
+                if($system->defineConstant('DT_CMS_PAGETYPE')){
+                    //check that this is single web page (for embed)
+                    $rec = recordSearchByID($system, $root_rec_id, array(DT_CMS_PAGETYPE), 'rec_ID,rec_RecTypeID');
+                    if(@$rec['rec_RecTypeID']==RT_CMS_MENU && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
+                        //get term id by concept code
+                        $val = recordGetField($rec, DT_CMS_PAGETYPE);
+                        $isWebPage = ($val==ConceptCode::getTermLocalID('2-6254')); //standalone
+                    }
                 }
                 
                 if($isWebPage){
+                    
                     return recordSearch($system, array('q'=>array('ids'=>$root_rec_id), 
                         'detail'=>array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET,DT_CMS_CSS,DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU,DT_THUMBNAIL), //'detail' 
                         'w'=>'e', 'cms_cut_description'=>1));

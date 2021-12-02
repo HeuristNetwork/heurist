@@ -378,8 +378,8 @@ $dtDefines = array('DT_NAME' => array(2, 1),
 
     'DT_EXTRACTED_TEXT' => array(2, 652),  //for pdf parser
     
-    'DT_CMS_TOP_MENU' => array(99, 742),  
-    'DT_CMS_MENU' => array(99, 761),  
+    'DT_CMS_TOP_MENU' => array(99, 742),  //pointer  to top level menues in home page
+    'DT_CMS_MENU' => array(99, 761),  //pointer to sub menu
     'DT_CMS_KEYWORDS' => array(99, 948),
     'DT_CMS_TARGET' => array(99, 949),
     'DT_CMS_HEADER' => array(2, 929),

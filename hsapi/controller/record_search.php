@@ -118,12 +118,15 @@
         $system->defineConstants();
         
         if(!($system->defineConstant('RT_CMS_HOME') &&
-             $system->defineConstant('RT_CMS_MENU') &&
-             $system->defineConstant('DT_CMS_PAGETYPE') && 
-             $system->defineConstant('DT_CMS_MENU') && 
-             $system->defineConstant('DT_CMS_TOP_MENU'))){
+             $system->defineConstant('RT_CMS_MENU'))){
                 
-            $response = $system->addError(HEURIST_ERROR, 'Required field type "Menu" not defined in this database');         
+            $response = $system->addError(HEURIST_ERROR, 'Required record type "Menu" not defined in this database');         
+            
+        }else if(!($system->defineConstant('DT_CMS_MENU') && 
+                   $system->defineConstant('DT_CMS_TOP_MENU'))){
+
+            $response = $system->addError(HEURIST_ERROR, 'Required field type "Menu pointer" not defined in this database');         
+            
         }else{
             
             $resids = array();
