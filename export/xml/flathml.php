@@ -1852,8 +1852,14 @@ if($rectype_templates){
     if(@$result['status']==HEURIST_OK){
         $result = $result['data'];
     }else{
+        $error_msg = @$result['message']; 
         $error_msg = $system->getError();
-        $error_msg = $error_msg[0]['message'];
+        if(count($error_msg)>0){
+            $error_msg = $error_msg[0]['message'];    
+        }else{
+            $error_msg = 'Unknown error on record search. Search parmeters: '.print_r($params,true);
+        }
+        
     }
 }
 
