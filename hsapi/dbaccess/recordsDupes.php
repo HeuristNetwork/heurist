@@ -206,13 +206,23 @@ public static function findDupes( $params ){
             
             
         }else if (strpos($v,'rec_')===0){
-            $s = 'NEW_LIPOSUCTION_255(IFNULL('.$v.',""))';
-            $header_fields[$v] = $s.' as '.$v; //for retrieve       
-            $header_fields2[$v] = $s; //for compare query
             
-            if($sort_field==$v || $sort_field==null){
-                $sort_field = $v;           
-            } 
+            if($v=='rec_AddedBy'){
+
+                $s = 'rec_AddedByUGrpID';
+                $header_fields[$v] = $s; //for retrieve       
+                $header_fields2[$v] = $s; //for compare query
+                
+            }else{
+            
+                $s = 'NEW_LIPOSUCTION_255(IFNULL('.$v.',""))';
+                $header_fields[$v] = $s.' as '.$v; //for retrieve       
+                $header_fields2[$v] = $s; //for compare query
+                
+                if($sort_field==$v || $sort_field==null){
+                    $sort_field = $v;           
+                } 
+            }                
         }
     }
     
@@ -223,8 +233,8 @@ public static function findDupes( $params ){
     $exact_fields = array();
     foreach($fields as $v){     
         
-             if($v=='rec_Title' || $v=='rec_URL' || $v=='rec_ScratchPad'){
-                 if(self::$distance>0){
+             if($v=='rec_Title' || $v=='rec_URL' || $v=='rec_ScratchPad' || $v=='rec_AddedBy'){
+                 if(self::$distance>0 && $v!='rec_AddedBy'){
                     $compare_fields[] = $header_fields2[$v];
                  }else{
                     $exact_fields[] = $header_fields[$v];        
