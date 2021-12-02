@@ -1443,11 +1443,24 @@ private static function validateEnumeration($recTypeID, $dt_id, $term_value, $db
         $recStruc = $dbdefs['rectypes']['typedefs'];
         //see similar code code in importAction.php validateEnumerations
         
-        $dt_def = $recStruc[$recTypeID]['dtFields'][$dt_id];
-
-        $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
-        $idx_term_tree = $recStruc['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
-        $idx_term_nosel = $recStruc['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+        $dt_def = @$recStruc[$recTypeID]['dtFields'][$dt_id];
+        
+        if($dt_def==null){ //such field is not found
+            $dtyStruc = @$dbdefs['detailtypes']['typedefs'];
+            
+            if($dtyStruc){
+                $dt_def = @$dtyStruc[$dt_id];
+                if($dt_def==null) return false;
+                
+                $idx_fieldtype = $dtyStruc['commonNamesToIndex']['dty_Type'];
+                $idx_term_tree = $dtyStruc['commonNamesToIndex']['dty_JsonTermIDTree'];
+                $idx_term_nosel = $dtyStruc['commonNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+            }            
+        }else{
+            $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
+            $idx_term_tree = $recStruc['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
+            $idx_term_nosel = $recStruc['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+        }
     
 
         $is_termid = false;
@@ -1539,3 +1552,4 @@ private static function addNewTerm($recTypeID, $dt_id, $term_label, $dbdefs){
     
 }  
 ?>
+
