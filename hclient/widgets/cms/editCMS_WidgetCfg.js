@@ -138,11 +138,32 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                     if(opts.layout_params['basemap']){
                         $dlg.find('input[name="map_basemap"]').val(opts.layout_params['basemap']);        
                     }
+                    if(opts.layout_params['basemap_filter']){
+                        $dlg.find('input[name="map_basemap_filter"]').val(opts.layout_params['basemap_filter']);        
+                    }
 
                 }
                 if(opts['mapdocument']>0){
                     $dlg.find('select[name="mapdocument"]').attr('data-mapdocument', opts['mapdocument']);        
                 }
+                
+                $dlg.find('button[name="basemap_filter"]')
+                    .button()
+                    .css('font-size','0.7em')
+                    .on( { click: function(){
+                        var cfg = window.hWin.HEURIST4.util.isJSON($dlg.find('input[name="map_basemap_filter"]').val());
+                        if(!cfg) cfg = null;
+                        imgFilter(cfg,null,function(filter){
+                            $dlg.find('input[name="map_basemap_filter"]').val( JSON.stringify(filter) );
+                        });   
+                    }});
+                $dlg.find('button[name="basemap_filter_reset"]')
+                    .button()
+                    .css('font-size','0.7em')
+                    .on( { click: function(){
+                        $dlg.find('input[name="map_basemap_filter"]').val('');
+                    }});
+                
 
             }else{
 
@@ -581,6 +602,8 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
             layout_params['published'] = 1;
             layout_params['template'] = $dlg.find('select[name="map_template"]').val();
             layout_params['basemap'] = $dlg.find('input[name="map_basemap"]').val();
+            layout_params['basemap_filter'] = $dlg.find('input[name="map_basemap_filter"]').val();
+            
             var popup = $dlg.find('input[name="map_popup"]:checked').val();
             if(popup!='standard'){
                 layout_params['popup'] = popup;

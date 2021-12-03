@@ -93,6 +93,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultListMenu.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/imgFilter.js"></script>
 
 
 <!--
@@ -193,6 +194,13 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     .v1 .browser-print-mode{
         padding: 3px 10px;
     }
+    
+    /*
+    .leaflet-layer {
+        filter: sepia(100%);
+        filter: invert(100%); grayscale(100%) sepia(100%) hue-rotate(180deg)
+    }    
+    */
 </style>
 
 <!-- Initializing -->
@@ -233,6 +241,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         layout_params['nocluster'] = __gp('nocluster');
         layout_params['editstyle'] = __gp('editstyle');
         layout_params['basemap'] = __gp('basemap');  //name of basemap
+        layout_params['basemap_filter'] = __gp('basemap_filter');  //name of basemap
         layout_params['extent'] = __gp('extent'); //@todo
         
         layout_params['controls'] = __gp('controls'); //comma separated list of visible controls

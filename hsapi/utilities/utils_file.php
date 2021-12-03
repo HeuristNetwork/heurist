@@ -281,6 +281,9 @@
     */
     function folderCreate($folder, $testWrite){
 
+        // -1  not exists
+        // -2  not writable
+        // -3  file with the same name cannot be deleted
         $res = folderExists($folder, $testWrite);
 
         if($res == -1){

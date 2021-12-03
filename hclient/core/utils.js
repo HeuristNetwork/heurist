@@ -934,7 +934,7 @@ window.hWin.HEURIST4.util = {
     },
 
     //
-    // Parse string date using Temoral library
+    // Parse string date using Temporal library
     //
     parseDates: function(start, end){
         if(window['Temporal'] && (start || end)){   

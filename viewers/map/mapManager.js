@@ -341,8 +341,29 @@ function hMapManager( _options )
                                   + '" data-mapid="'+map_providers[k]['name']+'">'
                                   + map_providers[k]['name']+'</label><br>';
             }
+            
+            content = content + '<div style="text-align:center">'
+                +'<button name="basemap_filter">filters</button>'
+                +'<button name="basemap_filter_reset">reset</button></div>';
+            
             content = $(content);
             content.find('input').on( { change: that.loadBaseMap });
+            
+            content.find('button[name="basemap_filter"]')
+                .button()
+                .css('font-size','0.7em')
+                .on( { click: function(){
+                        var cfg = options.mapwidget.mapping('getBaseMapFilter');
+                        imgFilter(cfg,null,function(filter){
+                            options.mapwidget.mapping('setBaseMapFilter', filter);
+                        });   
+                }});
+            content.find('button[name="basemap_filter_reset"]')
+                .button()
+                .css('font-size','0.7em')
+                .on( { click: function(){
+                    options.mapwidget.mapping('setBaseMapFilter', null);
+                }});
             
         }else  if(groupID=='mapdocs'){
             //load list of mapddocuments

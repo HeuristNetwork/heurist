@@ -197,6 +197,7 @@ $.widget( "heurist.mapping", {
     
     
     //base maps
+    basemaplayer_filter: null,
     basemaplayer_name: null,
     basemaplayer: null,
     basemap_providers: [
@@ -214,8 +215,12 @@ $.widget( "heurist.mapping", {
     //{name:'Esri.WorldTerrain'},
     {name:'Esri.WorldShadedRelief'},
     {name:'Stamen.Toner'},
-    {name:'Stamen.TerrainBackground'},
-    //{name:'Stamen.TopOSMRelief'},
+    {name:'Stamen.TonerLite'},
+    {name:'Stamen.TerrainBackground'}, //terrain w/o labels
+    //{name:'Stamen.TopOSMRelief'},    // doesn't work
+    //{name:'Stamen.TopOSMFeatures'},  // doesn't work
+    //{name:'Stamen.Terrain'},  terrain with labels
+    {name:'Stamen.Watercolor'},
     //{name:'OpenWeatherMap'}
     {name:'Esri.NatGeoWorldMap'},
     {name:'Esri.WorldGrayCanvas'},
@@ -409,6 +414,34 @@ $.widget( "heurist.mapping", {
     
     //--------------------
     
+    
+    setBaseMapFilter: function(cfg){
+        if(typeof cfg === 'string'){
+            this.basemaplayer_filter = window.hWin.HEURIST4.util.isJSON(cfg);
+        }else{
+            this.basemaplayer_filter = cfg;    
+        }
+        if(!this.basemaplayer_filter){
+            this.basemaplayer_filter = null;
+        }
+        
+        this.applyBaseMapFilter();
+    },
+    
+    applyBaseMapFilter: function(){
+        var filter = '';
+        if(this.basemaplayer_filter && $.isPlainObject(this.basemaplayer_filter)){
+            $.each(this.basemaplayer_filter, function(key, val){
+                filter = filter + key+'('+val+') ';
+            });
+        }
+        $('.leaflet-layer').css('filter', filter);
+    },
+
+    getBaseMapFilter: function(){
+        return this.basemaplayer_filter;
+    },
+    
     //
     //
     //
@@ -444,6 +477,10 @@ $.widget( "heurist.mapping", {
             if(provider['name']!=='None'){
                 this.basemaplayer = L.tileLayer.provider(provider['name'], provider['options'] || {})
                     .addTo(this.nativemap);        
+                    
+                if(this.basemaplayer_filter){
+                    this.applyBaseMapFilter();
+                }
             }            
             
         }   
@@ -1999,6 +2036,7 @@ $.widget( "heurist.mapping", {
     //   controls: [all,none,zoom,bookmark,geocoder,print,publish,legend]
     //   legend: [basemaps,search,mapdocs|onedoc]
     //   basemap: name of initial basemap
+    //   basemap_filter: css filter for basemap layer
     //   extent: fixed extent    
     //
     updateLayout: function(){
@@ -2469,7 +2507,10 @@ $.widget( "heurist.mapping", {
         
         // basemap: name of initial basemap
         if(params['basemap']){
+
             this.mapManager.loadBaseMap( params['basemap'] );  
+            
+            this.setBaseMapFilter( params['basemap_filter'] );
         }else{
             this.mapManager.loadBaseMap( 0 );  
         }
