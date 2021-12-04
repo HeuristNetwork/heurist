@@ -94,10 +94,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         this._super();
         
+        if(this.recordList.is(':visible') && this.options.auxilary=='term')
         this.space_for_drop = $('<span class="space_for_drop heurist-helper3" '
-                    +'style="position:absolute;top:80px;text-align:left;left:0;right:0;font-size: 0.8em;display:block;margin:0px;padding:5px 0 0 3px;background:white">'
-                    +'<span class="ui-icon ui-icon-arrowthick-1-e"/>&nbsp;top</span>') //drop here to move term to top level&nbsp;<span class="ui-icon ui-icon-arrowthick-1-w"/>
-                        .insertBefore(this.recordList);
+                        +'style="position:absolute;top:80px;text-align:left;left:0;right:0;font-size: 0.8em;display:block;margin:0px;padding:5px 0 0 3px;background:white">'
+                        +'<span class="ui-icon ui-icon-arrowthick-1-e"/>&nbsp;top</span>') //drop here to move term to top level&nbsp;<span class="ui-icon ui-icon-arrowthick-1-w"/>
+                            .insertBefore(this.recordList);
+        
 
         var that = this;
 
