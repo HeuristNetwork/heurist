@@ -108,7 +108,7 @@ function __updateDatabase(){
         if(hasTable($mysqli, 'defRecStructure')){
             
             if(hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
-                print $db_name.' already exists<br>';
+                //print $db_name.': already exists<br>';
             }else{
                 //alter table
                 $query = "ALTER TABLE `defRecStructure` ADD `rst_SemanticReferenceURL` VARCHAR( 250 ) NULL "
@@ -122,6 +122,23 @@ function __updateDatabase(){
                     print $db_name.'<br>';
                 }
             }    
+            
+            if(hasColumn($mysqli, 'defRecStructure', 'rst_TermsAsButtons')){
+               print $db_name.': rst_TermsAsButtons already exists';
+            }else{
+                //alter table
+                $query = "ALTER TABLE `defRecStructure` ADD `rst_TermsAsButtons` TinyInt( 1 ) DEFAULT '0' "
+                ." COMMENT 'If 1, term list fields are represented as buttons (if single value) or checkboxes (if repeat values)' "
+                .' AFTER `rst_SemanticReferenceURL`';
+                $res = $mysqli->query($query);
+                if(!$res){
+                    print $db_name.' Cannot modify defRecStructure to add rst_TermsAsButtons: '.$mysqli->error;
+                    return false;
+                }else{
+                    print $db_name.'<br>';
+                }
+            }    
+            
         }
     }
     print '[end report]';    

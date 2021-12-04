@@ -104,7 +104,7 @@ class DbDefRecStructure extends DbEntityBase
             $this->data['details'] = 'rst_ID,rst_RecTypeID,rst_DetailTypeID,rst_DisplayName'
             .',if(rst_DisplayHelpText is not null and (dty_Type=\'separator\' OR CHAR_LENGTH(rst_DisplayHelpText)>0),rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText'
             .',rst_RequirementType, rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue, rst_MaxValues'
-            .',rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_NonOwnerVisibility, rst_Status,rst_SemanticReferenceURL';
+            .',rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_NonOwnerVisibility, rst_Status,rst_SemanticReferenceURL,rst_TermsAsButtons';
             //dty_Type, rst_FilteredJsonTermIDTree/dty_JsonTermIDTree, rst_PtrFilteredIDs/dty_PtrTargetRectypeIDs 
         
         }else if(@$this->data['details']=='full'){
@@ -136,7 +136,8 @@ class DbDefRecStructure extends DbEntityBase
             //here we check for an override in the recTypeStrucutre for Pointer types which is a subset of the detailType dty_PtrTargetRectypeIDs
             "dty_PtrTargetRectypeIDs as rst_PtrFilteredIDs",
             "rst_CreateChildIfRecPtr", "rst_PointerMode", "rst_PointerBrowseFilter",
-            "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified","rst_SemanticReferenceURL",
+            "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified",
+            "rst_SemanticReferenceURL","rst_TermsAsButtons",
             "dty_TermIDTreeNonSelectableIDs",
             "dty_FieldSetRectypeID",
             "dty_Type");

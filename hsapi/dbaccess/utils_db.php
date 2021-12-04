@@ -1182,9 +1182,7 @@ error_log('UPDATED '.$session_id.'  '.$value);
             }
 
             
-            if(hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
-                $report[] = 'defRecStructure: rst_SemanticReferenceURL already exists';
-            }else{
+            if(!hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
                 //alter table
                 $query = "ALTER TABLE `defRecStructure` ADD `rst_SemanticReferenceURL` VARCHAR( 250 ) NULL "
                 ." COMMENT 'The URI to a semantic definition or web page describing this field used within this record type' "
@@ -1192,6 +1190,18 @@ error_log('UPDATED '.$session_id.'  '.$value);
                 $res = $mysqli->query($query);
                 if(!$res){
                     $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_SemanticReferenceURL', $mysqli->error);
+                    return false;
+                }
+            }  
+
+            if(!hasColumn($mysqli, 'defRecStructure', 'rst_TermsAsButtons')){
+                //alter table
+                $query = "ALTER TABLE `defRecStructure` ADD `rst_TermsAsButtons` TinyInt( 1 ) DEFAULT '0' "
+                ." COMMENT 'If 1, term list fields are represented as buttons (if single value) or checkboxes (if repeat values)' "
+                .' AFTER `rst_SemanticReferenceURL`';
+                $res = $mysqli->query($query);
+                if(!$res){
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_TermsAsButtons', $mysqli->error);
                     return false;
                 }
             }    

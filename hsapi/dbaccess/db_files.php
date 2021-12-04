@@ -777,7 +777,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
         */    
     }
     
-    if($params['fancybox']){
+    if(@$params['fancybox']){
         $result = '<div style="width:80%;height:90%">'.$result.'</div>';    
     }
     

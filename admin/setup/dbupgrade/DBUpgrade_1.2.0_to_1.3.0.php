@@ -216,7 +216,21 @@ $query = "CREATE TABLE defVocabularyGroups (
             $report[] = 'defRecStructure: rst_SemanticReferenceURL added';
         }    
 
-        
+        if(hasColumn($mysqli, 'defRecStructure', 'rst_TermsAsButtons')){
+            $report[] = 'defRecStructure: rst_TermsAsButtons already exists';
+        }else{
+            //alter table
+            $query = "ALTER TABLE `defRecStructure` ADD `rst_TermsAsButtons` TinyInt( 1 ) DEFAULT '0' "
+            ." COMMENT 'If 1, term list fields are represented as buttons (if single value) or checkboxes (if repeat values)' "
+            .' AFTER `rst_SemanticReferenceURL`';
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_TermsAsButtons', $mysqli->error);
+                return false;
+            }
+            $report[] = 'defRecStructure: rst_TermsAsButtons added';
+        }    
+
         //----------------------------        
         
         if(hasColumn($mysqli, 'defTerms', 'trm_SemanticReferenceURL')){
