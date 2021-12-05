@@ -197,6 +197,10 @@ title: "Overview"
                     if(data.node.key>0){
                           _refreshCurrentPage(data.node.key);
                           data.node.setActive( false );                        
+                          
+                          editCMS2.switchMode('page');        
+                          
+                          $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('highlightTopItem', data.node.key);
                     }
                 },
                 edit:{
@@ -253,7 +257,7 @@ title: "Overview"
                     //add,edit menu,edit page,remove
                     var actionspan = $('<div class="svs-contextmenu3" style="padding: 0px 20px 0px 0px;" data-parentid="'
                         +item.data.parent_id+'" data-menuid="'+menu_id+'">'
-                        +'<span class="ui-icon ui-icon-structure" title="Edit page"></span>'
+                        //since 12-05 +'<span class="ui-icon ui-icon-structure" title="Edit page"></span>'
                         +'<span class="ui-icon ui-icon-plus" title="Add new page/menu item"></span>'
                         +'<span class="ui-icon ui-icon-pencil" title="Edit menu record"></span>'
                         //+'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
@@ -327,7 +331,8 @@ title: "Overview"
                                      __editPageRecord(menuid);
                                 }
 
-                            }else if(ele.hasClass('ui-icon-structure')){
+                            }
+                            else if(ele.hasClass('ui-icon-structure')){ //not used - now any click on tree opens edit page
 
                                 editCMS2.switchMode('page');
                                 //open page structure 
@@ -471,8 +476,13 @@ title: "Overview"
     //
     function _highlightCurrentPage(){
         
-         if( $container.fancytree('instance')){
+        if(current_page_id==home_page_record_id){
+            $('.btn-website-homepage').css({'text-decoration':'underline'});
+        }else
+        if( $container.fancytree('instance')){
                 var tree = $container.fancytree('getTree');
+                
+                $('.btn-website-homepage').css({'text-decoration':'none'});
                 
                 tree.visit(function(node){
                     if(node.key==current_page_id){
@@ -481,7 +491,7 @@ title: "Overview"
                         $(node.li).find('.fancytree-title').css({'text-decoration':'none'});
                     }
                 });            
-         }
+        }
         
 
             /*
@@ -623,7 +633,7 @@ console.log('!!! '+current_page_id);
         if(!(page_id>0)) page_id = current_page_id;
         
         loadPageContent(page_id); //call global function from websiteScriptAndStyles
-        
+    
     }
 
     //

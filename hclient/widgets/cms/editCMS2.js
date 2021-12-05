@@ -110,21 +110,41 @@ function editCMS2(){
                             +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'"/>'
                             
                             +'<div id="treeWebSite" style="top:43px" class="ent_wrapper">'
-                                +'<div class="toolbarWebSite ent_header" style="padding:10px">'
+                                +'<div class="toolbarWebSite ent_header" style="height:85px;padding-top:15px;">'
                                 
-                                    +'<button title="Edit website properties (home page record)" class="btn-website-edit"/>'
-                                    +'<button title="Edit website home page" class="btn-website-homepage"/>'
-                                    +'<button  title="Add top level menu" class="btn-website-addpage"/>'
-                                    +'<span style="display:inline-block;padding:7px" class="heurist-helper1" '
+                                    +'<a href="#" class="btn-website-edit" style="padding-left:20px">'
+                                        +'<span class="ui-icon ui-icon-pencil"/>&nbsp;Configure website layout</a>'
+                                    +'<span style="display:inline-block;padding:7px 0 0 40px" class="heurist-helper1" '
                                         +'title="Select menu item and Dblclick (or F2) to edit menu title in place. Drag and drop to reorder menu">'
-                                        +'&nbsp;Drag menu items to re-order</span>'
-                                
+                                        +'Drag menu items to re-order</span><br>'
+                                    +'<span style="display:inline-block;padding:7px 0 7px 40px" class="heurist-helper1">'
+                                        +'Click to edit</span>'
+                                        
+                                    +'<div style="border-top:1px solid gray;padding:10px 8px">'                                            
+                                    +'<a href="#" title="Edit website home page" '
+                                        +'class="btn-website-homepage" style="text-decoration:none;">'
+                                        +'<span class="ui-icon ui-icon-home"/>&nbsp;Home page</a>'
+                                    //+'<button  title="Add top level menu" class="btn-website-addpage"/>'
+                                    +'</div>'     
+                                        
                                 +'</div>'
-                                +'<div class="treeWebSite ent_content_full" style="top:50px;padding:10px;"/>' //treeview - edit website menu
+                                
+                                +'<div class="treeWebSite ent_content_full" style="top:95px;padding:0px 10px;"/>' //treeview - edit website menu
                             +'</div>'
                             +'<div id="treePage" style="font-size:1.2em;top:43px" class="ent_wrapper">'
-                                +'<div class="treePage ent_content" style="top:0px;padding:10px;"/>' //treeview - edit page
-                                +'<div class="propertyView ent_content" style="top:0px;padding:10px;display:none"/>' //edit properties for element
+                            
+                                +'<div class="treePageHeader ent_header" style="height:85px;font-size:0.8em">'
+                                
+                                    +'<h2 class="truncate"></h2>'
+                                    +'<span style="display:inline-block;" class="heurist-helper1">'
+                                        +'Drag elements to re-order</span><br>'
+                                    +'<span style="display:inline-block;padding:7px 0px" class="heurist-helper1">'
+                                        +'Click to edit</span>'
+                                        
+                                +'</div>'
+                            
+                                +'<div class="treePage ent_content" style="top:95px;padding:10px;border-top:1px solid gray;"/>' //treeview - edit page
+                                +'<div class="propertyView ent_content" style="top:60px;padding:10px;border-top:1px solid gray;display:none"/>' //edit properties for element
                                 
                                 +'<div class="toolbarPage ent_footer" style="padding:10px;font-size:0.9em">'
                                     +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
@@ -189,8 +209,8 @@ function editCMS2(){
                     );
                     
                     
-                    editor_panel.find('.btn-website-homepage').button({icon:'ui-icon-structure'}).click(_editHomePage);
-                    editor_panel.find('.btn-website-edit').button({icon:'ui-icon-pencil'}).click(_editHomePageRecord);
+                    editor_panel.find('.btn-website-homepage').click(_editHomePage);
+                    editor_panel.find('.btn-website-edit').click(_editHomePageRecord);
                     editor_panel.find('.btn-website-addpage').button({icon:'ui-icon-plus'}).click(_addNewRootMenu);
                     
                     editor_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).click(_showWebSiteMenu);
@@ -368,8 +388,8 @@ function editCMS2(){
         }else{
             _layout_content = res;
             _initTreePage(_layout_content);
-            
         }
+        body.find('.treePageHeader > h2').text( options.record_id==home_page_record_id ? window.hWin.HR('Home Page') :opts.page_name );
         
         if(_editCMS_SiteMenu) _editCMS_SiteMenu.highlightCurrentPage();
     }
@@ -585,6 +605,8 @@ function editCMS2(){
     }
     
     function _hidePropertyView(){
+    
+        _layout_container.find('div[data-lid]').removeClass('cms-element-editing');                        
         
         if(_keep_EditPanelWidth>0){
             body.layout().sizePane('west', _keep_EditPanelWidth);    
@@ -597,7 +619,7 @@ function editCMS2(){
     }
 
     //
-    //
+    // mode - website or page
     //
     function _switchMode( mode, init_tinymce )
     {
@@ -967,6 +989,9 @@ function editCMS2(){
     function _showOverlayForElement( ele_ID ){
         if(ele_ID>0){
             var cms_ele = _layout_container.find('div#hl-'+ele_ID);
+            
+            if(cms_ele.hasClass('cms-element-editing')) return;
+            
             var pos = cms_ele.offset(); //realtive to document
             var pos2 = _layout_container.offset();
             var overlay_ele = $('.cms-element-overlay');//_layout_container.find('.cms-element-overlay[data-lid="'+ele_ID+'"]')
@@ -1173,6 +1198,9 @@ function editCMS2(){
         //1. show div with properties over treeview
         _panel_treePage.hide();
         _panel_propertyView.show();
+        _layout_container.find('.cms-element-overlay').css('visibility','hidden');
+        _layout_container.find('div[data-lid]').removeClass('cms-element-active');                        
+        _layout_container.find('div[id="hl-'+ele_id+'"]').addClass('cms-element-editing');
         
         if(body.layout().state['west']['outerWidth']<400){
             _keep_EditPanelWidth = body.layout().state['west']['outerWidth'];
@@ -1541,6 +1569,7 @@ function editCMS2(){
                         //window.hWin.HEURIST4.msg.showMsgFlash('saved');
 
                         if(_editCMS_SiteMenu && newname!=page_cache[options.record_id][DT_NAME]) {
+                            body.find('.treePageHeader > h2').text( newname ); 
                             _editCMS_SiteMenu.renameMenuEntry(options.record_id, newname);
                         }
                         

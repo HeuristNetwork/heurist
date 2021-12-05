@@ -457,24 +457,31 @@ $.widget( "heurist.navigation", {
         }else if(data.page_id>0){
 
             //highlight top most menu
-            var ele = $(event.target).parents('.ui-menu-item');
-            this.divMainMenuItems.find('a').removeClass('selected');
-            $(ele[ele.length-1].firstChild).addClass('selected');    
-            /*
-            $.each(ele, function (idx, item){
-            if($(item).parent().hasClass('ui-menu')){ //top most
-            that.divMainMenuItems.find('a').removeClass('selected');
-            $(item).children('a').addClass('selected');    
-            return false;
-            }
-            });
-            */
-
+            this.highlightTopItem(data.page_id);
 
             this._onMenuItemAction(data);                
 
         }
 
+    },
+    
+    //
+    // highlight top most menu
+    //
+    highlightTopItem: function(page_id){
+        
+        //dim all
+        this.divMainMenuItems.find('a').removeClass('selected');
+        
+        //find item
+        if(page_id>0){
+            var ele = this.element.find('a[data-pageid="'+page_id+'"]');
+            if(true || !ele.hasClass('.ui-menu-item')){
+                ele = ele.parents('.ui-menu-item');    
+            }
+            if(ele.length>0)
+                $(ele[ele.length-1].firstChild).addClass('selected');    
+        }
     },
     
     //

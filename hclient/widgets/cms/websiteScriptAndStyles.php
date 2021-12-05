@@ -189,8 +189,12 @@ if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in website
 .cms-element-active{
     -webkit-box-shadow: inset 0px 0px 38px 10px rgb(201, 194, 249), 0px 0px 8px 10px rgba(0,0,0,0);
     box-shadow: inset 10px 10px 124px 14px rgb(201, 194, 249), 0px 0px 8px 10px rgba(0,0,0,0);
-    
 }   
+.cms-element-editing{
+    -webkit-box-shadow: inset 0px 0px 0px 5px rgb(201, 194, 249);
+    box-shadow: inset 0px 0px 0px 5px rgb(201, 194, 249);
+}   
+
 /*     box-shadow: inset 0px 0px 38px 10px rgb(201, 194, 249), 0px 0px 8px 10px rgba(0,0,0,0); */
 .cms-element-overlay{
   visibility: hidden;
@@ -330,9 +334,7 @@ _time_debug = new Date().getTime() / 1000;
             __onInitComplete();
             
         }else{
-            
             initMainMenu( __onInitComplete );
-            
         }
         
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
@@ -419,7 +421,7 @@ if($site_css!=null){
                 if(isCMS_active){
                     $('#btnOpenCMSeditor').hide();
                     if(!editCMS_instance2) editCMS_instance2 = editCMS2();
-                    
+
                     if (! editCMS_instance2.startCMS({record_id:pageid, container:'#main-content',
                                     close: function(){
                                         isCMS_active = false;
@@ -433,6 +435,7 @@ if($site_css!=null){
                 }else{
                     layoutMgr.layoutInit( page_cache[pageid][DT_EXTENDED_DESCRIPTION], '#main-content', supp_options );    
                 }
+                
                 
                 current_page_id = pageid;
                 
