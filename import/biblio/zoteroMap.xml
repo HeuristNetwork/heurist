@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <map>
 <zoteroVersion value="3.0.11.SOURCE"/>
 <date value="Mon, 14 Jan 2013 01:27:38 GMT"/>
@@ -10,7 +11,7 @@
 <field label="Date" value="date"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
-<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
+<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah -->
 <field label="Language" value="language"/>
 <field label="Rights" value="rights" h-id="2-35"/>
 <field label="Extra" value="extra" h-id="2-4"/>
@@ -531,7 +532,6 @@
 <!--
     *OTHER ZOTERO TYPES THAT ARE NOT IN HEURIST
 
-
 <typeMap zType="note" cslType="">
 </typeMap>
 <typeMap zType="letter" cslType="personal_communication">
@@ -542,7 +542,9 @@
 <field label="Language" value="language" />
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
-<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
+
+<field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah 
+ 
 <field label="Archive" value="archive" />
 <field label="Loc. in Archive" value="archiveLocation" />
 <field label="Library Catalog" value="libraryCatalog" />
@@ -726,7 +728,7 @@
 <field label="Language" value="language"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
-<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
+        <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah
 <field label="Rights" value="rights" h-id="2-35"/>
 <field label="Extra" value="extra" h-id="2-4"/>
 <field value="creator" >
@@ -814,7 +816,7 @@
 <field label="Language" value="language"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
-<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
+      <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah
 <field label="Rights" value="rights" h-id="2-35"/>
 <field label="Extra" value="extra" h-id="2-4"/>
 <field value="creator" >
@@ -888,7 +890,7 @@
 <field label="Pages" value="pages" h-id="3-1001"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
-<!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
+     <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah
 <field label="Archive" value="archive"/>
 <field label="Loc. in Archive" value="archiveLocation"/>
 <field label="Library Catalog" value="libraryCatalog"/>
@@ -931,6 +933,4 @@
 <creatorType label="Director" value="director"/>
 </field>
 </typeMap>
-
-
 -->
