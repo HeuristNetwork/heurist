@@ -2802,6 +2802,13 @@ for resource id=>rec_ID, type=>rec_RecTypeID, title=>rec_Title
 for geo   geo => array(type=> , wkt=> )
 
 */
+/**
+* Adds details element to $record array (by reference)
+* 
+* @param mixed $system
+* @param mixed $record - record array - details to be added
+* @param mixed $need_details - array of dty_ID or dty_Type
+*/
 function recordSearchDetails($system, &$record, $need_details) {
 
     $recID = $record["rec_ID"];
@@ -2823,14 +2830,14 @@ function recordSearchDetails($system, &$record, $need_details) {
 
     if(is_array($need_details) && count($need_details)>0 ){
 
-        if(is_numeric($need_details[0]) && $need_details[0]>0){ //
+        if(is_numeric($need_details[0]) && $need_details[0]>0){ //by id
             if(count($need_details)==1){
                 $squery = $squery. ' AND dtl_DetailTypeID = '.$need_details[0];
             }else{
                 $squery = $squery. ' AND dtl_DetailTypeID in ('.implode(',',$need_details).')';    
             }
 
-        }else{
+        }else{ //by type
             $squery = $squery. ' AND dty_Type in ("'.implode('","',$need_details).'")';
         }
     }

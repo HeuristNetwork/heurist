@@ -665,7 +665,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
     
     if($style==null) $style='';
 
-    if($external_url && strpos($external_url,'http://')!==0){
+    if($external_url && strpos($external_url,'http://')!==0){ //download non secure external resource via heurist
         $filepath = $external_url;  //external 
     }else{
         //to itself

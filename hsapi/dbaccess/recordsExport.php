@@ -38,6 +38,7 @@ class RecordsExport {
     private static $system = null;
     private static $mysqli = null;
     private static $initialized = false;
+    private static $version = 3;
     
     private static $defRecTypes = null;
     private static $defDetailtypes = null;
@@ -55,6 +56,7 @@ private static function initialize()
     self::$system  = $system;
     self::$mysqli = $system->get_mysqli();
     self::$initialized = true;
+    self::$version = 3;
 }
 
 //
@@ -72,7 +74,7 @@ public static function setSession($system){
 // $data - recordSearch response
 //
 // $params: 
-//    format - json|geojson|xml|gephi
+//    format - json|geojson|xml|gephi|iiif
 //    linkmode = direct, direct_links, none, all
 //    defs  0|1  include database definitions
 //    file  0|1
@@ -83,6 +85,9 @@ public static function setSession($system){
 //    tlcmap 0|1  convert tlcmap records to layer
 //    restapi 0|1  - json output in format {records:[]}
 //
+// prefs for iiif
+//     version 2 or 3(default) 
+
 // prefs for geojson, json
 //    extended 0 as is (in heurist internal format), 1 - interpretable, 2 include concept code and labels
 //
@@ -180,6 +185,64 @@ public static function output($data, $params){
             //@todo xml for api
             fwrite($fd, '{"records":[');             
         }
+
+    }else if($params['format']=='iiif'){
+        
+        self::$version = (@$params['version']==2 || @$params['v']==2)?2:3;
+        
+        $manifest_uri = self::gen_uuid();
+            
+        if(self::$version==2){
+
+        $sequence_uri = self::gen_uuid();
+            
+    $iiif_header = <<<IIIF
+{
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@id": "http://$manifest_uri",
+    "@type": "sc:Manifest",
+    "label": "Heurist IIIF manifest",
+    "metadata": [],
+    "description": [
+        {
+            "@value": "[Click to edit description]",
+            "@language": "en"
+        }
+    ],
+    "license": "https://creativecommons.org/licenses/by/3.0/",
+    "attribution": "[Click to edit attribution]",
+    "sequences": [
+        {
+            "@id": "http://$sequence_uri",
+            "@type": "sc:Sequence",
+            "label": [
+                {
+                    "@value": "Normal Sequence",
+                    "@language": "en"
+                }
+            ],
+            "canvases": [
+IIIF;
+        }else{
+    
+    $iiif_header = <<<IIIF
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://$manifest_uri",
+  "type": "Manifest",
+  "label": {
+    "en": [
+      "Heurist IIIF manifest"
+    ]
+  },
+  "items": [
+IIIF;
+            
+        }
+        
+        fwrite($fd, $iiif_header);
+        
+        $params['depth'] = 0;
         
     }else if($params['format']=='json'){
         
@@ -285,6 +348,7 @@ XML;
     $layers_record_ids = [];
     
     $comma = '';
+    $cnt = 0;
     
     //
     // in case depth>0 gather all linked and related record ids with given depth
@@ -329,6 +393,10 @@ XML;
     $row_placeholder = array();
     $need_rec_type = false;
     
+    if($params['format']=='iiif'){
+        $retrieve_detail_fields = array('file');
+        $retrieve_header_fields = 'rec_ID,rec_RecTypeID,rec_Title';
+    }else
     if(@$params['leaflet']){
         //for leaflet get only limited set of fields 
         $retrieve_header_fields = 'rec_ID,rec_RecTypeID,rec_Title';
@@ -518,6 +586,17 @@ XML;
                 fwrite($fd, $comma.json_encode($record)); //as is
             }
             $comma = ',';
+
+
+        }else if($params['format']=='iiif'){ 
+            
+            $canvas = self::_getIiifCanvas($record);
+            if($canvas && $canvas!=''){
+                fwrite($fd, $comma.$canvas);
+                $comma = ",\n";
+                $cnt++;
+            }
+            if($cnt>1000) break;
             
         }else if($params['format']=='gephi'){ 
             
@@ -602,6 +681,14 @@ XML;
     }else if($params['format']=='json' && @$params['datatable']>0){
         
         fwrite($fd, ']}');     
+        
+    }else if($params['format']=='iiif'){
+
+        if(self::$version==2){        
+            fwrite($fd, ']}],"structures": []}'); 
+        }else{
+            fwrite($fd, ']}');    
+        }
         
     }else{  //json or xml 
     
@@ -772,14 +859,20 @@ XML;
         }else{
             //$content = file_get_contents($tmp_destination);
 
-            if($params['format']=='json' || $params['format']=='geojson'){
+            if($params['format']=='json' || $params['format']=='geojson' || $params['format']=='iiif'){
                 header( 'Content-Type: application/json');    
             }else{
                 header( 'Content-Type: text/xml');
             }
         
             if(@$params['file']==1 || @$params['file']===true){
-                $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.'.$params['format'];
+                
+                if($params['format']=='iiif'){
+                    $filename = 'manifest_'.$params['db'].'_'.date("YmdHis").'.json';
+                }else{
+                    $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.'.$params['format'];    
+                }
+                
                 header('Content-Disposition: attachment; filename='.$filename);
                 header('Content-Length: ' . self::get_file_size($tmp_destination));
             }
@@ -1417,6 +1510,171 @@ private static function _getJsonFeature($record, $mode){
 }
 
 
+//
+// convert heurist record to iiif canvas json
+// 
+// return null if not media content found
+//
+private static function _getIiifCanvas($record){
+
+    $canvas = '';    
+    $comma = '';
+    $info = array();
+    $label = strip_tags($record['rec_Title']);
+    $rectypeID = $record['rec_RecTypeID'];
+    
+    //1. get "file" field values
+    foreach ($record['details'] as $dty_ID=>$field_details) {
+        foreach($field_details as $dtl_ID=>$file){
+            array_push($info, $file['file']);
+        }
+    }
+    
+    //2. get file info
+    if(count($info)>0){
+        //$info = fileGetFullInfo(self::$system, $file_ids);
+    
+        foreach($info as $fileinfo){
+    
+        $mimeType = $fileinfo['fxm_MimeType'];
+    
+        $resource_type = null;
+
+        if(strpos($mimeType,"video/")===0){
+            if(strpos($mimeType,"youtube")>0 || strpos($mimeType,"vimeo")>0) continue;
+            
+            $resource_type = 'Video';
+        }else if(strpos($mimeType,"audio/")===0){
+            
+            if(strpos($mimeType,"soundcloud")>0) continue;
+
+            $resource_type = 'Sound';
+        }else if(strpos($mimeType,"image/")===0){
+            $resource_type = 'Image';
+        }
+    
+        if ((self::$version==2 && $resource_type!='Image') || ($resource_type==null)){
+            continue;
+        }
+        
+        $fileid = $fileinfo['ulf_ObfuscatedFileID'];
+        $external_url = $fileinfo['ulf_ExternalFileReference'];
+        if($external_url && strpos($external_url,'http://')!==0){ //download non secure external resource via heurist
+            $resource_url = $external_url;  //external 
+        }else{
+            //to itself
+            $resource_url = HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&file=".$fileid;
+        }
+        
+        $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
+        if(file_exists($thumbfile)){
+            $tumbnail_url = HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&thumb=".$fileid;
+        }else{
+            $tumbnail_url = HEURIST_ICON_URL.$rectypeID.'&version=thumb';
+        }
+        
+    
+        $canvas_uri = self::gen_uuid(); //uniqid('',true); 
+
+        $tumbnail_height = 200;
+        $tumbnail_width = 200;
+        $height = 800;
+        $width = 1000;
+
+        if(self::$version==2){
+
+$item = <<<CANVAS2
+{
+        "@id": "http://$canvas_uri",
+        "@type": "sc:Canvas",
+        "label": "$record_title",
+        "height": $height,
+        "width": $width,
+        "thumbnail" : {
+                "@id" : "$tumbnail_url",
+                "height": $tumbnail_height,
+                "width": $tumbnail_width
+         }, 
+        "images": [
+            {
+                "@type": "oa:Annotation",
+                "motivation": "sc:painting",
+                "resource": {
+                    "@id": "$resource_url",
+                    "@type": "dctypes:$resource_type",
+                    "format": "$mimeType"
+                },
+                "on": "http://$canvas_uri"
+            }
+        ]
+  }
+CANVAS2;
+    
+//                    "height": $height,
+//                    "width": $width
+      }else{
+    
+//$annotation_uri = self::gen_uuid();
+//  "duration": 5,
+    
+$item = <<<CANVAS3
+{
+      "id": "https://$canvas_uri",
+      "type": "Canvas",
+      "label": "$label",
+                "height": $height,
+                "width": $width,
+      "items": [
+        {
+          "id": "https://$canvas_uri/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://$canvas_uri/page/annotation",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "$resource_url",
+                "type": "$resource_type",
+                "format": "$mimeType"
+              },
+              "target": "https://$canvas_uri"
+            }
+          ]
+        }
+      ],
+      "thumbnail": [
+        {
+          "id": "$tumbnail_url",
+          "type": "Image",
+          "format": "image/png",
+          "width": $tumbnail_width,
+          "height": $tumbnail_height
+        }
+      ]    
+
+}
+CANVAS3;            
+
+/*
+                "height": $height,
+                "width": $width,
+                "duration": 5,
+*/
+        }
+        
+        
+        $canvas = $canvas.$comma.$item;
+        $comma =  ",\n";
+        
+        }//for
+    
+    }//count($file_ids)>0
+    
+    
+    return $canvas;
+}
+
 
 //
 // json to xml
@@ -1433,6 +1691,36 @@ private static function _array_to_xml( $data, &$xml_data ) {
             $xml_data->addChild("$key",htmlspecialchars("$value"));
         }
      }
+}
+
+
+private static function gen_uuid2() {
+    return vsprintf( '%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex(random_bytes(16)), 4) );
+}
+
+//
+//
+//
+private static function gen_uuid() {
+    return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+        // 32 bits for "time_low"
+        mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
+
+        // 16 bits for "time_mid"
+        mt_rand( 0, 0xffff ),
+
+        // 16 bits for "time_hi_and_version",
+        // four most significant bits holds version number 4
+        mt_rand( 0, 0x0fff ) | 0x4000,
+
+        // 16 bits, 8 bits for "clk_seq_hi_res",
+        // 8 bits for "clk_seq_low",
+        // two most significant bits holds zero and one for variant DCE1.1
+        mt_rand( 0, 0x3fff ) | 0x8000,
+
+        // 48 bits for "node"
+        mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
+    );
 }
 
 

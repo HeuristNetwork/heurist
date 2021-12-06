@@ -214,12 +214,14 @@ regional['en'] = {
         menu_export_geojson: 'GeoJSON',
         menu_export_kml: 'KML',
         menu_export_gephi: 'GEPHI',
+        menu_export_iiif: 'IIIF',
         menu_export_csv_hint: 'Export records as delimited text (comma/tab), applying record type',
         menu_export_hml_resultset_hint: 'Generate HML (Heurist XML format) for current set of search results (current query + expansion)',
         menu_export_json_hint: 'Generate JSON for current set of search results (current query)',
         menu_export_geojson_hint: 'Generate GeoJSON_T for current set of search results (current query)',
         menu_export_kml_hint: 'Generate KML for current set of search results (current query + expansion)',
         menu_export_gephi_hint: 'Generate GEPHI for current set of search results (current query + expansion)',
+        menu_export_iiif_hnt: 'Generate IIIF manifest for current set of search results',
         
     'Safeguard':'',
 

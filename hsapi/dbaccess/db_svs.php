@@ -295,7 +295,7 @@
                         return false;
                     }
                 }else{
-                    $system->addError(HEURIST_DB_ERROR,"Cannot delete saved search", $mysqli->error );
+                    $system->addError(HEURIST_DB_ERROR,'Cannot delete saved search', $query.' '.$mysqli->error );
                     return false;
                 }
 

@@ -55,7 +55,15 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
             var btns = this._getActionButtons();
 
             for(var idx in btns){
-                this._defineActionButton2(btns[idx], (this.options.format!='kml' ? this.toolbar : this.element.find('.kml-buttons')));
+                
+                var $cont = this.toolbar;
+                if(this.options.format=='kml'){
+                    $cont = this.element.find('.kml-buttons');
+                }else if (this.options.format=='iiif'){
+                    $cont = this.element.find('.iiif-buttons');
+                }
+                
+                this._defineActionButton2(btns[idx], $cont);
             }
         }
         
@@ -65,6 +73,9 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
         if(this.options.format=='kml'){
             this.element.find('.ent_content').hide();
             this.element.find('.kml-info').show();
+        }else if(this.options.format=='iiif'){
+            this.element.find('.ent_content').hide();
+            this.element.find('.iiif-info').show();
         }
         
 

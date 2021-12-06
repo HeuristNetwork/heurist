@@ -125,6 +125,17 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <label style="font-size:smaller;"><input type="checkbox" id="limitGEPHI"/>&nbsp;&nbsp;Limit gephi output with 1000 nodes</label>
         </div>
 
+        <div id="menu-export-iiif" class="export-item">
+            <button class="export-button">IIIF</button>
+            <a href="#" oncontextmenu="return false;" 
+                data-logaction="exp_IIIF"  style="padding-right:30px"
+                data-action="menu-export-iiif"
+                title="Generate IIIF manifest">
+                <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span>
+                <span class="ui-icon ui-icon-extlink export-popup mirador"></span><span class="export-popup mirador" style="padding-right:10px">open in Mirador</span>
+                IIIF</a>
+        </div>
+        
         <div id="menu-export-hml-multifile" class="export-item">
             <button class="export-button">HuNI</button>
             <a href="#" oncontextmenu="return false;" 

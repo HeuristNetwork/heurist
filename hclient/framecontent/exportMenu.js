@@ -74,6 +74,11 @@ function hexportMenu( container ) {
                         var ele = $(event.target);
                         if(ele.is('span')){
                             save_as_file = false;
+                            
+                            if(ele.hasClass('mirador')){
+                                save_as_file = 'mirador';
+                            }
+                            
                             ele = ele.parent();
                         }
                         var action = ele.attr('data-action');
@@ -241,6 +246,9 @@ function hexportMenu( container ) {
         }else if(action == "menu-export-gephi"){ 
             _exportRecords({format:'gephi', save_as_file:save_as_file});
 
+        }else if(action == "menu-export-iiif"){
+            _exportRecords({format:'iiif', save_as_file:save_as_file});
+            
         }else if(action == "menu-export-kml"){
             _exportKML(true, save_as_file);
         }else if(action == "menu-export-rss"){ //hidden
@@ -304,7 +312,7 @@ function hexportMenu( container ) {
                 if(isEntireDb){
                     params =  'depth=0';
                 }else {
-                    if(opts.questionResolved!==true){
+                    if(opts.format!='iiif' && opts.questionResolved!==true){
                         var $expdlg = window.hWin.HEURIST4.msg.showMsgDlg(
 '<p>The records you are exporting may contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'                
 //+'<p>Heurist follows the chain of related records, which will be included in the XML or JSON output. The total number of records exported will therefore exceed the results count indicated.</p>'
@@ -364,15 +372,26 @@ function hexportMenu( container ) {
                 params =  params + (opts.multifile?'&multifile=1':'');  
                
             }else{
-                script = 'hsapi/controller/record_output.php';
-                params = params + '&format='+opts.format+'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
                 
-                if(opts.format=='gephi' && $('#limitGEPHI').is(':checked')){
-                    params = params + '&limit=1000';    
+                script = 'hsapi/controller/record_output.php';
+                
+                if(opts.format=='iiif'){
+                    
+                        params = 'format=iiif';
+                        
+                        if(opts.save_as_file==='mirador'){
+                                script = 'hclient/widgets/viewers/miradorViewer.php'
+                        }
+                }else{
+                        params = params + '&format='+opts.format+'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
+                    
+                        if(opts.format=='gephi' && $('#limitGEPHI').is(':checked')){
+                            params = params + '&limit=1000';    
+                        }
                 }
             }
             
-            if(opts.save_as_file){          
+            if(opts.save_as_file===true){          
                 params = params + '&file=1'; //save as file
             }
                 
@@ -387,13 +406,16 @@ function hexportMenu( container ) {
             (ptrFilter ? "&" + ptrFilter : "") +*/
             "&db=" + window.hWin.HAPI4.database
             +'&'+params;
-
-            window.open(url, '_blank');
+            
+            window.open(url, '_blank');    
         }
 
         return false;
     }
-     
+    
+    //
+    //
+    //
     function _exportKML(isAll, save_as_file){
 
         var q = "";

@@ -138,6 +138,8 @@ $.widget( "heurist.resultList", {
     
     _grp_keep_status:{}, //expanded groups
     
+    _mediaViewer_list: [],
+    
     // the constructor
     _create: function() {
 

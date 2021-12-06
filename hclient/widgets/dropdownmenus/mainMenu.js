@@ -1037,6 +1037,12 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             that._exportRecords(popup_dialog_options);
             
         }else 
+        if(action == "menu-export-iiif"){
+            
+            popup_dialog_options.format = 'iiif';
+            that._exportRecords(popup_dialog_options);
+            
+        }else 
         if(action == "menu-import-add-record"){
             
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd');
