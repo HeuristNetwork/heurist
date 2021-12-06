@@ -260,7 +260,7 @@ class DbDefDetailTypes extends DbEntityBase
                 }
             }else{
                 //if enum or relmarker prevents vocabulary changing if there are records with this fieldtype
-                if($this->records[$idx]['dty_Type']=='enum' || $this->records[$idx]['dty_Type']=='relmarker'){
+                if(@$this->records[$idx]['dty_Type']=='enum' || @$this->records[$idx]['dty_Type']=='relmarker'){
                     
                     //get current vocabulary
                     $curr_vocab_id = mysql__select_value($mysqli,

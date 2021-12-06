@@ -831,7 +831,7 @@ class DbEntityBase
     //
     protected function prepareRecords(){
         //fields contains record data
-        if(is_string($this->data['fields'])){
+        if(@$this->data['fields'] && is_string($this->data['fields'])){
             $this->data['fields'] = json_decode($this->data['fields'], true);
         }
         
