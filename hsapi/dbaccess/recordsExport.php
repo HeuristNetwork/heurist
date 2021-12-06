@@ -1653,8 +1653,8 @@ $item = <<<CANVAS3
         }
       ]    
 
-}
-CANVAS3;            
+ }
+CANVAS3;
 
 /*
                 "height": $height,
