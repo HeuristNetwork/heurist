@@ -28,8 +28,14 @@
             $_SERVER['SERVER_PORT'] === 80 ? '' : ':'.$_SERVER['SERVER_PORT'])));
 
         $url = $url . '/' .  $_SERVER['REQUEST_URI'];  
-    
-        $url = str_replace('hclient/widgets/viewers/miradorViewer.php','hsapi/controller/record_output.php',$url);
+        
+        if($_REQUEST['manifest']){
+            $url = str_replace('hclient/widgets/viewers/miradorViewer.php','', $url);
+            $url = str_replace($_SERVER['QUERY_STRING'],'db='.$_REQUEST['db'].'&file='.$_REQUEST['manifest'],$url);
+        }else{
+            $url = str_replace('hclient/widgets/viewers/miradorViewer.php','hsapi/controller/record_output.php', $url);
+            
+        }
     
     //$_SERVER['QUERY_STRING'];
         $manifest_url = $url;

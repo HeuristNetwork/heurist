@@ -30,6 +30,12 @@
 * @subpackage  Records/View
 */  
 
+if(count($_REQUEST)>900){
+    error_log('TOO MANY _REQUEST PARAMS '.count($_REQUEST).' renderRecordData');
+    error_log(print_r(array_slice($_REQUEST, 0, 100),true));
+}    
+
+
 require_once(dirname(__FILE__)."/../../hsapi/System.php");
 require_once(dirname(__FILE__).'/../../hsapi/utilities/Temporal.php');
 
@@ -107,7 +113,7 @@ if(!($is_map_popup || $without_header)){
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>h4styles.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo HEURIST_BASE_URL;?>h4styles.css">
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
 
@@ -311,7 +317,10 @@ if(!($is_map_popup || $without_header)){
             $(document).ready(function() {
                 showHidePrivateInfo(null);
                 
-                $('.thumbnail2').mediaViewer({rec_Files:rec_Files, showLink:true})
+                var baseURL = '<?php echo HEURIST_BASE_URL;?>';                
+                var database = '<?php echo HEURIST_DBNAME;?>';                
+                
+                $('.thumbnail2').mediaViewer({rec_Files:rec_Files, showLink:true, database:database, baseURL:baseURL});
             });
             
             /*NOT USED
@@ -424,7 +433,7 @@ if(!($is_map_popup || $without_header)){
 
         <script type="text/javascript" src="../../viewers/gmap/mapViewer.js"></script>
         <script>
-            baseURL = "<?=HEURIST_BASE_URL?>viewers/gmap/mapStatic.php?width=300&height=300&db=<?=HEURIST_DBNAME?>";
+            baseURL = "<?php echo HEURIST_BASE_URL;?>viewers/gmap/mapStatic.php?width=300&height=300&db=<?php echo HEURIST_DBNAME;?>";
         </script>
 
         <?php
@@ -626,7 +635,7 @@ function print_header_line($bib) {
                  ID:<?= htmlspecialchars($bib['rec_ID']) ?>
                 <span class="link"><a id=edit-link class="normal"
                             onClick="return sane_link_opener(this);"
-                            target=_new href="<?php echo HEURIST_BASE_URL?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
+                            target=_new href="<?php echo HEURIST_BASE_URL;?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
                             <img class="rv-editpencil" src="../../hclient/assets/edit-pencil.png" title="Edit record" style="vertical-align: bottom"></a>
                 </span>
             </div>

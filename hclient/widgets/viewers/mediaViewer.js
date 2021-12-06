@@ -24,12 +24,24 @@ $.widget( "heurist.mediaViewer", {
     options: {
         rec_Files: null, //array of objects {id ,mimeType,filename,extrernal}
         openInPopup: true, //show video in popup
-        showLink: false // show link to open full view in new tab or download
+        showLink: false, // show link to open full view in new tab or download
+        baseURL: null,
+        database: null
     },
 
     // the constructor
     _create: function() {
         this.mediacontent = this.element;
+        
+        if(window.hWin && window.hWin.HAPI4){
+            if(!this.options.baseURL){
+                this.options.baseURL = window.hWin.HAPI4.baseURL;
+            }
+            if(!this.options.database){
+                this.options.database = window.hWin.HAPI4.database;
+            }
+        }
+        
         this._renderFiles();
     }, //end _create
 
@@ -77,10 +89,10 @@ $.widget( "heurist.mediaViewer", {
                     if(!filetitle) filetitle = title;
                     if(!mimeType) mimeType = '';
 
-                    var fileURL = window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database //+ (needplayer?'&player=1':'')
+                    var fileURL = this.options.baseURL+'?db=' + this.options.database //+ (needplayer?'&player=1':'')
                                  + '&file='+obf_recID;
 
-                    var thumbURL = window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database 
+                    var thumbURL =  this.options.baseURL+'?db=' +  this.options.database 
                                  + '&thumb='+obf_recID
 
 
@@ -98,18 +110,18 @@ $.widget( "heurist.mediaViewer", {
                     
                     if(filename === '_iiif'){
                         
-                        external_url = window.hWin.HAPI4.baseURL + "hclient/widgets/viewers/miradorViewer.html?db=" 
-                                 + window.hWin.HAPI4.database
-                                 + '&file='+obf_recID;
+                        external_url =  this.options.baseURL + "hclient/widgets/viewers/miradorViewer.php?db=" 
+                                 +  this.options.database
+                                 + '&manifest='+obf_recID;
                         
                         this._on($alink,{click:function(e){
                              
       var obf_recID = $(e.target).attr('data-id');
-      var url = window.hWin.HAPI4.baseURL + "hclient/widgets/viewers/miradorViewer.html?db=" + window.hWin.HAPI4.database
-                                 + '&file='+obf_recID;                            
+      var url =  this.options.baseURL + "hclient/widgets/viewers/miradorViewer.php?db=" +  this.options.database
+                                 + '&manifest='+obf_recID;                            
                                  
 //console.log(url)                                 
-      if(true){
+      if(window.hWin && window.hWin.HEURIST4){
             //borderless:true, 
             window.hWin.HEURIST4.msg.showDialog(url, {dialogid:'mirador-viewer',
                                 resizable:false, draggable: false, maximize:true, //width:'100%',height:'100%',
@@ -127,9 +139,9 @@ $.widget( "heurist.mediaViewer", {
                     }else 
                     if(false && mimeType=='application/pdf'){
 
-                        var fileURL_forembed = window.hWin.HAPI4.baseURL
+                        var fileURL_forembed =  this.options.baseURL
                                 + 'hsapi/controller/file_download.php?db=' 
-                                + window.hWin.HAPI4.database + '&embedplayer=1&file='+obf_recID;
+                                +  this.options.database + '&embedplayer=1&file='+obf_recID;
                                 
                         /* inline html  */
                         $('<div style="display:none;width:80%;height:90%" id="pdf-viewer">'
@@ -202,20 +214,25 @@ $.widget( "heurist.mediaViewer", {
 
             this.mediacontent.show();
 
+            var fancy_opts = { selectorParentEl: $('body'), 
+                                selector : 'a[data-myfancybox="fb-images"]', 
+                                loop:true};
+            
             
             if(window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ // && $.isFunction($.fancybox)
 //console.log('>>>> '+$.isFunction($.fancybox)+'  '+$.isFunction($.fn.fancybox));                
                     //$(window.hWin.document)
                     $('body').unbind('click.fb-start');
-                    window.hWin.HAPI4.fancybox({ selectorParentEl: $('body'), 
-                                selector : 'a[data-myfancybox="fb-images"]', 
-                                loop:true});
+                    window.hWin.HAPI4.fancybox( fancy_opts );
 /*                
                     var container_id = this.mediacontent.attr('id');
                     $.fancybox({
                                 selector : '#'+container_id+' > a[data-myfancybox="fb-images"]', 
                                 loop:true});
 */                                
+            }else if ($.isFunction($.fancybox)){
+                    $('body').unbind('click.fb-start');
+                    $.fancybox( fancy_opts );
             }
             
             // /\/redirects\/file_download.php\?db=(?:\w+)&id=(?:\w+)$/i});
