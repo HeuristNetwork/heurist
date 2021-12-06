@@ -120,8 +120,8 @@ if(!($is_map_popup || $without_header)){
         <script type="text/javascript" src="../../hclient/core/hintDiv.js"></script> <!-- for mapviewer roolover -->
         <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
         
-        <!--
         <link rel="stylesheet" type="text/css" href="../../external/jquery.fancybox/jquery.fancybox.css" />
+        <!--
         <script type="text/javascript" src="../../external/jquery.fancybox/jquery.fancybox.js"></script>
         -->
         <script type="text/javascript" src="../../hclient/widgets/viewers/mediaViewer.js"></script>
@@ -319,8 +319,15 @@ if(!($is_map_popup || $without_header)){
                 
                 var baseURL = '<?php echo HEURIST_BASE_URL;?>';                
                 var database = '<?php echo HEURIST_DBNAME;?>';                
+
+                if(window.hWin && window.hWin.HAPI4){
+                    $('.thumbnail2').mediaViewer({rec_Files:rec_Files, showLink:true, database:database, baseURL:baseURL});    
+                }else{
+                    $.getScript(baseURL+'external/jquery.fancybox/jquery.fancybox.js', function(){
+                        $('.thumbnail2').mediaViewer({rec_Files:rec_Files, showLink:true, database:database, baseURL:baseURL});
+                    });
+                }
                 
-                $('.thumbnail2').mediaViewer({rec_Files:rec_Files, showLink:true, database:database, baseURL:baseURL});
             });
             
             /*NOT USED

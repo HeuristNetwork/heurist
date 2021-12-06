@@ -218,7 +218,6 @@ $.widget( "heurist.mediaViewer", {
                                 selector : 'a[data-myfancybox="fb-images"]', 
                                 loop:true};
             
-            
             if(window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ // && $.isFunction($.fancybox)
 //console.log('>>>> '+$.isFunction($.fancybox)+'  '+$.isFunction($.fn.fancybox));                
                     //$(window.hWin.document)
@@ -230,9 +229,9 @@ $.widget( "heurist.mediaViewer", {
                                 selector : '#'+container_id+' > a[data-myfancybox="fb-images"]', 
                                 loop:true});
 */                                
-            }else if ($.isFunction($.fancybox)){
+            }else if ($.isFunction($.fn.fancybox)){
                     $('body').unbind('click.fb-start');
-                    $.fancybox( fancy_opts );
+                    $.fn.fancybox( fancy_opts );
             }
             
             // /\/redirects\/file_download.php\?db=(?:\w+)&id=(?:\w+)$/i});
