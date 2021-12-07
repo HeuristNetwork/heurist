@@ -156,6 +156,7 @@ $.widget( "heurist.search_faceted", {
         is_publication: false
     },
     
+    _current_query_request_id:null,
 
     cached_counts:[], //stored results of get_facets by stringified query index
     _input_fields:{},
@@ -185,6 +186,10 @@ $.widget( "heurist.search_faceted", {
         
         if(this.element.parents('.mceNonEditable').length>0){
             this.options.is_publication = true;
+        }
+        
+        if(!this.element.attr('id')){
+            this.element.uniqueId();
         }
         
         this._use_multifield = window.hWin.HAPI4.database=='johns_hamburg' &&
@@ -282,8 +287,6 @@ $.widget( "heurist.search_faceted", {
         .css({"overflow-y":"auto","overflow-x":"hidden","height":"100%"}) //"font-size":"0.9em",
         .appendTo( this.facets_list_container );
 
-        var current_query_request_id;
-        
         //was this.document
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
             +' '+window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE+' '+window.hWin.HAPI4.Event.ON_CUSTOM_EVENT, 
@@ -308,8 +311,8 @@ $.widget( "heurist.search_faceted", {
                 if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
                 
                         if(data){
-                            if(data.source==that.element.attr('id') ){   //search from this widget
-                                  current_query_request_id = data.id;
+                            if(data.source && data.source==that.element.attr('id') ){   //search from this widget
+                                  that._current_query_request_id = data.id;
                             }else{
                                 //search from outside - close this widget
                                 that._trigger( "onclose");
@@ -320,8 +323,9 @@ $.widget( "heurist.search_faceted", {
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
                     
                     var recset = data.recordset;
-                    if(recset && recset.queryid()==current_query_request_id) {
+                    if(recset && recset.queryid()==that._current_query_request_id) {
                           //search from this widget
+                          that._current_query_request_id = null;
                           that._currentRecordset = recset;
                           that._isInited = false;
                           that._recalculateFacets(-1);       
