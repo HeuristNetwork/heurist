@@ -747,7 +747,8 @@ class HPredicate {
     var $lessthan = false;
     var $greaterthan = false;
 
-    var $allowed = array('title','t','added','modified','url','notes','type','ids','id','count','cnt',
+    var $allowed = array('title','t','type','typeid','typename','added','modified',
+            'url','notes','ids','id','count','cnt',
             'f','field','geo','lt','linked_to','linkedto','lf','linkedfrom',
             'related','rt','related_to','relatedto','rf','relatedfrom','links','plain',
             'addedby','owner','access','tag','keyword','kwd');
@@ -904,6 +905,8 @@ class HPredicate {
                 
             
                 return array("where"=>$where_clause);
+            case 'typename':
+            case 'typeid':
             case 'type':
             case 't':
 

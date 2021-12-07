@@ -369,7 +369,8 @@ $.widget( "heurist.search_faceted_wiz", {
         var topPos = 0;
         var pos = this._dialog.dialog('option', 'position');
         if(pos && pos.of && !(pos.of instanceof Window)){
-            topPos = $(pos.of).offset().top+40;
+            var offset = $(pos.of).offset();
+            if(offset) topPos = offset.top+40;
         }
 
         var dh =  this._dialog.dialog('option', 'height');
@@ -1547,7 +1548,7 @@ $.widget( "heurist.search_faceted_wiz", {
                        harchy_fields.push("Added"); 
                     }else if(dtid=='ids'){
                        harchy_fields.push("Record ID"); 
-                    }else if(dtid=='typeid'){
+                    }else if(dtid=='typeid' || dtid=='t'){
                        harchy_fields.push("Type ID"); 
                     }else if(dtid=='typename'){
                        harchy_fields.push("Type Name"); 

@@ -2054,7 +2054,15 @@ window.hWin.HEURIST4.dbs = {
                 rtid = rtid.split(',')[0];
             }
             
-            if(rtid=='any'){
+            if(rtid==''){
+
+                if(dtid=='typeid' || dtid=='typename'){
+                    //dtid = null;
+                    //harchy.push(' . '+rec_header);
+                    //harchy_fields.push(rec_header);
+                }
+            
+            }else if(rtid=='any'){
                 harchy.push('');    
                 if(top_rty_ID>0) rtid = top_rty_ID;
                 
@@ -2101,7 +2109,8 @@ window.hWin.HEURIST4.dbs = {
                     harchy.push(' . '+rec_header);
                     harchy_fields.push(rec_header);
                 
-            }else{
+            }else
+            if(dtid){
                 
                 if(dtid.indexOf('r.')==0){
                     dtid = dtid.substr(2);

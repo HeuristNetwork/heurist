@@ -43,6 +43,7 @@ $.widget( "heurist.searchBuilderItem", {
       
      t,type: record type 
      f,field: field type id 
+     r:  reltype value
      linked_to,linkedfrom,related_to,relatedfrom,links: various link predicates 
 */    
     
@@ -726,6 +727,9 @@ Whole value = EQUAL
             }else 
             if(this.options.dty_ID=='anyfield' || this.options.dty_ID==''){
                 key = 'f';
+            }else
+            if(this.options.dty_ID=='typeid' || this.options.dty_ID=='typename'){
+                key = 't';
             }else {
                 key = this.options.dty_ID;
             }
