@@ -551,7 +551,7 @@ $.widget( "heurist.recordLookupCfg", {
             var rty_ID = this._current_cfg.rty_ID>0 ?$Db.getLocalID('rty',this._current_cfg.rty_ID) :'';
             
             //select service and type
-            if(cfg0.service_name) {
+            if(cfg0.service) {
                 this.selectServiceType.val(cfg0.service);
             }
 
