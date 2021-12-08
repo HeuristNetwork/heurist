@@ -378,33 +378,78 @@ class DbRecUploadedFiles extends DbEntityBase
             if(@$record['ulf_ExternalFileReference']){
                 
                 if(strpos(@$this->records[$idx]['ulf_OrigFileName'],'_tiled')!==0 &&
-                          @$this->records[$idx]['ulf_OrigFileName'] != '_iiif'){
+                   strpos(@$this->records[$idx]['ulf_OrigFileName'],'_iiif')!==0) 
+                {
                     
-                    //check iiif
-                    if( strpos($record['ulf_ExternalFileReference'], 'iiif')!==false
-                       || strpos($record['ulf_ExternalFileReference'], 'manifest.json')!==false 
-                       || $mimeType=='json' || $mimeType=='application/json'){
-                           
-                       //verify that url points to iiif manifest
-                       $iiif_manifest = loadRemoteURLContent($record['ulf_ExternalFileReference']);
-                       $iiif_manifest = json_decode($iiif_manifest, true);
-                       if($iiif_manifest!==false && is_array($iiif_manifest) && @$iiif_manifest['@type']=='sc:Manifest'){
-                           //take label, description, thumbnail
-                           //@$iiif_manifest['label'];
-                           
-                           if(!@$record['ulf_Description'] && @$iiif_manifest['description']){
-                               $this->records[$idx]['ulf_Description'] = @$iiif_manifest['description']; 
-                           }
-                           if(@$iiif_manifest['thumbnail'] && @$iiif_manifest['thumbnail']['@id']){
-                               $this->records[$idx]['ulf_TempThumbUrl'] = @$iiif_manifest['thumbnail']['@id'];      
-                           }
-                    
-                           $this->records[$idx]['ulf_OrigFileName'] = '_iiif';  
-                           
-                           $mimeType = 'json';
-                           $this->records[$idx]['ulf_MimeExt'] = 'json';
-                       }
-                       
+                    /*(strpos($record['ulf_ExternalFileReference'], 'iiif')!==false
+                    || strpos($record['ulf_ExternalFileReference'], 'manifest.json')!==false
+                    || strpos($record['ulf_ExternalFileReference'], 'info.json')!==false) */                    
+                    //check iiif - either manifest of image
+                    if($mimeType=='json' || $mimeType=='application/json'){
+
+                        //verify that url points to iiif manifest
+                        $iiif_manifest = loadRemoteURLContent($record['ulf_ExternalFileReference']);
+                        $iiif_manifest = json_decode($iiif_manifest, true);
+                        if($iiif_manifest!==false && is_array($iiif_manifest))
+                        {
+                            if(@$iiif_manifest['@type']=='sc:Manifest' ||   //v2
+                                @$iiif_manifest['type']=='Manifest')         //v3
+                            {
+                                //take label, description, thumbnail
+                                //@$iiif_manifest['label'];
+
+                                if(!@$record['ulf_Description'] && @$iiif_manifest['description']){
+                                    $this->records[$idx]['ulf_Description'] = @$iiif_manifest['description']; 
+                                }
+                                if(@$iiif_manifest['thumbnail']){
+
+                                    if(@$iiif_manifest['thumbnail']['@id']){  //v2
+                                        $this->records[$idx]['ulf_TempThumbUrl'] = @$iiif_manifest['thumbnail']['@id'];      
+                                    }else if(@$iiif_manifest['thumbnail']['id']){  //v3
+                                        $this->records[$idx]['ulf_TempThumbUrl'] = @$iiif_manifest['thumbnail']['id'];      
+                                    }
+                                }
+
+                                $this->records[$idx]['ulf_OrigFileName'] = '_iiif';  
+                                $mimeType = 'json';
+                                $this->records[$idx]['ulf_MimeExt'] = 'json';
+                                
+                            }else if(@$iiif_manifest['@context'] && (@$iiif_manifest['@id'] || @$iiif_manifest['id']))
+                            {   //IIIF image
+                                
+                                //create url for thumbnail
+                                
+                                $x = $iiif_manifest['width'];
+                                $y = $iiif_manifest['height'];
+                                
+                                $rx = 200 / $x;
+                                $ry = 200 / $y;
+                                
+                                $scale = $rx ? $ry ? min($rx, $ry) : $rx : $ry;
+                                
+                                if ($scale > 1) { //no enlarge
+                                    $scale = 1;
+                                }
+                                
+                                $new_x = ceil($x * $scale);
+                                $new_y = ceil($y * $scale);
+                                
+                                //https://gallica.bnf.fr/iiif/ark:/12148/bpt6k9604118j/f25/full/90,120/0/default.jpg
+                                
+                                $thumb_url = $record['ulf_ExternalFileReference'];
+                                
+                                //remove info.json
+                                $thumb_url = substr($thumb_url, 0, -9).'full/'.$new_x.','.$new_y.'/0/default.jpg';
+                                
+                                $this->records[$idx]['ulf_TempThumbUrl'] = $thumb_url;      
+                                
+                                $this->records[$idx]['ulf_OrigFileName'] = '_iiif_image';  
+                                $mimeType = 'json';
+                                $this->records[$idx]['ulf_MimeExt'] = 'json';
+                            }
+                            
+                        }
+
                     }
                     
                     if(!$this->records[$idx]['ulf_OrigFileName']){
@@ -556,7 +601,7 @@ class DbRecUploadedFiles extends DbEntityBase
                 }
             }
             
-            if($record['ulf_OrigFileName']=='_iiif' && @$record['ulf_TempThumbUrl']){
+            if(strpos($record['ulf_OrigFileName'],'_iiif')===0 && @$record['ulf_TempThumbUrl']){
 
                     $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
                     $temp_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");

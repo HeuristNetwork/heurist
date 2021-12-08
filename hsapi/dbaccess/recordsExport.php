@@ -1549,7 +1549,7 @@ private static function _getIiifCanvas($record){
             if(strpos($mimeType,"soundcloud")>0) continue;
 
             $resource_type = 'Sound';
-        }else if(strpos($mimeType,"image/")===0){
+        }else if(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
             $resource_type = 'Image';
         }
     
@@ -1573,13 +1573,66 @@ private static function _getIiifCanvas($record){
             $tumbnail_url = HEURIST_ICON_URL.$rectypeID.'&version=thumb';
         }
         
+        $height = 800;
+        $width = 1000;
+        $service = '';        
+        
+        //get iiif image parameters
+        if($fileinfo['ulf_OrigFileName']=='_iiif_image'){
+            
+                $iiif_manifest = loadRemoteURLContent($fileinfo['ulf_ExternalFileReference']);
+                $iiif_manifest = json_decode($iiif_manifest, true);
+                if($iiif_manifest!==false && is_array($iiif_manifest)){
+                    
+                    $context = @$iiif_manifest['@context'];
+                    $service_id = $iiif_manifest['@id'];
+                    $resource_url = $iiif_manifest['@id'].'/full/full/0/default.jpg';                    
+                    if(@$iiif_manifest['width']>0) $width = $iiif_manifest['width'];
+                    if(@$iiif_manifest['height']>0) $height = $iiif_manifest['height'];
+                    
+                    $profile = @$iiif_manifest['profile'];
+                    
+                    $mimeType = null;
+                    if(is_array($profile)){
+                        
+                        $mimeType = @$profile[1]['formats'][0]; 
+                    }else if($profile==null){
+                        $profile = 'level1';
+                    }
+                    if(!$mimeType) $mimeType= 'image/jpeg';
+                    
+                    if(self::$version==2){
+$service = <<<SERVICE2
+                "height": $height,
+                "width": $width,
+                "service" : {
+                            "profile" : "$profile",
+                            "@context" : "$context",
+                            "@id" : "$service_id"
+                          }                    
+                ],
+SERVICE2;
+                    }else{
+$service = <<<SERVICE3
+                "height": $height,
+                "width": $width,
+                "service": [
+                  {
+                    "id": "$service_id",
+                    "profile": "$profile"
+                  }
+                ],
+SERVICE3;
+//                    "type": "ImageService3"
+                    }
+                }
+        }
+        
     
         $canvas_uri = self::gen_uuid(); //uniqid('',true); 
 
         $tumbnail_height = 200;
         $tumbnail_width = 200;
-        $height = 800;
-        $width = 1000;
 
         if(self::$version==2){
 
@@ -1600,6 +1653,7 @@ $item = <<<CANVAS2
                 "@type": "oa:Annotation",
                 "motivation": "sc:painting",
                 "resource": {
+                    $service
                     "@id": "$resource_url",
                     "@type": "dctypes:$resource_type",
                     "format": "$mimeType"
@@ -1634,6 +1688,7 @@ $item = <<<CANVAS3
               "type": "Annotation",
               "motivation": "painting",
               "body": {
+                $service
                 "id": "$resource_url",
                 "type": "$resource_type",
                 "format": "$mimeType"

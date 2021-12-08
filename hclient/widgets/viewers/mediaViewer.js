@@ -22,7 +22,7 @@ $.widget( "heurist.mediaViewer", {
 
     // default options
     options: {
-        rec_Files: null, //array of objects {id ,mimeType,filename,extrernal}
+        rec_Files: null, //array of objects {id, mimeType, filename, extrernal}
         openInPopup: true, //show video in popup
         showLink: false, // show link to open full view in new tab or download
         baseURL: null,
@@ -74,9 +74,10 @@ $.widget( "heurist.mediaViewer", {
                 if(idx>=0){  //skip first
                     var file = this.options.rec_Files[idx];
                     
-                    var obf_recID, mimeType, filetitle = '', filename = null, external_url= null;
+                    var obf_recID, mimeType, filetitle = '', filename = null, external_url= null, rec_ID=0;
                     
                     if($.isPlainObject(file)){
+                        rec_ID = file.rec_ID;
                         obf_recID = file.id;
                         mimeType = file.mimeType;
                         filename = file.filename; //to detect _iiif or _tiled
@@ -104,31 +105,50 @@ $.widget( "heurist.mediaViewer", {
                         
                     $('<img>', {src: thumbURL, title:filetitle})
                             .css({border: '2px solid #FFF', margin:'5px', 'box-shadow': '0 2px 4px #bbb', width:'200px'})
-                            .attr('data-id', obf_recID)
                             .appendTo($alink);
 
                     
-                    if(filename === '_iiif'){
+                    if(filename && filename.indexOf('_iiif') === 0){ //manifest
+
+                        var param = 'manifest';
+                        if(filename == '_iiif_image'){
+                            param = 'q'; //it adds format=iiif in miradorViewer.php
+                            obf_recID = 'ids:'+rec_ID;
+                            if(rec_ID>0) $alink.attr('data-id', obf_recID);
+                        }
+                        $alink.attr('data-iiif', param);
                         
-                        external_url =  this.options.baseURL + "hclient/widgets/viewers/miradorViewer.php?db=" 
+                    
+                        //for link below thumb                        
+                        external_url =  this.options.baseURL 
+                                 + "hclient/widgets/viewers/miradorViewer.php?db=" 
                                  +  this.options.database
-                                 + '&manifest='+obf_recID;
-                        
+                                 + '&' + param + '='+obf_recID;
+//console.log(external_url);                        
+                        //on thumbnail click
                         this._on($alink,{click:function(e){
-                             
-      var obf_recID = $(e.target).attr('data-id');
-      var url =  this.options.baseURL + "hclient/widgets/viewers/miradorViewer.php?db=" +  this.options.database
-                                 + '&manifest='+obf_recID;                            
+                            
+                              var ele = $(e.target)
+                              ele = ele.is('a')?ele:ele.parent();
+                              
+                              var param  = ele.attr('data-iiif');
+                              var obf_recID = ele.attr('data-id');
+                              
+                              var url =  this.options.baseURL 
+                                    + "hclient/widgets/viewers/miradorViewer.php?db=" 
+                                    +  this.options.database
+                                    + '&' + param + '='+obf_recID;
                                  
-//console.log(url)                                 
-      if(window.hWin && window.hWin.HEURIST4){
-            //borderless:true, 
-            window.hWin.HEURIST4.msg.showDialog(url, {dialogid:'mirador-viewer',
-                                resizable:false, draggable: false, maximize:true, //width:'100%',height:'100%',
-                                allowfullscreen:true,'padding-content':'0px'});   
-      }else{
-            window.open(url, '_blank');        
-      }
+                                
+                              if(window.hWin && window.hWin.HEURIST4){
+                                    //borderless:true, 
+                                    window.hWin.HEURIST4.msg.showDialog(url, 
+                                        {dialogid:'mirador-viewer',
+                                         resizable:false, draggable: false, maximize:true, //width:'100%',height:'100%',
+                                         allowfullscreen:true,'padding-content':'0px'});   
+                              }else{
+                                    window.open(url, '_blank');        
+                              }
       
                         }});
                         

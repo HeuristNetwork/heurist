@@ -143,7 +143,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     },
  
     //
-    //
+    // show hide elements in edit form according to local/external new/edit mode
     //
     _initEditForm_step4: function(recordset){
         
@@ -199,7 +199,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 this.options.entity.fields[i_mime_ext].dtFields['rst_Display'] = 'hidden'; //temp till ext will be defined
                 this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'hidden'; //readonly fxm_MimeType
             
-                this._edit_dialog.dialog('option','height',350);
+                this._edit_dialog.dialog('option','height',390);
                 
                 
         }else
@@ -233,6 +233,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             
         }else{ //remote
             this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';  
+
             this.options.entity.fields[i_url_ext].dtFields['rst_Display']  = 'visible'; //edit url
             this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'hidden';
             this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'hidden';
@@ -542,8 +543,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 if(!window.hWin.HEURIST4.util.isempty(val)){
                     recTitle = '<div class="item" style="width:auto">'+val+'</div>';    
                 }
-            }else if(val.indexOf('_iiif@')==0){
-                val = val.substr(6);
+            }else if(val.indexOf('_iiif')==0){
+                val = (val=='_iiif') ?'IIIF Manifest' :'IIIF Image';
+                
                 if(!window.hWin.HEURIST4.util.isempty(val)){
                     recTitle = '<div class="item" style="width:auto">'+val+'</div>';    
                 }

@@ -1071,6 +1071,15 @@ function print_public_details($bib) {
                         'nonce' => $file_nonce,
                         'linked' => ($bd['name']=='Linked media')
                     ));
+                    
+                    if($originalFileName==='_iiif'){
+                        
+                        $originalFileName = 'IIIF Manifest';
+                        
+                    }else if($originalFileName==='_iiif_image'){
+                        
+                        $originalFileName = 'IIIF Image';
+                    }
               
                     $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($external_url?$external_url:$file_URL).'">'
                             .htmlspecialchars(($originalFileName && $originalFileName!='_remote')
@@ -1173,7 +1182,7 @@ function print_public_details($bib) {
 
     print '<script>';
     foreach ($thumbs as $thumb) {
-        print 'rec_Files.push({id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
+        print 'rec_Files.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
         if($is_map_popup) break;
     }
     print '</script>';
