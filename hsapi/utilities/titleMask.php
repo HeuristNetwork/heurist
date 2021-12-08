@@ -234,6 +234,36 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
         }
         $replacements['[['] = '[';
         $replacements[']]'] = ']';
+
+        // Check if there are any conditional parts in the title mask,
+		// Works by checking if the preceding field has a value, if it does the first part within the {} will print with the value following it
+		// otherwise the second part of the {} will be printed
+        if(preg_match_all("/\[[^\[\]]+?\]\s?{\\\\[^\\\\]*?\s*\\\\?[^\\\\]*?}/", $mask, $conditions_mask)){
+
+            foreach ($conditions_mask[0] as $key => $cond_str) {
+
+                $cond_field = array();
+                $cond_mask = array();
+                $cond_replace = '';
+
+                // Get the 'if', preceding field
+                preg_match("/\[[^\[\]]+?\]/", $cond_str, $cond_field);
+                // Get the 'then' and 'else' parts, each preceding by a backslash
+                preg_match("/{\\\\[^\\\\]*?\s*\\\\?[^\\\\]*?}/", $cond_str, $cond_mask);
+
+                $cond_parts = explode('\\', $cond_mask[0]);
+
+                if(!empty($replacements[$cond_field[0]])){
+                    $cond_replace = $cond_parts[1] . ' ' . $replacements[$cond_field[0]];
+                }else if($cond_parts[2] == '}'){
+                    $cond_replace = '';
+                }else{
+                    $cond_replace = rtrim($cond_parts[2], '}');
+                }
+
+                $mask = str_ireplace($cond_str, $cond_replace, $mask);
+            }
+        }
     }
 
     $title = array_str_replace(array_keys($replacements), array_values($replacements), $mask);
