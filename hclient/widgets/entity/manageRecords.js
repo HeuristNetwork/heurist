@@ -3114,17 +3114,24 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 }catch(e){
                     fields = null;
                 }
-                
+
+                var hasValue = false, hasDtlField = false;
+
                 //verify max lengtn in 64kB per value
                 for (var dtyID in fields){
                     if(parseInt(dtyID)>0){
                         
                         var dt = $Db.dty(dtyID, 'dty_Type');
+                        hasDtlField = true;
                         if(dt=='geo' || dt=='file') continue;
                         
-                        
                         var values = fields[dtyID];
+
+                        if(window.hWin.HEURIST4.util.isempty(values)) continue;
+
+                        hasValue = true;
                         if(!$.isArray(values)) values = [values];
+
                         for (var k=0; k<values.length; k++){
                             
                             var len = window.hWin.HEURIST4.util.byteLength(values[k]);
@@ -3147,11 +3154,17 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 return;
                                 
                             }
-
                         }
                     }
                 }//verify max size
                 
+                if(fields != null && !hasDtlField){
+                    window.hWin.HEURIST4.msg.showMsgFlash("There are no details to save", 1500);
+                    return;
+                }else if(fields != null && !hasValue){
+                    window.hWin.HEURIST4.msg.showMsgFlash("Please enter a value into any field to save the record", 1500);
+                    return;
+                }
             }
             
             if(fields==null) return; //validation failed
