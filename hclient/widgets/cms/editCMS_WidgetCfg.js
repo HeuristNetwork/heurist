@@ -136,7 +136,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                     $dlg.find('input[name="map_popup"][value="'+popup+'"]').prop('checked', true);        
                     
                     if(opts.layout_params['basemap']){
-                        $dlg.find('input[name="map_basemap"]').val(opts.layout_params['basemap']);        
+                        $dlg.find('select[name="map_basemap"]').attr('data-basemap', opts.layout_params['basemap']);    
                     }
                     if(opts.layout_params['basemap_filter']){
                         $dlg.find('input[name="map_basemap_filter"]').val(opts.layout_params['basemap_filter']);        
@@ -468,50 +468,76 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
 
             }else
             if(widget_name=='heurist_Map' && 
-                            $dlg.find('select[name="mapdocument"]').find('options').length==0){
+                $dlg.find('select[name="mapdocument"]').find('options').length==0){
 
-                            var $selectMapDoc = $dlg.find('select[name="mapdocument"]');
-                            //fill list of mapdpcuments
-                            var request = {
-                                q: 't:'+window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'],w: 'a',
-                                detail: 'header',
-                                source: 'cms_edit'};
-                            //perform filter        
-                            window.hWin.HAPI4.RecordMgr.search(request,
-                                function(response){
+                var $selectMapDoc = $dlg.find('select[name="mapdocument"]');
+                //fill list of mapdpcuments
+                var request = {
+                    q: 't:'+window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'],w: 'a',
+                    detail: 'header',
+                    source: 'cms_edit'};
+                //perform filter
+                window.hWin.HAPI4.RecordMgr.search(request,
+                    function(response){
 
-                                    if(response.status == window.hWin.ResponseStatus.OK){
+						if(response.status == window.hWin.ResponseStatus.OK){
 
-                                        var resdata = new hRecordSet(response.data);
-                                        var idx, records = resdata.getRecords(), opts = [{key:'',title:'none'}];
-                                        for(idx in records){
-                                            if(idx)
-                                            {
-                                                var record = records[idx];
-                                                opts.push({key:resdata.fld(record, 'rec_ID'), title:resdata.fld(record, 'rec_Title')});
-                                            }
-                                        }//for
+							var resdata = new hRecordSet(response.data);
+							var idx, records = resdata.getRecords(), opts = [{key:'',title:'none'}];
+							for(idx in records){
+								if(idx)
+								{
+									var record = records[idx];
+									opts.push({key:resdata.fld(record, 'rec_ID'), title:resdata.fld(record, 'rec_Title')});
+								}
+							}//for
 
-                                        window.hWin.HEURIST4.ui.fillSelector($selectMapDoc[0], opts);
-                                        if($selectMapDoc.attr('data-mapdocument')>0){
-                                            $selectMapDoc.val( $selectMapDoc.attr('data-mapdocument') );
-                                        }
-                                        window.hWin.HEURIST4.ui.initHSelect($selectMapDoc[0], false);
+							window.hWin.HEURIST4.ui.fillSelector($selectMapDoc[0], opts);
+							if($selectMapDoc.attr('data-mapdocument')>0){
+								$selectMapDoc.val( $selectMapDoc.attr('data-mapdocument') );
+							}
+							window.hWin.HEURIST4.ui.initHSelect($selectMapDoc[0], false);
 
-                                    }else {
-                                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                                    }
+						}else {
+							window.hWin.HEURIST4.msg.showMsgErr(response);
+						}
+                    }
+                );  
 
-                                }
-                            );  
+                var $selectMapTemplate = $dlg.find('select[name="map_template"]'); 
 
-                            var $select2 = $dlg.find('select[name="map_template"]'); 
+                window.hWin.HEURIST4.ui.createTemplateSelector( $selectMapTemplate
+                    ,[{key:'',title:'Standard popup template'}], $selectMapTemplate.attr('data-template'));
+                    //,{key:'none',title:'Disable popup'}
 
-                            window.hWin.HEURIST4.ui.createTemplateSelector( $select2
-                                ,[{key:'',title:'Standard popup template'}], $select2.attr('data-template'));
-                                //,{key:'none',title:'Disable popup'}
+                var $selectBaseMap = dele.find('select[name="map_basemap"]');
 
+                var baseMapOptions = [
+                    {key:'OpenStreetMap', title:'OpenStreetMap'},
+                    {key:'OpenTopoMap', title:'OpenTopoMap'},
+                    {key:'MapBox.StreetMap', title:'MapBox.StreetMap'},
+                    {key:'MapBox.Satellite', title:'MapBox.Satellite'},
+                    {key:'MapBox.Combined',title:'MapBox.Combined'},
+                    {key:'MapBox.Relief', title:'MapBox.Relief'},
+                    {key:'Esri.WorldStreetMap', title:'Esri.WorldStreetMap'},
+                    {key:'Esri.WorldTopoMap', title:'Esri.WorldTopoMap'},
+                    {key:'Esri.WorldImagery', title:'Esri.WorldImagery'},
+                    {key:'Esri.WorldShadedRelief', title:'Esri.WorldShadedRelief'},
+                    {key:'Stamen.Toner', title:'Stamen.Toner'},
+                    {key:'Stamen.TerrainBackground', title:'Stamen.TerrainBackground'},
+                    {key:'Esri.NatGeoWorldMap',title:'Esri.NatGeoWorldMap'},
+                    {key:'Esri.WorldGrayCanvas',title:'Esri.WorldGrayCanvas'}
+                ];
 
+                window.hWin.HEURIST4.ui.fillSelector($selectBaseMap[0], baseMapOptions);
+                if($selectBaseMap.attr('data-basemap') != null){
+                    $selectBaseMap.val($selectBaseMap.attr('data-basemap'));
+                }
+                $selectBaseMap = window.hWin.HEURIST4.ui.initHSelect($selectBaseMap[0], false);
+
+                if($selectBaseMap.hSelect('instance') != undefined){
+                    $selectBaseMap.hSelect('widget').css('width', '200px');
+                }
 
             }else
             if(widget_name=='heurist_resultListExt' && 
@@ -601,7 +627,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
             
             layout_params['published'] = 1;
             layout_params['template'] = $dlg.find('select[name="map_template"]').val();
-            layout_params['basemap'] = $dlg.find('input[name="map_basemap"]').val();
+            layout_params['basemap'] = $dlg.find('select[name="map_basemap"]').val();
             layout_params['basemap_filter'] = $dlg.find('input[name="map_basemap_filter"]').val();
             
             var popup = $dlg.find('input[name="map_popup"]:checked').val();
