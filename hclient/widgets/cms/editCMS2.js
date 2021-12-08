@@ -187,13 +187,14 @@ function editCMS2(){
                             contentSelector: '.editStructure',   
                             onopen_start : function( ){ 
                                 var tog = body.find('.ui-layout-toggler-'+options.editor_pos);
-                                tog.removeClass('prominent-cardinal-toggler');
-                                tog.find('.heurist-helper2').remove();
+                                tog.removeClass('prominent-cardinal-toggler togglerVertical');
+                                tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').remove();
                             },
                             onclose_end : function( ){ 
                                 var tog = body.find('.ui-layout-toggler-'+options.editor_pos);
-                                tog.addClass('prominent-cardinal-toggler');
-                                $('<span class="heurist-helper2" style="font-size:9px;">Edit Content</span>').appendTo(tog);
+                                tog.addClass('prominent-cardinal-toggler togglerVertical');
+                                var margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
+                                $('<span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Page structure and styling</span>').appendTo(tog);
                             },
                             togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-'+(options.editor_pos=='west'?'w':'e')+'"></div>',
                             togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'e':'w')+'"></div>',

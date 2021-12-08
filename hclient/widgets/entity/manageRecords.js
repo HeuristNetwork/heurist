@@ -1055,7 +1055,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         onclose_end : function( ){ 
                             var tog = that.element.find('.ui-layout-toggler-west');
                             tog.addClass('prominent-cardinal-toggler togglerVertical');
-                            $('<span class="heurist-helper2 westTogglerVertical" style="font-size:17px;width:200px;margin-top:225px;">Navigate / Move / Delete</span>').appendTo(tog);
+                            $('<span class="heurist-helper2 westTogglerVertical" style="width:200px;margin-top:220px;">Navigate / Move / Delete</span>').appendTo(tog);
                         },
                         togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
                         togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-e"></div>',
@@ -1074,11 +1074,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         contentSelector: '.editFormSummary',   
                         onopen_start : function(){ 
                             var tog = that.editFormPopup.find('.ui-layout-toggler-east');
-                            tog.removeClass('prominent-cardinal-toggler');
+                            tog.removeClass('prominent-cardinal-toggler togglerVertical');
+                            tog.find('.heurist-helper2.eastTogglerVertical').remove();
                         },
                         onclose_end : function(){ 
                             var tog = that.editFormPopup.find('.ui-layout-toggler-east');
-                            tog.addClass('prominent-cardinal-toggler');
+                            tog.addClass('prominent-cardinal-toggler togglerVertical');
+                            $('<span class="heurist-helper2 eastTogglerVertical" style="width:200px;">Record Summary</span>').appendTo(tog);
                         },
                         togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-e"></div>',
                         togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-w"></div>',
