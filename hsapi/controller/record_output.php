@@ -1,5 +1,10 @@
 <?php
 
+if(count($_REQUEST)>900){
+    error_log('TOO MANY _REQUEST PARAMS '.count($_REQUEST).' record_output');
+    error_log(print_r(array_slice($_REQUEST, 0, 100),true));
+}    
+
     /**
     * Application interface. See hRecordMgr in hapi.js
     * Record search and output in required format
@@ -28,7 +33,10 @@
     *           restapi: 0|1  not include db description and heurist header
     * 
     * prefs for geojson, json
-    *   extended 0 as is (in heurist internal format), 1 - interpretable, 2 include concept code and labels
+    *   extended 0 as is (in heurist internal format), 
+    *            1 - interpretable, 
+    *            2 - include concept code and labels
+    *            3 - simple plain object for mediaViewer (only records with file fields are included)
     *   leaflet - true|false returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
     *   simplify  true|false simplify  paths with more than 1000 vertices 
     * 
@@ -197,13 +205,13 @@
             }else if(@$params['q']!=null){  //first request - save base filter
                 //remove all other datatable keys from session
                 $dbname = $system->dbname_full();
-                if(@$_SESSION[$dbname]["ugr_Preferences"]!=null){
-                    $keys = array_keys($_SESSION[$dbname]["ugr_Preferences"]);
+                if(@$_SESSION[$dbname]['ugr_Preferences']!=null){
+                    $keys = array_keys($_SESSION[$dbname]['ugr_Preferences']);
                     if(is_array($keys))
                     foreach ($keys as $key) {
                         if(strpos($key,'datatable')===0){
-                            $_SESSION[$dbname]["ugr_Preferences"][$key] = null;    
-                            unset($_SESSION[$dbname]["ugr_Preferences"][$key]);
+                            $_SESSION[$dbname]['ugr_Preferences'][$key] = null;    
+                            unset($_SESSION[$dbname]['ugr_Preferences'][$key]);
                         }
                     }
                 }

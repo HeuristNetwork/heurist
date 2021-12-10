@@ -43,6 +43,11 @@
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
+if(count($_REQUEST)>900){
+    error_log('TOO MANY _REQUEST PARAMS '.count($_REQUEST).' file_download');
+    error_log(print_r(array_slice($_REQUEST, 0, 100),true));
+}    
+
 $system = new System(); //without connection
 $db = @$_REQUEST['db'];
 
@@ -156,8 +161,15 @@ if($db){
                         }    
                     }
                     
-                    //see db_files
-                    downloadFile($mimeType, $filepath, @$_REQUEST['embedplayer']==1?null:$originalFileName);
+                    if(@$_REQUEST['fancybox']==1 && strpos($fileinfo['fullPath'],'file_uploads/')===0){
+                        //show in viewer directly
+                        $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
+                        header('Location: '.$direct_url);
+                        
+                    }else{
+                        //see db_files
+                        downloadFile($mimeType, $filepath, @$_REQUEST['embedplayer']==1?null:$originalFileName);
+                    }
                 }else if($external_url){
 //DEBUG error_log('External '.$external_url);
 

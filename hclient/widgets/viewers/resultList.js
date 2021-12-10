@@ -49,6 +49,7 @@ $.widget( "heurist.resultList", {
         show_counter: true,
         show_viewmode: true,
         show_inner_header: false, // show title of current search in header (above toolbar)
+        show_fancybox_viewer: false, //opens fancybox viewer on click on thumbnail
         header_class: null,       //class name for menu
         show_url_as_link:false,
 
@@ -1458,7 +1459,7 @@ $.widget( "heurist.resultList", {
         if(fld('rec_ThumbnailURL')){
             html_thumb = '<div class="recTypeThumb realThumb" title="'+
                 recTitle_strip_all+'" style="background-image: url(&quot;'
-                + fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>';
+                + fld('rec_ThumbnailURL') + '&quot;);opacity:1" data-id="'+recID+'"></div>';
         }else{
             rectypeTitleClass = 'recordTitleInPlaceOfThumb';
             html_thumb = '<div class="recTypeThumb rectypeThumb" title="'
@@ -3233,6 +3234,9 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             this.expandDetailsInlineALL();   
         }
         
+        if(this.options.show_fancybox_viewer && rec_onpage.length>0){
+            this.div_content.mediaViewer({selector:'.realThumb', search_initial:'ids:'+rec_onpage.join(',') });        
+        }
     },
     
     //

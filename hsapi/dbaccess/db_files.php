@@ -225,10 +225,11 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
                 .' and dtl_DetailTypeID='.DT_THUMBNAIL.' limit 1'); 
     }
     if($fileid == null){
-        $query = $query.  
-            " and (dtl_UploadedFileID is not null)".    // no dty_ID of zero so undefined are ignored
-            " and (fxm_MimeType like 'image%' or fxm_MimeType='video/youtube' or fxm_MimeType='video/vimeo')".
-            " limit 1";
+        $query = $query
+            .' and (dtl_UploadedFileID is not null)'    // no dty_ID of zero so undefined are ignored
+            ." and (fxm_MimeType like 'image%' or fxm_MimeType='video/youtube' or fxm_MimeType='video/vimeo'  or fxm_MimeType='audio/soundcloud' "
+            ." or ulf_OrigFileName LIKE '_iiif%')"
+            .' limit 1';
         $fileid = mysql__select_value($system->get_mysqli(), $query);
     }
     
@@ -670,6 +671,9 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
     }else{
         //to itself
         $filepath = HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&file=".$fileid;
+        
+        //to avoid download via proxy 
+        $filepath = $filepath.'&fancybox=1';
     }
     $thumb_url = HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&thumb=".$fileid;
 
@@ -1038,6 +1042,19 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                     $img = UtilsImage::getRemoteImage($thumb_url);
                 }
                 */
+            }else if($file['fxm_MimeType'] == 'audio/soundcloud'){
+
+                $url = $file['ulf_ExternalFileReference'];
+
+                $hash = json_decode(loadRemoteURLContent('https://soundcloud.com/oembed?format=json&url='
+                                .rawurlencode($url), false), true);
+                $thumb_url = @$hash['thumbnail_url'];
+                if($thumb_url){
+                    $img = UtilsImage::getRemoteImage($thumb_url);    
+                }else{
+                    $img = '../../hclient/assets/branding/logo_soundcloud.png';
+                }
+
                 
             }else{
                 // image placeholder

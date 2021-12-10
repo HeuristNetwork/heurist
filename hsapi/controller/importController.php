@@ -97,6 +97,12 @@ require_once (dirname(__FILE__).'/../import/importSession.php'); //work work wit
 require_once (dirname(__FILE__).'/../import/importAction.php'); //work with import table: matching, assign id, performs validation and import
 require_once (dirname(__FILE__).'/../import/importHeurist.php'); //work with Heurist exchange format
 
+
+if(count($_REQUEST)>900){
+    error_log('TOO MANY _REQUEST PARAMS '.count($_REQUEST).' importController');
+    error_log(print_r(array_slice($_REQUEST, 0, 100),true));
+}    
+
 set_time_limit(0);
     
 $response = null;

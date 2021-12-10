@@ -393,7 +393,7 @@ XML;
     $row_placeholder = array();
     $need_rec_type = false;
     
-    if($params['format']=='iiif'){
+    if($params['format']=='iiif' || ($params['format']=='json' && @$params['extended']==3)){
         $retrieve_detail_fields = array('file');
         $retrieve_header_fields = 'rec_ID,rec_RecTypeID,rec_Title';
     }else
@@ -466,7 +466,8 @@ XML;
 
         $retrieve_header_fields = implode(',', $retrieve_header_fields);
         
-    }else{
+    }
+    else{
         
         $retrieve_header_fields = array();
         $retrieve_detail_fields = array();
@@ -582,6 +583,15 @@ XML;
             }else if(@$params['extended']>0 && @$params['extended']<3){ //with concept codes and labels
                 $feature = self::_getJsonFeature($record, $params['extended']);
                 fwrite($fd, $comma.json_encode($feature));
+            }else if(@$params['extended']==3){
+
+                $feature = self::_getMediaViewerData($record);
+                if($feature){
+                    fwrite($fd, $comma.$feature);
+                }else{
+                    continue;
+                }
+                
             }else{
                 fwrite($fd, $comma.json_encode($record)); //as is
             }
@@ -1509,6 +1519,72 @@ private static function _getJsonFeature($record, $mode){
     return $res;
 }
 
+//
+// convert heurist record to plain object for mediaViewer
+// 
+// return null if not media content found
+//
+private static function _getMediaViewerData($record){
+
+    $res = '';    
+    $comma = '';
+    $info = array();
+    
+    //1. get "file" field values
+    foreach ($record['details'] as $dty_ID=>$field_details) {
+        foreach($field_details as $dtl_ID=>$file){
+            array_push($info, $file['file']);
+        }
+    }
+    
+    //2. get file info
+    if(count($info)>0){
+    
+        foreach($info as $fileinfo){
+            
+            if(strpos($fileinfo['ulf_OrigFileName'],'_tiled')===0) continue;
+    
+            $mimeType = $fileinfo['fxm_MimeType'];
+        
+            $resource_type = null;
+
+            if(strpos($mimeType,"video/")===0){
+                $resource_type = 'Video';
+            }else if(strpos($mimeType,"audio/")===0){
+                if(strpos($mimeType,"soundcloud")>0) continue;
+                $resource_type = 'Sound';
+            }else if(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
+                $resource_type = 'Image';
+            }
+        
+            if($resource_type){
+            
+                $fileid = $fileinfo['ulf_ObfuscatedFileID'];
+                $external_url = $fileinfo['ulf_ExternalFileReference'];
+                
+                /*
+                $item = '{rec_ID:'.$record['rec_ID'].', id:"'.$fileid.'",mimeType:"'.$mimeType
+                        .'",filename:"'.htmlspecialchars($fileinfo['ulf_OrigFileName'])
+                        .'",external:"'.htmlspecialchars($external_url).'"}';
+                */
+
+                $res = $res.$comma.json_encode(array('rec_ID'=>$record['rec_ID'],
+                               'caption'=>htmlspecialchars($record['rec_Title']),
+                               'id'=>$fileid,
+                               'mimeType'=>$mimeType,
+                               'filename'=>htmlspecialchars($fileinfo['ulf_OrigFileName']),
+                               'external'=>htmlspecialchars($external_url)));
+                $comma =  ",\n";
+                               
+            }
+        }//for
+    
+    }//count($file_ids)>0
+    
+    
+    return $res;    
+}
+
 
 //
 // convert heurist record to iiif canvas json
@@ -1586,7 +1662,6 @@ private static function _getIiifCanvas($record){
                     
                     $context = @$iiif_manifest['@context'];
                     $service_id = $iiif_manifest['@id'];
-                    $resource_url = $iiif_manifest['@id'].'/full/full/0/default.jpg';                    
                     if(@$iiif_manifest['width']>0) $width = $iiif_manifest['width'];
                     if(@$iiif_manifest['height']>0) $height = $iiif_manifest['height'];
                     
@@ -1594,12 +1669,20 @@ private static function _getIiifCanvas($record){
                     
                     $mimeType = null;
                     if(is_array($profile)){
-                        
                         $mimeType = @$profile[1]['formats'][0]; 
+                        if($mimeType) $mimeType = 'image/'.$mimeType;
                     }else if($profile==null){
                         $profile = 'level1';
                     }
                     if(!$mimeType) $mimeType= 'image/jpeg';
+                    
+                    if(strpos('library.stanford.edu/iiif/image-api/1.1')>0){
+                        $quality = 'native';  
+                    }else{
+                        $quality = 'default';
+                    }
+                    $resource_url = $iiif_manifest['@id'].'/full/full/0/'.$quality.'.jpg';                    
+                    
                     
                     if(self::$version==2){
 $service = <<<SERVICE2

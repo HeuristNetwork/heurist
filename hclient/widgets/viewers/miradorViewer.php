@@ -35,11 +35,12 @@
             $url = str_replace($_SERVER['QUERY_STRING'],'db='.$_REQUEST['db'].'&file='.$_REQUEST['manifest'],$url);
         }else{
             //create manifest dynamically
-            if(strpos('format=iiif',$url)===false){
-                $url = $url.'&format=iiif';    
-            }
             $url = str_replace('hclient/widgets/viewers/miradorViewer.php','hsapi/controller/record_output.php', $url);
             
+        }
+        
+        if(strpos('format=iiif',$url)===false){
+                $url = $url.'&format=iiif';    
         }
     
     //$_SERVER['QUERY_STRING'];
