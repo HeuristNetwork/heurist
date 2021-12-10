@@ -695,10 +695,10 @@ window.hWin.HEURIST4.dbs = {
 
                     $res['children'] = [
                         {key:'term',title: 'Term',code: 'Term'},       
-                        {key:'code',title: 'Code',code: 'Code'},
-                        {key:'conceptid',title: 'Concept ID',code: 'ConceptID'},       
-                        {key:'internalid',title: 'Internal ID',code: 'InternalID'}
-                    ];
+                        {key:'code',title: 'Code',code: 'Code'},       
+                        {key:'conceptid',title: 'Concept ID',code: 'Concept ID'},       
+                        {key:'internalid',title: 'Internal ID',code: 'Internal ID'}
+                                ];
                 }
                 break;
 
