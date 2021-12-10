@@ -368,7 +368,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 $('<div style="vertical-align: middle;width: 100%;min-height: 32px; border-bottom: 1px solid gray; clear: both;">'
                     +'<div id="div_group_information" style="margin-right:150px;">A</div>'
                     +'<div style="position:absolute;right:10px;top:8px;"><label>Find: </label>'
-                    +'<input type="text" style="width:350px" class="find-term text ui-widget-content ui-corner-all"/></div>'
+                    +'<input type="text" style="width:175px" class="find-term text ui-widget-content ui-corner-all"/></div>'
                     +'</div>'
                     +'<div class="action-buttons" style="height:60px;background:white;padding:10px 8px;">'
                     +'<h4 style="display:inline-block;margin: 0 10px 0 0; vertical-align: middle;">Terms</h4>'
@@ -981,11 +981,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     window.hWin.HEURIST4.util.htmlEscape($Db.vcg($Db.trm(vocab_id,'trm_VocabularyGroupID'), 'vcg_Name'))
                     +'.'+window.hWin.HEURIST4.util.htmlEscape($Db.trm(vocab_id, 'trm_Label'));
             
-                sRef = '<span style="color:blue;font-size:smaller;vertical-align:text-top;">&nbsp; → term in '+real_vocab_name+'</span>';
+                sRef = '<span style="color:blue;font-size:smaller;">&nbsp; →'+real_vocab_name+'</span>.';
             }
 
             var sLabelHint = sLabel;
-            sLabel = sLabel + sRef;
+            sLabel = sRef + sLabel;
 
             var inv_id = $Db.trm(recID, 'trm_InverseTermId');
             if ( inv_id>0 ){
@@ -2749,7 +2749,7 @@ function showWarningAboutTermUsage(recID, refs){
         , null, {title:'Warning'},
         {default_palette_class: 'ui-heurist-design'});        
 
-    this._on($dlg.find('a[data-dty_ID]'),{click:function(e){
+    $dlg.find('a[data-dty_ID]').click(function(e){
 
         var rg_options = {
             isdialog: true, 
@@ -2761,7 +2761,7 @@ function showWarningAboutTermUsage(recID, refs){
         };
         window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', rg_options);
         return false;                    
-    }});
+    });
 }
 
 function onTermSaveError(response){

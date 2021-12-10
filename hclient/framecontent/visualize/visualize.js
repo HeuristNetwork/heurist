@@ -972,9 +972,12 @@ function updateStraightLines(lines, type) {
                 var source_width = Number($source_rect.attr('width')),
                     target_width = Number($target_rect.attr('width'));
 
-                // Get detail's y location within the source object
-                var detail_y = $detail[0].getBBox().y;
-                s_y += detail_y - iconSize * 0.6;
+                if($detail.length > 0){ // Check that the location of the detail can be found
+
+                    // Get detail's y location within the source object
+                    var detail_y = $detail[0].getBBox().y;
+                    s_y += detail_y - iconSize * 0.6;
+                }
 
                 // Get target's bottom y location
                 var b_target_y = t_y - iconSize + Number($target_rect.attr('height'));

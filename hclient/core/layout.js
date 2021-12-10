@@ -323,7 +323,7 @@ function hLayout(args) {
               onclose_end : function(){ 
                    var tog = $container.find('.ui-layout-toggler-east');
                    tog.addClass('prominent-cardinal-toggler togglerVertical');
-                   $('<span class="heurist-helper2 eastTogglerVertical" style="font-size:17px;width:75px;margin-top:30px;">Visualisation</span>').appendTo(tog);
+                   $('<span class="heurist-helper2 eastTogglerVertical" style="width:175px;">Visualisation</span>').appendTo(tog);
               }
             },
             tips: {

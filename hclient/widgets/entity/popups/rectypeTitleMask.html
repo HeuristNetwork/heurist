@@ -18,8 +18,8 @@
             </div>
         </div>
             
-        <div id="formContainer" style="position:absolute;top:0px;bottom:30px;left:220px;right:5px;"  class="heurist-helper2">
-                <div style="padding:10px;text-align:left">
+        <div id="formContainer" style="position:absolute;top:0px;bottom:30px;left:220px;right:5px;">
+                <div style="padding:10px;text-align:left" class="heurist-helper2">
                     The title mask builds a composite title from fields in the record (see manual).
 
                     Field values identified by [ ] are inserted into the mask,<br>
@@ -34,16 +34,22 @@
 
                     To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).
 
-                    <br/>&nbsp;<br/>
+                    Add optional text before a field (if it has a value) or a different set of text if a value is not available<br>
+
+                    by adding {\Text for existing value \Text for missing value} after a field.<br>
+
+                    e.g. <b>[Starting_date] {\Starting date of: \No starting date}</b> will either generate:<br>
+
+                    <b>"Starting date of: 04-11-1974"</b> or <b>"No starting date"</b> if there isn't Start_date is empty.<br>&nbsp;<br>
                 </div>
 
                 <hr/>
 
                 <div style="text-align:left; padding-top:20px;padding-bottom:1px;padding-left: 20px;">
                     <b>Build Mask:</b> &nbsp;&nbsp;&nbsp; <button id="btnInsertField" style="width:60px;">Insert fields</button>
-                    &nbsp;&nbsp;<i>Select fields in tree and click button to insert in mask at cursor position</i>
+                    &nbsp;&nbsp;<span class="heurist-helper2">Select fields in tree and click button to insert in mask at cursor position</span>
                     <br/>&nbsp;<br/>
-                    <textarea cols="550" id="rty_TitleMask" rows="5" style="font-size:1.2em;width:550px;"></textarea><br/>
+                    <textarea cols="550" id="rty_TitleMask" rows="5" style="font-size:1em;width:550px;"></textarea><br/>
                     <br>
                 </div>
 

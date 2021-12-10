@@ -234,6 +234,36 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
         }
         $replacements['[['] = '[';
         $replacements[']]'] = ']';
+
+        // Check if there are any conditional parts in the title mask,
+		// Works by checking if the preceding field has a value, if it does the first part within the {} will print with the value following it
+		// otherwise the second part of the {} will be printed
+        if(preg_match_all("/\[[^\[\]]+?\]\s?{\\\\[^\\\\]*?\s*\\\\?[^\\\\]*?}/", $mask, $conditions_mask)){
+
+            foreach ($conditions_mask[0] as $key => $cond_str) {
+
+                $cond_field = array();
+                $cond_mask = array();
+                $cond_replace = '';
+
+                // Get the 'if', preceding field
+                preg_match("/\[[^\[\]]+?\]/", $cond_str, $cond_field);
+                // Get the 'then' and 'else' parts, each preceding by a backslash
+                preg_match("/{\\\\[^\\\\]*?\s*\\\\?[^\\\\]*?}/", $cond_str, $cond_mask);
+
+                $cond_parts = explode('\\', $cond_mask[0]);
+
+                if(!empty($replacements[$cond_field[0]])){
+                    $cond_replace = $cond_parts[1] . ' ' . $replacements[$cond_field[0]];
+                }else if($cond_parts[2] == '}'){
+                    $cond_replace = '';
+                }else{
+                    $cond_replace = rtrim($cond_parts[2], '}');
+                }
+
+                $mask = str_ireplace($cond_str, $cond_replace, $mask);
+            }
+        }
     }
 
     $title = array_str_replace(array_keys($replacements), array_values($replacements), $mask);
@@ -474,10 +504,31 @@ private static function __get_enum_value($enum_id, $enum_param_name)
         $enum_param_name = "id";
     }
 
-    $ress = self::$mysqli->query("select trm_id, trm_label, trm_code, concat(trm_OriginatingDBID, '-', trm_IDInOriginatingDB) as trm_conceptid from defTerms where trm_ID = ".$enum_id);
+    $ress = self::$mysqli->query("select trm_id, trm_label, trm_code, concat(trm_OriginatingDBID, '-', trm_IDInOriginatingDB) as trm_conceptid, trm_ParentTermID from defTerms where trm_ID = ".$enum_id);
     if($ress){
         $relval = $ress->fetch_assoc();
-        $ret = @$relval['trm_'.mb_strtolower($enum_param_name, 'UTF-8')];
+
+        $get_param = mb_strtolower($enum_param_name, 'UTF-8');
+
+        // If trm_label then construct is: "parent_trm_label > trm_label"
+        if(strcasecmp($get_param, 'label') == 0 && $relval['trm_ParentTermID'] > 0 && $relval['trm_label'] != null){
+
+            $parent_ress = self::$mysqli->query("select trm_label from defTerms where trm_ID = " . $relval['trm_ParentTermID']);
+
+            if($parent_ress){
+
+                $ret = $parent_ress->fetch_assoc()['trm_label'];
+                if($ret == null){
+                    $ret = @$relval['trm_label'];
+                }else{
+                    $ret .= " > " . @$relval['trm_label'];
+                }
+
+                $parent_ress->close();
+            }
+        }else{
+            $ret = @$relval['trm_'.$get_param];
+        }
         $ress->close();
     }
 
