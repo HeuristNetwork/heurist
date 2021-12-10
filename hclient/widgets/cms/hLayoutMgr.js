@@ -51,7 +51,7 @@ function hLayoutMgr(){
     // layout - JSON
     // container - id or element
     //
-    function _layoutInit(layout, container){
+    function _layoutInit(layout, container, isFirstLevel){
         container = $(container);
         
         container.empty();   
@@ -60,9 +60,16 @@ function hLayoutMgr(){
             layout.indexOf('data-heurist-app-id')>0){ //old format with some widgets
             
                 container.html(layout);
+                //trying to convert old format to new one - to json
+                layout = false; //_convertOldCmsFormat(container, 0);
+                if(layout===false){
             
-                window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content', _supp_options );
-                return false;
+                    window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content', _supp_options );
+                    return false;
+                
+                }else{
+                    container.empty();    
+                }
             
         }
         
@@ -82,7 +89,7 @@ function hLayoutMgr(){
         }
         
 
-        if(_supp_options && _supp_options.page_name){
+        if(isFirstLevel===true && _supp_options && _supp_options.page_name){
             layout[0].name  = _supp_options.page_name;
         }
         
@@ -553,7 +560,89 @@ function hLayoutMgr(){
         return false;            
     }
     
+    //
+    //
+    //
+    // container.html(layout);
+    function _convertOldCmsFormat(container, lvl){
+        
+
+      var res = [];
+                
+      $.each(container.children(), function(idx, ele){
+          
+         ele = $(ele);
+         
+         var child;
+          
+         if(ele.attr('data-heurist-app-id')){
+             //this is widget
+             var opts = window.hWin.HEURIST4.util.isJSON(ele.text());
+             
+             child = {appid: ele.attr('data-heurist-app-id'),
+                                 options: opts};
+                                 
+             if(opts.__widget_name){
+                 child.name = opts.__widget_name.replaceAll('=','').trim();
+             }
+             if(!child.name) child.name = "Widget "+lvl+'.'+idx;
+         }else 
+         if(ele.find('div[data-heurist-app-id]').length==0){ //no widgets
+      
+             var tag = ele[0].nodeName;
+             var s = '<' + tag + '>'+ele.html()+'</' + tag + '>';
+//console.log(s);
+             
+             child = {name:"Content "+lvl+'.'+idx, 
+                                type:"text", 
+                                content: s };
+         }else{
+             //there are widgets among children
+             child = {name:"Group "+lvl+'.'+idx,
+                                type:"group", 
+                                folder:true, 
+                                children:_convertOldCmsFormat(ele, lvl+1) };
+         }
+         
+         if(child){
+             if(ele.attr('style')){
+                 
+                 
+                var styles = ele.attr('style').split(';'),
+                    i= styles.length,
+                    css = {},
+                    style, k, v;
+
+
+                while (i--)
+                {
+                    style = styles[i].split(':');
+                    k = $.trim(style[0]);
+                    v = $.trim(style[1]);
+                    if (k.length > 0 && v.length > 0)
+                    {
+                        css[k] = v;
+                    }
+                }                 
+                 
+                 //var css = window.hWin.HEURIST4.util.isJSON(ele.attr('style'));
+                 if(!$.isEmptyObject(css)) child['css'] = css;
+//console.log( ele.attr('style') );                 
+//console.log( css );                 
+             }
+             res.push(child);
+         }
+      });
+
+      if(lvl == 0){
+          res = [{name:"Name of this page",type:"group",folder:true, children:res }];
+      }
+      
+      return res;
+    }
     
+    
+    //
     //public members
     layoutMgr = {
 
@@ -582,7 +671,7 @@ function hLayoutMgr(){
         //
         layoutInit: function(layout, container, supp_options){
             _supp_options = supp_options;
-            return _layoutInit(layout, container);
+            return _layoutInit(layout, container, true);
         },
         
         layoutInitKey: function(layout, i){
