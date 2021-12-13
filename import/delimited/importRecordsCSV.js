@@ -3779,11 +3779,17 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         
                         var cnt = ($.isArray(tabs[k]['values_error']) && tabs[k]['values_error'].length>0)
                                         ?(tabs[k]['values_error'].length+' '):'';
+                    
+                        checked_field = tabs[k]['field_checked'];
+                        if(checked_field && $.isArray(checked_field)){
+                            checked_field = checked_field[0];
+                        }
+                    
+                        var colname = imp_session['columns'][checked_field.substr(6)]; //field_
+                            s = s + '<li><a href="#rec__'+k+'" style="color:red">'
+                                        +colname+'<br><span style="font-size:0.7em">'
+                                        +cnt+tabs[k]['short_message']+'</span></a></li>';
                         
-                        var colname = imp_session['columns'][tabs[k]['field_checked'].substr(6)]; //field_
-                        s = s + '<li><a href="#rec__'+k+'" style="color:red">'
-                                    +colname+'<br><span style="font-size:0.7em">'
-                                    +cnt+tabs[k]['short_message']+'</span></a></li>';
                     }
                     s = s + '</ul>';
                 }
@@ -3801,9 +3807,21 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         s = s + "<div class='error'><b>Only the first "+records.length+" of "+cnt+" rows are shown</b></div>";
                     }
 
+                    var ismultivalue = false;
                     var checked_field  = rec_tab['field_checked'];
-
-                    var ismultivalue = checked_field && imp_session['multivals'][checked_field.substr(6)];//highlight errors individually
+                    if(checked_field && $.isArray(checked_field)){
+                        checked_field = checked_field[0];
+                    }
+                    if(checked_field){
+                        ismultivalue = imp_session['multivals'][checked_field.substr(6)];//highlight errors individually
+                    }
+                    /*
+                    if(checked_field && checked_field.length>0){
+                        for (var m=0;m<checked_field.length;m++){    
+                            ismultivalue = imp_session['multivals'][checked_field[m].substr(6)];//highlight errors individually
+                            if(ismultivalue) break;
+                        }
+                    }*/
                     
                     s = s + "<div><span class='error'>Values in red are invalid: </span> "+rec_tab['err_message']+"<br/><br/></div>";
                     
@@ -4016,6 +4034,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             var btn_ads = $dlg.find('.add_terms');
             btn_ads.click(function(event){
                 
+                //window.hWin.HEURIST4.msg.bringCoverallToFront($dlg);
+                
                 var ele = $(event.target);
                 var tab_idx = ele.attr('tab_id');
                 var dt_id = ele.attr('dt_id');
@@ -4027,6 +4047,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             //activate add ALL terms buttons
             if(btn_ads.length>1){
                 $dlg.find('.add_all_terms').show().click(function(event){
+                    //window.hWin.HEURIST4.msg.bringCoverallToFront($dlg);
                     var prepared_data = [];
                     _importNewTermsToAllFields($dlg, 0, prepared_data);
                 });
@@ -4105,8 +4126,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         'fields'     : [{trm_Label:'Auto-added terms', trm_ParentTermID:'', trm_Depth:0, trm_Domain:'enum'}]                     
                         };
                 
+                    
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
+
                         if(response.status == window.hWin.ResponseStatus.OK){
                             var recIDs = response.data;
                             trm_ParentTermID = Number(recIDs[0]);
@@ -4138,6 +4161,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             _importNewTerms_continue($dlg, newvalues, trm_ParentTermID, fieldname, callback);
             
         }else{
+            //window.hWin.HEURIST4.msg.sendCoverallToBack();
+            
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Terms ' + s +' will be added to the vocabulary "'
                 + trm_ParentLabel +'"'
@@ -4190,6 +4215,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }//for    
         
         if(_prepareddata.length==0){
+            //window.hWin.HEURIST4.msg.sendCoverallToBack();
+            
             var s = 'Nothing to import. Validation reports that among proposed terms for field "'+fieldname+'"<br>'
                     +((skip_dup>0)?skip_dup+' already exist; ':' ')
                     +((skip_long>0)?skip_long+' have too long label; ':' ')
@@ -4223,6 +4250,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 
             var that = this;                                                
             //that.loadanimation(true);
+            window.hWin.HEURIST4.msg.bringCoverallToFront($dlg);
+            
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
@@ -4236,8 +4265,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                         var s = recIDs.length+' new term'
                                                 +((recIDs.length==1)?' was':'s were')+' imported. ';
                                         if(cnt==1 || is_all){
+                                            window.hWin.HEURIST4.msg.sendCoverallToBack();
                                             $dlg.dialog('close');
-                                            window.hWin.HEURIST4.msg.showMsgErr(s+'Please repeat "Prepare" action'); 
+                                            window.hWin.HEURIST4.msg.showMsgDlg(s+'Please repeat "Prepare" action'); 
                                             
                                         }else{
                                             window.hWin.HEURIST4.msg.showMsgErr(s+'Check other "error" tabs '

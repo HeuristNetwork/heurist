@@ -843,7 +843,11 @@ public static function validateImport($params) {
             
                 $field_name = "field_".$index;
 
-                $mapping[$field_type] = $field_name;
+                if(@$mapping[$field_type]){
+                    array_push($mapping[$field_type], $field_name);
+                }else{
+                    $mapping[$field_type] = array($field_name);   
+                }
                 
                 $imp_session['validation']['mapped_fields'][$field_name] = $field_type;
 
@@ -868,7 +872,12 @@ public static function validateImport($params) {
 
                 //all mapped fields - they will be used in validation query
                 array_push($sel_query, $field_name);
-                $mapping[$field_type] = $field_name;
+                if(@$mapping[$field_type]){
+                    array_push($mapping[$field_type], $field_name);
+                }else{
+                    $mapping[$field_type] = array($field_name);    
+                }
+                
 
                 $mapped_fields[$field_name] = $field_type;
             }
@@ -1051,11 +1060,13 @@ public static function validateImport($params) {
     foreach ($recStruc[$recordType]['dtFields'] as $ft_id => $ft_vals) {
 
         //find among mappings
-        $field_name = @$mapping[$ft_id];
+        $field_name = @$mapping[$ft_id]; //there may be several field_xx in csv to be imported
         if(!$field_name){
             
             if(is_array($mapping_prev_session)){
                 $field_name = array_search($recordType.".".$ft_id, $mapping_prev_session, true); //from previous session    
+                
+                if($field_name && !is_array($field_name)) $field_name = array($field_name);
             }
         }
         
@@ -1095,64 +1106,93 @@ public static function validateImport($params) {
         }else 
         if($ft_vals[$idx_fieldtype] == "geo"){
 
-            $geo_fields = array($field_name); //WKT field
+            //for geo fields take first
+            $geo_fields = array($field_name[0]); //WKT field
             
         }else
         if($ft_vals[$idx_reqtype] == "required"){
-            if(!$field_name){
+            if(!$field_name){ //required field is not mapped - error
                 //$ft_vals[$idx_fieldtype] == "file" || 
                 if(!($ft_vals[$idx_fieldtype] == "resource")){ //except file and resource
                     array_push($missed, $ft_vals[0]);    
                 }
                 
             }else{
-                if($ft_vals[$idx_fieldtype] == "resource"){ //|| $ft_vals[$idx_fieldtype] == "enum"){
-                    $squery = "not (".$field_name.">0)";
+                
+                $squery = array();
+                foreach($field_name as $f_name){
+                
+                
+                    if($ft_vals[$idx_fieldtype] == "resource"){ //|| $ft_vals[$idx_fieldtype] == "enum"){
+                        //$squery = "not (".$field_name.">0)";
+                        $squery[] = $f_name.'>0';
+                    }else{
+                        $squery[] = $f_name." is not null or ".$f_name."!=''";
+                        //$squery = $field_name." is null or ".$field_name."=''";
+                    }
+                    array_push($query_reqs, $field_name);
+                }
+                if($ft_vals[$idx_fieldtype] == "resource"){
+                    $squery = 'not ('.implode(' OR ',$squery).')';
                 }else{
-                    $squery = $field_name." is null or ".$field_name."=''";
+                    $squery = 'not ('.implode(' OR ',$squery).')';
                 }
 
-                array_push($query_reqs, $field_name);
                 array_push($query_reqs_where, $squery);
+                
             }
         }
 
         if($field_name){  //mapping exists
-
-            $dt_mapping[$field_name] = $ft_id; //$ft_vals[$idx_fieldtype];
+        
+            foreach($field_name as $f_name){
+                $dt_mapping[$f_name] = $ft_id; //$ft_vals[$idx_fieldtype];
+            }
 
             if($ft_vals[$idx_fieldtype] == "enum" ||  $ft_vals[$idx_fieldtype] == "relationtype") {
-                array_push($query_enum, $field_name);
-                $trm1 = "trm".count($query_enum);
-                array_push($query_enum_join,
-                    " defTerms $trm1 on ($trm1.trm_Code=$field_name OR "
-                    ." $trm1.trm_Label=$field_name OR $trm1.trm_Label=SUBSTRING_INDEX($field_name,'.',-1))"
-                    );
-                array_push($query_enum_where, "(".$trm1.".trm_Label is null and not ($field_name is null or $field_name='' or $field_name='NULL'))");
+            
+                foreach($field_name as $f_name){
+                
+                    array_push($query_enum, $f_name);
+                    $trm1 = "trm".count($query_enum);
+                    array_push($query_enum_join,
+                        " defTerms $trm1 on ($trm1.trm_Code=$f_name OR "
+                        ." $trm1.trm_Label=$f_name OR $trm1.trm_Label=SUBSTRING_INDEX($f_name,'.',-1))"
+                        );
+                    array_push($query_enum_where, "(".$trm1.".trm_Label is null and not ($f_name is null or $f_name='' or $f_name='NULL'))");
+                }
+                
             }else if($ft_vals[$idx_fieldtype] == "resource"){
-                array_push($query_res, $field_name);
+                
+                $f_name = $field_name[0]; //@todo for multimapping as for enum
+                
+                array_push($query_res, $f_name);
                 $trm1 = "rec".count($query_res);
-                array_push($query_res_join, " Records $trm1 on $trm1.rec_ID=$field_name ");
-                array_push($query_res_where, "(".$trm1.".rec_ID is null and not ($field_name is null or $field_name='' or $field_name='NULL'))");
+                array_push($query_res_join, " Records $trm1 on $trm1.rec_ID=$f_name ");
+                array_push($query_res_where, "(".$trm1.".rec_ID is null and not ($f_name is null or $f_name='' or $f_name='NULL'))");
 
             }else if($ft_vals[$idx_fieldtype] == "float" ||  $ft_vals[$idx_fieldtype] == "integer") {
 
-                array_push($query_num, $field_name);
-                array_push($query_num_where, "(NOT($field_name is null or $field_name='' or $field_name='NULL') and NOT($field_name REGEXP ".$numeric_regex."))");
+                $f_name = $field_name[0]; //@todo for multimapping as for enum
+                
+                array_push($query_num, $f_name);
+                array_push($query_num_where, "(NOT($f_name is null or $f_name='' or $f_name='NULL') and NOT($f_name REGEXP ".$numeric_regex."))");
 
 
 
             }else if($ft_vals[$idx_fieldtype] == "date" ||  $ft_vals[$idx_fieldtype] == "year") {
 
-                array_push($query_date, $field_name);
+                $f_name = $field_name[0]; //@todo for multimapping as for enum
+                
+                array_push($query_date, $f_name);
                 if($ft_vals[$idx_fieldtype] == "year"){
-                    array_push($query_date_where, "(concat('',$field_name * 1) != $field_name "
-                        ."and not ($field_name is null or $field_name='' or $field_name='NULL'))");
+                    array_push($query_date_where, "(concat('',$f_name * 1) != $f_name "
+                        ."and not ($f_name is null or $f_name='' or $f_name='NULL'))");
                 }else{
-                    array_push($query_date_where, "(str_to_date($field_name, '%Y-%m-%d %H:%i:%s') is null "
-                        ."and str_to_date($field_name, '%d/%m/%Y') is null "
-                        ."and str_to_date($field_name, '%d-%m-%Y') is null "
-                        ."and not ($field_name is null or $field_name='' or $field_name='NULL'))");
+                    array_push($query_date_where, "(str_to_date($f_name, '%Y-%m-%d %H:%i:%s') is null "
+                        ."and str_to_date($f_name, '%d/%m/%Y') is null "
+                        ."and str_to_date($f_name, '%d-%m-%Y') is null "
+                        ."and not ($f_name is null or $f_name='' or $f_name='NULL'))");
                 }
 
             }
