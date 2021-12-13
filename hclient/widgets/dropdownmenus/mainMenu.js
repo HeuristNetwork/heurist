@@ -469,8 +469,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             this.doLogin();
         }else {
             this._performInitialSearch();
-
-            if(!window.hWin.HEURIST4.util.getUrlParameter('nometadatadisplay', window.hWin.location.search) 
+            
+            var query = window.hWin.location.search.substring(1);
+            var vars = query.split('&');
+            //!window.hWin.HEURIST4.util.getUrlParameter('nometadatadisplay', window.hWin.location.search) 
+            if( vars && vars.length==1
 				&& window.hWin.HAPI4.sysinfo['db_total_records']>0){
                 // Wait a bit for the main menu to be initialised
                 setTimeout(function(){
@@ -1877,7 +1880,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     $(that.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
                     that._performInitialSearch();
 
-					if(!window.hWin.HEURIST4.util.getUrlParameter('nometadatadisplay', window.hWin.location.search) 
+                    var query = window.hWin.location.search.substring(1);
+                    var vars = query.split('&');
+                    //!window.hWin.HEURIST4.util.getUrlParameter('nometadatadisplay', window.hWin.location.search) 
+                    if( vars && vars.length==1
 						&& window.hWin.HAPI4.sysinfo['db_total_records']>0){
                         // Wait a bit for the main menu to be initialised
                         setTimeout(function(){
