@@ -484,18 +484,18 @@ CREATE TABLE recForwarding (
 
 CREATE TABLE recLinks (
   rl_ID   int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key',
-  rl_SourceID int(10) unsigned NOT NULL COMMENT 'Source record ID',
-  rl_TargetID int(10) unsigned NOT NULL COMMENT 'Target record ID',
-  rl_RelationID int(10) unsigned        COMMENT 'Relationship record ID',
-  rl_RelationTypeID int(10) unsigned    COMMENT 'Relationship type - defTerms.trm_ID',
-  rl_DetailTypeID int(10) unsigned      COMMENT 'Record Pointer detail type ID',
-  rl_DetailID int(10) unsigned          COMMENT 'Pointer Detail type',
+  rl_SourceID int(10) unsigned NOT NULL COMMENT 'ID of one of the records, the source record in the case of a record pointer linking the records',
+  rl_TargetID int(10) unsigned NOT NULL COMMENT 'ID of the second record, the target record in the case of a record pointer linking the records',
+  rl_RelationID int(10) unsigned        COMMENT 'For relationship records: ID of the record linking the source and target records',
+  rl_RelationTypeID int(10) unsigned    COMMENT 'Term ID (defTerms.trm_ID) for the relationship type linking these records',
+  rl_DetailTypeID int(10) unsigned      COMMENT 'For record pointer links: Detail type ID for the record pointer field in the source directed towards the target record',
+  rl_DetailID int(10) unsigned          COMMENT 'Detail ID of the record pointer value linking these records',
   PRIMARY KEY  (rl_ID),
   KEY rl_SourcePtrKey (rl_SourceID),
   KEY rl_TargetPtrKey (rl_TargetID),
   KEY rl_RelationKey (rl_RelationID),
   KEY rl_DetailKey (rl_DetailID)
-) ENGINE=InnoDB COMMENT='A cache for records links (pointers and relationships) to speed access';
+) ENGINE=InnoDB COMMENT='A cache for links between records (both record pointer fields and relationship records) to speed access';
 
 -- --------------------------------------------------------
 
