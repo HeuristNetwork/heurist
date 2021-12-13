@@ -124,7 +124,7 @@
                     {
                         "dtID": "trm_SemanticReferenceURL",
                         "dtFields":{
-                            "dty_Type":"freetext",
+                            "dty_Type":"blocktext",
                             "dty_Size":250,
                             "rst_DisplayWidth":60,
                             "rst_DisplayName":"Semantic / Reference URI:",
