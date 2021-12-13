@@ -547,7 +547,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                     
                     +'<a target="_new" href="'+window.hWin.HAPI4.baseURL+'?db='
                         +window.hWin.HAPI4.database
-                        +'&w=all&q=ids:' + rec_ids.join(',') + '">view as search</a>&nbsp;&nbsp;&nbsp;&nbsp;'
+                        +'&w=all&nometadatadisplay=1&q=ids:' + rec_ids.join(',') + '">view as search</a>&nbsp;&nbsp;&nbsp;&nbsp;'
 
                     +'<a href="#" data-action-ignore="'+i+ '">ignore in future</a>';
                         

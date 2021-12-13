@@ -1,6 +1,6 @@
 DIRECTORY STRUCTURE FOR HEURIST WEB SERVER
 
-Ian Johnson rev. 12 Feb 2016
+Ian Johnson rev. 12 Feb 2016, minor update 28 Nov 2021
 
 ------------------------------------------------------------------------------------
 
@@ -16,16 +16,18 @@ Heurist directory:    /var/www/html/HEURIST  (HEURIST may be installed in any we
 
 ---------------------------------------------------------------------------------------------------------
 
-VERSION 4 (June  2015 onwards) and version 5 (early 2018 onwards)
+VERSIONS: 4 (June  2015), 5 (early 2018), 6 (early 2021)
 
 SUMMARY:
 
     /var/www/html                           Optional: place simlinks in web root to shorten URL paths
 
                     heurist                 Simlink to .../HEURIST/heurist
-                    h5-xx                   Simlinks to .../HEURIST/h5-ao, h5-ij, h5-alpha, h5-beta etc.
-
-    /var/www/html/HEURIST/                  All Heurist files in this directory (file store normally a simlink))
+                    h6-xx                   Simlinks to .../HEURIST/h6-ao, h6-ij, etc.
+                    h6-alpha                Simlinks to the latest development version eg. h6-ao
+                    
+    /var/www/html/HEURIST/                  All Heurist files are in this directory 
+                                            (the file store, se below, is normally a simlink))
 
                     index.html              Heurist homepage providing access to services
                                             Supplied as move_to_parent_as_index.html in Heurist codebase root

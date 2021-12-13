@@ -551,7 +551,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                                     +'<div style="line-height:0.8;max-height:100px;overflow-y:auto">'+swarns_exists+'</div>';
                         }
                         if(cntWarnMemtypes>0){
-                            swarns_memtypes = '<h4 style="margin-bottom:0px">Files with not allowed mimetypes were not uploaded: '+cntWarnMemtypes+'</h4>'
+                            swarns_memtypes = '<h4 style="margin-bottom:0px">The following files were not uploaded as the mime type was not recognised (please contact us for an update). Count = '+cntWarnMemtypes+'</h4>'
                                     +'<div style="line-height:0.8;max-height:100px;overflow-y:auto">'+swarns_memtypes+'</div>';
                         }
                         if(cntOtherErrors>0){

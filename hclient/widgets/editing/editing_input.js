@@ -1394,7 +1394,7 @@ $.widget( "heurist.editing_input", {
                             isOpened = true;
                             
                             if(that.options.editing && (that.options.editing.editStructureFlag()===true)){
-                                window.hWin.HEURIST4.msg.showMsgFlash('This feature is disabled in edit structure mode',2000);                     return;
+                                window.hWin.HEURIST4.msg.showMsgFlash('This feature is disabled in edit structure mode, you can use it in normal record editing',3000);                     return;
                             }
                             
                             function __onCloseAddLink(context){
