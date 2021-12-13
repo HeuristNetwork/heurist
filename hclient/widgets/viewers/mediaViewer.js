@@ -76,7 +76,6 @@ $.widget( "heurist.mediaViewer", {
                         
             window.hWin.HAPI4.RecordMgr.search_new(request, function(response){
                 if(window.hWin.HEURIST4.util.isJSON(response)) {
-console.log(response);                   
                    that.options.rec_Files = response['records'];
                    if(that.options.rec_Files && that.options.rec_Files.length>0){
                         that._initControls();    

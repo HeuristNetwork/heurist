@@ -5,6 +5,7 @@
     * ignoring groups in future, merging group members, editing records
     * 
     * see admin menu
+    * Deprecated: new version see recordFindDuplicates.js, recordDupes.php
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -16,6 +17,7 @@
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     3.1.0
+    * @deprecated  since Heurist 6.0
     */
 
     /*
@@ -294,7 +296,7 @@
                                 
                                 print '<li>'.($crosstype ? $vals['type'].'&nbsp;&nbsp;' : '').
                                 '<a target="_new" href="'.HEURIST_BASE_URL.'viewers/record/viewRecord.php?db='.HEURIST_DBNAME.
-                                '&saneopen=1&recID='.$rec_id.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
+                                '&recID='.$rec_id.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
                                 if ($recURL)
                                     print '&nbsp;&nbsp;&nbsp;<span style="font-size: 70%;">(<a target="_new" href="'.
                                     $recURL.'">' . $recURL . '</a>)</span>';

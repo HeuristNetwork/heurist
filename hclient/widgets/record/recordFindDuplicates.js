@@ -559,7 +559,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                     s = s + '<li>'
                     + '<a target="_new" href="'+window.hWin.HAPI4.baseURL+'viewers/record/viewRecord.php?db='
                     + window.hWin.HAPI4.database
-                    + '&saneopen=1&recID='+rec_ids[j]+'">'+rec_ids[j]
+                    + '&recID='+rec_ids[j]+'">'+rec_ids[j]
                     + ': '+ window.hWin.HEURIST4.util.stripTags(dupes[i][rec_ids[j]])+'</a></li>';
                     
                 }
