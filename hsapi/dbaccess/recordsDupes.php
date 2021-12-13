@@ -280,9 +280,15 @@ public static function findDupes( $params ){
     if(count($exact_fields)>0){
         $compare_mode = ($compare_mode==1)?2:3;
         
-        if($compare_mode==3){
+        if($compare_mode==3){ //each field separately
             $exact_fields = ', '.implode(',',$exact_fields);    
         }else{
+            //remove "as dXXX" otherwise CONCAT doesn't work
+            foreach($exact_fields as $idx=>$fld){
+                $k = strpos($fld,' as ');
+                $exact_fields[$idx] = substr($exact_fields[$idx],0,$k);
+            }
+            
             $exact_fields = ', '.(count($exact_fields)>1?'CONCAT('.implode('|',$exact_fields).')':$exact_fields[0]);
         }
         
@@ -634,7 +640,7 @@ private static function _searchInCache(){
         $i = array_search($curr_recid,  self::$all_similar_ids, true); 
         if($i==false && $len1>2){
 
-            $dist = ceil($len1*self::$distance/100);
+            $dist = ceil($len1*self::$distance/100); //difference % set in client side
             if($dist==0){
                 $dist = 1;              
             }else if($dist>10){
