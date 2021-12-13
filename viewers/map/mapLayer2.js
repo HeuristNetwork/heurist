@@ -148,6 +148,11 @@ function hMapLayer2( _options ) {
 
             var layer_options = {minZoom:minZoom , maxZoom:maxZoom, extension:ext};
             
+            if(layer_url.indexOf('/info.json')>0){  //ccode1=='2-???' IIIF image
+                
+                layer_options['IIIF'] = true;
+            
+            }else
             if(ccode1=='2-549'){ //virtual earth
                 
                 layer_options['BingLayer'] = true;

@@ -513,11 +513,24 @@ $.widget( "heurist.mapping", {
     
         var new_layer;
 
-        var HeuristTilerLayer = HeuristTilerLayer = L.TileLayer.extend({
+        var HeuristTilerLayer = L.TileLayer.extend({
                         getBounds: function(){
                             return this.options._extent;  
                         }});
         
+        if(layer_options['IIIF']){
+        
+                HeuristTilerLayer = L.TileLayer.Iiif.extend({
+                        getBounds: function(){
+                            return this.options._extent;  
+                        }});
+                
+                layer_options['fitBounds'] = false;
+                
+                new_layer = new HeuristTilerLayer(layer_url, layer_options).addTo(this.nativemap);                
+                //new L.tileLayer.iiif
+        
+        }else
         if(layer_options['BingLayer'])
         {
                 var BingLayer = HeuristTilerLayer.extend({
@@ -584,6 +597,7 @@ $.widget( "heurist.mapping", {
                 
         }else{
             
+            //transparency for jpeg
             if(layer_options['MapTiler'] && layer_options['extension']=='.jpg'){
                 layer_options['matchRGBA'] = [ 0,  0,  0, 0  ]; //replace that match
                 layer_options['missRGBA'] =  null; //replace that not match
