@@ -161,7 +161,7 @@ if($db){
                         }    
                     }
                     
-                    if(@$_REQUEST['fancybox']==1 && strpos($fileinfo['fullPath'],'file_uploads/')===0){
+                    if($_SERVER["SERVER_NAME"]=='127.0.0.1' &&  @$_REQUEST['fancybox']==1 && strpos($fileinfo['fullPath'],'file_uploads/')===0){
                         //show in viewer directly
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
                         header('Location: '.$direct_url);
