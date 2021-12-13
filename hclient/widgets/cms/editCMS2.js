@@ -366,7 +366,7 @@ function editCMS2(){
     //
     // load page structure into tree and init layout
     //
-    function _initPage(){
+    function _initPage( supress_conversion ){
         
         if(tinymce) tinymce.remove('.tinymce-body'); //detach
         
@@ -379,6 +379,48 @@ function editCMS2(){
         var opts = {};
         if(page_cache[options.record_id]) opts = {page_name:page_cache[options.record_id][DT_NAME]};
         opts.rec_ID = home_page_record_id;
+        
+        if(supress_conversion!==true && typeof _layout_content === 'string' &&
+            _layout_content.indexOf('data-heurist-app-id')>0){ //old format with some widgets
+ 
+                var $dlg_pce = null;
+
+                var btns = [
+                    {text:window.hWin.HR('Proceed'),
+                        click: function() { 
+                            
+                            $dlg_pce.dialog('close'); 
+                            
+                            var res = layoutMgr.convertOldCmsFormat(_layout_content, _layout_container);
+                            if(res!==false){
+                                _layout_content = res;
+                                window.hWin.HEURIST4.msg.showMsgDlg('Conversion complete. If you are not satisfied with result please '
+                                +'email support at HeuristNetwork dot org the name of your database and '
+                                +'we will update the page manually to the new format. Don\'t save current page to avoid lost of original design');
+                            }
+                            
+                            _initPage(true);
+                        }
+                    },
+                    {text:window.hWin.HR('Cancel'),
+                        click: function() { 
+                            _initPage(true);
+                            $dlg_pce.dialog('close'); 
+                    }}
+                ];            
+ 
+            
+                //trying to convert old format to new one - to json
+                $dlg_pce = window.hWin.HEURIST4.msg.showMsgDlg(
+'<p>Heurist\'s CMS editor has been upgraded to a new system which is both much easier and much more powerful than the original editor and requires an entirely new data format. Heurist will convert most pages automatically to the new editor.</p>'
+ 
++'<p>Unfortunately if this page uses complex formatting which we cannot be sure of converting correctly through this automatic process. Please email support at HeuristNetwork dot org with the name of your database and we will update the page manually to the new format.</p>'
+ 
++'<p>In the meantime you can continue to edit the page using the old web page editor, but please note this editor will be DISCONTINUED at the end of February 2022.</p>',btns,'New website editor'); 
+                    
+                 return;
+        }
+        
         
         var res = layoutMgr.layoutInit(_layout_content, _layout_container, opts);
         
@@ -730,22 +772,23 @@ function editCMS2(){
                 node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
 
             var actionspan = '<div class="lid-actionmenu mceNonEditable" '
-            +' style="'+style_pos+';display:none;color:black;background:#95A7B7 !important;'
-            +'font-size:'+(is_intreeview?'12px':'16px')+';font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' 
+            +' style="'+style_pos+';display:none;color:black;background: rgba(201, 194, 249, 1) !important;'
+            +'font-size:'+(is_intreeview?'12px;right:13px':'16px')+';font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' 
             //+ ele_ID
-            + (is_intreeview?'':'<span class="ui-icon ui-icon-gear" style="width:20px"></span>')
+            + (is_intreeview?'<span class="ui-icon ui-icon-menu" style="width:20px"></span>'
+                            :'<span class="ui-icon ui-icon-gear" style="width:20px"></span>')
             + (true || is_root || is_cardinal?'':
-                ('<span data-action="drag" style="'+(is_intreeview?'':'display:block;')+'background:lightgreen;padding:4px" title="Drag to reposition">'
+                ('<span data-action="drag" style="'+(false && is_intreeview?'':'display:block;')+'padding:4px" title="Drag to reposition">' //
                     + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"/>Drag</span>'))               
-            + '<span data-action="edit" style="'+(is_intreeview?'':'display:block;')+'background:lightgray;padding:4px" title="Edit style and properties">'
+            + '<span data-action="edit" style="'+(false && is_intreeview?'':'display:block;')+'padding:4px" title="Edit style and properties">'
             +'<span class="ui-icon ui-icon-pencil"/>Style</span>';               
 
             //hide element for cardinal and delete for its panes                     
             if(node.data.type!='cardinal'){
-                actionspan += '<span data-action="element" style="'+(is_intreeview?'':'display:block;')+'background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new element/widget"/>Insert</span>';
+                actionspan += '<span data-action="element" style="'+(false && is_intreeview?'':'display:block;')+'padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new element/widget"/>Insert</span>';
             }
             if(!(is_root || is_cardinal)){
-                actionspan += ('<span data-action="delete" style="'+(is_intreeview?'':'display:block;')+'background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
+                actionspan += ('<span data-action="delete" style="'+(false && is_intreeview?'':'display:block;')+'padding:4px"><span class="ui-icon ui-icon-close" title="'
                     +'Remove element from layout"/>Delete</span>');
             }
 
@@ -755,6 +798,15 @@ function editCMS2(){
 
             if(is_intreeview){   //in treeview
                 actionspan.appendTo(item);
+                
+                actionspan.find('span[data-action]').hide();
+                actionspan.find('span.ui-icon-menu').click(function(event){
+                    var ele = $(event.target);
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    ele.hide();
+                    ele.parent().find('span[data-action]').show();
+                });
+                
             }else{ 
 
                 //$('<div>').addClass('cms-element-overlay').attr('data-lid',ele_ID).insertAfter(item);
@@ -852,7 +904,10 @@ function editCMS2(){
                     }
                     if(node){
                         var ele = node.find('.lid-actionmenu'); //$(event.target).children('.lid-actionmenu');
+                        ele.find('span[data-action]').hide();
+                        ele.find('span.ui-icon-menu').show();
                         ele.hide();//css('visibility','hidden');
+                        
                         //remove heighlight
                         _layout_container.find('div[data-lid]').removeClass('cms-element-active');
                         if(!_panel_propertyView.is(':visible'))

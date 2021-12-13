@@ -59,18 +59,10 @@ function hLayoutMgr(){
         if(typeof layout === 'string' &&
             layout.indexOf('data-heurist-app-id')>0){ //old format with some widgets
             
-                container.html(layout);
-                //trying to convert old format to new one - to json
-                layout = false; //_convertOldCmsFormat(container, 0);
-                if(layout===false){
-            
-                    window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content', _supp_options );
-                    return false;
+            container.html(layout);
                 
-                }else{
-                    container.empty();    
-                }
-            
+            window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content', _supp_options );
+            return false;
         }
         
         var res = window.hWin.HEURIST4.util.isJSON(layout);
@@ -597,6 +589,12 @@ function hLayoutMgr(){
                                 type:"text", 
                                 content: s };
          }else{
+             
+             if(ele[0].nodeName=='TABLE'){
+                 //window.hWin.HEURIST4.msg.showMsgDlg('We encounter troubles on conversion. Dynamic widget is within TABLE element');
+                 //return false;
+             }
+             
              //there are widgets among children
              child = {name:"Group "+lvl+'.'+idx,
                                 type:"group", 
@@ -672,6 +670,13 @@ function hLayoutMgr(){
         layoutInit: function(layout, container, supp_options){
             _supp_options = supp_options;
             return _layoutInit(layout, container, true);
+        },
+        
+        convertOldCmsFormat: function(layout, container){
+            container = $(container);
+            container.empty();   
+            container.html(layout);
+            return _convertOldCmsFormat(container, 0)
         },
         
         layoutInitKey: function(layout, i){
