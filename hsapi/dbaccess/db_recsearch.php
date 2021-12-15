@@ -2002,14 +2002,22 @@ function recordSearch($system, $params)
     }else{
 
         $is_mode_json = false;
+        
+        $q = @$params['q'];
 
-        if(@$params['q']!=null && @$params['q']!=''){
+        if($q!=null && $q!=''){
 
-            if(is_array(@$params['q'])){
-                $query_json = $params['q'];
+            if(is_array($q)){
+                $query_json = $q;
                 //DEBUG error_log('Q='.print_r($params['q'],true));                
             }else{
-                $query_json = json_decode(@$params['q'], true);
+                $query_json = json_decode($q, true);
+                
+                //try to pare plain string
+                if( strpos($q,'*')===0 && !(is_array($query_json) && count($query_json)>0)){
+                    $q = substr($q, 1);
+                    $query_json = parse_query_to_json( $q );
+                }
             }
 
             if(is_array($query_json) && count($query_json)>0){
