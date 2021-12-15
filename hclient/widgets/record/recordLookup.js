@@ -153,23 +153,27 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
 
         function fld(fldname, width){
             var s = recordset.fld(record, fldname);
-
             if(fldname == 'properties.LGA'){ 
                 s = s.lga; 
             }
-
             s = s?s:'';
+            var title = s;
+
+            if(fldname == 'recordLink'){
+                s = '<a href="' + s + '" target="_blank"> view here </a>';
+                title = 'View tclmap record';
+            }
+
             if(width>0){
-                s = '<div style="display:inline-block;width:'+width+'ex" class="truncate" title="'+s+'">'+s+'</div>';
+                s = '<div style="display:inline-block;width:'+width+'ex" class="truncate" title="'+title+'">'+s+'</div>';
             }
             return s;
         }
 
         var recID = fld('rec_ID');
         var rectypeID = fld('rec_RecTypeID');
-        var recTitle = fld('properties.placename',40); 
 
-        recTitle = recTitle + fld('properties.LGA',25)+fld('properties.state',6)+fld('properties.description',80); 
+        var recTitle = fld('properties.placename',40) + fld('properties.LGA', 25) + fld('properties.state', 6) + fld('properties.description', 65) + fld('recordLink', 12); 
 
         var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
 
@@ -177,17 +181,13 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
                 + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
-            + html_thumb
-
-                + '<div class="recordIcons">'
-                +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-                +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>' 
-                + '</div>'
-
-                //+ '<div class="recordTitle" style="left:30px;right:2px">'
-                    +  recTitle
-                //+ '</div>'
-            + '</div>';
+                        + html_thumb
+                        + '<div class="recordIcons">'
+                        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+                        +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>' 
+                        + '</div>'
+                        +  recTitle
+                    + '</div>';
         return html;
     },
 
@@ -279,25 +279,7 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
                     }
                 }
             }
-        );          
-        /*
-        var that = this;
-        
-        window.hWin.HEURIST4.util.sendRequest(sURL, null, this,
-        function(response)
-        {
-             window.hWin.HEURIST4.msg.sendCoverallToBack();
-             
-             if(response && response.status == window.hWin.ResponseStatus.UNKNOWN_ERROR)
-             {
-                  window.hWin.HEURIST4.msg.showMsgErr(response);
-                 
-             }else{
-                 that.element.find('#div_fieldset').hide();
-                 that.element.find('#div_result').text(response).show();
-             }
-        },'json');
-        */
+        );
     },
     
     //
@@ -305,18 +287,14 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
     //
     _onSearchResult: function(geojson_data){
         
-       this.recordList.show();
+        this.recordList.show();
        
-       var is_wrong_data = true;
+        var is_wrong_data = true;
                         
-       if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){
+        if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){
             
             var res_records = {}, res_orders = [];
-            /*
-            var fields = [
-"bkm_ID","bkm_UGrpID","rec_ID","rec_URL","rec_RecTypeID","rec_Title","rec_OwnerUGrpID",
-"rec_NonOwnerVisibility","rec_Modified","bkm_PwdReminder","rec_ThumbnailURL"];
-      
+            /*      
             var DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'],
                 DT_ORIGINAL_RECORD_ID = window.hWin.HAPI4.sysinfo['dbconst']['DT_ORIGINAL_RECORD_ID'],
                 DT_NAME       = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
@@ -330,6 +308,7 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
             var fields = ['rec_ID','rec_RecTypeID'];
             var map_flds = Object.keys(this.options.mapping.fields);
             fields = fields.concat(map_flds);
+            fields = fields.concat('recordLink');
             
             for(var k=0; k<map_flds.length; k++){
                 map_flds[k] = map_flds[k].split('.'); 
@@ -379,44 +358,18 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
                             }
                         }
                     }
-                        
                     values.push(val);    
                 }
+
+                // https://maps.google.com/?q=lat,lng or https://www.google.com/maps/search/?api=1&query=lat,lng
+                values.push('https://tlcmap.org/ghap/search?id=' + feature['properties']['id']);
+
                 if(hasGeo){
                     res_orders.push(recID);
                     res_records[recID] = values;    
                 }
-                
-                
-
-                /*
-                var header = {0:null,1:null,2:'recID',3:'',4:this.options.mapping.rty_ID,
-                   5:'TITLE',6:0,7:'viewable',8:'',9:null,10:null};
-                header[2] = recID;
-                header[4] = this.options.mapping.rty_ID;
-                header[5] = feature.properties.name;
-                
-                var details = {};
-                details[DT_NAME] = [feature.properties.name];
-                details[DT_ORIGINAL_RECORD_ID] = [feature.properties.id];
-                details[DT_SHORT_NAME] = [feature.LGA];
-                details[DT_ADMIN_UNIT] = [feature.state];
-                details[DT_EXTENDED_DESCRIPTION] = [feature.description];
-                details[DT_GEO_OBJECT] = [feature.geometry];
-                
-                res_records[recID] = header;
-                res_records[recID]['d'] = details;
-                */
             }
-            
-/*
-              'geometry': '2-28',
-              'properties.name': '2-1',  
-              'properties.id': '2-26', //original id
-              'state': '2-234',
-              'LGA': '2-2',
-              'description': '2-4'
-*/    
+
             if(res_orders.length>0){        
                 var res_recordset = new hRecordSet({
                     count: res_orders.length,
@@ -431,16 +384,14 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
                 this.recordList.resultList('updateResultSet', res_recordset);            
                 is_wrong_data = false;
             }
-       }
+        }
        
-       if(is_wrong_data){
-            //ele.text('ERROR '+geojson_data);                    
+        if(is_wrong_data){
             this.recordList.resultList('updateResultSet', null);            
             
             window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
-       }
+        }
     },
-
     
     //
     // 
@@ -448,8 +399,6 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
     _addNewRecord: function (record_type, field_values){
         
         window.hWin.HEURIST4.msg.sendCoverallToBack();
-    }
-    
-        
+    }  
 });
 
