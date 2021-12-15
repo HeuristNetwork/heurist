@@ -1109,7 +1109,7 @@ $.widget( "heurist.editing_input", {
                                         if(trm_info.trm_ParentTermID == 0){
                                             break;
                                         }else{
-                                            crafted_label = trm_info.trm_Label + ' > ' + crafted_label;
+                                            crafted_label = trm_info.trm_Label + '.' + crafted_label;
                                         }
                                     }
 
@@ -1133,7 +1133,7 @@ $.widget( "heurist.editing_input", {
                                 if(trm_info.trm_ParentTermID == 0){
                                     break;
                                 }else{
-                                    crafted_label = trm_info.trm_Label + ' > ' + crafted_label;
+                                    crafted_label = trm_info.trm_Label + '.' + crafted_label;
                                 }
                             }
 
