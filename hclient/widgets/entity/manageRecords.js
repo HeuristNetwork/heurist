@@ -3523,7 +3523,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     +'<img src="'+ph_gif
                         +'" width=36 height=36 class="rt-icon" style="padding:2px;background-size: 28px 28px;vertical-align:middle;margin: 2px 10px 2px 4px;'
                         +'background-image:url(\'' + rt_icon + '\');"/>'
-                    + '<span style="display:inline-block;vertical-align:middle;font-size:larger;font-weight:bold;max-width:100px;min-width:100px;" '
+                    + '<span style="display:inline-block;vertical-align:middle;font-size:larger;font-weight:bold;max-width:100px;" '
                     + 'class="truncate" title="'+ $Db.rty(this._currentEditRecTypeID,'rty_Name') +'">'
                         + $Db.rty(this._currentEditRecTypeID,'rty_Name')
                     + '</span>'
@@ -4154,29 +4154,49 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         var parententity = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
 
         // add new separate fieldset at the start w/ darker background
-        var top_fieldset = $('<fieldset>').css({'background-color': '#d1e7e7', 'margin-bottom': '10px'}).insertBefore(this.editForm.find('fieldset:first'));
+        var top_fieldset = $('<fieldset>').css({'background-color': '#d1e7e7', 'margin-bottom': '10px', 'padding-left': '10px'}).insertBefore(this.editForm.find('fieldset:first'));
 
-        // Display record title and (if available) child record fields to top of form
+        // check for child record field, move to new fieldset if any
+        var childrec_field = this.editForm.find('div[data-dtid="'+parententity+'"]');
+        if(childrec_field.length == 1){
+
+            // get help info and remove it so it doesn't appear when help is shown
+            //var help_text = childrec_field.find('div.heurist-helper1').text();
+            //childrec_field.find('div.heurist-helper1').text('');
+
+            // Input changes
+            //childrec_field.find('div.link-div').attr('title', help_text);
+
+            // Header changes
+            childrec_field.find('div.header').css({'font-size': '12px', 'text-align': 'left', 'width': '120px', 'min-width': '120px'});//.attr('title', help_text);
+            //childrec_field.find('div.header > label').css('color', 'black');
+
+            // Append to top
+            top_fieldset.append(childrec_field);
+        }
+
+        // Display record title
         var ele = this._editing.getFieldByName('rec_Title').show().editing_input('setDisabled', true);
 
-        // remove opacity change and set background to white
+        // remove opacity change and set background to lighter background
         var cur_styling = ele.find('input').attr('style');
-        ele.find('input').attr('style', cur_styling + 'background-color:#d1e7e7!important;opacity:1;font-size:13px;border:none;');
+        ele.find('input')
+            .attr('style', cur_styling + 'background-color:#e3f0f0!important;opacity:1;font-size:13px;border:none;')
+            .attr('title', 'A title constructed from one or more fields, which is used to identify records when displayed in search results.');
 
         // change label to required version, and add help icon
-        var $helper_icon = $('<span>')
-                            .addClass('ui-icon ui-icon-circle-help')
-                            .css('color', '#307d96')
-                            .attr('title', 'A title constructed from one or more fields, which is used to identify records when displayed in search results.');
-        ele.find('div.header').css('font-size', '12px').after($helper_icon);
-        ele.find('div.header > label').css({'color': 'black', 'font-weight': '800'}).text('Constructed title');
+        ele.find('div.header')
+            .css({'font-size': '1.3em', 'font-weight': 'bold', 'text-align': 'left', 'width': '120px', 'min-width': '120px'})
+            .attr('title', 'A title constructed from one or more fields, which is used to identify records when displayed in search results.');
+
+        ele.find('div.header > label').css('color', 'black').text('Constructed title');
 
         // add gear icon that opens title mask editor
         if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false){
 
             var $gear_icon = $('<span>')
                               .addClass('ui-icon ui-icon-gear')
-                              .css({'color': 'rgb(125, 154, 170)', 'margin': '0px 2px 3px'})
+                              .css({'color': 'rgb(125, 154, 170)', 'margin-bottom': '2px', 'min-width': '22px'})
                               .attr('title', 'Open Title Mask Editor')
                               .click(function(e) { that.editRecordTypeTitle(); });
 
@@ -4184,7 +4204,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             ele.find('span.btn_input_clear').remove();
         }
 
-        // 
         if(this.options.rts_editor){
             this._createRtsEditButton(null, ele);
         }
@@ -4192,21 +4211,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         // move rec_title field to new fieldset
         top_fieldset.append(ele);
 
-        // check for child record field, move to new fieldset if any
-        var childrec_field = this.editForm.find('div[data-dtid="'+parententity+'"]');
-        if(childrec_field.length == 1){
+        var url_field = this._editing.getFieldByName('rec_URL');
+        //url_field.find('input')
+        url_field.find('div.header')
+            .css({'font-size': '12px', 'text-align': 'left', 'width': '120px', 'min-width': '120px'});
 
-            childrec_field.find('div.link-div').css('background', 'white');
-
-            // get help info and remove it so it doesn't appear when help is shown
-            var help_text = childrec_field.find('div.heurist-helper1').text();
-            childrec_field.find('div.heurist-helper1').text('');
-
-            // add helper icon
-            childrec_field.find('div.header').css('font-size', '12px').after($helper_icon.clone().css('vertical-align', 'super').attr('title', help_text));
-            childrec_field.find('div.header > label').css({'color': 'black', 'font-weight': '800'});
-
-            top_fieldset.append(childrec_field);
-        }
+        top_fieldset.append(url_field);
     }
 });
