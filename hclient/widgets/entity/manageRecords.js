@@ -1050,12 +1050,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         onopen_start : function( ){ 
                             var tog = that.element.find('.ui-layout-toggler-west');
                             tog.removeClass('prominent-cardinal-toggler togglerVertical');
-                            tog.find('.heurist-helper2.westTogglerVertical').remove();
+                            tog.find('.heurist-helper2.westTogglerVertical').hide();
                         },
                         onclose_end : function( ){ 
                             var tog = that.element.find('.ui-layout-toggler-west');
                             tog.addClass('prominent-cardinal-toggler togglerVertical');
-                            $('<span class="heurist-helper2 westTogglerVertical" style="width:200px;margin-top:220px;">Navigate / Move / Delete</span>').appendTo(tog);
+
+                            if(tog.find('.heurist-helper2.westTogglerVertical').length > 0){
+                                tog.find('.heurist-helper2.westTogglerVertical').show();
+                            }else{
+                                $('<span class="heurist-helper2 westTogglerVertical" style="width:200px;margin-top:220px;">Navigate / Move / Delete</span>').appendTo(tog);
+                            }
                         },
                         togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
                         togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-e"></div>',
@@ -1075,12 +1080,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         onopen_start : function(){ 
                             var tog = that.editFormPopup.find('.ui-layout-toggler-east');
                             tog.removeClass('prominent-cardinal-toggler togglerVertical');
-                            tog.find('.heurist-helper2.eastTogglerVertical').remove();
+                            tog.find('.heurist-helper2.eastTogglerVertical').hide();
                         },
                         onclose_end : function(){ 
                             var tog = that.editFormPopup.find('.ui-layout-toggler-east');
                             tog.addClass('prominent-cardinal-toggler togglerVertical');
-                            $('<span class="heurist-helper2 eastTogglerVertical" style="width:200px;">Record Summary</span>').appendTo(tog);
+
+                            if(tog.find('.heurist-helper2.eastTogglerVertical').length > 0){
+                                tog.find('.heurist-helper2.eastTogglerVertical').show();
+                            }else{
+                                $('<span class="heurist-helper2 eastTogglerVertical" style="width:200px;">Record Summary</span>').appendTo(tog);
+                            }
                         },
                         togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-e"></div>',
                         togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-w"></div>',
@@ -1104,16 +1114,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 this.editFormPopup.show().layout(layout_opts); //.addClass('ui-heurist-bg-light')
                 
                 if(this.options.edit_structure){
-                    
+
                     this.editFormPopup.layout().show("north");
                     this.editFormPopup.layout().hide("east");  
-                    /*this.editFormPopup.layout().open("west");  
-                    var tog = this.editFormPopup.find('.ui-layout-toggler-east');
-                    tog.removeClass('prominent-cardinal-toggler');*/
-                    
                 }else if(this.usrPreferences.summary_closed==true || this.usrPreferences.summary_closed=='true'){
-                            var tog = that.editFormPopup.find('.ui-layout-toggler-east');
-                            tog.addClass('prominent-cardinal-toggler');
+
+                    var tog = that.editFormPopup.find('.ui-layout-toggler-east');
+                    tog.addClass('prominent-cardinal-toggler togglerVertical');
+
+                    $('<span class="heurist-helper2 eastTogglerVertical" style="width:200px;">Record Summary</span>').appendTo(tog);
                 }
                 
                 
@@ -2079,7 +2088,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             if(isClosed){
                 var tog = that.editFormPopup.find('.ui-layout-toggler-west');
                 tog.addClass('prominent-cardinal-toggler togglerVertical');
-                $('<span class="heurist-helper2 westTogglerVertical" style="font-size:17px;width:200px;margin-top:325px;">Navigate / Move / Delete</span>').appendTo(tog);
+
+				if(tog.find('.heurist-helper2.westTogglerVertical').length > 0){
+                    tog.find('.heurist-helper2.westTogglerVertical').show();
+                }else{
+                    $('<span class="heurist-helper2 westTogglerVertical" style="font-size:17px;width:200px;margin-top:220px;">Navigate / Move / Delete</span>').appendTo(tog);
+                }
             }
                 
         }
