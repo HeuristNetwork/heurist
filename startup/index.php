@@ -751,8 +751,9 @@ a{
                 <h1>Set Up a New Database</h1>
 
                 <div class="helper">                
-                    Create your first database on this Heurist server by registering as a user.<br>
-                    As creator of a database you becomes the database owner and can manage the database and other database users.
+                    Create your first database on this Heurist server (<strong><?php print HEURIST_SERVER_NAME; ?></strong>) by registering as a user.<br>
+                    As creator of a database you becomes the database owner and can manage the database and other database users.<br>
+                    For more information on Heurist see <a href="https://heuristnetwork.org/" target="_blank">Heurist Network website</a>
                 </div>
             
                 <div class="entry-box">

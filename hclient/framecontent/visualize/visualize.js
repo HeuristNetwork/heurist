@@ -427,8 +427,8 @@ function visualizeData() {
     addMarkerDefinitions(); // all marker/arrow types on lines
 
     // Lines 
-    addLines("bottom-lines", getSetting(setting_linecolor, '#000'), 2); // larger than top-line, shows connections
-    addLines("top-lines", "#FFF", 2); // small line that, if visible, shows if a field can have multiple values
+    addLines("bottom-lines", getSetting(setting_linecolor, '#000'), 1); // larger than top-line, shows connections
+    addLines("top-lines", "#FFF", 1); // small line that is for displaying direction arrows
     addLines("rollover-lines", "#FFF", 3); // invisible thicker line for rollover
    
     // Nodes
@@ -676,7 +676,7 @@ function addMarkerDefinitions() {
            .attr("fill", markercolor)
            .attr("opacity", 0.6)
            .append("path")                
-           .attr("d", 'M3,4 L-5.5,0 L3,-4');
+           .attr("d", 'M3,3 L-5,0 L3,-3');
 
     return markers;
 }
@@ -708,12 +708,10 @@ function addLines(name, color, thickness) {
             return name + " link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
          })
          .attr("stroke", function (d) {
-            if(hide_empty && d.targetcount == 0 || name === 'rollover-lines'){
+            if(hide_empty && d.targetcount == 0 || name === 'rollover-lines' || name == 'top-lines'){
                 return 'rgba(255, 255, 255, 0.0)'; //hidden
             }else if(d.targetcount == 0 && name === 'bottom-lines') {
                 return '#d9d8d6';
-            }else if($Db.rst(d.source.id, d.relation.id, 'rst_MaxValues') == 1 && name == 'top-lines') {
-                return 'rgba(255, 255, 255, 0.0)'; // hide it
             }else{
                 return color;
             }
@@ -1057,17 +1055,15 @@ function updateStraightLines(lines, type) {
                     }
                 }
 
-                var line, extra_pnts;
+                var line;
 
                 if(type == 'bottom-lines'){
+
+                    var ismultivalue = d.relation.id && $Db.rst(d.source.id, d.relation.id, 'rst_MaxValues') != 1 && $Db.rst(d.source.id, d.relation.id, 'rst_MaxValues') != null;
 
                     line = d3.select("#container").insert("svg:line", ".id"+d.source.id+" + *");
 
                     //add extra starting line
-                    extra_pnts = [
-                      "M",s_x, s_y,
-                      "L",s_x2, s_y];
-                    
                     line.attr("class", "offset_line")
                         .attr("stroke", "darkgray")
                         .attr("stroke-linecap", "round")
@@ -1077,6 +1073,19 @@ function updateStraightLines(lines, type) {
                         .attr("x2", s_x2)
                         .attr("y2", s_y)
                         .attr("marker-end", "url(#blob)");
+
+                    //add backwards crows foot, if multi value
+                    if(ismultivalue){
+
+                        d3.select("#container")
+                          .insert("svg:path", ".id"+d.source.id+" + *")
+                          .attr("class", "offset_line")
+                          .attr("stroke", "darkgray")
+                          .attr("stroke-linecap", "round")
+                          .attr("stroke-width", "3px")
+                          .attr("fill", "none")
+                          .attr("d", "M " + s_x + " " + (s_y+7) + " L " + s_x2 + " " + s_y + " L " + s_x + " " + (s_y-7));
+                    }
                 }
 
                 if(!bottom_tar && type == 'bottom-lines'){
@@ -1084,10 +1093,6 @@ function updateStraightLines(lines, type) {
                     line = d3.select("#container").insert("svg:line", ".id"+d.target.id+" + *");
 
                     // else, add extra ending line
-                    extra_pnts = [
-                      "M",t_x, t_y,
-                      "L",t_x2, t_y];
-
                     line.attr("class", "offset_line")
                         .attr("stroke", "darkgray")
                         .attr("stroke-linecap", "round")

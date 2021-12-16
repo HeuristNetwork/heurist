@@ -1109,7 +1109,7 @@ $.widget( "heurist.editing_input", {
                                         if(trm_info.trm_ParentTermID == 0){
                                             break;
                                         }else{
-                                            crafted_label = trm_info.trm_Label + ' > ' + crafted_label;
+                                            crafted_label = trm_info.trm_Label + '.' + crafted_label;
                                         }
                                     }
 
@@ -1133,7 +1133,7 @@ $.widget( "heurist.editing_input", {
                                 if(trm_info.trm_ParentTermID == 0){
                                     break;
                                 }else{
-                                    crafted_label = trm_info.trm_Label + ' > ' + crafted_label;
+                                    crafted_label = trm_info.trm_Label + '.' + crafted_label;
                                 }
                             }
 
@@ -2177,8 +2177,14 @@ $.widget( "heurist.editing_input", {
                 this._createDateInput($input, $inputdiv);
                 
                 $input.val(value);    
-                $input.change();   
-                                     
+                $input.change(); 
+
+				// Add additional help text 
+				var help_text = this.input_prompt.html();
+
+				if(!window.hWin.HEURIST4.util.isempty(help_text)){
+                    this.input_prompt.html(help_text + '<br>For older dates, type year first, then click the calendar. Dates can be yyyy, yyyy-mm or yyyy-mm-dd.');
+				}
             }else 
             if(this.isFileForRecord){ //----------------------------------------------------
                 

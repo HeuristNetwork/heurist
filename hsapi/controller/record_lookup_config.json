@@ -14,9 +14,28 @@
     }
 },
 {
-    "service": "postalCodeSearch",
+    "service": "geoName",
     "rty_ID": "",
     "label": "GeoNames",
+    "description": "Returns a list of locations for the placename query.",
+    "dialog": "recordLookupGN",
+    "fields": {
+        "name":"",
+        "lng":"",    
+        "lat":"",    
+        "countryCode":"",    
+        "adminCode1":"",    
+        "adminName1":"",
+        "fclName":"",
+        "fcodeName":"",
+        "geonameId":"",
+        "population":""
+    }
+},
+{
+    "service": "postalCodeSearch",
+    "rty_ID": "",
+    "label": "GeoNames - Postal Codes",
     "description": "Returns a list of postal codes and places for the placename/postalcode query.",
     "dialog": "recordLookupGN_postalCode",
     "fields": {

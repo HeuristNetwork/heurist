@@ -38,7 +38,7 @@ $.widget( "heurist.recordLookupGN_postalCode", $.heurist.recordAction, {
         title:  'Lookup values Postal codes for Heurist record',
         
         htmlContent: 'recordLookupGN_postalCode.html',
-        //helpContent: 'recordLookup.html', //in context_help folder
+        //helpContent: 'recordLookupGN_postalCode.html', //in context_help folder
         
         mapping:null, //configuration from sys_ExternalReferenceLookups
                
@@ -170,42 +170,40 @@ $.widget( "heurist.recordLookupGN_postalCode", $.heurist.recordAction, {
     _rendererResultList: function(recordset, record){
         
         function fld(fldname, width){
+
             var s = recordset.fld(record, fldname);
             s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
-            
+
+            var title = s;
+
+            if(fldname == 'googleMapLink'){
+                s = '<a href="' + s + '" target="_blank"> google maps </a>';
+                title = 'View location via Google Maps';
+            }
+
             if(width>0){
-                s = '<div style="display:inline-block;width:'+width+'ex" class="truncate">'+s+'</div>';
+                s = '<div style="display:inline-block;width:'+width+'ex" class="truncate" title="'+title+'">'+s+'</div>';
             }
             return s;
         }
-        
-//{"postalcode":"974","lng":"28_long","lat":"28_lat","countryCode":"26","adminCode1":"","adminName1":"","adminCode2":"","adminName2":"","adminCode3":"","adminName3":"","placeName":"1"}            
-        
-        
+
         var recID = fld('rec_ID');
-        var rectypeID = fld('rec_RecTypeID');
-        var recTitle = fld('placeName',40); 
-        
-        recTitle = fld('postalcode',10) + recTitle + fld('adminName2',30)+fld('adminName1',30)+fld('countryCode',6); 
-        
+        var rectypeID = fld('rec_RecTypeID'); 
+
+        var recTitle = fld('postalcode', 10) + fld('placeName', 40) + fld('adminName2', 30) + fld('adminName1', 30) + fld('countryCode', 6);// + fld('googleMapLink', 12);
+
         var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
-        
+
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                 + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
-                
-                
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
-            + html_thumb
-            
+                + html_thumb            
                 + '<div class="recordIcons">'
                 +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
                 +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>' 
                 + '</div>'
-            
-                //+ '<div class="recordTitle" style="left:30px;right:2px">'
-                    +  recTitle
-                //+ '</div>'
+                +  recTitle
             + '</div>';
         return html;
     },
@@ -225,37 +223,33 @@ $.widget( "heurist.recordLookupGN_postalCode", $.heurist.recordAction, {
     //
     doAction: function(){
 
-            //detect selection
-            var recset = this.recordList.resultList('getSelected', false);
-            
-            if(recset && recset.length() == 1){
-                
-                    var res = {};
-                    var rec = recset.getFirstRecord();
-                    
-                    var map_flds = Object.keys(this.options.mapping.fields);
-                    
-                    for(var k=0; k<map_flds.length; k++){
-                        var dty_ID = this.options.mapping.fields[map_flds[k]];
-                        var val = recset.fld(rec, map_flds[k]);
-                        
-                        if(map_flds[k]=='countryCode' && this._country_vocab_id>0){
-                            val = $Db.getTermByCode(this._country_vocab_id, val);
-                        }
-                        
-                        if(dty_ID>0 && val){
-                            res[dty_ID] = val;    
-                        }
-                    }
-                    
-console.log(res);                    
-                
-                    //pass mapped values and close dialog
-                    this._context_on_close = res;
-                    this._as_dialog.dialog('close');
-                
-            }
+        //detect selection
+        var recset = this.recordList.resultList('getSelected', false);
         
+        if(recset && recset.length() == 1){
+            
+            var res = {};
+            var rec = recset.getFirstRecord();
+            
+            var map_flds = Object.keys(this.options.mapping.fields);
+            
+            for(var k=0; k<map_flds.length; k++){
+                var dty_ID = this.options.mapping.fields[map_flds[k]];
+                var val = recset.fld(rec, map_flds[k]);
+                
+                if(map_flds[k]=='countryCode' && this._country_vocab_id>0){
+                    val = $Db.getTermByCode(this._country_vocab_id, val);
+                }
+                
+                if(dty_ID>0 && val){
+                    res[dty_ID] = val;    
+                }
+            }
+
+            //pass mapped values and close dialog
+            this._context_on_close = res;
+            this._as_dialog.dialog('close');
+        }        
     },
     
     //
@@ -264,36 +258,73 @@ console.log(res);
     //
     _doSearch: function(){
         
-        var sURL = 'http://api.geonames.org/postalCodeLookupJSON?username=osmakov';
-        
-
         if(this.element.find('#inpt_postalcode').val()=='' && this.element.find('#inpt_placename').val()==''){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a geoname or postal code...', 1000);
+            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a geoname or postal code to perform search', 1000);
             return;
         }
-        
+
+        var sURL = 'http://api.geonames.org/postalCodeLookupJSON?username=osmakov';
+
         if(this.element.find('#inpt_postalcode').val()!=''){
-            sURL = sURL + '&postalcode=' + this.element.find('#inpt_postalcode').val(); 
+            sURL += '&postalcode=' + this.element.find('#inpt_postalcode').val(); 
         }
         if(this.element.find('#inpt_placename').val()!=''){
-            sURL = sURL + '&placename=' + this.element.find('#inpt_placename').val();
+            sURL += '&placename=' + this.element.find('#inpt_placename').val();
         }
         if(this.element.find('#inpt_country').val()!=''){
+
+            var term_label = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Label');
             var _countryCode = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Code');
-            sURL = sURL + '&country=' + _countryCode; 
+
+            if(_countryCode == ''){
+                
+                switch (term_label) {
+                    case 'Iran':
+                        _countryCode = 'IR';
+                        break;
+                    case 'Kyrgistan': // Kyrgzstan
+                        _countryCode = 'KG';
+                        break;
+                    case 'Syria':
+                        _countryCode = 'SY';
+                        break;
+                    case 'Taiwan':
+                        _countryCode = 'TW';
+                        break;
+                    case 'UAE':
+                        _countryCode = 'AE';
+                        break;
+                    case 'UK':
+                        _countryCode = 'GB';
+                        break;
+                    case 'USA':
+                        _countryCode = 'US';
+                        break;
+                    case 'Vietnam':
+                        _countryCode = 'VN';
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if(_countryCode != ''){
+                sURL += '&country=' + _countryCode; 
+            }
         }
-/*        
-        this._onSearchResult({"postalcodes":[{"adminCode2":"708","adminCode3":"70805","adminName3":"Breitenwang","adminCode1":"07","adminName2":"Politischer Bezirk Reutte","lng":10.7333333,"countryCode":"AT","postalcode":"6600","adminName1":"Tirol","placeName":"Breitenwang","lat":47.4833333}]});
-        return;
+/* DEBUGGING
+this._onSearchResult({"postalcodes":[{"adminCode2":"708","adminCode3":"70805","adminName3":"Breitenwang","adminCode1":"07","adminName2":"Politischer Bezirk Reutte","lng":10.7333333,"countryCode":"AT","postalcode":"6600","adminName1":"Tirol","placeName":"Breitenwang","lat":47.4833333}]});
+return;
 */
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
-        
+
         var that = this;
-        var request = {service:sURL, serviceType:'geonames'};
+        var request = {service:sURL, serviceType:'geonames'};             
         //loading as geojson  - see controller record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
             function(response){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
+
                 if(response){
                     if(response.status && response.status != window.hWin.ResponseStatus.OK){
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -302,25 +333,7 @@ console.log(res);
                     }
                 }
             }
-        );          
-        /*
-        var that = this;
-        
-        window.hWin.HEURIST4.util.sendRequest(sURL, null, this,
-        function(response)
-        {
-             window.hWin.HEURIST4.msg.sendCoverallToBack();
-             
-             if(response && response.status == window.hWin.ResponseStatus.UNKNOWN_ERROR)
-             {
-                  window.hWin.HEURIST4.msg.showMsgErr(response);
-                 
-             }else{
-                 that.element.find('#div_fieldset').hide();
-                 that.element.find('#div_result').text(response).show();
-             }
-        },'json');
-        */
+        );
     },
     
     //
@@ -328,36 +341,35 @@ console.log(res);
     //
     _onSearchResult: function(json_data){
         
-       this.recordList.show();
-       
-       var is_wrong_data = true;
-       
-       json_data = window.hWin.HEURIST4.util.isJSON(json_data);
-                        
-       if (json_data) {
-            
+        this.recordList.show();
+
+        var is_wrong_data = true;
+
+        json_data = window.hWin.HEURIST4.util.isJSON(json_data);
+
+        if (json_data) {
+
             var res_records = {}, res_orders = [];
 
-                
             var DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
             if(DT_GEO_OBJECT>0 && !this.options.mapping.fields['location']){
                 this.options.mapping.fields['location'] = DT_GEO_OBJECT;
             }
-            
+
             var fields = ['rec_ID', 'rec_RecTypeID'];
             var map_flds = Object.keys(this.options.mapping.fields);
+
             fields = fields.concat(map_flds);
-            
-            //for(var k=0; k<map_flds.length; k++){
-            //    map_flds[k] = map_flds[k].split('.'); 
-            //}
-            
+            fields = fields.concat('googleMapLink');
+
             if(!json_data.postalcodes) json_data.postalcodes = json_data;
-            
+
             //parse json
             var i=0;
-            for(;i<json_data.postalcodes.length;i++){
-                var feature = json_data.postalcodes[i];
+            var data = json_data.postalcodes;
+
+            for(;i<data.length;i++){
+                var feature = data[i];
                 
                 var recID = i+1;
                 
@@ -366,63 +378,26 @@ console.log(res);
                 
                 for(var k=0; k<map_flds.length; k++){
                     
-                    /*
-                    var val = feature[ map_flds[k][0] ];
-                    for(var m=1; m<map_flds[k].length; m++){
-                        if(val && !window.hWin.HEURIST4.util.isnull( val[ map_flds[k][m] ])){
-                            val = val[ map_flds[k][m] ];
-                        }
-                    } 
-                    */     
-
-                    
                     if(map_flds[k]=='location'){
                         if(feature[ 'lng' ] && feature[ 'lat' ]){
                             val = 'p POINT('+feature[ 'lng' ]+' '+feature[ 'lat' ]+')';
                         }else{
                             val = '';
                         }
-                    }else if(map_flds[k]=='country'){
-
                     }else{
                         val = feature[ map_flds[k] ];
                     }
                         
                     values.push(val);    
                 }
-                
-                res_orders.push(recID);
-                res_records[recID] = values;    
-                
 
-                /*
-                var header = {0:null,1:null,2:'recID',3:'',4:this.options.mapping.rty_ID,
-                   5:'TITLE',6:0,7:'viewable',8:'',9:null,10:null};
-                header[2] = recID;
-                header[4] = this.options.mapping.rty_ID;
-                header[5] = feature.properties.name;
-                
-                var details = {};
-                details[DT_NAME] = [feature.properties.name];
-                details[DT_ORIGINAL_RECORD_ID] = [feature.properties.id];
-                details[DT_SHORT_NAME] = [feature.LGA];
-                details[DT_ADMIN_UNIT] = [feature.state];
-                details[DT_EXTENDED_DESCRIPTION] = [feature.description];
-                details[DT_GEO_OBJECT] = [feature.geometry];
-                
-                res_records[recID] = header;
-                res_records[recID]['d'] = details;
-                */
+                // https://maps.google.com/?q=lat,lng or https://www.google.com/maps/search/?api=1&query=lat,lng
+                values.push('https://www.google.com/maps/search/?api=1&query='+feature['lat']+','+feature['lng']);
+
+                res_orders.push(recID);
+                res_records[recID] = values;
             }
-            
-/*
-              'geometry': '2-28',
-              'properties.name': '2-1',  
-              'properties.id': '2-26', //original id
-              'state': '2-234',
-              'LGA': '2-2',
-              'description': '2-4'
-*/    
+
             if(res_orders.length>0){        
                 var res_recordset = new hRecordSet({
                     count: res_orders.length,
@@ -437,17 +412,12 @@ console.log(res);
                 this.recordList.resultList('updateResultSet', res_recordset);            
                 is_wrong_data = false;
             }
-       }
+        }
        
-       if(is_wrong_data){
-            //ele.text('ERROR '+geojson_data);                    
-            this.recordList.resultList('updateResultSet', null);            
-            
+        if(is_wrong_data){
+
+            this.recordList.resultList('updateResultSet', null);
             window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
-       }
+        }
     }
-
-    
-        
 });
-

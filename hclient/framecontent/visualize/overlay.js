@@ -164,10 +164,13 @@ function getRelationOverlayData(line) {
 
                 array.push(relation);
 
-                if($Db.rst(link.source.id, link.relation.id, 'rst_MaxValues') != 1){
-                    array.push({text: 'single value', size: '9px', style: 'italic', subheader:1});
-                }else{
-                    array.push({text: 'multi value', size: '9px', style: 'italic', subheader:1});
+                if(settings.isDatabaseStructure){
+
+                    if($Db.rst(link.source.id, link.relation.id, 'rst_MaxValues') != 1){
+                        array.push({text: 'multi value', size: '9px', style: 'italic', subheader:1});
+                    }else{
+                        array.push({text: 'single value', size: '9px', style: 'italic', subheader:1});
+                    }
                 }
 
                 continue;
@@ -180,10 +183,13 @@ function getRelationOverlayData(line) {
 
                 array.push(relation);
 
-                if($Db.rst(link.target.id, link.relation.id, 'rst_MaxValues') != 1){
-                    array.push({text: 'single value', size: '9px', style: 'italic', subheader:1});
-                }else{
-                    array.push({text: 'multi value', size: '9px', style: 'italic', subheader:1});
+                if(settings.isDatabaseStructure){
+
+                    if($Db.rst(link.source.id, link.relation.id, 'rst_MaxValues') != 1){
+                        array.push({text: 'multi value', size: '9px', style: 'italic', subheader:1});
+                    }else{
+                        array.push({text: 'single value', size: '9px', style: 'italic', subheader:1});
+                    }
                 }
 
                 continue;
@@ -193,7 +199,7 @@ function getRelationOverlayData(line) {
 
         // Show information for this link only
         var relation = {type: line.relation.type, cnt: line.targetcount, text: 
-                truncateText(line.relation.name, maxLength) + ", n=" + line.targetcount, size: "10px", subheader:1};
+                truncateText(line.relation.name, maxLength) + ", n=" + line.targetcount, size: "10px", subheader:0};
 
         array.push(relation);
     }
@@ -465,43 +471,47 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
       // Prepare icon + label combo prepare
       for(k = 0; k < info.length; k++){
           
-          /* ICON */
-          var linkicon = overlay
+        /* ICON */
+        var linkicon = overlay
             .append("svg:image")
             .attr("class", 'icon info-mode')
             .attr("xlink:href", function(d) { // pick relation icon
                   
                 if(info[k].type=='resource'){ // single arrow
-                  return window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/arrow_1.png'; 
+                    return window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/arrow_1.png'; 
                 }
                 else if(info[k].type=='relmarker'){ // double arrow
-                  return window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/arrow_2.png';
+                    return window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/arrow_2.png';
                 }
                 else{
-                  return '';
+                    return '';
                 }
             })
             .attr("x", function(d) { // if the icon has been rotated it needs to be moved left to keep it next to text
                 if(info[k].dir=='to' || $('#expand-links').is(':Checked')){
-                  return 2;
+                    return 2;
                 }else{
-                  return -18;
+                    return -18;
                 }
             }) 
             .attr("y", function(d, i) { // move relation icon down to sit next to text
-                  return position + 7.5;
+                if(settings.isDatabaseStructure && $('#expand-links').is(':Checked')){
+                    return position;
+                }else{
+                    return position + 7.5;
+                }
             })
             .attr("height", iconSize)
             .attr("width", iconSize);
 
-          if(info[k].dir == 'from'){ // rotate icon
+        if(info[k].dir == 'from'){ // rotate icon
             linkicon.style("transform", "scaleX(-1)");
-          }
+        }
 
-          text[0].push(linkicon[0][0]);
+        text[0].push(linkicon[0][0]);
 
-          /* LABEL */
-          var linkline = overlay.append("text")
+        /* LABEL */
+        var linkline = overlay.append("text")
             .text(info[k].text)
             .attr("class", 'info-mode')
             .attr("x", iconSize+2)
@@ -522,9 +532,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             .attr("font-weight", info[k].style)
             .style("font-style", info[k].style, "important")
             .style("font-size", info[k].size, "important");
-                    
-                    
-          text[0].push(linkline[0][0]);
+
+        text[0].push(linkline[0][0]);
       }
     }      
         

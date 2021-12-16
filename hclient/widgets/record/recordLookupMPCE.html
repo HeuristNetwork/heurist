@@ -1,5 +1,5 @@
 <!--
-* recordLookupTemplate.html : used by recordLookupTemplate.js
+* recordLookupMPCE.html : used by recordLookupMPCE.js
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Brandon McKay   <blmckay13@gmail.com>
@@ -48,13 +48,17 @@
         padding: 5px 10px;
     }
 
-    .label-tag {
+    .mpce .label-tag {
         margin-bottom: 5px;
-        width: auto;
-        font-size: 1.05em;
     }
 
-    .btn {
+    .mpce .key-label{
+        display: inline-block;
+
+        max-width: 240px;
+    }
+
+    .mpce .btn {
         display: inline-flex;
         margin: 5px 5px;
         border: 0.16em solid rgba(255,255,255,0) !important;
@@ -71,27 +75,27 @@
         border: 2px solid rgba(100,100,100,10) !important;
     }
 
-    .btn-delete {
+    .mpce .btn-delete {
         margin: auto;
         background-color: #f44336;        
     }
 
-    .btn-add {
+    .mpce .btn-add {
         margin: auto;       
         background-color: #66ff66;
         font-size: 0.8em;
     }
 
-    .btn-info {
+    .mpce .btn-info {
         margin: auto;       
         background-color: #00ACE6;
     }
 
-    .btn-save {
+    .mpce .btn-save {
         background-color: #4caf50; 
     }
 
-    .select {
+    .mpce .select {
         display: block;
         font-size: 17px;
         font-family: sans-serif;
@@ -105,58 +109,58 @@
         border: 1px solid #aaa;
     }
 
-    .select:hover {
+    .mpce .select:hover {
         border-color: #888;
     }
 
-    .select:focus {
+    .mpce .select:focus {
         border-color: #aaa;
         color: #222;
         outline: none;
     }
 
-    .select option {
+    .mpce .select option {
         font-weight: normal;
     }
 
-    .work-details {
+    .mpce .work-details {
         clear: both;
         width: auto;
         max-width: 100%;
     }
 
-    .viewed-details {
+    .mpce .viewed-details {
         margin-left: auto;
         display: flex;
         flex-wrap: wrap;
         width: 100%;
     }
 
-    .row {
+    .mpce .row {
     	box-sizing: border-box;
         display: flex;
         flex-wrap: nowrap;
         flex-direction: row;        
     }
 
-    .row:after {
+    .mpce .row:after {
     	content: "";
     	display: table;
     	clear: both;
     }
 
-    .column {
+    .mpce .column {
         float: left;
         width: 30%;
         padding: 0 10px;
     }
 
-    .popup-inform {
+    .mpce .popup-inform {
         float: left;
         width: 40%;
     }
 
-    .searchable-container {
+    .mpce .searchable-container {
     	float: right;
     	display: flex;
     	flex-wrap: nowrap;
@@ -164,7 +168,7 @@
         width: 40%;
     }
 
-    .btn-searchable {
+    .mpce .btn-searchable {
         display: inline-block;
         max-height: 40px;
         margin-left: 5px;
@@ -172,7 +176,7 @@
         font-size: 1.2em;
     }    
 
-    .checkboxlist ul {
+    .mpce .checkboxlist ul {
     	float: left;
     	margin: 0;
     	list-style: none;
@@ -188,11 +192,16 @@
     	font-size: 1.25em;
     }
 
-    .mpce h4 {
+    .mpce .searchable-container div {
     	font-size: 1.15em;
+        font-weight: 700;
+
+        text-align: center;
+
+        padding-top: 6px;
     }
 	
-	.assoc_btns{
+	.mpce .assoc_btns{
 		display: none;
 		color: blue;
 		text-decoration: underline;
@@ -200,8 +209,12 @@
 		cursor: pointer;
 		user-select: none;
 	}
+
+    .mpce #assoc_kywd{
+        font-weight: 800;
+    }
 	
-    .non-selectable{
+    .mpce .non-selectable{
         -webkit-user-select: none;
         -moz-user-select: none;
         -ms-user-select: none;
@@ -220,7 +233,7 @@
 
     	<div class="searchable-container">
 
-            <h4>External Searches:</h4>
+            <div>External Searches:</div>
 
             <button id="btnGoogle" style="background-color:#ffcc66;" class="btn btn-searchable">Google Books</button> <br>
             <button id="btnWorldCat" style="background-color:#ff99ff;" class="btn btn-searchable">World Cat</button> <br>
@@ -240,7 +253,7 @@
                     
                     <td style="max-width:40%;"> 
                         <label id="work-code_field" class="label-tag"></label> 
-                        <button id="btnEdition" class="btn btn-info" style="float:right;">Editions</button>
+                        <button id="btnEdition" class="btn btn-info" style="float:right;" title="Display editions for current work">Editions</button>
                     </td>
                 </tr>
 
@@ -262,7 +275,7 @@
     	        <fieldset class="work-keywords">
     	            <legend>Assigned Keywords:</legend>
     	            <label class="label-tag">Keywords assigned to the work</label>
-    	            <button id="btnLookup" class="btn btn-add" style="text-align:left; font-size:1em;">Add New Keyword</button>
+    	            <button id="btnLookup" class="btn btn-add" style="text-align:left; font-size:1em;" title="Lookup a keyword for the list">Add New Keyword</button>
     	            <br>
 
                     <div class="checkboxlist" style="width:100%;">
@@ -279,7 +292,7 @@
                 <fieldset class="prev-details">
                     <legend>Recently Used Keywords:</legend>
                     <label class="label-tag">Keywords assigned to recently viewed works</label>
-                    <button id="btnPrevAssign" class="btn btn-add" style="text-align:left; font-size:1em;">Add Selected</button>
+                    <button id="btnPrevAssign" class="btn btn-add" style="text-align:left; font-size:1em;" title="Add all checked keywords to list">Add Selected</button>
                     <label><input type="checkbox" class="check-all" id="checkall-prev">Check All</label>
                     <br>
                     
@@ -297,8 +310,8 @@
     	        <fieldset class="assoc-details">
     	            <legend>Associated Keywords:</legend>
     	            <label class="label-tag">Keywords commonly associated with <span id="assoc_kywd">&lt;click Find Associated&gt;</span> <span id="assoc_total"></span></label>
-    	            <button id="btnAssocAssign" class="btn btn-add" style="text-align:left; font-size:1em;">Add Selected</button>
-                    <button id="btnAssocRemove" class="btn btn-delete" style="text-align:left; font-size:1em;">Clear Selection</button>
+    	            <button id="btnAssocAssign" class="btn btn-add" style="text-align:left; font-size:1em;" title="Add all checked keywords to list">Add Selected</button>
+                    <button id="btnAssocRemove" class="btn btn-delete" style="text-align:left; font-size:1em;" title="Un-check all keywords">Clear Selection</button>
                     <label><input type="checkbox" class="check-all" id="checkall-assoc">Check All Visible</label>	            
     	            <br>
 

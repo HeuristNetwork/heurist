@@ -188,13 +188,19 @@ function editCMS2(){
                             onopen_start : function( ){ 
                                 var tog = body.find('.ui-layout-toggler-'+options.editor_pos);
                                 tog.removeClass('prominent-cardinal-toggler togglerVertical');
-                                tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').remove();
+                                tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').hide();
                             },
                             onclose_end : function( ){ 
                                 var tog = body.find('.ui-layout-toggler-'+options.editor_pos);
                                 tog.addClass('prominent-cardinal-toggler togglerVertical');
-                                var margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
-                                $('<span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Page structure and styling</span>').appendTo(tog);
+
+                                if(tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').length > 0){
+                                    tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').show();
+                                }else{
+
+                                    var margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
+                                    $('<span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Page structure and styling</span>').appendTo(tog);
+                                }
                             },
                             togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-'+(options.editor_pos=='west'?'w':'e')+'"></div>',
                             togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'e':'w')+'"></div>',
@@ -230,6 +236,20 @@ function editCMS2(){
                         //ui.newTab
                     }})
                     .addClass('ui-heurist-publish');
+
+                    if(true){ // this.usrPreferences.structure_closed==0, only if panel is closed by default
+
+                        var tog = body.find('.ui-layout-toggler-'+options.editor_pos);
+                        tog.addClass('prominent-cardinal-toggler togglerVertical');
+
+                        if(tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').length > 0){
+                            tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').show();
+                        }else{
+
+                            var margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
+                            $('<span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Page structure and styling</span>').appendTo(tog);
+                        }
+                    }
         }
         
         
