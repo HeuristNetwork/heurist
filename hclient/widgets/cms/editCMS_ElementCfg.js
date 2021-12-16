@@ -75,7 +75,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
 
         cont.find('h4').css({margin:0});
         cont.find('.props').hide(); //hide all
-        $('.btn-widget').hide();
+        $('.btn-widget').parent().hide();
         cont.find('.props.'+etype).show(); //show required only
 
         var activePage = (etype=='group'?0:(etype=='widget'?2:(etype=='cardinal'?1:2)));
@@ -95,16 +95,23 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             function __openWidgetCfg(){
                 editCMS_WidgetCfg(l_cfg, null, function(new_cfg){
                     //addign new option into 
+                    if(JSON.stringify(l_cfg.options) != JSON.stringify(new_cfg)){
+                        _enableSave();    
+                    }
+                    
                     l_cfg.options = new_cfg;
 
                     //recreate widget with new options
                     //var widget_ele = _layout_container.find('#hl-'+l_cfg.key); //element in main-content
                     layoutMgr.layoutAddWidget(l_cfg, element.parent());
+                    
+                    
                 } );
             }
 
             
             $('.btn-widget').button().css({'border-radius':'4px',display:'inline-block'}).click(__openWidgetCfg)
+            $('.btn-widget').parent().show();
             
             //var container = cont.find('div.widget');
             //$('<button>').button({label:top.HR('Configure')}).click(__openWidgetCfg).appendTo(container);
@@ -299,6 +306,8 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             var css = __getCss();
             element.removeAttr('style');
             element.css(css);
+            
+            _enableSave();
         }});
 
 
@@ -349,6 +358,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             if(element_cfg.css) element.css(element_cfg.css);
             main_callback.call(this, null);
         });
+        window.hWin.HEURIST4.util.setDisabled(cont.find('.btn-ok'), true);
         
         
         //direct editor        
@@ -381,6 +391,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             //l_cfg.css = element.css();
 
             _assignCssToUI();
+           
         });
         
         
@@ -392,8 +403,17 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
              btnDirectEdit.parent().hide();               
         }
         
+        $container.find('textarea').change(_enableSave);
+        $container.find('input').change(_enableSave);
     }
     
+    //
+    //
+    //
+    function _enableSave(){
+console.log(';enabe');
+        window.hWin.HEURIST4.util.setDisabled($container.find('.btn-ok'), false);
+    }
     
     //
     //

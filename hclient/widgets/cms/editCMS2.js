@@ -143,14 +143,13 @@ function editCMS2(){
                                         
                                 +'</div>'
                             
-                                +'<div class="treePage ent_content" style="top:95px;padding:10px;border-top:1px solid gray;"/>' //treeview - edit page
-                                +'<div class="propertyView ent_content" style="top:60px;padding:10px;border-top:1px solid gray;display:none"/>' //edit properties for element
+                                +'<div class="treePage ent_content" style="top:95px;padding:10px;border-top:1px solid gray;border-bottom:1px solid gray"/>' //treeview - edit page
+                                +'<div class="propertyView ent_content" style="top:60px;padding:10px;border-top:1px solid gray;border-bottom:1px solid gray;display:none"/>' //edit properties for element
                                 
-                                +'<div class="toolbarPage ent_footer" style="padding:10px;font-size:0.9em">'
+                                +'<div class="toolbarPage ent_footer" style="padding:10px;font-size:0.9em;text-align:left;">'
                                     +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
                                     +'<button title="Save changes for current page" class="btn-page-save ui-button-action">Save</button>'
                                     +'<button title="Exit/Close content editor" class="bnt-cms-exit">Close</button>'
-                        
                                 +'</div>'
                             +'</div>'
                         +'</div></div>').appendTo(body);
@@ -615,6 +614,11 @@ function editCMS2(){
                         window.hWin.HEURIST4.util.stopEvent(event);
                         ///  that._saveEditAndClose(null, 'close'); //close editor on second click
                     }
+                    if(data.node.key>0){
+                        body.layout().open(options.editor_pos);
+                        _layoutEditElement(data.node.key);
+                    }
+                
                 }
             }
             //,activate: function(event, data) { }
@@ -669,13 +673,17 @@ function editCMS2(){
     
     function _hidePropertyView(){
     
-        _layout_container.find('div[data-lid]').removeClass('cms-element-editing');                        
+        _layout_container.find('div[data-lid]').removeClass('cms-element-editing headline marching-ants marching');                        
         
         if(_keep_EditPanelWidth>0){
             body.layout().sizePane('west', _keep_EditPanelWidth);    
         }
         _keep_EditPanelWidth = 0;
 
+                        
+        body.find('.btn-page-restore').show();
+        body.find('.btn-page-save').show();
+        
         _panel_propertyView.hide();
         _panel_treePage.show();
 
@@ -1273,10 +1281,12 @@ function editCMS2(){
       
         //1. show div with properties over treeview
         _panel_treePage.hide();
+        body.find('.btn-page-restore').hide();
+        body.find('.btn-page-save').hide();
         _panel_propertyView.show();
-        _layout_container.find('.cms-element-overlay').css('visibility','hidden');
+        _layout_container.find('.cms-element-overlay').css('visibility','hidden'); //hide overlay above editing element
         _layout_container.find('div[data-lid]').removeClass('cms-element-active');                        
-        _layout_container.find('div[id="hl-'+ele_id+'"]').addClass('cms-element-editing');
+        _layout_container.find('div[id="hl-'+ele_id+'"]').addClass('cms-element-editing headline marching-ants marching');
         
         if(body.layout().state['west']['outerWidth']<400){
             _keep_EditPanelWidth = body.layout().state['west']['outerWidth'];
