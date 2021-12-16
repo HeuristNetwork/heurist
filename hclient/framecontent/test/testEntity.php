@@ -73,7 +73,6 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchBuilder.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchBuilderItem.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchBuilderSort.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchQuick.js"></script>
         
         <!--      
 
@@ -157,31 +156,6 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 $('#btn_qs').button().click(function(){
                     
                 showSearchBuilder();
-                    
-/*                    
-                    var cont = $('#searchQuick');
-                
-                //if( cont.is(':visible')){ // already visisble
-                //    return;
-                //}
-            
-                    if(!cont.search_quick_new('instance'))
-                    //initialization
-                    cont.search_quick_new({
-                        onClose: function() {  },
-                        menu_locked: function(is_locked, is_mouseleave){ 
-                            if(!is_mouseleave){
-                                //that._resetCloseTimers();    
-                                //that._explorer_menu_locked = is_locked; 
-                            }
-                    }  });  
-                    
-                    var explore_left = 100, explore_top = 100, explore_height = 400;
-                    
-                    //cont.dialog({autoOpen: true});
-                    
-                    cont.css({left:explore_left, top:explore_top, height:explore_height,'z-index':103}).show();
-  */                    
                     
                 });
                 
@@ -477,7 +451,6 @@ print $targetPath.'<br>';
             <div>
                 <button id="btn_qs">Quick search</button>
             </div>
-            <div id="searchQuick" style="position: absolute;height: 400;width:900; display:none">afweewfwefwefe</div>
         
             
             <div>

@@ -172,7 +172,6 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="hclient/widgets/viewers/app_timemap.js"></script>
         <script type="text/javascript" src="hclient/widgets/search/search.js"></script>
         <script type="text/javascript" src="hclient/widgets/search/searchByEntity.js"></script>
-        <script type="text/javascript" src="hclient/widgets/search/searchQuick.js"></script>
         <script type="text/javascript" src="hclient/widgets/search/searchBuilder.js"></script>
         <script type="text/javascript" src="hclient/widgets/search/searchBuilderItem.js"></script>
         <script type="text/javascript" src="hclient/widgets/search/searchBuilderSort.js"></script>

@@ -1,5 +1,6 @@
 /**
-* Search input form with possible preliminary filter
+* Simplified Search input form with possible preliminary filter
+* This widget is not used in main interface. It is listed aming available widgets in CMS
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -277,49 +278,6 @@ $.widget( "heurist.searchInput", {
 
             
             showSearchBuilder({search_realm:that.options.search_realm});
-            
-/* todo
-                var cont = this.element.find('#searchQuick');
-                
-                if(cont.length==0){
-                    cont = $('<div id="searchQuick" class="explore-widgets">').appendTo(this.element);
-                }else if( cont.is(':visible')){ // already visisble
-                    return;
-                }
-            
-                if(!cont.searchQuick('instance'))
-                    //initialization
-                    this.searchQuick = cont.searchQuick({
-                        onClose: function() { that.switchContainer('explore'); },
-                        menu_locked: function(is_locked, is_mouseleave){ 
-                            if(!is_mouseleave){
-                                that._resetCloseTimers();    
-                                that._explorer_menu_locked = is_locked; 
-                            }
-                    }  });    
-
-                explore_top = 0;
-                explore_height = 255;//268+36;
-                if(position){
-                    explore_top = position.top;
-                    explore_left = position.left;
-                }else{
-                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
-                    if(widget){
-                        explore_top = widget.position().top + 100;
-                    }else{
-                        explore_top = menu_item.offset().top;
-                    }
-                }
-       
-                
-                if(explore_top+explore_height>that.element.innerHeight()){
-                    explore_top = that.element.innerHeight() - explore_height;
-                }
-
-
-                that.menues_explore_popup.css({width:'700px',overflow:'hidden'});            
-*/            
         }
         
     }
