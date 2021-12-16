@@ -302,7 +302,7 @@ function parse_query_to_json($query){
                         
                         //if($previous_key && )
                         
-                        if(@$res[count($res)-1]['title']){
+                        if(false && @$res[count($res)-1]['title']){
                             $res[count($res)-1]['title'] .= (' '.$word);
                         }else{
                             array_push($res, array( 'title'=>$word ));        
