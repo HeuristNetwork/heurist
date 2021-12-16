@@ -364,8 +364,15 @@ $.widget( "heurist.mediaViewer", {
                                         //borderless:true, 
                                         window.hWin.HEURIST4.msg.showDialog(url, 
                                             {dialogid:'mirador-viewer',
-                                             resizable:false, draggable: false, maximize:true, //width:'100%',height:'100%',
+                                             //resizable:false, draggable: false, 
+                                             //maximize:true, 
+                                             default_palette_class: 'ui-heurist-explore',
+                                             width:'90%',height:'95%',
                                              allowfullscreen:true,'padding-content':'0px'});   
+                                             
+                                        $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
+                                        
+                                        $dlg.parent().css('top','50px');
                                   }else{
                                         window.open(url, '_blank');        
                                   }
@@ -418,6 +425,7 @@ $.widget( "heurist.mediaViewer", {
                             selector : '[data-myfancybox="fb-images"]', 
                             loop:true};
         $('body').unbind('click.fb-start');
+        //this.mediacontent.off("click.fb-start", '[data-myfancybox="fb-images"]');
         
         if(window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ 
                 window.hWin.HAPI4.fancybox( fancy_opts );
@@ -425,8 +433,25 @@ $.widget( "heurist.mediaViewer", {
                 $.fn.fancybox( fancy_opts );
         }
         
-    }
+    },
+
+    //
+    // opens explicitely
+    //    
+    show: function (){
+        this.mediacontent.find(this.options.selector+':first').click();
+    },
     
+    //
+    // removes of event handlers 
+    //
+    clearAll: function (){
+
+        if(this.options.selector){
+            this.mediacontent
+                    .off("click.fb-start", '[data-myfancybox="fb-images"]'); //this.options.selector
+        }
+    }
     
 
 
