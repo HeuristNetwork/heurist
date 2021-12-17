@@ -41,7 +41,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/db_users.php');
 require_once (dirname(__FILE__).'/../utilities/utils_file.php');
@@ -151,10 +150,28 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
     
     if(count($file_ids)>0){
 
-        if(is_numeric($file_ids[0])){
-            $query = "ulf_ID in (".implode(',', $file_ids).")";
+        if(is_string($file_ids[0]) && strlen($file_ids[0])>15){
+            
+            $query = 'ulf_ObfuscatedFileID';
+            if(count($file_ids)>1){
+                $query = $query.' in ("'.implode('","', $file_ids).'")';
+            }else{
+                $query = $query.' = "'.$file_ids[0].'"';
+            }
+            
+        }else if(is_numeric($file_ids[0]) && $file_ids[0]>0){
+            $query = 'ulf_ID';
+            
+            if(count($file_ids)>1){
+                $query = $query.' in ('.implode(',', $file_ids).')';
+            }else{
+                $query = $query.' = '.$file_ids[0];
+            }
         }else{
-            $query = "ulf_ObfuscatedFileID in ('".implode("','", $file_ids)."')";
+            $system->addError(HEURIST_INVALID_REQUEST, 
+                'Wrong file id parametrer provided to fileGetFullInfo.',
+                $mysqli->error);
+            return false;
         }
 
         $query = 'select ulf_ID, concat(ulf_FilePath,ulf_FileName) as fullPath, ulf_ExternalFileReference,'
