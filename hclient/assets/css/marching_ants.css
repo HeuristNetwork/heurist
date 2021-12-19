@@ -1,0 +1,100 @@
+.marching-ants {
+  background-size: 20px 2px, 20px 2px, 2px 20px, 2px 20px;
+  background-position: 0 0, 0 100%, 0 0, 100% 0;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  -webkit-animation: marching-ants-1 1s;
+          animation: marching-ants-1 1s;
+  -webkit-animation-timing-function: linear;
+          animation-timing-function: linear;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+  -webkit-animation-play-state: paused;
+          animation-play-state: paused;
+}
+.marching-ants:hover, .marching-ants.marching {
+  -webkit-animation-play-state: running;
+          animation-play-state: running;
+}
+.marching-ants.reverse {
+  animation-direction: reverse;
+}
+.marching-ants.bnw {
+  background-image: linear-gradient(to right, #fff 50%, #000 50%), linear-gradient(to right, #fff 50%, #000 50%), linear-gradient(to bottom, #fff 50%, #000 50%), linear-gradient(to bottom, #fff 50%, #000 50%);
+}
+.marching-ants.headline {
+  background-image: linear-gradient(to right, #fff 50%, #c9c2f9 50%), linear-gradient(to right, #fff 50%, #c9c2f9 50%), linear-gradient(to bottom, #fff 50%, #c9c2f9 50%), linear-gradient(to bottom, #fff 50%, #c9c2f9 50%);
+}
+.marching-ants.info {
+  background-image: linear-gradient(to right, #dd2 50%, transparent 50%), linear-gradient(to right, #dd2 50%, transparent 50%), linear-gradient(to bottom, #dd2 50%, transparent 50%), linear-gradient(to bottom, #dd2 50%, transparent 50%);
+}
+.marching-ants.warning {
+  background-size: 40px 4px, 40px 4px, 4px 40px, 4px 40px;
+  background-position: 0 0, 0 100%, 0 0, 100% 0;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  -webkit-animation: marching-ants-2 2s;
+          animation: marching-ants-2 2s;
+  -webkit-animation-timing-function: linear;
+          animation-timing-function: linear;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+  -webkit-animation-play-state: paused;
+          animation-play-state: paused;
+  background-image: linear-gradient(to right, #f00 50%, #fff 50%), linear-gradient(to right, #f00 50%, #fff 50%), linear-gradient(to bottom, #f00 50%, #fff 50%), linear-gradient(to bottom, #f00 50%, #fff 50%);
+}
+.marching-ants.warning:hover, .marching-ants.warning.marching {
+  -webkit-animation-play-state: running;
+          animation-play-state: running;
+}
+.marching-ants.warning.reverse {
+  animation-direction: reverse;
+}
+
+@-webkit-keyframes marching-ants-1 {
+  0% {
+    background-position: 0 0, 0 100%, 0 0, 100% 0;
+  }
+  100% {
+    background-position: 40px 0, -40px 100%, 0 -40px, 100% 40px;
+  }
+}
+
+@keyframes marching-ants-1 {
+  0% {
+    background-position: 0 0, 0 100%, 0 0, 100% 0;
+  }
+  100% {
+    background-position: 40px 0, -40px 100%, 0 -40px, 100% 40px;
+  }
+}
+@-webkit-keyframes marching-ants-2 {
+  0% {
+    background-position: 0 0, 0 100%, 0 0, 100% 0;
+  }
+  100% {
+    background-position: 40px 0, -40px 100%, 0 -40px, 100% 40px;
+  }
+}
+@keyframes marching-ants-2 {
+  0% {
+    background-position: 0 0, 0 100%, 0 0, 100% 0;
+  }
+  100% {
+    background-position: 40px 0, -40px 100%, 0 -40px, 100% 40px;
+  }
+}
+@-webkit-keyframes marching-ants-3 {
+  0% {
+    background-position: 0 0, 0 100%, 0 0, 100% 0;
+  }
+  100% {
+    background-position: 40px 0, -40px 100%, 0 -40px, 100% 40px;
+  }
+}
+@keyframes marching-ants-3 {
+  0% {
+    background-position: 0 0, 0 100%, 0 0, 100% 0;
+  }
+  100% {
+    background-position: 40px 0, -40px 100%, 0 -40px, 100% 40px;
+  }
+}

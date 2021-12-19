@@ -507,7 +507,40 @@ private static function __get_enum_value($enum_id, $enum_param_name)
     $ress = self::$mysqli->query("select trm_id, trm_label, trm_code, concat(trm_OriginatingDBID, '-', trm_IDInOriginatingDB) as trm_conceptid from defTerms where trm_ID = ".$enum_id);
     if($ress){
         $relval = $ress->fetch_assoc();
-        $ret = @$relval['trm_'.mb_strtolower($enum_param_name, 'UTF-8')];
+
+        $get_param = mb_strtolower($enum_param_name, 'UTF-8');
+
+        // If trm_label then construct is: "branch_trm_label. ... .leaf_term_label", ignore root label
+        if(strcasecmp($get_param, 'label') == 0 && $relval['trm_ParentTermID'] > 0 && $relval['trm_label'] != null){
+
+            $trm_id = @$relval['trm_ParentTermID'];
+            $ret = @$relval['trm_label'];
+
+            while(1){
+
+                $parent_ress = self::$mysqli->query("select trm_label, trm_ParentTermID from defTerms where trm_ID = " . $trm_id);
+
+                if($parent_ress){
+
+                    $parent_trm = $parent_ress->fetch_assoc();
+                    if($parent_trm == null || $parent_trm['trm_ParentTermID'] == null || $parent_trm['trm_ParentTermID'] == 0){
+                        $parent_ress->close();
+                        break;
+                    }else{
+                        $ret = $parent_trm['trm_label'] . "." . $ret;
+
+                        $trm_id = $parent_trm['trm_ParentTermID'];
+                    }
+
+                    $parent_ress->close();
+                }else{
+                    break;
+                }
+            }
+        }else{
+            $ret = @$relval['trm_'.$get_param];
+        }
+
         $ress->close();
     }
 

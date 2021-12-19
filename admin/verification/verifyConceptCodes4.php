@@ -81,12 +81,12 @@ $databases = mysql__getdatabases4($mysqli, false);
     }
 */
 
-if(true){
+if(false){
     //find non UTF-8 in rty_TitleMask
        
     __findWrongChars();   
        
-}else if(false){
+}else if(true){
     
     __updateDatabase();
 }else{
@@ -124,7 +124,7 @@ function __updateDatabase(){
             }    
             
             if(hasColumn($mysqli, 'defRecStructure', 'rst_TermsAsButtons')){
-               print $db_name.': rst_TermsAsButtons already exists';
+               print $db_name.': rst_TermsAsButtons already exists<br>';
             }else{
                 //alter table
                 $query = "ALTER TABLE `defRecStructure` ADD `rst_TermsAsButtons` TinyInt( 1 ) DEFAULT '0' "
@@ -360,7 +360,7 @@ function __findWrongChars(){
 
             $isOK = true;
             
-            $res = json_encode($response); //JSON_INVALID_UTF8_IGNORE 
+            $res = json_encode($list); //JSON_INVALID_UTF8_IGNORE 
             if(true || !$res){
 
                 foreach($list as $id => $val){

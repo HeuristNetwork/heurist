@@ -141,6 +141,9 @@ $.widget( "heurist.resultList", {
     
     _mediaViewer_list: [],
     
+    _rec_onpage: null,
+    _is_fancybox_active: false,
+    
     // the constructor
     _create: function() {
 
@@ -583,6 +586,37 @@ $.widget( "heurist.resultList", {
         this.reorder_button.find('span.ui-icon').css({'transform':'rotate(90deg)'});
                 
         this._on(this.reorder_button, {click: this.setOrderAndSaveAsFilter});
+        
+        //media carousel/viewer --------------
+        if(this.options.show_fancybox_viewer){
+            this.fancybox_button = $( '<button>' )
+                .button({icon: "ui-icon-image", showLabel:false, label:window.hWin.HR('Show media viewer for current page')})
+                .css({'float':'left','width':'28px', height:'28px', 'margin-left':'9px', 'font-size':'1em'})
+                .appendTo( this.div_toolbar );
+            
+            if(this._is_fancybox_active){
+                this.fancybox_button.css({'border':'2px solid', background: '#ddd'});
+            }
+            
+            this._on( this.fancybox_button, {
+                click: function(event) {
+                    this._is_fancybox_active = !this._is_fancybox_active;
+                    if(this._is_fancybox_active){
+                        if(this._rec_onpage){
+                            this.div_content.mediaViewer({selector:'.realThumb', search_initial:'ids:'+this._rec_onpage.join(',') });            
+                            setTimeout(function(){that.div_content.mediaViewer('show');},1000);
+                        }
+                        this.fancybox_button.css({'border':'2px solid', background: '#ddd'});
+                    }else{
+                        this.fancybox_button.css({'border':'none', background: 'none'});
+                        
+                        if(this.div_content.mediaViewer('instance')) this.div_content.mediaViewer('clearAll');
+                    }
+                    
+                    //window.hWin.HAPI4.save_pref('rec_list_viewmode_'+this.options.entityName, view_mode);
+            }});
+        }
+
 
         //------------------
         this.view_mode_selector = $( "<div>" )
@@ -959,6 +993,7 @@ $.widget( "heurist.resultList", {
         } 
         if(this.div_actions) this.div_actions.remove();
         if(this.div_search_form) this.div_search_form.remove();
+        if(this.fancybox_button) this.fancybox_button.remove();
         this.reorder_button.remove();
         this.div_toolbar.remove();
         this.div_content.remove();
@@ -3234,8 +3269,12 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             this.expandDetailsInlineALL();   
         }
         
+        this._rec_onpage = null;
         if(this.options.show_fancybox_viewer && rec_onpage.length>0){
-            this.div_content.mediaViewer({selector:'.realThumb', search_initial:'ids:'+rec_onpage.join(',') });        
+            this._rec_onpage = rec_onpage;
+            if(this._is_fancybox_active){
+                this.div_content.mediaViewer({selector:'.realThumb', search_initial:'ids:'+rec_onpage.join(',') });        
+            }
         }
     },
     

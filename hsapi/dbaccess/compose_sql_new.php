@@ -22,8 +22,15 @@
 require_once (dirname(__FILE__).'/compose_sql.php');
 
 /*
+Heurist is either json array  { conjunction: [ {predicate} , {predicate}, .... ] }
+or simplified plain string format
 
-query is json array  { conjunction: [ {predicate} , {predicate}, .... ] }
+Predicat is a pair of keyword and search value
+
+t 7 t:7  => {"t":"7"}
+t:7 f:20:value f1:"value with space" => {"t":"7","f:20":"value", "f:1":"value with space"}
+: means that it should have value after and before it   t  :  7  =? t:7
+linkedto:[ t:4 r:6421 ]  => {"linkedto":[{"t":4},{"r":6421}]}    [] - means subquery
 
 conjunction:  not, all (default)
 any        OR                                                                                           
@@ -70,7 +77,7 @@ related: related in any direction
 relatedfrom: relation type id (termid)    recordtype
 related_to:
 links: recordtype
-rel, r: - relation type (enum)
+relf, r: - relation type (enum)
     relf:  - field from relationship record  (for example relf:10 - start date)
           
     "rf:245":[{"t":4},{"r":6421}] - related from organization (4) with relation type 6421
@@ -153,6 +160,187 @@ $top_query;
 [{"t":"12"}, {"not":{"ids": [{"t":"12"},{"linkedfrom:134":{"t":"4"}}] }} ]  places not linked from events
     
 */
+
+/**
+* Parses siplified heurist query and returns it in  json format
+* 
+* @param String $query - heurist query in simplified notation
+*/
+function parse_query_to_json($query){
+    
+    $res = array();
+    $subres = array(); //parsed subqueries
+    
+    if($query!=null && $query!=''){
+
+    //1) get subqueries        /\[([^[\]]|(?R))*\]/
+        $cnt = preg_match_all('/\(([^[\)]|(?R))*\)/', $query, $subqueries);
+
+        
+        if($cnt>0){
+            
+            $subqueries = $subqueries[0];
+            foreach($subqueries as $subq){
+
+                 //trim parenthesis in begining and end of string   
+                 $subq = preg_replace_callback('/^\(|\)$/', function($m) {return '';}, $subq);
+                 
+                 $r = parse_query_to_json($subq);
+                 $subres[] = ($r)?$r:array();
+            }
+            
+            //for square brackets '/\[([^[\]]|(?R))*\]/'
+            
+            $query = preg_replace_callback('/\(([^[\)]|(?R))*\)/', 
+                function($m) {
+                    return ' [subquery] ';
+                }, $query);            
+            
+            
+        }
+    }else{
+        return false; //empty string
+    }    
+    
+//2) split by words ignoring quotes    
+    $cnt = preg_match_all('/[^\s":]+|"([^"]*)"|:{1}/',  $query, $matches);
+    if($cnt>0){
+        
+        $matches = $matches[0];
+        
+        $idx = 0;
+
+        $keyword = null;
+        
+//3) detect predicates  - they are in pairs: keyword:value
+        foreach ($matches as $word) 
+        {            
+            if($word==':'){
+              continue;  
+            } 
+            
+            $word = trim($word,'"');
+
+
+            if($keyword==null)
+            {
+                $dty_id = null;
+                
+                if(preg_match('/^(typename|typeid|type|t)$/', $word, $match)>0){ //rectype
+
+                    $keyword = 't';
+
+                }else if(preg_match('/^(ids|id|title|added|modified|url|notes|addedby|access|before)$/', $word, $match)>0){ //header fields
+
+                    $keyword = $match[0];
+                    
+                }else if(preg_match('/^(workgroup|wg|owner)$/', $word, $match)>0){ //ownership (header field)
+                
+                    $keyword = 'owner';
+
+                }else if(preg_match('/^(after|since)$/', $word, $match)>0){ //special case for modified
+                    
+                    $keyword = 'after';
+
+                }else if(preg_match('/^(sortby|sort|s)$/', $word, $match)>0){ //sort keyword
+                    
+                    $keyword = 'sortby';
+                    
+                }else if(preg_match('/^(field|f)(\d*)$/', $word, $match)>0){ //base field
+
+                    $keyword = 'f';
+                    $dty_id = @$match[2];
+
+                }else if(preg_match('/^(count|cnt|geo)(\d*)$/', $word, $match)>0){ //special base field
+
+                    $keyword = $match[1];
+                    $dty_id = @$match[2];
+
+                }else if(preg_match('/^(tag|keyword|kwd)$/', $word, $match)>0){ //tags
+
+                    $keyword = 'tag';
+
+                }else if(preg_match('/^(linked_to|linkedto|linkto|link_to|lt)(\d*)$/', $word, $match)>0){ //resource - linked to
+
+                    $keyword = 'lt';
+                    $dty_id = @$match[2];
+
+                }else if(preg_match('/^(linked_from|linkedfrom|linkfrom|link_from|lf)(\d*)$/', $word, $match)>0){ //backward link
+
+                    $keyword = 'lf';
+                    $dty_id = @$match[2];
+
+                }else if(preg_match('/^(related_to|relatedto|rt)(\d*)$/', $word, $match)>0){ //relationship to
+
+                    $keyword = 'rt';
+                    $dty_id = @$match[2];
+
+                }else if(preg_match('/^(related_from|relatedfrom|rf)(\d*)$/', $word, $match)>0){ //relationship from
+
+                    $keyword = 'rf';
+                    $dty_id = @$match[2];
+
+                }else if(preg_match('/^(related|links)$/', $word, $match)>0){ //link or relation in any direction
+
+                    $keyword = $match[0];
+                    
+                }else if(preg_match('/^(relf|r)(\d*)$/', $word, $match)>0){ //field from relation record 
+
+                    $keyword = $match[1];
+                    $dty_id = @$match[2];
+                    
+                }else if(preg_match('/^(any|all|not)$/', $word, $match)>0){ //logical operation
+
+                    $keyword = $match[0];
+                
+                }else{
+                    $warn = 'Keywords '.$word.' not recognized';
+                    //by default this is title (or add to previous value or skip pair?)
+                    if($word=='[subquery]'){ 
+                        $res = array_merge($res, array_shift($subres) );
+                    }else{
+                        
+                        //if($previous_key && )
+                        
+                        if(false && @$res[count($res)-1]['title']){
+                            $res[count($res)-1]['title'] .= (' '.$word);
+                        }else{
+                            array_push($res, array( 'title'=>$word ));        
+                        }
+                    }
+                    continue;
+                }
+
+                if($keyword){
+                    if($dty_id>0){
+                        $keyword = $keyword.':'.$dty_id;
+                    }
+                }
+                
+            }//keyword turn
+            else{
+                
+                if($word=='[subquery]'){ 
+                    $word = array_shift($subres);
+                }
+                
+                array_push($res, array( $keyword=>$word ));    
+                
+                $previous_key = $keyword;
+                
+                $keyword = null;
+            }
+        }//for
+    
+    }else{
+        $res =  false; //no entries
+    }
+    
+    return $res;
+    
+    
+}//END parse_query_to_json
+
 // $params need for
 // q - json query array
 // w - domain all or bookmarked or e(everything)
@@ -381,7 +569,12 @@ class HQuery {
                 }
                 
                 if($this->currUserID>0 && count($wg_ids)>0){
-                    $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+                    $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID ';
+                    if(count($wg_ids)>1){
+                        $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';    
+                    }else{
+                        $where2 = $where2 .' = '.$wg_ids[0] . ' )';    
+                    }
                 }
             }
             
@@ -747,11 +940,16 @@ class HPredicate {
     var $lessthan = false;
     var $greaterthan = false;
 
-    var $allowed = array('title','t','type','typeid','typename','added','modified',
-            'url','notes','ids','id','count','cnt',
-            'f','field','geo','lt','linked_to','linkedto','lf','linkedfrom',
-            'related','rt','related_to','relatedto','rf','relatedfrom','links','plain',
-            'addedby','owner','access','tag','keyword','kwd');
+    var $allowed = array('t','type','typeid','typename',
+            'ids','id','title','added','modified','url','notes',
+            'after','before', 
+            'addedby','owner','access',
+            'f','field',
+            'count','cnt','geo',
+            'lt','linked_to','linkedto','lf','linkedfrom',
+            'related','rt','related_to','relatedto','rf','relatedfrom',
+            'links','plain',
+            'tag','keyword','kwd');
     /*
     notes, n:        record heder notes (scratchpad)
     title:           title contains
@@ -953,10 +1151,12 @@ class HPredicate {
                 }else{
                     return $this->predicateField();
                 }
-
-            case 'title':
-            case 'added':
+                
+            case 'after':
+            case 'before':
             case 'modified':
+            case 'added':
+            case 'title':
             case 'url':
             case 'notes':
             case 'addedby':
@@ -1105,7 +1305,7 @@ class HPredicate {
 
             $sHeaderField = "rec_Added";
             
-        }else if($this->pred_type=='modified' || $this->field_id=='modified'){
+        }else if($this->pred_type=='modified' || $this->pred_type=='after' || $this->pred_type=='before' || $this->field_id=='modified'){
 
             $sHeaderField = "rec_Modified";
             
@@ -1908,7 +2108,10 @@ class HPredicate {
         }else{
 
             $datestamp = validateAndConvertToISO($this->value);
-
+            
+            if($datestamp==null){
+                return null;
+            }else
             if ($this->exact) {
                 return ($this->negate?'!':'')."= '$datestamp'";
             }
@@ -2019,7 +2222,6 @@ class HPredicate {
                 $this->value = substr($this->value, 1);
             }
             
-            
         }
         $this->value = $this->cleanQuotedValue($this->value);
 
@@ -2114,7 +2316,7 @@ class HPredicate {
                 $userids = array();
                 foreach($values as $username){
                     if(is_numeric($username)){
-                        $userids[] = $username;        
+                        $userids[] = $username;    //ugr_ID    
                     }else if(strtolower($username)=='currentuser' || strtolower($username)=='current_user'){
                         $userids[] = $currUserID;
                     }else{
@@ -2127,7 +2329,17 @@ class HPredicate {
                 $this->exact = true;
             }       
             
+            if($this->pred_type=='modified' || $this->pred_type=='added' 
+                || $this->pred_type=='after'  || $this->pred_type=='before'){
+                    
+                    
+                if($this->pred_type=='before') $this->lessthan = '<=';
+                if($this->pred_type=='after')  $this->greaterthan = '>';
             
+                    
+                $this->field_type = 'date';
+                $cs_ids = null;    
+            }else
             if($this->pred_type=='title' || $this->pred_type=='url' || $this->pred_type=='notes'
                 || $this->field_type =='date'){
                 $cs_ids = null;

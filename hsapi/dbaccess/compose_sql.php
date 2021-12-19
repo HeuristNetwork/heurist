@@ -241,7 +241,12 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
             } 
             
             if(count($wg_ids)>0){
-                $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+                $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID ';
+                if(count($wg_ids)>1){
+                    $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';    
+                }else{
+                    $where2 = $where2 .' = '.$wg_ids[0] . ' )';    
+                }
             }
         }
         
@@ -265,7 +270,12 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
         
         if(count($wg_ids)>0 && $currUserID>0){
                 //for hidden
-                $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+                $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID ';
+                if(count($wg_ids)>1){
+                    $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';    
+                }else{
+                    $where2 = $where2 .' = '.$wg_ids[0] . ' )';    
+                }
         }
     }
     

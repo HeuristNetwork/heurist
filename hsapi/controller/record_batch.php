@@ -24,6 +24,11 @@
     require_once (dirname(__FILE__).'/../dbaccess/recordsBatch.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
+if(count($_REQUEST)>900){
+    error_log('TOO MANY _REQUEST PARAMS '.count($_REQUEST).' record_batch');
+    error_log(print_r(array_slice($_REQUEST, 0, 100),true));
+}    
+    
     $response = array();
     $res = false;
 

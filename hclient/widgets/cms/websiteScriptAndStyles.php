@@ -185,14 +185,20 @@ if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in website
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/css/css.js"></script>
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/htmlmixed/htmlmixed.js"></script>
     
+    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>hclient/assets/css/marching_ants.css" />
+    
     <style>
 .cms-element-active{
     -webkit-box-shadow: inset 0px 0px 38px 10px rgb(201, 194, 249), 0px 0px 8px 10px rgba(0,0,0,0);
     box-shadow: inset 10px 10px 124px 14px rgb(201, 194, 249), 0px 0px 8px 10px rgba(0,0,0,0);
 }   
 .cms-element-editing{
+    /* frame around editing element
     -webkit-box-shadow: inset 0px 0px 0px 5px rgb(201, 194, 249);
     box-shadow: inset 0px 0px 0px 5px rgb(201, 194, 249);
+    */
+    -webkit-box-shadow: 0px 0px 0px 5px rgb(201, 194, 249);
+    box-shadow: 0px 0px 0px 5px rgb(201, 194, 249);
 }   
 
 /*     box-shadow: inset 0px 0px 38px 10px rgb(201, 194, 249), 0px 0px 8px 10px rgba(0,0,0,0); */

@@ -24,6 +24,11 @@ require_once(dirname(__FILE__).'/../utilities/utils_file.php');
 require_once(dirname(__FILE__).'/../utilities/utils_image.php');
 require_once(dirname(__FILE__).'/../utilities/UploadHandler.php');
 
+if(count($_REQUEST)>900){
+    error_log('TOO MANY _REQUEST PARAMS '.count($_REQUEST).' fileUpload');
+    error_log(print_r(array_slice($_REQUEST, 0, 100),true));
+}    
+
 $response = null;
 $system = new System();
 

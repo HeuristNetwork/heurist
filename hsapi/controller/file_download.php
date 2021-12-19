@@ -77,7 +77,7 @@ if($db){
         $size = @$_REQUEST['size'];
         
         if(is_numeric($fileid)){
-            error_log('Obfuscated id is allowed only');
+            error_log('Obfuscated id is allowed only. Query: '.@$_SERVER['QUERY_STRING']);
             exit;
         }
         
