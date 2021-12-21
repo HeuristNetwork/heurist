@@ -118,7 +118,7 @@ function editCMS2(){
                                         +'title="Select menu item and Dblclick (or F2) to edit menu title in place. Drag and drop to reorder menu">'
                                         +'Drag menu items to re-order</span><br>'
                                     +'<span style="display:inline-block;padding:7px 0 7px 40px" class="heurist-helper1">'
-                                        +'Click to edit</span>'
+                                        +'Click to edit the page</span>'
                                         
                                     +'<div style="border-top:1px solid gray;padding:10px 8px">'                                            
                                     +'<a href="#" title="Edit website home page" '
