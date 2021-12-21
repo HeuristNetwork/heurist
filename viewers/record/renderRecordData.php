@@ -121,9 +121,7 @@ if(!($is_map_popup || $without_header)){
         <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
         
         <link rel="stylesheet" type="text/css" href="../../external/jquery.fancybox/jquery.fancybox.css" />
-        <!--
-        <script type="text/javascript" src="../../external/jquery.fancybox/jquery.fancybox.js"></script>
-        -->
+
         <script type="text/javascript" src="../../hclient/widgets/viewers/mediaViewer.js"></script>
 
         <script type="text/javascript">
@@ -317,17 +315,20 @@ if(!($is_map_popup || $without_header)){
             $(document).ready(function() {
                 showHidePrivateInfo(null);
                 
-                var baseURL = '<?php echo HEURIST_BASE_URL;?>';                
-                var database = '<?php echo HEURIST_DBNAME;?>';                
+                //2021-12-17 fancybox viewer is disabled IJ doesn't like it - Except iiif
+                if(rec_Files.length>0){
+                    var baseURL = '<?php echo HEURIST_BASE_URL;?>';                
+                    var database = '<?php echo HEURIST_DBNAME;?>';                
 
-                if(window.hWin && window.hWin.HAPI4){
-                    $('.thumbnail2').mediaViewer({rec_Files:rec_Files, showLink:true, database:database, baseURL:baseURL});    
-                }else{
-                    $.getScript(baseURL+'external/jquery.fancybox/jquery.fancybox.js', function(){
-                        $('.thumbnail2').mediaViewer({rec_Files:rec_Files, showLink:true, database:database, baseURL:baseURL});
-                    });
+                    if(window.hWin && window.hWin.HAPI4){
+                        $('.thumbnail2').mediaViewer({rec_Files:rec_Files, showLink:true, database:database, baseURL:baseURL});    
+                    }else{
+                        $.getScript(baseURL+'external/jquery.fancybox/jquery.fancybox.js', function(){
+                            $('.thumbnail2').mediaViewer({rec_Files:rec_Files, showLink:true, database:database, baseURL:baseURL});
+                        });
+                    }
                 }
-                
+
             });
             
             /*NOT USED
@@ -414,7 +415,7 @@ if(!($is_map_popup || $without_header)){
             cursor: url(../../hclient/assets/zoom-out.png),pointer;
         }        
         .download_link{
-            padding: 7px 0;
+            padding: 15px 0;
             font-size: 9px;
         }
         .prompt {
@@ -1180,10 +1181,13 @@ function print_public_details($bib) {
     
     print '<div id="div_public_data">';
 
+    //2021-12-17 fancybox viewer is disabled IJ doesn't like it - Except iiif
     print '<script>';
     foreach ($thumbs as $thumb) {
+        if(strpos($thumb['orig_name'],'_iiif')===0){
         print 'rec_Files.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
-        if($is_map_popup) break;
+        //if($is_map_popup) break;
+        }
     }
     print '</script>';
     print '<div class="thumbnail2" style="text-align:center"></div>';
@@ -1204,18 +1208,25 @@ function print_public_details($bib) {
         print '<div class="thumbnail">';
     }
         $has_thumbs = (count($thumbs)>0);        
+      
+    $several_media = count($thumbs);
         
-    if(false) ///hide old thumbnails   
-        foreach ($thumbs as $thumb) {
+    if(true) // use/hide old thumbnails   
+        foreach ($thumbs as $k => $thumb) {
+            
+            if(strpos($thumb['orig_name'],'_iiif')===0) continue;
             
             $isAudioVideo = (strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0);
             
             $isImageOrPdf = (strpos($thumb['mimeType'],"image/")===0 || $thumb['mimeType']=='application/pdf');
             
             if($thumb['player'] && !$is_map_popup && $isAudioVideo){
-                print '<div class="fullSize" style="text-align:left;'.($is_production?'margin-left:100px':'').'">';
+                print '<div class="fullSize media-content" style="text-align:left;'
+                    .($is_production?'margin-left:100px':'')
+                    .($k>0?'display:none;':'').'">';
             }else{
-                print '<div class="thumb_image"'.($isImageOrPdf?'':' style="cursor:default"').'>';
+                print '<div class="thumb_image media-content"  style="'.($isImageOrPdf?'':'cursor:default;')
+                    .($k>0?'display:none;':'').'">';
             }
 
             $url = (@$thumb['external_url'] && strpos($thumb['external_url'],'http://')!==0) 
@@ -1247,18 +1258,23 @@ function print_public_details($bib) {
                         :'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
             }
             print '<br/><div class="download_link">';
+
+            if($k==0 && $several_media>1 && !$is_map_popup){
+                print '<a href="#" onclick="$(\'.media-content\').show()">all images</a>&nbsp;&nbsp;';
+            }
+
             if($thumb['player'] && !($is_map_popup || $without_header)){
                 print '<a id="lnk'.$thumb['id'].'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px" onclick="window.hWin.HEURIST4.ui.hidePlayer('
-                    .$thumb['id'].', this.parentNode)">SHOW THUMBNAIL</a>';
+                    .$thumb['id'].', this.parentNode)">show thumbnail</a>';
             }
             
             if(@$thumb['external_url']){
                 print '<a href="' . htmlspecialchars($thumb['external_url']) 
-                                . '" class="external-link" target=_blank>OPEN IN NEW TAB'
+                                . '" class="external-link" target=_blank>open in new tab'
                                 . (@$thumb['linked']?' (linked media)':'').'</a></div>';
             }else{
                 print '<a href="' . htmlspecialchars($download_url) 
-                                . '" class="external-link image_tool" target="_surf">DOWNLOAD'
+                                . '" class="external-link image_tool" target="_surf">download'
                                 . (@$thumb['linked']?' (linked media)':'').'</a></div>';
             }
             
@@ -1267,6 +1283,7 @@ function print_public_details($bib) {
                 print '<br>';
                 break; //in map popup show the only thumbnail
             }
+            
         }//for
         ?>
     </div>
