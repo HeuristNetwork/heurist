@@ -31,7 +31,7 @@ class DbDefTerms extends DbEntityBase
     private $labels_to_idx = null;
     /*
     'trm_OriginatingDBID'=>'int',
-    'trm_NameInOriginatingDB'=>63,
+    'trm_NameInOriginatingDB'=>250,
     'trm_IDInOriginatingDB'=>'int',
 
     'trm_AddedByImport'=>'bool2',

@@ -109,13 +109,13 @@ $query = 'UPDATE '.$db_name
         $mysqli->query($query);            
 if($mysqli->error){print $query.'  '.$mysqli->error; break;}
 
-$query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = SUBSTR(trm_Label,1,63),'
+$query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = trm_Label,'
             .' trm_OriginatingDBID=0'
             ." WHERE (trm_ID>3257 and trm_ID<3297 and trm_OriginatingDBID=0 and trm_IDInOriginatingDB=0)";
 $mysqli->query($query);            
 if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             
-$query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = SUBSTR(trm_Label,1,63),'
+$query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = trm_Label,'
             .' trm_OriginatingDBID=0'
             ." WHERE (trm_OriginatingDBID='' OR trm_OriginatingDBID=0 OR trm_OriginatingDBID IS NULL "
             ." OR trm_IDInOriginatingDB='' OR trm_IDInOriginatingDB=0 OR trm_IDInOriginatingDB IS NULL)";
@@ -227,12 +227,12 @@ $mysqli->query($query);
           
           /*  
         if(count($terms)>0){
-$query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = SUBSTR(trm_Label,1,63),'
+$query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = trm_Label,'
             .' trm_OriginatingDBID=2'
             ." WHERE (trm_ID>3257 and trm_ID<3297 and trm_OriginatingDBID=0 and trm_IDInOriginatingDB=0)";
 $mysqli->query($query);            
             
-$query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = SUBSTR(trm_Label,1,63),'
+$query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = trm_Label,'
             .' trm_OriginatingDBID='.$ver
             ." WHERE (trm_OriginatingDBID='' OR trm_OriginatingDBID=0 OR trm_OriginatingDBID IS NULL "
             ." OR trm_IDInOriginatingDB='' OR trm_IDInOriginatingDB=0 OR trm_IDInOriginatingDB IS NULL)";

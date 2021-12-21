@@ -1550,7 +1550,7 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
                     if(!($dbID>0)) $dbID = 0;
                     
                     $query= 'UPDATE defTerms SET trm_OriginatingDBID='.$dbID
-                                .', trm_NameInOriginatingDB=SUBSTR(trm_Label,0,63)'
+                                .', trm_NameInOriginatingDB=trm_Label'
                                 .', trm_IDInOriginatingDB='.$trmID
                                 .' WHERE (NOT trm_OriginatingDBID>0 OR trm_OriginatingDBID IS NULL) AND trm_ID='.$trmID;
                     $ext_db->query($query);

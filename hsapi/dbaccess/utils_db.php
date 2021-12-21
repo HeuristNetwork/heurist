@@ -1206,6 +1206,18 @@ error_log('UPDATED '.$session_id.'  '.$value);
                 }
             }    
             
+            if(!hasColumn($mysqli, 'defTerms', 'trm_Label', null, 'varchar(250)')){
+
+                $query = "ALTER TABLE `defTerms` "
+                ."CHANGE COLUMN `trm_Label` `trm_Label` VARCHAR(250) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank' ,"
+                ."CHANGE COLUMN `trm_NameInOriginatingDB` `trm_NameInOriginatingDB` VARCHAR(250) NULL DEFAULT NULL COMMENT 'Name (label) for this term in originating database'" ;
+
+                $res = $mysqli->query($query);
+                if(!$res){
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to change trm_Label and trm_NameInOriginatingDB', $mysqli->error);
+                    return false;
+                }
+            }        
         }
     }  
     
@@ -1238,7 +1250,7 @@ error_log('UPDATED '.$session_id.'  '.$value);
     * @param mixed $column_name
     * @param mixed $db_name
     */
-    function hasColumn($mysqli, $table_name, $column_name, $db_name=null){
+    function hasColumn($mysqli, $table_name, $column_name, $db_name=null, $given_type=null){
 
         if($db_name==null){
             //$db_name = HEURIST_DBNAME_FULL;
@@ -1253,6 +1265,17 @@ error_log('UPDATED '.$session_id.'  '.$value);
         $row_cnt = 0;
         if($res) {
             $row_cnt = $res->num_rows; 
+            
+            if($row_cnt>0 && $given_type!=null){
+                $row = $res->fetch_assoc();
+                if($row['Type']==$given_type){
+                    return true;
+                }else{
+                    return false; 
+                }
+            }
+            
+            
             $res->close();
         }
         return ($row_cnt>0);

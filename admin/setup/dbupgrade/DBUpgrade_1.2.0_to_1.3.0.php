@@ -247,6 +247,24 @@ $query = "CREATE TABLE defVocabularyGroups (
             }
             $report[] = 'defTerms: trm_SemanticReferenceURL added';
         }    
+
+        //----------------------------        
+        
+        if(hasColumn($mysqli, 'defTerms', 'trm_Label', null, 'varchar(250)')){
+            $report[] = 'defTerms: trm_Label already varchar(250)';
+        }else{
+
+            $query = "ALTER TABLE `defTerms` "
+            ."CHANGE COLUMN `trm_Label` `trm_Label` VARCHAR(250) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank' ,"
+            ."CHANGE COLUMN `trm_NameInOriginatingDB` `trm_NameInOriginatingDB` VARCHAR(250) NULL DEFAULT NULL COMMENT 'Name (label) for this term in originating database'" ;
+
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to change trm_Label and trm_NameInOriginatingDB', $mysqli->error);
+                return false;
+            }
+            $report[] = 'defTerms: trm_Label and trm_NameInOriginatingDB set to varchar(250)';
+        }        
         
         //----------------------------        
         

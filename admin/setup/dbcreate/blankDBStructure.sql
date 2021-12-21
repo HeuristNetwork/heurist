@@ -339,7 +339,6 @@ CREATE TABLE defRelationshipConstraints (
   KEY rcs_SourceRecTypeID (rcs_SourceRectypeID)
 ) ENGINE=InnoDB COMMENT='Constrain target-rectype/vocabularies/values for a pointer d';
 
-
 -- --------------------------------------------------------
 --
 -- Table structure for table 'defVocabularyGroups'
@@ -364,12 +363,12 @@ CREATE TABLE defVocabularyGroups (
 
 CREATE TABLE defTerms (
   trm_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key, the term code used in the detail record',
-  trm_Label varchar(500) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank',
+  trm_Label varchar(250) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank',
   trm_InverseTermId int(10) unsigned default NULL COMMENT 'ID for the inverse value (relationships), null if no inverse',
   trm_Description varchar(1000) default NULL COMMENT 'A description/gloss on the meaning of the term',
   trm_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   trm_OriginatingDBID mediumint(8) unsigned default NULL COMMENT 'Database where this detail type originated, 0 = locally',
-  trm_NameInOriginatingDB varchar(63) default NULL COMMENT 'Name (label) for this term in originating database',
+  trm_NameInOriginatingDB varchar(250) default NULL COMMENT 'Name (label) for this term in originating database',
   trm_IDInOriginatingDB mediumint(8) unsigned default NULL COMMENT 'ID used in database where this  term originated',
   trm_AddedByImport tinyint(1) unsigned NOT NULL default '0' COMMENT 'Set to 1 if term added by an import, otherwise 0',
   trm_IsLocalExtension tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flag that this value not in the externally referenced vocabulary',
@@ -388,7 +387,6 @@ CREATE TABLE defTerms (
   KEY trm_ParentTermIDKey (trm_ParentTermID),
   KEY trm_InverseTermIDKey (trm_InverseTermId)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COMMENT='Terms by detail type and the vocabulary they belong to';
-
 
 -- --------------------------------------------------------
 

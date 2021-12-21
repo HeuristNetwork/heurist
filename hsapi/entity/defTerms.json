@@ -30,7 +30,7 @@
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Role":"title",
-                        "dty_Size":500,
+                        "dty_Size":250,
                         "rst_DisplayName": "Term (label):",
                         "rst_DisplayHelpText": "The term in human-readable form.<br>Dropdowns are ordered alphabetically within each tree branch.<br>Precede terms with 01, 02, 03 ... to control order if required.", 
                         "rst_DisplayExtendedDescription":"",

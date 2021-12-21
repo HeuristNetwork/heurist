@@ -83,7 +83,7 @@ CREATE TABLE defCrosswalk (
   crw_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'The date when this mapping added or modified',
   PRIMARY KEY  (crw_ID),
   UNIQUE KEY crw_composite (crw_SourcedbID,crw_DefType,crw_LocalCode)
-) ENGINE=InnoDB  COMMENT='Map the codes used in this Heurist DB to codes used in other';
+) ENGINE=InnoDB COMMENT='Map the codes used in this Heurist DB to codes used in other';
 
 -- --------------------------------------------------------
 
@@ -98,7 +98,7 @@ CREATE TABLE defDetailTypeGroups (
   dtg_Description varchar(255) NOT NULL COMMENT 'General description fo this group of detail (field) types',
   dtg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (dtg_ID)
-) ENGINE=InnoDB   COMMENT='Groups detail types for display in separate sections of edit';
+) ENGINE=InnoDB COMMENT='Groups detail types for display in separate sections of edit';
 
 -- --------------------------------------------------------
 
@@ -220,8 +220,8 @@ CREATE TABLE defRecStructure (
   rst_MinValues tinyint(3) unsigned NOT NULL default '0' COMMENT 'If required, minimum number of values per record for this detail',
   rst_InitialRepeats TINYINT(1) DEFAULT 1 COMMENT 'Number of repeat values to be displayed for this field when a new record is first displayed',
   rst_DisplayDetailTypeGroupID tinyint(3) unsigned default NULL COMMENT 'If set, places detail in specified group instead of according to dty_DetailTypeGroup',
-  rst_FilteredJsonTermIDTree varchar(500) default NULL COMMENT 'JSON encoded tree of allowed terms, subset of those defined in defDetailType',
-  rst_PtrFilteredIDs varchar(250) default NULL COMMENT 'Allowed Rectypes (CSV) within list defined by defDetailType (for pointer details)',
+  rst_FilteredJsonTermIDTree varchar(500) default NULL COMMENT 'JSON encoded tree of allowed terms, subset of those defined in defDetailType. This field is no longer used',
+  rst_PtrFilteredIDs varchar(250) default NULL COMMENT 'Allowed Rectypes (CSV) within list defined by defDetailType (for pointer details) This field is no longer used',
   rst_CreateChildIfRecPtr tinyint(1) unsigned NOT NULL default '0' COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record',
   rst_PointerMode enum('addorbrowse','addonly','browseonly') DEFAULT 'addorbrowse' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing',
   rst_PointerBrowseFilter varchar(255)  DEFAULT NULL COMMENT 'When adding record pointer values, defines a Heurist filter to restrict the list of target records browsed',   
@@ -233,6 +233,8 @@ CREATE TABLE defRecStructure (
   rst_EntryMask Varchar(250) NULL COMMENT 'Data entry mask, use to control decimals on numeric values, content of text fields etc. for this record type - future implementation Aug 2017',
   rst_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   rst_LocallyModified tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
+  rst_SemanticReferenceURL VARCHAR( 250 ) NULL COMMENT 'The URI to a semantic definition or web page describing this field used within this record type',
+  rst_TermsAsButtons TinyInt(1) default '0' Comment 'If 1, term list fields are represented as buttons (if single value) or checkboxes (if repeat values)',  
   PRIMARY KEY  (rst_ID),
   UNIQUE KEY rst_composite (rst_RecTypeID,rst_DetailTypeID),
   KEY rst_DetailTypeID (rst_DetailTypeID)
@@ -253,7 +255,7 @@ CREATE TABLE defRecTypeGroups (
   rtg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (rtg_ID),
   UNIQUE KEY rtg_Name (rtg_Name)
-) ENGINE=InnoDB   COMMENT='Grouping mechanism for record types in pulldowns';
+) ENGINE=InnoDB COMMENT='Grouping mechanism for record types in pulldowns';
 
 -- --------------------------------------------------------
 
@@ -278,7 +280,7 @@ CREATE TABLE defRecTypes (
   rty_RecTypeGroupID tinyint(3) unsigned NOT NULL default '1' COMMENT 'Record type group to which this record type belongs',
   rty_RecTypeModelIDs varchar(63) default NULL COMMENT 'The model group(s) to which this rectype belongs, comma sep. list',
   rty_FlagAsFieldset tinyint(1) unsigned NOT NULL default '0' COMMENT '0 = full record type, 1 = Fieldset = set of fields to include in other rectypes',
-  rty_ReferenceURL varchar(250) default NULL COMMENT 'A reference URL describing/defining the record type',
+  rty_ReferenceURL varchar(250) default NULL COMMENT 'A semantic reference URI for, or a URL describing, the record type',
   rty_AlternativeRecEditor varchar(63) default NULL COMMENT 'Name or URL of alternative record editor function to be used for this rectype',
   rty_Type enum('normal','relationship','dummy') NOT NULL default 'normal' COMMENT 'Use to flag special record types to trigger special functions',
   rty_ShowURLOnEditForm tinyint(1) NOT NULL default '1' COMMENT 'Determines whether special URL field is shown at the top of the edit form',
@@ -332,7 +334,6 @@ CREATE TABLE defVocabularyGroups (
   UNIQUE KEY vcg_Name (vcg_Name)
 ) ENGINE=InnoDB COMMENT='Grouping mechanism for vocabularies in vocabularies/terms editor';
 
-
 -- --------------------------------------------------------
 
 --
@@ -341,12 +342,12 @@ CREATE TABLE defVocabularyGroups (
 
 CREATE TABLE defTerms (
   trm_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key, the term code used in the detail record',
-  trm_Label varchar(500) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank',
+  trm_Label varchar(250) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank',
   trm_InverseTermId int(10) unsigned default NULL COMMENT 'ID for the inverse value (relationships), null if no inverse',
   trm_Description varchar(1000) default NULL COMMENT 'A description/gloss on the meaning of the term',
   trm_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   trm_OriginatingDBID mediumint(8) unsigned default NULL COMMENT 'Database where this detail type originated, 0 = locally',
-  trm_NameInOriginatingDB varchar(63) default NULL COMMENT 'Name (label) for this term in originating database',
+  trm_NameInOriginatingDB varchar(250) default NULL COMMENT 'Name (label) for this term in originating database',
   trm_IDInOriginatingDB mediumint(8) unsigned default NULL COMMENT 'ID used in database where this  term originated',
   trm_AddedByImport tinyint(1) unsigned NOT NULL default '0' COMMENT 'Set to 1 if term added by an import, otherwise 0',
   trm_IsLocalExtension tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flag that this value not in the externally referenced vocabulary',
@@ -360,10 +361,11 @@ CREATE TABLE defTerms (
   trm_Code varchar(100) default NULL COMMENT 'Optional code eg. alphanumeric code which may be required for import or export',
   trm_SemanticReferenceURL VARCHAR( 250 ) NULL COMMENT 'The URL to a semantic definition or web page describing the term',
   trm_IllustrationURL VARCHAR( 250 ) NULL COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory',  
+  trm_VocabularyGroupID smallint(5) unsigned NULL default '0' COMMENT 'Vocabulary group to which this term belongs, if a top level term (vocabulary)',
   PRIMARY KEY  (trm_ID),
   KEY trm_ParentTermIDKey (trm_ParentTermID),
   KEY trm_InverseTermIDKey (trm_InverseTermId)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Terms by detail type and the vocabulary they belong to';
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COMMENT='Terms by detail type and the vocabulary they belong to';
 
 -- --------------------------------------------------------
 

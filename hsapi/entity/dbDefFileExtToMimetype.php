@@ -29,7 +29,7 @@ class DbDefFileExtToMimetype extends DbEntityBase
 {
     /*
     'trm_OriginatingDBID'=>'int',
-    'trm_NameInOriginatingDB'=>63,
+    'trm_NameInOriginatingDB'=>250,
     'trm_IDInOriginatingDB'=>'int',
 
     'trm_AddedByImport'=>'bool2',

@@ -95,7 +95,7 @@ class DbUtils {
                     if ($res===false) {$result = 1; }
                     // Terms
                     $res = $mysqli->query("update defTerms set "
-                        ."trm_OriginatingDBID='$dbID',trm_NameInOriginatingDB=trm_Label,trm_IDInOriginatingDB=trm_ID "
+                        ."trm_OriginatingDBID='$dbID',trm_NameInOriginatingDB=trm_Label, trm_IDInOriginatingDB=trm_ID "
                         ."where (trm_OriginatingDBID = '0') OR (trm_OriginatingDBID IS NULL) ");
                     if ($res===false) {$result = 1; }
 

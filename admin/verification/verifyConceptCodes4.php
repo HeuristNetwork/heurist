@@ -86,9 +86,13 @@ if(false){
        
     __findWrongChars();   
        
-}else if(true){
+}else if(false){
     
     __updateDatabase();
+}else if(true){
+    //trm_NameInOriginatingDB 
+    __setTermNameTo255();
+    //__findLongTermLabels();
 }else{
     findMissedTermLinks();
 }
@@ -393,4 +397,64 @@ function find_invalid_string($val){
     }
 }
 
+//
+//
+//
+function __findLongTermLabels(){
+    
+    global $mysqli, $databases; 
+
+
+    print '[long term labels]<br>';    
+    
+    foreach ($databases as $idx=>$db_name){
+
+        mysql__usedatabase($mysqli, $db_name);
+        
+        if(true){
+            
+            $list = mysql__select_assoc($mysqli, 'select trm_ID, trm_Label, CHAR_LENGTH(trm_Label) as chars, length(trm_Label) as len '
+            .' from defTerms where length(trm_Label)>255');
+
+            if($list && count($list)>0){
+            
+                print $db_name.'<br>';
+                foreach($list as $id=>$row){
+                    print '<div style="padding-left:100px">'.$id.'&nbsp;'.$row['chars'].'&nbsp;'.$row['len'].'&nbsp;'.$row['trm_Label'].'</div>';    
+                }
+                
+            }
+        }
+    }
+    print '[end report]';    
+    
+}
+
+//
+//
+//
+function __setTermNameTo255(){
+
+    global $mysqli, $databases; 
+
+
+    print '[set both trm_Label and trm_NameInOriginatingDB  to varchar(250)]<br>';    
+    
+    foreach ($databases as $idx=>$db_name){
+
+        mysql__usedatabase($mysqli, $db_name);
+$query = "ALTER TABLE `defTerms` "
+."CHANGE COLUMN `trm_Label` `trm_Label` VARCHAR(250) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank' ,"
+."CHANGE COLUMN `trm_NameInOriginatingDB` `trm_NameInOriginatingDB` VARCHAR(250) NULL DEFAULT NULL COMMENT 'Name (label) for this term in originating database'" ;
+        
+        $res = $mysqli->query($query);
+        if(!$res){
+            print $db_name.' Cannot modify defTerms: '.$mysqli->error;
+            return false;
+        }else{
+            print $db_name.'<br>';
+        }
+    }    
+    print '[end update]';    
+}
 ?>
