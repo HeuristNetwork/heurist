@@ -109,7 +109,7 @@ function editCMS2(){
                             +'<span style="position:absolute;top:22px;width:32px;height:24px;font-size:29px;cursor:pointer;'+(options.editor_pos=='west'?'right:5px':'')+'" '
                             +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'"/>'
                             
-                            +'<div id="treeWebSite" style="top:43px" class="ent_wrapper">'
+                            +'<div id="treeWebSite" style="top:43px;background-color:rgb(135,205,118);" class="ent_wrapper">'
                                 +'<div class="toolbarWebSite ent_header" style="height:85px;padding-top:15px;">'
                                 
                                     +'<a href="#" class="btn-website-edit" style="padding-left:20px">'
@@ -144,7 +144,7 @@ function editCMS2(){
                                 +'</div>'
                             
                                 +'<div class="treePage ent_content" style="top:95px;padding:10px;border-top:1px solid gray;border-bottom:1px solid gray"/>' //treeview - edit page
-                                +'<div class="propertyView ent_content" style="top:60px;padding:10px;border-top:1px solid gray;border-bottom:1px solid gray;display:none"/>' //edit properties for element
+                                +'<div class="propertyView ent_content" style="top:45px;padding:10px 0px;border-bottom:1px solid gray;display:none"/>' //edit properties for element border-top:1px solid gray;
                                 
                                 +'<div class="toolbarPage ent_footer" style="padding:10px;font-size:0.9em;text-align:left;">'
                                     +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
@@ -181,7 +181,7 @@ function editCMS2(){
                             togglerAlign_closed:16,   //top position   
                             togglerLength_closed:80,  //height of toggler button
                             initHidden: false, //!this.options.edit_structure,   //show structure list at once 
-                            initClosed: true, //!this.options.edit_structure && (this.usrPreferences.structure_closed!=0),
+                            initClosed: false, //!this.options.edit_structure && (this.usrPreferences.structure_closed!=0),
                             slidable:false,  //otherwise it will be over center and autoclose
                             contentSelector: '.editStructure',   
                             onopen_start : function( ){ 
@@ -341,10 +341,10 @@ function editCMS2(){
         
             var $dlg;
             var _buttons = [
-                {text:window.hWin.HR('Yes'), 
+                {text:window.hWin.HR('Save'), 
                     click: function(){_saveLayoutCfg(callback);$dlg.dialog('close');}
                 },
-                {text:window.hWin.HR('Ignore'), 
+                {text:window.hWin.HR('Discard'), 
                     click: function(){page_was_modified = false; $dlg.dialog('close'); if($.isFunction(callback)) callback.call(this);}
                 },
                 {text:window.hWin.HR('Cancel'), 
@@ -352,8 +352,8 @@ function editCMS2(){
                 }
             ];            
             
-            var sMsg = "Page has been modified. Click YES to save changes";
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:'Page has been modified'});   
+            var sMsg = window.hWin.HR('Page has been modified');
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:sMsg});   
 
             return true;     
         }else{
@@ -401,7 +401,7 @@ function editCMS2(){
         
         if(supress_conversion!==true && typeof _layout_content === 'string' &&
             _layout_content.indexOf('data-heurist-app-id')>0){ //old format with some widgets
- 
+/* 
                 var $dlg_pce = null;
 
                 var btns = [
@@ -413,9 +413,8 @@ function editCMS2(){
                             var res = layoutMgr.convertOldCmsFormat(_layout_content, _layout_container);
                             if(res!==false){
                                 _layout_content = res;
-                                window.hWin.HEURIST4.msg.showMsgDlg('Conversion complete. If you are not satisfied with result please '
-                                +'email support at HeuristNetwork dot org the name of your database and '
-                                +'we will update the page manually to the new format. Don\'t save current page to avoid lost of original design');
+                                var sMsg = '<p>Conversion complete</p>'
+                                window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
                             }
                             
                             _initPage(true);
@@ -436,8 +435,21 @@ function editCMS2(){
 +'<p>Unfortunately if this page uses complex formatting which we cannot be sure of converting correctly through this automatic process. Please email support at HeuristNetwork dot org with the name of your database and we will update the page manually to the new format.</p>'
  
 +'<p>In the meantime you can continue to edit the page using the old web page editor, but please note this editor will be DISCONTINUED at the end of February 2022.</p>',btns,'New website editor'); 
-                    
                  return;
+*/       
+
+                            var res = layoutMgr.convertOldCmsFormat(_layout_content, _layout_container);
+                            if(res!==false){
+                                _layout_content = res;
+                                
+var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is both much easier and much more powerful than the original editor and requires an entirely new data format. Heurist converts pages automatically to the new editor.</p>'
++'<p>If this page uses complex formatting which we cannot be sure of converting correctly through this automatic process.</p>'
++'<p>If you think this conversion is very different from your original, DO NOT hit SAVE, and open the page instead in the old web page editor (<b>Edit page content</b> or <b>Edit html source</b> links in the Publish menu) and get in touch with us (support at HeuristNetwork dot org) for help with conversion.</p>'
++'<p>Please note the old editor will be DISCONTINUED at the end of February 2022, and we may not have time to help you at the last moment, so please contact us immediately.</p>'
+                                
+                                window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
+                            }
+             
         }
         
         
@@ -541,7 +553,7 @@ function editCMS2(){
         _layout_container.find('div.editable').each(function(i, item){
             var ele_ID = $(item).attr('data-lid');
              //left:2px;top:2px;
-            _defineActionIcons(item, ele_ID, 'position:absolute;z-index:2;');   //left:2px;top:2px;         
+            _defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
         });
         
     }    
@@ -680,7 +692,7 @@ function editCMS2(){
         }
         _keep_EditPanelWidth = 0;
 
-                        
+        body.find('.treePageHeader > .heurist-helper1').show();
         body.find('.btn-page-restore').show();
         body.find('.btn-page-save').show();
         
@@ -886,8 +898,11 @@ function editCMS2(){
 
                     }else if(action=='delete'){
                         //different actions for separator and field
+                        var node = _panel_treePage.fancytree('getTree').getNodeByKey(''+ele_ID);
+                        $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
                         window.hWin.HEURIST4.msg.showMsgDlg(
-                            'Are you sure you wish to delete this element?', function(){ _layoutRemoveElement(ele_ID); }, 
+                            'Are you sure you wish to delete element "'+node.title+'"?', 
+                        function(){ _layoutRemoveElement(ele_ID); }, 
                             {title:'Warning',yes:'Proceed',no:'Cancel'},
                             {default_palette_class: default_palette_class});        
 
@@ -1281,6 +1296,7 @@ function editCMS2(){
       
         //1. show div with properties over treeview
         _panel_treePage.hide();
+        body.find('.treePageHeader > .heurist-helper1').hide();
         body.find('.btn-page-restore').hide();
         body.find('.btn-page-save').hide();
         _panel_propertyView.show();
@@ -1393,10 +1409,10 @@ function editCMS2(){
         }
         else if(widget_id=='text_media'){
             
-            new_ele = {name:'2 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
+            new_ele = {name:'Media and text', type:'group', css:{display:'flex', 'justify-content':'center'},
                 children:[
-                {name:'Column 1', type:'text', css:{flex:'0 1 auto'}, content:"<p><img src=\"https://heuristplus.sydney.edu.au/heurist/hclient/assets/v6/logo.png\" width=\"300\"</p>"},
-                {name:'Column 2', type:'text', css:{flex:'1 1 auto'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"}
+                {name:'Media', type:'text', css:{flex:'0 1 auto'}, content:"<p><img src=\"https://heuristplus.sydney.edu.au/heurist/hclient/assets/v6/logo.png\" width=\"300\"</p>"},
+                {name:'Text', type:'text', css:{flex:'1 1 auto'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"}
                 ]
             };
             
