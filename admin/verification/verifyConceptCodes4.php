@@ -30,6 +30,8 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
+print 'disabled'; 
+exit(); 
  
 define('PDIR','../../');  //need for proper path to js and css    
 

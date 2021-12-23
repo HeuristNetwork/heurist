@@ -1151,9 +1151,11 @@ error_log('UPDATED '.$session_id.'  '.$value);
         $dbVer = $system->get_system('sys_dbVersion');
         $dbVerSub = $system->get_system('sys_dbSubVersion');
 
-        if($dbVer==1 && $dbVerSub>2){
+        if($dbVer==1 && $dbVerSub<4){
         
             $mysqli = $system->get_mysqli();
+            
+            if($dbVerSub<3){
             
             //adds trash groups
             if(!(mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"')>0)){
@@ -1181,6 +1183,11 @@ error_log('UPDATED '.$session_id.'  '.$value);
                 $res = $mysqli->query($query);
             }
 
+            }//for v2
+            
+            $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');
+
+            if($dbVerSub==3 && $dbVerSubSub<1){
             
             if(!hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
                 //alter table
@@ -1218,6 +1225,13 @@ error_log('UPDATED '.$session_id.'  '.$value);
                     return false;
                 }
             }        
+            
+            } //for 1.3.0
+            
+            //update version
+            if($dbVerSub<3 || ($dbVerSub==3 && $dbVerSubSub<1)){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=1 WHERE 1');
+            }
         }
     }  
     
