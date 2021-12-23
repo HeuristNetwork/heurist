@@ -504,16 +504,17 @@ private static function __get_enum_value($enum_id, $enum_param_name)
         $enum_param_name = "id";
     }
 
-    $ress = self::$mysqli->query("select trm_id, trm_label, trm_code, concat(trm_OriginatingDBID, '-', trm_IDInOriginatingDB) as trm_conceptid from defTerms where trm_ID = ".$enum_id);
+    $ress = self::$mysqli->query('select trm_id, trm_label, trm_code, '
+    .'concat(trm_OriginatingDBID, \'-\', trm_IDInOriginatingDB) as trm_conceptid, trm_parenttermid from defTerms where trm_ID = '.$enum_id);
     if($ress){
         $relval = $ress->fetch_assoc();
 
         $get_param = mb_strtolower($enum_param_name, 'UTF-8');
 
         // If trm_label then construct is: "branch_trm_label. ... .leaf_term_label", ignore root label
-        if(strcasecmp($get_param, 'label') == 0 && $relval['trm_ParentTermID'] > 0 && $relval['trm_label'] != null){
+        if(strcasecmp($get_param, 'label') == 0 && @$relval['trm_parenttermid'] > 0 && $relval['trm_label'] != null){
 
-            $trm_id = @$relval['trm_ParentTermID'];
+            $trm_id = @$relval['trm_parenttermid'];
             $ret = @$relval['trm_label'];
 
             while(1){
