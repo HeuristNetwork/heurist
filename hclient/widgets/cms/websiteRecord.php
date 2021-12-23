@@ -119,7 +119,6 @@ loads main page for logo, icon, banner, style
 
 */
 //print 'SORRY DEBUG in PROGRESS<br>';
-$edit_ActivateEditor =(@$_REQUEST['edit']==2); //use new CMS editor and open it once
 $edit_OldEditor = (@$_REQUEST['edit']==1);
 
 $system->defineConstants();
@@ -196,8 +195,6 @@ if(!$hasAccess){
     exit();
 } 
 
-//$edit_ActivateEditor = (@$_REQUEST['edit']==2); //use new CMS editor and open it once
-//$edit_OldEditor = (@$_REQUEST['edit']==1);
 $showWarnAboutPublic = !$edit_OldEditor && ($rec['rec_NonOwnerVisibility'] != 'public');
 
 $hasAccess = ($system->is_admin() || $system->is_member($rec['rec_OwnerUGrpID']));
@@ -266,7 +263,8 @@ window.hWin.HEURIST4.msg.showMsgDlg(
 //-----------------------
 
 if(!($rec['rec_RecTypeID']==RT_CMS_HOME || $isWebPage)){
-    $message = 'Record #'.$rec_id.' is not allowed record type. Expecting Website Home Page or Standalone Web Page';
+    $message = 'Record #'.$rec_id.' is not allowed record type. '
+                    .'Expecting Website Home Page or Standalone Web Page';
     include ERROR_REDIR;
     exit();
 }                

@@ -78,7 +78,7 @@
 &lt;/div&gt;</detail>
 <detail conceptID="99-948" name="Keywords" id="914" basename="CMS Keywords">Search, Filter, Facets, Facet search, Advanced search, Dynamic search</detail>
 <detail conceptID="99-952" name="Show page title (override global setting)" id="920" basename="Show page title" termID="5444" termConceptID="2-532" ParentTerm="Flag (yes, no, unknown)">Yes</detail>
-<detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6253" termConceptID="2-6253" ParentTerm="Type of web page /menu">Menu + page in Heurist CMS</detail>
+<detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6254" termConceptID="2-6254" ParentTerm="Type of web page /menu">Standalone Web Page</detail>
 <reversePointer id="912" conceptID="99-742" basename="CMS Menus" name="Top level menus">63</reversePointer>
 <reversePointer id="912" conceptID="99-742" basename="CMS Menus" name="Top level menus">190</reversePointer>
 </record>

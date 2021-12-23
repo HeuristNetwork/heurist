@@ -1,5 +1,5 @@
 /*
-* editCMS.js - loads websiteRecord.php in edit mode
+* hLayoutMgr.js - web page generator based on json configuration
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

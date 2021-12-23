@@ -56,7 +56,8 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var init_page_record_id=<?php echo $open_page_on_init; ?>;
     var current_page_id = 0;
     var _IS_NEW_CMS_EDITOR = <?php echo $_is_new_cms_editor; ?>;
-    var isCMS_active = <?php echo $edit_ActivateEditor?$edit_ActivateEditor:'false'; ?>;
+    var isCMS_active = <?php echo (@$_REQUEST['edit']?'true':'false'); ?>; //use new CMS editor and open it onc
+    var isCMS_InHeuristUI = <?php echo (@$_REQUEST['edit']==2 ?'true':'false'); ?>;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
 </script>
     
@@ -423,7 +424,7 @@ if($site_css!=null){
             function __loadPageContent(){
 
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
-                
+
                 if(isCMS_active){
                     $('#btnOpenCMSeditor').hide();
                     if(!editCMS_instance2) editCMS_instance2 = editCMS2();

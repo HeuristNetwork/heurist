@@ -625,6 +625,7 @@ public static function importRecords($filename, $params){
     $rec_ids_details_empty = array();
     $resource_notfound = array();
     
+    $home_page_id = 0;
     $page_id_for_blog = 0; //for cms init find record with DT_EXTENDED_DESCRIPTION=='BLOG TEMPLATE'
     
     $data = self::readDataFile( $filename );
@@ -1148,7 +1149,7 @@ EOD;
                        if(is_array($value)){
                            $value = $value['id'];    
                        }
-                       if(strpos($value,'H-ID-')===0){
+                       if(strpos($value,'H-ID-')===0){ //there is such id in target
                            $value = substr($value,5);
                            
                            if($recid_already_checked[$value]){
@@ -1156,7 +1157,7 @@ EOD;
                            }else
                            if(is_numeric($value) && $value>0){
                                //check existence
-                               $is_found = (mysql__select_value(
+                               $is_found = (mysql__select_value($mysqli,
                                         'select rec_ID from Records where rec_ID='
                                         .$value)>0);
                                if($is_found){
@@ -1239,6 +1240,9 @@ EOD;
             
             if($is_blog_record){
                 $page_id_for_blog = $new_rec_id;
+            }
+            if($record['RecTypeID']==RT_CMS_HOME){
+                $home_page_id = $new_rec_id;
             }
             
             $execution_counter++;
@@ -1401,6 +1405,7 @@ EOD;
                              'count_updated'=>$cnt_updated,
                              'cnt_exist'=>count($ids_exist), //such record already exists
                              'details_empty'=>$rec_ids_details_empty, 
+                             'home_page_id'=>$home_page_id,
                              'page_id_for_blog'=>$page_id_for_blog,
                              'resource_notfound'=>$resource_notfound  ); //if value is H-ID-nnn
                 if(count($records_corr)<1000){

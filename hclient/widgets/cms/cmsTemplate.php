@@ -148,7 +148,7 @@ default content consists of
         
     #main-content-container > #main-content - target the content of particular page will be loaded  
 */
-if($isWebPage){
+if($isWebPage){ //set in websiteRecord.php 
 //WEB PAGE - EMBED
 ?>
 <div class="ent_wrapper">

@@ -403,8 +403,8 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
              btnDirectEdit.parent().hide();               
         }
         
-        $container.find('textarea').change(_enableSave);
-        $container.find('input').change(_enableSave);
+        $container.find('textarea').on({keypress:_enableSave});
+        $container.find('input').on({keypress:_enableSave});
     }
     
     //

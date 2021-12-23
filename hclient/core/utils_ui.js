@@ -2458,8 +2458,13 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
         if( window.hWin.HEURIST4.util.isNumber( options ) ){
             options = {record_id:options};
         }
-            
-        editCMS(  options ); //see editCMS.js
+        
+        //new cms editor
+        if(true)
+            editCMS_Manager( options );
+        else
+        //old cms editor    
+            editCMS(  options ); //see editCMS.js
     },
 
     //

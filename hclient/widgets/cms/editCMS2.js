@@ -1,5 +1,5 @@
 /*
-* editCMS.js - loads websiteRecord.php in edit mode
+* editCMS2.js - CMS editor
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -37,6 +37,7 @@ var editCMS_instance2 = null;
 //  page_cache
 //  home_page_record_id
 //  current_page_id
+//  isCMS_InHeuristUI
 
 //
 // options: record_id, content, container
@@ -61,6 +62,7 @@ function editCMS2(){
         
     var page_was_modified = false;
     var delay_onmove = 0, __timeout = 0;
+    var isWebPage = false;
     
     var current_edit_mode = 'page', //or website
         _editCMS_SiteMenu = null; 
@@ -94,6 +96,10 @@ function editCMS2(){
         // add edit layout - top most ent_wrapper becomes 
         //
         if($(this.document).find('.editStructure').length==0){
+            
+            
+                isWebPage = ($('body').find('#main-menu').length == 0);
+console.log('>>>>'+isWebPage);                
             
                 var new_ele = $('<div class="ui-layout-center"></div>');//.prependTo(body);
                                              
@@ -134,8 +140,11 @@ function editCMS2(){
                             +'<div id="treePage" style="font-size:1.2em;top:43px" class="ent_wrapper">'
                             
                                 +'<div class="treePageHeader ent_header" style="height:85px;font-size:0.8em">'
-                                
-                                    +'<h2 class="truncate"></h2>'
+                                    
+                                    +(isWebPage
+                                    ?('<div style="padding:20px"><a href="#" class="btn-website-edit">'
+                                        +'<span class="ui-icon ui-icon-pencil"/>&nbsp;Configure webpage</a></div>')
+                                    :'<h2 class="truncate"></h2>')
                                     +'<span style="display:inline-block;" class="heurist-helper1">'
                                         +'Drag elements to re-order</span><br>'
                                     +'<span style="display:inline-block;padding:7px 0px" class="heurist-helper1">'
@@ -146,10 +155,12 @@ function editCMS2(){
                                 +'<div class="treePage ent_content" style="top:95px;padding:10px;border-top:1px solid gray;border-bottom:1px solid gray"/>' //treeview - edit page
                                 +'<div class="propertyView ent_content" style="top:45px;padding:10px 0px;border-bottom:1px solid gray;display:none"/>' //edit properties for element border-top:1px solid gray;
                                 
-                                +'<div class="toolbarPage ent_footer" style="padding:10px;font-size:0.9em;text-align:left;">'
+                                +'<div class="toolbarPage ent_footer" style="padding:10px;font-size:0.9em;text-align:center;">'
                                     +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
-                                    +'<button title="Save changes for current page" class="btn-page-save ui-button-action">Save</button>'
-                                    +'<button title="Exit/Close content editor" class="bnt-cms-exit">Close</button>'
+                                    + '<button title="Save changes for current page" class="btn-page-save ui-button-action">Save</button>'
+                                    + (true!==isCMS_InHeuristUI
+                                        ?'<button title="Exit/Close content editor" class="bnt-cms-exit">Close</button>'
+                                        :'')
                                 +'</div>'
                             +'</div>'
                         +'</div></div>').appendTo(body);
@@ -235,6 +246,10 @@ function editCMS2(){
                         //ui.newTab
                     }})
                     .addClass('ui-heurist-publish');
+                    
+                    if(isWebPage){
+                        _tabControl.find('.ui-tabs-tab[aria-controls="treeWebSite"]').hide();
+                    }
 
                     if(true){ // this.usrPreferences.structure_closed==0, only if panel is closed by default
 

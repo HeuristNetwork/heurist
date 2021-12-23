@@ -145,8 +145,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             request.notes = null; //unset to reduce traffic
         }
 
-        //remove remark to debug 
-        //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        //set d=0 and c=0 to disable debug  http://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm
+        request.DBGSESSID='425944380594800002;d=1,p=0,c=1';
 
         var url = that.baseURL+"hsapi/controller/"+action+".php"; //+(new Date().getTime());
         
@@ -1577,7 +1577,10 @@ var fin_time = new Date().getTime() / 1000;
             doRequest:function(request, callback){
                 //todo - verify basic params
                 request['request_id'] = window.hWin.HEURIST4.util.random();
-                //request['DBGSESSID'] = '424657986609500001;d=1,p=0,c=0';  //DEBUG parameter
+                
+                //set d and c=0 to disable debug  http://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm
+                request.DBGSESSID='425944380594800002;d=1,p=0,c=1';
+                
                 _callserver('entityScrud', request, callback);
             },
 
@@ -2104,8 +2107,6 @@ var fin_time = new Date().getTime() / 1000;
         //
         //
         , doImportAction: function(request, callback){
-            //if(request) request.a = 'svs_delete';
-            //request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
             _callserver('importController', request,  function(response){_triggerRecordUpdateEvent(response, callback);});
         }
 
