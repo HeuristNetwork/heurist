@@ -622,7 +622,7 @@ public static function importRecords($filename, $params){
     $cnt_ignored = 0;
     $ids_exist = array();
     $rec_ids_details_empty = array();
-    $resource_notfound = array();
+    $resource_notfound = array();  //target id, source id, field name, value
     
     $home_page_id = 0;
     $page_id_for_blog = 0; //for cms init find record with DT_EXTENDED_DESCRIPTION=='BLOG TEMPLATE'
@@ -755,6 +755,7 @@ EOD;
         
         $def_dts  = $defs['detailtypes']['typedefs'];
         $idx_type = $def_dts['fieldNamesToIndex']['dty_Type'];
+        $idx_name = $def_dts['fieldNamesToIndex']['dty_Name'];
         $def_rst  = $defs['rectypes']['typedefs'];
         $idx_parent = $def_rst['dtFieldNamesToIndex']['rst_CreateChildIfRecPtr'];
         
@@ -1163,9 +1164,7 @@ EOD;
                                    $recid_already_checked[]  = $value;
                                    $resourse_id = $value;    
                                }else{
-                                    if(!in_array($value, $resource_notfound)){
-                                        $resource_notfound[] = $value;
-                                    }
+                                   $resource_notfound[] = array(0, $record_src['rec_ID'], $def_field[$idx_name], 'H-ID-'.$value);
                                }
                            }
 
@@ -1325,6 +1324,12 @@ EOD;
             }
             
             if(!$is_rollback){
+                
+                //set target id for $resource_notfound
+                foreach ($resource_notfound as $idx=>$item){
+                    $resource_notfound[$idx][0] = @$records_corr[$item[1]];
+                }
+                
                 //update resource fields with new record ids
                 foreach ($resource_fields as $src_recid=>$fields){  //src recid => dty ids
 
@@ -1346,9 +1351,9 @@ EOD;
                                     $query = 'DELETE FROM recDetails '
                                             .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
                                             .' AND dtl_Value='.$old_value;
-                                    if(!in_array($old_value, $resource_notfound)){
-                                        $resource_notfound[] = $old_value;
-                                    }
+                                            
+                                    $resource_notfound[] = array($trg_recid, $src_recid, 
+                                            $def_dts[$fieldtype_id]['commonFields'][$idx_name], $old_value);
                                 }
                                 if($query!=null){
                                     $ret = mysql__exec_param_query($mysqli, $query, null);

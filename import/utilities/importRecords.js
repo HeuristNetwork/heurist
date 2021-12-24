@@ -579,11 +579,32 @@ function hImportRecords(_max_upload_size) {
                             +response.data.count_updated+'  records have been updated.<br>'
                             +(response.data.count_ignored>0
                               ?(response.data.count_ignored+'  records have been ignored - record type not determined.<br>')
-                              :'')
-                            +(response.data.resource_notfound && response.data.resource_notfound.length>0
-                              ?(response.data.resource_notfound.length+' resource records not found: '
-                                    +response.data.resource_notfound.join(',')+ '<br>')
                               :'');
+                              
+                        if(response.data.resource_notfound && response.data.resource_notfound.length>0){
+
+                            var mdata = response.data.resource_notfound;
+                            var sList = '';
+                            var rec_ids = [];
+                            
+                            sList = sList + '<tr><td>ID in source</td><td>Record ID</td><td>Field</td><td>Value</td></tr>'
+                            for(var i=0; i<mdata.length; i++){
+                                sList = sList + '<tr><td>'+mdata[i][1]+'</td><td>'+mdata[i][0]
+                                     +'</td><td>'+mdata[i][2]+'</td><td>'+mdata[i][3]+'</td></tr>';
+                                if(rec_ids.indexOf(mdata[i][0])<0) rec_ids.push(mdata[i][0]);
+                            }
+                            
+                            sMsg = '<span class="ui-state-error">'+rec_ids.length 
+                                + ' records have pointers which do not point to records in the database</span>' 
+                                + '<div style="padding:10px">'
+                                + '<a href="#" onclick="{ $(event.target).hide(); $(\'#missed_pointers\').show();}">see list</a>'
+                                + '&nbsp;&nbsp;&nbsp;&nbsp;<a href="'
+                                + window.hWin.HAPI4.baseURL +  '?db=' + window.hWin.HAPI4.database+'&q=ids:' + rec_ids.join(',')
+                                +'" target="_blank">see records as search</a></div>'
+                                + '<div style="display:none" id="missed_pointers"><span class="heurist-helper3">Note: existing records referenced by their Heurist record IDs must be specified in the form H-ID-nnn, otherwise the value is taken as a reference to the ID of a record within the XML file you are importing, specified by the <id> tag.</span><br><table>'
+                                + sList + '</table></div>';
+                        }
+                              
                         if(response.data.details_empty && response.data.details_empty.length>0){
                             sMsg =  sMsg + (response.data.details_empty.length+' source records with empty details: '
                                     +response.data.details_empty.join(',')+ '<br>')
