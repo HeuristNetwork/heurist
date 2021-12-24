@@ -10,7 +10,7 @@
 * @version     4.0
 */
 
-// @todo  move all session routines to csvSession.php
+// @todo  move all session routines to csvSession.php ?
 // all parse routines to csvParser.php
     /*
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -221,7 +221,7 @@ if(!$system->init(@$_REQUEST['db'])){
             
             //update record types from remote database
             $res = ImportHeurist::importDefintions(@$_REQUEST['filename'], @$_REQUEST['session']);
-            $need_compress = true;
+            //$need_compress = true;
             
         }else if($action=='import_records'){
             

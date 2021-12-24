@@ -2107,7 +2107,10 @@ var fin_time = new Date().getTime() / 1000;
         //
         //
         , doImportAction: function(request, callback){
-            _callserver('importController', request,  function(response){_triggerRecordUpdateEvent(response, callback);});
+            _callserver('importController', request,  
+            function(response){
+                        _triggerRecordUpdateEvent(response, callback);
+            });
         }
 
         

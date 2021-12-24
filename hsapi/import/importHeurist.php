@@ -445,13 +445,12 @@ public static function importDefintions($filename, $session_id){
                 self::$system->error_exit(null);  //produce json output and exit script
             }*/
         }else{
-            //need to call refresh clinet side defintions
+            //need to call refresh client side defintions
             $res = 'ok'; //$importDef->getReport(false);
         }
 
 //error_log('report '.(microtime(true)-$time_debug));        
         
-        return $res;
     }
     
     return $res;
@@ -1164,7 +1163,9 @@ EOD;
                                    $recid_already_checked[]  = $value;
                                    $resourse_id = $value;    
                                }else{
-                                   $resource_notfound[] = $value;
+                                    if(!in_array($value, $resource_notfound)){
+                                        $resource_notfound[] = $value;
+                                    }
                                }
                            }
 
@@ -1345,6 +1346,9 @@ EOD;
                                     $query = 'DELETE FROM recDetails '
                                             .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
                                             .' AND dtl_Value='.$old_value;
+                                    if(!in_array($old_value, $resource_notfound)){
+                                        $resource_notfound[] = $old_value;
+                                    }
                                 }
                                 if($query!=null){
                                     $ret = mysql__exec_param_query($mysqli, $query, null);
