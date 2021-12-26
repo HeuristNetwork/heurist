@@ -102,7 +102,7 @@ if(!@$_REQUEST['pwd']){
                         $res = DbUtils::databaseDrop(false, $database_to_delete, $create_arc);    
                         
                         // in case deletion by sysadmin - send email to onwer of deleted database
-                        if(!$is_delete_current_db)
+                        if($res && !$is_delete_current_db)
                         { 
                     $server_name = HEURIST_SERVER_NAME;
                     $email_title = 'Your Heurist database '.$dbname.' has been archived';

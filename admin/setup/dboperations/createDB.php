@@ -22,7 +22,6 @@
 require_once(dirname(__FILE__).'/../../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/utils_file.php');
-require_once(dirname(__FILE__).'/../../../admin/structure/import/importDefintions.php');
 require_once('welcomeEmail.php');
 
 header('Content-type: text/javascript');
@@ -153,48 +152,17 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             
             
         }else if(true)  { //set to false to debug workflow without actual db creation
-            
-            $templateFileName = HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt";
-            $templateFoldersContent = 'NOT DEFINED'; //it is used for tempalate database only
 
-            //check template
-            if(!file_exists($templateFileName)){
-                $system->addError(HEURIST_SYSTEM_CONFIG, 
-                        'Template database structure file '.$templateFileName.' not found');
+            $res = DbUtils::databaseCreateFull($database_name_full, $user_record);
+
+            if(is_bool($res) && $res===false){
                 print json_encode($system->getError());
                 exit();
-            }            
-
-            //create empty database
-            if(!DbUtils::databaseCreate($database_name_full)){
-                print json_encode($system->getError());
-                exit();
-            }
+            }else if(is_array($res) && count($res) > 0){
             
-            //switch to new database            
-            mysql__usedatabase( $mysqli, $database_name_full);  
-
-            $idef = new ImportDefinitions();
-            $idef->initialize( $mysqli );
-
-            if(!$idef->doImport( $templateFileName )) {
+                // Catch if db root directory or any sub directory couldn't be created    
+                $warnings = $res;
                 
-                $system->addError(HEURIST_SYSTEM_CONFIG, 
-                    'Error importing core definitions from coreDefinitions.txt '
-                    .' for database '.$database_name_full.'<br>'
-                    .'Please check whether this file or database is valid; '.CONTACT_HEURIST_TEAM.' if needed');
-                    
-                mysql__drop_database( $mysqli, $database_name_full );
-                
-                print json_encode($system->getError());
-                exit();
-            }
-
-            $warnings = DbUtils::databaseCreateFolders($database_name_full);
-            
-            if(!is_array($warnings)) $warnings = array();
-            else if(count($warnings) > 0){ // Catch if db root directory or any sub directory couldn't be created
-
                 mysql__drop_database($mysqli, $database_name_full);
 
                 if(count($warnings) == 2 && $warnings['revert']){
@@ -217,42 +185,6 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             }
 
 //@TODO                createElasticIndex($database_name_full); // All Elastic methods use the database prefix.
-
-/*
-        if ($warnings > 0) {
-            echo "<h2>Please take note of $warnings above</h2>";
-            echo "You must create the folders indicated or else navigation tree, uploads, icons, templates, publishing, term images etc. will not work<br>";
-            echo "If upload folder is created but icons and template folders are not, look at file permissions on new folder creation";
-        }
-*/
-
-            if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){ //override content of setting folders with template database files - rectype icons, dashboard icons, smarty templates etc
-                $upload_root = $system->getFileStoreRootFolder();
-                unzipArchive($templateFoldersContent, $upload_root.$database_name.'/');    
-            }            
-            
-            //update owner in new database
-            $user_record['ugr_ID'] = 2;
-            $user_record['ugr_NavigationTree'] = '"bookmark":{"expanded":true,"key":"root_1","title":"root","children":[{"folder":false,"key":"_1","title":"Recent changes","data":{"url":"?w=bookmark&q=sortby:-m after:\"1 week ago\"&label=Recent changes"}},{"folder":false,"key":"_2","title":"All (date order)","data":{"url":"?w=bookmark&q=sortby:-m&label=All records"}}]},"all":{"expanded":true,"key":"root_2","title":"root","children":[{"folder":false,"key":"_3","title":"Recent changes","data":{"url":"?w=all&q=sortby:-m after:\"1 week ago\"&label=Recent changes"}},{"folder":false,"key":"_4","title":"All (date order)","data":{"url":"?w=all&q=sortby:-m&label=All records"}}]}';
-//,{"folder":true,"key":"_5","title":"Rules","children":[{"folder":false,"key":"12","title":"Person > anything they created","data":{"isfaceted":false}},{"folder":false,"key":"13","title":"Organisation > Assoc. places","data":{"isfaceted":false}}]}
-            $user_record['ugr_Preferences'] = '';
-            
-            $ret = mysql__insertupdate($mysqli, 'sysUGrps', 'ugr', $user_record);
-            if($ret!=2){
-                array_push($warnings, 'Cannot set owner user. '.$ret);                
-            }
-           
-            //add default saved searches and tree
-            $navTree = '{"expanded":true,"key":"root_3","title":"root","children":[{"expanded":true,"folder":true,"key":"_1","title":"Save some filters here ...","children":[]}]}';
-
-//{"key":"28","title":"Organisations","data":{"isfaceted":false}},{"key":"29","title":"Persons","data":{"isfaceted":false}},{"key":"30","title":"Media items","data":{"isfaceted":false}}
-                        
-            $ret = mysql__insertupdate($mysqli, 'sysUGrps', 'ugr', array('ugr_ID'=>1, 'ugr_NavigationTree'=>$navTree ));
-            if($ret!=1){
-                array_push($warnings, 'Cannot set navigation tree for group 1. '.$ret);                
-            }
-            
-
 /* register in cetral index
             $mysqli->query('insert into `Heurist_DBs_index`.`sysIdentifications` select "'
                     .$database_name_full.'" as dbName, s.* from `sysIdentification` as s');
