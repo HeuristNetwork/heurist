@@ -1238,11 +1238,13 @@ EOD;
             $records_corr[$record_src['rec_ID']] = $new_rec_id; 
             $keep_rectypes[$new_rec_id] = $record['RecTypeID'];
             
-            if($is_blog_record){
-                $page_id_for_blog = $new_rec_id;
-            }
-            if($record['RecTypeID']==RT_CMS_HOME){
-                $home_page_id = $new_rec_id;
+            if($is_cms_init){
+                if($is_blog_record){
+                    $page_id_for_blog = $new_rec_id;
+                }
+                if($record['RecTypeID']==RT_CMS_HOME){
+                    $home_page_id = $new_rec_id;
+                }
             }
             
             $execution_counter++;

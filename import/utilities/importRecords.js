@@ -601,7 +601,7 @@ function hImportRecords(_max_upload_size) {
                                 + '&nbsp;&nbsp;&nbsp;&nbsp;<a href="'
                                 + window.hWin.HAPI4.baseURL +  '?db=' + window.hWin.HAPI4.database+'&q=ids:' + rec_ids.join(',')
                                 +'" target="_blank">see records as search</a></div>'
-                                + '<div style="display:none" id="missed_pointers"><span class="heurist-helper3">Note: existing records referenced by their Heurist record IDs must be specified in the form H-ID-nnn, otherwise the value is taken as a reference to the ID of a record within the XML file you are importing, specified by the <id> tag.</span><br><table>'
+                                + '<div style="display:none" id="missed_pointers"><span class="heurist-helper3">Note: existing records referenced by their Heurist record IDs must be specified in the form H-ID-nnn, otherwise the value is taken as a reference to the ID of a record within the XML file you are importing, specified by the &lt;id&gt; tag.</span><br><table>'
                                 + sList + '</table></div>';
                         }
                               

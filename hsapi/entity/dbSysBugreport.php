@@ -245,6 +245,7 @@ class DbSysBugreport extends DbEntityBase
     //
     private function _prepareEmail($fields){
     
+//error_log('_prepareEmail: '.session_id().'   '.@$_SESSION["captcha_code"]);        
         //1. verify captcha
         if (@$fields['captcha'] && @$_SESSION["captcha_code"]){
             

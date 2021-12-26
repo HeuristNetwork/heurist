@@ -418,7 +418,7 @@ $.widget( "heurist.emailForm", {
             };
             
             window.hWin.HEURIST4.msg.bringCoverallToFront(this._element_form);
-            
+         
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
