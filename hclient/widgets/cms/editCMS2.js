@@ -1453,6 +1453,10 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             
             
         }
+        else if(widget_id=='text_1'){
+
+            new_ele = {name:'Content', type:'text', content:"<p>Lorem ipsum dolor sit amet ...</p>"};
+        }    
         else if(widget_id=='text_2'){
             
             new_ele = {name:'2 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
@@ -1534,6 +1538,9 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             }
         }
 
+        if($.isArray(new_element_json) && new_element_json.length==1){
+            new_element_json = new_element_json[0];
+        }
 
         parent_children.push(new_element_json);
         layoutMgr.layoutInitKey(parent_children, parent_children.length-1);

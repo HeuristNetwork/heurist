@@ -31,11 +31,15 @@ function editCMS_SelectElement( callback ){
         
     grp1:{name:'Content', description:'Content layouts or templates', is_header:true},
         
-        text_media:{name:'Text with media', description:'media and text '},
+        //text_media:{name:'Text with media', description:'media and text '},
+        text_1:{name:'Simple text box', description:''},
         text_2:{name:'Text in 2 columns', description:'2 columns layout'},
-        group_2:{name:'Groups as 2 columns', description:'2 columns layout'},
         text_3:{name:'Text in 3 columns', description:'3 columns layout'},
-        text_banner:{name:'Text with banner', description:'Text over background image'},
+        //group_2:{name:'Groups as 2 columns', description:'2 columns layout'},
+        text_banner:{name:'Text on banner', description:'Text over background image'},
+        
+    grp4:{name:'Composite Pages', description:'Content layouts or templates', is_header:true},
+        tpl_page: {name:'Simple Page', description:'Simple blank page'},
         tpl_discover: {name:'Discover (filters/results/map)', description:'3 columns layout'},
         tpl_blog: {name:'Blog', description:''},
 

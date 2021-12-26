@@ -201,7 +201,7 @@ function hLayoutMgr(){
             }
         }else if(layout.appid=='heurist_Map'){
             if(!layout.css['height']){
-                layout.css['height'] = '100%';
+                //layout.css['height'] = '100%';
             }
         }
 

@@ -1,4 +1,4 @@
-[{"name":"Discover","type":"group","children":
+{"name":"Discover","type":"group","children":
     [{"appid":"heurist_SearchTree","name":"Saved filters",
         "css":{"position":"relative","minWidth":200,"minHeight":300,"flex":" 1 150px"},
         "options":{"allowed_UGrpID":"4", 
@@ -21,4 +21,4 @@
         "css":{"position":"relative","minWidth":150,"minHeight":300,"flex":"2 1 300px"},
         "options":{"search_realm":"sr3"}}],
 "folder":true,
-"css":{"border-style":"none","display":"flex","width":"100%","height":"500px"}}]
+"css":{"border-style":"none","display":"flex","width":"100%","height":"500px"}}

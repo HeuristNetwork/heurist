@@ -247,7 +247,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             function __setDim(name){
                 var ele = cont.find('input[name="'+name+'"]');
                 var val = ele.val();
-                if(val!='' || parseInt(val)>0){
+                if( (val!='' || val!='auto') && parseInt(val)>0){
                     if(!(val.indexOf('%')>0 || val.indexOf('px')>0)){
                         val = val + 'px';
                     }
@@ -403,15 +403,15 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
              btnDirectEdit.parent().hide();               
         }
         
-        $container.find('textarea').on({keypress:_enableSave});
-        $container.find('input').on({keypress:_enableSave});
+        $container.find('textarea').on({keyup:_enableSave});
+        $container.find('input').on({keyup:_enableSave});
     }
     
     //
     //
     //
     function _enableSave(){
-console.log(';enabe');
+console.log(';enable');
         window.hWin.HEURIST4.util.setDisabled($container.find('.btn-ok'), false);
     }
     

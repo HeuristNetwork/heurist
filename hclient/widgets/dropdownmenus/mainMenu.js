@@ -920,10 +920,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     }
                 });
 
-        }else if(action == "menu-cms-embed"){
+        }else if(action == "menu-cms-embed"){ //create new standalone webpage
 
             window.hWin.HEURIST4.ui.showRecordActionDialog('embedDialog', 
-                                {cms_popup_dialog_options:popup_dialog_options, path: 'widgets/cms/' });
+                                {cms_popup_dialog_options:popup_dialog_options, path: 'widgets/cms/',title:'Web Page' });
             
         }else if(action == "menu-database-properties"){
 

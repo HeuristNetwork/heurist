@@ -510,7 +510,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                     ,[{key:'',title:'Standard popup template'}], $selectMapTemplate.attr('data-template'));
                     //,{key:'none',title:'Disable popup'}
 
-                var $selectBaseMap = dele.find('select[name="map_basemap"]');
+                var $selectBaseMap = $dlg.find('select[name="map_basemap"]');
 
                 var baseMapOptions = [
                     {key:'OpenStreetMap', title:'OpenStreetMap'},
