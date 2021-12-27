@@ -209,7 +209,7 @@ console.log('>>>>'+isWebPage);
                                 }else{
 
                                     var margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
-                                    $('<span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Page structure and styling</span>').appendTo(tog);
+                                    $('<span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content</span>').appendTo(tog);
                                 }
                             },
                             togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-'+(options.editor_pos=='west'?'w':'e')+'"></div>',
@@ -261,7 +261,7 @@ console.log('>>>>'+isWebPage);
                         }else{
 
                             var margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
-                            $('<span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Page structure and styling</span>').appendTo(tog);
+                            $('<span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content</span>').appendTo(tog);
                         }
                     }
         }
@@ -447,7 +447,7 @@ console.log('>>>>'+isWebPage);
                 $dlg_pce = window.hWin.HEURIST4.msg.showMsgDlg(
 '<p>Heurist\'s CMS editor has been upgraded to a new system which is both much easier and much more powerful than the original editor and requires an entirely new data format. Heurist will convert most pages automatically to the new editor.</p>'
  
-+'<p>Unfortunately if this page uses complex formatting which we cannot be sure of converting correctly through this automatic process. Please email support at HeuristNetwork dot org with the name of your database and we will update the page manually to the new format.</p>'
++'<p>Unfortunately this page uses complex formatting which we cannot be sure of converting correctly through this automatic process. </p>'
  
 +'<p>In the meantime you can continue to edit the page using the old web page editor, but please note this editor will be DISCONTINUED at the end of February 2022.</p>',btns,'New website editor'); 
                  return;
