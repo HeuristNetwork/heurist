@@ -108,9 +108,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             
             $user_record = $_REQUEST;
             
-            $s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
-            $salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
-            $user_record['ugr_Password'] = crypt($user_record['ugr_Password'], $salt);
+            $user_record['ugr_Password'] = hash_it( $user_record['ugr_Password'] );
             
         }else{ //get user parameters from logged user of current database
             

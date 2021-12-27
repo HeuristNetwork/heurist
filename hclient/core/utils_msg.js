@@ -888,7 +888,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         .appendTo($container);
 
                 frame_container = $('<div>').addClass('ent_content_full')
-                        .css({'top':'37px','bottom':'1px'})
+                        .css({'top':'37px','bottom':'1px', 'overflow':'hidden'})
                         .appendTo($container);
 
                 

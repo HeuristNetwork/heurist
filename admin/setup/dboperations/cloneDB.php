@@ -358,28 +358,23 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         echo_flush ('<script>document.getElementById("wait_p").style.display="none"</script><p style="padding-left:0px">Structure created OK</p>');
     }
     
-    // Connect to new database and  Remove initial values from empty database
-    mysql__usedatabase($mysqli, $targetdbname_full);
-    $mysqli->query('delete from sysIdentification where 1');
-    $mysqli->query('delete from defLanguages where 1');
-    
     if($isCloneTemplate){
         $source_database = $templateddb;
+        
         //copy current user from current HEURIST_DBNAME_FULL to cloned database as user#2
-        $mysqli->query('update sysUGrps u1, '.HEURIST_DBNAME_FULL.'.sysUGrps u2 SET '
-.'u1.ugr_Type=u2.ugr_Type ,u1.ugr_Name=u2.ugr_Name ,u1.ugr_LongName=u2.ugr_LongName ,u1.ugr_Description=u2.ugr_Description '
-.',u1.ugr_Password=u2.ugr_Password ,u1.ugr_eMail=u2.ugr_eMail, u1.ugr_FirstName=u2.ugr_FirstName ,u1.ugr_LastName=u2.ugr_LastName '
-.',u1.ugr_Department=u2.ugr_Department ,u1.ugr_Organisation=u2.ugr_Organisation ,u1.ugr_City=u2.ugr_City '
-.',u1.ugr_State=u2.ugr_State ,u1.ugr_Postcode=u2.ugr_Postcode ,u1.ugr_Interests=u2.ugr_Interests ,u1.ugr_Enabled=u2.ugr_Enabled '
-.',u1.ugr_MinHyperlinkWords=u2.ugr_MinHyperlinkWords '
-.',u1.ugr_IsModelUser=u2.ugr_IsModelUser ,u1.ugr_IncomingEmailAddresses=u2.ugr_IncomingEmailAddresses '
-.',u1.ugr_TargetEmailAddresses=u2.ugr_TargetEmailAddresses ,u1.ugr_URLs=u2.ugr_URLs,u1.ugr_FlagJT=u2.ugr_FlagJT '
-        .' where u1.ugr_ID=2 AND u2.ugr_ID='.$user_id);
+        $mysqli->query('update '.$targetdbname_full.'.sysUGrps u1, '.HEURIST_DBNAME_FULL.'.sysUGrps u2 SET '
+            .'u1.ugr_Type=u2.ugr_Type ,u1.ugr_Name=u2.ugr_Name ,u1.ugr_LongName=u2.ugr_LongName ,u1.ugr_Description=u2.ugr_Description '
+            .',u1.ugr_Password=u2.ugr_Password ,u1.ugr_eMail=u2.ugr_eMail, u1.ugr_FirstName=u2.ugr_FirstName ,u1.ugr_LastName=u2.ugr_LastName '
+            .',u1.ugr_Department=u2.ugr_Department ,u1.ugr_Organisation=u2.ugr_Organisation ,u1.ugr_City=u2.ugr_City '
+            .',u1.ugr_State=u2.ugr_State ,u1.ugr_Postcode=u2.ugr_Postcode ,u1.ugr_Interests=u2.ugr_Interests ,u1.ugr_Enabled=u2.ugr_Enabled '
+            .',u1.ugr_MinHyperlinkWords=u2.ugr_MinHyperlinkWords '
+            .',u1.ugr_IsModelUser=u2.ugr_IsModelUser ,u1.ugr_IncomingEmailAddresses=u2.ugr_IncomingEmailAddresses '
+            .',u1.ugr_TargetEmailAddresses=u2.ugr_TargetEmailAddresses ,u1.ugr_URLs=u2.ugr_URLs,u1.ugr_FlagJT=u2.ugr_FlagJT '
+                    .' where u1.ugr_ID=2 AND u2.ugr_ID='.$user_id);
         
     }else{
+        //current database
         $source_database = HEURIST_DBNAME_FULL;
-        $mysqli->query('delete from sysUsrGrpLinks where 1');
-        $mysqli->query('delete from sysUGrps where ugr_ID>=0');
     }
 
     list($source_database_full, $source_database) = mysql__get_names( $source_database );
@@ -395,38 +390,6 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         return false;
     }
     
-    //cleanup target database to avoid issues with addition of constraints
-
-    //1. cleanup missed trm_InverseTermId
-    $mysqli->query('update defTerms t1 left join defTerms t2 on t1.trm_InverseTermId=t2.trm_ID
-        set t1.trm_InverseTermId=null
-    where t1.trm_ID>0 and t2.trm_ID is NULL');
-    
-    //3. remove missed rl_SourceID and rl_TargetID
-    $mysqli->query('delete FROM recLinks
-        where rl_SourceID is not null
-    and rl_SourceID not in (select rec_ID from Records)');
-
-    $mysqli->query('delete FROM recLinks
-        where rl_TargetID is not null
-    and rl_TargetID not in (select rec_ID from Records)');
-    
-    //4. cleanup orphaned details
-    $mysqli->query('delete FROM recDetails
-        where dtl_RecID is not null
-    and dtl_RecID not in (select rec_ID from Records)');
-    
-    //5. cleanup missed references to uploaded files
-    $mysqli->query('delete FROM recDetails
-        where dtl_UploadedFileID is not null
-    and dtl_UploadedFileID not in (select ulf_ID from recUploadedFiles)');
-
-    //6. cleanup missed rec tags links
-    $mysqli->query('delete FROM usrRecTagLinks where rtl_TagID not in (select tag_ID from usrTags)');
-    $mysqli->query('delete FROM usrRecTagLinks where rtl_RecID not in (select rec_ID from Records)');
-
-    //7. cleanup orphaned bookmarks
-    $mysqli->query('delete FROM usrBookmarks where bkm_RecID not in (select rec_ID from Records)');
 
 /*    
     echo_flush ("<p>DEBUG. Db created without indicies and triggers</p>");
@@ -437,6 +400,19 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     // 4. add contrainsts, procedure and triggers
     echo_flush ("<p><b>Addition of Referential Constraints</b></p>");
     
+    if(DbUtils::databaseCreateConstraintsAndTriggers($targetdbname_full)){
+        echo_flush ('<p style="padding-left:20px">Referential constraints added OK</p>');
+        echo_flush ('<p style="padding-left:20px">Procedures and triggers added OK</p>');
+    }else{
+        DbUtils::databaseDrop( false, $targetdbname_full, false);
+        print '<p><h4>Note: </h4>Cloning failed due to an SQL constraints problem (internal database inconsistency). Please '
+                .CONTACT_HEURIST_TEAM
+                .' and request a fix for this problem - it should be cleaned up even if you don\'t need to clone the database</p>'
+                .$errorScriptExecution;
+         return false;
+    }
+    
+    /*
     if(db_script($targetdbname_full, HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql")){
         echo_flush ('<p style="padding-left:20px">Referential constraints added OK</p>');
     }else{
@@ -455,7 +431,8 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         DbUtils::databaseDrop( false, $targetdbname_full, false);
         print $sHighLoadWarning.$errorScriptExecution;
         return false;
-    }    
+    } 
+    */   
     
     // 5. remove registration info and assign originID for definitions
     $sourceRegID = mysql__select_value($mysqli, 'select sys_dbRegisteredID from sysIdentification where 1');
@@ -473,7 +450,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
     // Index new database for Elasticsearch
     //TODO: Needs error report, trap error and warn or abort clone
-    ElasticSearch::buildAllIndices($targetdbname_full); // ElasticSearch uses full database name including prefix
+    // ElasticSearch::buildAllIndices($targetdbname_full); // ElasticSearch uses full database name including prefix
 
     // Copy the images and the icons directories
     //TODO: Needs error report, trap error and warn or abort clone

@@ -2094,11 +2094,11 @@ $.widget( "heurist.mainMenu6", {
                                 +'<span class="ui-icon ui-icon-help"/>&nbsp;Startup hints</span>' ).click(function(){ that._loadStartHints(null); });					
 
                     that.introductions[section].find('.gs-box')
-                        .css({position:'absolute', left:10, right:10, top:10, 'min-width':700, margin:0}) //,'padding-left':20
+                        .css({position:'absolute', left:'10px', right:'10px', top:'10px', 'min-width':'700px', margin:0}) //,'padding-left':20
                         .show();
                     that.introductions[section].find('.gs-box > div:first').css('margin','23px 0');
                     that.introductions[section].find('.gs-box .ui-heurist-title.header')
-                        .css({position:'absolute', left:160, top:40, right:400, 'max-width':'540px'});
+                        .css({position:'absolute', left:'160px', top:'40px', right:'400px', 'max-width':'540px'});
 
                     $('<div class="gs-box">')
                         .css({position:'absolute', left:10, right:10, top:180, bottom:10, 'min-width':400, overflow: 'auto'})

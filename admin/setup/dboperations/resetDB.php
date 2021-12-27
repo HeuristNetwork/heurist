@@ -20,6 +20,7 @@
 */
 
 define('DEMO_DB', 'hdb_demo');
+define('DEMO_DB_TEMPLATE', 'hdb_demo_template');
 
 require_once(dirname(__FILE__).'/../../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
@@ -33,14 +34,40 @@ $res = false;
 $isSystemInited = $system->init(DEMO_DB);
 
 if($isSystemInited){
-                
-    $user_record = user_getById($system->get_mysqli(), 2);
+        
+    $mysqli = $system->get_mysqli();
+    $user_record = user_getById($mysqli, 2);
         
     $res = DbUtils::databaseDrop(false, DEMO_DB, false);    
                             
     if($res) { 
         
-        $res = DbUtils::databaseCreateFull(DEMO_DB, $user_record);
+        //clone
+        if(true){
+            $res = false;
+            if(DbUtils::databaseCreate(DEMO_DB, 1)){
+                if( DbUtils::databaseClone(DEMO_DB_TEMPLATE, DEMO_DB, false, false, false) ){
+                    if(DbUtils::databaseCreateConstraintsAndTriggers(DEMO_DB)){
+                        
+                        $source_db = substr(DEMO_DB_TEMPLATE, 4);
+                        $target_db = substr(DEMO_DB, 4);
+                        folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_db, HEURIST_FILESTORE_ROOT.$target_db );
+                        $query1 = "update recUploadedFiles set ulf_FilePath='".HEURIST_FILESTORE_ROOT.$target_db.
+                        "/' where ulf_FilePath='".HEURIST_FILESTORE_ROOT.$source_db."/' and ulf_ID>0";
+                        $res1 = $mysqli->query($query1);
+                        
+                        //change user#2 to guest
+                        mysql__insertupdate($mysqli, 'sysUGrps', 'ugr', array('ugr_ID'=>2, 'ugr_Name'=>'guest',
+                                    'ugr_Password' => hash_it( 'guest' ) ) );
+                        
+                        $res = true;
+                    }
+                }
+            }
+        }else{
+            //new empty
+            $res = DbUtils::databaseCreateFull(DEMO_DB, $user_record);
+        }
     }
 }
 

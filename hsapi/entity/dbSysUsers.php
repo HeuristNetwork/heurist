@@ -241,9 +241,8 @@ class DbSysUsers extends DbEntityBase
             }else if(@$this->records[$idx]['ugr_Password']){
 
                 $tmp_password = $this->records[$idx]['ugr_Password'];
-                $s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
-                $salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
-                $this->records[$idx]['ugr_Password'] = crypt($tmp_password, $salt);
+                
+                $this->records[$idx]['ugr_Password'] = hash_it( $tmp_password );
                 $this->records[$idx]['tmp_password'] = $tmp_password;
 
             }

@@ -1698,18 +1698,18 @@ background: #8ea9b9
 }
 .popup_buttons_div{
     position:absolute;
-    bottom:0;left:0px;right:0px;
+    bottom:0px;left:0px;right:0px;
     /*height:1.5em;*/
     text-align: right;
     padding: 4px;
 }
 
-.ent_wrapper{position:absolute;top:0;bottom:0;left:0;right: 0px;overflow:hidden;}
-.ent_header, .ent_footer, .ent_content, .ent_content_full{position:absolute; left:0; right:0;}
-.ent_header{top:0;height:2.2em; padding:0.2em 0.5em;}
+.ent_wrapper{position:absolute;top:0px;bottom:0px;left:0px;right: 0px;overflow:hidden;}
+.ent_header, .ent_footer, .ent_content, .ent_content_full{position:absolute; left:0px; right:0px;}
+.ent_header{top:0px;height:2.2em; padding:0.2em 0.5em;}
 .ent_content{top:2.8em;bottom:3.5em; overflow-y:auto;}
 
-.ent_content_full{position:absolute;top:2.8em;bottom: 0;left:0;right: 1;overflow-y:auto;}
+.ent_content_full{position:absolute;top:2.8em;bottom: 0px;left:0px;right: 1px;overflow-y:auto;}
 .ent_footer{bottom:0px;height:2.6em;}
 
 .ent_wrapper.editor fieldset > div{

@@ -714,7 +714,7 @@ class DbUtils {
     * It is assumed that all tables exist and empty in target db
     *
     * @param mixed $db_source
-    * @param mixed $db_target
+    * @param mixed $db_target - must exist as new empty heurist database created by  databaseCreate($targetdbname_full, 1)
     * @param mixed $verbose
     */
     public static function databaseClone($db_source, $db_target, $verbose, $nodata=false, $isCloneTemplate){
@@ -723,23 +723,35 @@ class DbUtils {
         
         $res = true;
         $mysqli = self::$mysqli;
+        $message = null;
         
         if( !mysql__usedatabase($mysqli, $db_source) ){
+            $message = 'Could not open source database '.$db_source;
             $res = false;
             if($verbose) {
-                echo ("<br/><p>Warning: Could not open source database ".$db_source);
+                $message = '<br/><p>Warning: '.$message.'</p>';
             }
         }else{
             
             if( !mysql__usedatabase($mysqli, $db_target) ){
+                $message = 'Could not open target database '.$db_target;
                 $res = false;
                 if($verbose) {
-                    echo ("<br/><p>Warning: Could not open target database ".$db_target);
+                    $message = '<br/><p>Warning: '.$message.'</p>';
                 }
             }
         }   
 
         if($res){
+            
+                // Remove initial values from empty target database
+                $mysqli->query('delete from sysIdentification where 1');
+                $mysqli->query('delete from defLanguages where 1');
+                
+                if(!$isCloneTemplate){
+                    $mysqli->query('delete from sysUsrGrpLinks where 1');
+                    $mysqli->query('delete from sysUGrps where ugr_ID>=0');
+                }            
                 
                 //$isCloneTemplate
                 $exception_for_clone_template = array('sysugrps','sysusrgrplinks',
@@ -757,7 +769,9 @@ class DbUtils {
                     $mysqli->query("SET foreign_key_checks = 0"); //disable
                     $mysqli->query("SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
 
-                    echo ("<b>Adding records to tables: </b>");
+                    if($verbose) {
+                        echo ("<b>Adding records to tables: </b>");
+                    }
                     while ($table = $tables->fetch_row()) { //loop for all tables
                         $table = $table[0];
                         
@@ -777,15 +791,22 @@ class DbUtils {
                         $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM ".$db_source.".`".$table."`"  );
 
                         if($res){
-                            echo (" > " . $table . ": ".$mysqli->affected_rows . "  ");
+                                if($verbose) {
+                                    echo (" > " . $table . ": ".$mysqli->affected_rows . "  ");
+                                }
                         }else{
-                            if($table=='usrReportSchedule'){
-                                echo ("<br/><p class=\"error\">Warning: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
-                            }else{
-                                echo ("<br/><p class=\"error\">Error: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
-                                $res = false;
-                                break;
-                            }
+                                if($table=='usrReportSchedule'){
+                                    if($verbose) {
+                                        echo ("<br/><p class=\"error\">Warning: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
+                                    }
+                                }else{
+                                    $message = "Unable to add records into ".$table." - SQL error: ".$mysqli->error;
+                                    if($verbose) {
+                                        $message = "<br/><p class=\"error\">Error: $message</p>";
+                                    }
+                                    $res = false;
+                                    break;
+                                }
                         }
 
                         if($table=='recForwarding'){ //remove missed records otherwise we get exception on constraint addition
@@ -811,10 +832,44 @@ class DbUtils {
                     
                     $mysqli->query("SET foreign_key_checks = 1"); //restore/enable foreign indexes verification
 
+                    //cleanup target database to avoid issues with addition of constraints
+
+                    //1. cleanup missed trm_InverseTermId
+                    $mysqli->query('update defTerms t1 left join defTerms t2 on t1.trm_InverseTermId=t2.trm_ID
+                        set t1.trm_InverseTermId=null
+                    where t1.trm_ID>0 and t2.trm_ID is NULL');
+                    
+                    //3. remove missed rl_SourceID and rl_TargetID
+                    $mysqli->query('delete FROM recLinks
+                        where rl_SourceID is not null
+                    and rl_SourceID not in (select rec_ID from Records)');
+
+                    $mysqli->query('delete FROM recLinks
+                        where rl_TargetID is not null
+                    and rl_TargetID not in (select rec_ID from Records)');
+                    
+                    //4. cleanup orphaned details
+                    $mysqli->query('delete FROM recDetails
+                        where dtl_RecID is not null
+                    and dtl_RecID not in (select rec_ID from Records)');
+                    
+                    //5. cleanup missed references to uploaded files
+                    $mysqli->query('delete FROM recDetails
+                        where dtl_UploadedFileID is not null
+                    and dtl_UploadedFileID not in (select ulf_ID from recUploadedFiles)');
+
+                    //6. cleanup missed rec tags links
+                    $mysqli->query('delete FROM usrRecTagLinks where rtl_TagID not in (select tag_ID from usrTags)');
+                    $mysqli->query('delete FROM usrRecTagLinks where rtl_RecID not in (select rec_ID from Records)');
+
+                    //7. cleanup orphaned bookmarks
+                    $mysqli->query('delete FROM usrBookmarks where bkm_RecID not in (select rec_ID from Records)');
+                    
                 }else{
                     $res = false;
+                    $message = 'Cannot get list of table in database '.$db_target;
                     if($verbose) {
-                        echo ("<br/><p class=\"error\">Error: Cannot get list of table in database ".$db_target."</p>");
+                        echo ("<br/><p class=\"error\">Error: $message</p>");
                     }
                 }
 
@@ -824,7 +879,11 @@ class DbUtils {
             }
 
         if(!$res){
-            //$mysqli->rollback();
+            if($verbose) {
+                if($message) echo $message;
+            }else{
+                self::$system->addError(HEURIST_ERROR, $message);
+            }
         }
 
         return $res;
