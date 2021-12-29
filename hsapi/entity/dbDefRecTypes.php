@@ -595,7 +595,10 @@ WHERE
         return $res;
     }   
     
-    
+    // TODO: All of this content is totally duplicated in defRecTypes.json
+    // One or other need to be removed. 
+    //Check first which one is actually being used in case there are some small differences  
+
     private function _readConfig(){
      
         $json = <<<CONFIG
