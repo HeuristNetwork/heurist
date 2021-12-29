@@ -1077,6 +1077,9 @@ $.widget( "heurist.resultList", {
             this._current_view_mode = newmode;
             
             if(newmode=='horizontal'){ // || newmode=='icons_list'){
+            
+                this.div_content.css('overflow-y','hidden');
+                
                 this._on(this.div_content,
                         {'mousewheel':this._recordDivNavigateUpDown
                 /*
@@ -1101,6 +1104,8 @@ $.widget( "heurist.resultList", {
                 }
                 
             }else{
+                this.div_content.css('overflow-y','auto');
+                
                 if(newmode=='list' && this.options.list_mode_is_table){
                     this.div_content.css({'display':'table','width':'100%'});
                 }else{

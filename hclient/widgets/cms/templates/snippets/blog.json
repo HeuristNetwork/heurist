@@ -1,4 +1,4 @@
-{"name":"Blogs","type":"group","children":[
+{"name":"Blogs","type":"group","template":"blog","children":[
     {"appid":"heurist_recordAddButton","name":"Add Blog post",
         "css":{"position":"relative","border-style":"none","padding-left":"20px","display":"block"},
         "options":{"RecTypeID":"7","OwnerUGrpID":"0","NonOwnerVisibility":"viewable","add_record_label":"Add blog post","init_at_once":true}},

@@ -27,8 +27,6 @@ function editCMS_SelectElement( callback ){
 
     var t_components = {
         
-        text:{name:'Simple Text', description:'Simple text wiht header'},
-        
     grp1:{name:'Content', description:'Content layouts or templates', is_header:true},
         
         //text_media:{name:'Text with media', description:'media and text '},
@@ -39,7 +37,7 @@ function editCMS_SelectElement( callback ){
         text_banner:{name:'Text on banner', description:'Text over background image'},
         
     grp4:{name:'Composite Pages', description:'Content layouts or templates', is_header:true},
-        tpl_page: {name:'Simple Page', description:'Simple blank page'},
+        tpl_default: {name:'Simple Page', description:'Simple blank page'},
         tpl_discover: {name:'Discover (filters/results/map)', description:'3 columns layout'},
         tpl_blog: {name:'Blog', description:''},
 
@@ -90,7 +88,7 @@ function editCMS_SelectElement( callback ){
 
     $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
         +"hclient/widgets/cms/editCMS_SelectElement.html?t="+(new Date().getTime()), 
-        buttons, 'Insert component into web page', 
+        buttons, window.hWin.HR('Insert component into web page'), 
         {  container:'cms-add-widget-popup',
             default_palette_class: 'ui-heurist-publish',
             width: 600,
@@ -138,7 +136,7 @@ function editCMS_SelectElement( callback ){
                     selected_name = sel.options[sel.selectedIndex].text;
                 });
 
-                sel.val('text').change();
+                sel.val('text_1').change();
                 selected_element = 'text';
 
             }

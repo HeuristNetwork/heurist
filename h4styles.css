@@ -1176,7 +1176,8 @@ div.div-result-list-content.icons_list{
 }
 /* horizontal */
 .horizontal .div-result-list-content{
-    overflow: hidden auto;
+    overflow-y: hidden;
+    overflow-x: auto;
 }
 .horizontal::-webkit-scrollbar-thumb{
     background-color: lightblue;
@@ -1185,7 +1186,7 @@ div.div-result-list-content.icons_list{
 .horizontal.div-result-list-content > div{
     display: table;
     border-spacing: 2px;
-    padding-top: 10px;
+    padding-top: 5px;
 }
 
 .horizontal .recordDiv {

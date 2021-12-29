@@ -94,7 +94,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
 
             function __openWidgetCfg(){
                 editCMS_WidgetCfg(l_cfg, null, function(new_cfg){
-                    //addign new option into 
+                    //add new options 
                     if(JSON.stringify(l_cfg.options) != JSON.stringify(new_cfg)){
                         _enableSave();    
                     }
@@ -405,13 +405,13 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         
         $container.find('textarea').on({keyup:_enableSave});
         $container.find('input').on({keyup:_enableSave});
+        $container.find('input').on({change:_enableSave});
     }
     
     //
     //
     //
     function _enableSave(){
-console.log(';enable');
         window.hWin.HEURIST4.util.setDisabled($container.find('.btn-ok'), false);
     }
     
@@ -536,6 +536,10 @@ console.log(';enable');
                         click: function() { 
                             var newval = codeEditor.getValue();
 
+                            if(l_cfg.content != newval){
+                                _enableSave();                
+                            }
+                            
                             element.html(newval);    
                             l_cfg.content = newval;
                             element_cfg.content = newval;
@@ -555,9 +559,7 @@ console.log(';enable');
             buttons: codeEditorBtns,
             //h6style_class: 'ui-heurist-publish',
             default_palette_class: 'ui-heurist-publish'
-            /*close: function(){
-                //_initWebSiteEditor(was_something_edited); 
-            }*/
+            //close: function(){}
         });                 
         
         
@@ -619,6 +621,8 @@ console.log(';enable');
                         
                         sUrl = 'url(\'' + sUrl + '\')';
                         $container.find('input[name="background-image"]').val(sUrl);
+                        
+                        _enableSave();
 
                     }
 

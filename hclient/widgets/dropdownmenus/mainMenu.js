@@ -855,9 +855,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             );
 
 
-        }else if(action == "menu-cms-edit"){
+        }else if(action && action.indexOf('menu-cms-edit')===0){
 
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+                
+                popup_dialog_options.is_new_editor = (action == 'menu-cms-edit-new');
                 
                 if(popup_dialog_options.record_id>0){
                     

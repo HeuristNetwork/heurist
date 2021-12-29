@@ -2460,7 +2460,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
         }
         
         //new cms editor
-        if(true)
+        if(options.is_new_editor===true)
             editCMS_Manager( options );
         else
         //old cms editor    
