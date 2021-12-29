@@ -33,6 +33,7 @@ $.widget( "heurist.connections", {
     _events: null,
     recordset_changed: true,
 
+    _show_once: true,
     // the constructor
     _create: function() {
 
@@ -155,6 +156,14 @@ $.widget( "heurist.connections", {
         
         //refesh if element is visible only - otherwise it costs much resources        
         if( this.element.is(':visible') && this.recordset_changed) {
+            
+            if(this._show_once){
+                this._show_once = false;
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                '<h3>The network graph function is being revised (January 2022)</h3>'
++'<p>We apologise for the inconvenience. If you want to use a preview please send us a bug report (top right in the Help dropdown) or an email asking for early access</p>');
+            }
+            
         
             if( window.hWin.HEURIST4.util.isempty(this.graphframe.attr('src')) || this.graphframe.attr('src')!==this.options.url)
             {
