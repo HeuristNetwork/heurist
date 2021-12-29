@@ -104,6 +104,9 @@ if($_is_new_cms_editor){
 .tox-toolbar{
     background-color: #b4eeff !important;
 }
+.ui-cms-mainmenu{
+    background: rgb(135, 205, 118) !important;
+}
 </style>     
 <?php
 }

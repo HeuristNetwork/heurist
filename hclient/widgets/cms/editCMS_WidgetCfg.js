@@ -605,9 +605,9 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
             }else{
                 layout_params['controls'] = 'none';
             }
-            if(ctrls.indexOf('legend')>=0){
+            if(ctrls.indexOf('legend')>=0){ //legend is visible
                 ctrls = [];
-                $dlg.find('input[name="legend"]:checked').each(
+                $dlg.find('input[name="legend"]').each( //visible section in legend
                     function(idx,item){
                         var is_exp = $dlg.find('input[name="legend_exp"][value="'+$(item).val()+'"]').is(':checked')?'':'-'
                         ctrls.push(is_exp+$(item).val());
@@ -629,7 +629,10 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
             layout_params['template'] = $dlg.find('select[name="map_template"]').val();
             layout_params['basemap'] = $dlg.find('select[name="map_basemap"]').val();
             layout_params['basemap_filter'] = $dlg.find('input[name="map_basemap_filter"]').val();
-            
+  
+//  use_timeline use_cluster editstyle map_rollover controls legend legend_exp legend_exp2 map_popup  mapdocument      
+//  map_template map_basemap_filter  map_template
+  
             var popup = $dlg.find('input[name="map_popup"]:checked').val();
             if(popup!='standard'){
                 layout_params['popup'] = popup;
@@ -663,11 +666,11 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                     }
                     cont.find('input[name="menu_recIDs"]').val( menu_recIDs );
                 }
-
+//controls":false,"legend":true,"legend_width":"250","legend_exp":false,"legend_exp2":false,
                 //find INPUT elements and fill opts with values
                 cont.find('input').each(function(idx, item){
                     item = $(item);
-                    if(item.attr('name') && item.attr('name').indexOf('map_')<0){
+                    if(item.attr('name') && item.parents('.heurist_Map').length==0){ //item.attr('name').indexOf('map')<0){
                         if(item.attr('type')=='checkbox'){
                             opts[item.attr('name')] = item.is(':checked');    
                         }else if(item.attr('type')=='radio'){
@@ -680,7 +683,9 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                 //find SELECT
                 $dlg.find('div.'+widget_name+' select').each(function(idx, item){
                     item = $(item);
-                    opts[item.attr('name')] = item.val();    
+                    if(item.parents('.heurist_Map').length==0){
+                        opts[item.attr('name')] = item.val();     
+                    }
                 });
 
                 if(widget_name=='heurist_resultListExt'){

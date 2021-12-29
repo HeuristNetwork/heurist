@@ -52,6 +52,7 @@ function hLayoutMgr(){
     // container - id or element
     //
     function _layoutInit(layout, container, isFirstLevel){
+        
         container = $(container);
         
         container.empty();   
@@ -80,6 +81,10 @@ function hLayoutMgr(){
             layout = res;    
         }
         
+        if(!$.isArray(layout)){
+console.log('!!!!');
+            layout = [layout];    
+        }
 
         if(isFirstLevel===true && _supp_options && _supp_options.page_name){
             layout[0].name  = _supp_options.page_name;
@@ -171,27 +176,37 @@ function hLayoutMgr(){
     //
     function _layoutAddWidget(layout, container){
 
+        $d = $(document.createElement('div'));
+
         //remove previous one
         var old_widget = container.find('#hl-'+layout.key);
         if(old_widget.length>0){
-            old_widget.remove();
+            //parent_ele = old_widget.parent();
+            //var prev_sibling = old_widget.prev();
+            old_widget.replaceWith($d);
+        }else{
+            $d.appendTo(container);    
         }
         
         //add new one
-        $d = $(document.createElement('div'));
         $d.attr('id','hl-'+layout.key).attr('data-lid', layout.key)
         .addClass('heurist-widget editable')
-        .addClass('cms-element')
-        .appendTo(container);
+        .addClass('cms-element');
+        
         
         if(!layout.css){
             layout.css  = {};    
             layout.css['minHeight'] = '100px';
+            //layout.css['position'] = 'relative';
         } 
-        layout.css['position'] = 'relative';
-        //layout.css['height'] = '100%';
-
+        if(!layout.css['position']) layout.css['position'] = 'relative';
+        
         //default values for various widgets
+        /*
+        if(layout.appid=='heurist_Map' ||  layout.appid=='heurist_SearchTree' || 
+           layout.appid=='heurist_resultList' || layout.appid=='heurist_resultListExt'){
+        }
+        
         if(layout.appid=='heurist_Search'){
             if(layout.css['display']!='flex'){
                 //layout.css['display'] = 'table';
@@ -203,7 +218,7 @@ function hLayoutMgr(){
             if(!layout.css['height']){
                 //layout.css['height'] = '100%';
             }
-        }
+        }*/
 
         
         //default min-height position depends on widget
@@ -480,6 +495,14 @@ function hLayoutMgr(){
     // Find element in array
     //
     function _layoutContentFindElement(content, ele_id){
+
+        if(!$.isArray(content)){
+            if(content.children && content.children.length>0){
+                return _layoutContentFindElement(content.children, ele_id);    
+            }else{
+                return null;
+            }
+        }
         
         for(var i=0; i<content.length; i++){
             if(content[i].key == ele_id){
@@ -493,9 +516,18 @@ function hLayoutMgr(){
     }
     
     //
-    // widget_id - id in cfg_widgets sushc as "heurist_SearchInput"
+    // widget_id - id in cfg_widgets sush as "heurist_SearchInput"
     //
     function _layoutContentFindWidget(content, widget_id){
+        
+        if(!$.isArray(content)){
+            if(content.children && content.children.length>0){
+                return _layoutContentFindWidget(content.children, widget_id);    
+            }else{
+                return null;
+            }
+        }
+        
         for(var i=0; i<content.length; i++){
             if(content[i].appid == widget_id){
                 return  content[i];
@@ -639,6 +671,41 @@ function hLayoutMgr(){
       return res;
     }
     
+    //
+    //
+    //
+    function _prepareTemplate(layout, callback){ 
+       
+        if(layout.template=='blog'){
+            
+           var ele = _layoutContentFindWidget(layout, 'heurist_SearchTree');
+           if (ele && ele.options.init_svsID=='????') {
+                layout.template = null;
+
+                try{
+                
+                var sURL2 = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/blog.js';
+                // 3. Execute template script to replace template variables, adds filters and smarty templates
+                    $.getScript(sURL2, function(data, textStatus, jqxhr){ //it will trigger oncomplete
+                          //function in blog.js
+                          _prepareTemplateBlog(layout, callback);
+                          
+                    }).fail(function( jqxhr, settings, exception ) {
+                        console.log( 'Error in template script: '+exception );
+                    });
+                    
+                    return true;    
+                    
+                }catch(e){
+                    alert('Error in blog template script');
+                }
+           }
+        }
+    }
+        
+        
+        
+    
     
     //
     //public members
@@ -707,6 +774,10 @@ function hLayoutMgr(){
         
         setEditMode: function(newmode){
             isEditMode = newmode;            
+        },
+        
+        prepareTemplate: function(layout, callback){
+            _prepareTemplate(layout, callback);
         }
         
         

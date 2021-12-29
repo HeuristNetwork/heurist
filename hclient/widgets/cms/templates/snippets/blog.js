@@ -1,6 +1,6 @@
 //this script will be executed once after addition of template
 //it adds new faceted search and new smarty template
-function _prepareTemplateBlog(ele_id, new_element_json, callback){
+function _prepareTemplateBlog(new_element_json, callback){
 
     var sfilter = {"facets":[{"var":84411,"code":"7:added","title":"Added","groupby":"month",
             "orderby":"desc","type":"date","order":0,"isfacet":"3","help":""},
@@ -26,12 +26,12 @@ function _prepareTemplateBlog(ele_id, new_element_json, callback){
                 //replace search realm
                 var realm_id = 'sr'+window.hWin.HEURIST4.util.random();
 
-                var ele = layoutMgr.layoutContentFindWidget(new_element_json.children, 'heurist_recordAddButton');
+                var ele = layoutMgr.layoutContentFindWidget(new_element_json, 'heurist_recordAddButton');
                 if(ele){
                     ele.options.RecTypeID = window.hWin.HAPI4.sysinfo['dbconst']['RT_BLOG_ENTRY'];
                 }
             
-                ele = layoutMgr.layoutContentFindWidget(new_element_json.children, 'heurist_SearchTree');
+                ele = layoutMgr.layoutContentFindWidget(new_element_json, 'heurist_SearchTree');
                 if(ele){
                     ele.options.search_realm = realm_id;
                     ele.options.init_svsID = svsID;
@@ -52,13 +52,13 @@ function _prepareTemplateBlog(ele_id, new_element_json, callback){
                     }else{
                         var template_name = res['ok'];
 
-                        var ele = layoutMgr.layoutContentFindWidget(new_element_json.children, 'heurist_resultList');
+                        var ele = layoutMgr.layoutContentFindWidget(new_element_json, 'heurist_resultList');
                         if(ele){
                             ele.options.search_realm = realm_id;
                             ele.options.rendererExpandDetails = template_name;
                         }
                       
-                        if($.isFunction(callback)) callback.call(this, ele_id, new_element_json);
+                        if($.isFunction(callback)) callback.call(this, new_element_json);
                     }
                     
                 });

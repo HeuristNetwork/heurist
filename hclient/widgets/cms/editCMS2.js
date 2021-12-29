@@ -99,7 +99,7 @@ function editCMS2(){
             
             
                 isWebPage = ($('body').find('#main-menu').length == 0);
-console.log('>>>>'+isWebPage);                
+//console.log('>>>>'+isWebPage);                
             
                 var new_ele = $('<div class="ui-layout-center"></div>');//.prependTo(body);
                                              
@@ -115,7 +115,7 @@ console.log('>>>>'+isWebPage);
                             +'<span style="position:absolute;top:22px;width:32px;height:24px;font-size:29px;cursor:pointer;'+(options.editor_pos=='west'?'right:5px':'')+'" '
                             +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'"/>'
                             
-                            +'<div id="treeWebSite" style="top:43px;background-color:rgb(172,220,163);" class="ent_wrapper">'
+                            +'<div id="treeWebSite" style="top:43px;" class="ent_wrapper ui-cms-mainmenu">'
                                 +'<div class="toolbarWebSite ent_header" style="height:85px;padding-top:15px;">'
                                 
                                     +'<a href="#" class="btn-website-edit" style="padding-left:20px">'
@@ -126,18 +126,19 @@ console.log('>>>>'+isWebPage);
                                     +'<span style="display:inline-block;padding:7px 0 7px 40px" class="heurist-helper1">'
                                         +'Click to edit the page</span>'
                                         
-                                    +'<div style="border-top:1px solid gray;padding:10px 8px">'                                            
+                                    +'<div style="border-top:1px solid gray;padding:4px 8px;margin:4px 0px;">'                                            
                                     +'<a href="#" title="Edit website home page" '
                                         +'class="btn-website-homepage" style="text-decoration:none;">'
                                         +'<span class="ui-icon ui-icon-home"/>&nbsp;Home page</a>'
-                                    //+'<button  title="Add top level menu" class="btn-website-addpage"/>'
+                                    +'<span  title="Add top level menu" class="btn-website-addpage ui-icon ui-icon-plus" '
+                                        +'style="display:none;float:right;cursor:pointer;color:black;padding-top:3px;"></span>'
                                     +'</div>'     
                                         
                                 +'</div>'
                                 
                                 +'<div class="treeWebSite ent_content_full" style="top:95px;padding:0px 10px;"/>' //treeview - edit website menu
                             +'</div>'
-                            +'<div id="treePage" style="font-size:1.2em;top:43px" class="ent_wrapper">'
+                            +'<div id="treePage" style="font-size:1em;top:43px" class="ent_wrapper">'
                             
                                 +'<div class="treePageHeader ent_header" style="height:85px;font-size:0.8em">'
                                     
@@ -152,16 +153,9 @@ console.log('>>>>'+isWebPage);
                                         
                                 +'</div>'
                             
-                                +'<div class="treePage ent_content" style="top:95px;padding:10px;border-top:1px solid gray;border-bottom:1px solid gray"/>' //treeview - edit page
-                                +'<div class="propertyView ent_content" style="top:45px;padding:10px 0px;border-bottom:1px solid gray;display:none"/>' //edit properties for element border-top:1px solid gray;
+                                +'<div class="treePage ent_content_full" style="top:95px;padding:10px;border-top:1px solid gray"/>' //treeview - edit page
+                                +'<div class="propertyView ent_content_full" style="top:45px;padding:10px 0px;display:none"/>' //edit properties for element border-top:1px solid gray;
                                 
-                                +'<div class="toolbarPage ent_footer" style="padding:10px;font-size:0.9em;text-align:center;">'
-                                    +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
-                                    + '<button title="Save changes for current page" class="btn-page-save ui-button-action">Save</button>'
-                                    + (true!==isCMS_InHeuristUI
-                                        ?'<button title="Exit/Close content editor" class="bnt-cms-exit">Close</button>'
-                                        :'')
-                                +'</div>'
                             +'</div>'
                         +'</div></div>').appendTo(body);
             
@@ -218,22 +212,20 @@ console.log('>>>>'+isWebPage);
 
                     body.layout(layout_opts); //.addClass('ui-heurist-bg-light')
 
-                    editor_panel.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'5px'}).click(_saveLayoutCfg)
-                    editor_panel.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'}).click(
-                        function(){
-                            _startCMS({record_id:options.record_id, container:'#main-content', content:null});
-                        }
-                    );
-                    
-                    
                     editor_panel.find('.btn-website-homepage').click(_editHomePage);
                     editor_panel.find('.btn-website-edit').click(_editHomePageRecord);
-                    editor_panel.find('.btn-website-addpage').button({icon:'ui-icon-plus'}).click(_addNewRootMenu);
+                    editor_panel.find('.btn-website-addpage').click(_addNewRootMenu); // button({icon:'ui-icon-plus'}).
+
+                    editor_panel.find('.btn-website-homepage').parent()
+                    .addClass('fancytree-node')
+                    .hover(
+                        function(e){editor_panel.find('.btn-website-addpage').show()},
+                        function(e){editor_panel.find('.btn-website-addpage').hide()});
+
                     
                     editor_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).click(_showWebSiteMenu);
                     
                     editor_panel.find('.bnt-cms-hidepanel').click(function(){ body.layout().close(options.editor_pos); } );
-                    editor_panel.find('.bnt-cms-exit').button().css({'border-radius':'4px'}).click(_closeCMS); //{icon:'ui-icon-close'}
                     
                     _panel_propertyView = body.find('.propertyView');
                     _panel_treeWebSite = body.find('.treeWebSite');
@@ -246,6 +238,8 @@ console.log('>>>>'+isWebPage);
                         //ui.newTab
                     }})
                     .addClass('ui-heurist-publish');
+                    
+                    _tabControl.find('.ui-tabs-nav').css('background','none');
                     
                     if(isWebPage){
                         _tabControl.find('.ui-tabs-tab[aria-controls="treeWebSite"]').hide();
@@ -691,6 +685,24 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
             _panel_treePage = body.find('.treePage').addClass('tree-rts')
                                 .fancytree(fancytree_options); //was recordList
+                                
+                                
+            $('<div class="toolbarPage" style="padding:10px;font-size:0.9em;text-align:center;">'
+                                    +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
+                                    + '<button title="Save changes for current page" class="btn-page-save ui-button-action">Save</button>'
+                                    + (true!==isCMS_InHeuristUI
+                                        ?'<button title="Exit/Close content editor" class="bnt-cms-exit">Close</button>'
+                                        :'')
+                                +'</div>').appendTo(_panel_treePage);
+            
+                                
+                    _panel_treePage.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'5px'}).click(_saveLayoutCfg)
+                    _panel_treePage.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'}).click(
+                        function(){
+                            _startCMS({record_id:options.record_id, container:'#main-content', content:null});
+                        }
+                    );
+                    _panel_treePage.find('.bnt-cms-exit').button().css({'border-radius':'4px'}).click(_closeCMS); //{icon:'ui-icon-close'}
 
         }
         
@@ -740,6 +752,9 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         
         if(mode=='page'){
             
+            _tabControl.find('li[aria-controls="treeWebSite"]')
+                                .removeClass('ui-cms-mainmenu');
+                    
             _hidePropertyView();
             
             _toolbar_Page.show();
@@ -756,6 +771,9 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             } //_initTinyMCE();
             
         }else{
+            _tabControl.find('li[aria-controls="treeWebSite"]')
+                .removeClass('ui-state-active') //ui-tabs-active 
+                .addClass('ui-cms-mainmenu');
                     
             _hidePropertyView();
             
@@ -766,7 +784,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             _layout_container.find('.lid-actionmenu[data-lid]').hide();
             _layout_container.find('div[data-lid]').removeClass('cms-element-active');                        
             _layout_container.find('.cms-element-overlay').css('visibility','hidden');            
-
             
             if(tinymce) tinymce.remove('.tinymce-body');
             
@@ -827,7 +844,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
 
             var actionspan = '<div class="lid-actionmenu mceNonEditable" '
-            +' style="'+style_pos+';display:none;color:black;background: rgba(201, 194, 249, 1) !important;'
+            +' style="'+style_pos+';display:none;z-index:999;color:black;background: rgba(201, 194, 249, 1) !important;'
             +'font-size:'+(is_intreeview?'12px;right:13px':'16px')+';font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' 
             //+ ele_ID
             + (is_intreeview?'<span class="ui-icon ui-icon-menu" style="width:20px"></span>'
@@ -1317,7 +1334,12 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         _panel_propertyView.show();
         _layout_container.find('.cms-element-overlay').css('visibility','hidden'); //hide overlay above editing element
         _layout_container.find('div[data-lid]').removeClass('cms-element-active');                        
-        _layout_container.find('div[id="hl-'+ele_id+'"]').addClass('cms-element-editing headline marching-ants marching');
+        
+        var ele = _layout_container.find('div[id="hl-'+ele_id+'"]').addClass('cms-element-editing');
+
+        if(!ele.css('background-image') || ele.css('background-image')=='none'){
+            ele.addClass('headline marching-ants marching');
+        }
         
         if(body.layout().state['west']['outerWidth']<400){
             _keep_EditPanelWidth = body.layout().state['west']['outerWidth'];
@@ -1437,13 +1459,13 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             var imgs = [
  'https://images.unsplash.com/photo-1524623243236-187b50e18f9f?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1228&q=80',
  'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
- 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1171&q=80',
+ //'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1171&q=80',
  'https://images.unsplash.com/photo-1529998274859-64a3872a3706?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
  'https://images.unsplash.com/40/whtXWmDGTTuddi1ncK5v_IMG_0097.jpg?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1171&q=80'];
  
-            var k = Math.floor(Math.random() * 5);
+            var k = Math.floor(Math.random() * 4);
             
-            new_ele = {name:'2 columns', type:'group', 
+            new_ele = {name:'Banner', type:'group', 
                     css:{display:'flex', 'justify-content':'center', 'align-items': 'center', 'min-height':'300px',
                     'background-image': 'url('+imgs[k]+')', 'background-size':'auto',  'background-repeat': 'no-repeat'},
                 children:[
@@ -1453,10 +1475,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             
             
         }
-        else if(widget_id=='text_1'){
-
-            new_ele = {name:'Content', type:'text', content:"<p>Lorem ipsum dolor sit amet ...</p>"};
-        }    
         else if(widget_id=='text_2'){
             
             new_ele = {name:'2 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
@@ -1599,7 +1617,18 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         // 2. Loads template json
         $.getJSON(sURL, 
         function( new_element_json ){
-                        
+            
+            if(template_name=='default'){
+                new_element_json = new_element_json.children[0];
+            }else if(template_name=='blog'){
+                layoutMgr.prepareTemplate(new_element_json, function(updated_json){
+                    _layoutInsertElement_continue( ele_id, updated_json );
+                });
+                return;
+            }
+            
+            _layoutInsertElement_continue( ele_id, new_element_json );
+/*                        
             if(template_name=='blog'){
                 
                 try{
@@ -1619,13 +1648,13 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     });
                     
                 }catch(e){
-                    alert('Error in template script');
+                    alert('Error in blog template script');
                 }
             }else{
                 
                 _layoutInsertElement_continue( ele_id, new_element_json );
             }
-
+*/
         }); //on template json load
         
     }

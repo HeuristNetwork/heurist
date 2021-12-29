@@ -26,8 +26,10 @@ function editCMS_SiteMenu( $container, editCMS2 ){
     
     var RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
         DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
+        DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
         DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
-        DT_CMS_MENU  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'];
+        DT_CMS_MENU  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
+        DT_CMS_PAGETITLE   = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'];
 
     function _init(){
 
@@ -505,21 +507,100 @@ console.log('!!! '+current_page_id);
     }
 
     //
-    // Select or create new menu item for website
+    // define title and content only
     //
-    // Opens record selector popup and adds selected menu given mapdoc or other menu
-    //
-    function _selectMenuRecord(parent_id, callback){
+    function _defineMenuRecordSimple(parent_id, callback){
         
-        if(editCMS2.warningOnExit(function(){ _selectMenuRecord(parent_id, callback) })) return;
-        
-        if(!callback){
-                callback = function(new_page_id){
-                        current_page_id = new_page_id;
-                        _refreshMainMenu(); //after addition of new page
-                };
-        }
+        var buttons= [
+            {text:window.hWin.HR('Cancel'), 
+                id:'btnCancel',
+                css:{'float':'right','margin-left':'30px','margin-right':'20px'}, 
+                click: function() { 
+                    $dlg.dialog( "close" );
+            }},
+            {text:window.hWin.HR('Select'), 
+                id:'btnSelect',
+                css:{'float':'right','margin-left':'30px','margin-right':'20px'}, 
+                click: function() { 
+                    $dlg.dialog( "close" );
+                    _defineMenuRecord(parent_id, callback);
+            }},
+            {text:window.hWin.HR('Insert'), 
+                id:'btnDoAction',
+                class:'ui-button-action',
+                disabled:'disabled',
+                css:{'float':'right'}, 
+                click: function() { 
+                    
+                    var details = {};
+                    details['t:'+DT_NAME] = [ $dlg.find('#pageName').val() ];
+                    details['t:'+DT_CMS_PAGETITLE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'] ];
 
+console.log(details);
+                    var template_name = $dlg.find('#pageContent').val();
+                    var sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.json';
+                    $.getJSON(sURL, 
+                    function( template_json ){
+                        $dlg.dialog( "close" );    
+                        
+                        function ___continue_addition(tmp_json){
+                            
+                            details['t:'+DT_EXTENDED_DESCRIPTION] = [ JSON.stringify(tmp_json) ];
+                            //add new record
+                            var request = {a: 'save', 
+                                ID:0, //new record
+                                RecTypeID: RT_CMS_MENU,
+                                details: details };     
+
+                            window.hWin.HAPI4.RecordMgr.saveRecord(request, 
+                                function(response){
+                                    var  success = (response.status == window.hWin.ResponseStatus.OK);
+                                    if(success){
+                                        var menu_id = response.data;
+                                        if(menu_id > 0){
+                                            _addMenuEntry(parent_id, menu_id, callback)
+                                        }
+                                    }else{
+                                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                                    }
+                                }
+                            );
+                        }
+                        
+                        if(template_name=='blog'){
+                            layoutMgr.prepareTemplate(template_json, ___continue_addition);
+                        }else{
+                            ___continue_addition(template_json)
+                        }
+                    });
+        }}];
+        
+    
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
+            +"hclient/widgets/cms/editCMS_AddPage.html?t="+(new Date().getTime()), 
+            buttons, window.hWin.HR('Define new web page'), 
+            {  container:'cms-add-widget-popup',
+                default_palette_class: 'ui-heurist-publish',
+                width: 600,
+                height: 250
+                , close: function(){
+                    $dlg.dialog('destroy');       
+                    $dlg.remove();
+                }
+                , open: function(){
+                    $dlg.find('#pageName').on('keyup', function(e){
+                        window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('#btnDoAction'), $(e.taget).val()=='');
+                    } );
+                }
+        });
+        
+    }
+    
+    //
+    // select among existing or define new record in full edit form
+    //
+    function _defineMenuRecord(parent_id, callback)
+    {
         var popup_options = {
             select_mode: 'select_single', //select_multi
             select_return_mode: 'recordset',
@@ -551,6 +632,28 @@ console.log('!!! '+current_page_id);
         window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
     }
 
+    
+    
+    //
+    // Select or create new menu item for website
+    //
+    // Opens record selector popup and adds selected menu given mapdoc or other menu
+    //
+    function _selectMenuRecord(parent_id, callback){
+        
+        if(editCMS2.warningOnExit(function(){ _selectMenuRecord(parent_id, callback) })) return;
+        
+        if(!callback){
+                callback = function(new_page_id){
+                        current_page_id = new_page_id;
+                        _refreshMainMenu(); //after addition of new page
+                };
+        }
+
+        _defineMenuRecordSimple(parent_id, callback);
+        
+    }
+        
     //
     // Add new menu(page) menu_id to  parent_id
     //
