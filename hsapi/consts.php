@@ -366,7 +366,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_SYMBOLOGY_COLOR' => array(3, 1037), // outdated
     'DT_BG_COLOR' => array(2, 551),         // outdated
     'DT_OPACITY' => array(3, 1090),         // outdated
-    
+    'DT_ORDERING_HIERARCHY' => array(2, 1082), // field used to define drag-drop ordering of records
     'DT_DATA_SOURCE' => array(3, 1083),
     'DT_MINIMUM_ZOOM' => array(3, 1085), // from Jan 2017 uses DT_MINIMUM_ZOOM and DT_MAXIMUM_ZOOM for both maps and layers
     'DT_MAXIMUM_ZOOM' => array(3, 1086), // prior Jan 2017 some databases used one, some used the other. Either now used for setting.
