@@ -325,6 +325,7 @@ regional['ru'] = {
     'Website': 'Веб сайт',
         menu_cms_create: 'Создать',
         menu_cms_edit: 'Править',
+        menu_cms_edit_new: 'Править (новое)',
         menu_cms_view: 'Просмотр',
         menu_cms_embed: 'Одиночная веб страница',
         menu_cms_create_hint: 'Create a new CMS website, stored in this database, with widgets to access data in the database',
