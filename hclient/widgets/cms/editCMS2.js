@@ -115,7 +115,7 @@ console.log('>>>>'+isWebPage);
                             +'<span style="position:absolute;top:22px;width:32px;height:24px;font-size:29px;cursor:pointer;'+(options.editor_pos=='west'?'right:5px':'')+'" '
                             +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'"/>'
                             
-                            +'<div id="treeWebSite" style="top:43px;background-color:rgb(135,205,118);" class="ent_wrapper">'
+                            +'<div id="treeWebSite" style="top:43px;background-color:rgb(172,220,163);" class="ent_wrapper">'
                                 +'<div class="toolbarWebSite ent_header" style="height:85px;padding-top:15px;">'
                                 
                                     +'<a href="#" class="btn-website-edit" style="padding-left:20px">'
@@ -458,7 +458,7 @@ console.log('>>>>'+isWebPage);
                                 _layout_content = res;
                                 
 var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is both much easier and much more powerful than the original editor and requires an entirely new data format. Heurist converts pages automatically to the new editor.</p>'
-+'<p>If this page uses complex formatting which we cannot be sure of converting correctly through this automatic process.</p>'
++'<p>If this page uses complex formatting we cannot be sure of converting correctly through this automatic process.</p>'
 +'<p>If you think this conversion is very different from your original, DO NOT hit SAVE, and open the page instead in the old web page editor (<b>Edit page content</b> or <b>Edit html source</b> links in the Publish menu) and get in touch with us (support at HeuristNetwork dot org) for help with conversion.</p>'
 +'<p>Please note the old editor will be DISCONTINUED at the end of February 2022, and we may not have time to help you at the last moment, so please contact us immediately.</p>'
                                 
