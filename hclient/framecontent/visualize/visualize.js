@@ -976,11 +976,6 @@ function updateStraightLines(lines, type) {
             pairs[key] = 1;
         }
 
-        // Hide Self Linking Nodes by default
-        if(d.target.id==d.source.id){
-            return [''];
-        }
-
         var R = pairs[key];
         var pnt = [];
 
@@ -994,21 +989,52 @@ function updateStraightLines(lines, type) {
             var target_x, target_y, dx, dy, dr, mx, my;
 
             if(currentMode == 'infoboxes_full'){
-                var $detail = $('.id'+d.source.id).find('[dtyid="'+ d.relation.id +'"]');
 
-                var detail_y = $detail[0].getBBox().y;
-                s_y = s_y + detail_y - 3;
+                var $detail = $('.id'+d.source.id).find('[dtyid="'+ d.relation.id +'"]'),
+                    $source_rect = $($('.id'+d.source.id).find('rect[rtyid="'+ d.source.id +'"]')[0]);
+
+                if($detail.length == 1){
+
+                    // Get detail's y location within the source object
+                    var detail_y = $detail[0].getBBox().y;
+                    s_y += detail_y - iconSize * 0.6;
+                }
+
+                // Reduce x and y locations
+                s_x -= (iconSize / 1.5);
+                t_x = (t_x - iconSize) + (Number($source_rect.attr('width')) / 2);
+                t_y -= iconSize - 2;
+
+                // Prepare extra starting line
+                var s_x2 = s_x;
+                s_x -= 7;
+
+                if(type == 'bottom-lines'){
+
+                    var line = d3.select("#container").insert("svg:line", ".id"+d.source.id+" + *");
+
+                    //add extra starting line
+                    line.attr("class", "offset_line")
+                        .attr("stroke", "darkgray")
+                        .attr("stroke-linecap", "round")
+                        .style("stroke-width", "3px")
+                        .attr("x1", s_x)
+                        .attr("y1", s_y)
+                        .attr("x2", s_x2)
+                        .attr("y2", s_y)
+                        .attr("marker-end", "url(#blob)");
+                }
 
                 // Affects Loop Size
-                target_x = s_x - 70;
-                target_y = s_y - 70;
+                target_x = s_x - 30;//45
+                target_y = s_y - 30;//45
 
                 dx = target_x - s_x;
                 dy = target_y - s_y;
-                dr = Math.sqrt(dx * dx + dy * dy)/1.5;
+                dr = Math.sqrt(dx * dx + dy * dy)/1.25; //1.5
                 mx = s_x + dx;
                 my = s_y + dy;
-
+           
                 pnt = [
                     "M",s_x,s_y,
                     "A",dr,dr,0,0,1,mx,my,
