@@ -629,8 +629,9 @@ function addMarkerDefinitions() {
 
     var markers = d3.select('#container').append('defs'); // create container
 
+    // *** Marker Mid ***
     markers.append('svg:marker') // Single arrow, pointing from field to rectype (for resources/pointers)
-           .attr('id', 'marker-ptr')
+           .attr('id', 'marker-ptr-mid')
            .attr("markerWidth", 20)
            .attr("markerHeight", 20)
            .attr("refX", -1)
@@ -644,7 +645,7 @@ function addMarkerDefinitions() {
            .attr("d", 'M0,5 L10,0 L0,-5');
 
     markers.append('svg:marker') // Double arrows, pointing opposite directions (for relmarkers)
-           .attr('id', 'marker-rel')
+           .attr('id', 'marker-rel-mid')
            .attr("markerWidth", 20)
            .attr("markerHeight", 20)
            .attr("refX", -1)
@@ -657,6 +658,64 @@ function addMarkerDefinitions() {
            .append("path")                
            .attr("d", 'M2,-5 L10,0 L2,5 M-2,-5 L-10,0 L-2,5');
 
+    markers.append("svg:marker") // Large and Small (child records) single arrows, pointing in opposite directions
+           .attr("id", "marker-childptr-mid")
+           .attr("markerWidth", 20)
+           .attr("markerHeight", 20)
+           .attr("refX", -1)
+           .attr("refY", 0)
+           .attr("viewBox", [-10, -10, 20, 20])
+           .attr("markerUnits", "userSpaceOnUse")
+           .attr("orient", "auto")
+           .attr("fill", markercolor)
+           .attr("opacity", 0.6)
+           .append("path")
+           .attr("d", 'M0,5 L10,0 L0,-5 M-9,3 L-17,0 L-9,-3');
+
+    // *** Marker-End ***
+    markers.append('svg:marker') // Single arrow, pointing from field to rectype (for resources/pointers)
+           .attr('id', 'marker-ptr-end')
+           .attr("markerWidth", 30)
+           .attr("markerHeight", 30)
+           .attr("refX", 15)
+           .attr("refY", 0)
+           .attr("viewBox", [-20, -20, 30, 30])
+           .attr("markerUnits", "userSpaceOnUse")
+           .attr("orient", "auto")
+           .attr("fill", markercolor)
+           .attr("opacity", 0.6)
+           .append("path")                
+           .attr("d", 'M0,5 L10,0 L0,-5');
+
+    markers.append('svg:marker') // Double arrows, pointing opposite directions (for relmarkers)
+           .attr('id', 'marker-rel-end')
+           .attr("markerWidth", 30)
+           .attr("markerHeight", 30)
+           .attr("refX", 15)
+           .attr("refY", 0)
+           .attr("viewBox", [-20, -20, 30, 30])
+           .attr("markerUnits", "userSpaceOnUse")
+           .attr("orient", "auto")
+           .attr("fill", markercolor)
+           .attr("opacity", 0.6)
+           .append("path")                
+           .attr("d", 'M2,-5 L10,0 L2,5 M-2,-5 L-10,0 L-2,5');
+
+    markers.append("svg:marker") // Large and Small (child records) single arrows, pointing in opposite directions
+           .attr("id", "marker-childptr-end")
+           .attr("markerWidth", 30)
+           .attr("markerHeight", 30)
+           .attr("refX", 15)
+           .attr("refY", 0)
+           .attr("viewBox", [-20, -20, 30, 30])
+           .attr("markerUnits", "userSpaceOnUse")
+           .attr("orient", "auto")
+           .attr("fill", markercolor)
+           .attr("opacity", 0.6)
+           .append("path")
+           .attr("d", 'M0,5 L10,0 L0,-5 M-9,3 L-17,0 L-9,-3');
+
+    // *** Misc ***
     markers.append("svg:marker") // Circle blob, for end of lines/extra connectors
            .attr("id", "blob")
            .attr("markerWidth", 5)
@@ -669,20 +728,6 @@ function addMarkerDefinitions() {
            .attr("cy", 5)
            .attr("r", 5)
            .style("fill", "darkgray");
-
-    markers.append("svg:marker") // Smaller single arrow, pointing from rectype to field (for child pointers)
-           .attr("id", "marker-childptr")
-           .attr("markerWidth", 20)
-           .attr("markerHeight", 20)
-           .attr("refX", 20)
-           .attr("refY", 0)
-           .attr("viewBox", [-10, -10, 20, 20])
-           .attr("markerUnits", "userSpaceOnUse")
-           .attr("orient", "auto")
-           .attr("fill", markercolor)
-           .attr("opacity", 0.6)
-           .append("path")                
-           .attr("d", 'M3,3 L-5,0 L3,-3');
 
     return markers;
 }
@@ -732,29 +777,57 @@ function addLines(name, color, thickness) {
              }
              return (scale>1)?w:(w/scale);
          });
-         
+
     // visible line, pointing from one node to another
-    if(name=='top-lines' && linetype != "stepped"){
-        lines.attr("marker-mid", function(d) {
-            if(!(hide_empty && d.targetcount == 0)){
+    if(name=='top-lines' && linetype == "straight" && currentMode == 'infoboxes_full'){
+
+        lines.attr("marker-end", function(d) {
+            if(!(hide_empty && d.targetcount == 0) && d.source.id != d.target.id){
                 // reference to marker id
-                if(d.relation.type == 'resource'){
-                    return "url(#marker-ptr)";
-                }else if(d.relation.type == 'relmarker' || d.relation.type == 'relationship'){
-                    return "url(#marker-rel)";
-                }else{
+                if($Db.rst(d.source.id, d.relation.id, 'rst_CreateChildIfRecPtr') == 1){ // double different size arrows
+                    return "url(#marker-childptr-end)";
+                }else if(d.relation.type == 'resource'){ // single arrow
+                    return "url(#marker-ptr-end)";
+                }else if(d.relation.type == 'relmarker' || d.relation.type == 'relationship'){ // double same size arrows
+                    return "url(#marker-rel-end)";
+                }else{ // error
                     return null;
                 }
             }
         });
 
-        lines.attr("marker-end", function(d) { // For child pointers
-            if(!(hide_empty && d.targetcount == 0) && $Db.rst(d.source.id, d.relation.id, 'rst_CreateChildIfRecPtr') == 1){
-                return "url(#marker-childptr)"; //reference to marker id
+        lines.attr("marker-mid", function(d) {
+            if(!(hide_empty && d.targetcount == 0) && d.source.id == d.target.id){
+                // reference to marker id
+                if($Db.rst(d.source.id, d.relation.id, 'rst_CreateChildIfRecPtr') == 1){ // double different size arrows
+                    return "url(#marker-childptr-mid)";
+                }else if(d.relation.type == 'resource'){ // single arrow
+                    return "url(#marker-ptr-mid)";
+                }else if(d.relation.type == 'relmarker' || d.relation.type == 'relationship'){ // double same size arrows
+                    return "url(#marker-rel-mid)";
+                }else{ // error
+                    return null;
+                }
+            }
+        });
+    }else if(name=='top-lines' && linetype != "stepped"){
+
+        lines.attr("marker-mid", function(d) {
+            if(!(hide_empty && d.targetcount == 0)){
+                // reference to marker id
+                if($Db.rst(d.source.id, d.relation.id, 'rst_CreateChildIfRecPtr') == 1){ // double different size arrows
+                    return "url(#marker-childptr-mid)";
+                }else if(d.relation.type == 'resource'){ // single arrow
+                    return "url(#marker-ptr-mid)";
+                }else if(d.relation.type == 'relmarker' || d.relation.type == 'relationship'){ // double same size arrows
+                    return "url(#marker-rel-mid)";
+                }else{ // error
+                    return null;
+                }
             }
         });
     }
-    
+
     if(name == 'rollover-lines'){
 
         lines.on("mouseover", function(d) {
@@ -1160,7 +1233,7 @@ function updateSteppedLines(lines, type){
            target_y = d.target.y;
        var res = [];
 
-       var marker_type = (d.relation.type == 'resource') ? 'url(#marker-ptr)' : 'url(#marker-rel)';
+       var marker_type = (d.relation.type == 'resource') ? 'url(#marker-ptr-mid)' : 'url(#marker-rel-mid)';
            
        if(d.target.id==d.source.id){ // Self Linking Node
            // Affects Loop Size
