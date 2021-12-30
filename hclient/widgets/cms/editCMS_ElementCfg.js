@@ -29,6 +29,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         codeEditorDlg = null,
         codeEditorBtns = null;
     var textAreaCss;
+    var margin_mode_full = false;
     
     function _init(){
 
@@ -212,7 +213,13 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             //style - border
             var val = cont.find('#border-style').val();
             css['border-style'] = val;
-            if(val!='none'){
+            
+            fieldset = cont.find('fieldset[data-section="border"] > div:not(:first)');
+            if(val=='none'){
+                fieldset.hide();
+                
+            }else{
+                fieldset.css('display','table-row');
                 
                 cont.find('input[name^="border-"]').each(function(i,item){
                     if($(item).val()){
@@ -226,10 +233,14 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             }
 
             //style - background
-            var val = cont.find('input[name="background"]').is(':checked');
-            if(val){
+            val = cont.find('input[name="background"]').is(':checked');
+            fieldset = cont.find('fieldset[data-section="background"] > div:not(:first)');
+            if(!val){
+                fieldset.hide();
                 css['background'] = 'none';
             }else{
+
+                fieldset.css('display','table-row');
                 val = cont.find('input[name^="background-color"]').val();
                 if(val) css['background-color'] = val;
                 
@@ -255,14 +266,29 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                 }
             }
             
-            __setDim('margin');
-            __setDim('padding');
             __setDim('width');
             __setDim('height');
             
+            if(margin_mode_full){
+                __setDim('margin-left');
+                __setDim('margin-top');
+                __setDim('margin-bottom');
+                __setDim('margin-right');
+                __setDim('padding-left');
+                __setDim('padding-top');
+                __setDim('padding-bottom');
+                __setDim('padding-right');
+            }else{
+                __setDim('margin');
+                __setDim('padding');
+            }
+            
             if(l_cfg.css){
                 var old_css = l_cfg.css;
-                var params = ['display','width','height','padding','margin',
+                var params = ['display','width','height',
+                        'padding','padding-left','padding-top','padding-bottom','padding-right',
+                        'margin','margin-left','margin-top','margin-bottom','margin-right',
+                        'background',
                         'flex-direction','flex-wrap','justify-content','align-items','align-content'];
                 for(var i=0; i<params.length; i++){
                     var prm = params[i];
@@ -276,7 +302,10 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             
             l_cfg.css = css;
             _assignCssTextArea();
-//console.log(css);            
+//console.log(css);  
+            element.removeAttr('style');
+            element.css(css);
+
             return css;
         }
         
@@ -295,31 +324,38 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                 }else{
                     cont.find('.flex-select').each(function(i,item){ $(item).parent().hide(); })
                 }
-            }else if(name=='border-style'){
-                if(ele.val()=='none'){
-                    cont.find('input[name^="border-"]').each(function(i,item){ $(item).parent().hide(); })
-                }else{
-                    cont.find('input[name^="border-"]').each(function(i,item){ $(item).parent().show(); })
-                }
             }
+            __getCss();
             
-            var css = __getCss();
-            element.removeAttr('style');
-            element.css(css);
+            //var css = 
+            //element.removeAttr('style');
+            //element.css(css);
             
             _enableSave();
         }});
 
 
         //4b. listeners for styles (border,bg,margin)
-        cont.find('input[data-type="css"]').change(function(event){
+        cont.find('input[data-type="css"]').change(__getCss);
+        cont.find('input[data-type="css"]').change(__getCss);
+        cont.find('input[name="background"]').change(__getCss);
+        /*
             var css = __getCss();
-            element.removeAttr('style');
-            element.css(css);
+            //element.removeAttr('style');
+            //element.css(css);
+        });*/
+        
+        //4c. button listeners
+        cont.find('.margin-mode').button()
+            .css({'font-size':'0.7em'})
+            .click(function(e){
+            //show hide short and full margin/padding
+            margin_mode_full = !margin_mode_full;
+            _onMarginMode();
         });
         
         
-        //4c. button listeners
+        
         cont.find('.btn-ok').button().css('border-radius','4px').click(function(){
             //5. save in layout cfg        
             var css = __getCss();
@@ -407,6 +443,23 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         $container.find('input').on({keyup:_enableSave});
         $container.find('input').on({change:_enableSave});
     }
+
+    //
+    //
+    //
+    function _onMarginMode(){
+        var cont = $container;
+        var btn = cont.find('.margin-mode');
+        if(margin_mode_full){
+            btn.text('short');
+            cont.find('.margin-short').hide();
+            cont.find('.margin-full').show();
+        }else{
+            btn.text('full');
+            cont.find('.margin-short').show();
+            cont.find('.margin-full').hide();
+        }
+    }
     
     //
     //
@@ -441,6 +494,8 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             
             var cont = $container;
             
+            margin_mode_full = false;
+            
             //assign flex css parameters
             var params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
             for(var i=0; i<params.length; i++){
@@ -450,9 +505,20 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
 
             //assign other css parameters
             cont.find('[data-type="css"]').each(function(i,item){
-                var val = l_cfg.css[$(item).attr('name')];
-                if(val){
+                var key = $(item).attr('name');
+                var val = l_cfg.css[key];
+                if(key=='background'){
+                    $(item).prop('checked', val='none');
+                }else if(val){
                     $(item).val($(item).attr('type')=='number'?parseInt(val):val);
+                }
+                
+                if(!margin_mode_full && val){
+                    if(key.indexOf('padding')===0 || 
+                       key.indexOf('margin')===0){
+                           
+                       margin_mode_full = (key.indexOf('-') > 0);    
+                    }
                 }
             });
 
@@ -473,11 +539,21 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             }else{
                 cont.find('.flex-select').each(function(i,item){ $(item).parent().hide(); })
             }
+            
+            var fieldset = cont.find('fieldset[data-section="border"] > div:not(:first)');
             if(cont.find('#border-style').val()=='none'){
-                cont.find('input[name^="border-"]').each(function(i,item){ $(item).parent().hide(); })
+                fieldset.hide();
             }else{
-                cont.find('input[name^="border-"]').each(function(i,item){ $(item).parent().show(); })
+                fieldset.css('display','table-row');
             }
+            fieldset = cont.find('fieldset[data-section="background"] > div:not(:first)');
+            if(cont.find('input[name="background"]').is(':checked')){
+                fieldset.css('display','table-row');
+            }else{
+                fieldset.hide();
+            }
+            
+            _onMarginMode();
     }
 
     

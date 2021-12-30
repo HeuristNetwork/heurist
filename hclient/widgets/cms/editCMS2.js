@@ -1688,13 +1688,14 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         
         var newname = newval[0].name;
         
-        // if page consist one group and one text - save only content of this text
+        // if page consist one group and one text without css - save only content of this text
         // it allows edit content in standard record edit
-        if(newval[0].children && newval[0].children.length==1 && newval[0].children[0].type=='text'){
+        /*if(newval[0].children && newval[0].children.length==1 && newval[0].children[0].type=='text'){
             newval = newval[0].children[0].content;
         }else{
             newval = JSON.stringify(newval);    
-        }
+        }*/
+        newval = JSON.stringify(newval);    
         
         var request = {a: 'addreplace',
                         recIDs: options.record_id,
