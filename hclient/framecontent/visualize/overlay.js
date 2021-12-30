@@ -61,7 +61,11 @@ function getRecordOverlayData(record) {
         var map = {};
         for(var i = 0; i < data.links.length; i++) {
             var link = data.links[i];
-            var isRequired = ($Db.rst(link.source.id, link.relation.id, 'rst_RequirementType') == 'required') ? 'y' : 'n';
+            var isRequired = (settings.isDatabaseStructure && $Db.rst(link.source.id, link.relation.id, 'rst_RequirementType') == 'required') ? 'y' : 'n';
+
+            if(link.relation.name == null && link.relation.type == 'resource'){
+                link.relation.name = 'Resource(s)';
+            }
 
             // Does our record point to this link?
             if(link.source.id == record.id) {
@@ -388,7 +392,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
     var text;
     if(type=='record'){ // Nodes
 
-        info = addMissingFields(info);
+        if(settings.isDatabaseStructure){
+            info = addMissingFields(info);
+        }
 
         text = overlay.selectAll("text")
                       .data(info)
@@ -445,25 +451,27 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           return d.size;
                       }, "important");
 
-        // Display rectypes used by selected fields
-        overlay.selectAll("text.info-mode-full").on("click", function(event){
+        if(settings.isDatabaseStructure){
 
-            if(event.dtyid == null || event.dtyid == 0 || isNaN(event.dtyid)){
-                return;
-            }
-            
-            var ids = $Db.dty(event.dtyid, 'dty_PtrTargetRectypeIDs');
+			// Display rectypes used by selected fields
+			overlay.selectAll("text.info-mode-full").on("click", function(event){
 
-            if(ids.indexOf(',') != -1){
+				if(event.dtyid == null || event.dtyid == 0 || isNaN(event.dtyid)){
+					return;
+				}
+				
+				var ids = $Db.dty(event.dtyid, 'dty_PtrTargetRectypeIDs');
 
-                ids.split(',').forEach(function(id){
-                    $('#records').find('#'+id).prop('checked', true).change();
-                });
-            }else{
-                $('#records').find('#'+ids).prop('checked', true).change();
-            }
-        }).style('cursor', 'pointer');
+				if(ids.indexOf(',') != -1){
 
+					ids.split(',').forEach(function(id){
+						$('#records').find('#'+id).prop('checked', true).change();
+					});
+				}else{
+					$('#records').find('#'+ids).prop('checked', true).change();
+				}
+			}).style('cursor', 'pointer');
+        }
     }else{ // link information, onhover
       
       position = 0;
@@ -575,11 +583,11 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 
             drag_link_source_id = d.id;
            
-            var bbox = $(".node.id"+d.id + " .foreground")[0].getBoundingClientRect();
+            var node = $(".node.id"+d.id);
+            var x = node.offset().left - 5;
+            var y = node.offset().top - 55;
+
             var svgPos = $("svg").position();
-            var x = bbox.left + bbox.width/2 - svgPos.left;
-            var y = bbox.top + bbox.height/2 - svgPos.top;  
-            
             var dx = (x < (event.clientX - svgPos.left))?-2:2;
             var dy = (y < (event.clientY - svgPos.top))?-2:2;
             

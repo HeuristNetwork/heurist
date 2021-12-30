@@ -489,16 +489,22 @@ function addContainer() {
     }
 
     //s = "translate(1,1)scale(1)";    
-    // Append zoomable container       
+    // Append zoomable container
     var container = svg.append("g")
                        .attr("id", "container")
                        .attr("transform", s);
+
+    var scaleExtentVals = [0.9, 2]; ////[0.75, 7.5]
+
+    if(!settings.isDatabaseStructure){
+        scaleExtentVals = [0.5, 3];
+    }
 
     // Zoom behaviour                   
     this.zoomBehaviour = d3.behavior.zoom()
                            .translate([translateX, translateY])
                            .scale(scale)
-                           .scaleExtent([0.9, 2]) //0.75, 7.5:
+                           .scaleExtent(scaleExtentVals)
                            .on("zoom", zoomed);
                     
     return container;
