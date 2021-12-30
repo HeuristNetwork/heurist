@@ -984,7 +984,7 @@ function updateStraightLines(lines, type) {
                 }
 
                 // Get target's bottom y location
-                var b_target_y = t_y - iconSize + Number($target_rect.attr('height'));
+                var b_target_y = t_y - iconSize + Number($target_rect.attr('height')) + 2;
 
                 // Left Side: x Point for starting and ending nodes
                 s_x -= iconSize;
@@ -992,10 +992,6 @@ function updateStraightLines(lines, type) {
                 // Right Side: x Point for starting and ending nodes
                 var r_source_x = s_x + source_width + iconSize / 4;
                 var r_target_x = t_x + target_width + iconSize / 4;
-
-                // Differences between points (x coord)
-                var right_diff = (r_target_x - r_source_x > r_source_x - r_target_x) ? r_target_x - r_source_x : r_source_x - r_target_x;
-                var left_diff = (t_x - s_x > s_x - t_x) ? t_x - s_x : s_x - t_x;
 
                 if(r_source_x < t_x){ // Right to Left Connection, Change source x location
                     
@@ -1014,51 +1010,34 @@ function updateStraightLines(lines, type) {
 
                     s_x -= 7;
                     t_x += 7;
-                }else if(t_y < s_y){ // target is above source and was same side connectors
+                }else{ // target is above/below source and was same side connectors
 
                     t_x += (target_width / 2);
 
-                    left_diff = (t_x - s_x > s_x - t_x) ? t_x - s_x : s_x - t_x;
-                    right_diff = (t_x - r_source_x > r_source_x - t_x) ? t_x - r_source_x : r_source_x - t_x;
-
-                    if(right_diff < left_diff){
-
-                        s_x = r_source_x;
-
-                        s_x2 = s_x - 5;
-
-                        s_x += 7;
+                    if(t_y < s_y){ // Target is above
+                        t_y = b_target_y;
                     }else{
-
-                        s_x2 = s_x + 5;
-                        s_x -= 7;
+                        t_y -= iconSize;
                     }
 
-                    t_y = b_target_y;
-
-                    bottom_tar = true;
-                }else{ // target is below source and same side connectors
-
-                    var org_x = s_x; // backup source x
+                    // Differences between points (x coord)
+                    var left_diff = (t_x - s_x > s_x - t_x) ? t_x - s_x : s_x - t_x;
+                    var right_diff = (t_x - r_source_x > r_source_x - t_x) ? t_x - r_source_x : r_source_x - t_x;
 
                     if(right_diff < left_diff){ // right 2 right
 
                         s_x = r_source_x;
-                        t_x = r_target_x;
 
                         s_x2 = s_x - 5;
-                        t_x2 = t_x;
 
                         s_x += 7;
-                        t_x += 7;
                     }else{ // left 2 left
 
                         s_x2 = s_x + 5;
-                        t_x2 = t_x;
-
                         s_x -= 7;
-                        t_x -= 7;
                     }
+
+                    bottom_tar = true;
                 }
 
                 var line;
@@ -1079,34 +1058,37 @@ function updateStraightLines(lines, type) {
                         .attr("x2", s_x2)
                         .attr("y2", s_y)
                         .attr("marker-end", "url(#blob)");
-
-                    //add backwards crows foot, if multi value
-                    if(ismultivalue){
-
-                        d3.select("#container")
-                          .insert("svg:path", ".id"+d.source.id+" + *")
-                          .attr("class", "offset_line")
-                          .attr("stroke", "darkgray")
-                          .attr("stroke-linecap", "round")
-                          .attr("stroke-width", "3px")
-                          .attr("fill", "none")
-                          .attr("d", "M " + s_x + " " + (s_y+7) + " L " + s_x2 + " " + s_y + " L " + s_x + " " + (s_y-7));
-                    }
                 }
 
                 if(!bottom_tar && type == 'bottom-lines'){
 
                     line = d3.select("#container").insert("svg:line", ".id"+d.target.id+" + *");
 
-                    // else, add extra ending line
+                    var linecolour = (!ismultivalue) ? 'darkgray' : 'dimgray';
+                    var linewidth = (!ismultivalue) ? '3px' : '2px';
+
+                    // add extra ending line
                     line.attr("class", "offset_line")
-                        .attr("stroke", "darkgray")
+                        .attr("stroke", linecolour)
                         .attr("stroke-linecap", "round")
-                        .style("stroke-width", "3px")
+                        .style("stroke-width", linewidth)
                         .attr("x1", t_x)
                         .attr("y1", t_y)
                         .attr("x2", t_x2)
                         .attr("y2", t_y);
+
+                    //add crows foot, if multi value
+                    if(ismultivalue){
+
+                        d3.select("#container")
+                          .insert("svg:path", ".id"+d.source.id+" + *")
+                          .attr("class", "offset_line")
+                          .attr("stroke", linecolour)
+                          .attr("stroke-linecap", "round")
+                          .attr("stroke-width", linewidth)
+                          .attr("fill", "none")
+                          .attr("d", "M " + t_x2 + " " + (t_y+5) + " L " + t_x + " " + t_y + " L " + t_x2 + " " + (t_y-5));
+                    }
                 }
 
                 dx = (t_x-s_x)/2;
@@ -1120,7 +1102,6 @@ function updateStraightLines(lines, type) {
                     "L", mdx, mdy,
                     "L", t_x, t_y 
                 ];
-
             }else{
 
                 dx = (t_x-s_x)/2;

@@ -653,7 +653,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                         var x = dem.x + dem.width / 2;
                         var y = dem.y + dem.height / 2;
 
-                        $icon.attr('transform', menuarrow_transform + 'rotate(90,'+x+','+y+')');
+                        $icon.attr('transform', menuarrow_transform + 'rotate(180,'+x+','+y+')');
 
                         // Set optimal width & height
                         rect_full.attr("width", maxWidth+icons_cnt*iconSize-3);  
