@@ -2979,7 +2979,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             }
 
             // display record title field and move child record field (if present) to the top of form
-            if(!that.options.edit_structure){
+            if(!that.options.edit_structure && !window.hWin.HEURIST4.util.isempty(that._getField('rec_Title'))){
                 that.showExtraRecordInfo();
             }
 
@@ -4194,9 +4194,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         // remove opacity change and set background to lighter background
         var cur_styling = ele.find('input').attr('style');
+        var cur_title = ele.find('input').val();
         ele.find('input')
-            .attr('style', cur_styling + 'background-color:#e3f0f0!important;opacity:1;font-size:13px;border:none;')
-            .attr('title', 'A title constructed from one or more fields, which is used to identify records when displayed in search results.');
+            .replaceWith('<div style="'+cur_styling+'background-color:#e3f0f0!important;font-size:13px;padding:3px;"'
+                        + ' title="A title constructed from one or more fields, which is used to identify records when displayed in search results.">'+ cur_title +'</div>');
 
         // change label to required version, and add help icon
         ele.find('div.header')
