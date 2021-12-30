@@ -2610,10 +2610,10 @@ $.widget( "heurist.search_faceted", {
                             +'<span class="ui-icon ui-icon-triangle-1-w-stop" '
                                 +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
                             +'<span class="ui-icon ui-icon-triangle-1-w" '
-                                +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
+                                +'style="cursor:pointer;font-size:smaller;float:left;color:gray;position:absolute;"/>'
                             +'<div style="height:0.4em;margin:2px 0px 0px 2px;float:left;width:'+(w-62)+'px"/>'
                             +'<span class="ui-icon ui-icon-triangle-1-e" '
-                                +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
+                                +'style="cursor:pointer;font-size:smaller;float:left;color:gray;position:absolute;"/>'
                             +'<span class="ui-icon ui-icon-triangle-1-e-stop" '
                                 +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/></div>'
                             ).appendTo($facet_values);
@@ -2624,16 +2624,37 @@ $.widget( "heurist.search_faceted", {
                             var slider = ele2.find('div')
                                 .attr('facet_index',facet_index)
                                 .slider({
-                                      range: true,
-                                      min: (mmin-delta<field.mmin0)?field.mmin0:(mmin-delta),  //field.mmin0
-                                      max: (mmax+delta>field.mmax0)?field.mmax0:(mmax+delta),
-                                      values: [ mmin, mmax ],
-                                      slide: __updateSliderLabel,
-                                      stop: __onSlideStop,
-                                      create: function(){
-                                          $(this).find('.ui-slider-handle').css({width:'4px',background:'black'});
-                                      }
-                                    });
+                                    range: true,
+                                    min: (mmin-delta<field.mmin0)?field.mmin0:(mmin-delta),  //field.mmin0
+                                    max: (mmax+delta>field.mmax0)?field.mmax0:(mmax+delta),
+                                    values: [ mmin, mmax ],
+                                    slide: __updateSliderLabel,
+                                    stop: __onSlideStop,
+                                    start: function(){
+                                        ele2.find('.ui-icon-triangle-1-w, .ui-icon-triangle-1-e').css('visibility', 'hidden');
+                                    },
+                                    create: function(){
+                                        $(this).find('.ui-slider-handle').css({width:'4px',background:'black'});
+
+                                        var left_step = ele2.find('span.ui-icon-triangle-1-w')
+                                                            .position({my: 'right center', at: 'left bottom', of: $($(this).find('.ui-slider-handle')[0])});
+
+                                        var right_step = ele2.find('span.ui-icon-triangle-1-e')
+                                                             .position({my: 'left center', at: 'right bottom', of: $($(this).find('.ui-slider-handle')[1])});
+
+                                        left_step.css({
+                                            'z-index': 10,
+                                            top: parseFloat(left_step.css('top')) + 3,
+                                            left: parseFloat(left_step.css('left')) + 2
+                                        });
+
+                                        right_step.css({
+                                            'z-index': 10,
+                                            top: parseFloat(right_step.css('top')) + 3,
+                                            left: parseFloat(right_step.css('left')) - 2
+                                        });
+                                    }
+                                });
                                     
                             that._on( ele2.find('span.ui-icon-triangle-1-w-stop'),
                                 {click: function(){

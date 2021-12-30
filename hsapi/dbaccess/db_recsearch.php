@@ -585,9 +585,9 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
 
         $format = 'Y';
 
-        if($count < 10){ // decrease interval size
+        if($count < 20){ // decrease interval size
 
-            while($count < 10){
+            while($count < 20){
 
                 $interval -= 5;
                 if($interval <= 1){
@@ -633,9 +633,9 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
 
         $format = 'd M Y';
 
-        if($count < 10){ // decrease interval size
+        if($count < 15){ // decrease interval size
     
-            while($count < 10){
+            while($count < 15){
 
                 $interval -= 12;
                 if($interval <= 1){
@@ -657,7 +657,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
                 $in_count++;
             }
 
-            if($in_count >= 10){
+            if($in_count >= 15){
                 return getDateHistogramData($system, $range, $org_interval, $rec_ids, $dty_id, 'year'); 
             }
         }
@@ -690,7 +690,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
             if($in_count >= 12){
                 return getDateHistogramData($system, $range, $org_interval, $rec_ids, $dty_id, 'month');
             }
-        }else if($count < 10){ // decrease interval size
+        }else if($count < 15){ // decrease interval size
    
             while($interval - 30 > 1 && $count < 1){
                 
