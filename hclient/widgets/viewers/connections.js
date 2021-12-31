@@ -310,7 +310,8 @@ $.widget( "heurist.connections", {
                                 name: relations.headers[recId][0],  //record title   records[id][5]
                                 image: window.hWin.HAPI4.iconBaseURL+relations.headers[recId][1],  //rectype id  records[id][4]
                                 count: 0,
-                                depth: 1
+                                depth: 1,
+                                rty_ID: relations.headers[recId][1]
                                };
                     nodes[recId] = node;
                 }
@@ -335,10 +336,9 @@ $.widget( "heurist.connections", {
                     var trmID = relations[i].trmID;
                     var relationName = "Floating relationship";
                     if(dtID > 0) {
-
-                        relationName = $Db.trm(dtID,'dtyName');
+                        relationName = $Db.dty(dtID, 'dty_Name');
                     }else if(trmID > 0) {
-                        relationName = $Db.trm(trmID,'trm_Label');
+                        relationName = $Db.trm(trmID, 'trm_Label');
                     }
 
                     // Link check  - both source and target must be in main result set (nodes)
@@ -349,7 +349,7 @@ $.widget( "heurist.connections", {
                                     targetcount: 1,
                                     relation: {id: dtID>0?dtID:trmID, 
                                                name: relationName,
-                                               type: dtID>0?'resource':'relationship'} 
+                                              type: dtID>0?'resource':'relationship'} 
                                    };
                         links.push(link); 
                     }      
