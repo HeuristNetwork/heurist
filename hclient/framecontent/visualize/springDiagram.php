@@ -138,6 +138,7 @@ function onPageInit(success){
         * @returns {Object}
         */
         function __parseData(records_ids, relations) {
+            
             var data = {}; 
             var nodes = {};                         
             var links = [];
@@ -151,7 +152,8 @@ function onPageInit(success){
                                 name: relations.headers[recId][0],  //record title   records[id][5]
                                 image: window.hWin.HAPI4.iconBaseURL+relations.headers[recId][1],  //rectype id  records[id][4]
                                 count: 0,
-                                depth: 1
+                                depth: 1,
+                                rty_ID: relations.headers[recId][1] 
                                };
                     nodes[recId] = node;
                 }
@@ -175,7 +177,7 @@ function onPageInit(success){
                         var trmID = relations[i].trmID;
                         var relationName = "Floating relationship";
                         if(dtID > 0) {
-                            relationName = $Db.dty(dt_ID, 'dty_Name');
+                            relationName = $Db.dty(dtID, 'dty_Name');
                         }else if(trmID > 0) {
                             relationName = $Db.trm(trmID, 'trm_Label');
                         }

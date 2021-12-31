@@ -43,7 +43,7 @@ function getRecordOverlayData(record) {
     var array = [];
 
     // Header
-    var header = {text: truncateText(record.name, rectypeLength), 
+    var header = {text: truncateText(window.hWin.HEURIST4.util.stripTags(record.name), rectypeLength), 
                   count: record.count, rtyid: record.id,
                   size: "9px", weight: "bold", height: 15, enter: true, image:record.image}; 
 
@@ -55,16 +55,20 @@ function getRecordOverlayData(record) {
     var fontSize = getSetting(setting_fontsize, 12);
     var xpos = 17;
 
+//console.log(record);
+    
     // Going through the current displayed data
     var data = settings.getData.call(this, settings.data);
     if(data && data.links.length > 0) {
         var map = {};
         for(var i = 0; i < data.links.length; i++) {
             var link = data.links[i];
-            var isRequired = (settings.isDatabaseStructure && $Db.rst(link.source.id, link.relation.id, 'rst_RequirementType') == 'required') ? 'y' : 'n';
+//console.log(link);
+            var isRequired = (settings.isDatabaseStructure && $Db.rst(link.source.rty_ID, link.relation.id, 'rst_RequirementType') == 'required') ? 'y' : 'n';
 
             if(link.relation.name == null && link.relation.type == 'resource'){
-                link.relation.name = 'Resource(s)';
+                link.relation.name = $Db.rst(link.source.rty_ID, link.relation.id, 'rst_DisplayName'); 
+                //'Resource(s) id='+link.relation.id;
             }
 
             // Does our record point to this link?
@@ -76,7 +80,7 @@ function getRecordOverlayData(record) {
 
                 if(!settings.isDatabaseStructure){
                     // Relation
-                    var relation = {text: "➜ " + truncateText(link.target.name, maxLength), size: "8px", height: 11, subheader:1, xpos:xpos, multiline:true};
+                    var relation = {text: "➜ " + truncateText(window.hWin.HEURIST4.util.stripTags(link.target.name), maxLength), size: "8px", height: 11, subheader:1, xpos:xpos, multiline:true};
                     if(settings.showCounts) {
                         relation.text += ", n=" + link.targetcount;                      
                     }
