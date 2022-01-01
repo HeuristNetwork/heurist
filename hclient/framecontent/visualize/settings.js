@@ -85,11 +85,11 @@ function putSetting(key, value) {
  * @param settings The plugin settings object
  */
 function checkStoredSettings() {
-    getSetting(   setting_linetype,      settings.linetype    );
-    getSetting(   setting_line_empty_link, settings.setting_line_empty_link );
-    getSetting(   setting_linelength,    settings.linelength  );
-    getSetting(   setting_linewidth,     settings.linewidth   );
-    getSetting(   setting_linecolor,     settings.linecolor   );
+    getSetting(   setting_linetype, 'straight'); //settings.linetype    );
+    getSetting(   setting_line_empty_link, 1); //settings.setting_line_empty_link );
+    getSetting(   setting_linelength,    200); //settings.linelength  );
+    getSetting(   setting_linewidth,     2); //settings.linewidth   );
+    getSetting(   setting_linecolor,     'blue'); //settings.linecolor   );
     getSetting(   setting_markercolor,   settings.markercolor );
     getSetting(   setting_entityradius,  settings.entityradius);
     getSetting(   setting_entitycolor,   settings.entitycolor );
@@ -233,9 +233,11 @@ function handleSettingsInUI() {
         
     $( "#setLinksMode" ).controlgroup();    
     
-    _syncUI();
+    putSetting(setting_linecolor, '#0070c0');  //2022-01-01
+    setLinkMode('straight'); //2022-01-01
+    //_syncUI();
 
-    var linksLength = getSetting(setting_linelength, 200);    
+    var linksLength = 200; //2022-01-01 getSetting(setting_linelength, 200);    
     $('#linksLength').val(linksLength).change(function(){
         var newval = $(event.target).val();
         putSetting(setting_linelength, newval);
@@ -244,7 +246,7 @@ function handleSettingsInUI() {
         }
     });
     
-    var linksWidth = getSetting(setting_linewidth);    
+    var linksWidth = 2; //2022-01-01 getSetting(setting_linewidth);    
     if(linksWidth<1) linksWidth = 1  //min
     else if(linksWidth>maxLinkWidth) linksWidth = maxLinkWidth;
     
@@ -266,7 +268,7 @@ function handleSettingsInUI() {
         });
         
     $("#linksPathColor_inpt")
-        .val(getSetting(setting_linecolor))
+        .val('blue')  //getSetting(setting_linecolor)
         .colorpicker({
                         hideButton: true, //show button right to input
                         showOn: "both",
@@ -280,6 +282,7 @@ function handleSettingsInUI() {
             }
         });
         
+      
     $("#linksMarkerColor")
         .addClass('ui-icon ui-icon-triangle-1-e')
         .css({'color':getSetting(setting_markercolor)})
@@ -485,7 +488,7 @@ function _syncUI(){
     var formula = getSetting(setting_formula,'linear')
     $('#toolbar').find('button[name="nodesMode"][value="'+formula+'"]').addClass('ui-heurist-btn-header1');
     
-    var linetype = getSetting(setting_linetype,'straight');
+    var linetype = 'straight'; //getSetting(setting_linetype, 'straight');
     $('#toolbar').find('button[name="linksMode"][value="'+linetype+'"]').addClass('ui-heurist-btn-header1');
     
     
@@ -604,10 +607,10 @@ function refreshLinesWidth(){
              function(d) { return getLineWidth(d.targetcount); });
     
         d3.selectAll("marker").attr("markerWidth", function(d) {    
-                        return getMarkerWidth(d.targetcount);             
+                        return getMarkerWidth(d?d.targetcount:0);             
                     })
                     .attr("markerHeight", function(d) {
-                       return getMarkerWidth(d.targetcount);
+                       return getMarkerWidth(d?d.targetcount:0);
                     });
     
 }

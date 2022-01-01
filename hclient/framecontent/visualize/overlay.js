@@ -87,7 +87,8 @@ function getRecordOverlayData(record) {
                 
                     // Add record relation to map
                     if(map[link.relation.name][relation.text] == undefined) {
-                        map[link.relation.name][relation.text] = relation;
+                        //Displays list of connected records below the connection fields - could overload large graphs
+                        //map[link.relation.name][relation.text] = relation;
                     }
                 }
             }
