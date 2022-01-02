@@ -778,7 +778,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
     }
     
     // Return the rec-detail-type ID for the given field in the given record type
-    if (mb_strpos($field_name, $fullstop) === FALSE) {    // direct field name lookup
+    if (mb_strpos($field_name, $fullstop) === FALSE && mb_strpos($field_name,'{')!==0) {    // direct field name lookup
 
         if($mode==1 && self::$fields_correspondence!=null){
             $field_name = self::__replaceInCaseOfImport($field_name);
@@ -898,13 +898,30 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         //it is required to distiguish rt for multiconstrained pointers
         $inner_rectype = 0;
         $inner_rectype_name = '';
-        $inner_rectype_cc = '';
-        $pos = mb_strpos($inner_field_name, $fullstop);
-        $pos2 = mb_strpos($inner_field_name, "}");
-        if ( $pos>0 &&  $pos2>0 && $pos2 < $pos ) { 
-            $inner_rectype_search = mb_substr($inner_field_name, 1, $pos-mb_strlen($fullstop)); 
+        $inner_rectype_cc = '';  //concept code
+        
+        if(count($matches)>3){
+            
+            $pos = mb_strpos($inner_field_name, '{'); //{Organization}..Name
+            $pos2 = mb_strpos($inner_field_name, '}');
+            if($pos===0 && $pos2==mb_strlen($inner_field_name)-1){
+                $inner_rectype_search = mb_substr($inner_field_name, 1, -1);     
+            }else{
+                $inner_rectype_search = $inner_field_name;
+            }
+            
             list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
-            $inner_field_name = mb_substr($inner_field_name, $pos+mb_strlen($fullstop)); 
+            $inner_field_name = $matches[3]; 
+        }else{
+        
+        
+            $pos = mb_strpos($inner_field_name, $fullstop); //{Organization}..Name
+            $pos2 = mb_strpos($inner_field_name, '}');
+            if ( $pos>0 &&  $pos2>0 && $pos2 < $pos ) { 
+                $inner_rectype_search = mb_substr($inner_field_name, 1, $pos-mb_strlen($fullstop)); 
+                list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
+                $inner_field_name = mb_substr($inner_field_name, $pos+mb_strlen($fullstop)); 
+            }
         }
 
         if($mode==0){ //replace with values
