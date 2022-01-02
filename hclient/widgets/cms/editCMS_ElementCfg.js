@@ -709,6 +709,47 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
 
         window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
     }
+
+    //
+    //
+    //    
+    function _warningOnExit( callback ){
+        
+        if(!$container.find('.btn-ok').prop('disabled')){
+            
+            var msg = 'Element has been modified';
+            
+            var $dlg;
+            var _buttons = [
+                {text:window.hWin.HR('Save'), 
+                    click: function(){
+                        $container.find('.btn-ok').click();
+                        $dlg.dialog('close');
+                        if($.isFunction(callback)) callback.call(this);
+                    }
+                },
+                {text:window.hWin.HR('Discard'), 
+                    click: function(){
+                        $container.find('.btn-cancel').click();
+                        $dlg.dialog('close'); 
+                        if($.isFunction(callback)) callback.call(this);
+                    }
+                },
+                {text:window.hWin.HR('Cancel'), 
+                    click: function(){$dlg.dialog('close');}
+                }
+            ];            
+            
+            var sMsg = window.hWin.HR(msg);
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:sMsg});   
+
+            return true;     
+        }else{
+            return false;     
+        }
+        
+        
+    }
     
         
 
@@ -722,6 +763,10 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         isA: function (strClass) {
             return (strClass === _className);
         },
+        
+        warningOnExit: function( callback ){
+            return _warningOnExit( callback );
+        }
     }
 
     _init();
