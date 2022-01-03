@@ -51,7 +51,7 @@ function editCMS2(){
     var _panel_treePage,     // panel with treeview for current page 
         _panel_treeWebSite,  // panel with tree menu - website structure
         _panel_propertyView, // panel with selected element properties
-        _edit_Element,  //instance of edit element class
+        _edit_Element = null,  //instance of edit element class
         _toolbar_WebSite,
         _toolbar_Page,
         _tabControl,
@@ -235,7 +235,6 @@ function editCMS2(){
                     _panel_treeWebSite = body.find('.treeWebSite');
                     
                     _toolbar_WebSite = body.find('.toolbarWebSite');
-                    _toolbar_Page = body.find('.toolbarPage');
                     
                     _tabControl = body.find('#tabsEditCMS').tabs({activate: function( event, ui ){
                         _switchMode();
@@ -351,6 +350,12 @@ function editCMS2(){
     //
     function _warningOnExit(callback){
         
+        if(_edit_Element && _edit_Element.warningOnExit(function(){
+            if(page_was_modified){
+                _saveLayoutCfg(callback);
+            }
+        })) return true;
+        
         if(page_was_modified){
             
             var msg = 'Page has been modified';
@@ -361,7 +366,11 @@ function editCMS2(){
                     click: function(){_saveLayoutCfg(callback);$dlg.dialog('close');}
                 },
                 {text:window.hWin.HR('Discard'), 
-                    click: function(){page_was_modified = false; $dlg.dialog('close'); if($.isFunction(callback)) callback.call(this);}
+                    click: function(){
+                            _toolbar_Page.hide();
+                            page_was_modified = false; 
+                            $dlg.dialog('close'); 
+                            if($.isFunction(callback)) callback.call(this);}
                 },
                 {text:window.hWin.HR('Cancel'), 
                     click: function(){$dlg.dialog('close');}
@@ -547,6 +556,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         var new_content = tinymce.activeEditor.getContent();
                         
                         page_was_modified = (page_was_modified || l_cfg.content!=new_content);
+                        if(page_was_modified && _edit_Element==null) _toolbar_Page.show();
                         
                         l_cfg.content = new_content;
                         
@@ -566,7 +576,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         tinymce.init(inlineConfig);
         
         // find all dragable elements - text and widgets
-        _layout_container.find('div.editable').each(function(i, item){
+        _layout_container.find('div.brick').each(function(i, item){   //
             var ele_ID = $(item).attr('data-lid');
              //left:2px;top:2px;
             _defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
@@ -694,7 +704,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                                 .fancytree(fancytree_options); //was recordList
                                 
                                 
-            $('<div class="toolbarPage page_tree" style="padding:10px;font-size:0.9em;text-align:center;">'
+            $('<div class="toolbarPage" style="padding:10px;font-size:0.9em;text-align:center;">'
                                     +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
                                     + '<button title="Save changes for current page" class="btn-page-save ui-button-action">Save</button>'
                                     + (true!==isCMS_InHeuristUI
@@ -702,6 +712,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                                         :'')
                                 +'</div>').appendTo(_panel_treePage);
             
+            _toolbar_Page = body.find('.toolbarPage').hide();
                                 
                     _panel_treePage.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'5px'}).click(_saveLayoutCfg)
                     _panel_treePage.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'}).click(
@@ -723,16 +734,29 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
     
         _layout_container.find('div[data-lid]').removeClass('cms-element-editing headline marching-ants marching');                        
         
-        if(_keep_EditPanelWidth>0){
-            body.layout().sizePane('west', _keep_EditPanelWidth);    
-        }
-        _keep_EditPanelWidth = 0;
+        _panel_treePage.find('span.fancytree-title').css({'font-style':'normal', 'text-decoration':'none'});
 
-        body.find('.page_tree').show();
-        body.find('.element_edit').hide();
+        function __restoreTree(){
+            if(_keep_EditPanelWidth>0){
+                body.layout().sizePane('west', _keep_EditPanelWidth);    
+            }
+            _keep_EditPanelWidth = 0;
+
+            body.find('.page_tree').show();
+            body.find('.element_edit').hide();
+            
+            if(page_was_modified && _edit_Element==null) _toolbar_Page.show();
+            
+            _panel_treePage[0].style.removeProperty('height'); //show();
+        }
         
-        _panel_propertyView.hide();
-        _panel_treePage[0].style.removeProperty('height'); //show();
+        if(_panel_propertyView.is(':visible')){
+            _panel_propertyView.effect('puff',{},200, __restoreTree);
+        }else{
+            __restoreTree();
+        }
+        
+
     }
 
     //
@@ -764,7 +788,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     
             _hidePropertyView();
             
-            _toolbar_Page.show();
             _toolbar_WebSite.hide();
         
             //_layout_container.find('div.editable').addClass('tinymce-body');
@@ -894,10 +917,17 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
                 actionspan.find('span[data-action]').hide();
                 actionspan.find('span.ui-icon-gear').click(function(event){
+console.log('!!!!');                    
                     var ele = $(event.target);
                     window.hWin.HEURIST4.util.stopEvent(event);
                     ele.hide();
-                    ele.parent().find('span[data-action]').show();
+                    
+                    if(ele.parent().hasClass('lid-actionmenu')){
+                        ele.parent().show();    
+                    }
+                    ele.parent().find('span[data-action]').show();    
+                    
+                    
                 });
 
                 //actionspan.appendTo(body);    
@@ -962,7 +992,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             //hide gear icon and overlay on mouse exit
             function _onmouseexit(event){
                 var node;
-                if($(event.target).hasClass('editable')){
+                if($(event.target).hasClass('brick')){ 
                     node =  $(event.target);
                     _layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-lid')+']').hide();
                     _layout_container.find('div[data-lid]').removeClass('cms-element-active');
@@ -1010,23 +1040,23 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     if(__timeout>0) clearTimeout(__timeout);
                     __timeout = 0;
 
-                    if($(event.target).parents('div.lid-actionmenu').length>0){
+                    if($(event.target).hasClass('.lid-actionmenu') || $(event.target).parents('div.lid-actionmenu').length>0){
                         if(delay_onmove>0) clearTimeout(delay_onmove);
                         delay_onmove = 0;
                         return;
                     }
 
-                    var is_in_page = ($(event.target).hasClass('editable') || $(event.target).parents('div.editable:first').length>0);
+                    var is_in_page = ($(event.target).hasClass('brick') || $(event.target).parents('div.brick:first').length>0);
 
                     if( is_in_page ){
                         //div.editable in container 
 
-                        if($(event.target).hasClass('editable')){
+                        if($(event.target).hasClass('brick')){
                             //console.log('itself');                              
                             node = $(event.target);
                         }else{
                             //console.log('parent');                              
-                            node = $(event.target).parents('div.editable:first');
+                            node = $(event.target).parents('div.brick:first');
                         } 
 
                         //tinymce is active - do not show toolbar
@@ -1212,7 +1242,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         }
         
         page_was_modified = true;
-        
+        if(_edit_Element==null) _toolbar_Page.show();
         _updateActionIcons(200); //it inits tinyMCE also
         
     }
@@ -1275,6 +1305,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         _updateActionIcons(200); //it inits tinyMCE also
         
         page_was_modified = true;
+        if(_edit_Element==null) _toolbar_Page.show();
     }
     
     //
@@ -1337,7 +1368,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             }}
         ]}];
 */        
-        if(_edit_Element){ //_panel_propertyView.is(':visible')){
+        if(_edit_Element){ //already opened - save previous
             
             if(_layout_container.find('div.cms-element-editing').attr('id')==('hl-'+ele_id)) return; //same
             
@@ -1356,8 +1387,9 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         _panel_propertyView.css('top',(h+90)+'px');
         body.find('.page_tree').hide();
         body.find('.element_edit').show();
+        _toolbar_Page.hide();
         
-        _panel_propertyView.show();
+        _panel_propertyView.fadeIn(500);//show();
         if(body.layout().state['west']['outerWidth']<400){
             _keep_EditPanelWidth = body.layout().state['west']['outerWidth'];
             body.layout().sizePane('west', 400);    
@@ -1365,8 +1397,12 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         
         //scroll tree that selected element will be visible
         var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_id);
-        _panel_treePage[0].scrollTop = $(node.li).position().top;
-        node.setActive(true);
+        var top1 = $(node.li).position().top;
+        if(_panel_treePage[0].scrollTop+h<top1){
+            _panel_treePage[0].scrollTop = top1;    
+        }
+        _panel_treePage.find('span.fancytree-title').css({'font-style':'normal','text-decoration':'none'});
+        $(node.li).find('span.fancytree-title:first').css({'font-style':'italic','text-decoration':'underline'}); //
         
         _layout_container.find('.cms-element-overlay').css('visibility','hidden'); //hide overlay above editing element
         _layout_container.find('div[data-lid]').removeClass('cms-element-active');                        
@@ -1498,7 +1534,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             
             new_ele = {name:'Banner', type:'group', 
                     css:{display:'flex', 'justify-content':'center', 'align-items': 'center', 'min-height':'300px',
-                    'background-image': 'url('+imgs[k]+')', 'background-size':'auto',  'background-repeat': 'no-repeat'},
+                    'background-image': 'url('+imgs[k]+')', 'background-size':'auto', 'background-repeat': 'no-repeat',
+                    'background-position': 'center'},
                 children:[
                     new_ele
                 ]
@@ -1624,6 +1661,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             },300);
 
         page_was_modified = true;
+        if(_edit_Element==null) _toolbar_Page.show();
         /*        
         [{name:'Layout', type:'group', //or cardinal
         children:[
@@ -1748,6 +1786,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         window.hWin.HEURIST4.msg.showMsgErr('It appears you do not have enough rights (logout/in to refresh) to edit this record');
                         
                     }else{
+                        _toolbar_Page.hide();
                         page_was_modified = false;
                         page_cache[options.record_id][DT_EXTENDED_DESCRIPTION] = newval; //update in cache
                         

@@ -132,6 +132,7 @@ console.log('!!!!');
         //create parent div
         $d = $(document.createElement('div'));
         $d.attr('id','hl-'+layout.key).attr('data-lid', layout.key) 
+                .addClass('cms-element brick')
                 .appendTo(container);
                 
         if(isEditMode){
@@ -155,7 +156,7 @@ console.log('!!!!');
         $d = $(document.createElement('div'));
         $d.attr('id','hl-'+layout.key).attr('data-lid', layout.key)
             .addClass('editable tinymce-body')
-            .addClass('cms-element')
+            .addClass('cms-element brick')
             .appendTo(container);
             
         if(!layout.css) layout.css = {};
@@ -191,7 +192,7 @@ console.log('!!!!');
         //add new one
         $d.attr('id','hl-'+layout.key).attr('data-lid', layout.key)
         .addClass('heurist-widget editable')
-        .addClass('cms-element');
+        .addClass('cms-element brick');
         
         
         if(!layout.css){
