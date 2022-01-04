@@ -82,12 +82,11 @@ function hLayoutMgr(){
         }
         
         if(!$.isArray(layout)){
-console.log('!!!!');
             layout = [layout];    
         }
 
         if(isFirstLevel===true && _supp_options && _supp_options.page_name){
-            layout[0].name  = _supp_options.page_name;
+            layout[0].name  = 'Page'; //_supp_options.page_name;
         }
         
         for(var i=0; i<layout.length; i++){

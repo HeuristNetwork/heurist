@@ -460,7 +460,7 @@ title: "Overview"
                         node.setTitle( newvalue ); 
                         _defineActionIcons( node );   
                     }
-                }                                w
+                }                                
                 if(page_cache[rec_id]) page_cache[rec_id][DT_NAME] = newvalue;
                 _refreshMainMenu( false ); //after Rename   
                 

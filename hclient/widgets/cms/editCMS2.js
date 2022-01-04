@@ -855,10 +855,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
     function _defineActionIcons(item, ele_ID, style_pos){ 
         if($(item).find('.lid-actionmenu').length==0){ //no one defined
 
-            if(!$(item).hasClass('fancytree-hide')){       
-                $(item).css('display','block');   
-            }
-
             ele_ID = ''+ele_ID;
             var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
 
@@ -867,6 +863,9 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 return;
             }
             var is_intreeview = $(item).hasClass('fancytree-node');
+            if(is_intreeview && !$(item).hasClass('fancytree-hide')){       
+                $(item).css('display','block');   
+            }
 
             var is_folder = node.folder;  //$(item).hasClass('fancytree-folder'); 
             var is_root = node.getParent().isRootNode();
@@ -878,7 +877,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             +'font-size:'+(is_intreeview?'12px;right:13px':'16px')+';font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' 
             //+ ele_ID
             + (is_intreeview?'<span class="ui-icon ui-icon-menu" style="width:20px"></span>'
-                            :'<span class="ui-icon ui-icon-gear" style="width:20px"></span>')
+                            :'<span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;background: rgb(201, 194, 249, 0.5);"></span>')
             + (true || is_root || is_cardinal?'':
                 ('<span data-action="drag" style="'+(false && is_intreeview?'':'display:block;')+'padding:4px" title="Drag to reposition">' //
                     + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"/>Drag</span>'))               
@@ -917,7 +916,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
                 actionspan.find('span[data-action]').hide();
                 actionspan.find('span.ui-icon-gear').click(function(event){
-console.log('!!!!');                    
+
                     var ele = $(event.target);
                     window.hWin.HEURIST4.util.stopEvent(event);
                     ele.hide();
@@ -991,9 +990,15 @@ console.log('!!!!');
 
             //hide gear icon and overlay on mouse exit
             function _onmouseexit(event){
+
+                var el = document.elementFromPoint(event.pageX, event.pageY);
+                if($(el).hasClass('ui-icon-gear')) return;
+
                 var node;
                 if($(event.target).hasClass('brick')){ 
+                    
                     node =  $(event.target);
+console.log('hide '+node.attr('data-lid'));
                     _layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-lid')+']').hide();
                     _layout_container.find('div[data-lid]').removeClass('cms-element-active');
                     
@@ -1023,10 +1028,12 @@ console.log('!!!!');
                         
                         //remove heighlight
                         _layout_container.find('div[data-lid]').removeClass('cms-element-active');
+                        _layout_container.find('.lid-actionmenu[data-lid]').hide();
                         
                         if(!_panel_propertyView.is(':visible'))
                             _layout_container.find('.cms-element-overlay').css('visibility','hidden');
                     }
+                    
                 }
             }               
 
@@ -1065,9 +1072,9 @@ console.log('!!!!');
                         }
 
                         //node =  $(event.target);
-
-                        _layout_container.find('.lid-actionmenu').hide(); //find other
-                        var ele = _layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-lid')+']');
+                        var ele_id = node.attr('data-lid');
+                        _layout_container.find('.lid-actionmenu[data-lid!='+ele_id+']').hide(); //find other
+                        var ele = _layout_container.find('.lid-actionmenu[data-lid='+ele_id+']');
 
                         var parent = node.parents('div.ui-layout-pane:first');
                         if(parent.length==0 || parent.parents('div[data-lid]').length==0){
@@ -1534,7 +1541,8 @@ console.log('!!!!');
             
             new_ele = {name:'Banner', type:'group', 
                     css:{display:'flex', 'justify-content':'center', 'align-items': 'center', 'min-height':'300px',
-                    'background-image': 'url('+imgs[k]+')', 'background-size':'auto', 'background-repeat': 'no-repeat',
+                    'background-image': 'url('+imgs[k]+')', 'bg-image': imgs[k], 
+                    'background-size':'auto', 'background-repeat': 'no-repeat',
                     'background-position': 'center'},
                 children:[
                     new_ele
@@ -1792,10 +1800,12 @@ console.log('!!!!');
                         
                         //window.hWin.HEURIST4.msg.showMsgFlash('saved');
 
+                        /* 2022-01-04 IJ does not want direct name of web page title
                         if(_editCMS_SiteMenu && newname!=page_cache[options.record_id][DT_NAME]) {
                             body.find('.treePageHeader > h2').text( newname ); 
                             _editCMS_SiteMenu.renameMenuEntry(options.record_id, newname);
                         }
+                        */
                         
                         if($.isFunction(callback)) callback.call(this);
                     }

@@ -191,124 +191,6 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         }
 
         
-        //
-        //
-        //
-        function __getCss(){
-            var css = {};
-            if(cont.find('#display').val()=='flex'){
-                css['display'] = 'flex';
-                
-                cont.find('.flex-select').each(function(i,item){
-                    if($(item).val()){
-                        css[$(item).attr('id')] = $(item).val();       
-                    }
-                });
-            }else if(cont.find('#display').val()=='table'){
-                css['display'] = 'table';
-            }else{
-                css['display'] = 'block';
-            }
-            
-            //style - border
-            var val = cont.find('#border-style').val();
-            css['border-style'] = val;
-            
-            fieldset = cont.find('fieldset[data-section="border"] > div:not(:first)');
-            if(val=='none'){
-                fieldset.hide();
-                
-            }else{
-                fieldset.css('display','table-row');
-                
-                cont.find('input[name^="border-"]').each(function(i,item){
-                    if($(item).val()){
-                        css[$(item).attr('name')] = $(item).val()
-                            +($(item).attr('type')=='number'?'px':'');       
-                    }
-                });
-                
-                if(!css['border-width']) css['border-width'] = '1px';
-                if(!css['border-color']) css['border-color'] = 'black';
-            }
-
-            //style - background
-            val = cont.find('input[name="background"]').is(':checked');
-            fieldset = cont.find('fieldset[data-section="background"] > div:not(:first)');
-            if(!val){
-                fieldset.hide();
-                css['background'] = 'none';
-            }else{
-
-                fieldset.css('display','table-row');
-                val = cont.find('input[name^="background-color"]').val();
-                if(val) css['background-color'] = val;
-                
-                val = cont.find('input[name^="background-image"]').val();
-                if(val){
-                    css['background-image'] = val;  
-                    val = cont.find('select[name^="background-position"]').val();
-                    css['background-position'] = val;  
-                    val = cont.find('select[name^="background-repeat"]').val();
-                    css['background-repeat'] = val;  
-                } 
-            }
-
-            
-            function __setDim(name){
-                var ele = cont.find('input[name="'+name+'"]');
-                var val = ele.val();
-                if( (val!='' || val!='auto') && parseInt(val)>0){
-                    if(!(val.indexOf('%')>0 || val.indexOf('px')>0)){
-                        val = val + 'px';
-                    }
-                    css[name] = val;
-                }
-            }
-            
-            __setDim('width');
-            __setDim('height');
-            
-            if(margin_mode_full){
-                __setDim('margin-left');
-                __setDim('margin-top');
-                __setDim('margin-bottom');
-                __setDim('margin-right');
-                __setDim('padding-left');
-                __setDim('padding-top');
-                __setDim('padding-bottom');
-                __setDim('padding-right');
-            }else{
-                __setDim('margin');
-                __setDim('padding');
-            }
-            
-            if(l_cfg.css){
-                var old_css = l_cfg.css;
-                var params = ['display','width','height',
-                        'padding','padding-left','padding-top','padding-bottom','padding-right',
-                        'margin','margin-left','margin-top','margin-bottom','margin-right',
-                        'background',
-                        'flex-direction','flex-wrap','justify-content','align-items','align-content'];
-                for(var i=0; i<params.length; i++){
-                    var prm = params[i];
-                    if (old_css[prm]){ //drop old value
-                        old_css[prm] = null;
-                        delete old_css[prm];
-                    };
-                }
-                css = $.extend(old_css, css);
-            }
-            
-            l_cfg.css = css;
-            _assignCssTextArea();
-//console.log(css);  
-            element.removeAttr('style');
-            element.css(css);
-
-            return css;
-        }
-        
         //4. listeners for selects    
         cont.find('select').hSelect({change:function(event){
             
@@ -325,7 +207,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                     cont.find('.flex-select').each(function(i,item){ $(item).parent().hide(); })
                 }
             }
-            __getCss();
+            _getCss();
             
             //var css = 
             //element.removeAttr('style');
@@ -336,11 +218,11 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
 
 
         //4b. listeners for styles (border,bg,margin)
-        cont.find('input[data-type="css"]').change(__getCss);
-        cont.find('input[data-type="css"]').change(__getCss);
-        cont.find('input[name="background"]').change(__getCss);
+        cont.find('input[data-type="css"]').change(_getCss);
+        cont.find('input[data-type="css"]').change(_getCss);
+        cont.find('input[name="background"]').change(_getCss);
         /*
-            var css = __getCss();
+            var css = _getCss();
             //element.removeAttr('style');
             //element.css(css);
         });*/
@@ -358,7 +240,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         
         cont.find('.btn-ok').button().css('border-radius','4px').click(function(){
             //5. save in layout cfg        
-            var css = __getCss();
+            var css = _getCss();
             l_cfg.css = css;
             l_cfg.name = cont.find('input[data-type="element-name"]').val();
             l_cfg.title = '<span data-lid="'+l_cfg.key+'">'+l_cfg.name+'</span>';
@@ -447,6 +329,128 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
     //
     //
     //
+    function _getCss()
+    {
+        var cont = $container;
+        var css = {};
+        if(cont.find('#display').val()=='flex'){
+            css['display'] = 'flex';
+
+            cont.find('.flex-select').each(function(i,item){
+                if($(item).val()){
+                    css[$(item).attr('id')] = $(item).val();       
+                }
+            });
+        }else if(cont.find('#display').val()=='table'){
+            css['display'] = 'table';
+        }else{
+            css['display'] = 'block';
+        }
+
+        //style - border
+        var val = cont.find('#border-style').val();
+        css['border-style'] = val;
+
+        fieldset = cont.find('fieldset[data-section="border"] > div:not(:first)');
+        if(val=='none'){
+            fieldset.hide();
+
+        }else{
+            fieldset.css('display','table-row');
+
+            cont.find('input[name^="border-"]').each(function(i,item){
+                if($(item).val()){
+                    css[$(item).attr('name')] = $(item).val()
+                    +($(item).attr('type')=='number'?'px':'');       
+                }
+            });
+
+            if(!css['border-width']) css['border-width'] = '1px';
+            if(!css['border-color']) css['border-color'] = 'black';
+        }
+
+        //style - background
+        val = cont.find('input[name="background"]').is(':checked');
+        fieldset = cont.find('fieldset[data-section="background"] > div:not(:first)');
+        if(!val){
+            fieldset.hide();
+            css['background'] = 'none';
+        }else{
+
+            fieldset.css('display','table-row');
+            val = cont.find('input[name="background-color"]').val();
+            if(val) css['background-color'] = val;
+
+            val = cont.find('input[name="background-image"]').val();
+            if(val){
+                css['background-image'] = val;  
+                css['bg-image'] = cont.find('input[name="bg-image"]').val();
+                val = cont.find('select[name="background-position"]').val();
+                css['background-position'] = val;  
+                val = cont.find('select[name="background-repeat"]').val();
+                css['background-repeat'] = val;  
+            } 
+        }
+
+
+        function __setDim(name){
+            var ele = cont.find('input[name="'+name+'"]');
+            var val = ele.val();
+            if( (val!='' || val!='auto') && parseInt(val)>0){
+                if(!(val.indexOf('%')>0 || val.indexOf('px')>0)){
+                    val = val + 'px';
+                }
+                css[name] = val;
+            }
+        }
+
+        __setDim('width');
+        __setDim('height');
+
+        if(margin_mode_full){
+            __setDim('margin-left');
+            __setDim('margin-top');
+            __setDim('margin-bottom');
+            __setDim('margin-right');
+            __setDim('padding-left');
+            __setDim('padding-top');
+            __setDim('padding-bottom');
+            __setDim('padding-right');
+        }else{
+            __setDim('margin');
+            __setDim('padding');
+        }
+
+        if(l_cfg.css){
+            var old_css = l_cfg.css;
+            var params = ['display','width','height',
+                'padding','padding-left','padding-top','padding-bottom','padding-right',
+                'margin','margin-left','margin-top','margin-bottom','margin-right',
+                'background','background-image','bg-image',
+                'flex-direction','flex-wrap','justify-content','align-items','align-content'];
+            for(var i=0; i<params.length; i++){
+                var prm = params[i];
+                if (old_css[prm]){ //drop old value
+                    old_css[prm] = null;
+                    delete old_css[prm];
+                };
+            }
+            css = $.extend(old_css, css);
+        }
+
+        l_cfg.css = css;
+        _assignCssTextArea();
+        //console.log(css);  
+        element.removeAttr('style');
+        element.css(css);
+
+        return css;
+    }
+
+
+    //
+    //
+    //
     function _onMarginMode(){
         var cont = $container;
         var btn = cont.find('.margin-mode');
@@ -460,7 +464,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             cont.find('.margin-full').hide();
         }
     }
-    
+
     //
     //
     //
@@ -523,9 +527,16 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             });
 
             //init file picker
+            cont.find('input[name="bg-image"]')
+                    .click(_selecHeuristMedia);
             cont.find('#btn-background-image').button()
                     .css({'font-size':'0.7em'})
                     .click(_selecHeuristMedia);
+
+            cont.find('#btn-background-image-clear')
+                    .button() //{icon:'ui-icon-close',showLabel:false})
+                    .css({'font-size':'0.7em'})
+                    .click(_clearBgImage);
             
             //init color pickers
             cont.find('input[name$="-color"]').colorpicker({
@@ -669,6 +680,14 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                 },500);
     }
     
+    function _clearBgImage(){
+        $container.find('input[name="background-image"]').val('');
+        $container.find('input[name="bg-image"]').val('');
+        
+        _getCss();
+        _enableSave();
+    }
+    
     //
     //
     //
@@ -690,14 +709,21 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                         var recordset = data.selection;
                         var record = recordset.getFirstRecord();
-
-                        //always add media as reference to production version of heurist code (not dev version)
-                        var sUrl = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
-                        +"&file="+recordset.fld(record,'ulf_ObfuscatedFileID');
+                        
+                        var sUrl = recordset.fld(record,'ulf_ExternalFileReference');
+                        if(!sUrl){
+                            //always add media as reference to production version of heurist code (not dev version)
+                            var sUrl = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
+                            +"&file="+recordset.fld(record,'ulf_ObfuscatedFileID');
+                            $container.find('input[name="bg-image"]').val(recordset.fld(record,'ulf_OrigFileName'));
+                        }else{
+                            $container.find('input[name="bg-image"]').val(sUrl);
+                        }
                         
                         sUrl = 'url(\'' + sUrl + '\')';
                         $container.find('input[name="background-image"]').val(sUrl);
                         
+                        _getCss();
                         _enableSave();
 
                     }
