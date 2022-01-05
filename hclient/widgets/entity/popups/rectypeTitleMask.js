@@ -222,7 +222,8 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         var that = this;
 
         //verify text title mask    
-        var mask = this.element.find('#rty_TitleMask').val();
+        var mask = this.element.find('#rty_TitleMask').val().replace(/  +/g, ' '); // condense multiple spaces into one /[\t ]+/g
+        this.element.find('#rty_TitleMask').val(mask);
 
         var baseurl = window.hWin.HAPI4.baseURL + "hsapi/controller/rectype_titlemask.php";
 
@@ -279,7 +280,9 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         var that = this;
         
         //verify text mask 
-        var mask = this.element.find('#rty_TitleMask').val();
+        var mask = this.element.find('#rty_TitleMask').val().replace(/  +/g, ' '); // condense multiple spaces into one
+        this.element.find('#rty_TitleMask').val(mask);
+
         var baseurl = window.hWin.HAPI4.baseURL + 'hsapi/controller/rectype_titlemask.php';
 
         var request = {rty_id:that.options.rty_ID, mask:mask, db: window.hWin.HAPI4.database, check:1}; //verify titlemask
