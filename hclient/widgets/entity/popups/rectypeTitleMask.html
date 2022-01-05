@@ -13,7 +13,7 @@
                 <label id="selectAll_container" style="font-size: 11px;"><input type="checkbox" id="selectAll">Select All Visible Options</label>
             </div>
 
-            <div style="position:absolute;top:72px;bottom:0px;left:0px;width:220px;outline: none;margin-top:-8px;overflow:auto">
+            <div style="position:absolute;top:72px;bottom:0px;left:0px;width:220px;height:445px;outline: none;margin-top:-8px;overflow:auto">
                 <div id="rectype_tree" class="rtt-tree tree-facets"></div>
             </div>
         </div>
@@ -48,8 +48,10 @@
                 <div style="text-align:left; padding-top:20px;padding-bottom:1px;padding-left: 20px;">
                     <b>Build Mask:</b> &nbsp;&nbsp;&nbsp; <button id="btnInsertField" style="width:60px;">Insert fields</button>
                     &nbsp;&nbsp;<span class="heurist-helper2">Select fields in tree and click button to insert in mask at cursor position</span>
-                    <br/>&nbsp;<br/>
-                    <textarea cols="550" id="rty_TitleMask" rows="5" style="font-size:1em;width:550px;"></textarea><br/>
+                    <br/>
+                    <span class="heurist-helper2" style="display: inline-block;padding:10px 0px;">For legibility we strongly advise splitting field specifications onto separate lines (which will be combined in the result)</span>
+                    <br/>
+                    <textarea cols="550" id="rty_TitleMask" rows="10" style="font-size:1em;width:550px;"></textarea><br/>
                     <br>
                 </div>
 

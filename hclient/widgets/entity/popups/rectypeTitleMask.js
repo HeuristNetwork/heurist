@@ -175,7 +175,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             
             if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
 
-            _text = _text + ' ['+node.data.code+'] '; //node.data.full_path
+            _text = _text + '['+node.data.code+']\r\n'; //node.data.full_path
             
             //DEBUG console.log( node.data.code );
         }
