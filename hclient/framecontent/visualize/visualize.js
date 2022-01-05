@@ -632,11 +632,11 @@ function addMarkerDefinitions() {
     // *** Marker Mid ***
     markers.append('svg:marker') // Single arrow, pointing from field to rectype (for resources/pointers)
            .attr('id', 'marker-ptr-mid')
-           .attr("markerWidth", 20)
-           .attr("markerHeight", 20)
+           .attr("markerWidth", 30)
+           .attr("markerHeight", 30)
            .attr("refX", -1)
            .attr("refY", 0)
-           .attr("viewBox", [-10, -10, 20, 20])
+           .attr("viewBox", [-20, -20, 30, 30])
            .attr("markerUnits", "userSpaceOnUse")
            .attr("orient", "auto")
            .attr("fill", markercolor)
@@ -646,11 +646,11 @@ function addMarkerDefinitions() {
 
     markers.append('svg:marker') // Double arrows, pointing opposite directions (for relmarkers)
            .attr('id', 'marker-rel-mid')
-           .attr("markerWidth", 20)
-           .attr("markerHeight", 20)
+           .attr("markerWidth", 30)
+           .attr("markerHeight", 30)
            .attr("refX", -1)
            .attr("refY", 0)
-           .attr("viewBox", [-10, -10, 20, 20])
+           .attr("viewBox", [-20, -20, 30, 30])
            .attr("markerUnits", "userSpaceOnUse")
            .attr("orient", "auto")
            .attr("fill", markercolor)
@@ -658,26 +658,26 @@ function addMarkerDefinitions() {
            .append("path")                
            .attr("d", 'M2,-5 L10,0 L2,5 M-2,-5 L-10,0 L-2,5');
 
-    markers.append("svg:marker") // Large and Small (child records) single arrows, pointing in opposite directions
+    markers.append("svg:marker") // Large and Small (child records) single arrows, pointing at each other
            .attr("id", "marker-childptr-mid")
-           .attr("markerWidth", 20)
-           .attr("markerHeight", 20)
+           .attr("markerWidth", 40)
+           .attr("markerHeight", 40)
            .attr("refX", -1)
            .attr("refY", 0)
-           .attr("viewBox", [-10, -10, 20, 20])
+           .attr("viewBox", [-30, -30, 40, 40])
            .attr("markerUnits", "userSpaceOnUse")
            .attr("orient", "auto")
            .attr("fill", markercolor)
            .attr("opacity", 0.6)
            .append("path")
-           .attr("d", 'M0,5 L10,0 L0,-5 M-9,3 L-17,0 L-9,-3');
+           .attr("d", 'M-30,5 L-20,0 L-30,-5 M6,3 L-2,0 L6,-3');
 
     // *** Marker-End ***
     markers.append('svg:marker') // Single arrow, pointing from field to rectype (for resources/pointers)
            .attr('id', 'marker-ptr-end')
            .attr("markerWidth", 30)
            .attr("markerHeight", 30)
-           .attr("refX", 15)
+           .attr("refX", 50)
            .attr("refY", 0)
            .attr("viewBox", [-20, -20, 30, 30])
            .attr("markerUnits", "userSpaceOnUse")
@@ -691,7 +691,7 @@ function addMarkerDefinitions() {
            .attr('id', 'marker-rel-end')
            .attr("markerWidth", 30)
            .attr("markerHeight", 30)
-           .attr("refX", 15)
+           .attr("refX", 50)
            .attr("refY", 0)
            .attr("viewBox", [-20, -20, 30, 30])
            .attr("markerUnits", "userSpaceOnUse")
@@ -701,19 +701,19 @@ function addMarkerDefinitions() {
            .append("path")                
            .attr("d", 'M2,-5 L10,0 L2,5 M-2,-5 L-10,0 L-2,5');
 
-    markers.append("svg:marker") // Large and Small (child records) single arrows, pointing in opposite directions
+    markers.append("svg:marker") // Large and Small (child records) single arrows, pointing at each other
            .attr("id", "marker-childptr-end")
-           .attr("markerWidth", 30)
-           .attr("markerHeight", 30)
-           .attr("refX", 15)
+           .attr("markerWidth", 40)
+           .attr("markerHeight", 40)
+           .attr("refX", 20)
            .attr("refY", 0)
-           .attr("viewBox", [-20, -20, 30, 30])
+           .attr("viewBox", [-30, -30, 40, 40])
            .attr("markerUnits", "userSpaceOnUse")
            .attr("orient", "auto")
            .attr("fill", markercolor)
            .attr("opacity", 0.6)
            .append("path")
-           .attr("d", 'M0,5 L10,0 L0,-5 M-9,3 L-17,0 L-9,-3');
+           .attr("d", 'M-30,5 L-20,0 L-30,-5 M6,3 L-2,0 L6,-3');
 
     // *** Misc ***
     markers.append("svg:marker") // Circle blob, for end of lines/extra connectors
