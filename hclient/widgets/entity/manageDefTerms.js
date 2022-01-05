@@ -1663,7 +1663,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             //request['trm_parentID'] = fields['trm_ParentTermID'];
         }
 
-        if(this._currentEditID == -1 && this.options.auxilary == 'vocabulary'){ // add 'vocab' to the end of new vocabulary
+        if(this._currentEditID == -1 && this.options.auxilary == 'vocabulary' && !fields['trm_Label'].endsWith(' vocab')){ // add 'vocab' to the end of new vocabulary
             fields['trm_Label'] += ' vocab';
         }
 
