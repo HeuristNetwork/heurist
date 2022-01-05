@@ -526,7 +526,7 @@ if(!$format) $format='csv';
             <label><input type="checkbox" id="sa_ignore_errors" class="text">&nbsp;
             Ignore validation. Add data "as is"</label>
 
-            <span style="padding-left: 200px;display:none;" id="presetMapping">Use mapping from other sessions: <select id="sel_presetMapping"></select></span>
+            <span style="padding-left: 230px;display:none;" id="presetMapping">Use previous mapping: <select id="sel_presetMapping"></select></span>
         </div>
         <div  id="divPrepareSetting" class="step4 step-ctrls" style="display:none;top:220px">
             <div class="heurist-helper1" id="divPrepareSettingHelp" style="display:block;">
