@@ -94,7 +94,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         this._super();
         
-        if(this.recordList.is(':visible') && this.options.auxilary=='term')
+        if(this.recordList.is(':visible') && this.options.auxilary=='term' && this.options.select_mode == 'manager')
         this.space_for_drop = $('<span class="space_for_drop heurist-helper3" '
                         +'style="position:absolute;top:80px;text-align:left;left:0;right:0;font-size: 0.8em;display:block;margin:0px;padding:5px 0 0 3px;background:white">'
                         +'<span class="ui-icon ui-icon-arrowthick-1-e"/>&nbsp;top</span>') //drop here to move term to top level&nbsp;<span class="ui-icon ui-icon-arrowthick-1-w"/>
@@ -704,7 +704,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 change:function(event){
                     this.options.trm_VocabularyID = $(event.target).val();
                     this._filterByVocabulary();
-            } }); 
+            } });
+            this.vocabularies_sel.css('margin', '10px 0px 0px 17px');
 
             this.options.trm_VocabularyID = this.options.initial_filter;
 
@@ -719,7 +720,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             if( !window.hWin.HEURIST4.util.isempty(this.options.select_mode_reference) ){
                 this.searchForm.css('height','7.5em');
-                this.recordList.css('top','7.5em');
+                this.recordList.css('top','8.5em');
                 this.options.recordList.transparent_background = true;
                 this.options.recordList.recordDivEvenClass = null;
                 //this.recordList.removeClass('ui-heurist-bg-light').css({'background':'none','border':'none'});
