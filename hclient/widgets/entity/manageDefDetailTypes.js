@@ -778,8 +778,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         window.hWin.HEURIST4.ui.addoption(el, 'freetext',  $Db.baseFieldType['freetext']);
                     }else if(_dty_Type=='freetext'){
                         window.hWin.HEURIST4.ui.addoption(el, 'blocktext',  $Db.baseFieldType['blocktext']);
+                        window.hWin.HEURIST4.ui.addoption(el, 'date',  $Db.baseFieldType['date']);
+                        window.hWin.HEURIST4.ui.addoption(el, 'float',  $Db.baseFieldType['float']);
                     }else if(_dty_Type=='blocktext'){
                         window.hWin.HEURIST4.ui.addoption(el, 'freetext',  $Db.baseFieldType['freetext']);
+                        window.hWin.HEURIST4.ui.addoption(el, 'date',  $Db.baseFieldType['date']);
+                        window.hWin.HEURIST4.ui.addoption(el, 'float',  $Db.baseFieldType['float']);
                     }else{
                         el.disabled = true;
                     }
