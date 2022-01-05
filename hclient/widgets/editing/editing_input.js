@@ -291,18 +291,29 @@ $.widget( "heurist.editing_input", {
             'margin-bottom': '0.2em'})
         .appendTo( this.input_cell );
 
-        //add prompt
+        //add prompt/help text
         var help_text = window.hWin.HEURIST4.ui.getRidGarbageHelp(this.f('rst_DisplayHelpText'));
         
         this.input_prompt = $( "<div>")
-        .html( help_text && !this.options.suppress_prompts ?help_text:'' )
-        .addClass('heurist-helper1').css('padding','0.2em 0');
-        // we use applyCompetencyLevel from now
-        //if(window.hWin.HAPI4.get_prefs('help_on')!=1){
-        //    this.input_prompt.hide();
-        //}
+            .html( help_text && !this.options.suppress_prompts ?help_text:'' )
+            .addClass('heurist-helper1').css('padding','0.2em 0');
         this.input_prompt.appendTo( this.input_cell );
 
+        // Add extended description, if available, viewable via clicking more... and collapsible with less...
+        var extend_help_text = this.f('rst_DisplayExtendedDescription');
+        if(help_text && !this.options.suppress_prompts 
+            && extend_help_text && this.options.recordset && this.options.recordset.entityName == 'Records'){
+
+            var $extend_help_eles = $("<span id='show_extended' style='color:blue;cursor:pointer;'> more...</span>"
+                + "<span id='extended_help' style='display:none;font-style:italic;'><br>"+ extend_help_text +"</span>"
+                + "<span id='hide_extended' style='display:none;color:blue;cursor:pointer;'> less...</span>")
+                .appendTo(this.input_prompt);
+
+            // Toggle extended description
+            $extend_help_eles.on('click', function(event){
+                $extend_help_eles.toggle();
+            });
+        }
 
         //values are not defined - assign default value
         var values_to_set;
