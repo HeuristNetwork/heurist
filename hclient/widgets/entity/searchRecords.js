@@ -36,7 +36,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             if(!window.hWin.HEURIST4.util.isArray(rt_list)){
                 rt_list = rt_list.split(',');
             }
-            is_expand_rt_list = (rt_list.length>1 && rt_list.length<10);
+            is_expand_rt_list = (rt_list.length>1 && rt_list.length<20);
             is_only_rt = (rt_list.length==1);
         }else{
             rt_list = [];
@@ -55,7 +55,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         
         var is_browse = (that.options.pointer_mode == 'browseonly');
         if(that.options.pointer_mode != 'addorbrowse'){
-            $('#row_helper > .heurist-helper1').css('visibility','hidden');    
+            $('#row_helper > .heurist-helper1').css('visibility','hidden');
+            $('#addrec_helper > .heurist-helper1').css('visibility','hidden');
         }
         if(that.options.pointer_mode == 'addonly'){
             this.element.find('.not-addonly').hide();
@@ -90,15 +91,14 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 
                 var rectypeID = rt_list[idx];
                 var name = $Db.rty(rectypeID,'rty_Name');
-                if(window.hWin.HEURIST4.util.isObject(name)) continue;
-                var label = (is_browse?'':window.hWin.HR('Add'))+' '+ name.trim();
+                var label = name.trim();
                 if(!name) continue;
                 
                 $('<button>')
                     .button({label: label, 
                              icon: is_browse?'ui-icon-search':"ui-icon-plus"})
                     .attr({'data-rtyid': rectypeID, 'title': label})
-                    .css({'font-size':'10px',display:'inline-block',width:190,'text-align':'left','margin':'6px 0px 3px 8px','text-transform':'none'})
+                    .css({'font-size':'10px',display:'inline-block',width:100,'text-align':'left','margin':'6px 0px 3px 8px','text-transform':'none'})
                     .addClass('truncate ui-button-action')
                     .click(function(e) {
                         
@@ -176,6 +176,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 }else if (is_browse) {
                     this.element.find('#row_addbtn').hide();
                     this.element.find('#row_helper').hide();
+                    this.element.find('#addrec_helper').hide();
                 }
             }
         
