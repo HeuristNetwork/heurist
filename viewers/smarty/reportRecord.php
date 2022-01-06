@@ -164,7 +164,7 @@ class ReportRecord {
     //
     // $rec - record id or record array - record to find records linked to or from this record
     // $rtyt_ID - record type or array of record type to filter output
-    // $direction - linkedfrom or linkedto or null to return  both direcctions
+    // $direction - linkedfrom or linkedto or null to return  both directions
     // returns array of record IDs devided to 2 arrays "linkedto" and "linkedfrom"
     //
     public function getLinkedRecords($rec, $rty_ID=null, $direction=null, $smarty_obj=null){
@@ -198,7 +198,7 @@ class ReportRecord {
             $to_records = array();
             $from_records = array();
             
-            if($direction==null || $direction=='linkedfrom'){
+            if($direction==null || $direction=='linkedto'){
                 // get linked records where current record is source
                 $from_query = 'SELECT rl_TargetID as linkID FROM recLinks '
                     .str_replace('linkID','rl_TargetID',$where).' rl_RelationID IS NULL AND rl_SourceID='.$rec_ID;
@@ -206,7 +206,7 @@ class ReportRecord {
                $to_records = mysql__select_list2($mysqli, $from_query);     
             }
 
-            if($direction==null || $direction=='linkedto'){
+            if($direction==null || $direction=='linkedfrom'){
                 // get linked records where current record is target
                 $to_query = 'SELECT rl_SourceID as linkID FROM recLinks '
                     .str_replace('linkID','rl_SourceID',$where).' rl_RelationID IS NULL AND rl_TargetID='.$rec_ID;
