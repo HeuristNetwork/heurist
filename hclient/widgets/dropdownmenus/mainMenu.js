@@ -267,7 +267,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART,
             function(e, data) {
                 if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
-                    if(data) {
+                    if(data && !data.search_realm) {
                         var query_request = data;
 
                         that._current_query_string = '&w='+query_request.w;
@@ -288,6 +288,23 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
     }, //end _create
 
+    _getCountWebPageRecords: function(callback){
+    
+        var RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
+        DT_CMS_PAGETYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETYPE'];
+        
+        var query_search_pages = {t:RT_CMS_MENU}
+        query_search_pages['f:'+DT_CMS_PAGETYPE] = window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE'];
+    
+        var request = {q:query_search_pages, w: 'a', detail: 'count', source:'_getCountWebPageRecords' };
+        window.hWin.HAPI4.RecordMgr.search(request, function(response){
+            if(response.status == window.hWin.ResponseStatus.OK){
+                callback.call(this, response.data.count);
+            }
+        });
+        
+    },
+    
      //
      //
      //   
@@ -848,13 +865,35 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         popup_dialog_options.webpage_private = is_private;
                         
                         window.hWin.HEURIST4.ui.showEditCMSDialog(popup_dialog_options); 
-                    },'New website',
+                    },
+                    window.hWin.HR('New website'),
                     {default_palette_class: 'ui-heurist-publish'});
 
                 }
             );
 
+        }
+        else if(action == "menu-cms-create-page"){
+            
+                that._create_WebPage( popup_dialog_options );    
 
+        }else if(action == 'menu-cms-edit-page' || action == 'menu-cms-view-page'){
+                
+                popup_dialog_options.is_new_editor = true;    
+                if(popup_dialog_options.record_id>0){
+                        window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options );                    
+                }else{
+                    that._getCountWebPageRecords(function( count ){
+                        if(count>0){ 
+                            //select
+                            that._select_WebPage( (action == 'menu-cms-view-page'), popup_dialog_options );    
+                        }else{
+                            //create
+                            that._create_WebPage( popup_dialog_options );    
+                        }
+                    });
+                }
+                    
         }else if(action && action.indexOf('menu-cms-edit')===0){
 
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
@@ -895,7 +934,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 
                 }
 
-        }else if(action == "menu-cms-view"){
+        }
+        else if(action == "menu-cms-view"){
 
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
                 that._getCountWebSiteRecords(function(){
@@ -922,7 +962,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     }
                 });
 
-        }else if(action == "menu-cms-embed"){ //create new standalone webpage
+        }
+        else if(action == "menu-cms-embed"){ //create new standalone webpage
 
             window.hWin.HEURIST4.ui.showRecordActionDialog('embedDialog', 
                                 {cms_popup_dialog_options:popup_dialog_options, path: 'widgets/cms/',title:'Web Page' });
@@ -1722,8 +1763,98 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     
     },
 
-    
+
+    // @todo - move to editCMS_Records
     //
+    //
+    _create_WebPage: function( popup_dialog_options )
+    {
+        var $dlg = window.hWin.HEURIST4.msg.showPrompt(
+            window.hWin.HR('Name for new page')+':',
+            function(value){ 
+
+                popup_dialog_options.record_id = -2;
+                popup_dialog_options.webpage_title = value;
+                popup_dialog_options.is_new_editor = true;
+
+                if(window.hWin.HEURIST4.util.isempty(value)){
+
+                    window.hWin.HEURIST4.msg.showMsgFlash('Specify name',1000);
+
+                }else{
+                    //$dlg
+                    //create new web page
+                    window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options );
+                }
+            },                    
+            window.hWin.HR('New standalone web page'),
+            {default_palette_class: 'ui-heurist-publish'});
+    },
+    
+    //@todo - move to editCMS_Records
+    //
+    //
+    _select_WebPage: function ( is_view_mode, popup_dialog_options ){
+        
+        var RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
+        DT_CMS_PAGETYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETYPE'];
+        
+        var query_search_pages = {t:RT_CMS_MENU}
+        query_search_pages['f:'+DT_CMS_PAGETYPE] = window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE'];
+        
+        var that = this;
+        
+        var popup_options = {
+                        select_mode: 'select_single', //select_multi
+                        select_return_mode: 'recordset',
+                        edit_mode: 'popup',
+                        selectOnSave: true, //it means that select popup will be closed after add/edit is completed
+                        title: window.hWin.HR('Select or create a standalone web page'),
+                        fixed_search: query_search_pages, // RT_CMS_MENU,
+                        parententity: 0,
+                        title: window.hWin.HR('Select Web page'),
+                        
+                        layout_mode: 'listonly',
+                        width:500, height:400,
+                        default_palette_class: 'ui-heurist-publish',
+                        
+                        resultList:{
+                            show_toolbar: false,
+                            view_mode:'icons',
+                            searchfull:null,
+                            //search_realm: '_select_WebPage',
+                            //search_initial: , 
+                            renderer:function(recordset, record){
+                                var recID = recordset.fld(record, 'rec_ID')
+                                var recTitle = recordset.fld(record, 'rec_Title'); 
+                                var recTitle_strip_all = window.hWin.HEURIST4.util.htmlEscape(recTitle);
+                                var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'+recTitle_strip_all+'</div>';
+                                return html;
+                            }
+                        },
+                        
+                        onselect:function(event, data){
+                                 if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                    var recordset = data.selection;
+                                    var rec_ID = recordset.getOrder()[0];
+                                    
+                                    if(is_view_mode){
+                                        that._openCMS(rec_ID);
+                                    }else{
+                                        popup_dialog_options.record_id = rec_ID;
+                                        window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options );    
+                                    }
+                                    
+                                 }
+                        }
+        };//popup_options
+        
+        window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
+        
+        
+    },
+    
+    //@todo - move to editCMS_Records
     // show popup with list of web home records - on select either view or edit
     //                
     _select_CMS_Home: function ( is_view_mode, popup_dialog_options ){
@@ -1731,7 +1862,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
         if(!(RT_CMS_HOME>0)){
             window.hWin.HEURIST4.msg.showMsgDlg('This function is still in development. You will need record types '
-                +'99-51, 99-52 and 99-53 which will be made available as part of Heurist_Reference_Set. '
+                +'99-51 and 99-52 which will be made available as part of Heurist_Reference_Set. '
                 +'You may contact support@HeuristNetwork.org if you want to test out this function prior to release.');
             return;
         }
@@ -1758,7 +1889,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         title: window.hWin.HR('Select or create a website home record'),
                         rectype_set: RT_CMS_HOME,
                         parententity: 0,
-                        title: 'Select Website',
+                        title: window.hWin.HR('Select Website'),
                         
                         layout_mode: 'listonly',
                         width:500, height:400,
@@ -1797,7 +1928,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
     }, 
     
-    //
+    //@todo - move to editCMS_Records
     // force_production_version
     // 
     _openCMS: function(rec_ID, force_production_version){
@@ -1806,7 +1937,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         if(force_production_version===true){
 
-            //replace devlopment folder to production on e(ie h5-ij to heurist)
+            //replace devlopment folder to production one (ie h6-ij to heurist)
             url = url.split('/');
             var i = url.length-1;
             while(i>0 && url[i]=='') i--;

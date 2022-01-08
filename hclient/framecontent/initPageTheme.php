@@ -126,7 +126,7 @@ function uout($idx, $def){
 textarea.ui-widget-content, input.ui-widget-content, select.ui-widget-content{
     background: <?php uout('cd_input', '#F4F2F4');?> !important; /*0511 !important;*/
 }
-.ui-widget-content {
+.ui-widget-content, .ui-widget-content-gray {
     border: 1px solid <?php uout('cd_bg', '#e0dfe0');?>; 
     background: <?php uout('cd_bg', '#e0dfe0');?>;
     color: <?php uout('cd_color', '#333333');?>;

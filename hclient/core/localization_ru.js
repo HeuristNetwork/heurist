@@ -327,7 +327,7 @@ regional['ru'] = {
         menu_cms_edit: 'Править',
         menu_cms_edit_new: 'Править (новое)',
         menu_cms_view: 'Просмотр',
-        menu_cms_embed: 'Одиночная веб страница',
+        menu_cms_embed: 'Отдельная веб страница',
         menu_cms_create_hint: 'Create a new CMS website, stored in this database, with widgets to access data in the database',
         menu_cms_edit_hint: 'Edit a CMS website defined in this database',
         menu_cms_view_hint: 'View a CMS website defined in this database',
@@ -336,7 +336,12 @@ regional['ru'] = {
         'Website Editor': 'Редактор вебсайта',
         'Sitewide Settings': 'Настройки сайта',
         'Current Page': 'Текущая страница',
-        'Page Editor': 'Редактор страницы',
+       'Page Editor': 'Редактор страницы',
+       
+    'Standalone page': 'Отдельная веб страница',
+        menu_cms_create_page: 'Создать',
+        menu_cms_edit_page: 'Править',
+        menu_cms_view_page: 'Просмотр',
         
     'Export': 'Экспорт',
         menu_export_csv: 'CSV',

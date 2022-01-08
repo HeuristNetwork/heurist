@@ -239,6 +239,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
        this._trigger( "onstart" ); //trigger ajust          
         
+       if(this.options.fixed_search) this.startSearch() 
     },  
 
     //
@@ -350,6 +351,10 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                             (this.options.pointer_filter?this.options.pointer_filter:''));
         }
         
+        if(this.options.fixed_search){
+            qstr = 'x';
+            qobj = this.options.fixed_search;
+        }
         
         if(qstr==''){
             this._trigger( "onresult", null, {recordset:new hRecordSet()} );

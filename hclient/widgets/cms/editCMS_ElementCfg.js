@@ -242,7 +242,8 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             //5. save in layout cfg        
             var css = _getCss();
             l_cfg.css = css;
-            l_cfg.name = cont.find('input[data-type="element-name"]').val();
+            l_cfg.name = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-name"]').val());
+            if(!l_cfg.name) l_cfg.name = 'Define name of element';
             l_cfg.title = '<span data-lid="'+l_cfg.key+'">'+l_cfg.name+'</span>';
             
         
@@ -743,8 +744,6 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         
         if(!$container.find('.btn-ok').prop('disabled')){
             
-            var msg = 'Element has been modified';
-            
             var $dlg;
             var _buttons = [
                 {text:window.hWin.HR('Save'), 
@@ -766,8 +765,9 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                 }
             ];            
             
-            var sMsg = window.hWin.HR(msg);
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:sMsg});   
+            var sMsg = '"'+ window.hWin.HEURIST4.util.stripTags(l_cfg.name) 
+                    +'" '+window.hWin.HR('element has been modified');
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Element changed')});   
 
             return true;     
         }else{
@@ -792,6 +792,10 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         
         warningOnExit: function( callback ){
             return _warningOnExit( callback );
+        },
+        
+        isModified: function(){
+            return !$container.find('.btn-ok').prop('disabled');
         }
     }
 

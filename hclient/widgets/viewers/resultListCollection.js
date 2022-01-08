@@ -152,7 +152,9 @@ $.widget( "heurist.resultListCollection", {
     //
     //
     _isSameRealm: function(data){
-        return !this.options.search_realm || (data && this.options.search_realm==data.search_realm);
+        return (!this.options.search_realm && (!data || window.hWin.HEURIST4.util.isempty(data.search_realm)))
+        ||
+        (this.options.search_realm && (data && this.options.search_realm==data.search_realm));
     },
 
     

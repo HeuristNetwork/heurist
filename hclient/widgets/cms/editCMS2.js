@@ -98,6 +98,13 @@ function editCMS2(){
         //
         if($(this.document).find('.editStructure').length==0){
             
+            /*window.onbeforeunload = _onbeforeunload;if(window.parent && window.parent.document.getElementById('web_preview')){
+                window.parent.document.getElementById('web_preview').contentWindow.onbeforeunload = _onbeforeunload;
+            }else{
+                window.onbeforeunload = _onbeforeunload;
+            }*/
+            window.onbeforeunload = _onbeforeunload;
+                
             
                 isWebPage = ($('body').find('#main-menu').length == 0);
 //console.log('>>>>'+isWebPage);                
@@ -158,7 +165,8 @@ function editCMS2(){
                                 +'</div>'
                             
                                 +'<div class="treePage ent_content_full" style="top:70px;padding:10px;border-top:1px solid gray"/>' //treeview - edit page
-                                +'<div class="propertyView ent_content_full" style="top:190px;padding:10px 0px;display:none;background-color:rgba(201, 194, 249, 1)"/>' //edit properties for element border-top:1px solid gray;
+                                +'<div class="propertyView ent_content_full ui-widget-content-gray" '
+                                    +' style="top:190px;padding:10px 0px;display:none;"/>' //edit properties for element
                                 
                             +'</div>'
                         +'</div></div>').appendTo(body);
@@ -236,9 +244,19 @@ function editCMS2(){
                     
                     _toolbar_WebSite = body.find('.toolbarWebSite');
                     
-                    _tabControl = body.find('#tabsEditCMS').tabs({activate: function( event, ui ){
+                    _tabControl = body.find('#tabsEditCMS').tabs({
+                    activate: function( event, ui ){
                         _switchMode();
                         //ui.newTab
+                    },
+                    beforeActivate: function( event, ui ){
+                        //console.log(ui.newTab);                        
+                        if(current_edit_mode=='page' && _warningOnExit(function(){ _switchMode( 'website' ) })) {
+                            return false;  
+                        }else{
+                            return true;
+                        }
+                        
                     }})
                     .addClass('ui-heurist-publish');
                     
@@ -344,12 +362,19 @@ function editCMS2(){
     }
 
 
+    function _onbeforeunload() {
+console.log('!!!!');        
+        if(page_was_modified || (_edit_Element && _edit_Element.isModified())){
+            return 'Page was changed. Are you sure you wish to exit and lose all modifications?';
+        }
+    }
     
     //
     //
     //
     function _warningOnExit(callback){
         
+        //at first check if element editor is active
         if(_edit_Element && _edit_Element.warningOnExit(function(){
             if(page_was_modified){
                 _saveLayoutCfg(callback);
@@ -357,8 +382,6 @@ function editCMS2(){
         })) return true;
         
         if(page_was_modified){
-            
-            var msg = 'Page has been modified';
             
             var $dlg;
             var _buttons = [
@@ -377,8 +400,8 @@ function editCMS2(){
                 }
             ];            
             
-            var sMsg = window.hWin.HR(msg);
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:sMsg});   
+            var sMsg = '"'+ body.find('.treePageHeader > h2').text() +'" '+window.hWin.HR('page has been modified');
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')});   
 
             return true;     
         }else{
@@ -728,6 +751,9 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         
     }
     
+    //
+    //
+    //
     function _hidePropertyView(){
         
         _edit_Element = null;
@@ -735,6 +761,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         _layout_container.find('div[data-lid]').removeClass('cms-element-editing headline marching-ants marching');                        
         
         _panel_treePage.find('span.fancytree-title').css({'font-style':'normal', 'text-decoration':'none'});
+        _panel_treePage.find('.fancytree-node').removeClass('fancytree-active');
 
         function __restoreTree(){
             if(_keep_EditPanelWidth>0){
@@ -750,7 +777,10 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             _panel_treePage[0].style.removeProperty('height'); //show();
         }
         
-        if(_panel_propertyView.is(':visible')){
+        if(current_edit_mode=='website'){
+            _panel_propertyView.hide();
+            __restoreTree();
+        }else if(_panel_propertyView.is(':visible')){
             _panel_propertyView.effect('puff',{},200, __restoreTree);
         }else{
             __restoreTree();
@@ -764,7 +794,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
     //
     function _switchMode( mode, init_tinymce )
     {
-    
+
         if(!mode){
             if(_tabControl.tabs('option','active')==0){
                 mode='website';           
@@ -877,7 +907,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             +'font-size:'+(is_intreeview?'12px;right:13px':'16px')+';font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' 
             //+ ele_ID
             + (is_intreeview?'<span class="ui-icon ui-icon-menu" style="width:20px"></span>'
-                            :'<span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;background: rgb(201, 194, 249, 0.5);"></span>')
+                            :'<span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;"></span>')
             + (true || is_root || is_cardinal?'':
                 ('<span data-action="drag" style="'+(false && is_intreeview?'':'display:block;')+'padding:4px" title="Drag to reposition">' //
                     + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"/>Drag</span>'))               
@@ -1141,8 +1171,8 @@ console.log('hide '+node.attr('data-lid'));
 
                         }else                            
                         { //separate overlay div - visible when mouse over tree
-                            _panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
                             if(!_panel_propertyView.is(':visible')){
+                                _panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
                                 _showOverlayForElement(ele_ID);
                             }
                                     
@@ -1409,7 +1439,9 @@ console.log('hide '+node.attr('data-lid'));
             _panel_treePage[0].scrollTop = top1;    
         }
         _panel_treePage.find('span.fancytree-title').css({'font-style':'normal','text-decoration':'none'});
+        $(node.li).find('.fancytree-node').removeClass('fancytree-active');
         $(node.li).find('span.fancytree-title:first').css({'font-style':'italic','text-decoration':'underline'}); //
+        $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
         
         _layout_container.find('.cms-element-overlay').css('visibility','hidden'); //hide overlay above editing element
         _layout_container.find('div[data-lid]').removeClass('cms-element-active');                        

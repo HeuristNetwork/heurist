@@ -98,7 +98,7 @@ $.widget( "heurist.resultList", {
         entityName:'records',   //records by default
         
         search_realm:  null,  //accepts search/selection events from elements of the same realm only
-        search_initial: null,  //NOT USED query string or svs_ID for initial search
+        search_initial: null,  //query string or svs_ID for initial search
         
         supress_load_fullrecord: false, //do not load full record data
         
@@ -421,7 +421,9 @@ $.widget( "heurist.resultList", {
     //
     //
     _isSameRealm: function(data){
-        return !this.options.search_realm || (data && this.options.search_realm==data.search_realm);
+        return (!this.options.search_realm && (!data || window.hWin.HEURIST4.util.isempty(data.search_realm)))
+        ||
+        (this.options.search_realm && (data && this.options.search_realm==data.search_realm));
     },
 
     //

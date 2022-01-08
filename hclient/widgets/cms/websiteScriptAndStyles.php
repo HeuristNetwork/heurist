@@ -214,7 +214,7 @@ if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in website
   background: rgba(201, 194, 249, 0.5);
 } 
 
-.ui-heurist-publish .fancytree-active, .ui-heurist-publish .fancytree-node:hover {
+.ui-heurist-publish .fancytree-active, .ui-heurist-publish .fancytree-editing, .ui-heurist-publish .fancytree-node:hover {
   background: rgba(201, 194, 249, 1) !important;
 }
 
@@ -430,7 +430,9 @@ if($site_css!=null){
 
                 if(isCMS_active){
                     $('#btnOpenCMSeditor').hide();
-                    if(!editCMS_instance2) editCMS_instance2 = editCMS2();
+                    if(!editCMS_instance2) {
+                        editCMS_instance2 = editCMS2();   
+                    }
 
                     if (! editCMS_instance2.startCMS({record_id:pageid, container:'#main-content',
                                     close: function(){

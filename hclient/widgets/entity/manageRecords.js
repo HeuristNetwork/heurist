@@ -33,6 +33,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _resizeTimer: 0,
     
     // additional option for this widget
+    // this.options.fixed_search - search form hidden and search query is fixed
+    // this.options.rectype_set  - filter for available record types (for selection)
     // this.options.edit_structure - open edit structure mode at once and work with fake record
     // this.options.selectOnSave - special case when open edit record from select popup
     // this.options.allowAdminToolbar  - if false hide ModifyStructure, Edit title mask and others

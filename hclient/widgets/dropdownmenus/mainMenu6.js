@@ -284,7 +284,7 @@ $.widget( "heurist.mainMenu6", {
                     
                     //not need to check realm since this widget the only per instance
                     //if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
-                    if(data && (data.ispreview || data.increment)) return;
+                    if(data && (data.ispreview || data.increment || data.search_realm)) return;
                     
                     that.reset_svs_edit = true;
                     if(data && !data.reset){
@@ -303,7 +303,7 @@ $.widget( "heurist.mainMenu6", {
                     
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
-                    if(data && data.request && (data.request.ispreview || data.request.increment)) return;
+                    if(data && data.request && (data.request.ispreview || data.request.increment || data.search_realm)) return;
                     
                     //if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
                     that.coverAll.hide();
