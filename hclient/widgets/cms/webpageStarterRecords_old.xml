@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hml xmlns="http://heuristnetwork.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://heuristnetwork.org/documentation_and_templates/scheme_hml.xsd">
+<database id="2">Heurist_Core_Definitions</database>
+<query q="ids:65" db="Heurist_Core_Definitions" depth="0"/>
+<dateStamp>2021-09-10T12:22:21+00:00</dateStamp>
+<resultCount>1</resultCount>
+<records>
+<record visibility="public" visnote="no login required" selected="no" depth="0">
+<id>65</id>
+<type id="52" conceptID="99-52">CMS Menu-Page</type>
+<citeAs>https://heuristplus.sydney.edu.au/h6-ao/?recID=65&amp;db=Heurist_Core_Definitions</citeAs>
+<title>&lt;i&gt;webpage:&lt;/i&gt;  &lt;b&gt;Discover&lt;/b&gt;   &lt;i&gt; &lt;/i&gt;</title>
+<added>2019-07-21 21:54:06</added>
+<modified>2021-09-10 12:19:33</modified>
+<workgroup id="2">johnson</workgroup>
+<detail conceptID="2-1" name="Menu label / page name" id="1" basename="Name / Title">Discover</detail>
+<detail conceptID="2-3" name="Menu rollover description (optional)" id="3" basename="Short summary">Search functions to search and display contents of the database represented by/in this website</detail>
+<detail conceptID="2-4" name="HTML content" id="4" basename="Extended description">&lt;p&gt;This is an unconfigured page. Remove
+  &lt;strong&gt; these instructions
+  &lt;/strong&gt;, or replace them with your instructions for users.
+&lt;/p&gt;
+&lt;p&gt;This page is set up as a container for database searches. We suggest using div (or a table) to position the widgets: search, results list and visualisation (map, timeline, network diagram, report etc.).&amp;nbsp;
+&lt;/p&gt;
+&lt;div&gt;
+  &lt;p&gt;Click on [Edit page content] in the website editor, then the&amp;nbsp;
+    &lt;span style=&quot;text-decoration: underline;&quot;&gt;edit
+    &lt;/span&gt;&amp;nbsp;link to set the list of saved searches you want to display on the left, and to set the parameters of each of the components 
+    &lt;br&gt;eg. map in the middle and list of results on the right. You will need to use the&amp;nbsp;
+    &lt;span style=&quot;text-decoration: underline;&quot;&gt;source
+    &lt;/span&gt; link at top right in the website editor to edit &amp;lt;div&amp;gt; structures.
+  &lt;/p&gt;
+  &lt;div style=&quot;position: relative; height: 500px; width: 100&#37;; border-color: #6A5ACD;&quot;&gt;
+    &lt;div id=&quot;mywidget_8060&quot; class=&quot;mceNonEditable&quot; style=&quot;background: #ffffff; position: absolute; top: 0px; width: 310px; bottom: 0px; overflow: hidden;&quot; data-heurist-app-id=&quot;heurist_SearchTree&quot;&gt;
+      {&quot;__widget_name&quot;:&quot;========================== SEARCHTREE ==========================&quot;, 
+      &quot;allowed_UGrpID&quot;:&quot;4&quot;, 
+      &quot;searchTreeMode&quot;:&quot;1&quot;, 
+      &quot;init_at_once&quot;:true, 
+      &quot;search_realm&quot;:&quot;sr1&quot;}
+    &lt;/div&gt;
+    &lt;div class=&quot;ent_wrapper&quot; style=&quot;position: absolute; top: 0px; bottom: 0px; left: 310px; right: 0px;&quot;&gt;
+      &lt;div id=&quot;mywidget_6670&quot; class=&quot;mceNonEditable&quot; style=&quot;background: #FFFFFF; position: absolute; top: 0px; width: 50&#37;; left: 0px; bottom: 0;&quot; data-heurist-app-id=&quot;heurist_Map&quot;&gt;
+        {&quot;__widget_name&quot;:&quot;========================== MAP ==========================&quot;, 
+        &quot;layout_params&quot;:{&quot;notimeline&quot;:false, 
+        &quot;nocluster&quot;:false, 
+        &quot;editstyle&quot;:true, 
+        &quot;map_rollover&quot;:true, 
+        &quot;controls&quot;:&quot;legend, 
+        bookmark, 
+        selector, 
+        print&quot;, 
+        &quot;published&quot;:1, 
+        &quot;template&quot;:&quot;&quot;, 
+        &quot;basemap&quot;:&quot;&quot;}, 
+        &quot;leaflet&quot;:true, 
+        &quot;init_at_once&quot;:true, 
+        &quot;search_realm&quot;:&quot;sr1&quot;}
+      &lt;/div&gt;
+      &lt;div id=&quot;mywidget_6953&quot; class=&quot;mceNonEditable ui-layout-mywidget_6953 ui-widget-content&quot; style=&quot;background: #FFFFFF; position: absolute; top: 0px; width: 50&#37;; right: 1px; bottom: 0;&quot; data-heurist-app-id=&quot;heurist_resultList&quot;&gt;
+        {&quot;__widget_name&quot;:&quot;========================== RESULTLIST ==========================&quot;, 
+        &quot;show_counter&quot;:true, 
+        &quot;show_viewmode&quot;:true, 
+        &quot;support_collection&quot;:false, 
+        &quot;support_reorder&quot;:false, 
+        &quot;show_inner_header&quot;:false, 
+        &quot;blog_result_list&quot;:false, 
+        &quot;recordview_onselect&quot;:&quot;inline&quot;, 
+        &quot;rendererExpandInFrame&quot;:true, 
+        &quot;recordDivClass&quot;:&quot;&quot;, 
+        &quot;show_url_as_link&quot;:true, 
+        &quot;view_mode&quot;:&quot;list&quot;, 
+        &quot;rendererExpandDetails&quot;:&quot;&quot;, 
+        &quot;show_toolbar&quot;:true, 
+        &quot;init_at_once&quot;:true, 
+        &quot;search_realm&quot;:&quot;sr1&quot;}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</detail>
+<detail conceptID="99-948" name="Keywords" id="914" basename="CMS Keywords">Search, Filter, Facets, Facet search, Advanced search, Dynamic search</detail>
+<detail conceptID="99-952" name="Show page title (override global setting)" id="920" basename="Show page title" termID="5444" termConceptID="2-532" ParentTerm="Flag (yes, no, unknown)">Yes</detail>
+<detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6254" termConceptID="2-6254" ParentTerm="Type of web page /menu">Standalone Web Page</detail>
+<reversePointer id="912" conceptID="99-742" basename="CMS Menus" name="Top level menus">63</reversePointer>
+<reversePointer id="912" conceptID="99-742" basename="CMS Menus" name="Top level menus">190</reversePointer>
+</record>
+</records>
+<recordCount>1</recordCount>
+</hml>

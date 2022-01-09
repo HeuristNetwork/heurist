@@ -276,6 +276,7 @@ function hLayoutMgr(){
         }
         
         if(_supp_options){
+            if(_supp_options.rec_ID) _supp_options.rec_ID = null; //@todo remove assignment - we don'y use it
             layout.options = $.extend(layout.options, _supp_options);    
         }
         
@@ -676,7 +677,11 @@ function hLayoutMgr(){
     //
     function _prepareTemplate(layout, callback){ 
        
-        if(layout.template=='blog'){
+        if(layout.template=='default'){
+        
+           callback.call(this, new_element_json.children[0]); 
+            
+        }else if(layout.template=='blog'){
             
            var ele = _layoutContentFindWidget(layout, 'heurist_SearchTree');
            if (ele && ele.options.init_svsID=='????') {

@@ -91,7 +91,7 @@ function editCMS_SelectElement( callback ){
         buttons, window.hWin.HR('Insert component into web page'), 
         {  container:'cms-add-widget-popup',
             default_palette_class: 'ui-heurist-publish',
-            width: 600,
+            width: 340,
             height: 600,
             close: function(){
                 $dlg.dialog('destroy');       

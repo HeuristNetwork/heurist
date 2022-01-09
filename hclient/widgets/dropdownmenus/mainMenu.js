@@ -863,6 +863,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         
                         popup_dialog_options.record_id = -1;
                         popup_dialog_options.webpage_private = is_private;
+                        popup_dialog_options.is_new_editor = true;    
                         
                         window.hWin.HEURIST4.ui.showEditCMSDialog(popup_dialog_options); 
                     },
@@ -1799,7 +1800,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         var RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
         DT_CMS_PAGETYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETYPE'];
         
-        var query_search_pages = {t:RT_CMS_MENU}
+        var query_search_pages = {t:RT_CMS_MENU, sort:'-id'};
         query_search_pages['f:'+DT_CMS_PAGETYPE] = window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE'];
         
         var that = this;
@@ -1822,7 +1823,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             show_toolbar: false,
                             view_mode:'icons',
                             searchfull:null,
-                            //search_realm: '_select_WebPage',
+                            //search_realm: 'x',
                             //search_initial: , 
                             renderer:function(recordset, record){
                                 var recID = recordset.fld(record, 'rec_ID')
@@ -1879,6 +1880,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             return;
         }
         
+        var query_search_sites = {t:RT_CMS_HOME, sort:'-id'};
+        
         var that = this;
         
         var popup_options = {
@@ -1887,7 +1890,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         edit_mode: 'popup',
                         selectOnSave: true, //it means that select popup will be closed after add/edit is completed
                         title: window.hWin.HR('Select or create a website home record'),
-                        rectype_set: RT_CMS_HOME,
+                        fixed_search: query_search_sites,
+                        //rectype_set: RT_CMS_HOME,
                         parententity: 0,
                         title: window.hWin.HR('Select Website'),
                         

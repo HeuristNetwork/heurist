@@ -141,7 +141,12 @@ function editCMS_Manager( options ){
                             +'<p>The pages can be edited by navigating to the page in the preview above and clicking '
                             +'<b>Edit page content</b> (either the button on the left or the link on the right of the page)</p>');
 
-console.log(response.data);                            
+//console.log(response.data);          
+                        //add blog template
+                        if(response.data.page_id_for_blog>0){
+                            _addTemplate('blog', response.data.page_id_for_blog);
+                        }
+                  
                             
                             options.record_id = response.data.home_page_id>0?response.data.home_page_id:response.data.ids[0];
                             editCMS_Manager( options );                            
@@ -154,6 +159,39 @@ console.log(response.data);
             });
             
     } //_createNewWebContent
+    
+    //
+    // replace content of page with template
+    //
+    function _addTemplate(template_name, affected_page_id){
+    
+
+        // 1. load template files
+        var sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.json';
+
+        // 2. Loads template json
+        $.getJSON(sURL, 
+        function( new_element_json ){
+            
+            if(!layoutMgr) hLayoutMgr();
+            
+            layoutMgr.prepareTemplate(new_element_json, function(updated_json){
+
+                //replace content of blog webpage
+                var request = {a: 'replace',
+                    recIDs: affected_page_id,
+                    dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
+                    rVal: JSON.stringify( updated_json )};
+                window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                    if(response.status == hWin.ResponseStatus.OK){
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+                               
+            }); 
+        });
+    }
     
     
     //

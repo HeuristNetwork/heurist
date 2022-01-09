@@ -488,6 +488,7 @@ console.log('!!!!');
 
                             var res = layoutMgr.convertOldCmsFormat(_layout_content, _layout_container);
                             if(res!==false){
+                                page_was_modified = true;
                                 _layout_content = res;
                                 
 var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is both much easier and much more powerful than the original editor and requires an entirely new data format. Heurist converts pages automatically to the new editor.</p>'
@@ -1028,7 +1029,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 if($(event.target).hasClass('brick')){ 
                     
                     node =  $(event.target);
-console.log('hide '+node.attr('data-lid'));
+//console.log('hide '+node.attr('data-lid'));
                     _layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-lid')+']').hide();
                     _layout_container.find('div[data-lid]').removeClass('cms-element-active');
                     

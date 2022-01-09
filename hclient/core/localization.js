@@ -194,8 +194,8 @@ regional['en'] = {
     //publish menu
     'Website': '',
         menu_cms_create: 'Create',
-        menu_cms_edit: 'Edit',
-        menu_cms_edit_new: 'Edit (experimental)',
+        menu_cms_edit: 'Edit (legacy)',
+        menu_cms_edit_new: 'Edit (new)',
         menu_cms_view: 'View',
         menu_cms_embed: 'Standalone web page',
         menu_cms_create_hint: 'Create a new CMS website, stored in this database, with widgets to access data in the database',

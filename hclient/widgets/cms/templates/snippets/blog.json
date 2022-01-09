@@ -2,7 +2,7 @@
     {"appid":"heurist_recordAddButton","name":"Add Blog post",
         "css":{"position":"relative","border-style":"none","padding-left":"20px","display":"block"},
         "options":{"RecTypeID":"7","OwnerUGrpID":"0","NonOwnerVisibility":"viewable","add_record_label":"Add blog post","init_at_once":true}},
-    {"name":"Group","type":"group","css":{"display":"flex"},"children":[
+    {"name":"Group","type":"group","css":{"display":"flex","flex":"1 1 auto"},"children":[
         {"appid":"heurist_SearchTree","name":"Saved filters",
             "css":{"position":"relative","minWidth":200,"minHeight":300},
             "options":{"allowed_svsIDs":1,
@@ -29,4 +29,4 @@
                     "init_at_once":true,
                     "search_realm":"sr3484"}}],
     "folder":true}],
-"folder":true,"css":{"border-style":"none","display":"flex","flex-direction":"column"}}
+"folder":true,"css":{"border-style":"none","display":"flex","flex-direction":"column","position":"relative","height":"100%"}}

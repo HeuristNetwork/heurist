@@ -2443,7 +2443,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
         }
     },
 
-    //
+    // @todo move it to new editCMS_Records
     // show record action dialog
     // options 
     //      record_id

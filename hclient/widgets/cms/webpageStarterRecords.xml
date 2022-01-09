@@ -15,67 +15,7 @@
 <workgroup id="2">johnson</workgroup>
 <detail conceptID="2-1" name="Menu label / page name" id="1" basename="Name / Title">Discover</detail>
 <detail conceptID="2-3" name="Menu rollover description (optional)" id="3" basename="Short summary">Search functions to search and display contents of the database represented by/in this website</detail>
-<detail conceptID="2-4" name="HTML content" id="4" basename="Extended description">&lt;p&gt;This is an unconfigured page. Remove
-  &lt;strong&gt; these instructions
-  &lt;/strong&gt;, or replace them with your instructions for users.
-&lt;/p&gt;
-&lt;p&gt;This page is set up as a container for database searches. We suggest using div (or a table) to position the widgets: search, results list and visualisation (map, timeline, network diagram, report etc.).&amp;nbsp;
-&lt;/p&gt;
-&lt;div&gt;
-  &lt;p&gt;Click on [Edit page content] in the website editor, then the&amp;nbsp;
-    &lt;span style=&quot;text-decoration: underline;&quot;&gt;edit
-    &lt;/span&gt;&amp;nbsp;link to set the list of saved searches you want to display on the left, and to set the parameters of each of the components 
-    &lt;br&gt;eg. map in the middle and list of results on the right. You will need to use the&amp;nbsp;
-    &lt;span style=&quot;text-decoration: underline;&quot;&gt;source
-    &lt;/span&gt; link at top right in the website editor to edit &amp;lt;div&amp;gt; structures.
-  &lt;/p&gt;
-  &lt;div style=&quot;position: relative; height: 500px; width: 100&#37;; border-color: #6A5ACD;&quot;&gt;
-    &lt;div id=&quot;mywidget_8060&quot; class=&quot;mceNonEditable&quot; style=&quot;background: #ffffff; position: absolute; top: 0px; width: 310px; bottom: 0px; overflow: hidden;&quot; data-heurist-app-id=&quot;heurist_SearchTree&quot;&gt;
-      {&quot;__widget_name&quot;:&quot;========================== SEARCHTREE ==========================&quot;, 
-      &quot;allowed_UGrpID&quot;:&quot;4&quot;, 
-      &quot;searchTreeMode&quot;:&quot;1&quot;, 
-      &quot;init_at_once&quot;:true, 
-      &quot;search_realm&quot;:&quot;sr1&quot;}
-    &lt;/div&gt;
-    &lt;div class=&quot;ent_wrapper&quot; style=&quot;position: absolute; top: 0px; bottom: 0px; left: 310px; right: 0px;&quot;&gt;
-      &lt;div id=&quot;mywidget_6670&quot; class=&quot;mceNonEditable&quot; style=&quot;background: #FFFFFF; position: absolute; top: 0px; width: 50&#37;; left: 0px; bottom: 0;&quot; data-heurist-app-id=&quot;heurist_Map&quot;&gt;
-        {&quot;__widget_name&quot;:&quot;========================== MAP ==========================&quot;, 
-        &quot;layout_params&quot;:{&quot;notimeline&quot;:false, 
-        &quot;nocluster&quot;:false, 
-        &quot;editstyle&quot;:true, 
-        &quot;map_rollover&quot;:true, 
-        &quot;controls&quot;:&quot;legend, 
-        bookmark, 
-        selector, 
-        print&quot;, 
-        &quot;published&quot;:1, 
-        &quot;template&quot;:&quot;&quot;, 
-        &quot;basemap&quot;:&quot;&quot;}, 
-        &quot;leaflet&quot;:true, 
-        &quot;init_at_once&quot;:true, 
-        &quot;search_realm&quot;:&quot;sr1&quot;}
-      &lt;/div&gt;
-      &lt;div id=&quot;mywidget_6953&quot; class=&quot;mceNonEditable ui-layout-mywidget_6953 ui-widget-content&quot; style=&quot;background: #FFFFFF; position: absolute; top: 0px; width: 50&#37;; right: 1px; bottom: 0;&quot; data-heurist-app-id=&quot;heurist_resultList&quot;&gt;
-        {&quot;__widget_name&quot;:&quot;========================== RESULTLIST ==========================&quot;, 
-        &quot;show_counter&quot;:true, 
-        &quot;show_viewmode&quot;:true, 
-        &quot;support_collection&quot;:false, 
-        &quot;support_reorder&quot;:false, 
-        &quot;show_inner_header&quot;:false, 
-        &quot;blog_result_list&quot;:false, 
-        &quot;recordview_onselect&quot;:&quot;inline&quot;, 
-        &quot;rendererExpandInFrame&quot;:true, 
-        &quot;recordDivClass&quot;:&quot;&quot;, 
-        &quot;show_url_as_link&quot;:true, 
-        &quot;view_mode&quot;:&quot;list&quot;, 
-        &quot;rendererExpandDetails&quot;:&quot;&quot;, 
-        &quot;show_toolbar&quot;:true, 
-        &quot;init_at_once&quot;:true, 
-        &quot;search_realm&quot;:&quot;sr1&quot;}
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;</detail>
+<detail conceptID="2-4" name="HTML content" id="4" basename="Extended description">[{&quot;name&quot;:&quot;Page&quot;,&quot;type&quot;:&quot;group&quot;,&quot;folder&quot;:true,&quot;children&quot;:[{&quot;name&quot;:&quot;Header&quot;,&quot;type&quot;:&quot;text&quot;,&quot;content&quot;:&quot;&lt;p&gt;This is an unconfigured page. Remove &lt;strong&gt; these instructions &lt;/strong&gt;, or replace them with your instructions for users.&lt;/p&gt;\n&lt;p&gt;This page is set up as a container for database searches. Select [Insert] in menu (gear icon or context menu in tree on the left) to add text elements and widgets: search, results list and visualisation (map, timeline, network diagram, report etc.). &lt;/p&gt;\n&lt;p&gt;Click on [Style] in this menu to modify appearance and configure parameters for each of the components.&lt;/p&gt;&quot;,&quot;css&quot;:{&quot;display&quot;:&quot;block&quot;,&quot;border-style&quot;:&quot;none&quot;}},{&quot;name&quot;:&quot;Discover&quot;,&quot;type&quot;:&quot;group&quot;,&quot;children&quot;:[{&quot;appid&quot;:&quot;heurist_SearchTree&quot;,&quot;name&quot;:&quot;Saved filters&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;minWidth&quot;:200,&quot;minHeight&quot;:300,&quot;flex&quot;:&quot; 1 150px&quot;},&quot;options&quot;:{&quot;allowed_UGrpID&quot;:&quot;4&quot;,&quot;searchTreeMode&quot;:&quot;1&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528}},{&quot;appid&quot;:&quot;heurist_Map&quot;,&quot;name&quot;:&quot;Map and timeline&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;height&quot;:&quot;100&#37;&quot;,&quot;flex&quot;:&quot;2 1 300px&quot;},&quot;options&quot;:{&quot;leaflet&quot;:true,&quot;init_at_once&quot;:true,&quot;layout_params&quot;:{&quot;notimeline&quot;:false,&quot;nocluster&quot;:false,&quot;editstyle&quot;:true,&quot;map_rollover&quot;:true,&quot;controls&quot;:&quot;legend&quot;,&quot;legend&quot;:&quot;off&quot;,&quot;published&quot;:1,&quot;template&quot;:&quot;&quot;,&quot;basemap&quot;:&quot;&quot;},&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528}},{&quot;appid&quot;:&quot;heurist_resultList&quot;,&quot;name&quot;:&quot;Standard filter result&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;minWidth&quot;:150,&quot;minHeight&quot;:300,&quot;flex&quot;:&quot;2 1 300px&quot;},&quot;options&quot;:{&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528}}],&quot;folder&quot;:true,&quot;css&quot;:{&quot;border-style&quot;:&quot;none&quot;,&quot;display&quot;:&quot;flex&quot;,&quot;width&quot;:&quot;100&#37;&quot;,&quot;height&quot;:&quot;500px&quot;}}],&quot;css&quot;:{}}]</detail>
 <detail conceptID="99-948" name="Keywords" id="914" basename="CMS Keywords">Search, Filter, Facets, Facet search, Advanced search, Dynamic search</detail>
 <detail conceptID="99-952" name="Show page title (override global setting)" id="920" basename="Show page title" termID="5444" termConceptID="2-532" ParentTerm="Flag (yes, no, unknown)">Yes</detail>
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6254" termConceptID="2-6254" ParentTerm="Type of web page /menu">Standalone Web Page</detail>
