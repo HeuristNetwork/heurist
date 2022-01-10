@@ -214,10 +214,13 @@ if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in website
   background: rgba(201, 194, 249, 0.5);
 } 
 
-.ui-heurist-publish .fancytree-active, .ui-heurist-publish .fancytree-editing, .ui-heurist-publish .fancytree-node:hover {
+
+.ui-heurist-publish .fancytree-active, .ui-heurist-publish .fancytree-editing, .ui-heurist-publish .fancytree-hover{
   background: rgba(201, 194, 249, 1) !important;
 }
-
+/*
+, .ui-heurist-publish .fancytree-node:hover 
+*/
 .ui-heurist-publish span.fancytree-node {
     padding: 3px 0px !important;
 }

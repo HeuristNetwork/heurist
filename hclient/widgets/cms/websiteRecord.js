@@ -2038,7 +2038,8 @@ function hCmsEditing(_options) {
         
         
         if(is_current_page_in_new_format){
-            window.hWin.HEURIST4.msg.showMsgFlash('Page is in new format. Click "View website" and then "CMS" link to open new editor',3000);
+            window.hWin.HEURIST4.msg.showMsgFlash(
+            'Page is in new format. Close the Publish panel and select Publish > Edit (New)', 5000);
             return;
         }
         
@@ -2094,7 +2095,8 @@ function hCmsEditing(_options) {
     function _editPageSource( event ){
         
         if(is_current_page_in_new_format){
-            window.hWin.HEURIST4.msg.showMsgFlash('Page is in new format. Click "View website" and then "CMS" link to open new editor',3000);
+            window.hWin.HEURIST4.msg.showMsgFlash(
+            'Page is in new format. Close the Publish panel and select Publish > Edit (New)', 5000);
             return;
         }
         

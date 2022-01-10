@@ -363,7 +363,7 @@ function editCMS2(){
 
 
     function _onbeforeunload() {
-console.log('!!!!');        
+
         if(page_was_modified || (_edit_Element && _edit_Element.isModified())){
             return 'Page was changed. Are you sure you wish to exit and lose all modifications?';
         }
@@ -521,13 +521,18 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
     // 1) init editor
     // 2) init hover toolbar - DnD,Edit Properties,Insert Sibling
     //
-    function _initTinyMCE(){
+    function _initTinyMCE( key ){
       
         tinymce.remove('.tinymce-body'); //detach
         _layout_container.find('.lid-actionmenu').remove();
+        
+        var selector = '.tinymce-body';
+        if(key>0){
+            selector = selector + '[data-lid='+key+']';
+        }
 
         var inlineConfig = {
-            selector: '.tinymce-body',
+            selector: selector,
             menubar: false,
             inline: true,
             
@@ -563,13 +568,20 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
                 editor.on('focus', function (e) {
                     if(current_edit_mode=='page'){
-                        _layout_container.find('.lid-actionmenu[data-lid]').hide();
-                        _layout_container.find('div[data-lid]').removeClass('cms-element-active');                        
-                        _layout_container.find('.cms-element-overlay').css('visibility','hidden');
+
+                            _layout_container.find('.lid-actionmenu[data-lid]').hide();
+                            _layout_container.find('div[data-lid]').removeClass('cms-element-active');  
+
+                            _layout_container.find('.cms-element-overlay').css('visibility','hidden');
+                            
+                            /*highlight editing element in tree
+                            var node = _panel_treePage.fancytree('getTree').getNodeByKey(key);
+                            _panel_treePage.find('.fancytree-hover').removeClass('fancytree-hover');
+                            $(node.li).find('.fancytree-node:first').addClass('fancytree-hover');
+                            */
                     }else{
-                        //prevent 
-                        //window.hWin.HEURIST4.util.stopEvent(e);
-                        //return false;
+                           //window.hWin.HEURIST4.util.stopEvent(e);
+                           //return false;
                     }
                 });
                 
@@ -583,6 +595,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         if(page_was_modified && _edit_Element==null) _toolbar_Page.show();
                         
                         l_cfg.content = new_content;
+                        //_panel_treePage.find('.fancytree-hover').removeClass('fancytree-hover');
                         
                 });
            
@@ -598,13 +611,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         };
         
         tinymce.init(inlineConfig);
-        
-        // find all dragable elements - text and widgets
-        _layout_container.find('div.brick').each(function(i, item){   //
-            var ele_ID = $(item).attr('data-lid');
-             //left:2px;top:2px;
-            _defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
-        });
         
     }    
     
@@ -751,6 +757,15 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         _switchMode(current_edit_mode);//, false);
         
     }
+
+    //
+    //
+    //
+    function _hideMenuInTree(){
+        var ele = _panel_treePage.find('.lid-actionmenu');
+        ele.hide(); //menu icon
+        ele.find('span[data-action]').hide(); //popup menu
+    }        
     
     //
     //
@@ -758,11 +773,14 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
     function _hidePropertyView(){
         
         _edit_Element = null;
+        _initTinyMCE();
     
         _layout_container.find('div[data-lid]').removeClass('cms-element-editing headline marching-ants marching');                        
         
         _panel_treePage.find('span.fancytree-title').css({'font-style':'normal', 'text-decoration':'none'});
         _panel_treePage.find('.fancytree-node').removeClass('fancytree-active');
+        
+        _hideMenuInTree();
 
         function __restoreTree(){
             if(_keep_EditPanelWidth>0){
@@ -778,7 +796,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             _panel_treePage[0].style.removeProperty('height'); //show();
         }
         
-        if(current_edit_mode=='website'){
+        if(true || current_edit_mode=='website'){
             _panel_propertyView.hide();
             __restoreTree();
         }else if(_panel_propertyView.is(':visible')){
@@ -875,6 +893,14 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             });
 
             _initTinyMCE();
+            
+            // find all dragable elements - text and widgets
+            _layout_container.find('div.brick').each(function(i, item){   //
+                var ele_ID = $(item).attr('data-lid');
+                 //left:2px;top:2px;
+                _defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
+            });
+            
             }, delay);
     }
 
@@ -1021,6 +1047,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
             //hide gear icon and overlay on mouse exit
             function _onmouseexit(event){
+                
+                if(_panel_propertyView.is(':visible')) return;
 
                 var el = document.elementFromPoint(event.pageX, event.pageY);
                 if($(el).hasClass('ui-icon-gear')) return;
@@ -1052,10 +1080,15 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         if(node) node = $(node[0]);
                     }
                     if(node){
+                        //_hideMenuInTree();
+                        
                         var ele = node.find('.lid-actionmenu'); //$(event.target).children('.lid-actionmenu');
                         ele.find('span[data-action]').hide();
                         ele.find('span.ui-icon-menu').show();
                         ele.hide();//css('visibility','hidden');
+                        
+                       
+                       $(node).removeClass('fancytree-hover');
                         
                         //remove heighlight
                         _layout_container.find('div[data-lid]').removeClass('cms-element-active');
@@ -1072,7 +1105,9 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 function(event){
 
                     if (current_edit_mode != 'page') return;
+                    if(_panel_propertyView.is(':visible')) return;
 
+                    
                     var node;
 
                     if(__timeout>0) clearTimeout(__timeout);
@@ -1088,7 +1123,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
                     if( is_in_page ){
                         //div.editable in container 
-
                         if($(event.target).hasClass('brick')){
                             //console.log('itself');                              
                             node = $(event.target);
@@ -1144,7 +1178,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         ele.show();
 
                     }else {
-                        //treeview node
+                        //node in treeview
+
 
                         if($(event.target).hasClass('fancytree-node')){
                             node =  $(event.target);
@@ -1152,6 +1187,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                             node = $(event.target).parents('.fancytree-node:first');
                         }
                         if(node){
+                            $(node).addClass('fancytree-hover');
+                            
                             node = $(node).find('.lid-actionmenu');
                             node.css('display','inline-block');//.css('visibility','visible');
                         }
@@ -1444,6 +1481,14 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         $(node.li).find('span.fancytree-title:first').css({'font-style':'italic','text-decoration':'underline'}); //
         $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
         
+        _hideMenuInTree();
+        /*
+        var ele = _panel_treePage.find('.lid-actionmenu');
+        ele.hide(); //menu icon
+        ele.find('span[data-action]').hide(); //popup menu
+        */
+        
+        
         _layout_container.find('.cms-element-overlay').css('visibility','hidden'); //hide overlay above editing element
         _layout_container.find('div[data-lid]').removeClass('cms-element-active');                        
         
@@ -1468,6 +1513,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         
         //show overlay for editing element
         _showOverlayForElement( ele_id );
+        
+        _initTinyMCE( ele_id );
         
         _edit_Element = editCMS_ElementCfg(element_cfg, _layout_container, _panel_propertyView, function(new_cfg){
 

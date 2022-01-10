@@ -796,6 +796,10 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         
         isModified: function(){
             return !$container.find('.btn-ok').prop('disabled');
+        },
+        
+        getKey: function(){
+            return element_cfg.key;
         }
     }
 

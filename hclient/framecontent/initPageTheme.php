@@ -572,7 +572,7 @@ span.fancytree-node:hover{
 .ui-heurist-publish .fancytree-active,
 .ui-heurist-publish .fancytree-node:hover
 {
-    background:<?php uout('publish_active', '#CCEBC5');?> !important;
+    background:<?php uout('publish_active', '#CCEBC5');?>; /*  !important */
 }
     
 /* SECTION SCHEME: ADMIN */
