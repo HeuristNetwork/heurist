@@ -566,6 +566,22 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             
             setup:function(editor) {
 
+                editor.on('click', function (e) {
+                    setTimeout(function(){
+                        var ele = $('body').find('.tox-toolbar-dock-transition');
+                        if(ele.length>0){
+                            var top = parseInt(ele.css('top'));
+                        console.log('click '+top);    
+                            var top2 = $('body').find('#main-content-container').position().top - 40;
+                            if(top<top2){
+                                //top = 130;
+                                ele.css({top:top2+'px'});  
+                            } 
+                        }
+                    },200);                            
+                
+                });
+                    
                 editor.on('focus', function (e) {
                     if(current_edit_mode=='page'){
 
@@ -573,12 +589,13 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                             _layout_container.find('div[data-lid]').removeClass('cms-element-active');  
 
                             _layout_container.find('.cms-element-overlay').css('visibility','hidden');
-                            
-                            /*highlight editing element in tree
+
+                            //highlight editing element in tree
+                            var key = tinymce.activeEditor.id.substr(3);
                             var node = _panel_treePage.fancytree('getTree').getNodeByKey(key);
-                            _panel_treePage.find('.fancytree-hover').removeClass('fancytree-hover');
-                            $(node.li).find('.fancytree-node:first').addClass('fancytree-hover');
-                            */
+                            _panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
+                            $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
+                    
                     }else{
                            //window.hWin.HEURIST4.util.stopEvent(e);
                            //return false;
