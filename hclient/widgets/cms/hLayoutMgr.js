@@ -142,6 +142,9 @@ function hLayoutMgr(){
         if(classes){
             $d.addClass(classes);
         } 
+        if(layout.classes){ //custom classes
+            $d.addClass(layout.classes);
+        }
         
         return $d;        
     }

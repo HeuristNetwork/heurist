@@ -72,6 +72,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
 
         cont.find('input[data-type="element-name"]').val(l_cfg.name);
         cont.find('input[data-type="element-id"]').val(l_cfg.dom_id);
+        cont.find('textarea[name="elementClasses"]').val(l_cfg.classes);
 
         var etype = (l_cfg.type?l_cfg.type:(l_cfg.appid?'widget':'text'));
 
@@ -251,6 +252,11 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             l_cfg.title = '<span data-lid="'+l_cfg.key+'">'+l_cfg.name+'</span>';
             
             l_cfg.dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
+            if(window.hWin.HEURIST4.util.isempty(cont.find('textarea[name="elementClasses"]').val())){
+                if(l_cfg.classes) delete l_cfg['classes'];
+            }else{
+                l_cfg.classes = cont.find('textarea[name="elementClasses"]').val();    
+            }
         
             //get cardinal parameters  
             if(l_cfg.type=='cardinal')
