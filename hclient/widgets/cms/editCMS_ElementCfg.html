@@ -224,7 +224,7 @@
                             <div class="header_narrow">Image:</div>
                             <div style="display: inline-block;">
                                 <input data-type="css" name="background-image" type="hidden" value=""/>
-                                <input data-type="css" name="bg-image" type="text" value="" style="width:195px" readonly="readonly"/>
+                                <input data-type="css" name="bg-image" type="text" value="" style="width:190px" readonly="readonly"/>
                                 <button id="btn-background-image" title="select image">select</button>
                                 <button id="btn-background-image-clear" title="clear image">x</button>
                             </div>
@@ -349,6 +349,11 @@
             <h3>Edit source</h3>
             <div style="background:none">
                 <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <div>
+                            <div class="header_narrow"><b>ID</b></div>
+                            <input data-type="element-id" value=""/>
+                            <div class="heurist-helper3">HTML (DOM) ID. For example to define target element for menu ("page-content")</div>
+                        </div>
                         <div>
                             <div class="header_narrow" style="vertical-align:top;"><b>CSS:</b></div>
                             <textarea name="elementCss" rows="10" cols="40">

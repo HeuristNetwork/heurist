@@ -37,7 +37,7 @@ var editCMS_instance2 = null;
 //  page_cache
 //  home_page_record_id
 //  current_page_id
-//  isCMS_InHeuristUI
+//  isCMS_InHeuristUI, isCMS_NewWebsite
 
 //
 // options: record_id, content, container
@@ -97,6 +97,12 @@ function editCMS2(){
         // add edit layout - top most ent_wrapper becomes 
         //
         if($(this.document).find('.editStructure').length==0){
+            
+            if(isCMS_NewWebsite){
+                isCMS_NewWebsite = false;
+                window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
+                            +'hclient/widgets/cms/editCMS_NewSiteMsg.html');
+            }
             
             /*window.onbeforeunload = _onbeforeunload;if(window.parent && window.parent.document.getElementById('web_preview')){
                 window.parent.document.getElementById('web_preview').contentWindow.onbeforeunload = _onbeforeunload;
@@ -528,7 +534,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         
         var selector = '.tinymce-body';
         if(key>0){
-            selector = selector + '[data-lid='+key+']';
+            selector = selector + '[data-hid='+key+']';
         }
 
         var inlineConfig = {
@@ -571,10 +577,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         var ele = $('body').find('.tox-toolbar-dock-transition');
                         if(ele.length>0){
                             var top = parseInt(ele.css('top'));
-                        console.log('click '+top);    
                             var top2 = $('body').find('#main-content-container').position().top - 40;
                             if(top<top2){
-                                //top = 130;
                                 ele.css({top:top2+'px'});  
                             } 
                         }
@@ -585,13 +589,15 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 editor.on('focus', function (e) {
                     if(current_edit_mode=='page'){
 
-                            _layout_container.find('.lid-actionmenu[data-lid]').hide();
-                            _layout_container.find('div[data-lid]').removeClass('cms-element-active');  
+                            _layout_container.find('.lid-actionmenu').hide();
+                            _layout_container.find('div[data-hid]').removeClass('cms-element-active');  
 
                             _layout_container.find('.cms-element-overlay').css('visibility','hidden');
 
+//console.log(tinymce.activeEditor.id+'   '+$(tinymce.activeEditor.targetElm).attr('data-hid'));                            
+//tinymce.activeEditor.id.substr(3)                            
                             //highlight editing element in tree
-                            var key = tinymce.activeEditor.id.substr(3);
+                            var key = $(tinymce.activeEditor.targetElm).attr('data-hid');
                             var node = _panel_treePage.fancytree('getTree').getNodeByKey(key);
                             _panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
                             $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
@@ -603,7 +609,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 });
                 
                 editor.on('blur', function (e) {
-                        var key = tinymce.activeEditor.id.substr(3);
+                        var key = $(tinymce.activeEditor.targetElm).attr('data-hid');
                         //update in _layout_content
                         var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, key);
                         var new_content = tinymce.activeEditor.getContent();
@@ -792,7 +798,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         _edit_Element = null;
         _initTinyMCE();
     
-        _layout_container.find('div[data-lid]').removeClass('cms-element-editing headline marching-ants marching');                        
+        _layout_container.find('div[data-hid]').removeClass('cms-element-editing headline marching-ants marching');                        
         
         _panel_treePage.find('span.fancytree-title').css({'font-style':'normal', 'text-decoration':'none'});
         _panel_treePage.find('.fancytree-node').removeClass('fancytree-active');
@@ -877,8 +883,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             _toolbar_WebSite.show();
 
             //remove highlights
-            _layout_container.find('.lid-actionmenu[data-lid]').hide();
-            _layout_container.find('div[data-lid]').removeClass('cms-element-active');                        
+            _layout_container.find('.lid-actionmenu').hide();
+            _layout_container.find('div[data-hid]').removeClass('cms-element-active');                        
             _layout_container.find('.cms-element-overlay').css('visibility','hidden');            
             
             if(tinymce) tinymce.remove('.tinymce-body');
@@ -903,7 +909,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
         setTimeout(function(){
             $.each( _panel_treePage.find('.fancytree-node'), function( idx, item ){
-                //var ele_ID = ele.parents('li:first').find('span[data-lid]').attr('data-lid');
+                
                 var ele_ID = $(item).find('span[data-lid]').attr('data-lid');
 
                 _defineActionIcons(item, ele_ID, 'position:absolute;right:8px;margin-top:1px;');
@@ -913,7 +919,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             
             // find all dragable elements - text and widgets
             _layout_container.find('div.brick').each(function(i, item){   //
-                var ele_ID = $(item).attr('data-lid');
+                var ele_ID = $(item).attr('data-hid');
                  //left:2px;top:2px;
                 _defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
             });
@@ -948,7 +954,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
             var actionspan = '<div class="lid-actionmenu mceNonEditable" '
             +' style="'+style_pos+';display:none;z-index:999;color:black;background: rgba(201, 194, 249, 1) !important;'
-            +'font-size:'+(is_intreeview?'12px;right:13px':'16px')+';font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' 
+            +'font-size:'+(is_intreeview?'12px;right:13px':'16px')
+            +';font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' 
             //+ ele_ID
             + (is_intreeview?'<span class="ui-icon ui-icon-menu" style="width:20px"></span>'
                             :'<span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;"></span>')
@@ -984,8 +991,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 
             }else{ 
 
-                //$('<div>').addClass('cms-element-overlay').attr('data-lid',ele_ID).insertAfter(item);
-
                 actionspan.insertAfter(item); //in main-content
 
                 actionspan.find('span[data-action]').hide();
@@ -1018,9 +1023,6 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     _lockDefaultEdit = false;
 
                     var ele_ID = ele.parents('.lid-actionmenu').attr('data-lid');
-
-                    //console.log('selected '+ele_ID);                        
-                    //if(!(ele_ID>0)) return;
                     _layout_container.find('.lid-actionmenu[data-lid='+ele_ID+']').hide();
 
                     var action = ele.attr('data-action');
@@ -1072,10 +1074,11 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
                 var node;
                 if($(event.target).hasClass('brick')){ 
+                    //cms element
                     
                     node =  $(event.target);
-//console.log('hide '+node.attr('data-lid'));
-                    _layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-lid')+']').hide();
+
+                    _layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-hid')+']').hide();
                     _layout_container.find('div[data-lid]').removeClass('cms-element-active');
                     
                     if(!_panel_propertyView.is(':visible'))
@@ -1108,8 +1111,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                        $(node).removeClass('fancytree-hover');
                         
                         //remove heighlight
-                        _layout_container.find('div[data-lid]').removeClass('cms-element-active');
-                        _layout_container.find('.lid-actionmenu[data-lid]').hide();
+                        _layout_container.find('div[data-hid]').removeClass('cms-element-active');
+                        _layout_container.find('.lid-actionmenu').hide();
                         
                         if(!_panel_propertyView.is(':visible'))
                             _layout_container.find('.cms-element-overlay').css('visibility','hidden');
@@ -1125,7 +1128,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     if(_panel_propertyView.is(':visible')) return;
 
                     
-                    var node;
+                    var node, ele_ID;
 
                     if(__timeout>0) clearTimeout(__timeout);
                     __timeout = 0;
@@ -1154,12 +1157,12 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         }
 
                         //node =  $(event.target);
-                        var ele_id = node.attr('data-lid');
+                        var ele_id = node.attr('data-hid');
                         _layout_container.find('.lid-actionmenu[data-lid!='+ele_id+']').hide(); //find other
                         var ele = _layout_container.find('.lid-actionmenu[data-lid='+ele_id+']');
 
                         var parent = node.parents('div.ui-layout-pane:first');
-                        if(parent.length==0 || parent.parents('div[data-lid]').length==0){
+                        if(parent.length==0 || parent.parents('div[data-hid]').length==0){
                             parent = _layout_container;  
                         }
                         /*
@@ -1193,6 +1196,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         ele.find('span.ui-icon-gear').show();  
                         ele.css({top:(pos.top<0?0:pos.top)+2+'px',left:(pos.left<0?0:pos.left)+2+'px'});
                         ele.show();
+                        
+                        ele_ID = $(node).attr('data-hid');
 
                     }else {
                         //node in treeview
@@ -1209,23 +1214,23 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                             node = $(node).find('.lid-actionmenu');
                             node.css('display','inline-block');//.css('visibility','visible');
                         }
+                        ele_ID = $(node).attr('data-lid');
                     }
 
-                    if(node){
-                        //highlight in preview/page
-                        var ele_ID = $(node).attr('data-lid');
-
-
-                        //highlight in treeview
+                    if(ele_ID>0){
+                        
                         if(is_in_page){
+                            //highlight in preview/page
                             node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
                             node.setActive(true);
 
-                            _layout_container.find('div[id^="hl-"]').removeClass('cms-element-active');
-                            _layout_container.find('div#hl-'+ele_ID).addClass('cms-element-active');
+                            _layout_container.find('div[data-hid]').removeClass('cms-element-active'); //remove from all
+                            _layout_container.find('div[data-hid='+ele_ID+']').addClass('cms-element-active');
 
                         }else                            
-                        { //separate overlay div - visible when mouse over tree
+                        {   
+                            //highlight in treeview
+                            //separate overlay div - visible when mouse over tree
                             if(!_panel_propertyView.is(':visible')){
                                 _panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
                                 _showOverlayForElement(ele_ID);
@@ -1253,13 +1258,13 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
     //
     function _showOverlayForElement( ele_ID ){
         if(ele_ID>0){
-            var cms_ele = _layout_container.find('div#hl-'+ele_ID);
+            var cms_ele = _layout_container.find('div[data-hid='+ele_ID+']');
             
             if(cms_ele.hasClass('cms-element-editing')) return;
             
             var pos = cms_ele.offset(); //realtive to document
             var pos2 = _layout_container.offset();
-            var overlay_ele = $('.cms-element-overlay');//_layout_container.find('.cms-element-overlay[data-lid="'+ele_ID+'"]')
+            var overlay_ele = $('.cms-element-overlay');
             if(overlay_ele.length==0){
                 overlay_ele = $('<div>').addClass('cms-element-overlay').appendTo(_layout_container); //attr('data-lid',ele_ID).insertAfter
             }
@@ -1303,7 +1308,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             //remove child
             parent_element = layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
             parent_children = parent_element.children;
-            parent_container = _layout_container.find('#hl-'+parentnode.key);//div[data-lid="
+            parent_container = _layout_container.find('div[data-hid='+parentnode.key+']');
             
         }
 
@@ -1462,12 +1467,12 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 */        
         if(_edit_Element){ //already opened - save previous
             
-            if(_layout_container.find('div.cms-element-editing').attr('id')==('hl-'+ele_id)) return; //same
+            if(_layout_container.find('div.cms-element-editing').attr('data-hid')==ele_id) return; //same
             
             //save previous element
             if(_edit_Element.warningOnExit(function(){_layoutEditElement(ele_id);})) return;
             
-            _layout_container.find('div[data-lid]').removeClass('cms-element-editing headline marching-ants marching');                        
+            _layout_container.find('div[data-hid]').removeClass('cms-element-editing headline marching-ants marching');                        
         }
 
       
@@ -1507,9 +1512,9 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         
         
         _layout_container.find('.cms-element-overlay').css('visibility','hidden'); //hide overlay above editing element
-        _layout_container.find('div[data-lid]').removeClass('cms-element-active');                        
+        _layout_container.find('div[data-hid]').removeClass('cms-element-active');                        
         
-        var ele = _layout_container.find('div[id="hl-'+ele_id+'"]').addClass('cms-element-editing');
+        var ele = _layout_container.find('div[data-hid="'+ele_id+'"]').addClass('cms-element-editing');
 
         if(!ele.css('background-image') || ele.css('background-image')=='none'){
             ele.addClass('headline marching-ants marching');
@@ -1713,7 +1718,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             }
             */
             parent_element = layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
-            parent_container = _layout_container.find('#hl-'+parentnode.key); //div[data-lid="
+            parent_container = _layout_container.find('div[data-hid='+parentnode.key+']');
             parent_children = parent_element.children;
 
         }else{
@@ -1724,7 +1729,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 parent_children = _layout_content;
             }else{
                 parent_element = layoutMgr.layoutContentFindElement(_layout_content, parentnode.parent.key);
-                parent_container = _layout_container.find('#hl-'+parentnode.parent.key);
+                parent_container = _layout_container.find('div[data-hid='+parentnode.parent.key+']');
                 parent_children = parent_element.children;
             }
         }

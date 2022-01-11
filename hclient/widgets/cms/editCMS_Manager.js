@@ -58,6 +58,8 @@ function editCMS_Manager( options ){
         return;
     }
     
+    options.is_open_in_new_tab = true;
+    
     
     if(home_page_record_id<0){
         _createNewWebContent();
@@ -83,6 +85,8 @@ function editCMS_Manager( options ){
         
             isWebPage = (home_page_record_id==-2);
             
+            options.is_new_website = !isWebPage;
+            
             if(options.container) options.container.empty();
 
             //create new set of records - website template -----------------------
@@ -104,7 +108,10 @@ function editCMS_Manager( options ){
             };
 
             //create default set of records for website see importController
-            window.hWin.HAPI4.doImportAction(request, function( response ){
+            function __callback( response ){
+                
+                $dlg = window.hWin.HEURIST4.msg.getMsgFlashDlg();
+                $dlg.dialog('close');
 
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
 
@@ -134,29 +141,29 @@ function editCMS_Manager( options ){
                         }
                     }else{
 
-                        window.hWin.HEURIST4.msg.showMsgDlg(
-                            '<p>To save you time we have created a set of commonly used menu entries and web pages with dummy content.</p>'
-                            +'<p>Please use <b>Menu &amp; pages</b> on the left to delete the menu entries you don\'t need or to rename them '
-                            +'(don\'t forget to change the title of the page which is generally a longer version of the menu label). You can also add new ones.</p>'
-                            +'<p>The pages can be edited by navigating to the page in the preview above and clicking '
-                            +'<b>Edit page content</b> (either the button on the left or the link on the right of the page)</p>');
-
+                        window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
+                            +'hclient/widgets/cms/editCMS_NewSiteMsg.html');
 //console.log(response.data);          
                         //add blog template
                         if(response.data.page_id_for_blog>0){
                             _addTemplate('blog', response.data.page_id_for_blog);
                         }
-                  
-                            
-                            options.record_id = response.data.home_page_id>0?response.data.home_page_id:response.data.ids[0];
-                            editCMS_Manager( options );                            
+
+                        options.record_id = response.data.home_page_id>0?response.data.home_page_id:response.data.ids[0];
+                        editCMS_Manager( options );                                
+
                     }
 
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                     closeCMSEditor();
                 }
-            });
+            };
+            
+            //__callback({status:'ok',data:{home_page_id:572}}); //DEBUG
+            
+            window.hWin.HAPI4.doImportAction(request, __callback);
+
             
     } //_createNewWebContent
     
@@ -195,45 +202,55 @@ function editCMS_Manager( options ){
     
     
     //
-    // load website/page and open cms editor
+    // load website/page and open cms editor in iframe within heurist interface
     //
     function _initWebSiteEditor(){
         
-        var sURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&website&id='+options.record_id+'&edit=2';
+        var sURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&website&id='+options.record_id;
         
-        if(options.container){ //load into container
+        if(options.is_open_in_new_tab){ //open in new tab
+        
+            sURL = sURL + '&edit=' + (options.is_new_website?'3':'2');
+            window.open(sURL, '_blank');
             
-
-            options.container.empty();
-            edit_dialog = options.container;
-            options.container.html('<iframe id="web_preview" style="overflow:none !important;width:100% !important"></iframe>');
+        }else {
             
-            options.container.find('#web_preview').attr('src', sURL);
-
-        }else{ 
-            //load into popup dialog
-            var edit_buttons = [
-                {text:window.hWin.HR('Close'), 
-                    id:'btnRecCancel',
-                    css:{'float':'right'}, 
-                    click: closeCMSEditor
-                }
-            ];
-
-            //var body = $(this.document).find('body');
-            //var dim = {h:body.innerHeight(), w:body.innerWidth()};
-            //dim.h = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+            sURL = sURL + '&edit=4';
             
-            edit_dialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(sURL,
-                edit_buttons, window.hWin.HR('Define Website'),
-                {   
-                    //open: onDialogInit, 
-                    width:'95%', height:'95%', isPopupDlg:true, 
-                    close:function(){
-                        edit_dialog.empty();//dialog('destroy');
-                    },
-                    beforeClose: beforeCloseCMSEditor
-            });
+            if(options.container){ //load into container
+                
+
+                options.container.empty();
+                edit_dialog = options.container;
+                options.container.html('<iframe id="web_preview" style="overflow:none !important;width:100% !important"></iframe>');
+                
+                options.container.find('#web_preview').attr('src', sURL);
+
+            }else{ 
+                //load into popup dialog
+                var edit_buttons = [
+                    {text:window.hWin.HR('Close'), 
+                        id:'btnRecCancel',
+                        css:{'float':'right'}, 
+                        click: closeCMSEditor
+                    }
+                ];
+
+                //var body = $(this.document).find('body');
+                //var dim = {h:body.innerHeight(), w:body.innerWidth()};
+                //dim.h = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+                
+                edit_dialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(sURL,
+                    edit_buttons, window.hWin.HR('Define Website'),
+                    {   
+                        //open: onDialogInit, 
+                        width:'95%', height:'95%', isPopupDlg:true, 
+                        close:function(){
+                            edit_dialog.empty();//dialog('destroy');
+                        },
+                        beforeClose: beforeCloseCMSEditor
+                });
+            }
         }
     
     }

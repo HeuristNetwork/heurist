@@ -270,6 +270,20 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                     var ele = $dlg.find('button[name="add_record_cfg"]');
 
                     if(!ele.button('instance')){
+                        
+                        function __human_readble(){
+                            
+                            var rty_ID = $dlg.find('input[name="RecTypeID"]').val();
+                            if(rty_ID>0){
+                                $('#add_record_desc').html(
+                                '&nbsp;&nbsp;<i>Record type: </i>'+$Db.rty(rty_ID,'rty_Name')
+                                //+' <i>editable by user/group# </i>'+$dlg.find('input[name="OwnerUGrpID"]').val()
+                                //+' <i>viewable by: </i>'+$dlg.find('input[name="NonOwnerVisibility"]').val()
+                                );                                
+                            }else{
+                                $('#add_record_desc').html('');
+                            }
+                        }
 
                         ele.button().click(
                             function(){
@@ -282,6 +296,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                                             $dlg.find('input[name="RecTypeID"]').val(context.RecTypeID);
                                             $dlg.find('input[name="OwnerUGrpID"]').val(context.OwnerUGrpID);
                                             $dlg.find('input[name="NonOwnerVisibility"]').val(context.NonOwnerVisibility);
+                                            __human_readble();
                                         }
 
                                     },
@@ -290,6 +305,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                                 );    
                             }
                         );
+                        __human_readble();
                     }
 
             }else

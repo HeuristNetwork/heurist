@@ -125,14 +125,33 @@ function hLayoutMgr(){
         
         return layout;
     }//_layoutInit
+    
+    //
+    // creates new div
+    //
+    function _layoutCreateDiv( layout, classes ){
+
+        var $d = $(document.createElement('div'));
+        if(!layout.dom_id){
+            layout.dom_id = 'hl-' + layout.key;
+        }
+        
+        $d.attr('id', layout.dom_id)
+          .attr('data-hid', layout.key); //.attr('data-lid', layout.key);
+        
+        if(classes){
+            $d.addClass(classes);
+        } 
+        
+        return $d;        
+    }
 
     function _layoutInitGroup(layout, container){
         
         //create parent div
-        $d = $(document.createElement('div'));
-        $d.attr('id','hl-'+layout.key).attr('data-lid', layout.key) 
-                .addClass('cms-element brick')
-                .appendTo(container);
+        var $d = _layoutCreateDiv(layout, 'cms-element brick');
+        
+        $d.appendTo(container);
                 
         if(isEditMode){
             //$d.css({'border':'2px dotted gray','border-radius':'4px','margin':'4px'});  
@@ -152,11 +171,9 @@ function hLayoutMgr(){
     }
     function _layoutInitText(layout, container){
         
-        $d = $(document.createElement('div'));
-        $d.attr('id','hl-'+layout.key).attr('data-lid', layout.key)
-            .addClass('editable tinymce-body')
-            .addClass('cms-element brick')
-            .appendTo(container);
+        var $d = _layoutCreateDiv(layout, 'editable tinymce-body cms-element brick');
+
+        $d.appendTo(container);
             
         if(!layout.css) layout.css = {};
         if($.isEmptyObject(layout.css)){ //default
@@ -176,10 +193,10 @@ function hLayoutMgr(){
     //
     function _layoutAddWidget(layout, container){
 
-        $d = $(document.createElement('div'));
+        var $d = _layoutCreateDiv(layout, 'editable heurist-widget cms-element brick');
 
         //remove previous one
-        var old_widget = container.find('#hl-'+layout.key);
+        var old_widget = container.find('div[data-hid='+layout.key+']');
         if(old_widget.length>0){
             //parent_ele = old_widget.parent();
             //var prev_sibling = old_widget.prev();
@@ -187,11 +204,6 @@ function hLayoutMgr(){
         }else{
             $d.appendTo(container);    
         }
-        
-        //add new one
-        $d.attr('id','hl-'+layout.key).attr('data-lid', layout.key)
-        .addClass('heurist-widget editable')
-        .addClass('cms-element brick');
         
         
         if(!layout.css){
@@ -240,7 +252,7 @@ function hLayoutMgr(){
             $d.css( layout.css );    
         }
         
-        _layoutInitWidget(layout, container.find('#hl-'+layout.key));
+        _layoutInitWidget(layout, container.find('div[data-hid='+layout.key+']'));
 
     }
     
@@ -307,12 +319,14 @@ function hLayoutMgr(){
     //
     function _layoutInitCardinal(layout, container){
         
-        var key_id = 'hl-'+layout.key;
+        var $d, $parent;
         
-        if(container.attr('id')==key_id){
+        layout.dom_id = 'hl-'+layout.key;
+        
+        if(container.attr('id')==layout.dom_id){
             $d = container;    
         }else{
-            $d = container.find('#'+key_id);
+            $d = container.find('#'+layout.dom_id);
         }
         
         if($d.length>0){
@@ -321,17 +335,13 @@ function hLayoutMgr(){
         }
         
         //create parent div
-        $parent = $(document.createElement('div'));
+        var $parent = _layoutCreateDiv(layout);
+        
         if( layout.css && !$.isEmptyObject(layout.css) ){
             $parent.css( layout.css );
         }
         
-        $parent.attr('id', key_id)
-          .attr('data-lid', layout.key)
-          //.css({height:'100%',width:'100%'})
-          .appendTo(container);
-        
-        //if(isEditMode) $parent.css('border','2px dashed green');
+        $parent.appendTo(container);
         
         
         var layout_opts = {applyDefaultStyles: true, maskContents: true};
@@ -375,16 +385,15 @@ function hLayoutMgr(){
             $d.addClass('ui-layout-'+pos)
               .appendTo($parent);
 
+
+            lpane.dom_id = 'hl-'+lpane.key;
+            var $d2 =_layoutCreateDiv(lpane, 'ui-layout-content2');  
               
-            $d2 = $(document.createElement('div'));
-            $d2.attr('id','hl-'+lpane.key)
-              .attr('data-lid', lpane.key)
-              .addClass('ui-layout-content2')
-              .appendTo($d);
+            $d2.appendTo($d);
               
               
             //@todo additional container for children>1        
-            layout_opts[pos+'__contentSelector'] = '#hl-'+lpane.key;
+            layout_opts[pos+'__contentSelector'] = '#'+lpane.dom_id;
                     
             //init                    
             _layoutInit(layout.children[i].children, $d2);
@@ -402,12 +411,15 @@ function hLayoutMgr(){
     //
     function _layoutInitTabs(layout, container){
         
-        var key_id = 'hl-'+layout.key;
         
-        if(container.attr('id')==key_id){
+        var $d;
+        
+        layout.dom_id = 'hl-'+layout.key;
+        
+        if(container.attr('id')==layout.dom_id){
             $d = container;    
         }else{
-            $d = container.find('#'+key_id);
+            $d = container.find('#'+layout.dom_id);
         }
         
         if($d.length>0){
@@ -416,10 +428,9 @@ function hLayoutMgr(){
         }
         
         //create parent div
-        $d = $(document.createElement('div'));
-        $d.attr('id', key_id)
-          .attr('data-lid', layout.key)
-          .appendTo(container);
+        $d = _layoutCreateDiv(layout);
+        
+        $d.appendTo(container);
           
         //if(isEditMode) $d.css('border','2px dotted blue');
           
@@ -431,13 +442,13 @@ function hLayoutMgr(){
         _layoutInit(layout.children, $d);
                 
         //tab header
-        $d = body.find('#'+key_id);
+        $d = body.find('#'+layout.dom_id);
         var groupTabHeader = $('<ul>').prependTo($d);
         
         for(var i=0; i<layout.children.length; i++){
       
             //.addClass('edit-form-tab')
-            $('<li>').html('<a href="#hl-'+layout.children[i].key
+            $('<li>').html('<a href="#'+layout.children[i].dom_id
                                 +'"><span style="font-weight:bold">'
                                 +layout.children[i].name+'</span></a>')
                         .appendTo(groupTabHeader);
@@ -452,12 +463,14 @@ function hLayoutMgr(){
     //
     function _layoutInitAccordion(layout, container){
        
-        var key_id = 'hl-'+layout.key;
+        var $d;
         
-        if(container.attr('id')==key_id){
+        layout.dom_id = 'hl-'+layout.key;
+        
+        if(container.attr('id')==layout.dom_id){
             $d = container;    
         }else{
-            $d = container.find('#'+key_id);
+            $d = container.find('#'+layout.dom_id);
         }
         
         if($d.length>0){
@@ -466,12 +479,9 @@ function hLayoutMgr(){
         }
             
         //create parent div
-        $d = $(document.createElement('div'));
-        $d.attr('id', key_id)
-              .attr('data-lid', layout.key)
-              .appendTo(container);
-       
-        //if(isEditMode) $d.css('border','2px dotted blue');
+        $d = _layoutCreateDiv(layout);
+        
+        $d.appendTo(container);
        
         //accordion panels    
         _layoutInit(layout.children, $d);
@@ -479,15 +489,16 @@ function hLayoutMgr(){
         //accordion headers
         for(var i=0; i<layout.children.length; i++){
       
-            $d = body.find('#hl-'+layout.children[i].key);
+            $d = body.find('#'+layout.children[i].dom_id);
             
             $('<h3>').html( layout.children[i].name )
                      .insertBefore($d);
             
         }
         
-        $d = body.find('#'+key_id);
+        $d = body.find('#'+layout.dom_id);
         $d.accordion({heightStyle: "content", 
+                      active:false,
                 //active:(currGroupType == 'expanded')?0:false,
                       collapsible: true });
     }

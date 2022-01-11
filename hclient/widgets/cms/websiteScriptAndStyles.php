@@ -56,8 +56,9 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var init_page_record_id=<?php echo $open_page_on_init; ?>;
     var current_page_id = 0;
     var _IS_NEW_CMS_EDITOR = <?php echo $_is_new_cms_editor; ?>;
-    var isCMS_active = <?php echo (@$_REQUEST['edit']?'true':'false'); ?>; //use new CMS editor and open it onc
-    var isCMS_InHeuristUI = <?php echo (@$_REQUEST['edit']==2 ?'true':'false'); ?>;
+    var isCMS_active = <?php echo (@$_REQUEST['edit']?'true':'false'); ?>; //use new CMS editor and init it once
+    var isCMS_InHeuristUI = <?php echo (@$_REQUEST['edit']==4 ?'true':'false'); ?>;
+    var isCMS_NewWebsite = <?php echo (@$_REQUEST['edit']==3 ?'true':'false'); ?>;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
 </script>
     
@@ -337,7 +338,6 @@ _time_debug = new Date().getTime() / 1000;
             <?php if($isEmptyHomePage) echo 'if(not_empty_page){ load_initially=not_empty_page;}'; ?>
             
             loadPageContent( init_page_record_id>0 ?init_page_record_id :load_initially );
-            
         }
         
         var topmenu = $('#main-menu');

@@ -54,7 +54,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         */
         
         
-        element = _layout_container.find('#hl-'+element_cfg.key); //element in main-content
+        element = _layout_container.find('div[data-hid='+element_cfg.key+']'); //element in main-content
         l_cfg = window.hWin.HEURIST4.util.cloneJSON(element_cfg);
 
         $container.empty().load(window.hWin.HAPI4.baseURL
@@ -71,6 +71,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         var cont = $container;
 
         cont.find('input[data-type="element-name"]').val(l_cfg.name);
+        cont.find('input[data-type="element-id"]').val(l_cfg.dom_id);
 
         var etype = (l_cfg.type?l_cfg.type:(l_cfg.appid?'widget':'text'));
 
@@ -103,7 +104,6 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                     l_cfg.options = new_cfg;
 
                     //recreate widget with new options
-                    //var widget_ele = _layout_container.find('#hl-'+l_cfg.key); //element in main-content
                     layoutMgr.layoutAddWidget(l_cfg, element.parent());
                     
                     
@@ -158,7 +158,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                         l_cfg.children[k].css['border-radius'] = '4px';
                         l_cfg.children[k].css['margin'] = '4px';*/
 
-                        var child_ele = _layout_container.find('#hl-'+l_cfg.children[k].key);
+                        var child_ele = _layout_container.find('div[data-hid='+l_cfg.children[k].key+']');
                         child_ele.removeAttr('style');
                         child_ele.css(l_cfg.children[k].css);
                     });
@@ -190,6 +190,10 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             }//for
         }
 
+        if(etype=='cardinal' || etype=='tabs' || etype=='accordion'){
+            cont.find('input[data-type="element-id"]').parent().hide();
+        }
+        
         
         //4. listeners for selects    
         cont.find('select').hSelect({change:function(event){
@@ -246,6 +250,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             if(!l_cfg.name) l_cfg.name = 'Define name of element';
             l_cfg.title = '<span data-lid="'+l_cfg.key+'">'+l_cfg.name+'</span>';
             
+            l_cfg.dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
         
             //get cardinal parameters  
             if(l_cfg.type=='cardinal')

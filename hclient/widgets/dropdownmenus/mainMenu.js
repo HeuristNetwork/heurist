@@ -952,6 +952,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         }
                         
                     }else if( window.hWin.HAPI4.is_admin() ){
+                        popup_dialog_options.is_new_editor = true;    
                         popup_dialog_options.record_id = -1;
                         window.hWin.HEURIST4.msg.showMsgDlg(
                                 'New website will be created. Continue?',
