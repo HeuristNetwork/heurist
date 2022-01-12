@@ -408,30 +408,33 @@ $.widget( "heurist.emailForm", {
                 email: this._element_form.find('#letter_email').val(),
                 content: this._element_form.find('#letter_content').val(),
                 captcha: this._element_form.find("#captcha").val()
+                //,captchaid: this._element_form.find("#captchaid").val()
             }
 
             var request = {
                 'a'          : 'save',
                 'entity'     : 'sysBugreport',
                 'request_id' : window.hWin.HEURIST4.util.random(),
+                'captchaid'  : this._element_form.find("#captchaid").val(),
                 'fields'     : fields
             };
             
             window.hWin.HEURIST4.msg.bringCoverallToFront(this._element_form);
          
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        window.hWin.HEURIST4.msg.sendCoverallToBack();
-                        
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            
-                            window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Email has been sent'));
-                            that.closeDialog(true); //force to avoid warning
-                     }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);    
-                        }
+                function(response){
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Email has been sent'));
+                        that.closeDialog(true); //force to avoid warning
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);    
+                        that._refreshCaptcha();
+                    }
             });
-                        
+
 
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(err_text);
@@ -447,7 +450,22 @@ $.widget( "heurist.emailForm", {
         var $dd = this._element_form.find('#captcha_img');
         var id = window.hWin.HEURIST4.util.random();
         if(true){  //simple captcha
-            $dd.load(window.hWin.HAPI4.baseURL+'hsapi/utilities/captcha.php?id='+id);
+            var that = this;
+            
+            var url = window.hWin.HAPI4.baseURL+'hsapi/utilities/captcha.php?json&id='+id;
+            
+            //var request = {json:1,id:id};
+            //window.hWin.HEURIST4.util.sendRequest(url, request, null, 
+            $.getJSON(url,
+                function(captcha){
+                        that._element_form.find('#captcha_img').text(captcha.value)
+                        that._element_form.find('#captchaid').val(captcha.id);
+                    });
+
+        
+        }else if(false){
+            var url = window.hWin.HAPI4.baseURL+'hsapi/utilities/captcha.php?id='+id;
+            $dd.load(url);
         }else{ //image captcha
             $dd.empty();
             $('<img src="'+window.hWin.HAPI4.baseURL+'hsapi/utilities/captcha.php?img='+id+'"/>').appendTo($dd);

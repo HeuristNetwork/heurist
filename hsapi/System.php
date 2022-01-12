@@ -1222,7 +1222,7 @@ error_log(print_r($_REQUEST, true));
         }
     }
     
-   /**
+    /**
     * Returns IF currentUser satisfies to required level
     *
     * @param requiredLevel 
@@ -1287,6 +1287,9 @@ error_log(print_r($_REQUEST, true));
             }
         }
         
+        $cookie_session_id = @$_COOKIE['heurist-sessionid'];
+        if(!$cookie_session_id) $cookie_session_id = @$_REQUEST['captchaid'];
+        
         //if(session_id() == '' || !isset($_SESSION)) {
         if (session_status() != PHP_SESSION_ACTIVE) {
             
@@ -1294,15 +1297,20 @@ error_log(print_r($_REQUEST, true));
             session_name('heurist-sessionid');
             //session_set_cookie_params ( 0, '/', '', $is_https);
             session_cache_limiter('none');
-            
-            if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes 
-                session_id($_COOKIE['heurist-sessionid']);
+
+//workaround for iframe - does not work            
+//error_log('SYSTEM NOT ACTVIE  cookie='.$cookie_session_id);                
+//ini_set('session.cookie_samesite', 'None');
+//ini_set('session.cookie_secure', 'true');            
+//header('P3P: CP="CAO PSA OUR"');
+            if ($cookie_session_id) { //get session id from cookes 
+                session_id($cookie_session_id);
                 @session_start();
                 
             } else {   //session does not exist - create new one and save on cookies
                 @session_start();
                 //$session_id = session_id();
-                //setcookie('heurist-sessionid', $session_id, 0, '/', '', $is_https ); //create new session - REM
+                //setcookie('heurist-sessionid', session_id(), 0, '/', '', $is_https ); //create new session - REM
             }
         }
         
@@ -1311,7 +1319,7 @@ error_log(print_r($_REQUEST, true));
             if (@$_SESSION[$this->dbname_full]['keepalive']) {
                 //update cookie - to keep it alive for next 30 days
                 $time = time() + 30*24*60*60;
-                $session_id = $_COOKIE['heurist-sessionid'];
+                $session_id = $cookie_session_id;
                 if (strnatcmp(phpversion(), '7.3') >= 0) {
                     $cres = setcookie('heurist-sessionid', $session_id, [
                         'expires' => $time,

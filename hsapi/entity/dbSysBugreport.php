@@ -244,8 +244,7 @@ class DbSysBugreport extends DbEntityBase
     // it sends email to owner of database or to email specified in website_id record
     //
     private function _prepareEmail($fields){
-    
-//error_log('_prepareEmail: '.session_id().'   '.@$_SESSION["captcha_code"]);        
+        
         //1. verify captcha
         if (@$fields['captcha'] && @$_SESSION["captcha_code"]){
             

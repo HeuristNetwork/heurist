@@ -1,6 +1,7 @@
 <?php
     /**
-    * Capture
+    * Stores Capture value in session "captcha_code"
+    * Returns either string or image with challenge
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -17,23 +18,28 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-session_name('heurist-sessionid');
-session_start();
-/*
-if(@$_REQUEST['captcha_code']){
-    //CAPTCHA Matching code
-
-    if ($_SESSION["captcha_code"] == $_POST["captcha_code"]) {
-          $response = array('status'=>HEURIST_OK, 'data'=>'ok');
-    } else {
-          $response = array('status'=>HEURIST_OK, 'data'=>'no');
+    
+if (session_status() != PHP_SESSION_ACTIVE) {
+    
+    $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+    session_name('heurist-sessionid');
+    session_cache_limiter('none');
+    
+    //error_log('NOT ACTVIE  cookie='.@$_COOKIE['heurist-sessionid']);    
+    
+    if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes 
+        session_id($_COOKIE['heurist-sessionid']);
+        @session_start();
+        
+    } else {   //session does not exist - create new one and save on cookies
+        @session_start();
+        //$session_id = session_id();
+        setcookie('heurist-sessionid', session_id(), 0, '/', '', $is_https ); //create new session - REM
     }
+}else{
+    //error_log('ALREADy ACTVIE '.session_id().'  cookie='.@$_COOKIE['heurist-sessionid']);
+}
 
-    header('Content-type: text/javascript');
-    print json_encode($response);
-    exit();
-
-}else */
 if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     $captchanumber = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz'; // Initializing PHP variable with string
     $captcha_code = substr(str_shuffle($captchanumber), 0, 4); // Getting first 6 word after shuffle.
@@ -55,6 +61,15 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     $captcha_code = ($ran1+$ran2) + 1;
     $_SESSION["captcha_code"] = $captcha_code;
     // print "Answer: the word '".strtolower($planets[$ran0])."' followed by the sum of ".$ran1." and ".$ran2;
-    print $ran1." + ".$ran2." + 1 = ";
+    $value = $ran1." + ".$ran2." + 1 = ";
+    
+    if(array_key_exists('json',$_REQUEST)){ //returns both session id and value
+        $value = array('id'=>session_id(),'value'=>$value);
+        header('Content-type: application/json;charset=UTF-8');
+        print json_encode($value);
+    }else{
+        print $value;    
+    }
 }
+//error_log('_capture: '.session_id().'   '.@$_SESSION["captcha_code"]);        
 ?>
