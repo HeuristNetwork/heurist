@@ -205,7 +205,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
 
             try{   
                 $origHasSeconds = (substr_count($value,':')>1);
-                $origWithoutDays = substr_count($value,'-')==1;
+                $origWithoutDays = substr_count($value,'-')==1 || substr_count($value,' ')==1 || substr_count($value,'/')==1;
                 
                 
                 $t2 = new DateTime($value);
