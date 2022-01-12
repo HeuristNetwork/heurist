@@ -777,6 +777,116 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     return $system->addError(HEURIST_UNKNOWN_ERROR, "An unknown error has occurred with attempting to retrieve the date data for DB => " . HEURIST_DBNAME . ", record ids => " . implode(',', $rec_ids));
 }
 
+//
+// Search for record ids based on provided search values, returns only one id per search
+// $ptr_record_ids => array of strings (example. ['1,2,3,4', '5,6,7,8', ...])
+// $search_values => array of strings (example. ['Jean-Jacques', ''])
+//
+function getRecordIds($system, $ptr_record_ids, $search_values){
+
+    $mysqli = $system->get_mysqli();
+    $rec_ids = array();
+
+    if(!$ptr_record_ids || count($ptr_record_ids) <= 0){
+        return $system->addError(HEURIST_ERROR, "No record type ids where sent to search");
+    }else if(!$search_values || count($search_values) != count($ptr_record_ids)){
+        return $system->addError(HEURIST_ERROR, "There needs to be an equal number of search values with each record type being checked");
+    }
+
+    foreach ($ptr_record_ids as $key => $record_id_set) {
+
+        $searching = $search_values[$key];
+        $query_base = "SELECT rec.rec_ID FROM Records AS rec INNER JOIN recDetails AS dtl ON rec.rec_ID = dtl.dtl_RecID WHERE rec.rec_RecTypeID IN ($record_id_set) AND ";
+
+        if(is_array($searching)){
+
+            foreach ($searching as $s_key => $search) {
+
+                $query = $query_base . "dtl.dtl_Value = '$search'";
+
+                $rtn = $mysqli->query($query);
+
+                if(!$rtn){
+                    $rec_ids[$key] = null;
+                    break;
+                }else{
+
+                    $ids = array();
+                    while($result = $rtn->fetch_row()){
+
+                        if($result){
+                            $ids[] = $result[0];
+                        }
+                    }
+                    $rtn->close();
+
+                    if(count($ids) > 0){
+                        $rec_ids[$key] = $ids;
+                        $query_base = "SELECT dtl.dtl_RecID FROM recDetails AS dtl WHERE dtl.dtl_RecID IN (". implode(',', $ids) .") AND ";
+                    }else{
+                        $rec_ids[$key] = null;
+                        break;
+                    }
+                }
+            }
+        }else{
+
+            $ids = array();
+
+            $query_base .= "dtl.dtl_Value = '$searching'";
+
+            $rtn = $mysqli->query($query_base);
+
+            if(!$rtn){
+                $rec_ids[$key] = null;
+            }else{
+
+                $ids = array();
+                while($result = $rtn->fetch_row()){
+
+                    if($result){
+                        $ids[] = $result[0];
+                    }
+                }
+                $rtn->close();
+
+                if(count($ids) > 0){
+                    $rec_ids[$key] = $ids;
+                }else{
+                    $rec_ids[$key] = null;
+                }
+            }
+        }
+
+        if(is_array($rec_ids[$key])){
+
+            if(count($rec_ids[$key]) == 1){
+                $rec_ids[$key] = $rec_ids[$key][0];
+            }else{ // Ambiguous, return a list of: Key => Rec ID, Value => Rec Titlemask
+
+                $query = "SELECT rec_ID, rec_Title FROM Records WHERE rec_ID IN (". implode(',', $rec_ids[$key]) .")";
+
+                $rec_ids[$key] = array();
+
+                $rtn = $mysqli->query($query);
+
+                if($rtn){
+
+                    while($result = $rtn->fetch_row()){
+
+                        if($result){
+                            $rec_ids[$key][$result[0]] = $result[1];
+                        }
+                    }
+                    $rtn->close();
+                }
+            }
+        }
+    }
+
+    return array("status"=>HEURIST_OK, "data"=>$rec_ids);
+}
+
 /**
 * search all related (links and releationship) records for given set of records
 * it searches links recursively and adds found records into original array  $ids 
