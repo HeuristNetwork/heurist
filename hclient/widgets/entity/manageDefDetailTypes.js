@@ -707,8 +707,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     this._on(btnBasefieldsList, 
                         {'click': function(){ // warn the user about the loss of popup data
                             var isChanged = (this._editing.getFieldByName('dty_Type').find('.ui-selectmenu-text').text() != 'Select...'
-                                                || !window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_HelpText')[0]).val())
-                                                || !window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_Name')[0]).val())
+                                                || (!window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_HelpText')[0]).val())
+                                                && !window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_Name')[0]).val()))
                                             ); // Check if values have been placed/selected in required fields
 
                             if(isChanged){
