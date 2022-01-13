@@ -479,7 +479,7 @@ foreach ($this->imp_recordtypes as $recId){
     //get name and try to find in target
     $isNotFound = true;
     foreach ($trg_rectypes['groups'] as $idx=>$group){
-        if(is_numeric($idx) && trim($group['name'])== trim($grp_name)){
+        if(is_numeric($idx) && mb_strtolower(trim($group['name']))== mb_strtolower(trim($grp_name))){
             $group_rt_ids[$grp_id] = $group['id'];
             $isNotFound = false;
             break;
@@ -605,7 +605,7 @@ foreach ($this->imp_fieldtypes as $ftId){
     //get name and try to find in target
     $isNotFound = true;
     foreach ($trg_detailtypes['groups'] as $idx=>$group){
-        if(is_numeric($idx) && trim($group['name'])== trim($grp_name)){
+        if(is_numeric($idx) && mb_strtolower(trim($group['name']))== mb_strtolower(trim($grp_name))){
             $group_ft_ids[$grp_id] = $group['id'];
             $isNotFound = false;
             break;
@@ -1546,7 +1546,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
             //get name and try to find in target by name
             $isNotFound = true;
             foreach ($this->target_defs['terms']['groups'] as $id=>$group){
-                if(is_numeric($id) && trim($group['vcg_Name'])== trim($grp_name)){
+                if(is_numeric($id) && mb_strtolower(trim($group['vcg_Name']))== mb_strtolower(trim($grp_name))){
                     $this->vcg_correspondence[$grp_id] = $id;
                     $isNotFound = false;
                     break;
