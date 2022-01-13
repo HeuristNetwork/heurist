@@ -1098,24 +1098,30 @@ function print_public_details($bib) {
                         'linked' => ($bd['name']=='Linked media')
                     ));
                     
+                    /*
                     if($originalFileName==='_iiif'){
-                        
                         $originalFileName = 'IIIF Manifest';
-                        
                     }else if($originalFileName==='_iiif_image'){
-                        
                         $originalFileName = 'IIIF Image';
-                    }
-              
-                    $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($external_url?$external_url:$file_URL).'">'
-                            .htmlspecialchars(($originalFileName && $originalFileName!='_remote')
-                                        ?$originalFileName
-                                        :($external_url?$external_url:$file_URL)).'</a> '
-                            .($fileSize>0?'[' .htmlspecialchars($fileSize) . 'kB]':'');
+                    }*/
+                    
+                    $bd['val'] = '<a target="_surf" href="'.htmlspecialchars($external_url?$external_url:$file_URL).'">';
 
                     if($file_description!=null && $file_description!=''){
-                        $bd['val'] = $bd['val'].'<br>'.htmlspecialchars($file_description);
+                        $bd['val'] = $bd['val'].htmlspecialchars($file_description).'<br>';
                     }
+                    $bd['val'] .= '<span class="external-link" style="vertical-align: bottom;"></span>';
+                    if(strpos($originalFileName,'_iiif')===0){
+                        $bd['val'] = $bd['val'].'<img src="'.HEURIST_BASE_URL.'hclient/assets/iiif_logo.png" style="width:16px"/>';
+                        $originalFileName = null;
+                    }
+              
+                    
+                    $bd['val'] .= '<span>'.htmlspecialchars(($originalFileName && $originalFileName!='_remote')
+                                        ?$originalFileName
+                                        :($external_url?$external_url:$file_URL)).'</span></a> '
+                            .($fileSize>0?'[' .htmlspecialchars($fileSize) . 'kB]':'');
+                    
                 }
 
             } else {
@@ -1363,7 +1369,8 @@ function print_public_details($bib) {
         $ele_id = ($bd['rst_DisplayOrder'] != '' || $bd['rst_DisplayOrder'] != null) ? 'data-order="' . $bd['rst_DisplayOrder'] . '"' : '';
 
         print '<div class="detailRow fieldRow" '. ($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt) ? '' : $ele_id) .' style="border:none 1px #00ff00;'   //width:100%;
-            .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none':'')
+            .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none;':'')
+            .($is_map_popup?'':'width:100%;')
             .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
         .'</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'
         .' '.$bd['val'].'</div></div>';

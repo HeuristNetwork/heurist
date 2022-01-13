@@ -183,13 +183,13 @@ $.widget( "heurist.editing_input", {
                     .appendTo( this.element )
             
                 this.btn_add = $( "<span>")
-                    .addClass("smallbutton editint-inout-repeat-button ui-icon-circlesmall-plus")
+                    .addClass("smallbutton editint-inout-repeat-button ui-icon ui-icon-circlesmall-plus")
                     .appendTo( btn_cont )
                 //.button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
                 .attr('tabindex', '-1')
                 .attr('title', 'Add another ' + lblTitle +' value' )                    
-                .css({display:'block', 'font-size':'1.9em', cursor:'pointer','vertical-align':'top', //'padding-top':'2px',
-                    'min-width':'22px',
+                .css({display:'block', 'font-size':'1.9em', cursor:'pointer', //'vertical-align':'top', //'padding-top':'2px',
+                    'min-width':'22px','margin-top': '5px',
 //outline_suppress does not work - so list all these props here explicitely                
                     outline: 'none','outline-style':'none', 'box-shadow':'none'
                 });
