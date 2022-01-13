@@ -17,7 +17,7 @@
 * 
 * requires
 * hclient/core/hintDiv.js (popup div)
-* need to define baseURL!!!
+* need to define mapStaticURL!!!
 *
 * used in rendereRecordData.php
 * 
@@ -33,9 +33,9 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/Map  
 */
-var baseURL = '';
+var mapStaticURL = '';
 if(window.hWin && window.hWin.HAPI4){
-    baseURL = window.hWin.HAPI4.baseURL+"viewers/gmap/mapStatic.php?width=300&height=300&db="+window.hWin.HAPI4.database;
+    mapStaticURL = window.hWin.HAPI4.baseURL+"viewers/gmap/mapStatic.php?width=300&height=300&db="+window.hWin.HAPI4.database;
 }
 
 function MapViewer() {
@@ -66,7 +66,7 @@ function MapViewer() {
 			}
 			var d = new Date().getTime()
 
-			var surl = baseURL+"&t="+d;
+			var surl = mapStaticURL+"&t="+d;
 
 			if(value){
 				surl = surl + "&value="+encodeURIComponent(value);

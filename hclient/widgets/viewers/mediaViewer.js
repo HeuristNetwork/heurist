@@ -105,7 +105,7 @@ $.widget( "heurist.mediaViewer", {
     ,_initControls: function(){
         
         if(this.options.selector){
-           
+           //thumbnails already exist
            this._initThumbnails( this.options.selector );
         }else{
             this._renderThumbnails();
@@ -381,7 +381,9 @@ $.widget( "heurist.mediaViewer", {
                             
                         }else
                         if(mimeType.indexOf('image')===0){
-                            $alink.attr('data-href',external_url?external_url:fileURL+'&fancybox=1')
+                            $alink.attr('data-href', external_url?external_url:fileURL+'&fancybox=1')
+                                  .attr('data-type', 'image')
+                                  .attr('data-src', external_url?external_url:fileURL+'&fancybox=1')
                                   .attr('data-myfancybox','fb-images')
                                   .css('cursor','pointer')
                                   .attr('data-thumb', thumbURL);

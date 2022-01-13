@@ -116,6 +116,7 @@ if(!($is_map_popup || $without_header)){
         <link rel="stylesheet" type="text/css" href="<?php echo HEURIST_BASE_URL;?>h4styles.css">
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
         <script type="text/javascript" src="../../hclient/core/hintDiv.js"></script> <!-- for mapviewer roolover -->
         <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
@@ -127,6 +128,9 @@ if(!($is_map_popup || $without_header)){
         <script type="text/javascript">
         
             var rec_Files = [];
+            var rec_Files_IIIF = [];
+            var baseURL = '<?php echo HEURIST_BASE_URL;?>';                
+            var database = '<?php echo HEURIST_DBNAME;?>';                
         
             function zoomInOut(obj,thumb,url) {
                 var thumb = thumb;
@@ -312,23 +316,44 @@ if(!($is_map_popup || $without_header)){
                 }
             }
 
-            $(document).ready(function() {
-                showHidePrivateInfo(null);
-                
+            // 
+            // Init thumbnails and assign mediaViewer
+            //
+            function showMediaViewer(){
                 //2021-12-17 fancybox viewer is disabled IJ doesn't like it - Except iiif
-                if(rec_Files.length>0){
-                    var baseURL = '<?php echo HEURIST_BASE_URL;?>';                
-                    var database = '<?php echo HEURIST_DBNAME;?>';                
+                if(rec_Files_IIIF.length>0){
 
                     if(window.hWin && window.hWin.HAPI4){
-                        $('.thumbnail2').mediaViewer({rec_Files:rec_Files, showLink:true, database:database, baseURL:baseURL});    
+                        $('.thumbnail2').mediaViewer({rec_Files:rec_Files_IIIF, showLink:true, database:database, baseURL:baseURL});    
                     }else{
                         $.getScript(baseURL+'external/jquery.fancybox/jquery.fancybox.js', function(){
-                            $('.thumbnail2').mediaViewer({rec_Files:rec_Files, showLink:true, database:database, baseURL:baseURL});
+                            $('.thumbnail2').mediaViewer({rec_Files:rec_Files_IIIF, showLink:true, database:database, baseURL:baseURL});
                         });
                     }
                 }
+            }
+            
+            //
+            // Init fancybox for "full screen" links
+            //
+            function initMediaViewer(){
 
+                if(!$('.thumbnail').mediaViewer('instance')){
+                    $('.thumbnail').mediaViewer({selector:'.mediaViewer_link', 
+                        rec_Files:rec_Files, showLink:false, database:database, baseURL:baseURL });                
+                        
+                    //setTimeout(function(){$('.thumbnail').mediaViewer('show');},1000);
+                }
+                
+            }
+
+            
+            $(document).ready(function() {
+                showHidePrivateInfo(null);
+             
+                initMediaViewer();
+                
+                showMediaViewer(); //init thumbs for iiif
             });
             
             /*NOT USED
@@ -441,7 +466,7 @@ if(!($is_map_popup || $without_header)){
 
         <script type="text/javascript" src="../../viewers/gmap/mapViewer.js"></script>
         <script>
-            baseURL = "<?php echo HEURIST_BASE_URL;?>viewers/gmap/mapStatic.php?width=300&height=300&db=<?php echo HEURIST_DBNAME;?>";
+            mapStaticURL = "<?php echo HEURIST_BASE_URL;?>viewers/gmap/mapStatic.php?width=300&height=300&db=<?php echo HEURIST_DBNAME;?>";
         </script>
 
         <?php
@@ -1185,8 +1210,10 @@ function print_public_details($bib) {
     print '<script>';
     foreach ($thumbs as $thumb) {
         if(strpos($thumb['orig_name'],'_iiif')===0){
-        print 'rec_Files.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
-        //if($is_map_popup) break;
+            print 'rec_Files_IIIF.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
+            //if($is_map_popup) break;
+        }else{
+            print 'rec_Files.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
         }
     }
     print '</script>';
@@ -1259,13 +1286,23 @@ function print_public_details($bib) {
             }
             print '<br/><div class="download_link">';
 
-            if($k==0 && $several_media>1 && !$is_map_popup){
-                print '<a href="#" onclick="$(\'.media-content\').show()">all images</a>&nbsp;&nbsp;';
-            }
+            if(!$is_map_popup){
+            
+                if($k==0 && $several_media>1){
+                    print '<a href="#" onclick="$(\'.media-content\').show()">'
+                    .'<span class="ui-icon ui-icon-menu" style="font-size:1em;display:inline-block;vertical-align: middle;"></span>all images</a>&nbsp;&nbsp;';
+                }
+                if(count($thumbs)>0 && !$isAudioVideo){
+                    print '<a href="#" data-id="'.$thumb['nonce'].'" class="mediaViewer_link">'
+                    .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1em;display:inline-block;vertical-align: middle;"></span>full screen</a>&nbsp;&nbsp;';
+                }
+                //.'onclick="initMediaViewer(); event.preventDefault(); return false;"
 
-            if($thumb['player'] && !($is_map_popup || $without_header)){
-                print '<a id="lnk'.$thumb['id'].'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px" onclick="window.hWin.HEURIST4.ui.hidePlayer('
-                    .$thumb['id'].', this.parentNode)">show thumbnail</a>';
+                if($thumb['player'] && !$without_header){
+                    print '<a id="lnk'.$thumb['id'].'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px" onclick="window.hWin.HEURIST4.ui.hidePlayer('
+                        .$thumb['id'].', this.parentNode)">show thumbnail</a>';
+                }
+                
             }
             
             if(@$thumb['external_url']){
