@@ -46,6 +46,23 @@
                 <input id="inpt_isbn" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
             </div>
 
+            <div id="rec_count_field" style="margin-top: 10px;">
+                <div class="header optional">
+                    <label for="rec_limit">Search for </label>
+
+                    <select id="rec_limit">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="500">500</option>
+                    </select>
+
+                    <label for="rec_limit"> records</label>
+                </div>
+            </div>
+
         </div>
 
     </fieldset>
@@ -56,5 +73,5 @@
 </div>
 
 <!-- Result List Container -->
-<div id="div_result" class="ent_content_full" style="display: none;top:8em">
+<div id="div_result" class="ent_content_full" style="display: none;top:9em">
 </div>

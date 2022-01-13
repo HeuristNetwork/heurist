@@ -103,25 +103,156 @@ if(count($_REQUEST)>900){
     }else if(@$params['serviceType'] == 'bnflibrary'){ // BnF Library Search
 
         $results = array();
-
-        // Create xml object, BnF Library Search always returns as XML no matter the chosen record schema
-        $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);         
-        // xml namespace urls: http://www.loc.gov/zing/srw/ (srw), http://www.openarchives.org/OAI/2.0/oai_dc/ (oai_dc), http://purl.org/dc/elements/1.1/ (dc)
+        
+        // Create xml object
+        $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
+        // xml namespace urls: http://www.loc.gov/zing/srw/ (srw), info:lc/xmlns/marcxchange-v2 (mxc)
 
         // Retrieve records from results
         $records = $xml_obj->children('http://www.loc.gov/zing/srw/', false)->records->record;
 
-        $nextStart = 0; // can be used to run the query again with a new start, startRecord
-
-        // Move each result's details into separate array
+        // Move each result's details into seperate array
         foreach ($records as $key => $details) {
-            $nextStart = intval($details->recordPosition);
-            $results['result'][] = $details->recordData->children('http://www.openarchives.org/OAI/2.0/oai_dc/', false)->children('http://purl.org/dc/elements/1.1/', false);
+
+            $formatted_array = array();
+
+            foreach ($details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record->controlfield as $key => $cf_ele) { // controlfield elements
+                $cf_tag = @$cf_ele->attributes()['tag'];
+
+                if($cf_tag == '003') { // Record URL
+                    $formatted_array['biburl'] = (string)$cf_ele[0];
+                    break;
+                }
+            }
+
+            foreach ($details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record->datafield as $key => $df_ele) { // datafield elements
+                $df_tag = @$df_ele->attributes()['tag'];
+
+                if(!$df_tag) {
+                    continue;
+                }
+
+                if($df_tag == '010') { // ISBN
+
+                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
+                        $sf_code = @$sf_ele->attributes()['code'];
+
+                        if($sf_code == 'a') {
+                            $formatted_array['isbn'] = (string)$sf_ele[0];
+                        }
+                    }
+                }else if($df_tag == '071' || $df_tag == '073' || $df_tag == '464') { // Description Fields
+
+                    $value = '';
+                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
+                        $sf_code = @$sf_ele->attributes()['code'];
+
+                        if($df_tag == '071' && ($sf_code == 'b' || $sf_code == 'a')) {
+                            $value = ($value == '') ? (string)$sf_ele[0] : ' ' . (string)$sf_ele[0];
+                        }else if($df_tag == '073' && $sf_code == 'a') {
+                            $value = 'Code à barres commercial : EAN ' . (string)$sf_ele[0];
+                        }else if($df_tag == '464' && $sf_code == 't') {
+                            $value = (string)$sf_ele[0];
+                        }
+                    }
+
+                    if($value != '') {
+                        $index = ($df_tag == '464') ? 0 : 1;
+
+                        if(!array_key_exists('description', $formatted_array) || !array_key_exists($index, $formatted_array['description'])) {
+                            $formatted_array['description'][$index] = $value;
+                        }else{
+                            $formatted_array['description'][$index] .= ' ' . $value;
+                        }
+                    }
+                }else if($df_tag == '101' || $df_tag == '102') { // Language, e.g. fre or FR
+
+                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
+                        $sf_code = @$sf_ele->attributes()['code'];
+
+                        if($sf_code == 'a') {
+                            $formatted_array['language'][] = (string)$sf_ele[0];
+                        }
+                    }
+                }else if($df_tag == '200' || $df_tag == '500') { // Title / Type / Primary Author (Full Name, Firstname Lastname)
+
+                    foreach($df_ele->subfield as $sub_key => $sf_ele) {
+                        $sf_code = @$sf_ele->attributes()['code'];
+
+                        if($sf_code == 'a') {
+
+                            if($df_tag == '500') {
+                                $formatted_array['title'] = (string)$sf_ele[0];
+                                break;
+                            }else if(!array_key_exists('title', $formatted_array)) { // Default Title
+                                $formatted_array['title'] = (string)$sf_ele[0];
+                                continue;
+                            }
+                        }else if($df_tag == '200' && $sf_code == 'b') {
+                            $formatted_array['type'] = (string)$sf_ele[0];
+                        }
+                    }
+                }else if($df_tag == '210' || $df_tag == '214') { // Publisher Location / Publisher Name / Year of Publication
+                    
+                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
+                        $sf_code = @$sf_ele->attributes()['code'];
+
+                        if($sf_code == 'a') {
+                            $formatted_array['publisher']['location'] = (string)$sf_ele[0];
+                        }else if($sf_code == 'c') {
+                            $formatted_array['publisher']['name'] = (string)$sf_ele[0];
+                        }else if($sf_code == 'd') {
+                            $formatted_array['date'] = (string)$sf_ele[0];
+                        }
+                    }
+                }else if($df_tag == '606') { // Subject Fields
+                    
+                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
+                        $sf_code = @$sf_ele->attributes()['code'];
+
+                        if($sf_code == "a" || $sf_code == "y" || $sf_code == "z") {
+
+                            if(!array_key_exists('subject', $formatted_array)) {
+                                $formatted_array['subject'] = (string)$sf_ele[0];
+                            }else{
+                                $formatted_array['subject'] .= (string)$sf_ele[0];
+                            }
+                        }
+                    }
+                }else if($df_tag == '608') { // Type, mostly for music compsitions for movies and such
+
+                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
+                        $sf_code = @$sf_ele->attributes()['code'];
+
+                        if($sf_code == 'a' && $sf_ele[0] == 'édition phonographique' && !array_key_exists('type', $formatted_array)) {
+                            $formatted_array['type'] = 'enregistrement sonore';
+                        }
+                    }
+                }else if($df_tag == '700' || $df_tag == '702') { // Primary Author Details & Secondary Author/Contributor Details
+
+                    $index = ($df_tag == '700') ? 'creator' : 'contributor';
+                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
+                        $sf_code = @$sf_ele->attributes()['code'];
+
+                        if($sf_code == '3') {
+                            $formatted_array[$index]['id'] = (string)$sf_ele[0];
+                        }else if($sf_code == 'a') {
+                            $formatted_array[$index]['surname'] = (string)$sf_ele[0];
+                        }else if($sf_code == 'b') {
+                            $formatted_array[$index]['firstname'] = (string)$sf_ele[0];
+                        }else if($sf_code == 'f') {
+                            $formatted_array[$index]['active'] = (string)$sf_ele[0];
+                        }
+                    }
+                }
+            }
+
+            $results['result'][] = $formatted_array;
         }
 
         // Add other details, can be used for more calls to retrieve all results (currently retrieves 500 records at max)
         $results['numberOfRecords'] = intval($xml_obj->children('http://www.loc.gov/zing/srw/', false)->numberOfRecords);
-        $results['nextStart'] = $nextStart + 1;
+        $results['nextStart'] = intval($xml_obj->children('http://www.loc.gov/zing/srw/', false)->nextRecordPosition);
 
         // Encode to json for response to JavaScript
         $remote_data = json_encode($results);

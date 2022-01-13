@@ -1081,7 +1081,19 @@ prof =Profile
 
                 _callserver('record_edit', request, function(response){_triggerRecordUpdateEvent(response, callback);});
             }
-            
+
+            /**
+            *  Batch Save Multiple Records (remove temporary flag if new record)
+            * 
+            * @param request a: batch_save
+            * @param callback - response object of record ids
+            */
+            ,batchSaveRecords: function(request, callback){
+                if(request) request.a = 'batch_save';
+
+                _callserver('record_edit', request, function(response){_triggerRecordUpdateEvent(response, callback)});
+            }
+
             ,duplicate: function(request, callback){
                 if(request) request.a = 'duplicate';
                 
@@ -1267,6 +1279,14 @@ prof =Profile
             //
             ,get_date_histogram_data: function(request, callback){
                 if(request && !request.a) request.a = 'gethistogramdata';
+                _callserver('record_search', request, callback);
+            }
+
+            //
+            // return record ids after matching record detail fields, using the rectype ids provided
+            //
+            ,get_record_ids: function(request, callback){
+                if(request && !request.a) request.a = 'getrecordids';
                 _callserver('record_search', request, callback);
             }
 

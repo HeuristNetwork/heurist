@@ -466,8 +466,35 @@ $.widget( "heurist.importStructure", {
                             = (window.hWin.HEURIST4.remote._selectedRtyID == recID)?null:recID;
                             that.panel_rty_list.manageDefRecTypes('refreshRecordList');                     
                         }else if(action=='import'){
-                            that._selectedRtyID = recID;
-                            that.startImport();   
+
+                            var $dlg;
+                            var msg = "If you proceed with download, Heurist will download three types of structural information:<br>"
+                                + "<ol>"
+                                + "<li>the selected record type, any fields, and vocabularies that are not yet in the database.</li>"
+                                + "<li>any unrecognised record types (and their fields and vocabularies) connected to the selected record type.</li>"
+                                + "<li>"
+                                    + "additional fields and vocabularies defined for record types already in your database which are connected<br>"
+                                    + "to any of the record types above (the fields will be added to the end of the record type and may be removed or<br>"
+                                    + "customised as desired; they will have no effect on existing data)."
+                                + "</li>"
+                                + "</ol>";
+
+                            var btns = {};
+
+                            btns['Proceed'] = function(){
+                                $dlg.dialog('close');
+
+                                that._selectedRtyID = recID;
+                                that.startImport();
+                            };
+                            btns['Cancel'] = function(){
+                                $dlg.dialog('close');
+                            }
+
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+                                {title: 'Downloading structure', yes:'Proceed', no:'Cancel'}, 
+                                {default_palette_class: 'ui-heurist-design'}
+                            );  
                         }
                     }
 

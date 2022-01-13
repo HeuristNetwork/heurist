@@ -70,6 +70,32 @@ if(count($_REQUEST)>900){
 
                 $response = recordSave($system, $_REQUEST);
 
+            } else if ($action=='batch_save') {
+
+                $rec_ids = array();
+
+                if(array_key_exists('records', $_REQUEST)){
+
+                    foreach ($_REQUEST['records'] as $key => $record) {
+                        
+                        $response = recordSave($system, $record);
+
+                        if(!$response || $response['status'] != HEURIST_OK){
+                            break;
+                        }else{
+                            $rec_ids[$key] = $response['data'];
+                        }
+                    }
+
+                    if($response['status'] == HEURIST_OK){
+                        $response['data'] = $rec_ids;
+                        //unset($response['rec_Title']);
+                    }
+                }else{
+                    // TODO: Improve message
+                    $response = array('status'=>HEURIST_ERROR, 'msg'=>'No records provided');
+                }
+
             } else if (($action=="d" || $action=="delete") && @$_REQUEST['ids']){
 
                 $response = recordDelete($system, $_REQUEST['ids'], true, @$_REQUEST['check_links'], @$_REQUEST['rec_RecTypeID'], @$_REQUEST['session']);

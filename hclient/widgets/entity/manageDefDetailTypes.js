@@ -327,18 +327,18 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 case 'status': 
                     html += fld2(30,'Del','text-align:center');
                     break;
-            }   
+            }
         }
-        
-        var w_desc = max_width-used_width-330;
+
+        var name_width = 200;
+
+        var w_desc = max_width-used_width-name_width;
         if(w_desc<30) w_desc = 30;
-//console.log(max_width+'  '+'  '+used_width+'  '+w_desc);            
+
         html = html.replace('$$DESC$$',fld2(w_desc, 'Description', 'text-align:left'));
 
-        var name_width = 330; //max_width - used_width;
-//console.log('  =>'+name_width);        
-        html = html.replace('$$NAME$$',fld2(name_width, 'Name', 'text-align:left'))
-        
+        html = html.replace('$$NAME$$',fld2(name_width, 'Name', 'text-align:left'));
+
         return html;
     },
     
@@ -379,17 +379,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     +     '<span class="ui-button-icon-primary ui-icon '+icon+'"></span>'
                     + '</div></div>'            
         }
-        
-        
+
         var max_width = this.recordList.find('.div-result-list-content').width() 
                             - ((this.options.select_mode=='select_multi') ?40:33);
         var used_width = 330;//244;
 
-        var w_desc = max_width - used_width - 330;
-        if(w_desc<30) w_desc = 30;
-        var name_width = 330; //max_width - used_width - w_desc;
-        
-        
+        var name_width = 200;
+
+        var w_desc = max_width - used_width - name_width + 10;
+        if(w_desc<30) w_desc = 30; 
 
         var grayed = '';
         var i = 0;
@@ -709,8 +707,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     this._on(btnBasefieldsList, 
                         {'click': function(){ // warn the user about the loss of popup data
                             var isChanged = (this._editing.getFieldByName('dty_Type').find('.ui-selectmenu-text').text() != 'Select...'
-                                                || !window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_HelpText')[0]).val())
-                                                || !window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_Name')[0]).val())
+                                                || (!window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_HelpText')[0]).val())
+                                                && !window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_Name')[0]).val()))
                                             ); // Check if values have been placed/selected in required fields
 
                             if(isChanged){
