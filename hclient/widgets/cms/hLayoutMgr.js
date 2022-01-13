@@ -132,7 +132,7 @@ function hLayoutMgr(){
     function _layoutCreateDiv( layout, classes ){
 
         var $d = $(document.createElement('div'));
-        if(!layout.dom_id){
+        if(!layout.dom_id || layout.dom_id.indexOf('hl-')===0){
             layout.dom_id = 'hl-' + layout.key;
         }
         

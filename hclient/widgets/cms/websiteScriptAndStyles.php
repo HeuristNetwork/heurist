@@ -108,7 +108,8 @@ if($_is_new_cms_editor){
 .ui-cms-mainmenu{
     background: rgb(135, 205, 118) !important;
 }
-</style>     
+</style>    
+
 <?php
 }
     

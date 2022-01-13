@@ -699,8 +699,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             
             click: function(event, data){
 
-                var ele = $(event.target);
-                if(!ele.hasClass('ui-icon')){
+                if(data.targetType=='title'){
                     if(data.node.isActive()){
                         window.hWin.HEURIST4.util.stopEvent(event);
                         ///  that._saveEditAndClose(null, 'close'); //close editor on second click
@@ -711,6 +710,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     }
                 
                 }
+                
             }
             //,activate: function(event, data) { }
         };
