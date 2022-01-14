@@ -575,8 +575,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 
             link = $('<a href="#">'
             +(this.options.is_h6style?'':'<span style="display:inline-block;padding-right:20px">'+window.hWin.HR('Settings')+'</span>') 
-            +'<div class="ui-icon-user" style="display:inline-block;font-size:16px;width:16px;line-height:16px;vertical-align:bottom;"></div>'
-            +'&nbsp;<div class="usrFullName" style="display:inline-block">'
+            +'<div class="ui-icon ui-icon-user" style="display:inline-block;font-size:12px;line-height:16px;vertical-align:bottom;"></div>'
+            +'&nbsp;&nbsp;<div class="usrFullName" style="display:inline-block">'
             +window.hWin.HAPI4.currentUser.ugr_FullName
             +'</div><div style="position:relative;" class="ui-icon ui-icon-carat-1-s"></div></a>');
                                                                                                            
@@ -584,8 +584,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
             link = $('<a href="#">'
             +(this.options.is_h6style?'':'<span style="display:inline-block;padding-right:20px">'+window.hWin.HR('Settings')+'</span>') 
-            +'<div class="ui-icon-circle-b-help" style="display:inline-block;font-size:16px;width:16px;line-height:16px;vertical-align:bottom;"></div>'
-            +'&nbsp;<div style="display:inline-block">'+ window.hWin.HR(name)
+            +'<div class="ui-icon ui-icon-circle-b-help" style="display:inline-block;font-size:11px;line-height:16px;vertical-align:bottom;"></div>'
+            +'&nbsp;&nbsp;<div style="display:inline-block">'+ window.hWin.HR(name)
             +'</div><div style="position:relative;" class="ui-icon ui-icon-carat-1-s"></div></a>');
             
         }else{
