@@ -124,9 +124,64 @@ Compare predicates
             = exact  (== case sensetive)
             > <  for numeric and dates only
 
+================================================
 
+new simplified heurist query rules.
 
+1) keywords and values are separated either by : or spaces or for subqueries by parentheses.
 
+t 10 f1 Peter  is equal to t:10 f1:Peter and produces [{"t":"10"},{"f:1":"Peter"}]
+t Person linkedto(t Place London)  is equal to  t:10 lt(t:12 London) and produces [{"t":"10"},{"lt":[{"t":"12"},{"title":"London"}]}]
+
+2) search values follows the same rules as currently ones
+
+a) To isolate several words value use double quotes:  t 12 "City of London"  =>  [{"t":"12"},{"title":"City of London"}]
+
+b) Use comparison predicates as first character of search value:
+f1 =Boris    =>  [{"f:1":"=Boris"}]
+f9 "<100 years ago"   => [{"f:9":"<100 years ago"}]  
+t 10 f20 -male  =>  [{"t":"10"},{"f:20":"-male"}]
+
+c) If keyword is not recognized then word is assumed as value for default keyword "title"
+London means title:London
+
+Here is cheat sheet of Heurist search keywords
+
+Record type: typename|typeid|type|t
+Record header fields:  ids|id|title|added|url|notes|addedby|access
+Record rec_Modified:  modified|before|after|since
+Record rec_OwnerUGrpID:  workgroup|wg|owner  
+Base field:    field|f      
+Base field counts:    count|cnt  
+Search location dtl_Geo:   geo : WKT
+Search record by tags:     tag|keyword|kwd  
+
+Search by resource/link:  linked_to|linkedto|linkto|link_to|lt    
+                                         linked_from|linkedfrom|linkfrom|link_from|lf      
+Search by relationships:  related_to|relatedto|rt
+                                         related_from|relatedfrom|rf
+Search by linked, related in both directions: related  
+                                                                      links
+Search for field in relationship record (#1)  relation type:  r
+                                                                    any other field:   relf:XXX  
+
+Keywords for all groups (except record header fields) are synonyms. The last one in the list is used as the default one.
+
+Search by linked/related records should refer to subquery for these records or list of record ids.
+Example:  search for person linked to London (recid 452)
+t Person  linkedto(t Place London)  
+[{"t":"Person"},{"lt":[{"t":"Place"},{"title":"London"}]}]  
+t 10 lt 452 
+                   
+Sort keywords: sortby|sort|s    - sort order is applicable for first level query, it is ignored in subqueries
+Logic operators:  any|all|not    -  by default predicates are logically connected by Conjunction (AND), to use Disjunction (OR) use "any" keyword with the following subquery
+
+any(London Paris Berlin)
+
+To test conversion
+https://heuristplus.sydney.edu.au/h6-ao/qparser.php
+
+To test new format in UI place * in the beginning of search string.
 
 */
 
@@ -238,6 +293,10 @@ function parse_query_to_json($query){
                 
                     $keyword = 'owner';
 
+                }else if(preg_match('/^(user|usr)$/', $word, $match)>0){ //ownership (header field)
+                
+                    $keyword = 'user';
+                    
                 }else if(preg_match('/^(after|since)$/', $word, $match)>0){ //special case for modified
                     
                     $keyword = 'after';
@@ -944,6 +1003,7 @@ class HPredicate {
             'ids','id','title','added','modified','url','notes',
             'after','before', 
             'addedby','owner','access',
+            'user','usr',
             'f','field',
             'count','cnt','geo',
             'lt','linked_to','linkedto','lf','linkedfrom',
@@ -1173,6 +1233,12 @@ class HPredicate {
 
                 return $res;
 
+            case 'user':
+            case 'usr':
+                //bookmarked by 
+                //$this->search_domain = BOOKMARK;
+                return $this->predicateBookmarked();
+                
             case 'tag':
             case 'keyword':
             case 'kwd':
@@ -1579,6 +1645,45 @@ class HPredicate {
 
     }
 
+    
+    //
+    //
+    //
+    function predicateBookmarked(){
+        
+        $where = '';
+        $this->field_type = "link";
+        $p = $this->qlevel;
+
+        $cs_ids = $this->value;
+        if(strpos($cs_ids, '-')===0){
+            $this->negate = true;
+            $cs_ids = substr($cs_ids, 1);
+        }
+
+        $cs_ids = $this->getUserIds($cs_ids);
+        //$cs_ids = getCommaSepIds($this->value);
+        if ($cs_ids) {  
+            
+
+                if(strpos($cs_ids, ',')>0){  //more than one
+
+                    $where = ' IN (SELECT bkm_RecID FROM usrBookmarks where '
+                            . 'bkm_UGrpID '.($this->negate?'NOT':'').' IN ('.$cs_ids.'))';
+                    
+                }else{
+                    $where = ' IN (SELECT bkm_RecID FROM usrBookmarks where bkm_UGrpID '.($this->negate?'!=':'=').$cs_ids.')';
+                }
+        }
+        if($where){
+            $where = "r$p.rec_ID ".$where;
+            return array("where"=>$where);
+        }else{
+            return null;
+        }
+        
+    }
+    
     //
     //
     //
@@ -2150,6 +2255,32 @@ class HPredicate {
         return !is_array($this->value) && ( strtolower($this->value)=='null'); // {"f:18":"NULL"}
     }
 
+    
+    /**
+    * Search user ids - prepare list of user ids
+    * 
+    * @param mixed $value
+    */
+    function getUserIds($value){
+        global $mysqli, $currUserID;
+        
+        $values = explode(',',$value);
+        $userids = array();
+        foreach($values as $username){
+            if(is_numeric($username)){
+                $userids[] = $username;    //ugr_ID    
+            }else if(strtolower($username)=='currentuser' || strtolower($username)=='current_user'){
+                $userids[] = $currUserID;
+            }else{
+                 $username = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where ugr_Name = "'
+                        .$mysqli->real_escape_string($username).'" limit 1');
+                 if($username!=null) $userids[] = $username;
+            }
+        }
+        return implode(',',$userids);
+    }
+                
+    
     /**
     * put your comment there...
     *
@@ -2312,20 +2443,7 @@ class HPredicate {
                 
                 
                 //if value is not numeric (user id), find user id by user login name
-                $values = explode(',',$this->value);
-                $userids = array();
-                foreach($values as $username){
-                    if(is_numeric($username)){
-                        $userids[] = $username;    //ugr_ID    
-                    }else if(strtolower($username)=='currentuser' || strtolower($username)=='current_user'){
-                        $userids[] = $currUserID;
-                    }else{
-                         $username = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where ugr_Name = "'
-                                .$mysqli->real_escape_string($username).'" limit 1');
-                         if($username!=null) $userids[] = $username;
-                    }
-                }
-                $this->value = implode(',', $userids);
+                $this->value = $this->getUserIds($this->value);
                 $this->exact = true;
             }       
             
