@@ -592,12 +592,12 @@ $.widget( "heurist.resultList", {
         //media carousel/viewer --------------
         if(this.options.show_fancybox_viewer){
             this.fancybox_button = $( '<button>' )
-                .button({icon: "ui-icon-image", showLabel:false, label:window.hWin.HR('Show media viewer for current page')})
-                .css({'float':'left','width':'28px', height:'28px', 'margin-left':'9px', 'font-size':'1em'})
+                .button({icon: "ui-icon-image", showLabel:false, label:window.hWin.HR('Clicking on thumbnail opens full screen media viewer')})
+                .css({'float':'right','width':'28px', height:'28px', 'font-size':'1em', 'margin-right':'15px'})
                 .appendTo( this.div_toolbar );
             
             if(this._is_fancybox_active){
-                this.fancybox_button.css({'border':'2px solid', background: '#ddd'});
+                this.fancybox_button.css({'border':'1px solid'}); //, background: '#ddd'
             }
             
             this._on( this.fancybox_button, {
@@ -606,9 +606,9 @@ $.widget( "heurist.resultList", {
                     if(this._is_fancybox_active){
                         if(this._rec_onpage){
                             this.div_content.mediaViewer({selector:'.realThumb', search_initial:'ids:'+this._rec_onpage.join(',') });            
-                            setTimeout(function(){that.div_content.mediaViewer('show');},1000);
+                            //setTimeout(function(){that.div_content.mediaViewer('show');},1000);
                         }
-                        this.fancybox_button.css({'border':'2px solid', background: '#ddd'});
+                        this.fancybox_button.css({'border':'1px solid'}); //, background: '#ddd'
                     }else{
                         this.fancybox_button.css({'border':'none', background: 'none'});
                         
