@@ -1318,18 +1318,32 @@ $.widget( "heurist.mapping", {
                 //define icon for record type                                        
                 if(markerStyle.iconType=='rectype' )
                 {
+                    
                     var rty_ID = feature.properties.rec_RecTypeID;
                     if(that.myIconRectypes[rty_ID+markerStyle.color]){
                         setIcon = that.myIconRectypes[rty_ID+markerStyle.color];
                     }else{
-                        
                         var fsize = markerStyle.iconSize;
-                        setIcon = L.icon({
-                            iconUrl: (window.hWin.HAPI4.iconBaseURL + rty_ID 
-                                + '&color='+encodeURIComponent(markerStyle.color)
-                                + '&bg='+encodeURIComponent('#ffffff')),
-                            iconSize: [fsize, fsize]                        
-                        });
+                        if(markerStyle.color){
+                            setIcon = L.divIcon({  
+                                html: '<img src="'
+                                +window.hWin.HAPI4.iconBaseURL + rty_ID
+                                +'" style="width:'+fsize+'px;height:'+fsize+'px;filter:'
+                                +hexToFilter(markerStyle.color)+'"/>',
+                                iconSize:[fsize, fsize]
+                                //iconAnchor:[fsize/2, fsize/4]
+                            });
+                        }else{
+                            setIcon = L.icon({
+                                iconUrl: window.hWin.HAPI4.iconBaseURL + rty_ID, 
+                                    //+ '&color='+encodeURIComponent(markerStyle.color)
+                                    //+ '&bg='+encodeURIComponent('#ffffff')),
+                                iconSize: [fsize, fsize]                        
+                            });
+                        }
+                        
+                        
+                        
                         that.myIconRectypes[rty_ID+markerStyle.color] = setIcon;
                     }
                 }
@@ -1344,6 +1358,8 @@ $.widget( "heurist.mapping", {
                     }else{
                         layer.setIcon(setIcon);    
                         layer.setOpacity( markerStyle.opacity );
+                        //if(markerStyle.color)
+                        //    layer.valueOf()._icon.style.filter = hexToFilter(markerStyle.color);
                     }
 
                 }else if(layer instanceof L.CircleMarker){

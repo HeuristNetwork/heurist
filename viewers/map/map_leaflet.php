@@ -95,6 +95,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultListMenu.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/imgFilter.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_color.js"></script>
 
 
 <!--

@@ -213,7 +213,7 @@ var cfg_layouts = [
     {id:'SearchAnalyze3', name:'Search Analyze Publish2', theme:'heurist', type:'cardinal',
         center:{minsize:156, dropable:false, apps:[{appid:'heurist_resultList', hasheader:false,
                      dockable:false, dragable:false, css:{'background-color':'white','font-size':'0.9em'}, //AO 2020-01-30 ,'font-size':'12px'
-                     options:{empty_remark:null, show_menu:true, support_collection:true, is_h6style:true, show_fancybox_viewer:false,
+                     options:{empty_remark:null, show_menu:true, support_collection:true, is_h6style:true, show_fancybox_viewer:true,
                      XXXrecordDivEvenClass: 'ui-widget-content',
                      show_savefilter:false, show_search_form:true, show_inner_header:true, 
                      show_url_as_link:true} }]},
