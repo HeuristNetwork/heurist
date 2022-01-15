@@ -2580,9 +2580,16 @@ $.widget( "heurist.editing_input", {
                         $('<span class="ui-icon ui-icon-folder-open"></span>')
                                 .css({position: 'absolute', margin: '5px 0px 0px 8px'}).insertBefore( $input ); 
                         
+                        var sz = 0;
+                        if(that.options.dtID=='rty_Thumb'){
+                            sz = 64;
+                        }else if(that.options.dtID=='rty_Icon'){
+                            sz = 16;
+                        }
+                        
                         //container for image
-                        var $input_img = this.input_img = $('<div tabindex="0" contenteditable class="image_input fileupload ui-widget-content ui-corner-all" style="border:dashed blue 2px">'
-                            + '<img src="'+urlThumb+'" class="image_input">'
+                        var $input_img = this.input_img = $('<div tabindex="0" contenteditable class="image_input fileupload ui-widget-content ui-corner-all" style="border:dashed blue 2px;">'
+                            + '<img src="'+urlThumb+'" class="image_input" style="'+(sz>0?('width:'+sz+'px;'):'')+'">'
                             + '</div>').appendTo( $inputdiv );                
                         if(this.configMode.entity=='recUploadedFiles'){
                            this.input_img.css({'min-height':'320px','min-width':'320px'});

@@ -734,15 +734,26 @@ class DbEntityBase
         }else if(file_exists($tempfile)){
             $path_parts = pathinfo($tempfile);
             $ext = strtolower($path_parts['extension']);
+
+            //special case - remove file with the same name and different ext
+            $ext2 = ($ext=='svg')?'png':'svg';
             
             if($version!=''){ //copy only icon or thumb
                 $new_name = $path.$version.'/'.$recID.'.'.$ext;
                 $isSuccess = fileCopy($tempfile, $new_name);
+                
+                fileDelete($path.$version.'/'.$recID.'.'.$ext2);
             }else{
                 $new_name = $path.$recID.'.'.$ext;
                 $new_name_thumb = $path.'thumbnail/'.$recID.'.'.$ext;
                 $isSuccess = fileCopy($tempfile, $new_name) &&  fileCopy($tempfile, $new_name_thumb);
+                
+                fileDelete($path.$recID.'.'.$ext2);
+                fileDelete($path.'thumbnail/'.$recID.'.'.$ext2);
             }
+
+            
+            
         }
         
         if(!$isSuccess){

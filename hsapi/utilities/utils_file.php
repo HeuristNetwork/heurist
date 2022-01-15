@@ -722,15 +722,20 @@
         }
         return true;
     }    
+    
+    function fileDelete( $filename ){
+        if(file_exists($filename)){
+            unlink($filename);
+        }
+    }
+    
     //
     //
     //
     function fileSave($rawdata, $filename)
     {
         if($rawdata){
-            if(file_exists($filename)){
-                unlink($filename);
-            }
+            fileDelete($filename);
             $fp = fopen($filename,'x');
             fwrite($fp, $rawdata);
             fclose($fp);

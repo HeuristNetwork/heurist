@@ -109,7 +109,7 @@ if($filename){ //download from scratch (for csv import)
 }else{
     
         
-        $content_type = 'image/png';
+        $content_type = 'image/png';  
 
         $rec_id = @$_REQUEST['icon'];  
         if($rec_id==null) $rec_id = @$_REQUEST['id'];  
@@ -154,7 +154,7 @@ if($filename){ //download from scratch (for csv import)
         
         //if file does not exist in entity folder
         //backward capability - copy from old rectype-icons to new location - entity folder
-        if($entity_name=='defRecTypes' && !file_exists($filename.'.png')){
+        if($entity_name=='defRecTypes' && !(file_exists($filename.'.png') || file_exists($filename.'.svg'))){
             
             if($viewmode=='thumbnail'){
                 $old_filename = HEURIST_ICON_DIR . 'thumb/th_' . $rec_id . '.png';
@@ -172,11 +172,13 @@ if($filename){ //download from scratch (for csv import)
             }
         }
         
-        $exts = array('png','jpg','jpeg','jpe','jfif','gif');
+        $exts = array('png','jpg','svg','jpeg','jpe','jfif','gif');
         foreach ($exts as $ext){
             if(file_exists($filename.'.'.$ext)){
                 if($ext=='jpg' || $ext=='jfif' || $ext=='jpe'){
                     $content_type = 'image/jpeg';
+                }else if($ext=='svg'){
+                    $content_type = 'image/svg+xml';
                 }else{
                     $content_type = 'image/'.$ext;    
                 }
@@ -208,7 +210,7 @@ if($filename){ //download from scratch (for csv import)
             }else{
                 
                 //color, bg, circle
-                if(@$_REQUEST['color']){
+                if(@$_REQUEST['color'] && $ext!='svg'){
                     UtilsImage::changeImageColor($filename, null, @$_REQUEST['color'], @$_REQUEST['circle'], @$_REQUEST['bg']);    
                 }else{
                     download_file($filename, $content_type);    

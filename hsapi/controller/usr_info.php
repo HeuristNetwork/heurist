@@ -123,11 +123,12 @@ if(count($_REQUEST)>900){
         }else if ($action=="sysimages") { //get list of system images
         
               $lib_path = @$_REQUEST['folders'];
+              $exts = array('png','svg');
+              
               if(!is_array($lib_path) || count($lib_path)<1){
                   $lib_path = array('admin/setup/iconLibrary/64px/'); //default
               }
-        
-              $res = folderContent($lib_path, array('png'));
+              $res = folderContent($lib_path, $exts);
               
         }else if ($action=="folders") { //get list of system images
 
