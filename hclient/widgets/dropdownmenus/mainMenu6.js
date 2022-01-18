@@ -676,19 +676,23 @@ $.widget( "heurist.mainMenu6", {
         var that = this,
             expandRecordAddSetting = false,
             delay = this._delayOnShow_ExploreMenu; //500
+
+        if(action_name=='recordAddSettings'){
+            action_name = 'recordAdd';
+            expandRecordAddSetting = true;
+        }
             
+        //menu section has several containers with particular widgets
+        var cont = this.menues_explore_popup.find('#'+action_name);
+ 
         if(action_name == 'recordAdd'){
-            if(menu_item && menu_item.attr('data-id')>0){
+            if(!expandRecordAddSetting && menu_item && menu_item.attr('data-id')>0){
                 delay = this._delayOnShow_AddRecordMenu;
             }
         }else{
             this.menues_explore_popup
                     .removeClass('ui-heurist-populate record-addition').addClass('ui-heurist-explore');
         }      
-
-        //menu section has several containers with particular widgets
-        var cont = this.menues_explore_popup.find('#'+action_name);
-        
       
         var explore_top = '2px',
         explore_height = 'auto',
@@ -710,10 +714,7 @@ $.widget( "heurist.mainMenu6", {
 
             that._current_explore_action = action_name;
 
-            if(action_name=='recordAddSettings'){
-                action_name = 'recordAdd';
-                expandRecordAddSetting = true;
-            }else if(action_name == 'svsAddFaceted' && that.containers['explore'].find('div#db_overview').length > 0){
+            if(action_name == 'svsAddFaceted' && that.containers['explore'].find('div#db_overview').length > 0){
                 that.containers['explore'].find('div#db_overview').hide();
             }
 
@@ -851,14 +852,14 @@ $.widget( "heurist.mainMenu6", {
                     explore_top = position.top;
                     explore_left = position.left;
                 }
-                    
+                 
                 if(!cont.recordAdd('instance')){
                     cont.recordAdd({
                         is_h6style: true,
                         onClose: function() { 
                             that._closeExploreMenuPopup();
                         },
-                        isExpanded: expandRecordAddSetting,
+                        isExpanded: expandRecordAddSetting, //false - show list, true - show preferences dialog
                         mouseover: function() { that._resetCloseTimers()},
                         menu_locked: function(is_locked, is_mouseleave){ 
                             if(!is_mouseleave){
@@ -1330,7 +1331,7 @@ $.widget( "heurist.mainMenu6", {
                 var that = this;
                 this._on(ele,{
                      mouseenter: function(e){
-//console.log('mouse endter recodADD');
+
                         this._resetCloseTimers();
                         this.show_ExploreMenu(e);
                      },
@@ -1338,7 +1339,7 @@ $.widget( "heurist.mainMenu6", {
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
                             this._resetCloseTimers();//reset
                             this._myTimeoutId2 = setTimeout(function(){  //was 6
-//console.log('hide explore record ADD');
+
                                         that._closeExploreMenuPopup();
                                         //that.menues['explore'].hide();
                                         //that.menues_explore_gap.hide();

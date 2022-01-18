@@ -163,7 +163,6 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             this.element.find('#btnAddRecordInNewWin').hide();
         }
         //function(event){that.doAction(event)} );
-
         if(this.options.allowExpanded){
             this.element.find('#div_more_options').show();
             this._on(this.element.find('#btn_more_options'),{click:function(){
@@ -210,7 +209,10 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
 
         }
 
-        return this._super();
+        var res = this._super();
+        
+        this._onRecordScopeChange();
+        return res;
     },
 
     
@@ -451,7 +453,6 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                +'</li>').appendTo(cont);    
         });
         */
-        
         return ele;
     },
     
@@ -462,7 +463,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     _onRecordScopeChange: function () 
     {
         var isdisabled = !this.getSelectedParameters( false );
-        
+     
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), isdisabled );
         window.hWin.HEURIST4.util.setDisabled( this.element.find('#btnAddRecordInNewWin'), isdisabled);
         window.hWin.HEURIST4.util.setDisabled( this.element.find('#btnAddRecord'), isdisabled);
