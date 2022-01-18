@@ -165,7 +165,8 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             
             this.element.find('#div_more_options').show();
             this._on(this.element.find('#btn_more_options'),{click:function(){
-                this.element.find('.add_record').show();
+                this.element.find('#div_sel_tags').css('display','block');
+                this.element.find('#div_add_link').show();
                 this.element.find('#div_more_options').hide();
                 this.element.parent().height('auto');
 
@@ -246,7 +247,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     //
     //    
     doExpand: function(is_expand){
-console.log('doExpand');
+
         if(!this._toolbar) return;
         
         var $dlg = this.element.children('fieldset');
@@ -265,7 +266,9 @@ console.log('doExpand');
 
         
             if(this.options.allowExpanded){
-                this.element.find('.add_record').show();
+                //this.element.find('.add_record').show();
+                this.element.find('#div_sel_tags').css('display','block');
+                this.element.find('#div_add_link').show();
                 this.element.find('#div_more_options').hide();
                 this.element.parent().height('auto');
                 this._adjustHeight();
