@@ -82,9 +82,9 @@
                 <div class="header" style="padding:0 16px;padding-top:20px;text-align:left"><label>ADVANCED</label></div>
             </div>
             
-            <div id="div_sel_tags" style="padding: 0.2em; max-width:480px;display:none;" class="add_record">
-                <div class="header_narrow" style="display:table-cell;width:115px;"><label>Add these tags:</label></div>
-                <div id="div_sel_tags2" style="display:table-cell;padding-bottom:20px;"></div>
+            <div id="div_sel_tags" style="padding: 0.2em; max-width:480px;display:block;" class="add_record">
+                <div class="header_narrow" style="display:inline-block;width:115px;"><label>Add these tags:</label></div>
+                <div id="div_sel_tags2" style="display:inline-block;padding-bottom:20px;"></div>
             </div>
                 <!--
             <div id="div_add_link" style="padding: 0.2em; min-width: 600px;display:none;" class="input add_record">
@@ -100,12 +100,12 @@
             </div>
                 -->
             <span id="div_add_link" style="padding: 0.2em; min-width: 480px;display:none;" class="input add_record">
-                <textarea id="txt_add_link" readonly    
-                    onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"
-                    class="text ui-widget-content ui-corner-all" rows=5 style="width:480px;resize: none"></textarea>
                 <div class="heurist-helper1" style="padding-bottom: 1em; display: block;">
                     Hyperlink this URL in a web page, browser bookmark or desktop shortcut to provide one-click addition of records
                 </div>    
+                <textarea id="txt_add_link" readonly    
+                    onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"
+                    class="text ui-widget-content ui-corner-all" rows=5 style="width:480px;resize: none"></textarea>
             </span>
             
 

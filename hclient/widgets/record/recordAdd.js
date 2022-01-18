@@ -137,8 +137,6 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             .insertBefore($dlg);
 
 
-            this.doExpand( this.options.isExpanded );
-
         }
 
         //add and init record type selector
@@ -164,6 +162,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         }
         //function(event){that.doAction(event)} );
         if(this.options.allowExpanded){
+            
             this.element.find('#div_more_options').show();
             this._on(this.element.find('#btn_more_options'),{click:function(){
                 this.element.find('.add_record').show();
@@ -172,7 +171,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
 
                 this._adjustHeight();
             }});
-
+            
             window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
                 isdialog : false,
                 container: $('#div_sel_tags2'),
@@ -212,6 +211,11 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         var res = this._super();
         
         this._onRecordScopeChange();
+        
+        if(this.options.is_h6style){
+            this.doExpand( this.options.isExpanded );
+        }
+        
         return res;
     },
 
@@ -232,15 +236,17 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 var ele = this.element.find('#txt_add_link');
                 var t1 = ele.offset().top;
                 var t2 = this.element.find('.ent_footer').offset().top;
-                var h = Math.max(t2-t1-40,40);
-                ele.height(h);                
+                if(t2>0){
+                    var h = Math.max(t2-t1-40,40);
+                    ele.height(h);                
+                }
     },
     
     //
     //
     //    
     doExpand: function(is_expand){
-
+console.log('doExpand');
         if(!this._toolbar) return;
         
         var $dlg = this.element.children('fieldset');
@@ -253,12 +259,22 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             this.expandBtn.hide();
             this.closeBtn.show();
             $dlg.css('bottom','40px').show(); //space to show button toolbar
-            this.element.parent().width(500).height(450);
+            this.element.parent().width(500);//.height(450);
             //$icon.css('float','left').removeClass('ui-icon-gear').addClass('ui-icon-carat-2-w');
             this._innerTitle.text(window.hWin.HR('Record addition settings'));
 
-            this.element.find('#div_more_options').show();
-            this.element.find('.add_record').hide();
+        
+            if(this.options.allowExpanded){
+                this.element.find('.add_record').show();
+                this.element.find('#div_more_options').hide();
+                this.element.parent().height('auto');
+                this._adjustHeight();
+            }else{
+                //this.element.find('#div_more_options').show();
+                this.element.find('.add_record').hide();
+                this.element.parent().height(450);
+            }
+            
 
             var pref_rectype = window.hWin.HAPI4.get_prefs('record-add-defaults')[0];
             this.element.find('#sel_recordtype').val(pref_rectype).hSelect('refresh');

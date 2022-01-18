@@ -870,7 +870,7 @@ $.widget( "heurist.mainMenu6", {
                 }else{
                     cont.recordAdd('doExpand', expandRecordAddSetting);                        
                 }
-                if(expandRecordAddSetting) explore_height = 430;
+                //always expanded if(expandRecordAddSetting) explore_height = 430;
 
             }//endif
          
