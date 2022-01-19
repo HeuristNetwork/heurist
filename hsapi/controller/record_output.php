@@ -13,7 +13,7 @@ if(count($_REQUEST)>900){
     * 
     * parameters
     * db - heurist database
-    * format = geojson|json|csv|kml|xml|hml|gephi
+    * format = geojson|json|csv|kml|xml|hml|gephi|iiif
     * linkmode = direct, direct_links, none, all
     * prefs:{ format specific parameters }, }
     * 

@@ -125,7 +125,7 @@ window.hWin.HEURIST4.ui = {
     },
 
     //
-    // create checkboxm, radio or select element
+    // create checkbox, radio or select element
     // options
     //  type:
     //  hideclear 

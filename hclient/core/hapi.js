@@ -228,6 +228,34 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     function _triggerRecordUpdateEvent(response, callback){
         if(response && response.status == window.hWin.ResponseStatus.OK){
             if($Db) $Db.needUpdateRtyCount = 1;
+            
+            if(response.affectedRty){
+                //clear record browse cache
+                if(window.hWin.HEURIST4.browseRecordTargets){
+                    var rtys = [];
+                    if($.isArray(response.affectedRty)){
+                        rtys = response.affectedRty;
+                    }else if(typeof response.affectedRty==='string'){
+                        rtys = response.affectedRty.split(',');
+                    }else{
+                        rtys = [response.affectedRty];
+                    }
+                    rtys.push('any');
+                    $.each(rtys, function(i,id){
+                        if(window.hWin.HEURIST4.browseRecordTargets[id]){
+                            id = ''+id;
+                            $.each(window.hWin.HEURIST4.browseRecordTargets[id], function(j,key){
+                                if(window.hWin.HEURIST4.browseRecordCache && window.hWin.HEURIST4.browseRecordCache[key]){
+                                    window.hWin.HEURIST4.browseRecordCache[key] = null;
+                                    delete window.hWin.HEURIST4.browseRecordCache[key];                                   
+                                }
+                            });
+                            window.hWin.HEURIST4.browseRecordTargets[id] = null;
+                            delete window.hWin.HEURIST4.browseRecordTargets[id];                                   
+                        }
+                    });
+                }
+            }            
             window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_UPDATE); //after save record     
         }
         if($.isFunction(callback)){

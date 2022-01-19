@@ -1668,7 +1668,7 @@ $.widget( "heurist.editing_input", {
             }
             rts = (rts.length>0)?rts.join(', '):'record';
             
-            //define explicit add relationship button
+            //define explicit add resource button
             $( "<button>", {title: "Select record to be linked"})
                         .button({icon:"ui-icon-triangle-1-e",
                                label:('&nbsp;&nbsp;&nbsp;<span style="color: #55555566;">select'+(isparententity?' child':'')+'&nbsp: '
@@ -1677,6 +1677,10 @@ $.widget( "heurist.editing_input", {
                         .addClass('sel_link2').css({'max-width':'300px'}) //, 'background': 'lightgray'})
                         .appendTo( $inputdiv );
             
+//console.log(that.options.dtID+'  '+that.options.rectypeID);
+            var __show_select_dialog = browseRecords(this, $input); //see editing_exts
+            
+/*
             var s_action = '';
             var pointerMode = that.f('rst_PointerMode');
             if(pointerMode=='addonly'){
@@ -1686,9 +1690,7 @@ $.widget( "heurist.editing_input", {
             }else{
                 s_action = 'select or create';
             }
-            
-//console.log(that.options.dtID+'  '+that.options.rectypeID);
-            
+
             var popup_options = {
                             select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
                             select_return_mode: 'recordset',
@@ -1738,18 +1740,6 @@ $.widget( "heurist.editing_input", {
                                         //ele.appendTo($inputdiv);
                                         that.onChange();
                                         
-                /* 2017-11-08 no more buttons
-                                        if($inputdiv.find('.sel_link').length==0){
-                                            var $btn_rec_edit_dialog = $( "<span>", {title: "Click select a record to be linked"})
-                                                .addClass('smallicon sel_link ui-icon ui-icon-pencil')
-                                                        .insertAfter( $input );
-                                                        
-                                            that._on( $btn_rec_edit_dialog, { click:  __show_select_dialog} ); 
-                                        }else{
-                                            $inputdiv.find('.sel_link').css({display:'inline-block'});
-                                        }
-                */                                           
-                                        
                                         if( $inputdiv.find('.link-div').length>0 ){ //hide this button if there are links
                                             $input.show();
                                             $inputdiv.find('.sel_link2').hide(); 
@@ -1761,7 +1751,6 @@ $.widget( "heurist.editing_input", {
                                      }
                             }
             };
-
 
             // event is false for confirmation of select mode for parententity
             // 
@@ -1808,20 +1797,8 @@ $.widget( "heurist.editing_input", {
                     window.hWin.HEURIST4.ui.showEntityDialog(that.configMode.entity, popup_options);
             }
 
-            that._findAndAssignTitle($input, value, __show_select_dialog);
-            
-            if(value>0){
-                /* 2017-11-08 no more button - use icon at the beginning of input 
-                        var $btn_rec_search_dialog = $( "<span>", {title: "Click to search and select"})
-                            .addClass('smallicon sel_link ui-icon ui-icon-pencil')
-                                    .insertAfter( $input );
-                            //.button({icons:{primary: 'ui-icon-pencil'},text:false}); //wasui-icon-link
-                        this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
-               */         
-            }
-            
             this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
-
+*/
             /* IJ asks to disable this feature 
             if( this.inputs.length>0 || this.element.find('.link-div').length>0){ //hide this button if there are links
                 $inputdiv.find('.sel_link2').hide();
@@ -1832,6 +1809,7 @@ $.widget( "heurist.editing_input", {
             //open dialog for second and further            
             if(this.inputs.length>0 && !(value>0))  __show_select_dialog();
             */
+            that._findAndAssignTitle($input, value, __show_select_dialog);
             
             this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
 

@@ -657,7 +657,8 @@
             if($keep_autocommit===true) $mysqli->autocommit(TRUE);
         }
 
-        return array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle); //, 'counts'=>$rty_counts
+        return array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle, 'affectedRty'=>$rectype); 
+        //, 'counts'=>$rty_counts
         /*
         $response = array("status"=>HEURIST_OK,
         "data"=> array(
@@ -746,6 +747,7 @@
             $bkmk_count = 0;
             $rels_count = 0;
             $deleted = array();
+            $affected_rectypes = array();
             $msg_error = '';
             $msg_termination = null;
             
@@ -776,6 +778,10 @@
                     $deleted = array_merge($deleted, $stat['deleted']);
                     $rels_count += $stat['rels_count'];
                     $bkmk_count += $stat['bkmk_count'];
+                    
+                    if(!in_array($rectypes[$recID],$affected_rectypes)){
+                        array_push($affected_rectypes, $rectypes[$recID]);    
+                    }
                 }
 
                 //update session and check for termination                
@@ -800,6 +806,7 @@
                 $res = $system->addError(HEURIST_DB_ERROR, 'Cannot delete record. '.$msg_error);
             }else{
                 $res = array('status'=>HEURIST_OK, 
+                    'affectedRty'=>$affected_rectypes,
                     'data'=> array( 'processed'=>count($allowed_recids),
                                     'deleted'=>count($deleted), 'noaccess'=>$noaccess_count,
                                     'bkmk_count'=>$bkmk_count, 'rels_count'=>$rels_count));
@@ -2371,8 +2378,9 @@
         }//while
 
         if($error==null){
-            $res = array("status"=>HEURIST_OK, 'data'
-                        =>array("added"=>$new_id, "bkmk_count"=>$bkmk_count, "rel_count"=>$rels_count));
+            $res = array("status"=>HEURIST_OK, 
+            'affectedRty'=>$recTypeID,
+            'data'=>array("added"=>$new_id, "bkmk_count"=>$bkmk_count, "rel_count"=>$rels_count));
         }else{
             $res = $system->addError(HEURIST_DB_ERROR, $error);
         }
