@@ -101,34 +101,45 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
                         }});
                 }
         });
+
+        //specify add new/save order buttons above record list
+        var btn_array = [
+            {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'),
+                  css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton',
+                  click: function() { that._onActionListener(null, 'add'); }},
+
+            {text:window.hWin.HR('Save Order'),
+                  css:{'margin-right':'0.5em','float':'right',display:'none'}, id:'btnApplyOrder',
+                  click: function() { that._onActionListener(null, 'save-order'); }}];
+
+        this._toolbar = this.searchForm;
+        this.searchForm.css({'padding-top': this.options.isFrontUI?'8px':'4px'}).empty();
+        //this._defineActionButton2(btn_array[1], this.searchForm);
         
-
-            //specify add new/save order buttons above record list
-            var btn_array = [
-                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'),
-                      css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton',
-                      click: function() { that._onActionListener(null, 'add'); }},
-
-                {text:window.hWin.HR('Save Order'),
-                      css:{'margin-right':'0.5em','float':'right',display:'none'}, id:'btnApplyOrder',
-                      click: function() { that._onActionListener(null, 'save-order'); }}];
-
-            this._toolbar = this.searchForm;
-            this.searchForm.css({'padding-top': this.options.isFrontUI?'8px':'4px'}).empty();
-            //this._defineActionButton2(btn_array[1], this.searchForm);
-            
-            $('<h3 style="margin:0;padding:0 8px;vertical-align: middle;width:100%;min-height: 32px; border-bottom: 1px solid gray; clear: both;">Vocabularies editor</h3>'
-                +'<div class="action-buttons" style="height:40px;background:white;padding:10px 8px;">'
-                +'<h4 style="display:inline-block;margin: 0 10px 0 0; vertical-align: middle;">Groups</h4></div>')
-            .appendTo( this.searchForm );
-            
-            this.searchForm.css({padding:'6px 0 0 0'});
-            this.recordList.css({ top:80});
-            
-            this._defineActionButton2(btn_array[0], this.searchForm.find('.action-buttons'));
+        $('<h3 style="margin:0;padding:0 8px;vertical-align: middle;width:100%;min-height: 32px; border-bottom: 1px solid gray; clear: both;">Vocabularies editor</h3>'
+            +'<div class="action-buttons" style="height:40px;background:white;padding:10px 8px;">'
+            +'<h4 style="display:inline-block;margin: 0 10px 0 0; vertical-align: middle;">Groups</h4></div>')
+        .appendTo( this.searchForm );
+        
+        this.searchForm.css({padding:'6px 0 0 0'});
+        this.recordList.css({ top:80});
+        
+        this._defineActionButton2(btn_array[0], this.searchForm.find('.action-buttons'));
         
         this._loadData();
-         
+
+        if(this.options.select_mode == 'manager'){
+
+            this._on(this.recordList.find('.div-result-list-content'), {'scroll': function(event){
+
+                var $ele = $(event.target);
+
+                if($ele.scrollLeft() !== 0){
+                    $ele.scrollLeft(0);
+                }
+            }});
+        }
+
         return true;
     },    
     

@@ -151,6 +151,18 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         }
 
         that._loadData();
+
+        if(this.options.select_mode == 'manager'){
+
+            this._on(this.recordList.find('.div-result-list-content'), {'scroll': function(event){
+
+                var $ele = $(event.target);
+
+                if($ele.scrollLeft() !== 0){
+                    $ele.scrollLeft(0);
+                }
+            }});
+        }
         
         return true;
     },    
