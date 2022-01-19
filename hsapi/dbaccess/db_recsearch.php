@@ -793,10 +793,10 @@ function getRecordIds($system, $ptr_record_ids, $search_values){
         return $system->addError(HEURIST_ERROR, "There needs to be an equal number of search values with each record type being checked");
     }
 
-    foreach ($ptr_record_ids as $key => $record_id_set) {
+    foreach ($ptr_record_ids as $key => $rectype_id_set) {
 
         $searching = $search_values[$key];
-        $query_base = "SELECT rec.rec_ID FROM Records AS rec INNER JOIN recDetails AS dtl ON rec.rec_ID = dtl.dtl_RecID WHERE rec.rec_RecTypeID IN ($record_id_set) AND ";
+        $query_base = "SELECT rec.rec_ID FROM Records AS rec INNER JOIN recDetails AS dtl ON rec.rec_ID = dtl.dtl_RecID WHERE rec.rec_RecTypeID IN ($rectype_id_set) AND ";
 
         if(is_array($searching)){
 
@@ -827,7 +827,9 @@ function getRecordIds($system, $ptr_record_ids, $search_values){
                         $rec_ids[$key] = null;
                         break;
                     }
+
                 }
+
             }
         }else{
 
@@ -862,24 +864,11 @@ function getRecordIds($system, $ptr_record_ids, $search_values){
 
             if(count($rec_ids[$key]) == 1){
                 $rec_ids[$key] = $rec_ids[$key][0];
-            }else{ // Ambiguous, return a list of: Key => Rec ID, Value => Rec Titlemask
+            }else{ // Ambiguous, need user to select appropriate record
 
-                $query = "SELECT rec_ID, rec_Title FROM Records WHERE rec_ID IN (". implode(',', $rec_ids[$key]) .")";
+                $rec_id_list = implode(',', $rec_ids[$key]);
 
-                $rec_ids[$key] = array();
-
-                $rtn = $mysqli->query($query);
-
-                if($rtn){
-
-                    while($result = $rtn->fetch_row()){
-
-                        if($result){
-                            $rec_ids[$key][$result[0]] = $result[1];
-                        }
-                    }
-                    $rtn->close();
-                }
+                $rec_ids[$key] = array($rec_id_list, $rectype_id_set);
             }
         }
     }
