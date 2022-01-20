@@ -549,10 +549,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     _adjustResultListTop: function(){
          if(this.searchForm && this.searchForm.length>0 && this.searchForm.is(':visible')){
-
-console.log('adjust '+this.searchForm.height());        
-             
-             
              this.recordList.css('top', this.searchForm.height());
          }else{
              this.recordList.css('top', 0); 

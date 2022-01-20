@@ -652,6 +652,7 @@ function browseRecords(_editing_input, $input){
                             window.hWin.HEURIST4.msg.showMsgErr(response);       
                        }
                     });
+                    return;
             }else{
                 
                 if(!that.selObj || !$(that.selObj).hSelect('instance')){
@@ -660,13 +661,22 @@ function browseRecords(_editing_input, $input){
                         $(that.selObj).remove();
                     }
                     
-                    that.selObj = window.hWin.HEURIST4.ui.createSelector(null, [{key:'select', title:'Search/Add'}]);
+                    that.selObj = window.hWin.HEURIST4.ui.createSelector(null);//, [{key:'select', title:'Search/Add'}]);
                     
                     $(that.selObj).appendTo($inputdiv);
                     $(that.selObj).hide();
                     
-                    var opt = window.hWin.HEURIST4.ui.addoption(that.selObj, 'select', window.hWin.HR('Search'));
-                    $(opt).attr('icon-url', window.hWin.HAPI4.baseURL+'hclient/assets/magglass_12x11.gif');
+                    var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/magglass_12x11.gif';
+                    var opt = window.hWin.HEURIST4.ui.addoption(that.selObj, 'select', 
+                    '<div style="width:300px"><input class="input_menu_filter" size="10"/>'
++'<span class="smallbutton ui-icon ui-icon-circlesmall-close" tabindex="-1" title="Clear entered value" '
++'style="position:relative; cursor: pointer; outline: none; box-shadow: none; border-color: transparent;"></span>'                   
+                    +'<span style="padding:0px 4px 0 20px;vertical-align:sub">'
+                    +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+                    + '" class="rt-icon" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
+                    + window.hWin.HR('Search') + '</div>');
+                    
+                    //$(opt).attr('icon-url', search_icon);
                     
                     $.each(window.hWin.HEURIST4.browseRecordCache[key], function(idx, item){
                         
@@ -679,8 +689,46 @@ function browseRecords(_editing_input, $input){
                             
                     });
 
-                    that.selObj = window.hWin.HEURIST4.ui.initHSelect(that.selObj, false);
-                    that.selObj.find('.rt-icon').css({width:'12px',height:'12px'});
+//console.log('init hselect '+key);                    
+                    $(that.selObj).css('max-width','300px');
+                    that.selObj = window.hWin.HEURIST4.ui.initHSelect(that.selObj, false,null,
+                        function(){
+                            var ele = that.selObj.hSelect('menuWidget');                                    
+                            ele.find('.rt-icon').css({width:'12px',height:'12px'});
+                            var inpt = ele.find('input.input_menu_filter');
+                            if(!inpt.attr('data-inited')){
+                                //reset filter                                
+                                that._on(ele.find('span.smallbutton'), {click:
+                                function(event){
+                                    window.hWin.HEURIST4.util.stopEvent(event); 
+                                    var mnu = that.selObj.hSelect('menuWidget');
+                                    mnu.find('input.input_menu_filter').val('');
+                                    mnu.find('li').css('display','list-item');
+                                }});
+                                //set filter
+                                that._on(ele, {keyup:function(event){
+                                    var val = $(event.target).val().toLowerCase();
+                                    window.hWin.HEURIST4.util.stopEvent(event);                       
+                                    var mnu = that.selObj.hSelect('menuWidget');
+                                    if(val.length<2){
+                                        mnu.find('li').css('display','list-item');
+                                    }else{
+                                        $.each(mnu.find('.ui-menu-item-wrapper'),
+                                            function(i,item){
+                                                if(i==0 || $(item).text().toLowerCase().indexOf(val)>=0){
+                                                    $(item).parent().css('display','list-item');
+                                                }else{
+                                                    $(item).parent().css('display','none');
+                                                }
+                                            });    
+                                    }                                    
+                                    
+                                }});
+                                inpt.attr('data-inited',1);
+                            }
+                            inpt.focus();
+                        }
+                    );
                     
                 }else{
                     that._off($(that.selObj), 'change');    

@@ -1064,7 +1064,7 @@ window.hWin.HEURIST4.ui = {
     //
     //
     //
-    initHSelect: function(selObj, useHtmlSelect, apply_style){            
+    initHSelect: function(selObj, useHtmlSelect, apply_style, onOpenMenu){            
 
         //var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
         ////depth>1 || (optgroup==null && depth>0
@@ -1169,6 +1169,9 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
                         wmenu_div.css('left', wbtn.position().left);    
                     }
                     
+                    if($.isFunction(onOpenMenu)){
+                        onOpenMenu.call(this);
+                    }
                     
                     //calculate position
 //console.log(pos+'+'+wmenu.height()+'>'+bodyheight);
@@ -2938,7 +2941,12 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
       buttonItem.css( "background-color", item.value )
      
       return buttonItem;
-   },    
+   },   
+   /*
+   _renderMenu: function( ul, items ) {
+        this._super();
+   },
+   */
   _renderItem: function( ul, item ) {
     var li = $( "<li>" ),
       wrapper = $( "<div>", { html: item.label } ); 
