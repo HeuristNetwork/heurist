@@ -63,6 +63,11 @@ $format = (array_key_exists('mode',$_REQUEST) && $_REQUEST['mode']=="js") ?"js":
 
 $mysqli = $system->get_mysqli();
 
+if($publish==3){
+    header("Content-type: text/html;charset=UTF-8");
+}
+
+
 if($rps_ID==0){
 	//regenerate all reports
 	$res = $mysqli->query('select * from usrReportSchedule');
@@ -137,8 +142,6 @@ function doReport($row){
             }
             if($publish == 3){ //request for current files
             
-                header("Content-type: text/html;charset=UTF-8");
-                
 			    $content = file_get_contents($outputfile);
 			    if($format=="js" && $ext != $format){
 				    $content = str_replace("\n","",$content);

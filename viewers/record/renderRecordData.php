@@ -29,15 +29,12 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/View
 */  
-
-if(count($_REQUEST)>900){
-    error_log('TOO MANY _REQUEST PARAMS '.count($_REQUEST).' renderRecordData');
-    error_log(print_r(array_slice($_REQUEST, 0, 100),true));
-}    
-
-
 require_once(dirname(__FILE__)."/../../hsapi/System.php");
 require_once(dirname(__FILE__).'/../../hsapi/utilities/Temporal.php');
+
+detectLargeInputs('REQUEST renderRecordData', $_REQUEST);
+detectLargeInputs('COOKIE renderRecordData', $_COOKIE);
+
 
 $system = new System();
 $inverses = null;

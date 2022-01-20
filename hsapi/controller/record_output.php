@@ -1,10 +1,4 @@
 <?php
-
-if(count($_REQUEST)>900){
-    error_log('TOO MANY _REQUEST PARAMS '.count($_REQUEST).' record_output');
-    error_log(print_r(array_slice($_REQUEST, 0, 100),true));
-}    
-
     /**
     * Application interface. See hRecordMgr in hapi.js
     * Record search and output in required format
@@ -71,7 +65,10 @@ if(count($_REQUEST)>900){
     require_once (dirname(__FILE__).'/../../admin/verification/verifyValue.php');
 
     require_once (dirname(__FILE__).'/../dbaccess/recordsExport.php');
-    
+ 
+detectLargeInputs('REQUEST record_output', $_REQUEST);
+detectLargeInputs('COOKIE record_output', $_COOKIE);
+   
     $response = array();
 
     $system = new System();

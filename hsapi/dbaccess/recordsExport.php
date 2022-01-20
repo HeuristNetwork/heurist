@@ -1671,12 +1671,13 @@ private static function _getIiifCanvas($record){
                     if(is_array($profile)){
                         $mimeType = @$profile[1]['formats'][0]; 
                         if($mimeType) $mimeType = 'image/'.$mimeType;
+                        $profile = @$profile[0];
                     }else if($profile==null){
                         $profile = 'level1';
                     }
                     if(!$mimeType) $mimeType= 'image/jpeg';
                     
-                    if(strpos('library.stanford.edu/iiif/image-api/1.1')>0){
+                    if(strpos($profile, 'library.stanford.edu/iiif/image-api/1.1')>0){
                         $quality = 'native';  
                     }else{
                         $quality = 'default';

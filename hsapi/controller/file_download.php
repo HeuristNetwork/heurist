@@ -43,10 +43,8 @@
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
-if(count($_REQUEST)>900){
-    error_log('TOO MANY _REQUEST PARAMS '.count($_REQUEST).' file_download');
-    error_log(print_r(array_slice($_REQUEST, 0, 100),true));
-}    
+detectLargeInputs('REQUEST file_download', $_REQUEST);
+detectLargeInputs('COOKIE file_download', $_COOKIE);
 
 $system = new System(); //without connection
 $db = @$_REQUEST['db'];

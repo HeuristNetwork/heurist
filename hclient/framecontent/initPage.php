@@ -27,6 +27,8 @@
 
 require_once(dirname(__FILE__)."/../../hsapi/System.php");
 
+detectLargeInputs('REQUEST initPage', $_REQUEST);
+detectLargeInputs('COOKIE initPage', $_COOKIE);
 
 if(defined('IS_INDEX_PAGE')){
     //from main (index) page it redirects to startup

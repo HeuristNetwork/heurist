@@ -30,6 +30,9 @@ require_once (dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 //require_once (dirname(__FILE__).'/../../hsapi/dbaccess/compose_sql.php');
 //require_once (dirname(__FILE__).'/../../hsapi/dbaccess/compose_sql_new.php');
 
+detectLargeInputs('REQUEST crosstabs', $_REQUEST);
+detectLargeInputs('COOKIE crosstabs', $_COOKIE);
+
 $system = new System();
 if( !$system->init(@$_REQUEST['db']) ){
     $response = $system->getError();

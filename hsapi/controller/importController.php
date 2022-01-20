@@ -98,10 +98,9 @@ require_once (dirname(__FILE__).'/../import/importAction.php'); //work with impo
 require_once (dirname(__FILE__).'/../import/importHeurist.php'); //work with Heurist exchange format
 
 
-if(count($_REQUEST)>900){
-    error_log('TOO MANY _REQUEST PARAMS '.count($_REQUEST).' importController');
-    error_log(print_r(array_slice($_REQUEST, 0, 100),true));
-}    
+detectLargeInputs('REQUEST importController', $_REQUEST);
+detectLargeInputs('COOKIE importController', $_COOKIE);
+
 
 set_time_limit(0);
     

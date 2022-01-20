@@ -23,6 +23,10 @@ require_once(dirname(__FILE__)."/../../hsapi/System.php");
 
 define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
 
+detectLargeInputs('REQUEST initPageMin', $_REQUEST);
+detectLargeInputs('COOKIE initPageMin', $_COOKIE);
+
+
 $error_msg = '';
 $isSystemInited = false;
 

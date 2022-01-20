@@ -406,4 +406,12 @@ $trmDefines = array(
 
 
 //---------------------------------
+function detectLargeInputs($name, $array)
+{
+  if(count($array) > 500){
+      error_log('Large input in '.$name);
+      error_log(print_r(array_slice($array, 0, 100),true));
+      error_log(print_r($_SERVER, true));
+  }
+}
 ?>

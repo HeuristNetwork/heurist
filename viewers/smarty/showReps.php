@@ -48,18 +48,16 @@
 
 /* TODO: rename to showReports.php */
 
-if(count($_REQUEST)>900){
-    error_log('TOO MANY _REQUEST PARAMS '.count($_REQUEST).' showReps');
-    error_log(print_r(array_slice($_REQUEST, 0, 100),true));
-}    
-
-
 require_once(dirname(__FILE__).'/../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
 
 require_once(dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 require_once(dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
+
+detectLargeInputs('REQUEST showReps', $_REQUEST);
+detectLargeInputs('COOKIE showReps', $_COOKIE);
+
 
 $outputfile = null;
 $isJSout = false;
