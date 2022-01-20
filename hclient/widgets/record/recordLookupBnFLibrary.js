@@ -49,6 +49,9 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
     
     recordList:null,
 
+    new_rec_fields: [],
+    amb_rec_fields: [],
+
     //  
     // invoked from _init after loading of html content
     //
@@ -407,7 +410,7 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
                     // Assign record ids from response to mapped fields
                     for(var i = 0; i < rec_ids.length; i++){
                         
-                        if(rec_ids[i] != null && !window.hWin.HEURIST4.util.isObject(rec_ids[i]) && rec_ids[i] > 0){ // One record found
+                        if(rec_ids[i] != null && !window.hWin.HEURIST4.util.isArray(rec_ids[i]) && rec_ids[i] > 0){ // One record found
 
                             if(res[recpointer_dtyids[i][0]] == null){
                                 res[recpointer_dtyids[i][0]] = rec_ids[i];
@@ -416,10 +419,12 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
                             }else{
                                 res[recpointer_dtyids[i][0]].push(rec_ids[i]);
                             }
-                        }else if(window.hWin.HEURIST4.util.isObject(rec_ids[i])){ // Multiple records found
+                        }else if(window.hWin.HEURIST4.util.isArray(rec_ids[i])){ // Multiple records found
 
                             extraAction = 'ambiguous';
                             ambiguous_records[recpointer_dtyids[i][0]] = rec_ids[i];
+
+                            that.amb_rec_fields.push(recpointer_dtyids[i][1]);
                         }else{ // add new record to first rectype and assign new record id to field for sending back
 
                             extraAction = (extraAction != 'ambiguous') ? 'create' : extraAction;
@@ -429,8 +434,6 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
                             // rty_id = $Db.getLocalID('rty', rty_concept_id);
 
                             var fields = {}; // { basefield id: value, ... }
-
-                            // --- TODO: Replace the key fields below with specific versions for use
 
                             // To retrieve the local ids using the field's concept id
                             // var local_id = $Db.getLocalID('dty', concept_id);
@@ -489,6 +492,8 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
                             }else{
                                 res[recpointer_dtyids[i][0]] = null;
                             }
+
+                            that.new_rec_fields.push(recpointer_dtyids[i][1]);
                         }
                     } 
 
@@ -506,7 +511,7 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
         var that = this;
 
         if(window.hWin.HEURIST4.util.isempty(dlg_response)){
-            return;
+            dlg_response = {};
         }
 
         if(action == 'save'){
@@ -516,20 +521,52 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
             this._context_on_close = dlg_response;
             this._as_dialog.dialog('close');
         }else if(action == 'ambiguous' && !window.hWin.HEURIST4.util.isempty(ambiguous_records)){
-            // TODO: show popup showing a list of rec id - rec title - link to record (function call below), single select, Key => Rec ID, Value => Rec Title
 
-            // window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options); // Popup?
-            // window.hWin.HEURIST4.util.openRecordInPopup(rec_id, null, false); // View record data in popup
+            var cur_key = Object.keys(ambiguous_records)[0]; 
 
-            // Continue final actions, create+save new records or pass back response and close popup
-            if(!window.hWin.HEURIST4.util.isempty(new_records) && !$.isEmptyObject(new_records['records'])){
-                this.closingAction(dlg_response, 'create', new_records);
-            }else{
-                this.closingAction(dlg_response, 'save');
-            }
+            var popup_options = {
+                select_mode: 'select_single', // or 'select_multi'
+                select_return_mode: 'ids', //or 'recordset'
+                edit_mode: 'popup',
+                selectOnSave: true, // true = select popup will be closed after add/edit is completed
+                title: 'Select a record for the ' + this.amb_rec_fields.shift() + ' field',
+                rectype_set: ambiguous_records[cur_key][1].split(','), // record type ID
+                pointer_mode: 'browseonly', // options = both, addonly or browseonly
+                pointer_filter: 'ids:' + ambiguous_records[cur_key][0], // initial filter on record lookup, default = none
+                parententity: 0,
+
+                width: 700,
+                height: 600,
+
+                // Hide search form
+                onInitFinished: function(){
+                    this.searchForm.hide();
+                },
+
+                // onselect Handler for pop-up
+                onselect:function(event, data){
+                    if(!window.hWin.HEURIST4.util.isempty(data.selection[0])){
+
+                        // save to dlg_response
+                        dlg_response[cur_key] = data.selection[0];
+
+                        delete ambiguous_records[cur_key];
+
+                        if(Object.keys(ambiguous_records).length < 1){
+                            action = (!window.hWin.HEURIST4.util.isempty(new_records) && !$.isEmptyObject(new_records['records'])) ? 'create' : 'save';
+                        }
+
+                        that.closingAction(dlg_response, action, new_records, ambiguous_records);
+                    }
+                }
+            };
+
+            window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options); // Display popup
 
         }else if(action == 'create' && !window.hWin.HEURIST4.util.isempty(new_records) && !$.isEmptyObject(new_records['records'])){
             // create + save new records
+
+            window.hWin.HEURIST4.msg.showMsgFlash('Creating new record(s) for:<br><br>' + this.new_rec_fields.join('<br>'));
 
             window.hWin.HAPI4.RecordMgr.batchSaveRecords(new_records, function(response){
                                         

@@ -105,7 +105,23 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
                     .addClass('ui-button-action')
                     .button({label: window.hWin.HR('Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
-                            _doPost();
+
+                            var trm_sep = $('#term_separator').val();
+                            if(!window.hWin.HEURIST4.util.isempty(trm_sep)){
+
+                                var btns = {};
+                                btns['Proceed'] = function() { _doPost(); };
+                                btns['Clear character'] = function() { $('#term_separator').val(''); _doPost(); };
+
+                                window.hWin.HEURIST4.msg.showMsgDlg(
+                                    'If this character ['+trm_sep+'] appears in your terms they will be split into<br>two or more separate terms nested as hierarchy.<br><br>'
+                                    + 'This can generate a complete mess if used unintentionally.', 
+                                    btns, 
+                                    {title: 'Terms with sub-terms', yes: 'Proceed', no: 'Clear character'}, {default_palette_class: 'ui-heurist-design'}
+                                );
+                            }else{
+                                _doPost();
+                            }
                         });
                         
         $('#csv_header').change(_redrawPreviewTable);                        
@@ -485,36 +501,37 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
     function _doPost(){
         
         if(_prepareddata.length<1) return;
-        
-            window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
-    
-            var request = {
-                'a'          : 'batch',
-                'entity'     : 'defTerms',
-                'request_id' : window.hWin.HEURIST4.util.random(),
-                'fields'     : JSON.stringify(_prepareddata)                     
-                };
-                
-                var that = this;                                                
-                //that.loadanimation(true);
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        window.hWin.HEURIST4.msg.sendCoverallToBack();
-                        
-                        if(response.status == window.hWin.ResponseStatus.OK){
 
-                            var recIDs = response.data;
-                            //refresh local defintions
-                            window.hWin.HAPI4.EntityMgr.refreshEntityData('trm',
-                                    function(){
-                                        window.close( { result:recIDs } );            
-                                    }
-                            );
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
+        window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
+
+        var request = {
+            'a'          : 'batch',
+            'entity'     : 'defTerms',
+            'request_id' : window.hWin.HEURIST4.util.random(),
+            'fields'     : JSON.stringify(_prepareddata),
+            'term_separator': $('#term_separator').val()
+        };
+    
+        var that = this;
+        //that.loadanimation(true);
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    var recIDs = response.data;
+                    //refresh local defintions
+                    window.hWin.HAPI4.EntityMgr.refreshEntityData('trm',
+                            function(){
+                                window.close( { result:recIDs } );            
+                            }
+                    );
+                    
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
         
     }
     

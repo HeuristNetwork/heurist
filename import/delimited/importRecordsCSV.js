@@ -1677,7 +1677,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
             // mapping selector
             s = s + '<td style="width:300px;">'
-                + (isIDfield && !mode_display_separate?'<span style="padding:4px 0px">&lt; Column to hold Heurist Record IDs &gt;</span>':'')
+                + (isIDfield && !mode_display_separate?'<span style="padding:4px 0px">&lt; Heurist IDs for records being added/updated &gt;</span>':'')
                 + '&nbsp;<span style="display:none;">'
                 + '<select id="sa_dt_'+i+'" style="width:280px; font-size: 1em;" data-field="'+i+'" '
                 //+ ' title="Only matchable fields - text, numeric, date, terms - are shown" '
@@ -4070,7 +4070,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         var tabs = imp_session['validation']['error'];
         var wrong_values = tabs[tab_idx]['values_error'];
         
-        _importNewTerms($dlg, dt_id, wrong_values, -1, '', function(context){
+        _importNewTerms($dlg, dt_id, wrong_values, -1, '', function(context, hasPeriod){
             
             if(context && $.isArray(context)){
                 
@@ -4082,7 +4082,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     _importNewTermsToAllFields($dlg, index, prepared_data);
                 }else{
                     //add all terms in prepared_data
-                    _importTerms($dlg, prepared_data, true);
+                    _importTerms($dlg, prepared_data, true, hasPeriod);
                 }
             }
             
@@ -4180,38 +4180,44 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         var _prepareddata = [], record;
         
         var skip_dup=0, skip_long=0, skip_long=0, skip_na=0;
+
+        var hasPeriod = false;
         
         //list of all children for given trm_ParentTermID in lower case
         var trm_ParentChildren = $Db.trm_TreeData(trm_ParentTermID,'labels');
         
         for(var i=0;i<newvalues.length;i++){
-                
-                var lbl = null;
-                
-                if(!window.hWin.HEURIST4.util.isempty(newvalues[i])){
-                    lbl = newvalues[i].trim();
+
+            var lbl = null;
+			
+            if(!window.hWin.HEURIST4.util.isempty(newvalues[i])){
+                lbl = newvalues[i].trim();
+            }
+
+            if(!window.hWin.HEURIST4.util.isempty(lbl)){
+
+                //verify duplication in parent term and if already added
+                if(false && trm_ParentChildren.indexOf(lbl.toLowerCase())>=0)
+                {
+                    skip_dup++;
+                    continue;
                 }
-                
-                if(!window.hWin.HEURIST4.util.isempty(lbl)){
-                    
-                    //verify duplication in parent term and if already added
-                    if(false && trm_ParentChildren.indexOf(lbl.toLowerCase())>=0)
-                    {
-                        skip_dup++;
-                        continue;
-                    }
-                    
-                    
-                    if(lbl.indexOf('.')<0 && lbl.length>500){
-                        skip_long++;
-                        continue;
-                    }
-                   
-                    _prepareddata.push({trm_Label:lbl, trm_ParentTermID:trm_ParentTermID, trm_Domain:'enum'});
-                    
-                }else{
-                    skip_na++;
+
+
+                if(lbl.indexOf('.')<0 && lbl.length>500){
+                    skip_long++;
+                    continue;
                 }
+				
+                if(lbl.indexOf('.') < 0){
+                    hasPeriod = true;
+                }
+
+            _prepareddata.push({trm_Label:lbl, trm_ParentTermID:trm_ParentTermID, trm_Domain:'enum'});
+				
+            }else{
+                skip_na++;
+            }
         }//for    
         
         if(_prepareddata.length==0){
@@ -4227,61 +4233,84 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }
         
         if($.isFunction(callback)){
-            callback.call(this, _prepareddata);
+            callback.call(this, _prepareddata, hasPeriod);
         }else{
-            _importTerms($dlg, _prepareddata, false);
+            _importTerms($dlg, _prepareddata, false, hasPeriod);
         }
     }
     
     //
     //
     //
-    function _importTerms($dlg, _prepareddata, is_all)
-    {
+    function _importTerms($dlg, _prepareddata, is_all, hasSeparator='.'){
+
         _prepareddata = JSON.stringify(_prepareddata);
-        
+
         //save hierarchy - label can have dots    
         var request = {
             'a'          : 'batch',
             'entity'     : 'defTerms',
             'request_id' : window.hWin.HEURIST4.util.random(),
-            'fields'     : _prepareddata                     
+            'fields'     : _prepareddata,
+            'term_separator': hasSeparator
+        };
+    
+        var that = this;
+
+        if(!hasSeparator || hasSeparator == '.'){
+            _importTerms_continue($dlg, request, is_all);
+        }else{
+
+            var btns = {};
+            btns['Periods as separators'] = function(){
+                _importTerms_continue($dlg, request, is_all);
             };
-                
-            var that = this;                                                
-            //that.loadanimation(true);
-            window.hWin.HEURIST4.msg.bringCoverallToFront($dlg);
-            
-            window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
 
-                        var recIDs = response.data;
+            btns['Periods as part of terms'] = function(){
+                request['term_separator'] = false;
 
-                        //refresh local definitions
-                        window.hWin.HAPI4.EntityMgr.refreshEntityData('trm',
-                                    function(){
-                                        var cnt = $dlg.find('.add_terms').length;
-                                        var s = recIDs.length+' new term'
-                                                +((recIDs.length==1)?' was':'s were')+' imported. ';
-                                        if(cnt==1 || is_all){
-                                            window.hWin.HEURIST4.msg.sendCoverallToBack();
-                                            $dlg.dialog('close');
-                                            window.hWin.HEURIST4.msg.showMsgDlg(s+'Please repeat "Prepare" action'); 
-                                            
-                                        }else{
-                                            window.hWin.HEURIST4.msg.showMsgErr(s+'Check other "error" tabs '
-                                            +'to add missing terms for other enumeration fields. '
-                                            +'And finally close this dialog and repeat "Prepare" action'); 
-                                        }
-                                    }
-                        );
-                                    
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
-        
+                _importTerms_continue($dlg, request, is_all);
+            };
+
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'You have term(s) which contain periods (.). These are often used as separators between levels of a hierarchical term tree.<br><br>'
+                + 'Do you want to treat periods as hierarchical separators?<br>(note: will apply to ALL terms in the import which contain periods)',
+                btns, 
+                {title: 'Presence of periods in terms', yes: 'Periods as separators', no: 'Periods as part of terms'}, {default_palette_class: 'ui-heurist-populate'}
+            );
+        }
+    }
+
+    function _importTerms_continue($dlg, request, is_all){
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    var recIDs = response.data;
+
+                    //refresh local definitions
+                    window.hWin.HAPI4.EntityMgr.refreshEntityData('trm',
+                        function(){
+                            var cnt = $dlg.find('.add_terms').length;
+                            var s = recIDs.length+' new term'
+                                    +((recIDs.length==1)?' was':'s were')+' imported. ';
+                            if(cnt==1 || is_all){
+                                $dlg.dialog('close');
+                                window.hWin.HEURIST4.msg.showMsgErr(s+'Please repeat "Prepare" action'); 
+                                
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(s+'Check other "error" tabs '
+                                +'to add missing terms for other enumeration fields. '
+                                +'And finally close this dialog and repeat "Prepare" action'); 
+                            }
+                        }
+                    );
+                                
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
     }
         
 

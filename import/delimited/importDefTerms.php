@@ -167,15 +167,15 @@ separate term and each of these values with comma or tab.
 <div style="position:absolute;right:200px;width:200px; height:100%; border-right:1px lightgray solid">
     <div class="ent_header" style="height:10em;">
         <p><b>Step 2</b></p>
-        <div style="padding-top:1em;">
+        <div>
             <input id="csv_header" 
-                style="margin:1em 0.5em 0 0"
+                style="margin:0 0.5em 0 0"
                 class="text ui-widget-content ui-corner-all" type="checkbox" value="1">
             <label for="csv_header">Labels in line 1</label>
         </div>
-        <div id="btnParseData" style="position:absolute;bottom:10px;">Analyse</div>
+        <div id="btnParseData" style="margin-top: 10px;">Analyse</div>
     </div>
-    <fieldset class="ent_content_full" style="top:10em;padding-top:1em;">
+    <fieldset class="ent_content_full" style="top:7em;padding-top:1em;">
             <div>
                 <label for="csv_delimiter">Field separator:</label>
                 <select id="csv_delimiter" class="text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
@@ -193,17 +193,21 @@ separate term and each of these values with comma or tab.
             </div>
             <div>
                 <label for="csv_linebreak">Line separator:</label>
-                    <select id="csv_linebreak" class="text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
-                        <option selected value="auto">auto detect</option>
-                        <option value="1">No lines</option>
-                        <option value="2">No lines. Group by 2</option>
-                        <option value="3">No lines. Group by 3</option>
-                        <!--
-                        <option value="win">Windows</option>
-                        <option value="nix">Unix</option>
-                        <option value="mac">Mac</option>
-                        -->
-                    </select>
+                <select id="csv_linebreak" class="text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
+                    <option selected value="auto">auto detect</option>
+                    <option value="1">No lines</option>
+                    <option value="2">No lines. Group by 2</option>
+                    <option value="3">No lines. Group by 3</option>
+                    <!--
+                    <option value="win">Windows</option>
+                    <option value="nix">Unix</option>
+                    <option value="mac">Mac</option>
+                    -->
+                </select>
+            </div>
+            <div>
+                <label for="term_separator">Sub-term separator:</label>
+                <input id="term_separator" class="text ui-widget-content ui-corner-all" style="width: 25px;margin-left: 8px;">
             </div>
     </fieldset>            
 </div>
