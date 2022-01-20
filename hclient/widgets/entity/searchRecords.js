@@ -19,6 +19,8 @@
 
 $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
+    _select_mode: 1, //0 - add, 1 - search
+    
     //
     _initControls: function() {
         this._super();
@@ -26,7 +28,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         var that = this;
 
         //-----------------
-        this.element.css('min-width','700px');
+        this.element.css('min-width','255px');
         this.selectRectype = this.element.find('#sel_rectypes');
         
         var rt_list = this.options.rectype_set;
@@ -54,13 +56,16 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         this.btn_select_rt = this.element.find( "#btn_select_rt");
         
         var is_browse = (that.options.pointer_mode == 'browseonly');
+        var is_addonly = (that.options.pointer_mode == 'addonly');
+        
         if(that.options.pointer_mode != 'addorbrowse'){
-            $('#row_helper > .heurist-helper1').css('visibility','hidden');
             $('#addrec_helper > .heurist-helper1').css('visibility','hidden');
         }
-        if(that.options.pointer_mode == 'addonly'){
+        if(is_addonly){
+            this.element.find('#lbl_add_record').text('Add new');
             this.element.find('.not-addonly').hide();
             this.options.pointer_filter = '';
+            this._select_mode = 0;
         }else{
             this.element.find('#cb_initial').prop('checked', 
                 !window.hWin.HEURIST4.util.isempty(this.options.pointer_filter));
@@ -78,22 +83,54 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }else{
             this.element.find('.i-counts').hide();
         }
+
+        this.btn_add_record
+            .button({label: window.hWin.HR('Add Record'), 
+                        icon: is_browse?null:"ui-icon-plus"})
+            .addClass('ui-button-action')
+            .click(function(e) {
+                that._trigger( "onaddrecord", null, that.selectRectype.val() );
+                /*
+                if(!is_browse && that.selectRectype.val()>0){
+                    that._trigger( "onaddrecord", null, that.selectRectype.val() );
+                }else{
+                    that.btn_select_rt.click();
+                }
+                */
+            });  
+        if(is_browse){
+            this.element.find('#lbl_add_record').text('Select in list');
+            this.btn_add_record.hide();
+        }else{
+            this.btn_add_record.show();
+        }
         
             
-        // create list of buttons for every rectype in this.options.rectype_set
-        if(is_expand_rt_list){
+        // create list of tabs for every rectype in this.options.rectype_set
+        if(!is_addonly && is_expand_rt_list){ //(rt_list.length>1 && rt_list.length<20)
             
+            this.element.find('label[for="sel_rectypes-button"]').hide();
+            this.element.find('#sel_rectypes-button').hide();
             this.btn_select_rt.hide();
-            this.btn_add_record.hide();
-            var cont = this.btn_add_record.parent();
+            var cont = this.element.find('#row_tabulator');
+
+            var groupTabHeader = $('<ul>').appendTo(cont);
             
             for(var idx=0; idx<rt_list.length; idx++){
                 
                 var rectypeID = rt_list[idx];
                 var name = $Db.rty(rectypeID,'rty_Name');
-                var label = name.trim();
+                var label = window.hWin.HEURIST4.util.htmlEscape(name.trim());
                 if(!name) continue;
-                
+
+        
+                $('<li>').html('<a href="#rty'+rectypeID
+                                    +'"><span style="font-weight:bold">'
+                                    +label+'</span></a>')
+                        .appendTo(groupTabHeader);
+                $('<div id="rty'+rectypeID+'">').appendTo(cont);
+            
+/*  pair of add+search buttons              
                 $('<button>')
                     .button({label: label, 
                              icon: is_browse?'ui-icon-search':"ui-icon-plus"})
@@ -111,7 +148,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                         }
                     })
                     .appendTo(cont);
-
+                    
                 if(this.options.pointer_mode == 'addorbrowse'){
                                 
                     $('<button>')
@@ -130,64 +167,73 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                         .appendTo(cont);
                     
                 }
-                
-            }
+*/                
+            }//for
+            
+            //on switch - change filter
+            cont.tabs({activate:function( event, ui ) {
+                var rtyid = ui.newPanel.attr('id').substr(3);
+                that._select_mode = 1; //search
+                that.selectRectype.val( rtyid ).hSelect('refresh');
+                that.selectRectype.change();
+            }});
             
         }else{
-            
-            this.btn_add_record
-            .button({label: window.hWin.HR(is_browse?"Search Record":"Add Record"), 
-                        icon: is_browse?null:"ui-icon-plus"})
-            .addClass('ui-button-action')
-            .click(function(e) {
-                if(!is_browse && that.selectRectype.val()>0){
-                    that._trigger( "onaddrecord", null, that.selectRectype.val() );
-                }else{
-                    that.btn_select_rt.click();
-                }
-            });  
-            
+
             this.btn_select_rt
-                .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
-                
-           //open and adjust position of dropdown    
+            .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
+
+            //open and adjust position of dropdown    
             this._on( this.btn_select_rt, {
-                    click:  function(){
+                click:  function(){
+                    this._select_mode = 0;
                     this.selectRectype.hSelect('open');
                     this.selectRectype.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.btn_add_record });
                     return false;
-                        
-                }});
-            if(rt_list.length==1) this.btn_select_rt.hide()
 
-           
-           //adjust position of dropdown    
-           this.sel_rectypes_btn = this.element.find( "#sel_rectypes-button");
-           this._on( this.sel_rectypes_btn, {
-                    click:  function(){
+            }});
+
+            //adjust position of dropdown    
+            this.sel_rectypes_btn = this.element.find( "#sel_rectypes-button");
+            this._on( this.sel_rectypes_btn, {
+                click:  function(){
+                    this._select_mode = 1;
                     this.selectRectype.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.sel_rectypes_btn });
-                }});
-                
+            }});
+
             this.btn_add_record.parent().controlgroup();
-            
+
             if(is_only_rt){
-                if(that.options.pointer_mode == 'addonly'){
+                this.element.find('label[for="sel_rectypes-button"]').hide();
+                this.element.find('#sel_rectypes-button').hide();
+                this.btn_select_rt.hide();
+                
+                if(is_addonly){
                     that._trigger( "onaddrecord", null, that.selectRectype.val() );
                 }else if (is_browse) {
-                    this.element.find('#row_addbtn').hide();
-                    this.element.find('#row_helper').hide();
-                    this.element.find('#addrec_helper').hide();
+                    //this.element.find('#addrec_helper').hide();
                 }
+            }else if(is_addonly){
+                that.btn_select_rt.click(); //show dropdown
             }
-        
+
         }//is_expand_rt_list    
         
+        // change label for btn_add_record 
+        //
         function __onSelectRecType(sel){
             if(that.btn_add_record.is(':visible')){
+                /*
                 if(sel.val()>0){
                     lbl = window.hWin.HR(is_browse?'Select':'Add')+' '+ sel.find( "option:selected" ).text().trim();
                 }else{
                     lbl = window.hWin.HR(is_browse?"Search Record":"Add Record");
+                }
+                */
+                if(sel.val()>0){
+                    lbl = window.hWin.HR('Add')+' '+ sel.find( "option:selected" ).text().trim();
+                }else{
+                    lbl = window.hWin.HR('Add Record');
                 }
                 that.btn_add_record.button('option','label',lbl);
             }
@@ -196,7 +242,12 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         this._on( this.selectRectype, {
             change: function(event){
                 __onSelectRecType(this.selectRectype);
-                this.startSearch();
+                if(this._select_mode==1){
+                    this.startSearch();    
+                }else{
+                    this.btn_add_record.click();
+                }
+                
             }
         });
 
@@ -211,25 +262,30 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             this.element.find('#'+filter_pref).prop('checked', true);
         }
 
-        if(this.options.parententity>0){
-            this.element.find('#row_parententity_helper').css({'display':'table-row'});
-            this.element.find('#row_parententity_helper2').css({'display':'table-row'});
-            this.element.find('#row_parententity_helper2').parent('.ent_header').css({'z-index':99});
-            
-            this.btn_search_start2 = this.element.find('#btn_search_start2').css({height:'20px',width:'20px'})
-                .button({showLabel:false, icon:"ui-icon-search", iconPosition:'end'});
-                
-            this._on( this.btn_search_start2, {click: this.startSearch });
-                
+        if(is_addonly){
             __onSelectRecType(this.selectRectype);
         }else{
-            if(this.options.parentselect>0){
-                var ele = this.element.find('#row_parententity_helper3').css({'display':'table-row'});
-                ele.find('span').text( $Db.rty(this.options.parentselect,'rty_Name') );
-            }
-            //start search
-            if(this.selectRectype.val()>0){
-                this.selectRectype.change(); 
+            if(this.options.parententity>0){
+                
+                this.element.find('#row_parententity_helper').css({'display':'table-row'});
+                this.element.find('#row_parententity_helper2').css({'display':'table-row'});
+                this.element.find('#row_parententity_helper2').parent('.ent_header').css({'z-index':99});
+                
+                this.btn_search_start2 = this.element.find('#btn_search_start2').css({height:'20px',width:'20px'})
+                    .button({showLabel:false, icon:"ui-icon-search", iconPosition:'end'});
+                    
+                this._on( this.btn_search_start2, {click: this.startSearch });
+                    
+                __onSelectRecType(this.selectRectype);
+            }else{
+                if(this.options.parentselect>0){
+                    var ele = this.element.find('#row_parententity_helper3').css({'display':'table-row'});
+                    ele.find('span').text( $Db.rty(this.options.parentselect,'rty_Name') );
+                }
+                //start search
+                if(this.selectRectype.val()>0){
+                    this.selectRectype.change(); 
+                }
             }
         }
         

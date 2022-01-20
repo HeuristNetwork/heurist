@@ -455,7 +455,6 @@ function hLayoutMgr(){
                                 +'"><span style="font-weight:bold">'
                                 +layout.children[i].name+'</span></a>')
                         .appendTo(groupTabHeader);
-            
         }
         
         $d.tabs();

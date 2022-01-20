@@ -1012,18 +1012,7 @@ $.widget( "heurist.manageEntity", {
                 position: position,
                 beforeClose: options.beforeClose,
                 resizeStop: function( event, ui ) {//fix bug
-                    //that.element.parent()
-                    var pele = that.element.parents('div[role="dialog"]');
-                    /*
-                    var ptop = pele.find('.ui-dialog-titlebar');
-                    var hr = ptop.is(':visible')?ptop.height():0;
-                    var pbtm = pele.find('.ui-dialog-buttonpane');
-                    hr = hr + ((pbtm.length>0 && pbtm.is(':visible'))?pbtm.height():0);
-                    */
-                    that.element.css({overflow: 'none !important',
-                    //border: '1px red solid !important',
-                    'width':pele.width()-24 });
-                    //,'height':pele.height() - hr });
+                    that._onDialogResize();
                 },
                 close:function(){
 /*
@@ -1067,6 +1056,24 @@ $.widget( "heurist.manageEntity", {
             }
                 
             
+    },
+    
+    //
+    //
+    //
+    _onDialogResize: function(){
+            //that.element.parent()
+            var pele = this.element.parents('div[role="dialog"]');
+            /*
+            var ptop = pele.find('.ui-dialog-titlebar');
+            var hr = ptop.is(':visible')?ptop.height():0;
+            var pbtm = pele.find('.ui-dialog-buttonpane');
+            hr = hr + ((pbtm.length>0 && pbtm.is(':visible'))?pbtm.height():0);
+            */
+            this.element.css({overflow: 'none !important',
+            //border: '1px red solid !important',
+            'width':pele.width()-24 });
+            //,'height':pele.height() - hr });
     },
     
     //
