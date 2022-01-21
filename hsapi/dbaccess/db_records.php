@@ -1554,6 +1554,16 @@
                 if(mb_strlen($new_title)>1023){
                     $new_title = mb_substr($new_title,0,1023);  
                 } 
+                /*
+                if(strlen($new_title)>1023){
+error_log('>>>>'.strlen($new_title).'   '+mb_strlen($new_title));                    
+                }
+                
+                $k = 1022;
+                while(strlen($new_title)>1023){
+                  $new_t1itle = mb_substr($new_title,0,$k);  
+                  $k--;
+                }*/
                 
                 //$date_mod = date('Y-m-d H:i:s'); rec_Modified=?, 
                 

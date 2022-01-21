@@ -279,6 +279,10 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
         $mask = $masks[$rec['rec_RecTypeID']];
 
         $new_title = TitleMask::execute($mask, $rec['rec_RecTypeID'], 0, $rec_id, _ERR_REP_WARN);
+        if(mb_strlen($new_title)>1023){
+            $new_title = mb_substr($new_title,0,1023);  
+        } 
+        
         $processed_count++;
         
         $rec_title = trim($rec['rec_Title']);
