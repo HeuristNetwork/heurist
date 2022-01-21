@@ -1044,11 +1044,15 @@ function ShowReps() {
             
             if(codes[1]=='Relationship'){
                 insertGetRelatedRecords();
+                
+                return '{foreach $r.Relationships as $Relationship name='+loopname+'}'+_remark +'\n\n{/foreach}'+_remark;
+                
+            }else{
+                return '{foreach $'+varname+'s as $'+field+' name='+loopname+'}'+_remark
+                        +'\n\t'+getrecord+'\n'  //' {* '+_remark + '*}'
+                        +'\n{/foreach} '+_remark;
             }
             
-            return '{foreach $'+varname+'s as $'+field+' name='+loopname+'}'+_remark
-                    +'\n\t'+getrecord+'\n'  //' {* '+_remark + '*}'
-                    +'\n{/foreach} '+_remark;
     }
     //
     //
@@ -1361,9 +1365,10 @@ this_id       : "term"
                     var codes = _nodep.data.code;
                     if(!codes) codes = key;
                     
+                    var prefix = 'r';
+                    
                     if(true){
                         codes = codes.split(':');
-                        var lastcode = codes[codes.length-1];
                         
                         if(key.indexOf('rec_')===0){
                             _varname = key.replace('_','');
@@ -1371,8 +1376,17 @@ this_id       : "term"
                         
                         if(codes[0]=='Relationship'){ //_nodep.data.type == 'relationship'){
                             insertGetRelatedRecords();
-                            _varname = codes[0]+'.'+(_varname!=''?_varname:codes[1]);
+                            if(_varname!='') {
+                                if(inloop!=1) inloop = 2; //Relationship will be without prefix $r
+                            }else if(codes[1]){
+                                _varname = codes[1];
+                            }
+                            
+                            _varname = codes[0]+(_varname!=''?('.'+_varname):'');
                         }else{
+
+                            var offset = 3;
+                            var lastcode = codes[codes.length-1];
                                                 
                             if(_nodep.data.type == 'rectype'){
                                 rectypeId = _nodep.data.rtyID_local;
@@ -1380,55 +1394,95 @@ this_id       : "term"
                             }else if(key.indexOf('rec_')!==0)
                             {
                                 if(key=='term' || key=='code' || key=='conceptid' || key=='internalid'){ //terms
+                                    if( inloop!=1 ){
                                         _varname = ('.'+key);
-                                        lastcode = codes[codes.length-2];
+                                    }
+                                    offset = 4;
+                                    lastcode = codes[codes.length-2];
                                 }else if (lastcode.indexOf('lt')==0) {
                                     lastcode = lastcode.substring(2);
                                 }
                                 _varname = 'f'+lastcode+_varname;    
                             }
-                            
+/*
+0: "5"   rt
+1: "lt15"   -5
+2: "10"  rt
+3: "lt240"  -3
+4: "48"  rt
+5: "title"
+
+0: "5"
+1: "lt15"  -4
+2: "10"
+3: "263"
+4: "Term"
+*/                            
                             if(codes.length>3){ //second level (isif && codes.length==2) || 
                                 
-                                var parent_key = codes[1];
-                                if(parent_key.indexOf('lt')==0){ //resource
-                                    parent_key = 'f'+parent_key.substring(2);
-                                }else{
-                                    parent_key = 'f'+parent_key;
+                                var parent_key = '';
+                                var pkeys = [];
+                                while(codes.length-offset>0){
+                                    var pkey = codes[codes.length-offset];
+                                    if(pkey.indexOf('lt')==0){ //resource
+                                        pkey = 'f'+pkey.substring(2);
+                                    }else{
+                                        pkey = 'f'+pkey;
+                                    }
+                                    offset = offset + 2;
+                                    //prefix = prefix + '.' + pkey;
+                                    
+                                    pkeys.unshift(pkey);
+                                    
+                                    if(!parent_key) parent_key = pkey;
+                                    if(pkeys.length==2) break;
                                 }
+                                if(pkeys.length<2) pkeys.unshift(prefix);
+                                prefix = pkeys.join('.');
+                                //prefix = prefix + '.' + pkey;
+                                //prefix = parent_key; 
                                 
                                 if( inloop<2 ){
                                     
-                                    _getrec = '{$r.' + parent_key 
-                                                      + '=$heurist->getRecord($r.'+parent_key+')}\n';
+                                    //r.
+                                    _getrec = '{$' + parent_key + '=$heurist->getRecord($'+prefix+')}\n';
+                                    var _getrec2 = '{$' + parent_key + '=$heurist->getRecord($'+parent_key+')}\n';
                                     //find if above cursor code already has such line             
-                                    if(findAboveCursor(_getrec)) {
+                                    if(findAboveCursor(_getrec) || findAboveCursor(_getrec2)) {
                                             _getrec = '';
                                     }
+                                    
+                                    //_getrec = _getrec+''+_getrec2;
+                                    
+                                    
                                     _varname = parent_key +  (_varname?('.' + _varname):'');
                                 }
+                                prefix = '';
                             }
                         }
                     }else{
                         _varname = key;
                     }
                     
+                    // 0 - outside loop
+                    // 1 - insert loop operator
+                    // 2 - in loop
                     if( inloop<2 ){
-                        _varname = 'r' + (_varname?('.' + _varname):'');
+                        _varname = prefix + ((prefix && _varname)?'.':'') + _varname;
                     }
                     
                     _nodep.data.varname = _varname;
                     //_nodep.data.key = _varname;
                 }
                 
-            }
+            }//true
 
             
             var cursorIndent = 0;
             
             if( inloop==1 ){
                 
-                _getrec = '';
+                //** _getrec = '';
                 _text = _addMagicLoopOperator2(_nodep, _varname);
                 
             }else if(isif){
@@ -1620,7 +1674,7 @@ this_id       : "term"
             if(k>=0){
                 
                 var s = '\n{$r.Relationships = $heurist->getRelatedRecords($r)}\n'+
-                '{$r.Relationship = (count($r.Relationships)>0)?$r.Relationships[0]:array()}\n';
+                '{$Relationship = (count($r.Relationships)>0)?$r.Relationships[0]:array()}\n';
                 
                 codeEditor.replaceRange(s, {line:l_no, ch:k+24}, {line:l_no, ch:k+24});
                 
