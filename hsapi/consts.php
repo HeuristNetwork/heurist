@@ -414,4 +414,28 @@ function detectLargeInputs($name, $array)
       error_log(print_r($_SERVER, true));
   }
 }
+
+function boot_error_handler($errno, $errstr, $errfile, $errline){
+    switch($errno){
+        case E_WARNING:
+        //case E_PARSE:
+        //case E_NOTICE:
+            if(strpos($errstr,'Input variables')>0){
+        
+                $message = "$errstr $errfile:$errline";
+                error_log('Large INPUT: '.$message);
+                error_log(print_r(array_slice($_REQUEST, 0, 100),true));
+                error_log(print_r($_SERVER, true));
+            /*
+            if(class_exists('Log')){
+                Log::write($message, 'warning', true);
+            }
+            if(ENV != ENV_PROD){
+                echo $message;
+            }
+            */
+            }
+            break;
+    }
+}
 ?>

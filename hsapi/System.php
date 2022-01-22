@@ -32,6 +32,8 @@ require_once (dirname(__FILE__).'/structure/dbsImport.php');
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+set_error_handler('boot_error_handler');    
+
 /**
 *  Class that contains mysqli (dbconnection), current user and system settings
 *
