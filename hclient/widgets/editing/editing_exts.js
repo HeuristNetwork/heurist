@@ -437,14 +437,17 @@ function browseRecords(_editing_input, $input){
 
     var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
     var pointerMode = that.f('rst_PointerMode');
+    var is_dropdown = (pointerMode && pointerMode.indexOf('dropdown')===0);
     
     var s_action = '';
     if(pointerMode=='addonly'){
         s_action = 'create';
-    }else if(pointerMode=='browseonly'){
+    }else if(pointerMode=='browseonly' || pointerMode=='dropdown'){
         s_action = 'select';
+        pointerMode = 'browseonly';
     }else{
         s_action = 'select or create';
+        pointerMode = 'addorbrowse';
     }
 
     var popup_options = {
@@ -556,7 +559,7 @@ function browseRecords(_editing_input, $input){
     }
 
     
-    if(s_action=='select' && !isparententity && !(popup_options.parententity>0)){
+    if(is_dropdown && !isparententity && !(popup_options.parententity>0)){
         
         // select target record from cached drop down
         //
@@ -669,17 +672,17 @@ function browseRecords(_editing_input, $input){
                     var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/magglass_12x11.gif',
                         filter_icon = window.hWin.HAPI4.baseURL+'hclient/assets/filter_icon_black18.png';
                     var opt = window.hWin.HEURIST4.ui.addoption(that.selObj, 'select', 
-                    '<div style="width:300px">'
+                    '<div style="width:300px;padding:15px 0px">'
                     +'<span style="padding:0px 4px 0 10px;vertical-align:sub">'
                     +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-                    + '" class="rt-icon rt_icon2" style="background-image: url(&quot;'+filter_icon+ '&quot;);"/></span>'
-                    +'<input class="input_menu_filter" size="10" style="outline: none;background:none"/>'
+                    + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+filter_icon+ '&quot;);"/></span>'
+                    +'<input class="input_menu_filter" size="10" style="outline: none;background:none;border: 1px solid lightgray;"/>'
 +'<span class="smallbutton ui-icon ui-icon-circlesmall-close" tabindex="-1" title="Clear entered value" '
 +'style="position:relative; cursor: pointer; outline: none; box-shadow: none; border-color: transparent;"></span>'                   
                     +'<span style="padding:0px 4px 0 20px;vertical-align:sub">'
                     +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-                    + '" class="rt-icon rt_icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
-                    + window.hWin.HR('Search') + '/' +  window.hWin.HR('Add') + '</div>');
+                    + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
+                    + window.hWin.HR('Search') + (s_action=='select'?'':('/' +  window.hWin.HR('Add'))) + '</div>');
                     
                     //$(opt).attr('icon-url', search_icon);
                     
@@ -712,7 +715,12 @@ function browseRecords(_editing_input, $input){
                                     mnu.find('li').css('display','list-item');
                                 }});
                                 //set filter
-                                that._on(ele, {keyup:function(event){
+                                that._on(ele, {
+                                    click:function(event){
+                                        window.hWin.HEURIST4.util.stopEvent(event);
+                                        return false;                       
+                                    },
+                                    keyup:function(event){
                                     var val = $(event.target).val().toLowerCase();
                                     window.hWin.HEURIST4.util.stopEvent(event);                       
                                     var mnu = that.selObj.hSelect('menuWidget');
@@ -742,10 +750,9 @@ function browseRecords(_editing_input, $input){
                     
                 }else{
                     that._off($(that.selObj), 'change');    
-                    that.selObj.val('');   
                 }
                 
-
+                that.selObj.val('');
                 that.selObj.hSelect('open');
                 that.selObj.hSelect('widget').hide();
                 that.selObj.hSelect('menuWidget')

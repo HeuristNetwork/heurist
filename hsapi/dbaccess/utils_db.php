@@ -1187,50 +1187,63 @@ error_log('UPDATED '.$session_id.'  '.$value);
             
             $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');
 
-            if($dbVerSub==3 && $dbVerSubSub<1){
+            if($dbVerSub==3){
             
-            if(!hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
-                //alter table
-                $query = "ALTER TABLE `defRecStructure` ADD `rst_SemanticReferenceURL` VARCHAR( 250 ) NULL "
-                ." COMMENT 'The URI to a semantic definition or web page describing this field used within this record type' "
-                .' AFTER `rst_LocallyModified`';
-                $res = $mysqli->query($query);
-                if(!$res){
-                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_SemanticReferenceURL', $mysqli->error);
-                    return false;
-                }
-            }  
-
-            if(!hasColumn($mysqli, 'defRecStructure', 'rst_TermsAsButtons')){
-                //alter table
-                $query = "ALTER TABLE `defRecStructure` ADD `rst_TermsAsButtons` TinyInt( 1 ) DEFAULT '0' "
-                ." COMMENT 'If 1, term list fields are represented as buttons (if single value) or checkboxes (if repeat values)' "
-                .' AFTER `rst_SemanticReferenceURL`';
-                $res = $mysqli->query($query);
-                if(!$res){
-                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_TermsAsButtons', $mysqli->error);
-                    return false;
-                }
-            }    
+            if($dbVerSubSub<1){
             
-            if(!hasColumn($mysqli, 'defTerms', 'trm_Label', null, 'varchar(250)')){
+                if(!hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
+                    //alter table
+                    $query = "ALTER TABLE `defRecStructure` ADD `rst_SemanticReferenceURL` VARCHAR( 250 ) NULL "
+                    ." COMMENT 'The URI to a semantic definition or web page describing this field used within this record type' "
+                    .' AFTER `rst_LocallyModified`';
+                    $res = $mysqli->query($query);
+                    if(!$res){
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_SemanticReferenceURL', $mysqli->error);
+                        return false;
+                    }
+                }  
 
-                $query = "ALTER TABLE `defTerms` "
-                ."CHANGE COLUMN `trm_Label` `trm_Label` VARCHAR(250) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank' ,"
-                ."CHANGE COLUMN `trm_NameInOriginatingDB` `trm_NameInOriginatingDB` VARCHAR(250) NULL DEFAULT NULL COMMENT 'Name (label) for this term in originating database'" ;
+                if(!hasColumn($mysqli, 'defRecStructure', 'rst_TermsAsButtons')){
+                    //alter table
+                    $query = "ALTER TABLE `defRecStructure` ADD `rst_TermsAsButtons` TinyInt( 1 ) DEFAULT '0' "
+                    ." COMMENT 'If 1, term list fields are represented as buttons (if single value) or checkboxes (if repeat values)' "
+                    .' AFTER `rst_SemanticReferenceURL`';
+                    $res = $mysqli->query($query);
+                    if(!$res){
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_TermsAsButtons', $mysqli->error);
+                        return false;
+                    }
+                }    
+                
+                if(!hasColumn($mysqli, 'defTerms', 'trm_Label', null, 'varchar(250)')){
 
-                $res = $mysqli->query($query);
-                if(!$res){
-                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to change trm_Label and trm_NameInOriginatingDB', $mysqli->error);
-                    return false;
-                }
-            }        
+                    $query = "ALTER TABLE `defTerms` "
+                    ."CHANGE COLUMN `trm_Label` `trm_Label` VARCHAR(250) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank' ,"
+                    ."CHANGE COLUMN `trm_NameInOriginatingDB` `trm_NameInOriginatingDB` VARCHAR(250) NULL DEFAULT NULL COMMENT 'Name (label) for this term in originating database'" ;
+
+                    $res = $mysqli->query($query);
+                    if(!$res){
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to change trm_Label and trm_NameInOriginatingDB', $mysqli->error);
+                        return false;
+                    }
+                }        
+            }
+            if($dbVerSubSub<2){
             
+                    $query = "ALTER TABLE `defRecStructure` "
+                    ."CHANGE COLUMN `rst_PointerMode` `rst_PointerMode` enum('addorbrowse','addonly','browseonly','dropdown','dropdown_add') DEFAULT 'addorbrowse' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing'";
+                    $res = $mysqli->query($query);
+                    if(!$res){
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to change rst_PointerMode', $mysqli->error);
+                        return false;
+                    }
+                
+            }
             } //for 1.3.0
             
             //update version
-            if($dbVerSub<3 || ($dbVerSub==3 && $dbVerSubSub<1)){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=1 WHERE 1');
+            if($dbVerSub<3 || ($dbVerSub==3 && $dbVerSubSub<2)){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=2 WHERE 1');
             }
         }
     }  
