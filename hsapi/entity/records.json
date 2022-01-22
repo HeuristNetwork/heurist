@@ -10,7 +10,7 @@
         
         "entityTitle": "Record",
         "entityTitlePlural": "Records",
-        "empty_remark": "No record types match the search criteria",
+        "empty_remark": "No records match the search criteria",
 
         "sel_actions": [{"key":"edit", "title":"Edit Record"},
                         {"key":"delete", "title":"Remove Record"}],

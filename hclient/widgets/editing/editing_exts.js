@@ -666,15 +666,20 @@ function browseRecords(_editing_input, $input){
                     $(that.selObj).appendTo($inputdiv);
                     $(that.selObj).hide();
                     
-                    var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/magglass_12x11.gif';
+                    var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/magglass_12x11.gif',
+                        filter_icon = window.hWin.HAPI4.baseURL+'hclient/assets/filter_icon_black18.png';
                     var opt = window.hWin.HEURIST4.ui.addoption(that.selObj, 'select', 
-                    '<div style="width:300px"><input class="input_menu_filter" size="10"/>'
+                    '<div style="width:300px">'
+                    +'<span style="padding:0px 4px 0 10px;vertical-align:sub">'
+                    +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+                    + '" class="rt-icon rt_icon2" style="background-image: url(&quot;'+filter_icon+ '&quot;);"/></span>'
+                    +'<input class="input_menu_filter" size="10" style="outline: none;background:none"/>'
 +'<span class="smallbutton ui-icon ui-icon-circlesmall-close" tabindex="-1" title="Clear entered value" '
 +'style="position:relative; cursor: pointer; outline: none; box-shadow: none; border-color: transparent;"></span>'                   
                     +'<span style="padding:0px 4px 0 20px;vertical-align:sub">'
                     +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-                    + '" class="rt-icon" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
-                    + window.hWin.HR('Search') + '</div>');
+                    + '" class="rt-icon rt_icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
+                    + window.hWin.HR('Search') + '/' +  window.hWin.HR('Add') + '</div>');
                     
                     //$(opt).attr('icon-url', search_icon);
                     
@@ -694,7 +699,8 @@ function browseRecords(_editing_input, $input){
                     that.selObj = window.hWin.HEURIST4.ui.initHSelect(that.selObj, false,null,
                         function(){
                             var ele = that.selObj.hSelect('menuWidget');                                    
-                            ele.find('.rt-icon').css({width:'12px',height:'12px'});
+                            ele.find('.rt-icon').css({width:'12px',height:'12px','margin-right':'10px'});
+                            ele.find('.rt-icon2').css({'margin-right':'0px'});
                             var inpt = ele.find('input.input_menu_filter');
                             if(!inpt.attr('data-inited')){
                                 //reset filter                                
@@ -725,8 +731,12 @@ function browseRecords(_editing_input, $input){
                                     
                                 }});
                                 inpt.attr('data-inited',1);
+                                
+                                inpt.parents('.ui-menu-item-wrapper').removeClass('ui-menu-item-wrapper ui-state-active');
                             }
-                            inpt.focus();
+                            inpt.focus(); //#e0dfe0
+                            
+                            //.css('background','red !important');
                         }
                     );
                     
