@@ -1231,7 +1231,7 @@ error_log('UPDATED '.$session_id.'  '.$value);
             if($dbVerSubSub<2){
             
                     $query = "ALTER TABLE `defRecStructure` "
-                    ."CHANGE COLUMN `rst_PointerMode` `rst_PointerMode` enum('addorbrowse','addonly','browseonly','dropdown','dropdown_add') DEFAULT 'addorbrowse' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing'";
+                    ."CHANGE COLUMN `rst_PointerMode` `rst_PointerMode` enum('dropdown_add','dropdown','addorbrowse','addonly','browseonly') DEFAULT 'dropdown_add' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing'";
                     $res = $mysqli->query($query);
                     if(!$res){
                         $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to change rst_PointerMode', $mysqli->error);

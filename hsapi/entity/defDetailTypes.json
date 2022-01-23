@@ -133,6 +133,8 @@
                         "rst_DisplayHelpText": "", 
                         "rst_DefaultValue":"addorbrowse",
                         "rst_FieldConfig":[
+                            {"key":"dropdown_add", "title":"Dropdown (add OK, list max 1000)"},
+                            {"key":"dropdown", "title":"Dropdown (no add, list max 1000)"},
                             {"key":"addorbrowse", "title":"add or browse"},
                             {"key":"addonly", "title":"add only"},
                             {"key":"browseonly", "title":"browse only"}]
