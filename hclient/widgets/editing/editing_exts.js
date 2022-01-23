@@ -433,10 +433,18 @@ function browseRecords(_editing_input, $input){
     
     var that = _editing_input;
     
+    
     var $inputdiv = $input.parent(); //div.input-div
 
+    if ($inputdiv.find('.sel_link2 > .ui-button-icon').hasClass('rotate')) return;
+    
     var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
     var pointerMode = that.f('rst_PointerMode');
+    
+    if(isparententity && pointerMode!='addonly'){
+        pointerMode = 'addorbrowse';
+    }
+    
     var is_dropdown = (pointerMode && pointerMode.indexOf('dropdown')===0);
     
     var s_action = '';
@@ -586,6 +594,9 @@ function browseRecords(_editing_input, $input){
                 
             }else if(!window.hWin.HEURIST4.browseRecordCache[key]){
             
+                    $inputdiv.find('.sel_link2 > .ui-button-icon').removeClass('ui-icon-triangle-1-e');
+                    $inputdiv.find('.sel_link2 > .ui-button-icon').addClass('ui-icon-loading-status-circle rotate');
+                
                     var rectype_set = that.f('rst_PtrFilteredIDs');
                     var qobj = (rectype_set)?[{t:rectype_set}]:null;
                     var pointer_filter = that.f('rst_PointerBrowseFilter');
@@ -613,6 +624,10 @@ function browseRecords(_editing_input, $input){
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
                             function __assignCache(value){
+                                
+                                   $inputdiv.find('.sel_link2 > .ui-button-icon').addClass('ui-icon-triangle-1-e');
+                                   $inputdiv.find('.sel_link2 > .ui-button-icon').removeClass('ui-icon-loading-status-circle rotate');
+                                
                                    window.hWin.HEURIST4.browseRecordCache[key] = value;
                                    if(!rectype_set) rectype_set = 'any';
                                    rectype_set = rectype_set.split(',');
@@ -696,7 +711,8 @@ function browseRecords(_editing_input, $input){
                     +'<span style="padding:0px 4px 0 20px;vertical-align:sub">'
                     +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
                     + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
-                    + window.hWin.HR('Search') + (s_action=='select'?'':('/' +  window.hWin.HR('Add'))) + '</div>');
+                    + window.hWin.HR('Search') + (s_action=='select'?'':('/' +  window.hWin.HR('Add'))) 
+                    + '<div class="not-found" style="padding:10px;color:darkgreen;display:none;">No records match the filter</div></div>');
                     
                     //$(opt).attr('icon-url', search_icon);
                     
@@ -743,12 +759,14 @@ function browseRecords(_editing_input, $input){
                                     }else{
                                         $.each(mnu.find('.ui-menu-item-wrapper'),
                                             function(i,item){
-                                                if(i==0 || $(item).text().toLowerCase().indexOf(val)>=0){
+                                                if($(item).text().toLowerCase().indexOf(val)>=0){
                                                     $(item).parent().css('display','list-item');
                                                 }else{
                                                     $(item).parent().css('display','none');
                                                 }
                                             });    
+                                        mnu.find('div.not-found').css('display',
+                                            mnu.find('.ui-menu-item-wrapper:visible').length==0?'block':'none');
                                     }                                    
                                     
                                 }});

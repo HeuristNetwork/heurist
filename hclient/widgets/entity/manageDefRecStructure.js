@@ -943,7 +943,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                                 rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')[0] 
                             };
                         }
-
+                        
                         var dty_IDs = res.selection;
 
                         that.addMultiNewFields(dty_IDs, after_dty_ID, rst);
@@ -1063,7 +1063,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 'request_id' : window.hWin.HEURIST4.util.random(),
                 'details'    : 'list', //'structure',
                 'rst_RecTypeID': that.options.rty_ID,
-                'rst_DetailTypeID':dty_ID
+                'rst_DetailTypeID': dty_ID
                 };
             
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
@@ -1423,6 +1423,11 @@ console.log('No active tree node!!!!')
                     },200); //without timeout preview form scrolls to kept position
                     
                 }
+                
+                var v = that._editing.getValue('rst_CreateChildIfRecPtr')[0];
+                //$Db.rst(rty_ID, dty_ID, 'rst_CreateChildIfRecPtr');
+                this._rst_PointerMode_Enable(v!=1);
+                
                 this.editForm.show();
                 this._editing.setFocus();
                 
@@ -1851,7 +1856,7 @@ console.log('No active tree node!!!!')
         }
         var ele = this._editing.getFieldByName('rst_DefaultValue_resource');
         ele.editing_input('fset','rst_PtrFilteredIDs', ptrIds);
-        ele.editing_input('fset','rst_PointerMode', 'browseonly');
+        ele.editing_input('fset','rst_PointerMode', 'dropdown_add');
         this._editing.setFieldValueByName('rst_DefaultValue_resource', defval, false); //recreates
         
     },
@@ -2334,6 +2339,27 @@ console.log('No active tree node!!!!')
     },
     
     //
+    // enable or disable dropdown entries for rst_PointerMode
+    //
+    _rst_PointerMode_Enable: function(is_enable){
+        
+        var pointer_mode = this._editing.getFieldByName('rst_PointerMode');
+        var inpt = pointer_mode.editing_input('getInputs');
+        inpt = inpt[0];
+        
+        if(is_enable){
+            inpt.find('option[value^="dropdown"]').removeProp('disabled');
+        }else{
+            inpt.find('option[value^="dropdown"]').prop('disabled','disabled');
+            inpt.val('addorbrowse');
+        }
+        inpt.hSelect('refresh');
+      
+        
+    },
+    
+    
+    //
     //
     //
     onCreateChildIfRecPtr: function ( ed_input ){
@@ -2343,9 +2369,9 @@ console.log('No active tree node!!!!')
         
         var $dlg;
         var value = ed_input.getValues()[0];   //!$(ed_input).is(':checked')
+        var that = this;
  
         if(value==0){ 
-            var that = this;
             //warning on cancel
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                 '<h3>Turning off child-record function</h3><br>'
@@ -2353,7 +2379,8 @@ console.log('No active tree node!!!!')
                 +'<div>If you do accidentally turn this function off, it IS possible to turn it back on again (preferably immediately …) and recover most of the information/functionality.</div><br>'
                 +'<div><label><input type="checkbox">Yes, I want to turn child-record function OFF for this field</label></div>',
                 {'Proceed':function(){ 
-                    ed_input.setValue(0, false); 
+                    ed_input.setValue(0, false);
+                    that._rst_PointerMode_Enable(true); 
                     that.onEditFormChange();
                     $dlg.dialog('close'); },
                 'Cancel':function(){ ed_input.setValue(1, true); $dlg.dialog('close'); } },
@@ -2432,7 +2459,8 @@ console.log('No active tree node!!!!')
                             window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
 
                             $Db.rst(rty_ID, dty_ID, 'rst_CreateChildIfRecPtr', 1);
-
+                            
+                            that._rst_PointerMode_Enable(false);
                         }else{
                             ed_input.setValue(0, true);
                             //$(ed_input).prop('checked', false);
@@ -2441,7 +2469,8 @@ console.log('No active tree node!!!!')
                     });
                 },
                 'Cancel':function(){ ed_input.setValue(0, false); $dlg.dialog('close'); } },
-                {title:'Warning'});    
+                {title:'Warning'},
+                {default_palette_class:this.options.default_palette_class});    
         }
 
         //enable proceed button on checkbox mark    

@@ -1605,9 +1605,30 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                     // Setup default value
                     resource_default.editing_input('fset','rst_PtrFilteredIDs', fields['dty_PtrTargetRectypeIDs']);
-                    resource_default.editing_input('fset','rst_PointerMode', 'browseonly');
+                    resource_default.editing_input('fset','rst_PointerMode', 'dropdown_add');
                     this._editing.setFieldValueByName('rst_DefaultValue_resource', default_val, false);
 
+
+                    // enable/disable rst_PointerMode depend on rst_CreateChildIfRecPtr                   
+                    function __rst_PointerMode_Enable(is_enable){
+                        
+                        var inpt = pointer_mode.editing_input('getInputs');
+                        inpt = inpt[0];
+                        
+                        if(is_enable){
+                            inpt.find('option[value^="dropdown"]').removeProp('disabled');
+                        }else{
+                            inpt.find('option[value^="dropdown"]').prop('disabled','disabled');
+                            inpt.val('addorbrowse');
+                        }
+                        inpt.hSelect('refresh');
+                    }
+                    
+                    child_rec.editing_input('option','change', function(){
+                        var value = this.getValues()[0];
+                        __rst_PointerMode_Enable(value!=1);
+                    }); 
+                    
                     // Setup help button
                     var help_button = $('<span style="padding-left:40px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"/>')
                             .appendTo(child_rec.find('.input-div'));
