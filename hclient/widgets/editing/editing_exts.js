@@ -580,7 +580,11 @@ function browseRecords(_editing_input, $input){
                 window.hWin.HEURIST4.browseRecordTargets = {};
             }
             
-            if(!window.hWin.HEURIST4.browseRecordCache[key]){
+            if(window.hWin.HEURIST4.browseRecordCache[key]=='zero' || window.hWin.HEURIST4.browseRecordCache[key]>1000){
+            
+                __show_select_dialog();
+                
+            }else if(!window.hWin.HEURIST4.browseRecordCache[key]){
             
                     var rectype_set = that.f('rst_PtrFilteredIDs');
                     var qobj = (rectype_set)?[{t:rectype_set}]:null;
@@ -600,61 +604,71 @@ function browseRecords(_editing_input, $input){
                     
                     qobj.push({"sortby":"t"}); //sort by title
                     
-                    /*var request = { 
-                        //q: qstr, 
-                        q: qobj,
-                        w: 'a',
-                        limit: limit,
-                        needall: needall,
-                        detail: 'ids',
-                        id: window.hWin.HEURIST4.util.random()}
-                    window.hWin.HAPI4.RecordMgr.search(request, function( response ){
-                    }*/
-                        
-                        
                     var request = {
                         q: qobj,
-                        restapi: 1,
-                        columns:['rec_ID', 'rec_RecTypeID', 'rec_Title'],
-                        zip: 1,
-                        format:'json'};
-                    
-                    that.is_disabled = true;
-                    
-                    if(!that.selObj){
-                        that._off($(that.selObj), 'change');   
-                        $(that.selObj).remove();   
-                        that.selObj = null;
-                    }
-                        
-                    window.hWin.HAPI4.RecordMgr.search_new(request,
-                    function(response){
-                       that.is_disabled = false;
-                       if(window.hWin.HEURIST4.util.isJSON(response)) {
-                           if(response['records'] && response['records'].length>0){
-                               //keep in cache
-                               window.hWin.HEURIST4.browseRecordCache[key] = response['records'];
-                               if(!rectype_set) rectype_set = 'any';
-                               rectype_set = rectype_set.split(',');
-                               $.each(rectype_set, function(i,rty_id){
-                                   var rty_id = ''+rty_id;
-                                   if(!window.hWin.HEURIST4.browseRecordTargets[rty_id]){
-                                       window.hWin.HEURIST4.browseRecordTargets[rty_id] = [];
-                                   }
-                                   window.hWin.HEURIST4.browseRecordTargets[rty_id].push(key);
-                               });
-                               
-                               __show_select_dropdown();
+                        w: 'a',
+                        source:'_browseRecords',
+                        detail: 'count'};
+                    window.hWin.HAPI4.RecordMgr.search(request, function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            
+                            function __assignCache(value){
+                                   window.hWin.HEURIST4.browseRecordCache[key] = value;
+                                   if(!rectype_set) rectype_set = 'any';
+                                   rectype_set = rectype_set.split(',');
+                                   $.each(rectype_set, function(i,rty_id){
+                                       var rty_id = ''+rty_id;
+                                       if(!window.hWin.HEURIST4.browseRecordTargets[rty_id]){
+                                           window.hWin.HEURIST4.browseRecordTargets[rty_id] = [];
+                                       }
+                                       window.hWin.HEURIST4.browseRecordTargets[rty_id].push(key);
+                                   });
+                            }
+                            
+                            if(response.data.count>1000){
+                                __assignCache(response.data.count);
+                                __show_select_dialog();
+                            }else{
+                                
+                                var request = {
+                                    q: qobj,
+                                    restapi: 1,
+                                    columns:['rec_ID', 'rec_RecTypeID', 'rec_Title'],
+                                    zip: 1,
+                                    format:'json'};
+                                
+                                that.is_disabled = true;
+                                
+                                if(!that.selObj){
+                                    that._off($(that.selObj), 'change');   
+                                    $(that.selObj).remove();   
+                                    that.selObj = null;
+                                }
+                                    
+                                window.hWin.HAPI4.RecordMgr.search_new(request,
+                                function(response){
+                                   that.is_disabled = false;
+                                   if(window.hWin.HEURIST4.util.isJSON(response)) {
+                                       if(response['records'] && response['records'].length>0){
+                                           //keep in cache
+                                           __assignCache(response['records']);
+                                           __show_select_dropdown();
 
-                           }else{
-                               //nothing found
-                               window.hWin.HEURIST4.msg.showMsgFlash('No records for Browse filter');
-                               __show_select_dialog();
-                           }
-                       }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);       
-                       }
+                                       }else{
+                                           //nothing found
+                                           __assignCache('zero');
+                                           window.hWin.HEURIST4.msg.showMsgFlash('No records for Browse filter');
+                                           __show_select_dialog();
+                                       }
+                                   }else{
+                                        window.hWin.HEURIST4.msg.showMsgErr(response);       
+                                   }
+                                });
+                                
+                            }
+                        }
                     });
+                        
                     return;
             }else{
                 

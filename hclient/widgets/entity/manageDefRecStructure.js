@@ -2030,6 +2030,9 @@ console.log('No active tree node!!!!')
             if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
                 fields['rst_DefaultValue'] = fields['rst_TermPreview'];
             }else if(dt_type=='resource'){
+                //reset cache
+                window.hWin.HEURIST4.browseRecordCache = {};
+                window.hWin.HEURIST4.browseRecordTargets = {};
                 fields['rst_DefaultValue'] = fields['rst_DefaultValue_resource'];
             }else if(dt_type=='separator'){
                 fields['rst_DefaultValue'] = fields['rst_SeparatorType'];

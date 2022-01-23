@@ -225,8 +225,8 @@
                             {"key":"addorbrowse", "title":"add or browse"},
                             {"key":"addonly", "title":"add only"},
                             {"key":"browseonly", "title":"browse only"},
-                            {"key":"dropdown", "title":"Dropdown (no add to list)"},
-                            {"key":"dropdown_add", "title":"Dropdown (add to list OK)"}]
+                            {"key":"dropdown", "title":"Dropdown (no add, list max 1000)"},
+                            {"key":"dropdown_add", "title":"Dropdown (add OK, list max 1000)"}]
                     }
                 },
                 {
