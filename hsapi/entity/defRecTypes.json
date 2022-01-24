@@ -34,6 +34,7 @@
                 },
                 {
                     "dtID": "rty_Name",
+                    "titleField": true,
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Size":63,

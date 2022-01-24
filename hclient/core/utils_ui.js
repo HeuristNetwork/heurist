@@ -1169,6 +1169,8 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
                         wmenu_div.css('left', wbtn.position().left);    
                     }
                     
+                    wmenu_div.css('zIndex',69999);
+                    
                     if($.isFunction(onOpenMenu)){
                         onOpenMenu.call(this);
                     }
@@ -1186,8 +1188,9 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
             if(dminwidth=='0px' || window.hWin.HEURIST4.util.isempty(dminwidth)) dminwidth = '10em';
 
             var menuwidget = menu.hSelect( "menuWidget" );
-            menuwidget.css( {'background':'#F4F2F4','zIndex':9999999 }); //'padding':0,
+            menuwidget.css( {'background':'#F4F2F4'}); //'padding':0,
             menuwidget.addClass('heurist-selectmenu overflow').css({'max-height':'280px','font-size':'12px'});
+            menuwidget.parent('div.ui-selectmenu-menu').css('zIndex',69999);
             
             //menuwidget.find()
             

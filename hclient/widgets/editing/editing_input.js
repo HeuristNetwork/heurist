@@ -1677,138 +1677,8 @@ $.widget( "heurist.editing_input", {
                         .addClass('sel_link2').css({'max-width':'300px'}) //, 'background': 'lightgray'})
                         .appendTo( $inputdiv );
             
-//console.log(that.options.dtID+'  '+that.options.rectypeID);
             var __show_select_dialog = browseRecords(this, $input); //see editing_exts
             
-/*
-            var s_action = '';
-            var pointerMode = that.f('rst_PointerMode');
-            if(pointerMode=='addonly'){
-                s_action = 'create';
-            }else if(pointerMode=='browseonly'){
-                s_action = 'select';
-            }else{
-                s_action = 'select or create';
-            }
-
-            var popup_options = {
-                            select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
-                            select_return_mode: 'recordset',
-                            edit_mode: 'popup',
-                            selectOnSave: true, //it means that select popup will be closed after add/edit is completed
-                            title: window.hWin.HR((isparententity)
-                                ?('CHILD record pointer: '+s_action+' a linked child record')
-                                :('Record pointer: '+s_action+' a linked record')),
-                            rectype_set: that.f('rst_PtrFilteredIDs'),
-                            pointer_mode: pointerMode,
-                            pointer_filter: that.f('rst_PointerBrowseFilter'),  //initial filter
-                            pointer_field_id: (isparententity)?0:that.options.dtID,
-                            pointer_source_rectype:  (isparententity)?0:that.options.rectypeID,
-                            parententity: (isparententity)?that.options.recID:0,
-                            
-                            onselect:function(event, data){
-                                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                        var recordset = data.selection;
-                                        var record = recordset.getFirstRecord();
-                                        
-                                        var rec_Title = recordset.fld(record,'rec_Title');
-                                        if(window.hWin.HEURIST4.util.isempty(rec_Title)){
-                                            // no proper selection 
-                                            // consider that record was not saved - it returns FlagTemporary=1 
-                                            return;
-                                        }
-                                       
-                                        var targetID = recordset.fld(record,'rec_ID');
-                                        var rec_Title = recordset.fld(record,'rec_Title');
-                                        var rec_RecType = recordset.fld(record,'rec_RecTypeID');
-                                        that.newvalues[$input.attr('id')] = targetID;
-                                        
-                                        //window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
-                                        
-                                        //save last 25 selected records
-                                        var now_selected = data.selection.getIds(25);
-                                        window.hWin.HAPI4.save_pref('recent_Records', now_selected, 25);      
-                                        
-                                        
-                                        $input.empty();
-                                        var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($input, 
-                                            {rec_ID: targetID, 
-                                             rec_Title: rec_Title, 
-                                             rec_RecTypeID: rec_RecType,
-                                             rec_IsChildRecord:isparententity
-                                            }, __show_select_dialog);
-                                        //ele.appendTo($inputdiv);
-                                        that.onChange();
-                                        
-                                        if( $inputdiv.find('.link-div').length>0 ){ //hide this button if there are links
-                                            $input.show();
-                                            $inputdiv.find('.sel_link2').hide(); 
-                                        }else{
-                                            $input.hide();
-                                            $inputdiv.find('.sel_link2').show();
-                                        }
-                                        
-                                     }
-                            }
-            };
-
-            // event is false for confirmation of select mode for parententity
-            // 
-            var __show_select_dialog = function(event){
-                
-                    if(that.is_disabled) return;
-                
-                    if(event!==false){
-                
-                        if(event) event.preventDefault();
-             
-                        if(popup_options.parententity>0){
-                            
-                            if(that.newvalues[$input.attr('id')]>0){
-                                
-                                window.hWin.HEURIST4.msg.showMsgFlash('Points to a child record; value cannot be changed (delete it or edit the child record itself)', 2500);
-                                return;
-                            }
-                            //__show_select_dialog(false); 
-                        }
-                    }
-                    
-                    var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+that.configMode.entity, 
-                        {width: null,  //null triggers default width within particular widget
-                        height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
-        
-                    popup_options.width = Math.max(usrPreferences.width,710);
-                    popup_options.height = Math.max(usrPreferences.height,600);
-                    
-                    if(pointerMode!='browseonly' && that.options.editing && that.configMode.entity=='records'){
-                        
-                        var ele = that.options.editing.getFieldByName('rec_OwnerUGrpID');
-                        if(ele){
-                            var vals = ele.editing_input('getValues');
-                            ele = that.options.editing.getFieldByName('rec_NonOwnerVisibility');
-                            var vals2 = ele.editing_input('getValues');
-                            popup_options.new_record_params = {};
-                            popup_options.new_record_params['ro'] = vals[0];
-                            popup_options.new_record_params['rv'] = vals2[0];
-                        }
-                    }
-                    
-                    //init related/liked records selection dialog - selectRecord
-                    window.hWin.HEURIST4.ui.showEntityDialog(that.configMode.entity, popup_options);
-            }
-
-            this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
-*/
-            /* IJ asks to disable this feature 
-            if( this.inputs.length>0 || this.element.find('.link-div').length>0){ //hide this button if there are links
-                $inputdiv.find('.sel_link2').hide();
-            }else{
-                $inputdiv.find('.sel_link2').show();
-            }
-            
-            //open dialog for second and further            
-            if(this.inputs.length>0 && !(value>0))  __show_select_dialog();
-            */
             that._findAndAssignTitle($input, value, __show_select_dialog);
             
             this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
@@ -1818,7 +1688,6 @@ $.widget( "heurist.editing_input", {
         } 
         
         else if(this.detailType=='resource' && this.configMode.entity=='DefRecTypes'){ //-----------
-        //@TODO remove as soon as defRecType entity manager is completed
         
             __show_select_dialog = function(event){
         

@@ -2353,6 +2353,7 @@ console.log('No active tree node!!!!')
             inpt.find('option[value^="dropdown"]').prop('disabled','disabled');
             inpt.val('addorbrowse');
         }
+        inpt.parent().addClass('selectmenu-parent');
         inpt.hSelect('refresh');
       
         
