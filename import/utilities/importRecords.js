@@ -22,9 +22,9 @@
 /*
 _importDefinitions - downloads and import defintions from other database
 
-                                               ImportHeurist::getDefintions 
-hapi.doImportAction -> importController.php -> ImportHeurist::importDefintions
-                                               ImportHeurist::importRecords
+                                               ImportHeurist::getDefintions - reads import file and returns rty to be imported
+hapi.doImportAction -> importController.php -> ImportHeurist::importDefintions - import/sync definitions
+                                               ImportHeurist::importRecords - import records
 
 */
 
@@ -149,6 +149,7 @@ function hImportRecords(_max_upload_size) {
                                 
                                     _hideProgress(0);
                                     if(response.status == window.hWin.ResponseStatus.OK){
+console.log(response);                                        
                                         //render list of rectypes to be imported
                                         source_db = response.data.database;
                                         var source_db_name = response.data.database_name;

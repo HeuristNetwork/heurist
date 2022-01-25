@@ -408,6 +408,10 @@ public static function importDefintions($filename, $session_id){
         
         $imp_rectypes = $data['heurist']['database']['rectypes'];
         
+        //find orphaned detail types
+        $imp_detailtypes = $data['heurist']['database']['detailtypes'];
+        
+        
         ini_set('max_execution_time', 0);
         $importDef = new DbsImport( self::$system );
 
@@ -430,7 +434,8 @@ public static function importDefintions($filename, $session_id){
                     'defType'=>'rectype', 
                     'databaseID'=>@$data['heurist']['database']['id'], 
                     'definitionID'=>array_keys($imp_rectypes),
-                    'rectypes'=>$imp_rectypes )))
+                    'rectypes'=>$imp_rectypes,
+                    'fieldtypes'=>$imp_detailtypes )))
         {
             $res = $importDef->doImport();
         }

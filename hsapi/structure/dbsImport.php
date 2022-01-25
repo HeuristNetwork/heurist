@@ -343,8 +343,6 @@ $time_debug = microtime(true);
                         $ccode = $def_dts[$ftId]['commonFields'][$idx_ccode];
                         $local_ftId = $this->_getLocalCode('detailtype', $this->target_defs, $ccode);
 
-                        // ------------------------------------------------------------------------------------------------
-
                         //Get vocabulary for all terms used
                         $dt_Type = $def_dts[$ftId]['commonFields'][$idx_type];
                         if($dt_Type == "enum" || $dt_Type == "relmarker"){ 
@@ -352,20 +350,38 @@ $time_debug = microtime(true);
                             $this->_getTopMostVocabulary($def_dts[$ftId]['commonFields'][$idx_terms], $dt_Type);
                         }
                         
-                        if($local_ftId>0){
+                        if($local_ftId>0){ //already exists in target
                             $this->fields_correspondence[$ftId] = $local_ftId;
-                            //$this->fields_correspondence_existed[$ftId] = $local_ftId;
                             continue; //field with the same concept code is already in database
                         }
 
                         //there is no such field in target - it must be imported
                         array_push($this->imp_fieldtypes, $ftId);
-
-                        
                         
                     }
                 }
             }//for
+            
+            //5. some field types may not belong to recordtypes, they should be imported too
+            // {id: '1', name: 'Titre', code: '2-1'}
+            $all_fieldtypes = @$data['fieldtypes'];//[$local_id]['name']  
+            if($all_fieldtypes && count($all_fieldtypes)>0){
+                foreach ($all_fieldtypes as $ftId => $field){
+                    if(!(@$this->fields_correspondence[$ftId] || in_array($ftId, $this->imp_fieldtypes) )){
+
+                            $ccode = $def_dts[$ftId]['commonFields'][$idx_ccode];
+                            $local_ftId = $this->_getLocalCode('detailtype', $this->target_defs, $ccode);
+
+                            if($local_ftId>0){ //already exists in target
+                                $this->fields_correspondence[$ftId] = $local_ftId;
+                                continue; //field with the same concept code is already in database
+                            }
+                            //there is no such field in target - it must be imported
+                            array_push($this->imp_fieldtypes, $ftId);
+                    }   
+                }
+            }
+            
         }
      
 if(_DBG) error_log('Preparation '.(microtime(true)-$time_debug2));        
