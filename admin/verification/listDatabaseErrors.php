@@ -1264,10 +1264,21 @@ if($active_all || in_array('date_values', $active)) {
                 if($wascorrected>0){
                     print '<div style="margin:10px 0"><b>Auto-corrected dates</b> '
                             ."The following dates have been corrected as shown ($wascorrected)</div><table>";
-                    
-                    foreach ($bibs as $row) 
-                        if($row['new_value']!=null && $row['new_value']!='' && @$row['is_ambig']===false)
-                    {
+
+					$skipped_dates = 0;
+
+                    foreach ($bibs as $row) {
+                        if($row['new_value']!=null && $row['new_value']!='' && @$row['is_ambig']===false) {
+
+                            if(strtotime($row['new_value']) == strtotime($row['dtl_Value'])){ 
+
+                                for($i = 0; $i < $row['dtl_Value']; $i ++){	
+                                    if($row['new_value'] == '0' && $row['dtl_Value'] != $row['new_value']){
+                                        $skipped_dates++;
+                                    }
+                                }
+							}
+                            else{
                     ?>
                     <tr>
                         <td></td>
@@ -1282,8 +1293,14 @@ if($active_all || in_array('date_values', $active)) {
                         <td><?= ($row['new_value']=='remove'?'=>&nbsp;removed':('=>&nbsp;&nbsp;'.$row['new_value'])) ?></td>
                     </tr>
                     <?php
+                            }
+                        }
                     }
-                    print '</table>';                    
+                    print '</table>';
+
+                    if($skipped_dates != 0){
+                        print "<div style='font-weight: bold'>$skipped_dates dates have had leading zeroes added to them</div>";
+                    }
                 }
                 
                 
