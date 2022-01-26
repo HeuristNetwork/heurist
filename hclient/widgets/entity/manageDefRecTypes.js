@@ -819,7 +819,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                         html += __action_btn('','ui-icon-lock',window.hWin.HR('manageDefRectypes_reserved'),'gray');
                     }else{
                         if(recordset.fld(record,'rty_RecCount')>0){
-                            html += __action_btn('','ui-icon-trash-b',window.hWin.HR('manageDefRectypes_hasrecs'));    
+                            html += __action_btn('delete_hasrecs','ui-icon-trash-b',window.hWin.HR('manageDefRectypes_hasrecs'), 'darkgray');
                         }else{
                             //var links = window.hWin.HAPI4.EntityMgr.getEntityData('rst_Links')
                             //var is_referenced = (links['refs'] && links['refs'][recID]);
@@ -828,7 +828,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                             if(is_referenced){
                                 html += __action_btn('delete','ui-icon-trash-b', window.hWin.HR('manageDefRectypes_referenced'));    
                             }else{
-                                html += __action_btn('delete','ui-icon-trash', window.hWin.HR('manageDefRectypes_hasrecs'));        
+                                html += __action_btn('delete','ui-icon-trash', window.hWin.HR('manageDefRectypes_delete'));
                             }
                         }
                     }    
@@ -910,12 +910,29 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     _onActionListener:function(event, action){
         
 
-        if(action && action.action=='delete'){
-            
-            //if(this.rst_links.reverse[action.recID] || this.rst_links.rel_reverse[action.recID])
-            if(!window.hWin.HEURIST4.util.isnull(this.rst_links[action.recID]))
-            {            
-                
+        if(action && (action.action=='delete' || action.action=='delete_hasrecs')){
+
+			if(action.action == 'delete_hasrecs'){
+
+                var rectype_id = action.recID;
+                var $ele = $(event.target);
+
+                var sMsg = 'The record type <b>'+ $Db.rty(rectype_id, 'rty_Name') +'</b> has existing records.<br>These records must be deleted in order to delete this record type.<br><br>'
+                    + 'Click the <a href="#" data-rty_ID="'+ rectype_id +'">Filter</a> button or use Explore > Entities to find and delete all records.';
+
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title: 'Warning'}, {default_palette_class:this.options.default_palette_class});
+
+                this._on($dlg.find('a[data-rty_ID]'),{click:function(e){
+
+                    $ele.find('div[recid="'+ rectype_id +'"]').find('div[data-key="filter"]').click();
+
+                    $dlg.dialog('close');
+                    return false;
+                }});
+
+                return;
+            }else if(!window.hWin.HEURIST4.util.isnull(this.rst_links[action.recID])){
+
                 var res = this.rst_links[action.recID];
                 /*
                 if(this.rst_links.reverse[action.recID])
