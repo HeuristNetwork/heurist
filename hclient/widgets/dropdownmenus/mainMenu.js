@@ -979,8 +979,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
             popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['service_config'];
             popup_dialog_options['title'] = "Lookup service configuration";
+            popup_dialog_options['path'] = 'widgets/lookup/';
 
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordLookupCfg', popup_dialog_options);
+            window.hWin.HEURIST4.ui.showRecordActionDialog('lookupConfig', popup_dialog_options);
 
         }else if(action == "menu-database-rollback"){
 

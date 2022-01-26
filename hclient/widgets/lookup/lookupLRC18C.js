@@ -26,7 +26,7 @@
 */
 
 mapDict = {}
-$.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
+$.widget("heurist.lookupLRC18C", $.heurist.recordAction, {
     
     //defintions mapping
     // source rectype: target rectype
@@ -175,7 +175,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
         edit_fields: null,  //realtime values from edit form fields
         edit_record: false,  //recordset of the only record - currently editing record (values before edit start)
         title: 'Lookup ESTC Helsinki Bibliographic Metadata values for Heurist record',
-        htmlContent: 'recordLookupLRC18C.html',
+        htmlContent: 'lookupLRC18C.html',
         helpContent: null, //help file in context_help folder
 
     },
@@ -415,7 +415,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
 //"dialog":"LRC18C","fields":{"properties.edition":"1028"}}}
 
 
-    /* Get the user input from recordLookupLRC18C.html and build the query string */
+    /* Get the user input from lookupLRC18C.html and build the query string */
     /* Then lookup ESTC database if the query produces any search results */
     _doSearch: function () {
         edition_name = "";

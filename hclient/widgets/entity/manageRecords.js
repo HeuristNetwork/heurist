@@ -3675,13 +3675,21 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             function(event){ 
                                 
                                 var srvname = $(event.target).attr('data-cfg');
-                                
+
                                 var cfg = window.hWin.HAPI4.sysinfo['service_config'][srvname];
-                                
+                                var dialog_name = cfg.dialog;
+
+                                if(dialog_name == 'recordLookup'){
+                                    dialog_name = 'lookupTCL';
+                                }else if(dialog_name.includes('recordLookup')){
+                                    dialog_name = dialog_name.replace('recordLookup', 'lookup');
+                                }
+
                             window.hWin.HEURIST4.ui.showRecordActionDialog(cfg.dialog, //'recordLookup'
                                 { mapping: cfg, 
                                   edit_fields: this._editing.getValues(true),
                                   edit_record: this._currentEditRecordset,
+                                  path: 'widgets/lookup/',
                                   onClose:function(recset){
                                     if(recset){
                                         

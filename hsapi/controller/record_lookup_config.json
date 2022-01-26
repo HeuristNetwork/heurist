@@ -3,7 +3,7 @@
     "rty_ID": "3-1009",
     "label": "AGHP lookup",
     "description": "Search for Australian Gazetteer of historic places",
-    "dialog": "recordLookup",
+    "dialog": "lookupTLC",
     "fields":{
       "properties.placename": "2-1",
       "geometry": "2-28",
@@ -18,7 +18,7 @@
     "rty_ID": "",
     "label": "GeoNames",
     "description": "Returns a list of locations for the placename query.",
-    "dialog": "recordLookupGN",
+    "dialog": "lookupGN",
     "fields": {
         "name":"",
         "lng":"",    
@@ -37,7 +37,7 @@
     "rty_ID": "",
     "label": "GeoNames - Postal Codes",
     "description": "Returns a list of postal codes and places for the placename/postalcode query.",
-    "dialog": "recordLookupGN_postalCode",
+    "dialog": "lookupGN_postalCode",
     "fields": {
         "postalcode":"",
         "lng":"",    
@@ -56,7 +56,7 @@
     "service": "MPCE",
     "rty_ID": "1268-53",
     "label": "MPCE Super Book (Work) predictive keywording",
-    "dialog": "recordLookupMPCE",
+    "dialog": "lookupMPCE",
     "description": "A project keyword classification toolkit for the Super Book (Work) Table.",
     "fields": {
         "workID":"",
@@ -71,7 +71,7 @@
     "rty_ID": "94",
     "label": "ESTC lookup",
     "description": "",
-    "dialog": "recordLookupLRC18C",
+    "dialog": "lookupLRC18C",
     "fields": {
       "properties.edition": "1028"
     }
@@ -80,7 +80,7 @@
     "service": "bnfLibrary",
     "rty_ID": "",
     "label": "BnF Library Lookup",
-    "dialog": "recordLookupBnFLibrary",
+    "dialog": "lookupBnFLibrary",
     "description": "A proof of concept for searching via the BnF Library API (under development)",
     "fields": {
         "isbn": "",

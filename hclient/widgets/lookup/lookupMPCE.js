@@ -1,7 +1,7 @@
 /**
- * recordLookupMPCE.js
+ * lookupMPCE.js
  *
- *  1) This file loads html content from recordLookupMPCE.html
+ *  1) This file loads html content from lookupMPCE.html
  *  2) This file outlines the functionality of the MPCE toolkit, including:
  *      - Assigning New Keywords to a Super Book (Work) record
  *      - Looking up a list of keywords that have been assigned with a selected keyword in other works
@@ -28,7 +28,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
+$.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
 
         // default options
     options: {
@@ -41,7 +41,7 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
 
         title:  "Super Book (Work) Classification Tool for MPCE Project",
 
-        htmlContent: "recordLookupMPCE.html",
+        htmlContent: "lookupMPCE.html",
         helpContent: null, //help file in context_help folder
 
         add_new_record: false,

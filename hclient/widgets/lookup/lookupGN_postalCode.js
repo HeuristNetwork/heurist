@@ -1,5 +1,5 @@
 /**
-* recordLookupGN_postalCode.js - GeoNames postalCode lookup service
+* lookupGN_postalCode.js - GeoNames postalCode lookup service
 * 
 *   It consists of search form and result list to select one or several values of record
 * 
@@ -26,7 +26,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.recordLookupGN_postalCode", $.heurist.recordAction, {
+$.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
 
     // default options
     options: {
@@ -37,8 +37,8 @@ $.widget( "heurist.recordLookupGN_postalCode", $.heurist.recordAction, {
         
         title:  'Lookup values Postal codes for Heurist record',
         
-        htmlContent: 'recordLookupGN_postalCode.html',
-        //helpContent: 'recordLookupGN_postalCode.html', //in context_help folder
+        htmlContent: 'lookupGN_postalCode.html',
+        //helpContent: 'lookupGN_postalCode.html', //in context_help folder
         
         mapping:null, //configuration from sys_ExternalReferenceLookups
                

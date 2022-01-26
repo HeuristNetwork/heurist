@@ -792,11 +792,11 @@ $.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
                         }
                     }else if(map_flds[k] == 'publisher'){
 
-                        if(record[map_flds[k]]['location'] && record[map_flds[k]]['location'][0] == '['){
+                        if(record[map_flds[k]] && record[map_flds[k]]['location'] && record[map_flds[k]]['location'][0] == '['){
                             record[map_flds[k]]['location'] = record[map_flds[k]]['location'].slice(1, -1);
                         }
                         values.push(record[map_flds[k]]);
-                    }else if(map_flds[k] == 'date'){
+                    }else if(map_flds[k] == 'date' && record[map_flds[k]]){
                         values.push(record[map_flds[k]].replace(/\D/g, '')); // Strip non-Numeric chars
                     }else{ // just add field details
                         values.push(record[map_flds[k]]);

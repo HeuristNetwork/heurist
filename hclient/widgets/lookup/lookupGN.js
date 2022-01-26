@@ -1,5 +1,5 @@
 /**
-* recordLookup.js - Lookup values in third-party web service for Heurist record 
+* lookupGN.js - GeoNames lookup service
 * 
 *   It consists of search form and result list to select one or several values of record
 * 
@@ -26,7 +26,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.recordLookup", $.heurist.recordAction, {
+$.widget( "heurist.lookupGN", $.heurist.recordAction, {
 
     // default options
     options: {
@@ -35,10 +35,10 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
         width:  800,
         modal:  true,
         
-        title:  'Lookup values for Heurist record',
+        title:  'Lookup values Postal codes for Heurist record',
         
-        htmlContent: 'recordLookup.html',
-        helpContent: 'recordLookup.html', //in context_help folder
+        htmlContent: 'lookupGN.html',
+        //helpContent: 'lookupGN.html', //in context_help folder
         
         mapping:null, //configuration from sys_ExternalReferenceLookups
                
@@ -47,13 +47,12 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
     },
     
     recordList:null,
+    _country_vocab_id: 0,
 
     //  
     // invoked from _init after loading of html content
     //
     _initControls: function(){
-
-        var that = this;
             
 /*
 "placename":"Manly",
@@ -67,10 +66,23 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
 "description":"A suburb about 4 km S by E of Brookvale and about 6 km N by E of Vaucluse.  Boundaries shown on map marked GNB 3641"
 
 [{"type":"Feature","id":"857","properties":{"rec_ID":"857"....},"geometry":{"type":"Point","coordinates":[48.671137,46.998197]}},
-*/    
+*/   
+
+        var that = this;
+
+        //fill countries dropdown
+        var ele = this.element.find('#inpt_country');
+        this._country_vocab_id = $Db.getLocalID('trm','2-509');
+        window.hWin.HEURIST4.ui.createTermSelect(ele.get(0), {vocab_id:this._country_vocab_id,topOptions:'select...',useHtmlSelect:false});
+
+        if(ele.hSelect('instance') != 'undefined'){
+            ele.hSelect('widget').css({'max-width':'30em'});
+        }
         
-        this.element.find('fieldset > div > .header').css({width:'80px','min-width':'80px'})
-        
+        this.element.find('#search_container > div > div > .header').css({width:'70px','min-width':'70px', display: 'inline-block'});
+
+        this.element.find('#btn_container').position({my: 'left center', at: 'right center', of: '#search_container'});
+
         this.options.resultList = $.extend(this.options.resultList, 
         {
                recordDivEvenClass: 'recordDiv_blue',
@@ -88,7 +100,7 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
                //view_mode: this.options.view_mode?this.options.view_mode:null,
                
                pagesize:(this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
-               empty_remark: '<div style="padding:1em 0 1em 0">Nothing found</div>',
+               empty_remark: '<div style="padding:1em 0 1em 0">No Locations Found</div>',
                renderer: this._rendererResultList
                /*
                searchfull: function(arr_ids, pageno, callback){
@@ -146,22 +158,27 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
     },
     
     
+    //  "postalcode":"6600", 
+    //  "countryCode":"AT",
+    //  "adminCode1":"07","adminName1":"Tirol",
+    //  "adminCode2":"708","adminName2":"Politischer Bezirk Reutte"
+    //  "adminCode3":"70805","adminName3":"Breitenwang",
+    //  "placeName":"Breitenwang" 
     //
-    //
+    //"lng":10.7333333,"lat":47.4833333},
     //
     _rendererResultList: function(recordset, record){
-
+        
         function fld(fldname, width){
+
             var s = recordset.fld(record, fldname);
-            if(fldname == 'properties.LGA'){ 
-                s = s.lga; 
-            }
-            s = s?s:'';
+            s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
+
             var title = s;
 
             if(fldname == 'recordLink'){
                 s = '<a href="' + s + '" target="_blank"> view here </a>';
-                title = 'View tclmap record';
+                title = 'View geoname record';
             }
 
             if(width>0){
@@ -171,9 +188,9 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
         }
 
         var recID = fld('rec_ID');
-        var rectypeID = fld('rec_RecTypeID');
+        var rectypeID = fld('rec_RecTypeID'); 
 
-        var recTitle = fld('properties.placename',40) + fld('properties.LGA', 25) + fld('properties.state', 6) + fld('properties.description', 65) + fld('recordLink', 12); 
+        var recTitle = fld('name', 40) + fld('adminName1', 20) + fld('countryCode', 6) + fld('fcodeName', 40) + fld('fclName', 20) + fld('recordLink', 12);
 
         var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
 
@@ -181,13 +198,13 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
                 + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
-                        + html_thumb
-                        + '<div class="recordIcons">'
-                        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-                        +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>' 
-                        + '</div>'
-                        +  recTitle
-                    + '</div>';
+                + html_thumb            
+                + '<div class="recordIcons">'
+                +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+                +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>' 
+                + '</div>'
+                +  recTitle
+            + '</div>';
         return html;
     },
 
@@ -202,27 +219,37 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
     },
 
     //
-    // Either perform search or select entry in resultList and triggers addition of new record
+    // Return json array dty_ID:value 
     //
     doAction: function(){
 
-            //detect selection
-            var sel = this.recordList.resultList('getSelected', false);
+        //detect selection
+        var recset = this.recordList.resultList('getSelected', false);
+        
+        if(recset && recset.length() == 1){
             
-            if(sel && sel.length() == 1){
+            var res = {};
+            var rec = recset.getFirstRecord();
+            
+            var map_flds = Object.keys(this.options.mapping.fields);
+            
+            for(var k=0; k<map_flds.length; k++){
+                var dty_ID = this.options.mapping.fields[map_flds[k]];
+                var val = recset.fld(rec, map_flds[k]);
                 
-                if(this.options.add_new_record){
-                    //create new record 
-                    //window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
-                    //this._addNewRecord(this.options.rectype_for_new_record, sel);                     
-                }else{
-                    //pass mapped values and close dialog
-                    this._context_on_close = sel;
-                    this._as_dialog.dialog('close');
+                if(map_flds[k]=='countryCode' && this._country_vocab_id>0){
+                    val = $Db.getTermByCode(this._country_vocab_id, val);
                 }
                 
+                if(dty_ID>0 && val){
+                    res[dty_ID] = val;    
+                }
             }
-        
+
+            //pass mapped values and close dialog
+            this._context_on_close = res;
+            this._as_dialog.dialog('close');
+        }        
     },
     
     //
@@ -231,46 +258,70 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
     //
     _doSearch: function(){
         
-        var sURL;
-        if(this.options.mapping.service=='tlcmap'){
-            sURL = 'http://tlcmap.org/ghap/search?format=csv&paging=100';
-            
-        }else if(this.options.mapping.service=='tlcmap_old'){
-            sURL = 'http://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?format=json&paging=100';  
-        }else{
-            window.hWin.HEURIST4.msg.showMsgFlash('Name of service not defined...', 500);
+        if(this.element.find('#inpt_placename').val()==''){
+            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a geoname to perform search', 1000);
             return;
         }
 
-        if(this.element.find('#inpt_name').val()=='' && this.element.find('#inpt_anps_id').val()==''){
-            window.hWin.HEURIST4.msg.showMsgFlash('Define name or ANPS ID...', 500);
-            return;
+        var sURL = 'http://api.geonames.org/searchJSON?username=osmakov';
+
+        if(this.element.find('#inpt_placename').val()!=''){
+            sURL += '&name=' + this.element.find('#inpt_placename').val();
         }
-        
+        if(this.element.find('#inpt_country').val()!=''){
+
+            var term_label = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Label');
+            var _countryCode = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Code');
+
+            if(_countryCode == ''){
+                
+                switch (term_label) {
+                    case 'Iran':
+                        _countryCode = 'IR';
+                        break;
+                    case 'Kyrgistan': // Kyrgzstan
+                        _countryCode = 'KG';
+                        break;
+                    case 'Syria':
+                        _countryCode = 'SY';
+                        break;
+                    case 'Taiwan':
+                        _countryCode = 'TW';
+                        break;
+                    case 'UAE':
+                        _countryCode = 'AE';
+                        break;
+                    case 'UK':
+                        _countryCode = 'GB';
+                        break;
+                    case 'USA':
+                        _countryCode = 'US';
+                        break;
+                    case 'Vietnam':
+                        _countryCode = 'VN';
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if(_countryCode != ''){
+                sURL += '&country=' + _countryCode; 
+            }
+        }
+/* DEBUGGING
+this._onSearchResult({"postalcodes":[{"adminCode2":"708","adminCode3":"70805","adminName3":"Breitenwang","adminCode1":"07","adminName2":"Politischer Bezirk Reutte","lng":10.7333333,"countryCode":"AT","postalcode":"6600","adminName1":"Tirol","placeName":"Breitenwang","lat":47.4833333}]});
+return;
+*/
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
-        
-        
-        if(this.element.find('#inpt_name').val()!=''){
-            sURL = sURL + '&' 
-            + (this.element.find('#inpt_exact').is(':checked')?'name':'fuzzyname')
-            + '=' + encodeURIComponent(this.element.find('#inpt_name').val());
-        }
-        if(this.element.find('#inpt_anps_id').val()!=''){
-            sURL = sURL + '&anps_id=' + this.element.find('#inpt_anps_id').val();
-        }
-        if(this.element.find('#inpt_lga').val()!=''){
-            sURL = sURL + '&lga=' + encodeURIComponent(this.element.find('#inpt_lga').val());
-        }
-        if(this.element.find('#inpt_state').val()!=''){
-            sURL = sURL + '&state=' + this.element.find('#inpt_state').val();
-        }
 
         var that = this;
-        var request = {service:sURL, serviceType:'tlcmap'};             
+        var request = {service:sURL, serviceType:'geonames'};             
         //loading as geojson  - see controller record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
             function(response){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
+
                 if(response){
                     if(response.status && response.status != window.hWin.ResponseStatus.OK){
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -285,89 +336,62 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
     //
     //
     //
-    _onSearchResult: function(geojson_data){
+    _onSearchResult: function(json_data){
         
         this.recordList.show();
-       
+
         var is_wrong_data = true;
-                        
-        if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){
-            
+
+        json_data = window.hWin.HEURIST4.util.isJSON(json_data);
+
+        if (json_data) {
+
             var res_records = {}, res_orders = [];
-            /*      
-            var DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'],
-                DT_ORIGINAL_RECORD_ID = window.hWin.HAPI4.sysinfo['dbconst']['DT_ORIGINAL_RECORD_ID'],
-                DT_NAME       = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
-                DT_SHORT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_NAME'],
-                DT_ADMIN_UNIT = window.hWin.HAPI4.sysinfo['dbconst']['DT_ADMIN_UNIT'],
-                DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
-            */
-                
+
             var DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
-            
-            var fields = ['rec_ID','rec_RecTypeID'];
+            if(DT_GEO_OBJECT>0 && !this.options.mapping.fields['location']){
+                this.options.mapping.fields['location'] = DT_GEO_OBJECT;
+            }
+
+            var fields = ['rec_ID', 'rec_RecTypeID'];
             var map_flds = Object.keys(this.options.mapping.fields);
+
             fields = fields.concat(map_flds);
             fields = fields.concat('recordLink');
-            
-            for(var k=0; k<map_flds.length; k++){
-                map_flds[k] = map_flds[k].split('.'); 
-            }
-            
-            if(!geojson_data.features) geojson_data.features = geojson_data;
+
+            if(!json_data.geonames) json_data.geonames = json_data;
             
             //parse json
             var i=0;
-            for(;i<geojson_data.features.length;i++){
-                var feature = geojson_data.features[i];
+            var data = json_data.geonames; console.log(data);
+            for(;i<data.length;i++){
+                var feature = data[i];
                 
                 var recID = i+1;
                 
-                var hasGeo = false;
+                var val;
                 var values = [recID, this.options.mapping.rty_ID];
+                
                 for(var k=0; k<map_flds.length; k++){
                     
-                    var val = feature[ map_flds[k][0] ];
-                    
-                    for(var m=1; m<map_flds[k].length; m++){
-                        if(val && !window.hWin.HEURIST4.util.isnull( val[ map_flds[k][m] ])){
-                            val = val[ map_flds[k][m] ];
+                    if(map_flds[k]=='location'){
+                        if(feature[ 'lng' ] && feature[ 'lat' ]){
+                            val = 'p POINT('+feature[ 'lng' ]+' '+feature[ 'lat' ]+')';
+                        }else{
+                            val = '';
                         }
-                    }      
-                    
-                    if(DT_GEO_OBJECT == this.options.mapping.fields[map_flds[k]]){
-                        if(!window.hWin.HEURIST4.util.isempty(val)){
-                            val = {"type": "Feature", "geometry": val};
-                            var wkt = stringifyMultiWKT(val);    
-                            if(window.hWin.HEURIST4.util.isempty(wkt)){
-                                val = '';
-                            }else{
-                                //@todo the same code mapDraw.php:134
-                                var typeCode = 'm';
-                                if(wkt.indexOf('GEOMETRYCOLLECTION')<0 && wkt.indexOf('MULTI')<0){
-                                    if(wkt.indexOf('LINESTRING')>=0){
-                                        typeCode = 'l';
-                                    }else if(wkt.indexOf('POLYGON')>=0){
-                                        typeCode = 'pl';
-                                    }else {
-                                        typeCode = 'p';
-                                    }
-                                }
-                                val = typeCode+' '+wkt;
-                                hasGeo = true;
-                            }
-                        }
+                    }else{
+                        val = feature[ map_flds[k] ];
                     }
+                        
                     values.push(val);    
                 }
 
-                // https://maps.google.com/?q=lat,lng or https://www.google.com/maps/search/?api=1&query=lat,lng
-                values.push('https://tlcmap.org/ghap/search?id=' + feature['properties']['id']);
+                // Push additional information, GeoName: www.geonames.org/geoname_rec_id/
+                values.push('https://www.geonames.org/' + feature['geonameId'] + '/');
 
-                if(hasGeo){
-                    res_orders.push(recID);
-                    res_records[recID] = values;    
-                }
+                res_orders.push(recID);
+                res_records[recID] = values;
             }
 
             if(res_orders.length>0){        
@@ -387,18 +411,9 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
         }
        
         if(is_wrong_data){
-            this.recordList.resultList('updateResultSet', null);            
-            
+
+            this.recordList.resultList('updateResultSet', null);
             window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
         }
-    },
-    
-    //
-    // 
-    //
-    _addNewRecord: function (record_type, field_values){
-        
-        window.hWin.HEURIST4.msg.sendCoverallToBack();
-    }  
+    }
 });
-

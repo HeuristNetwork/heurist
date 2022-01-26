@@ -1,7 +1,7 @@
 /**
- * recordLookupLRC18C.js
+ * lookupLRC18C.js
  *
- *  1) Loads html content from recordLookupLRC18C.html
+ *  1) Loads html content from lookupLRC18C.html
  *  2) Imports data from ESTC_Helsinki_Bibliographic_Metadata to Libraries_Readers_Culture_18C_Atlantic
  *  3) User will input lookup query details, a result list is rendered to user, a single item from results is selected
  *  4) Once the user clicks 'Check Author', this script imports Author, Work  and Book(Edition) record data to this DB
@@ -26,7 +26,7 @@
 */
 
 mapDict = {}
-$.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
+$.widget("heurist.lookupLRC18C", $.heurist.recordAction, {
 
     options: {
         height: 520,
@@ -43,7 +43,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         edit_fields: null,  //realtime values from edit form fields
         edit_record: false,  //recordset of the only record - currently editing record (values before edit start)
         title: 'Lookup values for Heurist record',
-        htmlContent: 'recordLookupLRC18C.html',
+        htmlContent: 'lookupLRC18C.html',
         helpContent: null, //help file in context_help folder
 
     },
@@ -969,7 +969,7 @@ _rendererResultList: function (recordset, record) {
 
     },
 
-    /* Get the user input from recordLookupLRC18C.html and build the query string */
+    /* Get the user input from lookupLRC18C.html and build the query string */
     /* Then lookup ESTC database if the query produces any search results */
     _doSearch: function () {
         edition_name = "";

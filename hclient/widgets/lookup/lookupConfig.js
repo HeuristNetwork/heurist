@@ -1,5 +1,5 @@
 /**
-* recordLookupCfg.js - configuration for record lookup services
+* lookupConfig.js - configuration for record lookup services
 *                       original config is hsapi/controller/record_lookup_config.json
 *
 * @package     Heurist academic knowledge management system
@@ -18,7 +18,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.recordLookupCfg", {
+$.widget( "heurist.lookupConfig", {
 
     // default options
     options: {
@@ -29,7 +29,7 @@ $.widget( "heurist.recordLookupCfg", {
         width:  900,
         modal:  true,
         title:  '',
-        htmlContent: 'recordLookupCfg.html',
+        htmlContent: 'lookupConfig.html',
         helpContent: null,
         
         //parameters
@@ -89,7 +89,7 @@ $.widget( "heurist.recordLookupCfg", {
         
         //load html from file
         if(this._need_load_content && this.options.htmlContent){        
-            this.element.load(window.hWin.HAPI4.baseURL+'hclient/widgets/record/'+this.options.htmlContent
+            this.element.load(window.hWin.HAPI4.baseURL+'hclient/widgets/lookup/'+this.options.htmlContent
                             +'?t='+window.hWin.HEURIST4.util.random(), 
             function(response, status, xhr){
                 that._need_load_content = false;
@@ -321,6 +321,8 @@ $.widget( "heurist.recordLookupCfg", {
             this.element.find('#btnSave').button().on('click', function() {that._closeHandler(true, false, null);} );
             this.element.find('#btnClose').button().on('click', function() {that._closeHandler(false, false, null);} );
 
+            window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnSave'), !this._services_modified);
+
             // mouse leaves container
             this.element.find('.ent_wrapper:first').on('mouseleave', function(event) {
 
@@ -368,6 +370,14 @@ $.widget( "heurist.recordLookupCfg", {
                 has_changes = true;
             }
 
+            if(value.dialog == 'recordLookup'){
+                value.dialog = 'lookupTCL';
+                has_changes = true;
+            }else if(value.dialog.includes('recordLookup')){
+                value.dialog = value.dialog.replace('recordLookup', 'lookup');
+                has_changes = true;
+            }
+
             // Ensure that the key is correct, otherwise there will be problems with updating (creating duplicates)
             if(key.includes("_") === false){
 
@@ -411,6 +421,8 @@ $.widget( "heurist.recordLookupCfg", {
 
                 that._is_modified = false;
                 that._services_modified = false;
+
+                window.hWin.HEURIST4.util.setDisabled(that.element.find('#btnSave'), !this._services_modified);
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
@@ -653,12 +665,12 @@ $.widget( "heurist.recordLookupCfg", {
 
         this.btnDiscard.show();
 
-        
         window.hWin.HEURIST4.util.setDisabled(this.btnApply, !this._is_modified);
+
         if(this._is_modified){
             this.btnApply.addClass('ui-button-action');
         }else{
-            this.btnApply.removeClass('ui-button-action');   
+            this.btnApply.removeClass('ui-button-action');
         }
     },
     
@@ -886,6 +898,7 @@ $.widget( "heurist.recordLookupCfg", {
                 this._isNewCfg = false;
 
                 this._services_modified = true;
+                window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnSave'), !this._services_modified);
 
                 this._reloadServiceList(); // reload left panel
 
@@ -915,7 +928,9 @@ $.widget( "heurist.recordLookupCfg", {
         if(this.options.service_config[service_id]!=null) { // check if service has been assigned
             delete this.options.service_config[service_id]; // remove assigned service
             is_del = true;
+
             this._services_modified = true;
+            window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnSave'), !this._services_modified);
         }
 
         if(is_del){
