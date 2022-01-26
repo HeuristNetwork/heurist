@@ -1073,7 +1073,7 @@ $.widget( "heurist.editing_input", {
             							trm_tooltip = $(parent_container).tooltip({
             								items: "div.ui-state-active",
             								position: { // Post it to the right of menu item
-            									my: "left+15 center",
+            									my: "left+20 center",
             									at: "right center",
             									collision: "none"
             								},
@@ -1087,7 +1087,7 @@ $.widget( "heurist.editing_input", {
             								open: function(event, ui){ // Add custom CSS
             									ui.tooltip.css({
             										"width": "200px",
-            										"background": "#E3F0F0",
+            										"background": "#D1E7E7",
             										"font-size": "1.1em"
             									});
             								}
