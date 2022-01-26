@@ -138,7 +138,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
                             $formatted_array['isbn'] = (string)$sf_ele[0];
                         }
                     }
-                }else if($df_tag == '071' || $df_tag == '073' || $df_tag == '464') { // Description Fields
+                }else if($df_tag == '071' || $df_tag == '073' || $df_tag == '464' || $df_tag == '300' || $df_tag == '305') { // Description Fields
 
                     $value = '';
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
@@ -150,6 +150,8 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
                             $value = 'Code à barres commercial : EAN ' . (string)$sf_ele[0];
                         }else if($df_tag == '464' && $sf_code == 't') {
                             $value = (string)$sf_ele[0];
+                        }else if($df_tag == '300' || $df_tag == '305') {
+                            $value = (string)$sf_ele[0];
                         }
                     }
 
@@ -159,7 +161,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
                         if(!array_key_exists('description', $formatted_array) || !array_key_exists($index, $formatted_array['description'])) {
                             $formatted_array['description'][$index] = $value;
                         }else{
-                            $formatted_array['description'][$index] .= ' ' . $value;
+                            $formatted_array['description'][$index] .= '; ' . $value;
                         }
                     }
                 }else if($df_tag == '101' || $df_tag == '102') { // Language, e.g. fre or FR
@@ -253,6 +255,9 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
         // Encode to json for response to JavaScript
         $remote_data = json_encode($results);
+    }else if(@$params['serviceType'] == 'nomisma'){
+
+        //error_log(print_r($remote_data, TRUE)); //DEBUGGING
     }
 
 	// Return response

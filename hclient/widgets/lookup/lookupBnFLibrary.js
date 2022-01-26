@@ -1,8 +1,8 @@
 /**
-* recordLookupBnFLibrary.js - Searching the BnF Library's bibliographic records (Under Development)
+* lookupBnFLibrary.js - Searching the BnF Library's bibliographic records (Under Development)
 * 
 * This file:
-*   1) Loads the content of the corresponding html file (recordLookupBnFLibrary.html), and
+*   1) Loads the content of the corresponding html file (lookupBnFLibrary.html), and
 *   2) Performs an api call to the BnF Library's Search API using the User's input, displaying the results within a Heurist result list
 * 
 * NOTE: This external lookup currently attempts to return record ids for resources (record pointers) via creator ids and full names,
@@ -26,7 +26,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.recordLookupBnFLibrary", $.heurist.recordAction, {
+$.widget( "heurist.lookupBnFLibrary", $.heurist.recordAction, {
 
     // default options
     options: {

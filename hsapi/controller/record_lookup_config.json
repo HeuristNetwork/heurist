@@ -96,5 +96,24 @@
         "rights": "",
         "biburl": ""
     }
+},
+{
+    "service": "nomisma",
+    "rty_ID": "",
+    "label": "Nomisma Lookup",
+    "dialog": "lookupNomisma",
+    "description": "A proof of concept for searching via the Nomisma Library API (under development)",
+    "fields": {
+        "label": "",
+        "properties.gazetteer_label": "",
+        "geometry": "",
+        "properties.toponym": "",
+        "properties.gazetteer_uri": "",
+        "properties.type": "",
+        "properties.count": "",
+        "when.timespans.start": "",
+        "when.timespans.end": "",
+        "properties.closing_date": ""
+    }
 }
 ]
