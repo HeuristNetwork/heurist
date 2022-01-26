@@ -99,6 +99,8 @@ body{
             <!-- HEURIST CMS LOGO IMAGE -->
             <div class="text2">
                 <div id="main-title" style="display: table-cell;width: 70%;"></div>
+                <div id="main-title-alt" style="display: table-cell;"></div>
+                <div id="main-title-alt2" style="display: table-cell;"></div>
                 <div id="main-logo" style="width: 145px;display: table-cell"></div>
                 <div id="main-logo-alt" style="display: table-cell;min-width: 140px;height: 80px;"></div>
             </div>

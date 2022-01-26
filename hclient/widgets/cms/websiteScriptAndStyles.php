@@ -827,7 +827,7 @@ $title_alt2 -> #main-title-alt2
   
   var ele = $('#main-title');
   if(ele.length>0){
-      ele.empty().hide();
+      //ele.empty().hide();
   <?php       
   print '$(\'<h2 '.($image_banner?' style="text-shadow: 3px 3px 5px black"':'').'>'
         . str_replace("'",'&#039;',strip_tags($website_title,'<i><b><u><em><strong><sup><sub><small><br>'))
