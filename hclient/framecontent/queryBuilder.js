@@ -1,5 +1,5 @@
 /**
-* queryBuilder.js:  Dialog elements for the RuleSet builder         EXPEREMENTAL
+* queryBuilder.js:  Dialog elements for the RuleSet builder         EXPERIMENTAL
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

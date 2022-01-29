@@ -782,11 +782,11 @@ CREATE TABLE usrRecTagLinks (
 
 CREATE TABLE IF NOT EXISTS usrRecPermissions (
     rcp_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary table key',
-    rcp_UGrpID smallint(5) unsigned NOT NULL COMMENT 'ID of group',
-    rcp_RecID int(10) unsigned NOT NULL COMMENT 'The record to which permission is linked',
-    rcp_Level enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',
+    rcp_UGrpID smallint(5) unsigned NOT NULL COMMENT 'ID of group  to which an additional permission is being assigned',
+    rcp_RecID int(10) unsigned NOT NULL COMMENT 'The record to which this additional permission is assigned',
+    rcp_Level enum('view','edit') NOT NULL default 'view' COMMENT 'Level of additional permission assigned',
     PRIMARY KEY  (rcp_ID)
-) ENGINE=InnoDB COMMENT='Permissions for groups to records';
+) ENGINE=InnoDB COMMENT='Permissions for additional groups to view or edit a hidden (private) record';
             
 -- --------------------------------------------------------
 
