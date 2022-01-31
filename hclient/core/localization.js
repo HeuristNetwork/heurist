@@ -574,16 +574,6 @@ regional['en'] = {
 // TODO: messages above, particularly the default startup message, have been substnatially modified/improved 6/11/17, 
 //       so translated versions require update.
 
-
-regional['de'] = {
-    language: 'Deutsch',
-    'Databases': 'Datenbanken',
-    'Design database': 'Constructdatenbanke',
-    'Import_data': 'Data importieren',
-    'Help': 'Hilfe',
-    'About': 'Ueber'
-};
-
 regional['fr'] = {
     language: 'French',
     'Databases': 'Bases de données',
