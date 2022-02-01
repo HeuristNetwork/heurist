@@ -63,7 +63,7 @@
         <div id="setDivNodes" class="toolbar-section advanced" 
             style="display:none;padding-left:15px; min-width:190px">
             <label>Nodes</label>
-            <div class="colorblock" style="margin-left:10px;width:auto;" title="Color of nodes">
+            <div class="colorblock" style="margin-top:-4px;width:auto;" title="Color of nodes">
                 <input id="entityColor" style="width:0px;border:none"/></div>
                 
             <div id="setNodesMode" style="display:inline-block">
@@ -78,7 +78,14 @@
         </div>
 
         <!-- add advanced class to toggle this section -->
-        <div id="setDivLinks" class="toolbar-section" 
+        <div id="setDivLinks" class="toolbar-section advanced" 
+            style="display:none;border-left: solid 1px gray; min-width:214px;padding-right: 10px;">
+            <label>Links</label>
+            <label><input id="linksEmpty" title="Show empty links" type="checkbox"/>&nbsp;empty</label>
+            <label><input id="expand-links" title="Expand all links" type="checkbox"/>&nbsp;expand</label>
+        </div>
+        
+        <div id="setDivLinks2" class="toolbar-section" 
             style="display:none;border-left: solid 1px gray; min-width:214px;padding-right: 10px;">
             <label>Links</label>
 
@@ -101,8 +108,6 @@
             x
             <input id="linksWidth" title="Links Thickness" class="number-input small" type="number" min="1" max="25" step="1" />
             
-            <label><input id="linksEmpty" title="Show empty links" type="checkbox"/>&nbsp;empty</label>
-            <label><input id="expand-links" title="Expand all links" type="checkbox"/>&nbsp;expand</label>
         </div>
 
         <!-- add advanced class to toggle this section -->
