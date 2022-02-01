@@ -23,6 +23,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _entityName:'records',
     
     _currentEditRecTypeID:null,
+    _swf_rules: [],
     _isInsert: false,
     _additionWasPerformed: false, //NOT USED for selectAndSave mode
     _updated_tags_selection: null,
@@ -3132,6 +3133,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 return;   
             }
         
+            var that = this;                                    
+        
             if(!fields){
                 try{
                     fields = this._getValidatedValues(); 
@@ -3189,11 +3192,53 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     window.hWin.HEURIST4.msg.showMsgFlash("Please enter a value into any field to save the record", 1500);
                     return;
                 }
+                
+                
+                //assign workflow stage field 2-9453
+                if(fields!=null && this._swf_rules.length>0){
+                    var swf_mode = this.element.find('.sel_workflow_stages').val();
+                    if(swf_mode=='on' || (swf_mode=='new' && this._isInsert)){
+                        
+                        var opts_swf_stages = '';
+                        var dtyID = $Db.getLocalID('dty', '2-1080');
+                        var curr_stage = fields[dtyID];
+                        
+                        for (var i=0; i<this._swf_rules.length; i++){
+                            var is_disabled = '';
+                            if(this._swf_rules[i]['swf_StageRestrictedTo']){
+                                var grps = this._swf_rules[i]['swf_StageRestrictedTo'];
+                                if(!window.hWin.HAPI4.is_member(grps)){
+                                    is_disabled = ' disabled';
+                                }
+                            }
+                            var is_selected = (this._swf_rules[i]['swf_Stage']==curr_stage)?' selected':'';
+                            
+                            opts_swf_stages = opts_swf_stages 
+                                + '<option value="'+this._swf_rules[i]['swf_Stage']+'"'
+                                +is_disabled+is_selected+'>'
+                                +window.hWin.HEURIST4.util.htmlEscape($Db.trm(this._swf_rules[i]['swf_Stage'],'trm_Label'))
+                                +'</option>';
+                        }
+                        
+                        
+                        window.hWin.HEURIST4.msg.showPrompt(
+                        '<div class="heurist-helper3">This setting will determine actions to be taken such as visibility settings, marking for publication or email notifications</div>'
+                        +'<p><label>Workflow stage: </label><select id="dlg-prompt-value" class="text ui-corner-all">'
+                            + opts_swf_stages
+                        +'</select></p>',
+                        function(val){
+                            
+                            fields[dtyID] = val;
+                            that._saveEditAndClose( fields, afterAction );
+                            
+                        }, {title: window.hWin.HR('Set workflow stage'), yes: window.hWin.HR('Save')});
+                        return;
+                    }
+                } //END assign workflow stage field 2-9453
+                
             }
             
             if(fields==null) return; //validation failed
-
-            var that = this;                                    
 
             //assign new set of tags to record
             if($.isArray(that._updated_tags_selection)){
@@ -3214,7 +3259,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     });
                 return;
             }
-
+            
 
        
             var request = {ID: this._currentEditID, 
@@ -3533,6 +3578,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
         var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'none' }; //#ecf1fb
 
+        var swf_rules_mode = 'on';
+        if(this.usrPreferences['swf_rules_mode'] && this.usrPreferences['swf_rules_mode'][this._currentEditRecTypeID]){
+            swf_rules_mode = this.usrPreferences['swf_rules_mode'][this._currentEditRecTypeID];
+        }
+        
         // Icon
         var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
         var rt_icon = window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID;
@@ -3540,6 +3590,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         if( this.element.find('.chb_opt_fields').length==0 )
         {  //not inited yet
 
+            this._swf_rules = $Db.getSwfByRectype(this._currentEditRecTypeID);
+        
             $('<div style="display:table;min-width:575px;width:100%">'
              +'<div style="display:table-cell;text-align:left;padding:10px 0px 5px 15px;">'
 
@@ -3563,6 +3615,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         +(ishelp_on?'checked':'')+'/>Show help</label><span style="display:inline-block;width:40px"></span>'
                     +'<label class="lbl_opt_fields"><input type="checkbox" class="chb_opt_fields" '
                         +(isfields_on?'checked':'')+'/>Optional fields</label>'
+                    +'<span style="display:inline-block;width:40px"></span>'
+                    +'<span class="div_workflow_stages"><label>Workflow stage popup: </label>'
+                    +'<select class="sel_workflow_stages">'
+                        +'<option value="new">New records only</option>'
+                        +'<option value="on">New and existing records</option>'
+                        +'<option value="off">OFF</option></select></span>'
                 +'</div>'
 
                 +'<div style="padding:10px 50px 0px 0px;float:right">'
@@ -3770,7 +3828,22 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             
                             that._showHideEmptyFieldGroups();
                         });
-                        
+                       
+            
+            if(this._swf_rules.length>0){           
+                       
+                this.element.find('.sel_workflow_stages').val(swf_rules_mode);
+                            
+                this.element.find('.sel_workflow_stages')
+                .change(function( event ){
+                    if(!that.usrPreferences['swf_rules_mode']) that.usrPreferences['swf_rules_mode'] = {};
+                    that.usrPreferences['swf_rules_mode'][that._currentEditRecTypeID] = $(event.target).val();
+                });
+            
+            }else{
+                this.element.find('.div_workflow_stages').hide();
+            }
+            
         }
         else{
             this.element.find('.chb_opt_fields').prop('checked', isfields_on);
@@ -3946,6 +4019,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             //display message at bottom
             $('<div id="mod-struct-help" style="font-size:1.2em;margin-top:30px;">Use the gearwheel <span class="ui-icon-gear"></span> to add/edit fields and headings</div>')
             .appendTo(this.editForm.last('.editForm.recordEditor'));			
+            
+            //hide swf mode selector
+            this.element.find('.div_workflow_stages').hide();            
 			
             //if record type has been changed - reload rts_editor
             this._reloadRtsEditor();
@@ -3959,12 +4035,19 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             this.element.find('.btn-edit-rt-back').hide();
             this.element.find('.chb_opt_fields').attr('disabled', false);
             this.element.find('.lbl_opt_fields').show();
+            this.element.find('.sel_workflow_stages').attr('disabled', false);
+            this.element.find('.lbl_workflow_stages').show();
             
             this.element.find('.btn-edit-rt').hide();
             this.element.find('.btn-edit-rt-titlemask').hide();  
             
             $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
 
+            if(this._swf_rules.length>0){
+                this.element.find('.div_workflow_stages').show();
+            }
+            
+            
             //to save space - hide all fieldsets without visible fields
             this._showHideEmptyFieldGroups();
 

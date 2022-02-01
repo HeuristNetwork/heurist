@@ -999,6 +999,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
             window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', entity_dialog_options);
                                     
+        }else if(action == "menu-structure-workflowstages"){
+
+            window.hWin.HEURIST4.ui.showEntityDialog('sysWorkflowRules', entity_dialog_options);
+                                    
         }else if(action == "menu-structure-vocabterms"){
 
             window.hWin.HEURIST4.ui.showEntityDialog('defTerms', entity_dialog_options);

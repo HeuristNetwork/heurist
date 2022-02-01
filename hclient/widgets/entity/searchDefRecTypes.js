@@ -122,7 +122,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             
             this.element.find('#input_sort_type_div').hide();
         }else{
-            if(smode=='select_multi'){
+            if(smode=='select_multi' || smode=='select_single'){
                 
                 this.element.find('#btn_ui_config').hide();
                 this.element.find('#div_show_all_groups').hide();
@@ -424,7 +424,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                         request['rty_ID_local'] = '=0';
                 }
                 
-            }else if(this.options.select_mode=='select_multi'){
+            }else if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single'){
                     if(this.input_search_group.val()>0){
                         request['rty_RecTypeGroupID'] = this.input_search_group.val();
                         this.options.rtg_ID = request['rty_RecTypeGroupID'];

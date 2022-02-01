@@ -42,6 +42,7 @@
     require_once (dirname(__FILE__).'/../entity/dbSysBugreport.php');
     require_once (dirname(__FILE__).'/../entity/dbSysDashboard.php');
     require_once (dirname(__FILE__).'/../entity/dbSysImportFiles.php');
+    require_once (dirname(__FILE__).'/../entity/dbSysWorkflowRules.php');
     require_once (dirname(__FILE__).'/../entity/dbRecThreadedComments.php');
     require_once (dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
     require_once (dirname(__FILE__).'/../entity/dbRecords.php');
@@ -79,7 +80,7 @@
     function entityRefreshDefs( $system, $entities, $need_config ){
         
         if($entities=='all' || $entities==null){
-            $entities = array('rty','dty','rst','trm','rtg','dtg','vcg');  //
+            $entities = array('rty','dty','rst','trm','rtg','dtg','vcg','swf');  //
         }else if(!is_array($entities)){
             $entities = explode(',',$entities);
         }
@@ -123,6 +124,7 @@
             else if($entity_name=='trm') $entity_name = 'defTerms';
             else if($entity_name=='vcg') $entity_name = 'defVocabularyGroups';
             else if($entity_name=='rst') $entity_name = 'defRecStructure';   
+            else if($entity_name=='swf') $entity_name = 'sysWorkflowRules';   
             
             return $entity_name;
     }

@@ -44,6 +44,10 @@ getColorFromTermValue - Returns hex color by label or code for term by id
     trm_getAllVocabs - get all vocab where given term presents directly or by reference
     trm_RemoveLinks - remove all entries of term from trm_Links
 
+    
+WORKFLOW STAGES
+
+getSwfByRectype - returns rules for recordtype and current user
 
 RECTYPES
    
@@ -1034,7 +1038,7 @@ window.hWin.HEURIST4.dbs = {
     
     $Db = window.hWin.HEURIST4.dbs
     
-    rty,dty,rst,rtg,dtg,trm = dbdef(entityName,....)  access hEntityMgr.entity_data[entityName]
+    rty,dty,rst,rtg,dtg,trm,swf = dbdef(entityName,....)  access hEntityMgr.entity_data[entityName]
     
     set(entityName, id, field, newvalue)    
         id - localcode or concept code. For rst this are 2 params rtyID, dtyID
@@ -1065,6 +1069,10 @@ window.hWin.HEURIST4.dbs = {
 
     trm: function(rec_ID, fieldName, newValue){
         return $Db.getset('defTerms', rec_ID, fieldName, newValue);        
+    },
+
+    swf: function(rec_ID, fieldName, newValue){
+        return $Db.getset('sysWorkflowRules', rec_ID, fieldName, newValue);        
     },
     
     //
@@ -1562,7 +1570,8 @@ window.hWin.HEURIST4.dbs = {
 
                 //sort children by name
                 children.sort(function(a,b){
-                    return recset.fld(a,'trm_Label').localeCompare(recset.fld(b,'trm_Label')) ? 1 : -1;
+                    return recset.fld(a,'trm_Label').toLowerCase()<recset.fld(b,'trm_Label').toLowerCase()?-1:1;
+//return recset.fld(a,'trm_Label').localeCompare(recset.fld(b,'trm_Label')) ? 1 : -1;
                 });
                 
                 if(mode=='tree'){
@@ -2175,7 +2184,38 @@ window.hWin.HEURIST4.dbs = {
 
 
         return removeFacet? false :{harchy:harchy, harchy_fields:harchy_fields};
+    },
+    
+    //
+    // returns rules for recordtype and user
+    //
+    getSwfByRectype: function(_rty_ID, _usr_ID){
+        
+        var res = [];
+        
+        $Db.swf().each2(function(id, record){
+            
+            var rty_ID = record['swf_RecTypeID'];
+            if(rty_ID == _rty_ID) 
+            {
+                var is_allowed = true;
+                if(_usr_ID>0 && record['swf_StageRestrictedTo']){
+                    //check restriction
+                    var grps = record['swf_StageRestrictedTo'].split(',');
+                    if(grps.indexOf(''+_usr_ID)<0){
+                        is_allowed = false;
+                    }
+                }
+                if(is_allowed){
+                    res.push(record);    
+                }
+            }
+        });
+        
+        return res;
     }
+    
+    
 
 }//end dbs
 

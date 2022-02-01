@@ -55,6 +55,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageUsrSavedSearches.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchUsrSavedSearches.js"></script>
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysWorkflowRules.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysWorkflowRules.js"></script>
         
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysIdentification.js"></script>
@@ -145,7 +148,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 
                 //open at once 
                 //testLookuService();
-                //testEntity(true);
+                testEntity(true);
                 //testEditSymbology();
                 
                 //test console.log('>>>'+$Db.isTermByReference(6302, 528));
@@ -459,13 +462,14 @@ print $targetPath.'<br>';
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <label>Entity:
                         <select id="entity-sel">
+                            <option value="SysWorkflowRules">Workflow Rules</option>
                             <option value="SysBugreport">Bug report</option>
                             <option value="Records">Records</option>
-                            <option value="SysUsers" >Users +</option>
+                            <option value="SysUsers">Users +</option>
                             <option value="SysGroups">Workgroups +</option>
                             <option value="UsrTags">Tags +</option>
                             <option value="RecUploadedFiles">Uploaded Files +</option>
-                            <option value="UsrReminders" >Reminders</option>
+                            <option value="UsrReminders">Reminders</option>
                             <option value="UsrSavedSearches">Filters</option>
                             <option value="SysIdentification">Database Property</option>
                             <option value="SysDatabases">Databases</option>
@@ -536,7 +540,7 @@ print $targetPath.'<br>';
                 </div>
                 
             </div>
-        <div id="main_div" style="position:absolute;top:250px;min-height:300px;width:900;border:1px solid">
+        <div id="main_div" style="position:absolute;top:300px;min-height:300px;width:900;border:1px solid">
         </div>
         
         <div id="selected_div" style="float:right;width:200;border:1px solid">

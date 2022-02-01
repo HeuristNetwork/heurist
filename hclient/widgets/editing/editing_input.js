@@ -1688,6 +1688,7 @@ $.widget( "heurist.editing_input", {
         } 
         
         else if(this.detailType=='resource' && this.configMode.entity=='DefRecTypes'){ //-----------
+            //it defines slightly different select dialog for defRecTypes
         
             __show_select_dialog = function(event){
         
@@ -1697,7 +1698,7 @@ $.widget( "heurist.editing_input", {
                 var sels = that.newvalues[$input.attr('id')];//$(event.target).attr('id')];
                 
                 var rg_options = {
-                    select_mode: 'select_multi',
+                    select_mode: (this.configMode.csv!==false?'select_multi':'select_single'),
                     edit_mode: 'popup',
                     isdialog: true,
                     width: 440,
@@ -1796,7 +1797,7 @@ $.widget( "heurist.editing_input", {
             .appendTo( $inputdiv );
             */
             //.button({icons:{primary: icon_for_button},text:false});
-             
+            
             var popup_options = {
                 isdialog: true,
                 select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
@@ -3660,6 +3661,8 @@ console.log('onpaste');
                this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'])
             { //specific behaviour - show all
                 allTerms = 'relation'; //show all possible relations
+            }else if(typeof allTerms == 'string' && allTerms.indexOf('-')>0){ //vocabulary concept code
+                allTerms = $Db.getLocalID('trm', allTerms);
             }
             
             

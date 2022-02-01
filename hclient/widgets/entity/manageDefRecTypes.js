@@ -88,7 +88,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             //this.options.edit_mode = 'none'
         }
         
-        if(this.options.select_mode=='select_multi' && this.options.edit_mode=='popup'){
+        //this.options.edit_mode=='popup'
+        if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single'){ //special compact case
             this.options.width = 440;
         }
             
@@ -123,7 +124,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     });                                
                 });
                 
-            if(this.options.isFrontUI && this.options.select_mode!='select_multi'){ //adjust table widths
+            if(this.options.isFrontUI && this.options.select_mode!='select_multi' && this.options.select_mode!='select_single'){ //adjust table widths
 
                 window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE, 
                     function(){
@@ -254,7 +255,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             }    
                     
                     
-        }else if(this.options.select_mode=='select_multi'){
+        }else if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single'){
             this.recordList.resultList({ 
                     show_toolbar: true,
                     view_mode:'list',
@@ -1543,7 +1544,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     
     saveUiPreferences:function(new_params){
 
-        if(this.options.select_mode=='select_multi') return true;
+        if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single') return true;
         if(new_params){
             var params = this.getUiPreferences();
             

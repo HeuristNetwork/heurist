@@ -951,7 +951,7 @@ $.widget( "heurist.importStructure", {
         + '</div>'
         + '<div title="Click to import this record type" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="import" '
         + ' style="display:inline-block;height:16px;vertical-align:bottom;font-size:1.4em;padding-left:20px">'
-        +     '<span class="ui-button-icon-primary ui-icon-arrowthick-1-s" style="cursor:pointer"></span><span class="ui-button-text"></span>'
+        +     '<span class="ui-button-icon-primary ui-icon ui-icon-arrowthick-1-s" style="cursor:pointer"></span><span class="ui-button-text"></span>'
         + '</div></div>';
 
         var info = '';

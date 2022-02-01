@@ -2536,7 +2536,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
         
         }else{
             
-            options.path
+            //options.path
             
             var path = window.hWin.HAPI4.baseURL + 'hclient/'
                 +(options.path?options.path:'widgets/record/');

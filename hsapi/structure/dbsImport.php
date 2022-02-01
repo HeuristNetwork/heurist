@@ -116,7 +116,7 @@ class DbsImport {
 $time_debug = microtime(true);
 $time_debug2 = $time_debug;
         
-        $entityTypeToBeImported = $data['defType']; //rt|rectype,field|dt|detailtype,term
+        $entityTypeToBeImported = $data['defType']; //'rectype','detailtype','term'
         
         $allowed_types = array('rectype','detailtype','term');
         

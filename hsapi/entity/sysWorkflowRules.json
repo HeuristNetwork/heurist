@@ -1,0 +1,117 @@
+{
+        "entityName": "sysWorkflowRules",
+
+        "tableName": "sysWorkflowRules",
+        "tablePrefix": "swf",
+        
+        "helpContent": "sysWorkflowRules.html",
+        
+        "searchFormContent": "searchSysWorkflowRules.html",
+        
+        "entityTitle": "Workflow Stages Rules",
+        "entityTitlePlural": "Workflow Stages Rules",
+        "empty_remark": "Please use the search field above to locate relevant rule",
+
+        "fields": [
+                {
+                    "dtID": "swf_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "swf_RecTypeID",
+                    "dtFields":{
+                        "dty_Type":"resource",
+                        "rst_DisplayName": "Record type:",
+                        "rst_DisplayHelpText": "", 
+                        "rst_FieldConfig": {"entity":"defRecTypes","csv":false},
+                        "rst_DisplayWidth":30,
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "swf_Stage",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName": "Stage:",
+                        "rst_DisplayHelpText": "Workflow stage. ", 
+                        "rst_RequirementType":"required",
+                        "rst_FilteredJsonTermIDTree":"2-9453"
+                    }
+                },
+                {
+                    "dtID": "swf_StageRestrictedTo",
+                    "dtFields":{
+                        "dty_Type":"resource",
+                        "rst_DisplayName": "Stage restricted to:",
+                        "rst_DisplayHelpText": "Groups that allowed set this stage",
+                        "rst_FieldConfig": {"entity":"sysGroups","csv":true},
+                        "rst_DisplayWidth": 30
+                    }
+                },
+                {
+                    "dtID": "swf_Ownership",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_DisplayName": "Ownership:",
+                        "rst_DisplayHelpText": "",
+                        "rst_FieldConfig": [
+                        {"key":"null", "title":"No changes"},
+                        {"key":"0", "title":"Any logged-in user can edit"},
+                        {"key":"group", "title":"Specific group"}
+                        ]
+                    }
+                },
+                {
+                    "dtID": "swf_SetOwnership",
+                    "dtFields":{
+                        "rst_Display": "hidden",
+                        "dty_Type":"resource",
+                        "rst_DisplayName": "Owner groups:",
+                        "rst_DisplayHelpText": "Group that will be assigned as owner and its member can edit record",
+                        "rst_FieldConfig": {"entity":"sysGroups","csv":false}
+                    }
+                },
+                {
+                    "dtID": "swf_Visibility",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_DisplayName": "View permissions:",
+                        "rst_DisplayHelpText": "",
+                        "rst_FieldConfig": [
+                        {"key":"null", "title":"No changes"},
+                        {"key":"public", "title":"Public - viewable for anyone"},
+                        {"key":"viewable", "title":"Any logged-in user can view"},
+                        {"key":"hidden", "title":"Hidden - only owner and selected groups can view"}
+                        ]
+                    }
+                },
+                {
+                    "dtID": "swf_SetVisibility",
+                    "dtFields":{
+                        "rst_Display": "hidden",
+                        "dty_Type": "resource",
+                        "rst_DisplayName": "Groups that can also view the record",
+                        "rst_DisplayHelpText": "Additional groups:",
+                        "rst_FieldConfig": {"entity":"sysGroups","csv":true}
+                    }
+                },
+                {
+                    "dtID": "swf_SendEmail",
+                    "dtFields":{
+                        "dty_Type":"resource",
+                        "rst_DisplayName": "Info about stage:",
+                        "rst_DisplayHelpText": "Groups that are emailed about setting this stage",
+                        "rst_FieldConfig": {"entity":"sysGroups","csv":true}
+                    }
+                }
+                
+     ]
+}
