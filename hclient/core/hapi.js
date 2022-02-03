@@ -1844,6 +1844,7 @@ var fin_time = new Date().getTime() / 1000;
                  search_result_pagesize:100,
                  search_detail_limit: 2000,
                  userCompetencyLevel: 2, //'beginner',
+                 userFontSize: 14, //px
                  deriveMapLocation: true,
                  help_on: true, 
                  optfields: true,

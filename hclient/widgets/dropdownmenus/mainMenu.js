@@ -1440,8 +1440,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             }});
             */
 
-            //default            
+            //default
             prefs['userCompetencyLevel'] = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+            prefs['userFontSize'] = window.hWin.HAPI4.get_prefs_def('userFontSize', 14);
             prefs['searchQueryInBrowser'] = window.hWin.HAPI4.get_prefs_def('searchQueryInBrowser', 1);
             prefs['mapcluster_on'] = window.hWin.HAPI4.get_prefs_def('mapcluster_on', 1);
             prefs['mapcluster_zoom'] = window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 12);
