@@ -121,7 +121,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
         var parisian_Category = window.hWin.HEURIST4.ui.createTermSelect( this.element.find('#category_field')[0], {
                 vocab_id: [this.id_map.VI_Category],    // Vocabulary ID/Term ID
                 defaultTermID: this.parisian_category,   //Default/Selected Term
-                topOptions: [{title:"Select a Parisian Classification..."}],      //Top Options  [{key:0, title:'...select me...'},....]
+                topOptions: [{title:"Select a Parisian Classification...", key:''}],      //Top Options  [{key:0, title:'...select me...'},....]
                 useHtmlSelect: false     // use native select of jquery select
             }
         );

@@ -97,7 +97,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
     
             $remote_data = json_encode($remote_data);
         }
-    }else if(@$params['serviceType'] == 'bnflibrary'){ // BnF Library Search
+    }else if(@$params['serviceType'] == 'bnflibrary_bib'){ // BnF Library Search
 
         $results = array();
         
@@ -129,118 +129,128 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
                     continue;
                 }
 
-                if($df_tag == '010') { // ISBN
+                if($df_tag == '245') { // Title / Type
+
+                    foreach($df_ele->subfield as $sub_key => $sf_ele) {
+
+                        $sf_code = @$sf_ele->attributes()['code'];
+
+                        if($sf_code == 'a') {
+                            $formatted_array['title'] = (string)$sf_ele[0];
+                        }else if($sf_code == 'd'){
+                            $formatted_array['type'] = (string)$sf_ele[0];
+                        }else if($sf_code == 'f'){
+
+                            if(array_key_exists('title', $formatted_array)){
+                                $formatted_array['title'] .= ' ' . (string)$sf_ele[0];
+                            }else{
+                                $formatted_array['title'] = (string)$sf_ele[0];
+                            }
+                        }
+                    }
+                }else if($df_tag == '260') { // Publisher Location / Publisher Name / Year of Publication
+                    
+                    $value = '';
+                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
+                        $sf_code = @$sf_ele->attributes()['code'];
+
+                        if($sf_code == 'a') {
+
+                            $str_val = (string)$sf_ele[0];
+                            if($str_val[0] == '['){
+                                $formatted_array['publisher']['location'] = substr($str_val, 1, -1);
+                            }else{
+                                $formatted_array['publisher']['location'] = $str_val;
+                            }
+                        }else if($sf_code == 'c') {
+
+                            $str_val = (string)$sf_ele[0];
+                            if($str_val[0] == '['){
+                                $str_val = substr($str_val, 1, -1);
+                            }
+                            $formatted_array['publisher']['name'] = $str_val;
+                        }else if($sf_code == 'd') {
+                            $formatted_array['publisher']['date'] = (string)$sf_ele[0]; //preg_replace('/[^0-9]/', '', (string)$sf_ele[0]);
+                        }
+                    }
+                }else if($df_tag == '100' || (!array_key_exists('creator', $formatted_array) && $df_tag == '101')) { // Creator
+
+                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
+                        $sf_code = @$sf_ele->attributes()['code'];
+
+                        if($sf_code == '3') {
+                            $formatted_array['creator']['id'] = (string)$sf_ele[0];
+                        }else if($sf_code == 'a') {
+                            $formatted_array['creator']['surname'] = (string)$sf_ele[0];
+                        }else if($sf_code == 'm') {
+                            $formatted_array['creator']['firstname'] = (string)$sf_ele[0];
+                        }else if($sf_code == 'd') {
+                            $formatted_array['creator']['active'] = (string)$sf_ele[0];
+                        }
+                    }
+                }else if($df_tag == '700'){ // Contributor
+
+                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
+                        $sf_code = @$sf_ele->attributes()['code'];
+
+                        if($sf_code == '3') {
+                            $formatted_array['contributor']['id'] = (string)$sf_ele[0];
+                        }else if($sf_code == 'a') {
+                            $formatted_array['contributor']['surname'] = (string)$sf_ele[0];
+                        }else if($sf_code == 'm') {
+                            $formatted_array['contributor']['firstname'] = (string)$sf_ele[0];
+                        }else if($sf_code == 'd') {
+                            $formatted_array['contributor']['active'] = (string)$sf_ele[0];
+                        }
+                    }
+                }else if($df_tag == '020') { // ISBN
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
 
                         if($sf_code == 'a') {
                             $formatted_array['isbn'] = (string)$sf_ele[0];
+                            break;
                         }
                     }
-                }else if($df_tag == '071' || $df_tag == '073' || $df_tag == '464' || $df_tag == '300' || $df_tag == '305') { // Description Fields
+                }else if($df_tag == '280') { // Description
 
                     $value = '';
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
 
-                        if($df_tag == '071' && ($sf_code == 'b' || $sf_code == 'a')) {
-                            $value = ($value == '') ? (string)$sf_ele[0] : ' ' . (string)$sf_ele[0];
-                        }else if($df_tag == '073' && $sf_code == 'a') {
-                            $value = 'Code à barres commercial : EAN ' . (string)$sf_ele[0];
-                        }else if($df_tag == '464' && $sf_code == 't') {
-                            $value = (string)$sf_ele[0];
-                        }else if($df_tag == '300' || $df_tag == '305') {
-                            $value = (string)$sf_ele[0];
+                        if($df_tag == '280'){
+
+                            if($sf_code == 'a' || $sf_code == 'c' || $sf_code == 'd'){
+                                $value = ($value == '') ? (string)$sf_ele[0] : ' ' . (string)$sf_ele[0];
+                            }
                         }
                     }
 
                     if($value != '') {
-                        $index = ($df_tag == '464') ? 0 : 1;
 
-                        if(!array_key_exists('description', $formatted_array) || !array_key_exists($index, $formatted_array['description'])) {
-                            $formatted_array['description'][$index] = $value;
-                        }else{
-                            $formatted_array['description'][$index] .= '; ' . $value;
+                        if($df_tag == '280') {
+                            $formatted_array['description'] = $value;
                         }
                     }
-                }else if($df_tag == '101' || $df_tag == '102') { // Language, e.g. fre or FR
+                }else if($df_tag == '919') { // Language, e.g. fre or FR
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
 
-                        if($sf_code == 'a') {
-                            $formatted_array['language'][] = (string)$sf_ele[0];
+                        if($sf_code == 'p') {
+                            $formatted_array['language'] = (string)$sf_ele[0];
+                            break;
                         }
                     }
-                }else if($df_tag == '200' || $df_tag == '500') { // Title / Type / Primary Author (Full Name, Firstname Lastname)
-
-                    foreach($df_ele->subfield as $sub_key => $sf_ele) {
-                        $sf_code = @$sf_ele->attributes()['code'];
-
-                        if($sf_code == 'a') {
-
-                            if($df_tag == '500') {
-                                $formatted_array['title'] = (string)$sf_ele[0];
-                                break;
-                            }else if(!array_key_exists('title', $formatted_array)) { // Default Title
-                                $formatted_array['title'] = (string)$sf_ele[0];
-                                continue;
-                            }
-                        }else if($df_tag == '200' && $sf_code == 'b') {
-                            $formatted_array['type'] = (string)$sf_ele[0];
-                        }
-                    }
-                }else if($df_tag == '210' || $df_tag == '214') { // Publisher Location / Publisher Name / Year of Publication
+                }else if($df_tag == '327') { // Extended Description
                     
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
 
-                        if($sf_code == 'a') {
-                            $formatted_array['publisher']['location'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'c') {
-                            $formatted_array['publisher']['name'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'd') {
-                            $formatted_array['date'] = (string)$sf_ele[0];
-                        }
-                    }
-                }else if($df_tag == '606') { // Subject Fields
-                    
-                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
-                        $sf_code = @$sf_ele->attributes()['code'];
-
-                        if($sf_code == "a" || $sf_code == "y" || $sf_code == "z") {
-
-                            if(!array_key_exists('subject', $formatted_array)) {
-                                $formatted_array['subject'] = (string)$sf_ele[0];
-                            }else{
-                                $formatted_array['subject'] .= (string)$sf_ele[0];
-                            }
-                        }
-                    }
-                }else if($df_tag == '608') { // Type, mostly for music compsitions for movies and such
-
-                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
-                        $sf_code = @$sf_ele->attributes()['code'];
-
-                        if($sf_code == 'a' && $sf_ele[0] == 'édition phonographique' && !array_key_exists('type', $formatted_array)) {
-                            $formatted_array['type'] = 'enregistrement sonore';
-                        }
-                    }
-                }else if($df_tag == '700' || $df_tag == '702') { // Primary Author Details & Secondary Author/Contributor Details
-
-                    $index = ($df_tag == '700') ? 'creator' : 'contributor';
-                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
-                        $sf_code = @$sf_ele->attributes()['code'];
-
-                        if($sf_code == '3') {
-                            $formatted_array[$index]['id'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'a') {
-                            $formatted_array[$index]['surname'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'b') {
-                            $formatted_array[$index]['firstname'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'f') {
-                            $formatted_array[$index]['active'] = (string)$sf_ele[0];
+                        if($sf_code == "a") {
+                            $formatted_array['ext_description'] = (string)$sf_ele[0];
+                            break;
                         }
                     }
                 }
@@ -255,9 +265,10 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
         // Encode to json for response to JavaScript
         $remote_data = json_encode($results);
-    }else if(@$params['serviceType'] == 'nomisma'){
+    }else if(@$params['serviceType'] == 'nomisma_rdf'){
 
         //error_log(print_r($remote_data, TRUE)); //DEBUGGING
+		//$remote_data = json_encode($remote_data); // getRdf currently returns an error, so this isn't used
     }
 
 	// Return response

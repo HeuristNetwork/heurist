@@ -79,22 +79,21 @@
 {
     "service": "bnfLibrary",
     "rty_ID": "",
-    "label": "BnF Library Lookup",
-    "dialog": "lookupBnFLibrary",
-    "description": "A proof of concept for searching via the BnF Library API (under development)",
+    "label": "BnF Library - bibliographic records",
+    "dialog": "lookupBnFLibrary_bib",
+    "description": "A proof of concept for searching via the BnF Library API (under development) for Bibliographic Records",
     "fields": {
-        "isbn": "",
         "title": "",
-        "subject": "",
-        "description": "",
-        "creator": "",
-        "contributor": "",
         "publisher": "",
         "date": "",
+        "creator": "",
+        "contributor": "",
+        "biburl": "",
+        "description": "",
+        "ext_description": "",
         "language": "",
         "type": "",
-        "rights": "",
-        "biburl": ""
+        "isbn": ""
     }
 },
 {

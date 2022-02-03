@@ -3739,6 +3739,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                                 if(dialog_name == 'recordLookup'){
                                     dialog_name = 'lookupTCL';
+                                }else if(dialog_name == 'recordLookupBnFLibrary' || dialog_name == 'lookupBnFLibrary'){
+                                    dialog_name = 'lookupBnFLibrary_bib';
                                 }else if(dialog_name.includes('recordLookup')){
                                     dialog_name = dialog_name.replace('recordLookup', 'lookup');
                                 }

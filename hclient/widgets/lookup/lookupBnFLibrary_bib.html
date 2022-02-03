@@ -1,0 +1,141 @@
+<!--
+* lookupBnFLibrary_bib.html: used by lookupBnFLibrary_bib.js
+*
+* @author      Brandon McKay   <blmckay13@gmail.com>
+* @copyright   (C) 2005-2021 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     6
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+-->
+
+<!-- Search Container -->
+<div id="ent_header" style="height:7em; padding: 0.2em; width: 100%;">
+    <fieldset style="display:inline-block; float: left;" id="search_container">
+
+        <div style="padding: 0.2em; width: 100%;" class="input" id="query_form">
+
+            <div>
+                <!-- Any -->
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_any">Any Field:</label>
+                </div>
+                <select id="inpt_any_link">
+                    <option value="any">ANY</option>
+                    <option value="all" selected>ALL</option>
+                    <option value="adj">ADJ</option>
+                </select>
+                <input id="inpt_any" class="text ui-widget-content ui-corner-all" style="max-width:30em;"/>
+                <select id="inpt_any_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                </select>
+
+                <!-- Title -->
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_title">Title:</label>
+                </div>
+                <select id="inpt_title_link">
+                    <option value="any">ANY</option>
+                    <option value="all">ALL</option>
+                    <option value="adj">ADJ</option>
+                </select>
+                <input id="inpt_title" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
+                <select id="inpt_title_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                </select>
+
+            </div>
+
+            <div id="separate_fields" style="margin-top: 10px;">
+                <!-- Author -->
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_author">Author:</label>
+                </div>
+                <select id="inpt_author_link">
+                    <option value="any">ANY</option>
+                    <option value="all">ALL</option>
+                    <option value="adj">ADJ</option>
+                </select>
+                <input id="inpt_author" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
+                <select id="inpt_author_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                </select>
+
+                <!-- Record ID -->
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_recordid">Record ID:</label>
+                </div>
+                <select id="inpt_recordid_link">
+                    <option value="any">ANY</option>
+                    <option value="all">ALL</option>
+                    <option value="adj">ADJ</option>
+                </select>
+                <input id="inpt_recordid" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
+            <!-- There is no field after record id
+                <select id="inpt_recordid_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                </select>
+            -->
+
+            </div>
+
+            <div id="rec_filter_fields" style="margin-top: 10px;">
+                <!--<div class="header optional" style="display: inline-block;">
+                    <label for="inpt_doctype">Searching for </label>
+
+
+
+Recherche par type de document (a : texte imprimé / c : musique notée / e : document cartographique / g : enregistrement sonore / h : image animée / i : image fixe 
+/ o : objet monétiforme / p : objet / r : multimédia multisupport / s : document électronique / t : document d'archive et manuscrit) 
+et récupération des notices de spectacles (v : spectacle)
+
+Search by type of document
+a: printed text / c: notated music / e: cartographic document / g: sound recording / h: moving image / i: still image / 
+o: monetary object / p: object / r: multi-support multimedia / s: electronic document / t: archive document and manuscript)
+and recovery of show notes (v: show)
+
+
+                    <select id="inpt_doctype">
+                        <option value="a" selected>texte imprimé</option>
+                        <option value="c">musique notée</option>
+                        <option value="g">enregistrement sonore</option>
+                        <option value="h">image animée</option>
+                        <option value="i">image fixe</option>
+                        <option value="s">document électronique</option>
+                    </select>
+
+                    <label for="inpt_doctype"> records</label>
+                </div>-->
+
+                <div class="header optional" style="display: inline-block;margin-left: 20px;">
+                    <label for="rec_limit">Search for </label>
+
+                    <select id="rec_limit">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="500">500</option>
+                    </select>
+
+                    <label for="rec_limit"> records</label>
+                </div>
+            </div>
+
+        </div>
+
+    </fieldset>
+
+    <div style="display: inline-block;" id="btn_container">
+        <button id="btnStartSearch">Search</button>
+    </div>
+</div>
+
+<!-- Result List Container -->
+<div id="div_result" class="ent_content_full" style="display: none;top:9em">
+</div>

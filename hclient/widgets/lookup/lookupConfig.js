@@ -370,12 +370,44 @@ $.widget( "heurist.lookupConfig", {
                 has_changes = true;
             }
 
-            if(value.dialog == 'recordLookup'){
-                value.dialog = 'lookupTCL';
+            if(that.options.service_config[key]['dialog'] == 'recordLookup'){
+                that.options.service_config[key]['dialog'] = 'lookupTCL';
                 has_changes = true;
-            }else if(value.dialog.includes('recordLookup')){
-                value.dialog = value.dialog.replace('recordLookup', 'lookup');
+            }else if(that.options.service_config[key]['dialog'].includes('recordLookup')){
+                that.options.service_config[key]['dialog'] = that.options.service_config[key]['dialog'].replace('recordLookup', 'lookup');
                 has_changes = true;
+            }
+
+            if(that.options.service_config[key]['service'] == 'bnfLibrary'){
+
+                var n_fields = that.options.service_config[key]['fields'];
+                var hasFieldChanges = false;
+                for(var obj_key in n_fields){
+                    if(obj_key == 'subject'){
+
+                        delete n_fields[obj_key];
+                        n_fields['ext_description'] = '';
+
+                        hasFieldChanges = true;
+                    }else if(obj_key == 'rights'){
+
+                        delete n_fields[obj_key];
+
+                        hasFieldChanges = true;
+                    }
+                }
+
+                if(hasFieldChanges){
+                    that.options.service_config[key]['fields'] = n_fields;
+
+                    has_changes = true;
+                }
+				
+                if(that.options.service_config[key]['dialog'] == 'lookupBnFLibrary'){
+                    that.options.service_config[key]['dialog'] = 'lookupBnFLibrary_bib';
+
+                    has_changes = true;
+                }
             }
 
             // Ensure that the key is correct, otherwise there will be problems with updating (creating duplicates)
