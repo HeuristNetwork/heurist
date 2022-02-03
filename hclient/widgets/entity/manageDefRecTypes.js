@@ -1419,24 +1419,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             if(this.options.select_mode=='select_multi'){ // Select new rectype, for multi select
                 this.recordList.find('div[recid="'+ recID +'"]').click();
             }
-  
-/*            
-            var rg_options = {
-                select_mode: 'select_multi',
-                edit_mode: 'popup',
-                isdialog: true,
-                width: 540,
-                onselect:function(event, data){
-                    if(data && data.selection){
-                        var newsel = data.selection;
-                    }
-                }
-            }
-            window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', rg_options);
-*/           
 
-            this._addNewFields(recID, true);
-           
+            this._addInitialTabs(recID);
         }else{
         }
         this._triggerRefresh('rty');
@@ -1453,11 +1437,72 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
 */        
     },
-    
+
+	//
+	// Display dialog with set of default tab options for new rectypes
+	//
+    _addInitialTabs: function(rty_ID){
+
+        var that = this;
+        var $dlg;
+        var msg = '';
+
+        var dty_ids = [];
+        var tabs = ['General Info', 'General', 'Identification', 'Description', 'Categorisation', 'Localisation', 'Dating', 'Images', 'Links', 'References'];
+
+        $Db.dty().each(function(dty_ID, rec){
+           if($Db.dty(dty_ID,'dty_Type')=='separator'){
+               dty_ids.push(dty_ID);
+           } 
+        });
+
+        msg = 'Unless the record type is very simple with few fields, we suggest using tabs to<br>organsie the fields describing this record type.<br>'
+                + 'Please choose from this list of frequently used headings (tabs can be added or<br>removed later, and the labels can be easily edited).<br><br>';
+
+        var k = 1;
+        for(var i = 0; i < tabs.length; i++){
+
+            var checked = '';
+            if(i == 0){
+                checked = ' checked="true"';
+                k++;
+            }
+
+            msg += '<label><input type="checkbox" value="'+ tabs[i] +'"'+ checked +'>'+ tabs[i] +'</label><br>';
+        }
+
+        var btns = {};
+        btns['Create tabs'] = function(){
+
+            var headings = [];
+
+            var $checked_opts = $dlg.find('input:checked');
+            
+            if($checked_opts.length == 0){ // no options
+                window.hWin.HEURIST4.msg.showMsgFlash('Please select a suggested tab, or click "No tabs"', 3000);
+            }else if($checked_opts.length > dty_ids.length){ // not enough ids for selected number of headers
+                window.hWin.HEURIST4.msg.showMsgFlash('Please choice fewer tabs...', 3000);
+            }else{ // checked options
+
+                for(var j = 0; j < $checked_opts.length; j++){
+                    headings.push($($checked_opts[j]).val());
+                }
+
+                that._addNewFields(rty_ID, headings);
+            }
+        };
+        btns['No tabs'] = function(){
+            that._addNewFields(rty_ID, null);
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Suggested tabs', yes: 'Create tabs', no: 'No tabs'}, {default_palette_class: 'ui-heurist-design'});
+    },
+	
     //
     // Add default tab separators to new record type
     //    
-    _addNewFields: function( rty_ID, is_new ){
+    _addNewFields: function(rty_ID, tab_headings, dty_ids){
       
 		this._selected_fields = {};
 		
@@ -1465,27 +1510,27 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 		this._selected_fields['values'] = {};
 		
 		var that = this;
-		
-		//add 3 default tabs 
-		var k = 0;
-		$Db.dty().each(function(dty_ID, rec){
-		   if($Db.dty(dty_ID,'dty_Type')=='separator'){
-			   if(k==0){
-				   that._selected_fields['fields'].unshift(dty_ID);    
-				   that._selected_fields['values'][dty_ID] = {dty_Name:'Overview',rst_DefaultValue:'tabs'};
-			   }else{
-				   that._selected_fields['fields'].push(dty_ID);    
-				   if(k==1){
-						that._selected_fields['values'][dty_ID] = {dty_Name:'Details',rst_DefaultValue:'tabs'};
-				   }else{
-						that._selected_fields['values'][dty_ID] = {dty_Name:'References',rst_DefaultValue:'tabs'};
-				   }
-			   }
-			   k++;
-			   if(k>2) return false;//break
-		   } 
-		});      
-        
+
+        if(!window.hWin.HEURIST4.util.isempty(tab_headings)){
+    		
+            var i = 0;
+    		$Db.dty().each(function(dty_ID, rec){
+    		    if($Db.dty(dty_ID,'dty_Type')=='separator'){
+
+                    if(i == 0){
+                        that._selected_fields['fields'].unshift(dty_ID);
+                        that._selected_fields['values'][dty_ID] = {dty_Name: tab_headings[i], rst_DefaultValue: 'tabs'};
+                    }else{                    
+                        that._selected_fields['fields'].push(dty_ID);
+                        that._selected_fields['values'][dty_ID] = {dty_Name: tab_headings[i], rst_DefaultValue: 'tabs'};
+                    }
+                    i++;
+
+                    if(i >= tab_headings.length) return false;
+    		    } 
+    		});
+        }
+
         window.hWin.HEURIST4.msg.bringCoverallToFront();
         window.hWin.HEURIST4.msg.coverallKeep = true;
         window.hWin.HEURIST4.msg.showMsgFlash('loading structure', false);
@@ -1518,7 +1563,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 		);
     },
 
-    
     //
     //
     //

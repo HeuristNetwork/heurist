@@ -424,6 +424,8 @@ class DbDefRecStructure extends DbEntityBase
             }
             if(@$newfields_values[$dty_ID]['dty_DefaultValue']){
                 $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['dty_DefaultValue'];
+            }else if(@$newfields_values[$dty_ID]['rst_DefaultValue']){
+                $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['rst_DefaultValue'];
             }
             
             $records[] = $recvalues;
