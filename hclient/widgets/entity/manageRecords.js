@@ -4290,7 +4290,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         // remove opacity change and set background to lighter background
         var cur_styling = ele.find('input').attr('style');
-        var cur_title = ele.find('input').val();
+        var cur_title = this._getField('rec_Title').replace(/[\r\n]+/g, ' ');
         ele.find('input')
             .replaceWith('<div style="'+cur_styling+'background-color:#e3f0f0!important;font-size:13px;padding:3px;max-width:'+title_maxwidth+'px;width:'+title_maxwidth+'px;" class="truncate"'
                         + ' title="A title constructed from one or more fields, which is used to identify records when displayed in search results.">'+ cur_title +'</div>');
