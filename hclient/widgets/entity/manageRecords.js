@@ -4271,20 +4271,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         // add new separate fieldset at the start w/ darker background
         var top_fieldset = $('<fieldset>').css({'background-color': '#d1e7e7', 'margin-bottom': '10px', 'padding-left': '10px'}).insertBefore(this.editForm.find('fieldset:first'));
 
+        var title_maxwidth = (top_fieldset.width() != 0) ? top_fieldset.width() : top_fieldset.parent().width();
+        title_maxwidth = title_maxwidth * 0.85 - (this.options.rts_editor ? 30 : 0);
+
         // check for child record field, move to new fieldset if any
         var childrec_field = this.editForm.find('div[data-dtid="'+parententity+'"]');
         if(childrec_field.length == 1){
 
-            // get help info and remove it so it doesn't appear when help is shown
-            //var help_text = childrec_field.find('div.heurist-helper1').text();
-            //childrec_field.find('div.heurist-helper1').text('');
-
-            // Input changes
-            //childrec_field.find('div.link-div').attr('title', help_text);
-
             // Header changes
             childrec_field.find('div.header').css({'font-size': '12px', 'text-align': 'left', 'width': '120px', 'min-width': '120px'});//.attr('title', help_text);
-            //childrec_field.find('div.header > label').css('color', 'black');
 
             // Append to top
             top_fieldset.append(childrec_field);
@@ -4297,7 +4292,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         var cur_styling = ele.find('input').attr('style');
         var cur_title = ele.find('input').val();
         ele.find('input')
-            .replaceWith('<div style="'+cur_styling+'background-color:#e3f0f0!important;font-size:13px;padding:3px;"'
+            .replaceWith('<div style="'+cur_styling+'background-color:#e3f0f0!important;font-size:13px;padding:3px;max-width:'+title_maxwidth+'px;width:'+title_maxwidth+'px;" class="truncate"'
                         + ' title="A title constructed from one or more fields, which is used to identify records when displayed in search results.">'+ cur_title +'</div>');
 
         // change label to required version, and add help icon
@@ -4312,7 +4307,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             var $gear_icon = $('<span>')
                               .addClass('ui-icon ui-icon-gear')
-                              .css({'color': 'rgb(125, 154, 170)', 'margin-bottom': '2px', 'min-width': '22px'})
+                              .css({'color': 'rgb(125, 154, 170)', 'margin-bottom': '2px', 'min-width': '22px', 'cursor': 'pointer'})
                               .attr('title', 'Open Title Mask Editor')
                               .click(function(e) { that.editRecordTypeTitle(); });
 
@@ -4320,15 +4315,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             ele.find('span.btn_input_clear').remove();
         }
 
-        if(this.options.rts_editor){
-            this._createRtsEditButton(null, ele);
-        }
-
         // move rec_title field to new fieldset
         top_fieldset.append(ele);
 
         var url_field = this._editing.getFieldByName('rec_URL');
-        //url_field.find('input')
         url_field.find('div.header')
             .css({'font-size': '12px', 'text-align': 'left', 'width': '120px', 'min-width': '120px'});
 

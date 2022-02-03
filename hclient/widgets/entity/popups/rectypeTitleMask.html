@@ -19,7 +19,7 @@
         </div>
             
         <div id="formContainer" style="position:absolute;top:0px;bottom:30px;left:220px;right:5px;">
-                <div style="padding:10px;text-align:left" class="heurist-helper2">
+                <div style="padding:10px;text-align:left;padding-bottom:0px;" class="heurist-helper2">
                     The title mask builds a composite title from fields in the record (see manual).
 
                     Field values identified by [ ] are inserted into the mask,<br>
@@ -32,15 +32,17 @@
 
                     The constructed value is used as the extended title displayed in search results and other lists.<br>
 
-                    To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).
+                    To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).<br>&nbsp;<br>
 
-                    Add optional text before a field (if it has a value) or a different set of text if a value is not available<br>
-
-                    by adding {\Text for existing value \Text for missing value} after a field.<br>
+                    Add optional text if a value is not available by adding {\Text for existing value \Text for missing value} after a field.<br>
 
                     e.g. <b>[Starting_date] {\Starting date of: \No starting date}</b> will either generate:<br>
 
-                    <b>"Starting date of: 04-11-1974"</b> or <b>"No starting date"</b> if there isn't Start_date is empty.<br>&nbsp;<br>
+                    <b>"Starting date of: 04-11-1974"</b> or <b>"No starting date"</b> if there isn't Start_date is empty.<br>
+
+                    Additional add a character cap to field values by adding the desire amount within the optional text like so,<br>
+
+                    {<b>50</b> \Text for existing value \Text for missing value} will cause the value, if it exists, to show 50 characters max.<br>&nbsp;<br>
                 </div>
 
                 <hr/>

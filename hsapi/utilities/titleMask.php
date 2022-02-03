@@ -235,26 +235,41 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
         $replacements['[['] = '[';
         $replacements[']]'] = ']';
 
-        // Check if there are any conditional parts in the title mask,
+        // Check if there are any conditional parts in the title mask, or a character limit
 		// Works by checking if the preceding field has a value, if it does the first part within the {} will print with the value following it
 		// otherwise the second part of the {} will be printed
-        if(preg_match_all("/\[[^\[\]]+?\]\s?{\\\\[^\\\\]*?\s*\\\\?[^\\\\]*?}/", $mask, $conditions_mask)){
+		// Character limit involves placing the character max before the first '\' part (before the 'if' section)
+        if(preg_match_all("/\[[^\[\]]+?\]\s?{\d*?\s?\\\\[^\\\\]*?\s*\\\\?[^\\\\]*?}/", $mask, $conditions_mask)){
 
             foreach ($conditions_mask[0] as $key => $cond_str) {
 
                 $cond_field = array();
                 $cond_mask = array();
                 $cond_replace = '';
-
                 // Get the 'if', preceding field
                 preg_match("/\[[^\[\]]+?\]/", $cond_str, $cond_field);
                 // Get the 'then' and 'else' parts, each preceding by a backslash
-                preg_match("/{\\\\[^\\\\]*?\s*\\\\?[^\\\\]*?}/", $cond_str, $cond_mask);
+                preg_match("/{\d*?\s?\\\\[^\\\\]*?\s*\\\\?[^\\\\]*?}/", $cond_str, $cond_mask);
 
                 $cond_parts = explode('\\', $cond_mask[0]);
 
-                if(!empty($replacements[$cond_field[0]])){
-                    $cond_replace = $cond_parts[1] . ' ' . $replacements[$cond_field[0]];
+                $new_str_maxlen = 0;
+                $new_str = array_key_exists($cond_field[0], $replacements) ? $replacements[$cond_field[0]] : '';
+
+                if(!empty($new_str)){
+
+                    if(strlen($cond_parts[0]) > 1){
+
+                        $new_str_maxlen = intval(substr($cond_parts[0], 1));
+
+                        if($new_str_maxlen > 0 && strlen($new_str) > $new_str_maxlen){
+                            $cond_replace = $cond_parts[1] . ' ' . substr($new_str, 0, $new_str_maxlen) . '...';
+                        }else{
+                            $cond_replace = $cond_parts[1] . ' ' . $new_str;
+                        }
+                    }else{
+                        $cond_replace = $cond_parts[1] . ' ' . $new_str;
+                    }
                 }else if($cond_parts[2] == '}'){
                     $cond_replace = '';
                 }else{
