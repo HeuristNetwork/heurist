@@ -308,6 +308,15 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                             if(!that.getRecordSet()){
                                 that._loadData( true ); //not yet loaded
                             }
+
+							if(that.options.select_mode == 'manager'){ // reset search to default for manager
+
+                                that.searchForm.find('#input_search').val('');
+                                that.searchForm.find('#chb_show_all_groups').prop('checked', false);
+                                that.searchForm.find('#input_sort_type').val('name');
+
+                                that.searchForm.searchDefRecTypes('startSearch');
+                            }
                         },
                         add_to_begin: true
                     };
