@@ -1868,7 +1868,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 //console.log('same parent nothing to change');            
                 return;
             }
-            
+
+            var that = this;
             var new_vocab_id;
 
             //if new parent is vocabulary
@@ -1890,13 +1891,66 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     var trm_labels = $Db.trm_TreeData(new_parent_id, 'labels'); //labels in lowcase
                     var lbl = $Db.trm(trm_ID, 'trm_Label');
                     if(trm_labels.indexOf(lbl.toLowerCase())>=0){
-                        window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Reference':'Term')
-                            + ' with name <b>"'+lbl
-                            +'"</b> is already in vocabulary <b>"'+$Db.trm(new_parent_id,'trm_Label')+'"</b>'
-                            +'<p>To make this move, edit the term so that it is different from any in the top level '
-                            +'of the vocabulary to which you wish to move it. Once moved, you can merge within '
-                            +'the vocabulary or reposition the term and edit it appropriately.</p>'
-                            ,null,'Duplication',
+
+                        var $dlg;
+                        var msg = (isRef?'Reference':'Term')
+                                    + ' with name <b>"'+lbl
+                                    +'"</b> is already among children of <b>"'+$Db.trm(new_parent_id,'trm_Label')+'"</b>'
+                                    +'<p>To make this move, edit the term label so that it is disambiguated (2, 3, ...) or slightly different '
+                                    +'from any term in the top level of the vocabulary to which you wish to move it.'
+                                    +'Once moved, you can merge within the vocabulary or reposition the term and edit it appropriately.</p>';
+
+                        var btns = {};
+                        btns['Cancel'] = function(){
+                            $dlg.dialog('close');
+                        };
+                        btns['Move term with disambiguation'] = function(){
+
+                            var i = 2;
+                            while(true){
+
+                                var new_label = lbl + ' ' + i;
+
+                                if(trm_labels.indexOf(new_label.toLowerCase()) < 0){
+                                    params['trm_Label'] = new_label;
+                                    break;
+                                }
+                            }
+
+                            var old_parent_id = old_parent_ids[old_parent_ids.length-1];
+                            var old_vocab_id = old_parent_ids[0];
+
+                            if(isRef){
+                                that._saveEditAndClose( {'trm_ID': params['trm_ID'], 'trm_Label': new_label},
+                                    function(){
+                                        //change parent for reference  @todo - take correct old_parent_ids
+                                        $Db.setTermReferences(trm_ID, new_vocab_id, new_parent_id, old_vocab_id, old_parent_id,
+                                                function(){
+                                                    that.it_was_insert = true;
+                                                    that._afterSaveEventHandler2();//to reset filter and trigger global refresh
+                                                });
+                                    },
+                                    onTermSaveError
+                                );
+                            }else{
+
+                                that._saveEditAndClose( params ,  //change in defTerms
+                                    function(){  
+                                        if(params.trm_ParentTermID>0){
+                                            $Db.changeParentInIndex(new_parent_id, trm_ID, old_parent_id);
+                                            that._filterByVocabulary();
+                                        }
+                                        that._triggerRefresh('term');
+                                    },
+                                    onTermSaveError
+                                );
+                            }
+
+                            $dlg.dialog('close');
+                        };
+
+                        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+                            {title: 'Duplication', no: 'Cancel', yes: 'Move term with disambiguation'},
                             {default_palette_class:this.options.default_palette_class}); 
                         return;
                     }
@@ -1932,15 +1986,65 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     var lbl = $Db.trm(trm_ID, 'trm_Label');
                     if($Db.trm_HasChildWithLabel(new_parent_id, lbl))                    
                     {
-                    //var trm_labels = $Db.trm_TreeData(new_parent_id, 'labels'); //labels in lowcase
-                    //if(trm_labels.indexOf(lbl.toLowerCase())>=0){
-                        window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Reference':'Term')
-                            + ' with name <b>"'+lbl
-                            +'"</b> is already among children of <b>"'+$Db.trm(new_parent_id,'trm_Label')+'"</b>'
-                            +'<p>To make this move, edit the term so that it is different from any in the top level '
-                            +'of the vocabulary to which you wish to move it. Once moved, you can merge within '
-                            +'the vocabulary or reposition the term and edit it appropriately.</p>'
-                            ,null,'Duplication',
+                        var $dlg;
+                        var msg = (isRef?'Reference':'Term')
+                                    + ' with name <b>"'+lbl
+                                    +'"</b> is already among children of <b>"'+$Db.trm(new_parent_id,'trm_Label')+'"</b>'
+                                    +'<p>To make this move, edit the term label so that it is disambiguated (2, 3, ...) or slightly different '
+                                    +'from any term in the top level of the vocabulary to which you wish to move it.'
+                                    +'Once moved, you can merge within the vocabulary or reposition the term and edit it appropriately.</p>';
+
+                        var btns = {};
+                        btns['Cancel'] = function(){
+                            $dlg.dialog('close');
+                        };
+                        btns['Move term with disambiguation'] = function(){
+
+                            var i = 2;
+                            while(true){
+
+                                var new_label = lbl + ' ' + i;
+
+                                if(!$Db.trm_HasChildWithLabel(new_parent_id, new_label)){
+                                    params['trm_Label'] = new_label;
+                                    break;
+                                }
+                            }
+
+                            var old_parent_id = old_parent_ids[old_parent_ids.length-1];
+                            var old_vocab_id = old_parent_ids[0];
+
+                            if(isRef){
+                                that._saveEditAndClose( {'trm_ID': params['trm_ID'], 'trm_Label': new_label},
+                                    function(){
+                                        //change parent for reference  @todo - take correct old_parent_ids
+                                        $Db.setTermReferences(trm_ID, new_vocab_id, new_parent_id, old_vocab_id, old_parent_id,
+                                                function(){
+                                                    that.it_was_insert = true;
+                                                    that._afterSaveEventHandler2();//to reset filter and trigger global refresh
+                                                });
+                                    },
+                                    onTermSaveError
+                                );
+                            }else{
+
+                                that._saveEditAndClose( params ,  //change in defTerms
+                                    function(){  
+                                        if(params.trm_ParentTermID>0){
+                                            $Db.changeParentInIndex(new_parent_id, trm_ID, old_parent_id);
+                                            that._filterByVocabulary();
+                                        }
+                                        that._triggerRefresh('term');
+                                    },
+                                    onTermSaveError
+                                );
+                            }
+
+                            $dlg.dialog('close');
+                        };
+
+                        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+                            {title: 'Duplication', no: 'Cancel', yes: 'Move term with disambiguation'},
                             {default_palette_class:this.options.default_palette_class}); 
                         return;
                     }
@@ -1957,9 +2061,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     return;
                 }
             }
-
-
-            var that = this;
             
             var old_parent_id = old_parent_ids[old_parent_ids.length-1];
 
