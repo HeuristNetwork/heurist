@@ -656,7 +656,7 @@ function addMarkerDefinitions() {
            .attr("fill", markercolor)
            .attr("opacity", 0.6)
            .append("path")                
-           .attr("d", 'M2,-5 L10,0 L2,5 M-2,-5 L-10,0 L-2,5');
+           .attr("d", 'M1,-5 L9,0 L1,5 M-1,-5 L-9,0 L-1,5');
 
     markers.append("svg:marker") // Large and Small (child records) single arrows, pointing at each other
            .attr("id", "marker-childptr-mid")
@@ -699,7 +699,7 @@ function addMarkerDefinitions() {
            .attr("fill", markercolor)
            .attr("opacity", 0.6)
            .append("path")                
-           .attr("d", 'M2,-5 L10,0 L2,5 M-2,-5 L-10,0 L-2,5');
+           .attr("d", 'M1,-5 L9,0 L1,5 M-1,-5 L-9,0 L-1,5');
 
     markers.append("svg:marker") // Large and Small (child records) single arrows, pointing at each other
            .attr("id", "marker-childptr-end")
@@ -808,10 +808,11 @@ function addLines(name, color, thickness) {
                 }else{ // error
                     return null;
                 }
+            }else if(d.relation.type == 'relmarker' || d.relation.type == 'relationship'){ // double same size arrows
+                return "url(#marker-rel-mid)";
             }
         });
     }else if(name=='top-lines' && linetype != "stepped"){
-
         lines.attr("marker-mid", function(d) {
             if(!(hide_empty && d.targetcount == 0)){
                 // reference to marker id
