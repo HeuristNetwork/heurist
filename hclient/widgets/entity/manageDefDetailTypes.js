@@ -1598,6 +1598,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                     // Customisation options
                     var pointer_mode = this._editing.getFieldByName('rst_PointerMode');
+					var pointer_mode_inpt = pointer_mode.editing_input('getInputs')[0];
                     var browser_filter = this._editing.getFieldByName('rst_PointerBrowseFilter');
                     var child_rec = this._editing.getFieldByName('rst_CreateChildIfRecPtr');
                     var resource_default = this._editing.getFieldByName('rst_DefaultValue_resource');
@@ -1608,6 +1609,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     resource_default.editing_input('fset','rst_PointerMode', 'dropdown_add');
                     this._editing.setFieldValueByName('rst_DefaultValue_resource', default_val, false);
 
+                    pointer_mode_inpt.val(resource_default.editing_input('f', 'rst_PointerMode'));
+                    if(pointer_mode_inpt.hSelect('instance') != undefined){
+                        pointer_mode_inpt.hSelect('refresh');
+                    }
 
                     // enable/disable rst_PointerMode depend on rst_CreateChildIfRecPtr                   
                     function __rst_PointerMode_Enable(is_enable){
@@ -1657,14 +1662,20 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         element: $ele[0], 
                         open: function(event){
 
-                            var sel = pointer_mode.find('select');
+                            var cur_val = pointer_mode_inpt.val(); // retain current value
 
                             // Reset mode selector
-                            if(sel.hSelect('instance')!=undefined){
-                                sel.hSelect('destroy');
+                            if(pointer_mode_inpt.hSelect('instance')!=undefined){
 
-                                sel.hSelect();
-                                sel.hSelect('menuWidget').css('background', '#f2f2f2');
+                                pointer_mode_inpt.hSelect('destroy');
+
+                                pointer_mode_inpt.hSelect();
+
+                                pointer_mode_inpt.hSelect('widget').css('width', '20em');
+                                pointer_mode_inpt.hSelect('menuWidget').css('background', '#f2f2f2');
+
+                                pointer_mode_inpt.val(cur_val); // restore original value
+                                pointer_mode_inpt.hSelect('refresh');
                             }
 
                             $(event.target).parent().find('.ui-dialog-buttonset > .ui-button.ui-corner-all.ui-widget').addClass('ui-button-action');
