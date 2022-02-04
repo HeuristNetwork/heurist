@@ -62,7 +62,7 @@
                         "rst_DisplayName": "Ownership:",
                         "rst_DisplayHelpText": "",
                         "rst_FieldConfig": [
-                        {"key":"null", "title":"No changes"},
+                        {"key":"null", "title":"No change"},
                         {"key":"0", "title":"Any logged-in user can edit"},
                         {"key":"group", "title":"Specific group"}
                         ]
@@ -86,7 +86,7 @@
                         "rst_DisplayName": "View permissions:",
                         "rst_DisplayHelpText": "",
                         "rst_FieldConfig": [
-                        {"key":"null", "title":"No changes"},
+                        {"key":"null", "title":"No change"},
                         {"key":"public", "title":"Public - viewable for anyone"},
                         {"key":"viewable", "title":"Any logged-in user can view"},
                         {"key":"hidden", "title":"Hidden - only owner and selected groups can view"}
@@ -108,8 +108,8 @@
                     "dtFields":{
                         "dty_Type":"resource",
                         "rst_DisplayName": "Info about stage:",
-                        "rst_DisplayHelpText": "Groups that are emailed about setting this stage",
-                        "rst_FieldConfig": {"entity":"sysGroups","csv":true}
+                        "rst_DisplayHelpText": "Users that are emailed about setting this stage",
+                        "rst_FieldConfig": {"entity":"sysUsers","csv":true}
                     }
                 }
                 

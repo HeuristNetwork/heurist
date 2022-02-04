@@ -2742,8 +2742,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 }
             }
 */            
-            // Add fields that are in record set (field_in_recset) 
-            // but not in structure (fields_ids) - NON STANDARD FIELDS
+            // 1) Add fields that are in record set (field_in_recset) 
+            //    but not in structure (fields_ids) - NON STANDARD FIELDS
+            // 2) Disable (readonly) for DT_WORKFLOW_STAGE 2-1080 workflow stage field
+
             addhead = 0;
             for(var k=0; k<field_in_recset.length; k++){
                 //field in recset is not in structure
@@ -2791,9 +2793,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         addhead++;
                         
                         var rfr = that._getFakeRectypeField(field_in_recset[k], 1100+addhead);
-                        s_fields.push(rfr);
                         
+                        if(field_in_recset[k]==window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE']){
+                            rfr['rst_Display'] = 'readonly';
+                        }
+                        
+                        s_fields.push(rfr);
                     }
+                    
                 }
             }//for   
             
@@ -3200,7 +3207,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     if(swf_mode=='on' || (swf_mode=='new' && this._isInsert)){
                         
                         var opts_swf_stages = '';
-                        var dtyID = $Db.getLocalID('dty', '2-1080');
+                        var dtyID = $Db.getLocalID('dty', '2-1080'); //workflow stage field
                         var curr_stage = fields[dtyID];
                         
                         for (var i=0; i<this._swf_rules.length; i++){
@@ -3231,7 +3238,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             fields[dtyID] = val;
                             that._saveEditAndClose( fields, afterAction );
                             
-                        }, {title: window.hWin.HR('Set workflow stage'), yes: window.hWin.HR('Save')});
+                        }, {title: window.hWin.HR('Set workflow stage'), yes: window.hWin.HR('Save')},
+                        {default_palette_class: this.options.default_palette_class}); //'ui-heurist-populate'
                         return;
                     }
                 } //END assign workflow stage field 2-9453

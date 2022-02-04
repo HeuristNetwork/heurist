@@ -27,10 +27,11 @@ require_once (dirname(__FILE__).'/consts.php');
 require_once (dirname(__FILE__).'/dbaccess/utils_db.php');
 require_once (dirname(__FILE__).'/dbaccess/db_users.php');
 require_once (dirname(__FILE__).'/utilities/utils_file.php');
+require_once (dirname(__FILE__).'/utilities/utils_mail.php');
 require_once (dirname(__FILE__).'/structure/dbsImport.php');
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+//use PHPMailer\PHPMailer\PHPMailer;
+//use PHPMailer\PHPMailer\Exception;
 
 set_error_handler('boot_error_handler');    
 
@@ -1961,8 +1962,14 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
 
             if($this->send_email_on_error==1 && count($logs_to_be_emailed)>0){
                 
-                $msg = 'Error report '.HEURIST_SERVER_NAME.' for '.$y1.($y2==$y1?'':(' ~ '.$y2));
+                $msgTitle = 'Error report '.HEURIST_SERVER_NAME.' for '.$y1.($y2==$y1?'':(' ~ '.$y2));
+                $msg = $msgTitle;
+                foreach($logs_to_be_emailed as $log_file){
+                    $msg = $msg.'<br>'.file_get_contents($log_file);
+                }
+                sendPHPMailer('bugs@HeuristNetwork.org', 'Bug reporter', HEURIST_MAIL_TO_BUG, $msgTitle, $msg, null);
 
+                /*    
                 //send an email with attachment
                 $email = new PHPMailer();
                 $email->CharSet = 'UTF-8';
@@ -1990,7 +1997,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                     error_log('Cannot send email. Please ask system administrator to verify that mailing is enabled on your server. '
                      .$email->ErrorInfo);     
                 }                    
-                //$rv = sendEmail(HEURIST_MAIL_TO_BUG, $Title, $sMsg, null);
+                */
             }
             
         
@@ -2028,6 +2035,10 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                 . " by any confident user, as they bring bug-fixes, cosmetic improvements and new"
                 . " features. They are safe to use and we will respond repidly to any reported bugs.";
 
+                
+                sendPHPMailer('info@HeuristNetwork.org', 'Update notification', HEURIST_MAIL_TO_ADMIN, $title, $msg, null);
+                
+                /*
                 $email = new PHPMailer(true);
                 $email->isHTML(true);
                 //$email->From('info@HeuristNetwork.org');
@@ -2042,8 +2053,8 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                 } catch (Exception $e) {
                     error_log('Cannot send email. Please ask system administrator to verify that mailing is enabled on your server. ' . $e->getMessage());
                 }
-
                 if($email->ErrorInfo)
+                */
 
                 return;
 
