@@ -367,7 +367,7 @@ function editCMS2(){
         }
     }
 
-
+    // global listener on window close/exit
     function _onbeforeunload() {
 
         if(page_was_modified || (_edit_Element && _edit_Element.isModified())){
@@ -572,6 +572,21 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             
             setup:function(editor) {
 
+                editor.on('change', function(e) {
+                    if(tinymce.activeEditor.targetElm){
+                        var key = $(tinymce.activeEditor.targetElm).attr('data-hid');
+                        //update in _layout_content
+                        var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, key);
+                        var new_content = tinymce.activeEditor.getContent();
+                        
+                        page_was_modified = (page_was_modified || l_cfg.content!=new_content);
+                        if(page_was_modified && _edit_Element==null) _toolbar_Page.show();
+                        
+                        l_cfg.content = new_content;
+                        //_panel_treePage.find('.fancytree-hover').removeClass('fancytree-hover');
+                    }
+                });                
+                                
                 editor.on('click', function (e) {
                     setTimeout(function(){
                         var ele = $('body').find('.tox-toolbar-dock-transition');
@@ -607,21 +622,12 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                            //return false;
                     }
                 });
-                
+                /*
                 editor.on('blur', function (e) {
-                        var key = $(tinymce.activeEditor.targetElm).attr('data-hid');
-                        //update in _layout_content
-                        var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, key);
-                        var new_content = tinymce.activeEditor.getContent();
-                        
-                        page_was_modified = (page_was_modified || l_cfg.content!=new_content);
-                        if(page_was_modified && _edit_Element==null) _toolbar_Page.show();
-                        
-                        l_cfg.content = new_content;
-                        //_panel_treePage.find('.fancytree-hover').removeClass('fancytree-hover');
+console.log('BLUR');                    
                         
                 });
-           
+                */
                 editor.ui.registry.addButton('customHeuristMedia', {
                       icon: 'image',
                       text: 'Add Media',
