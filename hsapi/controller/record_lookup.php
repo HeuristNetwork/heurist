@@ -265,6 +265,114 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
         // Encode to json for response to JavaScript
         $remote_data = json_encode($results);
+    }else if(@$params['serviceType'] == 'bnflibrary_aut'){
+
+        $results = array();
+        
+        // Create xml object
+        $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
+        // xml namespace urls: http://www.loc.gov/zing/srw/ (srw), info:lc/xmlns/marcxchange-v2 (mxc)
+
+        // Retrieve records from results
+        $records = $xml_obj->children('http://www.loc.gov/zing/srw/', false)->records->record;
+
+        // Move each result's details into seperate array
+        foreach ($records as $key => $details) {
+
+            $formatted_array = array();
+
+            foreach ($details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record->controlfield as $key => $cf_ele) { // controlfield elements
+                $cf_tag = @$cf_ele->attributes()['tag'];
+
+                if($cf_tag == '003') { // Record URL
+                    $formatted_array['auturl'] = (string)$cf_ele[0];
+                    break;
+                }
+            }
+
+            foreach ($details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record->datafield as $key => $df_ele) { // datafield elements
+                $df_tag = @$df_ele->attributes()['tag'];
+
+                if(!$df_tag) {
+                    continue;
+                }
+
+                if($df_tag == '100' || $df_tag == '110' || $df_tag == '167' || $df_tag == '170') { // Name
+
+                    foreach($df_ele->subfield as $sub_key => $sf_ele) {
+
+                        $sf_code = @$sf_ele->attributes()['code'];
+
+                        if($df_tag == '170' && $sf_code == 'a') {
+                            $formatted_array['name'] = (string)$sf_ele[0];
+                            break;
+                        }else if($df_tag == '100'){
+
+                            if($sf_code == 'a'){ // Name
+                                $formatted_array['name'] = (string)$sf_ele[0];
+                            }else if($sf_code == 'm'){ // Name
+
+                                if( array_key_exists('name', $formatted_array)){
+                                    $formatted_array['name'] .= ', ' . (string)$sf_ele[0];
+                                }else{
+                                    $formatted_array['name'] = (string)$sf_ele[0];
+                                }
+                            }else if($sf_code == 'd'){ // Years active
+
+                                if( array_key_exists('name', $formatted_array)){
+                                    $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
+                                }else{
+                                    $formatted_array['name'] = 'No Name Provided';
+                                }
+                            }
+                        }else if($df_tag == '110'){
+
+                            if($sf_code == 'a'){ // Name
+                                $formatted_array['name'] = (string)$sf_ele[0];
+                            }else if($sf_code == 'c'){ // Location
+
+                                if( array_key_exists('name', $formatted_array)){
+                                    $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
+                                }else{
+                                    $formatted_array['name'] = 'No Name Provided';
+                                }
+                            }
+                        }else if($df_tag == '167'){
+
+                            if($sf_code == 'a'){ // Location
+                                $formatted_array['name'] = (string)$sf_ele[0];
+                            }else if($sf_code == 'm'){ // Dept
+
+                                if( array_key_exists('name', $formatted_array)){
+                                    $formatted_array['name'] .= ' (' . (string)$sf_ele[0] . ')';
+                                }else{
+                                    $formatted_array['name'] = 'No Name Provided';
+                                    break;
+                                }
+                            }else if($sf_code == 'x'){ // Name
+
+                                if( array_key_exists('name', $formatted_array)){
+                                    $formatted_array['name'] .= ' - ' . (string)$sf_ele[0];
+                                }else{
+                                    $formatted_array['name'] = (string)$sf_ele[0];
+                                }
+                            }
+                        } 
+                    }
+
+                    break;
+                }
+            }
+
+            $results['result'][] = $formatted_array;
+        }
+
+        // Add other details, can be used for more calls to retrieve all results (currently retrieves 500 records at max)
+        $results['numberOfRecords'] = intval($xml_obj->children('http://www.loc.gov/zing/srw/', false)->numberOfRecords);
+        $results['nextStart'] = intval($xml_obj->children('http://www.loc.gov/zing/srw/', false)->nextRecordPosition);
+
+        // Encode to json for response to JavaScript
+        $remote_data = json_encode($results);
     }else if(@$params['serviceType'] == 'nomisma_rdf'){
 
         //error_log(print_r($remote_data, TRUE)); //DEBUGGING

@@ -1,0 +1,100 @@
+<!--
+* lookupBnFLibrary_aut.html: used by lookupBnFLibrary_aut.js
+*
+* @author      Brandon McKay   <blmckay13@gmail.com>
+* @copyright   (C) 2005-2021 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     6
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+-->
+
+<!-- Search Container -->
+<div id="ent_header" style="height:7em; padding: 0.2em; width: 100%;">
+    <fieldset style="display:inline-block; float: left;" id="search_container">
+
+        <div style="padding: 0.2em; width: 100%;" class="input" id="query_form">
+
+            <div>
+                <!-- Any -->
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_any">Any Field:</label>
+                </div>
+                <select id="inpt_any_link">
+                    <option value="any">ANY</option>
+                    <option value="all" selected>ALL</option>
+                    <option value="adj">ADJ</option>
+                </select>
+                <input id="inpt_any" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <select id="inpt_any_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                </select>
+
+                <br>
+
+                <!-- Title -->
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_accesspoint">Access Point:</label>
+                </div>
+                <select id="inpt_accesspoint_link">
+                    <option value="any">ANY</option>
+                    <option value="all" selected>ALL</option>
+                    <option value="adj">ADJ</option>
+                </select>
+                <input id="inpt_accesspoint" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <select id="inpt_accesspoint_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                </select>
+
+                <br>
+
+                <!-- Record ID -->
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_recordid">Record ID:</label>
+                </div>
+                <select id="inpt_recordid_link">
+                    <option value="any">ANY</option>
+                    <option value="all" selected>ALL</option>
+                    <option value="adj">ADJ</option>
+                </select>
+                <input id="inpt_recordid" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+            <!-- There is no field after record id
+                <select id="inpt_recordid_logic">
+                    <option value="and" selected>AND</option>
+                    <option value="or">OR</option>
+                </select>
+            -->
+
+            </div>
+
+        </div>
+
+    </fieldset>
+
+    <div style="display: inline-block;" id="btn_container">
+        <button id="btnStartSearch">Search</button>
+
+        <div id="rec_filter_fields" style="margin-top: 20px;">
+            <div class="header optional">
+                <label for="rec_limit">Search for </label>
+
+                <select id="rec_limit">
+                    <option value="10">10</option>
+                    <option value="20" selected>20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                    <option value="500">500</option>
+                </select>
+
+                <label for="rec_limit"> records</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Result List Container -->
+<div id="div_result" class="ent_content_full" style="display: none;top:9em">
+</div>

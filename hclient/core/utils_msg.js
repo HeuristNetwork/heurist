@@ -237,10 +237,17 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     //
     // creates and returns div (id=dialog-common-messages) that is base element for jquery ui dialog
     //
-    getMsgDlg: function(){
-        var $dlg = $( "#dialog-common-messages" );
+    getMsgDlg: function(dialogId){
+
+        if(window.hWin.HEURIST4.util.isempty(dialogId)){
+            dialogId = "dialog-common-messages";
+        }else if(dialogId[0] == '#'){
+            dialogId = dialogId.slice(0, 1);
+        }
+
+        var $dlg = $( "#" + dialogId );
         if($dlg.length==0){
-            $dlg = $('<div>',{id:'dialog-common-messages'})
+            $dlg = $('<div>',{id: dialogId})
                 .css({'min-wdith':'380px','max-width':'640px'}) //,padding:'1.5em 1em'
                 .appendTo( $('body') );
         }
@@ -1116,7 +1123,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     bringCoverallToFront: function(ele, styles) {
         if (!  window.hWin.HEURIST4.msg.coverall ) {
             window.hWin.HEURIST4.msg.coverall = 
-                $('<div>Loading Content...</div>').addClass('coverall-div').css({'zIndex': 60000, 'padding': '30px 0 0 30px', 'font-size': '1.2em'}); //9999999999
+                $('<div><div style="position: absolute;top: 30px;left: 30px;">Loading Content...</div></div>').addClass('coverall-div').css({
+                    'zIndex': 60000, //9999999999
+                    'font-size': '1.2em'
+                });
         }else{
             window.hWin.HEURIST4.msg.coverall.detach();
         }
@@ -1175,10 +1185,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
         
         var isPopupDlg = (ext_options.isPopupDlg || ext_options.container);
+        var dialogId = (!ext_options.dialogId) ? 'dialog-common-messages' : ext_options.dialogId;
 
         var $dlg = isPopupDlg  //show popup in specified container
                     ?window.hWin.HEURIST4.msg.getPopupDlg(ext_options.container)
-                    :window.hWin.HEURIST4.msg.getMsgDlg();
+                    :window.hWin.HEURIST4.msg.getMsgDlg(dialogId);
 
         if(message!=null){
             

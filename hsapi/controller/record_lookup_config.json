@@ -97,6 +97,17 @@
     }
 },
 {
+    "service": "bnfLibraryAut",
+    "rty_ID": "",
+    "label": "BnF Library - authoritative records",
+    "dialog": "lookupBnFLibrary_aut",
+    "description": "A proof of concept for searching via the BnF Library API for Authoritative Records (under development)",
+    "fields": {
+        "name": "",
+        "auturl": ""
+    }
+},
+{
     "service": "nomisma",
     "rty_ID": "",
     "label": "Nomisma Lookup",
