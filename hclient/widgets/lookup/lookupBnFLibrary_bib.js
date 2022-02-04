@@ -91,8 +91,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
         // Init record list
         this.recordList = this.element.find('#div_result');
-        this.recordList.resultList( this.options.resultList );     
-        
+        this.recordList.resultList( this.options.resultList );
+        this.recordList.resultList('option', 'pagesize', this.options.pagesize); // so the pagesize doesn't get set to a different value
+
         // Init select & double click events for result list
         this._on( this.recordList, {        
             "resultlistonselect": function(event, selected_recs){
@@ -290,17 +291,23 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
                 if(val != null){
 
+                    var val_isArray = window.hWin.HEURIST4.util.isArray(val);
+                    var val_isObject = window.hWin.HEURIST4.util.isObject(val);
+
                     // Match term labels with val, need to return the term's id to properly save its value
                     if(field_type == 'enum'){
+
+                        if(val_isObject){
+                            val = val[Object.keys(val)[0]];
+                        }
 
                         var vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
                         var term_Ids = $Db.trm_TreeData(vocab_ID, 'set');
 
-                        if(window.hWin.HEURIST4.util.isempty(val) || (map_flds[k] == 'language' && (val == 'und' || val == 'XX'))){ // No value
+                        if(map_flds[k] == 'language' && (val == 'und' || val == 'XX')){ // No language provided
                             val = null;
                         }else{
 
-                            var val_isArray = window.hWin.HEURIST4.util.isArray(val);
                             var term_found = false;
 
                             for(var i=0; i<term_Ids.length; i++){
@@ -345,54 +352,82 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         }
                     }else if(field_type == 'resource'){ // prepare data for user to select a record
 
-                        var complete_val = '';
+                        var search_val = '';
                         var org_val = '';
 
-                        if(map_flds[k] == 'creator' || map_flds[k] == 'contributor'){
+                        if(val_isObject){
 
-                            if(val['firstname']){
-                                org_val = val['firstname'];
-                            }
-                            if(val['surname']){
-                                org_val = (org_val != '') ? org_val + ' ' + val['surname'] : val['surname'];
-                            }
-                            if(val['active']){
-                                org_val = (org_val != '') ? org_val + ' [' + val['active'] + ']' : 'No Name, years active: ' + val['active'];
-                            }
-                            if(val['id']){
-                                org_val = (org_val != '') ? org_val + ' (id: ' + val['id'] + ')' : 'No Name, id: ' + val['id'];
+                            if(map_flds[k] == 'creator' || map_flds[k] == 'contributor'){
+
+                                if(val['firstname']){
+                                    org_val = val['firstname'];
+                                }
+                                if(val['surname']){
+                                    org_val = (org_val != '') ? org_val + ' ' + val['surname'] : val['surname'];
+                                }
+                                if(val['active']){
+                                    org_val = (org_val != '') ? org_val + ' [' + val['active'] + ']' : 'No Name, years active: ' + val['active'];
+                                }
+                                if(val['id']){
+                                    org_val = (org_val != '') ? org_val + ' (id: ' + val['id'] + ')' : 'No Name, id: ' + val['id'];
+                                }
+
+                                if(org_val == ''){
+                                    org_val = 'No Creator Provided';
+                                }
+                            }else if(map_flds[k] == 'publisher'){
+
+                                if(val['location']){
+                                    org_val = val['location'];
+                                }
+                                if(val['name']){
+                                    org_val = (org_val != '') ? org_val + ': ' + val['name'] : val['name'];
+                                }
+                                if(val['date']){
+                                    org_val = (org_val != '') ? org_val + ', ' + val['date'] : 'No Publisher Provided';
+                                }
+                            }else{
+
+                                for(var key in val){
+
+                                    if(org_val != ''){
+                                        org_val += ', ';
+                                    }
+                                    org_val += val[key];
+                                }
                             }
 
-                            if(org_val == ''){
-                                org_val = 'No Creator Provided';
-                            }
-                        }else if(map_flds[k] == 'publisher'){
+                            for(var key in val){
 
-                            if(val['location']){
-                                org_val = val['location'];
+                                if(key == 'date' || key == 'active'){ // dates containing non-numeric characters (e.g. '18..-19..' or '1990 (DL)') can cause problems
+                                    continue;
+                                }
+
+                                if(search_val != ''){
+                                    search_val += ',';
+                                }
+
+                                search_val += '{"f":"' + val[key] + '"}';
                             }
-                            if(val['name']){
-                                org_val = (org_val != '') ? org_val + ': ' + val['name'] : val['name'];
+                        }else if(val_isArray){
+
+                            org_val = val[key].join(', ');
+
+                            for(var i = 0; i < val.length; i++){
+
+                                if(search_val != ''){
+                                    search_val += ',';
+                                }
+
+                                search_val += '{"f":"' + val[i] + '"}';
                             }
-                            if(val['date']){
-                                org_val = (org_val != '') ? org_val + ', ' + val['date'] : 'No Publisher Provided';
-                            }
+                        }else{
+
+                            org_val = val;
+                            search_val = '{"f":"' + val + '"}';
                         }
 
-                        for(var key in val){
-
-                            if(key == 'date' || key == 'active'){ // dates containing non-numeric characters (e.g. '18..-19..' or '1990 (DL)') can break the Heurist query
-                                continue;
-                            }
-
-                            if(complete_val != ''){
-                                complete_val += ',';
-                            }
-
-                            complete_val += '{"f":"' + val[key] + '"}';
-                        }
-
-                        val = '{"any":[' + complete_val.replace(/  +/g, ' ') + ']}';
+                        val = '{"any":[' + search_val.replace(/  +/g, ' ') + ']}';
 
                         rec_pointers.push([dty_ID, val, org_val]);
 
@@ -563,12 +598,14 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             }
 
             // Create dlg
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Record pointer fields to set', yes: 'Done'}, 
-                {default_palette_class: 'ui-heurist-populate', modal: false, position: {my: "right-20 center", at: "right-20 center", of: window}}
-            );
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Record pointer fields to set', yes: 'Done'}, {
+                default_palette_class: 'ui-heurist-populate', 
+                modal: false, 
+                dialogId: 'BnFLib_bib', 
+                position: {my: "right-20 center", at: "right-20 center", of: window}
+            });
 
             var rec_count = 0;
-            var cur_fields = [];
 
             // onClick - 'Record' Row within the Recpointer Dlg
             $dlg.find('.recordDiv').on('click', function(event){
@@ -582,12 +619,6 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                 var dt_id = $ele.attr('data-dtid');
                 var ptr_rectypes = $Db.dty(dt_id, 'dty_PtrTargetRectypeIDs');
                 var index = $ele.attr('data-index');
-
-                if(cur_fields.length > 0 && cur_fields.includes(dt_id)){
-                    return;
-                }else{
-                    cur_fields.push(dt_id);
-                }
 
                 var init_filter = rec_pointers[index][1];
 
@@ -609,8 +640,6 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
                     // Process selected record set
                     onselect: function(event, data){
-
-                        cur_fields.splice(cur_fields.indexOf(dt_id), 1);
 
                         var recset = data.selection;
 
@@ -764,13 +793,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
         /** 
          * Additional search fields can be found here [catalogue.bnf.fr/api/test.do], note: ONLY the bibliographic fields can be added here (fields starting with 'bib.')
-         * if you wish to query authority records (fields starting with 'aut.') a separate query and additional php handling will need to be setup
-         * 
+         * if you wish to query authority records (fields starting with 'aut.'), we suggest the alternative BnF lookup available (lookupBnFLibrary_aut)
          * each field name and search value are separated by a relationship, common ones are: [all, any, adj]
-         * for this scenario we have placed an 'all' at every instance
-         * 
          * also separating each field query is a boolean logic [and, or, not]
-         * for this scenario we have used 'and'
          */
 
         var titleHasValue = this.element.find('#inpt_title').val() != '';
