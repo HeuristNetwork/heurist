@@ -12,14 +12,14 @@
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
 <!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah -->
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
 <field label="Rights" value="rights" h-id="2-35"/>
 <field label="Extra" value="extra" h-id="2-4"/>
 <field label="Version" value="version" h-id="2-49"/>
 <!--  line added by Jarrah  -->
 <field label="Item Type" value="itemType" h-id="3-1000"/>
 <!--  line added by Jarrah  -->
-<field label="Tags" value="tags" h-id="1268-941"/>
+<field label="Tags" value="tags" h-id="2-1084"/>
 <!--  line added by Jarrah  -->
 <field label="Date Added" value="dateAdded" h-id="2-10"/>
 <!--  line added by Jarrah  -->
@@ -28,7 +28,7 @@
 <field value="creator">
 <creatorType label="Author" value="author" h-id="2-15"/>
 <creatorType label="Contributor" value="contributor" h-id="2-15"/>
-<creatorType label="Translator" value="translator" h-id="99-4449"/>
+<creatorType label="Translator" value="translator" h-id="3-1057"/>
 </field>
 </typeMap>
 <typeMap zType="book" cslType="book" h-id="3-102">
@@ -42,11 +42,11 @@
 <field label="# of Volumes" value="numberOfVolumes" h-id="3-1002"/>
 <field label="Edition" value="edition" h-id="2-49"/>
 <field label="Place" value="place" h-id="3-1018.3-104.2-27"/>
-<field label="Publisher" value="publisher" h-id="3-1018.2-21.2-4.2-1"/>
-<!-- pubref.organization.title  -->
+<field label="Publisher" value="publisher" h-id="3-1018.3-104.2-21.2-4.2-1"/><!-- h-id corrected by Jarrah 18.01.2022 -->
+<!-- pubref.pubseries.organization.title  -->
 <field label="Date" value="date" h-id="2-9"/>
 <field label="# of Pages" value="numPages" h-id="3-1001"/>
-<field label="Language" value="language" h-id="99-1403"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 18.01.2022 -->
 <!--  h-id added by Jarrah  -->
 <field label="ISBN" value="ISBN" h-id="3-1011"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
@@ -58,13 +58,13 @@
 <!--  h-id added by Jarrah  -->
 <field label="Call Number" value="callNumber" h-id="3-1019"/>
 <field label="Rights" value="rights" h-id="2-35"/>
-<field label="Version" value="version" h-id="1144-335"/>
+<field label="Version" value="version" h-id="2-49"/>
 <!--
- line added by Jarrah, NB: this h-id differs from other defs for this zField 
+ line added by Jarrah, NB: this field is called Edition in the Book record, base field name Version Number
 -->
 <field label="Item Type" value="itemType" h-id="3-1000"/>
 <!--  line added by Jarrah  -->
-<field label="Tags" value="tags" h-id="1268-941"/>
+<field label="Tags" value="tags" h-id="2-1084"/>
 <!--  line added by Jarrah  -->
 <field label="Item Type" value="itemType" h-id="3-1000"/>
 <!--  line added by Jarrah  -->
@@ -80,7 +80,7 @@
 <creatorType label="Contributor" value="contributor" h-id="2-15"/>
 <creatorType label="Editor" value="editor" h-id="3-1013"/>
 <creatorType label="Series Editor" value="seriesEditor" h-id="3-1018.3-104.3-1013.2-10.2-1"/>
-<creatorType label="Translator" value="translator" h-id="99-4449"/>
+<creatorType label="Translator" value="translator" h-id="3-1057"/>
 </field>
 </typeMap>
 <typeMap zType="bookSection" cslType="chapter" h-id="3-108">
@@ -96,7 +96,7 @@
 <field label="Publisher" value="publisher" h-id="3-1028.3-102.3-1018.3-104.2-21.2-4.2-1"/>
 <field label="Date" value="date" h-id="3-1028.3-102.2-9"/>
 <field label="Pages" value="pages" h-id="3-1026"/>
-<field label="Language" value="language" h-id="99-1403"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 18.01.2022 -->
 <!--  h-id added by Jarrah  -->
 <field label="ISBN" value="ISBN" h-id="3-1028.3-102.3-1011"/>
 <field label="DOI" value="DOI" h-id="3-1003"/>
@@ -114,7 +114,7 @@
 <!--  line added by Jarrah  -->
 <field label="Item Type" value="itemType" h-id="3-1000"/>
 <!--  line added by Jarrah  -->
-<field label="Tags" value="tags" h-id="1268-941"/>
+<field label="Tags" value="tags" h-id="2-1084"/>
 <!--  line added by Jarrah  -->
 <field label="Date Added" value="dateAdded" h-id="2-10"/>
 <!--  line added by Jarrah  -->
@@ -127,7 +127,7 @@
 <creatorType label="Contributor" value="contributor" h-id="2-15"/>
 <creatorType label="Editor" value="editor" h-id="3-1028.3-102.2-15.2-10.2-1"/>
 <creatorType label="Series Editor" value="seriesEditor" h-id="3-1028.3-102.3-1018.3-104.3-1013.2-10.2-1"/>
-<creatorType label="Translator" value="translator" h-id="99-4449"/>
+<creatorType label="Translator" value="translator" h-id="3-1057"/>
 <!--  h-id changed by Jarrah  -->
 </field>
 </typeMap>
@@ -148,7 +148,7 @@
 <!--  h-id added by Jarrah  -->
 <field label="Pages" value="pages" h-id="3-1001"/>
 <field label="Series" value="titleSeries"/>
-<field label="Language" value="language" h-id="99-1403"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 18.01.2022 -->
 <!--  h-id added by Jarrah  -->
 <field label="DOI" value="DOI" h-id="3-1003"/>
 <!--  h-id added by Jarrah  -->
@@ -164,7 +164,7 @@
 <field label="Call Number" value="callNumber" h-id="3-1019"/>
 <field label="Accesssed" value="accessed"/>
 <field label="Rights" value="url"/>
-<field label="Tags" value="tags" h-id="1268-941"/>
+<field label="Tags" value="tags" h-id="2-1084"/>
 <!--  line added by Jarrah  -->
 <field label="Version" value="version" h-id="2-49"/>
 <!--  line added by Jarrah  -->
@@ -198,7 +198,7 @@
 <field label="Series Title" value="seriesTitle" h-id="3-1035.3-113.3-1034.3-111.3-1018.3-104.2-2"/>
 <field label="Series Text" value="seriesText" h-id="3-1035.3-113.3-1034.3-111.3-1018.3-104.2-3"/>
 <field label="Journal Abbr" value="journalAbbreviation" h-id="3-1035.3-113.3-1034.3-111.2-2"/>
-<field label="Language" value="language" h-id="99-1403"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 18.01.2022 -->
 <!--  h-id added by Jarrah  -->
 <field label="DOI" value="DOI" h-id="3-1003"/>
 <field label="ISSN" value="ISSN" h-id="3-1035.3-113.3-1034.3-111.3-1032"/>
@@ -215,7 +215,7 @@
 <!--  line added by Jarrah  -->
 <field label="Item Type" value="itemType" h-id="3-1000"/>
 <!--  line added by Jarrah  -->
-<field label="Tags" value="tags" h-id="1268-941"/>
+<field label="Tags" value="tags" h-id="2-1084"/>
 <!--  line added by Jarrah  -->
 <field label="Date Added" value="dateAdded" h-id="2-10"/>
 <!--  line added by Jarrah  -->
@@ -227,7 +227,7 @@
 <creatorType label="Contributor" value="contributor" h-id="2-15"/>
 <creatorType label="Editor" value="editor" h-id="3-1035.3-113.3-1013.2-10.2-1"/>
 <creatorType label="Reviewed Author" value="reviewedAuthor" h-id="2-15"/>
-<creatorType label="Translator" value="translator" h-id="99-4449"/>
+<creatorType label="Translator" value="translator" h-id="3-1057"/>
 <!--  h-id changed by Jarrah  -->
 </field>
 </typeMap>
@@ -239,7 +239,7 @@
 <field label="Issue" value="issue" h-id="3-1064.3-125.3-1033"/>
 <field label="Date" value="date" h-id="3-1064.3-125.2-9"/>
 <field label="Pages" value="pages" h-id="3-1026"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
 <field label="ISSN" value="ISSN" h-id="3-1064.3-125.3-1066.3-124.3-1032"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
@@ -251,7 +251,7 @@
 <field label="Rights" value="rights" h-id="2-35"/>
 <field label="Version" value="version" h-id="2-49"/>
 <!--  line added by Jarrah  -->
-<field label="Tags" value="tags" h-id="1268-941"/>
+<field label="Tags" value="tags" h-id="2-1084"/>
 <!--  line added by Jarrah  -->
 <field label="Item Type" value="itemType" h-id="3-1000"/>
 <!--  line added by Jarrah  -->
@@ -279,7 +279,7 @@
 <field label="Date" value="date" h-id="3-1065.3-127.2-9"/>
 <field label="Section" value="section" h-id="3-1065.3-127.3-1033"/>
 <field label="Pages" value="pages" h-id="3-1026"/>
-<field label="Language" value="language" h-id="99-1403"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 18.01.2022 -->
 <!--  h-id added by Jarrah  -->
 <field label="ISSN" value="ISSN" h-id="3-1065.3-127.3-1067.3-126.3-1032"/>
 <field label="URL" value="url" h-id="3-1058"/>
@@ -289,7 +289,7 @@
 <field label="Library Catalog" value="libraryCatalog"/>
 <field label="Call Number" value="callNumber" h-id="3-1065.3-127.3-1067.3-126.3-1019"/>
 <field label="Rights" value="rights" h-id="2-35"/>
-<field label="Tags" value="tags" h-id="1268-941"/>
+<field label="Tags" value="tags" h-id="2-1084"/>
 <!--  line added by Jarrah  -->
 <field label="Item Type" value="itemType" h-id="3-1000"/>
 <!--  line added by Jarrah  -->
@@ -309,7 +309,7 @@
 <field label="Place" value="place" h-id="2-21.2-4.2-27"/>
 <field label="Date" value="date" h-id="2-9"/>
 <field label="# of Pages" value="numPages" h-id="3-1001"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
 <!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
@@ -323,7 +323,7 @@
 <!--  line added by Jarrah  -->
 <field label="Item Type" value="itemType" h-id="3-1000"/>
 <!--  line added by Jarrah  -->
-<field label="Tags" value="tags" h-id="1268-941"/>
+<field label="Tags" value="tags" h-id="2-1084"/>
 <!--  line added by Jarrah  -->
 <field label="Item Type" value="itemType" h-id="3-1000"/>
 <!--  line added by Jarrah  -->
@@ -348,7 +348,7 @@
 <field label="Institution" value="institution" baseField="publisher" h-id="3-1018.3-104.2-21.2-4.2-1"/>
 <field label="Date" value="date" h-id="2-9"/>
 <field label="Pages" value="pages" h-id="3-1001"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
 <!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
@@ -361,7 +361,7 @@
 <!--  line added by Jarrah  -->
 <field label="Item Type" value="itemType" h-id="3-1000"/>
 <!--  line added by Jarrah  -->
-<field label="Tags" value="tags" h-id="1268-941"/>
+<field label="Tags" value="tags" h-id="2-1084"/>
 <!--  line added by Jarrah  -->
 <field label="Item Type" value="itemType" h-id="3-1000"/>
 <!--  line added by Jarrah  -->
@@ -385,7 +385,7 @@
 <field label="Medium" value="medium"/>
 <field label="Artwork Size" value="artworkSize"/>
 <field label="Date" value="date" h-id="2-9"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="Archive" value="archive"/>
 <field label="Loc. in Archive" value="archiveLocation"/>
@@ -405,7 +405,7 @@
 <field label="Title" value="title" h-id="2-1"/>
 <field label="Abstract" value="abstractNote" h-id="2-3"/>
 <field label="Date" value="date" h-id="2-9"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
 <field label="Accesssed" value="accessed"/>
@@ -414,7 +414,7 @@
 <field label="Library Catalog" value="libraryCatalog"/>
 <field label="Call Number" value="callNumber" h-id="3-1019"/>
 <field label="Accesssed" value="accessed"/>
-<field label="Rights" value="url" h-id="2-35"/>
+<field label="Rights" value="rights" h-id="2-35"/> <!-- Jarrah corrected value to "rights" 04.02.2022 -->
 <field label="Extra" value="extra" h-id="2-4"/>
 <field value="creator">
 <creatorType label="Author" value="author" h-id="2-15"/>
@@ -429,14 +429,14 @@
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
 <field label="Accesssed" value="accessDate"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
 <field label="Rights" value="rights" h-id="2-35"/>
 <field label="Extra" value="extra" h-id="2-4"/>
 <field label="Version" value="version" h-id="2-49"/>
 <!--  line added by Jarrah  -->
 <field label="Item Type" value="itemType" h-id="3-1000"/>
 <!--  line added by Jarrah  -->
-<field label="Tags" value="tags" h-id="1268-941"/>
+<field label="Tags" value="tags" h-id="2-1084"/>
 <!--  line added by Jarrah  -->
 <field label="Item Type" value="itemType" h-id="3-1000"/>
 <!--  line added by Jarrah  -->
@@ -457,7 +457,7 @@
 <field label="Abstract" value="abstractNote"/>
 <field label="Type" value="letterType" baseField="type"/>
 <field label="Date" value="date" h-id="2-9"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
 <!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
@@ -470,7 +470,7 @@
 <field value="creator">
 <creatorType label="Author" value="author" h-id="2-15"/>
 <creatorType label="Contributor" value="contributor" h-id="2-15"/>
-<creatorType label="Translator" value="translator" h-id="99-4449"/>
+<creatorType label="Translator" value="translator" h-id="3-1057"/>
 <creatorType label="Editor" value="editor" h-id="3-1013"/>
 </field>
 </typeMap>
@@ -481,7 +481,7 @@
 <field label="Place" value="place" h-id="3-1018.3-104.2-27"/>
 <field label="Date" value="date" h-id="2-9"/>
 <field label="# of Pages" value="numPages" h-id="3-1001"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
 <!-- <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah-->
@@ -494,7 +494,7 @@
 <field value="creator">
 <creatorType label="Author" value="author" h-id="2-15"/>
 <creatorType label="Contributor" value="contributor" h-id="2-15"/>
-<creatorType label="Translator" value="translator" h-id="99-4449"/>
+<creatorType label="Translator" value="translator" h-id="3-1057"/>
 <creatorType label="Editor" value="editor" h-id="3-1013"/>
 </field>
 </typeMap>
@@ -514,7 +514,7 @@
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="urls"/>
 <field label="Accesssed" value="accessed"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/><!-- h-id modified by Jarrah 04.02.2022 -->
 <field label="Archive" value="archive"/>
 <field label="Loc. in Archive" value="archiveLocation"/>
 <field label="Library Catalog" value="libraryCatalog"/>
@@ -539,12 +539,11 @@
 <field label="Abstract" value="abstractNote" />
 <field label="Type" value="letterType" baseField="type" />
 <field label="Date" value="date" />
-<field label="Language" value="language" />
+<field label="Language" value="language" h-id="2-965"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
 
-<field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah 
- 
+<field label="Accessed" value="accessDate" h-id="2-9"/> 
 <field label="Archive" value="archive" />
 <field label="Loc. in Archive" value="archiveLocation" />
 <field label="Library Catalog" value="libraryCatalog" />
@@ -569,7 +568,7 @@
 <field label="System" value="system"/>
 <field label="Place" value="place"/>
 <field label="Company" value="company"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="ISBN" value="isbn"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
@@ -596,7 +595,7 @@
 <field label="Publisher" value="publisher"/>
 <field label="Date" value="date"/>
 <field label="Pages" value="pages"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="ISBN" value="isbn"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
@@ -631,7 +630,7 @@
 <field label="Genre" value="genre"/>
 <field label="Format" value="format"/>
 <field label="Running Time" value="runningTime"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="urls"/>
 <field label="Accesssed" value="accessed"/>
@@ -653,7 +652,7 @@
 <field label="Forum/Listserv Title" value="forum/listservTitle" />
 <field label="Post Type" value="postType"/>
 <field label="Date" value="date" h-id = "2-9"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="Pages" value="pages"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="urls" h-id ="3-1058"/>
@@ -680,7 +679,7 @@
 <field label="Session" value="session"/>
 <field label="History" value="history"/>
 <field label="Date" value="date"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="urls"/>
 <field label="Accesssed" value="accessed"/>
@@ -696,7 +695,7 @@
 <field label="Title" value="title" h-id ="2-1"/>
 <field label="Abstract" value="abstract"/>
 <field label="Date" value="date" h-id = "2-9"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id = "3-1058"/>
 <field label="Accesssed" value="accessed"/>
@@ -725,10 +724,10 @@
 <field label="Issue Date" value="Issue date"/>
 <field label="References" value="references"/>
 <field label="Legal Status" value="legalStatus"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
-        <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah
+        <field label="Accessed" value="accessDate" h-id="2-9"/> 
 <field label="Rights" value="rights" h-id="2-35"/>
 <field label="Extra" value="extra" h-id="2-4"/>
 <field value="creator" >
@@ -748,7 +747,7 @@
 <field label="Running Time" value="runningTime" />
 <field label="URL" value="urls"/>
 <field label="Accesssed" value="accessed"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="Rights" value="rights" h-id="2-35"/>
 <field label="Extra" value="extra" h-id="2-4"/>
@@ -767,7 +766,7 @@
 <field label="Meeting Name" value="meetingName"/>
 <field label="URL" value="url" h-id="3-1058"/>
 <field label="Accesssed" value="accessed"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="Rights" value="rights" h-id="2-35"/>
 <field label="Extra" value="extra" h-id="2-4"/>
@@ -787,7 +786,7 @@
 <field label="Network" value="network"/>
 <field label="Date" value="date"/>
 <field label="Running Time" value="runningTime"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
 <field label="Accesssed" value="accessed"/>
@@ -813,10 +812,10 @@
 <field label="Section" value="section"/>
 <field label="Session" value="session"/>
 <field label="History" value="history"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
-      <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah
+      <field label="Accessed" value="accessDate" h-id="2-9"/> 
 <field label="Rights" value="rights" h-id="2-35"/>
 <field label="Extra" value="extra" h-id="2-4"/>
 <field value="creator" >
@@ -836,7 +835,7 @@
 <field label="Network" value="network"/>
 <field label="Date" value="date"/>]
 <field label="Running Time" value="runningTime"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
 <field label="Accesssed" value="accessed"/>
@@ -873,7 +872,7 @@
 <field label="ISBN" value="isbn"/>
 <field label="ISSN" value="issn"/>
 <field label="Issue" value="issue"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="Legislative Body" value="legislativeBody"/>
 <field label="Network" value="network"/>
 <field label="Place" value="place"/>
@@ -886,11 +885,11 @@
 <field label="Session" value="session"/>
 <field label="Type" value="type"/>
 <field label="Volume" value="volume"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="Pages" value="pages" h-id="3-1001"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
-     <field label="Accessed" value="accessDate" h-id="2-9"/> commented out by Jarrah
+     <field label="Accessed" value="accessDate" h-id="2-9"/>
 <field label="Archive" value="archive"/>
 <field label="Loc. in Archive" value="archiveLocation"/>
 <field label="Library Catalog" value="libraryCatalog"/>
@@ -918,7 +917,7 @@
 <field label="Studio" value="studio"/>
 <field label="Date" value="date"/>
 <field label="Running Time" value="runningTIme"/>
-<field label="Language" value="language"/>
+<field label="Language" value="language" h-id="2-965"/>
 <field label="ISBN" value="isbn"/>
 <field label="Short Title" value="shortTitle" h-id="2-2"/>
 <field label="URL" value="url" h-id="3-1058"/>
