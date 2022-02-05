@@ -465,9 +465,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                             }
                         }  
 
-                        if(contructed_val == ''){
+                        if(contructed_val == '' && val == ''){
                             val = 'No '+ map_flds[k] +' provided';
-                        }else{
+                        }else if(contructed_val != ''){
                             val = contructed_val;                  
                         }
                     }
