@@ -4209,8 +4209,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     continue;
                 }
 				
-                if(lbl.indexOf('.') < 0){
-                    hasPeriod = true;
+                if(lbl.indexOf('.') >= 0){
+                    hasPeriod = '.';
                 }
 
             _prepareddata.push({trm_Label:lbl, trm_ParentTermID:trm_ParentTermID, trm_Domain:'enum'});
@@ -4242,7 +4242,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     //
     //
-    function _importTerms($dlg, _prepareddata, is_all, hasSeparator='.'){
+    function _importTerms($dlg, _prepareddata, is_all, hasSeparator=''){
 
         _prepareddata = JSON.stringify(_prepareddata);
 
@@ -4252,27 +4252,35 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             'entity'     : 'defTerms',
             'request_id' : window.hWin.HEURIST4.util.random(),
             'fields'     : _prepareddata,
-            'term_separator': hasSeparator
+            'term_separator': !hasSeparator ? '' : hasSeparator
         };
     
         var that = this;
 
-        if(!hasSeparator || hasSeparator == '.'){
+        if(!hasSeparator || hasSeparator == ''){
             _importTerms_continue($dlg, request, is_all);
         }else{
 
+            var $dlg_term_warning;
+
             var btns = {};
             btns['Periods as separators'] = function(){
+
+                request['term_separator'] = '.';
+                $dlg_term_warning.dialog('close');
+
                 _importTerms_continue($dlg, request, is_all);
             };
 
             btns['Periods as part of terms'] = function(){
-                request['term_separator'] = false;
+
+                request['term_separator'] = '';
+                $dlg_term_warning.dialog('close');
 
                 _importTerms_continue($dlg, request, is_all);
             };
 
-            window.hWin.HEURIST4.msg.showMsgDlg(
+            $dlg_term_warning = window.hWin.HEURIST4.msg.showMsgDlg(
                 'You have term(s) which contain periods (.). These are often used as separators between levels of a hierarchical term tree.<br><br>'
                 + 'Do you want to treat periods as hierarchical separators?<br>(note: will apply to ALL terms in the import which contain periods)',
                 btns, 
