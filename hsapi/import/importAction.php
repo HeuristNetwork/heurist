@@ -1300,7 +1300,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             
             $wrong_records = self::validateEnumerations($query, $imp_session, $field, $dt_mapping[$field], 
                 $idx, $recStruc, $recordType,
-                "Term list values read must match existing terms defined for the field. Periods are taken as indicators of hierarchy", "new terms", $progress_session_id);
+                "Term list values read must match existing term labels OR standard codes defined for the field. Periods may be used as indicators of hierarchy (option in following screen if periods detected)", "new terms", $progress_session_id);
 
         }else{
 
@@ -1309,7 +1309,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             ." where ".$only_for_specified_id."(".$query_enum_where[$k].")";  //implode(" or ",$query_enum_where);
             
             $wrong_records = self::getWrongRecords($query, $imp_session,
-                "Term list values read must match existing terms defined for the field. Periods are taken as indicators of hierarchy",
+                "Term list values read must match existing term labels OR standard codes defined for the field. Periods may be used as indicators of hierarchy (option in following screen if periods detected)",
                 "Invalid Terms", $field);
         }
 
