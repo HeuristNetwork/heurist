@@ -76,7 +76,7 @@ class DbSysWorkflowRules extends DbEntityBase
             
         }else if(@$this->data['details']=='name' || @$this->data['details']=='list' || @$this->data['details']=='full'){
 
-            $this->data['details'] = 'swf_ID,swf_RecTypeID,swf_Stage,swf_StageRestrictedTo,swf_SetOwnership,swf_SetVisibility,swf_SendEmail';
+            $this->data['details'] = 'swf_ID,swf_RecTypeID,swf_Stage,swf_Order,swf_StageRestrictedTo,swf_SetOwnership,swf_SetVisibility,swf_SendEmail';
             
         }else{
             $needCheck = true;
@@ -93,7 +93,7 @@ class DbSysWorkflowRules extends DbEntityBase
 
         //----- order by ------------
         //compose ORDER BY 
-        $order = array('swf_RecTypeID, swf_Stage ASC');
+        $order = array('swf_RecTypeID, swf_Order, swf_Stage ASC');
         
         $is_ids_only = (count($this->data['details'])==1);
         
@@ -155,11 +155,55 @@ class DbSysWorkflowRules extends DbEntityBase
                 if($this->records[$idx]['swf_SendEmail']==''){
                     $this->records[$idx]['swf_SendEmail'] = null;
                 }
+                if($this->records[$idx]['swf_Order']=='' || $this->records[$idx]['swf_Order']<0){
+                    $this->records[$idx]['swf_Order'] = 0;
+                }else if($this->records[$idx]['swf_Order']>255){
+                    $this->records[$idx]['swf_Order'] = 255;
+                }
         }
 
         return $ret;
         
     }       
+    
+    // Operations:
+    // 1) adds entire ruleset for record type
+    // 2) set order of stages per record type
+    //
+    public function batch_action(){
+
+        $ret = true;
+        $rty_ID = @$this->data['rty_ID'];
+        if($rty_ID>0){
+
+            $mysqli = $this->system->get_mysqli();
+
+            if(mysql__select_value($mysqli, 
+            'SELECT swf_RecTypeID FROM sysWorkflowRules where swf_RecTypeID='.$rty_ID.' LIMIT 1')>0){
+
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'There are already rules for record type '.$rty_ID);
+                $ret = false;
+            }else{
+                $this->system->defineConstant('TRM_SWF');
+                $query = 'INSERT INTO sysWorkflowRules (swf_RecTypeID,swf_Stage) SELECT '
+                .$rty_ID.', trm_ID FROM defTerms where trm_ParentTermID='.TRM_SWF;
+                $ret = $mysqli->query($query);
+                if(!$ret){
+                    $this->system->addError(HEURIST_DB_ERROR, 
+                        'Cannot add ruleset to sysWorkflowRules table', $mysqli->error);
+                    $ret = false;
+                }
+            }
+
+        }else{
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined');
+            $ret = false;
+
+        }
+
+        return $ret;
+    }
+
     
 }
 ?>

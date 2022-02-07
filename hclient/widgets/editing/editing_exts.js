@@ -427,7 +427,7 @@ function calculateImageExtentFromWorldFile(_editing){
 
 
 //
-// that 
+// It uses window.hWin.HEURIST4.browseRecordCache
 //
 function browseRecords(_editing_input, $input){
     

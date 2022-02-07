@@ -3435,6 +3435,49 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
     //
     //
     setOrderAndSaveAsFilter: function(){
+            
+        this.setOrderManually(
+            function(recordset, record){ 
+                var recID = recordset.fld(record, 'rec_ID');
+                return '<div class="recordDiv" recid="'+recID+'">'  //id="rd'+recID+'" 
+                //+'<span style="min-width:150px">'
+                //+ recID + '</span>'
+                + window.hWin.HEURIST4.util.htmlEscape( recordset.fld(record, 'rec_Title') ) 
+                + '</div>';
+            },
+            function( new_rec_order ){
+
+                if(new_rec_order.length>0){
+
+                    var svsID;
+                    if(that._currentSavedFilterID>0 && window.hWin.HAPI4.currentUser.usr_SavedSearch && 
+                        window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID]){
+
+                        //if current saved search has sortby:set - just edit with new query
+                        var squery = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][_QUERY];
+                        if(squery.indexOf('sortby:set')>=0){
+                            svsID = that._currentSavedFilterID;
+                        }else{
+                            var groupID =  window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][_GRPID];
+                            window.hWin.HAPI4.save_pref('last_savedsearch_groupid', groupID);
+                        }
+                    }
+
+                    //call for saved searches dialog
+                    var squery = 'ids:'+new_rec_order.join(',')+' sortby:set';
+                    var  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
+                    if(widget){
+                        widget.svs_list('editSavedSearch', 'saved', null, svsID, squery, null, true); //call public method
+                    }
+                }
+            }                   
+        );
+    },    
+    
+    //
+    //
+    //
+    setOrderManually: function(renderer, save_callback){
                     
         if(!this.sortResultList){
             
@@ -3451,14 +3494,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                    select_mode: 'select_single',
                    entityName: this._entityName,
                    pagesize: 9999999999999,
-                   renderer: function(recordset, record){ 
-                       var recID = recordset.fld(record, 'rec_ID');
-                        return '<div class="recordDiv" recid="'+recID+'">'  //id="rd'+recID+'" 
-                                //+'<span style="min-width:150px">'
-                                //+ recID + '</span>'
-                                + window.hWin.HEURIST4.util.htmlEscape( recordset.fld(record, 'rec_Title') ) 
-                                + '</div>';
-                   }
+                   renderer: renderer
                    });     
         }
         
@@ -3482,40 +3518,18 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             default_palette_class:'ui-heurist-explore',
             buttons:[
                 {text:window.hWin.HR('menu_reorder_save'), click: function(){
+
                     //get new order of records ids
                     var recordset = that.sortResultList.resultList('getRecordSet');
                     var new_rec_order = recordset.getOrder();
-                    
                     $dlg.dialog( "close" );
-                    
                     if(new_rec_order.length>0){
-                    
-                        var svsID;
-                        if(that._currentSavedFilterID>0 && window.hWin.HAPI4.currentUser.usr_SavedSearch && 
-                            window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID]){
-                           
-                           //if current saved search has sortby:set - just edit with new query
-                           var squery = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][_QUERY];
-                           if(squery.indexOf('sortby:set')>=0){
-                                svsID = that._currentSavedFilterID;
-                           }else{
-                                var groupID =  window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][_GRPID];
-                                window.hWin.HAPI4.save_pref('last_savedsearch_groupid', groupID);
-                           }
-                        }
-                    
-                        //call for saved searches dialog
-                        var squery = 'ids:'+new_rec_order.join(',')+' sortby:set';
-                        var  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
-                        if(widget){
-                            widget.svs_list('editSavedSearch', 'saved', null, svsID, squery, null, true); //call public method
-                        }
+                        save_callback.call(this, new_rec_order )       
                     }
                 }},
                 {text:window.hWin.HR('Cancel'), click: function(){$dlg.dialog( "close" );}}
             ]
             });
-                        
                 
     },    
     

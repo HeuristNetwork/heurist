@@ -1241,17 +1241,21 @@ error_log('UPDATED '.$session_id.'  '.$value);
                 
             }
             
-            if($dbVerSubSub<3){
-                if(!hasTable($mysqli, 'sysWorkflowRules')){
-                    $query = "CREATE TABLE sysWorkflowRules  (
+            if($dbVerSubSub<4){
+                if(hasTable($mysqli, 'sysWorkflowRules')){
+                    $query = 'DROP TABLE IF EXISTS sysWorkflowRules';
+                    $res = $mysqli->query($query);
+                }
+                $query = "CREATE TABLE sysWorkflowRules  (
   swf_ID int unsigned NOT NULL auto_increment COMMENT 'Primary key',
   swf_RecTypeID  smallint unsigned NOT NULL COMMENT 'Record type, foreign key to defRecTypes table',
   swf_Stage int unsigned NOT NULL default '0' COMMENT 'trm_ID from vocabulary \"Workflow stage\" 2-9453',
+  swf_Order tinyint(3) unsigned zerofill NOT NULL default '000' COMMENT 'Ordering of stage per record type',
   swf_StageRestrictedTo varchar(255) default NULL Comment 'Comma separated list of ugr_ID who are allowed to set workgroup stage to this value. Null = anyone',
   swf_SetOwnership smallint NULL default NULL COMMENT 'Workgroup to be set as the owner group, Null = No change, 0=everyone',
   swf_SetVisibility  varchar(255) default NULL COMMENT 'public=anyone, viewable=all logged in, hidden = private, hidden may be followed by comma separated list of ugr_ID that should be set to have view permission',
   swf_SendEmail  varchar(255) default NULL COMMENT 'Comma separated list of ugr_ID that will be emailed on stage change',
-PRIMARY KEY  (swf_ID),
+PRIMARY KEY (swf_ID),
 UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
 ) ENGINE=InnoDB COMMENT='Describes the rules to be applied when the value of the Workflow stage field is changed to this value'";
                     $res = $mysqli->query($query);
@@ -1259,18 +1263,18 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                         $system->addError(HEURIST_DB_ERROR, 'Cannot create sysWorkflowRules table', $mysqli->error);
                         return false;
                     }
-                }    
+                    
             }
             } //for 1.3.0
             
             //update version
-            if($dbVerSub<3 || ($dbVerSub==3 && $dbVerSubSub<3)){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=3 WHERE 1');
+            if($dbVerSub<3 || ($dbVerSub==3 && $dbVerSubSub<4)){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=4, sys_dbSubSubVersion=3 WHERE 1');
             }
             
             
             //import field 2-1080 Workflowstages
-            if($dbVerSub==3 && $dbVerSubSub<3 && !(ConceptCode::getDetailTypeLocalID('2-1080')>0)){
+            if($dbVerSub==3 && $dbVerSubSub<4 && !(ConceptCode::getDetailTypeLocalID('2-1080')>0)){
                 $importDef = new DbsImport( $system );
                 if($importDef->doPrepare(  array(
                             'defType'=>'detailtype', 

@@ -1334,10 +1334,18 @@ $.widget( "heurist.editing_input", {
             .val(value)
             .change(function(){that.onChange();})
             .appendTo( $inputdiv );
+            
+            var mode = null;
+            
+            if(this.configMode.mode=='all_users' || this.configMode.mode=='all_users_and_groups'){
+                topOptions = this.configMode.topOptions;
+                mode = this.configMode.mode;
+            }else{
+                topOptions = [{key:'',title:window.hWin.HR('select user/group...')},
+                    {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName'] }];
+            }
 
-            window.hWin.HEURIST4.ui.createUserGroupsSelect($input.get(0),null,
-                [{key:'',title:window.hWin.HR('select user/group...')},
-                    {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName'] }] );
+            window.hWin.HEURIST4.ui.createUserGroupsSelect($input.get(0), mode, topOptions );
             if(value){
                 $input.val(value);
             }

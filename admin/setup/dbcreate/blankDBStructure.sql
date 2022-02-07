@@ -588,6 +588,7 @@ CREATE TABLE sysWorkflowRules  (
   swf_ID int unsigned NOT NULL auto_increment COMMENT 'Primary key',
   swf_RecTypeID  smallint unsigned NOT NULL COMMENT 'Record type, foreign key to defRecTypes table',
   swf_Stage int unsigned NOT NULL default '0' COMMENT 'trm_ID from vocabulary "Workflow stage" 2-9453',
+  swf_Order tinyint(3) unsigned zerofill NOT NULL default '000' COMMENT 'Ordering of stage per record type',
   swf_StageRestrictedTo varchar(255) default NULL Comment 'Comma separated list of ugr_ID who are allowed to set workgroup stage to this value. Null = anyone',
   swf_SetOwnership smallint NULL default NULL COMMENT 'Workgroup to be set as the owner group, Null = No change, 0=everyone',
   swf_SetVisibility  varchar(255) default NULL COMMENT 'public=anyone, viewable=all logged in, hidden = private, hidden may be followed by comma separated list of ugr_ID that should be set to have view permission',

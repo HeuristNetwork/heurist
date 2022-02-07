@@ -1003,7 +1003,49 @@ window.hWin.HEURIST4.ui = {
             groups = window.hWin.HAPI4.sysinfo.db_usergroups;
             
         }else 
-        if(!groups){ //use groups of current user
+        if(groups=='all_users' || groups=='all_users_and_groups'){ //all users
+        
+        
+                if(window.hWin.HEURIST4.allUsersCache){
+                    if(topOptions){
+                        topOptions = window.hWin.HEURIST4.util.cloneJSON(topOptions);
+                        topOptions.push({key:'', title:'──────────',disabled:true});    
+                    } 
+                    if(groups=='all_users_and_groups'){
+                        if(!topOptions) topOptions = [];
+                        $.each(window.hWin.HAPI4.sysinfo.db_usergroups,function(idx,name){
+                            topOptions.push({key:idx, title:name});
+                        })
+                        topOptions.push({key:'', title:'──────────',disabled:true});
+                    }
+                    groups = window.hWin.HEURIST4.allUsersCache;    
+                }else{
+                //It uses It uses window.hWin.HEURIST4.allUsersCache
+        
+                    //get all users
+                    var request = {a:'search', entity:'sysUsers', details:'fullname'};
+                
+                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            
+                            var recordset = new hRecordSet(response.data);
+                            window.hWin.HEURIST4.allUsersCache = {};                    
+                            recordset.each2(function(id,rec){
+                                window.hWin.HEURIST4.allUsersCache[id] = rec['ugr_FullName'];
+                            });
+                            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, groups, topOptions, callback);
+                            
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });
+                    return;
+                }
+        
+        
+        }else
+        if(!groups){ //not defined - use groups of current user
         
             groups = {};
             for (var groupID in window.hWin.HAPI4.currentUser.ugr_Groups)
@@ -1031,7 +1073,7 @@ window.hWin.HEURIST4.ui = {
                 }
             }
         }
-        if(groups){   //it may 1) array of group ids 2) [ids=>name] 3) [ids=a>rray(0,name,0)]
+        if(groups){   //it may 1) array of group ids 2) [ids=>name] 3) [ids=>array(0,name,0)]
 
             for (var idx in groups)
             {
