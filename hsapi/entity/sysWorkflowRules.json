@@ -10,7 +10,7 @@
         
         "entityTitle": "Workflow Stages Rules",
         "entityTitlePlural": "Workflow Stages Rules",
-        "empty_remark": "Please use the search field above to locate relevant rule",
+        "empty_remark": "Please select a record type to see the workflow stage rules",
 
         "fields": [
                 {
@@ -45,6 +45,16 @@
                     }
                 },
                 {
+                    "dtID": "swf_Order",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"Order in workflow:",
+                        "rst_DisplayHelpText": "Ordering of stage in workflow per record type", 
+                        "rst_DisplayWidth":5
+                    }
+                },
+                {
                     "dtID": "swf_StageRestrictedTo",
                     "dtFields":{
                         "dty_Type":"resource",
@@ -59,6 +69,7 @@
                     "dtFields":{
                         "dty_Type":"enum",
                         "dty_Role":"virtual",
+                        "rst_Display": "hidden",
                         "rst_DisplayName": "Ownership:",
                         "rst_DisplayHelpText": "",
                         "rst_FieldConfig": [
@@ -71,11 +82,14 @@
                 {
                     "dtID": "swf_SetOwnership",
                     "dtFields":{
-                        "rst_Display": "hidden",
-                        "dty_Type":"resource",
-                        "rst_DisplayName": "Owner groups:",
-                        "rst_DisplayHelpText": "Group that will be assigned as owner and its member can edit record",
-                        "rst_FieldConfig": {"entity":"sysGroups","csv":false}
+                        "dty_Type":"user",
+                        "rst_DisplayName": "Ownership:",
+                        "rst_DisplayHelpText": "Group or user with edit permissions",
+                        "rst_FieldConfig": {"mode":"all_users_and_groups","topOptions":[
+                        {"key":"null", "title":"No change"},
+                        {"key":"0", "title":"Any logged-in user can edit"}
+                        ]
+                        }
                     }
                 },
                 {

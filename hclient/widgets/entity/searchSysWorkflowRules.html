@@ -1,17 +1,22 @@
 <div>
-    <div style="float:left;">
+    <div>
         <h3 id="inner_title" style="display:inline-block;margin:0 10px 0 0; vertical-align: middle;">Workflow Stages Rules</h3>
-        <div id="btn_add_record" style="display:inline-block"></div>
+        <div class="heurist-helper3" style="font-size: 0.8em;padding: 3px;">
+            This function allows an administrator to set rules which are applied when a record changes workflow stage. 
+            <br>Separate rules are defined for each record (entity) type.
+        </div>
+        
     </div>
 
-    <div style="float:right;">
+    <div>
 
         <div style="display:inline-block;padding:0.2em">
-            <div class="header4" style="display: inline-block;width:5em">
-                <label for="input_search_rectype" accesskey="R"><U>R</U>ectype: </label></div>
+            <div class="header4" style="display: inline-block;">
+                <label for="input_search_rectype" accesskey="R"><U>R</U>ecord (entity) type: </label></div>
             <select id="input_search_rectype" class="text ui-widget-content ui-corner-all" 
                 style="width: 300px; margin-right:0.2em">
             </select>
+            <div id="btn_add_record" style="display:inline-block"></div>
         </div>
         
         <!-- 

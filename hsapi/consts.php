@@ -404,7 +404,8 @@ $trmDefines = array(
     'TRM_PAGETYPE' => array(2, 6254),
     'TRM_NO' => array(2, 531),
     'TRM_NO_OLD' => array(99, 5447),
-    'TRM_SWF_IMPORT' => array(2, 9454)
+    'TRM_SWF' => array(2, 9453), //workflow stages vocabulary
+    'TRM_SWF_IMPORT' => array(2, 9454)  //01 - Imported
 );
 
 

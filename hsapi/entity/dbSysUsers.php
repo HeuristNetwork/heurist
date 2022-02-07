@@ -104,6 +104,10 @@ class DbSysUsers extends DbEntityBase
 
             $this->data['details'] = 'ugr_ID,ugr_Name';
 
+        }else if(@$this->data['details']=='fullname'){
+
+            $this->data['details'] = 'ugr_ID,CONCAT(ugr_FirstName,\' \',ugr_LastName) as ugr_FullName';
+            
         }else if(@$this->data['details']=='count'){
             
             $this->data['details'] = 'ugr_ID';

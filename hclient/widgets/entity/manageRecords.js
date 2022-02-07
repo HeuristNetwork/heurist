@@ -23,7 +23,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _entityName:'records',
     
     _currentEditRecTypeID:null,
-    _swf_rules: [],
+    _swf_rules: [], //getSwfByRectype
     _isInsert: false,
     _additionWasPerformed: false, //NOT USED for selectAndSave mode
     _updated_tags_selection: null,
@@ -3228,11 +3228,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         }
                         
                         
-                        window.hWin.HEURIST4.msg.showPrompt(
+                        var $dlg = window.hWin.HEURIST4.msg.showPrompt(
                         '<div class="heurist-helper3">This setting will determine actions to be taken such as visibility settings, marking for publication or email notifications</div>'
                         +'<p><label>Workflow stage: </label><select id="dlg-prompt-value" class="text ui-corner-all">'
                             + opts_swf_stages
-                        +'</select></p>',
+                        +'</select>&nbsp;&nbsp;<button id="btn_advance">Advance</button></p>',
                         function(val){
                             
                             fields[dtyID] = val;
@@ -3240,6 +3240,18 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             
                         }, {title: window.hWin.HR('Set workflow stage'), yes: window.hWin.HR('Save')},
                         {default_palette_class: this.options.default_palette_class}); //'ui-heurist-populate'
+                        
+                        
+                        $dlg.find('#btn_advance').button({icon:'ui-icon-caret-1-e',iconPosition:'end'})
+                                .css('font-size','0.9em')
+                        .click(function(){
+                                $dlg.find('#dlg-prompt-value')[0].selectedIndex++;    
+                                if($dlg.find('#dlg-prompt-value')[0].selectedIndex<0){
+                                      $dlg.find('#dlg-prompt-value')[0].selectedIndex=0;            
+                                }
+                        })
+                        
+                        
                         return;
                     }
                 } //END assign workflow stage field 2-9453
@@ -3599,6 +3611,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         {  //not inited yet
 
             this._swf_rules = $Db.getSwfByRectype(this._currentEditRecTypeID);
+            if(this._swf_rules){
+                this._swf_rules.sort(function(a,b){  
+                        return (Number(a['swf_Order'])<Number(b['swf_Order'])?-1:1);
+                });
+            }
         
             $('<div style="display:table;min-width:575px;width:100%">'
              +'<div style="display:table-cell;text-align:left;padding:10px 0px 5px 15px;">'
