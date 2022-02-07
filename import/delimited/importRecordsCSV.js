@@ -3226,7 +3226,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                         if(res['count_warning']>0){
 
-                            $('#mrr_warning').text('Warnings: '+res['count_warning']);
+                            $('#mrr_warning').text('Data errors: '+res['count_warning']);
                             $('#prepareWarnings').show();//.css('display','inline-block');
                             $('#btnShowWarnings').show();
 //console.log(res);                            
@@ -3243,15 +3243,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         
                         if(res['count_error']>0){
                             
-                            $('#mrr_error').text('Errors: '+res['count_error']);
+                            $('#mrr_error').text('Unrecognised terms: '+res['count_error']);
                             $('#prepareErrors').show();//.css('display','inline-block');
                             
-                            window.hWin.HEURIST4.msg.showMsgErr((res['count_error']==1?'There is one row':('There are '+res['count_error']+' rows'))
-                            +' with errors in your input.<br><br> '
-                            +' These could include unrecognised terms, invalid dates, unknown record pointers (no record with given ID), '
-                            +' missing required values and so forth.<br><br>'
-                            + 'It is better to fix these in the source file and then process it again, as uploading faulty data generally leads to major fix-up work.'
-                            + 'Click "Show" button  for a list of errors');                            
+                            window.hWin.HEURIST4.msg.showMsgErr((res['count_error']==1?'There is one row':('There are '+res['count_error']+' ROWS '))
+                            +'with warnings in your input (the same error may occur in many rows).'
+                            +'<br><br>These could include unrecognised terms, invalid dates, unknown record pointers '
+                            +'(no record with given ID), missing required values and so forth.'
+                            + '<br><br>The data can be imported as-is and new terms can be added automatically, '
+                            + 'but if the data has too many mistakes it may be better to fix these in the source '
+                            + 'file and then process it again. Open Refine is a useful free tool for fixing errors.'
+                            + '<br><br> On the other hand, Admin > Verify Integrity can be used to find many common '
+                            + 'errors once the data is loaded. Click "Show" button for a list of errors.');                            
                     
                             $('.step3 > .normal').hide();
                             $('.step3 > .skip_step').hide();
