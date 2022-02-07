@@ -8,7 +8,9 @@ New and existing service mapping is found at hsapi/controller/record_lookup_conf
 
 All lookups are extenstions of the recordAction widget (hclient/widget/record/recordAction.js)
 
-lookupTCL.js and lookupTCL.html can provide a very simple template for creating new external lookups
+lookupTCL.js and lookupTCL.html can provide a very simple template for creating new external lookups, but also look at the BnF lookups which have handling for inserting terms and record pointers.
+
+TODO 7 Feb 2022: The improvements for terms and record pointers should be migrated to the general template.
 
 Notes:
 
@@ -19,9 +21,9 @@ The services can be accessed via a call to window.hWin.HAPI4.RecordMgr.lookup_ex
 
 Result Lists (widget found at hclient/widget/viewers/resultList.js) can be used to display the retrieved data as records in a list format for the user to select from.
 
-When returning values to the Heurist record form, for fields that are record pointers (resources), terms, or relationship markers, the id for the corresponding record/term is required for it to appear within the record form.
-
-Updated:	26 Jan 2022
+When returning values to the Heurist record form, for fields that are record pointers (resources) or terms, the id for the corresponding record/term neeeds to be inserted. In the BnF lookup, new terms in term fields are added automatically. Values for record pointers are fed sequentially to the data entry form as a search on the specified field, alloing the user to choose between alternatives or create a new record as required. Relationship markers are not handled. 
+ 
+Updated:	07 Feb 2022
 
 ----------------------------------------------------------------------------------------------------------------
 
