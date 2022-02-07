@@ -404,11 +404,10 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         $record['FlagTemporary'] = 0;
     }
 
-    //workflow stages    
+    //workflow stages   
+    $new_swf_stage = 0; 
     $swf_emails = null;
     if($record['FlagTemporary']!=1 && $system->defineConstant('DT_WORKFLOW_STAGE')){
-        
-        $new_swf_stage = 0;
         
         if($modeImport>0 && $system->defineConstant('TRM_SWF_IMPORT')){
             //hardcoded term id for "import" stage
@@ -689,11 +688,18 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     //send notification email
     if($swf_emails!=null){
         
-        $title = 'Workflow Stage has been changed';
-        $msg = $title.'<br>User '.$userinfo.' has changed workflow stage for '
-            .'<a href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&recID='.$recID.'&fmt=html">record #'.$recID
-            .'</a>';
-        sendPHPMailer('info@HeuristNetwork.org', 'Heurist. Workflow stage update notification', 
+        $stage_name = mysql__select_value($mysqli, 'select trm_Label from defTerms where trm_ID='.$new_swf_stage);
+        $user = $system->getCurrentUser();
+        $user = @$user['ugr_FullName'];
+        
+        $title = 'Workflow Stage change';
+        $msg = '<b>'.$title.'</b>'
+        .'<a href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&recID='.$recID.'&fmt=html">Record #'.$recID
+        .'  "'.strip_tags($newTitle).'"</a><br>'
+        .' has been changed to "'.$stage_name
+        .'"<br> by user: '.($user?$user:$system->get_user_id());
+     
+        sendPHPMailer('info@HeuristNetwork.org', 'Heurist DB '.HEURIST_DBNAME.'. ID: '.$recID, //'Workflow stage update notification', 
                     $swf_emails, $title, $msg, null);
     }
     
@@ -1831,6 +1837,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
     if($system->defineConstant('DT_KML')){ array_push($not_purify, DT_KML); }
     if($system->defineConstant('DT_QUERY_STRING')){ array_push($not_purify, DT_QUERY_STRING); }
     if($system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }
+    if($system->defineConstant('DT_CMS_EXTFILES')){ array_push($not_purify, DT_CMS_EXTFILES); }
     // $purifier = getHTMLPurifier();
 
     //2. verify (value, termid, file id, resource id) and prepare details (geo field). verify required field presence
