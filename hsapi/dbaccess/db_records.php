@@ -1831,6 +1831,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
     if($system->defineConstant('DT_KML')){ array_push($not_purify, DT_KML); }
     if($system->defineConstant('DT_QUERY_STRING')){ array_push($not_purify, DT_QUERY_STRING); }
     if($system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }
+    if($system->defineConstant('DT_CMS_EXTFILES')){ array_push($not_purify, DT_CMS_EXTFILES); }
     // $purifier = getHTMLPurifier();
 
     //2. verify (value, termid, file id, resource id) and prepare details (geo field). verify required field presence
