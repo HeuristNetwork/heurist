@@ -974,6 +974,7 @@ error_log(print_r($_REQUEST, true));
                  if($curr_user_id>0){
                     $query = 'select count(*) from usrWorkingSubsets where wss_OwnerUGrpID='.$curr_user_id;
                     $db_workset_count = mysql__select_value($this->mysqli, $query);
+                    $db_workset_count = ($db_workset_count>0)?$db_workset_count:0;
                  }
              }
         }
