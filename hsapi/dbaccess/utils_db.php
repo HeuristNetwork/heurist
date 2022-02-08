@@ -1141,10 +1141,10 @@ error_log('UPDATED '.$session_id.'  '.$value);
         return $res;
     }    
 
-    // @todo - remove
-    // see DBUpgrade_1.2.0_to_1.3.0.php
-    // Adds trash group
-    // Adds sysIdentification.sys_ExternalReferenceLookups 
+    // 
+    // For Sybversion update see DBUpgrade_1.2.0_to_1.3.0.php
+    //
+    // This method updates from 1.3.0 to 1.3.4
     //
     function updateDatabseToLatest4($system){
         
@@ -1152,13 +1152,13 @@ error_log('UPDATED '.$session_id.'  '.$value);
         $dbVerSub = $system->get_system('sys_dbSubVersion');
         $dbVerSubSub = 0;
 
-        if($dbVer==1 && $dbVerSub<4){
+        if($dbVer==1 && $dbVerSub==3){
         
             $mysqli = $system->get_mysqli();
             
-            if($dbVerSub<3){
+            if($dbVerSub<3){//not used
             
-            //adds trash groups
+            //adds trash groups if they are missed
             if(!(mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"')>0)){
     $query = 'INSERT INTO defRecTypeGroups (rtg_Name,rtg_Order,rtg_Description) '
     .'VALUES ("Trash",255,"Drag record types here to hide them, use dustbin icon on a record type to delete permanently")';
@@ -1185,11 +1185,9 @@ error_log('UPDATED '.$session_id.'  '.$value);
             }
 
             }//for v2
-            
+
             $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');
 
-            if($dbVerSub==3){
-            
             if($dbVerSubSub<1){
             
                 if(!hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
@@ -1265,16 +1263,15 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                     }
                     
             }
-            } //for 1.3.0
             
             //update version
-            if($dbVerSub<3 || ($dbVerSub==3 && $dbVerSubSub<4)){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=4, sys_dbSubSubVersion=3 WHERE 1');
+            if($dbVerSubSub<4){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=4 WHERE 1');
             }
             
             
             //import field 2-1080 Workflowstages
-            if($dbVerSub==3 && $dbVerSubSub<4 && !(ConceptCode::getDetailTypeLocalID('2-1080')>0)){
+            if($dbVerSubSub<4 && !(ConceptCode::getDetailTypeLocalID('2-1080')>0)){
                 $importDef = new DbsImport( $system );
                 if($importDef->doPrepare(  array(
                             'defType'=>'detailtype', 

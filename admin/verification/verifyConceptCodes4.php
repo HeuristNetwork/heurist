@@ -92,11 +92,46 @@ if(false){
     
     __updateDatabase();
 }else if(true){
+    
+    __checkVersionDatabase();
+}else if(false){
     //trm_NameInOriginatingDB 
     __setTermNameTo255();
     //__findLongTermLabels();
 }else{
     findMissedTermLinks();
+}
+
+//
+// Report database versions
+//
+function __checkVersionDatabase(){
+    global $mysqli, $databases; 
+
+    print 'versions<br>';
+
+    foreach ($databases as $idx=>$db_name){
+
+        mysql__usedatabase($mysqli, $db_name);
+
+        $query = 'SELECT sys_dbSubVersion, sys_dbSubSubVersion from sysIdentification';
+        $ver = mysql__select_row_assoc($mysqli, $query);
+if(!$ver) print $mysqli->error;       
+
+        if($ver['sys_dbSubVersion']<3){
+            print '<div style="color:red;font-weight:bold;">';
+        }else if($ver['sys_dbSubVersion']>3){
+            $query = 'UPDATE sysIdentification SET sys_dbSubVersion=3 WHERE sys_ID=1';
+            $mysqli->query($query);
+            print '<div style="color:green;font-weight:bold;">';
+        }else{
+            print '<div>';
+        }
+        
+        print $db_name.'  >'.$ver['sys_dbSubVersion'].'  '.$ver['sys_dbSubSubVersion'].'</div>';
+        
+    }
+
 }
 
 //
