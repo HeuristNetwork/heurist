@@ -3149,7 +3149,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     fields = null;
                 }
 
-                var hasValue = false, hasDtlField = false;
+                var hasValue = false, hasDtlField = false, hasScript = false;
 
                 //verify max lengtn in 64kB per value
                 for (var dtyID in fields){
@@ -3180,13 +3180,21 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 +'as Unicode uses multiple bytes per character.';
                                 window.hWin.HEURIST4.msg.showMsgFlash(sMsg,1500);
                                 
-                                var inpt = this._editing.getFieldByName(idx);
+                                var inpt = this._editing.getFieldByName(dtyID);
                                 if(inpt){
                                     inpt.editing_input('showErrorMsg', sMsg);
                                     $(this.editForm.find('input.ui-state-error')[0]).focus();   
                                 }
                                 return;
                                 
+                            }
+                            if(dtyID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_EXTFILES'])
+                            {
+                                if(values[k].indexOf('<script')>=0 && values[k].indexOf('</script>')>0){
+                                    var inpt = this._editing.getFieldByName(dtyID);
+                                    if(inpt) inpt.editing_input('showErrorMsg', '&lt;sctipt&gt; tag not allowed');  
+                                    hasScript = true;
+                                }
                             }
                         }
                     }
@@ -3198,8 +3206,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 }else if(fields != null && !hasValue){
                     window.hWin.HEURIST4.msg.showMsgFlash("Please enter a value into any field to save the record", 1500);
                     return;
+                }else if(fields != null && hasScript){
+                    window.hWin.HEURIST4.msg.showMsgFlash("Some fields have &lt;sctipt&gt; tag. It is not allowed in database", 1500);
+                    return;
                 }
-                
                 
                 //assign workflow stage field 2-9453
                 if(fields!=null && this._swf_rules.length>0){
@@ -3207,7 +3217,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     if(swf_mode=='on' || (swf_mode=='new' && this._isInsert)){
                         
                         var opts_swf_stages = '';
-                        var dtyID = $Db.getLocalID('dty', '2-1080'); //workflow stage field
+                        var dtyID = window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE']; //$Db.getLocalID('dty', '2-1080'); //workflow stage field
                         var curr_stage = fields[dtyID];
                         
                         for (var i=0; i<this._swf_rules.length; i++){
