@@ -44,7 +44,7 @@ regional['de'] = {
     'Edit': 'Bearbeiten',
     'Delete': 'Löschen',
     'Create': 'Erstellen',
-    'Confirm': 'Bestätigung',
+    'Confirm': 'Bestätigen',
     'Proceed': 'Vorgehen',
     'Continue': 'Fortfahren',
     'Go': 'Gehen',
