@@ -43,7 +43,7 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
             +'Notification includes a URL which will open the list of records<br>'
             +'in a Heurist search, from which they can be bookmarked<br>');
         
-        this._reminderWidgetContainer = $('<div>').addClass('ent_wrapper').css({'top':'120'}).appendTo( this.element );
+        this._reminderWidgetContainer = $('<div>').addClass('ent_wrapper').css({'top':'120px'}).appendTo( this.element );
         
         var that = this;
         
