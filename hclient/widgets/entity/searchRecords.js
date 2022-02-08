@@ -177,6 +177,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 that.selectRectype.val( rtyid ).hSelect('refresh');
                 that.selectRectype.change();
             }});
+            groupTabHeader.css('background','none');
             
         }else{
 
