@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * db access to sysUGrpps table
+    * 
     * 
     *
     * @package     Heurist academic knowledge management system

@@ -407,6 +407,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     //workflow stages   
     $new_swf_stage = 0; 
     $swf_emails = null;
+    $stage_field_idx = -1;
     if($record['FlagTemporary']!=1 && $system->defineConstant('DT_WORKFLOW_STAGE')){
         
         if($modeImport>0 && $system->defineConstant('TRM_SWF_IMPORT')){
@@ -414,18 +415,31 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             $new_swf_stage = TRM_SWF_IMPORT;
             
         }else{
-            foreach ($detailValues as $values) {
+            foreach ($detailValues as $idx=>$values) {
                 if($values['dtl_DetailTypeID']==DT_WORKFLOW_STAGE){
+                    $stage_field_idx = $idx;
                     $new_swf_stage = @$values['dtl_Value'];    
                     break;
                 }
             }
         }
         if($new_swf_stage>0){
-            //set $record onwership and visibility 
+            // set $record onwership and visibility 
             // and assign $record['swf'] = true, to avoid recordCanChangeOwnerwhipAndAccess
-            //returns emails 
-            $swf_emails = recordWorkFlowStage($system, $record, $new_swf_stage);
+            // returns array( new_value, curr_value, emails )
+            $swf_res = recordWorkFlowStage($system, $record, $new_swf_stage);
+            
+            $new_swf_stage = @$swf_res['new_value'];
+            if($new_swf_stage==0){ //not allowed - keep old stage
+                if($stage_field_idx>=0 && @$swf_res['curr_value']>0){
+                    $detailValues[$stage_field_idx]['dtl_Value'] = $swf_res['curr_value'];
+                }
+            }else{
+                $swf_emails = @$swf_res['emails'];
+                if($stage_field_idx<0){
+                    array_push($detailValues,array('dtl_DetailTypeID'=>DT_WORKFLOW_STAGE, 'dtl_Value'=>$new_swf_stage));
+                }
+            }
         }
     }
     
@@ -1831,12 +1845,12 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
 
     //list of field ids that will not html purified
     $not_purify = array();
-    if($system->defineConstant('DT_CMS_SCRIPT')){ array_push($not_purify, DT_CMS_SCRIPT); }
+    /*if($system->defineConstant('DT_CMS_SCRIPT')){ array_push($not_purify, DT_CMS_SCRIPT); }
     if($system->defineConstant('DT_CMS_CSS')){ array_push($not_purify, DT_CMS_CSS); }
     if($system->defineConstant('DT_SYMBOLOGY')){ array_push($not_purify, DT_SYMBOLOGY); }
     if($system->defineConstant('DT_KML')){ array_push($not_purify, DT_KML); }
     if($system->defineConstant('DT_QUERY_STRING')){ array_push($not_purify, DT_QUERY_STRING); }
-    if($system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }
+    if($system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }*/
     if($system->defineConstant('DT_CMS_EXTFILES')){ array_push($not_purify, DT_CMS_EXTFILES); }
     // $purifier = getHTMLPurifier();
 
@@ -2712,17 +2726,20 @@ function isValidTerm($system, $term_tocheck, $domain, $dtyID, $rectype)
 * 
 * @param mixed $system
 * @param mixed $record
-* @return email addresses for notification
+* @return array( new_value, curr_value, emails )
 */
 function recordWorkFlowStage($system, &$record, $new_value){
 
+    $current_value = 0;
+    $emails = null;
+    
     if($new_value>0 && @$record['FlagTemporary']!=1){
     
         $recID = intval(@$record['ID']);    
         $is_insert = ($recID<1);
         $recID = abs($recID);
     
-        $current_value = 0;
+        
         $mysqli = $system->get_mysqli();
         
         if(!$is_insert){
@@ -2757,7 +2774,7 @@ function recordWorkFlowStage($system, &$record, $new_value){
                 //changing ownership
                 if($rule['swf_SetOwnership']!=null && $rule['swf_SetOwnership']>=0){
                     $record['OwnerUGrpID'] = $rule['swf_SetOwnership'];    
-                    $record['swf'] = true;
+                    $record['swf'] = true; //marker that ownership is change by workflow stage - it will not check that current user has rights
                 }
                 //changing visibility
                 if($rule['swf_SetVisibility']!=null){
@@ -2772,20 +2789,21 @@ function recordWorkFlowStage($system, &$record, $new_value){
                 }
                 
                 //get email addresses for notification
+                
                 if($rule['swf_SendEmail']!=null){
                     
                     $query = 'SELECT ugr_eMail FROM sysUGrps '
                     .'WHERE ugr_ID IN ('.$rule['swf_SendEmail'].')';
                     $emails = mysql__select_list2($mysqli, $query);
-                    
-                    return $emails;                   
                 }
                 
+            }else{
+                $new_value = 0; //not allowed
             }
         }
     }
     
-    return null;
+    return array('new_value'=>$new_value, 'curr_value'=>$current_value, 'emails'=>$emails);
 }
 
 ?>

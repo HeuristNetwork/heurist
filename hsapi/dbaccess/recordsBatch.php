@@ -111,12 +111,13 @@ class RecordsBatch
     private function _initPutifier(){
         if($this->purifier==null){
             $not_purify = array();
-            if($this->system->defineConstant('DT_CMS_SCRIPT')){ array_push($not_purify, DT_CMS_SCRIPT); }
+            /*if($this->system->defineConstant('DT_CMS_SCRIPT')){ array_push($not_purify, DT_CMS_SCRIPT); }
             if($this->system->defineConstant('DT_CMS_CSS')){ array_push($not_purify, DT_CMS_CSS); }
             if($this->system->defineConstant('DT_SYMBOLOGY')){ array_push($not_purify, DT_SYMBOLOGY); }
             if($this->system->defineConstant('DT_KML')){ array_push($not_purify, DT_KML); }
             if($this->system->defineConstant('DT_QUERY_STRING')){ array_push($not_purify, DT_QUERY_STRING); }
-            if($this->system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }
+            if($this->system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }*/
+            if($system->defineConstant('DT_CMS_EXTFILES')){ array_push($not_purify, DT_CMS_EXTFILES); }
             
             $this->not_purify = $not_purify;
             //$this->purifier = getHTMLPurifier();  DISABLED
