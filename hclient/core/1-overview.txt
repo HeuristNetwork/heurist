@@ -7,6 +7,14 @@ Notes:
 Updated:     18 Oct 2015
 
 
+Heurist Records,recDetails
+
+    hRecordSearch.js - wrapper class for hRecordMgr.search - executes this method either callback or global events
+
+    
+    
+    
+
 Javascript classes
 
 hAPI - main class that stores current system values and allows to interact with server API

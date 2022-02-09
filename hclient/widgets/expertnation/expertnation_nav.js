@@ -201,7 +201,7 @@ $.widget( "heurist.expertnation_nav", {
                 +' f:196:'+this.options.uni_ID+' sortby:f:'+this.DT_ORDER,
                 w: 'all', detail:details };
 
-            window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset )
+            window.hWin.HAPI4.RecordSearch.doSearchWithCallback( request, function( recordset )
                 {
                     if(recordset!=null){
                         that._constructNavigationMenu( recordset );

@@ -450,7 +450,7 @@ console.log('initial in index.php '+qsearch);
                     var request = {q: qsearch, w: qdomain, f: 'map', rules: rules, source:'init' };
                     //window.hWin.HEURIST4.query_request = request;
                     setTimeout(function(){
-                            window.hWin.HAPI4.SearchMgr.doSearch(document, request);
+                            window.hWin.HAPI4.RecordSearch.doSearch(document, request);
                     }, 3000);
                 }
 */                

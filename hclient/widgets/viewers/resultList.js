@@ -408,7 +408,7 @@ $.widget( "heurist.resultList", {
             
             var request = {q:this.options.search_initial, w: 'a', detail: 'ids', 
                         source:'init', search_realm: this.options.search_realm };
-            window.hWin.HAPI4.SearchMgr.doSearch(this.document, request);
+            window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
             
         }else if(false){
             this.updateResultSet(recordset); // render records if search in this realm has been performed earlier
@@ -1397,7 +1397,7 @@ $.widget( "heurist.resultList", {
 
                 var that = this;
 
-                window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, function( new_recordset )
+                window.hWin.HAPI4.RecordSearch.doSearchWithCallback( request, function( new_recordset )
                     {
                         if(new_recordset!=null){
                             var record = new_recordset.getFirstRecord();
@@ -2009,7 +2009,7 @@ $.widget( "heurist.resultList", {
                            function( context ){
                                if(context){
                                    // refresh search
-                                   window.hWin.HAPI4.SearchMgr.doSearch( that, that._query_request );
+                                   window.hWin.HAPI4.RecordSearch.doSearch( that, that._query_request );
                                }
                            }
                         });
@@ -2023,7 +2023,7 @@ $.widget( "heurist.resultList", {
                            function( context ){
                                if(context){
                                    // refresh search
-                                   window.hWin.HAPI4.SearchMgr.doSearch( this, this._query_request );
+                                   window.hWin.HAPI4.RecordSearch.doSearch( this, this._query_request );
                                }
                            }
                         });
@@ -2526,7 +2526,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             this._query_request.w = 'a';
             this._query_request.source = this.element.attr('id'); //orig = 'rec_list';
 
-            window.hWin.HAPI4.SearchMgr.doSearch( this, this._query_request );
+            window.hWin.HAPI4.RecordSearch.doSearch( this, this._query_request );
         }
 
         return false;

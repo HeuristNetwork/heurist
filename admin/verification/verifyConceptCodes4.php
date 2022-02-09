@@ -30,9 +30,10 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-print 'disabled'; 
-exit(); 
+//print 'disabled'; 
+//exit(); 
  
+//define('OWNER_REQUIRED', 1);   
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
@@ -108,7 +109,12 @@ if(false){
 function __checkVersionDatabase(){
     global $mysqli, $databases; 
 
-    print 'versions<br>';
+    if(@$_REQUEST['reset']){
+                $query = 'UPDATE sysIdentification SET sys_dbSubVersion=2, sys_dbSubSubVersion=0 WHERE sys_ID=1';
+                $mysqli->query($query);
+        print ' Database reset to v 1.2.0<br>';
+        return;
+    }
 
     foreach ($databases as $idx=>$db_name){
 
@@ -116,20 +122,21 @@ function __checkVersionDatabase(){
 
         $query = 'SELECT sys_dbSubVersion, sys_dbSubSubVersion from sysIdentification';
         $ver = mysql__select_row_assoc($mysqli, $query);
-if(!$ver) print $mysqli->error;       
-
-        if($ver['sys_dbSubVersion']<3){
-            print '<div style="color:red;font-weight:bold;">';
-        }else if($ver['sys_dbSubVersion']>3){
-            $query = 'UPDATE sysIdentification SET sys_dbSubVersion=3 WHERE sys_ID=1';
-            $mysqli->query($query);
-            print '<div style="color:green;font-weight:bold;">';
+        if(!$ver){
+            print $db_name.'  >>> '.$mysqli->error;  
         }else{
-            print '<div>';
-        }
-        
-        print $db_name.'  >'.$ver['sys_dbSubVersion'].'  '.$ver['sys_dbSubSubVersion'].'</div>';
-        
+
+            if($ver['sys_dbSubVersion']<3){
+                print '<div style="color:red;font-weight:bold;">';
+            }else if($ver['sys_dbSubVersion']>3){
+                //$query = 'UPDATE sysIdentification SET sys_dbSubVersion=3 WHERE sys_ID=1';
+                //$mysqli->query($query);
+                print '<div style="color:green;font-weight:bold;">';
+            }else{
+                print '<div>';
+            }
+            print $db_name.'  >>>  1.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion'].'</div>';
+        }        
     }
 
 }

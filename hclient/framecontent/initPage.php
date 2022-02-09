@@ -180,7 +180,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/search_minimal.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hRecordSearch.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_geo.js"></script>
@@ -249,7 +249,7 @@ _dout('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000
             // In case of standalone page
             //load minimum set of required scripts
             $.getMultiScripts(['localization.js'/*, , 'utils_msg.js'
-                'utils_ui.js', 'search_minimal.js', 'recordset.js', 'hapi.js'*/], '<?php echo PDIR;?>hclient/core/')
+                'utils_ui.js', 'hRecordSearch.js', 'recordset.js', 'hapi.js'*/], '<?php echo PDIR;?>hclient/core/')
             .done(function() {
                 // all done
                 window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);

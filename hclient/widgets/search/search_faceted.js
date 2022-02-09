@@ -1481,7 +1481,7 @@ $.widget( "heurist.search_faceted", {
             }
             
             //perform search
-            window.hWin.HAPI4.SearchMgr.doSearch( this, request );
+            window.hWin.HAPI4.RecordSearch.doSearch( this, request );
             
             //perform search for facet values
             //that._recalculateFacets(content_id);

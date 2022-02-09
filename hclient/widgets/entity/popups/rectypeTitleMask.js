@@ -97,7 +97,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         //load list of records
         var request = request = {q: 't:'+this.options.rty_ID, w: 'all', detail:'header', limit:100 };
          
-        window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset )
+        window.hWin.HAPI4.RecordSearch.doSearchWithCallback( request, function( recordset )
         {
             if(recordset!=null){
                 

@@ -534,7 +534,7 @@ console.log(data);
             request.source = this.element.attr('id');
             request.search_realm = this.options.search_realm;
             
-            window.hWin.HAPI4.SearchMgr.doSearch( this, request );
+            window.hWin.HAPI4.RecordSearch.doSearch( this, request );
             
             if($.isFunction(this.options.onClose)){
                 this.options.onClose();

@@ -355,7 +355,7 @@ if(isset($_POST['data'])) {
                 //load details if required
                  var request = request = {q: 'ids:'+ids.join(','), w: 'all', detail:details };
                  
-                 window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, function( new_recordset )
+                 window.hWin.HAPI4.RecordSearch.doSearchWithCallback( request, function( new_recordset )
                  {
                     if(new_recordset!=null){
                         this.records = new_recordset.getRecords();

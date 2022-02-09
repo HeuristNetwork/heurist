@@ -142,7 +142,7 @@ that._dout('myOnShowEvent');
         {
             var request = { q:this.options.search_initial, w: 'a', detail: 'ids', 
                         source:'init', search_realm: this.options.search_realm };
-            window.hWin.HAPI4.SearchMgr.doSearch(this.document, request);
+            window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
         }
         
         

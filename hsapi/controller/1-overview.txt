@@ -3,8 +3,13 @@ Directory:    /hserver/controller
 
 Overview:   All files in this folder are services. They are utilized in hapi.js to obtain various data (in json format) from server side.
 
-Notes:      Work process:
 
+
+usr_info.php - controller for request from client side HAPI4.hSystemMgr (@todo rename to "system something")
+
+
+
+Notes:      Work process:
             1. check permission
             2. parse  $_REQUEST
             3. call functions from   common/db_***.php
@@ -17,8 +22,8 @@ record_shp.php - Converts shp+dbf files to geojson output or downloads zip archi
  
  
 deprecated
-map_data.php
-sys_structure.php            
+map_data.php - for google map interface only
+sys_structure.php  - used in import defintions only to retrieve structure from different database          
             
 Updated:     29 Nov 2021
 

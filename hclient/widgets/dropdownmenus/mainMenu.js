@@ -2095,7 +2095,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         if(rules) request['rules'] = rules;
 
                         setTimeout(function(){
-                            window.hWin.HAPI4.SearchMgr.doSearch(window.hWin.document, request);//initial search
+                            window.hWin.HAPI4.RecordSearch.doSearch(window.hWin.document, request);//initial search
                             }, 1000);
                     }else{
                         //trigger search finish to init some widgets

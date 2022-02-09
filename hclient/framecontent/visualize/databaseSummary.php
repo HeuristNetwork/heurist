@@ -136,7 +136,7 @@ A:link {
                     if(window.hWin.HAPI4.sysinfo['layout']=='H4Default'){
                         window.hWin.HAPI4.LayoutMgr.putAppOnTopById('FAP');
                     }
-                    window.hWin.HAPI4.SearchMgr.doSearch( $(window.hWin.document), request );                    
+                    window.hWin.HAPI4.RecordSearch.doSearch( $(window.hWin.document), request );                    
                     
                     if(window.hWin.HAPI4.sysinfo['layout']!='H4Default'){
                         window.close();    

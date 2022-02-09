@@ -1,5 +1,8 @@
 /**
-* Main class for Heurist API
+* Main class for Heurist 
+*   it stores major config info
+*   local db definitions
+*   and provides methods to call server side 
 *
 * Constructor:
 * @param _db - database name, if omit it takes from url parameter
@@ -22,6 +25,31 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/*
+
+Properties:
+    baseURL
+    baseURL_pro
+    iconBaseURL - url for record type icon (rty_ID to be added)
+    database - current database name
+    sysinfo
+
+Localization routines (assigned to window.hWin)
+
+    HR  returns localized string
+    HRA = localize all elements with class slocale for given element
+    HRes = returns url or loads content for localized resource
+
+LayoutMgr   hLayout object (@todo replace to new version from CMS)
+
+Classes for server interaction
+
+    SystemMgr - user credentials and system utilities
+    RecordMgr - Records SCRUD actions    
+    RecordSearch - wrapper for RecordMgr.search method
+    EntityMgr - SCRUD for database defenitions and user/groups
+
+*/
 function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     var _className = "HAPI",
     _version   = "0.4",
@@ -94,8 +122,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         if(typeof hLayout !== 'undefined' && $.isFunction(hLayout)){
             that.LayoutMgr = new hLayout();
         }
-        if(typeof hSearchMinimal !== 'undefined' && $.isFunction(hSearchMinimal)){
-            that.SearchMgr = new hSearchMinimal();
+        if(typeof hRecordSearch !== 'undefined' && $.isFunction(hRecordSearch)){
+            that.RecordSearch = new hRecordSearch();
         }
         
         if(!window.onresize){
@@ -108,8 +136,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 that._delayOnResize = setTimeout(__trigger,1000);
             }
         }
-
-
+        
         /*if(_currentUser){
         that.currentUser = _currentUser;
         }else{}*/
@@ -262,39 +289,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 callback(response);
         }
     }
+
     
-    // TODO: Remove, enable or explain
-    /**
-    * User class
-    *
-    * @returns {Object}
-    function hUserMgr(){
-
-    var _currentUser = null,
-    _guestUser = {ugr_ID:0, ugr_FullName:'Guest'};
-
-    var that = {
-
-    // request {username: , password: }
-    // response HUser object
-    login: function(request, callback){
-    if(request) request.a = 'login';
-    _callserver('usr_info', request, callback);
-    }
-
-    ,logout: function(callback){
-    _callserver('usr_info', {a:'logout'}, callback);
-    }
-    }
-    }
-    */
-
-
     /**
     * System class that responsible for interaction with server in domains:
     *       user/groups information/credentials
-    *       database definitions - record structure, field types, terms
-    *       saved searches
+    *       saved searches - @todo move to EntityMgr
+    *       system info
     *
     * see usr_info.php and sys_structure.php
     *
@@ -305,26 +306,38 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     *   verify_credentials  - checks whether user is logged in and force_refresh_sys_info in case change roles or update db settings
     * 
     *   sys_info     - get current user info and database settings - used only in hapi.init and on force_refresh_sys_info
+    *                  (for details $system->getCurrentUserAndSysInfo) 
+    *   sys_info_count - 
     *   save_prefs   - save user preferences  in session
-    *   mygroups     - description of current user Workgroups
+    * 
+    *   -----
+    *           @todo move to EntityMgr
     *   ssearch_get  - get saved searches for current user and all usergroups where user is memeber, or by list of ids
     *   ssearch_save - save saved search in database
     *   ssearch_copy - duplicate
     *   ssearch_delete - delete saved searches by IDs
     *   ssearch_savetree - save saved search treeview data
     *   ssearch_gettree - get saved search treeview data
-    *   get_defs     - get the desired database structure definition
-    *   get_defs_all
-    * 
-    *   get_url_content_type - resolve mimetype for given url
-    * 
-    *   versionCheck - checks client software version and database version
-    * 
+    *   ------ 
+    *          @todo move to EntityMgr 
     *   user_get
     *   usr_names
-    *   user_log
+    *   mygroups  - description of current user's Workgroups
+    *   user_log  - activity log
     *   user_save
-    *   user_wss - working subset
+    *   user_wss  - working subset
+    *   ------
+    *   get_defs     - get the desired database structure definition (used in import defs only)
+    *   get_defs_all - returns number of records in database, worksets and dashboard info (@todo remove)
+    * 
+    *   ------ 
+    *   get_url_content_type - resolve mimetype for given url
+    *   get_sysimages
+    *   get_sysfolders
+    *   checkPresenceOfRectype - check and download missed rectypes
+    *   import_definitions
+    *   versionCheck  - checks client software version and db version check (move)
+    * 
     *
     * @returns {Object}
     */
@@ -514,6 +527,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 }
             }
             
+            /**
+            * Returns number of records in database, worksets and dashboard info
+            */
             ,sys_info_count: function(callback){
                 _callserver('usr_info', {a:'sys_info_count'}, 
                     function(response){
@@ -527,10 +543,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         }
                     });
             }
-
+            
             /**
             * Get current user if logged in, and global database settings
             * used only in hapi.init and on force_refresh_sys_info
+            * 
+            * see $system->getCurrentUserAndSysInfo
             */
             ,sys_info: function(callback){
    
@@ -555,7 +573,18 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     }
                 );
             }
-
+            
+            /**
+            * Save user personal info/register new user
+            * @param request - object - user info
+            * @param callback
+            */
+            ,save_prefs: function(request, callback){
+                if(request) request.a = 'save_prefs';
+                _callserver('usr_info', request, callback);
+            }
+            
+            
             /**
             * set/clear work subset
             */
@@ -584,7 +613,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if(request) request.a = 'usr_get';
                 _callserver('usr_info', request, callback);
             }
-            
+
             //get user full names by id
             ,usr_names:function(request, callback){
 
@@ -638,6 +667,19 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 }
             }
 
+            /**
+            * Returns detailed description of groups for current user
+            *
+            * response data - array of ugl_GroupID:[ugl_Role, ugr_Name, ugr_Description]
+            */
+            ,mygroups: function(callback){
+                _callserver('usr_info', {a:'groups'}, callback);
+            }
+            
+            
+            //
+            // activity logging
+            //
             ,user_log: function(activity, suplementary){
                 
                 if(gtag && $.isFunction(gtag)){ //google log function
@@ -723,25 +765,6 @@ prof =Profile
             }
             
             /**
-            * Save user personal info/register new user
-            * @param request - object - user info
-            * @param callback
-            */
-            ,save_prefs: function(request, callback){
-                if(request) request.a = 'save_prefs';
-                _callserver('usr_info', request, callback);
-            }
-            
-            /**
-            * Returns detailed description of groupfs for current user
-            *
-            * response data - array of ugl_GroupID:[ugl_Role, ugr_Name, ugr_Description]
-            */
-            ,mygroups: function(callback){
-                _callserver('usr_info', {a:'groups'}, callback);
-            }
-
-            /**
             *  Get saved searches for current user and all usergroups where user is memeber
             *
             * request
@@ -797,6 +820,7 @@ prof =Profile
                 _callserver('usr_info', request, callback);
             }
             /**
+            * @todo - replace with EntityMgr.refreshEntityData
             *  Get the desired database structure definition in old format - used to get rectypes from REMOTE database ONLY
             * request
             *   terms, rectypes, detailtypes :  list of desired ids,  OR 'all'
@@ -807,6 +831,9 @@ prof =Profile
                 _callserver('sys_structure', request, callback);
             }
 
+            //
+            // wrapper for EntityMgr.refreshEntityData - to be replaced
+            //    
             ,get_defs_all: function(is_message, document, callback){
                 
                 window.hWin.HEURIST4.msg.bringCoverallToFront();
@@ -837,11 +864,13 @@ prof =Profile
 
             },
             
+            //returns mimetype for given url
             get_url_content_type: function(url, callback){
                 var request = {a:'get_url_content_type', url: url};
                 _callserver('usr_info', request, callback);
             },
 
+            //returns list of files for given folders
             get_sysimages: function(folders, callback){
                 var request = {a:'sysimages', folders: folders};
                 _callserver('usr_info', request, callback);
@@ -855,8 +884,7 @@ prof =Profile
                 _callserver('usr_info', request, callback);
             },
             
-
-            //
+            // @todo - move
             // 1. verifies that given rty_IDs (concept codes) exist in this database
             // 2. If rectype is missed - download from given db_ID (registration ID)
             // 3. Show warning of info report
@@ -980,8 +1008,9 @@ prof =Profile
                 });
             },
             
-            //
-            //
+            // @todo move 
+            // 1. Checks client software version and 
+            // 2. Checks Database version and runs update script
             //
             versionCheck: function(){
 
@@ -1137,6 +1166,9 @@ prof =Profile
                 _callserver('record_edit', request, callback);
             }
             
+            /**
+            * Increment value for given detail field and returns it
+            */
             ,increment: function(rtyID, dtyID, callback){
                 var request = {a:'increment', rtyID:rtyID, dtyID:dtyID};
                 _callserver('record_edit', request, callback);
@@ -1156,7 +1188,7 @@ prof =Profile
             }
 
             /**
-            * Batch edition of record details
+            * Batch edition/update of record details
             *
             * @param request a: add,replace,delete
             *
@@ -1179,7 +1211,7 @@ prof =Profile
             
             /**
             * Search for records via global events
-            * to search directly use SearchMgr
+            * to search directly use RecordSearch
             *
             * request { }
             *  q - query string
@@ -1328,9 +1360,9 @@ prof =Profile
 
     /**
     * System class that responsible for interaction with server in domains:
-    *       user/groups information/credentials
-    *       database definitions - record structure, field types, terms
-    *       saved searches
+    *       User/groups information/credentials
+    *       Database definitions - record structure, field types, terms
+    *       @todo saved searches
     *
     * see entityScrud.php and db[TableName].php in dbaccess
     *
@@ -1692,6 +1724,8 @@ var fin_time = new Date().getTime() / 1000;
         baseURL: '', 
         iconBaseURL: '',
         database: '',
+        currentUser: _guestUser,
+        sysinfo: {},
 
         Event: {
             /*LOGIN: "LOGIN",
@@ -1942,9 +1976,6 @@ var fin_time = new Date().getTime() / 1000;
                 return that.currentUser['ugr_ID'];  
         },
         
-        currentUser: _guestUser,
-        sysinfo: {},
-
         // main result set that is filled in search_minimal - keeps all
         // purposes:
         // 1) to keep main set of records (original set) to apply RuleSet
@@ -1973,7 +2004,7 @@ var fin_time = new Date().getTime() / 1000;
         EntityMgr: new hEntityMgr(),
 
         //assign it later since we may have different search managers - incremental, partial...
-        SearchMgr: null, //class that responsible for search and incremental loading of result
+        RecordSearch: null, //class that responsible for search and incremental loading of result
 
         LayoutMgr: null,
 
@@ -2047,7 +2078,7 @@ var fin_time = new Date().getTime() / 1000;
         },
         
         //
-        //returns url or loads content for localized resource (help, documentation)
+        // returns url or loads content for localized resource (for example help, documentation or html snipper for form)
         // name - name of file (default html ext)
         // ele - target element
         //
@@ -2112,7 +2143,7 @@ var fin_time = new Date().getTime() / 1000;
         }
 
         //
-        //  returns url to entity image
+        //  returns url for entity image
         // 
         // version = thumb, icon
         // def - if file not found return empty placeholder (0) or "add image" gif (1) 

@@ -1233,7 +1233,7 @@ $.widget( "heurist.mainMenu6", {
                     }
                     var request = window.hWin.HEURIST4.util.parseHeuristQuery(q); 
                     request.qname = qname;
-                    window.hWin.HAPI4.SearchMgr.doSearch( this, request );
+                    window.hWin.HAPI4.RecordSearch.doSearch( this, request );
                 }
             });
 
@@ -2061,7 +2061,7 @@ $.widget( "heurist.mainMenu6", {
                             detail: 'ids'
                         };
 
-                        window.hWin.HAPI4.SearchMgr.doSearch(this, request);
+                        window.hWin.HAPI4.RecordSearch.doSearch(this, request);
 
                         that.switchContainer('explore');
                     }

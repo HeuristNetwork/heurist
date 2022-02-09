@@ -546,7 +546,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
         this._query_request.id = null;
         this._query_request.source = this.element.attr('id');
-        window.hWin.HAPI4.SearchMgr.doSearch( this, this._query_request );
+        window.hWin.HAPI4.RecordSearch.doSearch( this, this._query_request );
     },
     
     //

@@ -1110,7 +1110,7 @@ map.data.addListener('mouseover', function(event) {
 
             
             // Retrieve records for this request
-            window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, 
+            window.hWin.HAPI4.RecordSearch.doSearchWithCallback( request, 
             
                     function( recordset, original_recordset ){
 

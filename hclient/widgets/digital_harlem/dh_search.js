@@ -51,7 +51,7 @@ $.widget( "heurist.dh_search", {
         // it adds some parameters to search request and postprocess the result
         this._isDigitalHarlem = (window.hWin.HAPI4.sysinfo['layout'].indexOf('DigitalHarlem')==0);
         if(this._isDigitalHarlem){
-                window.hWin.HAPI4.SearchMgr = new hSearchMinimalDigitalHarlem();
+                window.hWin.HAPI4.RecordSearch = new hSearchMinimalDigitalHarlem();
         }
                 
 
@@ -125,7 +125,7 @@ $.widget( "heurist.dh_search", {
                         if(false && !window.hWin.HEURIST4.util.isempty(init_search)){
                             var request = {q: init_search, w: 'a', f: 'map', source:'init' };
                             setTimeout(function(){
-                                window.hWin.HAPI4.SearchMgr.doSearch(document, request);
+                                window.hWin.HAPI4.RecordSearch.doSearch(document, request);
                             }, 3000);
                         }else{
                             //trigger search finish to init some widgets
@@ -578,7 +578,7 @@ $.widget( "heurist.dh_search", {
             request.qname = this.usr_SavedSearch[svsID][_NAME];
 
             //get hapi and perform search
-            window.hWin.HAPI4.SearchMgr.doSearch( this, request );
+            window.hWin.HAPI4.RecordSearch.doSearch( this, request );
 
 
         }

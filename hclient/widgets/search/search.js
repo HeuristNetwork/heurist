@@ -1002,7 +1002,7 @@ $.widget( "heurist.search", {
 
             this.query_request = request;
 
-            window.hWin.HAPI4.SearchMgr.doSearch( this, request );
+            window.hWin.HAPI4.RecordSearch.doSearch( this, request );
 
         }
 

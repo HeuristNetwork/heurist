@@ -1,9 +1,19 @@
 /**
-* Minimal search
-* returns only ids
-* rules are searched on server side
+* Search wrapper for hRecordMgr.search. 
+* It executes this method either callback or global events.
+* It allows to load entire set of records (incremental search by chunks has been disabled)
 * 
-* It keeps result in HAPI4.currentRecordset
+* It searches for record IDS only. Rules are searched on server side
+* 
+* Three main methods
+* 
+* doSearchWithCallback - result is passed to provided callback function
+*
+* doSearch - before search it trigers global event ON_REC_SEARCHSTART
+*            on finish ON_REC_SEARCHFINISH and pass result as event data
+*            besides it keeps result in HAPI4.currentRecordset
+* 
+* doApplyRules - applies rules to existing result set (HAPI4.currentRecordset)
 * 
 *
 * @package     Heurist academic knowledge management system
@@ -23,8 +33,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hSearchMinimal() {
-     var _className = "SearchMinimal",
+function hRecordSearch() {
+     var _className = "hRecordSearch",
          _version   = "0.4";
 
 
@@ -63,7 +73,9 @@ function hSearchMinimal() {
         
     }
 
-    // search with event triggers    
+    //
+    // search with event triggers 
+    //   
     function _doSearch( originator, request ){
         
             var owner_element_id, owner_doc;
@@ -147,7 +159,7 @@ function hSearchMinimal() {
                         recordset.setRequest( qr  );
 
                 }else{
-                    //erorr - trigger event with empty resultset
+                    //error - trigger event with empty resultset
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
                 

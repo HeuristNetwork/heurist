@@ -1,8 +1,8 @@
 /**
 *
-* dh_search_minimal.js (Digital Harlem) : Special search class (based on search_minimal.js Minimal search)
+* dh_search_minimal.js (Digital Harlem) : Special search class (based on hRecordSearch Minimal search)
 *
-* Replaces standard search in window.hWin.HAPI4.SearchMgr
+* Replaces standard search in window.hWin.HAPI4.RecordSearch
 *
 * 1) it adds special parameters to search request:
 *       getrelrecs - get relationship records

@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * SCRUD controller
+    * Entity SCRUD controller - web interface. It uses functions from entityScrudSrv.php
     * search, create, read, update and delete
     * 
     * Application interface. See hRecordMgr in hapi.js
