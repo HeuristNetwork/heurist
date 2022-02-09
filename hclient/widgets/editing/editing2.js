@@ -189,6 +189,31 @@ function hEditing(_options) {
                     },....]
         */
         
+        //special case for group_inside - add it as a child for parent
+        
+        function __processGroupInside(fields){
+        
+            var prev_children = null;
+            var idx = 0;
+            while(idx<fields.length){
+                if( $.isPlainObject(fields[idx]) && fields[idx].groupType ){ //this is group
+                    
+                    if(fields[idx].groupType=='group_inside' && prev_children){
+                        //move this group inside previous group on the same level
+                        prev_children.push(fields[idx]);    
+                        fields.splice(idx,1);
+                        continue;
+                    }else{
+                        prev_children = fields[idx].children;
+                        __processGroupInside(fields[idx].children);  
+                    }
+                }
+                idx++;
+            }//for
+        
+        }//__processGroupInside
+        __processGroupInside(recstructure);
+        
         function __createGroup(fields, groupContainer, fieldContainer){
             var idx, tab_index;
                 
@@ -208,10 +233,36 @@ function hEditing(_options) {
 
                         __createGroup(fields[idx].children, groupContainer, fieldContainer);
                         continue;                        
+                    }else if(fields[idx].groupType=='group_inside'){
+                   
+                         
+                        var headerText = fields[idx]['groupHeader'];
+                        var headerHelpText = fields[idx]['groupHelpText'];
+                        var is_header_visible = fields[idx]['groupTitleVisible'];
+                                
+
+                        var hele = $('<h4>').text(headerText).addClass('separator').appendTo(fieldContainer);
+                        
+                        if(!is_header_visible){
+                            ele.addClass('separator-hidden').hide();
+                        }
+                        var div_prompt = $('<div>').text(headerHelpText)
+                               .addClass('heurist-helper1')
+                               .addClass('separator-helper').css({'padding-left':'14px'})
+                               .appendTo(fieldContainer);
+
+                        var ele = $('<div>').appendTo(fieldContainer);    
+                        if(parseInt(fields[idx]['dtID'])>0){ //for Records only
+                            ele.attr('data-dtid', fields[idx]['dtID']);
+                        }
+                        
+                        __createGroup(fields[idx].children, groupContainer, fieldContainer);
+                        continue;
                     }
                     
-                    
                     if(fields[idx].groupType != currGroupType){ //create new group container and init previous
+                    
+                    
                         //init previous one 
                         if(groupEle!=null){
                             if(currGroupType == 'accordion' || currGroupType == 'expanded'){
@@ -277,7 +328,8 @@ function hEditing(_options) {
 
                         newFieldContainer.addClass(options.className);
 
-                    }else if(currGroupType == 'tabs'){
+                    }
+                    else if(currGroupType == 'tabs'){
                         // class="separator2"
                         $('<li>').addClass('edit-form-tab').html('<a href="#'+newFieldContainer.attr('id')+'"><span style="font-weight:bold">'+headerText+'</span></a>')
                         .appendTo(groupTabHeader);
@@ -286,9 +338,12 @@ function hEditing(_options) {
 
                         newFieldContainer.addClass(options.className);
 
-                    }else{
-
-                        var ele = $('<h4>').text(headerText).addClass('separator').appendTo(groupContainer);
+                    }
+                    else{
+                        
+                        var ele = $('<h4>').text(headerText).addClass('separator');
+                        
+                        ele.appendTo(groupContainer);    
 
                         if(!is_header_visible){
                             ele.addClass('separator-hidden').hide();

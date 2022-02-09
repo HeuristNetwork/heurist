@@ -2834,6 +2834,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         groupHidden: false,
                         groupTitleVisible: (dtFields['rst_RequirementType']!=='forbidden'),
                         groupType: (dtFields['rst_DefaultValue']=='group'||
+                                    dtFields['rst_DefaultValue']=='group_inside'||
                                     dtFields['rst_DefaultValue']=='tabs'||
                                     dtFields['rst_DefaultValue']=='tabs_new'||
                                     dtFields['rst_DefaultValue']=='accordion'||
