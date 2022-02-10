@@ -158,7 +158,7 @@ regional['en'] = {
         menu_structure_vocabterms_hint: 'Add new and modify Vocabularies &amp; Terms',
         menu_structure_fieldtypes_hint: 'Browse and edit the base field definitions referenced by record types (often shared by multiple record types)',
         menu_structure_import_hint: 'Selectively import record types, fields, terms and connected record types from other Heurist databases',
-        menu_structure_summary_hint: 'Visualise the internal connections between record types in the database and add connections (record pointers and relationshi markers) between them',
+        menu_structure_summary_hint: 'Visualise the internal connections between record types in the database and add connections (record pointers and relationship markers) between them',
         menu_structure_refresh_hint: 'Clear and reload Heurist\'s internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.',
 
     'Setup': '',
@@ -318,7 +318,7 @@ regional['en'] = {
         menu_selected_rectype_change_hint: 'Change record types for filtered records',
         menu_selected_extract_pdf: 'Extract text from PDF files',
         menu_selected_extract_pdf_hint: 'Extract text from PDF (experimental)',
-    'Shared': '',
+    'Share': '',
         menu_selected_notify: 'Notify (email)',
         menu_selected_notify_hint: 'Select one or more records, then click to send notification',
         menu_selected_email: 'Send email',

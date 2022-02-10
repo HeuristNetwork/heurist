@@ -1,11 +1,12 @@
 /**
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2020 University of Sydney
+* @copyright   (C) 2005-2022 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Michael Falk <michaelgfalk@gmail.com>
+* @author      Hagen Peukert   <hagen.peukert@uni-hamburg.de>
+* @author      Michael Falk    <michaelgfalk@gmail.com>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @version     6.0
 */
 
 /*
@@ -32,7 +33,7 @@ regional['de'] = {
     'Show data': 'Daten anzeigen',
     'Actions': 'Aktionen',
     'Embed': 'Einbinden',
-    'Clear': 'Verwerfen', //really tricky, it depends on what is shown on the screen, it could also be 'leeren' = to empty
+    'Clear': 'Leeren',
     'Warning': 'Warnung',
     'Cancel': 'Abbrechen',
     'Record Info': 'Datensatzinfo',
@@ -94,7 +95,7 @@ regional['de'] = {
         menu_database_create: 'Neu',
         menu_database_clone: 'Klonen',
         menu_database_delete: 'Löschen',
-        menu_database_clear: 'Verwerfen', //here I really not sure, but it is definitely not Abräumen
+        menu_database_clear: 'Leeren',
         menu_database_rollback: 'Zurücksetzen',
         menu_database_register: 'Registrieren',
         menu_database_properties: 'Eigenschaften',
@@ -278,9 +279,9 @@ regional['de'] = {
     'Collect': 'Sammeln',
         menu_collected_add: 'Hinzufügen',
         menu_collected_add_hint: 'Die ausgewählten Datensätze der Sammlung hinzufügen.',
-        menu_collected_del: 'Entfernen',
+        menu_collected_del: 'Leeren',
         menu_collected_del_hint: 'Die ausgewählten Datensätze aus der Sammlung entfernen.',
-        menu_collected_clear: 'Alle Datensätze entfernen',
+        menu_collected_clear: 'Alle Datensätze leeren',
         menu_collected_clear_hint: 'Die Inhalte der Sammlung leeren.',
         menu_collected_save: 'Speichern unter',
         menu_collected_save_hint: 'Datensätze als Sammlung speichern, um sie zukünftig einfacher aufzurufen.',
@@ -418,49 +419,51 @@ regional['de'] = {
 
     //record actions dialogs
     'Processed records': 'Verarbeitete Datensätze',
-    recordAction_select_lbl: 'Records scope:',
-    recordAction_select_hint: 'please select the records to be affected …',    
-        'All records': '',
-        'Selected results set (count=': '',
-        'Current results set (count=': '',
-        'only:': '',
-    'Add or Remove Tags for Records': '',
-        'Add tags': '',
-        'Remove tags': '',
-        'Bookmark': '',
-        recordTag_hint0: 'Select tags to be added to bookmarks for chosen URLs<br>',
-        recordTag_hint1: 'Select tags to be added to bookmarks for chosen record scope<br>',
-        recordTag_hint2: 'Select tags to be added or removed for chosen record scope<br>',
-        recordTag_hint3: 'Matching tags are shown as you type. Click on a listed tag to add it.<br>Unrecognised tags are added automatically as user-specific tags <br>(group tags must be added explicitly by a group administrator). Tags may contain spaces.',
-        'No tags were affected': '',
-        'Bookmarks added': '',
-        'Tags added': '',
-        'Tags removed': '',
-    'Unbookmark selected records': '',    
-        recordUnbookmark_hint: 'Select the scope of records with bookmarks to be removed.<br>'
-            +'Any personal tags for these records will be detached <br>'
-            +'These operation ONLY removes the bookmark from your resources, <br>'
-            +'it does not delete the record entries<br>',
-        'Remove Bookmarks': '',
-        'Bookmarks removed': '',
-    'Set Record Rating': '',
-        'Set Rating': '',
-        'Please specify rating value': '',
-        'Rating updated': '',
-        'No Rating': '',
-    'Delete Records': '',
+    recordAction_select_lbl: 'Umfang der Aktion',
+    recordAction_select_hint: 'Bitte wählen Sie die Datensätze aus, die betroffen sein sollen.',
+        'All records': 'Alle Datensätze',
+        'Selected results set (count=': 'Aktuell ausgewählten Datensätze (Anzahl=',
+        'Current results set (count=': 'Alle Datensätze in der aktuellen Abfrage (Anzahl=',
+        'only:': 'nur:',
+    'Add or Remove Tags for Records': 'Datensätze taggen oder enttaggen',
+        'Add tags': 'Taggen',
+        'Remove tags': 'Enttaggen',
+        'Bookmark': 'Bookmarken',
+        recordTag_hint0: 'Tags auswählen, die Lesezeichen der ausgewählten URLs hinzugefügt werden.<br>',
+        recordTag_hint1: 'Tags auswählen, die Lesezeichen der Datensätze in der ausgewählten Umfang hinzugefügt werden.<br>', 
+        recordTag_hint2: 'Tags auswählen, die allen Datensätzen in der ausgewählte Umfang hinzugefügt werden.<br>',
+        recordTag_hint3: 'Tags werden währed der Eingabe automatisch vervollständigt. Klicken um hinzuzufügen.'
+            +'<br>Neue Tags sind automatisch als \‚User-Specific\‘ erstellt werden;'
+            +'<br>Arbeitsgruppen-Tags soll von einer*m Gruppeadministrator*in erstellt werden. Tags können Leerzeichen enthalten.',
+        'No tags were affected': 'Keine Tags wurden betroffen',
+        'Bookmarks added': 'Lesezeichen hinzugefügt.',
+        'Tags added': 'Tags hinzugefügt',
+        'Tags removed': 'Tags entfernt',
+    'Unbookmark selected records': 'Ausgewählte Datensätze entbookmarken',    
+        recordUnbookmark_hint: 'Datensätze auswählen, deren Lesezeichen entfernt werden.<br>'
+            +'Alle \‚Personal Tags\‘ werden aus den ausgewählten Datensätzen entfernt.<br>'
+            +'Diese Aktion <em>nur</em> die Lesezeichen Ihrer Datensätze entfernt;<br>'
+            +'sie löscht keine Datensätze.',
+        'Remove Bookmarks': 'Entbookmarken',
+        'Bookmarks removed': 'Entwerfte Lesezeichen',
+    'Set Record Rating': 'Datensatz bewerten',
+        'Set Rating': 'Bewerten',
+        'Please specify rating value': 'Bewertung angeben',
+        'Rating updated': 'Bewertung aktualisiert',
+        'No Rating': 'Keine Bewertung',
+    'Delete Records': 'Datensätze löschen',
     
     //SERVER SIDE ERROR MESSAGES
-    'Record type not defined or wrong': '',
+    'Record type not defined or wrong': 'Es gibt keinen so genannten Datentyp in der Datenbank',
     
     //Client side error message
     Error_Title: 'Heurist',
-    Error_Empty_Message: 'No error message was supplied, please report to Heurist developers.',
-    Error_Report_Code: 'Report this code to Heurist team',
-    Error_Report_Team: 'If this error occurs repeatedly, please contact your system administrator or email us (support at HeuristNetwork dot org) and describe the circumstances under which it occurs so that we/they can find a solution',
-    Error_Wrong_Request: 'The value, number and/or set of request parameters is not valid.',
-    Error_System_Config: 'May result from a network outage, or because the system is not properly configured. If the problem persists, please report to your system administrator',
-    Error_Json_Parse: 'Cannot parse server response',
+    Error_Empty_Message: 'Keine Fehlermeldung. Bitte benachrichtigen Sie dem Heurist-Team über diesen Fehler.',
+    Error_Report_Code: 'Diese Fehlerkode dem Heurist-Team benachrichtigen.',
+    Error_Report_Team: 'Wenn dieser Fehler immer wieder auftritt, bitte benachrichtigen Sie ihn dem Heurist-Team und beschreiben Sie die Umstände, unter denen er auftrit.',
+    Error_Wrong_Request: 'Die Anforderungsparameter sind falsh.',
+    Error_System_Config: 'Dieser Fehler wird wahrscheinlich von einem Netzwerkausfall oder Systemkonfigurationsfehlr verursacht. Bitte melden Sie ihn Ihrem*r Systemadministrator*in.',
+    Error_Json_Parse: 'Serverantwort nicht analyisierbar.'
     
 //---------------------- END OF TRANSLATION 2021-10-19
 
