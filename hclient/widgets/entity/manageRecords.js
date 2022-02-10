@@ -2834,7 +2834,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         groupHidden: false,
                         groupTitleVisible: (dtFields['rst_RequirementType']!=='forbidden'),
                         groupType: (dtFields['rst_DefaultValue']=='group'||
-                                    dtFields['rst_DefaultValue']=='group_inside'||
+                                    dtFields['rst_DefaultValue']=='group_break'||
                                     dtFields['rst_DefaultValue']=='tabs'||
                                     dtFields['rst_DefaultValue']=='tabs_new'||
                                     dtFields['rst_DefaultValue']=='accordion'||
@@ -4055,7 +4055,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             $(this.element).find('.separator-hidden').css({width: '80%', display: 'inline-block'});
             
             //display message at bottom
-            $('<div id="mod-struct-help" style="font-size:1.2em;margin-top:30px;">Use the gearwheel <span class="ui-icon-gear"></span> to add/edit fields and headings</div>')
+            $('<div id="mod-struct-help" style="font-size:1.2em;margin-top:30px;">Use the gearwheel <span class="ui-icon ui-icon-gear"></span> to add/edit fields and headings</div>')
             .appendTo(this.editForm.last('.editForm.recordEditor'));			
             
             //hide swf mode selector

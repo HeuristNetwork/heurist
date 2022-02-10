@@ -198,15 +198,21 @@ function hEditing(_options) {
             while(idx<fields.length){
                 if( $.isPlainObject(fields[idx]) && fields[idx].groupType ){ //this is group
                     
-                    if(fields[idx].groupType=='group_inside' && prev_children){
+                    if(fields[idx].groupType=='group' && prev_children){
                         //move this group inside previous group on the same level
                         prev_children.push(fields[idx]);    
                         fields.splice(idx,1);
                         continue;
+                    }else if(fields[idx].groupType=='group_break'){
+                        prev_children = null;    
+                    }else if (fields[idx].groupType=='group'){ //group inside
+                        fields[idx].groupType = 'group_break';  
                     }else{
-                        prev_children = fields[idx].children;
-                        __processGroupInside(fields[idx].children);  
+                        prev_children = fields[idx].children;    
                     }
+                        
+                        //__processGroupInside(fields[idx].children);  
+                    
                 }
                 idx++;
             }//for
@@ -233,25 +239,28 @@ function hEditing(_options) {
 
                         __createGroup(fields[idx].children, groupContainer, fieldContainer);
                         continue;                        
-                    }else if(fields[idx].groupType=='group_inside'){
+                    }else if(fields[idx].groupType=='group'){ //group inside
                    
                          
                         var headerText = fields[idx]['groupHeader'];
                         var headerHelpText = fields[idx]['groupHelpText'];
                         var is_header_visible = fields[idx]['groupTitleVisible'];
                                 
-
-                        var hele = $('<h4>').text(headerText).addClass('separator').appendTo(fieldContainer);
+                        var hele = $('<h4>')
+                            .text(headerText).addClass('separator').appendTo(fieldContainer);
                         
                         if(!is_header_visible){
-                            ele.addClass('separator-hidden').hide();
+                            hele.addClass('separator-hidden').hide();
                         }
+                        hele.css({'margin-bottom':'4px'});
+                        
                         var div_prompt = $('<div>').text(headerHelpText)
                                .addClass('heurist-helper1')
-                               .addClass('separator-helper').css({'padding-left':'14px'})
+                               .addClass('separator-helper').css({'padding-left':'20px','padding-bottom':'4px'})
                                .appendTo(fieldContainer);
 
                         var ele = $('<div>').appendTo(fieldContainer);    
+                        
                         if(parseInt(fields[idx]['dtID'])>0){ //for Records only
                             ele.attr('data-dtid', fields[idx]['dtID']);
                         }
