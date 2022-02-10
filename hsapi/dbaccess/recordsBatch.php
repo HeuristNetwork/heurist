@@ -31,7 +31,7 @@ require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_records.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
 require_once (dirname(__FILE__).'/../utilities/titleMask.php');
-require_once (dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
+//require_once (dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
 
 /**
 * Methods for batch actions for list of records (recIDs) OR by record type rtyID
@@ -117,7 +117,7 @@ class RecordsBatch
             if($this->system->defineConstant('DT_KML')){ array_push($not_purify, DT_KML); }
             if($this->system->defineConstant('DT_QUERY_STRING')){ array_push($not_purify, DT_QUERY_STRING); }
             if($this->system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }*/
-            if($system->defineConstant('DT_CMS_EXTFILES')){ array_push($not_purify, DT_CMS_EXTFILES); }
+            if($this->system->defineConstant('DT_CMS_EXTFILES')){ array_push($not_purify, DT_CMS_EXTFILES); }
             
             $this->not_purify = $not_purify;
             //$this->purifier = getHTMLPurifier();  DISABLED

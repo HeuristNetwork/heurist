@@ -559,7 +559,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 'media table  paste help noneditable '   //contextmenu textcolor - in core for v5
             ],      
 
-            toolbar: ['formatselect | bold italic forecolor backcolor  | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help' ],  
+            toolbar: ['formatselect | bold italic forecolor backcolor  | customHeuristMedia link | align | bullist numlist outdent indent | table | customHRtag | removeformat | help' ],  
 
             content_css: [
                 '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
@@ -633,6 +633,13 @@ console.log('BLUR');
                       text: 'Add Media',
                       onAction: function (_) {  //since v5 onAction in v4 onclick
                             __addHeuristMedia();
+                      }
+                    });
+                editor.ui.registry.addButton('customHRtag', {
+                      //icon: 'image',
+                      text: '&lt;hr&gt;',
+                      onAction: function (_) {  //since v5 onAction in v4 onclick
+                            tinymce.activeEditor.insertContent( '<hr>' );
                       }
                     });
                 
