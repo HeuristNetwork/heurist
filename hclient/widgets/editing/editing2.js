@@ -235,7 +235,7 @@ function hEditing(_options) {
                 if( $.isPlainObject(fields[idx]) && fields[idx].groupType ){ //this is group
                 //  window.hWin.HEURIST4.util.isArrayNotEmpty(fields[idx].children)
                     
-                    if(fields[idx].groupHidden){ //this group is hidden all fields goes to previous group
+                    if(fields[idx].groupHidden || fields[idx]['groupTitleVisible']===false){ //this group is hidden all fields goes to previous group
 
                         __createGroup(fields[idx].children, groupContainer, fieldContainer);
                         continue;                        
@@ -249,18 +249,19 @@ function hEditing(_options) {
                         var hele = $('<h4>')
                             .text(headerText).addClass('separator').appendTo(fieldContainer);
                         
-                        if(!is_header_visible){
-                            hele.addClass('separator-hidden').hide();
-                        }
                         hele.css({'margin-bottom':'4px'});
                         
                         var div_prompt = $('<div>').text(headerHelpText)
                                .addClass('heurist-helper1')
                                .addClass('separator-helper').css({'padding-left':'20px','padding-bottom':'4px'})
                                .appendTo(fieldContainer);
+                        if(!is_header_visible){
+                            hele.addClass('separator-hidden').hide();
+                            div_prompt.addClass('separator-hidden').hide();
+                        }
 
+                        //container for gear-wheel                              
                         var ele = $('<div>').appendTo(fieldContainer);    
-                        
                         if(parseInt(fields[idx]['dtID'])>0){ //for Records only
                             ele.attr('data-dtid', fields[idx]['dtID']);
                         }
@@ -373,7 +374,7 @@ function hEditing(_options) {
                          }
                          if(!is_header_visible){
                             div_prompt.addClass('separator-hidden').hide();
-                        }
+                         }
                     }
                     if(currGroupType == 'tabs'){ //some space on the top
                         $(newFieldContainer).append('<div style="min-height:10px">&nbsp;</div>');
