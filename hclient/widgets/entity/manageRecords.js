@@ -3808,24 +3808,39 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                             }
                                         }else{
                                             //lookup dialog returns pairs - dtyID=>value
-                                            
                                             var dtyIds = Object.keys(recset);
+                                            var recpointer_vals = [];
 
                                             for(var k=0; k<dtyIds.length; k++){
+
                                                 var dt_id = dtyIds[k];
-                                                if(dt_id>0)
-                                                {
+
+                                                if(dt_id>0){
+
                                                     var newval = recset[dt_id];
-                                                    if(!$.isArray(newval)){
-                                                        newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
-                                                        newval = [newval];  
+
+                                                    if($Db.dty(dt_id, 'dty_Type') == 'resource' && !Number.isInteger(newval)){ // prepare for record selection/creations for recpointers
+
+                                                        if(recpointer_vals.length == 0 && recset['ext_url']){
+                                                            recpointer_vals.push([recset['ext_url']]);
+                                                        }
+
+                                                        recpointer_vals.push([dt_id, newval]);
+                                                    }else{
+                                                        if(!$.isArray(newval)){
+                                                            newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
+                                                            newval = [newval];
+                                                        }
+
+                                                        that._editing.setFieldValueByName( dt_id, newval );
+                                                        //var ele_input = that._editing.getFieldByName(dt_id );
                                                     } 
-                                                    that._editing.setFieldValueByName( dt_id, newval );
-                                                    //var ele_input = that._editing.getFieldByName(dt_id );
                                                 }
                                             }
 
-                                            
+                                            if(recpointer_vals.length > 0){
+                                                that.processResourceFields(recpointer_vals);
+                                            }
                                         }
                                     }
                                 }});
@@ -4361,5 +4376,162 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             .css({'font-size': '12px', 'text-align': 'left', 'width': '120px', 'min-width': '120px'});
 
         top_fieldset.append(url_field);
+    },
+	
+	//
+    // Process record pointer fields values from External Lookups, that aren't integers (ids)
+    // 
+    // Param:
+    //  resource_values (array): array of field ids and field values [{[ext_url]}, [dt_id, value], ...] {optional}
+    //
+    processResourceFields: function(resource_values){
+
+        var that = this;
+
+        if(resource_values){
+
+            // Misc, styling for 'table cells'
+            var field_style = 'display: table-cell;padding: 7px 3px;max-width: 75px;width: 75px;';
+            var val_style = 'display: table-cell;padding: 7px 3px;max-width: 300px;width: 300px;';
+
+            // Construct Dialog for user handling of recpointer fields
+            var $dlg;
+            var url = '';
+
+            if(resource_values[0].length == 1){ // contains only the external record link
+                url = resource_values[0][0];
+            }
+
+            // Recpointer Dlg - Content
+            var msg = 'Values remaining to be attributed, click a row to assign a record<br>'
+                + url +'<br><br>'
+                + '<div style="display: table">'
+                + '<div style="display: table-row">'
+                    + '<div style="'+ field_style +'">Field</div><div style="'+ val_style +'">Value</div>'
+                + '</div>';
+
+            // Other variables
+            var field_values = {};
+            var todo_count = 0;
+
+            // Add each row of record pointers
+            for(var i = 1; i < resource_values.length; i++){
+
+                var cur_values = resource_values[i];
+                for(var j = 0; j < cur_values[1].length; j++){
+
+                    var cur_details = cur_values[1][j];
+
+                    var field_name = $Db.rst(that._currentEditRecTypeID, cur_values[0], 'rst_DisplayName'); // $Db.rst(rectype_id, basefield_id, field_name);
+
+                    msg += '<div style="display: table-row;" class="recordDiv" data-value="" data-dtid="'+ cur_values[0] +'" data-index="'+ todo_count +'">'
+                            + '<div style="'+ field_style +'" class="truncate" title="'+ field_name +'">'+ field_name +'</div>'
+                            + '<div style="'+ val_style +'" class="truncate" title="'+ cur_details +'">'+ cur_details +'</div>'
+                        + '</div>';
+
+                    field_values[cur_values[0]] = [];
+                    todo_count ++;
+                }
+            }
+
+            msg += '</div>'; // close div table
+
+            // Recpointer Dlg - Button
+            var btn = {};
+            btn['Done'] = function(){
+                // Close Recpointer Dlg
+                $dlg.dialog('close');
+            }
+
+            // Create Recpointer Dlg
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Record pointer fields to set', yes: 'Done'}, {
+                default_palette_class: 'ui-heurist-populate', 
+                modal: true, 
+                dialogId: 'lookup_RecPointers', 
+                position: {my: "right-20 center", at: "right-20 center", of: window}
+            });
+
+            var complete_count = 0;
+
+            // onClick - 'Record' Row within the Recpointer Dlg
+            $dlg.find('.recordDiv').on('click', function(event){
+
+                var $ele = $(event.target);
+                if(!$ele.hasClass('recordDiv')){ // check that the correct element is retrieved
+                    $ele = $ele.parents('.recordDiv');
+                }
+
+                // Retrieve important details
+                var dt_id = $ele.attr('data-dtid');
+                var ptr_rectypes = $Db.dty(dt_id, 'dty_PtrTargetRectypeIDs');
+                var index = Number($ele.attr('data-index'));
+
+                var init_value = $($ele.find('div')[1]).text();
+
+                // Show dialog for selecting/creating a record
+                var opts = {
+                    select_mode: 'select_single',
+                    select_return_mode: 'recordset', // or ids
+                    edit_mode: 'popup',
+                    selectOnSave: true,
+                    title: 'Select or create a record for the ' + $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName') + ' field',
+                    rectype_set: ptr_rectypes, // string of rectype_ids separated by commas (e.g. '1,2,3')
+                    pointer_mode: 'both', // or browseonly or addonly
+                    pointer_filter: null, // Heurist query for initial search
+                    parententity: 0,
+
+                    height: 700,
+                    width: 600,
+                    modal: true,
+
+                    onInitFinished: function(event){
+
+                        var that_searchForm = this;
+                        setTimeout(function(){ 
+                            that_searchForm.searchForm.find('#input_search').val(init_value); 
+                            that_searchForm.searchForm.find('#btn_search_start').click();
+                        }, 500);
+                    },
+
+                    // Process selected record set
+                    onselect: function(event, data){
+
+                        var recset = data.selection;
+
+                        var record = recset.getFirstRecord();
+                        var rec_ID = recset.fld(record, 'rec_ID')
+                        var rec_Title = recset.fld(record, 'rec_Title');
+
+                        field_values[dt_id].push(rec_ID);
+
+                        that._editing.setFieldValueByName(dt_id, field_values[dt_id]);
+
+                        // Update information
+                        $ele.attr('data-value', rec_ID);
+                        $($ele.find('div')[1]).attr('title', rec_Title).text(rec_Title);
+                        window.hWin.HEURIST4.util.setDisabled($ele, true); // set to disabled
+
+                        complete_count ++;
+
+                        if(complete_count >= todo_count){
+                            // Close Recpointer Dlg
+                            $dlg.dialog('close');
+                        }else{
+
+                            var $n_ele = $ele.parent().find('div[data-index="'+ (index+1) +'"]');
+
+                            if($n_ele.length == 1 && !$n_ele.hasClass('ui-state-disabled')){
+
+                                $n_ele.click();
+                            }
+                        }
+                    }
+                };
+
+                window.hWin.HEURIST4.ui.showEntityDialog('records', opts);
+            });
+
+            $($dlg.find('.recordDiv')[0]).click();
+        }
     }
 });

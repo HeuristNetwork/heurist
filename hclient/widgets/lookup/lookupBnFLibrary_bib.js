@@ -84,7 +84,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                
                entityName: this._entityName,
                
-               pagesize: this.options.pagesize, // number of records to display per page
+               pagesize: this.options.pagesize, // number of records to display per page, 
                empty_remark: '<div style="padding:1em 0 1em 0">No records match the search</div>', // For empty results
                renderer: this._rendererResultList // Record render function, is called on resultList updateResultSet
         });                
@@ -259,6 +259,12 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
      * Return record field values in the form of a json array mapped as [dty_ID: value, ...]
      * For multi-values, [dty_ID: [value1, value2, ...], ...]
      * 
+     * To trigger record pointer selection/creation popup, value must equal [dty_ID, default_searching_value]
+     * 
+     * Include a url to an external record that will appear in the record pointer guiding popup, add 'ext_url' to res
+     *  the value must be the complete html (i.e. anchor tag with href and target attributes set)
+     *  e.g. res['ext_url'] = '<a href="www.google.com" target="_blank">Link to Google</a>'
+     * 
      * Param: None
      */
     doAction: function(){
@@ -280,7 +286,6 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             var map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
 
             var new_terms = []; // array of terms that need to be created, [vocab id, detail id, value]
-            var rec_pointers = []; // array of record pointers that need an assignment, [detail id, initial filter, plain label]
 
             // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
             for(var k=0; k<map_flds.length; k++){
@@ -297,8 +302,13 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                     // Match term labels with val, need to return the term's id to properly save its value
                     if(field_type == 'enum'){
 
-                        if(val_isObject){
-                            val = val[Object.keys(val)[0]];
+                        if(val_isObject){ 
+
+                            if(Object.keys(val).length > 1){ // should not be a term, or alternative handling required
+                                continue;
+                            }else{ // take first option
+                                val = val[Object.keys(val)[0]];
+                            }
                         }
 
                         var vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
@@ -350,91 +360,63 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                                 }
                             }
                         }
-                    }else if(field_type == 'resource'){ // prepare data for user to select a record
+                    }else if(field_type == 'resource'){ // prepare search string for user to select/create a record
 
                         var search_val = '';
-                        var org_val = '';
 
                         if(val_isObject){
 
                             if(map_flds[k] == 'creator' || map_flds[k] == 'contributor'){
 
                                 if(val['firstname']){
-                                    org_val = val['firstname'];
+                                    search_val = val['firstname'];
                                 }
                                 if(val['surname']){
-                                    org_val = (org_val != '') ? org_val + ' ' + val['surname'] : val['surname'];
+                                    search_val = (search_val != '') ? search_val + ' ' + val['surname'] : val['surname'];
                                 }
                                 if(val['active']){
-                                    org_val = (org_val != '') ? org_val + ' [' + val['active'] + ']' : 'No Name, years active: ' + val['active'];
+                                    search_val = (search_val != '') ? search_val + ' [' + val['active'] + ']' : 'No Name, years active: ' + val['active'];
                                 }
                                 if(val['id']){
-                                    org_val = (org_val != '') ? org_val + ' (id: ' + val['id'] + ')' : 'No Name, id: ' + val['id'];
+                                    search_val = (search_val != '') ? search_val + ' (id: ' + val['id'] + ')' : 'No Name, id: ' + val['id'];
                                 }
 
-                                if(org_val == ''){
-                                    org_val = 'No Creator Provided';
+                                if(search_val == ''){
+                                    search_val = 'No Creator Provided';
                                 }
                             }else if(map_flds[k] == 'publisher'){
 
                                 if(val['location']){
-                                    org_val = val['location'];
+                                    search_val = val['location'];
                                 }
                                 if(val['name']){
-                                    org_val = (org_val != '') ? org_val + ': ' + val['name'] : val['name'];
+                                    search_val = (search_val != '') ? search_val + ': ' + val['name'] : val['name'];
                                 }
                                 if(val['date']){
-                                    org_val = (org_val != '') ? org_val + ', ' + val['date'] : 'No Publisher Provided';
+                                    search_val = (search_val != '') ? search_val + ', ' + val['date'] : 'No Publisher Provided';
                                 }
                             }else{
 
                                 for(var key in val){
 
-                                    if(org_val != ''){
-                                        org_val += ', ';
+                                    if(search_val != ''){
+                                        search_val += ', ';
                                     }
-                                    org_val += val[key];
+                                    search_val += val[key];
                                 }
-                            }
-
-                            for(var key in val){
-
-                                if(key == 'date' || key == 'active'){ // dates containing non-numeric characters (e.g. '18..-19..' or '1990 (DL)') can cause problems
-                                    continue;
-                                }
-
-                                if(search_val != ''){
-                                    search_val += ',';
-                                }
-
-                                search_val += '{"f":"' + val[key] + '"}';
                             }
                         }else if(val_isArray){
-
-                            org_val = val[key].join(', ');
-
-                            for(var i = 0; i < val.length; i++){
-
-                                if(search_val != ''){
-                                    search_val += ',';
-                                }
-
-                                search_val += '{"f":"' + val[i] + '"}';
-                            }
+                            search_val = val[key].join(', ');
                         }else{
-
-                            org_val = val;
-                            search_val = '{"f":"' + val + '"}';
+                            search_val = val;
                         }
 
-                        val = '{"any":[' + search_val.replace(/  +/g, ' ') + ']}';
+                        val = search_val;
 
-                        rec_pointers.push([dty_ID, val, org_val]);
-
-                        res[dty_ID] = null;
-
-                        continue;
-                    }else{ // Extra handling, in case creator | contributor | publisher are not record pointers
+                        if(!res['ext_url']){
+                            res['ext_url'] = '<a href="'+ recset.fld(rec, 'biburl') +'" target="_blank">View BnF Record</a>'
+                        }
+                    }else if(field_type != 'date' && field_type != 'float'){ // Extra handling, in case creator | contributor | publisher are not record pointers
 
                         var contructed_val = '';
 
@@ -488,7 +470,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         }
 
                         res[dty_ID].push(complete_val.slice(0, -2));
-                    }else if(window.hWin.HEURIST4.util.isArray(val)){
+                    }else if(field_type != 'resource' && window.hWin.HEURIST4.util.isArray(val)){
                         res[dty_ID].push(val.join(', '));
                     }else{
                         res[dty_ID].push(val);    
@@ -496,11 +478,8 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                 }
             }
 
-            // Perform one of three actions
-            if(rec_pointers.length > 0){
-                this.closingAction(res, 'recpointer', rec_pointers, new_terms); // user selects or creates records for recpointer fields
-            }else if(new_terms.length > 0){
-                this.closingAction(res, 'term', null, new_terms); // user prepares term, checks if entered term exists (creates a new term, if it doesn't exist)
+            if(new_terms.length > 0){
+                this.closingAction(res, 'term', new_terms); // user prepares term, checks if entered term exists (creates a new term, if it doesn't exist)
             }else{
                 this.closingAction(res, 'save');
             }
@@ -514,10 +493,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
      * Param:
      *  dlg_reponse (json) => mapped values to fields
      *  action (string) => which action to perform ('save', 'recpointer', 'term')
-     *  rec_pointers (array) => contains basic data used to help users select records ([0 => dty_ID, 1 => initial filter, 2 => readable string])
-     *  new_terms (array) => contains basic data used to help users create terms ([0 => vocab_ID, 1 => dty_ID, 2 => retrieved term label])
+     *  new_terms (array) => contains basic data used to help users create/correct terms ([0 => vocab_ID, 1 => dty_ID, 2 => retrieved term label])
      */
-    closingAction: function(dlg_response, action = 'save', rec_pointers, new_terms){
+    closingAction: function(dlg_response, action = 'save', new_terms){
 
         var that = this;
 
@@ -543,140 +521,6 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                 this._context_on_close = dlg_response;
                 this._as_dialog.dialog('close');
             }
-
-        }else if(rec_pointers && rec_pointers.length > 0){ // create / select a record for each recpointer field, user input
-
-            // rec_pointers = 0 => dt_ID, 1 => initial filter, 2 => readable string
-            this.toggleCover('Handling Record Pointers....');
-
-            // Retrieve BnF Record URL
-            var sel_recset = this.recordList.resultList('getSelected', false);
-            var sel_record = sel_recset.getFirstRecord();
-            var url = sel_recset.fld(sel_record, 'biburl');
-
-            // Misc, styling for 'table cells'
-            var field_style = 'display: table-cell;padding: 7px 3px;max-width: 75px;width: 75px;';
-            var val_style = 'display: table-cell;padding: 7px 3px;max-width: 300px;width: 300px;';
-
-            // Construct Dialog for user handling of recpointer fields
-            var $dlg;
-
-            // Recpointer Dlg - Content
-            var msg = 'Values remaining to be attributed, click a row to assign a record<br>'
-                + '<a href="'+ url +'" target="_blank">View BnF Record</a><br><br>'
-                + '<div style="display: table">'
-                + '<div style="display: table-row">'
-                    + '<div style="'+ field_style +'">Field</div><div style="'+ val_style +'">Value</div>'
-                + '</div>';
-
-            for(var i = 0; i < rec_pointers.length; i ++){
-                
-                var cur_details = rec_pointers[i];
-                var field_name = $Db.rst(that.options.mapping.rty_ID, cur_details[0], 'rst_DisplayName'); // $Db.rst(rectype_id, basefield_id, field_name);
-
-                msg += '<div style="display: table-row;" class="recordDiv" data-value="" data-dtid="'+ cur_details[0] +'" data-index="'+ i +'">'
-                        + '<div style="'+ field_style +'" class="truncate" title="'+ field_name +'">'+ field_name +'</div>'
-                        + '<div style="'+ val_style +'" class="truncate" title="'+ cur_details[2] +'">'+ cur_details[2] +'</div>'
-                    + '</div>';
-            }
-
-            msg += '</div>'; // close div table
-
-            // Recpointer Dlg - Button
-            var btn = {};
-            btn['Done'] = function(){
-
-                // Close Recpointer Dlg
-                $dlg.dialog('close');
-
-                // Check next action
-                if(new_terms.length > 0){
-                    that.closingAction(dlg_response, 'term', null, new_terms);
-                }else{
-                    that.closingAction(dlg_response, 'save');
-                }
-            }
-
-            // Create dlg
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Record pointer fields to set', yes: 'Done'}, {
-                default_palette_class: 'ui-heurist-populate', 
-                modal: false, 
-                dialogId: 'BnFLib_bib', 
-                position: {my: "right-20 center", at: "right-20 center", of: window}
-            });
-
-            var rec_count = 0;
-
-            // onClick - 'Record' Row within the Recpointer Dlg
-            $dlg.find('.recordDiv').on('click', function(event){
-
-                var $ele = $(event.target);
-                if(!$ele.hasClass('recordDiv')){ // check that the correct element is retrieved
-                    $ele = $ele.parents('.recordDiv');
-                }
-
-                // Retrieve important details
-                var dt_id = $ele.attr('data-dtid');
-                var ptr_rectypes = $Db.dty(dt_id, 'dty_PtrTargetRectypeIDs');
-                var index = $ele.attr('data-index');
-
-                var init_filter = rec_pointers[index][1];
-
-                // Show dialog for selecting/creating a record
-                var opts = {
-                    select_mode: 'select_single',
-                    select_return_mode: 'recordset', // or ids
-                    edit_mode: 'popup',
-                    selectOnSave: true,
-                    title: 'Select or create a record for the ' + $Db.rst(that.options.mapping.rty_ID, dt_id, 'rst_DisplayName') + ' field',
-                    rectype_set: ptr_rectypes, // string of rectype_ids separated by commas (e.g. '1,2,3')
-                    pointer_mode: 'both', // or browseonly or addonly
-                    pointer_filter: init_filter, // Heurist query for initial search
-                    parententity: 0,
-
-                    height: 700,
-                    width: 600,
-                    modal: false,
-
-                    // Process selected record set
-                    onselect: function(event, data){
-
-                        var recset = data.selection;
-
-                        var record = recset.getFirstRecord();
-                        var rec_ID = recset.fld(record, 'rec_ID')
-                        var rec_Title = recset.fld(record, 'rec_Title');
-
-                        if(!dlg_response[dt_id]){
-                            dlg_response[dt_id] = [];
-                        }
-
-                        dlg_response[dt_id].push(rec_ID);
-
-                        // Update information
-                        $ele.attr('data-value', rec_ID);
-                        $($ele.find('div')[1]).attr('title', rec_Title).text(rec_Title);
-                        window.hWin.HEURIST4.util.setDisabled($ele, true); // set to disabled
-
-                        rec_count ++;
-
-                        if(rec_count >= rec_pointers.length){
-
-                            // Close Recpointer Dlg
-                            $dlg.dialog('close');
-
-                            if(new_terms.length > 0){
-                                that.closingAction(dlg_response, 'term', null, new_terms);
-                            }else{
-                                that.closingAction(dlg_response, 'save');
-                            }
-                        }
-                    }
-                };
-
-                window.hWin.HEURIST4.ui.showEntityDialog('records', opts);
-            });
-
         }else if(new_terms && new_terms.length > 0){ // create new terms / rename returned term, user input
 
             this.toggleCover('Handling Terms....');
@@ -794,7 +638,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         /** 
          * Additional search fields can be found here [catalogue.bnf.fr/api/test.do], note: ONLY the bibliographic fields can be added here (fields starting with 'bib.')
          * if you wish to query authority records (fields starting with 'aut.'), we suggest the alternative BnF lookup available (lookupBnFLibrary_aut)
+         * 
          * each field name and search value are separated by a relationship, common ones are: [all, any, adj]
+         * 
          * also separating each field query is a boolean logic [and, or, not]
          */
 
