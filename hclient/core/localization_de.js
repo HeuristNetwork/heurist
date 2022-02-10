@@ -419,8 +419,8 @@ regional['de'] = {
 
     //record actions dialogs
     'Processed records': 'Verarbeitete Datensätze',
-    recordAction_select_lbl: 'Umfang der Aktion',
-    recordAction_select_hint: 'Bitte wählen Sie die Datensätze aus, die betroffen sein sollen.',
+    recordAction_select_lbl: 'Datensatzbereich',
+    recordAction_select_hint: 'Bitte wählen Sie die betroffenen Datensätze aus.',
         'All records': 'Alle Datensätze',
         'Selected results set (count=': 'Aktuell ausgewählten Datensätze (Anzahl=',
         'Current results set (count=': 'Alle Datensätze in der aktuellen Abfrage (Anzahl=',
@@ -429,23 +429,23 @@ regional['de'] = {
         'Add tags': 'Taggen',
         'Remove tags': 'Enttaggen',
         'Bookmark': 'Bookmarken',
-        recordTag_hint0: 'Tags auswählen, die Lesezeichen der ausgewählten URLs hinzugefügt werden.<br>',
-        recordTag_hint1: 'Tags auswählen, die Lesezeichen der Datensätze in der ausgewählten Umfang hinzugefügt werden.<br>', 
-        recordTag_hint2: 'Tags auswählen, die allen Datensätzen in der ausgewählte Umfang hinzugefügt werden.<br>',
-        recordTag_hint3: 'Tags werden währed der Eingabe automatisch vervollständigt. Klicken um hinzuzufügen.'
-            +'<br>Neue Tags sind automatisch als \‚User-Specific\‘ erstellt werden;'
-            +'<br>Arbeitsgruppen-Tags soll von einer*m Gruppeadministrator*in erstellt werden. Tags können Leerzeichen enthalten.',
-        'No tags were affected': 'Keine Tags wurden betroffen',
+        recordTag_hint0: 'Tags auswählen, die Lesezeichen der ausgewählten URLs werden hinzugefügt.<br>',
+        recordTag_hint1: 'Tags auswählen, die Lesezeichen der Datensätze werden im ausgewählten Bereich hinzugefügt.<br>', 
+        recordTag_hint2: 'Tags auswählen, die Datensätze werden im ausgewählten Bereich hinzugefügt.<br>',
+        recordTag_hint3: 'Tags werden währed der Eingabe automatisch vervollständigt. Klicken, um hinzuzufügen.'
+            +'<br>Neue Tags werden automatisch als \‚User-Specific\‘ erstellt;'
+            +'<br>Arbeitsgruppen-Tags sollen von einer*m Gruppeadministrator*in erstellt werden. Tags können Leerzeichen enthalten.',
+        'No tags were affected': 'Es sind keine Tags betroffen',
         'Bookmarks added': 'Lesezeichen hinzugefügt.',
         'Tags added': 'Tags hinzugefügt',
         'Tags removed': 'Tags entfernt',
-    'Unbookmark selected records': 'Ausgewählte Datensätze entbookmarken',    
-        recordUnbookmark_hint: 'Datensätze auswählen, deren Lesezeichen entfernt werden.<br>'
+    'Unbookmark selected records': 'Für ausgewählte Datensätze Lesezeichen entfernen',    
+        recordUnbookmark_hint: 'Datensätze auswählen, deren Lesezeichen entfernt werden sollen.<br>'
             +'Alle \‚Personal Tags\‘ werden aus den ausgewählten Datensätzen entfernt.<br>'
-            +'Diese Aktion <em>nur</em> die Lesezeichen Ihrer Datensätze entfernt;<br>'
+            +'Diese Aktion entfernt <em>nur</em> die Lesezeichen Ihrer Datensätze;<br>'
             +'sie löscht keine Datensätze.',
-        'Remove Bookmarks': 'Entbookmarken',
-        'Bookmarks removed': 'Entwerfte Lesezeichen',
+        'Remove Bookmarks': 'Lesezeichen entfernen',
+        'Bookmarks removed': 'Lesezeichen entfernt',
     'Set Record Rating': 'Datensatz bewerten',
         'Set Rating': 'Bewerten',
         'Please specify rating value': 'Bewertung angeben',
@@ -454,16 +454,16 @@ regional['de'] = {
     'Delete Records': 'Datensätze löschen',
     
     //SERVER SIDE ERROR MESSAGES
-    'Record type not defined or wrong': 'Es gibt keinen so genannten Datentyp in der Datenbank',
+    'Record type not defined or wrong': 'Falscher oder nicht definierter Datentyp',
     
     //Client side error message
     Error_Title: 'Heurist',
-    Error_Empty_Message: 'Keine Fehlermeldung. Bitte benachrichtigen Sie dem Heurist-Team über diesen Fehler.',
-    Error_Report_Code: 'Diese Fehlerkode dem Heurist-Team benachrichtigen.',
-    Error_Report_Team: 'Wenn dieser Fehler immer wieder auftritt, bitte benachrichtigen Sie ihn dem Heurist-Team und beschreiben Sie die Umstände, unter denen er auftrit.',
-    Error_Wrong_Request: 'Die Anforderungsparameter sind falsh.',
-    Error_System_Config: 'Dieser Fehler wird wahrscheinlich von einem Netzwerkausfall oder Systemkonfigurationsfehlr verursacht. Bitte melden Sie ihn Ihrem*r Systemadministrator*in.',
-    Error_Json_Parse: 'Serverantwort nicht analyisierbar.'
+    Error_Empty_Message: 'Keine Fehlermeldung. Bitte benachrichtigen Sie das Heurist-Team über diesen Fehler.',
+    Error_Report_Code: 'Diesen Fehlerkode dem Heurist-Team melden.',
+    Error_Report_Team: 'Sollte dieser Fehler wiederholt auftreten, benachrichtigen Sie bitte das Heurist-Team und beschreiben Sie die Umstände, unter denen er auftrit.',
+    Error_Wrong_Request: 'Wert, Anzahl und/oder die Menge der Anfrageparameter sind ungültig.',
+    Error_System_Config: 'Dieser Fehler wird wahrscheinlich von einem Netzwerkausfall oder Systemkonfigurationsfehler verursacht. Bitte melden Sie ihn Ihrem*r Systemadministrator*in.',
+    Error_Json_Parse: 'Antwort des Servers ist unbekannt.'
     
 //---------------------- END OF TRANSLATION 2021-10-19
 
