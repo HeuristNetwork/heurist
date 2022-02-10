@@ -1636,8 +1636,37 @@ console.log('No active tree node!!!!')
             var ele = this._editing.getInputs('rst_DisplayName');
             this._on( $(ele[0]), {
                 keypress: window.hWin.HEURIST4.ui.preventChars} );
-            
-                
+
+            edit_ele = this._editing.getFieldByName('rst_TermsAsButtons');
+            if(dt_type=='enum'){
+                edit_ele.show();
+
+                this._on(edit_ele.find('input'), {
+                    change: function(event){
+
+                        if($(event.target).is(':checked')){                            
+
+                            var f_width = that._editing.getValue('rst_DisplayWidth')[0];
+
+                            if(f_width <= 0){
+
+                                that._editing.setFieldValueByName('rst_DisplayWidth', 90, true);
+                                that.onEditFormChange();
+                            }
+                        }
+                    }
+                });
+
+                if(edit_ele.find('input').is(':checked')){
+                    var f_width = this._editing.getValue('rst_DisplayWidth')[0];
+
+                    if(f_width <= 0){
+
+                        this._editing.setFieldValueByName('rst_DisplayWidth', 90, true);
+                        this.onEditFormChange();
+                    }
+                }
+            }
         }
 
         var btnCancel = $('<button>').attr('id', 'btnCloseEditor_rts')
@@ -1821,9 +1850,12 @@ console.log('No active tree node!!!!')
         ele.editing_input('fset','rst_TermIDTreeNonSelectableIDs', disTerms);
         this._editing.setFieldValueByName('rst_TermPreview', defval, false); //recreates
 
-        
         this._editing.setFieldValueByName('rst_TermVocabularyName', $Db.trm(allTerms, 'trm_Label'), false); //recreates
-        
+
+        if(term_type == 'enum'){
+            this._editing.setFieldValueByName('rst_TermsAsButtons', $Db.rst(this.options.rty_ID, this._currentEditID, 'rst_TermsAsButtons'), false);
+        }
+
         /*
         var ele = this._editing.getFieldByName('rst_DefaultValue_enum');
         var defval = this._editing.getValue('rst_DefaultValue_enum')[0];

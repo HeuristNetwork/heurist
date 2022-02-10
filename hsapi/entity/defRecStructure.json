@@ -104,7 +104,18 @@
                             {"key":"relmarker", "title":"Relationship marker"},
                             {"key":"resource", "title":"Record pointer"},
                             {"key":"separator", "title":"Header"}
-                            ]                        
+                            ]
+                    }
+                },
+                {
+                    "dtID": "rst_TermsAsButtons",
+                    "dtFields":{
+                        "dty_Type":"boolean",
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"Display as buttons:",
+                        "rst_DisplayHelpText":"If checked, will use radio buttons if single value field, checkboxes if multi-value, reverts automatically to dropdown if >20 values.",
+                        "rst_DefaultValue":"0",
+                        "rst_FieldConfig":["1", "0"]
                     }
                 },
                 {

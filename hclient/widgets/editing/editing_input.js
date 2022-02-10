@@ -61,7 +61,10 @@ $.widget( "heurist.editing_input", {
     isFileForRecord:false,
     entity_image_already_uploaded: false,
 
+    enum_buttons:null, // null = dropdown/selectmenu/none, radio or checkbox
+
     is_disabled: false,
+    new_value: '', // value for new input
     
     // the constructor
     _create: function() {
@@ -206,8 +209,10 @@ $.widget( "heurist.editing_input", {
 
                         if(this.is_disabled) return;
 
+                        if(window.hWin.HEURIST4.util.isempty(this.new_value) && this.new_value != '') this.new_value = '';
+
                         if( !(Number(this.f('rst_MaxValues'))>0)  || this.inputs.length < this.f('rst_MaxValues')){
-                            this._addInput('');
+                            this._addInput(this.new_value);
                             this._refresh();
                             
                             if($.isFunction(this.options.onrecreate)){
@@ -488,17 +493,18 @@ $.widget( "heurist.editing_input", {
         if(window.hWin.HEURIST4.util.isnull(val) && this.options.dtID>0 && this.options.rectypeID>0){ //try get from $Db
             val = $Db.rst(this.options.rectypeID, this.options.dtID, fieldname);
         }
-        
         if(window.hWin.HEURIST4.util.isempty(val)){ //some default values
             if(fieldname=='rst_RequirementType') val = 'optional'
             else if(fieldname=='rst_MaxValues') val = 1
-                else if(fieldname=='dty_Type') val = 'freetext'
-                    else if(fieldname=='rst_DisplayHeight' && this.f('dty_Type')=='blocktext') 
-                          val = 8 //height in rows
-                       else if(fieldname=='rst_DisplayWidth'
-                            && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='url' || 
-                                this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource'))   
-                                    val = this.f('dty_Type')=='freetext'?20:80;  //default minimum width for input fields in ex
+            else if(fieldname=='dty_Type') val = 'freetext'
+            else if(fieldname=='rst_DisplayHeight' && this.f('dty_Type')=='blocktext') 
+                val = 8 //height in rows
+            else if(fieldname=='rst_DisplayWidth'
+                && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='url' || 
+                    this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource'))   
+                        val = this.f('dty_Type')=='freetext'?20:80;  //default minimum width for input fields in ex
+            else if(fieldname=='rst_TermsAsButtons')
+                val = 0;
         }
         if(window.hWin.HEURIST4.util.isempty(val)){
             return null;
@@ -520,9 +526,12 @@ $.widget( "heurist.editing_input", {
     //
     //
     _removeInput: function(input_id){
-        if(this.inputs.length>1){
+
+        var that = this;
+
+        if(this.inputs.length>1 && this.enum_buttons == null){
+
             //find in array
-            var that = this;
             $.each(this.inputs, function(idx, item){
 
                 var $input = $(item);
@@ -542,18 +551,42 @@ $.widget( "heurist.editing_input", {
                         that.entity_image_already_uploaded = false;
                     }else{
                         if($input.hSelect('instance')!==undefined) $input.hSelect('destroy');
-                        
+
                         //remove element
                         $input.parents('.input-div').remove();
                     }
                     //remove from array
                     that.inputs.splice(idx,1);
-                    that.onChange();                    
+                    that.onChange();
                     return;
                 }
 
             });
 
+        }else if(this.inputs.length >= 1 && this.enum_buttons == 'checkbox'){ // uncheck all checkboxes
+
+            var $input;
+
+            $(this.inputs[0]).val(''); // Set first value to empty
+
+            if(this.inputs.length > 1){
+
+                for (var i = 1; i < this.inputs.length; i++) {
+                    
+                    $input = $(this.inputs[i]);
+
+                    this._off($input, 'change');
+
+                    $input.parents('.input-div').remove();
+
+                    that.inputs.splice(i,1);
+                    i--;
+                }
+            }
+
+            $(this.inputs[0]).parents('.input-div').find('input[type="checkbox"]').prop('checked', false);
+
+            that.onChange();
         }else{  //and clear last one
             this._clearValue(input_id, '');
         }
@@ -629,18 +662,13 @@ $.widget( "heurist.editing_input", {
             this.inputs = [];
             this.newvalues = {};
         }
-        
-        //if(this.f('rst_DisplayName')=="Group/separator type:"){
-        //    console.log(this.f('rst_DefaultValue'));
-        //}
-        
+
         var that = this;
 
         var $input = null;
         //@todo check faceted search!!!!! var inputid = 'input'+(this.options.varid?this.options.varid :idx+'_'+this.options.dtID);
         //repalce to uniqueId() if need
         value = window.hWin.HEURIST4.util.isnull(value)?'':value;
-
 
         var $inputdiv = $( "<div>" ).addClass('input-div').insertBefore(this.error_message); //was this.input_prompt
 
@@ -919,7 +947,7 @@ $.widget( "heurist.editing_input", {
                 if(parseFloat(dwidth)>0){
                     dwidth = dwidth+'ex';
                 }
-            }           
+            }
 
             $input = $('<select>').uniqueId()
                 .addClass('text ui-widget-content ui-corner-all')
@@ -1164,7 +1192,6 @@ $.widget( "heurist.editing_input", {
             }
             
             //allow edit terms only for true defTerms enum and if not DT_RELATION_TYPE
-            
             if(window.hWin.HEURIST4.util.isempty(allTerms)) 
                 //&& (allTerms!='relation'))  //'this.options.dtID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']))
             {
@@ -1265,29 +1292,143 @@ $.widget( "heurist.editing_input", {
                          rec_ID: -1,
                          trm_VocabularyID: vocab_id,
                          onClose: function(){
-                             
-                             //recreate selector
-                            $.each(that.inputs, function(index, input){ 
-                                input = $(input);
-                                input.css('width','auto');
-                                input = that._recreateSelector(input, true);
-                                that._on( input, {change:that._onTermChange} );
-                                that._showHideSelByImage(input);
 
-                            });
+                            var child_terms = $Db.trm_TreeData(vocab_id, 'set');
+                            var asButtons = that.options.recordset && that.options.recordset.entityName=='Records' && that.f('rst_TermsAsButtons');
+
+                            if((that.enum_buttons != null || asButtons == 1) && child_terms.length <= 20){ // recreate buttons/checkboxes
+
+                                that.enum_buttons = (Number(that.f('rst_MaxValues')) != 1) ? 'checkbox' : 'radio';
+                                that.createEnumButtons(true, child_terms);
+
+                                // Change from select to input text
+                                $.each(that.inputs, function(idx, input){
+
+                                    var $input = $(input);
+                                    var value = $input.val();
+                                    var inpt_id = $input.attr('id');
+
+                                    if($input.is('select')){
+
+                                        if($input.hSelect('instance') != undefined){
+                                            $input.hSelect('destroy');
+                                        }
+                                        that._off($input, 'change');
+                                        var $inputdiv = $input.parent();
+                                        $input.remove();
+
+                                        $input = $('<input type="text" class="text ui-widget-content ui-corner-all">')
+                                                    .attr('id', inpt_id)
+                                                    .val(value)
+                                                    .prependTo($inputdiv)
+                                                    .hide();
+
+                                        that._on( $input, {change:that.onChange} );
+
+                                        that.inputs[idx] = $input;
+
+                                        if(idx != 0){
+                                            $inputdiv.hide();
+                                        }
+
+                                        if(that.btn_add){
+                                            that.btn_add.hide(); // Hide repeat button, removeClass('smallbutton ui-icon-circlesmall-plus')
+                                        }
+                                    }
+                                });
+                            }else{
+
+                                that.enum_buttons = null;
+
+                                $.each(that.inputs, function(idx, input){ 
+
+                                    var $input = $(input);
+                                    var value = $input.val();
+                                    var inpt_id = $input.attr('id');
+
+                                    if($input.is('input')){ // Change from input text to select
+
+                                        that._off($input, 'change');
+                                        var $inputdiv = $input.parent();
+                                        if(idx == 0){
+                                            $inputdiv.find('label.enum_input, br').remove();
+                                            $inputdiv.find('.smallicon').css({'top': '', 'margin-top': '2px'});
+                                        }
+                                        $input.remove();
+
+                                        $input = $('<select>')
+                                                    .attr('id', inpt_id)
+                                                    .addClass('text ui-widget-content ui-corner-all')
+                                                    .prependTo( $inputdiv );
+
+                                        $inputdiv.show();
+
+                                        that.inputs[idx] = $input;
+
+                                        if(that.btn_add){
+                                            that.btn_add.show(); // Hide repeat button, removeClass('smallbutton ui-icon-circlesmall-plus')
+                                        }
+                                    }
+
+                                    if(window.hWin.HEURIST4.util.isempty(value) && value != ''){
+                                        value = true;
+                                    }
+
+                                    $input.css('width','auto');
+                                    $input = that._recreateSelector($input, value);
+                                    that._on( $input, {change:that._onTermChange} );
+                                    that._showHideSelByImage( $input ); 
+                                });
+                            }
                                 
                          }
                     };
-                window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options); // it recreates  
-                
-                return;
-                
+
+                    window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options); // it recreates  
+
+                    return;
                 }} ); //end btn onclick
 
                 }
             }//allow edit terms only for true defTerms enum
             
-            
+            // Display term selector as radio buttons/checkboxes
+            var asButtons = this.options.recordset && this.options.recordset.entityName=='Records' && this.f('rst_TermsAsButtons');
+            var vocab_id = that.f('rst_FilteredJsonTermIDTree');
+            var child_terms = $Db.trm_TreeData(vocab_id, 'set');
+
+            if(asButtons == 1 && child_terms.length <= 20){
+
+                this.enum_buttons = (Number(this.f('rst_MaxValues')) != 1) ? 'checkbox' : 'radio';
+                var inpt_id = $input.attr('id');
+
+                if(this.enum_buttons == 'checkbox' && $inputdiv.parent().find('input:checkbox').length > 0){ // Multi value, check if checkboxes exist
+
+                    $inputdiv.parent().find('input:checkbox[data-id="'+value+'"]').prop('checked', true); // Check additional value
+                    $inputdiv.hide();
+                }else{ // Create input elements
+
+                    this.createEnumButtons(false, child_terms, $inputdiv, [value]);
+                }
+
+                if($input.hSelect('instance') != undefined){
+                    $input.hSelect('destroy');
+                }
+                this._off($input, 'change');
+                $input.remove();
+
+                $input = $('<input type="text" class="text ui-widget-content ui-corner-all">')
+                            .attr('id', inpt_id)
+                            .val(value)
+                            .prependTo($inputdiv)
+                            .hide();
+
+                this._on( $input, {change:this.onChange} );
+
+                if(this.btn_add){
+                    this.btn_add.hide(); // Hide repeat button, removeClass('smallbutton ui-icon-circlesmall-plus')
+                }
+            }
         }
         else if(this.detailType=='boolean'){//----------------------------------------------------
 
@@ -1334,7 +1475,6 @@ $.widget( "heurist.editing_input", {
             .val(value)
             .change(function(){that.onChange();})
             .appendTo( $inputdiv );
-            
             var mode = null;
             
             if(this.configMode.mode=='all_users' || this.configMode.mode=='all_users_and_groups'){
@@ -1690,9 +1830,6 @@ $.widget( "heurist.editing_input", {
             that._findAndAssignTitle($input, value, __show_select_dialog);
             
             this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
-
-
-            
         } 
         
         else if(this.detailType=='resource' && this.configMode.entity=='DefRecTypes'){ //-----------
@@ -1805,7 +1942,7 @@ $.widget( "heurist.editing_input", {
             .appendTo( $inputdiv );
             */
             //.button({icons:{primary: icon_for_button},text:false});
-            
+
             var popup_options = {
                 isdialog: true,
                 select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
@@ -3005,8 +3142,6 @@ console.log('onpaste');
                     }});
         }
 
-
-
         this.inputs.push($input);
         
         var dwidth = this.f('rst_DisplayWidth');
@@ -3054,72 +3189,73 @@ console.log('onpaste');
         //var $btn_clear = $( "<div>")
         if(this.options.showclear_button && this.options.dtID!='rec_URL')
         {
+            if(!(this.detailType == 'enum' && this.inputs.length > 1 && this.enum_buttons == 'checkbox')){
 
-            var $btn_clear = $('<span>')
-            .addClass("smallbutton ui-icon ui-icon-circlesmall-close btn_input_clear")//   ui-icon
-            .attr('tabindex', '-1')
-            .attr('title', 'Clear entered value')
-            .attr('data-input-id', $input.attr('id'))
-            .appendTo( $inputdiv )
-            //.button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
-            .css({'margin-top': '3px', position: 'absolute',
-                 cursor:'pointer',             //'font-size':'2em',
-//outline_suppress does not work - so list all these props here explicitely                
-                    outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'
-            });
-			
-            if (this.isFileForRecord)	/* Check if button needs to be placed within a container, or appended to input */
-            {
-                $('#img_clear').replaceWith( $btn_clear );
-            }
-            else
-            {
-                $($btn_clear.appendTo( $inputdiv ));
-            }			
-            
-            // bind click events
-            this._on( $btn_clear, {
-                click: function(e){
-                                            
-                    if(that.is_disabled) return;
-                    
-                    //if empty
-                    if(that.getValues()[0] == '') return;
-
-                    var input_id = $(e.target).attr('data-input-id');  //parent(). need if button
-                    
-					if (this.isFileForRecord) /* Need to hide the player and image containers, and the download link for images */
-                    {
-                        $parentNode = $(e.target.parentNode);
-                        $parentNode.find('.thumb_image').hide();
-                        $parentNode.find('.fullSize').hide();
-                        $parentNode.find('.download_link').hide();
-                        $parentNode.find('#player'+value.ulf_ID).hide();
-                        
-                        $parentNode.find(".smallText").text("Click image to freeze in place").css({
-                            "font-size": "smaller", 
-                            "color": "grey", 
-                            "position": "", 
-                            "bottom": ""
-                        });						
-						
-                        that._on($input, {mouseout:__hideImagePreview});
-                        that._on($input_img, {mouseout:__hideImagePreview});
-                        
-                        isClicked = 0;
-                    }
-					
-                    if(that.detailType=="resource" && that.configMode.entity=='records' 
-                            && that.f('rst_CreateChildIfRecPtr')==1){
-                        that._clearChildRecordPointer( input_id );
-                    }else{
-                        that._removeInput( input_id );
-                    }
-                    
-                    that.onChange(); 
+                var $btn_clear = $('<span>')
+                .addClass("smallbutton ui-icon ui-icon-circlesmall-close btn_input_clear")//   ui-icon
+                .attr('tabindex', '-1')
+                .attr('title', 'Clear entered value')
+                .attr('data-input-id', $input.attr('id'))
+                .appendTo( $inputdiv )
+                //.button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
+                .css({'margin-top': '3px', position: 'absolute',
+                     cursor:'pointer',             //'font-size':'2em',
+    //outline_suppress does not work - so list all these props here explicitely                
+                        outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'
+                });
+    			
+                if (this.isFileForRecord)	/* Check if button needs to be placed within a container, or appended to input */
+                {
+                    $('#img_clear').replaceWith( $btn_clear );
                 }
-            });
+                else
+                {
+                    $($btn_clear.appendTo( $inputdiv ));
+                }			
+                
+                // bind click events
+                this._on( $btn_clear, {
+                    click: function(e){
+                                                
+                        if(that.is_disabled) return;
+                        
+                        //if empty
+                        if(that.getValues()[0] == '') return;
 
+                        var input_id = $(e.target).attr('data-input-id');  //parent(). need if button
+                        
+    					if (this.isFileForRecord) /* Need to hide the player and image containers, and the download link for images */
+                        {
+                            $parentNode = $(e.target.parentNode);
+                            $parentNode.find('.thumb_image').hide();
+                            $parentNode.find('.fullSize').hide();
+                            $parentNode.find('.download_link').hide();
+                            $parentNode.find('#player'+value.ulf_ID).hide();
+                            
+                            $parentNode.find(".smallText").text("Click image to freeze in place").css({
+                                "font-size": "smaller", 
+                                "color": "grey", 
+                                "position": "", 
+                                "bottom": ""
+                            });						
+    						
+                            that._on($input, {mouseout:__hideImagePreview});
+                            that._on($input_img, {mouseout:__hideImagePreview});
+                            
+                            isClicked = 0;
+                        }
+    					
+                        if(that.detailType=="resource" && that.configMode.entity=='records' 
+                                && that.f('rst_CreateChildIfRecPtr')==1){
+                            that._clearChildRecordPointer( input_id );
+                        }else{
+                            that._removeInput( input_id );
+                        }
+                        
+                        that.onChange(); 
+                    }
+                });
+            }
         }
         
         //move term error message to last 
@@ -3516,12 +3652,11 @@ console.log('onpaste');
                              opt.text(parentTerms+'.'+opt.attr('term-orig'));
                         }
                     }
-                
                 }
 
                 //hide individual error                
                 $input.parent().find('.term-error-message').hide();
-                
+
                 this.onChange();
     },
     
@@ -3546,14 +3681,93 @@ console.log('onpaste');
                 },500);
             },
             onClose: function(){
-                $.each(that.inputs, function(index, input){ 
-                    input = $(input);
-                    input.css('width','auto');
-                    input = that._recreateSelector(input, true);
-                    that._on( input, {change:that._onTermChange} );
-                    that._showHideSelByImage( input ); 
-                });
-                
+
+                var child_terms = $Db.trm_TreeData(vocab_id, 'set');
+                var asButtons = that.options.recordset && that.options.recordset.entityName=='Records' && that.f('rst_TermsAsButtons');
+
+                if((that.enum_buttons != null || asButtons == 1) && child_terms.length <= 20){ // recreate buttons/checkboxes
+
+                    that.enum_buttons = (Number(that.f('rst_MaxValues')) != 1) ? 'checkbox' : 'radio';
+                    that.createEnumButtons(true, child_terms);
+
+                    // Change from select to input text
+                    $.each(that.inputs, function(idx, input){
+
+                        var $input = $(input);
+                        var value = $input.val();
+                        var inpt_id = $input.attr('id');
+
+                        if($input.is('select')){
+
+                            if($input.hSelect('instance') != undefined){
+                                $input.hSelect('destroy');
+                            }
+                            that._off($input, 'change');
+                            var $inputdiv = $input.parent();
+                            $input.remove();
+
+                            $input = $('<input type="text" class="text ui-widget-content ui-corner-all">')
+                                        .attr('id', inpt_id)
+                                        .val(value)
+                                        .prependTo($inputdiv)
+                                        .hide();
+
+                            that._on( $input, {change:that.onChange} );
+
+                            that.inputs[idx] = $input;
+
+                            if(idx != 0){
+                                $inputdiv.hide();
+                            }
+
+                            if(that.btn_add){
+                                that.btn_add.hide(); // Hide repeat button, removeClass('smallbutton ui-icon-circlesmall-plus')
+                            }
+                        }
+                    });
+                }else{
+
+                    that.enum_buttons = null;
+
+                    $.each(that.inputs, function(idx, input){ 
+
+                        var $input = $(input);
+                        var value = $input.val();
+
+                        if($input.is('input')){
+
+                            that._off($input, 'change');
+                            var $inputdiv = $input.parent();
+                            if(idx == 0){
+                                $inputdiv.find('label.enum_input, br').remove();
+                                $inputdiv.find('.smallicon').css({'top': '', 'margin-top': '2px'});
+                            }
+                            $input.remove();
+
+                            $input = $('<select>')
+                                        .attr('id', inpt_id)
+                                        .addClass('text ui-widget-content ui-corner-all')
+                                        .prependTo( $inputdiv );
+
+                            $inputdiv.show();
+
+                            that.inputs[idx] = $input;
+
+                            if(that.btn_add){
+                                that.btn_add.show(); // Show repeat button, removeClass('smallbutton ui-icon-circlesmall-plus')
+                            }
+                        }
+
+                        if(window.hWin.HEURIST4.util.isempty(value) && value != ''){
+                            value = true;
+                        }
+
+                        $input.css('width','auto');
+                        $input = that._recreateSelector($input, value);
+                        that._on( $input, {change:that._onTermChange} );
+                        that._showHideSelByImage( $input ); 
+                    });
+                }
             }
         };
         
@@ -3911,11 +4125,15 @@ console.log('onpaste');
                     this.element.find('.rel_link').show();
                 }else{
                     $input.val( display_value?display_value :value);    
-                    
+
                     if(that.detailType=='enum' || that.detailType=='relationtype'){    
                         //selectmenu
                         if($($input).hSelect("instance")!=undefined){
                            $($input).hSelect("refresh"); 
+                        }
+
+                        if(that.enum_buttons != null){
+                            $input.parent().find('input:'+that.enum_buttons).prop('checked', false);
                         }
                     }
                 }
@@ -4003,7 +4221,7 @@ console.log('onpaste');
                 }       
                 
             }else{
-                res = $input.val();    
+                res = $input.val();
             }
             
             if(!window.hWin.HEURIST4.util.isnull(res) && res!=''){
@@ -4125,7 +4343,7 @@ console.log('onpaste');
             this.options.values = [''];
             return true;
         }else{
-        
+
             if(this.options.readonly || this.f('rst_Display')=='readonly'){
                 return false;
             }else{
@@ -4136,18 +4354,16 @@ console.log('onpaste');
                 var idx;
                 for (idx in this.inputs) {
                     var res = this._getValue(this.inputs[idx]);
-                    
                     //both original and current values are not empty
                     if (!(window.hWin.HEURIST4.util.isempty(this.options.values[idx]) && window.hWin.HEURIST4.util.isempty(res))){
                         if (this.options.values[idx]!=res){
-                                return true;
+                            return true;
                         }
                     }
                 }
             }
-        
-            return false;        
-        
+
+            return false;
         }
     },
 
@@ -4618,8 +4834,7 @@ console.log('onpaste');
                 
                 $input.change(__onDateChange);
     },
-    
-    
+
     //
     //
     //
@@ -4703,6 +4918,142 @@ console.log('onpaste');
             }
         });
         
+    },
+
+    //
+    // Set up checkboxes/radio buttons for enum field w/ rst_TermsAsButtons set to 1
+    // Params:
+    //	isRefresh (bool): whether to clear $inputdiv first
+    //	terms_list (array): array of term ids
+    //	$inputdiv (jQuery Obj): element where inputs will be placed
+    //	values (array): array of existing values to check by default
+    //
+    createEnumButtons: function(isRefresh, terms_list, $inputdiv, values){
+
+        var that = this;
+
+        var vocab_id = this.f('rst_FilteredJsonTermIDTree');
+
+        // Check for necessary variables
+        if(terms_list == null){ // array of trm_ids
+            terms_list = $Db.trm_TreeData(vocab_id, 'set');
+        }
+        if($inputdiv == null){ // all visible inputs will be placed within first inputdiv
+            $inputdiv = $(this.inputs[0]).parent();
+        }
+        if(values == null){ // array of existing values
+
+            values = [];
+
+            $.each(that.inputs, function(idx, ele){
+                var $ele = $(ele);
+
+                values.push($ele.val());
+            });
+        }
+
+        if(isRefresh){ // does inputdiv need to be cleared first of old data
+
+            var $eles = $(this.inputs[0]).parent().find('label.enum_input, br');
+
+            if($eles.length > 0){
+                $eles.remove();
+            }
+        }
+
+		// get width of each input
+        var f_width = this.f('rst_DisplayWidth');
+        var labelWidth = (f_width < 90) ? 90 : (f_width > 200) ? 200 : f_width;
+
+        for(var i = 0; i < terms_list.length; i++){
+
+            var trm_label = $Db.trm(terms_list[i], 'trm_Label');
+            var trm_id = terms_list[i];
+            var isChecked = (values && values.includes(trm_id)) ? true : false;
+
+            var $btn_input = $('<input>', {'type': this.enum_buttons, 'title': trm_label, 'value': trm_id, 'data-id': trm_id, 'checked': isChecked, name: this.options.dtID})
+                .change(function(event){ 
+
+                    var isNewVal = false;
+                    var changed_val = $(event.target).val();
+
+                    if($(event.target).is(':checked')){ // check if adding new vlaue
+                        isNewVal = true;
+                    }
+
+                    if(that.enum_buttons == 'radio'){
+
+                        if(isNewVal){
+                            $(that.inputs[0]).val(changed_val);
+                        }else{
+                            $(that.inputs[0]).val('');
+                        }
+                    }else{
+
+                        if(!isNewVal){
+
+                            if(that.inputs.length == 1){
+                                $(that.inputs[0]).val('');
+                            }else{
+                                $.each(that.inputs, function(idx, ele){
+
+                                    var $ele = $(ele);
+
+                                    if($ele.val() == changed_val){
+
+                                        if(idx != 0){
+                                            $ele.parents('.input-div').remove();
+                                            that.inputs.splice(idx, 1);
+
+                                            return false;
+                                        }else{
+
+                                            var last_idx = that.inputs.length - 1;
+                                            var $last_ele = $(that.inputs[last_idx]);
+
+                                            $(that.inputs[0]).val($last_ele.val());
+
+                                            $last_ele.parents('.input-div').remove();
+                                            that.inputs.splice(last_idx, 1);
+
+                                            return false;
+                                        }
+                                    }
+                                });
+                            }
+                        }else{
+
+                            // trigger default new value
+                            that.new_value = changed_val;
+                            that.btn_add.click();
+                        }
+                    }
+
+                    that.onChange();
+                });
+
+            // add new label+(checkbox | radio button) combo			
+            var $label = $('<label>', {'title': trm_label, append: [$btn_input, trm_label]})
+                            .addClass('truncate enum_input')
+                            .css({
+                                'max-width': labelWidth,
+                                'min-width': labelWidth,
+                                'display': 'inline-block'
+                            })
+                            .appendTo($inputdiv);
+
+            if(terms_list.length > 6 && (i+1) < terms_list.length && (i+1) % 4 == 0){
+                $inputdiv.append('<br>');
+            }
+        }
+
+        // styling for additional term controls
+        var $other_btns = $inputdiv.find('.smallicon, .smallbutton');
+        if($other_btns.length > 0){
+            $other_btns.appendTo($inputdiv);
+
+            $other_btns.filter('.smallicon').css({'top': '-4px', 'margin-top': ''});
+        }
     }
 
 });
