@@ -1,14 +1,10 @@
 /**
-* lookupTCL.js - Lookup values in third-party web service for Heurist record 
+* lookupTLC.js - Lookup values in third-party web service for Heurist record 
 * 
-*   It consists of search form and result list to select one or several values of record
-* 
-*       descendants of this widget 
-*   1) perform search on external third-part web service
-*   2) render result in our resultList (custom record renderer, found at hclient/widget/viewers/resultList.js)
-*   3) map external results with our field details (see options.mapping)
-*   4) either returns these mapped fields (to edit record form) 
-*       or trigger addition of new record with selected values
+* This file:
+*   1) Loads the content of the corresponding html file (lookupTLC.html)
+*   2) Performs an api call to the Geoname service using the User's input, displaying the results within a Heurist result list
+*   3) map external results with our field details (see options.mapping) and returns the mapped results to the record edit form
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -26,7 +22,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.lookupTCL", $.heurist.recordAction, {
+$.widget( "heurist.lookupTLC", $.heurist.recordAction, {
 
     // dialog options, the default values and other available options can be found in hclient/widget/record/recordAction.js
     options: {
@@ -37,8 +33,8 @@ $.widget( "heurist.lookupTCL", $.heurist.recordAction, {
 
         title:  'Lookup values for Heurist record', // dialog title
         
-        htmlContent: 'lookupTCL.html', // in hclient/widgets/lookup folder
-        helpContent: 'lookupTCL.html', // in context_help folder
+        htmlContent: 'lookupTLC.html', // in hclient/widgets/lookup folder
+        helpContent: 'lookupTLC.html', // in context_help folder
 
         mapping: null, //configuration from record_lookup_config.json (DB Location: sysIdentification.sys_ExternalReferenceLookups)
                
@@ -143,7 +139,7 @@ $.widget( "heurist.lookupTCL", $.heurist.recordAction, {
 
             if(fldname == 'recordLink'){
                 s = '<a href="' + s + '" target="_blank"> view here </a>';
-                title = 'View tclmap record';
+                title = 'View tlcmap record';
             }
 
             if(width>0){

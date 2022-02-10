@@ -370,15 +370,33 @@ $.widget( "heurist.lookupConfig", {
                 has_changes = true;
             }
 
-            if(that.options.service_config[key]['dialog'] == 'recordLookup'){
-                that.options.service_config[key]['dialog'] = 'lookupTCL';
+            if(that.options.service_config[key]['dialog'] == 'recordLookup' || that.options.service_config[key]['dialog'] == 'lookupTCL'){
+                that.options.service_config[key]['dialog'] = 'lookupTLC';
+
+                has_changes = true;
+            }else if(that.options.service_config[key]['dialog'] == 'recordLookupBnFLibrary' || that.options.service_config[key]['dialog'] == 'lookupBnFLibrary'){
+                that.options.service_config[key]['dialog'] = 'lookupBnFLibrary_bib';
+
                 has_changes = true;
             }else if(that.options.service_config[key]['dialog'].includes('recordLookup')){
                 that.options.service_config[key]['dialog'] = that.options.service_config[key]['dialog'].replace('recordLookup', 'lookup');
+
                 has_changes = true;
             }
 
-            if(that.options.service_config[key]['service'] == 'bnfLibrary'){
+            // Ensure that the key is correct, otherwise there will be problems with updating (creating duplicates)
+            if(key.includes("_") === false){
+
+                var new_key = that.options.service_config[key]['service_id'];
+                that.options.service_config[new_key] = window.hWin.HEURIST4.util.cloneJSON(that.options.service_config[key]);
+
+                delete that.options.service_config[key];
+
+                has_changes = true;
+            }
+
+            // Update BnF Config
+            if(that.options.service_config[key]['service'] == 'bnfLibraryBib'){
 
                 var n_fields = that.options.service_config[key]['fields'];
                 var hasFieldChanges = false;
@@ -402,23 +420,6 @@ $.widget( "heurist.lookupConfig", {
 
                     has_changes = true;
                 }
-				
-                if(that.options.service_config[key]['dialog'] == 'lookupBnFLibrary'){
-                    that.options.service_config[key]['dialog'] = 'lookupBnFLibrary_bib';
-
-                    has_changes = true;
-                }
-            }
-
-            // Ensure that the key is correct, otherwise there will be problems with updating (creating duplicates)
-            if(key.includes("_") === false){
-
-                var new_key = that.options.service_config[key]['service_id'];
-                that.options.service_config[new_key] = window.hWin.HEURIST4.util.cloneJSON(that.options.service_config[key]);
-
-                delete that.options.service_config[key];
-
-                has_changes = true;
             }
         });
 

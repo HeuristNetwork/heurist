@@ -3773,8 +3773,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 var cfg = window.hWin.HAPI4.sysinfo['service_config'][srvname];
                                 var dialog_name = cfg.dialog;
 
-                                if(dialog_name == 'recordLookup'){
-                                    dialog_name = 'lookupTCL';
+                                if(dialog_name == 'recordLookup' || dialog_name == 'lookupTCL'){
+                                    dialog_name = 'lookupTLC';
                                 }else if(dialog_name == 'recordLookupBnFLibrary' || dialog_name == 'lookupBnFLibrary'){
                                     dialog_name = 'lookupBnFLibrary_bib';
                                 }else if(dialog_name.includes('recordLookup')){
