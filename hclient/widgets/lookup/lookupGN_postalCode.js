@@ -1,14 +1,10 @@
 /**
-* lookupGN_postalCode.js - GeoNames postalCode lookup service
+* lookupGN_postalCode.js - GeoNames postalCode DB lookup service
 * 
-*   It consists of search form and result list to select one or several values of record
-* 
-*       descendants of this widget 
-*   1) perform search on external third-part web service
-*   2) render result in our resultList (custom renderer)
-*   3) map external results with our field details (see options.mapping)
-*   4) either returns these mapped fields (to edit record form) 
-*       or trigger addition of new record with selected values
+* This file:
+*   1) Loads the content of the corresponding html file (lookupGN_postakCode.html)
+*   2) Performs an api call to the Geoname service's Postalcode DB using the User's input, displaying the results within a Heurist result list
+*   3) map external results with our field details (see options.mapping) and returns the mapped results to the record edit form
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -101,14 +97,7 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
                
                pagesize:(this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
                empty_remark: '<div style="padding:1em 0 1em 0">No Locations Found</div>',
-               renderer: this._rendererResultList
-               /*
-               searchfull: function(arr_ids, pageno, callback){
-                   that._recordListGetFullData(arr_ids, pageno, callback);
-               rendererHeader: this.options.show_list_header ?function(){
-                        return that._recordListHeaderRenderer();  //custom header for list mode (table header)
-                        }:null
-               */        
+               renderer: this._rendererResultList       
         });                
 
         //init record list
@@ -143,9 +132,12 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
         return this._super();
     },
     
-    //
-    //
-    //
+    /**
+     * Function handler for pressing the enter button while focused on input element
+     * 
+     * Param:
+     *  e (event trigger)
+     */
     startSearchOnEnterPress: function(e){
         
         var code = (e.keyCode ? e.keyCode : e.which);
@@ -158,15 +150,15 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
     },
     
     
-    //  "postalcode":"6600", 
-    //  "countryCode":"AT",
-    //  "adminCode1":"07","adminName1":"Tirol",
-    //  "adminCode2":"708","adminName2":"Politischer Bezirk Reutte"
-    //  "adminCode3":"70805","adminName3":"Breitenwang",
-    //  "placeName":"Breitenwang" 
-    //
-    //"lng":10.7333333,"lat":47.4833333},
-    //
+    /**
+     * Result list rendering function called for each record
+     * 
+     * Param:
+     *  recordset (hRecordSet) => Heurist Record Set
+     *  record (json) => Current Record being rendered
+     * 
+     * Return: html
+     */
     _rendererResultList: function(recordset, record){
         
         function fld(fldname, width){
@@ -208,9 +200,9 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
         return html;
     },
 
-    //    
-    //
-    //
+    /**
+     * Initial dialog buttons on bottom bar, _getActionButtons() under recordAction.js
+     */
     _getActionButtons: function(){
         var res = this._super(); //dialog buttons
         res[1].text = window.hWin.HR('Select');
@@ -218,9 +210,18 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
         return res;
     },
 
-    //
-    // Return json array dty_ID:value 
-    //
+    /**
+     * Return record field values in the form of a json array mapped as [dty_ID: value, ...]
+     * For multi-values, [dty_ID: [value1, value2, ...], ...]
+     * 
+     * To trigger record pointer selection/creation popup, value must equal [dty_ID, default_searching_value]
+     * 
+     * Include a url to an external record that will appear in the record pointer guiding popup, add 'ext_url' to res
+     *  the value must be the complete html (i.e. anchor tag with href and target attributes set)
+     *  e.g. res['ext_url'] = '<a href="www.google.com" target="_blank">Link to Google</a>'
+     * 
+     * Param: None
+     */
     doAction: function(){
 
         //detect selection
@@ -252,10 +253,12 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
         }        
     },
     
-    //
-    // create search url
-    // perform search
-    //
+    /**
+     * Create search URL using user input within form
+     * Perform server call and handle response
+     * 
+     * Params: None
+     */
     _doSearch: function(){
         
         if(this.element.find('#inpt_postalcode').val()=='' && this.element.find('#inpt_placename').val()==''){
@@ -336,9 +339,12 @@ return;
         );
     },
     
-    //
-    //
-    //
+    /**
+     * Prepare json for displaying via the Heuirst resultList widget
+     * 
+     * Param:
+     *  json_data (json) => search response
+     */
     _onSearchResult: function(json_data){
         
         this.recordList.show();

@@ -1,6 +1,6 @@
-Directory:	/hclient/widgets/lookup
+Directory:  /hclient/widgets/lookup
 
-Overview:	Perform requests to external sources to populate records
+Overview:   Perform requests to external sources to populate records
 
 Service requests are handled within hsapi/controller/record_lookup.php
 
@@ -8,22 +8,38 @@ New and existing service mapping is found at hsapi/controller/record_lookup_conf
 
 All lookups are extenstions of the recordAction widget (hclient/widget/record/recordAction.js)
 
-lookupTCL.js and lookupTCL.html can provide a very simple template for creating new external lookups, but also look at the BnF lookups which have handling for inserting terms and record pointers.
+lookup_Template.js and lookup_Template.html can provide a simple template for creating new external lookups, this also includes the handling for inserting terms and record pointers.
+(This template is based off of the BnF_bib lookup with some specifics stripped out)
 
-TODO 7 Feb 2022: The improvements for terms and record pointers should be migrated to the general template.
+Current Services:
+ - TLCMap: Query the Time Layered Cultural Mapping of Australian history and culture database (site: tlcmap.org)
+ - GeoNames: Query the Geonames databse for geographical locations covering all countries and many places (site: geonames.org)
+ - GeoNames Postalcodes: Query the Geonames' postalcode database (site: geonames.org/postal-codes/)
+ - MPCE: Assign keywords to a Work (Book) record from searches or by association
+ - LRC18: Import record information from the ESTC_Helsinki_Bibliographic_Metadata database via searching
+ - BnF Bib: Query the BnF Library's bibliographic records (site: www.bnf.fr)
+ - BnF Aut: Query the BnF Library's authoritative records (site: www.bnf.fr)
+ - Nomisma: Query Nomisma's database records (site: nomisma.org)
 
 Notes:
 
 The services can be accessed via a call to window.hWin.HAPI4.RecordMgr.lookup_external_service(request, callback), where:
- => request (JSON Object): requires at least two keys; 'service': the URL for the external API request, and 'service_type': the name of the current external lookup (e.g. tclmap, geonames)
+ => request (JSON Object): requires at least two keys; 'service': the URL for the external API request, and 'service_type': the name of the current external lookup (e.g. tlcmap, geonames)
  => callback (Function): Function to receive the response from the server call
     -> The response variable will be a JSON object with two keys of focus; status: response status, and data: containing the response from the external API request
 
+Alternatively, perform a simple record search by calling window.hWin.HAPI4.RecordMgr.search(request, callback), where:
+ => request (JSON Object): can contain; q = heurist query (required), w = a | b (all or bookmarks), f = details of output (can be labeled 'detail'), limit, o = offset, and db = which database to query
+ => callback (Function): Same as above callback
+Both the MPCE and LRC18C lookups contain examples of record searching.
+
 Result Lists (widget found at hclient/widget/viewers/resultList.js) can be used to display the retrieved data as records in a list format for the user to select from.
 
-When returning values to the Heurist record form, for fields that are record pointers (resources) or terms, the id for the corresponding record/term neeeds to be inserted. In the BnF lookup, new terms in term fields are added automatically. Values for record pointers are fed sequentially to the data entry form as a search on the specified field, alloing the user to choose between alternatives or create a new record as required. Relationship markers are not handled. 
- 
-Updated:	07 Feb 2022
+When returning values to the Heurist record form, for fields that are record pointers (resources) or terms, the id for the corresponding record/term neeeds to be inserted. 
+In the BnF_bib lookup, new terms in term fields are added automatically. Values for record pointers are fed in order of mapped fields to the data entry form as a search on the specified field, 
+allowing the user to choose between alternatives or create a new record as required. Relationship markers are not handled. 
+
+Updated: 10 Feb 2022
 
 ----------------------------------------------------------------------------------------------------------------
 

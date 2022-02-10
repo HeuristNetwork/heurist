@@ -1,14 +1,15 @@
 /**
-* lookupNomisma.js - Lookup values in third-party web service to populate a Heurist record 
+* lookupNomisma.js - Searching the Nomisma's records (Under Development)
 * 
-*   It consists of search form and result list to select one or several values of record
+* This file:
+*   1) Loads the content of the corresponding html file (lookupNomisma.html), and
+*   2) Performs an api call to Nomisma's Search API using the User's input, displaying the results within a Heurist result list
 * 
-*       descendants of this widget 
-*   1) perform search on external third-part web service
-*   2) render result in our resultList (custom renderer)
-*   3) map external results with our field details (see options.mapping)
-*   4) either returns these mapped fields (to edit record form) 
-*       or trigger addition of new record with selected values
+* Current Nomisma services supported:
+*    - getMints
+*    - getHoards
+*    - getFindspots
+*    - getRdf (currently unavailable)
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -60,7 +61,8 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
         //this.element.find('#btn_container').position({my: 'left top', at: 'right top', of: '#search_container'});
 
         // Action button styling
-        this.element.find('#btnMintSearch, #btnHoardsSearch, #btnFindspotsSearch').addClass("ui-button-action");
+        this.element.find('#btnMintSearch, #btnHoardsSearch, #btnFindspotsSearch, #btnRdfSearch').addClass("ui-button-action");
+        this.element.find('#btnRdfSearch').hide();
 
         // Prepare result list options
         this.options.resultList = $.extend(this.options.resultList, 
