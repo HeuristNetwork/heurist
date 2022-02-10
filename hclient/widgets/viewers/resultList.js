@@ -592,12 +592,12 @@ $.widget( "heurist.resultList", {
         //media carousel/viewer --------------
         if(this.options.show_fancybox_viewer){
             this.fancybox_button = $( '<button>' )
-                .button({icon: "ui-icon-image", showLabel:false, label:window.hWin.HR('Clicking on thumbnail opens full screen media viewer')})
+                .button({icon: "ui-icon-arrow-4-diag", showLabel:false, label:window.hWin.HR('Clicking on thumbnail opens full screen media viewer')})
                 .css({'float':'right','width':'28px', height:'28px', 'font-size':'1em', 'margin-right':'15px'})
                 .appendTo( this.div_toolbar );
             
             if(this._is_fancybox_active){
-                this.fancybox_button.css({'border':'1px solid'}); //, background: '#ddd'
+                this.fancybox_button.css({'border':'1px solid', background: '#dbdcfd'}); //, background: '#ddd'
             }
             
             this._on( this.fancybox_button, {
@@ -608,7 +608,7 @@ $.widget( "heurist.resultList", {
                             this.div_content.mediaViewer({selector:'.realThumb', search_initial:'ids:'+this._rec_onpage.join(',') });            
                             //setTimeout(function(){that.div_content.mediaViewer('show');},1000);
                         }
-                        this.fancybox_button.css({'border':'1px solid'}); //, background: '#ddd'
+                        this.fancybox_button.css({'border':'1px solid', background: '#dbdcfd'}); //, background: '#ddd'
                     }else{
                         this.fancybox_button.css({'border':'none', background: 'none'});
                         
@@ -631,7 +631,12 @@ $.widget( "heurist.resultList", {
             +(this.options.entityName=='records'?'<button value="record_content" class="btnset_radio"/>':'')
         )
         .appendTo( this.div_toolbar );
-        
+
+        if(this.options.show_fancybox_viewer){
+            var r_padding = right_padding + 3;
+            this.view_mode_selector.css('padding', '2px '+r_padding+'px 2px '+right_padding+'px');
+        }
+
         this.view_mode_selector.find('button[value="list"]')
             .button({icon: "ui-icon-menu", showLabel:false, label:window.hWin.HR('Single lines')})
             .css('font-size','1em');
