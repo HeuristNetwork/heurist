@@ -3221,6 +3221,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         var dtyID = window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE']; //$Db.getLocalID('dty', '2-1080'); //workflow stage field
                         var curr_stage = fields[dtyID];
                         
+                        //TRM_SWF_IMPORT should we disable it?
+                        
                         for (var i=0; i<this._swf_rules.length; i++){
                             var is_disabled = '';
                             if(this._swf_rules[i]['swf_StageRestrictedTo']){
@@ -3255,7 +3257,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         
                         $dlg.find('#btn_advance').button({icon:'ui-icon-caret-1-e',iconPosition:'end'})
                                 .css('font-size','0.9em')
-                        .click(function(){
+                        .click(function(){  //select next
                                 $dlg.find('#dlg-prompt-value')[0].selectedIndex++;    
                                 if($dlg.find('#dlg-prompt-value')[0].selectedIndex<0){
                                       $dlg.find('#dlg-prompt-value')[0].selectedIndex=0;            

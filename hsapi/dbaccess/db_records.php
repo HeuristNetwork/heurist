@@ -344,7 +344,8 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         return $system->addError(HEURIST_INVALID_REQUEST, "Record type is wrong");
     }
 
-    $is_insert = ($recID<1);   
+    $is_insert = ($recID<1); 
+    $is_save_new_record = false;  
 
     // recDetails data
     if ( @$record['details'] ) {
@@ -401,6 +402,13 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             $record['FlagTemporary'] = 1;
         }
     }else if(!$is_insert) {
+        
+        //check if previous FlagTemporary is 1 
+        if($system->defineConstant('TRM_SWF_ADDED')){
+            $query = 'SELECT rec_FlagTemporary FROM Records WHERE rec_ID='.$recID;
+            $is_save_new_record = (mysql__select_value($mysqli, $query)==1);
+        }
+        
         $record['FlagTemporary'] = 0;
     }
 
@@ -422,12 +430,15 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                     break;
                 }
             }
+            if($is_save_new_record && !($new_swf_stage>0)){
+                $new_swf_stage = TRM_SWF_ADDED;
+            }
         }
         if($new_swf_stage>0){
             // set $record onwership and visibility 
             // and assign $record['swf'] = true, to avoid recordCanChangeOwnerwhipAndAccess
             // returns array( new_value, curr_value, emails )
-            $swf_res = recordWorkFlowStage($system, $record, $new_swf_stage);
+            $swf_res = recordWorkFlowStage($system, $record, $new_swf_stage, $is_insert || $is_save_new_record);
             
             $new_swf_stage = @$swf_res['new_value'];
             if($new_swf_stage==0){ //not allowed - keep old stage
@@ -2728,7 +2739,7 @@ function isValidTerm($system, $term_tocheck, $domain, $dtyID, $rectype)
 * @param mixed $record
 * @return array( new_value, curr_value, emails )
 */
-function recordWorkFlowStage($system, &$record, $new_value){
+function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
 
     $current_value = 0;
     $emails = null;
@@ -2736,17 +2747,10 @@ function recordWorkFlowStage($system, &$record, $new_value){
     if($new_value>0 && @$record['FlagTemporary']!=1){
     
         $recID = intval(@$record['ID']);    
-        $is_insert = ($recID<1);
         $recID = abs($recID);
-    
+  
         
         $mysqli = $system->get_mysqli();
-        
-        if(!$is_insert){
-            //check if previous FlagTemporary is 1 
-            $query = 'SELECT rec_FlagTemporary FROM Records WHERE rec_ID='.$recID;
-            $is_insert = (mysql__select_value($mysqli, $query)==1);
-        }
         
         if(!$is_insert){
             //find current stage
@@ -2763,7 +2767,7 @@ function recordWorkFlowStage($system, &$record, $new_value){
             
             //check that current user can change workflow stage
             $is_allowed = false;
-            if($rule['swf_StageRestrictedTo']==null || $system->is_admin() 
+            if($rule!=null && $rule['swf_StageRestrictedTo']==null || $system->is_admin() 
                 || $system->is_member($rule['swf_StageRestrictedTo'])){
                 
                 $is_allowed = true;

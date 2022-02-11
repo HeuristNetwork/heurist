@@ -1,8 +1,8 @@
--- Heurist Definitions Exchange File generated: 04 Feb 2022 @ 23:27
--- Installation = https://heuristplus.sydney.edu.au/h6-ao/
+-- Heurist Definitions Exchange File generated: 11 Feb 2022 @ 15:50
+-- Installation = https://heuristplus.sydney.edu.au/heurist/
 -- Database = Heurist_Core_Definitions
--- Program Version: 6.2.26
--- Database Version: 1.4.3
+-- Program Version: 6.2.27
+-- Database Version: 1.3.4
 
 -- RECORD TYPE GROUPS
 -- `rtg_ID`,`rtg_Name`,`rtg_Domain`,`rtg_Order`,`rtg_Description`,`rtg_Modified`
@@ -4271,15 +4271,15 @@
 ('9433','970121 Expanding Knowledge in History and Archaeology','','','open','1176','970121 Expanding Knowledge in History and Archaeology','4740','1','0','enum','0','0','9412','1','2020-11-26 01:56:54','0','','','','0'),
 ('9434','970122 Expanding Knowledge in Philosophy and Religious Studies','','','open','1176','970122 Expanding Knowledge in Philosophy and Religious Studies','4741','1','0','enum','0','0','9412','1','2020-11-26 01:56:54','0','','','','0'),
 ('9453','Workflow stage','','','open','2','Workflow stage vocab vocab','9453','0','0','enum','0','0','','1','2021-12-03 06:04:43','1','','','','20'),
-('9454','01 - Imported','','','open','2','Imported','9454','0','0','enum','0','0','9453','1','2021-09-30 06:53:29','1','','','',''),
-('9455','02 - Initial version','','','open','2','Initial version','9455','0','0','enum','0','0','9453','1','2021-09-30 06:53:38','1','','','',''),
-('9456','03 - to be reviewed','','','open','2','to be reviewed','9456','0','0','enum','0','0','9453','1','2021-09-29 20:54:17','1','','','',''),
-('9457','04 - Ready to publish','','','open','2','Ready to publish','9457','0','0','enum','0','0','9453','1','2021-09-29 20:54:24','1','','','',''),
-('9458','05 - Publish','','','open','2','Publish','9458','0','0','enum','0','0','9453','1','2021-09-29 20:54:30','1','','','',''),
+('9454','00 - Imported','','','reserved','2','Imported','9454','0','0','enum','0','0','9453','1','2022-02-11 10:56:19','1','','','',''),
+('9455','02 - Draft','','','reserved','2','Initial version','9455','0','0','enum','0','0','9453','1','2022-02-11 10:56:45','1','','','',''),
+('9456','03 - to be reviewed','','','reserved','2','to be reviewed','9456','0','0','enum','0','0','9453','1','2022-02-11 10:57:02','1','','','',''),
+('9457','04 - Ready to publish / final review','','','reserved','2','Ready to publish','9457','0','0','enum','0','0','9453','1','2022-02-11 10:57:41','1','','','',''),
+('9458','05 - Publish','','','reserved','2','Publish','9458','0','0','enum','0','0','9453','1','2022-02-11 10:57:27','1','','','',''),
 ('9461','Mr','','','open','2','Mr','93','0','0','enum','0','0','507','1','2012-06-04 08:18:58','0','','','','0'),
 ('9462','Ms','','','open','2','Ms','95','0','0','enum','0','0','507','1','2012-06-04 08:18:58','0','','','','0'),
 ('9463','Reverend','','','open','2','Reverend','3287','0','0','enum','0','0','507','1','2016-05-14 07:17:07','0','','','','0'),
-('9464','00 - Initial stage (new record default)','','','open','2','00 - Initial stage (new record default)','9464','0','0','enum','0','0','9453','1','2022-02-04 03:08:57','0','','','',''),
+('9464','01 - Editing (includes manually created)','','','reserved','2','00 - Initial stage (new record default)','9464','0','0','enum','0','0','9453','1','2022-02-11 10:56:29','1','','','',''),
 >>EndData>>
 
  
@@ -5952,8 +5952,6 @@
 ('VIE','VI','Vietnamese','','0000-00-00 00:00:00'),
 ('YID','YI','Yiddish','','0000-00-00 00:00:00'),
 >>EndData>>
-
- 
 
  
 
