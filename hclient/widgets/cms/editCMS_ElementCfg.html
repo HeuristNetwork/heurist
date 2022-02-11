@@ -279,41 +279,43 @@
                         </div>
                 </fieldset>
                 <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
-                        <button class="margin-mode" style="position:absolute;right: 10px;">full</button>
+                        <button class="margin-mode" style="position:absolute;right: 10px;">compact</button>
                         <div>
                             <div class="header_narrow"><b>Margins</b></div>
-                            <div style="display:inline-block;" class="margin-short">
+                            <div style="display:none;" class="margin-short">
                             <label>&nbsp;Inner:</label>
                             <input data-type="css" name="padding" type="number" min="0" value="" placeholder="0" style="width:50px"/>
                             <label>&nbsp;Outer:</label>
                             <input data-type="css" name="margin"  type="number" min="0" value="" placeholder="0" style="width:50px"/>           </div> 
                         </div>
-                        <div style="display:none" class="margin-full">
+                        <div style="display:inline-block" class="margin-full">
                             <div class="header_narrow" style="vertical-align:middle">Inner</div>
-                            <div style="vertical-align:middle;display:inline-block;">
-                                <input data-type="css" name="padding-left" type="number" min="0" value="" placeholder="0" style="width:30px"/>
+                            <div style="vertical-align:middle;display:inline-block;padding-left:20px">
+                                <label><input class="cb_sync" data-type="padding" type="checkbox"/>sync&nbsp;</label>
+                                <input data-type="css" name="padding-left" type="number" min="0" value="" placeholder="0" style="margin:2px;width:30px"/>
                             </div>    
                             <div style="vertical-align:middle;display:inline-block;">
-                                <input data-type="css" name="padding-top" type="number" min="0" value="" placeholder="0" style="width:30px"/>
+                                <input data-type="css" name="padding-top" type="number" min="0" value="" placeholder="0" style="margin:2px;width:30px"/>
                                 <br>
-                                <input data-type="css" name="padding-bottom" type="number" min="0" value="" placeholder="0" style="width:30px"/>
+                                <input data-type="css" name="padding-bottom" type="number" min="0" value="" placeholder="0" style="margin:2px;width:30px"/>
                             </div>    
                             <div style="vertical-align:middle;display:inline-block;">
-                                <input data-type="css" name="padding-right" type="number" min="0" value="" placeholder="0" style="width:30px"/>
+                                <input data-type="css" name="padding-right" type="number" min="0" value="" placeholder="0" style="margin:2px;width:30px"/>
                             </div>    
                         </div>
-                        <div style="display:none" class="margin-full">
+                        <div style="display:inline-block" class="margin-full">
                             <div class="header_narrow" style="vertical-align:middle">Outer</div>
-                            <div style="vertical-align:middle;display:inline-block;">
-                                <input data-type="css" name="margin-left" type="number" min="0" value="" placeholder="0" style="width:30px"/>
+                            <div style="vertical-align:middle;display:inline-block;padding-left:20px">
+                                <label><input class="cb_sync" data-type="margin" type="checkbox"/>sync&nbsp;</label>
+                                <input data-type="css" name="margin-left" type="number" min="0" value="" placeholder="0" style="margin:2px;width:30px"/>
                             </div>    
                             <div style="vertical-align:middle;display:inline-block;">
-                                <input data-type="css" name="margin-top" type="number" min="0" value="" placeholder="0" style="width:30px"/>
+                                <input data-type="css" name="margin-top" type="number" min="0" value="" placeholder="0" style="margin:2px;width:30px"/>
                                 <br>
-                                <input data-type="css" name="margin-bottom" type="number" min="0" value="" placeholder="0" style="width:30px"/>
+                                <input data-type="css" name="margin-bottom" type="number" min="0" value="" placeholder="0" style="margin:2px;width:30px"/>
                             </div>    
                             <div style="vertical-align:middle;display:inline-block;">
-                                <input data-type="css" name="margin-right" type="number" min="0" value="" placeholder="0" style="width:30px"/>
+                                <input data-type="css" name="margin-right" type="number" min="0" value="" placeholder="0" style="margin:2px;width:30px"/>
                             </div>    
                         </div>
                 </fieldset>

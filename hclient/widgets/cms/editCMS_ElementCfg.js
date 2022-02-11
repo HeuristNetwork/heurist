@@ -29,7 +29,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         codeEditorDlg = null,
         codeEditorBtns = null;
     var textAreaCss;
-    var margin_mode_full = false;
+    var margin_mode_full = true;
     
     function _init(){
 
@@ -241,7 +241,10 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             _onMarginMode();
         });
         
-        
+        cont.find('.cb_sync').parent().css({'font-size':'0.8em'});
+        cont.find('.cb_sync').change(_onMarginSync);
+        cont.find('input[name="padding-left"]').change(_onMarginSyncVal);
+        cont.find('input[name="margin-left"]').change(_onMarginSyncVal);
         
         cont.find('.btn-ok').button().css('border-radius','4px').click(function(){
             //5. save in layout cfg        
@@ -459,6 +462,49 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         return css;
     }
 
+    //
+    //
+    //
+    function _onMarginSync(event){
+        
+        var type = $(event.target).attr('data-type');
+        
+        if($(event.target).is(':checked')){
+            
+            //disable
+            //window.hWin.HEURIST4.util.setDisabled($container.find('input[name^="'+type+'-"]'), true);
+            //window.hWin.HEURIST4.util.setDisabled($container.find('input[name^="'+type+'-left"]'), false);
+
+            $container.find('input[name^="'+type+'-"]').prop('readonly',true);
+            $container.find('input[name^="'+type+'-left"]').removeProp('readonly');
+            
+            _onMarginSyncVal(null, type)
+            
+        }else{
+            $container.find('input[name^="'+type+'-"]').removeProp('readonly');
+            //window.hWin.HEURIST4.util.setDisabled($container.find('input[name^="'+type+'-"]'), false);
+        }       
+    }
+    
+    //
+    //
+    //
+    function _onMarginSyncVal(event, type){
+        
+        if(!type){
+            type = $(event.target).attr('name');
+            type = type.substr(0,type.indexOf('-'));
+        }
+        
+        if($container.find('.cb_sync[data-type="'+type+'"]').is(':checked')){
+        
+                var val = $container.find('input[name="'+type+'-left"]').val();
+                $container.find('input[name="'+type+'-top"]').val(val);
+                $container.find('input[name="'+type+'-bottom"]').val(val);
+                $container.find('input[name="'+type+'-right"]').val(val);
+                _getCss();
+        }
+    }
 
     //
     //
@@ -469,7 +515,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         if(margin_mode_full){
             btn.text('short');
             cont.find('.margin-short').hide();
-            cont.find('.margin-full').show();
+            cont.find('.margin-full').css({display: 'inline-block'});
         }else{
             btn.text('full');
             cont.find('.margin-short').show();
@@ -510,8 +556,6 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             
             var cont = $container;
             
-            margin_mode_full = false;
-            
             //assign flex css parameters
             var params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
             for(var i=0; i<params.length; i++){
@@ -519,6 +563,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                 if (l_cfg.css[prm]) cont.find('#'+prm).val(l_cfg.css[prm]);
             }
 
+            var no_margin_values = true, mode_full = false;    
             //assign other css parameters
             cont.find('[data-type="css"]').each(function(i,item){
                 var key = $(item).attr('name');
@@ -529,15 +574,18 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                     $(item).val($(item).attr('type')=='number'?parseInt(val):val);
                 }
                 
-                if(!margin_mode_full && val){
+                if(!mode_full && !window.hWin.HEURIST4.util.isempty(val)){
                     if(key.indexOf('padding')===0 || 
                        key.indexOf('margin')===0){
                            
-                       margin_mode_full = (key.indexOf('-') > 0);    
+                       no_margin_values = false;
+                           
+                       mode_full = (key.indexOf('-') > 0);    
                     }
                 }
             });
-
+            margin_mode_full = no_margin_values || mode_full;
+console.log(no_margin_values +'  '+ mode_full);
             //init file picker
             cont.find('input[name="bg-image"]')
                     .click(_selecHeuristMedia);
