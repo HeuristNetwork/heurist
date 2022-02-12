@@ -30,6 +30,7 @@ class UploadHandler
 
     // PHP File Upload error message codes:
     // http://php.net/manual/en/features.file-upload.errors.php
+    // indexes from 1 - 8 is from $_FILES[idx]['error']
     protected $error_messages = array(
         1 => 'The uploaded file exceeds the upload_max_filesize directive in php.ini',
         2 => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form',
@@ -152,6 +153,8 @@ class UploadHandler
             
             // The php.ini settings upload_max_filesize and post_max_size
             // take precedence over the following max_file_size setting:
+            // need to set this value - to catch oversize on client size 
+            // post_max_size will not be checked on server side: $_FILES will be empty
             'max_file_size' => null,
             'min_file_size' => 1,
             // The maximum number of files for the upload directory:

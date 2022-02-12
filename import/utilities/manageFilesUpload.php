@@ -29,6 +29,11 @@ define('PDIR','../../');  //need for proper path to js and css
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
+$post_max_size = get_php_bytes('post_max_size');
+$file_max_size = get_php_bytes('upload_max_filesize');
+$max_size = min($file_max_size,$post_max_size);
+if(!($max_size>0)) $max_size = 0;
+
 ?>
 <html>
     <head>
@@ -473,6 +478,10 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                         setTimeout(function(){ window.close(); }, 100);
                 }
             }
+            
+            var max_file_size = <?php echo $max_size;?>;
+            var max_file_size_msg = 'File size exceeds allowed upload_max_filesize or post_max_size '
+                                        +window.hWin.HEURIST4.util.formatFileSize(max_file_size);
 
             $(function () {
                 'use strict';
@@ -499,14 +508,33 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                                 size = -1;
                                 return false;
                             }else{
-                                size = size + Number($(item).attr('file-size'));    
+                                var filesize = Number($(item).attr('file-size'));
+                                if(max_file_size>0 && filesize > max_file_size){
+                                    var template = $(item).parents('tr');
+                                    template.find('button.start').prop('disabled',true).css('color','lightgray');
+                                    $(item).text(window.hWin.HEURIST4.util.formatFileSize(filesize)+' !')
+                                        .attr('title', max_file_size_msg)
+                                        .css('color', 'red');
+                                        
+                                    var data = template.data('data') || {};              
+                                    if(data.files){ //prevent upload
+                                        data.files[0].error = max_file_size_msg;
+                                    }
+                                        
+                                }else{
+                                    size = size + filesize;     
+                                }
                             }
                         });
-                        if(size>=0){
-
+                        
+                        if(size>0){
+                            
                             window.hWin.HEURIST4.util.setDisabled($('#btnStart'), false);                    
                             window.hWin.HEURIST4.util.setDisabled($('#btnCancel'), false);                    
                             $('#btnStart').button('option','label','Start uploads '+window.hWin.HEURIST4.util.formatFileSize(size));
+                        }else{
+                            window.hWin.HEURIST4.util.setDisabled($('#btnStart'), true);                    
+                            $('#btnStart').button('option','label','Start uploads');
                         }
                   
                     },
@@ -618,7 +646,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                         '<?=HEURIST_BASE_URL?>external/jquery-file-upload/cors/result.html?%s'
                     )
                 );
-
+                
                 // Load existing files:
                 $('#fileupload').addClass('fileupload-processing');
                 $.ajax({
@@ -628,9 +656,9 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     data: { db: "<?php echo HEURIST_DBNAME; ?>",
                             acceptFileTypes:"<?php echo implode('|',$allowed_exts);?>",
                             unique_filename: 0,
+                            max_file_size: <?php echo $max_size;?>,
                             folder: $('#upload_folder').val() },
                     dataType: 'json',
-
                     /*
                     disableImageResize: /Android(?!.*Chrome)|Opera/
                     .test(window.navigator.userAgent),

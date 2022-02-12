@@ -39,6 +39,9 @@ if(@$_REQUEST['acceptFileTypes']!=null){
 if(@$_REQUEST['unique_filename']!=null){
     $options['unique_filename'] = ($_REQUEST['unique_filename']!='0');   
 }
+if(@$_REQUEST['max_file_size']>0){
+    $options['max_file_size'] = $_REQUEST['max_file_size']; 
+}
 
 //if(@$_REQUEST['upload_folder']){
 //    $options['upload_dir'] = $_REQUEST['upload_folder'];   
