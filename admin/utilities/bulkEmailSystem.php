@@ -411,7 +411,7 @@ class systemEmailExt {
 		$mailer->CharSet = "UTF-8";
 		$mailer->Encoding = "base64";
         $mailer->isHTML(true);
-        $mailer->SetFrom(HEURIST_MAIL_TO_ADMIN, $cur_user["ugr_FullName"]);
+        $mailer->SetFrom($cur_user["ugr_eMail"], $cur_user["ugr_FullName"]);
 
 		foreach ($this->user_details as $email => $details) {
 
