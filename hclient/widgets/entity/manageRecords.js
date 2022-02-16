@@ -4326,6 +4326,18 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         // add new separate fieldset at the start w/ darker background
         var top_fieldset = $('<fieldset>').css({'background-color': '#d1e7e7', 'margin-bottom': '10px', 'padding-left': '10px'}).insertBefore(this.editForm.find('fieldset:first'));
 
+        var admin_override = window.hWin.HAPI4.is_admin() && !window.hWin.HAPI4.is_member(that._getField('rec_OwnerUGrpID'));
+
+        if(admin_override){ // check if user is not owner, but is admin 
+
+            top_fieldset.append(
+                '<div style="display: table; margin-bottom: 7px">'
+                    + '<div class="header" style="vertical-align: top; display: table-cell; font-size: 1.3em; font-weight: bold; text-align: left; width: auto;">'
+                        + '<span style="color: red; font-weight: bold;">DATABASE ADMINISTRATOR OVERRIDE</span> (you do not own this record)'
+                    + '</div>'
+                + '</div>');
+        }
+
         var title_maxwidth = (top_fieldset.width() != 0) ? top_fieldset.width() : top_fieldset.parent().width();
         title_maxwidth = title_maxwidth * 0.85 - (this.options.rts_editor ? 30 : 0);
 
@@ -4352,7 +4364,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         // change label to required version, and add help icon
         ele.find('div.header')
-            .css({'font-size': '1.3em', 'font-weight': 'bold', 'text-align': 'left', 'width': '120px', 'min-width': '120px'})
+            .css({'font-size': '1.3em', 'font-weight': 'bold', 'text-align': 'left', 'width': '120px', 'min-width': '120px', 'padding-top': '0px'})
             .attr('title', 'A title constructed from one or more fields, which is used to identify records when displayed in search results.');
 
         ele.find('div.header > label').css('color', 'black').text('Constructed title');
