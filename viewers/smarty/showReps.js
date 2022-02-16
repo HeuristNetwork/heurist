@@ -1058,8 +1058,15 @@ function ShowReps() {
     //
     //
     function _getRemark(_nodep){
-        
-        var s =  window.hWin.HEURIST4.util.stripTags(_nodep.title);
+
+        var s = _nodep.title;
+        var key = _nodep.key;
+
+        if(key=='term' || key=='code' || key=='conceptid' || key=='internalid'){
+            s = _nodep.parent.title + '.' + s;
+        }
+
+        s =  window.hWin.HEURIST4.util.stripTags(s);
         if(_nodep.parent && _nodep.parent.data.codes ){ //!_nodep.parent.isRootNode()
             s = window.hWin.HEURIST4.util.stripTags(_nodep.parent.title) + ' >> ' + s;
         }
