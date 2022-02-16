@@ -3189,7 +3189,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 return;
                                 
                             }
-                            if(dtyID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_EXTFILES'])
+                            if(dtyID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_EXTFILES'] && typeof values[k]==='string')
                             {
                                 if(values[k].indexOf('<script')>=0 && values[k].indexOf('</script>')>0){
                                     var inpt = this._editing.getFieldByName(dtyID);

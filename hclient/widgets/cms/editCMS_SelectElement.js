@@ -51,6 +51,7 @@ function editCMS_SelectElement( callback ){
         heurist_resultListDataTable:{name:'Table format', description:'Result list as data table'},            
 
         heurist_Map:{name:'Map and timeline', description:'Map and timeline widgets'},            
+        heurist_StoryMap:{name:'Story Map', description:'Storyline/map controller widgets'},            
         heurist_Graph:{name:'Network graph', description:'Visualization for records links and relationships'},            
         
         heurist_Navigation:{name:'Menu', description:'Navigation Menu'},            

@@ -414,7 +414,9 @@ $.widget( "heurist.mapping", {
     
     //--------------------
     
-    
+    //
+    // css filter for base map
+    // 
     setBaseMapFilter: function(cfg){
         if(typeof cfg === 'string'){
             this.basemaplayer_filter = window.hWin.HEURIST4.util.isJSON(cfg);
@@ -995,7 +997,7 @@ $.widget( "heurist.mapping", {
     //
     // zoom map to given bounds
     //
-    zoomToBounds: function(bounds){
+    zoomToBounds: function(bounds, fly_params){
         
             if(bounds && !(bounds instanceof L.LatLngBounds)){
                 if($.isArray(bounds) && bounds.length>1 ){
@@ -1006,7 +1008,21 @@ $.widget( "heurist.mapping", {
             if(bounds && bounds.isValid()){
                 //this.nativemap.options.maxZoom = null;
                 L.Util.setOptions( this.nativemap, {maxZoom: 17});
-                this.nativemap.fitBounds(bounds);  
+                
+                
+                if(fly_params){
+                    
+                    if(fly_params===true){
+                        fly_params = {animate:true, duration:1.5};
+                    }
+                    this.nativemap.flyToBounds(bounds, fly_params);
+            
+                }else{
+                    this.nativemap.fitBounds(bounds);      
+                }
+                        
+                
+                
                 //this.nativemap.options.maxZoom = 25;
                 L.Util.setOptions( this.nativemap, {maxZoom: 25});
 //console.log('3. '+this.nativemap.options.maxZoom);                
@@ -1144,7 +1160,7 @@ $.widget( "heurist.mapping", {
         var affected_layer = this.all_layers[layer_id];
         
         if(!affected_layer || affected_layer instanceof L.ImageOverlay || affected_layer instanceof L.TileLayer){
-            return   
+            return; //not applicable for images   
         } 
 
         this._clearHighlightedMarkers();
@@ -1280,6 +1296,13 @@ $.widget( "heurist.mapping", {
                         }
                     }*/
                     that.all_markers[layer_id].push( layer );    
+                }else if(layer instanceof L.Polyline && !(layer instanceof L.Polygon)){
+                    var use_style = window.hWin.HEURIST4.util.cloneJSON( style );
+                    use_style.fill = false;
+                    if(!layer.feature){
+                        layer.feature = {properties:feature.properties};
+                    } 
+                    layer.feature.default_style = use_style;
                 }
 
                 layer.on('click', function(e){that._onLayerClick(e)} );
@@ -1292,9 +1315,25 @@ $.widget( "heurist.mapping", {
             
         }else{
             
-            affected_layer.eachLayer( function(child_layer){ 
-                    child_layer.feature.default_style = style;
-            } );
+            function __childLayers(layer, feature){
+                if(layer instanceof L.LayerGroup){
+                    layer.eachLayer( function(child_layer){__childLayers(child_layer, feature) } );
+                }else if(layer instanceof L.Polyline && !(layer instanceof L.Polygon)){
+                    var use_style = window.hWin.HEURIST4.util.cloneJSON( style );
+                    use_style.fill = false;
+                    if(!layer.feature){
+                        layer.feature = {properties: feature.properties};
+                    } 
+                    layer.feature.default_style = use_style;
+                }else{
+                    if(!layer.feature){
+                        layer.feature = {properties: feature.properties};
+                    }
+                    layer.feature.default_style = style;        
+                }
+            }
+            
+            affected_layer.eachLayer( function(child_layer){__childLayers(child_layer, child_layer.feature) });
         }
         
         //apply marker style
@@ -1749,8 +1788,13 @@ $.widget( "heurist.mapping", {
             }
         }
         */
-       
         
+        if(feature.geometry && feature.geometry.type=='GeometryCollection'){
+            use_style = window.hWin.HEURIST4.util.cloneJSON( use_style );
+            use_style.fill = false;
+        }
+        
+       
         //change color for selected features
         if( feature.properties && this.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0){
             use_style = window.hWin.HEURIST4.util.cloneJSON( use_style );
@@ -1819,7 +1863,7 @@ $.widget( "heurist.mapping", {
     //
     // get bounds for selection
     //
-    zoomToSelection: function( _selection ){
+    zoomToSelection: function( _selection, _fly_params ){
         
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)){
             _selection  =  this.selected_rec_ids;
@@ -1841,7 +1885,9 @@ $.widget( "heurist.mapping", {
         });
 
         bounds = this._mergeBounds(bounds);
-        this.zoomToBounds(bounds);
+        
+        this.zoomToBounds(bounds, _fly_params);    
+        
     },
 
     
@@ -2982,7 +3028,9 @@ $.widget( "heurist.mapping", {
         
     },
     
-    
+    //
+    // apply new style for all drawnItems 
+    //
     drawSetStyle2: function(new_style){
         
         var that = this;
@@ -2995,16 +3043,17 @@ $.widget( "heurist.mapping", {
             
             var new_style2 = window.hWin.HEURIST4.util.cloneJSON(new_style);
             new_style2.fill = false;
-                            
+            new_style2.fillColor = null;
+
             that.map_draw.setDrawingOptions({
                 polyline: {shapeOptions:new_style2},
             });
 
             that.drawnItems.eachLayer(function (layer) {
-                if(layer instanceof L.Polyline ){
-                      layer.setStyle(new_style2);
-                }else if(layer instanceof L.Polygon ){
+                if(layer instanceof L.Polygon ){
                       layer.setStyle(new_style);
+                }else if(layer instanceof L.Polyline ){
+                      layer.setStyle(new_style2);
                 }
             });
     },

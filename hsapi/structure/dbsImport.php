@@ -579,7 +579,7 @@ foreach ($this->imp_recordtypes as $rtyID){
 
             $new_rtyID  = abs($res);
             $this->rectypes_correspondence[$rtyID] = $new_rtyID;
-            $trg_rectypes['names'][$new_rtyID] = $def_rectype[$idx_name];
+            $trg_rectypes['names'][$new_rtyID] = $def_rectype[$idx_name]; //replace with new name
             $this->copyRectypeIcon($rtyID, $new_rtyID);
 
             $this->rectypes_added[] = $new_rtyID;

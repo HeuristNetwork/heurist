@@ -3074,8 +3074,9 @@ function recordLinksFileContent($system, $record){
 
 }
 
-//
+// 
 // find geo in linked places 
+// @todo - use as place record type defined in $system->user_GetPreference('deriveMapLocation', 1)
 //
 function recordSearchGeoDetails($system, $recID) {
 
@@ -3083,12 +3084,14 @@ function recordSearchGeoDetails($system, $recID) {
     if($system->defineConstant('RT_PLACE') && $system->defineConstant('DT_GEO_OBJECT')){
 
         //$recID = $record["rec_ID"];     
-        $squery = 'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo) as dtl_Geo, rl_TargetID,dtl_ID'
+        $squery = 'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo) as dtl_Geo, '
+        .'rl_TargetID,dtl_ID,rl_DetailTypeID'
         .' FROM recDetails, recLinks, Records '
         .' WHERE dtl_DetailTypeID='. DT_GEO_OBJECT
-        .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID='.RT_PLACE
+        .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID='.RT_PLACE //@todo use other than Place rectype
         //'in ('. join(',', $rectypes_as_place)
-        .' AND rl_SourceID = '.$recID; 
+        .' AND rl_SourceID = '.$recID
+        .' ORDER BY rl_ID'; 
         //'in (' . join(',', $chunk_rec_ids) . ')';
 
         $mysqli = $system->get_mysqli();
@@ -3103,7 +3106,8 @@ function recordSearchGeoDetails($system, $recID) {
                         "geo" => array(
                             "type" => $rd["dtl_Value"],
                             "wkt" => $rd["dtl_Geo"],
-                            "placeID" => $rd["rl_TargetID"]
+                            "placeID" => $rd["rl_TargetID"],
+                            "pointerDtyID" => $rd["rl_DetailTypeID"]
                         )
                     );
                     $details[$rd["dtl_DetailTypeID"]][$rd["dtl_ID"]] = $detailValue;

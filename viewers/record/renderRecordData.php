@@ -749,7 +749,7 @@ function print_header_line($bib) {
                 <span class="link"><a id=edit-link class="normal"
                             onClick="return sane_link_opener(this);"
                             target=_new href="<?php echo HEURIST_BASE_URL;?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
-                            <img class="rv-editpencil" src="../../hclient/assets/edit-pencil.png" title="Edit record" style="vertical-align: bottom"></a>
+                            <img class="rv-editpencil" src="<?php echo HEURIST_BASE_URL;?>hclient/assets/edit-pencil.png" title="Edit record" style="vertical-align: bottom"></a>
                 </span>
             </div>
             <?php
@@ -1293,16 +1293,18 @@ function print_public_details($bib) {
     print '<div id="div_public_data">';
 
     //2021-12-17 fancybox viewer is disabled IJ doesn't like it - Except iiif
-    print '<script>';
-    foreach ($thumbs as $thumb) {
-        if(strpos($thumb['orig_name'],'_iiif')===0){
-            print 'rec_Files_IIIF.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
-            //if($is_map_popup) break;
-        }else{
-            print 'rec_Files.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
+    if(!($is_map_popup || $without_header)){
+        print '<script>';
+        foreach ($thumbs as $thumb) {
+            if(strpos($thumb['orig_name'],'_iiif')===0){
+                print 'rec_Files_IIIF.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
+                //if($is_map_popup) break;
+            }else{
+                print 'rec_Files.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
+            }
         }
+        print '</script>';
     }
-    print '</script>';
     print '<div class="thumbnail2" style="text-align:center"></div>';
 
     

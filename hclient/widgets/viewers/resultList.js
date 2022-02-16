@@ -52,6 +52,7 @@ $.widget( "heurist.resultList", {
         show_fancybox_viewer: false, //opens fancybox viewer on click on thumbnail
         header_class: null,       //class name for menu
         show_url_as_link:false,
+        show_action_buttons: true,
 
         title: null,  //see show_inner_header
         //searchsource: null,
@@ -71,7 +72,7 @@ $.widget( "heurist.resultList", {
         rendererHeader: null,   // renderer function to draw header for list view-mode (for content)
         rendererGroupHeader: null,   // renderer function for group header (see groupByField)
         
-        recordDivClass: '', // additional class that modifies recordDiv appearance (see for example "public" in h4styles.css) 
+        recordDivClass: '', // additional class that modifies recordDiv appearance (see for example "public" or "outline_supress" in h4styles.css) 
                             // it is used if renderer is null
         recordDivEvenClass:null,  //additional class for even entries recordDiv
         
@@ -91,6 +92,8 @@ $.widget( "heurist.resultList", {
         //events  
         onSelect: null,  //on select event 
 
+        onScroll: null,  //on scroll ends
+        
         onPageRender: null, //event listner on complete of page render
 
         navigator:'auto',  //none, buttons, menu, auto
@@ -509,7 +512,12 @@ $.widget( "heurist.resultList", {
         .css({'overflow-y':'auto'})
         .appendTo( this.element );
         
+        if($.isFunction(this.options.onScroll)){
+            this._on(this.div_content, {'scroll':this.options.onScroll});
+        }
+                          
 
+        
         this.div_loading = $( "<div>" )
         .css({ 'width': '50%', 'height': '50%', 'top': '25%', 'margin': '0 auto', 'position': 'relative',
             'z-index':'99999999', 'background':'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center' })
@@ -801,9 +809,20 @@ $.widget( "heurist.resultList", {
     },
 
     _setOption: function( key, value ) {
-        this._super( key, value );
-        if(key == 'rendererHeader' || key == 'view_mode'){
-            this.applyViewMode(this.options.view_mode, true);
+        if(key=='onScroll'){
+            this.options.onScroll = value;
+
+            this._off(this.div_content, 'scroll');
+            if($.isFunction(value)){
+                this._on(this.div_content, {'scroll':value});
+            }
+                          
+            
+        }else{
+            this._super( key, value );
+            if(key == 'rendererHeader' || key == 'view_mode'){
+                this.applyViewMode(this.options.view_mode, true);
+            }
         }
     },
 
@@ -1621,7 +1640,8 @@ $.widget( "heurist.resultList", {
 
         
         //action button container
-        + '<div class="action-button-container">' 
+        + (this.options.show_action_buttons?(
+         '<div class="action-button-container">' 
 
         + '<div title="'+window.hWin.HR('resultList_action_edit')+'" '
         + 'class="rec_edit_link action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
@@ -1702,7 +1722,7 @@ $.widget( "heurist.resultList", {
         + '</div>'
             :'')
         
-        + '</div>' //END action button container
+        + '</div>'):'') //END action button container
         
         + '</div>';
 
@@ -2198,24 +2218,32 @@ $.widget( "heurist.resultList", {
                         .attr('data-recid', recID)
                         .css({'overflow':'hidden','padding-top':'5px','height':'25px'}) //'max-height':'600px','width':'100%',
                         .addClass('record-expand-info');
-                        
+                    
                     if(this.options.view_mode=='list'){
                         ele.appendTo($rdiv);
                     }else{
-                        ele.css({'box-shadow':'0px 3px 8px #666','margin':'6px',
+                        
+                        if(this.options.recordDivClass){
+                            ele.addClass(this.options.recordDivClass);
+                        }else{
+                            ele.css({'box-shadow':'0px 3px 8px #666','margin':'6px',
                                  //'width':'97%',
                                   padding:'5px',
                                  'border-radius': '3px 3px 3px 3px',
                                  'border':'2px solid #62A7F8'});
+                        }
+                        
+                        
                                  
                         if(this.options.view_mode=='icons' && this._expandAllDivs){
 
                             $rdiv.addClass('expanded');
                             $rdiv.children().not('.recTypeThumb').hide();
                             //show on hover as usual 
-                            $rdiv.find('.action-button-container').show();
-                            $rdiv.find('.action-button').removeClass('ui-button-icon-only');
-                            if(window.hWin.HAPI4.has_access()){
+                            var action_buttons = $rdiv.find('.action-button-container');
+                            if(action_buttons.length>0 && window.hWin.HAPI4.has_access()){
+                                action_buttons.show();
+                                $rdiv.find('.action-button').removeClass('ui-button-icon-only');
                                 ele.css({'margin':'0px 0px 0px 80px'});
                             }else{
                                 ele.css({'margin':'0px'});

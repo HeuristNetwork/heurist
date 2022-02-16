@@ -511,7 +511,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
     //
     function _onMarginMode(){
         var cont = $container;
-        var btn = cont.find('.margin-mode');
+        var btn = cont.find('.margin-mode').hide();
         if(margin_mode_full){
             btn.text('short');
             cont.find('.margin-short').hide();
@@ -584,8 +584,8 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                     }
                 }
             });
-            margin_mode_full = no_margin_values || mode_full;
-console.log(no_margin_values +'  '+ mode_full);
+            margin_mode_full = true; //no_margin_values || mode_full;
+//console.log(no_margin_values +'  '+ mode_full);
             //init file picker
             cont.find('input[name="bg-image"]')
                     .click(_selecHeuristMedia);

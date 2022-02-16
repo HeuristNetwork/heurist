@@ -39,8 +39,10 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                 css:{'float':'right'}, 
                 click: function() { 
                         var config = _getValues();
-                        main_callback.call(this, config);
-                        $dlg.dialog( "close" );    
+                        if(config!==false){
+                            main_callback.call(this, config);
+                            $dlg.dialog( "close" );    
+                        }
         }}];
 
         if($dlg && $dlg.length>0){
@@ -164,7 +166,6 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                         $dlg.find('input[name="map_basemap_filter"]').val('');
                     }});
                 
-
             }else{
 
                 $dlg.find('div.'+widget_name+' input').each(function(idx, item){
@@ -346,7 +347,6 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                             selval = 0;
                             $dlg.find('#heurist_SearchTreeMode1').prop('checked',true);
                         }
-
 
                         //visible for buttons and tree mode
                         var ele = $dlg.find('#allowed_UGrpID');
@@ -556,6 +556,77 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                 }
 
             }else
+            if(widget_name=='heurist_StoryMap'){
+                
+                var $selectTemplate = $dlg.find('select[name="reportOverview"]'); 
+
+                window.hWin.HEURIST4.ui.createTemplateSelector( $selectTemplate
+                    ,[{key:'',title:'Standard record view'}], opts['reportOverview']);
+                    
+                $selectTemplate = $dlg.find('select[name="reportElement"]'); 
+
+                window.hWin.HEURIST4.ui.createTemplateSelector( $selectTemplate
+                    ,[{key:'',title:'Standard record view'}], opts['reportElement']);
+
+                /*
+                var selectFields = $dlg.find('select[name="storyFields"]'); 
+                window.hWin.HEURIST4.ui.createRectypeDetailSelect(selectFields[0], 
+                        null, 'resource', 
+                        [{key:'',title:''}], {selectedValue:opts['storyFields']});
+                */
+                var defValue = $dlg.find('input[name="storyFields"]').val();
+                
+                if(window.hWin.HEURIST4.util.isempty(defValue)){
+                    var DT_STORY_FIELD = $Db.getLocalID('dty','1414-1089');// Story element field    
+                    if(DT_STORY_FIELD>0) defValue = DT_STORY_FIELD;
+                }
+                
+                
+                var ele = $dlg.find('#storyFields');
+
+                var ed_options = {
+                        recID: -1,
+                        dtID: ele.attr('id'), 
+                        values: [defValue],
+                        readonly: false,
+                        showclear_button: true,
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:1,
+                            rst_DisplayName: 'Story element fields', 
+                            rst_DisplayHelpText: 'Defines the field that points to story element records (such as Life event, Ocuppation etc)',
+                            rst_FieldConfig: {entity:'defDetailTypes', csv:true, filters:{types:['resource']}}
+                        },
+                        change:function(){
+                        }
+                    };
+
+                ele.editing_input(ed_options);
+                ele.parent().css('display','block');
+                ele.find('.header').css({'width':'150px','text-align':'right'});
+                
+                //----------------
+                ele = $dlg.find('#storyRectypes');
+
+                var ed_options = {
+                        recID: -1,
+                        dtID: ele.attr('id'), 
+                        values: [$dlg.find('input[name="storyRectypes"]').val()],
+                        readonly: false,
+                        showclear_button: true,
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:1,
+                            rst_DisplayName: 'Story element record types', rst_DisplayHelpText:'',
+                            rst_FieldConfig: {entity:'defRecTypes', csv:true}
+                        },
+                        change:function(){
+                        }
+                    };
+
+                ele.editing_input(ed_options);
+                ele.parent().css('display','block');
+                ele.find('.header').css({'width':'150px','text-align':'right'});
+
+            }else
             if(widget_name=='heurist_resultListExt' && 
                             $dlg.find('select[name="rep_template"]').find('options').length==0){
 
@@ -681,7 +752,23 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                         return false;   
                     }
                     cont.find('input[name="menu_recIDs"]').val( menu_recIDs );
+                }else
+                if(widget_name=='heurist_StoryMap'){
+                    var storyRectypes = cont.find('#storyRectypes').editing_input('getValues');
+                    cont.find('input[name="storyRectypes"]').val( storyRectypes );
+                    
+                    //cont.find('select[name="storyFields"]').val
+                    var storyFields = cont.find('#storyFields').editing_input('getValues');
+                    cont.find('input[name="storyFields"]').val( storyFields );
+                    
+                    if(window.hWin.HEURIST4.util.isempty(storyFields) || 
+                        ($.isArray(storyFields)&& (storyFields.length==0||window.hWin.HEURIST4.util.isempty(storyFields[0]))))
+                    {
+                        window.hWin.HEURIST4.msg.showMsgErr('Please set at least one story field');                     
+                        return false;   
+                    }
                 }
+                
 //controls":false,"legend":true,"legend_width":"250","legend_exp":false,"legend_exp2":false,
                 //find INPUT elements and fill opts with values
                 cont.find('input').each(function(idx, item){

@@ -670,7 +670,7 @@ window.hWin.HEURIST4.ui = {
 
         return $(selObj);
     },
-
+    
     /**
     * get SELECT for details of given recordtype
     *

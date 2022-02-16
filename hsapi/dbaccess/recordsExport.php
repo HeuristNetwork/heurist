@@ -168,6 +168,15 @@ public static function output($data, $params){
     if($params['format']=='geojson'){
         
         $find_places_for_geo = (self::$system->user_GetPreference('deriveMapLocation', 1)==1);
+        
+        //define constant for start and end places
+        define('DT_PLACE_START', ConceptCode::getDetailTypeLocalID('2-134'));
+        define('DT_PLACE_END', ConceptCode::getDetailTypeLocalID('2-864'));
+        
+        define('DT_PLACE_START2', ConceptCode::getDetailTypeLocalID('1414-1092'));
+        define('DT_PLACE_END2', ConceptCode::getDetailTypeLocalID('1414-1088'));
+        define('DT_PLACE_TRAN', ConceptCode::getDetailTypeLocalID('1414-1090'));
+        
 
         if(@$params['leaflet']){
             fwrite($fd, '{"geojson":');         
@@ -1239,7 +1248,12 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
     }
     
     if(count($geovalues)==0 && $find_places_for_geo){
+        
         //this record does not have geo value - find it in related/linked places
+        $point0 = null;
+        $point1 = null;
+        $points = array();
+        
         $geodetails = recordSearchGeoDetails(self::$system, $record['rec_ID']);    
         foreach ($geodetails as $dty_ID=>$field_details) {
             foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
@@ -1247,8 +1261,38 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                     $json = self::_getJsonFromWkt($wkt, $simplify);
                     if($json){
                        $geovalues[] = $json; 
+                       
+                       if($json['type']=='Point'){
+                           $pointerDtyID =  @$value['geo']['pointerDtyID'];
+                           
+                           if(defined('DT_PLACE_END') && $pointerDtyID==DT_PLACE_END){
+                                $point1 = $json;            
+                           }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START){
+                                $point0 = $json;            
+                           }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_END2){
+                                $point1 = $json;            
+                           }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START2){
+                                $point0 = $json;            
+                           }else if(defined('DT_PLACE_TRAN') && $pointerDtyID==DT_PLACE_TRAN){
+                                $points[] = $json;            
+                           }
+                           
+                       }
                     }
             }
+        }
+        //create link path from begin to end place
+        if( ($point1 && $point0) || count($points)>0){
+            //$geovalues = array();
+            $path = array('type'=>'LineString', 'coordinates'=>array());
+            if($point0) $path['coordinates'][] = $point0['coordinates'];
+            if(count($points)>0){
+                foreach($points as $pnt){
+                    $path['coordinates'][] = $pnt['coordinates'];
+                }                
+            }
+            if($point1) $path['coordinates'][] = $point1['coordinates'];
+            $geovalues[] = $path;
         }
     }
 

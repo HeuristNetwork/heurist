@@ -1240,7 +1240,7 @@ function hMapManager( _options )
         },
         
         //
-        // returns layer OR map document (if recid is not define)
+        // returns layer OR map document (if recid is not defined)
         //
         getLayer: function( mapdoc_id, recid ){
             return mapDocuments.getLayer(mapdoc_id, recid);
