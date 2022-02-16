@@ -56,6 +56,8 @@ var cfg_widgets = [
     {id:'heurist_Map', name:'Map (old)', title:'Map and timeline', widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js'},  // map in iframe
     {id:'heurist_Map2', name:'Map', title:'Map and timeline',
                 widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js', minh:300, minw:300},  // map in iframe
+    {id:'heurist_StoryMap', name:'StoryMap', title:'Story Map',
+                widgetname:'app_storymap', script:'hclient/widgets/viewers/app_storymap.js', minh:300, minw:200},
     {id:'heurist_Frame', name:'Static Page', widgetname:'staticPage', script:'hclient/widgets/viewers/staticPage.js'},
 
     {id:'heurist_Graph', name:'Network', widgetname:'connections', script:'hclient/widgets/viewers/connections.js'},

@@ -25,6 +25,7 @@
                 },
                 {
                     "dtID": "dty_Name",
+                    "titleField": true,
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Role":"title",

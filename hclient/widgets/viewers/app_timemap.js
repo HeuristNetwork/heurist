@@ -45,7 +45,9 @@ $.widget( "heurist.app_timemap", {
         //this value reset to false on every search_finish, need to set it to true explicitely before each search
         preserveViewport: false,   //zoom to current search
         //only the first request call the server - all others requests will show/hide items only
-        use_cache: false   
+        use_cache: false,
+        
+        onMapInit: null   //event triggered when map is fully loaded/inited
     },
 
     _events: null,
@@ -391,7 +393,10 @@ console.log(re);
                                       source:that.element.attr('id'), search_realm:that.options.search_realm } );
 
                     });
-                        
+                    
+                    if($.isFunction(this.options.onMapInit)){
+                        this.options.onMapInit.call();
+                    }
                 }
                 
                 this.map_inited = true;
@@ -426,7 +431,9 @@ console.log(re);
             mapping = this.mapframe[0].contentWindow.mapping;
             if(mapping){
                 mapping.mapping('addSearchResult', data, dataset_name);    
-            }else{
+                
+                return true;
+            }else if(data['q']){
                 //mapping not defined yet - perfrom initial search
                 this.options.search_initial = data['q'];
                 this.recordset_changed = true;
@@ -434,8 +441,9 @@ console.log(re);
             }
             
         }
+        return false;
     }
-    
+
     //
     // highlight and zoom
     //
@@ -491,7 +499,7 @@ console.log(re);
     }
 
     //
-    //
+    // zoom to layer extent - selection - layer id 
     //
     , _zoomToLayer: function (selection) {
         
@@ -623,12 +631,24 @@ console.log(re);
     },
     
     //leaflet
-    zoomToSelection:function(selection){
+    zoomToSelection:function(selection, fly_params){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping){
-            mapping.mapping('zoomToSelection', selection );
+            mapping.mapping('zoomToSelection', selection, fly_params );
         }
     }
 
+    //    
+    //
+    //
+    , getMapping: function(){
+        if(this.mapframe[0].contentWindow){
+            var map = this.mapframe[0].contentWindow.mapping;
+            return map.mapping('instance');
+        }else{
+            return null;
+        }
+    }
+    
 
 });

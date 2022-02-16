@@ -26,11 +26,22 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         var that = this;
         
         this.input_search_type = this.element.find('#input_search_type');   //field type
-        var vals = [{key:'any',title:'any type'}];
+        var vals = []; 
+        var filter_types = [];
+        if(this.options.filters && this.options.filters.types){
+            filter_types = this.options.filters.types;
+            if($.isArray(filter_types) && filter_types.length>0){
+                this.input_search_type.val(filter_types[0]);
+            }else{
+                filter_types = [];
+            }
+        }else{
+            vals = [{key:'any',title:'any type'}];
+        }
         
         for (var key in $Db.baseFieldType)
         if(!window.hWin.HEURIST4.util.isempty($Db.baseFieldType[key])){
-            if(key!='calculated')
+            if(key!='calculated' && (filter_types.length==0 || filter_types.indexOf(key)>=0))
                 vals.push({key:key,title:$Db.baseFieldType[key]});
         }
 
@@ -145,7 +156,6 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                 
                 if(s!='') request['dty_Name'] = s;
             }
-        
         
             if(this.input_search_type.val()!='' && this.input_search_type.val()!='any'){
                 request['dty_Type'] = this.input_search_type.val();

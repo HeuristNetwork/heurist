@@ -1017,7 +1017,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 }else if(action=='filter'){
                     
                     window.hWin.HAPI4.RecordSearch.doSearch( this, 
-                        {q:'{"t":"'+recID+'"}',detail:'ids',source:this.element.attr('id')} );
+                        {q:'{"t":"'+recID+'"}',detail:'ids', source:this.element.attr('id')} );
                     //this.closeDialog(true);
                     
                 }else if(action=='group'){

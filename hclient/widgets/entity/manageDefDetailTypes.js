@@ -66,6 +66,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this.options.edit_mode = 'popup';    
             //this.options.edit_mode = 'none';
         }
+        
+        if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single'){ //special compact case
+            this.options.width = 440;
+        }
+        
 
         this._super();
 
@@ -178,10 +183,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
 
             this.coverMessage();			
-        }else if(this.options.select_mode=='select_multi'){
-            this.recordList.resultList('fullResultSet', $Db.dty());   
-        }
-        
 //console.log( 'DT initControls  ' + (new Date().getTime() / 1000 - this._time_debug));
 //this._time_debug = new Date().getTime() / 1000;
         
@@ -232,6 +233,25 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 that._loadData(true);    
             }
         }
+
+        }else if(this.options.select_mode=='select_multi'){
+            
+            this.recordList.resultList({ 
+                    show_toolbar: true,
+                    view_mode:'list',
+                    show_viewmode: false,
+                    list_mode_is_table: true});
+                   
+            this.searchForm.css({padding:'10px', 'min-width': '420px'});
+            this.recordList.css({'min-width': '420px'});
+         
+            this.visible_fields = ['name','type','usedin'];
+            
+            this.recordList.resultList('fullResultSet', $Db.dty());   
+            
+            that._loadData(true);
+        }
+        
         
         // init search header
         this.searchForm.searchDefDetailTypes(this.options);

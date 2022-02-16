@@ -23,13 +23,13 @@
             <div class="btn-cancel" style="margin-right:20px">Cancel</div>
         </div>
         
-        <div class="ent_content_full">
+        <div class="ent_content_full" style="top:50px">
 
         <fieldset style="font-size:1em;">
                     <div style="display:inline-block;" class="header_narrow">Name:</div>
                     <div style="display:inline-block;width:80%"><input data-type="element-name" style="width:100%"/></div>
         </fieldset>
-        <div style="text-align:center;padding: 10px;">
+        <div style="text-align:left;padding-left: 42px;">
             <div class="btn-widget ui-button-action">Widget Configure</div>
         </div>
         <div id="properties_form" style="font-size:1em;">
@@ -211,6 +211,17 @@
             </div>
             <h3>Styles</h3>
             <div style="background:none">
+            
+                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <div>
+                            <div class="header_narrow"><b>Dimensions</b></div>
+                            <label>&nbsp;Width:</label>
+                            <input data-type="css" name="width" type="text" min="0" placeholder="auto" style="width:50px"/>
+                            <label>&nbsp;Height:</label>
+                            <input data-type="css" name="height"  type="text" min="0" placeholder="auto" style="width:50px"/>                       
+                        </div>
+                </fieldset>
+            
                 <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;" data-section="background">
                         <div>
                             <label><b>Background:</b>
@@ -291,7 +302,7 @@
                         <div style="display:inline-block" class="margin-full">
                             <div class="header_narrow" style="vertical-align:middle">Inner</div>
                             <div style="vertical-align:middle;display:inline-block;padding-left:20px">
-                                <label><input class="cb_sync" data-type="padding" type="checkbox"/>sync&nbsp;</label>
+                                <label><input class="cb_sync" data-type="padding" type="checkbox" checked/>sync&nbsp;</label>
                                 <input data-type="css" name="padding-left" type="number" min="0" value="" placeholder="0" style="margin:2px;width:30px"/>
                             </div>    
                             <div style="vertical-align:middle;display:inline-block;">
@@ -306,7 +317,7 @@
                         <div style="display:inline-block" class="margin-full">
                             <div class="header_narrow" style="vertical-align:middle">Outer</div>
                             <div style="vertical-align:middle;display:inline-block;padding-left:20px">
-                                <label><input class="cb_sync" data-type="margin" type="checkbox"/>sync&nbsp;</label>
+                                <label><input class="cb_sync" data-type="margin" type="checkbox" checked/>sync&nbsp;</label>
                                 <input data-type="css" name="margin-left" type="number" min="0" value="" placeholder="0" style="margin:2px;width:30px"/>
                             </div>    
                             <div style="vertical-align:middle;display:inline-block;">
@@ -317,15 +328,6 @@
                             <div style="vertical-align:middle;display:inline-block;">
                                 <input data-type="css" name="margin-right" type="number" min="0" value="" placeholder="0" style="margin:2px;width:30px"/>
                             </div>    
-                        </div>
-                </fieldset>
-                <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
-                        <div>
-                            <div class="header_narrow"><b>Dimensions</b></div>
-                            <label>&nbsp;Width:</label>
-                            <input data-type="css" name="width" type="text" min="0" placeholder="auto" style="width:50px"/>
-                            <label>&nbsp;Height:</label>
-                            <input data-type="css" name="height"  type="text" min="0" placeholder="auto" style="width:50px"/>                       
                         </div>
                 </fieldset>
             </div>

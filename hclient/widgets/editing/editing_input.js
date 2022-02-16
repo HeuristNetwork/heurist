@@ -1949,6 +1949,7 @@ $.widget( "heurist.editing_input", {
                 select_return_mode:select_return_mode, //ids or recordset(for files)
                 filter_group_selected:null,
                 filter_groups: this.configMode.filter_group,
+                filters: this.configMode.filters,
                 onselect:function(event, data){
 
                     if(data){

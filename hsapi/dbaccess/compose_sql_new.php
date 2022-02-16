@@ -683,7 +683,7 @@ class HQuery {
     }
     
     //
-    // {"sort":"f:233"}  {"sort":"-title"}  
+    // {"sort":"f:233"}  {"sort":"-title"}  {"sort":"set:4,5,1"}  
     //    
     function createSortClause() {
         

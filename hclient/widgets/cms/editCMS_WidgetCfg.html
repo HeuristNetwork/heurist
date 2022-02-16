@@ -191,6 +191,52 @@
         <input name="target_db" value=""/>
     </div>
 
+    <!-- story line / storymap -->    
+    <div class="heurist_StoryMap">
+        <input name="storyFields" type="hidden" value=""/>
+        <div id="storyFields" style="display:table-row"></div>
+    </div>
+    <div class="heurist_StoryMap">
+        <input name="storyRectypes" type="hidden" value=""/>
+        <div id="storyRectypes" style="display:table-row"></div>
+    </div>
+    <div class="heurist_StoryMap">
+        <div class="header">
+            <label>Overview template&nbsp;</label>
+        </div>
+        <select name="reportOverview" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
+        </select>
+        <br><i>Defines the format used to display story overview information</i>
+    </div>
+    <div  class="heurist_StoryMap">
+        <div class="header"><label>Overview mode:</label></div>
+        <select name="reportOverviewMode" class="text ui-widget-content ui-corner-all" title="">
+            <option value="inline">Inline</option>
+            <option value="tab">Tab</option>
+            <option value="header">Header</option>
+        </select>
+    </div>
+    <div class="heurist_StoryMap">
+        <div class="header">
+            <label>Story element template&nbsp;</label>
+        </div>
+        <select name="reportElement" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
+        </select>
+        <br><i>Defines the format used to display story element information</i>
+    </div>
+    <div class="heurist_StoryMap">
+        <div class="header"><label>Overview mode:</label></div>
+        <select name="reportElementMode" class="text ui-widget-content ui-corner-all" title="">
+            <option value="vertical">List Vertical</option>
+            <option value="slide">Slide</option>
+            <option value="popup">Popup on map</option>
+        </select>
+    </div>
+    <div class="heurist_StoryMap">
+        <div class="header"><label>Map Unique ID</label></div>
+        <input name="map_widget_id"/>
+    </div>
+    
     <!-- mapping -->    
     <div class="heurist_Map">
         <div class="header"><label>Heurist map document</label></div>

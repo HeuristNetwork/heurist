@@ -573,7 +573,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             setup:function(editor) {
 
                 editor.on('change', function(e) {
-                    if(tinymce.activeEditor.targetElm){
+                    if(tinymce.activeEditor && tinymce.activeEditor.targetElm){
                         var key = $(tinymce.activeEditor.targetElm).attr('data-hid');
                         //update in _layout_content
                         var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, key);
