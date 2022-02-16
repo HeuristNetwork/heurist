@@ -315,8 +315,10 @@ $.widget( "heurist.editing_input", {
                 .appendTo(this.input_prompt);
 
             // Toggle extended description
-            $extend_help_eles.on('click', function(event){
-                $extend_help_eles.toggle();
+            this._on($extend_help_eles, {
+                'click': function(event){
+                    $extend_help_eles.toggle()
+                }
             });
         }
 
@@ -2187,7 +2189,24 @@ $.widget( "heurist.editing_input", {
 				var help_text = this.input_prompt.html();
 
 				if(!window.hWin.HEURIST4.util.isempty(help_text)){
-                    this.input_prompt.html(help_text + '<br>For older dates, type year first, then click the calendar. Dates can be yyyy, yyyy-mm or yyyy-mm-dd.');
+
+                    var additional_help = 'For older dates, type year first, then click the calendar. Dates can be yyyy, yyyy-mm or yyyy-mm-dd.';
+
+                    if(help_text.indexOf(additional_help) < 0){
+                        this.input_prompt.html(help_text + '<br>' + additional_help);
+
+                        var $extended_desc = this.input_prompt.find('#show_extended, #extended_help, #hide_extended');
+                        if($extended_desc.length > 0){
+                            this.input_prompt.append($extended_desc);
+
+                            // Toggle extended description
+                            this._on($extended_desc, {
+                                'click': function(event){
+                                    $extended_desc.toggle()
+                                }
+                            });
+                        }
+                    }
 				}
             }else 
             if(this.isFileForRecord){ //----------------------------------------------------
