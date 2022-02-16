@@ -863,7 +863,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             window.hWin.HEURIST4.msg.sendCoverallToBack();
             if(requests.length>0){
                 res.count = requests.length;
-                window.hWin.HEURIST4.msg.showMsgFlash('Link created...', 500);
+                window.hWin.HEURIST4.msg.showMsgFlash('Link created...', 3000);
                 this._context_on_close = res;
                 
                 if(this._openRelationRecordEditor && res.count==1 && res.relation_recID>0){
