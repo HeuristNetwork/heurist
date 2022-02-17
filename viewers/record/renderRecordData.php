@@ -240,7 +240,7 @@ if(!($is_map_popup || $without_header)){
                 } 
                 ?>
             }
-            
+
             //
             //
             //
@@ -271,7 +271,10 @@ if(!($is_map_popup || $without_header)){
                     window.hWin.HAPI4.save_pref('recordData_PrivateInfo', prefVal);    
                 }
             }
-			
+
+            //
+            // Add group headers to record viewer
+            //
             function createRecordGroups(groups){
 
                 var $group_container = $('div#div_public_data');
@@ -299,17 +302,97 @@ if(!($is_map_popup || $without_header)){
                             var detail_order = $detail.attr('data-order');
                             if(detail_order < order){ // detail belongs in previous group
                                 return;
-                            }else if(detail_order > order && (next_order == null || detail_order < next_order)){
+                            }else if(detail_order > order && (next_order == null || order < next_order)){
                                 $detail.appendTo($field_container);
                             }else{ // detail belongs in next group
                                 return false;
                             }
                         });
 
-                        $('<h4>').css({'margin': '5px 0px 2px 0px', 'font-size': '1.1em'}).text(group_name).appendTo($group_container);
+                        $('<h4>').attr('data-order', order).css({'margin': '5px 0px 2px 0px', 'font-size': '1.1em'}).text(group_name).appendTo($group_container);
 
                         $field_container.appendTo($group_container);
                     });
+                }
+            }
+
+            //
+            // Move related record details to corresponding field location
+            //
+            function moveRelatedDetails(related_records){
+
+                var $rel_section = $('div.relatedSection');
+
+                var $public_fields = $('div#div_public_data').find('fieldset[id], div[data-order]');
+
+                if(related_records == null || $public_fields == null || $public_fields.length == 0){
+                    return;
+                }
+
+                for(var key in related_records){
+
+                    var rl_order = related_records[key][0];
+                    var $pre_location = null;
+                    var isAfter = false;
+
+                    $.each($public_fields, function(idx, field){
+
+                        var $cur_field = $(field);
+                        var $next_field = $($public_fields[Number(idx)+1]);
+
+                        if(idx != 0){
+                            var $prev_field = $($public_fields[Number(idx)-1]);
+                        }
+
+                        var cur_order;
+                        var next_order = null;
+
+                        if($cur_field.is('fieldset')){
+                            cur_order = $cur_field.attr('id');
+                        }else{
+                            cur_order = $cur_field.attr('data-order');
+                        }
+
+                        if($next_field){
+
+                            if($next_field.is('fieldset')){
+                                next_order = $next_field.attr('id');
+                            }else{
+                                next_order = $next_field.attr('data-order');
+                            }
+                        }
+
+                        if(cur_order < rl_order && (next_order == null || rl_order < next_order)){ 
+
+                            if($next_field && $next_field.is('div')){
+                                $pre_location = $next_field;
+                            }else if($cur_field.is('div')){
+                                $pre_location = $cur_field.parent();
+                            }else{
+                                $pre_location = $cur_field;
+                            }
+
+                            return false;
+                        }
+                    });
+
+                    if($pre_location != null){
+
+                        for(var i = 1; i < Object.keys(related_records[key]).length; i++){
+
+                            var $rel_field = $rel_section.find('div[data-id="'+ related_records[key][i] +'"]').hide();
+
+                            if($pre_location.is('fieldset')){
+                                $rel_field.clone().appendTo($pre_location).show();
+                            }else{
+                                $pre_location.before($rel_field.clone().show());
+                            }
+                        }
+                    }
+                }
+
+                if($rel_section.find('div[data-id]').length == 0){
+                    $rel_section.hide();
                 }
             }
 
@@ -1424,137 +1507,214 @@ function print_other_tags($bib) {
 //
 function print_relation_details($bib) {
 
-        global $system, $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure;
+    global $system, $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure;
 
-        $mysqli = $system->get_mysqli();
-        
-        $from_res = $mysqli->query('select recDetails.*
-            from recDetails
-            left join Records on rec_ID = dtl_RecID
-            where dtl_DetailTypeID = '.$relSrcDT.
-            ' and rec_RecTypeID = '.$relRT.
-            ' and dtl_Value = ' . $bib['rec_ID']);        //primary resource
+    $mysqli = $system->get_mysqli();
+	
+    $from_res = $mysqli->query('select recDetails.*
+		from recDetails
+		left join Records on rec_ID = dtl_RecID
+		where dtl_DetailTypeID = '.$relSrcDT.
+		' and rec_RecTypeID = '.$relRT.
+		' and dtl_Value = ' . $bib['rec_ID']);        //primary resource
 
+    $to_res = $mysqli->query('select recDetails.*
+		from recDetails
+		left join Records on rec_ID = dtl_RecID
+		where dtl_DetailTypeID = '.$relTrgDT.
+		' and rec_RecTypeID = '.$relRT.
+		' and dtl_Value = ' . $bib['rec_ID']);          //linked resource
 
-        $to_res = $mysqli->query('select recDetails.*
-            from recDetails
-            left join Records on rec_ID = dtl_RecID
-            where dtl_DetailTypeID = '.$relTrgDT.
-            ' and rec_RecTypeID = '.$relRT.
-            ' and dtl_Value = ' . $bib['rec_ID']);          //linked resource
+    if (($from_res==false || $from_res->num_rows <= 0)  &&  
+		 ($to_res==false || $to_res->num_rows<=0)){
+		   return 0;  
+    } 
 
-        if (($from_res==false || $from_res->num_rows <= 0)  &&  
-             ($to_res==false || $to_res->num_rows<=0)){
-               return 0;  
-        } 
-        
     $link_cnt = 0;    
 
     if($is_map_popup){
        print '<div class="map_popup">';
     }else{
-       print '<div class="detailRowHeader" style="float:left">Related'; 
+       print '<div class="detailRowHeader relatedSection" style="float:left">Related'; 
     }
 
     $accessCondition = '(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '.
     ($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")');
-    
+
+    $relfields_details = mysql__select_all($mysqli,
+            'SELECT rst_DisplayName, rst_DisplayOrder, dty_PtrTargetRectypeIDs 
+             FROM defRecStructure 
+             INNER JOIN defDetailTypes ON rst_DetailTypeID = dty_ID 
+             WHERE dty_Type = "relmarker" AND rst_RequirementType != "forbidden" AND rst_RecTypeID = '. $bib['rec_RecTypeID'] .'
+             ORDER BY rst_DisplayOrder');
+
+    $move_details = array();
+
     if($from_res){
-    while ($reln = $from_res->fetch_assoc()) {
-        
-        $bd = fetch_relation_details($reln['dtl_RecID'], true);
+		while ($reln = $from_res->fetch_assoc()) {
+			
+			$bd = fetch_relation_details($reln['dtl_RecID'], true);
 
-        // get title mask for display
-        $recTitle = mysql__select_value($mysqli,
-                'select rec_Title from Records where rec_ID = '.$reln['dtl_RecID']);
-        if(!$recTitle){
-            $recTitle = $bd['RelatedRecID']['rec_Title'];
-        }
+			// get title mask for display
+			$recTitle = mysql__select_value($mysqli,
+					'select rec_Title from Records where rec_ID = '.$reln['dtl_RecID']);
+			if(!$recTitle){
+				$recTitle = $bd['RelatedRecID']['rec_Title'];
+			}
 
-        // check related record
-        if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
-            continue;
-        }
-        $relatedRecID = $bd['RelatedRecID']['rec_ID'];
-        
-        if(mysql__select_value($mysqli, 
-            "select count(rec_ID) from Records where rec_ID =$relatedRecID and $accessCondition")==0){
-            //related is not accessable
-            continue;
-        }
-        
-        print '<div class="detailRow fieldRow"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2 linkRow
-        $link_cnt++;
-        //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
-        if(array_key_exists('RelTerm',$bd)){
-            print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>'; // fetch now returns the enum string also
-        }
-        print '<div class=detail>';
-            if (@$bd['RelatedRecID']) {
-                if(true || $is_map_popup){  
-                    print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
-                }
-                print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
-                        .strip_tags($recTitle,ALLOWED_TAGS).'</a>';
-            } else {
-                print strip_tags($bd['Title'],ALLOWED_TAGS);
-            }
-            print '&nbsp;&nbsp;';
-            if (@$bd['StartDate']) print htmlspecialchars(temporalToHumanReadableString($bd['StartDate']));
-            if (@$bd['EndDate']) print ' until ' . htmlspecialchars(temporalToHumanReadableString($bd['EndDate']));
-        print '</div></div>';
-    }
-    $from_res->close();
+			// check related record
+			if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
+				continue;
+			}
+			$relatedRecID = $bd['RelatedRecID']['rec_ID'];
+			
+			if(mysql__select_value($mysqli, 
+				"select count(rec_ID) from Records where rec_ID =$relatedRecID and $accessCondition")==0){
+				//related is not accessable
+				continue;
+			}
+
+			$field_name = false;
+
+			if(!$is_map_popup && $relfields_details && count($relfields_details) > 0){
+
+				for($i = 0; $i < count($relfields_details); $i++){
+
+					$ptrtarget_ids = explode(',', $relfields_details[$i][2]);
+					$fld_name = $relfields_details[$i][0];
+
+					if(in_array($bd['RelatedRecID']['rec_RecTypeID'], $ptrtarget_ids)){
+
+						if(array_key_exists($fld_name, $move_details)){
+
+							array_push($move_details[$fld_name], $bd['recID']);
+
+							$field_name = '';
+						}else{
+
+							$move_details[$fld_name] = array();
+							array_push($move_details[$fld_name], $relfields_details[$i][1], $bd['recID']);
+
+							$field_name = $fld_name;
+						}
+
+						break;
+					}
+				}
+			}
+			
+			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2 linkRow
+			$link_cnt++;
+			//		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
+
+			if($field_name === false && array_key_exists('RelTerm',$bd)){
+				print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>';
+			}else if($field_name !== false){
+				print '<div class=detailType>' . $field_name . '</div>';
+			}
+
+			print '<div class=detail>';
+				if (@$bd['RelatedRecID']) {
+					if(true || $is_map_popup){  
+						print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
+					}
+					print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
+							.strip_tags($recTitle,ALLOWED_TAGS).'</a>';
+				} else {
+					print strip_tags($bd['Title'],ALLOWED_TAGS);
+				}
+				print '&nbsp;&nbsp;';
+				if (@$bd['StartDate']) print htmlspecialchars(temporalToHumanReadableString($bd['StartDate']));
+				if (@$bd['EndDate']) print ' until ' . htmlspecialchars(temporalToHumanReadableString($bd['EndDate']));
+			print '</div></div>';
+		}
+		$from_res->close();
     }
     if($to_res){
-    while ($reln = $to_res->fetch_assoc()) {
-        
-        $bd = fetch_relation_details($reln['dtl_RecID'], false);
+        while ($reln = $to_res->fetch_assoc()) {
 
-        // get title mask for display
-        $recTitle = mysql__select_value($mysqli,
-                'select rec_Title from Records where rec_ID = '.$reln['dtl_RecID']);
-        if(!$recTitle){
-            $recTitle = $bd['RelatedRecID']['rec_Title'];
-        }
+			$bd = fetch_relation_details($reln['dtl_RecID'], false);
 
-        // check related record
-        if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
-            continue;
-        }
-        $relatedRecID = $bd['RelatedRecID']['rec_ID'];
-        if(mysql__select_value($mysqli, 
-            "select count(rec_ID) from Records where rec_ID =$relatedRecID and $accessCondition")==0){
-            //related is not accessable
-            continue;
-        }
+			// get title mask for display
+			$recTitle = mysql__select_value($mysqli,
+					'select rec_Title from Records where rec_ID = '.$reln['dtl_RecID']);
+			if(!$recTitle){
+				$recTitle = $bd['RelatedRecID']['rec_Title'];
+			}
 
-        print '<div class="detailRow fieldRow"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2linkRow
-        $link_cnt++;
-        //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
-        if(array_key_exists('RelTerm',$bd)){
-            print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>';
+			// check related record
+			if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
+				continue;
+			}
+			$relatedRecID = $bd['RelatedRecID']['rec_ID'];
+			if(mysql__select_value($mysqli, 
+				"select count(rec_ID) from Records where rec_ID =$relatedRecID and $accessCondition")==0){
+				//related is not accessable
+				continue;
+			}
+
+			$field_name = false;
+
+			if(!$is_map_popup && $relfields_details && count($relfields_details) > 0){
+
+				for($i = 0; $i < count($relfields_details); $i++){
+
+					$ptrtarget_ids = explode(',', $relfields_details[$i][2]);
+					$fld_name = $relfields_details[$i][0];
+
+					if(in_array($bd['RelatedRecID']['rec_RecTypeID'], $ptrtarget_ids)){
+
+						if(array_key_exists($fld_name, $move_details)){
+
+							array_push($move_details[$fld_name], $bd['recID']);
+
+							$field_name = '';
+						}else{
+
+							$move_details[$fld_name] = array();
+							array_push($move_details[$fld_name], $relfields_details[$i][1], $bd['recID']);
+
+							$field_name = $fld_name;
+						}
+
+						break;
+					}
+				}
+			}
+
+			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2linkRow
+			$link_cnt++;
+
+			if($field_name === false && array_key_exists('RelTerm',$bd)){
+				print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>';
+			}else if($field_name !== false){
+				print '<div class=detailType>' . $field_name . '</div>';
+			}
+
+			print '<div class=detail>';
+				if (@$bd['RelatedRecID']) {
+					if(true || $is_map_popup){  
+						print '<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
+					}
+					print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
+						.strip_tags($recTitle,ALLOWED_TAGS).'</a>';
+				} else {
+					print strip_tags($bd['Title'],ALLOWED_TAGS);
+				}
+				print '&nbsp;&nbsp;';
+				if (@$bd['StartDate']) print htmlspecialchars($bd['StartDate']);
+				if (@$bd['EndDate']) print ' until ' . htmlspecialchars($bd['EndDate']);
+			print '</div></div>';
         }
-        print '<div class=detail>';
-            if (@$bd['RelatedRecID']) {
-                if(true || $is_map_popup){  
-                    print '<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
-                }
-                print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
-                    .strip_tags($recTitle,ALLOWED_TAGS).'</a>';
-            } else {
-                print strip_tags($bd['Title'],ALLOWED_TAGS);
-            }
-            print '&nbsp;&nbsp;';
-            if (@$bd['StartDate']) print htmlspecialchars($bd['StartDate']);
-            if (@$bd['EndDate']) print ' until ' . htmlspecialchars($bd['EndDate']);
-        print '</div></div>';
-    }
         $to_res->close();
     }
-    
+
     print '</div>';
-    
+
+    if(is_array($move_details) && count($move_details) > 0){
+        echo '<script>moveRelatedDetails(', json_encode($move_details, JSON_FORCE_OBJECT), ');</script>';
+    }
+
     return $link_cnt;
 }
 

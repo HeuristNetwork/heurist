@@ -126,6 +126,9 @@ if(!$format) $format='csv';
                 position: absolute;
                 top: 200px;
             }
+            div.select_rectype_seq.ui-state-focus{
+                background-color: #c8e3fb !important;
+            }
         </style>
     </head>
 
@@ -510,8 +513,8 @@ if(!$format) $format='csv';
                         onchange="{importRecordsCSV.onMatchModeSet();importRecordsCSV.doMatchingInit();}">&nbsp;
             <label for="sa_match1" id="lbl_sa_match1" style="padding-right:3em">Use Heurist ID column</label>
 
-            
-            <input type="radio" name="sa_match" id="sa_match2" value="2" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
+            <input type="radio" name="sa_match" id="sa_match2" value="2" class="text" 
+                        onchange="{importRecordsCSV.onMatchModeSet();importRecordsCSV.doMatchingInit();}">&nbsp;
             <label for="sa_match2">Skip matching (all new records)</label>
 
             <div class="heurist-helper1" id="divMatchingSettingHelp" style="display:block;padding-top:1em;padding-bottom:3px;">

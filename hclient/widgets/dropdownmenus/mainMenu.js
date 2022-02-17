@@ -1111,11 +1111,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                  
         }else 
         if(action == "menu-import-get-template"){
-
-            window.hWin.HEURIST4.util.downloadURL(window.hWin.HAPI4.baseURL
-                    +'export/xml/flathml.php?file=1&rectype_templates=y&db='
-                    +window.hWin.HAPI4.database);
-            
+            that._generateHeuristTemplate();
         }else
         if(action == 'menu-extract-pdf'){
             
@@ -2325,42 +2321,117 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     }
      
     //
-    // NOY USED anymore
+    // create popup to guide user for creating a template file w/ rectypes
+    // NOTE: json template file currently unavailable
     //
-    , _exportKML: function(isAll, save_as_file){
+    _generateHeuristTemplate: function(){
 
-        var q = "";
-        if(isAll){
+        var $dlg;
 
-            q = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+        var content = "<div style='display: table'>"
+                        + "<div style='margin-bottom: 10px'>"
+                            + "<div class='header' style='display: table-cell;max-width: 125px; min-width: 125px;'>Download template: </div>"
+                            + "<div style='display: table-cell'>"
+                                + "<label for='template-xml'><input name='template-type' id='template-xml' type='radio' value='xml' checked> XML</label>"
+                                + "<label for='template-json'><input name='template-type' id='template-json' type='radio' value='json'> JSON</label>"
+                            + "</div>"
+                        + "</div>"
 
-            if(q=='?'){
-                window.hWin.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
-                return;
+                        + "<div>"
+                            + "<div class='header' style='display: table-cell;max-width: 125px; min-width: 125px;'>Record types: </div>"
+                            + "<div style='display: table-cell'>"
+                                + "<label for='rectypes-all'><input id='rectypes-all' type='checkbox'> All Rectypes</label>"
+                                + "<div style='margin: 5px 0px'>or</div>"
+                                + "<button id='rectypes-select'>Select record types</button>"
+                                + "<div style='margin: 10px 0px'>Selected Record Types: </div>"
+                                + "<div "
+                                    + "style='min-width:165px;max-width:165px;max-height:200px;min-height:200px;border: black solid 1px;padding:5px;margin-top:5px;overflow-y:auto;'"
+                                    + " id='rectypes-list' data-ids=''>"
+                                        + "<span style='display: inline-block;margin: 5px 0px;'> None </span>"
+                                + "</div>"
+                            + "</div>"
+                        + "</div>"
+                    + "</div>";
+
+        var btns = {};
+        btns['Download'] = function(){
+
+            var template_type = $dlg.find('input[name="template-type"]:checked').attr('id');
+            var rectype_ids = $dlg.find('div#rectypes-list').attr('data-ids');
+            var is_all_rectypes = $dlg.find('input#rectypes-all:checked');
+
+            if(is_all_rectypes) { rectype_ids = 'y'; } // get all rectypes
+
+            if(template_type == 'template-xml'){
+
+                window.hWin.HEURIST4.util.downloadURL(window.hWin.HAPI4.baseURL
+                        +'export/xml/flathml.php?file=1&'
+                        +'rectype_templates='+ rectype_ids
+                        +'&db='+window.hWin.HAPI4.database);
+            }else{
+
+                window.hWin.HEURIST4.msg.showMsgFlash('JSON templates are currently unavailable', 3000);
             }
 
+            $dlg.dialog('close');
+        };
+        btns['Close'] = function(){
+            $dlg.dialog('close');
+        };
 
-        }else{
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, 
+            {title: 'Download XML or JSON template', yes: 'Download', no: 'Close'},
+            {default_palette_class: 'ui-heurist-publish', dialogId: 'template_popup', width: 400, height: 500});
 
-            if (!window.hWin.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs)) {
-                window.hWin.HEURIST4.msg.showMsgDlg("Please select at least one record to export");
-                return false;
-            }
-            q = "?w=all&q=ids:"+this._selectionRecordIDs.join(",");
-        }
+        $dlg.find('button#rectypes-select').button().on('click', function(){
 
-        if(q!=''){
-            var url = window.hWin.HAPI4.baseURL + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + window.hWin.HAPI4.database;
-            if(save_as_file){
-                url = url + '&file=1';
-            }
-            
-            
-            window.open(url, '_blank');
-        }
+            var $selected_rectypes = $dlg.find('div#rectypes-list');
+
+            var popup_options = {
+                select_mode: 'select_multi',
+                edit_mode: 'popup',
+                isdialog: true,
+                width: 440,
+                title: 'Select record types',
+                selection_on_init: $selected_rectypes.attr('data-ids').split(','),
+                default_palette_class: 'ui-heurist-publish',
+
+                onselect:function(event, data){
+
+                    var ids = data.selection;
+
+                    if(ids != null && window.hWin.HEURIST4.util.isArrayNotEmpty(ids)){
+
+                        $selected_rectypes.attr('data-ids', data.selection.join(',')).text('');
+
+                        for(var i = 0; i < ids.length; i++){
+
+                            var name = $Db.rty(ids[i], 'rty_Name');
+
+                            $selected_rectypes.append(
+                                '<span class="truncate" style="display: inline-block;width: 155px; max-width: 155px;margin: 5px 0px" title="'+ name +'">'
+                                    + name +
+                                '</span>');
+
+                            if((i+1) != ids.length){
+                                $selected_rectypes.append('<br>');
+                            }
+                        }
+                    }else{
+                        $selected_rectypes.attr('data-ids', '').text('<span style="display: inline-block;margin: 5px 0px;"> None </span>');
+                    }
+                }
+            };
+
+            window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', popup_options);
+        });
+
+        $dlg.find('input#rectypes-all').on('change', function(event){
+            window.hWin.HEURIST4.util.setDisabled($dlg.find('button#rectypes-select, div#rectypes-list'), $(event.target).is(':checked'));
+        });
+
+        window.hWin.HEURIST4.util.setDisabled($dlg.find('label[for="template-json"]'), true); // disable json version, currently unavailable
 
         return false;
     }
-            
-
 });

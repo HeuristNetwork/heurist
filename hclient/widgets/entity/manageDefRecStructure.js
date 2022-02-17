@@ -1015,7 +1015,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             rst_DisplayWidth: rst_fields['rst_DisplayWidth'] ?rst_fields['rst_DisplayWidth']:'100',  
             rst_SemanticReferenceURL: rst_fields['rst_SemanticReferenceURL'] 
                         ?rst_fields['rst_SemanticReferenceURL']
-                        :$Db.dty(dty_ID,'dty_SemanticReferenceURL'),  
+                        :$Db.dty(dty_ID,'dty_SemanticReferenceURL'),
+            rst_TermsAsButtons: rst_fields['rst_TermsAsButtons'] ? rst_fields['rst_TermsAsButtons'] : 0,
             /*
             dty_Type: dtFields[fi['dty_Type']]
             rst_DisplayHeight: "3"
@@ -1044,6 +1045,11 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             fields['rst_PointerBrowserFilter'] = rst_fields['rst_PointerBrowserFilter'];
             fields['rst_CreateChildIfRecPtr'] = rst_fields['rst_CreateChildIfRecPtr'];
             fields['rst_DefaultValue_resource'] = rst_fields['rst_DefaultValue_resource'];
+        }else if(dty_type=='enum'){
+
+            if(fields['rst_TermsAsButtons'] == 1 && fields['rst_DisplayWidth'] < 100){
+                fields['rst_DisplayWidth'] = 100;
+            }
         }
         
 /*            
@@ -1650,7 +1656,7 @@ console.log('No active tree node!!!!')
 
                             if(f_width <= 0){
 
-                                that._editing.setFieldValueByName('rst_DisplayWidth', 90, true);
+                                that._editing.setFieldValueByName('rst_DisplayWidth', 100, true);
                                 that.onEditFormChange();
                             }
                         }
@@ -1662,7 +1668,7 @@ console.log('No active tree node!!!!')
 
                     if(f_width <= 0){
 
-                        this._editing.setFieldValueByName('rst_DisplayWidth', 90, true);
+                        this._editing.setFieldValueByName('rst_DisplayWidth', 100, true);
                         this.onEditFormChange();
                     }
                 }

@@ -1039,16 +1039,19 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
            }
            if(this.options.newFieldForRtyID>0){
                 depended_fields = this._editing.getFieldByClass('newFieldForRtyID');
-               for(var idx in depended_fields){
-                   $(depended_fields[idx]).show();
-               }
-               var ele = this._editing.getFieldByName('rst_DisplayWidth');
-               if(dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float'){
-                   ele.editing_input('setValue', dt_type=='float'?10:(dt_type=='freetext'?60:100));
-                   ele.show();  
-               }else{
-                   ele.hide();  
-               }
+                for(var idx in depended_fields){
+                    $(depended_fields[idx]).show();
+                }
+                var ele = this._editing.getFieldByName('rst_DisplayWidth');
+                if(dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float'){
+                    ele.editing_input('setValue', dt_type=='float'?10:(dt_type=='freetext'?60:100));
+                    ele.show();  
+                }else{
+                    if(dt_type=='enum'){
+                        ele.editing_input('setValue', 100);
+                    }
+                    ele.hide();
+                }
            }
     },
     

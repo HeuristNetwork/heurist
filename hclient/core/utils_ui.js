@@ -2009,7 +2009,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
                                         
                                           ele.trigger('remove');
                                           ele.remove();
-                                          window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Relation has been deleted'));
+                                          window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Relation has been deleted'), 3000);
 
                                           if($(container).find('.link-div').length==0){
                                                 $(container).find('.add-rel-button').show();
