@@ -2318,7 +2318,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }
 */
         return false;
-    }
+    },
      
     //
     // create popup to guide user for creating a template file w/ rectypes
