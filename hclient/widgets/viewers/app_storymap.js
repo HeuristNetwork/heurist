@@ -20,7 +20,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
 $.widget( "heurist.app_storymap", {
 
     // default options
@@ -60,8 +59,10 @@ $.widget( "heurist.app_storymap", {
 
     _resultset: null, // current story list
     _resultList: null,
+    _tabs: null, //tabs control
     _mapping: null,    // mapping widget
     _currentElementID: 0,
+    _L: null, //refrence to leaflet
 
     // the constructor
     _create: function() {
@@ -121,16 +122,16 @@ $.widget( "heurist.app_storymap", {
         this._resultList.resultList('applyViewMode', 'record_content', true);
                 
         
-        var _tabs = this.element.find('.ui-tabs:first');
-        if(_tabs.length>0 && _tabs.tabs('instance')){
+        this._tabs = this.element.find('.ui-tabs:first');
+        if(this._tabs.length>0 && this._tabs.tabs('instance')){
             
             var h = this.element.find('.ui-tabs-nav:first').height(); //find('#tabCtrl').
             this.pnlOverview.height(this.element.height() - h);
             this._resultList.height(this.element.height() - h); //465
             
-            _tabs.tabs('option','activate',function(event, ui){
+            this._tabs.tabs('option','activate',function(event, ui){
                 if(that._resultset && that._resultset.length()>0 
-                    && !(that._currentElementID>0) && _tabs.tabs('option','active')==1){
+                    && !(that._currentElementID>0) && that._tabs.tabs('option','active')==1){
                     that._startNewStoryElement( that._resultset.getOrder()[0] );
                 }
             });
@@ -266,7 +267,7 @@ $.widget( "heurist.app_storymap", {
                                         that._startNewStory(recID);        
                                     });
                             }else{
-                                that._resultset = null;
+                                that._resultset = new hRecordSet();
                                 that._startNewStory(recID);
                             }
                             
@@ -358,10 +359,19 @@ console.log(pntEnd);
 //console.log('NOT INTED');                 
                 var that = this;
                 this._mapping.app_timemap('option','onMapInit', function(){
+                    var map = that._mapping.app_timemap('getMapping');
+                    map.isMarkerClusterEnabled = false;
                     that._mapping.app_timemap('updateDataset', that._resultset, 'Story Map');
                 });
+            }else{
+                var map = this._mapping.app_timemap('getMapping');
+                map.isMarkerClusterEnabled = false;
             }
             
+        }
+        
+        if(this._tabs){
+            this._tabs.tabs('option', 'active', 0);   
         }
         
         
@@ -415,33 +425,112 @@ console.log(pntEnd);
         if(this._currentElementID != recID){
             this._currentElementID = recID;
             
-            var actions = ['zoom_in'];
+            var actions = ['fade_in','fly_to','highlight'];
             //take list of required actions on story element change
             // zoom out - show entire bounds
-            // zoom in - zoom to current step
-            // fade_out - show marker, path or poly
-            // bounce
+            // zoom_in - zoom to current step
+            // *fly_to - fly to step 
+            // *fade_in - show marker, path or poly
+            // bounce ??
             // highlight
             // follow_path - move marker along path
             // ant_path - css style
             // show_report - popup on map
+
+            var all_events = this._resultset.getOrder();
             
-            if(actions.indexOf('zoom_in')>=0){
-                
-                this._mapping.app_timemap('zoomToSelection', [recID], true);
-                
-/*                
+            var that = this;
+            
             var map = this._mapping.app_timemap('getMapping');
-            if(map){
-console.log('mapping accessible');                
-                //map.mapping('addSearchResult', this._resultset, 'Current query');//, true);     
+            var nativemap = map.nativemap;
+            if(window.hWin.HEURIST4.util.isnull(this._L)) this._L = map.getLeaflet();
+            
+            var L = this._L;
+            
+            //hide all, gather to be animated
+            var to_hide = [], layers = [];
+            var hide_before_show = (actions.indexOf('fade_in')>=0);
+            
+            nativemap.eachLayer(function(top_layer){    
+                if(top_layer instanceof L.LayerGroup)
+                top_layer.eachLayer(function(layer){
+                      if (layer instanceof L.Layer && layer.feature)  //(!(layer.cluster_layer_id>0)) &&
+                      {
+                            if(layer.feature.properties.rec_ID==recID){
+                                layers.push(layer);
+                                if(hide_before_show){
+                                    layer.remove();    
+                                }else if(layer._map==null){
+                                    layer.addTo( nativemap );           
+                                }
+                            }else 
+                            if (window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, all_events)>=0)
+                            {
+                                layer.remove();
+                            }
+                      }
+                });
+            });
+            
+            var delay = 0;   
+            // ZOOM IN       
+            if(actions.indexOf('zoom_in')>=0 || actions.indexOf('fly_to')>=0){
+                var useRuler = (layers.length==1), bounds = [];
+                $.each(layers, function(i, layer){
+                    bounds.push( map.getLayerBounds(layer, useRuler) );    
+                });
+                bounds = map._mergeBounds(bounds);
+                map.zoomToBounds(bounds, (actions.indexOf('fly_to')>=0) ); //default 1.5 seconds   
+                delay = (actions.indexOf('fly_to')>=0)?2000:1000;
+            }
+            
+            // FADE IN
+            setTimeout(function(){
+                that.fadeInLayerLeaflet(nativemap, layers, 0, 1, 0.05, 100);     
+            },delay);
+
+            /*
+            if(actions.indexOf('fade_in')>=0){
+                var map = this._mapping.app_timemap('getMapping');
+                map.fadeInLayers( [recID] );
+            }
+            var map = this._mapping.app_timemap('getMapping');
+            var layers = map.findLayerByRecID( [recID] );
+            if(layers.length>0){
+                    console.log('Found: '+recID);  
             }else{
-console.log('map not initied');                
+                console.log('NOT Found: '+recID);
+            } 
+            if(actions.indexOf('fade_in')>=0){
+                  this.fadeInLayerLeaflet(layers, 0, 1, 0.1, 100);     
             }
-*/                
-            }
-                   
+            */       
         }
+    },
+    
+    // Fade-in function for Leaflet
+    fadeInLayerLeaflet: function(nativemap, layers, startOpacity, finalOpacity, opacityStep, delay) 
+    {
+        var L = this._L;
+        var opacity = startOpacity;
+        var timer = setTimeout(function changeOpacity() {
+            if (opacity < finalOpacity) {
+                $.each(layers,function(i, lyr){
+                    if(lyr instanceof L.Marker){
+                        lyr.setOpacity( opacity );                        
+                    }else{
+                        lyr.setStyle({
+                            opacity: opacity,
+                            fillOpacity: opacity
+                        });
+                    }
+                    if(lyr._map==null) lyr.addTo( nativemap )                    
+                });
+                opacity = opacity + opacityStep
+            }
+
+            timer = setTimeout(changeOpacity, delay);
+            }, delay)
     }
-        
+
 });

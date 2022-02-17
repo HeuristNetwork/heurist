@@ -93,8 +93,6 @@ Thematic mapping
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
-
 $.widget( "heurist.mapping", {
 
     // default options
@@ -123,7 +121,7 @@ $.widget( "heurist.mapping", {
         map_rollover: false,
         map_popup_mode: 'standard',
         
-        zoomToPointInKM: 5
+        zoomToPointInKM: 2
     },
     
     /* expremental 
@@ -387,6 +385,9 @@ $.widget( "heurist.mapping", {
         if(this.nativemap) this.nativemap.invalidateSize();
     },
     
+    getLeaflet: function(){
+        return L;
+    },  
     
     //that.onInitComplete();
     //
@@ -1007,24 +1008,24 @@ $.widget( "heurist.mapping", {
                         
             if(bounds && bounds.isValid()){
                 //this.nativemap.options.maxZoom = null;
-                L.Util.setOptions( this.nativemap, {maxZoom: 17});
+                //L.Util.setOptions( this.nativemap, {maxZoom: 17});
                 
                 
                 if(fly_params){
                     
                     if(fly_params===true){
-                        fly_params = {animate:true, duration:1.5};
+                        fly_params = {animate:true, duration:1.5, maxZoom: 20};
                     }
                     this.nativemap.flyToBounds(bounds, fly_params);
             
                 }else{
-                    this.nativemap.fitBounds(bounds);      
+                    this.nativemap.fitBounds(bounds, {maxZoom: 20});      
                 }
                         
                 
                 
                 //this.nativemap.options.maxZoom = 25;
-                L.Util.setOptions( this.nativemap, {maxZoom: 25});
+                //L.Util.setOptions( this.nativemap, {maxZoom: 25});
 //console.log('3. '+this.nativemap.options.maxZoom);                
             }                
         
@@ -1861,6 +1862,109 @@ $.widget( "heurist.mapping", {
     },
     
     //
+    //
+    //    
+    findLayerByRecID: function(recIDs){
+        
+        var that = this;
+        var res = [];
+        
+        function __eachLayer(layer, method) {
+            for (var i in layer._layers) {
+                var res = method.call(this, layer._layers[i]);
+                if(res===false){
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        function __validateLayer(layer){
+            if (layer instanceof L.Layer && layer.feature && layer.feature.properties &&
+                (window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, recIDs)>=0)){
+                
+                res.push(layer);
+                if(recIDs.length==1) return false;
+            }
+            return true;
+        }
+        
+        /*
+        __eachLayer(that.nativemap, function(layer){
+            
+            if(layer instanceof L.LayerGroup)   //geojson only
+            {
+                var r = __eachLayer(layer, __validateLayer);
+                //console.log('>>');
+                //if(top_layer.feature) console.log('>'+top_layer.feature.properties.rec_ID);
+            } else{
+                return __validateLayer(layer);   
+            }
+            
+        });
+        */
+        
+        that.nativemap.eachLayer(function(top_layer){    
+            if(top_layer instanceof L.LayerGroup)   //geojson only
+            {
+                var r = top_layer.eachLayer(function(layer){
+                    if (layer instanceof L.Layer && layer.feature && //(!(layer.cluster_layer_id>0)) &&
+                        (window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, recIDs)>=0)) 
+                    {
+                        res.push(layer);
+                        //if(recIDs.length==1) return false;
+                    }
+                });
+                //if(r===false) return false;
+                //console.log('>>');
+                //if(top_layer.feature) console.log('>'+top_layer.feature.properties.rec_ID);
+            }    
+        });
+        
+
+        return res;        
+    },
+
+    //
+    //
+    //
+    fadeInLayers: function( _selection){
+        var layers = this.findLayerByRecID( _selection );
+
+        /*
+        $.each(layers,function(i, lyr){
+            if(lyr instanceof L.Marker){
+                var icon = lyr._icon;
+                $(icon).fadeIn(4000);
+                //layer.valueOf()._icon
+            }});
+        */    
+        
+        var opacity = 0, finalOpacity=1, opacityStep=0.1, delay=200;
+        var timer = setTimeout(function changeOpacity() {
+            if (opacity < finalOpacity) {
+                $.each(layers,function(i, lyr){
+                    
+                    if(lyr instanceof L.Marker){
+                        //var icon = lyr._icon;
+                        //$(icon).css('opacity', opacity);
+                        lyr.setOpacity( opacity );                        
+                    }else{
+                        lyr.setStyle({
+                            opacity: opacity,
+                            fillOpacity: opacity
+                        });
+                    }
+                });
+                opacity = opacity + opacityStep
+            }
+
+            timer = setTimeout(changeOpacity, delay);
+        }, delay);
+
+    },
+    
+    //
     // get bounds for selection
     //
     zoomToSelection: function( _selection, _fly_params ){
@@ -1870,9 +1974,9 @@ $.widget( "heurist.mapping", {
         }
         
         var that = this, bounds = [], bnd;
-        
+
         var useRuler = (_selection.length==1);
-    
+        
         that.nativemap.eachLayer(function(top_layer){    
             if(top_layer instanceof L.LayerGroup)   //geojson only
                 top_layer.eachLayer(function(layer){
@@ -1933,8 +2037,8 @@ $.widget( "heurist.mapping", {
                     corner2 = L.latLng(bbox[3], bbox[2]);
                 return L.latLngBounds(corner1, corner2);            
             }else{
-                var corner1 = L.latLng(ll.lat-0.02, ll.lng-0.02),
-                    corner2 = L.latLng(ll.lat+0.02, ll.lng+0.02);
+                var corner1 = L.latLng(ll.lat-0.002, ll.lng-0.002),
+                    corner2 = L.latLng(ll.lat+0.002, ll.lng+0.002);
                 return L.latLngBounds(corner1, corner2);            
             }
         }else{

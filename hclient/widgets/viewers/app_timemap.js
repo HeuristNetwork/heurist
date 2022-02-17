@@ -649,6 +649,15 @@ console.log(re);
             return null;
         }
     }
-    
+    /*
+    , getNativeMap: function(){
+        if(this.mapframe[0].contentWindow){
+            var map = this.mapframe[0].contentWindow.mapping;
+            map = map.mapping('instance');
+            return (map)?map.nativemap:null;
+        }else{
+            return null;
+        }
+    }*/
 
 });
