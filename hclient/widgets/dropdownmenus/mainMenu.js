@@ -2358,7 +2358,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
             var template_type = $dlg.find('input[name="template-type"]:checked').attr('id');
             var rectype_ids = $dlg.find('div#rectypes-list').attr('data-ids');
-            var is_all_rectypes = $dlg.find('input#rectypes-all:checked');
+            var is_all_rectypes = $dlg.find('input#rectypes-all').is(':checked');
 
             if(is_all_rectypes) { rectype_ids = 'y'; } // get all rectypes
 
