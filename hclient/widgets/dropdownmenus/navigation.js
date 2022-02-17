@@ -593,8 +593,10 @@ $.widget( "heurist.navigation", {
                                 $(page_target).css({'min-height':$(page_target).parent().height()-page_footer.height()-10 });
                             } 
                             
-                            window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
-                            //window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            layoutMgr.layoutInit( null, $(page_target) );
+                            
+                            //OLD 2022-02-17 window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
+                            
                             if($.isFunction(that.options.aftermenuselect)){
                                 that.options.aftermenuselect( document, data.page_id );
                                 /*setTimeout(function(){

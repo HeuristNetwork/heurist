@@ -55,14 +55,25 @@ function hLayoutMgr(){
         
         container = $(container);
         
+        if(layout==null){
+            //take layout from container
+            layout = container.html();
+            var res = window.hWin.HEURIST4.util.isJSON(layout);
+            if(res!==false){
+                layout = res;    
+            }
+        }
+        
         container.empty();   
         
         if(typeof layout === 'string' &&
             layout.indexOf('data-heurist-app-id')>0){ //old format with some widgets
             
             container.html(layout);
+            
+            //'#main-content'
                 
-            window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content', _supp_options );
+            window.hWin.HAPI4.LayoutMgr.appInitFromContainer( null, container, _supp_options );
             return false;
         }
         

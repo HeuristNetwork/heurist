@@ -1497,9 +1497,6 @@ console.log('Cardinal layout widget does not have proper options');
             var layout = _getLayoutParams($container, supp_options); 
             
             //init groups/cardinal layouts
-            
-            
-            
             if(layout){
                 _appInitAll(layout, $container); 
             }else{

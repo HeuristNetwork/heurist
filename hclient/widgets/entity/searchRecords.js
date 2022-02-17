@@ -119,17 +119,18 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             for(var idx=0; idx<rt_list.length; idx++){
                 
                 var rectypeID = rt_list[idx];
-                var name = $Db.rty(rectypeID,'rty_Name');
-                var label = window.hWin.HEURIST4.util.htmlEscape(name.trim());
-                if(!name) continue;
+                if(rectypeID>0){
+                    var name = $Db.rty(rectypeID,'rty_Name');
+                    var label = window.hWin.HEURIST4.util.htmlEscape(name.trim());
+                    if(!name) continue;
 
-        
-                $('<li>').html('<a href="#rty'+rectypeID
-                                    +'"><span style="font-weight:bold">'
-                                    +label+'</span></a>')
-                        .appendTo(groupTabHeader);
-                $('<div id="rty'+rectypeID+'">').appendTo(cont);
             
+                    $('<li>').html('<a href="#rty'+rectypeID
+                                        +'"><span style="font-weight:bold">'
+                                        +label+'</span></a>')
+                            .appendTo(groupTabHeader);
+                    $('<div id="rty'+rectypeID+'">').appendTo(cont);
+                }
 /*  pair of add+search buttons              
                 $('<button>')
                     .button({label: label, 
