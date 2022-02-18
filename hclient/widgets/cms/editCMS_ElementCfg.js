@@ -71,7 +71,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         var cont = $container;
 
         cont.find('input[data-type="element-name"]').val(l_cfg.name);
-        cont.find('input[data-type="element-id"]').val(l_cfg.dom_id);
+        cont.find('input[data-type="element-id"]').val(l_cfg.dom_id); //duplication for options.widget_id
         cont.find('textarea[name="elementClasses"]').val(l_cfg.classes);
 
         var etype = (l_cfg.type?l_cfg.type:(l_cfg.appid?'widget':'text'));
@@ -96,6 +96,12 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             //var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
 
             function __openWidgetCfg(){
+                
+                var dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
+                if(dom_id!=l_cfg.options.widget_id){
+                    l_cfg.options.widget_id = dom_id;
+                }
+                
                 editCMS_WidgetCfg(l_cfg, null, function(new_cfg){
                     //add new options 
                     if(JSON.stringify(l_cfg.options) != JSON.stringify(new_cfg)){
@@ -103,6 +109,12 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                     }
                     
                     l_cfg.options = new_cfg;
+                    
+
+                    if(new_cfg.widget_id){
+                        l_cfg.dom_id = new_cfg.widget_id;
+                        cont.find('input[data-type="element-id"]').val(l_cfg.dom_id);
+                    }
 
                     //recreate widget with new options
                     layoutMgr.layoutAddWidget(l_cfg, element.parent());
@@ -255,6 +267,10 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             l_cfg.title = '<span data-lid="'+l_cfg.key+'">'+l_cfg.name+'</span>';
             
             l_cfg.dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
+            if(l_cfg.appid && l_cfg.options){
+                l_cfg.options.widget_id = l_cfg.dom_id;
+            }
+
             if(window.hWin.HEURIST4.util.isempty(cont.find('textarea[name="elementClasses"]').val())){
                 if(l_cfg.classes) delete l_cfg['classes'];
             }else{

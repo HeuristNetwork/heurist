@@ -605,6 +605,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                 ele.find('.header').css({'width':'150px','text-align':'right'});
                 
                 //----------------
+                /*
                 ele = $dlg.find('#storyRectypes');
 
                 var ed_options = {
@@ -625,6 +626,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                 ele.editing_input(ed_options);
                 ele.parent().css('display','block');
                 ele.find('.header').css({'width':'150px','text-align':'right'});
+                */
 
             }else
             if(widget_name=='heurist_resultListExt' && 
@@ -754,8 +756,8 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                     cont.find('input[name="menu_recIDs"]').val( menu_recIDs );
                 }else
                 if(widget_name=='heurist_StoryMap'){
-                    var storyRectypes = cont.find('#storyRectypes').editing_input('getValues');
-                    cont.find('input[name="storyRectypes"]').val( storyRectypes );
+                    //var storyRectypes = cont.find('#storyRectypes').editing_input('getValues');
+                    //cont.find('input[name="storyRectypes"]').val( storyRectypes );
                     
                     //cont.find('select[name="storyFields"]').val
                     var storyFields = cont.find('#storyFields').editing_input('getValues');

@@ -37,7 +37,7 @@ $.widget( "heurist.app_storymap", {
         reportOverview: null, // smarty report for overview. It uses storyRecordID
         reportElement: null,  // to draw items in resultList
         //story/result list parameters
-        reportOverviewMode: 'inline', // tab | header
+        reportOverviewMode: 'inline', // tab | header, no
         reportElementMode: 'vertical', //vertical list, carousel/slide, map popup
         reportElementCss: null,
 
@@ -69,12 +69,21 @@ $.widget( "heurist.app_storymap", {
 
         var that = this;
         
+        var cssOverview = {};
+        
+        if(this.options.reportOverviewMode=='no' || this.options.reportOverviewMode=='inline'){
+            cssOverview = {display:'none'};
+        }else if(this.options.reportOverviewMode=='header'){
+            cssOverview = {height: '200px'};
+        }
+        
         var layout = [{"name":"StoryMap","type":"group","css":{}, //"position":"relative","height":"100%"
             "children":
-            [{"name":"TabControl","type":"tabs","css":{},"folder":true,"dom_id":"tabCtrl","children":
-                [{"name":top.HR('Overview'),"type":"group","css":{},"folder":true,
+            [{"name":"TabControl","type": (this.options.reportOverviewMode=='tab'?"tabs":"group"),
+                "css":{},"folder":true,"dom_id":"tabCtrl","children":
+                [{"name":top.HR('Overview'),"type":"group","css":cssOverview,"folder":true,
                     "children":[{"name":"Overview content","type":"text","css":{},"content":"Overview content","dom_id":"pnlOverview"}]},
-                    {"name":top.HR('Story'),"type":"group","css":{},"folder":true,
+                 {"name":top.HR('Story'),"type":"group","css":{},"folder":true,
                         "children":[{"appid":"heurist_resultList","name":"Story list","css":{"position":"relative","minWidth":150,"minHeight":400},
                             "options":{
                                 "select_mode": "none",
@@ -136,6 +145,8 @@ $.widget( "heurist.app_storymap", {
                 }
             });
             
+        }else if(this.options.reportOverviewMode=='header'){
+            this.pnlOverview.height(cssOverview.height);
         }
         
         /*        
@@ -314,7 +325,7 @@ $.widget( "heurist.app_storymap", {
             this._mapping = $('#'+this.options.map_widget_id)    
         }
         
-        if(this._mapping){
+        if(this._mapping && this._mapping.length>0){
             
             //adds links between start and end place
             //start (1414-1092 or 2-134), transition (1414-1090) and end places (1414-1088 or 2-864)                    
@@ -399,15 +410,31 @@ console.log(pntEnd);
                         +'&db='+window.hWin.HAPI4.database;
             }
             
-            
-            this.pnlOverview.addClass('loading').css({'overflow-y':'auto'})
-                .load(infoURL, function(){ 
-                            var ele2 = $(this);
-                            var h = ele2[0].scrollHeight+10;
-                            ele2.removeClass('loading').css('min-height','200px');//.height('auto');    
+            if(this.options.reportOverviewMode!='no'){
+                var that = this;
+                this.pnlOverview.addClass('loading').css({'overflow-y':'auto'})
+                    .load(infoURL, function(){ 
+                                var ele2 = $(this);
+                                ele2.removeClass('loading').css('min-height','200px');//.height('auto');    
+                                
+                        if(that.options.reportOverviewMode=='inline'){
+                            var ele = that._resultList.find('.div-result-list-content');
+
+                            if(ele2.find('div[data-recid]').length>0){ //for standard view
+                                ele2.find('div[data-recid]')[0].style = null;
+                            }
                             
+                            $('<div class="recordDiv outline_suppress expanded" recid="0" tabindex="0">')
+                                .html(that.pnlOverview.html()).prependTo(ele);
+                                
+                        }else{
+                            var h = ele2[0].scrollHeight+10;
                             ele2.find('div[data-recid]').css('max-height','100%');
-                });   
+                        }
+                                
+                    });   
+                    
+            }
             
         }else{
             //clear 
@@ -440,6 +467,8 @@ console.log(pntEnd);
             var all_events = this._resultset.getOrder();
             
             var that = this;
+            
+            if(this._mapping && this._mapping.length>0){
             
             var map = this._mapping.app_timemap('getMapping');
             var nativemap = map.nativemap;
@@ -504,7 +533,9 @@ console.log(pntEnd);
             if(actions.indexOf('fade_in')>=0){
                   this.fadeInLayerLeaflet(layers, 0, 1, 0.1, 100);     
             }
-            */       
+            */     
+            
+            }  
         }
     },
     

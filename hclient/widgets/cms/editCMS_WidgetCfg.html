@@ -196,9 +196,18 @@
         <input name="storyFields" type="hidden" value=""/>
         <div id="storyFields" style="display:table-row"></div>
     </div>
-    <div class="heurist_StoryMap">
+    <div class="heurist_StoryMapXXXX">
         <input name="storyRectypes" type="hidden" value=""/>
         <div id="storyRectypes" style="display:table-row"></div>
+    </div>
+    <div  class="heurist_StoryMap">
+        <div class="header"><label>Overview mode:</label></div>
+        <select name="reportOverviewMode" class="text ui-widget-content ui-corner-all" title="">
+            <option value="tab">Tab</option>
+            <option value="inline">Inline as first story element</option>
+            <option value="header">Header</option>
+            <option value="no">No overview</option>
+        </select>
     </div>
     <div class="heurist_StoryMap">
         <div class="header">
@@ -207,14 +216,6 @@
         <select name="reportOverview" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
         </select>
         <br><i>Defines the format used to display story overview information</i>
-    </div>
-    <div  class="heurist_StoryMap">
-        <div class="header"><label>Overview mode:</label></div>
-        <select name="reportOverviewMode" class="text ui-widget-content ui-corner-all" title="">
-            <option value="inline">Inline</option>
-            <option value="tab">Tab</option>
-            <option value="header">Header</option>
-        </select>
     </div>
     <div class="heurist_StoryMap">
         <div class="header">
@@ -225,7 +226,7 @@
         <br><i>Defines the format used to display story element information</i>
     </div>
     <div class="heurist_StoryMap">
-        <div class="header"><label>Overview mode:</label></div>
+        <div class="header"><label>Story mode:</label></div>
         <select name="reportElementMode" class="text ui-widget-content ui-corner-all" title="">
             <option value="vertical">List Vertical</option>
             <option value="slide">Slide</option>
@@ -235,6 +236,7 @@
     <div class="heurist_StoryMap">
         <div class="header"><label>Map Unique ID</label></div>
         <input name="map_widget_id"/>
+        <br><i>Reference to map widget. Define this unique ID in Map widget properties</i>
     </div>
     
     <!-- mapping -->    
@@ -396,12 +398,14 @@
     
     <div Xclass="heurist_Navigation heurist_Search heurist_SearchTree heurist_resultList heurist_resultListExt heurist_resultListDataTable heurist_resultListCollection heurist_Map">
         <div class="header"><label>Search group</label></div>
-            <input name="search_realm"  value="sr1"/>
+        <input name="search_realm"  value="sr1"/>
+        <br><i>Name of group of widgets that shares search and select events</i>
     </div>
     
     <div>
         <div class="header"><label>Unique id</label></div>
             <input name="widget_id"/>
+            <br><i>Unique HTML ID for widget, for reference in javascript and from another widgets</i>
     </div>
     
     

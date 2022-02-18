@@ -153,7 +153,8 @@ $.widget( "heurist.search_faceted", {
         preliminary_filter:null,
         svs_ID: null,
         onclose: null,// callback
-        is_publication: false
+        is_publication: false,
+        respect_relation_direction: false
     },
     
     _current_query_request_id:null,
@@ -570,11 +571,9 @@ $.widget( "heurist.search_faceted", {
                             }else if(fld.indexOf('lt')==0){
                                 pref = 'linkedfrom';    
                             }else if(fld.indexOf('rf')==0){
-                                pref = 'related_to';    
-                                //pref = 'links';
+                                pref = that.options.respect_relation_direction?'related_to':'related';    
                             }else if(fld.indexOf('rt')==0){
-                                pref = 'relatedfrom';    
-                                //pref = 'links';
+                                pref = that.options.respect_relation_direction?'relatedfrom':'related';
                             }
 
                             qp = {};
@@ -649,11 +648,9 @@ $.widget( "heurist.search_faceted", {
                     var slink = null;
 
                     if(linktype=='rt'){
-                        slink = "related_to:";
-                        //slink = "links:";
+                        slink = (that.options.respect_relation_direction?'related_to':'related')+':';
                     }else if(linktype=='rf'){
-                        slink = "relatedfrom:";
-                        //slink = "links:";
+                        slink = (that.options.respect_relation_direction?'relatedfrom':'related')+':'; 
                     }else if(linktype=='lt'){
                         slink = "linked_to:";
                     }else if(linktype=='lf'){
