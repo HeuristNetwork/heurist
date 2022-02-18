@@ -123,10 +123,10 @@ class DbSysWorkflowRules extends DbEntityBase
     //    
     protected function _validatePermission(){
         
-        if(!$this->system->is_dbowner() && count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_admin() && count($this->recordIDs)>0){ //there are records to update/delete
 
             $this->system->addError(HEURIST_REQUEST_DENIED, 
-                'You are not DB owner. Insufficient rights (logout/in to refresh) for this operation');
+                'You are not DB admin. Insufficient rights (logout/in to refresh) for this operation');
             return false;
         }
 
@@ -184,14 +184,23 @@ class DbSysWorkflowRules extends DbEntityBase
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'There are already rules for record type '.$rty_ID);
                 $ret = false;
             }else{
-                $this->system->defineConstant('TRM_SWF');
-                $query = 'INSERT INTO sysWorkflowRules (swf_RecTypeID,swf_Stage) SELECT '
-                .$rty_ID.', trm_ID FROM defTerms where trm_ParentTermID='.TRM_SWF;
-                $ret = $mysqli->query($query);
-                if(!$ret){
-                    $this->system->addError(HEURIST_DB_ERROR, 
-                        'Cannot add ruleset to sysWorkflowRules table', $mysqli->error);
+                
+                if(!$this->system->is_admin()){
+
+                    $this->system->addError(HEURIST_REQUEST_DENIED, 
+                        'You are not DB admin. Insufficient rights (logout/in to refresh) for this operation');
                     $ret = false;
+                }else{                
+                    
+                    $this->system->defineConstant('TRM_SWF');
+                    $query = 'INSERT INTO sysWorkflowRules (swf_RecTypeID,swf_Stage) SELECT '
+                    .$rty_ID.', trm_ID FROM defTerms where trm_ParentTermID='.TRM_SWF;
+                    $ret = $mysqli->query($query);
+                    if(!$ret){
+                        $this->system->addError(HEURIST_DB_ERROR, 
+                            'Cannot add ruleset to sysWorkflowRules table', $mysqli->error);
+                        $ret = false;
+                    }
                 }
             }
 
