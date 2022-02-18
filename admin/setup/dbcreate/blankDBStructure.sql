@@ -395,9 +395,9 @@ CREATE TABLE defTerms (
 --
 
 CREATE TABLE defTermsLinks (
-  trl_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Primary key for vocablary-terms hierarchy',
+  trl_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Primary key for vocabulary-terms hierarchy',
   trl_ParentID smallint(5) unsigned NOT NULL COMMENT 'The ID of the parent/owner term in the hierarchy',
-  trl_TermID smallint(5) unsigned NOT NULL COMMENT 'Term identificator',
+  trl_TermID smallint(5) unsigned NOT NULL COMMENT 'The ID of the child term',
   PRIMARY KEY  (trl_ID),
   UNIQUE KEY trl_CompositeKey (trl_ParentID,trl_TermID)
 ) ENGINE=InnoDB COMMENT='Identifies hierarchy of vocabularies and terms';
