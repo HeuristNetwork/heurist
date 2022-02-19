@@ -990,8 +990,13 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     addNewFieldToStructure: function(dty_ID, after_dty_ID, rst_fields){
         
-        if(this._cachedRecordset.getById(dty_ID) ){
-            window.hWin.HEURIST4.msg.showMsgFlash('Such field already exists in structure');
+        var updateCache = false;
+        if(this._cachedRecordset == null){
+            updateCache = true;
+        }
+
+        if(!updateCache && this._cachedRecordset.getById(dty_ID)){
+            window.hWin.HEURIST4.msg.showMsgFlash('Such field already exists in structure', 3000);
             return;
         }
         
@@ -1010,30 +1015,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             rst_DisplayName: $Db.dty(dty_ID,'dty_Name'),
             rst_DisplayHelpText: $Db.dty(dty_ID,'dty_HelpText'),
             rst_RequirementType: rst_fields['rst_RequirementType'] ?rst_fields['rst_RequirementType']:'optional',
-            //rst_Repeatability: 'single',
             rst_MaxValues: (rst_fields['rst_MaxValues']>=0) ?rst_fields['rst_MaxValues']:'1',  //0 repeatable
             rst_DisplayWidth: rst_fields['rst_DisplayWidth'] ?rst_fields['rst_DisplayWidth']:'100',  
             rst_SemanticReferenceURL: rst_fields['rst_SemanticReferenceURL'] 
                         ?rst_fields['rst_SemanticReferenceURL']
                         :$Db.dty(dty_ID,'dty_SemanticReferenceURL'),
             rst_TermsAsButtons: rst_fields['rst_TermsAsButtons'] ? rst_fields['rst_TermsAsButtons'] : 0,
-            /*
-            dty_Type: dtFields[fi['dty_Type']]
-            rst_DisplayHeight: "3"
-            rst_TermPreview: ""
-            rst_FilteredJsonTermIDTree: "497"
-            dty_TermIDTreeNonSelectableIDs: ""
-            rst_PtrFilteredIDs: ""
-            rst_PointerMode: "addorbrowse"
-            rst_PointerBrowseFilter: ""
-            rst_CreateChildIfRecPtr: "0"
-            rst_DefaultValue: ""
-            rst_SeparatorType: ""
-            rst_DisplayExtendedDescription: "Please provide an extended description for display on rollover ..."
-            rst_Status: "open"
-            rst_NonOwnerVisibility: "viewable"
-            rst_LocallyModified: "1"    
-            */
         };
         
         var dty_type = $Db.dty(dty_ID,'dty_Type');
@@ -1051,79 +1038,24 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 fields['rst_DisplayWidth'] = 100;
             }
         }
-        
-/*            
-            refreshEntityData('defRecStructure',function(){
-                
-            });
-*/            
-        
-        
+
+
         var that = this;
         this._saveEditAndClose(fields, function( recID, fields ){
             
-            //get full field info to update local definitions
-            var request = {
-                'a'          : 'search',
-                'entity'     : that.options.entity.entityName,
-                'request_id' : window.hWin.HEURIST4.util.random(),
-                'details'    : 'list', //'structure',
-                'rst_RecTypeID': that.options.rty_ID,
-                'rst_DetailTypeID': dty_ID
-                };
-            
-            window.hWin.HAPI4.EntityMgr.doRequest(request, 
-            function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
-                    
-                    var recset = hRecordSet(response.data);
-                    fields = recset.getRecord( response.data.order[0] ); //get as JSON
-                    fields['rst_ID'] = recID;
+            if(updateCache){
+                window.hWin.HAPI4.EntityMgr.refreshEntityData(['defRecStructure'], function(){
 
-                    that._cachedRecordset.setRecord(recID, fields);
-                    
-                    var tree = that._treeview.fancytree("getTree");
-                    var parentnode;
-                    if(after_dty_ID>0){
-                        parentnode = tree.getNodeByKey(after_dty_ID);
-                    }else{
-                        parentnode = tree.rootNode; //getRootNode();//getActiveNode();
-                    }
-                    if(!parentnode){
-console.log('No active tree node!!!!')                      
-                        return;  
-                    } 
-                    
-                    //add new node to tree
-                    parentnode.addNode({key:recID}, 
-                            (parentnode.isRootNode() || parentnode.folder==true)
-                                                    ?'firstChild':'after');
-                    if(parentnode.folder){
-                        parentnode.setExpanded(true);
-                    }
-                    
-                    that._stillNeedUpdateForRecID = 0;
-                    
-                    //update 1)recordset, 2) defintions 3)treeview 
-                    that._afterSaveEventHandler(recID, fields);
-                    
-                    //
-                    that._show_optional = (fields['rst_RequirementType']=='optional');
-                    //
-                    that._open_formlet_for_recID = recID;
-                    //save order  it calls _showRecordEditorPreview to update preview and open formlet field editor
-                    that._saveRtStructureTree();
-            
-                }else{
-                    
-                }
-            });
-            
-            
+                    that._cachedRecordset = $Db.rst(that.options.rty_ID);
+
+                    that._updateRtStructureTree(recID, after_dty_ID);
+                });
+            }else{
+                that._updateRtStructureTree(recID, after_dty_ID);
+            }           
         });
-
     },
-	
+    
     //
     // add several base fields at once to rectype, and update structure
     //
@@ -1131,8 +1063,10 @@ console.log('No active tree node!!!!')
 
         var that = this;
 
-        var idCnt = dty_IDs.length; // number of new fields
-        var rty_ID = that.options.rty_ID; // current rectype
+        var updateCache = false;
+        if(this._cachedRecordset == null){
+            updateCache = true;
+        }
 
         if(window.hWin.HEURIST4.util.isempty(rst_fields)){
             rst_fields = {};
@@ -1143,8 +1077,8 @@ console.log('No active tree node!!!!')
         sel_fields['values'] = {};
 
         // Add fields to rectyp structure, places the fields at the start of structure
-        for(var i = 0; i < idCnt; i++){
-            if(this._cachedRecordset.getById(dty_IDs[i])){ // Check if field is already a part of rectype
+        for(var i = 0; i < dty_IDs.length; i++){
+            if(!updateCache && this._cachedRecordset.getById(dty_IDs[i])){ // Check if field is already a part of rectype
                 continue;
             }
 
@@ -1161,76 +1095,99 @@ console.log('No active tree node!!!!')
             'entity': 'defRecStructure',
             'newfields': sel_fields,
             'order': 0,
-            'rtyID': rty_ID,
+            'rtyID': this.options.rty_ID,
             'request_id': window.hWin.HEURIST4.util.random()
         };
 
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(save_response){
+                if(save_response.status == window.hWin.ResponseStatus.OK){ //save_response.data == array of ids
+
+                    if(updateCache){
+
+                        window.hWin.HAPI4.EntityMgr.refreshEntityData(['defRecStructure'], function(){
+
+                            that._cachedRecordset = $Db.rst(that.options.rty_ID);
+
+                            // re-structure tree to place new fields at the place the user requested
+                            for(var j = 0; j < save_response.data.length; j++){
+
+                                var dtyID = save_response.data[j]; //recID == save_response.data[j]
+                                that._updateRtStructureTree(dtyID, after_dty_ID);
+                            }
+                        });
+                    }else{
+                        // re-structure tree to place new fields at the place the user requested
+                        for(var j = 0; j < save_response.data.length; j++){
+
+                            var dtyID = save_response.data[j]; //recID == save_response.data[j]
+                            that._updateRtStructureTree(dtyID, after_dty_ID);
+                        }
+                    }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            }
+        );
+    },
+
+    //
+    // Add new nodes to record structure tree
+    //
+    _updateRtStructureTree: function(dty_ID, after_dty_ID){
+
+        var that = this;
+
+        request = {
+            'a': 'search',
+            'entity': that.options.entity.entityName,
+            'details': 'list',
+            'rst_RecTypeID': that.options.rty_ID,
+            'rst_DetailTypeID': dty_ID,
+            'request_id': window.hWin.HEURIST4.util.random()
+        }; // Retrieve field information
+
+        var rec_ID = dty_ID;
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    // re-structure tree to place new fields at the place the user requested
-                    for(var j = 0; j < idCnt; j++){
-                        var recID = dty_IDs[j];
-						
-                        request = {
-                            'a': 'search',
-                            'entity': that.options.entity.entityName,
-                            'details': 'list',
-                            'rst_RecTypeID': rty_ID,
-                            'rst_DetailTypeID': recID,
-                            'request_id': window.hWin.HEURIST4.util.random()
-                        }; // Retrieve field information
+                    var recset = hRecordSet(response.data); // get recset
+                    var fields = recset.getRecord( response.data.order[0] ); // get fields from recset
+                    fields['rst_ID'] = rec_ID; // set id values
 
-                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                            function(response){
-                                if(response.status == window.hWin.ResponseStatus.OK){
-                                    
-                                    var recset = hRecordSet(response.data); // get recset
-                                    var fields = recset.getRecord( response.data.order[0] ); // get fields from recset
-                                    fields['rst_ID'] = fields['rst_DetailTypeID']; // set id values
-                                    recID = fields['rst_DetailTypeID'];
-
-                                    that._cachedRecordset.setRecord(recID, fields); // update cached record
-                                    
-                                    var tree = that._treeview.fancytree("getTree"); // get fancytree to update
-                                    var parentnode;
-									// get parentnode for new leaf
-                                    if(after_dty_ID>0){
-                                        parentnode = tree.getNodeByKey(after_dty_ID);
-                                    }else{
-                                        parentnode = tree.rootNode;
-                                    }
-                                    if(!parentnode){ 
-                                        return;  
-                                    } 
-                                    
-                                    // insert node into rectype structured francytree
-                                    parentnode.addNode({key:recID}, 
-                                            (parentnode.isRootNode() || parentnode.folder==true)
-                                                                    ?'firstChild':'after');
-                                    if(parentnode.folder){
-                                        parentnode.setExpanded(true);
-                                    }
-                                    
-                                    that._stillNeedUpdateForRecID = 0;
-                                    
-                                    that._afterSaveEventHandler(recID, fields); // save general handler
-                                    
-                                    that._show_optional = (fields['rst_RequirementType']=='optional');
-
-                                    that._open_formlet_for_recID = recID;
-                                    //save new order, update preview and open formlet field editor (modify structure)
-                                    that._saveRtStructureTree();
-                                }
-                                else{
-                                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                                }
-                            }
-                        );
+                    that._cachedRecordset.setRecord(rec_ID, fields); // update cached record
+                    
+                    var tree = that._treeview.fancytree("getTree"); // get fancytree to update
+                    var parentnode;
+                    // get parentnode for new leaf
+                    if(after_dty_ID>0){
+                        parentnode = tree.getNodeByKey(after_dty_ID);
+                    }else{
+                        parentnode = tree.rootNode;
                     }
-                }
-                else{
+                    if(!parentnode){ 
+                        return;  
+                    } 
+                    
+                    // insert node into rectype structured francytree
+                    parentnode.addNode({key:rec_ID}, 
+                            (parentnode.isRootNode() || parentnode.folder==true)
+                                                    ?'firstChild':'after');
+                    if(parentnode.folder){
+                        parentnode.setExpanded(true);
+                    }
+                    
+                    that._stillNeedUpdateForRecID = 0;
+                    
+                    that._afterSaveEventHandler(rec_ID, fields); // save general handler
+                    
+                    that._show_optional = (fields['rst_RequirementType']=='optional');
+
+                    that._open_formlet_for_recID = rec_ID;
+                    //save new order, update preview and open formlet field editor (modify structure)
+                    that._saveRtStructureTree();
+                }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
             }
