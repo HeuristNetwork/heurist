@@ -119,6 +119,7 @@ $.widget( "heurist.app_storymap", {
         
         //add story panel and result list
         this._resultList = this.element.find('#storyList');
+        this.pnlStory = this._resultList.parent();
 
 /*console.log('>>>'+this.options.reportElement);
         if(this.options.reportElement){
@@ -147,7 +148,33 @@ $.widget( "heurist.app_storymap", {
             
         }else if(this.options.reportOverviewMode=='header'){
             this.pnlOverview.height(cssOverview.height);
+        }else 
+        if(this.options.reportOverviewMode=='inline'){
+            this._resultList.parent().height(this.element.height());
+            this._resultList.height('100%');    
         }
+        
+        if(this.options.reportElementMode=='slide'){
+            this.pnlStoryReport = $('<div>').css({width:'100%',height:'100%',overflow:'auto'})
+                .appendTo(this.pnlStory);
+                
+            var css = ' style="width:30px;height:30px;line-height:30px;display:inline-block;'
+                +'text-decoration:none;text-align: center;font-weight: bold;color:#ccc;'
+                
+            $('<div style="top:10px;right:10px;position:absolute;z-index: 800;border: 2px solid #ccc; background:white;'
+                +'background-clip: padding-box;border-radius: 4px;width:64px;">'
+            +'<a id="btn-prev" '+css+'border-right: 1px solid #ccc" href="#" '
+                +'title="Previous" role="button" aria-label="Previous">&lt;</a>'
+            +'<a id="btn-next" '+css+'" href="#" '
+                +'title="Next" role="button" aria-label="Next">&gt;</a></div>')        
+                .appendTo(this.pnlStory);
+                
+            this._on(this.pnlStory.find('#btn-prev'),{click:function(){ this._onNavigate(false); }});    
+            this._on(this.pnlStory.find('#btn-next'),{click:function(){ this._onNavigate(true); }});    
+                
+            this._resultList.hide();
+        }
+        
         
         /*        
         if(this.options.tabpanel){
@@ -225,6 +252,37 @@ $.widget( "heurist.app_storymap", {
                 return false; //$(item).attr('recid');
             }
         });
+    },
+    
+    //
+    // for slide
+    //
+    _onNavigate: function(is_forward){
+        
+        var order = this._resultset.getOrder();
+        var recID = 0;
+        
+        if(this._currentElementID>0){
+            var idx = window.hWin.HEURIST4.util.findArrayIndex(this._currentElementID, order);
+            if(is_forward){
+                idx++;
+            }else{
+                idx--;
+            }
+            if(idx>=0 && idx<order.length){
+                recID = order[idx];
+            }
+        }else{
+            recID = order[0]; //first
+        }
+        
+        if(recID>0){
+            this._startNewStoryElement( recID );    
+        }else
+        if(this.options.reportOverviewMode=='inline'){
+            //show overview for inline mode
+            this._startNewStory(this.options.storyRecordID);
+        }
     },
         
     //
@@ -385,8 +443,9 @@ console.log(pntEnd);
             this._tabs.tabs('option', 'active', 0);   
         }
         
-        
-        this._resultList.resultList('updateResultSet', this._resultset);
+        if(this.options.reportElementMode!='slide'){      
+            this._resultList.resultList('updateResultSet', this._resultset);
+        }
         
         this._currentElementID = null;
                         
@@ -414,22 +473,29 @@ console.log(pntEnd);
                 var that = this;
                 this.pnlOverview.addClass('loading').css({'overflow-y':'auto'})
                     .load(infoURL, function(){ 
-                                var ele2 = $(this);
-                                ele2.removeClass('loading').css('min-height','200px');//.height('auto');    
-                                
-                        if(that.options.reportOverviewMode=='inline'){
-                            var ele = that._resultList.find('.div-result-list-content');
+                        
+                        var ele2 = $(this);
+                        ele2.removeClass('loading').css('min-height','200px');//.height('auto');    
 
-                            if(ele2.find('div[data-recid]').length>0){ //for standard view
-                                ele2.find('div[data-recid]')[0].style = null;
-                            }
+                        if(ele2.find('div[data-recid]').length>0){ //for standard view
+                            ele2.find('div[data-recid]')[0].style = null;
+                        }
                             
-                            $('<div class="recordDiv outline_suppress expanded" recid="0" tabindex="0">')
-                                .html(that.pnlOverview.html()).prependTo(ele);
+                        if(that.options.reportOverviewMode=='inline'){
+                            
+                            if(that.options.reportElementMode=='slide'){      
+                                that.pnlStoryReport.html(that.pnlOverview.html())
+                            }else{
+                                var ele = that._resultList.find('.div-result-list-content');    
+                                $('<div class="recordDiv outline_suppress expanded" recid="0" tabindex="0">')
+                                    .html(that.pnlOverview.html()).prependTo(ele);
+                            }
                                 
                         }else{
                             var h = ele2[0].scrollHeight+10;
-                            ele2.find('div[data-recid]').css('max-height','100%');
+                            if(ele2.find('div[data-recid]').length>0){
+                                ele2.find('div[data-recid]').css('max-height','100%');
+                            }
                         }
                                 
                     });   
@@ -451,6 +517,42 @@ console.log(pntEnd);
 
         if(this._currentElementID != recID){
             this._currentElementID = recID;
+            
+            
+            
+            if(this.options.reportElementMode=='slide'){      
+
+                
+                var infoURL;
+                var isSmarty = false;
+                
+                if( typeof this.options.reportOverview === 'string' 
+                                && this.options.reportOverview.substr(-4)=='.tpl' ){
+                
+                    infoURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
+                            + recID 
+                            + '&db='+window.hWin.HAPI4.database+'&template='
+                            + encodeURIComponent(this.options.reportElement);
+                    isSmarty = true;
+                }else{
+                    infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
+                            +recID
+                            +'&db='+window.hWin.HAPI4.database;
+                }
+                
+                this.pnlStoryReport.addClass('loading').css({'overflow-y':'auto'})
+                    .load(infoURL, function(){ 
+                        
+                        var ele2 = $(this);
+                        ele2.removeClass('loading').css('min-height','200px');//.height('auto');    
+
+                        if(ele2.find('div[data-recid]').length>0){ //for standard view
+                            ele2.find('div[data-recid]')[0].style = null;
+                        }
+                    });
+                
+            }                    
+            
             
             var actions = ['fade_in','fly_to','highlight'];
             //take list of required actions on story element change
