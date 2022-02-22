@@ -515,46 +515,85 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                ).appendTo(actionspan);
                */
 
-               //hide icons on mouse exit
-               function _onmouseexit(event){
-                       var node;
-                       if($(event.target).is('li')){
-                          node = $(event.target).find('.fancytree-node');
-                       }else if($(event.target).hasClass('fancytree-node')){
-                          node =  $(event.target);
-                       }else{
-                          //hide icon for parent 
-                          node = $(event.target).parents('.fancytree-node');
-                          if(node) node = $(node[0]);
-                       }
-                       var ele = node.find('.svs-contextmenu3'); //$(event.target).children('.svs-contextmenu3');
-                       ele.hide();//css('visibility','hidden');
-                       that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
-               }               
-               
-               $(item).hover(
-                   function(event){
-                       var node;
-                       if($(event.target).hasClass('fancytree-node')){
-                          node =  $(event.target);
-                       }else{
-                          node = $(event.target).parents('.fancytree-node');
-                       }
-                       var ele = $(node).find('.svs-contextmenu3');
-                       ele.css('display','inline-block');//.css('visibility','visible');
-                       
-                       //highlight in preview
-                       var dty_ID = $(node).find('span[data-dtid]').attr('data-dtid');
-                       that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
-                       if(dty_ID>0)
-                       that.previewEditor.find('div[data-dtid="'+dty_ID+'"]').addClass('ui-state-active');
-                       
-                   }
-               );               
-               $(item).mouseleave(
-                   _onmouseexit
-               );
-           }
+            var field_tooltip;
+
+            //hide icons on mouse exit
+            function _onmouseexit(event){
+                var node;
+                if($(event.target).is('li')){
+                    node = $(event.target).find('.fancytree-node');
+                }else if($(event.target).hasClass('fancytree-node')){
+                    node =  $(event.target);
+                }else{
+                    //hide icon for parent 
+                    node = $(event.target).parents('.fancytree-node');
+                    if(node) node = $(node[0]);
+                }
+                var ele = node.find('.svs-contextmenu3'); //$(event.target).children('.svs-contextmenu3');
+                ele.hide();//css('visibility','hidden');
+                that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
+
+                if(field_tooltip.tooltip("instance") !== undefined){
+                    field_tooltip.tooltip("destroy");
+                }
+            }               
+
+            $(item).hover(
+                function(event){
+                    var node;
+                    if($(event.target).hasClass('fancytree-node')){
+                        node =  $(event.target);
+                    }else{
+                        node = $(event.target).parents('.fancytree-node');
+                    }
+                    var ele = $(node).find('.svs-contextmenu3');
+                    ele.css('display','inline-block');//.css('visibility','visible');
+
+                    //highlight in preview
+                    var dty_ID = $(node).find('span[data-dtid]').attr('data-dtid');
+                    that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
+                    if(dty_ID>0){
+                        that.previewEditor.find('div[data-dtid="'+dty_ID+'"]').addClass('ui-state-active');
+
+                        var code = 'ID: '+ dty_ID +' ('+ $Db.getConceptID('dty', dty_ID) +')';
+                        var type = $Db.dty(dty_ID, 'dty_Type');
+                        type = 'Type - '+ type.charAt(0).toUpperCase() + type.slice(1);
+                        var name = $Db.dty(dty_ID, 'dty_Name');
+
+                        var tt_content = '<div>'+ name +'</div>'
+                                        +'<div style="margin: 10px 0px;">'+ type +'</div>'
+                                        +'<div>'+ code +'</div>';
+
+                        var tt_width = (code.length > name.length && code.length > type.length) ? code.length : (name.length > type.length) ? name.length : type.length;
+
+                        field_tooltip = node.parents('ul.fancytree-container').tooltip({
+                            items: node,
+                            position:{
+                                my: 'left+10 center',
+                                at: 'right center',
+                                collision: 'none'
+                            },
+                            show:{
+                                duration: 0
+                            },
+                            content: function(){
+                                return tt_content;
+                            },
+                            open: function(event, ui){
+                                ui.tooltip.css({
+                                    "width": tt_width + 'ex',
+                                    "background": "#D1E7E7",
+                                    "font-size": "1.1em"
+                                });
+                            }
+                        });
+                    }
+                }
+            );               
+            $(item).mouseleave(
+                _onmouseexit
+            );
+        }
     },
     
     //
@@ -1300,7 +1339,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     isHeader = true;
                 }
                     
-                if(ed_ele.length==0){ //popup edit  not used anymore
+                if(ed_ele.length==0){ //popup edit, currently used for fields/headers that are hidden in receditor
                     if(!this.editForm.hasClass('ent_content_full')){
                         //put editForm back to original container
                         this.editForm
@@ -1314,6 +1353,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     this._edit_dialog.dialog('option','close', function(){
                         that._closeFormlet();
                     });
+                    this._edit_dialog.removeClass('ui-heurist-bg-light').parent().addClass('ui-heurist-design');
                 }else{
                     //make field edit formlet in "design" color
                     this.editForm

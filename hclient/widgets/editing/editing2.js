@@ -237,6 +237,10 @@ function hEditing(_options) {
                     
                     if(fields[idx].groupHidden || fields[idx]['groupTitleVisible']===false){ //this group is hidden all fields goes to previous group
 
+                        if(fieldContainer == null){
+                            fieldContainer = groupContainer.find('fieldset').last();
+                        }
+
                         __createGroup(fields[idx].children, groupContainer, fieldContainer);
                         continue;                        
                     }else if(fields[idx].groupType=='group'){ //group inside

@@ -260,6 +260,10 @@ $failed_exts = array();
 
             print "<div>Synchronisation completed</div>";
             print "<div style=\"color:green\">Total files processed: $rep_counter </div>";
+
+            if($rep_counter > 0){
+                print '<script type="text/javascript">if(window.hWin.HEURIST4.dbs) { window.hWin.HEURIST4.dbs.get_record_counts(null); }</script>';
+            }
         }
 
         // ---- HARVESTING AND OTHER FUNCTIONS -----------------------------------------------------------------

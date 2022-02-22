@@ -2383,7 +2383,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             {title: 'Download XML or JSON template', yes: 'Download', no: 'Close'},
             {default_palette_class: 'ui-heurist-publish', dialogId: 'template_popup', width: 400, height: 500});
 
-        $dlg.find('button#rectypes-select').button().on('click', function(){
+        $dlg.find('button#rectypes-select').button();
+
+        $dlg.find('button#rectypes-select, div#rectypes-list').on('click', function(){
 
             var $selected_rectypes = $dlg.find('div#rectypes-list');
 
@@ -2409,7 +2411,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             var name = $Db.rty(ids[i], 'rty_Name');
 
                             $selected_rectypes.append(
-                                '<span class="truncate" style="display: inline-block;width: 155px; max-width: 155px;margin: 5px 0px" title="'+ name +'">'
+                                '<span class="truncate" style="display: inline-block;width: 155px; max-width: 155px;margin: 2.5px 0px" title="'+ name +'">'
                                     + name +
                                 '</span>');
 
