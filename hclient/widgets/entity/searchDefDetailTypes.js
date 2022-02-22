@@ -137,7 +137,10 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             var request = {}
         
             if(this.input_search.val()!=''){
+
                 var s = this.input_search.val();
+                this.element.find('#chb_show_all_groups').prop('checked', true);
+
                 if(window.hWin.HEURIST4.util.isNumber(s) && parseInt(s)>0){
                      request['dty_ID'] = s;   
                      s = '';

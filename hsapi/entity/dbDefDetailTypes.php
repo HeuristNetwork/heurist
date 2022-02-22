@@ -191,24 +191,30 @@ class DbDefDetailTypes extends DbEntityBase
         if(count($this->recordIDs)==0){             
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid field type identificator');
             return false;
-        }        
-        if(count($this->recordIDs)>1){             
+        }
+        if(count($this->recordIDs)>1){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'It is not possible to remove field types in batch');
-            return false;
-        }        
-        
-        $dtyID = $this->recordIDs[0];
-        
-        $query = 'select count(dtl_ID) from recDetails where dtl_DetailTypeID='.$dtyID;
-        $dtCount = mysql__select_value($this->system->get_mysqli(), $query);
-        
-        if($dtCount>0){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 
-                "You cannot delete field type $dtyID as it is used $dtCount times in the data");
             return false;
         }
 
-        return parent::delete();        
+        $dtyID = $this->recordIDs[0]; 
+
+        $query = 'select dtl_RecID from recDetails where dtl_DetailTypeID='.$dtyID;
+        $rec_IDs = mysql__select_list2($this->system->get_mysqli(), $query);
+
+        if($rec_IDs && count($rec_IDs) > 0){
+
+            $query = 'select dty_Name from defDetailTypes where dty_ID='.$dtyID;
+            $fld_name = mysql__select_value($this->system->get_mysqli(), $query);
+
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                'You cannot delete field <strong>'. $fld_name .'</strong> as it is used <strong>'. count($rec_IDs) .'</strong> times in record data.<br><br>'
+                .'<a href="#" onclick="window.open(\''. HEURIST_BASE_URL .'?db='. HEURIST_DBNAME .'&q=ids:'. implode(',', $rec_IDs) .'\',\'_blank\');">'
+                .'Open these records in a search</a> to allow the removal of all instances of the '. $fld_name .' field.');
+            return false;
+        }
+
+        return parent::delete();
     }
  
  
