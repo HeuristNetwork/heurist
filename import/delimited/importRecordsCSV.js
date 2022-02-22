@@ -2005,6 +2005,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         var allowed2 = ['resource'];
         var topitems2 = [{key:'',title:(currentStep==3)?'Matching - select field ...':'select field ...'}]; 
 
+        var exact_matches = []; // track which records have an exact match, skip 
+        var assigned_columns = {}; // track temp assigned columns
+
         $.each(sels, function (idx, item){
             var $item = $(item);
             if($item.attr('id')==keyfield_sel){
@@ -2049,30 +2052,92 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                     // Compare fieldnames with column names within CSV data
                     var options = $item.find('option');
-                    var col_name = imp_session['columns'][idx];
+                    var fcol_name = imp_session['columns'][idx];
+
+                    var hs_rating = 0; // highest similarity rating
+                    var hs_value = 0; // option value of highest similarity rating
 
                     $.each(options, function(i, option){
 
+                        if(exact_matches.includes(option.value)){ // column has already been exactly matched
+                            return true;
+                        }
+
                         var rec_column_parts = option.text.split(' [');
-                        var rec_column = '';
+                        var rcol_name = '';
 
                         if(rec_column_parts.length > 2){
                             for(var j = 0; j < rec_column_parts.length-1; j++){
-                                rec_column += rec_column_parts[j];
+                                rcol_name += rec_column_parts[j];
                             }
                         }else{
-                            rec_column = rec_column_parts[0];
+                            rcol_name = rec_column_parts[0];
                         }
 
-                        if(rec_column == col_name || rec_column.toLowerCase() == col_name.toLowerCase()){
+                        if(rcol_name == fcol_name || rcol_name.toLowerCase() == fcol_name.toLowerCase()){ // Extact match
+
                             $item.val(option.value);
 
                             if(sel.hSelect("instance") != undefined){
                                 sel.hSelect("refresh");
                             }
+
+                            if(assigned_columns.hasOwnProperty(option.value)){
+                                var $ele = assigned_columns[option.value];
+
+                                $ele.val('');
+
+                                if($ele.hSelect("instance") != undefined){
+                                    $ele.hSelect("refresh");
+                                }
+
+                                delete assigned_columns[option.value];
+                            }
+
+                            exact_matches.push(option.value);
+
                             return false;
+                        }else if(fcol_name.length >= 4 || fcol_name.length == rcol_name.length){
+                            // perform partial matching, based on the Sørensen–Dice Coefficient
+
+                            if(assigned_columns.hasOwnProperty(option.value)){ // skip
+                                return true;
+                            }
+
+                            var rcol_bigrams = [];
+                            var fcol_bigrams = [];
+                            var bigger_len = (rcol_name.length > fcol_name.length) ? rcol_name.length : fcol_name.length;
+
+                            // Create bigrams of both column names
+                            for(var i = 0; i < bigger_len; i++){
+
+                                if(i < rcol_name.length){
+                                    rcol_bigrams.push(rcol_name.substring(i, i + 2).toLowerCase());
+                                }
+                                if(i < fcol_name.length){
+                                    fcol_bigrams.push(fcol_name.substring(i, i + 2).toLowerCase());
+                                }
+                            }
+
+                            var shared_bigrams = rcol_bigrams.filter(bigram => fcol_bigrams.includes(bigram));
+                            var sdc_rating = (2 * shared_bigrams.length / (rcol_bigrams.length + fcol_bigrams.length) * 100).toFixed(2);
+
+                            if(sdc_rating > 70 && sdc_rating > hs_rating){
+                                hs_rating = sdc_rating;
+                                hs_value = option.value;
+                            }
                         }
                     });
+
+                    if(hs_value != 0 && hs_rating != 0){
+                        $item.val(hs_value);
+
+                        if(sel.hSelect("instance") != undefined){
+                            sel.hSelect("refresh");
+                        }
+
+                        assigned_columns[hs_value] = $item;
+                    }
 			   }
                
                $(sel).change(function(){
