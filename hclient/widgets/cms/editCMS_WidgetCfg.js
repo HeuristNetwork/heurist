@@ -44,7 +44,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                             $dlg.dialog( "close" );    
                         }
         }}];
-
+        
         if($dlg && $dlg.length>0){
             //container provided
 
@@ -87,9 +87,18 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
         $dlg.find('div[class^="heurist_"]').hide(); //hide all
         $dlg.find('div.'+widget_name+'').show();
         
+        //fill page list
+        var selPage = $dlg.find('select[name="search_page"]');
+        var pages = $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('getMenuContent','list');
+        pages.unshift({key:'',title:''});   
+        window.hWin.HEURIST4.ui.createSelector(selPage[0], pages);
+        
         if(opts!==false){
             
-
+            if(opts.search_page) {
+                $(selPage).val(opts.search_page);        
+                //selPage.hSelect('refresh');
+            }
             $dlg.find('input[name="search_realm"]').val(opts.search_realm);    
             $dlg.find('input[name="widget_id"]').val(opts.widget_id);    
 
@@ -824,6 +833,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
 
         opts['init_at_once'] = true;
         opts['search_realm'] = $dlg.find('input[name="search_realm"]').val();
+        opts['search_page'] = $dlg.find('select[name="search_page"]').val();
         opts['widget_id'] = $dlg.find('input[name="widget_id"]').val();    
 
         return opts;

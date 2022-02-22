@@ -43,6 +43,7 @@ $.widget( "heurist.search", {
         onsearch: null,  //on start search
         onresult: null,   //on search result
 
+        search_page: null, //target page (for CMS)
         search_realm:  null  //accepts search/selection events from elements of the same realm only
     },
 
@@ -999,6 +1000,7 @@ $.widget( "heurist.search", {
             request.detail = 'ids'; //'detail';
             request.source = this.element.attr('id');
             request.search_realm = this.options.search_realm;
+            request.search_page = this.options.search_page;
 
             this.query_request = request;
 
@@ -1041,7 +1043,8 @@ $.widget( "heurist.search", {
                     path+'searchBuilderSort.js'];
                 $.getMultiScripts(scripts)
                 .done(function() {
-                    showSearchBuilder({search_realm:that.options.search_realm});
+                    showSearchBuilder({ search_realm:that.options.search_realm, 
+                                        search_page:that.options.search_page });
                 }).fail(function(error) {
                     //console.log(error);                
                     window.hWin.HEURIST4.msg.showMsgWorkInProgress();

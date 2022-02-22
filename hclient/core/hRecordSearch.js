@@ -83,7 +83,7 @@ function hRecordSearch() {
             if(originator){
                 if(originator.document){
                     owner_doc = originator.document;
-                    owner_element_id = originator.element.attr('id');
+                    owner_element_id = originator.element?originator.element.attr('id'):'main_doc';
                 }else{
                     owner_doc = originator;
                     owner_element_id = 'main_doc';

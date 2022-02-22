@@ -150,7 +150,7 @@ $.widget( "heurist.navigation", {
     
     //
     // resdata - result of request to server side
-    // orientation - treeview, horizontal, vertical
+    // orientation - treeview, horizontal, vertical, list
     //
     getMenuContent: function(orientation, parent_id, menuitems, lvl){
         
@@ -182,7 +182,7 @@ $.widget( "heurist.navigation", {
             TERM_NO_old = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO_OLD']; //$Db.getLocalID('trm','99-5447');
 
         
-        var res = '';
+        var res = (orientation=='list')?[]:'';
         var resitems = [];
     
         for(var i=0; i<menuitems.length; i++)
@@ -236,6 +236,10 @@ $.widget( "heurist.navigation", {
                                         //&& menuitems.length==1);
                     resitems.push($res);
 
+                }else if(orientation=='list'){
+                    
+                    res.push({key:page_id, title:window.hWin.HEURIST4.util.htmlEscape(menuName) });
+                    
                 }else{
                 
                     res = res + '<li><a href="#" style="padding:2px 1em;'
@@ -269,6 +273,10 @@ $.widget( "heurist.navigation", {
                             
                             $res['children'] = subres;
                             
+                        }else if(orientation=='list'){
+                           
+                            res = res.concat(subres);
+                            
                         } else if(subres!='') {
                             
                             res = res + '<ul style="min-width:200px"' 
@@ -277,7 +285,7 @@ $.widget( "heurist.navigation", {
                     }
                 }
                 
-                if(orientation!='treeview'){
+                if(orientation!='list' && orientation!='treeview'){
                     res = res + '</li>';
                 }
                 

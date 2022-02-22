@@ -286,6 +286,8 @@ var DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS;
 //
 function onPageInit(success)
 {
+    
+    console.log('onPageInit');
 
 DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
 DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
@@ -301,7 +303,7 @@ _time_debug = new Date().getTime() / 1000;
     
     $('#main-menu').hide();
     
-    hLayoutMgr();
+    hLayoutMgr(); //init globa var
     
     //cfg_widgets is from layout_defaults.js
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
@@ -394,8 +396,9 @@ function initMainMenu( afterInitMainMenu ){
 
 //
 // Loads content of specified record to #main-content and inits all widgets 
+// eventdata - event to be triggered after page load (to perform search or selection)
 //
-function loadPageContent(pageid){
+function loadPageContent(pageid, eventdata){
     
     /* @todo
     var args = null; //arguments that will be passed to afterPageLoad
@@ -428,7 +431,8 @@ if($site_css!=null){
 ?>          
         
         if(_IS_NEW_CMS_EDITOR){ 
-        
+            
+            //after load event listener
             function __loadPageContent(){
 
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -463,14 +467,12 @@ if($site_css!=null){
                     page_target.css({'min-height':page_target.parent().height()-page_footer.height()-10 });
                 } 
 
-                afterPageLoad( document, pageid ); //execute custom script and custom css
+                afterPageLoad( document, pageid, eventdata); //execute custom script and custom css
             }        
             
             if(page_cache[pageid]){
                 __loadPageContent();
             }else{
-                //var request = {recid:pageid, field:, db:window.hWin.HAPI4.database};
-                //window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, __loadPageContent);
                 
                 var server_request = {
                     q: 'ids:'+pageid,
@@ -483,7 +485,7 @@ if($site_css!=null){
                 //perform search see record_output.php       
                 window.hWin.HAPI4.RecordMgr.search_new(server_request,
                     function(response){
-//console.log(response);                       
+                      
                        if(window.hWin.HEURIST4.util.isJSON(response)) {
                            if(response['records'] && response['records'].length>0){
                                var res = response['records'][0]['details'];
@@ -547,11 +549,13 @@ var datatable_custom_render = null;
 // then it executes this function
 // args - are arguments to be passed to custom javascript function - first element of array is pageid
 //
-function afterPageLoad(document, args){
+function afterPageLoad(document, args, eventdata){
     
+    var pageid = null;
     
     if($.isArray(args)){
         pageid = args[0];
+        //if(args.length>1) eventdata = args[1]
     }else{
         pageid = args;
     }
@@ -584,7 +588,7 @@ function afterPageLoad(document, args){
         $('#main-content-container').css({top:show_page_title?190:152});
     }
     
-    if(typeof pageid==='undefined') return;
+    if(typeof pageid==='undefined' || pageid==null ) return;
     
     
     //remove old style and custom style per page ===========================
@@ -685,6 +689,7 @@ function afterPageLoad(document, args){
     }
     
     
+    // create internal links 
     //find all link elements for loading another page and define onclick handler - loadPageContent
     $('a').each(function(i,link){
         
@@ -693,28 +698,34 @@ function afterPageLoad(document, args){
         var href = $(link).attr('href');
         if (href && href!='#') 
         {
+//console.log(href);         
+            var pageid = 0;
             if(  (href.indexOf(window.hWin.HAPI4.baseURL)===0 || href[0] == '?')
                 && window.hWin.HEURIST4.util.getUrlParameter('db',href) == window.hWin.HAPI4.database
                 && window.hWin.HEURIST4.util.getUrlParameter('id',href) == home_page_record_id)
             {
-                var pageid = window.hWin.HEURIST4.util.getUrlParameter('pageid',href);
-                if(pageid>0){
-                    
-                    $(link).attr('data-pageid', pageid);
-                    
-                    var scr = 'javascript:{loadPageContent('+pageid+');window.hWin.HEURIST4.util.stopEvent(event);}';
-                    $(link).attr('href',scr);
-                    //$(link).attr('data-href',scr);
-                    
-                    /*
-                    $(link).on({click:function(e){
-                        var pageid = $(e.target).attr('data-pageid');
-                        loadPageContent(pageid);            
-                        window.hWin.HEURIST4.util.stopEvent(e);
-                    }});
-                    */
-                    
-                }
+                pageid = window.hWin.HEURIST4.util.getUrlParameter('pageid',href);
+            }else if(href.indexOf(window.hWin.HAPI4.baseURL)===0){
+                pageid = href.substr(window.hWin.HAPI4.baseURL.length);
+            }else if(href>0){
+                pageid = href;
+            }
+            if(pageid>0){
+                
+                $(link).attr('data-pageid', pageid);
+                
+                var scr = 'javascript:{loadPageContent('+pageid+');window.hWin.HEURIST4.util.stopEvent(event);}';
+                $(link).attr('href',scr);
+                //$(link).attr('data-href',scr);
+                
+                /*
+                $(link).on({click:function(e){
+                    var pageid = $(e.target).attr('data-pageid');
+                    loadPageContent(pageid);            
+                    window.hWin.HEURIST4.util.stopEvent(e);
+                }});
+                */
+                
             }
         }
         
@@ -722,6 +733,30 @@ function afterPageLoad(document, args){
     
     //var ele = $('#mobilemenu');
     //_dout('MOBILE '+ele.find('a.extern').length);
+    
+    //Execute event
+    if(eventdata){
+        if(eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
+            window.hWin.HAPI4.RecordSearch.doSearch( this, eventdata );
+        }else{
+            $(document).trigger(eventdata.event_type, eventdata);  //for select  
+        }
+    }
+    
+//console.log('init event listner');        
+    $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
+            +' '+window.hWin.HAPI4.Event.ON_REC_SELECT, function(e, data) {        
+                
+                if(data && data.search_page>0 && data.search_page!=current_page_id){
+//console.log(data);               
+                    var new_pageid = data.search_page;
+                    data.search_page = null
+                    data.event_type = e.type;
+                    loadPageContent(new_pageid, data);
+                }
+                
+            });
+        
     
 }
 

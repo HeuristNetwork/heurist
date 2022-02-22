@@ -1105,6 +1105,7 @@ $.widget( "heurist.searchBuilder", {
                     request.detail = 'ids';
                     request.source = this.element.attr('id');
                     request.search_realm = this.options.search_realm;
+                    request.search_page = this.options.search_page;
                     
                     window.hWin.HAPI4.RecordSearch.doSearch( this, request );
             }
