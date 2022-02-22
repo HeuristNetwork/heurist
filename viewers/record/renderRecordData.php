@@ -1472,7 +1472,7 @@ function print_public_details($bib) {
         $query = "SELECT rst_DisplayName, rst_DisplayOrder 
                   FROM defRecStructure
                   LEFT JOIN defDetailTypes ON rst_DetailTypeID = dty_ID
-                  WHERE rst_RecTypeID = ". $bib['rec_RecTypeID'] ." AND dty_Type = 'separator'
+                  WHERE rst_RecTypeID = ". $bib['rec_RecTypeID'] ." AND dty_Type = 'separator' AND rst_RequirementType != 'forbidden'
                   ORDER BY rst_DisplayOrder";
 
         $groups_res = $mysqli->query($query);
