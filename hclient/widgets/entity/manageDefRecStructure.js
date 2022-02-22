@@ -1300,7 +1300,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     isHeader = true;
                 }
                     
-                if(ed_ele.length==0){ //popup edit  not used anymore
+                if(ed_ele.length==0){ //popup edit, currently used for fields/headers that are hidden in receditor
                     if(!this.editForm.hasClass('ent_content_full')){
                         //put editForm back to original container
                         this.editForm
@@ -1314,6 +1314,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     this._edit_dialog.dialog('option','close', function(){
                         that._closeFormlet();
                     });
+                    this._edit_dialog.removeClass('ui-heurist-bg-light').parent().addClass('ui-heurist-design');
                 }else{
                     //make field edit formlet in "design" color
                     this.editForm
