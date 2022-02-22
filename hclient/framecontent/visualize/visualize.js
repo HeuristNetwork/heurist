@@ -728,6 +728,21 @@ function addMarkerDefinitions() {
            .attr("cy", 5)
            .attr("r", 5)
            .style("fill", "darkgray");
+		   
+    markers.append("svg:marker") // Text, for self linking nodes
+           .attr("id", "self-link")
+           .attr("markerWidth", 10)
+           .attr("markerHeight", 10)
+           .attr("refX", 0)
+           .attr("refY", 0)
+           .attr("viewBox", [0, 0, 20, 20])
+           .attr("overflow", "visible")
+           .append("text")
+           .attr("x", -6)
+           .attr("y", -1)
+           .style("fill", "black")
+           .style("font-size", "6.1px")
+           .text("Self");
 
     return markers;
 }
@@ -782,37 +797,28 @@ function addLines(name, color, thickness) {
     if(name=='top-lines' && linetype == "straight" && currentMode == 'infoboxes_full'){
 
         lines.attr("marker-end", function(d) {
-            if(!(hide_empty && d.targetcount == 0) && d.source.id != d.target.id){
+            if(!(hide_empty && d.targetcount == 0)){
                 // reference to marker id
                 if($Db.rst(d.source.id, d.relation.id, 'rst_CreateChildIfRecPtr') == 1){ // double different size arrows
                     return "url(#marker-childptr-end)";
                 }else if(d.relation.type == 'resource'){ // single arrow
                     return "url(#marker-ptr-end)";
-                }else if(d.relation.type == 'relmarker' || d.relation.type == 'relationship'){ // double same size arrows
-                    return "url(#marker-rel-end)";
-                }else{ // error
+                }else{ // other/error
                     return null;
                 }
             }
         });
 
         lines.attr("marker-mid", function(d) {
-            if(!(hide_empty && d.targetcount == 0) && d.source.id == d.target.id){
-                // reference to marker id
-                if($Db.rst(d.source.id, d.relation.id, 'rst_CreateChildIfRecPtr') == 1){ // double different size arrows
-                    return "url(#marker-childptr-mid)";
-                }else if(d.relation.type == 'resource'){ // single arrow
-                    return "url(#marker-ptr-mid)";
-                }else if(d.relation.type == 'relmarker' || d.relation.type == 'relationship'){ // double same size arrows
-                    return "url(#marker-rel-mid)";
-                }else{ // error
-                    return null;
-                }
-            }else if(d.relation.type == 'relmarker' || d.relation.type == 'relationship'){ // double same size arrows
+            // reference to marker id
+            if(!(hide_empty && d.targetcount == 0) && (d.relation.type == 'relmarker' || d.relation.type == 'relationship')){ // double same size arrows
                 return "url(#marker-rel-mid)";
+            }else{ // other/error
+                return null;
             }
         });
     }else if(name=='top-lines' && linetype != "stepped"){
+
         lines.attr("marker-mid", function(d) {
             if(!(hide_empty && d.targetcount == 0)){
                 // reference to marker id
@@ -1005,15 +1011,10 @@ function updateStraightLines(lines, type) {
 
                 // Reduce x and y locations
                 s_x -= (iconSize / 1.5);
-                t_x = (t_x - iconSize) + (Number($source_rect.attr('width')) / 2);
-                t_y -= iconSize - 2;
 
                 // Prepare extra lines
                 var s_x2 = s_x;
-                s_x -= 7;
-
-                var t_y2 = t_y - iconSize;
-                t_y = t_y2 - 10;
+                s_x -= 12;
 
                 if(type == 'bottom-lines'){
 
@@ -1028,37 +1029,9 @@ function updateStraightLines(lines, type) {
                         .attr("y1", s_y)
                         .attr("x2", s_x2)
                         .attr("y2", s_y)
-                        .attr("marker-end", "url(#blob)");
-
-                    //add crows foot, if multi value
-                    if(ismultivalue){
-
-                        d3.select("#container")
-                          .insert("svg:path", ".id"+d.source.id+" + *")
-                          .attr("class", "offset_line")
-                          .attr("stroke", 'dimgray')
-                          .attr("stroke-linecap", "round")
-                          .attr("stroke-width", '2px')
-                          .attr("fill", "none")
-                          .attr("d", "M " + (t_x+5) + " " + t_y2 + " L " + t_x + " " + t_y + " M " + t_x + " " + t_y2 + " L " + t_x + " " + t_y + " L " + (t_x-5) + " " + t_y2);
-                    }
+                        .attr("marker-end", "url(#blob)")
+                        .attr("marker-start", "url(#self-link)");
                 }
-
-                // Affects Loop Size
-                target_x = s_x - 30;//45
-                target_y = s_y - 30;//45
-
-                dx = target_x - s_x;
-                dy = target_y - s_y;
-                dr = Math.sqrt(dx * dx + dy * dy)/1.25; //1.5
-                mx = s_x + dx;
-                my = s_y + dy;
-           
-                pnt = [
-                    "M",s_x,s_y,
-                    "A",dr,dr,0,0,1,mx,my,
-                    "A",dr,dr,0,0,1,t_x,t_y
-                ];
             }else{
 
                 // Affects Loop Size
