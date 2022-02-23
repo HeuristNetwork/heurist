@@ -429,7 +429,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                                 contructed_val = (contructed_val != '') ? val['surname'] + ', ' + contructed_val : val['surname'];
                             }
                             if(val['active']){
-                                contructed_val = (contructed_val != '') ? org_val + ' [' + val['active'] + ']' : 'No Name, years active: ' + val['active'];
+                                contructed_val = (contructed_val != '') 
+                                                ? contructed_val + ' [' + val['active'] + ']' 
+                                                : 'No Name, years active: ' + val['active'];
                             }
                             /*if(val['id']){
                                 org_val = (org_val != '') ? org_val + ' (id: ' + val['id'] + ')' : 'No Name, id: ' + val['id'];
