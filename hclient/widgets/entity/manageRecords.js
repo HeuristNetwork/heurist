@@ -822,7 +822,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 }},
                         {text:window.hWin.HR('New'), id:'btnRecSaveAndNew',
                               css:{'margin-left':'0.5em','margin-right':'10em'},
-                              click: function() { that._saveEditAndClose( null, 'newrecord' ); }},
+                              click: function() { 
+
+                                    var isChanged = that._editing.isModified() || that._updated_tags_selection!=null;
+                                    if(isChanged){
+                                        that._saveEditAndClose( null, 'newrecord' );      
+                                    }else{
+                                        that._initEditForm_step3(-1);
+                                    }
+                              }},
                               
                         {text:window.hWin.HR('Save'), id:'btnRecSave',
                               accesskey:"S",
