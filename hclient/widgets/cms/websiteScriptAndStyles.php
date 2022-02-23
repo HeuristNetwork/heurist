@@ -24,20 +24,46 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
+    
+ 
+    /*
+    Workflow on initialization:
+    onHapiInit->initHeaderElements, onPageInit->initMainMenu->loadPageContent->afterPageLoad
+
+
+    onHapiInit  - loads defintions and calls initHeaderElements and onPageInit
+
+    initHeaderElements - substitute elements in header with values from CMS_HOME record
+    onPageInit      - 
+    initMainMenu    - Inits main menu widget
+    loadPageContent - Loads content of specified record to #main-content and inits all widgets   
+    afterPageLoad - applies custom css and js for loaded page, assign listeners for interpage binding
+        
+    _openCMSeditor - opens/hides side panel with CMS editor (listener of #btnOpenCMSeditor)
+    */  
+
+
 if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')&& !@$_REQUEST['embed'])  {
-    ?>
+?>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
-    <?php
+    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/js/datatable/datatables.min.css"/>
+    <script type="text/javascript" src="<?php echo PDIR;?>external/js/datatable/datatables.min.js"></script>        
+    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancytree/jquery.fancytree-all.min.js"></script>
+<?php
 }else{
-    ?>
+?>
     <script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
-    <?php
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css"/>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>
+<?php
 }
 ?>
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.layout/jquery.layout-latest.js"></script>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
     
 <!-- CSS -->
 <?php 
@@ -114,17 +140,6 @@ if($_is_new_cms_editor){
 <?php
 }
     
-if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')){
-?>
-    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/js/datatable/datatables.min.css"/>
-    <script type="text/javascript" src="<?php echo PDIR;?>external/js/datatable/datatables.min.js"></script>        
-<?php
-}else{
-?>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css"/>
-<?php 
-}
 
 if(is_array($external_files) && count($external_files)>0){
     foreach ($external_files as $ext_file){
@@ -133,14 +148,6 @@ if(is_array($external_files) && count($external_files)>0){
         }
     }
 }
-
-if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
-        print '<script type="text/javascript" src="'.PDIR.'external/jquery.fancytree/jquery.fancytree-all.min.js"></script>';
-}else{
-        print '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>';
-}   
-    print '<link rel="stylesheet" type="text/css" href="'.PDIR.'external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />';
-
 
 //do not include edit stuff for embed 
 if(!array_key_exists('embed', $_REQUEST)){
@@ -171,13 +178,7 @@ if(!array_key_exists('embed', $_REQUEST)){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAccess.js"></script>
     
-    <!--
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce/jquery.tinymce.min.js"></script>
-    -->
-    
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
-    
     <script type="text/javascript" src="<?php echo PDIR;?>admin/structure/import/importStructure.js"></script>
 <?php
 }
@@ -261,17 +262,11 @@ if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in website
 
 if($edit_OldEditor){  //old CMS editor
 ?>
-    <!--
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
-    <script src="<?php echo PDIR;?>external/tinymce/tinymce.min.js"></script>
-    <script src="<?php echo PDIR;?>external/tinymce5/jquery.tinymce.min.js"></script>
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js"></script>
-    <script src="<?php echo PDIR;?>external/tinymce/jquery.tinymce.min.js"></script>
-    -->
     <script src="websiteRecord.js"></script>
-    <?php
+<?php
 }else{
 ?>    
+
 <script>
 function _dout(msg){      
     //console.log(msg);
@@ -279,25 +274,26 @@ function _dout(msg){
 
 // global 
 var DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS;
+
 //
-// init page for publication version  
-// for old cms version see websiteRecord.js
-// invoked from onHapiInit
+// Inits page for publication version  
+// It is invoked from onHapiInit
+// (for old cms version see websiteRecord.js)
+//
+//  1. Inits hLayoutMgr
+//  2. Calls initMainMenu 
 //
 function onPageInit(success)
 {
-    
-    console.log('onPageInit');
+    DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+    DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
+    DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
+    DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'];
 
-DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
-DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
-DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
-DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'];
+    _dout('webpage onPageInit  '+(new Date().getTime() / 1000 - _time_debug));
+    _dout('webpage onPageInit  '+init_page_record_id);
 
-_dout('webpage onPageInit  '+(new Date().getTime() / 1000 - _time_debug));
-_dout('webpage onPageInit  '+init_page_record_id);
-
-_time_debug = new Date().getTime() / 1000;
+    _time_debug = new Date().getTime() / 1000;
         
     if(!success) return;
     
@@ -317,20 +313,11 @@ _time_debug = new Date().getTime() / 1000;
     });
     
     //fix bug for tinymce popups - it lost focus if it is called from dialog
-    /*
-    $(window.hWin.document).on('focusin', function(e) {
-        if ($(e.target).closest(".tox-tinymce-aux").length) {
-            e.stopImmediatePropagation();
-        }
-    });
-    */
-
     $(document).on('focusin', function(e) {
         if ($(e.target).closest(".tox-tinymce-aux").length) {
             e.stopImmediatePropagation();
         }
     });
-
     
     setTimeout(function(){
         //init main menu in page header
@@ -361,11 +348,10 @@ _time_debug = new Date().getTime() / 1000;
         
     },300);
     
-    
 }
 
 //
-// afterInitMainMenu - loads intial page (usually this is home page
+// Inits main menu widget (element #main-menu) 
 //
 function initMainMenu( afterInitMainMenu ){
     
@@ -390,13 +376,14 @@ function initMainMenu( afterInitMainMenu ){
     
     topmenu.attr('data-heurist-app-id','heurist_Navigation');
     window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, topmenu.parent(), lopts);
-        //afterInitMainMenu);
+
     topmenu.show();
 }
 
 //
 // Loads content of specified record to #main-content and inits all widgets 
-// eventdata - event to be triggered after page load (to perform search or selection)
+// pageid    - record id to be loaded 
+// eventdata - event to be triggered after page load (to perform intial search)
 //
 function loadPageContent(pageid, eventdata){
     
@@ -543,22 +530,18 @@ var page_cache = {};
 var previous_page_id = -1;
 
 var datatable_custom_render = null;
+
 //
-// Executes custom javascript defined in field DT_CMS_SCRIPT
-// it wraps this script into function afterPageLoad_[pageid](args) and adds this script into head
-// then it executes this function
+// 1. Replaces old custom css per page with new one (from DT_CMS_CSS)
+// 2. Adds custom script (DT_CMS_SCRIPT) to header and executes it  
+//      it wraps this script into function afterPageLoad_[pageid](args) 
+// 3. Adds listeners for all "a" elements with href="pageid" for intepage website links
+// 4. Adds global listerner for ON_REC_SEARCHSTART and ON_REC_SELECT for interpage widget links
+//
 // args - are arguments to be passed to custom javascript function - first element of array is pageid
 //
-function afterPageLoad(document, args, eventdata){
-    
-    var pageid = null;
-    
-    if($.isArray(args)){
-        pageid = args[0];
-        //if(args.length>1) eventdata = args[1]
-    }else{
-        pageid = args;
-    }
+function afterPageLoad(document, pageid, eventdata){
+
     
     //var pagetitle = $($(page_target).children()[0]);
     var pagetitle = $('#main-content > h2.webpageheading');
@@ -736,7 +719,8 @@ function afterPageLoad(document, args, eventdata){
     
     //Execute event
     if(eventdata){
-        if(eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
+        if(eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART 
+            || eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SELECT){
             window.hWin.HAPI4.RecordSearch.doSearch( this, eventdata );
         }else{
             $(document).trigger(eventdata.event_type, eventdata);  //for select  
@@ -748,10 +732,24 @@ function afterPageLoad(document, args, eventdata){
             +' '+window.hWin.HAPI4.Event.ON_REC_SELECT, function(e, data) {        
                 
                 if(data && data.search_page>0 && data.search_page!=current_page_id){
-//console.log(data);               
+                    
                     var new_pageid = data.search_page;
                     data.search_page = null
-                    data.event_type = e.type;
+                    
+                    if(e.type==window.hWin.HAPI4.Event.ON_REC_SELECT){
+                        if($.isArray(data.selection) && data.selection.length>0){
+                            //convert SELECT to SEARCHSTART
+                            data = {detail:'ids', neadall:1, w:'a',
+                                 q:'ids:'+data.selection.join(','),
+                                 search_realm: data.search_realm};
+                            
+                        }else{
+                            return; //ignore empty selection
+                        }
+                    }
+                    
+//console.log(data);               
+                    data.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART; //e.type;
                     loadPageContent(new_pageid, data);
                 }
                 
@@ -761,7 +759,8 @@ function afterPageLoad(document, args, eventdata){
 }
 
 //
-// ->initHeaderElements->onPageInit
+// After initialization of HAPI it checks database version, refreshes local definitions
+// and calss   ->initHeaderElements and ->onPageInit
 //
 function onHapiInit(success){   
     
@@ -821,9 +820,9 @@ if(isset($customTemplateNotFound)){
 
 }
 
-
 //
-//substitute values in header
+// substitute elements in header with values from CMS_HOME record
+// for example $image_logo->#main-logo
 //
 function initHeaderElements(){   
 /*
@@ -917,9 +916,8 @@ function performCaptcha(){
         }, {title: "Captcha Test", yes: "Proceed", no: "Cancel"});
 }
 
-
 //
-//  open/hides side panel with NEW CMS editor controls  (see link #btnOpenCMSeditor in cmsTemplate.php)
+//  opens/hides side panel with NEW CMS editor controls  (see link #btnOpenCMSeditor in cmsTemplate.php)
 //
 function _openCMSeditor(event){
     
@@ -949,11 +947,10 @@ function _openCMSeditor(event){
 }
 
 
-
 var gtag = null;//google log - DO NOT REMOVE
 
 //
-//init hapi    
+// Init HAPI 
 //
 $(document).ready(function() {
     

@@ -222,7 +222,8 @@ $.widget( "heurist.resultList", {
 
                     that.setSelected(null);
                     $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
-                        {selection:null, source:that.element.attr('id'), search_realm:that.options.search_realm} );
+                        {selection:null, source:that.element.attr('id'), 
+                            search_realm:that.options.search_realm} );
                         
                     if(that.options.show_search_form){
                         if (data.primary_rt && !data.ispreview)
@@ -365,7 +366,10 @@ $.widget( "heurist.resultList", {
                                             $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                                             {selection:data.selection, 
                                                 map_layer_action: 'zoom',
-                                                source:that.element.attr('id'), search_realm:that.options.search_realm} );
+                                                source:that.element.attr('id'), 
+                                                search_realm:that.options.search_realm
+                                                //,search_page:that.options.search_page
+                                            } );
                                             
                                         }else if(data.map_layer_status=='loading'){
                                             s = 'loading';
@@ -1982,8 +1986,10 @@ $.widget( "heurist.resultList", {
                         $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                         {selection:[selected_rec_ID], 
                             map_layer_action: 'trigger_visibility',  //dataset_visibility: true, 
-                            source:this.element.attr('id'), search_realm:this.options.search_realm} );
-                    
+                            source:this.element.attr('id'), 
+                            search_realm:this.options.search_realm
+                            //,search_page:this.options.search_page
+                        } );
                     
                 }            
                 return;            
@@ -1995,7 +2001,10 @@ $.widget( "heurist.resultList", {
                     $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                     {selection:[selected_rec_ID], 
                         map_layer_action: 'download', //dataset_download: true, 
-                        source:this.element.attr('id'), search_realm:this.options.search_realm} );
+                        source:this.element.attr('id'), 
+                        search_realm:this.options.search_realm
+                        //,search_page: this.options.search_page
+                    } );
                     
                 }
                 return;            
@@ -2386,7 +2395,9 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         if(this.options.eventbased){
             selected_ids = this.getSelected( true );
             $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
-                {selection:selected_ids, source:this.element.attr('id'), search_realm:this.options.search_realm} );
+                {selection:selected_ids, source:this.element.attr('id'), 
+                    search_realm:this.options.search_realm,
+                    search_page: this.options.search_page} );
         }else{
             var selected_recs = this.getSelected( false );
             this._trigger( "onselect", null, selected_recs );
