@@ -1972,6 +1972,9 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                         }else{
                             $term_tocheck = getTermByLabel($dtl_Value, $term_domain); //within domain
                         }
+                        if($dtyID=1079){
+                            $isValid = true;
+                        }
                         $isValid = isValidTerm($system, $term_tocheck, $term_domain, $dtyID, $rectype);
                         if($isValid){
                             $dtl_Value = $term_tocheck;
@@ -2173,10 +2176,13 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
             }else{
                 if(!@$errorValues[$dtyID])
                 {
-                    $query = 'SELECT IF((rst_DisplayName=\'\' OR rst_DisplayName IS NULL), dty_Name, rst_DisplayName) as rst_DisplayName '
-                    .'FROM defRecStructure, defDetailTypes WHERE rst_RecTypeID='.$rectype
-                    .' and  dty_ID=rst_DetailTypeID and rst_DetailTypeID='.$dtyID;
+                    $query = 'SELECT rst_DisplayName FROM defRecStructure WHERE rst_RecTypeID='.$rectype
+                        .' and rst_DetailTypeID='.$dtyID;
                     $field_name = mysql__select_value($mysqli, $query);
+                    if(!$field_name){
+                        $query = 'SELECT dty_Name FROM defDetailTypes WHERE dty_ID='.$dtyID;
+                        $field_name = mysql__select_value($mysqli, $query);
+                    }
 
                     $dt_names = dbs_GetDtLookups();
 
@@ -2767,8 +2773,11 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
             
             //check that current user can change workflow stage
             $is_allowed = false;
-            if($rule!=null && $rule['swf_StageRestrictedTo']==null || $system->is_admin() 
-                || $system->is_member($rule['swf_StageRestrictedTo'])){
+            if($rule!=null && 
+                ($rule['swf_StageRestrictedTo']==null 
+                || $system->is_admin() 
+                || $system->is_member($rule['swf_StageRestrictedTo']))
+            ){
                 
                 $is_allowed = true;
             }
