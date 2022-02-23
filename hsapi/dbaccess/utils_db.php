@@ -805,20 +805,23 @@
                     }
                     
                 }else{
-                    //recreate trigger if recLinks does not exist
+                    //recreate triggers if recLinks does not exist
+                }
+                if($isok){
+                    
                     if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false))
                     {
                         $system->addError(HEURIST_DB_ERROR, 'Cannot execute script addProceduresTriggers.sql');
                         //$response = $system->getError();
                         $isok = false;
                     }
-                }
-                if($isok){
-                    if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/sqlCreateRecLinks.sql"))
-                    {
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot execute script sqlCreateRecLinks.sql');
-                        //$response = $system->getError();
-                        $isok = false;
+                    if($isok){
+                        if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/sqlCreateRecLinks.sql"))
+                        {
+                            $system->addError(HEURIST_DB_ERROR, 'Cannot execute script sqlCreateRecLinks.sql');
+                            //$response = $system->getError();
+                            $isok = false;
+                        }
                     }
                 }
         }
