@@ -161,7 +161,7 @@ $.widget( "heurist.connections", {
                 this._show_once = false;
                 window.hWin.HEURIST4.msg.showMsgDlg(
                     '<h3>WORK IN PROGRESS</h3>'
-                    +'<h3>The network graph function is being revised (1st week January 2022)</h3>'
+                    +'<h3>The network graph function is being revised</h3>'
                     +'<p>Although it appears, it is not showing the right information. We apologise for the inconvenience.</p>'
                     +'<p>If you want to use this function, please send us a bug report (top right in the Help dropdown) or an email asking for early access.</p>');
 
