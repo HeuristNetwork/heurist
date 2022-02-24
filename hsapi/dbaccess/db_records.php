@@ -1972,9 +1972,6 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                         }else{
                             $term_tocheck = getTermByLabel($dtl_Value, $term_domain); //within domain
                         }
-                        if($dtyID=1079){
-                            $isValid = true;
-                        }
                         $isValid = isValidTerm($system, $term_tocheck, $term_domain, $dtyID, $rectype);
                         if($isValid){
                             $dtl_Value = $term_tocheck;
