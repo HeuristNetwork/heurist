@@ -20,7 +20,7 @@
 //
 //
 //
-function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_callback ){
+function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_callback, already_changed ){
 
     var _className = 'editCMS_ElementCfg';
     var element;
@@ -257,48 +257,17 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         cont.find('.cb_sync').change(_onMarginSync);
         cont.find('input[name="padding-left"]').change(_onMarginSyncVal);
         cont.find('input[name="margin-left"]').change(_onMarginSyncVal);
+
+        //save entire page (in background)
+        cont.find('.btn-save-page').button().css('border-radius','4px').click(function(){
+            _getCfgFromUI();
+            main_callback.call(this, l_cfg, 'save');
+        });
+
         
         cont.find('.btn-ok').button().css('border-radius','4px').click(function(){
             //5. save in layout cfg        
-            var css = _getCss();
-            l_cfg.css = css;
-            l_cfg.name = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-name"]').val());
-            if(!l_cfg.name) l_cfg.name = 'Define name of element';
-            l_cfg.title = '<span data-lid="'+l_cfg.key+'">'+l_cfg.name+'</span>';
-            
-            l_cfg.dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
-            if(l_cfg.appid && l_cfg.options){
-                l_cfg.options.widget_id = l_cfg.dom_id;
-            }
-
-            if(window.hWin.HEURIST4.util.isempty(cont.find('textarea[name="elementClasses"]').val())){
-                if(l_cfg.classes) delete l_cfg['classes'];
-            }else{
-                l_cfg.classes = cont.find('textarea[name="elementClasses"]').val();    
-            }
-        
-            //get cardinal parameters  
-            if(l_cfg.type=='cardinal')
-            for(var i=0; i<l_cfg.children.length; i++){
-                    var lpane = l_cfg.children[i];
-                    var pane = lpane.type;
-
-                    l_cfg.children[i].options = {}; //reset
-            
-                    $.each(cont.find('[data-type="cardinal"][data-pane="'+pane+'"]'), function(k, item){
-                         item = $(item);
-                         var name = item.attr('name');
-                         var val = item.val();
-                         if(item.attr('type')=='checkbox'){
-                             val = item.is(':checked'); 
-                             l_cfg.children[i].options[name] = val;    
-                         }else if(val!=''){
-                             l_cfg.children[i].options[name] = val;    
-                         }
-                    });
-            }//for
-            
-            
+            _getCfgFromUI();
             main_callback.call(this, l_cfg);
         });
         cont.find('.btn-cancel').css('border-radius','4px').button().click(function(){
@@ -307,6 +276,8 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
             if(element_cfg.css) element.css(element_cfg.css);
             main_callback.call(this, null);
         });
+        
+        window.hWin.HEURIST4.util.setDisabled(cont.find('.btn-save-page'), already_changed!==true);
         window.hWin.HEURIST4.util.setDisabled(cont.find('.btn-ok'), true);
         
         
@@ -357,6 +328,53 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         $container.find('input').on({change:_enableSave});
     }
 
+
+    //
+    //
+    //
+    function _getCfgFromUI(){            
+        
+            var cont = $container;
+            var css = _getCss();
+            l_cfg.css = css;
+            l_cfg.name = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-name"]').val());
+            if(!l_cfg.name) l_cfg.name = 'Define name of element';
+            l_cfg.title = '<span data-lid="'+l_cfg.key+'">'+l_cfg.name+'</span>';
+            
+            l_cfg.dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
+            if(l_cfg.appid && l_cfg.options){
+                l_cfg.options.widget_id = l_cfg.dom_id;
+            }
+
+            if(window.hWin.HEURIST4.util.isempty(cont.find('textarea[name="elementClasses"]').val())){
+                if(l_cfg.classes) delete l_cfg['classes'];
+            }else{
+                l_cfg.classes = cont.find('textarea[name="elementClasses"]').val();    
+            }
+        
+            //get cardinal parameters  
+            if(l_cfg.type=='cardinal')
+            for(var i=0; i<l_cfg.children.length; i++){
+                    var lpane = l_cfg.children[i];
+                    var pane = lpane.type;
+
+                    l_cfg.children[i].options = {}; //reset
+            
+                    $.each(cont.find('[data-type="cardinal"][data-pane="'+pane+'"]'), function(k, item){
+                         item = $(item);
+                         var name = item.attr('name');
+                         var val = item.val();
+                         if(item.attr('type')=='checkbox'){
+                             val = item.is(':checked'); 
+                             l_cfg.children[i].options[name] = val;    
+                         }else if(val!=''){
+                             l_cfg.children[i].options[name] = val;    
+                         }
+                    });
+            }//for
+            
+    }            
+    
     //
     //
     //
@@ -544,6 +562,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
     //
     function _enableSave(){
         window.hWin.HEURIST4.util.setDisabled($container.find('.btn-ok'), false);
+        window.hWin.HEURIST4.util.setDisabled($container.find('.btn-save-page'), false);
     }
     
     //
@@ -871,6 +890,10 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         
         isModified: function(){
             return !$container.find('.btn-ok').prop('disabled');
+        },
+        
+        onContentChange: function(){
+            _enableSave();
         },
         
         getKey: function(){

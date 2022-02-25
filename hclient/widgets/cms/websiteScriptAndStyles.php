@@ -424,8 +424,10 @@ if($site_css!=null){
 
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
 
+                $('#btnOpenCMSeditor').html(isCMS_active?'Close CMS':'CMS');
+                
                 if(isCMS_active){
-                    $('#btnOpenCMSeditor').hide();
+                    //$('#btnOpenCMSeditor').hide();
                     if(!editCMS_instance2) {
                         editCMS_instance2 = editCMS2();   
                     }
@@ -433,7 +435,8 @@ if($site_css!=null){
                     if (! editCMS_instance2.startCMS({record_id:pageid, container:'#main-content',
                                     close: function(){
                                         isCMS_active = false;
-                                        $('#btnOpenCMSeditor').show();
+                                        $('#btnOpenCMSeditor').html('CMS');
+                                        //$('#btnOpenCMSeditor').show();
                                     }})) //see editCMS2.js    
                     {
                         //page is not loaded (previous page has been modified and not saved
@@ -542,7 +545,6 @@ var datatable_custom_render = null;
 //
 function afterPageLoad(document, pageid, eventdata){
 
-    
     //var pagetitle = $($(page_target).children()[0]);
     var pagetitle = $('#main-content > h2.webpageheading');
     var title_container = $('#main-pagetitle');
@@ -929,7 +931,7 @@ function _openCMSeditor(event){
         //close
         isCMS_active = false;
         editCMS_instance2.closeCMS();
-        btn.show();
+        //btn.show();
     }else{
         isCMS_active = true;
         if(!editCMS_instance2) editCMS_instance2 = editCMS2();
@@ -940,10 +942,10 @@ function _openCMSeditor(event){
                                         isCMS_active = false;
                                         btn.show();
                                     }}); //see editCMS2.js    
-        btn.hide();
+        //btn.hide();
     }
     
-    //$(event.target).html(isCMS_active?'Close CMS':'CMS');
+    btn.html(isCMS_active?'Close CMS':'CMS');
 }
 
 

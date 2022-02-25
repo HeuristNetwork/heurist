@@ -51,7 +51,7 @@ function editCMS2(){
     var _panel_treePage,     // panel with treeview for current page 
         _panel_treeWebSite,  // panel with tree menu - website structure
         _panel_propertyView, // panel with selected element properties
-        _edit_Element = null,  //instance of edit element class
+        _edit_Element = null,  //instance of edit element class editCMS_ElementCfg
         _toolbar_WebSite,
         _toolbar_Page,
         _tabControl,
@@ -321,6 +321,19 @@ function editCMS2(){
                 });
             */
         }
+        
+        //swtich to page tab automatically
+        _layout_container.click(function(event){
+            if(current_edit_mode!='page'){
+                //if($(event.target).is('a') || 
+                //if($(event.target).parents('.mceNonEditable').length>0) return;
+                //switch to page mode                
+                _switchMode('page');
+            }
+        });
+        
+        
+        
         _initPage();
     }    
     
@@ -580,7 +593,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         var new_content = tinymce.activeEditor.getContent();
                         
                         page_was_modified = (page_was_modified || l_cfg.content!=new_content);
-                        if(page_was_modified && _edit_Element==null) _toolbar_Page.show();
+                        _onPageChange();
                         
                         l_cfg.content = new_content;
                         //_panel_treePage.find('.fancytree-hover').removeClass('fancytree-hover');
@@ -650,6 +663,26 @@ console.log('BLUR');
         
     }    
     
+    //
+    //
+    //
+    function _onPageChange(){
+            
+        if(page_was_modified){
+
+            if(_edit_Element==null){
+                //show toolbar with Save/Discard
+                _toolbar_Page.show();
+            }else{
+                //activate save buttons
+                _edit_Element.onContentChange();
+            }
+            
+        }else{
+             _toolbar_Page.hide();
+        }
+
+    }
     
     //
     // browse for heurist uploaded/registered files/resources and add player link
@@ -827,7 +860,7 @@ console.log('BLUR');
             body.find('.page_tree').show();
             body.find('.element_edit').hide();
             
-            if(page_was_modified && _edit_Element==null) _toolbar_Page.show();
+            _onPageChange();
             
             _panel_treePage[0].style.removeProperty('height'); //show();
         }
@@ -1352,7 +1385,8 @@ console.log('BLUR');
         }
         
         page_was_modified = true;
-        if(_edit_Element==null) _toolbar_Page.show();
+        _onPageChange();
+        
         _updateActionIcons(200); //it inits tinyMCE also
         
     }
@@ -1415,7 +1449,7 @@ console.log('BLUR');
         _updateActionIcons(200); //it inits tinyMCE also
         
         page_was_modified = true;
-        if(_edit_Element==null) _toolbar_Page.show();
+        _onPageChange();
     }
     
     //
@@ -1551,12 +1585,16 @@ console.log('BLUR');
         
         _initTinyMCE( ele_id );
         
-        _edit_Element = editCMS_ElementCfg(element_cfg, _layout_container, _panel_propertyView, function(new_cfg){
+        //
+        // mode - 0       take values from _edit_Element without saving in db
+        //        'save'  save entire page in db
+        //
+        _edit_Element = editCMS_ElementCfg(element_cfg, _layout_container, _panel_propertyView, function(new_cfg, mode){
 
                     //save
                     if(new_cfg){
                         
-                        layoutMgr.layoutContentSaveElement(_layout_content, new_cfg);
+                        layoutMgr.layoutContentSaveElement(_layout_content, new_cfg); //replace element to new one
 
                         //update treeview                    
                         var node = _panel_treePage.fancytree('getTree').getNodeByKey(''+new_cfg.key);
@@ -1569,12 +1607,22 @@ console.log('BLUR');
                             layoutMgr.layoutInitCardinal(new_cfg, _layout_container);
                         }
                         
-                        page_was_modified = true;            
+                        if(mode=='save'){
+                            _saveLayoutCfg();
+                            page_was_modified = false;
+                        }else{
+                            page_was_modified = true;            
+                        }
+                        
+                        _onPageChange();
                     }
-                    //close
-                    _hidePropertyView();
                     
-                } );
+                    if(mode!='save'){
+                        //close
+                        _hidePropertyView();
+                    }
+                    
+                }, page_was_modified );
     }
     
     
@@ -1877,6 +1925,9 @@ console.log('BLUR');
             }
         }
         __cleanLayout(newval);
+
+//console.log(newval);        
+
         
         var newname = newval[0].name;
         
