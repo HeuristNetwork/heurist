@@ -2679,7 +2679,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             //add special 2-247 field "Parent Entity"
             //verify that current record type is a child for pointer fields with rst_CreateChildIfRecPtr=1
             
-            
+            var DT_WORKFLOW_STAGE = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE']);
             var DT_PARENT_ENTITY  = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
             if( window.hWin.HEURIST4.util.findArrayIndex(DT_PARENT_ENTITY, field_in_recset)<0 && 
                     this.options.parententity>0)    //parent record id is set already (case: this is addition of new child from search record dialog)
@@ -2788,22 +2788,27 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         s_fields.push(rfr);
                         
                     }else{
+
+                        //ignore
                         //fields that are not in rectype structure
+                        if(field_in_recset[k]!=DT_WORKFLOW_STAGE){
                     
-                        if(addhead==0){                    
-                            //fake header
-                            var rfr = that._getFakeRectypeField(9999999);
-                            rfr['rst_DisplayName'] = 'Non-standard fields for this record type';
-                            rfr['dty_Type'] = 'separator';
-                            rfr['rst_DisplayOrder'] = 1100;
-                            s_fields.push(rfr);
+                            if(addhead==0){                    
+                                //fake header
+                                var rfr = that._getFakeRectypeField(9999999);
+                                rfr['rst_DisplayName'] = 'Non-standard fields for this record type';
+                                rfr['dty_Type'] = 'separator';
+                                rfr['rst_DisplayOrder'] = 1100;
+                                s_fields.push(rfr);
+                            }
+                            addhead++;
+                        
                         }
-                        addhead++;
                         
                         var rfr = that._getFakeRectypeField(field_in_recset[k], 1100+addhead);
                         
-                        if(field_in_recset[k]==window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE']){
-                            rfr['rst_Display'] = 'readonly';
+                        if(field_in_recset[k]==DT_WORKFLOW_STAGE){
+                            rfr['rst_Display'] = 'hidden';
                         }
                         
                         s_fields.push(rfr);

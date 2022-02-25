@@ -84,6 +84,7 @@ $titleDT = ($system->defineConstant('DT_NAME') ? DT_NAME : 0);
 $system->defineConstant('DT_GEO_OBJECT');
 $system->defineConstant('DT_PARENT_ENTITY');
 $system->defineConstant('DT_DATE');
+$system->defineConstant('DT_WORKFLOW_STAGE');
 
 
 
@@ -1447,6 +1448,13 @@ function print_public_details($bib) {
     $prevLbl = null;
     foreach ($bds as $bd) {
         if (defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) continue;
+        
+        if(defined('DT_WORKFLOW_STAGE') && $bd['dty_ID']==DT_WORKFLOW_STAGE){
+
+            $query = 'SELECT rst_ID FROM defRecStructure WHERE rst_DetailTypeID ='.$bd['dty_ID']
+                .' AND rst_RecTypeID = '. $bib['rec_RecTypeID'];
+            if(!(mysql__select_value($mysqli, $query)>0)) continue; //not in structure
+        }
 
         $ele_id = ($bd['rst_DisplayOrder'] != '' || $bd['rst_DisplayOrder'] != null) ? 'data-order="' . $bd['rst_DisplayOrder'] . '"' : '';
 
