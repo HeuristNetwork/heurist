@@ -2037,8 +2037,9 @@ $.widget( "heurist.mapping", {
                     corner2 = L.latLng(bbox[3], bbox[2]);
                 return L.latLngBounds(corner1, corner2);            
             }else{
-                var corner1 = L.latLng(ll.lat-0.002, ll.lng-0.002),
-                    corner2 = L.latLng(ll.lat+0.002, ll.lng+0.002);
+                //for city 0.002 for country 0.02
+                var corner1 = L.latLng(ll.lat-0.02, ll.lng-0.02),
+                    corner2 = L.latLng(ll.lat+0.02, ll.lng+0.02);
                 return L.latLngBounds(corner1, corner2);            
             }
         }else{

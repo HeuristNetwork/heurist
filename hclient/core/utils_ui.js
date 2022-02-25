@@ -2425,7 +2425,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
             }).fail(function(error) {
                 //console.log(error);                
                 // one or more scripts failed to load
-                window.hWin.HEURIST4.msg.showMsgWorkInProgress();
+                window.hWin.HEURIST4.msg.showMsg_ScriptFail();
             }).always(function() {
                 // always called, both on success and error
             });
@@ -2596,7 +2596,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
             }).fail(function(error) {
                 // one or more scripts failed to load
                 //console.log(error);                
-                window.hWin.HEURIST4.msg.showMsgWorkInProgress();
+                window.hWin.HEURIST4.msg.showMsg_ScriptFail();
             }).always(function() {
                 // always called, both on success and error
             });

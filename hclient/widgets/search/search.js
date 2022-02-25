@@ -1047,7 +1047,7 @@ $.widget( "heurist.search", {
                                         search_page:that.options.search_page });
                 }).fail(function(error) {
                     //console.log(error);                
-                    window.hWin.HEURIST4.msg.showMsgWorkInProgress();
+                    window.hWin.HEURIST4.msg.showMsg_ScriptFail();
                 }).always(function() {
                     // always called, both on success and error
                 });

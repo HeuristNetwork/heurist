@@ -22,7 +22,7 @@ getPopupDlg    - creates and returns div (id=dialog-popup) similar to  dialog-co
 
 showMsg        - NEW MAIN 
 showMsgDlg     - MAIN 
-showMsgWorkInProgress - shows standard work in progress message
+showMsg_ScriptFail - shows standard error message on dynamic script loading
 showPrompt    - show simple input value dialog with given prompt message
     
 showMsgFlash - show buttonless dialog with given timeout
@@ -185,19 +185,22 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     },
     
     //
-    //  shows standard work in progress message (not used)
+    //  shows message if loading of js fail
     //
-    showMsgWorkInProgress: function( isdlg, message ){
+    showMsg_ScriptFail: function( isdlg, message ){
 
         if(window.hWin.HEURIST4.util.isempty(message)){
             message = "this feature";
         }
 
-        message = "Beta version: we are still working on "
-              + message
-              + "<br/><br/>Please email Heurist support (info at HeuristNetwork dot org)"
-              + "<br/>if you need this feature and we will provide workarounds and/or fast-track your needs.";
+        message = 
+'Unfortunately we have encountered a program error. Please report this to us using ' 
++'the bug reporter under Help at the top right of the main screen, or via email '
++'to support@heuristnetwork.org so that we can fix it immediately.' 
 
++'<br><br>Please remember to tell us the context in which this occurred. '
++'A screenshot including the URL is very useful.';
+        
         if(isdlg){
             window.hWin.HEURIST4.msg.showMsgDlg(message, null, "Work in Progress");    
         }else{

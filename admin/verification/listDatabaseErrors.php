@@ -151,7 +151,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
             function onEditFieldType(dty_ID){
                 
-                window.hWin.HEUIRIST4.msg.showMsgWorkInProgress();
+                window.hWin.HEUIRIST4.msg.showMsg_ScriptFail();
                 return;
 
                 var sURL = "<?=HEURIST_BASE_URL?>admin/structure/fields/editDetailType.html?db=<?= HEURIST_DBNAME?>";
@@ -176,7 +176,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
             function onEditRtStructure(rty_ID){
 
-                window.hWin.HEUIRIST4.msg.showMsgWorkInProgress();
+                window.hWin.HEUIRIST4.msg.showMsg_ScriptFail();
                 return;
                 
                 window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 

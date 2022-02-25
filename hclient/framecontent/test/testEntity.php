@@ -323,7 +323,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                        }
                         
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgWorkInProgress();
+                        window.hWin.HEURIST4.msg.showMsg_ScriptFail();
                     }
 */
                 }else{//on this page
@@ -357,7 +357,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                        }
                         
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgWorkInProgress();
+                        window.hWin.HEURIST4.msg.showMsg_ScriptFail();
                     }
 */                
                 }
