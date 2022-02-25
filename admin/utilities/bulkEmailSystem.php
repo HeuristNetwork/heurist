@@ -39,6 +39,8 @@ use PHPMailer\PHPMailer\Exception;
 
 class systemEmailExt {
 
+	private $cur_user; // logged in user's details
+
 	public $databases; // list of selected DBs
 	public $invalid_dbs; // list of invalid DBs
 
@@ -153,8 +155,35 @@ class systemEmailExt {
 			return $rtn;
 		}
 
+		// Retrieve current user's email address
+		$this->cur_user = $system->getCurrentUser();
+		$this->getUserEmail();
 
 		return 0;
+	}
+
+	/*
+	 * Get current user's email
+	 *
+	 * Param: None
+	 *
+	 * Return: VOID
+	 */
+
+	private function getUserEmail() {
+
+		global $system;
+		$mysqli = $system->get_mysqli();
+
+		$query = "SELECT ugr.ugr_eMail FROM ". HEURIST_DBNAME_FULL .".sysUGrps AS ugr WHERE ugr.ugr_ID = ". $this->cur_user['ugr_ID'];
+
+		$email = $mysqli->query($query);
+
+		if(!$email){
+			$this->cur_user['ugr_eMail'] = HEURIST_MAIL_TO_ADMIN;
+		}else{
+			$this->cur_user['ugr_eMail'] = $email->fetch_row()[0];
+		}
 	}
 
 	/*
@@ -404,14 +433,12 @@ class systemEmailExt {
 			return -1;
         }
 
-        $cur_user = $system->getCurrentUser();
-
 		// Initialise PHPMailer
 		$mailer = new PHPMailer(true);
 		$mailer->CharSet = "UTF-8";
 		$mailer->Encoding = "base64";
         $mailer->isHTML(true);
-        $mailer->SetFrom($cur_user["ugr_eMail"], $cur_user["ugr_FullName"]);
+        $mailer->SetFrom($this->cur_user["ugr_eMail"], $this->cur_user["ugr_FullName"]);
 
 		foreach ($this->user_details as $email => $details) {
 
