@@ -62,10 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.2.28"; // sets current program version number, determined by Heurist development lead
+$version = "6.2.29"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// 6.2.29 25 Feb 2022
 // 6.2.28 18 Feb 2022 Option to treat periods in terms as hierarchy or not, improved record pointer selection popup with tabs, simple divider within tabs in edit form, improve file bulk upload reporting, tidy up workflow managhement, first draft storymap, 
 // 6.2.27 06 Feb 2022 New website editor, BnF lookup which handles term and record pointer fields, improvements to IIIF Mirador, workflow manager prototype, increae max term length, imporvements to xml import, further refinements to structue visualisation, full window image viewer option, fast dropdown-style selection of record poitners with filtering up to 1000 records, allow text field conversions to date or numeric, limit text length in constructed titles, improve date correction, import terms containign periods, many cosmetics 
 // 6.2.24 14 Dec 2021 Fixed up problems with messed up term trees in core definitions, lots of fruther work on new website editor, prototype IIIF handling with Mirador and creation of manifests, preliminary external data lookups for BnF, cleaner edit form headers, refinements to strucute visualisaiton, conditional values in title mask, lots of small bug fixes
