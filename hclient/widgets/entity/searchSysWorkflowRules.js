@@ -41,13 +41,19 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
                         click: function(){
                                 this._trigger( "onadd" );    
                         }} );
+
+        this._on( this.element.find('#edit_swf_vocab'), {
+                        click: function(){
+                            this._trigger('onvocabedit');
+                        }
+        });
         
         this.input_search_rectype = this.element.find('#input_search_rectype');
         var rty_selector = window.hWin.HEURIST4.ui.createRectypeSelectNew(this.input_search_rectype.get(0), 
                 {rectypeList:  null, 
-                 showAllRectypes: true }); //topOptions:'select record type'
+                 showAllRectypes: true}); //topOptions:'select record type'
         this._on(rty_selector,  { change:this.startSearch });
-                
+
         if(!window.hWin.HEURIST4.allUsersCache){
 
             //get all users
@@ -74,7 +80,6 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
         }else{
             this.startSearch();     
         }
-        
     },  
     
     //
@@ -139,6 +144,4 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
             this.startSearch();
         }
     },
-    
-    
 });

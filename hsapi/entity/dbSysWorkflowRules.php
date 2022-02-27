@@ -194,7 +194,7 @@ class DbSysWorkflowRules extends DbEntityBase
                     
                     $this->system->defineConstant('TRM_SWF');
                     $query = 'INSERT INTO sysWorkflowRules (swf_RecTypeID,swf_Stage) SELECT '
-                    .$rty_ID.', trm_ID FROM defTerms where trm_ParentTermID='.TRM_SWF;
+                    .$rty_ID.', trm_ID FROM defTerms where trm_ParentTermID='.TRM_SWF.' ORDER BY trm_Label';
                     $ret = $mysqli->query($query);
                     if(!$ret){
                         $this->system->addError(HEURIST_DB_ERROR, 
