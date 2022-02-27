@@ -242,6 +242,10 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
 
                 if(val != null){
 
+                    if(field_type == 'resource' && !res['ext_url']){
+                        res['ext_url'] = recset.fld(rec, 'auturl');
+                    }
+
                     var val_isArray = window.hWin.HEURIST4.util.isArray(val);
                     var val_isObject = window.hWin.HEURIST4.util.isObject(val);
 
@@ -255,6 +259,8 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
                             }else{ // take first option
                                 val = val[Object.keys(val)[0]];
                             }
+                        }else if(val_isArray){
+                            val = val[0];
                         }
 
                         var vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
@@ -294,12 +300,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
 
                         // Check if a value was found, if not prepare for creating new term
                         if(!term_found){
-                            
-                            if(val_isArray){
-                                new_terms.push([vocab_ID, dty_ID, val[0]]); 
-                            }else{
-                                new_terms.push([vocab_ID, dty_ID, val]);
-                            }
+                            new_terms.push(val);
                         }
                     }else if(field_type == 'resource'){ // prepare search string for user to select/create a record
 
@@ -321,10 +322,6 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
                         }
 
                         val = search_val;
-
-                        if(!res['res_url']){
-                            res['ext_url'] = '<a href="'+ recset.fld(rec, 'auturl') +'" target="_blank">View BnF Record</a>'
-                        }
                     }
                 }
 
@@ -353,24 +350,18 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
                 }
             }
 
-            if(new_terms.length > 0){
-                this.closingAction(res, 'term', new_terms); // user prepares term, checks if entered term exists (creates a new term, if it doesn't exist)
-            }else{
-                this.closingAction(res, 'save');
-            }
+            this.closingAction(res);
         }
     },
 
 
     /**
-     * Perform final actions (e.g. create new terms for enum fields) before exiting popup
+     * Perform final actions before exiting popup
      * 
      * Param:
      *  dlg_reponse (json) => mapped values to fields
-     *  action (string) => which action to perform ('save', 'recpointer', 'term')
-     *  new_terms (array) => contains basic data used to help users create terms ([0 => vocab_ID, 1 => dty_ID, 2 => retrieved term label])
      */
-    closingAction: function(dlg_response, action = 'save', new_terms){
+    closingAction: function(dlg_response){
 
         var that = this;
 
@@ -378,103 +369,11 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
             dlg_response = {};
         }
 
-        if(action == 'save'){ // send response and close dialog
+        this.toggleCover('');
 
-            if(this.added_terms){ // update terms cache, if new terms have been created
-
-                window.hWin.HAPI4.EntityMgr.refreshEntityData(['defTerms'], function(success){
-
-                    if(success){
-
-                        that.added_terms = false;
-                        that.closingAction(dlg_response, 'save', null);
-                    }
-                });
-            }else{
-
-                // Pass mapped values back and close dialog
-                this._context_on_close = dlg_response;
-                this._as_dialog.dialog('close');
-            }
-
-        }else if(new_terms && new_terms.length > 0){ // create new terms / rename returned term, user input
-
-            this.toggleCover('Handling Terms....');
-            var cur_details = new_terms.shift();
-
-            var $dlg;
-
-            // Term Dlg - Content
-            var msg = 'You are creating a new term for the <strong>' + $Db.rst(this.options.mapping.rty_ID, cur_details[1], 'rst_DisplayName') + '</strong> field.<br><br>'
-                    + 'New Term: <input type="text" id="new_term_label" value="'+ cur_details[2] +'"> <br><br>'
-                    + 'Please correct the term above, as required, before clicking Insert term<br>(you can type an existing term or a correction)';
-
-            // Term Dlg - Button
-            var btn = {};
-            btn['Insert term'] = function(){
-
-                var new_label = $dlg.find('input#new_term_label').val();
-                var term_Ids = $Db.trm_TreeData(cur_details[0], 'set');
-                var savedTerm = false;
-
-                // Check if entered term exists within vocab
-                for(var i=0; i<term_Ids.length; i++){
-
-                    var trm_Label = $Db.trm(term_Ids[i], 'trm_Label').toLowerCase();
-
-                    if(new_label.toLowerCase() == trm_Label){
-
-                        dlg_response[cur_details[1]] = term_Ids[i];
-                        $dlg.dialog('close');
-                        savedTerm = true;
-
-                        break;
-                    }
-                }
-
-                if(savedTerm){
-
-                    if(new_terms.length <= 0){
-                        action = 'save';
-                    }
-                    that.closingAction(dlg_response, action, new_terms);
-                }else{ // Create new term
-
-                    var request = {
-                        'a': 'save',
-                        'entity': 'defTerms',
-                        'request_id': window.hWin.HEURIST4.util.random(),
-                        'fields': {'trm_ID': -1, 'trm_Label': new_label, 'trm_ParentTermID': cur_details[0]},
-                        'isfull': 0
-                    };
-
-                    window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
-
-                        if(response.status == window.hWin.ResponseStatus.OK){
-
-                            dlg_response[cur_details[1]] = response.data[0]; // response.data[0] == new term id
-
-                            if(new_terms.length <= 0){
-                                action = 'save';
-                            }
-
-                            that.added_terms = true;
-
-                            $dlg.dialog('close');
-                            that.closingAction(dlg_response, action, new_terms);
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-                }
-            };
-
-            // Create dlg
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Unknown term', yes: 'Insert term'}, {default_palette_class: 'ui-heurist-design'});
-        }else{ // Error request
-            window.hWin.HEURIST4.msg.showMsgErr('Unable to close dialog');
-            return;
-        }
+        // Pass mapped values back and close dialog
+        this._context_on_close = dlg_response;
+        this._as_dialog.dialog('close');
     },
     
     /**

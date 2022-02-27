@@ -162,46 +162,32 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
             var s = recordset.fld(record, fldname);
 
-            if(fldname == 'creator'){
-
-                var obj = s;
-                var creator_val = '';
+            if(fldname == 'author'){
 
                 if(!s){ 
                     return '<div style="display:inline-block;width:'+width+'ex" class="truncate"">No provided creator</div>';
                 }
 
-                if(s.hasOwnProperty('firstname') && s['firstname'] != ''){
-                    creator_val = s['firstname'];
-                }
-                if(s.hasOwnProperty('surname') && s['surname'] != ''){
-                    creator_val = (creator_val != '') ? s['surname'] + ', ' + creator_val : s['surname'];
-                }
-                if(s.hasOwnProperty('active') && s['active'] != ''){
-                    creator_val += ' (' + s['active'] + ')';
-                }
-                if(!creator_val){
-                    creator_val = 'Missing creator';
-                }
+                var creator_val = '';
 
-                s = recordset.fld(record, 'contributor');
-                if(s){
+                for(var idx in s){
 
-                    var contrib_val = '';
-                    var hasFirstName = false;
-                    if(s.hasOwnProperty('firstname') && s['firstname'] != ''){
-                        contrib_val = '; ' + s['firstname'];
-                        hasFirstName = true;
-                    }
-                    if(s.hasOwnProperty('surname') && s['surname'] != ''){
-                        contrib_val = (hasFirstName) ? '; ' + s['surname'] + ', ' + s['firstname'] : '; ' + s['surname'];
-                    }
-                    if(s.hasOwnProperty('active') && s['active'] != ''){
-                        contrib_val += ' (' + s['active'] + ')';
-                    }
+                    var cur_string = '';
+                    var cur_obj = s[idx];
 
-                    if(contrib_val != ''){
-                        creator_val += contrib_val;
+                    if(cur_obj.hasOwnProperty('firstname') && cur_obj['firstname'] != ''){
+                        cur_string = cur_obj['firstname'];
+                    }
+                    if(cur_obj.hasOwnProperty('surname') && cur_obj['surname'] != ''){
+                        cur_string = (cur_string != '') ? cur_obj['surname'] + ', ' + cur_string : cur_obj['surname'];
+                    }
+                    if(cur_obj.hasOwnProperty('active') && cur_obj['active'] != ''){
+                        cur_string += ' (' + cur_obj['active'] + ')';
+                    }
+                    if(!cur_string){
+                        creator_val += 'Missing author; ';
+                    }else{
+                        creator_val += cur_string + '; ';
                     }
                 }
 
@@ -233,7 +219,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;' + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
-        var recTitle = fld('creator', 50) + fld('date', 7) + fld('title', 75) + fld('biburl', 12); 
+        var recTitle = fld('author', 50) + fld('date', 7) + fld('title', 75) + fld('biburl', 12); 
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
             + html_thumb
@@ -296,114 +282,121 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
                 if(val != null){
 
+                    if(field_type == 'resource' && !res['ext_url']){
+                        res['ext_url'] = recset.fld(rec, 'biburl');
+                    }
                     var val_isArray = window.hWin.HEURIST4.util.isArray(val);
                     var val_isObject = window.hWin.HEURIST4.util.isObject(val);
+
+                    var search_val = '';
+
+                    if(map_flds[k] == 'author'){ // special scenario for author field
+
+                        for(var i = 0; i < val.length; i++){
+
+                            var cur_val = val[i];
+
+                            if(cur_val['firstname']){
+                                search_val = cur_val['firstname'];
+                            }
+                            if(cur_val['surname']){
+                                search_val = (search_val != '') ? search_val + ' ' + cur_val['surname'] : cur_val['surname'];
+                            }
+                            if(cur_val['active']){
+                                search_val = (search_val != '') ? search_val + ' [' + cur_val['active'] + ']' : 'No Name, years active: ' + cur_val['active'];
+                            }
+                            if(cur_val['id']){
+                                search_val = (search_val != '') ? search_val + ' (id: ' + cur_val['id'] + ')' : 'No Name, id: ' + cur_val['id'];
+                            }
+
+                            if(search_val != ''){
+
+                                if(!res[dty_ID]){
+                                    res[dty_ID] = [];
+                                }
+
+                                res[dty_ID].push(search_val);
+                            }
+                        }
+
+                        continue;
+                    }
 
                     // Match term labels with val, need to return the term's id to properly save its value
                     if(field_type == 'enum'){
 
+                        // For objects and arrays, use first option only
                         if(val_isObject){ 
 
-                            if(Object.keys(val).length > 1){ // should not be a term, or alternative handling required
+                            if(Object.keys(val).length > 1){
                                 continue;
                             }else{ // take first option
                                 val = val[Object.keys(val)[0]];
                             }
+                        }else if(val_isArray){
+                            val = val[0];
                         }
 
                         var vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
                         var term_Ids = $Db.trm_TreeData(vocab_ID, 'set');
 
-                        if(map_flds[k] == 'language' && (val == 'und' || val == 'XX')){ // No language provided
-                            val = null;
-                        }else{
+                        var term_found = false;
 
-                            var term_found = false;
+                        for(var i=0; i<term_Ids.length; i++){
 
-                            for(var i=0; i<term_Ids.length; i++){
+                            var trm_Label = $Db.trm(term_Ids[i], 'trm_Label').toLowerCase();
 
-                                var trm_Label = $Db.trm(term_Ids[i], 'trm_Label').toLowerCase();
+                            if(val_isArray){ // multiple values, Language usually has two values and Type only has one
 
-                                if(val_isArray){ // multiple values, Language usually has two values and Type only has one
+                                for(var j = 0; j < val.length; j++){
 
-                                    for(var j = 0; j < val.length; j++){
-
-                                        if(val[j].toLowerCase() == trm_Label){
-
-                                            val = term_Ids[i];
-                                            term_found = true;
-                                            break;
-                                        }
-                                    }
-                                }else if(val){ // In case of one single value
-                                    
-                                    if(val.toLowerCase() == trm_Label){
+                                    if(val[j].toLowerCase() == trm_Label){
 
                                         val = term_Ids[i];
                                         term_found = true;
                                         break;
                                     }
                                 }
+                            }else if(val){ // In case of one single value
+                                
+                                if(val.toLowerCase() == trm_Label){
 
-                                if(term_found){
+                                    val = term_Ids[i];
+                                    term_found = true;
                                     break;
                                 }
                             }
 
-                            // Check if a value was found, if not prepare for creating new term
-                            if(!term_found){
-                                
-                                if(val_isArray){
-                                    new_terms.push([vocab_ID, dty_ID, val[0]]); 
-                                }else{
-                                    new_terms.push([vocab_ID, dty_ID, val]);
-                                }
+                            if(term_found){
+                                break;
                             }
+                        }
+
+                        // Check if a value was found, if not prepare for creating new term
+                        if(!term_found){
+                            new_terms.push(val);
                         }
                     }else if(field_type == 'resource'){ // prepare search string for user to select/create a record
 
-                        var search_val = '';
+                        if(map_flds[k] == 'publisher'){
 
-                        if(val_isObject){
+                            if(val['location']){
+                                search_val = val['location'];
+                            }
+                            if(val['name']){
+                                search_val = (search_val != '') ? search_val + ': ' + val['name'] : val['name'];
+                            }
+                            if(val['date']){
+                                search_val = (search_val != '') ? search_val + ', ' + val['date'] : 'No Publisher Provided';
+                            }
+                        }else if(val_isObject){
 
-                            if(map_flds[k] == 'creator' || map_flds[k] == 'contributor'){
+                            for(var key in val){
 
-                                if(val['firstname']){
-                                    search_val = val['firstname'];
+                                if(search_val != ''){
+                                    search_val += ', ';
                                 }
-                                if(val['surname']){
-                                    search_val = (search_val != '') ? search_val + ' ' + val['surname'] : val['surname'];
-                                }
-                                if(val['active']){
-                                    search_val = (search_val != '') ? search_val + ' [' + val['active'] + ']' : 'No Name, years active: ' + val['active'];
-                                }
-                                if(val['id']){
-                                    search_val = (search_val != '') ? search_val + ' (id: ' + val['id'] + ')' : 'No Name, id: ' + val['id'];
-                                }
-
-                                if(search_val == ''){
-                                    search_val = 'No Creator Provided';
-                                }
-                            }else if(map_flds[k] == 'publisher'){
-
-                                if(val['location']){
-                                    search_val = val['location'];
-                                }
-                                if(val['name']){
-                                    search_val = (search_val != '') ? search_val + ': ' + val['name'] : val['name'];
-                                }
-                                if(val['date']){
-                                    search_val = (search_val != '') ? search_val + ', ' + val['date'] : 'No Publisher Provided';
-                                }
-                            }else{
-
-                                for(var key in val){
-
-                                    if(search_val != ''){
-                                        search_val += ', ';
-                                    }
-                                    search_val += val[key];
-                                }
+                                search_val += val[key];
                             }
                         }else if(val_isArray){
                             search_val = val[key].join(', ');
@@ -412,31 +405,11 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         }
 
                         val = search_val;
-
-                        if(!res['ext_url']){
-                            res['ext_url'] = '<a href="'+ recset.fld(rec, 'biburl') +'" target="_blank">View BnF Record</a>'
-                        }
-                    }else if(field_type != 'date' && field_type != 'float'){ // Extra handling, in case creator | contributor | publisher are not record pointers
+                    }else{ // Extra handling, in case publisher are not record pointers
 
                         var contructed_val = '';
 
-                        if(map_flds[k] == 'creator' || map_flds[k] == 'contributor'){
-
-                            if(val['firstname']){
-                                contructed_val = val['firstname'];
-                            }
-                            if(val['surname']){
-                                contructed_val = (contructed_val != '') ? val['surname'] + ', ' + contructed_val : val['surname'];
-                            }
-                            if(val['active']){
-                                contructed_val = (contructed_val != '') 
-                                                ? contructed_val + ' [' + val['active'] + ']' 
-                                                : 'No Name, years active: ' + val['active'];
-                            }
-                            /*if(val['id']){
-                                org_val = (org_val != '') ? org_val + ' (id: ' + val['id'] + ')' : 'No Name, id: ' + val['id'];
-                            }*/
-                        }else if(map_flds[k] == 'publisher'){
+                        if(map_flds[k] == 'publisher'){
 
                             if(val['location']){
                                 contructed_val = val['location'];
@@ -480,24 +453,18 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                 }
             }
 
-            if(new_terms.length > 0){
-                this.closingAction(res, 'term', new_terms); // user prepares term, checks if entered term exists (creates a new term, if it doesn't exist)
-            }else{
-                this.closingAction(res, 'save');
-            }
+            this.closingAction(res);
         }
     },
 
 
     /**
-     * Perform final actions (e.g. create new terms for enum fields) before exiting popup
+     * Perform final actions before exiting popup
      * 
      * Param:
      *  dlg_reponse (json) => mapped values to fields
-     *  action (string) => which action to perform ('save', 'recpointer', 'term')
-     *  new_terms (array) => contains basic data used to help users create/correct terms ([0 => vocab_ID, 1 => dty_ID, 2 => retrieved term label])
      */
-    closingAction: function(dlg_response, action = 'save', new_terms){
+    closingAction: function(dlg_response, action = 'save'){
 
         var that = this;
 
@@ -505,102 +472,11 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             dlg_response = {};
         }
 
-        if(action == 'save'){ // send response and close dialog
+        this.toggleCover('');
 
-            if(this.added_terms){ // update terms cache, if new terms have been created
-
-                window.hWin.HAPI4.EntityMgr.refreshEntityData(['defTerms'], function(success){
-
-                    if(success){
-
-                        that.added_terms = false;
-                        that.closingAction(dlg_response, 'save', null);
-                    }
-                });
-            }else{
-
-                // Pass mapped values back and close dialog
-                this._context_on_close = dlg_response;
-                this._as_dialog.dialog('close');
-            }
-        }else if(new_terms && new_terms.length > 0){ // create new terms / rename returned term, user input
-
-            this.toggleCover('Handling Terms....');
-            var cur_details = new_terms.shift();
-
-            var $dlg;
-
-            // Term Dlg - Content
-            var msg = 'You are creating a new term for the <strong>' + $Db.rst(this.options.mapping.rty_ID, cur_details[1], 'rst_DisplayName') + '</strong> field.<br><br>'
-                    + 'New Term: <input type="text" id="new_term_label" value="'+ cur_details[2] +'"> <br><br>'
-                    + 'Please correct the term above, as required, before clicking Insert term<br>(you can type an existing term or a correction)';
-
-            // Term Dlg - Button
-            var btn = {};
-            btn['Insert term'] = function(){
-
-                var new_label = $dlg.find('input#new_term_label').val();
-                var term_Ids = $Db.trm_TreeData(cur_details[0], 'set');
-                var savedTerm = false;
-
-                // Check if entered term exists within vocab
-                for(var i=0; i<term_Ids.length; i++){
-
-                    var trm_Label = $Db.trm(term_Ids[i], 'trm_Label').toLowerCase();
-
-                    if(new_label.toLowerCase() == trm_Label){
-
-                        dlg_response[cur_details[1]] = term_Ids[i];
-                        $dlg.dialog('close');
-                        savedTerm = true;
-
-                        break;
-                    }
-                }
-
-                if(savedTerm){
-
-                    if(new_terms.length <= 0){
-                        action = 'save';
-                    }
-                    that.closingAction(dlg_response, action, new_terms);
-                }else{ // Create new term
-
-                    var request = {
-                        'a': 'save',
-                        'entity': 'defTerms',
-                        'request_id': window.hWin.HEURIST4.util.random(),
-                        'fields': {'trm_ID': -1, 'trm_Label': new_label, 'trm_ParentTermID': cur_details[0]},
-                        'isfull': 0
-                    };
-
-                    window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
-
-                        if(response.status == window.hWin.ResponseStatus.OK){
-
-                            dlg_response[cur_details[1]] = response.data[0]; // response.data[0] == new term id
-
-                            if(new_terms.length <= 0){
-                                action = 'save';
-                            }
-
-                            that.added_terms = true;
-
-                            $dlg.dialog('close');
-                            that.closingAction(dlg_response, action, new_terms);
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-                }
-            };
-
-            // Create dlg
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Unknown term', yes: 'Insert term'}, {default_palette_class: 'ui-heurist-design'});
-        }else{ // Error request
-            window.hWin.HEURIST4.msg.showMsgErr('Unable to close dialog');
-            return;
-        }
+        // Pass mapped values back and close dialog
+        this._context_on_close = dlg_response;
+        this._as_dialog.dialog('close');
     },
     
     /**
@@ -785,6 +661,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             }
 
             if(res_orders.length>0){
+
+                res_records = this.removeDupAuthors(fields.indexOf('author'), res_records);
+
                 // Create the record set for the resultList
                 var res_recordset = new hRecordSet({
                     count: res_orders.length,
@@ -810,6 +689,36 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             this.recordList.resultList('updateResultSet', null);
             window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
         }
+    },
+
+    //
+    removeDupAuthors: function(author_key, records){
+
+        if(records == null || !window.hWin.HEURIST4.util.isObject(records) || window.hWin.HEURIST4.util.isempty(author_key)){
+            return records;
+        }
+
+        for(var i in records){
+
+            var author_details = records[i][author_key];
+
+            if(author_details){
+
+                records[i][author_key] = author_details.filter(function(val, idx, arr){
+
+                    return idx === arr.findIndex(function(obj){
+
+                        if(val.id && obj.id){
+                            return val.id == obj.id;
+                        }else if(val.firstname && val.surname && obj.firstname && obj.surname){
+                            return val.firstname == obj.firstname && val.surname == obj.surname;
+                        }
+                    });
+                });
+            }
+        }
+
+        return records;
     },
 
     // Simple coverall used during API search request, covers entire dialog

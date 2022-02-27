@@ -3822,9 +3822,18 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                                 }
                                             }
                                         }else{
+
+                                            var assigned_fields = []; // list of fields assigned
+                                            var recpointer_vals = []; // list of search values for recpointer fields
+                                            var term_vals = []; // list of label values for enum/term fields
+
+                                            if(recpointer_vals.length == 0 && recset['ext_url']){ // retrieve and delete external url
+                                                recpointer_vals.push([recset['ext_url']]);
+												delete recset['ext_url'];
+                                            }
+
                                             //lookup dialog returns pairs - dtyID=>value
                                             var dtyIds = Object.keys(recset);
-                                            var recpointer_vals = [];
 
                                             for(var k=0; k<dtyIds.length; k++){
 
@@ -3833,14 +3842,49 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                                 if(dt_id>0){
 
                                                     var newval = recset[dt_id];
+                                                    var type = $Db.dty(dt_id, 'dty_Type');
+                                                    var extra_processing = false;
 
-                                                    if($Db.dty(dt_id, 'dty_Type') == 'resource' && !Number.isInteger(newval)){ // prepare for record selection/creations for recpointers
+                                                    if(type == 'resource' || type == 'enum'){
 
-                                                        if(recpointer_vals.length == 0 && recset['ext_url']){
-                                                            recpointer_vals.push([recset['ext_url']]);
+                                                        var completed = []; // completed recpointers/terms
+
+                                                        if(window.hWin.HEURIST4.util.isArray(newval)){
+
+                                                            for(var i = 0; i < newval.length; i++){
+
+                                                                if(Number.isInteger(+newval[i])){ // is fine
+                                                                    completed.push(newval[i]);
+                                                                    continue;
+                                                                }
+
+                                                                // needs additional handling
+                                                                if(type == 'resource'){
+                                                                    recpointer_vals.push([dt_id, newval[i]]);
+                                                                }else{
+                                                                    term_vals.push([dt_id, newval[i]]);
+                                                                }
+                                                            }
+                                                        }else{
+
+                                                            if(Number.isInteger(+newval)){
+                                                                completed.push(newval);
+                                                            }else{
+
+                                                                if(type == 'resource'){
+                                                                    recpointer_vals.push([dt_id, newval]);
+                                                                }else{
+                                                                    term_vals.push([dt_id, newval]);
+                                                                }
+                                                            }
                                                         }
 
-                                                        recpointer_vals.push([dt_id, newval]);
+                                                        if(completed.length > 0){
+                                                            that._editing.setFieldValueByName(dt_id, completed);
+
+                                                            var fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
+                                                            if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
+                                                        }
                                                     }else{
                                                         if(!$.isArray(newval)){
                                                             newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
@@ -3848,13 +3892,17 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                                         }
 
                                                         that._editing.setFieldValueByName( dt_id, newval );
-                                                        //var ele_input = that._editing.getFieldByName(dt_id );
-                                                    } 
+
+                                                        var fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
+                                                        if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
+                                                    }
                                                 }
                                             }
 
-                                            if(recpointer_vals.length > 0){
-                                                that.processResourceFields(recpointer_vals);
+                                            if(term_vals.length > 0){
+                                                that.processTermFields(term_vals, recpointer_vals, assigned_fields, {});
+                                            }else{
+                                                that.processResourceFields(recpointer_vals, assigned_fields);
                                             }
                                         }
                                     }
@@ -4406,32 +4454,178 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     },
 	
 	//
-    // Process record pointer fields values from External Lookups, that aren't integers (ids)
-    // 
-    // Param:
-    //  resource_values (array): array of field ids and field values [{[ext_url]}, [dt_id, value], ...] {optional}
+    // Process term field values from External Lookups, that aren't integers (ids)
     //
-    processResourceFields: function(resource_values){
+    // Param:
+    //  term_values (array): array of field ids and term label [[dt_id, label], ...]
+    //  resource_values (array): array of field ids and field values [{[ext_url]}, [dt_id, value], ...]
+    //  completed_fields (array): array of field names that have already been assigned
+    //  new_terms (object): contains the values for enum fields to assign after handling all terms {dt_id: [trm_id, ...]}
+    //      key => field id (dt_id), value => array of term id(s) ([trm_id1, trm_id2, ...])
+    //
+    processTermFields: function(term_values, resource_values, completed_fields, new_terms){
 
         var that = this;
 
-        if(resource_values){
+        if(new_terms == null) { new_terms = {}; }
 
-            // Misc, styling for 'table cells'
-            var field_style = 'display: table-cell;padding: 7px 3px;max-width: 75px;width: 75px;';
-            var val_style = 'display: table-cell;padding: 7px 3px;max-width: 300px;width: 300px;';
+        if(term_values == null && Object.keys(new_terms).length == 0){ // no terms to handle
+            this.processResourceFields(resource_values, completed_fields);
+        }else if(term_values.length == 0){ // all terms handled
 
-            // Construct Dialog for user handling of recpointer fields
-            var $dlg;
-            var url = '';
+            if(new_terms['refresh']){ // check whether local cache needs updating
 
-            if(resource_values[0].length == 1){ // contains only the external record link
-                url = resource_values[0][0];
+                delete new_terms['refresh'];
+
+                window.hWin.HAPI4.EntityMgr.refreshEntityData(['defTerms'], function(success){
+
+                    if(success){
+
+                        for(var fld_id in new_terms){ // pass term ids to respective fields
+                            that._editing.setFieldValueByName(fld_id, new_terms[fld_id]);
+
+                            var fieldname = $Db.rst(that._currentEditRecTypeID, fld_id, 'rst_DisplayName');
+                            if(!completed_fields.includes(fieldname)) { completed_fields.push(fieldname); }
+                        }
+                        that.processResourceFields(resource_values, completed_fields);
+                    }
+                });
+            }else{ // no cache updating needed
+
+                for(var fld_id in new_terms){
+                    that._editing.setFieldValueByName(fld_id, new_terms[fld_id]);
+
+                    var fieldname = $Db.rst(that._currentEditRecTypeID, fld_id, 'rst_DisplayName');
+                    if(!completed_fields.includes(fieldname)) { completed_fields.push(fieldname); }
+                }
+                this.processResourceFields(resource_values, completed_fields);
             }
 
-            // Recpointer Dlg - Content
-            var msg = 'Values remaining to be attributed, click a row to assign a record<br>'
-                + url +'<br><br>'
+            return;
+        }
+        var cur_term = term_values.shift(); // 0 => dt_id, 1 => term label
+        var vocab_id = $Db.dty(cur_term[0], 'dty_JsonTermIDTree');
+        var field_name = $Db.rst(this._currentEditRecTypeID, cur_term[0], 'rst_DisplayName');
+
+        // add current field (dt_id) to new_terms, and retain any existing values
+        if(!new_terms.hasOwnProperty(cur_term[0])){
+            var existing_val = this._editing.getValue(cur_term[0]);
+            new_terms[cur_term[0]] = (existing_val == null || window.hWin.HEURIST4.util.isempty(existing_val[0])) ? [] : existing_val;
+        }
+
+        var $dlg;
+
+        // Term Dlg - Content
+        var msg = 'You are creating a new term for the <strong>' + field_name + '</strong> field.<br><br>'
+                + 'New Term: <input type="text" id="new_term_label" value="'+ cur_term[1] +'"> <br><br>'
+                + 'Please correct the term above, as required, before clicking Insert term<br>(you can type an existing term or a correction)';
+
+        // Term Dlg - Button
+        var btn = {};
+        btn['Insert term'] = function(){
+
+            var new_label = $dlg.find('input#new_term_label').val();
+            var term_Ids = $Db.trm_TreeData(vocab_id, 'set');
+            var savedTerm = false;
+
+            // Check if entered term exists within vocab
+            for(var i=0; i<term_Ids.length; i++){
+
+                var trm_Label = $Db.trm(term_Ids[i], 'trm_Label').toLowerCase();
+
+                if(new_label.toLowerCase() == trm_Label){
+
+                    new_terms[cur_term[0]].push(term_Ids[i]);
+
+                    $dlg.dialog('close');
+
+                    break;
+                }
+            }
+
+            if(savedTerm){
+                that.processTermFields(term_values, resource_values, completed_fields, new_terms);
+            }else{ // Create new term
+
+                var request = {
+                    'a': 'save',
+                    'entity': 'defTerms',
+                    'request_id': window.hWin.HEURIST4.util.random(),
+                    'fields': {'trm_ID': -1, 'trm_Label': new_label, 'trm_ParentTermID': vocab_id},
+                    'isfull': 0
+                };
+
+                window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        new_terms[cur_term[0]].push(response.data[0]); // response.data[0] == new term id
+
+                        $dlg.dialog('close');
+
+                        new_terms['refresh'] = true;
+                        that.processTermFields(term_values, resource_values, completed_fields, new_terms);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+            }
+        };
+        btn['Skip'] = function(){
+
+            $dlg.dialog('close');
+            that.processTermFields(term_values, resource_values, completed_fields, new_terms);
+        };
+
+        // Create dlg
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Unknown term', yes: 'Insert term', no: 'Skip'}, {default_palette_class: 'ui-heurist-design'});
+    },
+	
+	//
+    // Process record pointer fields values from External Lookups, that aren't integers (ids)
+    // 
+    // Param:
+    //  resource_values (array): array of field ids and field values [{[ext_url]}, [dt_id, value], ...]
+    //  completed_fields (array): array of field names that have already been assigned
+    //
+    processResourceFields: function(resource_values, completed_fields){
+
+        var that = this;
+
+        // Misc, styling for 'table cells'
+        var field_style = 'display: table-cell;padding: 7px 3px;max-width: 125px;min-width: 125px;';
+        var val_style = 'display: table-cell;padding: 7px 3px;max-width: 300px;min-width: 300px;';
+
+        // Construct Dialog for user handling of recpointer fields
+        var $dlg;
+        var url = '';
+        var completed = '';
+
+        var hasValue = (resource_values != null && resource_values.length > 0);
+
+        if(hasValue && resource_values[0].length == 1){ // contains only the external record link
+            url = '<a href="' + resource_values[0][0] + '" target="_blank">View external record <span style="font-size:10px;" class="ui-icon ui-icon-extlink" /></a><br><br>';
+        }
+
+        // Add already assigned fields
+        if(completed_fields.length > 0){
+            completed = 'The following fields have been inserted:<br><ul style="list-style: none;">';
+
+            for(var j = 0; j < completed_fields.length; j++){
+                completed += '<li>' + completed_fields[j] + '</li>';
+            }
+
+            completed += '</ul><br>';
+        }
+
+        var msg = url + completed
+
+        if(hasValue){ // Display full popup
+
+            // Recpointer Dlg - Main Content
+            msg += 'Values remaining to be attributed, click a row to assign a value'
+                + '<br><br>'
+                + '<div id="wrapper" style="max-height: 250px;overflow: auto;">'
                 + '<div style="display: table">'
                 + '<div style="display: table-row">'
                     + '<div style="'+ field_style +'">Field</div><div style="'+ val_style +'">Value</div>'
@@ -4444,38 +4638,37 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             // Add each row of record pointers
             for(var i = 1; i < resource_values.length; i++){
 
-                var cur_values = resource_values[i];
-                for(var j = 0; j < cur_values[1].length; j++){
+                var cur_details = resource_values[i];
 
-                    var cur_details = cur_values[1][j];
+                var field_name = $Db.rst(this._currentEditRecTypeID, cur_details[0], 'rst_DisplayName');
 
-                    var field_name = $Db.rst(that._currentEditRecTypeID, cur_values[0], 'rst_DisplayName'); // $Db.rst(rectype_id, basefield_id, field_name);
+                msg += '<div style="display: table-row;background: rgba(65, 105, 225, 0.8);color: black;" class="recordDiv" data-value="" '
+                            +'data-dtid="'+ cur_details[0] +'" data-index="'+ todo_count +'">'
+                        + '<div style="'+ field_style +'" class="truncate" title="'+ field_name +'">'+ field_name +'</div>'
+                        + '<div style="'+ val_style +'" class="truncate" title="'+ cur_details[1] +'">'+ cur_details[1] +'</div>'
+                    + '</div>';
 
-                    msg += '<div style="display: table-row;" class="recordDiv" data-value="" data-dtid="'+ cur_values[0] +'" data-index="'+ todo_count +'">'
-                            + '<div style="'+ field_style +'" class="truncate" title="'+ field_name +'">'+ field_name +'</div>'
-                            + '<div style="'+ val_style +'" class="truncate" title="'+ cur_details +'">'+ cur_details +'</div>'
-                        + '</div>';
+                var existing_val = this._editing.getValue(cur_details[0]);
+                field_values[cur_details[0]] = (existing_val == null || window.hWin.HEURIST4.util.isempty(existing_val[0])) ? [] : existing_val;
 
-                    field_values[cur_values[0]] = [];
-                    todo_count ++;
-                }
+                todo_count ++;
             }
 
-            msg += '</div>'; // close div table
+            msg += '</div></div>'; // close div.table and div#wrapper
 
             // Recpointer Dlg - Button
             var btn = {};
-            btn['Done'] = function(){
+            btn['Close'] = function(){
                 // Close Recpointer Dlg
                 $dlg.dialog('close');
             }
 
             // Create Recpointer Dlg
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Record pointer fields to set', yes: 'Done'}, {
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Record pointer fields to set', yes: 'Close'}, {
                 default_palette_class: 'ui-heurist-populate', 
                 modal: true, 
                 dialogId: 'lookup_RecPointers', 
-                position: {my: "right-20 center", at: "right-20 center", of: window}
+                position: {my: "left top+20", at: "left top+20", of: window}
             });
 
             var complete_count = 0;
@@ -4523,11 +4716,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     // Process selected record set
                     onselect: function(event, data){
 
+                        if(!data || !data.selection) return;
+
                         var recset = data.selection;
 
                         var record = recset.getFirstRecord();
                         var rec_ID = recset.fld(record, 'rec_ID')
                         var rec_Title = recset.fld(record, 'rec_Title');
+
+                        if(!rec_ID || rec_ID <= 0 || rec_Title=='') return;
 
                         field_values[dt_id].push(rec_ID);
 
@@ -4557,8 +4754,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 window.hWin.HEURIST4.ui.showEntityDialog('records', opts);
             });
+        }else{// Display reduced version for 2 seconds
 
-            $($dlg.find('.recordDiv')[0]).click();
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 
+                {title: 'Field mapping completed', ok: 'Close'}, 
+                {default_palette_class: 'ui-heurist-populate', position: {my: "left top+20", at: "left top+20", of: window}}
+            );
+
+            setTimeout(function(){ $dlg.dialog('close'); }, 2000);
         }
     }
 });

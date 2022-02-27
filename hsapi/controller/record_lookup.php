@@ -113,6 +113,8 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
             $formatted_array = array();
 
+            $author_idx = 0;
+
             foreach ($details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record->controlfield as $key => $cf_ele) { // controlfield elements
                 $cf_tag = @$cf_ele->attributes()['tag'];
 
@@ -173,36 +175,23 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
                             $formatted_array['publisher']['date'] = (string)$sf_ele[0]; //preg_replace('/[^0-9]/', '', (string)$sf_ele[0]);
                         }
                     }
-                }else if($df_tag == '100' || (!array_key_exists('creator', $formatted_array) && $df_tag == '101')) { // Creator
+                }else if($df_tag == '100' || $df_tag == '101' || $df_tag == '700') { // Creator
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
 
                         if($sf_code == '3') {
-                            $formatted_array['creator']['id'] = (string)$sf_ele[0];
+                            $formatted_array['author'][$author_idx]['id'] = (string)$sf_ele[0];
                         }else if($sf_code == 'a') {
-                            $formatted_array['creator']['surname'] = (string)$sf_ele[0];
+                            $formatted_array['author'][$author_idx]['surname'] = (string)$sf_ele[0];
                         }else if($sf_code == 'm') {
-                            $formatted_array['creator']['firstname'] = (string)$sf_ele[0];
+                            $formatted_array['author'][$author_idx]['firstname'] = (string)$sf_ele[0];
                         }else if($sf_code == 'd') {
-                            $formatted_array['creator']['active'] = (string)$sf_ele[0];
+                            $formatted_array['author'][$author_idx]['active'] = (string)$sf_ele[0];
                         }
                     }
-                }else if($df_tag == '700'){ // Contributor
 
-                    foreach ($df_ele->subfield as $sub_key => $sf_ele) {
-                        $sf_code = @$sf_ele->attributes()['code'];
-
-                        if($sf_code == '3') {
-                            $formatted_array['contributor']['id'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'a') {
-                            $formatted_array['contributor']['surname'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'm') {
-                            $formatted_array['contributor']['firstname'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'd') {
-                            $formatted_array['contributor']['active'] = (string)$sf_ele[0];
-                        }
-                    }
+                    $author_idx ++;
                 }else if($df_tag == '020') { // ISBN
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {

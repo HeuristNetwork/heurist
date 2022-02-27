@@ -396,11 +396,13 @@ $.widget( "heurist.lookupConfig", {
             }
 
             // Update BnF Config
-            if(that.options.service_config[key]['service'] == 'bnfLibraryBib'){
+            if(that.options.service_config[key]['service'] == 'bnfLibrary'){
 
                 var n_fields = that.options.service_config[key]['fields'];
                 var hasFieldChanges = false;
                 for(var obj_key in n_fields){
+
+                    var val = '';
                     if(obj_key == 'subject'){
 
                         delete n_fields[obj_key];
@@ -408,6 +410,24 @@ $.widget( "heurist.lookupConfig", {
 
                         hasFieldChanges = true;
                     }else if(obj_key == 'rights'){
+
+                        delete n_fields[obj_key];
+
+                        hasFieldChanges = true;
+                    }else if(obj_key == 'creator'){
+
+                        val = n_fields[obj_key];
+                        n_fields['author'] = val;
+
+                        delete n_fields[obj_key];
+
+                        hasFieldChanges = true;
+                    }else if(obj_key == 'contributor'){
+
+                        if(!n_fields.hasOwnProperty('author')){
+                            val = n_fields[obj_key];
+                            n_fields['author'] = val;
+                        }
 
                         delete n_fields[obj_key];
 
