@@ -500,15 +500,15 @@ window.hWin.HEURIST4.dbs = {
                             }
                         }
                     });//for details
-                    
+
+                    //add resource and relation at the end of result array
+                    $children = $children.concat($children_links);
+
                     //sort bt rst_DisplayOrder
                     $children.sort(function(a,b){
                         return (a['display_order']<b['display_order'])?-1:1;
                     });
-                    
-                    //add resource and relation at the end of result array
-                    $children = $children.concat($children_links);
-                    
+
                     //--------------------------------------------
                     //find all reverse links and relations
                     if( ($mode==4 && $recursion_depth<2) || ($mode==5 && $recursion_depth==0) )
