@@ -427,7 +427,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 window.hWin.HEURIST4.remote = {};
                                 window.hWin.HEURIST4.remote.rectypes = response.data.rectypes;
                                 
-                                that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes, false ); //change to true to hide where rty_ShowInList=0
+                                that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes, true ); //change to true to hide where rty_ShowInList=0
 
                                 window.hWin.HAPI4.SystemMgr.get_defs( //only basefield names
                                     {detailtypes:'all', mode:0, remote:that.options.import_structure.database_url}, function(response){
@@ -516,14 +516,24 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
 
         var idx_visibility = rectypes.typedefs.commonNamesToIndex.rty_ShowInLists;
+        var idx_groupid = rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID;
         var hasRtToImport = false;
+        var trash_id = -1;
+
+        for (var key in rectypes.groups){
+            if(rectypes.groups[key].name == 'Trash'){
+                trash_id = rectypes.groups[key].id;
+                break;
+            }
+        }
 
         for (var r_id in rectypes.typedefs)
         {
             if(r_id>0){
                 var rectype = rectypes.typedefs[r_id].commonFields;
+                var isHidden = (rectype[idx_visibility] == '0' || rectype[idx_groupid] == trash_id);
 
-                if(hideDisabled && rectype[idx_visibility]=='0' ){
+                if(hideDisabled && isHidden){
                     continue;
                 }
                 
