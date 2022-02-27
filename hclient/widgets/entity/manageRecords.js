@@ -3235,7 +3235,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         var curr_stage = fields[dtyID];
                         
                         //TRM_SWF_IMPORT should we disable it?
-                        
+
                         for (var i=0; i<this._swf_rules.length; i++){
                             var is_disabled = '';
                             if(this._swf_rules[i]['swf_StageRestrictedTo']){
@@ -3253,21 +3253,39 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 +'</option>';
                         }
                         
-                        
-                        var $dlg = window.hWin.HEURIST4.msg.showPrompt(
+                        var $dlg;
+                        var btns = {};
+
+                        btns[window.hWin.HR('Save')] = function(){
+                            fields[dtyID] = $dlg.find('#dlg-prompt-value').val();
+                            that._saveEditAndClose( fields, afterAction );
+
+                            $dlg.dialog('close');
+                        };
+                        btns[window.hWin.HR('Cancel')] = function(){
+                            swf_mode = $dlg.find('.sel_workflow_stages').val();
+                            that.element.find('.sel_workflow_stages').val(swf_mode);
+
+                            $dlg.dialog('close');
+                        };
+
+                        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                         '<div class="heurist-helper3">This setting will determine actions to be taken such as visibility settings, marking for publication or email notifications</div>'
                         +'<p><label>Workflow stage: </label><select id="dlg-prompt-value" class="text ui-corner-all">'
                             + opts_swf_stages
-                        +'</select>&nbsp;&nbsp;<button id="btn_advance">Advance</button></p>',
-                        function(val){
-                            
-                            fields[dtyID] = val;
-                            that._saveEditAndClose( fields, afterAction );
-                            
-                        }, {title: window.hWin.HR('Set workflow stage'), yes: window.hWin.HR('Save')},
+                        +'</select>&nbsp;&nbsp;<button id="btn_advance">Advance</button></p><br><br>', btns, 
+                        {title: window.hWin.HR('Set workflow stage'), yes: window.hWin.HR('Save'), no: window.hWin.HR('Cancel')},
                         {default_palette_class: this.options.default_palette_class}); //'ui-heurist-populate'
-                        
-                        
+
+                        var $ele = this.element.find('.div_workflow_stages');
+
+                        if($ele.length == 1){
+                            $ele.clone(true, true)
+                                .appendTo($dlg);
+
+                            $dlg.find('.sel_workflow_stages').val(swf_mode);
+                        }
+
                         $dlg.find('#btn_advance').button({icon:'ui-icon-caret-1-e',iconPosition:'end'})
                                 .css('font-size','0.9em')
                         .click(function(){  //select next
@@ -3275,9 +3293,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 if($dlg.find('#dlg-prompt-value')[0].selectedIndex<0){
                                       $dlg.find('#dlg-prompt-value')[0].selectedIndex=0;            
                                 }
-                        })
-                        
-                        
+                        });
+
                         return;
                     }
                 } //END assign workflow stage field 2-9453
