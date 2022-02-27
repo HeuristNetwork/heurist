@@ -103,7 +103,13 @@
 
             $success = $mysqli->select_db($database_name_full);
             if(!$success){
-                return array(HEURIST_INVALID_REQUEST, "Could not open database ".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8'));
+                $db_exists = mysql__select_value($mysqli, "SHOW DATABASES LIKE '$database_name_full'");
+
+                if($db_exists == null){
+                    return array(HEURIST_ACTION_BLOCKED, "The requested database '".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8')."' does not exist");
+                }else{
+                    return array(HEURIST_INVALID_REQUEST, "Could not open database ".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8'));
+                }
             }
 
             //$mysqli->query('SET CHARACTER SET utf8mb4'); //utf8 is utf8mb3 by default
