@@ -1744,9 +1744,9 @@ $.widget( "heurist.editing_input", {
                         .addClass('sel_link2').css({'max-width':'300px'}) //, 'background': 'lightgray'})
                         .appendTo( $inputdiv );
             
-            var __show_select_dialog = browseRecords(this, $input); //see editing_exts
+            var __show_select_function = browseRecords(this, $input); //see editing_exts
             
-            that._findAndAssignTitle($input, value, __show_select_dialog);
+            that._findAndAssignTitle($input, value, __show_select_function);
             
             this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
         } 
@@ -4810,6 +4810,8 @@ console.log('onpaste');
                                     .prependTo($inputdiv)
                                     .hide();
 
+                        $inputdiv.find('input[data-id="'+ value +'"]').prop('checked', true);
+
                         that._on( $input, {change:that.onChange} );
 
                         that.inputs[idx] = $input;
@@ -4915,14 +4917,14 @@ console.log('onpaste');
         }
 
         var f_width = this.f('rst_DisplayWidth');
-        f_width = (window.hWin.HEURIST4.util.isempty(f_width) || f_width < 100) ? 100 : f_width;
+        f_width = (window.hWin.HEURIST4.util.isempty(f_width) || f_width < 100) ? 110 : f_width + 10; // +10 for extra room
         var labelWidth = 25; // label+input width
 
         //var taken_width = this.input_cell.parent().find('span.editint-inout-repeat-button').width() + this.input_cell.parent().find('div.header').width() + 20;
 
         $inputdiv.css({'max-width': f_width + 'ex', 'min-width': f_width + 'ex'}); console.log($inputdiv);
 
-        var row_limit = Math.floor(f_width / labelWidth) - 1;
+        var row_limit = Math.floor(f_width / labelWidth);
 
         for(var i = 0; i < terms_list.length; i++){
 

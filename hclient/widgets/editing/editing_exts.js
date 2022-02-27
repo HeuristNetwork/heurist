@@ -723,15 +723,15 @@ function browseRecords(_editing_input, $input){
                         var icon = window.hWin.HAPI4.iconBaseURL + item['rec_RecTypeID'];
                         $(opt).attr('icon-url', icon);
                         $(opt).attr('data-rty', item['rec_RecTypeID']);
-
-                            
                     });
 
 //console.log('init hselect '+key);                    
                     $(that.selObj).css('max-width','300px');
                     that.selObj = window.hWin.HEURIST4.ui.initHSelect(that.selObj, false,null,
                         function(){
-                            var ele = that.selObj.hSelect('menuWidget');                                    
+                            var ele = that.selObj.hSelect('menuWidget');
+                            ele.css('max-width', '500px');
+                            ele.find('div.ui-menu-item-wrapper').addClass('truncate');
                             ele.find('.rt-icon').css({width:'12px',height:'12px','margin-right':'10px'});
                             ele.find('.rt-icon2').css({'margin-right':'0px'});
                             var inpt = ele.find('input.input_menu_filter');
@@ -784,11 +784,16 @@ function browseRecords(_editing_input, $input){
                     that._off($(that.selObj), 'change');    
                 }
                 
+                var $inpt_ele = $inputdiv.find('.sel_link2');
+                if($inpt_ele.is(':hidden') && $inputdiv.find('.link-div').length == 1){
+                    $inpt_ele = $inputdiv.find('.link-div');
+                }
+
                 that.selObj.val('');
                 that.selObj.hSelect('open');
                 that.selObj.hSelect('widget').hide();
                 that.selObj.hSelect('menuWidget')
-                        .position({my: "left top", at: "left bottom", of: $inputdiv.find('.sel_link2')});
+                        .position({my: "left top", at: "left bottom", of: $inpt_ele});
                 
 
                 that._on($(that.selObj),{change:function(event){
@@ -814,7 +819,7 @@ function browseRecords(_editing_input, $input){
                                  rec_Title: rec_Title, 
                                  rec_RecTypeID: rec_RecType,
                                  rec_IsChildRecord:false
-                                }, __show_select_dialog);
+                                }, __show_select_dropdown);
                             //ele.appendTo($inputdiv);
                             that.onChange();
                             
@@ -834,11 +839,11 @@ function browseRecords(_editing_input, $input){
         }
         
     
-        that._on( $inputdiv.find('.sel_link2'), { click: __show_select_dropdown } );    
+        that._on( $inputdiv.find('.sel_link2'), { click: __show_select_dropdown } );
+
+        return __show_select_dropdown;
     }else{
-        that._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );    
+        that._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
+        return __show_select_dialog;
     }
-    
-    return __show_select_dialog;
-    
 }

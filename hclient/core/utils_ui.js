@@ -3026,7 +3026,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     
         $('<span style="float:left;padding-right:2px"><img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         + '" class="rt-icon" style="background-image: url(&quot;'+icon_url+ '&quot;);"/></span>')
-          .appendTo( wrapper );    
+          .prependTo( wrapper );    
 
     }
 
