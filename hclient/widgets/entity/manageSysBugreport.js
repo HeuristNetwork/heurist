@@ -34,7 +34,7 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';
         this.options.width = 700;
-        this.options.height = 800;
+        this.options.height = 825;
 
         this._super();
     },
@@ -78,14 +78,44 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
     },
     
     _afterInitEditForm: function(){
+
         this._super();
-        
+
+        var that = this;
+
         //find file uploader and make entire dialogue as a paste zone - to catch Ctrl+V globally
         var ele = this._as_dialog.find('input[type=file]');
         if(ele.length>0){
             ele.fileupload('option','pasteZone',this._as_dialog);
         }
-        
+
+		// Add spacing between fields, and give textarea's larger height
+        var eles = this._editing.getAllFields();
+        for(var i = 0; i < eles.length; i++){ // ignore last element (image field)
+
+            var $ele = $(eles[i]);
+
+            if($ele.find('textarea').length != 0 || $ele.find('.fileupload').length != 0){
+                $ele.css({'padding-top': '2.2em', 'display': 'block'});
+
+                if($ele.find('textarea').length != 0){
+                    setTimeout(function(idx){ $(eles[idx]).find('textarea').attr('rows', 14); }, 1500, i);
+                }
+            }else{
+                // text input, first element
+                $ele.css({'padding-top': '1.2em', 'display': 'block'});
+                // add extra info at top
+				var $extra_info = $('<div>')
+                                    .append('<div class="header">')
+                                    .append($ele.find('span.editint-inout-repeat-button').clone())
+                                    .append('<div class="input-cell">');
+
+                $extra_info.find('div.input-cell')
+                            .html('For bug reports it is very helpful if you can provide a screen capture,<br>preferably of the whole screen including the URL');
+
+                $ele.parent().prepend($extra_info);
+            }
+        }
     },    
     
 });
