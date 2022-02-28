@@ -40,6 +40,7 @@ $.widget( "heurist.mediaViewer", {
 
     // the constructor
     _create: function() {
+console.log('!!!!');
         this.mediacontent = this.element;
         
         if(window.hWin && window.hWin.HAPI4){
@@ -429,7 +430,7 @@ $.widget( "heurist.mediaViewer", {
         $('body').unbind('click.fb-start');
         //this.mediacontent.off("click.fb-start", '[data-myfancybox="fb-images"]');
         
-        if(window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ 
+        if(window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ 
                 window.hWin.HAPI4.fancybox( fancy_opts );
         }else if ($.isFunction($.fn.fancybox)){
                 $.fn.fancybox( fancy_opts );

@@ -405,12 +405,37 @@ function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
 
 //
 // Strip js and clean html
+// it calls before other output filters
 //
 function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $template){
     
     global $is_jsallowed;
     
     if($is_jsallowed){
+        
+        //check if need to init mediaViewer
+        if(strpos($tpl_source,'fancybox-thumb')>0){
+            
+            $tpl_source = 
+                    '<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>'
+                    .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-ui.js"></script>'
+                    .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.js"></script>'
+                    .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/widgets/viewers/mediaViewer.js"></script>'
+.'<script>'
+.'var rec_Files=[];</script>'
+        .$tpl_source;
+            
+            $tpl_source .= (
+                '<script>$(function() {'
+                
+.'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend","<link rel=\"stylesheet\" href=\"'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.css\" />");'                
+                
+                    .'$("body").mediaViewer({rec_Files:rec_Files, showLink:false, selector:".fancybox-thumb", '
+                    .'database:"'.HEURIST_DBNAME.'", baseURL:"'.HEURIST_BASE_URL.'"});'    
+                  .'});'
+                .'</script>');
+        }
+        
         
         return $tpl_source;
         
@@ -479,6 +504,8 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
 
 //
 // SMARTY callback:  calls save_report_output2
+// executed after smarty execution - save output to file
+// before this it calls smarty_output_filter_strip_js to strip js
 //
 function smarty_output_filter($tpl_source, Smarty_Internal_Template $template)
 {
@@ -619,6 +646,7 @@ function save_report_output2($tpl_source){
 
 //
 // wrap smarty output into javascript function document.write
+// before this it calls smarty_output_filter_strip_js to strip js
 //
 function smarty_output_js_filter($tpl_source, Smarty_Internal_Template $template)
 {
@@ -782,6 +810,8 @@ function smarty_function_wrap($params, &$smarty)
                 $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
                 $originalFileName = $fileinfo['ulf_OrigFileName'];
                 $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
+                $file_desc = htmlspecialchars(strip_tags($fileinfo['ulf_Description']));
+                $mimeType = $fileinfo['fxm_MimeType'];
                     
                 $file_playerURL = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce.'&mode=tag';
                 $file_thumbURL  = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&thumb='.$file_nonce;
@@ -790,24 +820,29 @@ function smarty_function_wrap($params, &$smarty)
                 if($mode=="link") {
 
                     $sname = (!$originalFileName || $originalFileName=='_remote' || strpos($originalFileName,'_iiif')===0)?$external_url:$originalFileName;
-                    $sres = $sres."<a href='".$file_URL."' target='_blank' title='".$fileinfo['ulf_Description']."' $style>".$sname."</a>";
+                    $sres = $sres."<a href='".$file_URL."' target='_blank' title='".$file_desc."' $style>".$sname."</a>";
                     
                 }else 
-                if($mode=="thumbnail" ){
+                if($mode=="thumbnail"){
 
-                    $sres = $sres."<a href='".$file_URL."' target='_blank'>".
-                    "<img src='".$file_thumbURL."' title='".$fileinfo['ulf_Description']."' $size $style/></a>";
-
+                    if(@$params['fancybox']){
+                        $sres .= "<img class=\"fancybox-thumb\" data-id=\"$file_nonce\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>";
+                    }else{
+                        $sres = $sres."<a href='".$file_URL."' target='_blank'>".
+                        "<img class=\"\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>";
+                    }
+                    
                 }else{ //player is default
 
-
-                
-                    $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
-                    //$params = $fileinfo['ulf_Parameters'];  //ulf_Parameters - not used anymore (for backward capability only)
-                    
-                    //$sres = $sres.getPlayerTag($value['nonce'], $value['mimeType'], $value['URL'], $size);
                     $sres = $sres.fileGetPlayerTag($file_nonce, $mimeType, $params, $external_url, $size, $style); //see db_files
                     
+                }
+                
+                if(@$params['fancybox']){
+                    $sres .= ('<script>rec_Files.push({id:"'.$file_nonce
+                            .'",mimeType:"'.$mimeType
+                            .'",filename:"'.htmlspecialchars($originalFileName)
+                            .'",external:"'.htmlspecialchars($external_url).'"});</script>');
                 }
 
             }

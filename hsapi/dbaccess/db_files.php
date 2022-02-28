@@ -766,9 +766,17 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
             if(($size==null || $size=='') && $style==''){
                 $size = 'width="300"';
             }
+            $fancybox = '';
+            if(@$params['fancybox']){
+                $fancybox =' class="fancybox-thumb" data-id="'.$fileid.'" ';               
+            }else if(!$external_url){
+                $fancybox =' data-id="'.$fileid.'" ';               
+            }
             $result = '<img '.$size.$style.' src="'.$filepath.'"'
-                .($external_url?'':' data-id="'.$fileid.'"')
+                .$fancybox
                 .'/>';
+                
+                
 
     }else if($mimeType=='application/pdf'){
         //error_log($filepath);                 
