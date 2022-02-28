@@ -215,7 +215,7 @@ $.widget( "heurist.search_faceted", {
             if(this.options.is_h6style && !this.options.is_publication){
                 
                 this.div_title = $('<div class="ui-heurist-header truncate" '
-                    +'style="position:relative;width:180px;padding:10px;font-size: 0.9em;">')
+                    +'style="position:relative;padding:10px;font-size: 0.9em; max-width:90%">')  //width:180px;
                     .appendTo( this.div_header );
                 
             }else{
