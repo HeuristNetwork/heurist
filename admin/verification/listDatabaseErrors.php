@@ -1938,6 +1938,9 @@ if($active_all || in_array('nonstandard_fields', $active)) {
         if(defined('DT_PARENT_ENTITY') && DT_PARENT_ENTITY>0){
             $query = $query." AND dty_ID != ".DT_PARENT_ENTITY;
         }    
+        if($system->defineConstant('DT_WORKFLOW_STAGE')){
+            $query = $query." AND dty_ID != ".DT_WORKFLOW_STAGE;
+        }
 
         $res = $mysqli->query( $query );
 
