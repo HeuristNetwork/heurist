@@ -406,14 +406,14 @@ function loadPageContent(pageid, eventdata){
         var page_target = $('#main-content');
         //_dout('load page  '+pageid+'   '+page_footer.length);              
         
-        var supp_options = {rec_ID:home_page_record_id};
+        var supp_options = {rec_ID:home_page_record_id, 
+            heurist_resultListExt:{record_with_custom_styles: home_page_record_id}};
         
 
 <?php        
 //style from field DT_CMS_CSS of home record 
 if($site_css!=null){
-        print 'supp_options = {heurist_resultListExt:{custom_css_for_frame:"'
-            .htmlspecialchars(str_replace("\n",' ',$site_css)).'"}};';
+//        print 'supp_options = {heurist_resultListExt:{custom_css_for_frame:"'.htmlspecialchars(str_replace("\n",' ',$site_css)).'"}};';
 }
 ?>          
         
@@ -630,7 +630,7 @@ function afterPageLoad(document, pageid, eventdata){
             //disable it
             $( "#main-content" ).off( "onexitpage");
             //execute the script
-            window[func_name]( document, args );
+            window[func_name]( document, pageid, eventdata );
         }
     }
 

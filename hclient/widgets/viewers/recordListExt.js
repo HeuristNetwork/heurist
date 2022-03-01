@@ -31,11 +31,13 @@ $.widget( "heurist.recordListExt", {
         selection: null,  //list of selected record ids
         url:null,               //
         is_frame_based: true,
-        custom_css_for_frame: null,
         
         reload_for_recordset: false, //refresh every time recordset is changed - for smarty report from CMS
         search_realm: null,
         search_initial: null,  //NOT USED query string or svs_ID for initial search
+        
+        custom_css_for_frame: null,
+        record_with_custom_styles: 0, //record id with custom css and style links DT_CMS_CSS and DT_CMS_EXTFILES
         
         onLoadComplete: null  //callback
         
@@ -295,6 +297,11 @@ this._dout('refresh vis='+this.element.is(':visible'));
                         newurl = newurl + '&db=' + window.hWin.HAPI4.database;    
                     }
                     
+                    if(this.options.record_with_custom_styles){
+                        newurl = newurl + '&cssid=' + this.options.record_with_custom_styles;
+                    }
+                    
+                    
                 }
             }
             if(newurl==null){
@@ -336,6 +343,10 @@ this._dout('refresh vis='+this.element.is(':visible'));
             if(this.options.reload_for_recordset)
             {
                 var newurl = window.hWin.HAPI4.baseURL +  this.options.url.replace("[query]", query_string_main);
+                
+                if(this.options.record_with_custom_styles){ //to load custom css and style links
+                    newurl = newurl + '&cssid=' + this.options.record_with_custom_styles;
+                }
                 
                 this.loadURL( newurl );
                 return;    
@@ -412,6 +423,8 @@ this._dout('refresh vis='+this.element.is(':visible'));
     //
     _checkRecordsetLengthAndRunSmartyReport: function(limit){
         
+console.log('_checkRecordsetLengthAndRunSmartyReport');
+        
         if(!this.options.is_frame_based) return;
 
         var showReps = this.dosframe[0].contentWindow.showReps;
@@ -440,6 +453,9 @@ this._dout('refresh vis='+this.element.is(':visible'));
         showReps.processTemplate();
     },
     
+    //
+    //
+    //
     _checkRecordsetLengthAndRunCrosstabsAnalysis: function(limit, query_string_main){
 /* @todo */
         if(!this.options.is_frame_based) return;

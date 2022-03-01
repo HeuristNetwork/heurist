@@ -40,7 +40,6 @@ $.widget( "heurist.mediaViewer", {
 
     // the constructor
     _create: function() {
-console.log('!!!!');
         this.mediacontent = this.element;
         
         if(window.hWin && window.hWin.HAPI4){

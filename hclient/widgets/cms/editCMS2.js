@@ -1314,10 +1314,12 @@ console.log('BLUR');
             if(overlay_ele.length==0){
                 overlay_ele = $('<div>').addClass('cms-element-overlay').appendTo(_layout_container); //attr('data-lid',ele_ID).insertAfter
             }
-            overlay_ele.attr('data-lid',ele_ID)
-            .css({top:((pos.top-pos2.top)+'px'),
-                left:((pos.left-pos2.left)+'px'),width:cms_ele.width(),height:cms_ele.height()});
-            overlay_ele.css('visibility','visible');
+            if(pos && pos2){
+                overlay_ele.attr('data-lid',ele_ID)
+                .css({top:((pos.top-pos2.top)+'px'),
+                    left:((pos.left-pos2.left)+'px'),width:cms_ele.width(),height:cms_ele.height()});
+                overlay_ele.css('visibility','visible');
+            }
         }
     }
 

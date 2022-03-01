@@ -73,6 +73,7 @@ $publishmode = 0;
 $execution_counter = 0;
 $execution_total_counter = 0;
 $is_jsallowed = true;
+$record_with_custom_styles = 0; //record id with custom css and style links DT_CMS_CSS and DT_CMS_EXTFILES
 
 $is_included = isset($system); //this script is included into other one
 
@@ -111,13 +112,15 @@ function executeSmartyTemplate($system, $params){
 
     //$smarty is inited in smartyInit.php
     global $smarty, $outputfile, $isJSout, $gparams, $max_allowed_depth, $publishmode,
-           $execution_counter, $execution_total_counter, $is_included, $is_jsallowed;
+           $execution_counter, $execution_total_counter, $is_included, $is_jsallowed,
+           $record_with_custom_styles;
 
            
     $isJSout     = (array_key_exists("mode", $params) && $params["mode"]=="js"); //use javascript wrap
     $outputfile  = (array_key_exists("output", $params)) ? $params["output"] :null;
     $publishmode = (array_key_exists("publish", $params))? intval($params['publish']):0;
     $emptysetmessage = (array_key_exists("emptysetmessage", $params))? $params['emptysetmessage']:null;
+    $record_with_custom_styles = (array_key_exists("cssid", $params))? $params['cssid']:null;
            
     if(!isset($system) || !$system->is_inited()){
         smarty_error_output( $system, null );
@@ -409,7 +412,7 @@ function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
 //
 function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $template){
     
-    global $is_jsallowed;
+    global $system, $is_jsallowed, $record_with_custom_styles;
     
     if($is_jsallowed){
         
@@ -434,6 +437,51 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                     .'database:"'.HEURIST_DBNAME.'", baseURL:"'.HEURIST_BASE_URL.'"});'    
                   .'});'
                 .'</script>');
+        }
+        
+        //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
+        if($record_with_custom_styles>0){
+            //find record with css fields
+            $css_fields = array();
+            if($system->defineConstant('DT_CMS_CSS')){
+                array_push($css_fields, DT_CMS_CSS);
+            }
+            if($system->defineConstant('DT_CMS_EXTFILES')){
+                array_push($css_fields, DT_CMS_EXTFILES);
+            }
+            if(count($css_fields)>0){
+                $record = recordSearchByID($system, $record_with_custom_styles,$css_fields,'rec_ID');
+                if($record && @$record['details']){
+
+                    if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
+                       //add to begining 
+                       $tpl_source = '<style>'.recordGetField($record, DT_CMS_CSS).'</style>'.$tpl_source;
+                       
+                       $tpl_source = $tpl_source.'<script>if(document.body) document.body.classList.add("smarty-report");</script>';
+                    }
+                    
+                    if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
+                        //add to header
+                        $external_files = @$record['details'][DT_CMS_EXTFILES];
+                        if($external_files!=null){
+                            if(!is_array($external_files)){
+                                $external_files = array($external_files);
+                            }
+                            if(count($external_files)>0){
+            $tpl_source = $tpl_source.'<script>$(function() {';
+                                foreach ($external_files as $ext_file){
+                                    if(strpos($ext_file,'<link')===0){ // || strpos($ext_file,'<script')===0
+            $tpl_source = $tpl_source.'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend",\''
+                                    .$ext_file //str_replace('"','\"',$ext_file)
+                                    .'\');';                                        }
+                                }
+                                
+            $tpl_source = $tpl_source.'});</script>';
+                            }
+                        }
+                    }
+                }
+            }
         }
         
         

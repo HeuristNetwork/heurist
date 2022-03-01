@@ -302,8 +302,11 @@ function hLayoutMgr(){
         }
         
         if(_supp_options){
-            if(_supp_options.rec_ID) _supp_options.rec_ID = null; //@todo remove assignment - we don'y use it
-            layout.options = $.extend(layout.options, _supp_options);    
+            if(_supp_options.rec_ID) _supp_options.rec_ID = null; //@todo remove assignment - we don't use it
+            
+            if(_supp_options[layout.appid]){
+                layout.options = $.extend(layout.options, _supp_options[layout.appid]);        
+            }
         }
         
         
