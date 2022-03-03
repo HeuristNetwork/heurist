@@ -1054,8 +1054,8 @@ class HPredicate {
             { //subqueries
                 //special bahvior for relation - extract reltypes and record ids
                 $p_type = strtolower($this->pred_type);
-                if($p_type=='related_to' || $p_type=='rt' ||
-                   $p_type=='relatedfrom' || $p_type=='rf')
+                if($p_type=='related_to' || $p_type=='relatedto' || $p_type=='rt' ||
+                   $p_type=='related_from' || $p_type=='relatedfrom' || $p_type=='rf')
                 {
                     
                     $this->relation_fields = array();
@@ -1065,27 +1065,37 @@ class HPredicate {
                     // extract all with predicate type "r" - this is either relation type or other fields from relatinship record
                     // "rf:245":[{"t":4},{"r":6421}] - related from organization (4) with relation type 6421
                     foreach($value as $idx=>$val){
-                        if($idx==='r' || @$val['r'])
+                        if($idx==='r'){ //for relation type
+                            
+                            $this->relation_types = prepareIds($val);
+                            
+                        }else if (is_array($val) && @$val['r']) //for relation type
                         {
-                            if(@$val['r']) $val = $val['r'];
+                            $val = $val['r'];
                             $this->relation_types = prepareIds($val);
                             
                             //remove from array
                             //array_splice($this->value, $idx, 1);
                             //break;
 
-                        }else if(strpos($idx,'r')===0 || strpos(@array_keys($val)[0],'r')===0){ 
-                            //fields in relationship record
-                            //{"t":10,"rf:245":[{"t":4},{"r":6421},{"relf:10":">2010"}]}}
-                            if(strpos($idx,'r')===0){   //that's for {,,}
-                               $rel_field = str_replace('r:','f:',$idx);
+                        //for fields in relation record
+                        }else if(strpos($idx,'r:')===0 || strpos($idx,'relf:')===0){  //that's for {"r:10":10,,}
+                               //fields in relationship record
+                               //{"r:10":">2010"}
+                               $rel_field = $idx;
+                               $rel_field = strpos($rel_field,'r:')===0
+                                                    ?str_replace('r:','f:',$rel_field)
+                                                    :str_replace('relf:','f:',$rel_field);    
                                $this->relation_fields[$rel_field] = $val;       
-                            }else{
-                               $rel_field = array_keys($val)[0];  //that's for [{},{}]
-                               $this->relation_fields[str_replace('r:','f:',$rel_field)] = $val[$rel_field];       
-                               
-                            }
-                            //array_splice($this->value, $idx, 1);
+                        
+                        }else if(is_array($val) && (@array_keys($val)[0]==='r:' || @array_keys($val)[0]==='relf:')){  //that's for [{"r:10":10},{}]
+                            //{"t":10,"rf:245":[{"t":4},{"r":6421},{"relf:10":">2010"}]}}
+                               $rel_field = array_keys($val)[0];  
+                               $rel_field2 = strpos($rel_field,'r:')===0
+                                                    ?str_replace('r:','f:',$rel_field)
+                                                    :str_replace('relf:','f:',$rel_field);    
+                            
+                                $this->relation_fields[$rel_field2] = $val[$rel_field];       
                         }else{
                             $this->value[$idx] = $val;
                         }
@@ -1104,8 +1114,8 @@ class HPredicate {
                     
                     // related to particular records
                     foreach($value as $idx=>$val){
-                        if($idx==='ids' || @$val['ids']){
-                            if(@$val['ids']) $val = $val['ids'];
+                        if($idx==='ids' || (is_array($val) && @$val['ids']) ){
+                            if(is_array($val) && @$val['ids']) $val = $val['ids'];
                             $this->value = $val;
                             $value = array(); //reset
                             break;
@@ -2088,7 +2098,7 @@ class HPredicate {
                 }
 
             }else{
-                //related to/from lsit of record ids
+                //related to/from list of record ids
                 $val = $this->getFieldValue();                
 
                 if(!$this->field_list){
