@@ -67,6 +67,7 @@ $.widget( "heurist.importStructure", {
     //cached records hRecordSet for databases
     _cachedRecordset_dbs:null,
 
+    _is_rename_target: false,
     _selectedDB:null, //regid of currently selected database
     _selectedRtyID:null,
 
@@ -478,14 +479,50 @@ $.widget( "heurist.importStructure", {
                                     + "customised as desired; they will have no effect on existing data)."
                                 + "</li>"
                                 + "</ol>";
+                                
+                            msg =  msg + '<p style="font-size:smaller">'
++'<label><input type="checkbox" id="rename_target_entities"/>&nbsp;Check this box</label> '
++' if you wish the record type names, field names and description, and term '
++' labels to be replaced by the names and labels being imported. Use with care as this can overwrite existing '
++'customisation with names which may be quite different and out-of-context with existing data. '
++'If this is not a new database, we suggest cancelling and making a clone first (please' 
++' delete the clone once you are happy with the result of the import).</p>';
 
                             var btns = {};
 
                             btns['Proceed'] = function(){
-                                $dlg.dialog('close');
+                                
+                                var is_rename = $dlg.find('#rename_target_entities').is(':checked');
+                                that._is_rename_target = is_rename;
+                                if(is_rename){
+                                                            
+                                    var $dlg2, btn2 = {};
+                                    btn2['Yes, overwrite'] = function(){
+                                        $dlg2.dialog('close');
+                                        $dlg.dialog('close');
+                                        that._selectedRtyID = recID;
+                                        that.startImport();
+                                    };
+                                    btn2['Get me out of here'] = function(){
+                                        $dlg2.dialog('close');
+                                    };
+                                                            
+                                                            
+                                    $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
+'Are you sure you want to overwrite existing record type names, field names and term labels?', 
+                                                btn2, {title: 'Warning'},
+                                                {default_palette_class: 'ui-heurist-design', 
+                                                 //dialogId: 'dialog-common-messages2'
+                                                }
+                                                );
+                                }else{
+                                    $dlg.dialog('close');
+                                    that._selectedRtyID = recID;
+                                    that.startImport();
+                                }
+                           //[  Yes, overwrite ]  [ Get me out of here ]
 
-                                that._selectedRtyID = recID;
-                                that.startImport();
+                                
                             };
                             btns['Cancel'] = function(){
                                 $dlg.dialog('close');
@@ -495,6 +532,7 @@ $.widget( "heurist.importStructure", {
                                 {title: 'Downloading structure', yes:'Proceed', no:'Cancel'}, 
                                 {default_palette_class: 'ui-heurist-design'}
                             );  
+                            
                         }
                     }
 
@@ -804,7 +842,7 @@ $.widget( "heurist.importStructure", {
         
         var that = this;
         
-        window.hWin.HAPI4.SystemMgr.import_definitions(this._selectedDB, this._selectedRtyID,
+        window.hWin.HAPI4.SystemMgr.import_definitions(this._selectedDB, this._selectedRtyID, this._is_rename_target,
             function(response){    
 
             window.hWin.HEURIST4.msg.sendCoverallToBack(); 

@@ -96,7 +96,7 @@ $.widget( "heurist.embedDialog", {
                             window.hWin.HEURIST4.msg.showMsgFlash('Import definitions', 10000);
                             
                             //synch record type from Database #2 Heurist_Core_Definitions
-                            window.hWin.HAPI4.SystemMgr.import_definitions(2, 52,
+                            window.hWin.HAPI4.SystemMgr.import_definitions(2, 52, false,
                                 function(response){    
                                     window.hWin.HEURIST4.msg.sendCoverallToBack(); 
                                     var $dlg2 = window.hWin.HEURIST4.msg.getMsgFlashDlg();

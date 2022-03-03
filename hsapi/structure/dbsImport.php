@@ -59,7 +59,8 @@ class DbsImport {
     
     private $broken_terms;
     private $broken_terms_reason;
-    
+
+    private $rename_target_entities = false;    
     
     //  $data = 
     function __construct( $system ) {
@@ -115,6 +116,8 @@ class DbsImport {
         
 $time_debug = microtime(true);
 $time_debug2 = $time_debug;
+
+        $this->rename_target_entities = (@$data['is_rename_target'] == 1);
         
         $entityTypeToBeImported = $data['defType']; //'rectype','detailtype','term'
         
@@ -540,9 +543,18 @@ foreach ($this->imp_recordtypes as $rtyID){
     $def_rectype = $def_rts[$rtyID]['commonFields'];
 
     $new_rtyID = @$this->rectypes_correspondence[$rtyID];
-    if($new_rtyID>0){ //already  exists - update fields only - add missed fields
+    if($new_rtyID>0){ 
+        //already  exists - update fields only - add missed fields
+        // and overwrite name - if "rename" option is ON
         $this->rectypes_upddated[] = $new_rtyID;
+        
+        if($this->rename_target_entities){
+            //$alt_name = $this->doDisambiguate($def_rectype[$idx_name], $trg_rectypes['names']);
+            renameRectype($new_rtyID, $def_rectype, $def_rts['commonNamesToIndex']);
+        }
+        
     }else{
+        //new record type - there is no such record type in target database
     
         //replace group id with local one
         $grp_id = $def_rectype[$idx_rt_grp];
@@ -571,7 +583,6 @@ foreach ($this->imp_recordtypes as $rtyID){
         if(!$def_rectype[$idx_origin_name]){
             $def_rectype[$idx_origin_name] = $def_rectype[$idx_name];
         }
-        
 
         $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false, null);
     //if(_DBG) error_log('rt '.$rtyID);
@@ -667,6 +678,15 @@ $idx_origin_name   = $def_dts['fieldNamesToIndex']['dty_NameInOriginatingDB'];
 $idx_ccode       = $def_dts['fieldNamesToIndex']['dty_ConceptID'];
 
 
+if($this->rename_target_entities){
+    //rename fields that are already in target database
+    foreach($this->fields_correspondence as $src_ID=>$trg_ID){
+        if(@$def_dts[$src_ID]['commonFields'])
+            renameDetailtype($trg_ID, $def_dts[$src_ID]['commonFields'], $def_dts['fieldNamesToIndex']);
+    }
+}
+
+
 foreach ($this->imp_fieldtypes as $ftId){
 
     $def_field = $def_dts[$ftId]['commonFields'];
@@ -723,7 +743,7 @@ foreach ($this->imp_fieldtypes as $ftId){
             .'<br><br>MySQL message:'.$res);
         return false;
     }
-}
+}//for addition base/detail fields
 if(_DBG) error_log('Fields '.(microtime(true)-$time_debug).'   '.count($this->imp_fieldtypes));        
 $time_debug = microtime(true);        
 
@@ -732,11 +752,18 @@ $time_debug = microtime(true);
 // VI. Add/update record structures
 $trg_def_rts = $this->target_defs['rectypes']['typedefs'];
                 
-$idx_type           = $def_rts['dtFieldNamesToIndex']['dty_Type'];
-$idx_terms_tree     = $def_rts['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];  //value is the same as
-$idx_terms_disabled = $def_rts['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
-$idx_constraints    = $def_rts['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
-$idx_defaultvalue   = $def_rts['dtFieldNamesToIndex']['rst_DefaultValue'];
+$def_rts2 = $def_rts['dtFieldNamesToIndex'];
+$idx_type           = $def_rts2['dty_Type'];
+$idx_terms_tree     = $def_rts2['rst_FilteredJsonTermIDTree'];  //value is the same as
+$idx_terms_disabled = $def_rts2['dty_TermIDTreeNonSelectableIDs'];
+$idx_constraints    = $def_rts2['rst_PtrFilteredIDs'];
+$idx_defaultvalue   = $def_rts2['rst_DefaultValue'];
+
+$idx_name = $def_rts2['rst_DisplayName'];
+$idx_desc = $def_rts2['rst_DisplayHelpText'];
+$idx_desc2 = $def_rts2['rst_DisplayExtendedDescription'];
+$idx_ref = $def_rts2['rst_SemanticReferenceURL'];
+
 
 $dtFieldNames = $def_rts['dtFieldNames'];
 
@@ -752,11 +779,22 @@ foreach ($this->imp_recordtypes as $rtyID){
             $fields = array();    
         }
         
-        //assign values from source
-        foreach ($def_rts[$rtyID]['dtFields'] as $ftId => $def_field){
-            if(!@$fields[ $this->fields_correspondence[$ftId] ]){
-                $fields[ $this->fields_correspondence[$ftId] ] = $def_field;
+        //if field does not exists, assign values from source
+        foreach ($def_rts[$rtyID]['dtFields'] as $ftId => $def_field){ //loop by source
+            $trg_dty_id = $this->fields_correspondence[$ftId];
+            if(!@$fields[ $trg_dty_id ]){
+                //add
+                $fields[ $trg_dty_id ] = $def_field;
+                
+            }else  if($this->rename_target_entities){
+                
+                $fields[$trg_dty_id][$idx_name] = $def_field[$idx_name];
+                $fields[$trg_dty_id][$idx_desc] = $def_field[$idx_desc];
+                $fields[$trg_dty_id][$idx_desc2] = $def_field[$idx_desc2];
+                $fields[$trg_dty_id][$idx_ref] = $def_field[$idx_ref]==null?'':$def_field[$idx_ref];
             }
+            
+            
         }
         //clear term trees and resource constraints; assign default value for terms
         foreach ($fields as $ftId => $def_field){
@@ -774,6 +812,9 @@ foreach ($this->imp_recordtypes as $rtyID){
             $def_field[$idx_terms_disabled] = '';
             $def_field[$idx_constraints] = '';
             $fields[$ftId] = $def_field;
+            
+            
+            
         }
         
 
@@ -1378,9 +1419,14 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                         }
                     }
                 }else{
-                    //find vocabuary in target and all its terms
+                    //find vocabulary in target and all its terms
                     $all_terms_in_vocab = $this->targetTerms->treeData($new_term_id, 3);
                 }
+                
+                if($this->rename_target_entities){
+                    renameTerm($new_term_id, $term_import, $terms['fieldNamesToIndex']);
+                }
+                
                                 
                 $new_term_id = -$new_term_id;
             }else{
@@ -1650,7 +1696,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
     }
     
     //
-    //
+    // If entity with the same nae exists in target database it adds numeric count to the end of name
     //
     private function doDisambiguate($newvalue, $entities){
 

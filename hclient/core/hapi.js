@@ -173,8 +173,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
 
         //set d=0 and c=0 to disable debug  http://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm
-        request.DBGSESSID='425944380594800002;d=0,p=0,c=0';
-        //request.DBGSESSID='425944380594800002;d=1,p=0,c=1';
+        //request.DBGSESSID='425944380594800002;d=0,p=0,c=0';
+        request.DBGSESSID='425944380594800002;d=1,p=0,c=1';
 
         var url = that.baseURL+"hsapi/controller/"+action+".php"; //+(new Date().getTime());
        
@@ -933,7 +933,7 @@ prof =Profile
             
                 if(message==false){
                 
-                    window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed, callback);
+                    window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed, false, callback);
                     
                 }else{
                     
@@ -948,7 +948,7 @@ prof =Profile
                             window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Import definitions'), 10000);
 
                             //import missed record types
-                            window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed,
+                            window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed, false,
                                 function(response){    
                                     window.hWin.HEURIST4.msg.sendCoverallToBack(); 
                                     var $dlg2 = window.hWin.HEURIST4.msg.getMsgFlashDlg();
@@ -977,10 +977,11 @@ prof =Profile
             // databaseID - source database 
             // definitionID - rectype (array) id or concept code to be imported
             //
-            import_definitions: function(databaseID, definitionID, callback){
+            import_definitions: function(databaseID, definitionID, is_rename_target, callback){
              
                 var request = {databaseID:databaseID, 
                     definitionID: definitionID, //array of id or concept codes
+                    is_rename_target: is_rename_target?1:0,
                     db:window.hWin.HAPI4.database, import:'rectype'};
                     
                 _callserver('sys_structure', request, function(response){
@@ -1659,8 +1660,8 @@ var fin_time = new Date().getTime() / 1000;
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
                 //set d and c=0 to disable debug  http://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm
-                request.DBGSESSID='425944380594800002;d=0,p=0,c=0';
-                //request.DBGSESSID='425944380594800002;d=1,p=0,c=1';
+                //request.DBGSESSID='425944380594800002;d=0,p=0,c=0';
+                request.DBGSESSID='425944380594800002;d=1,p=0,c=1';
                 
                 _callserver('entityScrud', request, callback);
             },
