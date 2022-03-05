@@ -22,6 +22,7 @@
 function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
 
     var _className = 'editCMS_WidgetCfg';
+    var isWebPage = false;
     
     function _init(){
 
@@ -89,9 +90,18 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
         
         //fill page list
         var selPage = $dlg.find('select[name="search_page"]');
-        var pages = $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('getMenuContent','list');
-        pages.unshift({key:'',title:''});   
-        window.hWin.HEURIST4.ui.createSelector(selPage[0], pages);
+        
+        var main_menu = $('#main-menu > div[widgetid="heurist_Navigation"]');
+        
+        if(main_menu.length>0){
+            pages = main_menu.navigation('getMenuContent','list');
+            pages.unshift({key:'',title:''});   
+            window.hWin.HEURIST4.ui.createSelector(selPage[0], pages);
+            isWebPage = false;
+        }else{
+            isWebPage = true;
+            selPage.parent().hide();
+        }
         
         if(opts!==false){
             

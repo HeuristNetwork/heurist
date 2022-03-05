@@ -429,7 +429,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
         .$tpl_source;
             
             $tpl_source .= (
-                '<script>$(function() {'
+                '<script>$(document).ready(function() {'
                 
 .'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend","<link rel=\"stylesheet\" href=\"'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.css\" />");'                
                 
@@ -468,7 +468,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                                 $external_files = array($external_files);
                             }
                             if(count($external_files)>0){
-            $tpl_source = $tpl_source.'<script>$(function() {';
+            $tpl_source = $tpl_source.'<script>(function() {';
                                 foreach ($external_files as $ext_file){
                                     if(strpos($ext_file,'<link')===0){ // || strpos($ext_file,'<script')===0
             $tpl_source = $tpl_source.'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend",\''
@@ -476,7 +476,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                                     .'\');';                                        }
                                 }
                                 
-            $tpl_source = $tpl_source.'});</script>';
+            $tpl_source = $tpl_source.'})();</script>';
                             }
                         }
                     }
