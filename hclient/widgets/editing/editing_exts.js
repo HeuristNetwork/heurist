@@ -425,6 +425,73 @@ function calculateImageExtentFromWorldFile(_editing){
 
 }
 
+//
+// Opening menuWidget's with searching capabilities
+// that => context
+// $select => jQuery select with hSelect init'd
+// disableClick => disable click on search option, to avoid selecting it as the value
+//
+function openSearchMenu(that, $select, disableClick=true){
+
+    var $menu = $select.hSelect('menuWidget');
+    var $inpt = $menu.find('input.input_menu_filter');
+
+    if(!$inpt.attr('data-inited')){
+
+        //reset filter                                
+        that._on($menu.find('span.smallbutton'), {click:
+        function(event){
+            window.hWin.HEURIST4.util.stopEvent(event); 
+            var $mnu = $select.hSelect('menuWidget');
+            $mnu.find('input.input_menu_filter').val('');
+            $mnu.find('li').css('display','list-item');
+            $mnu.find('div.not-found').hide();
+        }});
+
+        //set filter
+        that._on($menu, {
+            click:function(event){
+                window.hWin.HEURIST4.util.stopEvent(event);
+                return false;                       
+            },
+            keyup:function(event){
+            var val = $(event.target).val().toLowerCase();
+            window.hWin.HEURIST4.util.stopEvent(event);                       
+            var $mnu = $select.hSelect('menuWidget');
+            if(val.length<2){
+                $mnu.find('li').css('display','list-item');
+            }else{
+                $.each($mnu.find('.ui-menu-item-wrapper'),
+                    function(i,item){
+                        if($(item).text().toLowerCase().indexOf(val)>=0){
+                            $(item).parent().css('display','list-item');
+                        }else{
+                            $(item).parent().css('display','none');
+                        }
+                    });    
+                $mnu.find('div.not-found').css('display',
+                    $mnu.find('.ui-menu-item-wrapper:visible').length==0?'block':'none');
+            }                                    
+            
+        }});
+
+		if(disableClick){			
+			//stop click for menu filter option
+			that._on($menu.find('li.ui-menu-item:first'), {
+				click: function(event){
+					window.hWin.HEURIST4.util.stopEvent(event);
+					return false;
+				}
+			});
+		}
+
+        $inpt.attr('data-inited',1);
+
+        $inpt.parents('.ui-menu-item-wrapper').removeClass('ui-menu-item-wrapper ui-state-active');
+    }
+
+    $inpt.focus();
+}
 
 //
 // It uses window.hWin.HEURIST4.browseRecordCache
@@ -734,49 +801,8 @@ function browseRecords(_editing_input, $input){
                             ele.find('div.ui-menu-item-wrapper').addClass('truncate');
                             ele.find('.rt-icon').css({width:'12px',height:'12px','margin-right':'10px'});
                             ele.find('.rt-icon2').css({'margin-right':'0px'});
-                            var inpt = ele.find('input.input_menu_filter');
-                            if(!inpt.attr('data-inited')){
-                                //reset filter                                
-                                that._on(ele.find('span.smallbutton'), {click:
-                                function(event){
-                                    window.hWin.HEURIST4.util.stopEvent(event); 
-                                    var mnu = that.selObj.hSelect('menuWidget');
-                                    mnu.find('input.input_menu_filter').val('');
-                                    mnu.find('li').css('display','list-item');
-                                }});
-                                //set filter
-                                that._on(ele, {
-                                    click:function(event){
-                                        window.hWin.HEURIST4.util.stopEvent(event);
-                                        return false;                       
-                                    },
-                                    keyup:function(event){
-                                    var val = $(event.target).val().toLowerCase();
-                                    window.hWin.HEURIST4.util.stopEvent(event);                       
-                                    var mnu = that.selObj.hSelect('menuWidget');
-                                    if(val.length<2){
-                                        mnu.find('li').css('display','list-item');
-                                    }else{
-                                        $.each(mnu.find('.ui-menu-item-wrapper'),
-                                            function(i,item){
-                                                if($(item).text().toLowerCase().indexOf(val)>=0){
-                                                    $(item).parent().css('display','list-item');
-                                                }else{
-                                                    $(item).parent().css('display','none');
-                                                }
-                                            });    
-                                        mnu.find('div.not-found').css('display',
-                                            mnu.find('.ui-menu-item-wrapper:visible').length==0?'block':'none');
-                                    }                                    
-                                    
-                                }});
-                                inpt.attr('data-inited',1);
-                                
-                                inpt.parents('.ui-menu-item-wrapper').removeClass('ui-menu-item-wrapper ui-state-active');
-                            }
-                            inpt.focus(); //#e0dfe0
-                            
-                            //.css('background','red !important');
+
+                            openSearchMenu(that, that.selObj, false);
                         }
                     );
                     

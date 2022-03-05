@@ -3648,7 +3648,9 @@ console.log('onpaste');
     // recreate SELECT for enum/relation type
     //
     _recreateSelector: function($input, value){
-        
+
+        var that = this;
+
         if(value===true){
             //keep current
             value = ($input)?$input.val():null;
@@ -3758,7 +3760,31 @@ console.log('onpaste');
                 {vocab_id:allTerms, //headerTermIDsList:headerTerms,
                     defaultTermID:value, topOptions:topOptions, supressTermCode:true, 
                     useHtmlSelect:this.options.useHtmlSelect});
-        
+
+            if(typeof openSearchMenu!=='undefined' && $.isFunction(openSearchMenu) && this.options.recordset && this.options.recordset.entityName == 'Records'){
+
+                var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/magglass_12x11.gif';
+
+                var opt = document.createElement('option');
+
+                opt.text = '<div style="width:175px;padding:10px 0px">'
+                +'<span style="padding-right:10px;vertical-align:sub">'
+                +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+                + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
+                +'<input class="input_menu_filter" size="15" style="outline: none;background:none;border: 1px solid lightgray;"/>'
+                +'<span class="smallbutton ui-icon ui-icon-circlesmall-close" tabindex="-1" title="Clear entered value" '
+                +'style="position:relative; cursor: pointer; outline: none; box-shadow: none; border-color: transparent;"></span>'
+                + '<div class="not-found" style="padding:10px;color:darkgreen;display:none;">No terms match the filter</div></div>';
+
+                opt.value = 'select';
+
+                $input.get(0).prepend(opt);
+
+                $input.hSelect('destroy');
+
+                window.hWin.HEURIST4.ui.initHSelect($input, this.options.useHtmlSelect, null, function(){ openSearchMenu(that, $input, true); });
+            }
+
             var opts = $input.find('option');      
             if(opts.length==0 || (opts.length==1 && $(opts[0]).text()=='')){
                $input.hSelect('widget').html('<span style="padding: 0.1em 2.1em 0.2em 0.2em">no terms defined, please add terms</span><span class="ui-selectmenu-icon ui-icon ui-icon-triangle-1-e"></span>'); 
@@ -3857,7 +3883,7 @@ console.log('onpaste');
 
                     //this._on(this.error_message.find('.term-move'),{click:function(){}});
                     if(window.hWin.HAPI4.is_admin()){  
-                        var that = this;
+
                         //
                         // select term (with the same name) in all fields
                         //
@@ -4919,15 +4945,15 @@ console.log('onpaste');
             }
         }
 
-        var f_width = this.f('rst_DisplayWidth');
+        // input div's width
+        var f_width = parseInt(this.f('rst_DisplayWidth'));
         f_width = (window.hWin.HEURIST4.util.isempty(f_width) || f_width < 100) ? 110 : f_width + 10; // +10 for extra room
-        var labelWidth = 25; // label+input width
 
+		//var labelWidth = 25; // label+input width
         //var taken_width = this.input_cell.parent().find('span.editint-inout-repeat-button').width() + this.input_cell.parent().find('div.header').width() + 20;
+        //var row_limit = Math.floor(f_width / labelWidth);
 
-        $inputdiv.css({'max-width': f_width + 'ex', 'min-width': f_width + 'ex'}); console.log($inputdiv);
-
-        var row_limit = Math.floor(f_width / labelWidth);
+        $inputdiv.css({'max-width': (f_width + 20) + 'ex', 'min-width': f_width + 'ex'});
 
         for(var i = 0; i < terms_list.length; i++){
 
@@ -4999,10 +5025,9 @@ console.log('onpaste');
             var $label = $('<label>', {'title': trm_label, append: [$btn, trm_label]})
                             .addClass('truncate enum_input')
                             .css({
-                                'max-width': labelWidth + 'ex',
-                                'min-width': labelWidth + 'ex',
+                                'max-width': '120px',
                                 'display': 'inline-block',
-                                'margin-right': '10px'
+                                'margin-right': '15px'
                             })
                             .appendTo($inputdiv);
 
