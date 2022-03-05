@@ -96,6 +96,8 @@ if(!in_array($action_type, $allowed_actions)){
 
 <script type="text/javascript" src="recordAction.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_exts.js"></script>
+
 
 <script type="text/javascript">
     // Callback function on page init complete

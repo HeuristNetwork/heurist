@@ -1744,7 +1744,10 @@ $.widget( "heurist.editing_input", {
                         .addClass('sel_link2').css({'max-width':'300px'}) //, 'background': 'lightgray'})
                         .appendTo( $inputdiv );
             
-            var __show_select_function = browseRecords(this, $input); //see editing_exts
+            __show_select_function = null;
+            if(typeof browseRecords!=='undefined' && $.isFunction(browseRecords)){
+                __show_select_function = browseRecords(this, $input); //see editing_exts
+            }
             
             that._findAndAssignTitle($input, value, __show_select_function);
             
