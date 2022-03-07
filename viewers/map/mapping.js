@@ -1578,7 +1578,12 @@ $.widget( "heurist.mapping", {
                 if(window.hWin.HEURIST4.leaflet_popup){
                     width = window.hWin.HEURIST4.leaflet_popup.width;
                     height = window.hWin.HEURIST4.leaflet_popup.height;
-                }                
+                }else{
+
+                    $popup_ele.find('.leaflet-popup-content-wrapper').css({
+						'height': '100%'
+                    });
+				}
 
                 if(that.options.layout_params['popup_resizing'] != null){
                     resizable = that.options.layout_params['popup_resizing'];
