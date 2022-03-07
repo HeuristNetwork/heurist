@@ -278,8 +278,17 @@ that._dout('myOnShowEvent');
                                 var type = $Db.dty(dt,'dty_Type');
                                 if(type=='enum' || type=='relationtype'){
                                     cols[i]['render'] = function(data,type){
-                                        if (type === 'display') {
-                                            return (data>0)?$Db.trm(data,'trm_Label'):data;
+
+                                        if(type === 'display'){
+
+                                            if(window.hWin.HEURIST4.util.isArray(data)){
+                                                for(var i = 0; i < data.length; i++){
+                                                    data[i] = (data[i] > 0) ? $Db.trm(data[i], 'trm_Label') : data[i];
+                                                }
+                                                return data;
+                                            }else{
+                                                return (data > 0) ? $Db.trm(data,'trm_Label') : data;
+                                            }
                                         }else{
                                             return data;
                                         }

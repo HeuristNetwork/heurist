@@ -568,11 +568,12 @@ if(!($max_size>0)) $max_size = 0;
                                 var k = s.indexOf('Filetype not listed among');
                                 swarns_memtypes = swarns_memtypes + '<br>'+s.substr(0,k);    
                                 cntWarnMemtypes++;
-                            }else{
+                            }else
+                            if(s.indexOf('uploaded file exceeds')<0){ // ignore msg about exceeding upload max
                                 swarns = swarns + '<br>'+s;    
                                 cntOtherErrors++;
                             }
-                        }); 
+                        });
 
                         if(cntAlreadyExists>0){            
                             swarns_exists = '<h4 style="margin-bottom:0px">Already uploaded files: '+cntAlreadyExists+'</h4>'
@@ -585,7 +586,7 @@ if(!($max_size>0)) $max_size = 0;
                         if(cntOtherErrors>0){
                             swarns = '<h4 style="margin-bottom:0px">Attention. '
                                       +(cntOtherErrors==1?'File was not':(cntOtherErrors+' files were not'))
-                                      +' uploaded.</h4><div style="line-height:0.8;max-height:100px;overflow-y:auto">'+swarns+'</div>';
+                                      +' uploaded.</h4><div style="line-height:1;max-height:100px;overflow-y:auto">'+swarns+'</div>';
                         }
 
                         swarns = swarns_exists + swarns_memtypes + swarns;

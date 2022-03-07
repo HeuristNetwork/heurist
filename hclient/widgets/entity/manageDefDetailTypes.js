@@ -1674,6 +1674,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 url:window.hWin.HAPI4.baseURL+'context_help/parent_child_instructions.html #content',
                                 no_init:true} );
 
+                    browser_filter.find('.heurist-helper1').before(
+                        '<div style="display: inline-block; font-style: italic; font-size: 0.9em;">'
+                        + 'Enter an old-style (non-JSon) filter string such as f:123:7245 to filter to term 7245 in field 123'
+                        + '</div>'
+                    );
+
                     // Setup dialog element
                     var $dlg;
                     var $ele = $('<fieldset>')

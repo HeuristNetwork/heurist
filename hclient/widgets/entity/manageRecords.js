@@ -4158,7 +4158,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 			
             //if record type has been changed - reload rts_editor
             this._reloadRtsEditor();
-            
+
+            // add '+' button to end of tabs, creates new tab header
+            this._addNewTabButton();
         }else{
 
             $(this.element).find('.separator-hidden').hide();
@@ -4390,12 +4392,68 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         
         return true;
     },
-    
-    /**
-	 * Display the record title field (cannot be edited here),
-	 * and, if applicable, the child record fields at the top of the form
-	 */
 
+    //
+    // Add plus symbol to end of each tab group, 
+    // when clicked (activated) begins process of adding new tab to group
+    //
+    _addNewTabButton: function(){
+
+        if(this._currentEditRecTypeID <= 0){
+            return;
+        }
+
+        var that = this;
+
+        var $tabs = this.editForm.find('div.ui-tabs[data-group-dtid]');
+
+        if($tabs.length > 0){
+
+            $tabs.each(function(idx, group){
+
+                var $group = $(group);
+                var $tabs = $group.find('ul[role="tablist"]');
+                var last_dtid = $group.find('fieldset:last-child div[data-dtid]:first-child').attr('data-dtid');
+
+                var $empty_cont = $('<div>').uniqueId();
+                var $new_tab = $('<li>').addClass('add_new_tab').append('<a href="#'+ $empty_cont.attr('id') +'"></a>').appendTo($tabs);
+
+                var $add_tab = $('<span>')
+                        .attr({'data-dty_ID': last_dtid, 'title': 'Click to add new tab'})
+                        .addClass('ui-icon ui-icon-circlesmall-plus')
+                        .css({'font-size': '275%', 'height': '20px', 'width': '20px', 'top': '8px'})
+                        .clone()
+                        .appendTo($new_tab.find('a'));
+
+                $group.tabs('refresh');
+
+                $new_tab.css({'background': '#e9e9e9', border: 'none'});
+
+                that._on($group, {
+                    'tabsbeforeactivate': function(event, ui){
+
+                        if(event.originalEvent && ui.newTab.hasClass('add_new_tab') && event.originalEvent.type == 'click'){
+
+                            var dt_id = ui.newTab.find('span[data-dty_ID]').attr('data-dty_ID');
+
+                            if(dt_id == null) return false;
+
+                            that.options.rts_editor.manageDefRecStructure('addNewSeparator', dt_id);
+
+                            return false;
+                        }else if(ui.newTab.hasClass('add_new_tab')){
+                            return false;
+                        }
+                    }
+                });
+            });
+        }
+    },
+	
+    //
+	// Display the record title field (cannot be edited here),
+	// and, if applicable, the child record fields at the top of the form
+	//
     showExtraRecordInfo: function(){
 
         var that = this;

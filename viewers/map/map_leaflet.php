@@ -189,10 +189,6 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         background-position: 3px !important;
     }
     
-    .map_popup .detail, .map_popup .detail > a{
-        max-width: 286px;
-    }
-    
     .v1 .browser-print-mode{
         padding: 3px 10px;
     }
@@ -224,7 +220,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         
         
         function __gp(name){
-            return window.hWin.HEURIST4.util.getUrlParameter(name, location.search)
+            return window.hWin.HEURIST4.util.getUrlParameter(name, location.search);
         }
 
         var layout_params = null;
@@ -249,7 +245,12 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         layout_params['controls'] = __gp('controls'); //comma separated list of visible controls
         layout_params['legend'] = __gp('legend'); //legend configuration: csv basemaps,mapdocs,search,off,width
         layout_params['template'] = __gp('template'); //smarty template for popup info
-        
+
+        layout_params['popup_behaviour'] = __gp('popup_behaviour'); // fixed size, fixed width, scale to content
+        layout_params['popup_width'] = __gp('popup_width'); // = width, for scale = max-width
+        layout_params['popup_height'] = __gp('popup_height'); // = height, for scale = max-height
+        layout_params['popup_resizing'] = __gp('popup_resizing'); // whether to enable resizing, currently turned off
+
         layout_params['published'] = __gp('published');
         layout_params['popup'] = __gp('popup');
         layout_params['map_rollover'] = __gp('map_rollover');
