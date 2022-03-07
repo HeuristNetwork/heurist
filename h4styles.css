@@ -1425,7 +1425,9 @@ span.fancytree-checkbox{
 .fancytree-ext-filter .fancytree-node.fancytree-match .fancytree-title{
     font-weight: normal !important;
 }
-
+.fancytree-ext-filter .fancytree-node .fancytree-title{
+    color: black !important;
+}
 
 /* FancyTree */
 /* Map */
@@ -1850,19 +1852,15 @@ background: #8ea9b9
 .map_popup{
     display:table;
     width:100%;
+    border-spacing: 0px 5px;
 }
 .map_popup .detailType{
-    text-align:left;
     line-height:14px;
-    width:280px;
-    display:block;
     font-style:italic;
 }
-.map_popup .detail{
-    display:block;
-}
 .map_popup .detail, .map_popup .detail > a{
-    min-width: 150px;
+    max-width: 250px;
+    min-width: 250px;
     line-height: 16px;
     vertical-align:top;    
 }

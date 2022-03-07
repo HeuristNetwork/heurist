@@ -593,13 +593,13 @@ if ($bkm_ID>0 || $rec_id>0) {
                     .'</div></div>'); 
                                       
         }
-    
-        if($is_map_popup){
+
+        /*if($is_map_popup){
             print '<div data-recid="'.$bibInfo['rec_ID'].'" style="max-height:250px;overflow-y:auto;">';// style="font-size:0.8em"
         }else{
-            print '<div data-recid="'.$bibInfo['rec_ID'].'">'; // style="font-size:0.8em"
-        }
+        }*/
 	        
+            print '<div data-recid="'.$bibInfo['rec_ID'].'">'; // style="font-size:0.8em"
             print_details($bibInfo);
 	        print '</div>';
             

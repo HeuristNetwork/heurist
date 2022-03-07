@@ -331,7 +331,7 @@ $.widget( "heurist.mapping", {
         this.nativemap.setView([20, 20], 1); //@todo change to bookmarks
         
         //4. INIT CONTROLS
-        if(this.main_popup==null) this.main_popup = L.popup();
+        if(this.main_popup==null) this.main_popup = L.popup({maxWidth: 'auto'});
         
         //zoom plugin
         this.map_zoom = L.control.zoom({ position: 'topleft' });//.addTo( this.nativemap );
@@ -1539,118 +1539,183 @@ $.widget( "heurist.mapping", {
     //
     _onLayerSelect: function(layer, latlng){
 
-            
-            var  that = this;
-            
-            function __showPopup(content, latlng){
-                
-                if(that.options.map_popup_mode=='standard'){
-                    
-                    that.main_popup.setLatLng(latlng)
-                                .setContent(content)
-                                .openOn(that.nativemap);
-                                
-                } else if(that.options.map_popup_mode=='dialog'){
-                    
-                    window.hWin.HEURIST4.msg.showMsg(content);
-                    
-                }
-            }
-            
-            
-            if(layer.feature.properties.rec_ID>0){
-                
-                
-                if(that.vistimeline) that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
+        var that = this;
+        var popupURL;
 
-                that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight
-                if($.isFunction(that.options.onselect)){
-                    that.options.onselect.call(that, [layer.feature.properties.rec_ID]);
-                }
+        function __showPopup(content, latlng){
+            
+            if(that.options.map_popup_mode=='standard'){
                 
-                var popupURL;
-                var info = layer.feature.properties.rec_Info; //popup info may be already prepared
-                if(info){
-                    if(info.indexOf('http://')==0 || info.indexOf('https://')==0){
-                        popupURL =  info; //load content from url
-                    }
+                that.main_popup.setLatLng(latlng)
+                            .setContent(content)
+                            .openOn(that.nativemap);
+
+                var $popup_ele = $(that.main_popup.getElement()); // popup container
+                var $content = $popup_ele.find('.leaflet-popup-content'); // content container
+
+                // Default options
+                var width = 'auto';
+                    height = 'auto',
+                    resizable = true,
+                    maxw = '',
+                    maxh = '94%';
+
+                var behaviour = that.options.layout_params['popup_behaviour'];
+
+                // For CMS websites
+                if(behaviour == 'fixed'){
+                    width = (that.options.layout_params['popup_width'] != null) ? that.options.layout_params['popup_width'] : width;
+                    height = (that.options.layout_params['popup_height'] != null) ? that.options.layout_params['popup_height'] : height;
+                }else if(behaviour == 'fixed_width'){
+                    width = (that.options.layout_params['popup_width'] != null) ? that.options.layout_params['popup_width'] : width;
+                    maxh = (that.options.layout_params['popup_height'] != null) ? that.options.layout_params['popup_height'] : '94%';
+                }else if(behaviour == 'scale'){
+                    maxw = (that.options.layout_params['popup_width'] != null) ? that.options.layout_params['popup_width'] : '';
+                    maxh = (that.options.layout_params['popup_height'] != null) ? that.options.layout_params['popup_height'] : '94%';
+                }
+
+                // user preference, session cached only
+                if(window.hWin.HEURIST4.leaflet_popup){
+                    width = window.hWin.HEURIST4.leaflet_popup.width;
+                    height = window.hWin.HEURIST4.leaflet_popup.height;
+                }                
+
+                if(that.options.layout_params['popup_resizing'] != null){
+                    resizable = that.options.layout_params['popup_resizing'];
+                }
+
+                $popup_ele.css({
+                    'width': width,
+                    'height': height
+                });
+
+                $content.css({
+                    'max-width': maxw,
+                    'max-height': maxh,
+                    'overflow': 'auto'
+                });
+
+                /*if(!(that.mapPopUpTemplate || layer.options.popup_template) && width == 'auto' && height == 'auto'){
+                    $popup_ele.css({'height': '300px'});
+                }*/
+
+                that.main_popup.update();
+
+                if(resizable !== 'false' || resizable === false){
+
+                    $popup_ele.find('.leaflet-popup-content-wrapper').resizable({
+                        ghost: true,
+                        stop: function(event, ui){
+
+                            var dims = ui.size;
+                            window.hWin.HEURIST4.leaflet_popup = dims; // cache width and height
+
+                            $popup_ele.css(dims); // update popup's dimensions
+
+                            that.main_popup.update();
+                        },
+                        handles: 'all'
+                    });
+                }else if($popup_ele.resizable('instance') !== undefined){
+                    $popup_ele.resizable('destroy');
+                }
+            } else if(that.options.map_popup_mode=='dialog'){
+                
+                window.hWin.HEURIST4.msg.showMsg(content);
+                
+            }
+        }
+
+        if(layer.feature.properties.rec_ID>0){
+            
+            if(that.vistimeline) that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
+
+            that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight
+            if($.isFunction(that.options.onselect)){
+                that.options.onselect.call(that, [layer.feature.properties.rec_ID]);
+            }
+
+            var info = layer.feature.properties.rec_Info; //popup info may be already prepared
+            if(info){
+                if(info.indexOf('http://')==0 || info.indexOf('https://')==0){
+                    popupURL =  info; //load content from url
+                }
+            }else{
+                
+                if(layer.options.popup_template=='none' || (layer.options.popup_template==null && that.mapPopUpTemplate=='none') ){
+                    that.main_popup.closePopup();
+                    return;
+                }
+                //take database from dataset origination database
+                var db = layer.options.origination_db!=null
+                                ?layer.options.origination_db
+                                :window.hWin.HAPI4.database;
+                    
+                
+                if(that.mapPopUpTemplate || layer.options.popup_template){
+                    
+                    popupURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
+                            + layer.feature.properties.rec_ID
+                            + '&db='+db+'&template='
+                            + encodeURIComponent(layer.options.popup_template || that.mapPopUpTemplate);
+                    
                 }else{
                     
-                    if(layer.options.popup_template=='none' || (layer.options.popup_template==null && that.mapPopUpTemplate=='none') ){
-                        that.main_popup.closePopup();
-                        return;
-                    }
-                    //take database from dataset origination database
-                    var db = layer.options.origination_db!=null
-                                    ?layer.options.origination_db
-                                    :window.hWin.HAPI4.database;
-                        
-                    
-                    if(that.mapPopUpTemplate || layer.options.popup_template){
-                        
-                        popupURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
-                                + layer.feature.properties.rec_ID
-                                + '&db='+db+'&template='
-                                + encodeURIComponent(layer.options.popup_template || that.mapPopUpTemplate);
-                        
-                    }else{
-                        
-                        popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='
-                                +layer.feature.properties.rec_ID
-                                +'&db='+db;
-                        
-                        if(that.options.map_popup_mode=='dialog'){
-                            popupURL = popupURL + '&ll=WebSearch';
-                        }else{
-                            popupURL = popupURL+'&mapPopup=1&ll='+window.hWin.HAPI4.sysinfo['layout'];    
-                        }
-                        
-                        
-                    }  
-                }              
-                //open popup
-                if(popupURL){
+                    popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='
+                            +layer.feature.properties.rec_ID
+                            +'&db='+db;
                     
                     if(that.options.map_popup_mode=='dialog'){
-                        
-                            var opts = { 
-                                    is_h6style: true,
-                                    modal: false,
-                                    dialogid: 'recordview_popup',    
-                                    //onmouseover: function(){that._clearTimeouts();},
-                                    title:window.hWin.HR('Info')}                
-                        
-                            window.hWin.HEURIST4.msg.showDialog(popupURL, opts);
-                            
-                    }else if(that.options.map_popup_mode!='none'){
-                        $.get(popupURL, function(responseTxt, statusTxt, xhr){
-                            if(statusTxt == "success"){
-                                __showPopup(responseTxt, latlng);
-                            }
-                        });
+                        popupURL = popupURL + '&ll=WebSearch';
+                    }else{
+                        popupURL = popupURL+'&mapPopup=1&ll='+window.hWin.HAPI4.sysinfo['layout'];    
                     }
-                }else{
-                    __showPopup(info, latlng);
-                }
-        
-            }else{
-                    // show multiple selection
-                    var sText = '';    
-                    for(var key in layer.feature.properties) {
-                        if(layer.feature.properties.hasOwnProperty(key) && key!='_deleted'){
-                               sText = sText 
-                                + '<div class="detailRow fieldRow" style="border:none 1px #00ff00;">'
-                                + '<div class="detailType">'+key+'</div><div class="detail truncate">'
-                                + window.hWin.HEURIST4.util.htmlEscape(layer.feature.properties[key])
-                                + '</div></div>';                
+                    
+                    
+                }  
+            }              
+            //open popup
+            if(popupURL){
+                
+                if(that.options.map_popup_mode=='dialog'){
+                    
+                        var opts = { 
+                                is_h6style: true,
+                                modal: false,
+                                dialogid: 'recordview_popup',    
+                                //onmouseover: function(){that._clearTimeouts();},
+                                title:window.hWin.HR('Info')}                
+                    
+                        window.hWin.HEURIST4.msg.showDialog(popupURL, opts);
+                        
+                }else if(that.options.map_popup_mode!='none'){
+                    $.get(popupURL, function(responseTxt, statusTxt, xhr){
+                        if(statusTxt == "success"){
+                            __showPopup(responseTxt, latlng);
                         }
-                    }
-                    if(sText!=''){
-                        sText = '<div class="map_popup">' + sText + '</div>';
-                        __showPopup(sText, latlng);
-                    }
+                    });
+                }
+            }else{
+                __showPopup(info, latlng);
             }
-        
+    
+        }else{
+            // show multiple selection
+            var sText = '';    
+            for(var key in layer.feature.properties) {
+                if(layer.feature.properties.hasOwnProperty(key) && key!='_deleted'){
+                       sText = sText 
+                        + '<div class="detailRow fieldRow" style="border:none 1px #00ff00;">'
+                        + '<div class="detailType">'+key+'</div><div class="detail truncate">'
+                        + window.hWin.HEURIST4.util.htmlEscape(layer.feature.properties[key])
+                        + '</div></div>';                
+                }
+            }
+            if(sText!=''){
+                sText = '<div class="map_popup">' + sText + '</div>';
+                __showPopup(sText, latlng);
+            }
+        }
     },
     
     //
