@@ -342,7 +342,7 @@ function hMapManager( _options )
                                   + map_providers[k]['name']+'</label><br>';
             }
             
-            content = content + '<div style="text-align:center">'
+            content = content + '<div style="text-align:center; display: inline-block;margin-left: 5px;" id="basemap_filter_btns">'
                 +'<button name="basemap_filter">filters</button>'
                 +'<button name="basemap_filter_reset">reset</button></div>';
             
@@ -351,7 +351,7 @@ function hMapManager( _options )
             
             content.find('button[name="basemap_filter"]')
                 .button()
-                .css('font-size','0.7em')
+                .css({'font-size': '0.8em', 'padding': '0em 1em'})
                 .on( { click: function(){
                         var cfg = options.mapwidget.mapping('getBaseMapFilter');
                         imgFilter(cfg,null,function(filter){
@@ -360,7 +360,7 @@ function hMapManager( _options )
                 }});
             content.find('button[name="basemap_filter_reset"]')
                 .button()
-                .css('font-size','0.7em')
+                .css({'font-size': '0.8em', 'padding': '0em 1em'})
                 .on( { click: function(){
                     options.mapwidget.mapping('setBaseMapFilter', null);
                 }});
@@ -1263,6 +1263,8 @@ function hMapManager( _options )
 
             options.mapwidget.mapping('loadBaseMap', idx);
             options.container.find('input[data-mapindex="'+idx+'"]').attr('checked',true);
+
+            options.container.find('input[data-mapindex="'+idx+'"]').parent().after(options.container.find('#basemap_filter_btns'));
         },
         
         //
