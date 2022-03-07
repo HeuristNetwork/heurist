@@ -1670,6 +1670,13 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     }
                 }
             }
+
+            edit_ele = this._editing.getFieldByName('rst_PointerBrowseFilter');
+            if(edit_ele){
+                edit_ele.find('.heurist-helper3').before(
+                    '<div style="display: inline-block; font-style: italic">Enter an old-style (non-JSon) filter string such as f:123:7245 to filter to term 7245 in field 123</div>'
+                );
+            }
         }
 
         var btnCancel = $('<button>').attr('id', 'btnCloseEditor_rts')
