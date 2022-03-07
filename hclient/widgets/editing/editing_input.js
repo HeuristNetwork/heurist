@@ -5031,7 +5031,7 @@ console.log('onpaste');
                             })
                             .appendTo($inputdiv);
 
-            if((i+1) < terms_list.length && (i+1) % row_limit == 0){
+            if((i+1) < terms_list.length){ //ART 07.03.22 && (i+1) % row_limit == 0
                 $inputdiv.append('<br>');
             }
         }
