@@ -149,6 +149,7 @@ $.widget( "heurist.mapping", {
     map_publish: null,
     map_draw: null,
     map_help: null,
+    map_scale: null,
     
     //popup element
     main_popup: null,
@@ -340,7 +341,11 @@ $.widget( "heurist.mapping", {
         
         //content for legend
         this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element, is_ui_main:is_ui_main});
-        
+
+        //map scale
+        this.map_scale = L.control.scale({ position: 'bottomleft' }).addTo( this.nativemap );
+        $(this.map_scale._container).css({'margin-left': '20px', 'margin-bottom': '20px'});
+
         this.updateLayout();
         
         this._adjustLegendHeight();
