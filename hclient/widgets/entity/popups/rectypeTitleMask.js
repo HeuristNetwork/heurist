@@ -22,7 +22,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
     // default options
     options: {
     
-        height: 600,
+        height: 700,
         width:  800,
         modal:  true,
         title:  'Record Type Title Mask Edit',
