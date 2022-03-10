@@ -100,16 +100,21 @@
         if($dbname){
             
             list($database_name_full, $database_name) = mysql__get_names( $dbname );
+            
+            $res = mysql__check_dbname($dbname);           
+            if($res===true){
+                $success = $mysqli->select_db($database_name_full);
+                if(!$success){
+                    $db_exists = mysql__select_value($mysqli, "SHOW DATABASES LIKE '$database_name_full'");
 
-            $success = $mysqli->select_db($database_name_full);
-            if(!$success){
-                $db_exists = mysql__select_value($mysqli, "SHOW DATABASES LIKE '$database_name_full'");
-
-                if($db_exists == null){
-                    return array(HEURIST_ACTION_BLOCKED, "The requested database '".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8')."' does not exist");
-                }else{
-                    return array(HEURIST_INVALID_REQUEST, "Could not open database ".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8'));
+                    if($db_exists == null){
+                        return array(HEURIST_ACTION_BLOCKED, "The requested database '".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8')."' does not exist");
+                    }else{
+                        return array(HEURIST_INVALID_REQUEST, "Could not open database ".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8'));
+                    }
                 }
+            }else{
+                return $res;
             }
 
             //$mysqli->query('SET CHARACTER SET utf8mb4'); //utf8 is utf8mb3 by default
@@ -120,17 +125,27 @@
     }
     
     //
+    // Avoid illegal chars in db
+    //
+    function mysql__check_dbname($db_name){
+        
+        $res = true;
+        if (preg_match('[\W]', $db_name)){
+            $res = array(HEURIST_INVALID_REQUEST, 
+                'Only letters, numbers and underscores (_) are allowed in the database name');
+        }
+        return $res;
+    }
+    
+    //
     //
     //
     function mysql__create_database( $mysqli, $db_name ){
 
-        $res = false;
+        $res = mysql__check_dbname($db_name);
 
         // Avoid illegal chars in db
-        if (preg_match('[\W]', $db_name)){
-            $res = array(HEURIST_INVALID_REQUEST, 
-                'Only letters, numbers and underscores (_) are allowed in the database name');
-        }else{
+        if ($res===true) {
             // Create database
             // databse is created wiht utf8 (3-bytes encoding) and case insensetive collation order
             // Records, recDetails and defTerms are create with utf8mb4 (4bytes encoding) - see blankDBStructure.sql
