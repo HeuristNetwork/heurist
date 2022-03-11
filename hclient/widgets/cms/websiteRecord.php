@@ -137,14 +137,17 @@ if(!($rec_id>0))
 {
     //if recID is not defined - find fist available "CMS home" record
     
-    $rec_id = mysql__select_value($mysqli, 'select rec_ID from Records '
-    .' WHERE rec_FlagTemporary=0 AND rec_NonOwnerVisibility="public" '
-    .' AND rec_RecTypeID='.RT_CMS_HOME.' limit 1');
-    
-    if(!($rec_id>0)){
-        //@todo find first record of 99-51 rectype
-        $message = 'Sorry, there are no publicly accessible websites defined for this database. '
-        .'Please ask the owner to publish their website(s).';
+    $res = recordSearch($system, array('q'=>array('t'=>RT_CMS_HOME), 'detail'=>'ids'));
+    if(@$res['status']==HEURIST_OK){
+        $rec_id = @$res['data']['records'][0];
+        if(!($rec_id>0)){
+            $message = 'Sorry, there are no publicly accessible websites defined for this database. '
+            .'Please ask the owner to publish their website(s).';
+            include ERROR_REDIR;
+            exit();
+        }
+    }else{
+        //$message = $system->getError()['message'];
         include ERROR_REDIR;
         exit();
     }

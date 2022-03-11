@@ -852,7 +852,7 @@ $title_alt2 -> #main-title-alt2
   <?php if($website_title){  ?>
   
   var ele = $('#main-title');
-  if(ele.length>0){
+  if(ele.length>0 && ele.children().length==0){
       //ele.empty().hide();
   <?php       
   print '$(\'<h2 '.($image_banner?' style="text-shadow: 3px 3px 5px black"':'').'>'
@@ -868,6 +868,8 @@ $title_alt2 -> #main-title-alt2
       }
       
       
+  }else{
+      ele.show();
   }
   <?php } ?>
 
