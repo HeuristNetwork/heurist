@@ -259,12 +259,6 @@ if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in website
     
 <?php
 }
-
-if($edit_OldEditor){  //old CMS editor
-?>
-    <script src="websiteRecord.js"></script>
-<?php
-}else{
 ?>    
 
 <script>
@@ -278,7 +272,6 @@ var DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS;
 //
 // Inits page for publication version  
 // It is invoked from onHapiInit
-// (for old cms version see websiteRecord.js)
 //
 //  1. Inits hLayoutMgr
 //  2. Calls initMainMenu 
@@ -524,11 +517,7 @@ if($site_css!=null){
 
     }
 }
-</script>
-<?php
-}
-?>
-<script>
+
 var page_cache = {};
 var previous_page_id = -1;
 

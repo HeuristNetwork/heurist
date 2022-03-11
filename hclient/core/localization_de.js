@@ -181,8 +181,7 @@ regional['de'] = {
     //publish menu
     'Website': 'Website',
         menu_cms_create: 'Erstellen',
-        menu_cms_edit: 'Bearbeiten (Legacy-Schnittstelle)',
-        menu_cms_edit_new: 'Bearbeiten (Neue-Schnittstelle)',
+        menu_cms_edit: 'Bearbeiten',
         menu_cms_view: 'Ansehen',
         menu_cms_embed: 'Eigenständige Webseite',
         menu_cms_create_hint: 'Eine neue CMS-Website erstellen. Die Website wird auf Daten aus der Datenbank mithilfe des Heurist-Widgets zugreifen können.',

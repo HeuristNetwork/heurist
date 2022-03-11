@@ -2507,12 +2507,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
             options = {record_id:options};
         }
         
-        //new cms editor
-        if(options.is_new_editor===true)
-            editCMS_Manager( options );
-        else
-        //old cms editor    
-            editCMS(  options ); //see editCMS.js
+        editCMS_Manager( options );
     },
 
     //
