@@ -2388,16 +2388,22 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         var pointer_mode = this._editing.getFieldByName('rst_PointerMode');
         var inpt = pointer_mode.editing_input('getInputs');
         inpt = inpt[0];
-        
+
         if(is_enable){
             inpt.find('option[value^="dropdown"]').removeProp('disabled');
+            inpt.find('option[value^="browseonly"]').removeProp('disabled');
+            inpt.val('dropdown_add');
         }else{
             inpt.find('option[value^="dropdown"]').prop('disabled','disabled');
+            inpt.find('option[value^="browseonly"]').prop('disabled','disabled');
             inpt.val('addorbrowse');
         }
         inpt.parent().addClass('selectmenu-parent');
         inpt.hSelect('refresh');
       
+        var ele = inpt.hSelect('menuWidget');
+        ele.find('li').show();
+        ele.find('li.ui-state-disabled').hide();
         
     },
     

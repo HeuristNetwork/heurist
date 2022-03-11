@@ -231,7 +231,8 @@
                         "rst_Class":"resource",
                         "rst_DisplayName":"Pointer mode:",
                         "rst_DisplayHelpText": "", 
-                        "rst_DefaultValue":"addorbrowse",
+                        "rst_DefaultValue":"dropdown_add",
+                        "rst_DisplayHelpText": "For child record pointers, only standard addition modes are available",
                         "rst_FieldConfig":[
                             {"key":"dropdown_add", "title":"Dropdown (add OK, list max 1000)"},
                             {"key":"dropdown", "title":"Dropdown (no add, list max 1000)"},
