@@ -90,11 +90,13 @@ function recordAdd($system, $record, $return_id_only=false){
                 unset($record[$key]);
             }
         }
-
+        
         $rectype = @$record['RecTypeID'];
         $access = @$record['NonOwnerVisibility'];
         $access_grps = @$record['NonOwnerVisibilityGroups'];
         $owner_grps = prepareIds(@$record['OwnerUGrpID'], true);
+        
+        $rectype = ConceptCode::getRecTypeLocalID($rectype);
     }else{
         $rectype = null;
         $access = null;
@@ -109,7 +111,7 @@ function recordAdd($system, $record, $return_id_only=false){
     }
 
     if (!($rectype && dbs_GetRectypeByID($mysqli, $rectype)) ) {
-        return $system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong');
+        return $system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong ('.$rectype.')');
     }
 
     // OWNER -----------

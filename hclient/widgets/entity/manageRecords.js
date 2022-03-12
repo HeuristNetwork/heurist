@@ -2206,10 +2206,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             if(that.options.new_record_params['Title'] && window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']>0){
                that.options.new_record_params['details'] = {};
                that.options.new_record_params['details'][window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']] = that.options.new_record_params['Title']; 
-            }    
+            }
+            
+            var is_thumbnail_generation = false;    
             if(that.options.new_record_params['URL'] && window.hWin.HAPI4.sysinfo['dbconst']['DT_THUMBNAIL']>0){
                if(!that.options.new_record_params['details']) that.options.new_record_params['details'] = {};
                that.options.new_record_params['details'][window.hWin.HAPI4.sysinfo['dbconst']['DT_THUMBNAIL']] = 'generate_thumbnail_from_url';
+               is_thumbnail_generation = true;
             }
             
             //
@@ -2289,8 +2292,18 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                 }else if(that.options.new_record_params['details']){                     
                     //need to use save because method "add" inserts only header
+                    
+                    var msg = null;
+                    if(is_thumbnail_generation){
+                        msg = window.hWin.HR('generating thumbnail');
+                    }
+                    var dlged = that._getEditDialog();
+                    if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged,null,msg);
+                    
                     window.hWin.HAPI4.RecordMgr.saveRecord( that.options.new_record_params,
                         function(response){ 
+                                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            
                                 if(response.status == window.hWin.ResponseStatus.OK){
                                     response.is_insert=true; 
                                     that._initEditForm_step3(response.data, true); //it returns new record id only

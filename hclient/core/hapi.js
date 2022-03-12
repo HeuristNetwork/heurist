@@ -60,7 +60,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     
     _guestUser = {ugr_ID:0, ugr_FullName:'Guest' },
     _listeners = [];
-    _is_callserver_in_progress = false;
+    _is_callserver_in_progress = false,
+    
+    _use_debug = false;
 
     /**
     * initialization of hAPI object
@@ -173,8 +175,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
 
         //set d=0 and c=0 to disable debug  http://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm
-        request.DBGSESSID='425944380594800002;d=0,p=0,c=0';
-        //request.DBGSESSID='425944380594800002;d=1,p=0,c=1';
+        request.DBGSESSID= (_use_debug)?'425944380594800002;d=1,p=0,c=1':'425944380594800002;d=0,p=0,c=0';
 
         var url = that.baseURL+"hsapi/controller/"+action+".php"; //+(new Date().getTime());
        
@@ -1660,8 +1661,7 @@ var fin_time = new Date().getTime() / 1000;
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
                 //set d and c=0 to disable debug  http://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm
-                request.DBGSESSID='425944380594800002;d=0,p=0,c=0';
-                //request.DBGSESSID='425944380594800002;d=1,p=0,c=1';
+                request.DBGSESSID= (_use_debug)?'425944380594800002;d=1,p=0,c=1':'425944380594800002;d=0,p=0,c=0';
                 
                 _callserver('entityScrud', request, callback);
             },

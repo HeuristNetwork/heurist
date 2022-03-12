@@ -236,10 +236,13 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     _adjustHeight:function(){
                 var ele = this.element.find('#txt_add_link');
                 var t1 = ele.offset().top;
-                var t2 = this.element.find('.ent_footer').offset().top;
-                if(t2>0){
-                    var h = Math.max(t2-t1-40,40);
-                    ele.height(h);                
+                var ele2 = this.element.find('.ent_footer');
+                if(ele2.length>0){
+                    var t2 = ele2.offset().top;
+                    if(t2>0){
+                        var h = Math.max(t2-t1-40,40);
+                        ele.height(h);                
+                    }
                 }
     },
     
