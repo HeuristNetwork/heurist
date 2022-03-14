@@ -348,6 +348,8 @@ function onPageInit(success)
 //
 function initMainMenu( afterInitMainMenu ){
     
+    _dout('initMainMenu');
+    
     var topmenu = $('#main-menu');
 
     var lopts = {  
@@ -380,6 +382,7 @@ function initMainMenu( afterInitMainMenu ){
 //
 function loadPageContent(pageid, eventdata){
     
+    _dout('loadPageContent');
     /* @todo
     var args = null; //arguments that will be passed to afterPageLoad
     
@@ -534,6 +537,7 @@ var datatable_custom_render = null;
 //
 function afterPageLoad(document, pageid, eventdata){
 
+    _dout('afterPageLoad');
     //var pagetitle = $($(page_target).children()[0]);
     var pagetitle = $('#main-content > h2.webpageheading');
     var title_container = $('#main-pagetitle');
@@ -755,6 +759,8 @@ function afterPageLoad(document, pageid, eventdata){
 //
 function onHapiInit(success){   
     
+    _dout('onHapiInit');
+    
     //_dout('webpage hapi inited  '+ (new Date().getTime() / 1000 - _time_debug));
     _time_debug = new Date().getTime() / 1000;
     
@@ -816,6 +822,9 @@ if(isset($customTemplateNotFound)){
 // for example $image_logo->#main-logo
 //
 function initHeaderElements(){   
+    
+    _dout('initHeaderElements');
+
 /*
 $image_logo  -> #main-logo
 $image_altlogo -> #main-logo-alt
