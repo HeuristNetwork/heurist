@@ -271,9 +271,9 @@ class DbsTerms
             $res = array();    
         }
         
-        if($parent_id=='relation'){
+        if($parent_id=='relation' || $parent_id=='enum'){
             //find all vocabulary with domain "relation"
-            $vocab_ids = $this->getVocabs('relation');
+            $vocab_ids = $this->getVocabs($parent_id);
             foreach($vocab_ids as $trm_ID){
                 $res2 = $this->treeData($trm_ID, $mode);
                 $res = array_merge($res,$res2);

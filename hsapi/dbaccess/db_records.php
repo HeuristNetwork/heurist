@@ -1972,7 +1972,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                         if (is_numeric($dtl_Value)){
                             $term_tocheck = $dtl_Value;
                         }else{
-                            $term_tocheck = getTermByLabel($dtl_Value, $term_domain); //within domain
+                            $term_tocheck = $terms->getTermByLabel($term_domain, $dtl_Value); //within domain
                         }
                         $isValid = isValidTerm($system, $term_tocheck, $term_domain, $dtyID, $rectype);
                         if($isValid){
@@ -2692,7 +2692,7 @@ return null; //not found
 // see VerifyValue
 function isValidTerm($system, $term_tocheck, $domain, $dtyID, $rectype)
 {
-    global $recstructures, $detailtypes, $terms;
+    global $recstructures, $detailtypes, $terms; //DbsTerms
 
     $terms_ids = null;
 
