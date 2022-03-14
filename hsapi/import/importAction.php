@@ -1616,7 +1616,11 @@ private static function validateEnumerations($query, $imp_session, $fields_check
         $wrong_records = array();
         $wrong_values = array();
         
+        $cc = 0;
+        
         while ($row = $res->fetch_row()){
+            
+            //if(!($row[0]==462 || $row[0]==679)) continue;
 
             $is_error = false;
             $newvalue = array();
@@ -1636,6 +1640,12 @@ private static function validateEnumerations($query, $imp_session, $fields_check
                     }else{
                         //strip accents on both sides
                         $term_id = VerifyValue::isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id, true );
+                        
+                        /*
+                        if($cc<5 && !$term_id){
+                            error_log($r_value.'   ['.$r_value2.']  >'.$term_id.'<  '.$dt_def[$idx_term_tree].'  dt_id='.$dt_id);
+                            $cc++;
+                        }*/
                      
                         if(!$term_id){
                             $term_id = VerifyValue::isValidTermCode($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );

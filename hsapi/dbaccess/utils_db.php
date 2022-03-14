@@ -880,9 +880,19 @@
 
         for($i = 0; $i < $inputStrLength; $i++) {
             $currentChar = mb_substr($inputStr, $i, 1, $encoding);
-
-            $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);
-
+            if(mb_ord($currentChar)==0xA0){ //non breaking space
+                $translatedCharPos = '';    
+            }else{
+                $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);    
+            }
+/*
+if ( $i<2 ){
+    $ch = mb_chr(mb_ord($currentChar));
+    error_log($i.'  '.($i<2).'  >'.$currentChar.'<  '.mb_ord($currentChar).'  '.$ch.'  '.(mb_ord($currentChar)==0xA0));  
+ //error_log(mb_strpos($from, $ch, 0, $encoding));
+} 
+*/
+            
             if($translatedCharPos === false) {
                 $translated .= $currentChar;
             }
@@ -897,12 +907,13 @@
     //
     //
     //
-    function stripAccents($stripAccents){
-        return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
+    function stripAccents($stripAccents){ 
+        return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß',
+                                      'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
     }    
 
     function  trim_lower_accent($item){
-        return mb_strtolower(stripAccents($item));
+        return trim(mb_strtolower(stripAccents(trim($item))));
     }
 
     function  trim_lower_accent2(&$item, $key){

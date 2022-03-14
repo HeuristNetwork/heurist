@@ -3831,7 +3831,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             +' if you have used an incomplete set of fields for matching.</div>';
 
         }
-        else if(mode=='error' || mode=='warning'){    //------------------------------------------------------------------------------------------- 
+        else if(mode=='error' || mode=='warning'){    //----------------------------------------------------------------------------------- 
 
                 var is_missed = false;
                 var tabs = res[mode];
