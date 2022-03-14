@@ -1080,6 +1080,13 @@ public static function validateImport($params) {
                 $field_name1 = array_search($recordType.".".$ft_id."_lat", $mapping_prev_session, true);
                 $field_name2 = array_search($recordType.".".$ft_id."_long", $mapping_prev_session, true);
             }
+            
+            if(is_array($field_name1) && count($field_name1)>0){
+                $field_name1 = $field_name1[0];
+            }
+            if(is_array($field_name2) && count($field_name2)>0){
+                $field_name2 = $field_name2[0];
+            }
 
             //search for empty required fields in import table
             if($ft_vals[$idx_reqtype] == "required"){
