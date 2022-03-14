@@ -1137,7 +1137,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
         
         if(!message){
-            message = window.hWin.HR('Loading Content')+'...';
+            message = 'Loading Content';
+            message = ($.isFunction(window.hWin.HR)?window.hWin.HR(message):message)+'...';
         }    
         window.hWin.HEURIST4.msg.coverall.find('.internal_msg').html(message);
         
