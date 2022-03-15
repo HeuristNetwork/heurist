@@ -877,21 +877,25 @@
         $inputStrLength = mb_strlen($inputStr, $encoding);
 
         $translated = '';
+        
+        //$inputStr = preg_replace("/\s+/u", ' ', $inputStr); //any spaces
 
+//error_log($inputStr.'  '.$inputStrLength);
+        
         for($i = 0; $i < $inputStrLength; $i++) {
             $currentChar = mb_substr($inputStr, $i, 1, $encoding);
-            if(mb_ord($currentChar)==0xA0){ //non breaking space
+            /*
+            if(mb_ord($currentChar)==0xA0 || mb_ord($currentChar)==65279){ //non breaking space or BOM
                 $translatedCharPos = '';    
             }else{
                 $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);    
-            }
-/*
-if ( $i<2 ){
-    $ch = mb_chr(mb_ord($currentChar));
-    error_log($i.'  '.($i<2).'  >'.$currentChar.'<  '.mb_ord($currentChar).'  '.$ch.'  '.(mb_ord($currentChar)==0xA0));  
- //error_log(mb_strpos($from, $ch, 0, $encoding));
-} 
-*/
+            }*/
+            $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);    
+/*          
+if($i<5){
+    error_log ($i.'  >'.$currentChar.'<  ord='.mb_ord($currentChar).'  chr='.mb_chr(mb_ord($currentChar)));
+}*/
+            
             
             if($translatedCharPos === false) {
                 $translated .= $currentChar;
@@ -903,17 +907,42 @@ if ( $i<2 ){
 
         return $translated;
     }
+    
+/*    
+    //override standard trim function to sanitize unicode white spaces
+    //Rename existing function
+    rename_function('trim', '__trim');
+    //Override function with another
+    override_function('trim', '$string', 'return override_trim($string);');
 
+    //new trim  function
+    function override_trim($string){
+        $str = preg_replace('/\xc2\xa0/', ' ', $str);  //non breakable space
+        $str = preg_replace("/\xEF\xBB\xBF/", "", $str); // BOM
+        //$str = preg_replace("/\s+/u", ' ', $str); //any spaces
+        return __trim($str);
+    }
+*/
     //
     //
     //
     function stripAccents($stripAccents){ 
         return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß',
                                       'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
-    }    
-
+    }  
+    
+    //
+    // trim including &nbsp; and &xef; (BOM)
+    //
+    function super_trim( $str ){
+        return trim($str, " \n\r\t\v\x00\xC2\xA0\xEF\xBB\xBF");
+    }  
+    
+    //
+    //
+    //
     function  trim_lower_accent($item){
-        return trim(mb_strtolower(stripAccents(trim($item))));
+        return mb_strtolower(stripAccents(trim($item," \n\r\t\v\x00\xC2\xA0\xEF\xBB\xBF"))); //including &nbsp; and &xef; (BOM)
     }
 
     function  trim_lower_accent2(&$item, $key){
