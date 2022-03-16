@@ -224,10 +224,12 @@ $.widget( "heurist.mapping", {
     {name:'Esri.NatGeoWorldMap'},
     {name:'Esri.WorldGrayCanvas'},
     {name:'None'}
-    ],    
+    ],
+
+    available_maxzooms: [],
+
     // ---------------    
     // the widget's constructor
-    
     //
     _create: function() {
 
@@ -304,7 +306,7 @@ $.widget( "heurist.mapping", {
         
         $('#'+map_element_id).css('padding',0); //reset padding otherwise layout set it to 10px
         
-        this.nativemap = L.map( map_element_id, {zoomControl:false, tb_del:true, maxZoom:25} )
+        this.nativemap = L.map( map_element_id, {zoomControl:false, tb_del:true} )
             .on('load', function(){ } );
 
         //init basemap layer        
@@ -338,14 +340,14 @@ $.widget( "heurist.mapping", {
         
         //legend contains mapManager
         this.map_legend = L.control.manager({ position: 'topright' }).addTo( this.nativemap );
-        
-        //content for legend
-        this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element, is_ui_main:is_ui_main});
 
         //map scale
         this.map_scale = L.control.scale({ position: 'bottomleft' }).addTo( this.nativemap );
         $(this.map_scale._container).css({'margin-left': '20px', 'margin-bottom': '20px'});
 
+        //content for legend
+        this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element, is_ui_main:is_ui_main});
+        
         this.updateLayout();
         
         this._adjustLegendHeight();
@@ -485,9 +487,24 @@ $.widget( "heurist.mapping", {
             if(provider['name']!=='None'){
                 this.basemaplayer = L.tileLayer.provider(provider['name'], provider['options'] || {})
                     .addTo(this.nativemap);        
-                    
+
                 if(this.basemaplayer_filter){
                     this.applyBaseMapFilter();
+                }
+
+                var cur_maxZoom = this.nativemap.getMaxZoom();
+                var layer_maxZoom = (provider['options'] && provider['options']['maxZoom']) ? provider['options']['maxZoom'] : 18;
+
+                if(cur_maxZoom < layer_maxZoom){
+                    this.nativemap.setMaxZoom(layer_maxZoom);
+
+                    var idx = this.available_maxzooms.findIndex(arr => arr[0] == 'basemap');
+                    if(idx != -1){ // update max zoom value
+                        this.available_maxzooms[idx] = ['basemap', layer_maxZoom];
+                    }else{ // add max zoom value
+                        this.available_maxzooms.push(['basemap', layer_maxZoom]);
+                        this.available_maxzooms.sort((a, b) => b[1] - a[1]);
+                    }
                 }
             }            
             
@@ -619,15 +636,28 @@ $.widget( "heurist.mapping", {
             }else{
                 new_layer = new HeuristTilerLayer(layer_url, layer_options).addTo(this.nativemap);             
             }
-    
         }
         
         this.all_layers[new_layer._leaflet_id] = new_layer;
         
         this._updatePanels();
         
+        if(layout_opts && layout_opts['maxZoom']){
+
+            var idx = this.available_maxzooms.findIndex(arr => arr[0] == new_layer._leaflet_id);
+            if(idx != -1){
+                this.available_maxzooms[idx] = [new_layer._leaflet_id, layout_opts['maxZoom']];
+            }else{
+                this.available_maxzooms.push([new_layer._leaflet_id, layout_opts['maxZoom']]);
+                this.available_maxzooms.sort((a, b) => b[1] - a[1]);
+            }
+
+            if(this.nativemap.getMaxZoom() < layout_opts['maxZoom']){
+                this.nativemap.setMaxZoom(layout_opts['maxZoom']);
+            }
+        }
+
         return new_layer._leaflet_id;
-        
     },
     
     //
@@ -1012,28 +1042,23 @@ $.widget( "heurist.mapping", {
             }
                         
             if(bounds && bounds.isValid()){
-                //this.nativemap.options.maxZoom = null;
-                //L.Util.setOptions( this.nativemap, {maxZoom: 17});
-                
-                
+
+                var maxZoom = this.nativemap.getMaxZoom();
+                if(window.hWin.HEURIST4.util.isObject(fly_params) && fly_params['maxZoom'] && fly_params['maxZoom'] > maxZoom){
+                    fly_params['maxZoom'] = maxZoom;
+                }
+
                 if(fly_params){
                     
                     if(fly_params===true){
-                        fly_params = {animate:true, duration:1.5, maxZoom: 20};
+                        fly_params = {animate:true, duration:1.5, maxZoom: maxZoom};
                     }
                     this.nativemap.flyToBounds(bounds, fly_params);
             
                 }else{
-                    this.nativemap.fitBounds(bounds, {maxZoom: 20});      
-                }
-                        
-                
-                
-                //this.nativemap.options.maxZoom = 25;
-                //L.Util.setOptions( this.nativemap, {maxZoom: 25});
-//console.log('3. '+this.nativemap.options.maxZoom);                
-            }                
-        
+                    this.nativemap.fitBounds(bounds, {maxZoom: maxZoom});      
+                }             
+            }
     },
     
     //
@@ -1066,7 +1091,17 @@ $.widget( "heurist.mapping", {
                 //update timeline
                 this.vistimeline.timeline('timelineRefresh', this.timeline_items, this.timeline_groups);
             }
-            this._updatePanels()
+
+            this._updatePanels();
+
+            var idx = this.available_maxzooms.findIndex(arr => arr[0] == layer_id);
+            if(idx != -1){ // remove from available max zooms
+                this.available_maxzooms.splice(idx, 1);
+            }
+
+            if(idx == 0){ // check if max fzoom needs updating
+                this.nativemap.setMaxZoom(this.available_maxzooms[idx][1]);
+            }
         }
     },
 
@@ -1238,8 +1273,8 @@ $.widget( "heurist.mapping", {
                             $.each(markers, function(i, top_layer){    
                                 if(top_layer.feature){
                                     selected_layers[top_layer._leaflet_id] = top_layer;
-                                    sText = sText + '<option value="'+top_layer._leaflet_id+'">'
-                                                            + window.hWin.HEURIST4.util.htmlEscape( top_layer.feature.properties.rec_Title )+ '</option>';
+                                    var title = window.hWin.HEURIST4.util.htmlEscape( top_layer.feature.properties.rec_Title );
+                                    sText = sText + '<option title="'+ title +'" value="'+top_layer._leaflet_id+'">'+ title +'</option>';
                                 }
                             });
                             
@@ -1478,8 +1513,8 @@ $.widget( "heurist.mapping", {
                                 
                                     if(top_layer.contains(latlng)){
                                         selected_layers[top_layer._leaflet_id] = top_layer;
-                                        sText = sText + '<option value="'+top_layer._leaflet_id+'">'
-                                                        + window.hWin.HEURIST4.util.htmlEscape( top_layer.feature.properties.rec_Title )+ '</option>';
+                                        var title = window.hWin.HEURIST4.util.htmlEscape( top_layer.feature.properties.rec_Title );
+                                        sText = sText + '<option title="'+title+'" value="'+top_layer._leaflet_id+'">'+title+'</option>';
                                     }
                                     
                             }
@@ -1516,22 +1551,26 @@ $.widget( "heurist.mapping", {
                                 +'" style="width:100%;overflow-y: auto;border: none;outline: none; cursor:pointer">'
                                 +sText+'</select>') 
                         .openOn(this.nativemap);
-                    
-                    var that = this;
-                        
-                    var ele = $(this.main_popup._container).find('select');
-                    ele.on({'change':function(evt){
-                        var leaflet_id = $(evt.target).val();
-                        that._onLayerSelect(selected_layers[leaflet_id], latlng);
-                    },'mousemove':function(evt){
-                        var leaflet_id = $(evt.target).attr('value');
-                        if(leaflet_id>0){
-                            $(evt.target).siblings().removeClass('selected');
-                            $(evt.target).addClass('selected');
-                            var layer = selected_layers[leaflet_id];
-                            that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight from popup
-                        }
-                    }});
+
+        $(this.main_popup.getElement()).css({
+            width: '300px'
+        })
+
+        var that = this;
+            
+        var ele = $(this.main_popup._container).find('select');
+        ele.on({'change':function(evt){
+            var leaflet_id = $(evt.target).val();
+            that._onLayerSelect(selected_layers[leaflet_id], latlng);
+        },'mousemove':function(evt){
+            var leaflet_id = $(evt.target).attr('value');
+            if(leaflet_id>0){
+                $(evt.target).siblings().removeClass('selected');
+                $(evt.target).addClass('selected');
+                var layer = selected_layers[leaflet_id];
+                that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight from popup
+            }
+        }});
     },
 
     //
@@ -1578,12 +1617,7 @@ $.widget( "heurist.mapping", {
                 if(window.hWin.HEURIST4.leaflet_popup){
                     width = window.hWin.HEURIST4.leaflet_popup.width;
                     height = window.hWin.HEURIST4.leaflet_popup.height;
-                }else{
-
-                    $popup_ele.find('.leaflet-popup-content-wrapper').css({
-						'height': '100%'
-                    });
-				}
+                }                
 
                 if(that.options.layout_params['popup_resizing'] != null){
                     resizable = that.options.layout_params['popup_resizing'];
@@ -1616,6 +1650,7 @@ $.widget( "heurist.mapping", {
                             window.hWin.HEURIST4.leaflet_popup = dims; // cache width and height
 
                             $popup_ele.css(dims); // update popup's dimensions
+                            $popup_ele.find('.leaflet-popup-content-wrapper').css({left: '', top: ''}); // remove top and left changes
 
                             that.main_popup.update();
                         },
@@ -1663,7 +1698,6 @@ $.widget( "heurist.mapping", {
                             + layer.feature.properties.rec_ID
                             + '&db='+db+'&template='
                             + encodeURIComponent(layer.options.popup_template || that.mapPopUpTemplate);
-                    
                 }else{
                     
                     popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='
