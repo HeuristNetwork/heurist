@@ -1162,10 +1162,10 @@ $.widget( "heurist.editing_input", {
 
                     // Craft initial label
                     var trm_info = $Db.trm(value);
-                    if(value && trm_info){
+                    if(value && Number.isInteger(+value) && trm_info){
                         var crafted_label = trm_info.trm_Label;
 
-                        if(trm_info.trm_ParentTermID != 0){
+                        if(crafted_label != undefined && trm_info.trm_ParentTermID != 0){
 
                             while(1){
 
@@ -3763,7 +3763,7 @@ console.log('onpaste');
 
             if(typeof openSearchMenu!=='undefined' && $.isFunction(openSearchMenu) && this.options.recordset && this.options.recordset.entityName == 'Records'){
 
-                var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/magglass_12x11.gif';
+                var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/filter_icon_black18.png';
 
                 var opt = document.createElement('option');
 
@@ -3782,7 +3782,34 @@ console.log('onpaste');
 
                 $input.hSelect('destroy');
 
-                window.hWin.HEURIST4.ui.initHSelect($input, this.options.useHtmlSelect, null, function(){ openSearchMenu(that, $input, true); });
+                var performedOnce = 0;
+
+                window.hWin.HEURIST4.ui.initHSelect($input, this.options.useHtmlSelect, null, function(){ 
+
+                    if(performedOnce == 0){
+
+                        // Extra indenting + re-label blank option
+                        $input.hSelect('menuWidget').find('div[role="option"]').each(function(idx, opt){
+
+                            var l_pad = 0;
+                            var in_styles = $(opt).attr('style');
+                            in_styles = in_styles.slice(0, in_styles.length - 1).split(';').findIndex(function(style){
+                                if(style.indexOf('padding-left:') >= 0){
+                                    l_pad = parseFloat(style.split(':')[1]) + 1;
+                                }
+                            });
+                            $(opt).css('padding-left', l_pad + 'em');
+
+                            if(idx == 1){
+                                $(opt).text('<blank>');
+                            }
+                        });
+
+                        performedOnce = 1;
+                    }
+
+                    menuWidgetOpen(that, $input, true); 
+                });
             }
 
             var opts = $input.find('option');      
