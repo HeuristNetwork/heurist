@@ -74,6 +74,7 @@ $execution_counter = 0;
 $execution_total_counter = 0;
 $is_jsallowed = true;
 $record_with_custom_styles = 0; //record id with custom css and style links DT_CMS_CSS and DT_CMS_EXTFILES
+$is_snippet_output = false; //output a html page or html snippet
 
 $is_included = isset($system); //this script is included into other one
 
@@ -121,6 +122,7 @@ function executeSmartyTemplate($system, $params){
     $publishmode = (array_key_exists("publish", $params))? intval($params['publish']):0;
     $emptysetmessage = (array_key_exists("emptysetmessage", $params))? $params['emptysetmessage']:null;
     $record_with_custom_styles = (array_key_exists("cssid", $params))? $params['cssid']:null;
+    $is_snippet_output  = @$params['snippet']==1;
            
     if(!isset($system) || !$system->is_inited()){
         smarty_error_output( $system, null );
@@ -412,9 +414,73 @@ function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
 //
 function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $template){
     
-    global $system, $is_jsallowed, $record_with_custom_styles;
+    global $system, $is_jsallowed, $record_with_custom_styles, $is_snippet_output;
     
     if($is_jsallowed){
+        
+        if(!$is_snippet_output){ //full html output. inside iframe - add all styles and scripts to header at once7
+        
+            $head = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+                
+            //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
+            if($record_with_custom_styles>0){
+                //find record with css fields
+                $css_fields = array();
+                if($system->defineConstant('DT_CMS_CSS')){
+                    array_push($css_fields, DT_CMS_CSS);
+                }
+                if($system->defineConstant('DT_CMS_EXTFILES')){
+                    array_push($css_fields, DT_CMS_EXTFILES);
+                }
+                if(count($css_fields)>0){
+                    $record = recordSearchByID($system, $record_with_custom_styles,$css_fields,'rec_ID');
+                    if($record && @$record['details']){
+
+                        if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
+                           //add to begining 
+                           $head .= '<style>'.recordGetField($record, DT_CMS_CSS).'</style>';
+                        }
+                        
+                        if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
+                            //add to header
+                            $external_files = @$record['details'][DT_CMS_EXTFILES];
+                            if($external_files!=null){
+                                if(!is_array($external_files)){
+                                    $external_files = array($external_files);
+                                }
+                                foreach ($external_files as $ext_file){
+                                    $head .= $ext_file;
+                                }
+                            }
+                        }
+                    }
+                }
+            }            
+
+            //check if need to init mediaViewer
+            if(strpos($tpl_source,'fancybox-thumb')>0){
+
+                $head .= 
+                    ('<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>'
+                    .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-ui.min.js"></script>'
+                    .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.js"></script>'
+                    .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/widgets/viewers/mediaViewer.js"></script>'
+                    .'<link rel="stylesheet" href="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.css" />');
+                
+                //init mediaviewer after page load
+                $head .=  ('<script>'
+                .'var rec_Files=[];'
+                .'$(document).ready(function() {'
+                    .'$("body").mediaViewer({rec_Files:rec_Files, showLink:false, selector:".fancybox-thumb", '
+                    .'database:"'.HEURIST_DBNAME.'", baseURL:"'.HEURIST_BASE_URL.'"});'    
+                  .'});'
+                .'</script>');
+            }
+
+            $head .= '</head><body class=""smarty-report">';
+            $tpl_source = $head.$tpl_source.'</body></head>';
+            
+        }else{ //html snippet output (without head)
         
         //check if need to init mediaViewer
         if(strpos($tpl_source,'fancybox-thumb')>0){
@@ -457,7 +523,9 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                        //add to begining 
                        $tpl_source = '<style>'.recordGetField($record, DT_CMS_CSS).'</style>'.$tpl_source;
                        
-                       $tpl_source = $tpl_source.'<script>if(document.body) document.body.classList.add("smarty-report");</script>';
+                       $tpl_source = $tpl_source.'<script>if(document.body){
+                            document.body.classList.add("smarty-report");
+                       } </script>';
                     }
                     
                     if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
@@ -476,14 +544,14 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                                     .'\');';                                        }
                                 }
                                 
-            $tpl_source = $tpl_source.'})();</script>';
+            $tpl_source = $tpl_source.' })();</script>';
                             }
                         }
                     }
                 }
             }
         }
-        
+        }
         
         return $tpl_source;
         

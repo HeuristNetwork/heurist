@@ -2273,7 +2273,7 @@ $.widget( "heurist.resultList", {
                     if( typeof this.options.rendererExpandDetails === 'string' 
                             && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
 
-                        infoURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
+                        infoURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?snippet=1&publish=1&debug=0&q=ids:'
                         + recID 
                         + '&db='+window.hWin.HAPI4.database+'&template='
                         + encodeURIComponent(this.options.rendererExpandDetails);

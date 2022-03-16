@@ -178,7 +178,7 @@ this._dout('onLoadComplete refresh again');
             this.options.onLoadComplete.call(this);
         }
         
-        //add custom css to iframe
+        //add custom css to iframe  besides see cssid parameter
         if(this.options.is_frame_based && this.options.custom_css_for_frame){
             
             var fdoc = this.dosframe[0].contentWindow.document;

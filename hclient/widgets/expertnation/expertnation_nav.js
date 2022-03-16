@@ -729,7 +729,7 @@ $.widget( "heurist.expertnation_nav", {
         ele.show();
         //load and execute smarty template for record
 
-        var sURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?h4=1&w=a&db='+window.hWin.HAPI4.database
+        var sURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?snippet=1&h4=1&w=a&db='+window.hWin.HAPI4.database
         +'&q=ids:'+recID+'&template=BoroProfileOrPlace.tpl';
 
         ele.load(sURL);
