@@ -110,7 +110,9 @@ $.widget( "heurist.resultList", {
         aggregate_values: null, //supplementary values per record id - usually to store counts, sum, avg 
         aggregate_link: null,    //link to assigned to aggregate value label
 		
-		blog_result_list: false	//whether the result list is used for blog records, limiting pagesize if it is
+		blog_result_list: false,	//whether the result list is used for blog records, limiting pagesize if it is
+
+		auto_select_first: false   //automatically select first record within result list
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -3090,8 +3092,8 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         if(this.options.select_mode!='select_multi'){
             this.div_content.find('.recordSelector').hide();
             
-            if(this.options.view_mode == 'horizontal'){
-                //always select first div for horizontal viewmode
+            if(this.options.view_mode == 'horizontal' || this.options.auto_select_first !== false){
+                //always select first div for horizontal viewmode, or if auto_select_first is set
                 var ele = this.div_content.find('.recordDiv:first');//.addClass('selected');
                 if(ele.length>0) this._recordDivOnClick({target:ele[0]});
             }            
