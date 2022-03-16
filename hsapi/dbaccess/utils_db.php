@@ -100,16 +100,21 @@
         if($dbname){
             
             list($database_name_full, $database_name) = mysql__get_names( $dbname );
+            
+            $res = mysql__check_dbname($dbname);           
+            if($res===true){
+                $success = $mysqli->select_db($database_name_full);
+                if(!$success){
+                    $db_exists = mysql__select_value($mysqli, "SHOW DATABASES LIKE '$database_name_full'");
 
-            $success = $mysqli->select_db($database_name_full);
-            if(!$success){
-                $db_exists = mysql__select_value($mysqli, "SHOW DATABASES LIKE '$database_name_full'");
-
-                if($db_exists == null){
-                    return array(HEURIST_ACTION_BLOCKED, "The requested database '".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8')."' does not exist");
-                }else{
-                    return array(HEURIST_INVALID_REQUEST, "Could not open database ".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8'));
+                    if($db_exists == null){
+                        return array(HEURIST_ACTION_BLOCKED, "The requested database '".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8')."' does not exist");
+                    }else{
+                        return array(HEURIST_INVALID_REQUEST, "Could not open database ".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8'));
+                    }
                 }
+            }else{
+                return $res;
             }
 
             //$mysqli->query('SET CHARACTER SET utf8mb4'); //utf8 is utf8mb3 by default
@@ -120,17 +125,27 @@
     }
     
     //
+    // Avoid illegal chars in db
+    //
+    function mysql__check_dbname($db_name){
+        
+        $res = true;
+        if (preg_match('[\W]', $db_name)){
+            $res = array(HEURIST_INVALID_REQUEST, 
+                'Only letters, numbers and underscores (_) are allowed in the database name');
+        }
+        return $res;
+    }
+    
+    //
     //
     //
     function mysql__create_database( $mysqli, $db_name ){
 
-        $res = false;
+        $res = mysql__check_dbname($db_name);
 
         // Avoid illegal chars in db
-        if (preg_match('[\W]', $db_name)){
-            $res = array(HEURIST_INVALID_REQUEST, 
-                'Only letters, numbers and underscores (_) are allowed in the database name');
-        }else{
+        if ($res===true) {
             // Create database
             // databse is created wiht utf8 (3-bytes encoding) and case insensetive collation order
             // Records, recDetails and defTerms are create with utf8mb4 (4bytes encoding) - see blankDBStructure.sql
@@ -862,12 +877,26 @@
         $inputStrLength = mb_strlen($inputStr, $encoding);
 
         $translated = '';
+        
+        //$inputStr = preg_replace("/\s+/u", ' ', $inputStr); //any spaces
 
+//error_log($inputStr.'  '.$inputStrLength);
+        
         for($i = 0; $i < $inputStrLength; $i++) {
             $currentChar = mb_substr($inputStr, $i, 1, $encoding);
-
-            $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);
-
+            /*
+            if(mb_ord($currentChar)==0xA0 || mb_ord($currentChar)==65279){ //non breaking space or BOM
+                $translatedCharPos = '';    
+            }else{
+                $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);    
+            }*/
+            $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);    
+/*          
+if($i<5){
+    error_log ($i.'  >'.$currentChar.'<  ord='.mb_ord($currentChar).'  chr='.mb_chr(mb_ord($currentChar)));
+}*/
+            
+            
             if($translatedCharPos === false) {
                 $translated .= $currentChar;
             }
@@ -878,16 +907,42 @@
 
         return $translated;
     }
+    
+/*    
+    //override standard trim function to sanitize unicode white spaces
+    //Rename existing function
+    rename_function('trim', '__trim');
+    //Override function with another
+    override_function('trim', '$string', 'return override_trim($string);');
 
+    //new trim  function
+    function override_trim($string){
+        $str = preg_replace('/\xc2\xa0/', ' ', $str);  //non breakable space
+        $str = preg_replace("/\xEF\xBB\xBF/", "", $str); // BOM
+        //$str = preg_replace("/\s+/u", ' ', $str); //any spaces
+        return __trim($str);
+    }
+*/
     //
     //
     //
-    function stripAccents($stripAccents){
-        return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
-    }    
-
+    function stripAccents($stripAccents){ 
+        return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß',
+                                      'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
+    }  
+    
+    //
+    // trim including &nbsp; and &xef; (BOM)
+    //
+    function super_trim( $str ){
+        return trim($str, " \n\r\t\v\x00\xC2\xA0\xEF\xBB\xBF");
+    }  
+    
+    //
+    //
+    //
     function  trim_lower_accent($item){
-        return mb_strtolower(stripAccents($item));
+        return mb_strtolower(stripAccents(trim($item," \n\r\t\v\x00\xC2\xA0\xEF\xBB\xBF"))); //including &nbsp; and &xef; (BOM)
     }
 
     function  trim_lower_accent2(&$item, $key){

@@ -72,8 +72,9 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
 -->
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css">
 <?php 
+//https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css
 //include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; 
 ?>
 

@@ -223,7 +223,7 @@ private static function findRecordIds($imp_session, $params){
                         
                         
                     }else{
-                        $fieldvalue = trim($row[$fieldname]);
+                        $fieldvalue = super_trim($row[$fieldname]);
                     
                     
                         if($field_type=="url" || $field_type=="id"){  // || $field_type=="scratchpad"){
@@ -312,7 +312,7 @@ private static function findRecordIds($imp_session, $params){
                                 $keys_values[$mapping_fieldname_to_index[$multivalue_field_name]] = $value;
                     } 
                     
-                    if(trim($value)!=''){ //if multivalue field has values use $values_tobind
+                    if(super_trim($value)!=''){ //if multivalue field has values use $values_tobind
                             $a_tobind[0] = $a_tobind[0].'s';
                             $a_tobind[] = $value;
                             $a_keys[] = $value;
@@ -1080,6 +1080,13 @@ public static function validateImport($params) {
                 $field_name1 = array_search($recordType.".".$ft_id."_lat", $mapping_prev_session, true);
                 $field_name2 = array_search($recordType.".".$ft_id."_long", $mapping_prev_session, true);
             }
+            
+            if(is_array($field_name1) && count($field_name1)>0){
+                $field_name1 = $field_name1[0];
+            }
+            if(is_array($field_name2) && count($field_name2)>0){
+                $field_name2 = $field_name2[0];
+            }
 
             //search for empty required fields in import table
             if($ft_vals[$idx_reqtype] == "required"){
@@ -1609,7 +1616,11 @@ private static function validateEnumerations($query, $imp_session, $fields_check
         $wrong_records = array();
         $wrong_values = array();
         
+        $cc = 0;
+        
         while ($row = $res->fetch_row()){
+            
+            //if(!($row[0]==575)) continue;
 
             $is_error = false;
             $newvalue = array();
@@ -1629,6 +1640,13 @@ private static function validateEnumerations($query, $imp_session, $fields_check
                     }else{
                         //strip accents on both sides
                         $term_id = VerifyValue::isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id, true );
+                        
+                        
+                        /*if($cc<5 && !$term_id){
+                            //error_log(print_r($row,true));
+                            error_log($r_value.'   ['.$r_value2.']  >'.$term_id.'<  '.$dt_def[$idx_term_tree].'  idx='.$field_idx);
+                            $cc++;
+                        }*/
                      
                         if(!$term_id){
                             $term_id = VerifyValue::isValidTermCode($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
@@ -1716,7 +1734,7 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
             $newvalue = array();
             $values = self::getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
             foreach($values as $idx=>$r_value){
-                $r_value2 = trim($r_value);
+                $r_value2 = super_trim($r_value);
                 if(!($r_value2=='' || $r_value2=='NULL' || $r_value2<0)){        // && $r_value2>0
 
                     if (!VerifyValue::isValidPointer($dt_def[$idx_pointer_types], $r_value2, $dt_id ))
@@ -1790,7 +1808,7 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
             $newvalue = array();
             $values = self::getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
             foreach($values as $idx=>$r_value){
-                if($r_value!=null && trim($r_value)!='' && trim($r_value2)!='NULL'){
+                if($r_value!=null && super_trim($r_value)!='' && super_trim($r_value2)!='NULL'){
 
                     if(!is_numeric($r_value)){
                         $is_error = true;
@@ -1854,7 +1872,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
             $newvalue = array();
             $values = self::getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
             foreach($values as $idx=>$r_value){
-                if($r_value!=null && trim($r_value)!='' && trim($r_value)!='NULL'){
+                if($r_value!=null && super_trim($r_value)!='' && super_trim($r_value)!='NULL'){
 
 
                     if( is_numeric($r_value) && ($r_value=='0' || intval($r_value)) ){
@@ -1925,7 +1943,7 @@ private static function getMultiValues($values, $csv_enclosure, $csv_mvsep){
     $values =  ($csv_mvsep=='none')?array($values) :explode($csv_mvsep, $values);
     
     if(count($values)==1){
-        array_push($nv, trim($values[0]));
+        array_push($nv, super_trim($values[0]));
     }else{
 
         if($csv_enclosure==1){
@@ -1941,7 +1959,7 @@ private static function getMultiValues($values, $csv_enclosure, $csv_mvsep){
                 if(strpos($value,$csv_enclosure)===0 && strrpos($value,$csv_enclosure)===strlen($value)-1){
                     $value = substr($value,1,strlen($value)-2);
                 }
-                array_push($nv, trim($value));
+                array_push($nv, super_trim($value));
             }
         }
     }
@@ -2492,10 +2510,10 @@ public static function performImport($params, $mode_output){
 
                     if($field_type=="url"){
                         if($row[$index])
-                            $details['URL'] = trim($row[$index]);
+                            $details['URL'] = super_trim($row[$index]);
                     }else if($field_type=="scratchpad"){
                         if($row[$index])
-                            $details['ScratchPad'] = trim($row[$index]);
+                            $details['ScratchPad'] = super_trim($row[$index]);
                         
                     }else{
 
@@ -2524,7 +2542,7 @@ public static function performImport($params, $mode_output){
                         foreach ($values as $idx=>$r_value)
                         {
                             $value = null;
-                            $r_value = trim($r_value);
+                            $r_value = super_trim($r_value);
 
                             if(($fieldtype_type == "enum" || $fieldtype_type == "relationtype")){
 
@@ -2729,7 +2747,7 @@ public static function performImport($params, $mode_output){
                             else{
                                 //double spaces are removed on preprocess stage $value = trim(preg_replace('/([\s])\1+/', ' ', $r_value));
 
-                                $value = trim($r_value);
+                                $value = super_trim($r_value);
 
                                 if($value!='' && $value!='NULL') {
                                     if($fieldtype_type == "date") {

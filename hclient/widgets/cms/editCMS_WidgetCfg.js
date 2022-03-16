@@ -163,6 +163,37 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                         $dlg.find('input[name="map_basemap_filter"]').val(opts.layout_params['basemap_filter']);        
                     }
 
+                    if(opts.layout_params['popup_behaviour']){
+                        $dlg.find('input[name="popup_behaviour"][value="'+ opts.layout_params['popup_behaviour'] +'"]').prop('checked', true);
+
+                        if(opts.layout_params['popup_behaviour'] == 'scale'){
+                            $dlg.find('span#pw_label').text('Max width:');
+                        }
+                        if(opts.layout_params['popup_behaviour'] == 'scale' || opts.layout_params['popup_behaviour'] == 'fixed_width'){
+                            $dlg.find('span#ph_label').text('Max length:');
+                        }
+                    }
+                    if(opts.layout_params['popup_width']){
+
+                        var value = opts.layout_params['popup_width'];
+                        var unit = (value.indexOf('px') > 0) ? value.slice(-2) : value.slice(-1);
+                        value = (value.indexOf('px') > 0) ? value.slice(0, -2) : value.slice(0, -1);
+
+                        $dlg.find('input[name="popup_width"]').val(value); // first index
+                        $dlg.find('select[name="popup_wunit"]').val(unit); // second index
+                    }
+                    if(opts.layout_params['popup_height']){
+
+                        var value = opts.layout_params['popup_height'];
+                        var unit = (value.indexOf('px') > 0) ? value.slice(-2) : value.slice(-1);
+                        value = (value.indexOf('px') > 0) ? value.slice(0, -2) : value.slice(0, -1);
+
+                        $dlg.find('input[name="popup_height"]').val(value); // first index
+                        $dlg.find('select[name="popup_hunit"]').val(unit); // second index
+                    }
+                    if(opts.layout_params['popup_resizing']){
+                        $dlg.find('input[name="popup_resizing"]').prop('checked', false); //opts.layout_params['popup_resizing']
+                    }
                 }
                 if(opts['mapdocument']>0){
                     $dlg.find('select[name="mapdocument"]').attr('data-mapdocument', opts['mapdocument']);        
@@ -574,6 +605,23 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                     $selectBaseMap.hSelect('widget').css('width', '200px');
                 }
 
+                $dlg.find('input[name="popup_behaviour"]')
+                    .change(function(event){
+
+                        var val = $dlg.find('input[name="popup_behaviour"]:checked').val();
+
+                        if(val == 'scale'){
+                            $dlg.find('span#pw_label').text('Max width:');
+                        }else{
+                            $dlg.find('span#pw_label').text('Width:');
+                        }
+
+                        if(val == 'scale' || val == 'fixed_width'){
+                            $dlg.find('span#ph_label').text('Max length:');
+                        }else{
+                            $dlg.find('span#ph_label').text('Length:');
+                        }
+                    });
             }else
             if(widget_name=='heurist_StoryMap'){
                 
@@ -737,6 +785,11 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
             layout_params['template'] = $dlg.find('select[name="map_template"]').val();
             layout_params['basemap'] = $dlg.find('select[name="map_basemap"]').val();
             layout_params['basemap_filter'] = $dlg.find('input[name="map_basemap_filter"]').val();
+
+            layout_params['popup_behaviour'] = $dlg.find('input[name="popup_behaviour"]:checked').val();
+            layout_params['popup_width'] = $dlg.find('input[name="popup_width"]').val() + $dlg.find('select[name="popup_wunit"]').val();
+            layout_params['popup_height'] = $dlg.find('input[name="popup_height"]').val() + $dlg.find('select[name="popup_hunit"]').val();
+            layout_params['popup_resizing'] = false;//$dlg.find('input[name="popup_resizing"]').is(':checked')
   
 //  use_timeline use_cluster editstyle map_rollover controls legend legend_exp legend_exp2 map_popup  mapdocument      
 //  map_template map_basemap_filter  map_template

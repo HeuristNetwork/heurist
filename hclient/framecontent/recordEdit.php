@@ -30,7 +30,8 @@
     require_once(dirname(__FILE__)."/initPage.php");
     require_once(dirname(__FILE__)."/../../hsapi/utilities/testSimilarURLs.php");
    
-   
+    $params = array();
+    
 //this is an addition/bookmark of URL - at the moment from bookmarklet only
 if(@$_REQUEST['u']){ 
     
@@ -43,6 +44,8 @@ if(@$_REQUEST['u']){
     if (! preg_match('!^[a-z]+:!i', $url)) $url = 'https://' . $url;       
     if (substr($url, -1) == '/') $url = substr($url, 0, strlen($url)-1);
 
+    $mysqli = $system->get_mysqli();
+    
     // look up the user's bookmark (usrBookmarks) table, see if they've already got this URL bookmarked -- if so, just edit it 
     $res = mysql__select_row($mysqli, 'select bkm_ID, rec_ID from usrBookmarks left join Records on rec_ID=bkm_recID '
                 .'where bkm_UGrpID="'.$system->get_user_id().'" '
@@ -66,10 +69,11 @@ if(@$_REQUEST['u']){
 //rec_rectype   
         
         
-        $params = array();
+        
         
         $rec_rectype = @$_REQUEST['rec_rectype'];    
-        if($rec_rectype>0){
+        if($rec_rectype!=null){
+            $rec_rectype = ConceptCode::getRecTypeLocalID($rec_rectype);
             $params['rec_rectype'] = $rec_rectype;
         }
         if(@$_REQUEST['t']){
@@ -137,16 +141,19 @@ if(@$_REQUEST['u']){
                $params['rec_rectype']  = RT_NOTE;
            }
         }
-        
-        
-        print '<script>var prepared_params = '.json_encode($params).';</script>';
-        
     }
     
 }   
 else{
-    print '<script>var prepared_params = {};</script>';
+    $params = array();
+    
+    $rec_rectype = @$_REQUEST['rec_rectype'];    
+    if($rec_rectype!=null){
+        $rec_rectype = ConceptCode::getRecTypeLocalID($rec_rectype);
+        $params['rec_rectype'] = $rec_rectype;
+    }
 }   
+print '<script>var prepared_params = '.json_encode($params).';</script>';
 
 if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         print '<script type="text/javascript" src="'.PDIR.'external/jquery.fancytree/jquery.fancytree-all.min.js"></script>';

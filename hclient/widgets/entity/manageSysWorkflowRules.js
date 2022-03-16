@@ -91,7 +91,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
         
             this.updateRecordList(null, {recordset:$Db.swf()});
             if(!is_first && this.searchForm.searchDefRecTypes('instance')){ //is_first!==true && 
-                this.searchForm.searchSysWorkflowRules('startSearch');    
+                this.searchForm.searchSysWorkflowRules('startSearch');
             }
     },
     
@@ -144,7 +144,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
             this.searchForm.searchSysWorkflowRules(this.options);
             
             
-            var iheight = 11;
+            var iheight = 12;
             this.searchForm.css({'height':iheight+'em',padding:'10px'});
             this.recordList.css({'top':iheight+0.5+'em'});
             
@@ -206,7 +206,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
                             },500);
                         },
                         onClose: function(){
-                            that.searchForm.searchSysWorkflowRules('startSearch'); 
+                            that.searchForm.searchSysWorkflowRules('startSearch');
                         }
                     };
                     
@@ -232,6 +232,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
         var results = this._super(event, request);
         
         this.searchForm.searchSysWorkflowRules('setButton', (results==null || results.length()==0));
+        this.searchForm.searchSysWorkflowRules('refreshRectypeList');
 
         if(results==null || results.length()==0){ //count_total
         

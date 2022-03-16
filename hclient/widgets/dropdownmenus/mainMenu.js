@@ -863,7 +863,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         
                         popup_dialog_options.record_id = -1;
                         popup_dialog_options.webpage_private = is_private;
-                        popup_dialog_options.is_new_editor = true;    
                         
                         window.hWin.HEURIST4.ui.showEditCMSDialog(popup_dialog_options); 
                     },
@@ -880,7 +879,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
         }else if(action == 'menu-cms-edit-page' || action == 'menu-cms-view-page'){
                 
-                popup_dialog_options.is_new_editor = true;    
                 if(popup_dialog_options.record_id>0){
                         window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options );                    
                 }else{
@@ -895,11 +893,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     });
                 }
                     
-        }else if(action && action.indexOf('menu-cms-edit')===0){
+        }else if(action == 'menu-cms-edit'){
 
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-                
-                popup_dialog_options.is_new_editor = (action == 'menu-cms-edit-new');
                 
                 if(popup_dialog_options.record_id>0){
                     
@@ -952,7 +948,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         }
                         
                     }else if( window.hWin.HAPI4.is_admin() ){
-                        popup_dialog_options.is_new_editor = true;    
                         popup_dialog_options.record_id = -1;
                         window.hWin.HEURIST4.msg.showMsgDlg(
                                 'New website will be created. Continue?',
@@ -1779,7 +1774,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
                 popup_dialog_options.record_id = -2;
                 popup_dialog_options.webpage_title = value;
-                popup_dialog_options.is_new_editor = true;
 
                 if(window.hWin.HEURIST4.util.isempty(value)){
 

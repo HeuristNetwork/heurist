@@ -255,7 +255,7 @@ $.widget( "heurist.app_storymap", {
     },
     
     //
-    // for slide
+    // for slide - navigate between story elements
     //
     _onNavigate: function(is_forward){
         
@@ -286,7 +286,7 @@ $.widget( "heurist.app_storymap", {
     },
         
     //
-    //
+    // Loads story elements for given record from server side
     //
     _checkForStory: function(recID, is_forced){
         
@@ -324,6 +324,7 @@ $.widget( "heurist.app_storymap", {
                             
                                 recIDs = recIDs.join(',');
                                 
+                                //returns story elements in exact order
                                 var request = {q:[{ids:recIDs},{sort:('set:'+recIDs)}], detail:'header'};
                                 
                                 if(that.options.storyRectypes.length>0){
@@ -373,8 +374,9 @@ $.widget( "heurist.app_storymap", {
         }
     },
     
-    //
-    //
+    // 1. Lods all map data (to remove?)
+    // 2. loads list of story elements (this._resultset) into reulst list
+    // 3. Render overview as smarty report or renderRecordData
     //
     _startNewStory: function(recID){
         
@@ -439,10 +441,12 @@ console.log(pntEnd);
             
         }
         
+        //switch to Overview
         if(this._tabs){
             this._tabs.tabs('option', 'active', 0);   
         }
         
+        //loads list of story elements into reulst list
         if(this.options.reportElementMode!='slide'){      
             this._resultList.resultList('updateResultSet', this._resultset);
         }
@@ -482,6 +486,7 @@ console.log(pntEnd);
                         }
                             
                         if(that.options.reportOverviewMode=='inline'){
+                            //loads overview as first element in story list
                             
                             if(that.options.reportElementMode=='slide'){      
                                 that.pnlStoryReport.html(that.pnlOverview.html())
@@ -511,7 +516,8 @@ console.log(pntEnd);
     },
 
     //
-    //
+    // 1. Loads story for slide (if reportElementMode=='slide')
+    // 2. Executes animation on map
     //
     _startNewStoryElement: function(recID){
 
@@ -520,7 +526,7 @@ console.log(pntEnd);
             
             
             
-            if(this.options.reportElementMode=='slide'){      
+            if(this.options.reportElementMode=='slide'){   //one by one   
 
                 
                 var infoURL;

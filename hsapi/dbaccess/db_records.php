@@ -90,11 +90,13 @@ function recordAdd($system, $record, $return_id_only=false){
                 unset($record[$key]);
             }
         }
-
+        
         $rectype = @$record['RecTypeID'];
         $access = @$record['NonOwnerVisibility'];
         $access_grps = @$record['NonOwnerVisibilityGroups'];
         $owner_grps = prepareIds(@$record['OwnerUGrpID'], true);
+        
+        $rectype = ConceptCode::getRecTypeLocalID($rectype);
     }else{
         $rectype = null;
         $access = null;
@@ -109,7 +111,7 @@ function recordAdd($system, $record, $return_id_only=false){
     }
 
     if (!($rectype && dbs_GetRectypeByID($mysqli, $rectype)) ) {
-        return $system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong');
+        return $system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong ('.$rectype.')');
     }
 
     // OWNER -----------
@@ -567,7 +569,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
             $dtyID = $values['dtl_DetailTypeID'];
             $dtl_Value = @$values['dtl_Value'];
-            if($dtl_Value) $dtl_Value = trim($dtl_Value);
+            if($dtl_Value) $dtl_Value = super_trim($dtl_Value); //including &nbsp; and &xef; (BOM)
             $dtl_UploadedFileID = @$values['dtl_UploadedFileID'];
             $dtl_Geo = @$values['dtl_Geo'];
 
@@ -1877,7 +1879,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
 
         foreach ($values as $eltID => $dtl_Value) {
 
-            if(!is_array($dtl_Value) && strlen(trim($dtl_Value))==0){
+            if(!is_array($dtl_Value) && strlen(super_trim($dtl_Value))==0){
                 continue;
             }
 
@@ -1898,7 +1900,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                     //TEST $lim = 100;
                     if($lim>0){
                         //remove script tag
-                        $dtl_Value = trim($dtl_Value);
+                        $dtl_Value = super_trim($dtl_Value);
                         $dtl_Value = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $dtl_Value);
 
                         //$dtl_Value = $purifier->purify($dtl_Value);
@@ -1920,12 +1922,12 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
 
                 case "freetext":
                 case "blocktext":
-                    $len  = strlen(trim($dtl_Value));
+                    $len  = strlen(super_trim($dtl_Value));
                     $isValid = ($len > 0); //preg_match("/\\S/", $dtl_Value);
                     if(!$isValid ){
                         $err_msg = 'Value is empty';  
                     }else if(!in_array($dtyID, $not_purify)){
-                        $dtl_Value = trim($dtl_Value);
+                        $dtl_Value = super_trim($dtl_Value);
                         $dtl_Value = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $dtl_Value);
                         //$dtl_Value = $purifier->purify($dtl_Value);
                         //$dtl_Value = htmlspecialchars_decode( $dtl_Value );  //&gt; to >
@@ -1933,13 +1935,13 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                     break;
 
                 case "date":
-                    $len  = strlen(trim($dtl_Value));
+                    $len  = strlen(super_trim($dtl_Value));
                     $isValid = ($len > 0); //preg_match("/\\S/", $dtl_Value);
                     if(!$isValid ){
                         $err_msg = 'Value is empty';  
                     }else{
                         //yesterday, today, tomorrow, now
-                        $sdate = strtolower(trim($dtl_Value));
+                        $sdate = strtolower(super_trim($dtl_Value));
                         if($sdate=='today'){
                             $dtl_Value = date('Y-m-d');
                         }else if($sdate=='now'){
@@ -1970,7 +1972,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                         if (is_numeric($dtl_Value)){
                             $term_tocheck = $dtl_Value;
                         }else{
-                            $term_tocheck = getTermByLabel($dtl_Value, $term_domain); //within domain
+                            $term_tocheck = $terms->getTermByLabel($term_domain, $dtl_Value); //within domain
                         }
                         $isValid = isValidTerm($system, $term_tocheck, $term_domain, $dtyID, $rectype);
                         if($isValid){
@@ -2150,7 +2152,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
 
             //ignore all errors and skip empty values
             if($validation_mode==0 && $isValid!==true){
-                if(strlen(trim($dtl_Value))==0) continue;
+                if(strlen(super_trim($dtl_Value))==0) continue;
                 $isValid = true;
             }
 
@@ -2250,11 +2252,11 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
 //
 function prepareGeoValue($mysqli, $dtl_Value){                        
 
-    $geoType = trim(substr($dtl_Value, 0, 2));
+    $geoType = super_trim(substr($dtl_Value, 0, 2));
     if($geoType=='p'||$geoType=='l'||$geoType=='pl'||$geoType=='c'||$geoType=='r'||$geoType=='m'){
-        $geoValue = trim(substr($dtl_Value, 2));
+        $geoValue = super_trim(substr($dtl_Value, 2));
     }else{
-        $geoValue = trim($dtl_Value);
+        $geoValue = super_trim($dtl_Value);
         if(strpos($geoValue, 'GEOMETRYCOLLECTION')!==false || strpos($geoValue, 'MULTI')!==false){
             $geoType = "m";
         }else if(strpos($geoValue,'POINT')!==false){
@@ -2690,7 +2692,7 @@ return null; //not found
 // see VerifyValue
 function isValidTerm($system, $term_tocheck, $domain, $dtyID, $rectype)
 {
-    global $recstructures, $detailtypes, $terms;
+    global $recstructures, $detailtypes, $terms; //DbsTerms
 
     $terms_ids = null;
 

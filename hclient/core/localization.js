@@ -131,7 +131,7 @@ regional['en'] = {
         menu_profile_import_hint: 'Import users one at a time from another database on the system, including user name, password and email address - users are NOT assigned to workgroups',
     'Utilities': '',
         menu_profile_files: 'Manage files',
-        menu_profile_preferences: 'My Preferences',
+        menu_profile_preferences: 'My preferences',
         menu_structure_verify: 'Verify integrity',
         menu_structure_duplicates: 'Find duplicate records',
         menu_manage_rectitles: 'Rebuild record titles',
@@ -146,11 +146,11 @@ regional['en'] = {
 
     //design menu
     'Modify': '',
-        menu_structure_rectypes: 'Record Types',
+        menu_structure_rectypes: 'Record types',
         menu_structure_vocabterms: 'Vocabularies',
-        menu_structure_fieldtypes: 'Base Fields',
+        menu_structure_fieldtypes: 'Base fields',
         menu_structure_import: 'Browse templates',
-        menu_structure_workflowstages: 'Workflow Stages',
+        menu_structure_workflowstages: 'Workflow stages',
         menu_lookup_config: 'External lookups',
         menu_structure_summary: 'Visualise',
         menu_structure_refresh: 'Refresh memory',
@@ -195,8 +195,7 @@ regional['en'] = {
     //publish menu
     'Website': '',
         menu_cms_create: 'Create',
-        menu_cms_edit: 'Edit (legacy)',
-        menu_cms_edit_new: 'Edit (new)',
+        menu_cms_edit: 'Edit',
         menu_cms_view: 'View',
         menu_cms_embed: 'Standalone web page',
         menu_cms_create_hint: 'Create a new CMS website, stored in this database, with widgets to access data in the database',

@@ -1250,8 +1250,8 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
     if(count($geovalues)==0 && $find_places_for_geo){
         
         //this record does not have geo value - find it in related/linked places
-        $point0 = null;
-        $point1 = null;
+        $point0 = array();
+        $point1 = array();
         $points = array();
         
         $geodetails = recordSearchGeoDetails(self::$system, $record['rec_ID']);    
@@ -1266,13 +1266,13 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                            $pointerDtyID =  @$value['geo']['pointerDtyID'];
                            
                            if(defined('DT_PLACE_END') && $pointerDtyID==DT_PLACE_END){
-                                $point1 = $json;            
+                                $point1[] = $json;            
                            }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START){
-                                $point0 = $json;            
+                                $point0[] = $json;            
                            }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_END2){
-                                $point1 = $json;            
+                                $point1[] = $json;            
                            }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START2){
-                                $point0 = $json;            
+                                $point0[] = $json;            
                            }else if(defined('DT_PLACE_TRAN') && $pointerDtyID==DT_PLACE_TRAN){
                                 $points[] = $json;            
                            }
@@ -1282,17 +1282,63 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
             }
         }
         //create link path from begin to end place
-        if( ($point1 && $point0) || count($points)>0){
+        if (count($point1)>0 && count($point0)>0 || count($points)>0){
             //$geovalues = array();
-            $path = array('type'=>'LineString', 'coordinates'=>array());
-            if($point0) $path['coordinates'][] = $point0['coordinates'];
-            if(count($points)>0){
-                foreach($points as $pnt){
-                    $path['coordinates'][] = $pnt['coordinates'];
-                }                
+            
+            //many start points and transition points - star from start points to first transition
+            if(count($point0)>1 || count($point1)>1){
+                $path = array('type'=>'MultiLineString', 'coordinates'=>array());
+                
+                
+                if(count($points)>0){
+
+                    //adds lines from start to first transition    
+                    if(count($point0)>0){
+                        foreach($point0 as $pnt){
+                            $path['coordinates'][] = array($pnt['coordinates'], $points[0]['coordinates']);
+                        }                
+                    }
+
+                    $path_t = array();
+                    foreach($points as $pnt){
+                        $path_t[] = $pnt['coordinates'];
+                    }                
+                    $path['coordinates'][] = $path_t;
+                    
+                    //lines from last transition to end points
+                    if(count($point1)>0){
+                        $lidx = count($points)-1;
+                        foreach($point1 as $pnt){
+                            $path['coordinates'][] = array($points[$lidx]['coordinates'], $pnt['coordinates']);
+                        }                
+                    }
+                    
+                }else if(count($point0)==count($point1)){
+                    //adds lines from start to end
+                    foreach($point0 as $idx=>$pnt){
+                        $path['coordinates'][] = array($pnt['coordinates'], $point1[$idx]['coordinates']);
+                    }                
+                }
+                
+                
+            }else{
+                $path = array('type'=>'LineString', 'coordinates'=>array());    
+                
+                if(count($point0)>0) $path['coordinates'][] = $point0[0]['coordinates'];
+
+                if(count($points)>0)
+                    foreach($points as $pnt){
+                        $path['coordinates'][] = $pnt['coordinates'];
+                    }                
+                
+                if(count($point1)>0) $path['coordinates'][] = $point1[0]['coordinates'];
+            
             }
-            if($point1) $path['coordinates'][] = $point1['coordinates'];
-            $geovalues[] = $path;
+            
+            
+            if(count($path['coordinates'])>0){
+                $geovalues[] = $path;    
+            }
         }
     }
 

@@ -1652,14 +1652,20 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         
                         var inpt = pointer_mode.editing_input('getInputs');
                         inpt = inpt[0];
-                        
+
                         if(is_enable){
                             inpt.find('option[value^="dropdown"]').removeProp('disabled');
+                            inpt.find('option[value^="browseonly"]').removeProp('disabled');
+                            inpt.val('dropdown_add');
                         }else{
                             inpt.find('option[value^="dropdown"]').prop('disabled','disabled');
+                            inpt.find('option[value^="browseonly"]').prop('disabled','disabled');
                             inpt.val('addorbrowse');
                         }
                         inpt.hSelect('refresh');
+                        var ele = inpt.hSelect('menuWidget');
+                        ele.find('li').show();
+                        ele.find('li.ui-state-disabled').hide();
                     }
                     
                     child_rec.editing_input('option','change', function(){
@@ -1673,6 +1679,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     window.hWin.HEURIST4.ui.initHelper( {button:help_button, title:'Creation of records as children', 
                                 url:window.hWin.HAPI4.baseURL+'context_help/parent_child_instructions.html #content',
                                 no_init:true} );
+
+                    browser_filter.find('.heurist-helper1').before(
+                        '<div style="display: inline-block; font-style: italic; font-size: 0.9em;">'
+                        + 'Enter an old-style (non-JSon) filter string such as f:123:7245 to filter to term 7245 in field 123'
+                        + '</div>'
+                    );
 
                     // Setup dialog element
                     var $dlg;

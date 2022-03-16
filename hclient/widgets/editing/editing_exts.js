@@ -460,6 +460,7 @@ function openSearchMenu(that, $select, disableClick=true){
             var $mnu = $select.hSelect('menuWidget');
             if(val.length<2){
                 $mnu.find('li').css('display','list-item');
+                $mnu.find('div.not-found').hide();
             }else{
                 $.each($mnu.find('.ui-menu-item-wrapper'),
                     function(i,item){
@@ -656,7 +657,7 @@ function browseRecords(_editing_input, $input){
             }
             
             if(window.hWin.HEURIST4.browseRecordCache[key]=='zero' || window.hWin.HEURIST4.browseRecordCache[key]>1000){
-            
+  
                 __show_select_dialog();
                 
             }else if(!window.hWin.HEURIST4.browseRecordCache[key]){
@@ -676,7 +677,7 @@ function browseRecords(_editing_input, $input){
                     }
                     if(window.hWin.HEURIST4.util.isempty(qobj)){
                         window.hWin.HEURIST4.msg.showMsgFlash('Constraints or browse filter not defined');       
-                        __show_select_dialog();
+                        setTimeout(__show_select_dialog, 2000);
                         return;
                     }
                     
@@ -710,6 +711,10 @@ function browseRecords(_editing_input, $input){
                             if(response.data.count>1000){
                                 __assignCache(response.data.count);
                                 __show_select_dialog();
+                            }else if (response.data.count==0){
+                                __assignCache('zero');
+                                window.hWin.HEURIST4.msg.showMsgFlash('No records for Browse filter');
+                                setTimeout(__show_select_dialog, 1000);
                             }else{
                                 
                                 var request = {
@@ -740,7 +745,7 @@ function browseRecords(_editing_input, $input){
                                            //nothing found
                                            __assignCache('zero');
                                            window.hWin.HEURIST4.msg.showMsgFlash('No records for Browse filter');
-                                           __show_select_dialog();
+                                           setTimeout(__show_select_dialog, 1000);
                                        }
                                    }else{
                                         window.hWin.HEURIST4.msg.showMsgErr(response);       
@@ -779,7 +784,8 @@ function browseRecords(_editing_input, $input){
                     +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
                     + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
                     + window.hWin.HR('Search') + (s_action=='select'?'':('/' +  window.hWin.HR('Add'))) 
-                    + '<div class="not-found" style="padding:10px;color:darkgreen;display:none;">No records match the filter</div></div>');
+                    + '<div class="not-found" style="padding:10px;color:darkgreen;display:none;">'
+                    +window.hWin.HR('No records match the filter')+'</div></div>');
                     
                     //$(opt).attr('icon-url', search_icon);
                     

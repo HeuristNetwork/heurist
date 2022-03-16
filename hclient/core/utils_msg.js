@@ -1123,16 +1123,24 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     },
     
     //curtain
-    bringCoverallToFront: function(ele, styles) {
+    bringCoverallToFront: function(ele, styles, message) {
         if (!  window.hWin.HEURIST4.msg.coverall ) {
             window.hWin.HEURIST4.msg.coverall = 
-                $('<div><div style="position: absolute;top: 30px;left: 30px;">Loading Content...</div></div>').addClass('coverall-div').css({
+                $('<div><div class="internal_msg" style="position: absolute;top: 30px;left: 30px;">'
+                        +'</div></div>').addClass('coverall-div')
+                .css({
                     'zIndex': 60000, //9999999999
                     'font-size': '1.2em'
                 });
         }else{
             window.hWin.HEURIST4.msg.coverall.detach();
         }
+        
+        if(!message){
+            message = 'Loading Content';
+            message = ($.isFunction(window.hWin.HR)?window.hWin.HR(message):message)+'...';
+        }    
+        window.hWin.HEURIST4.msg.coverall.find('.internal_msg').html(message);
         
         if(ele){
             if($(ele).find('.coverall-div').length==0) window.hWin.HEURIST4.msg.coverall.appendTo($(ele));
@@ -1141,7 +1149,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
         
         if(!styles){
-            styles = {'background-color': "#000", opacity: '0.6'};
+            styles = {'background-color': "#000", opacity: '0.6', color: 'green', 'font-size': '25px', 'font-weight': 'bold'};
         }
         window.hWin.HEURIST4.msg.coverall.css( styles );
         

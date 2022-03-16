@@ -239,7 +239,7 @@ window.hWin.HEURIST4.dbs = {
                     parent_link - include field DT_PARENT_ENTITY - link to parent record
             header - all+header fields
       $mode 
-         3 - for record title mask editor - without reverse, enum (id,label,code,internal id)
+         3 - for record title mask editor - without reverse, enum (id,label,code,internal id) - 4 levels depth
          4 - find reverse links and relations   
          5 - for faceted search wiz, filter builder - lazy treeview with reverse links
          6 - for import structure, export csv - lazy tree without reverse
@@ -698,10 +698,10 @@ window.hWin.HEURIST4.dbs = {
                 if($mode==3 || $mode==7){
 
                     $res['children'] = [
-                        {key:'term',title: 'Term',code: 'Term'},       
-                        {key:'code',title: 'Code',code: 'Code'},       
-                        {key:'conceptid',title: 'Concept ID',code: 'Concept ID'},       
-                        {key:'internalid',title: 'Internal ID',code: 'Internal ID'}
+                        {key:'term',title: 'Term',code: 'term'},       
+                        {key:'code',title: 'Code',code: 'code'},       
+                        {key:'conceptid',title: 'Concept ID',code: 'conceptid'},       
+                        {key:'internalid',title: 'Internal ID',code: 'internalid'}
                                 ];
                 }
                 break;
@@ -710,9 +710,11 @@ window.hWin.HEURIST4.dbs = {
             case 'relmarker':
             
                 var $max_depth = 2;
-                if ($mode==4) //$mode==6 || 
+                if ($mode==4){ //$mode==6 || 
                    $max_depth = 3;
-                else if ($mode==5 || $mode==6 || $mode==7) //make it 1 for lazy load
+                }else if ($mode==3){
+                   $max_depth = 4;
+                }else if ($mode==5 || $mode==6 || $mode==7) //make it 1 for lazy load
                    $max_depth = 1; 
                                                                 
                 if($recursion_depth<$max_depth){

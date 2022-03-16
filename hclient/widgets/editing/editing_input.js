@@ -5030,10 +5030,6 @@ console.log('onpaste');
                                 'margin-right': '15px'
                             })
                             .appendTo($inputdiv);
-
-            if((i+1) < terms_list.length && (i+1) % row_limit == 0){
-                $inputdiv.append('<br>');
-            }
         }
 
         var $other_btns = $inputdiv.find('.smallicon, .smallbutton');

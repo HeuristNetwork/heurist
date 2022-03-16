@@ -612,13 +612,13 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         if(recID<0){
             if(this._additionMode=='local'){
-                this.options['edit_title'] = 'Upoad file';
+                this.options['edit_title'] = 'Upload file';
             }else if(this._additionMode=='remote'){
                 this.options['edit_title'] = 'Specify external file/URL';
             }else if(this._additionMode=='tiled'){
                 this.options['edit_title'] = 'Upload tiled image stack';
             }else{
-                this.options['edit_title'] = 'Upoad file, Select existing or specify URL';
+                this.options['edit_title'] = 'Upload file, Select existing or specify URL';
             }
         }else{
             this.options['edit_title'] = null;

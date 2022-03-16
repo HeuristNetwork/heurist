@@ -144,4 +144,24 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
             this.startSearch();
         }
     },
+
+    //
+    // Refresh list of rectypes with sys workflow setup
+    //
+    refreshRectypeList: function(){
+
+        // List rectypes that have swf assigned
+        var rectype_names = [];
+
+        $Db.swf().each2(function(id, record){
+
+            var rty_name = $Db.rty(record['swf_RecTypeID'], 'rty_Name');
+
+            if(!rectype_names.includes(rty_name)){ 
+                rectype_names.push(rty_name); 
+            }
+        });
+
+        this.element.find('span#existing_swr').text(rectype_names.join(', '));
+    }
 });

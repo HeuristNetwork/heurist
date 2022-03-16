@@ -319,6 +319,28 @@
         <br><i>Defines the format used to display the popup information when user clicks on a map object</i>
     </div>
 
+    <div  class="heurist_Map">
+        <div class="header"><label>Map popup parameters</label></div>
+        <div>
+            <p><span style="min-width: 105px;display: inline-block;text-align: right;">Popup behaviour&nbsp;</span>
+                <label><input type="radio" name="popup_behaviour" value="fixed" checked>Fixed size</label>&nbsp;
+                <label><input type="radio" name="popup_behaviour" value="fixed_width">Fixed width</label>&nbsp;
+                <label><input type="radio" name="popup_behaviour" value="scale">Scale to content</label>
+            </p>
+            <p><span style="min-width: 105px;display: inline-block;text-align: right;">Popup size&nbsp;</span>
+                <label>&nbsp;<span id="pw_label">Width:</span> <input name="popup_width" maxlength="3" size="4" value="600"></label>&nbsp;
+                <select name="popup_hunit"><option value="px">px</option><option value="%">%</option></select>
+                <label>&nbsp;<span id="ph_label">Length:</span> <input name="popup_height" maxlength="3" size="4" value="400"></label>&nbsp;
+                <select name="popup_wunit"><option value="px">px</option><option value="%">%</option></select>
+            </p>
+            <!-- Temp hide -->
+            <p style="display: none;"><span style="min-width: 105px;display: none;text-align: right;">Other settings&nbsp;</span>
+                <label><input type="checkbox" name="popup_resizing">Resizable</label>
+                <br><i>check this to allow the user to resize the popup, note: this will overwrite any width and length you set here</i>
+            </p>
+        </div>
+    </div>
+
     <div class="heurist_resultListExt">
         <div class="header">
              <label>Custom report template&nbsp;</label>

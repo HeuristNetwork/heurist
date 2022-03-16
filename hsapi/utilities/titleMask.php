@@ -814,9 +814,9 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
     $matches = array();
 
     // 
-    if($fullstop == '.'){
+    if(false && $fullstop == '.'){
         //preg_match does not split   A...term or A(s.)..term correctly
-        preg_match($fullstop_ex, $field_name, $matches);
+        preg_match_all($fullstop_ex, $field_name, $matches);
     }else{
         //parse human readable with double fullstops
         $matches = explode($fullstop, $field_name);
@@ -880,14 +880,19 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                             $s1 = self::__get_dt_field($rt, $rdt_id, $mode, 'originalName');
                         }
 
-                        return $s1. $fullstop_concat .$inner_field_name;
+                        return $s1. $fullstop_concat .strtolower($inner_field_name);
                     }
 
                 }else{
                     //ERROR
                     return array("'$inner_field_name' is an unrecognised qualifier for a terms list field");
                 }
+            }else if($dt_type== 'resource'){
+                
+                
             }
+            
+            
             if($dt_type== 'relmarker') { //@todo - to implement it in nearest future
                 return array("'$parent_field_name' is a relationship marker field type. This type is not supported at present.");
             }
@@ -914,26 +919,81 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         $inner_rectype = 0;
         $inner_rectype_name = '';
         $inner_rectype_cc = '';  //concept code
+        $multi_constraint = false;
         
-        if(count($matches)>3){
+        if(count($matches)>3){ //this is resource field  [Places referenced..Media..Media item title]
             
-            $pos = mb_strpos($inner_field_name, '{'); //{Organization}..Name
+            $ishift = 0;
+            $pos = mb_strpos($inner_field_name, '{'); //{Organization}..Name - name of target rectype is defined
             $pos2 = mb_strpos($inner_field_name, '}');
             if($pos===0 && $pos2==mb_strlen($inner_field_name)-1){
                 $inner_rectype_search = mb_substr($inner_field_name, 1, -1);     
+                
+                $ishift = 3;
+                $multi_constraint = true;
             }else{
-                $inner_rectype_search = $inner_field_name;
+                
+                $inner_rectype = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs');
+                $inner_rectype = explode(",", $inner_rectype);
+                if(count($inner_rectype)==1 && $inner_rectype[0]>0){
+                    $inner_rectype = $inner_rectype[0];
+                    $ishift = 2;
+                }else{
+                    $inner_rectype = 0;
+                    $inner_rectype_search = $inner_field_name;    
+                    $ishift = 3;
+                }
+                
+            }
+            if($inner_rectype==0){
+                list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
+                if(!($inner_rectype>0)){
+                    return array("'$inner_rectype_search' not recognised as a record type");
+                }
             }
             
-            list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
-            $inner_field_name = $matches[3]; 
+            $f_name = implode($fullstop, array_splice($matches,$ishift));
+            
+            if($mode==0){//replace with value
+                $pointer_ids = self::__get_field_value( $rdt_id, $rt, $mode, $rec_id);
+                $pointer_ids = prepareIds($pointer_ids);
+                $res = array();
+                foreach ($pointer_ids as $rec_id){
+                    $fld_value = self::__fill_field($f_name, $inner_rectype, $mode, $rec_id); //recursion        
+                    array_push($res, $fld_value);
+                }
+                return implode(", ", $res);
+            }else{
+                
+                    if($mode==1){
+                        $s1 = $rdt_id; //parent detail id
+                        if($multi_constraint){
+                            $s1 = $s1 .$fullstop_concat.'{'. $inner_rectype_cc.'}';
+                        }
+                    }else{
+                        $s1 = self::__get_dt_field($rt, $rdt_id, $mode, 'originalName');
+                        if($multi_constraint){
+                            $s1 = $s1 .$fullstop_concat.'{'. $inner_rectype_name. '}';
+                        }
+                    }
+
+                    $s2 = self::__fill_field($f_name, $inner_rectype, $mode, $rec_id);
+                    if(is_array($s2)) return $s2; //error
+                    return $s1. $fullstop_concat .$s2; //recursion;                
+            }
+            
+            
+            return $res;
+            // TEMP
+            //list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
+            //$inner_field_name = $matches[3]; 
         }else{
         
         
             $pos = mb_strpos($inner_field_name, $fullstop); //{Organization}..Name
             $pos2 = mb_strpos($inner_field_name, '}');
             if ( $pos>0 &&  $pos2>0 && $pos2 < $pos ) { 
-                $inner_rectype_search = mb_substr($inner_field_name, 1, $pos-mb_strlen($fullstop)); 
+                $inner_rectype_search = mb_substr($inner_field_name, 1, $pos2-1);  //was $pos-mb_strlen($fullstop)
                 list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
                 $inner_field_name = mb_substr($inner_field_name, $pos+mb_strlen($fullstop)); 
             }

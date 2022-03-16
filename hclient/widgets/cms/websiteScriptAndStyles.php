@@ -259,12 +259,6 @@ if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in website
     
 <?php
 }
-
-if($edit_OldEditor){  //old CMS editor
-?>
-    <script src="websiteRecord.js"></script>
-<?php
-}else{
 ?>    
 
 <script>
@@ -278,7 +272,6 @@ var DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS;
 //
 // Inits page for publication version  
 // It is invoked from onHapiInit
-// (for old cms version see websiteRecord.js)
 //
 //  1. Inits hLayoutMgr
 //  2. Calls initMainMenu 
@@ -355,6 +348,8 @@ function onPageInit(success)
 //
 function initMainMenu( afterInitMainMenu ){
     
+    _dout('initMainMenu');
+    
     var topmenu = $('#main-menu');
 
     var lopts = {  
@@ -387,6 +382,7 @@ function initMainMenu( afterInitMainMenu ){
 //
 function loadPageContent(pageid, eventdata){
     
+    _dout('loadPageContent');
     /* @todo
     var args = null; //arguments that will be passed to afterPageLoad
     
@@ -524,11 +520,7 @@ if($site_css!=null){
 
     }
 }
-</script>
-<?php
-}
-?>
-<script>
+
 var page_cache = {};
 var previous_page_id = -1;
 
@@ -545,6 +537,7 @@ var datatable_custom_render = null;
 //
 function afterPageLoad(document, pageid, eventdata){
 
+    _dout('afterPageLoad');
     //var pagetitle = $($(page_target).children()[0]);
     var pagetitle = $('#main-content > h2.webpageheading');
     var title_container = $('#main-pagetitle');
@@ -766,6 +759,8 @@ function afterPageLoad(document, pageid, eventdata){
 //
 function onHapiInit(success){   
     
+    _dout('onHapiInit');
+    
     //_dout('webpage hapi inited  '+ (new Date().getTime() / 1000 - _time_debug));
     _time_debug = new Date().getTime() / 1000;
     
@@ -827,6 +822,9 @@ if(isset($customTemplateNotFound)){
 // for example $image_logo->#main-logo
 //
 function initHeaderElements(){   
+    
+    _dout('initHeaderElements');
+
 /*
 $image_logo  -> #main-logo
 $image_altlogo -> #main-logo-alt
@@ -863,7 +861,7 @@ $title_alt2 -> #main-title-alt2
   <?php if($website_title){  ?>
   
   var ele = $('#main-title');
-  if(ele.length>0){
+  if(ele.length>0 && ele.children().length==0){
       //ele.empty().hide();
   <?php       
   print '$(\'<h2 '.($image_banner?' style="text-shadow: 3px 3px 5px black"':'').'>'
@@ -879,6 +877,8 @@ $title_alt2 -> #main-title-alt2
       }
       
       
+  }else{
+      ele.show();
   }
   <?php } ?>
 
