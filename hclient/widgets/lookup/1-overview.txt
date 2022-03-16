@@ -8,7 +8,7 @@ New and existing service mapping is found at hsapi/controller/record_lookup_conf
 
 All lookups are extenstions of the recordAction widget (hclient/widget/record/recordAction.js)
 
-lookup_Template.js and lookup_Template.html can provide a simple template for creating new external lookups, this also includes the handling for inserting terms and record pointers.
+lookup_Template.js and lookup_Template.html can provide a simple template for creating new external lookups, this also includes how to prepare data for inserting terms and record pointers.
 (This template is based off of the BnF_bib lookup with some specifics stripped out)
 
 Current Services:
@@ -16,7 +16,7 @@ Current Services:
  - GeoNames: Query the Geonames databse for geographical locations covering all countries and many places (site: geonames.org)
  - GeoNames Postalcodes: Query the Geonames' postalcode database (site: geonames.org/postal-codes/)
  - MPCE: Assign keywords to a Work (Book) record from searches or by association
- - LRC18: Import record information from the ESTC_Helsinki_Bibliographic_Metadata database via searching
+ - LRC18: Import record information from the ESTC_Helsinki_Bibliographic_Metadata database via a search
  - BnF Bib: Query the BnF Library's bibliographic records (site: www.bnf.fr)
  - BnF Aut: Query the BnF Library's authoritative records (site: www.bnf.fr)
  - Nomisma: Query Nomisma's database records (site: nomisma.org)
@@ -35,11 +35,10 @@ Both the MPCE and LRC18C lookups contain examples of record searching.
 
 Result Lists (widget found at hclient/widget/viewers/resultList.js) can be used to display the retrieved data as records in a list format for the user to select from.
 
-When returning values to the Heurist record form, for fields that are record pointers (resources) or terms, the id for the corresponding record/term neeeds to be inserted. 
-In the BnF_bib lookup, new terms in term fields are added automatically. Values for record pointers are fed in order of mapped fields to the data entry form as a search on the specified field, 
-allowing the user to choose between alternatives or create a new record as required. Relationship markers are not handled. 
+For resource (record pointer) and term fields, an id is needed to assign the corresponding value (record id and term id, respectively), or an array of ids.
+If any other value is returned, as necessary, the user will be prompted to create new terms and select/create new records for resource fields.
 
-Updated: 10 Feb 2022
+Updated: 13 Mar 2022
 
 ----------------------------------------------------------------------------------------------------------------
 

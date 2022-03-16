@@ -50,6 +50,8 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
     added_terms: false,
 
+    action_timeout: null, // timeout for processing doAction
+
     //  
     // invoked from _init after loading of html content
     //
@@ -258,6 +260,37 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         this.toggleCover('Processing Selection...');
 
         var that = this;
+        var field_name, val; // in case timeout completes 
+
+        this.action_timeout = setTimeout(function(){
+
+            that.toggleCover('');
+
+            var dty_id = that.options.mapping.fields[field_name];
+
+            if(field_name == 'author'){
+
+            }else{
+
+                if(window.hWin.HEURIST4.util.isArray(val)){
+                    val = val.join(',');
+                }else if(window.hWin.HEURIST4.util.isObject(val)){
+                    var new_val = '';
+                    for(var key in val) { new_val = (new_val == '') ? val[key] : new_val + ',' + val[key]; }
+                    val = new_val;
+                }
+            }
+
+            window.hWin.HEURIST4.msg.showMsgErr(
+                'An error has occurred with mapping values to their respective fields,<br>'
+                + 'please report this by using the bug reporter under Help at the top right of the main screen or,<br>'
+                + 'via email directly to support@heuristnetwork.org so we can fix it wuickly.<br><br>'
+                + 'Invalid field details:<br>'
+                + 'Response field - "' + field_name + '"<br>'
+                + 'Record field - "' + $Db.rst(that.options.mapping.rty_ID, dty_id, 'rst_DisplayName') + '" (<em>' + $Db.dty(dty_id, 'dty_Type') + '</em>)<br>'
+                + 'Value to insert - "' + val + '"<br>'
+            );
+        }, 20000); // set timeout to 20 seconds
 
         this.added_terms = false;
 
@@ -276,11 +309,12 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
             for(var k=0; k<map_flds.length; k++){
 
-                var dty_ID = this.options.mapping.fields[map_flds[k]];
-                var val = recset.fld(rec, map_flds[k]);
+                field_name = map_flds[k];
+                var dty_ID = this.options.mapping.fields[field_name];
+                val = recset.fld(rec, field_name);
                 var field_type = $Db.dty(dty_ID, 'dty_Type');
 
-                if(val != null){
+                if(val != null && dty_ID != ''){
 
                     if(field_type == 'resource' && !res['ext_url']){
                         res['ext_url'] = recset.fld(rec, 'biburl');
@@ -290,7 +324,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
                     var search_val = '';
 
-                    if(map_flds[k] == 'author'){ // special scenario for author field
+                    if(field_name == 'author'){ // special scenario for author field
 
                         for(var i = 0; i < val.length; i++){
 
@@ -306,7 +340,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                                 search_val = (search_val != '') ? search_val + ' [' + cur_val['active'] + ']' : 'No Name, years active: ' + cur_val['active'];
                             }
                             if(cur_val['id']){
-                                search_val = (search_val != '') ? search_val + ' (id: ' + cur_val['id'] + ')' : 'No Name, id: ' + cur_val['id'];
+                                search_val = (search_val != '') ? org_val + ' (id: ' + cur_val['id'] + ')' : 'No Name, id: ' + cur_val['id'];
                             }
 
                             if(search_val != ''){
@@ -378,7 +412,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         }
                     }else if(field_type == 'resource'){ // prepare search string for user to select/create a record
 
-                        if(map_flds[k] == 'publisher'){
+                        if(field_name == 'publisher'){
 
                             if(val['location']){
                                 search_val = val['location'];
@@ -409,7 +443,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
                         var contructed_val = '';
 
-                        if(map_flds[k] == 'publisher'){
+                        if(field_name == 'publisher'){
 
                             if(val['location']){
                                 contructed_val = val['location'];
@@ -423,7 +457,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         }  
 
                         if(contructed_val == '' && val == ''){
-                            val = 'No '+ map_flds[k] +' provided';
+                            val = 'No '+ field_name +' provided';
                         }else if(contructed_val != ''){
                             val = contructed_val;                  
                         }
@@ -467,6 +501,8 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
     closingAction: function(dlg_response, action = 'save'){
 
         var that = this;
+
+        clearTimeout(this.action_timeout); // clear timeout
 
         if(window.hWin.HEURIST4.util.isempty(dlg_response)){
             dlg_response = {};
