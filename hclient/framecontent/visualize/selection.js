@@ -57,6 +57,17 @@ function updateCircles(selector, fgColor, bgColor) {
 }
 
 /**
+* Updates the foreground and background rectangles of all nodes
+* @param fgColor New foreground color
+* @param bgColor New background color
+*/
+function updateRectangles(selector, colour) {
+    var nodes = d3.selectAll(selector);
+    nodes.select('rect.info-mode-full').style('fill', colour);
+    nodes.select('rect.info-mode').style('fill', colour);
+}
+
+/**
 * Handler when a record node has been clicked
 * @param event D3 event
 * @param data  Visualisation data object
@@ -119,17 +130,29 @@ function onRecordNodeClick(event, data, node) {
 * 
 * @param selectedNodeIds
 */
-function visualizeSelection(selectedNodeIds) {
+function visualizeSelection(selectedNodeIds) { //console.log(settings.data);
     settings.selectedNodeIds = selectedNodeIds; // Update settings object
-    updateCircles(".node", foregroundColor, getSetting(setting_entitycolor)); // Deselect all
+
+    if(currentMode == 'icons'){
+        updateCircles(".node", foregroundColor, getSetting(setting_entitycolor)); // Deselect all
+    }else if(selectedNodeIds && selectedNodeIds.length>0){
+        updateRectangles(".node", getSetting(setting_entitycolor));
+    }else{
+        updateRectangles(".node", foregroundColor);
+    }
 
     // Select new nodes
     if(selectedNodeIds && selectedNodeIds.length>0){
         for(var i=0; i<selectedNodeIds.length; i++){
             var selector = ".id"+selectedNodeIds[i];
-            updateCircles(selector, selectionColor, selectionColor);    
+
+            if(currentMode == 'icons'){
+                updateCircles(selector, selectionColor, selectionColor);
+            }else{
+                updateRectangles(selector, selectionColor);
+            }
         }
-    }            
+    }
 }
 
 /************************************** SELECTION BOX **********************************/

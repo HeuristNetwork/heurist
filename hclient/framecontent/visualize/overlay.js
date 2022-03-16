@@ -166,10 +166,12 @@ function getRelationOverlayData(line) {
         for (var i = 0; i < data.links.length; i++){
             var link = data.links[i];
 
+            var count = (!settings.isDatabaseStructure && link.targetcount <= 1) ? '' : ', n=' + link.targetcount;
+
             // Show information for all links, with same source and target ids
             if(link.source.id == line.source.id && link.target.id == line.target.id){
                 var relation = {type: link.relation.type, cnt: link.targetcount, 
-                        text: truncateText(link.relation.name, maxLength) + ', n=' + link.targetcount, size: "10px", dir: "to"};
+                        text: truncateText(link.relation.name, maxLength) + count, size: "10px", dir: "to"};
 
                 array.push(relation);
 
@@ -188,7 +190,7 @@ function getRelationOverlayData(line) {
             // Reverse Links, information about links that are sourced from the target
             if(link.source.id == line.target.id && link.target.id == line.source.id){
                 var relation = {type: link.relation.type, cnt: link.targetcount, 
-                        text: truncateText(link.relation.name, maxLength) + ', n=' + link.targetcount, size: "10px", dir: "from"};
+                        text: truncateText(link.relation.name, maxLength) + count, size: "10px", dir: "from"};
 
                 array.push(relation);
 
@@ -206,9 +208,11 @@ function getRelationOverlayData(line) {
         }
     }else{
 
+        let count = (!settings.isDatabaseStructure && line.targetcount <= 1) ? '' : ', n=' + line.targetcount;
+
         // Show information for this link only
         var relation = {type: line.relation.type, cnt: line.targetcount, text: 
-                truncateText(line.relation.name, maxLength) + ", n=" + line.targetcount, size: "10px", subheader:0};
+                truncateText(line.relation.name, maxLength) + count, size: "10px", subheader:0};
 
         array.push(relation);
     }
