@@ -83,6 +83,18 @@ function editCMS2(){
     
     var options;
     
+    function _loadTinyMCE(callback) {
+       const tinyMCEPath = window.hWin.HAPI4.baseURL+'external/tinymce5/tinymce.min.js';
+       const script = document.createElement('script');
+       script.id = 'tiny-mce-script';
+       script.onload = function(){  //() => 
+         // tinymce is loaded at this point
+         //this.setState({tinymceLoaded: true});
+         callback.call(this);
+       };
+       script.src = tinyMCEPath;
+       document.head.appendChild(script);
+    }    
     //
     // returns false if new page is not loaded (previous page has been modified and not saved
     //
@@ -97,6 +109,38 @@ function editCMS2(){
         // add edit layout - top most ent_wrapper becomes 
         //
         if($(this.document).find('.editStructure').length==0){
+            
+            //add timymce and codemirror
+            if(typeof tinymce === 'undefined'){
+
+                _loadTinyMCE(function(){_startCMS(_options)});
+                //document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend",
+                //    '<script type="text/javascript" src="'+window.hWin.HAPI4.baseURL+'external/tinymce5/tinymce.min.js"></script>');   
+                /* 
+                $.getMultiScripts(['tinymce5/tinymce.min.js'
+                ,'codemirror-5.61.0/lib/codemirror.js',
+                'codemirror-5.61.0/lib/util/formatting.js',
+                'codemirror-5.61.0/mode/xml/xml.js',
+                'codemirror-5.61.0/mode/javascript/javascript.js',
+                'codemirror-5.61.0/mode/css/css.js',
+                'codemirror-5.61.0/mode/htmlmixed/htmlmixed.js'
+                ], window.hWin.HAPI4.baseURL+'external/')
+                .done(function() {
+                    // all done
+                    _startCMS(_options)
+
+                }).fail(function(error) {
+                    // one or more scripts failed to load
+                    window.hWin.HEURIST4.msg.showMsg_ScriptFail();
+                    //console.log('Can not load tinyMCE and CodeMirror scripts');
+
+                }).always(function() {
+                    // always called, both on success and error
+                });                
+                */
+                
+                return;
+            }
             
             if(isCMS_NewWebsite){
                 isCMS_NewWebsite = false;

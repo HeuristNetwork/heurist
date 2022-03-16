@@ -114,8 +114,9 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultListCollection.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/app_storymap.js"></script>
 
+<!--
 <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
-
+-->
 <?php
 if($_is_new_cms_editor){
 ?>
@@ -152,10 +153,11 @@ if(is_array($external_files) && count($external_files)>0){
 //do not include edit stuff for embed 
 if(!array_key_exists('embed', $_REQUEST)){
 ?>    
-    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.fileupload.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/js/wellknown.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_geo.js"></script>
+    
+    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.fileupload.js"></script>
     
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/select_imagelib.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
@@ -186,13 +188,14 @@ if(!array_key_exists('embed', $_REQUEST)){
 if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in websiteRecord.php - if true we use old CMS editor
 ?>
     <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
+
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.js"></script>
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/util/formatting.js"></script>
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/xml/xml.js"></script>
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/javascript/javascript.js"></script>
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/css/css.js"></script>
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/htmlmixed/htmlmixed.js"></script>
-    
+
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>hclient/assets/css/marching_ants.css" />
     
     <style>
