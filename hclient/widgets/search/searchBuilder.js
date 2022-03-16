@@ -767,56 +767,7 @@ $.widget( "heurist.searchBuilder", {
                 var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes );
 
                             treedata[0].expanded = true; //first expanded
-                            
-                            //add additional entry for direct links (resource fields)
-                            function __addResField(tdata){
-                                
-                                //$.each(tdata, function(i, node)
-                                var i = 0;
-                                while (i<tdata.length)
-                                {
-                                    node = tdata[i];
-                                    if(node.type=='resource'){
 
-                                        var codes = node.code.split(':');
-                                        var dtid = codes[codes.length-1];
-                                        var linktype = dtid.substr(0,2);
-                                        if(linktype=='lt'){
-                                            codes[codes.length-1] = dtid.substr(2);                        
-                                            tdata.splice(i, 0, 
-                                                {key:node.key, type:'resource',
-                                                title: node.title,
-                                                code:codes.join(':')});                                        
-                                            node.title = ' fields'; //node.title + 
-                                            node.extraClasses = 'triangle-checkbox';
-                                            i++;                       
-                                        }
-                                    }else if(node.type=='relmarker'){
-
-                                        var codes = node.code.split(':');
-                                        var dtid = codes[codes.length-1];
-                                        var linktype = dtid.substr(0,2);
-                                        if(linktype=='rt'){
-                                            codes[codes.length-1] = dtid.substr(2);                        
-                                            tdata.splice(i, 0, 
-                                                {key:node.key, type:'relmarker',
-                                                title: node.title,
-                                                code:codes.join(':')});                                        
-                                            node.title = ' fields'; //node.title + 
-                                            node.extraClasses = 'triangle-checkbox';
-                                            i++;                       
-                                        }
-                                        
-                                    }
-
-                                    i++;    
-                                }
-                                
-                            }
-                            
-                            __addResField(treedata[0].children);
-                            
-                            
                             if(!treediv.is(':empty') && treediv.fancytree('instance')){
                                 treediv.fancytree('destroy');
                             }
@@ -836,18 +787,23 @@ $.widget( "heurist.searchBuilder", {
                                 },
                                 renderNode: function(event, data){
                                     
-                                    if(data.node.data.is_generic_fields){
+                                    if(data.node.data.is_generic_fields || data.node.data.is_rec_fields){
                                         $(data.node.span.childNodes[0]).css('display', 'inline-block');
                                         $(data.node.span.childNodes[1]).hide();
                                         $(data.node.span.childNodes[3]).css('font-weight', 'normal');
+
+                                        if(data.node.parent && data.node.parent.data.type == 'resource'){ // add left border+margin
+                                            $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
+                                        }
                                     }
+
                                 },
                                 lazyLoad: function(event, data){
                                     
                                     var node = data.node;
                                     var parentcode = node.data.code; 
                                     var rectypes = node.data.rt_ids;
-                                    
+
                                     var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, 
                                                                                             allowed_fieldtypes, parentcode );
                                     if(res.length>1){
@@ -855,25 +811,7 @@ $.widget( "heurist.searchBuilder", {
                                     }else{
                                         data.result = res[0].children;
                                     }
-                                    
-                                    if(node.data.type=='resource'){
-                                        
-                                        __addResField(data.result);                                        
-                                        
-                                        /* option: add the same item as in __addResField but on next level
-                                        var codes = parentcode.split(':');
-                                        var dtid = codes[codes.length-1];
-                                        var linktype = dtid.substr(0,2);
-                                        if(linktype=='lt'){
-                                            codes[codes.length-1] = dtid.substr(2); 
-                                            data.result.unshift(
-                                                {key:node.data.key,type:'resource',
-                                                title:'<span style="font-size:0.9em;font-style:italic;padding-left:22px">Pick the specific resource</span>',
-                                                name:'Known resource',code:codes.join(':')});
-                                        }
-                                        */
-                                    }
-                                    
+
                                     return data;                                                   
                                     /* from server
                                     var node = data.node;

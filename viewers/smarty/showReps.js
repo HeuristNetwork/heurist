@@ -937,6 +937,7 @@ function ShowReps() {
 
                 var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 7, 
                     rectypes, ['ID','title','typeid','typename','modified','url','tags','all'], parentcode );
+
                 if(res.length>1){
                     data.result = res;
                 }else{
@@ -946,9 +947,6 @@ function ShowReps() {
                 return data;                                                   
             },
             loadChildren: function(e, data){
-                setTimeout(function(){
-                    //that._assignSelectedFields();
-                    },500);
             },
             select: function(e, data) {
             },
@@ -984,27 +982,29 @@ function ShowReps() {
             renderNode: function(event, data) {
                 // Optionally tweak data.node.span
                 var node = data.node;
-                if(true){
-                    var $span = $(node.span);
-                    var new_title = node.title;//debug + '('+node.data.code+'  key='+node.key+  ')';
-                    
-                    
-                    if(node.data.type!='enum'){
-                        var op = '';
-                        if(node.data.type=='resource' || node.title=='Relationship'){ //resource
-                            op = 'repeat';
-                        }else if(node.children){
-                            op = 'if';
-                        }else{
-                            op = 'insert';
-                        }
-                        if(op){
-                            new_title = new_title + ' (<a href="#">'+op+'</a>)'; 
-                        }
+
+                var $span = $(node.span);
+                var new_title = node.title;//debug + '('+node.data.code+'  key='+node.key+  ')';
+
+                if(node.data.type!='enum' && node.data.is_rec_fields == null){
+                    var op = '';
+                    if(node.data.type=='resource' || node.title=='Relationship'){ //resource
+                        op = 'repeat';
+                    }else if(node.children){
+                        op = 'if';
+                    }else{
+                        op = 'insert';
                     }
-                    
-                    $span.find("> span.fancytree-title").html(new_title);
+                    if(op){
+                        new_title = new_title + ' (<a href="#">'+op+'</a>)'; 
+                    }
                 }
+
+                if(data.node.parent && data.node.parent.data.type == 'resource'){ // add left border+margin
+                    $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
+                }
+                
+                $span.find("> span.fancytree-title").html(new_title);
             }            
         });
         

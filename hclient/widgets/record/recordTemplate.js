@@ -214,7 +214,6 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                 });
             }
         });
-        this.element.find('#selectAll_container').css({'position':'absolute', 'margin-left':'37px'});
     },
     
     //
@@ -260,9 +259,9 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                     }
                 },
                 renderNode: function(event, data){
-                    
-                    if(data.node.data.is_generic_fields) { // hide blue arrow for generic fields
-                        $(data.node.span.childNodes[1]).hide();
+
+                    if(data.node.parent && data.node.parent.data.type == 'resource'){ // add left border+margin
+                        $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
                     }
                 },
                 lazyLoad: function(event, data){

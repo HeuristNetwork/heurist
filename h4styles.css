@@ -1452,17 +1452,11 @@ span.fancytree-checkbox{
 /* CSV Export, Facet Filter Builder and Record Title Mask */
 .tree-csv span:not(.fancytree-has-children) span.fancytree-expander,
 .tree-facets span:not(.fancytree-has-children) span.fancytree-expander {  /* Hide expander for nodes without children */
-    visibility: hidden;
+    display: none;
 }
 .tree-csv .fancytree-has-children span.fancytree-checkbox,
-.tree-facets .fancytree-has-children span.fancytree-checkbox {  /* Change checkbox to blue arrow */
-    background-position: 0px -176px;    /* Empty Blue Arrow */
-}
-.tree-csv .fancytree-has-children.fancytree-partsel span.fancytree-checkbox,
-.tree-facets .fancytree-has-children.fancytree-partsel span.fancytree-checkbox,
-.tree-csv .fancytree-has-children.fancytree-selected span.fancytree-checkbox,
-.tree-facets .fancytree-has-children.fancytree-selected span.fancytree-checkbox {   /* Change checkbox to blue arrow */
-    background-position: -64px -176px;    /* Filled Blue Arrow */
+.tree-facets .fancytree-has-children span.fancytree-checkbox {  /* Hide checkbox */
+    display: none;
 }
 .tree-csv span.fancytree-icon,
 .tree-facets span.fancytree-icon {  /* Hide icon */
@@ -1470,43 +1464,28 @@ span.fancytree-checkbox{
 }
 
 /* Filter Builder */
-.tree-filter.hidden_checkboxes span.fancytree-checkbox
-{
+.tree-filter.hidden_checkboxes span.fancytree-checkbox{  /* Hide checkbox for nodes without children */
     display:none;
 }
-.tree-filter .fancytree-has-children span.fancytree-checkbox
-{
-    background-position: 0px -176px; /* blue arrow */
-    display:inline-block;
-}
-.tree-filter .fancytree-has-children.triangle-checkbox span.fancytree-expander
-{
-    display: inline-block;
-    visibility: hidden;
-}
-.tree-filter .fancytree-has-children.triangle-checkbox span.fancytree-checkbox
-{
+.tree-filter .fancytree-has-children span.fancytree-checkbox{  /* Replace checkbox for nodes with children */
     background-position: 0px -80px; /* white triangle */
     display: inline-block;
 }
-.tree-filter .fancytree-expanded.fancytree-has-children.triangle-checkbox span.fancytree-checkbox
-{
+.tree-filter .fancytree-expanded.fancytree-has-children span.fancytree-checkbox{
     background-position: -32px -80px; /* black triangle  */
     display: inline-block;
 }
-
-.tree-filter .fancytree-has-children.fancytree-partsel span.fancytree-checkbox
-{
+.tree-filter .fancytree-has-children.fancytree-partsel span.fancytree-checkbox{
     background-position: -64px -176px;
 }
-.tree-filter .fancytree-has-children.fancytree-selected span.fancytree-checkbox:hover
-{
+.tree-filter .fancytree-has-children.fancytree-selected span.fancytree-checkbox:hover{
     background-position: -64px -48px;
 }
 .tree-filter .fancytree-expander{
     display:none;
 }
 
+/* Record structure and CMS editor */
 .tree-rts .fancytree-folder > .fancytree-title{
     text-transform: uppercase;
     color: #999999;
@@ -1524,6 +1503,21 @@ span.fancytree-checkbox{
 }
 .tree-rts .optional, a.optional, .optional{
     color:black !important;
+}
+
+/* Custom report */
+.rtt-tree span.fancytree-expander{
+    display: none;
+}
+.rtt-tree .fancytree-has-children span.fancytree-expander{
+    display: inline-block;
+}
+
+/* Allow horizontal scrolling */
+.tree-csv .fancytree-container, .tree-facets .fancytree-container, 
+.tree-filter .fancytree-container, .tree-rts .fancytree-container, 
+.rtt-tree .fancytree-container{
+	display: inline-block;
 }
 
 .forbidden > label{

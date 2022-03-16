@@ -268,6 +268,7 @@ window.hWin.HEURIST4.dbs = {
             
             var $res = {};
             var $children = [];
+            var $dtl_fields = [];
             var headerFields = [];
             
             //add default fields - RECORD TYPE HEADER
@@ -278,15 +279,15 @@ window.hWin.HEURIST4.dbs = {
                 $children.push({key:'rec_TypeName', title:'Record TypeName', code:'Record TypeName'});
                 $children.push({key:'rec_Modified', title:"Record Modified", code:'Record Modified'});
 
-                var s = '<span style="font-style:italic">Generic Fields</span>';
-                $children = [
-                    {title:s, folder:true, is_generic_fields:true, children:$children}];
-
                 if($recursion_depth>0){ // keep record title separate from generic fields
                     $children.push({key:'rec_Title', type:'freetext',
                         title:'Record Title', 
                         code:'Record Title'});
                 }
+
+                var s = '<span style="font-style:italic">metadata</span>';
+                $children = [
+                    {title:s, folder:true, is_generic_fields:true, children:$children}];
             }else
             if($recursion_depth==0 && $fieldtypes.length>0){    
                  //include record header fields
@@ -395,14 +396,9 @@ window.hWin.HEURIST4.dbs = {
                             {title:s, folder:true, is_generic_fields:true, children:$rl_children});
                     }
                     
-                    var s = '<span style="font-style:italic">Generic Fields</span>';
+                    var s = '<span style="font-style:italic">metadata</span>';
                     $grouped.push(
                         {title:s, folder:true, is_generic_fields:true, children:$children});
-                    if($fieldtypes.indexOf('anyfield')>=0){ //for filter builder 
-                        $grouped.push({key:'anyfield', type:'freetext', //-16px -80px      -48px -80px open
-                        title:"<span style='font-size:0.9em;font-style:italic;padding-left:22px'>ANY FIELD</span>", 
-                        code:($recTypeId+_separator+'anyfield'), name:'Any field'});    
-                    }
                     
                     $children = $grouped;
                 }
@@ -411,7 +407,7 @@ window.hWin.HEURIST4.dbs = {
             if($recTypeId>0 && $Db.rty($recTypeId,'rty_Name')){//---------------
 
                 $res['key'] = $recTypeId;
-                $res['title'] = $Db.rty($recTypeId,'rty_Name');
+                $res['title'] = '<span style="font-weight: bold;">'+$Db.rty($recTypeId,'rty_Name')+'</span>';
                 $res['type'] = 'rectype';
                 
                 $res['conceptCode'] = $Db.getConceptID('rty', $recTypeId);
@@ -451,7 +447,6 @@ window.hWin.HEURIST4.dbs = {
                     // add details --------------------------------
                     if($details)
                     $details.each2(function($dtID, $dtValue){
-                    
                         //@TODO forbidden for import????
                         if($dtValue['rst_RequirementType']!='forbidden'){
 
@@ -487,7 +482,7 @@ window.hWin.HEURIST4.dbs = {
                                         $res_dt['title'] = "<span class='ui-icon ui-icon-menu' style='margin-right:2px;'>&nbsp;</span>" + $res_dt['title'];
                                     }
 									
-                                    $children.push($res_dt);
+                                    $dtl_fields.push($res_dt);
                                 }
                                 /*
                                 if(is_array($res_dt) && count($res_dt)==1){
@@ -502,12 +497,18 @@ window.hWin.HEURIST4.dbs = {
                     });//for details
 
                     //add resource and relation at the end of result array
-                    $children = $children.concat($children_links);
+                    $dtl_fields = $dtl_fields.concat($children_links);
 
-                    //sort bt rst_DisplayOrder
-                    $children.sort(function(a,b){
+                    //sort by rst_DisplayOrder
+                    $dtl_fields.sort(function(a,b){
                         return (a['display_order']<b['display_order'])?-1:1;
                     });
+
+                    if($fieldtypes.indexOf('anyfield')>=0){ //for filter builder 
+                        $dtl_fields.unshift({key:'anyfield', type:'freetext',
+                        title:"<span style='font-size:0.9em;font-style:italic;'>ANY</span>", 
+                        code:($recTypeId+_separator+'anyfield'), name:'Any field'});    
+                    }
 
                     //--------------------------------------------
                     //find all reverse links and relations
@@ -537,7 +538,7 @@ window.hWin.HEURIST4.dbs = {
                                     $res_dt = __getDetailSection($rtyIDs[i], $dtID, $recursion_depth, $mode, $fieldtypes, $recTypeId, null);
                      
                                     if($res_dt){
-                                        $children.push( $res_dt );
+                                        $dtl_fields.push( $res_dt );
                                     }
                                 }
                         }//for
@@ -547,7 +548,7 @@ window.hWin.HEURIST4.dbs = {
                 }
                 
                 if($mode==7 && $recursion_depth==0 && !parentcode){
-                    $children.push(__getRecordTypeTree('Relationship', 0, $mode, $fieldtypes, null));
+                    $dtl_fields.push(__getRecordTypeTree('Relationship', 0, $mode, $fieldtypes, null));
                 }   
 
             }
@@ -644,13 +645,15 @@ window.hWin.HEURIST4.dbs = {
                 
             }
 
-            
+            if($dtl_fields.length > 0){
+                $children.push({title: 'fields', folder: true, is_rec_fields: true, children: $dtl_fields});
+            }
+
             if($mode<5 || $recursion_depth==0){
                 $res['children'] = $children;
             }
 
             return $res;
-            
     } //__getRecordTypeTree
 
     /*

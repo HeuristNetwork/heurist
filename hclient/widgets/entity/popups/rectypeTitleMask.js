@@ -433,12 +433,11 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             renderNode: function(event, data){
 
                 if(data.node.data.type == "enum") { // hide blue and expand arrows for terms
-
-                    $(data.node.span.childNodes[0]).css('visibility', 'hidden');
+                    $(data.node.span.childNodes[0]).hide();
                     $(data.node.span.childNodes[1]).hide();
-                }else if(data.node.data.is_generic_fields){ // hide blue arrow for generic fields
-                    $(data.node.span.childNodes[1]).hide();
-                }else{
+                }else if(data.node.parent && (data.node.parent.data.type == 'resource' || data.node.parent.data.type == 'rectype')){ // add left border+margin
+                    $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
+                }else{ console.log(data);
 
                     if(data.node.parent && data.node.parent.data.type == 'enum'){ // make term options inline and smaller
                         $(data.node.li).css('display', 'inline-block');
@@ -449,7 +448,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                         }else if(data.node.key == 'internalid'){
                             $(data.node.span.childNodes[3]).text('Int-ID');
                         }else if(data.node.key == 'term'){
-                            $(data.node.parent.ul).css({'transform': 'scale(0.75)', 'padding-left': '10px'});
+                            $(data.node.parent.ul).css({'transform': 'scale(0.8)', 'padding': '0px', 'position': 'relative', 'left': '-12px'});
                         }
                     }
                 }
