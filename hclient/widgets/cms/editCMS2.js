@@ -122,9 +122,10 @@ function editCMS2(){
                 
                 new_ele.appendTo(body);
                 
-                var editor_panel = $('<div class="ui-layout-'+options.editor_pos+'">'      
+                var editor_panel = $('<div class="ui-layout-'+options.editor_pos+'">'
+                        +'<div style="margin: 10px;text-align: right;cursor: pointer;" id="closeCMS">close<span style="padding-left: 10px;" class="ui-icon ui-icon-close" /></div>'
                         +'<div class="ent_wrapper editStructure" id="tabsEditCMS">' 
-                            +'<ul style="margin-'+(options.editor_pos=='west'?'right':'left')+':40px"><li><a href="#treeWebSite">Menu</a></li><li><a href="#treePage">Page</a></li></ul>'
+                            +'<ul style="margin-'+(options.editor_pos=='west'?'right':'left')+':40px"><li><a href="#treeWebSite">Site</a></li><li><a href="#treePage">Page</a></li></ul>'
                             
                             +'<span style="position:absolute;top:22px;width:32px;height:24px;font-size:29px;cursor:pointer;'+(options.editor_pos=='west'?'right:5px':'')+'" '
                             +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'"/>'
@@ -244,7 +245,9 @@ function editCMS2(){
                     editor_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).click(_showWebSiteMenu);
                     
                     editor_panel.find('.bnt-cms-hidepanel').click(function(){ body.layout().close(options.editor_pos); } );
-                    
+
+                    editor_panel.find('#closeCMS').click(_closeCMS);
+
                     _panel_propertyView = body.find('.propertyView');
                     _panel_treeWebSite = body.find('.treeWebSite');
                     
