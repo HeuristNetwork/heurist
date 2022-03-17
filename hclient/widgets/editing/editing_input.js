@@ -3808,7 +3808,8 @@ console.log('onpaste');
                         performedOnce = 1;
                     }
 
-                    menuWidgetOpen(that, $input, true); 
+                    //Artem: Brandon, what does it mean? 
+                    //menuWidgetOpen(that, $input, true); 
                 });
             }
 
