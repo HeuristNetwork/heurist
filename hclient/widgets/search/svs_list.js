@@ -104,6 +104,7 @@ $.widget( "heurist.svs_list", {
                 
                     this.options.allowed_UGrpID = [4]; //web searches - by default
             }
+            
         }
             
         if(window.hWin.HAPI4.has_access() && this.options.buttons_mode){
@@ -487,12 +488,25 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
         //window.hWin.HAPI4.currentUser.ugr_SvsTreeData = this.__default_TreeData();
         window.hWin.HAPI4.SystemMgr.ssearch_get( {UGrpID: this.options.allowed_UGrpID},
                 function(response){
+
                     if(response.status == window.hWin.ResponseStatus.OK){
                         if(response.data.order && response.data.svs){
                             that.loaded_saved_searches = response.data.svs; //svs_id=>array()
                         }else{
                             that.loaded_saved_searches = response.data; //svs_id=>array()
                         }
+                        if(window.hWin.HEURIST4.util.isempty(that.loaded_saved_searches) &&
+                            that.options.allowed_UGrpID.length==1 && that.options.allowed_UGrpID[0]==4){
+                                //special case if allowed_UGrpID is #4 (Website filters) and this group is missed - replace it to group#2
+                                that.options.allowed_UGrpID[0] = 1;
+                                if(!window.hWin.HAPI4.currentUser.ugr_Groups[1]) {
+                                    window.hWin.HAPI4.currentUser.ugr_Groups[1] = 'member';   
+                                }
+                                that.reloadSavedSearches(callback);
+                                return;
+                        }
+                        
+                        
                         window.hWin.HAPI4.currentUser.usr_SavedSearch = that.loaded_saved_searches
                         
                         if(that.options.buttons_mode){
