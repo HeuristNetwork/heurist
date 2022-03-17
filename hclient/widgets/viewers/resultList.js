@@ -26,7 +26,7 @@ $.widget( "heurist.resultList", {
     options: {
         widget_id: null, //user identificator to find this widget custom js script on web/CMS page
         is_h6style: false,
-        view_mode: null, // 'list','icons','thumbs','thumbs3','horizontal','icons_list','record_content' 
+        view_mode: null, // 'list','icons','thumbs','thumbs3','horizontal','vertical','icons_list','record_content' 
         list_mode_is_table: false,
 
         select_mode:null,//none, manager, select_single, select_multi
@@ -40,7 +40,7 @@ $.widget( "heurist.resultList", {
 
         eventbased:true, //if false it does not listen global events
 
-        show_toolbar: true,   //toolbar contains menu,savefilter,counter,viewmode and paginathorizontalion
+        show_toolbar: true,   //toolbar contains menu,savefilter,counter,viewmode and pagination
         show_search_form: false,
         show_menu: false,       //@todo ? - replace to action_select and action_buttons
         support_collection: false,
@@ -1061,7 +1061,7 @@ $.widget( "heurist.resultList", {
     applyViewMode: function(newmode, forceapply){
 
         
-        var allowed = ['list','icons','thumbs','thumbs3','horizontal','icons_list','record_content'];
+        var allowed = ['list','icons','thumbs','thumbs3','horizontal','vertical','icons_list','record_content'];
         
         if(newmode=='icons_expanded') newmode=='record_content'; //backward capability 
 
@@ -1103,7 +1103,7 @@ $.widget( "heurist.resultList", {
             }
             */
             
-            this.div_content.removeClass('list icons thumbs thumbs3 horizontal icons_list');
+            this.div_content.removeClass('list icons thumbs thumbs3 horizontal vertical icons_list');
             this.div_content.addClass(newmode);
             
             this._current_view_mode = newmode;
@@ -1134,6 +1134,19 @@ $.widget( "heurist.resultList", {
                     });
                     
                 }
+                
+            }else if(newmode=='vertical'){ 
+
+                this.div_content.css('overflow-x','hidden');
+                
+                var w = this.div_content.width();
+                    w = (((w<60) ?60 :((w>200)?230:w))-30) + 'px';
+                    
+                this.div_content.find('.recordDiv').css({
+                        height: w,
+                        width: w,
+                        'min-height':w 
+                    });
                 
             }else{
                 this.div_content.css('overflow-y','auto');
@@ -2165,7 +2178,7 @@ $.widget( "heurist.resultList", {
         }
         
         //$.isFunction(this.options.renderer) && 
-        if((this.options.view_mode!='horizontal')   // && this.options.view_mode!='icons_list'
+        if((this.options.view_mode!='horizontal' && this.options.view_mode!='vertical')   // && this.options.view_mode!='icons_list'
             && this.options.recordview_onselect=='inline'
             && this.options.expandDetailsOnClick){ // && this.options.view_mode=='list'
 
@@ -3035,7 +3048,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         }
         
         //special div for horizontal
-        if(this.options.view_mode == 'horizontal'){  //|| this.options.view_mode == 'icons_list'){
+        if(this.options.view_mode == 'horizontal' || this.options.view_mode == 'vertical'){  //|| this.options.view_mode == 'icons_list'){
             html = '<div>'+html+'</div>';
         }
         
@@ -3092,7 +3105,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         if(this.options.select_mode!='select_multi'){
             this.div_content.find('.recordSelector').hide();
             
-            if(this.options.view_mode == 'horizontal' || this.options.auto_select_first !== false){
+            if(this.options.view_mode == 'horizontal' || this.options.view_mode == 'vertical' || this.options.auto_select_first !== false){
                 //always select first div for horizontal viewmode, or if auto_select_first is set
                 var ele = this.div_content.find('.recordDiv:first');//.addClass('selected');
                 if(ele.length>0) this._recordDivOnClick({target:ele[0]});
@@ -3126,6 +3139,14 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                         height: h,
                         width: h,
                         'min-width': h
+            });
+        }else if(this.options.view_mode == 'vertical'){
+            var w = this.div_content.width();
+                w = (((w<60) ?60 :((w>200)?230:w))-30) + 'px';
+            $allrecs.css({
+                        height: w,
+                        width: w,
+                        'min-height': w
             });
         }
         

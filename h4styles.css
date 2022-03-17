@@ -695,7 +695,7 @@ div .selected_last{
 
 
 /* THUMBS VIEW */
-.thumbs .recordDiv, .thumbs3 .recordDiv, .horizontal .recordDiv{
+.thumbs .recordDiv, .thumbs3 .recordDiv, .horizontal .vertical .recordDiv{
     -moz-user-select: none;
     border: 3px solid #FFFFFF;
     border-collapse: collapse;
@@ -1199,30 +1199,47 @@ div.div-result-list-content.icons_list{
     padding: 3px;
 }
 
-.horizontal .recordDiv .recTypeThumb{
+.vertical .recordDiv {
+    min-height: 200px;
+    width: 200px;
+    display: block;
+    border: 1px solid lightblue;
+    padding: 3px;
+    border-spacing: 2px;
+}
+
+.horizontal .recordDiv .recTypeThumb,
+.vertical .recordDiv .recTypeThumb{
     top:0px;
     position: relative;
     width: 100%;
     height: 100%;
 }
 
-.horizontal .recordDiv:hover {
+.horizontal .recordDiv:hover,
+.vertical .recordDiv:hover,
+ {
     z-index:10;
     -moz-box-shadow:0px 3px 8px #666;
     -webkit-box-shadow:0px 3px 8px #666;
     box-shadow:0px 3px 8px #666;
 }
 
-.horizontal .recordDiv .recordTitle,
-.horizontal .recordDiv .recordSelector,
-.horizontal .recordDiv .recordIcons,
-.horizontal .recordDiv .rec_owner,
-.horizontal .recordDiv .action-button-container
+.horizontal .recordTitle,
+.horizontal .recordSelector,
+.horizontal .recordIcons,
+.horizontal .rec_owner,
+.horizontal .action-button-container,
+.vertical .recordTitle,
+.vertical .recordSelector,
+.vertical .recordIcons,
+.vertical .rec_owner,
+.vertical .action-button-container
 {
     display:none !important;    
 }
 
-.horizontal .recordDiv .recordTitleInPlaceOfThumb{
+.horizontal .recordTitleInPlaceOfThumb{
     height: 95%;
     left: 10px;
     right: 10px;
@@ -1232,7 +1249,16 @@ div.div-result-list-content.icons_list{
     font-size: larger;
     text-align: center;
 }
-.horizontal .recordDiv .rectypeThumb{
+.vertical .recordTitleInPlaceOfThumb{
+    height: 95%;
+    padding: 20px;
+    display: block !important;
+    font-weight: bold;
+    font-size: larger;
+    text-align: center;
+    position: relative;
+}
+.horizontal .rectypeThumb, .vertical .rectypeThumb{
     opacity: 0.2;
 }
 

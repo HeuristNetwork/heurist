@@ -290,6 +290,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                 .change(function(e){
 
                     var is_horiz = ($(e.target).val()=='horizontal');
+                    var is_vertical = ($(e.target).val()=='vertical');
 
                     if($(e.target).val()=='treeview'){
                         $dlg.find('#expandLevels').show();
@@ -302,10 +303,24 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                         var vs = vals[i].split(':');
                         if(vs && vs.length==2){
                             vs[0] = vs[0].trim();
-                            if(vs[0]=='width'){
-                                vals[i] = ('\nwidth: '+(is_horiz?'100%':'200px'));
-                            }else if(vs[0]=='height'){
-                                vals[i] = ('\nheight: '+(is_horiz?'50px':'300px'));
+                            if(is_horiz){
+                                if(vs[0]=='width'){
+                                    vals[i] = ('\nwidth: 100%');
+                                }else if(vs[0]=='height'){
+                                    vals[i] = ('\nheight:50px');
+                                }
+                            }else if(is_vertical){
+                                if(vs[0]=='width'){
+                                    vals[i] = ('\nwidth: 50px');
+                                }else if(vs[0]=='height'){
+                                    vals[i] = ('\nheight:100%');
+                                }
+                            }else{
+                                if(vs[0]=='width'){
+                                    vals[i] = ('\nwidth: 200px');
+                                }else if(vs[0]=='height'){
+                                    vals[i] = ('\nheight:300px');
+                                }
                             }
                         }
                     }
