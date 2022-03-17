@@ -133,22 +133,34 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	}
 
 	while($db = $db_list->fetch_row()){
+        
+        //check version - use >=1.3.0
+        $query = 'SELECT sys_dbVersion, sys_dbSubVersion from '.$db[0].'.sysIdentification';
+        $ver = mysql__select_row_assoc($mysqli, $query);
+        if(!$ver){
+            continue; //skip - broken database
+        }else{
+            if($ver['sys_dbSubVersion']<3){
+                continue; //skip - old database
+            }
+        }        
+        
 
 		// Ensure that the Heurist db has the required tables, ignore if they don't
-    $query = "SHOW TABLES IN ".$db[0]." WHERE Tables_in_".$db[0]." = 'Records' OR Tables_in_".$db[0]." = 'recDetails' OR Tables_in_".$db[0]." = 'sysUGrps' OR Tables_in_".$db[0]." = 'sysUsrGrpLinks'";
+        $query = "SHOW TABLES IN ".$db[0]." WHERE Tables_in_".$db[0]." = 'Records' OR Tables_in_".$db[0]." = 'recDetails' OR Tables_in_".$db[0]." = 'sysUGrps' OR Tables_in_".$db[0]." = 'sysUsrGrpLinks'";
 
-    $table_listing = $mysqli->query($query);
-    if (!$table_listing || mysqli_num_rows($table_listing) != 4) { // Skip, missing required tables
+        $table_listing = $mysqli->query($query);
+        if (!$table_listing || mysqli_num_rows($table_listing) != 4) { // Skip, missing required tables
 
-    	if($table_listing && $db_request == "all"){
-    		$invalid_dbs[] = $db[0];
-    	}
+    	    if($table_listing && $db_request == "all"){
+    		    $invalid_dbs[] = $db[0];
+    	    }
 
-      continue;
-    }
+          continue;
+        }
 
-    $dbs[] = $db[0];
-	}
+        $dbs[] = $db[0];
+	}//while
 
 	if($db_request == "all"){ // No additional filtering needed
 		$data = $dbs;
@@ -175,8 +187,15 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 								) AS a";
 
 			$count_res = $mysqli->query($query);
-			if(!$count_res){
+			if($count_res>0){
 
+                $row = $count_res->fetch_row();
+
+                if($row[0] > $count){
+                    $data[] = $db;
+                }
+                
+            }else{
 				$response = array("status"=>HEURIST_ERROR, "message"=>"Unable to filter Heurist databases based on provided filter.<br>", "error_msg"=>$mysqli->error, "request"=>$db_request);
 				$rtn = json_encode($response);
 
@@ -186,12 +205,6 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 				exit();
 
-			}else{
-				$row = $count_res->fetch_row();
-
-				if($row[0] > $count){
-					$data[] = $db;
-				}
 			}
 		}
 	}
@@ -242,12 +255,14 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 		$res = $mysqli->query($query);
 		if(!$res){
-
+            continue;
+/*            
 			$response = array("status"=>HEURIST_ERROR, "message"=>"Unable to retrieve user count for databases => $db<br>", "error_msg"=>$mysqli->error, "request"=>$user_request);
 			$rtn = json_encode($response);
 
 			print $rtn;
 			exit();
+*/            
 		}
 
 		while($row = $res->fetch_row()){
