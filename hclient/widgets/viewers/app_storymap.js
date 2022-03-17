@@ -138,10 +138,12 @@ $.widget( "heurist.app_storymap", {
             var h = this.element.find('.ui-tabs-nav:first').height(); //find('#tabCtrl').
             this.pnlOverview.height(this.element.height() - h);
             this._resultList.height(this.element.height() - h); //465
+            this.pnlStory.height(this.element.height() - h); //465
             
             this._tabs.tabs('option','activate',function(event, ui){
                 if(that._resultset && that._resultset.length()>0 
                     && !(that._currentElementID>0) && that._tabs.tabs('option','active')==1){
+                    that._onNavigateStatus(0);
                     that._startNewStoryElement( that._resultset.getOrder()[0] );
                 }
             });
@@ -158,14 +160,16 @@ $.widget( "heurist.app_storymap", {
             this.pnlStoryReport = $('<div>').css({width:'100%',height:'100%',overflow:'auto'})
                 .appendTo(this.pnlStory);
                 
-            var css = ' style="width:30px;height:30px;line-height:30px;display:inline-block;'
-                +'text-decoration:none;text-align: center;font-weight: bold;color:#ccc;'
+            var css = ' style="height:30px;line-height:30px;display:inline-block;'
+                +'text-decoration:none;text-align: center;font-weight: bold;color:black;'
                 
             $('<div style="top:10px;right:10px;position:absolute;z-index: 800;border: 2px solid #ccc; background:white;'
-                +'background-clip: padding-box;border-radius: 4px;width:64px;">'
-            +'<a id="btn-prev" '+css+'border-right: 1px solid #ccc" href="#" '
+                +'background-clip: padding-box;border-radius: 4px;">' //;width:64px;
+            +'<a id="btn-prev" '+css+'width:30px;border-right: 1px solid #ccc" href="#" '
                 +'title="Previous" role="button" aria-label="Previous">&lt;</a>'
-            +'<a id="btn-next" '+css+'" href="#" '
+            +'<span id="nav-status" '+css+';width:auto;padding:0px 5px;border-right: 1px solid #ccc" href="#" '
+                +'>1 of X</span>'
+            +'<a id="btn-next" '+css+'width:30px;" href="#" '
                 +'title="Next" role="button" aria-label="Next">&gt;</a></div>')        
                 .appendTo(this.pnlStory);
                 
@@ -260,7 +264,7 @@ $.widget( "heurist.app_storymap", {
     _onNavigate: function(is_forward){
         
         var order = this._resultset.getOrder();
-        var recID = 0;
+        var recID = 0, idx=-1;
         
         if(this._currentElementID>0){
             var idx = window.hWin.HEURIST4.util.findArrayIndex(this._currentElementID, order);
@@ -269,11 +273,11 @@ $.widget( "heurist.app_storymap", {
             }else{
                 idx--;
             }
-            if(idx>=0 && idx<order.length){
-                recID = order[idx];
-            }
         }else{
-            recID = order[0]; //first
+            idx = 0;
+        }
+        if(idx>=0 && idx<order.length){
+            recID = order[idx];
         }
         
         if(recID>0){
@@ -283,7 +287,33 @@ $.widget( "heurist.app_storymap", {
             //show overview for inline mode
             this._startNewStory(this.options.storyRecordID);
         }
+        this._onNavigateStatus(idx);
     },
+
+    //
+    //
+    //
+    _onNavigateStatus: function(idx){
+
+        var order = this._resultset.getOrder();
+        var dis_next = false, dis_prev = false;;    
+        
+        if(idx>=order.length-1){
+          idx = order.length-1; 
+          dis_next = true;      
+        } 
+        if(idx < (this.options.reportOverviewMode=='inline'?0:1)){
+            idx = (this.options.reportOverviewMode=='inline')?-1:0;
+            dis_prev = true;      
+        }
+        
+        window.hWin.HEURIST4.util.setDisabled(this.element.find('#btn-prev'), dis_prev  );
+        window.hWin.HEURIST4.util.setDisabled(this.element.find('#btn-next'), dis_next);
+        
+        
+        this.element.find('#nav-status').text((idx+1)+' of '+order.length);
+    },
+
         
     //
     // Loads story elements for given record from server side
