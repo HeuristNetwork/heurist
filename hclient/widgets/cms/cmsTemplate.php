@@ -34,7 +34,7 @@
     * main-content - is the target div for content of particular page to be loaded  
     * 
     * There are following variables (their values are defined in website home record) that can be used in html header
-    * $website_title
+    * $website_title 
     * $meta_keywords
     * $meta_description 
     * $image_icon
@@ -47,6 +47,8 @@
     * $page_header_menu - code to define main menu widget, leave it unchanged as content of main-menu div
     * $page_header - custom content for main-header defined in website home page record 
     * $page_footer - custom content for footer  
+    * 
+    * $show_pagetitle - true|false to show curent page title in #main-pagetitle
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -115,7 +117,6 @@
 #main-pagetitle{
     position: absolute;
     padding: 15px 0 5px 10px;
-    top:150px;
     bottom: 0;
     left: 0;
     right: 0;
@@ -204,7 +205,7 @@ if($isWebPage){ //set in websiteRecord.php
     
     }
     ?>  
-        <div id="main-pagetitle" class="ui-heurist-bg-light">loading...</div>       
+        <div id="main-pagetitle" class="ui-heurist-bg-light"></div>       
     </div>
     <div class="ent_content_full  ui-heurist-bg-light"  id="main-content-container"
             style="top:152px;<?php echo ($is_page_footer_fixed?'bottom:'.$page_footer_height.'px;':''); ?>padding: 5px;">

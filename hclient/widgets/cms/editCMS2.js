@@ -75,7 +75,9 @@ function editCMS2(){
     //     DT_CMS_THEME = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_THEME'],
     DT_NAME       = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
     DT_CMS_HEADER = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'],
-    DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
+    DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
+    DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],
+    TRM_NO = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'];
 
     var body = $(this.document).find('body');
     var dim = {h:body.innerHeight(), w:body.innerWidth()};
@@ -508,9 +510,11 @@ function editCMS2(){
         }else {
             return;
         }
-        
         var opts = {};
-        if(page_cache[options.record_id]) opts = {page_name:page_cache[options.record_id][DT_NAME]};
+        if(page_cache[options.record_id]){
+            opts = {page_name:page_cache[options.record_id][DT_NAME]};  
+            assignPageTitle(options.record_id)
+        } 
         opts.rec_ID = home_page_record_id;
         
         if(supress_conversion!==true && typeof _layout_content === 'string' &&

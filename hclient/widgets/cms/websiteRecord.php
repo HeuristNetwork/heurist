@@ -213,12 +213,12 @@ if(!(@$_REQUEST['field']>1)){
     $website_title = __getValue($rec, DT_NAME);
     $isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU && 
                 defined('DT_CMS_PAGETYPE') &&
-                __getValue($rec, DT_CMS_PAGETYPE)==ConceptCode::getTermLocalID('2-6254'));
+                __getValue($rec, DT_CMS_PAGETYPE)==TRM_PAGETYPE_WEBPAGE); //ConceptCode::getTermLocalID('2-6254')
     
     if(!$isWebPage){ //for standalone webpage always without title
         $show_pagetitle = __getValue($rec, DT_CMS_PAGETITLE);
-        $show_pagetitle = ($show_pagetitle!==ConceptCode::getTermLocalID('2-531') && 
-                           $show_pagetitle!==ConceptCode::getTermLocalID('99-5447'));
+        $show_pagetitle = ($show_pagetitle!==TRM_NO &&  // ConceptCode::getTermLocalID('2-531') 
+                           $show_pagetitle!==TRM_NO_OLD);    //ConceptCode::getTermLocalID('99-5447')
     }
 }
 
@@ -252,10 +252,10 @@ window.hWin.HEURIST4.msg.showMsgDlg(
         //default value - content of page
         $content = __getValue($rec, DT_EXTENDED_DESCRIPTION);
         
+        /* 2022-02-17
         $empty_mark = (trim($content)=='')?' date-empty="1"':'';
         $hide_mark = ($show_pagetitle) ?'' :' style="display:none;"';
         
-        /* 2022-02-17
         print '<h2 class="webpageheading" '.$empty_mark.$hide_mark.'>' 
             .strip_tags($website_title,'<i><b><u><em><strong><sup><sub><small><br>')
             .'</h2>';    
