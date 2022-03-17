@@ -401,7 +401,8 @@ $dtDefines = array('DT_NAME' => array(2, 1),
 
 
 $trmDefines = array(
-    'TRM_PAGETYPE' => array(2, 6254),
+    'TRM_PAGETYPE_WEBPAGE' => array(2, 6254),
+    'TRM_PAGETYPE_MENUITEM' => array(2, 6253),
     'TRM_NO' => array(2, 531),
     'TRM_NO_OLD' => array(99, 5447),
     'TRM_SWF' => array(2, 9453), //workflow stages vocabulary
