@@ -3808,8 +3808,7 @@ console.log('onpaste');
                         performedOnce = 1;
                     }
 
-                    //Artem: Brandon, what does it mean? 
-                    //menuWidgetOpen(that, $input, true); 
+                    openSearchMenu(that, $input, true); // perform special function, found under editing_exts.js
                 });
             }
 
