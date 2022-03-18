@@ -30,7 +30,7 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-//print 'disabled'; 
+print 'disabled'; 
 exit(); 
  
 //define('OWNER_REQUIRED', 1);   
@@ -92,15 +92,17 @@ if(false){
 }else if(false){
     
     __updateDatabase();
-}else if(true){
+}else if(false){
     
     __checkVersionDatabase();
 }else if(false){
     //trm_NameInOriginatingDB 
     __setTermNameTo255();
     //__findLongTermLabels();
-}else{
+}else if(false){
     findMissedTermLinks();
+}else{
+    __setTermYesNo();
 }
 
 //
@@ -500,5 +502,124 @@ $query = "ALTER TABLE `defTerms` "
         }
     }    
     print '[end update]';    
+}
+
+/*
+
+In a correct database eg. core defs, 
+
+2-531 = No
+2-532 = Yes
+
+In a problem database:
+
+The Flags vocabulary used in the show headings field, and possibly other fields, has No = 99-5447 and Yes = 99-5446 as valid values, which throws out data entry when the 2-53x terms have been inserted, and any functions which check for 2-53x terms (although the web page headings field checks for both)
+
+The correct 2-53x terms exist in the database:
+Replace the local IDs in any vocabulary which uses 99-544x terms with the corresponding 2-53x local IDs
+Update any record details which specify the local ID of 99-544x terms with the corresponding local IDs of the 2-53x terms 
+
+The 2-53x terms are not present:
+Add the 2-53x terms
+Set the concept IDs of the 99-544x terms to 2-53x - these will now be associated with the correct terms
+The local IDs specifying the terms in the vocab will now point to the correct terms
+The local IDs in record details will continue to point to those terms
+
+*/
+function __setTermYesNo(){
+    
+    global $mysqli, $databases; 
+    
+    print '[Fix Yes/No terms]<br>';    
+    
+    foreach ($databases as $idx=>$db_name){
+
+        mysql__usedatabase($mysqli, $db_name);
+//get local codes for 2-532, 2-531 and 99-5446(yes) 99-5447 (no) in vocab (99-5445)
+        $yes_0 = getLocalCode(2, 532);
+        $no_0 = getLocalCode(2, 531);
+        
+        $yes_1 = getLocalCode(99, 5446);
+        $no_1 = getLocalCode(99, 5447);
+
+        print $db_name.' ';    
+        
+        if($yes_1>0 || $no_1>0){
+            
+            print '<b>';
+        
+        $vocab = getLocalCode(99, 5445);
+        
+// get all enum fields        
+        $enums = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes WHERE dty_Type="enum"');
+        $enums = 'dtl_DetailTypeID IN ('.implode(',',$enums).')';
+        
+        if($yes_1>0){
+//replace 99-544x to 2-53x in recDetails
+            if($yes_0>0){
+                $query = 'UPDATE recDetails SET dtl_Value='.$yes_0.' WHERE dtl_Value='.$yes_1.' AND '.$enums;
+                $mysqli->query($query);
+    //add references to vocabulary 99-5445       
+                if($vocab>0){
+                $query = 'INSERT INTO defTermsLinks (trl_ParentID,trl_TermID) VALUES('.$vocab.','.$yes_0.')';
+                $mysqli->query($query);
+                }
+    //remove old term                            
+                $query = 'DELETE FROM defTerms WHERE trm_ID='.$yes_1;
+                $mysqli->query($query);
+                
+                
+                print ' "yes" replaced';
+            }else{
+                $query = 'UPDATE defTerms set trm_OriginatingDBID=2 trm_IDInOriginatingDB=532 WHERE trm_ID='.$yes_1;
+                $mysqli->query($query);
+                if($vocab>0){
+                $query = 'INSERT INTO defTermsLinks (trl_ParentID,trl_TermID) VALUES('.$vocab.','.$yes_1.')';
+                $mysqli->query($query);
+                }
+                print ' "yes" added';
+            }
+        }
+        
+        if($no_1>0){
+//replace 99-544x to 2-53x in recDetails
+            if($no_0>0){
+                $query = 'UPDATE recDetails SET dtl_Value='.$no_0.' WHERE dtl_Value='.$no_1.' AND '.$enums;
+                $mysqli->query($query);
+    //add references to vocabulary 99-5445       
+                if($vocab>0){
+                $query = 'INSERT INTO defTermsLinks (trl_ParentID,trl_TermID) VALUES('.$vocab.','.$no_0.')';
+                $mysqli->query($query);
+                }
+    //remove old term                            
+                $query = 'DELETE FROM defTerms WHERE trm_ID='.$no_1;
+                $mysqli->query($query);
+                
+                print ' "no" replaced';
+            }else{
+                $query = 'UPDATE defTerms set trm_OriginatingDBID=2 trm_IDInOriginatingDB=531 WHERE trm_ID='.$no_1;
+                $mysqli->query($query);
+                if($vocab>0){
+                $query = 'INSERT INTO defTermsLinks (trl_ParentID,trl_TermID) VALUES('.$vocab.','.$no_1.')';
+                $mysqli->query($query);
+                }
+                print ' "no" added';
+            }
+        }
+        
+        print '</b><br>';
+        
+        }else{
+            print ' no wrong terms <br>';
+        }
+        
+    }
+    
+}
+
+function getLocalCode($db_id, $id){
+    global $mysqli;
+    $query = 'select trm_ID from defTerms where trm_OriginatingDBID='.$db_id.' and trm_IDInOriginatingDB='.$id;
+    return mysql__select_value($mysqli, $query);
 }
 ?>
