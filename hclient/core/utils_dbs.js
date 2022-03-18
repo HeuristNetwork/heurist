@@ -407,7 +407,7 @@ window.hWin.HEURIST4.dbs = {
             if($recTypeId>0 && $Db.rty($recTypeId,'rty_Name')){//---------------
 
                 $res['key'] = $recTypeId;
-                $res['title'] = '<span style="font-weight: bold;">'+$Db.rty($recTypeId,'rty_Name')+'</span>';
+                $res['title'] = $Db.rty($recTypeId,'rty_Name');
                 $res['type'] = 'rectype';
                 
                 $res['conceptCode'] = $Db.getConceptID('rty', $recTypeId);
@@ -469,7 +469,7 @@ window.hWin.HEURIST4.dbs = {
                                         for (var i=0; i<$res_dt['constraint']; i++){
                                             $res_dt['children'][i]['code'] = $res_dt['code']
                                                                 + _separator + '{'+$res_dt['children'][i]['title'] +'}';
-                                            $res_dt['children'][i]['title'] = $res_dt['title'] + ' ('+ $res_dt['children'][i]['title']+')';
+                                            $res_dt['children'][i]['title'] = $res_dt['title'] + ' (<span style="font-weight: bold;">'+ $res_dt['children'][i]['title']+'</span>)';
                                             $children_links.push($res_dt['children'][i]);    
                                         }
                                     }else{
