@@ -577,6 +577,7 @@ $.widget( "heurist.navigation", {
                 //load page content to page_target element 
                 if(page_target[0]!='#') page_target = '#'+page_target;
 
+                
                 var continue_load_page = function() {
                     
                     if(pageCss && Object.keys(pageCss).length>0){
@@ -592,7 +593,53 @@ $.widget( "heurist.navigation", {
                     
                     var page_footer = $(page_target).find('#page-footer');
                     if(page_footer.length>0) page_footer.detach();
+                
+                    var server_request = {
+                        q: 'ids:'+data.page_id,
+                        restapi: 1,
+                        columns: 
+                        ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION],
+                        zip: 1,
+                        format:'json'};
+                    
+                    //perform search see record_output.php       
+                    window.hWin.HAPI4.RecordMgr.search_new(server_request,
+                        function(response){
+                          
+                           if(window.hWin.HEURIST4.util.isJSON(response)) {
+                                if(response['records'] && response['records'].length>0){
+                                    var res = response['records'][0]['details'];
+                                    var keys = Object.keys(res);
+                                    for(var idx in keys){
+                                        var key = keys[idx];
+                                        res[key] = res[key][ Object.keys(res[key])[0] ];
+                                    }
+                                    //res[DT_NAME] = res[DT_NAME]
+                                    //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE]
+                                    //console.log(res);           
+                                    if(page_footer.length>0){
+                                        page_footer.appendTo( $(page_target) );
+                                        $(page_target).css({'min-height':$(page_target).parent().height()-page_footer.height()-10 });
+                                    } 
+                                    
+                                    layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], $(page_target) ); 
 
+                                    if($.isFunction(that.options.aftermenuselect)){
+                                        that.options.aftermenuselect( document, data.page_id );
+                                        /*setTimeout(function(){
+                                        that.options.aftermenuselect( data.page_id );
+                                        },2000);*/
+                                    }                    
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr('Web Page not found (record #'+data.page_id+')');
+                                }
+                           }else {
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                           }
+                        });                
+                
+
+                    /*
                     $(page_target).empty().load(page_url,
                         function(){
 
@@ -601,17 +648,15 @@ $.widget( "heurist.navigation", {
                                 $(page_target).css({'min-height':$(page_target).parent().height()-page_footer.height()-10 });
                             } 
                             
+
                             layoutMgr.layoutInit( null, $(page_target) );
                             
                             //OLD 2022-02-17 window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
                             
                             if($.isFunction(that.options.aftermenuselect)){
                                 that.options.aftermenuselect( document, data.page_id );
-                                /*setTimeout(function(){
-                                that.options.aftermenuselect( data.page_id );
-                                },2000);*/
                             }
-                    });
+                    });*/
                 };
 
                 //before load we trigger  function

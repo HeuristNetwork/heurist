@@ -3502,6 +3502,8 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
     //
     //
     setOrderAndSaveAsFilter: function(){
+        
+        var that = this;
             
         this.setOrderManually(
             function(recordset, record){ 

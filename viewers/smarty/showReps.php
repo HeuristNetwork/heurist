@@ -477,7 +477,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                 .'</script>');
             }
 
-            $head .= '</head><body class=""smarty-report">';
+            $head .= '</head><body class="smarty-report">';
             $tpl_source = $head.$tpl_source.'</body></head>';
             
         }else{ //html snippet output (without head)
