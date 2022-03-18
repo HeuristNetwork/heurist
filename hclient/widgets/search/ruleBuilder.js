@@ -376,8 +376,9 @@ $.widget( "heurist.ruleBuilder", {
         var sel = window.hWin.HEURIST4.ui.initHSelect(this.select_fields, false);
         sel.hSelect( "widget" ).css({'font-size':'0.9em','max-width':'200px'});
         var that = this;
+        this.select_fields = sel;
         sel.hSelect({change: function( event, data ) {
-                        that.select_fields.val(data.item.value);//change value for underlaying html select
+                        //that.select_fields.val(data.item.value);//change value for underlaying html select
                         that._onSelectFieldtype();
                 }});
         
@@ -553,7 +554,6 @@ $.widget( "heurist.ruleBuilder", {
     _initRules: function(){
 
         if(this.options.rules){
-
             var codes = this.options.rules.codes;
             
             var query = window.hWin.HEURIST4.util.isJSON(this.options.rules.query);
@@ -639,6 +639,7 @@ $.widget( "heurist.ruleBuilder", {
                 }
                 
                 this.select_fields.val( sel_field );
+                this.select_fields.hSelect('refresh');
                 this._onSelectFieldtype();
 
                 if(isNaN(linktype) || linktype<0 || linktype>4){

@@ -74,7 +74,7 @@ function onPageInit(success) //callback function of hAPI initialization
         if(!window.hWin.HEURIST4.util.isempty(rules)){
 
             if(!window.hWin.HEURIST4.util.isArray(rules)) rules = $.parseJSON(rules);
-            
+
             if(rules.length>0){
                 var i;
                 for(i=0; i<rules.length; i++){
