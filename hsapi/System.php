@@ -937,8 +937,8 @@ error_log(print_r($_REQUEST, true));
                 fileAdd($Title.'  '.$sMsg, $root_folder.$curr_logfile);
             }
 
-            $message = 'Heurist was unable to process. '.$message;
-            $sysmsg = 'This warning has been emailed to the Heurist team (for servers maintained by the project - may not be enabled on other servers). As we cannot always review all automated reports, please contact us if this error is causing you a problem, this will help us identify important issues. We apologise for any inconvenience';
+            $message = 'Heurist was unable to process this request. '.$message;
+            $sysmsg = 'Although errors are emailed to the Heurist team (for servers maintained directly by the project), there are several thousand Heurist databases, so we are unable to review all automated reports. Please contact us if this error is causing you a problem, as this will help us identify important issues. We apologise for any inconvenience';
 
             //$root_folder.$curr_logfile."\n".
             error_log($Title.'  '.$sMsg);     

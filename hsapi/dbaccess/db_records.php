@@ -580,14 +580,19 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                     $mysqli->rollback();
                     if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                 }
-
+                
+                /** REMOVED BY IAN 20/3/2022 - this is an instant email in a low level loop 
+                    which could cause a self-inflicted DOS if it happened in a loop eg. a file import. Errors go in the log in any case, which is a better place to 
+                    deal with them.   
                 //$email_to, $email_title, $email_text, $email_header
                 sendEmail(HEURIST_MAIL_TO_ADMIN, 
-                    'DATABASE ERROR :'.$system->dbname().' Cannot save details.',
+                    'DATABASE ERROR :'.$system->dbname().'Cannot save value - possibly bad encoding.',
                     ($syserror?'. System message:'.$syserror:'')."\n Record#: $recID \n"
                     .print_r($values,true), null, true);
+                **/
+                
+                return $system->addError(HEURIST_DB_ERROR, 'Cannot save value - possibly bad encoding.', $syserror);
 
-                return $system->addError(HEURIST_DB_ERROR, 'Cannot save details.', $syserror);
             }
 
             /*if($dtl_Geo){
@@ -612,7 +617,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                             if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                         }
                         return $system->addError(HEURIST_DB_ERROR, 
-                            'Cannot save details. Cannot insert reverse pointer for child record', $syserror);
+                            'Cannot save value. Cannot insert reverse pointer for child record', $syserror);
                     }else if($res!=0){ 
                         //update record title for child record
                         list($child_rectype, $child_title) = mysql__select_row($mysqli,
@@ -631,7 +636,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                             if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                         }
                         return $system->addError(HEURIST_DB_ERROR, 
-                            'Cannot save details. Cannot insert pointer for parent record', $syserror);
+                            'Cannot save value. Cannot insert pointer for parent record', $syserror);
                     }else if($res!=0){ 
                         //update record title for parent record
                         list($parent_rectype, $parent_title) = mysql__select_row($mysqli,
