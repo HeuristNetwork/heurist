@@ -30,8 +30,8 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-print 'disabled'; 
-exit(); 
+//print 'disabled'; 
+//exit(); 
  
 //define('OWNER_REQUIRED', 1);   
 define('PDIR','../../');  //need for proper path to js and css    
@@ -535,6 +535,15 @@ function __setTermYesNo(){
     foreach ($databases as $idx=>$db_name){
 
         mysql__usedatabase($mysqli, $db_name);
+
+        print $db_name.' ';    
+        
+        if(!hasTable($mysqli, 'defTermsLinks')){
+            print ' defTermsLinks does not exist<br>';
+            continue;
+        }
+        
+        
 //get local codes for 2-532, 2-531 and 99-5446(yes) 99-5447 (no) in vocab (99-5445)
         $yes_0 = getLocalCode(2, 532);
         $no_0 = getLocalCode(2, 531);
@@ -542,8 +551,6 @@ function __setTermYesNo(){
         $yes_1 = getLocalCode(99, 5446);
         $no_1 = getLocalCode(99, 5447);
 
-        print $db_name.' ';    
-        
         if($yes_1>0 || $no_1>0){
             
             print '<b>';
@@ -559,10 +566,13 @@ function __setTermYesNo(){
             if($yes_0>0){
                 $query = 'UPDATE recDetails SET dtl_Value='.$yes_0.' WHERE dtl_Value='.$yes_1.' AND '.$enums;
                 $mysqli->query($query);
+    //replace in term links
+                $query = 'UPDATE defTermsLinks trl_TermID='.$yes_0.' WHERE trl_TermID='.$yes_1;
+                $mysqli->query($query);
     //add references to vocabulary 99-5445       
                 if($vocab>0){
-                $query = 'INSERT INTO defTermsLinks (trl_ParentID,trl_TermID) VALUES('.$vocab.','.$yes_0.')';
-                $mysqli->query($query);
+                    $query = 'INSERT INTO defTermsLinks (trl_ParentID,trl_TermID) VALUES('.$vocab.','.$yes_0.')';
+                    $mysqli->query($query);
                 }
     //remove old term                            
                 $query = 'DELETE FROM defTerms WHERE trm_ID='.$yes_1;
@@ -585,6 +595,9 @@ function __setTermYesNo(){
 //replace 99-544x to 2-53x in recDetails
             if($no_0>0){
                 $query = 'UPDATE recDetails SET dtl_Value='.$no_0.' WHERE dtl_Value='.$no_1.' AND '.$enums;
+                $mysqli->query($query);
+    //replace in term links
+                $query = 'UPDATE defTermsLinks trl_TermID='.$no_0.' WHERE trl_TermID='.$no_1;
                 $mysqli->query($query);
     //add references to vocabulary 99-5445       
                 if($vocab>0){
