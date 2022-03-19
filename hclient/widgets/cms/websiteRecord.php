@@ -424,41 +424,35 @@ $home_page_record_id = $rec_id;
 
 $websiteScriptAndStyles_php = HEURIST_DIR.'hclient/widgets/cms/websiteScriptAndStyles.php';
 
-if($custom_template){ //from field of CMS main menu record
-    
-    if(substr( $custom_template, -4 ) !== '.php'){
-            $custom_template = $custom_template.'.php';
-    }
-    
-    if($default_CMS_Template_Path && file_exists($default_CMS_Template_Path)){
-        
-        $custom_template = $default_CMS_Template_Path.$custom_template;
-        
-    }else if(strpos($custom_template,'/')!==false){
 
-        //otherwise this is relative to code directory
-        $custom_template = HEURIST_DIR.$custom_template;
-    }else{
-        //if there are not slashes - it is assumed it is in heurist root folder
-        $custom_template = PDIR.'../'.$custom_template;    
-    }
+$template = __getTemplate($custom_template);
+if(!$template && $default_CMS_Template){
+    $template = __getTemplate($default_CMS_Template);    
 }
 
-if($custom_template){
-    if(file_exists($custom_template)){
-        //use custom template for website
-        include ($custom_template);
-        exit;
-    }else{
-        $customTemplateNotFound = $custom_template;
-    }
-}        
-if(false && $default_CMS_Template_Path && file_exists($default_CMS_Template_Path.'cmsTemplate.php')){
-    //use server custom template
-    include $default_CMS_Template_Path.'cmsTemplate.php';
-    
+if($template!==false){
+    //use custom template for website
+    include ($template);
 }else{
-    //use default template
+    //use default template for this folder
     include 'cmsTemplate.php';
 } 
+
+//
+//
+//
+function __getTemplate($template){
+
+    if($template){
+        if(substr( $template, -4 ) !== '.php'){
+                $template = $template.'.php';
+        }
+        if($template!='cmsTemplate.php'){
+            $template = HEURIST_DIR.'hclient/widgets/cms/templates/'.$template;
+            if(!file_exists($template)) return false;
+        }
+        return $template;
+    }
+    return false;
+}
 ?>
