@@ -1133,6 +1133,8 @@ $.widget( "heurist.resultList", {
                         'min-width': h
                     });
                     
+                    this.div_content.find('.recordTitleInPlaceOfThumb').css({height: h});
+                    
                 }
                 
             }else if(newmode=='vertical'){ 
@@ -1547,9 +1549,17 @@ $.widget( "heurist.resultList", {
                 + fld('rec_ThumbnailURL') + '&quot;);opacity:1" data-id="'+recID+'"></div>';
         }else{
             rectypeTitleClass = 'recordTitleInPlaceOfThumb';
-            html_thumb = '<div class="recTypeThumb rectypeThumb" title="'
-                +recTitle_strip_all+'" style="background-image: url(&quot;'
-                + window.hWin.HAPI4.iconBaseURL  + rectypeID + '&version=thumb&quot;);"></div>';
+            if(this.options.view_mode=='horizontal' || this.options.view_mode=='vertical'){
+                html_thumb = '<div class="recordTitleInPlaceOfThumb">' // '+rectypeTitleClass+'
+                    +recTitle_strip2
+                    + '</div>';
+                
+            }else{
+                html_thumb = '<div class="recTypeThumb rectypeThumb" title="'
+                    +recTitle_strip_all+'" style="background-image: url(&quot;'
+                    + window.hWin.HAPI4.iconBaseURL  + rectypeID + '&version=thumb&quot;);"></div>';
+            }
+            
         }
 
         // Show a key icon and popup if there is a password reminder string
@@ -1651,7 +1661,7 @@ $.widget( "heurist.resultList", {
 
 
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
-        + '<div title="'+(is_logged?'dbl-click to edit: ':'')+recTitle_strip_all+'" class="recordTitle '+rectypeTitleClass+'">'
+        + '<div title="'+(is_logged?'dbl-click to edit: ':'')+recTitle_strip_all+'" class="recordTitle">' //  '+rectypeTitleClass+'
         +   sCount  
         +     (this.options.show_url_as_link && fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
             + recTitle_strip1 + "</a>") :recTitle_strip2)  
@@ -3140,6 +3150,8 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                         width: h,
                         'min-width': h
             });
+            this.div_content.find('.recordTitleInPlaceOfThumb').css({height: h});
+            
         }else if(this.options.view_mode == 'vertical'){
             var w = this.div_content.width();
                 w = (((w<60) ?60 :((w>200)?230:w))-30) + 'px';
