@@ -577,8 +577,9 @@ $.widget( "heurist.ruleBuilder", {
                     case 'links': linktype = 0; break;
                     case 'lt': linktype = 1; break;
                     case 'lf': linktype = 2; break;
-                    case 'rt': linktype = 3; break;
-                    case 'rf': linktype = 4; break;
+                    case 'rt': linktype = 3; break; //
+                    case 'rf':
+                    case 'related': linktype = 4; break; //rf
                 }
                 
                 if(linktype>0){
@@ -742,8 +743,8 @@ $.widget( "heurist.ruleBuilder", {
                 case 0: link = 'links'; break;
                 case 1: link = 'lt'; break;
                 case 2: link = 'lf'; break;
-                case 3: link = 'rt'; break;
-                case 4: link = 'rf'; break;
+                case 3: link = 'related'; break; //'rt'
+                case 4: link = 'related'; break; //'rf'
             }             
             
             if(linktype>0 && dty_ID>0){
