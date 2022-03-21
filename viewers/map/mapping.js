@@ -121,7 +121,7 @@ $.widget( "heurist.mapping", {
         map_rollover: false,
         map_popup_mode: 'standard',
         
-        zoomToPointInKM: 2
+        zoomToPointInKM:5  //is set either from map documet DT_ZOOM_KM_POINT or from url parameters
     },
     
     /* expremental 
@@ -2138,7 +2138,7 @@ $.widget( "heurist.mapping", {
             var ll = layer.getLatLng();
             
             //if field 2-925 is set (zoom to point in km) use it
-            if(useRuler){
+            if(useRuler){ //zoom to single point
                 var ruler = cheapRuler(ll.lat);
                 var bbox = ruler.bufferPoint([ll.lng, ll.lat], this.options.zoomToPointInKM);   //0.01          
                 //w, s, e, n
@@ -2401,6 +2401,8 @@ $.widget( "heurist.mapping", {
         
         this.options.map_rollover = __parseval(params['map_rollover']);
         this.options.default_style = window.hWin.HEURIST4.util.isJSON(params['style']);
+        
+        if(params['maxzoom']>0) this.options.zoomToPointInKM = params['maxzoom']; //it may be overwritten by map document
 
         //special case - till thematic map is not developed - for custom style
         /* expremental 
