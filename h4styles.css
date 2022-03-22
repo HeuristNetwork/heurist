@@ -1539,11 +1539,12 @@ span.fancytree-checkbox{
     display: inline-block;
 }
 
-/* Allow horizontal scrolling */
+/* Allow horizontal scrolling of trees */
 .tree-csv .fancytree-container, .tree-facets .fancytree-container, 
 .tree-filter .fancytree-container, .tree-rts .fancytree-container, 
 .rtt-tree .fancytree-container{
 	display: inline-block;
+	min-width: 95%;
 }
 
 .forbidden > label{
