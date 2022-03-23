@@ -492,7 +492,10 @@ function editCMS2(){
         //2. reload content
         layoutMgr.setEditMode(false);
         layoutMgr.layoutInit(_layout_content, _layout_container, {rec_ID:home_page_record_id});
-        
+
+        // Display cms editor button
+        body.find('#btnOpenCMSeditor').show();
+
         if($.isFunction(options.close)){
             options.close.call();
         }

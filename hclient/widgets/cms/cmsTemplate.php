@@ -138,6 +138,11 @@
     font-weight:bold;
     color:blue;
 }
+#btn_editor, #btnOpenCMSeditor{
+    padding: 2px 8px;
+    background-color: white !important;
+    outline: darkblue solid 1px;
+}
 
 </style>
 </head>
@@ -199,9 +204,9 @@ if($isWebPage){ //set in websiteRecord.php
 
     if(!$edit_OldEditor && $system->is_member(1)){
         print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$home_page_record_id.'" id="btn_editor" target="_blank" '
-        .'style="position:absolute;right:80px;top:5px;" class="cms-button">Heurist</a>'
+        .'style="position:absolute;left:95px; top:5px;color:blue !important;" class="cms-button">database</a>'
         .'<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
-        .'style="position:absolute;right:10px; top:5px;" class="cms-button">CMS</a>';
+        .'style="position:absolute;left:5px;top:5px;color:blue !important;" class="cms-button">website editor</a>';
     
     }
     ?>  
