@@ -588,7 +588,7 @@ regional['fr'] = {
 
     'Register': 'S\'inscrire',
     'Registration': 'Inscription',
-    'Login': 'Login',
+    'Heurist Login': 'Heurist Login',
     'Please log in': 'Veuillez log in',
     'Please contact to register':'Veuillez nous contacter pour s\'inscrire',
     'Log out' : 'Logout',
@@ -706,7 +706,7 @@ regional['nl'] = {
 
     'Register': 'Registreer',
     'Registration': 'Registratie',
-    'Login': 'Login',
+    'Heurist Login': 'Heurist Login',
     'Please log in': 'Registreer of log in om de volledige functionaliteit van Heurist te gebruiken',
     'Please contact to register':'Neem contact op met de database-eigenaar om toegang te krijgen',
     'Log out' : 'Uitloggen',
