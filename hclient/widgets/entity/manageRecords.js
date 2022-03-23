@@ -4146,14 +4146,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     btn.hide();
                 }else{
                     btn.button({icon:'ui-icon-gear-crossed'}).show()
-                        .click(function(){ 
-                                        
+                        .one('click', function(){
                             that.editFormPopup.layout().hide('west');
                             that.options.rts_editor = null;
                             that.reloadEditForm( true );
-                            
-                            //that.options.rts_editor.manageDefRecStructure('closeDialog');
-                        });                
+                        });
                     if(btn_css) btn.css(btn_css);
                 }
             }
