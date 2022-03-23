@@ -942,7 +942,7 @@ if($i<5){
         if($k===0){
             $str = substr($str,2);            
             return super_trim($str);
-        }else if($k==$len-2){
+        }else if($k===$len-2){
             $str = substr($str,0,$len-2);
             return super_trim($str);
         }
@@ -950,7 +950,7 @@ if($i<5){
         if($k===0){
             $str = substr($str,3);            
             return super_trim($str);
-        }else if($k==$len-3){
+        }else if($k===$len-3){
             $str = substr($str,0,$len-3);
             return super_trim($str);
         }
