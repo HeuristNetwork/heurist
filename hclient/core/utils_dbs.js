@@ -274,16 +274,15 @@ window.hWin.HEURIST4.dbs = {
             //add default fields - RECORD TYPE HEADER
             if($mode==3){
 
+				if($recursion_depth>0){ // keep record title separate from generic fields
+                    $children.push({key:'rec_Title', type:'freetext',
+                        title:'Constructed title', code:'Record Title'});
+                }
+
                 $children.push({key:'rec_ID',title:'Record ID', code:'Record ID'});
                 $children.push({key:'rec_RecTypeID', title:'Record TypeID', code:'Record TypeID'});
                 $children.push({key:'rec_TypeName', title:'Record TypeName', code:'Record TypeName'});
                 $children.push({key:'rec_Modified', title:"Record Modified", code:'Record Modified'});
-
-                if($recursion_depth>0){ // keep record title separate from generic fields
-                    $children.push({key:'rec_Title', type:'freetext',
-                        title:'Record Title', 
-                        code:'Record Title'});
-                }
 
                 var s = '<span style="font-style:italic">metadata</span>';
                 $children = [

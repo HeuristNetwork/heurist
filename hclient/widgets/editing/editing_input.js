@@ -723,115 +723,140 @@ $.widget( "heurist.editing_input", {
                 .css({'overflow':'auto',display:'flex',resize:'both'})
                 .appendTo( $('<div>').css({'display':'inline-block'}).appendTo($inputdiv) );
                 $editor.parent().hide();
-                  
-                var $btn_edit_switcher = $( '<span>html</span>', {title: 'Show/hide Rich text editor'})
-                    //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')      btn_add_term
-                    .addClass('smallbutton')
-                    .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                    .appendTo( $inputdiv );
-                                
-                function __showEditor(is_manual){
-                    
-                            var eid = '#'+$input.attr('id')+'_editor';                    
 
-                            $(eid).parent().css({display:'inline-block'}); //.height($input.height()+100)
-                            //to show all toolbar buttons - minimum 768
-                            $(eid).width(Math.max(768, $input.width())).height($input.height()).val($input.val()); 
-                            //html($.parseHTML(   
-                            
-                            $btn_edit_switcher.text('text');
-        
-                            var nw = $input.css('min-width');
-                            
-                            tinymce.init({
-                                    //target: $editor, 
-                                    //selector: '#'+$input.attr('id'),
-                                    selector: eid,
-                                    menubar: false,
-                                    inline: false,
-                                    branding: false,
-                                    elementpath: false,
-                                    statusbar: true,        
-                                    resize: 'both', 
-                                    
-                                    relative_urls : false,
-                                    remove_script_host : false,
-                                    convert_urls : true, 
-                                    
-                                    entity_encoding:'raw',
-                                    inline_styles: true,
-                                    content_style: "body { font-size: 8pt; font-family: Helvetica,Arial,sans-serif; }",
-                                    //width: nw, // '120ex', 
-                                    height: ($input.height()+110),
-                                    setup:function(editor) {
-                                        
-                                        if(editor.ui){
-                                            editor.ui.registry.addButton('customHeuristMedia', {
-                                                  icon: 'image',
-                                                  text: 'Media',
-                                                  onAction: function (_) {  //since v5 onAction in v4 onclick
-                                                        that._addHeuristMedia();
-                                                  }
-                                                });                                        
-                                        }else{
-                                            editor.addButton('customHeuristMedia', {
-                                                  icon: 'image',
-                                                  text: 'Media',
-                                                  onclick: function (_) {  //since v5 onAction in v4 onclick
-                                                        that._addHeuristMedia();
-                                                  }
-                                                });                                        
-                                        }
-                                        /*
-                                        editor.on('init', function(e) {
-                                            $('.tox-edit-area').css({border:'1px solid blue'});
-                                        });
-                                        */
+                var $btn_edit_switcher;
 
-                                        editor.on('change', function(e) {
-                                            
-                                            var newval = editor.getContent();
-                                            var nodes = $.parseHTML(newval);
-                                            if(nodes && nodes.length==1 &&  !(nodes[0].childElementCount>0) &&
-                                                (nodes[0].nodeName=='#text' || nodes[0].nodeName=='P'))
-                                            { 
-                                                //remove the only tag
-                                                $input.val(nodes[0].textContent);
-                                            }else{
-                                                $input.val(newval);     
-                                            }
-                                            
-                                            //$input.val( ed.getContent() );
-                                            that.onChange();
-                                            
-                                        });
-                                    },
-                                    plugins: [                                     //contextmenu, textcolor since v5 in core
-                                        'advlist autolink lists link image preview ', //anchor charmap print 
-                                        'searchreplace visualblocks code fullscreen',
-                                        'media table paste help'  //insertdatetime  wordcount
-                                      ],      
-                                      //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-                                    toolbar: ['formatselect | bold italic forecolor | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help'],
-                                    content_css: [
-                                        '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
-                                        //,'//www.tinymce.com/css/codepen.min.css'
-                                        ]                    
-                              });
-                              
-                              
-                                                 $input.hide();
+                if(this.options.recordset && this.options.recordset.entityName == 'Records'){
 
+                    var $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
+
+                    $btn_edit_switcher = $('<div>').appendTo( $inputdiv );
+
+                    $('<span>text</span>')
+                        .attr('title', 'plain text or source, showing markup')
+                        .addClass('smallbutton')
+                        .css({cursor: 'pointer', 'text-decoration': 'underline'})
+                        .appendTo($btn_edit_switcher);
+
+                    $('<span>wysiwyg</span>')
+                        .attr('title', 'rendering of the text, taken as html')
+                        .addClass('smallbutton')
+                        .css({cursor: 'pointer', 'margin-left': '10px'})
+                        .appendTo($btn_edit_switcher);
+
+                    $('<span>table</span>')
+                        .attr('title', 'treats the text as a table/spreadsheet and opens a lightweight spreadsheet editor')
+                        .addClass('smallbutton')
+                        .css({cursor: 'pointer', 'margin-left': '10px'})
+                        .hide() // currently un-available
+                        .appendTo($btn_edit_switcher);
+                }else{
+                    $btn_edit_switcher = $( '<span>wysiwyg</span>', {title: 'Show/hide Rich text editor'})
+                        //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')      btn_add_term
+                        .addClass('smallbutton')
+                        .css({'line-height': '20px','vertical-align':'top', cursor:'pointer','text-decoration':'underline'})
+                        .appendTo( $inputdiv );
                 }
-                
-                
+
+                function __showEditor(is_manual){
+
+                    var eid = '#'+$input.attr('id')+'_editor';
+
+                    $(eid).parent().css({display:'inline-block'}); //.height($input.height()+100)
+                    //to show all toolbar buttons - minimum 768
+                    $(eid).width(Math.max(768, $input.width())).height($input.height()).val($input.val()); 
+                    //html($.parseHTML(   
+
+                    $btn_edit_switcher.text('text');
+
+                    var nw = $input.css('min-width');
+
+                    tinymce.init({
+                        //target: $editor, 
+                        //selector: '#'+$input.attr('id'),
+                        selector: eid,
+                        menubar: false,
+                        inline: false,
+                        branding: false,
+                        elementpath: false,
+                        statusbar: true,        
+                        resize: 'both', 
+
+                        relative_urls : false,
+                        remove_script_host : false,
+                        convert_urls : true, 
+
+                        entity_encoding:'raw',
+                        inline_styles: true,
+                        content_style: "body { font-size: 8pt; font-family: Helvetica,Arial,sans-serif; }",
+                        //width: nw, // '120ex', 
+                        height: ($input.height()+110),
+                        setup:function(editor) {
+
+                            if(editor.ui){
+                                editor.ui.registry.addButton('customHeuristMedia', {
+                                    icon: 'image',
+                                    text: 'Media',
+                                    onAction: function (_) {  //since v5 onAction in v4 onclick
+                                        that._addHeuristMedia();
+                                    }
+                                });                                        
+                            }else{
+                                editor.addButton('customHeuristMedia', {
+                                    icon: 'image',
+                                    text: 'Media',
+                                    onclick: function (_) {  //since v5 onAction in v4 onclick
+                                        that._addHeuristMedia();
+                                    }
+                                });                                        
+                            }
+                            /*
+                            editor.on('init', function(e) {
+                                 $('.tox-edit-area').css({border:'1px solid blue'});
+                            });
+                            */
+
+                            editor.on('change', function(e) {
+
+                                var newval = editor.getContent();
+                                var nodes = $.parseHTML(newval);
+                                if(nodes && nodes.length==1 &&  !(nodes[0].childElementCount>0) &&
+                                    (nodes[0].nodeName=='#text' || nodes[0].nodeName=='P'))
+                                { 
+                                    //remove the only tag
+                                    $input.val(nodes[0].textContent);
+                                }else{
+                                    $input.val(newval);     
+                                }
+                                            
+                                //$input.val( ed.getContent() );
+                                that.onChange();            
+                            });
+                        },
+                        plugins: [ //contextmenu, textcolor since v5 in core
+                            'advlist autolink lists link image preview ', //anchor charmap print 
+                            'searchreplace visualblocks code fullscreen',
+                            'media table paste help'  //insertdatetime  wordcount
+                        ],      
+                        //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
+                        toolbar: ['formatselect | bold italic forecolor | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help'],
+                        content_css: [
+                            '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
+                            //,'//www.tinymce.com/css/codepen.min.css'
+                        ]
+                    });
+                    $input.hide();
+                }
+
                 var isCMS_content = (( 
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']) &&
                         (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'] || 
                          this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'] || 
                          this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER']));
-                
+
+				var cur_action = 'text';
+
                 if( isCMS_content ){
                     
                     var fstatus = '';
@@ -912,28 +937,65 @@ $.widget( "heurist.editing_input", {
                             .attr('title','Edit website content in the website editor');   
                             
                     }
-                }else{
-                    
-                    this._on( $btn_edit_switcher, { click: function(){
-                            
-                            var eid = '#'+$input.attr('id')+'_editor';                    
-                            if($input.is(':visible')){
+                }else if($btn_edit_switcher.is('div')){
+
+                    this._on($btn_edit_switcher.find('span'), { 
+                        click: function(event){
+
+                            var sel_action = $(event.target).text();
+                            if(cur_action == sel_action) return;
+
+                            cur_action = sel_action;
+
+                            $btn_edit_switcher.find('span').css('text-decoration', '');
+                            $(event.target).css('text-decoration', 'underline');
+
+                            var eid = '#'+$input.attr('id')+'_editor';
+
+                            if(cur_action == 'wysiwyg'){
                                 __showEditor(true); //show tinymce editor
-                            }else{
-                                $btn_edit_switcher.text('wyswyg');
+                            }else if(cur_action == 'text'){
                                 $input.show();
                                 tinymce.remove(eid);
                                 $(eid).parent().hide();
                                 __adjustTextareaHeight();
                             }
-                        }});
+                        }
+                    });
+                }else{
+                    
+                    this._on( $btn_edit_switcher, { click: function(){
+                            
+                        var eid = '#'+$input.attr('id')+'_editor';                    
+                        if($input.is(':visible')){
+                            __showEditor(true); //show tinymce editor
+                        }else{
+                            $btn_edit_switcher.text('wyswyg');
+                            $input.show();
+                            tinymce.remove(eid);
+                            $(eid).parent().hide();
+                            __adjustTextareaHeight();
+                        }
+                    }});
                 }
                  
                 //what is visible initially
                 if( !isCMS_content && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_KML'] ) {
+
                     var nodes = $.parseHTML(value);
                     if(nodes && (nodes.length>1 || (nodes[0] && nodes[0].nodeName!='#text'))){ //if it has html show editor at once
-                             setTimeout(__showEditor,1200); 
+                        setTimeout(function(){
+
+                            if($btn_edit_switcher.is('span')){
+                                $btn_edit_switcher.text('text'); 
+                            }else{
+                                cur_action = 'wysiwyg';
+                                $btn_edit_switcher.find('span').css('text-decoration', '');
+                                $btn_edit_switcher.find('span:container("wysiwyg")').css('text-decoration', 'underline');
+                            }
+
+                            __showEditor(); 
+                        },1200); 
                     }
                 }
                 
@@ -2141,7 +2203,7 @@ $.widget( "heurist.editing_input", {
                 var f_id = value.ulf_ID;
                 var f_nonce = value.ulf_ObfuscatedFileID;
 
-                var $clear_container = $('<span id="img_clear"></span>').appendTo( $inputdiv );
+                var $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
                 
                 $input.css({'padding-left':'30px', cursor:'hand'});
                 //folder icon in the begining of field
@@ -3144,13 +3206,8 @@ console.log('onpaste');
                         outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'
                 });
     			
-                if (this.isFileForRecord)	/* Check if button needs to be placed within a container, or appended to input */
-                {
-                    $('#img_clear').replaceWith( $btn_clear );
-                }
-                else
-                {
-                    $($btn_clear.appendTo( $inputdiv ));
+                if($inputdiv.find('#btn_clear_container').length > 0){ // Check if button needs to be placed within a container, or appended to input
+                    $inputdiv.find('#btn_clear_container').replaceWith( $btn_clear );
                 }			
                 
                 // bind click events

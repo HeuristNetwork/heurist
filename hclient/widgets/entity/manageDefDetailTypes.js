@@ -1714,6 +1714,19 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                                 pointer_mode_inpt.hSelect('destroy');
 
+                                if(!window.hWin.HEURIST4.browseRecordMax){
+                                    window.hWin.HEURIST4.browseRecordMax = 1000;
+                                }
+
+                                $.each(pointer_mode_inpt.find('option'), function(idx, ele){
+                                    var $ele = $(ele);
+                                    var title = $ele.text();
+
+                                    if(title.indexOf('#') != -1){
+                                        $ele.text(title.replace('#', window.hWin.HEURIST4.browseRecordMax));
+                                    }
+                                });
+
                                 pointer_mode_inpt.hSelect();
 
                                 pointer_mode_inpt.hSelect('widget').css('width', '20em');

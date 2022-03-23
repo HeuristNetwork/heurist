@@ -71,6 +71,17 @@
                     }
                 },
                 {
+                    "dtID": "rst_DisplayWidth_ext",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"virtual",
+                        "rst_Class":"freetext blocktext float",
+                        "rst_DisplayName":"Field width:",
+                        "rst_DisplayHelpText": "Display width of this field in the data entry form (does not limit maximum data length)",
+                        "rst_RequirementType":"optional"
+                    }
+                },
+                {
                     "dtID": "rst_DisplayHelpText",
                     "dtFields":{
                         "dty_Type":"blocktext",
@@ -234,8 +245,8 @@
                         "rst_DefaultValue":"dropdown_add",
                         "rst_DisplayHelpText": "For child record pointers, only standard addition modes are available",
                         "rst_FieldConfig":[
-                            {"key":"dropdown_add", "title":"Dropdown (add OK, list max 1000)"},
-                            {"key":"dropdown", "title":"Dropdown (no add, list max 1000)"},
+                            {"key":"dropdown_add", "title":"Dropdown (add OK, list max #)"},
+                            {"key":"dropdown", "title":"Dropdown (no add, list max #)"},
                             {"key":"addorbrowse", "title":"add or browse"},
                             {"key":"addonly", "title":"add only"},
                             {"key":"browseonly", "title":"browse only"}]
