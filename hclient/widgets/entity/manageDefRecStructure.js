@@ -2451,12 +2451,25 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             inpt.val('addorbrowse');
         }
         inpt.parent().addClass('selectmenu-parent');
+
+        if(!window.hWin.HEURIST4.browseRecordMax){
+            window.hWin.HEURIST4.browseRecordMax = 1000;
+        }
+
+        $.each(inpt.find('option'), function(idx, ele){
+            var $ele = $(ele);
+            var title = $ele.text();
+
+            if(title.indexOf('#') != -1){
+                $ele.text(title.replace('#', window.hWin.HEURIST4.browseRecordMax));
+            }
+        });
+
         inpt.hSelect('refresh');
       
         var ele = inpt.hSelect('menuWidget');
         ele.find('li').show();
         ele.find('li.ui-state-disabled').hide();
-        
     },
     
     
