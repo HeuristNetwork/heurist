@@ -149,6 +149,12 @@ $.widget( "heurist.resultList", {
     _rec_onpage: null,
     _is_fancybox_active: false,
     
+    sortResultList: null,
+    sortResultListDlg: null, //tab panel or dialog
+    is_sortResultList_tab_based: true,
+    need_fill_sortResultList: true,
+    
+    
     // the constructor
     _create: function() {
 
@@ -2051,9 +2057,16 @@ $.widget( "heurist.resultList", {
                 }
                 return;
             }else 
+            if($target.hasClass('rec_remove') || $target.parents('.rec_remove').length>0){ //remove from record set - not from db
+                if(this._currentRecordset){
+                    this._currentRecordset.removeRecord(selected_rec_ID);
+                    this.updateResultSet(this._currentRecordset);
+                }
+                return;
+            }else
             if($target.hasClass('rec_delete') || $target.parents('.rec_delete').length>0){
                 if(this._currentRecordset){
-                    var record = this._currentRecordset.getById(selected_rec_ID)
+                    var record = this._currentRecordset.getById(selected_rec_ID);
                     var rectypeID = this._currentRecordset.fld(record, 'rec_RecTypeID' );
                     //show delete dialog
                     if(rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']){
@@ -3524,6 +3537,10 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 //+'<span style="min-width:150px">'
                 //+ recID + '</span>'
                 + window.hWin.HEURIST4.util.htmlEscape( recordset.fld(record, 'rec_Title') ) 
+                + (that.is_sortResultList_tab_based?
+('<div class="action-button-container">'
++'<span class="ui-button-icon-primary ui-icon ui-icon-circle-minus rec_remove" style="cursor:pointer;font-size:11px"></span></div>')
+                :'')
                 + '</div>';
             },
             function( new_rec_order ){
@@ -3562,7 +3579,61 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                     
         if(!this.sortResultList){
             
-            this.sortResultListDlg = $('<div>').appendTo(this.element);
+            var list_parent;
+            
+            if(this.is_sortResultList_tab_based){
+                //show as separate tab on tabcontrol
+                var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetById('heurist_Graph');
+                
+                var ele = $(app.widget);  //find panel with widget
+                if( ele.hasClass('ui-tabs-panel') ){
+                    //get parent tab and make it active
+                    ele = $(ele.parent());
+                    
+                    var num_tabs = ele.find('ul li').length + 1;
+
+                    ele.find('ul').append(
+                        '<li><a href="#tab' + num_tabs + '">' + window.hWin.HR('Reorder') + '</a></li>');
+        
+                    this.sortResultListDlg = $('<div id="tab' + num_tabs + '" style="position:absolute;inset:38px 4px 0px 2px">'
+                    +'<div class="ent_header">'
+                        +'<button id="btn-save-order">Save as Filter</button>'
+                        +'<button id="btn-clear" style="float:right">Clear and close</button>'
+                        +'</div></div>').appendTo(ele);
+                    
+                    ele.tabs('refresh');
+                    
+                    function __closeReorderTab(){
+                        this.need_fill_sortResultList = true;
+                        var tabs = $(this.sortResultListDlg.parent());
+                        tabs.find('a[href="#'
+                            +this.sortResultListDlg.attr('id')+'"]')
+                            .closest('li').hide();
+                        tabs.tabs('option','active',0);
+                    }
+                    
+                    ele = this.sortResultListDlg.find('#btn-clear').button();
+                    this._on(ele,{click:__closeReorderTab});
+
+                    ele = this.sortResultListDlg.find('#btn-save-order').button();
+                    this._on(ele,{click:function(){
+                        
+                        //get new order of records ids
+                        var recordset = this.sortResultList.resultList('getRecordSet');
+                        var new_rec_order = recordset.getOrder();
+                        if(new_rec_order.length>0){
+                            save_callback.call(this, new_rec_order )       
+                        }
+                        //__closeReorderTab();                        
+                    }});
+                    
+                }
+            }else{
+                this.sortResultListDlg = $('<div>').appendTo(this.element);
+            }
+            
+            
+            
             //init result list
             this.sortResultList = $('<div>').appendTo(this.sortResultListDlg)
                 .resultList({
@@ -3579,39 +3650,157 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                    });     
         }
         
-        //fill result list with current page ids
-        //get all ids on page
-        var ids_on_current_page = [];
-        this.div_content.find('.recordDiv').each(function(ids, rdiv){
-            ids_on_current_page.push($(rdiv).attr('recid'));
-        });
-        if(ids_on_current_page.length==0) return;
-        //get susbet
-        var page_recordset = this._currentRecordset.getSubSetByIds(ids_on_current_page);
-        page_recordset.setOrder(ids_on_current_page); //preserver order
-        this.sortResultList.resultList('updateResultSet', page_recordset);
-        
-        var that = this;    
-            
-        var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({element: $(this.sortResultListDlg)[0],
-            title: window.hWin.HR('menu_reorder_title'),
-            height:500,
-            default_palette_class:'ui-heurist-explore',
-            buttons:[
-                {text:window.hWin.HR('menu_reorder_save'), click: function(){
-
-                    //get new order of records ids
-                    var recordset = that.sortResultList.resultList('getRecordSet');
-                    var new_rec_order = recordset.getOrder();
-                    $dlg.dialog( "close" );
-                    if(new_rec_order.length>0){
-                        save_callback.call(this, new_rec_order )       
-                    }
-                }},
-                {text:window.hWin.HR('Cancel'), click: function(){$dlg.dialog( "close" );}}
-            ]
+        if(this.need_fill_sortResultList){
+            //fill result list with current page ids
+            //get all ids on page
+            var ids_on_current_page = [];
+            this.div_content.find('.recordDiv').each(function(ids, rdiv){
+                ids_on_current_page.push($(rdiv).attr('recid'));
             });
+            if(ids_on_current_page.length==0) return;
+            //get susbet
+            var page_recordset = this._currentRecordset.getSubSetByIds(ids_on_current_page);
+            page_recordset.setOrder(ids_on_current_page); //preserve order
+            this.sortResultList.resultList('updateResultSet', page_recordset);
+        }
+        
+        
+        if(this.is_sortResultList_tab_based){
+            
+            this.need_fill_sortResultList = false;
+            
+            var tabs = $(this.sortResultListDlg.parent());
+            var num_tabs = tabs.find('ul li').length;
+            
+            tabs.find('a[href="#'
+                            +this.sortResultListDlg.attr('id')+'"]')
+                            .closest('li').show();
+            tabs.tabs('option','active',num_tabs-1);
+            
+            this.sortResultList.css({top:'40px',bottom: '4px',position: 'absolute', width: '100%'});
+            
+            var that = this;
+            
+            //init drag and drop
+            if(!this.options.draggable){
                 
+//console.log('INIT DND');                                        
+                
+            this.options.draggable = 
+                    function(){
+                        
+                        that.element.find('.recordDiv').draggable({ // 
+                                    revert: 'invalid',
+                                    helper: function(){ 
+                                        
+                                        //get selection
+                                        var rec_ids = that.getSelected(true);
+                                        if (window.hWin.HEURIST4.util.isempty(rec_ids)){
+                                            rec_ids = [];
+                                        }
+                                        var r_id = ($(this).hasClass('recordDiv')
+                                                        ?$(this)
+                                                        :$(this).parent('.recordDiv')).attr('recid');
+                                        
+                                        if(r_id>0 && rec_ids.indexOf(r_id)<0){
+                                            rec_ids.push(r_id);
+                                        }
+                                        
+                                        if(rec_ids.length>0){
+                                            return $('<div class="rt_draggable ui-drag-drop" recid="'+
+                                                rec_ids.join(',')
+                                            +'" style="width:300;padding:4px;text-align:center;font-size:0.8em;background:#EDF5FF"'
+                                            +'>Drag '+(rec_ids.length>1?(rec_ids.length+' records'):'')+' and drop to order list</div>'); 
+                                        }else{
+                                            return null;
+                                        }
+                                    },
+                                    zIndex:100,
+                                    appendTo:'body',
+                                    containment: 'window',
+                                    scope: 'sort_order_change'
+                                    //delay: 200
+                                })
+                    };
+                    
+            this.options.draggable.call();
+            
+            this.sortResultList.resultList('option','droppable',
+            function(){
+                    
+                    that.sortResultList.find('.recordDiv')  //.recordDiv, ,.recordDiv>.item
+                        .droppable({
+                            //accept: '.rt_draggable',
+                            scope: 'sort_order_change',
+                            hoverClass: 'ui-drag-drop',
+                            drop: function( event, ui ){
+
+                                var trg = $(event.target).hasClass('recordDiv')
+                                            ?$(event.target)
+                                            :$(event.target).parents('.recordDiv');
+                                            
+                                //var rec_IDs = $(ui.draggable).attr('recid').split(',');
+                                var rec_IDs = $(ui.helper).attr('recid').split(',');
+                                var after_rec_ID = trg.attr('recid');
+                    
+                                if(!window.hWin.HEURIST4.util.isempty(rec_IDs) && after_rec_ID>0){
+
+                                        //get subset
+                                        var to_be_added = that._currentRecordset.getSubSetByIds(rec_IDs);
+                                        
+                                        //merge
+                                        var curr_recset = that.sortResultList.resultList('getRecordSet');
+                                        
+                                        var cnt_0 = curr_recset.length();
+                                        
+                                        curr_recset = curr_recset.doUnite(to_be_added, after_rec_ID);
+                                        
+                                        var cnt_added = (curr_recset.length()-cnt_0);
+                                        
+                                        if(cnt_added>0){
+                                            //refresh
+                                            that.sortResultList.resultList('updateResultSet', curr_recset);           
+                                            
+                                            var msg = cnt_added+(rec_IDs.length>0?' of '+rec_IDs.length:'')
+                                            +' record'+(cnt_added>1?'s':'')+' added';
+                                            
+                                            window.hWin.HEURIST4.msg.showMsgFlash(msg);  
+                                        }else{
+                                            window.hWin.HEURIST4.msg.showMsgFlash('Record'+(rec_IDs.length>1?'s':'')+' already in list');  
+                                        }
+                                            
+                                }
+                        }});
+            });
+            
+            var foo = this.sortResultList.resultList('option','droppable')
+            foo.call() 
+            
+            }
+
+        } else {
+        
+            var that = this;    
+                
+            var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({element: $(this.sortResultListDlg)[0],
+                title: window.hWin.HR('menu_reorder_title'),
+                height:500,
+                default_palette_class:'ui-heurist-explore',
+                buttons:[
+                    {text:window.hWin.HR('menu_reorder_save'), click: function(){
+
+                        //get new order of records ids
+                        var recordset = that.sortResultList.resultList('getRecordSet');
+                        var new_rec_order = recordset.getOrder();
+                        $dlg.dialog( "close" );
+                        if(new_rec_order.length>0){
+                            save_callback.call(this, new_rec_order )       
+                        }
+                    }},
+                    {text:window.hWin.HR('Cancel'), click: function(){$dlg.dialog( "close" );}}
+                ]
+                });
+        }        
     },    
     
     //

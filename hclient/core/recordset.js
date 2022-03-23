@@ -1632,9 +1632,15 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         /**
         * Returns new recordSet that is the join from current and given recordset
         */
-        doUnite: function(recordset2){
+        doUnite: function(recordset2, after_rec_id){
             if(recordset2==null){
                 return that;
+            }
+            
+            var after_idx = -1;
+            if(after_rec_id>0){
+                after_idx = window.hWin.HEURIST4.util.findArrayIndex(after_rec_id, order);
+                if(after_idx==order.length-1) after_idx = -1;
             }
             
             //join records
@@ -1646,9 +1652,14 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             for (idx=0;idx<order2.length;idx++){
                 recid = order2[idx];
                 //for (recid in records2){
-                if(recid && !records[recid]){
+                if(recid && !records[recid]){ //there is not such record in target
                     records_new[recid] = records2[recid];
-                    order_new.push(recid);
+                    if(after_idx>=0){
+                        after_idx++;
+                        order_new.splice(after_idx,0,recid);
+                    }else{
+                        order_new.push(recid);    
+                    }
                 }
             }
             //join structures
@@ -1668,17 +1679,25 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             fields2 = jQuery.unique( fields2 );*/
 
             var rectypes2 = recordset2.getRectypes();
-            jQuery.merge( rectypes2, rectypes );
-            rectypes2 = jQuery.unique( rectypes2 );
+            if(!rectypes2) {
+                rectypes2 = rectypes;
+            }else{
+                jQuery.merge( rectypes2, rectypes );
+                rectypes2 = jQuery.unique( rectypes2 );
+            }
             
-            var relationship = recordset2.getRelationship();
-            jQuery.merge( relationship2, relationship );
-            relationship2 = jQuery.unique( relationship2 );
+            var relationship2 = recordset2.getRelationship();
+            if(!relationship2) {
+                relationship2 = relationship;   
+            }else{
+                jQuery.merge( relationship2, relationship );
+                relationship2 = jQuery.unique( relationship2 );
+            }
             
             return new hRecordSet({
                 entityName: that.entityName,
                 queryid: queryid,
-                count: total_count, //keep from original
+                count: Math.max(order_new.length,total_count), //keep from original
                 offset: 0,
                 fields: fields,
                 rectypes: rectypes2,

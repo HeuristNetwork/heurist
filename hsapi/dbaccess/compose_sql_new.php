@@ -2133,7 +2133,6 @@ class HPredicate {
                     $where = $where . ' AND ' . $w2['where'];
                 }
             }
-            
             return array("from"=>"recLinks ".$rl, "where"=>$where);
         }
     }
