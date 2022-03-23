@@ -1558,24 +1558,19 @@ function print_relation_details($bib) {
 
     $move_details = array();
 
+    $extra_styling = (!$is_map_popup) ? 'style="max-width: max-content;"' : '';
+
     if($from_res){
 		while ($reln = $from_res->fetch_assoc()) {
 			
 			$bd = fetch_relation_details($reln['dtl_RecID'], true);
-
-			// get title mask for display
-			$recTitle = mysql__select_value($mysqli,
-					'select rec_Title from Records where rec_ID = '.$reln['dtl_RecID']);
-			if(!$recTitle){
-				$recTitle = $bd['RelatedRecID']['rec_Title'];
-			}
 
 			// check related record
 			if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
 				continue;
 			}
 			$relatedRecID = $bd['RelatedRecID']['rec_ID'];
-			
+
 			if(mysql__select_value($mysqli, 
 				"select count(rec_ID) from Records where rec_ID =$relatedRecID and $accessCondition")==0){
 				//related is not accessable
@@ -1610,7 +1605,18 @@ function print_relation_details($bib) {
 					}
 				}
 			}
-			
+
+            // get title mask for display
+            if(array_key_exists('rec_Title',$bd['RelatedRecID'])){
+                $recTitle = $bd['RelatedRecID']['rec_Title'];
+
+                if($field_name !== false && array_key_exists('RelTerm',$bd)){
+                    $recTitle = $bd['RelTerm'] . ' - > ' . $recTitle;
+                }
+            }else{
+                $recTitle = 'record id ' . $relatedRecID;
+            }
+
 			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2 linkRow
 			$link_cnt++;
 			//		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
@@ -1621,7 +1627,7 @@ function print_relation_details($bib) {
 				print '<div class=detailType>' . $field_name . '</div>';
 			}
 
-			print '<div class=detail>';
+			print '<div class="detail" '. $extra_styling .'>';
 				if (@$bd['RelatedRecID']) {
 					if(true || $is_map_popup){  
 						print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
@@ -1643,18 +1649,12 @@ function print_relation_details($bib) {
 
 			$bd = fetch_relation_details($reln['dtl_RecID'], false);
 
-			// get title mask for display
-			$recTitle = mysql__select_value($mysqli,
-					'select rec_Title from Records where rec_ID = '.$reln['dtl_RecID']);
-			if(!$recTitle){
-				$recTitle = $bd['RelatedRecID']['rec_Title'];
-			}
-
 			// check related record
 			if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
 				continue;
 			}
 			$relatedRecID = $bd['RelatedRecID']['rec_ID'];
+
 			if(mysql__select_value($mysqli, 
 				"select count(rec_ID) from Records where rec_ID =$relatedRecID and $accessCondition")==0){
 				//related is not accessable
@@ -1690,6 +1690,17 @@ function print_relation_details($bib) {
 				}
 			}
 
+            // get title mask for display
+            if(array_key_exists('rec_Title',$bd['RelatedRecID'])){
+                $recTitle = $bd['RelatedRecID']['rec_Title'];
+
+                if($field_name !== false && array_key_exists('RelTerm',$bd)){
+                    $recTitle = $bd['RelTerm'] . ' - > ' . $recTitle;
+                }
+            }else{
+                $recTitle = 'record id ' . $relatedRecID;
+            }
+
 			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2linkRow
 			$link_cnt++;
 
@@ -1699,7 +1710,7 @@ function print_relation_details($bib) {
 				print '<div class=detailType>' . $field_name . '</div>';
 			}
 
-			print '<div class=detail>';
+			print '<div class="detail" '. $extra_styling .'>';
 				if (@$bd['RelatedRecID']) {
 					if(true || $is_map_popup){  
 						print '<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';

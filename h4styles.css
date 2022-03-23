@@ -1852,7 +1852,6 @@ background: #8ea9b9
     text-transform: none;
 }
 .detail a, .detail {
-    text-wrap: normal;
     word-wrap: break-word;
     /*white-space: nowrap;*/
     word-break: break-word;
