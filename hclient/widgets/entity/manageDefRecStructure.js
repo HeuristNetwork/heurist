@@ -1817,7 +1817,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                            if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){
                                this._recreateDefaultValue();
                            }
-
+                           if(dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float'){
+                               this._recreateFieldWidth();
+                           }
                        }
                        
                     
@@ -1960,7 +1962,57 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             
     },
 
-    
+    //
+    //
+    //
+    _recreateFieldWidth: function(){
+
+        var that = this;
+
+        setTimeout(function(){that._editing.getFieldByName('rst_DisplayWidth').hide();}, 200);
+
+        var width = this._editing.getValue('rst_DisplayWidth')[0];
+        var $ele = this._editing.getFieldByName('rst_DisplayWidth_ext').find('.input-div');
+
+        $ele.empty();
+
+        var is_max = width == 0;
+
+        $('<div style="line-height:2ex;padding-top:4px">'
+                +'<input type="radio" value="0" name="widthType">'
+                +'<input class="text ui-widget-content ui-corner-all" autocomplete="disabled" autocorrect="off" autocapitalize="none" spellcheck="false" style="min-width:22ex;width:10ex;">'
+                +'<label style="text-align:left;line-height:12px;">'
+                +'<input type="radio" value="1" name="widthType" style="margin-top:0px">'
+                +'&nbsp;Max width</label>'
+            +'</div>').appendTo($ele);
+
+        this._on($ele.find('input[name="widthType"]'), {
+            change: function(event){
+                var $input = $ele.find('input.text');
+                var is_max = $ele.find('input[name="widthType"]:checked').val() == '1';
+
+                window.hWin.HEURIST4.util.setDisabled($input, is_max);
+
+                var val = is_max ? 0 : $input.val();
+                if(width != val){
+                    this._editing.setFieldValueByName('rst_DisplayWidth', val, true);
+                }
+            }
+        });
+
+        this._on($ele.find('input.text'),{
+            keyup: function(event){
+                var val = $ele.find('input.text').val();
+                this._editing.setFieldValueByName('rst_DisplayWidth', val, true);
+            }
+        });
+
+        $ele.find('input[name="widthType"][value="'+(is_max ? 1 : 0)+'"]').prop('checked', true).change();
+        if(!is_max){
+            $ele.find('input.text').val(width);
+        }
+    },
+
     //
     // trigger to update rst_DisplayOrder
     //
