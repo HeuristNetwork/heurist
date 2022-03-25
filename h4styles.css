@@ -1493,12 +1493,14 @@ span.fancytree-checkbox{
 .tree-filter.hidden_checkboxes span.fancytree-checkbox{  /* Hide checkbox for nodes without children */
     display:none;
 }
-.tree-filter .fancytree-has-children span.fancytree-checkbox{  /* Replace checkbox for nodes with children */
-    background-position: 0px -80px; /* white triangle */
+.tree-filter .fancytree-has-children span.fancytree-checkbox{  /*Replace checkbox for nodes with children */
+    background-position: -4px -80px;/* white triangle */
     display: inline-block;
+    width: 8px;
+    margin-left: 0px !important;    
 }
 .tree-filter .fancytree-expanded.fancytree-has-children span.fancytree-checkbox{
-    background-position: -32px -80px; /* black triangle  */
+    background-position: -36px -80px; /* black triangle  */
     display: inline-block;
 }
 .tree-filter .fancytree-has-children.fancytree-partsel span.fancytree-checkbox{

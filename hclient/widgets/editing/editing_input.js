@@ -1458,7 +1458,7 @@ $.widget( "heurist.editing_input", {
             .appendTo( $inputdiv );
             var mode = null;
             
-            if(this.configMode.mode=='all_users' || this.configMode.mode=='all_users_and_groups'){
+            if(this.configMode && (this.configMode.mode=='all_users' || this.configMode.mode=='all_users_and_groups')){
                 topOptions = this.configMode.topOptions;
                 mode = this.configMode.mode;
             }else{

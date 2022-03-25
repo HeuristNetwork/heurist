@@ -377,6 +377,8 @@ $.widget( "heurist.searchBuilderItem", {
         
         if(dty_ID.indexOf('r.')==0){
             dty_ID = dty_ID.substr(2);    
+        }else if(dty_ID.indexOf('lt')==0 || dty_ID.indexOf('lf')==0){
+            dty_ID = dty_ID.substr(2);    
         }
         
         if(dty_ID>0){ //numeric - base field
@@ -610,7 +612,13 @@ Whole value = EQUAL
             ed_options['dtID'] = dty_ID;
             ed_options['dtFields'] = null;
             
-        } 
+        }else if(field_type=='resource'){ 
+                ed_options.dtFields = window.hWin.HEURIST4.util.cloneJSON($Db.rst(ed_options['rectypeID'], ed_options['dtID']));
+                ed_options.dtFields['rst_CreateChildIfRecPtr'] = 0;
+                ed_options.dtFields['rst_PtrFilteredIDs'] = $Db.dty(ed_options['dtID'], 'dty_PtrTargetRectypeIDs');
+                ed_options.dtFields['rst_DefaultValue'] = '';
+                ed_options.dtFields['rst_PointerMode'] = 'browseonly';
+        }
         
         //init input elements
         this._predicate_input_ele = $("<div>")
