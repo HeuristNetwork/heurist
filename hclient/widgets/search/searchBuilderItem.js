@@ -422,11 +422,15 @@ $.widget( "heurist.searchBuilderItem", {
                         //user selector
                         field_type = 'user';
 
+                }else  if (dty_ID=='ids'){
+                    
+                    field_type = dty_ID;
+
                 }else  if (dty_ID=='access' || 
-                           dty_ID=='ids' || 
                            dty_ID=='tag'){
                         
-                        field_type = dty_ID;
+                        field_type = 'enum';//dty_ID;
+                        ed_options['dtID'] = dty_ID;
                 }
             }
             
