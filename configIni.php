@@ -62,10 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.2.30"; // sets current program version number, determined by Heurist development lead
+$version = "6.2.31"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// 6.2.31 26 March 2022
 // 6.2.30 10 March 2022
 // 6.2.29 25 Feb 2022
 // 6.2.28 18 Feb 2022 Option to treat periods in terms as hierarchy or not, improved record pointer selection popup with tabs, simple divider within tabs in edit form, improve file bulk upload reporting, tidy up workflow managhement, first draft storymap, 
