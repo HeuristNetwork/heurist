@@ -151,9 +151,13 @@ $.widget( "heurist.resultList", {
     
     sortResultList: null,
     sortResultListDlg: null, //tab panel or dialog
-    is_sortResultList_tab_based: true,
-    need_fill_sortResultList: true,
+    _is_sortResultList_tab_based: true,
+    _sortResultList_need_fill: true,
     
+    _sortResult_svsID: 0, //last saved svs ID for sort result
+    _sortResult_was_changed: false,
+    
+    _currentSavedFilterID: 0,
     
     // the constructor
     _create: function() {
@@ -3537,7 +3541,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 //+'<span style="min-width:150px">'
                 //+ recID + '</span>'
                 + window.hWin.HEURIST4.util.htmlEscape( recordset.fld(record, 'rec_Title') ) 
-                + (that.is_sortResultList_tab_based?
+                + (that._is_sortResultList_tab_based?
 ('<div class="action-button-container">'
 +'<span class="ui-button-icon-primary ui-icon ui-icon-circle-minus rec_remove" style="cursor:pointer;font-size:11px"></span></div>')
                 :'')
@@ -3548,6 +3552,9 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 if(new_rec_order.length>0){
 
                     var svsID;
+                    if(that._sortResult_svsID>0){
+                        svsID = that._sortResult_svsID;
+                    }else
                     if(that._currentSavedFilterID>0 && window.hWin.HAPI4.currentUser.usr_SavedSearch && 
                         window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID]){
 
@@ -3565,7 +3572,11 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                     var squery = 'ids:'+new_rec_order.join(',')+' sortby:set';
                     var  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
                     if(widget){
-                        widget.svs_list('editSavedSearch', 'saved', null, svsID, squery, null, true); //call public method
+                        widget.svs_list('editSavedSearch', 'saved', null, svsID, squery, null, true, 
+                        function(new_svs_id){
+                            that._sortResult_svsID = new_svs_id;
+                            that._sortResult_was_changed = false;
+                        }); //call public method
                     }
                 }
             }                   
@@ -3581,7 +3592,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             
             var list_parent;
             
-            if(this.is_sortResultList_tab_based){
+            if(this._is_sortResultList_tab_based){
                 //show as separate tab on tabcontrol
                 var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetById('heurist_Graph');
                 
@@ -3596,36 +3607,69 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                         '<li><a href="#tab' + num_tabs + '">' + window.hWin.HR('Reorder') + '</a></li>');
         
                     this.sortResultListDlg = $('<div id="tab' + num_tabs + '" style="position:absolute;inset:38px 4px 0px 2px">'
-                    +'<div class="ent_header">'
-                        +'<button id="btn-save-order">Save as Filter</button>'
-                        +'<button id="btn-clear" style="float:right">Clear and close</button>'
-                        +'</div></div>').appendTo(ele);
+                    +'</div>').appendTo(ele);
                     
                     ele.tabs('refresh');
                     
+                    
+                    $('<div class="ent_header">'
+                        +'<span style="padding-top: 5px;display: inline-block;">'
+                            +window.hWin.HR('Drag records to position in list, drag into list to add them')+'</span>'
+                        +'<button id="btn-clear" style="float:right">'+window.hWin.HR('Close')+'</button>'
+                        +'<button id="btn-save-order" style="float:right">'+window.hWin.HR('Save')+'</button>'
+                        +'</div>').appendTo(this.sortResultListDlg);
+
+                    this.sortResultListDlg.css('top',ele.find('ul').height()+4);                        
+                        
+                    
                     function __closeReorderTab(){
-                        this.need_fill_sortResultList = true;
-                        var tabs = $(this.sortResultListDlg.parent());
+                        var tabs = $(that.sortResultListDlg.parent());
                         tabs.find('a[href="#'
-                            +this.sortResultListDlg.attr('id')+'"]')
+                            +that.sortResultListDlg.attr('id')+'"]')
                             .closest('li').hide();
                         tabs.tabs('option','active',0);
+                        that._last_saved_set = 0;
+                        that._sortResultList_need_fill = true;
+                        that._sortResult_was_changed = false;
                     }
                     
-                    ele = this.sortResultListDlg.find('#btn-clear').button();
-                    this._on(ele,{click:__closeReorderTab});
-
-                    ele = this.sortResultListDlg.find('#btn-save-order').button();
-                    this._on(ele,{click:function(){
-                        
+                    function __saveReorderTab(){
                         //get new order of records ids
-                        var recordset = this.sortResultList.resultList('getRecordSet');
+                        var recordset = that.sortResultList.resultList('getRecordSet');
                         var new_rec_order = recordset.getOrder();
                         if(new_rec_order.length>0){
-                            save_callback.call(this, new_rec_order )       
+                            save_callback.call(that, new_rec_order )       
                         }
-                        //__closeReorderTab();                        
+                    }
+                    
+                    
+                    ele = this.sortResultListDlg.find('#btn-clear').button();
+                    this._on(ele,{click: function(){
+                     
+                        if(that._sortResult_was_changed){
+                            //show warning
+                            var $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                            '<p>' + window.hWin.HR('resultList_reorder_list_changed')+'</p>',
+                            {'Save' :function(){ 
+                                __saveReorderTab();
+                                $__dlg.dialog( "close" );
+                            },
+                            'Cancel':function(){
+                                $__dlg.dialog( "close" );
+                            },
+                            'Close':function(){
+                                __closeReorderTab();
+                                $__dlg.dialog( "close" );
+                            }
+                            }, {title:window.hWin.HR('Warning')});
+                        }else{
+                            __closeReorderTab();    
+                        }    
+                        
                     }});
+
+                    ele = this.sortResultListDlg.find('#btn-save-order').button();
+                    this._on(ele,{click:__saveReorderTab});
                     
                 }
             }else{
@@ -3642,6 +3686,9 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                    multiselect: false,
                    view_mode: 'list',
                    sortable: true,
+                   onSortStop: function(){
+                        that._sortResult_was_changed = true;
+                   },
                    show_toolbar: false,
                    select_mode: 'select_single',
                    entityName: this._entityName,
@@ -3650,7 +3697,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                    });     
         }
         
-        if(this.need_fill_sortResultList){
+        if(this._sortResultList_need_fill){
             //fill result list with current page ids
             //get all ids on page
             var ids_on_current_page = [];
@@ -3662,12 +3709,13 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             var page_recordset = this._currentRecordset.getSubSetByIds(ids_on_current_page);
             page_recordset.setOrder(ids_on_current_page); //preserve order
             this.sortResultList.resultList('updateResultSet', page_recordset);
+            this._sortResult_was_changed = false;
         }
         
         
-        if(this.is_sortResultList_tab_based){
+        if(this._is_sortResultList_tab_based){
             
-            this.need_fill_sortResultList = false;
+            this._sortResultList_need_fill = false;
             
             var tabs = $(this.sortResultListDlg.parent());
             var num_tabs = tabs.find('ul li').length;
@@ -3710,11 +3758,14 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                                             return $('<div class="rt_draggable ui-drag-drop" recid="'+
                                                 rec_ids.join(',')
                                             +'" style="width:300;padding:4px;text-align:center;font-size:0.8em;background:#EDF5FF"'
-                                            +'>Drag '+(rec_ids.length>1?(rec_ids.length+' records'):'')+' and drop to order list</div>'); 
+                                            +'>'
+                                            +'Drop '+(rec_ids.length>1?(rec_ids.length+' selected records'):'record')
+                                            +' at desired position in list</div>'); 
                                         }else{
                                             return null;
                                         }
                                     },
+                                    cursorAt:{top: 0, left: 5},                                    
                                     zIndex:100,
                                     appendTo:'body',
                                     containment: 'window',
@@ -3741,9 +3792,9 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                                             
                                 //var rec_IDs = $(ui.draggable).attr('recid').split(',');
                                 var rec_IDs = $(ui.helper).attr('recid').split(',');
-                                var after_rec_ID = trg.attr('recid');
+                                var before_rec_ID = trg.attr('recid');
                     
-                                if(!window.hWin.HEURIST4.util.isempty(rec_IDs) && after_rec_ID>0){
+                                if(!window.hWin.HEURIST4.util.isempty(rec_IDs) && before_rec_ID>0){
 
                                         //get subset
                                         var to_be_added = that._currentRecordset.getSubSetByIds(rec_IDs);
@@ -3753,13 +3804,14 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                                         
                                         var cnt_0 = curr_recset.length();
                                         
-                                        curr_recset = curr_recset.doUnite(to_be_added, after_rec_ID);
+                                        curr_recset = curr_recset.doUnite(to_be_added, before_rec_ID);
                                         
                                         var cnt_added = (curr_recset.length()-cnt_0);
                                         
                                         if(cnt_added>0){
                                             //refresh
                                             that.sortResultList.resultList('updateResultSet', curr_recset);           
+                                            that._sortResult_was_changed = true;
                                             
                                             var msg = cnt_added+(rec_IDs.length>0?' of '+rec_IDs.length:'')
                                             +' record'+(cnt_added>1?'s':'')+' added';
