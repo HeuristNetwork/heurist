@@ -1427,6 +1427,16 @@ class HPredicate {
             }else{
                 $ignoreApostrophe = $ignoreApostrophe && (strpos($val,"'")===false);
                 
+                if($this->fulltext){
+                    
+                    if($sHeaderField=='rec_Title'){
+                        //execute fulltext search query
+                        $res = $res.'(MATCH(r'.$this->qlevel.'.'.$sHeaderField.') '.$val.')';
+                    }else{
+                        $this->error_message = 'Full text search is allowed for rec_Title only';
+                        return null;
+                    }
+                }else
                 if($ignoreApostrophe){
                     $res = "( replace( r".$this->qlevel.".$sHeaderField, \"'\", \"\")".$val.")";     
                 }else{
@@ -2559,29 +2569,47 @@ class HPredicate {
     function checkFullTextIndex(){
         global $mysqli;
         
-        $fld = mysql__select_value($mysqli,
-        'select group_concat(distinct column_name) as fld'
-        .' from information_schema.STATISTICS '
-        ." where table_schema = '".HEURIST_DBNAME_FULL."' and table_name = 'recDetails' and index_type = 'FULLTEXT'");        
-        
-        if($fld==null){
+        if($this->pred_type=='title' || $this->field_id=='title'){
 
-            $mysqli->query('ALTER TABLE recDetails ADD FULLTEXT INDEX `dtl_Value_FullText` (`dtl_Value`)'); // VISIBLE
-          
-/*            
-            $k=0;
-            while($k<10){
-                $prog = mysql__select_value($mysqli,"select progress from FROM sys.session where db='".HEURIST_DBNAME_FULL."' "
-                ." AND current_statement like 'ALTER TABLE recDetails ADD FULLTEXT%'");
-error_log($prog);     
-usleep(200);           
-                $k++;
-            }
-*/            
+            $fld = mysql__select_value($mysqli,
+            'select group_concat(distinct column_name) as fld'
+            .' from information_schema.STATISTICS '
+            ." where table_schema = '".HEURIST_DBNAME_FULL."' and table_name = 'Records' and index_type = 'FULLTEXT'");        
             
-            $this->error_message = 'create_fulltext';  
-            return true;
+            if($fld==null){
+                $mysqli->query('ALTER TABLE Records ADD FULLTEXT INDEX `rec_Title_FullText` (`rec_Title`)'); // VISIBLE
+                $this->error_message = 'create_fulltext';  
+                return true;
+            }
+                    
+        }else{
+        
+            $fld = mysql__select_value($mysqli,
+            'select group_concat(distinct column_name) as fld'
+            .' from information_schema.STATISTICS '
+            ." where table_schema = '".HEURIST_DBNAME_FULL."' and table_name = 'recDetails' and index_type = 'FULLTEXT'");        
+            
+            if($fld==null){
+
+                $mysqli->query('ALTER TABLE recDetails ADD FULLTEXT INDEX `dtl_Value_FullText` (`dtl_Value`)'); // VISIBLE
+              
+    /*            
+                $k=0;
+                while($k<10){
+                    $prog = mysql__select_value($mysqli,"select progress from FROM sys.session where db='".HEURIST_DBNAME_FULL."' "
+                    ." AND current_statement like 'ALTER TABLE recDetails ADD FULLTEXT%'");
+    error_log($prog);     
+    usleep(200);           
+                    $k++;
+                }
+    */            
+                
+                $this->error_message = 'create_fulltext';  
+                return true;
+            }
+            
         }
+        
         return false;
 /*        
 ALTER TABLE `hdb_osmak_7`.`recdetails` DROP INDEX `dtl_Value_FullText` ;        
