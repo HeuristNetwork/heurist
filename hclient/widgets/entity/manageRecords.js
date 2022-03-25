@@ -3848,7 +3848,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                     dialog_name = dialog_name.replace('recordLookup', 'lookup');
                                 }
 
-                            window.hWin.HEURIST4.ui.showRecordActionDialog(cfg.dialog, //'recordLookup'
+                            window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, //'recordLookup'
                                 { mapping: cfg, 
                                   edit_fields: this._editing.getValues(true),
                                   edit_record: this._currentEditRecordset,
