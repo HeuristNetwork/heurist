@@ -274,16 +274,14 @@ window.hWin.HEURIST4.dbs = {
             //add default fields - RECORD TYPE HEADER
             if($mode==3){
 
+				if($recursion_depth>0){ // keep record title separate from generic fields
+                    $children.push({key:'rec_Title', type:'freetext', title:'Constructed title', code:'Record Title'});
+                }
+
                 $children.push({key:'rec_ID',title:'Record ID', code:'Record ID'});
                 $children.push({key:'rec_RecTypeID', title:'Record TypeID', code:'Record TypeID'});
                 $children.push({key:'rec_TypeName', title:'Record TypeName', code:'Record TypeName'});
                 $children.push({key:'rec_Modified', title:"Record Modified", code:'Record Modified'});
-
-                if($recursion_depth>0){ // keep record title separate from generic fields
-                    $children.push({key:'rec_Title', type:'freetext',
-                        title:'Record Title', 
-                        code:'Record Title'});
-                }
 
                 var s = '<span style="font-style:italic">metadata</span>';
                 $children = [
@@ -297,6 +295,8 @@ window.hWin.HEURIST4.dbs = {
                     $fieldtypes.push('modified');
                 }  
                 
+                var recTitle_item = null;
+                
                 if(all_header_fields || $fieldtypes.indexOf('ID')>=0 || $fieldtypes.indexOf('rec_ID')>=0){
                     $children.push({key:'rec_ID', type:'integer',
                         title:('ID'+($mode!=7?' <span style="font-size:0.7em">(Integer)</span>':'')), 
@@ -304,9 +304,10 @@ window.hWin.HEURIST4.dbs = {
                 }
 
                 if(all_header_fields || $fieldtypes.indexOf('title')>=0 || $fieldtypes.indexOf('rec_Title')>=0){
-                    $children.push({key:'rec_Title', type:'freetext',
+                    //$children.push();
+                    recTitle_item = {key:'rec_Title', type:'freetext',
                         title:('Title'+($mode!=7?' <span style="font-size:0.7em">(Constructed Text)</span>':'')), 
-                        code:($recTypeId+_separator+'title'), name:'Record title'});
+                        code:($recTypeId+_separator+'title'), name:'Record title'};
                 }
                 
                 if(all_header_fields || $fieldtypes.indexOf('typeid')>=0 || $fieldtypes.indexOf('rec_RecTypeID')>=0){
@@ -396,6 +397,10 @@ window.hWin.HEURIST4.dbs = {
                             {title:s, folder:true, is_generic_fields:true, children:$rl_children});
                     }
                     
+                    if(recTitle_item){
+                        $grouped.push( recTitle_item );
+                    }
+                    
                     var s = '<span style="font-style:italic">metadata</span>';
                     $grouped.push(
                         {title:s, folder:true, is_generic_fields:true, children:$children});
@@ -468,8 +473,9 @@ window.hWin.HEURIST4.dbs = {
                                         
                                         for (var i=0; i<$res_dt['constraint']; i++){
                                             $res_dt['children'][i]['code'] = $res_dt['code']
-                                                                + _separator + '{'+$res_dt['children'][i]['title'] +'}';
-                                            $res_dt['children'][i]['title'] = $res_dt['title'] + ' (<span style="font-weight: bold;">'+ $res_dt['children'][i]['title']+'</span>)';
+                                                        + _separator + '{'+$res_dt['children'][i]['title'] +'}';
+                                            $res_dt['children'][i]['title'] = $res_dt['title']
+                                                        + ' (<span style="font-weight: bold;">'+ $res_dt['children'][i]['title']+'</span>)';
                                             $children_links.push($res_dt['children'][i]);    
                                         }
                                     }else{
@@ -748,8 +754,9 @@ window.hWin.HEURIST4.dbs = {
                                 
                                 var $type_name = $Db.baseFieldType[$detailType];
                                 
-                                $dt_title = " <span style='font-style:italic'>" + $dt_title + 
-                                    "</span> <span style='font-size:0.7em'>(" + $type_name + ")</span>";
+                                $dt_title = ' <span'+($mode!=5?' style="font-style:italic"':'')
+                                    +'>' + $dt_title 
+                                    +'</span> <span style="font-size:0.7em">(' + $type_name + ')</span>';
                             }else{
                                 $dt_title = ' <span style="font-style:italic">' + $dt_title + '</span>';
                             }
@@ -938,6 +945,7 @@ window.hWin.HEURIST4.dbs = {
                         //debug $def['title'] = @$def['code'].$def['title'];   
                         //asign codes
                         if($.isArray(def['children'])){
+                            //def['children'].unshift({});
                             def = __assignCodes(def);
                             res.push( def );
                         }                    

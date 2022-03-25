@@ -59,6 +59,19 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
 
                 
             $dlg.find('#span-database').text(window.hWin.HAPI4.database);
+
+            $dlg.find('img#favicon').attr('src', window.hWin.HAPI4.baseURL + 'favicon.ico');
+
+            if(window.hWin.HAPI4.sysinfo.host_logo){
+
+                $('<div style="height:40px;padding-left:4px;float:right">'
+                    +'<a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
+                    +'" target="_blank" style="text-decoration:none;color:black;">'
+                            +'<label>at: </label>'
+                            +'<img src="'+window.hWin.HAPI4.sysinfo.host_logo
+                            +'" height="35" align="center"></a></div>')
+                .appendTo($dlg.find('div#host_info'));
+            }
             
             //find all labels and apply localization
             $dlg.find('label').each(function(){
@@ -217,7 +230,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 width: 450,
                 modal: true,
                 resizable: false,
-                title: window.hWin.HR('Login'),
+                title: window.hWin.HR('Heurist Login'),
                 buttons: arr_buttons,
                 close: function() {
                     allFields.val( "" ).removeClass( "ui-state-error" );
@@ -233,7 +246,6 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 },
                 open: function() {
                     isreset = false;
-                    $dlg.dialog("option","title",window.hWin.HR('Login'));
                     $("#btn_login2").button("option","label",'<b>'+window.hWin.HR('Login')+'</b>');
                     //$dlg.find("#btn_login2").button("option","label",window.hWin.HR('Login'));
                     $dlg.find("#fld_reset").hide();

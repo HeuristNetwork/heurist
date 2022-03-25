@@ -194,6 +194,9 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                     if(opts.layout_params['popup_resizing']){
                         $dlg.find('input[name="popup_resizing"]').prop('checked', false); //opts.layout_params['popup_resizing']
                     }
+                    if(opts.layout_params['maxzoom']>0){
+                        $dlg.find('input[name="map_maxzoom"]').val(opts.layout_params['maxzoom']);        
+                    }
                 }
                 if(opts['mapdocument']>0){
                     $dlg.find('select[name="mapdocument"]').attr('data-mapdocument', opts['mapdocument']);        
@@ -805,6 +808,11 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
             layout_params['popup_width'] = $dlg.find('input[name="popup_width"]').val() + $dlg.find('select[name="popup_wunit"]').val();
             layout_params['popup_height'] = $dlg.find('input[name="popup_height"]').val() + $dlg.find('select[name="popup_hunit"]').val();
             layout_params['popup_resizing'] = false;//$dlg.find('input[name="popup_resizing"]').is(':checked')
+            
+            if($dlg.find('input[name="map_maxzoom"]').val()>0){
+                layout_params['maxzoom'] = $dlg.find('input[name="map_maxzoom"]').val();
+            }
+
   
 //  use_timeline use_cluster editstyle map_rollover controls legend legend_exp legend_exp2 map_popup  mapdocument      
 //  map_template map_basemap_filter  map_template
@@ -820,6 +828,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
             var mapdoc_id = $dlg.find('select[name="mapdocument"]').val();
             if(mapdoc_id>0) opts['mapdocument'] = mapdoc_id;
 
+            
         }
 
                 var cont = $dlg.find('div.'+widget_name);

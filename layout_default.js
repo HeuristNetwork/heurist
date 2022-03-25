@@ -249,7 +249,6 @@ var cfg_layouts = [
                     {appid:'heurist_resultListExt', name: 'Crosstabs', options:{title:'Crosstabs', 
                                 url: 'viewers/crosstab/crosstabs.php?db=[dbname]','data-logaction':'open_Crosstabs',
                                 css:{overflow:'hidden'}}}
-                    
             ]}]
         }
     },

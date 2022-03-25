@@ -254,6 +254,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         layout_params['published'] = __gp('published');
         layout_params['popup'] = __gp('popup');
         layout_params['map_rollover'] = __gp('map_rollover');
+        layout_params['maxzoom'] = __gp('maxzoom');
         layout_params['style'] = window.hWin.HEURIST4.util.isJSON(__gp('style')); //default style
 
         mapping = $('#mapping').mapping({

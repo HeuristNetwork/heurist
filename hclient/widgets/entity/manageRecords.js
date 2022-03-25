@@ -191,7 +191,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         +'<option>5</option><option>10</option><option>20</option><option>30</option>'
                         +'<option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>'
                         +'<option>120</option><option>150</option>'
-                        +'<option>200</option></select></div>'
+                        +'<option value="0">Max</option></select></div>'
 
                    +'<span class="edit_rts_btn" style="top:24px;left:80px;position:absolute;background:lightblue;display:none" '
                    +' data-apply="1" title="Save changes for field properties">Apply</span>'
@@ -298,6 +298,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                             $('.heurist-helper1').hide();
                                         }
                                         
+                                        if((dtFields['dty_Type'] == 'freetext' || dtFields['dty_Type'] == 'blocktext' || dtFields['dty_Type'] == 'float') 
+												&& dtFields['rst_DisplayWidth'] == 0){
+
+                                            var width = that.editForm.width() * 0.75;
+                                            inpt.find('input, textarea').css({'min-width': width, width: width});
+                                        }
                                     }else{
                                         window.hWin.HEURIST4.msg.showMsgErr(response);
                                     }
@@ -431,15 +437,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     that.rts_actions_menu.find('select.s_reqtype').val(rst_fields['rst_RequirementType']).hSelect('refresh');
                     var v = rst_fields['rst_MaxValues'];
                     that.rts_actions_menu.find('select.s_repeat').val(v!=null && v>=0?v:0).hSelect('refresh');
+                    var prev_v = 5;
                     if(dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float'){
                         that.rts_actions_menu.find('div.s_width').show();
+						prev_v = 0;
                     }else{
                         that.rts_actions_menu.find('div.s_width').hide()    
                     }
                     v = Number(rst_fields['rst_DisplayWidth']);
                     if(isNaN(v) || window.hWin.HEURIST4.util.isempty(v)) v=100;
                     //v = (v!=null && v>0)?(v==5?v :(Math.floor(v/10)*10)):100;
-                    var prev_v = 5;
                     that.rts_actions_menu.find('select.s_width > option').each(function(i,item){
                         if(Number($(item).val())>v){
                             v = prev_v;
@@ -2838,7 +2845,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             var group_fields = null;
             var groupCount = 0, hasTabs = false, hasField = false;
-            var temp_group_details = [];
+            var temp_group_details = [], max_length_fields = [];
 
             for(var k=0; k<s_fields.length; k++){
 
@@ -2886,6 +2893,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         group_fields.push({"dtID": dtFields['dt_ID'], "dtFields":dtFields});
                     }else{
                         fields.push({"dtID": dtFields['dt_ID'], "dtFields":dtFields});
+                    }
+
+                    if((dtFields['dty_Type'] == 'freetext' || dtFields['dty_Type'] == 'blocktext' || dtFields['dty_Type'] == 'float') 
+                        && dtFields['rst_RequirementType'] != 'forbidden' && dtFields['rst_DisplayWidth'] == '0'){ // set field width to max
+
+                        max_length_fields.push(dtFields['dt_ID']);
                     }
                 }
             }//for s_fields
@@ -3145,6 +3158,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             if(!hasField && window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false){ // open modify structure, if able when there are no fields
                 this.editRecordType(true);
+            }else if(max_length_fields.length > 0){
+
+                let maxw = this.editForm.width() * ((this.options.rts_editor) ? 0.75 : 0.8);
+
+                for(var i = 0; i < max_length_fields.length; i++){
+
+                    var field = this._editing.getFieldByName(max_length_fields[i]);
+                    field.find('input, textarea').css({'width': maxw, 'max-width': maxw});
+                }
             }
 
         }else{
@@ -4124,14 +4146,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     btn.hide();
                 }else{
                     btn.button({icon:'ui-icon-gear-crossed'}).show()
-                        .click(function(){ 
-                                        
+                        .one('click', function(){
                             that.editFormPopup.layout().hide('west');
                             that.options.rts_editor = null;
                             that.reloadEditForm( true );
-                            
-                            //that.options.rts_editor.manageDefRecStructure('closeDialog');
-                        });                
+                        });
                     if(btn_css) btn.css(btn_css);
                 }
             }

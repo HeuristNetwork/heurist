@@ -28,7 +28,7 @@ regional['ru'] = {
 
     'Register': 'Регистрация',
     'Registration': 'Регистрация',
-    'Login': 'Войти',
+    'Heurist Login': 'Войти',
     'Please log in': 'Зарегистрируйтесь, чтобы использовать все возможности Heurist',
     'Please contact to register':'Для получения регистрации свяжитесь с администратором',
     'Log out' : 'Выйти',

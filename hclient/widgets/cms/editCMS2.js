@@ -32,10 +32,11 @@ widget:
 */
 
 var editCMS_instance2 = null;
-// global variables
+// global variables defined in websiteScriptAndStyles
 //  layoutMgr - global variable defined in hLayoutMgr
 //  page_cache
 //  home_page_record_id
+//  isWebPage
 //  current_page_id
 //  isCMS_InHeuristUI, isCMS_NewWebsite
 
@@ -63,7 +64,6 @@ function editCMS2(){
         
     var page_was_modified = false;
     var delay_onmove = 0, __timeout = 0;
-    var isWebPage = false;
     
     var current_edit_mode = 'page', //or website
         _editCMS_SiteMenu = null; 
@@ -157,9 +157,6 @@ function editCMS2(){
             }*/
             window.onbeforeunload = _onbeforeunload;
                 
-            
-                isWebPage = ($('body').find('#main-menu').length == 0);
-//console.log('>>>>'+isWebPage);                
             
                 var new_ele = $('<div class="ui-layout-center"></div>');//.prependTo(body);
                                              
@@ -492,7 +489,10 @@ function editCMS2(){
         //2. reload content
         layoutMgr.setEditMode(false);
         layoutMgr.layoutInit(_layout_content, _layout_container, {rec_ID:home_page_record_id});
-        
+
+        // Display cms editor button
+        body.find('#btnOpenCMSeditor').show();
+
         if($.isFunction(options.close)){
             options.close.call();
         }

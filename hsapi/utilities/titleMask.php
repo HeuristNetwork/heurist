@@ -885,7 +885,13 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 
                 }else{
                     //ERROR
-                    return array("'$inner_field_name' is an unrecognised qualifier for a terms list field");
+                    return array("error_title" => "Syntax error", 
+                                 "message" => "Unable to interpret '$inner_field_name' as a field<br><br>"
+                                            + "Fields must be enclosed in square brackets []. If the name appears<br>"
+                                            + "correct, please check for unwanted spaces, formatting or other characters.<br><br>"
+                                            + "If you have used the tree on the left to insert a field and it insert incorrect<br>"
+                                            + "text, please let us know with name of database, record type and field name,<br>"
+                                            + "as this should not happen.");
                 }
             }else if($dt_type== 'resource'){
                 
@@ -948,7 +954,13 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
             if($inner_rectype==0){
                 list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
                 if(!($inner_rectype>0)){
-                    return array("'$inner_rectype_search' not recognised as a record type");
+                    return array("error_title" => "Syntax error", 
+                                 "message" => "Unable to interpret '$inner_rectype_search' as a record type<br><br>"
+                                            + "Record types must be enclosed in curly brackets {}. If the name appears<br>"
+                                            + "correct, please check for unwanted spaces, formatting or other characters.<br><br>"
+                                            + "If you have used the tree on the left to insert a field and it insert incorrect<br>"
+                                            + "text, please let us know with name of database, record type and field name,<br>"
+                                            + "as this should not happen.");
                 }
             }
             

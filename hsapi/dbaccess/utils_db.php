@@ -935,14 +935,36 @@ if($i<5){
     // trim including &nbsp; and &xef; (BOM)
     //
     function super_trim( $str ){
-        return trim($str, " \n\r\t\v\x00\xC2\xA0\xEF\xBB\xBF");
+        
+        $str = trim($str);
+        $len = strlen($str);
+        $k = strpos($str,"\xC2\xA0");
+        if($k===0){
+            $str = substr($str,2);            
+            return super_trim($str);
+        }else if($k===$len-2){
+            $str = substr($str,0,$len-2);
+            return super_trim($str);
+        }
+        $k = strpos($str,"\xEF\xBB\xBF");
+        if($k===0){
+            $str = substr($str,3);            
+            return super_trim($str);
+        }else if($k===$len-3){
+            $str = substr($str,0,$len-3);
+            return super_trim($str);
+        }
+        
+        return $str;
+        
+        //return trim($str); //trim($str, " \n\r\t\v\x00\xC2\xA0\xEF\xBB\xBF");
     }  
     
     //
     //
     //
     function  trim_lower_accent($item){
-        return mb_strtolower(stripAccents(trim($item," \n\r\t\v\x00\xC2\xA0\xEF\xBB\xBF"))); //including &nbsp; and &xef; (BOM)
+        return mb_strtolower(stripAccents(super_trim($item))); //including &nbsp; and &xef; (BOM)
     }
 
     function  trim_lower_accent2(&$item, $key){

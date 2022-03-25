@@ -1241,13 +1241,13 @@ div.div-result-list-content.icons_list{
 
 .horizontal .recordTitleInPlaceOfThumb{
     height: 95%;
-    left: 10px;
-    right: 10px;
-    bottom: 0px;        
-    display: block !important;
+    position: relative;
+    display: inline-block !important;
     font-weight: bold;
     font-size: larger;
     text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis    
 }
 .vertical .recordTitleInPlaceOfThumb{
     height: 95%;
@@ -1493,12 +1493,14 @@ span.fancytree-checkbox{
 .tree-filter.hidden_checkboxes span.fancytree-checkbox{  /* Hide checkbox for nodes without children */
     display:none;
 }
-.tree-filter .fancytree-has-children span.fancytree-checkbox{  /* Replace checkbox for nodes with children */
-    background-position: 0px -80px; /* white triangle */
+.tree-filter .fancytree-has-children span.fancytree-checkbox{  /*Replace checkbox for nodes with children */
+    background-position: -4px -80px;/* white triangle */
     display: inline-block;
+    width: 8px;
+    margin-left: 0px !important;    
 }
 .tree-filter .fancytree-expanded.fancytree-has-children span.fancytree-checkbox{
-    background-position: -32px -80px; /* black triangle  */
+    background-position: -36px -80px; /* black triangle  */
     display: inline-block;
 }
 .tree-filter .fancytree-has-children.fancytree-partsel span.fancytree-checkbox{
@@ -1539,11 +1541,12 @@ span.fancytree-checkbox{
     display: inline-block;
 }
 
-/* Allow horizontal scrolling */
+/* Allow horizontal scrolling of trees */
 .tree-csv .fancytree-container, .tree-facets .fancytree-container, 
 .tree-filter .fancytree-container, .tree-rts .fancytree-container, 
 .rtt-tree .fancytree-container{
 	display: inline-block;
+	min-width: 95%;
 }
 
 .forbidden > label{
@@ -1851,7 +1854,6 @@ background: #8ea9b9
     text-transform: none;
 }
 .detail a, .detail {
-    text-wrap: normal;
     word-wrap: break-word;
     /*white-space: nowrap;*/
     word-break: break-word;

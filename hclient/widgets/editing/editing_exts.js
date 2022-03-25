@@ -648,6 +648,7 @@ function browseRecords(_editing_input, $input){
             }
             
             var key = that.f('rst_RecTypeID')+'-'+that.f('rst_DetailTypeID');
+			var recordMax = 1000;
     
             if(!window.hWin.HEURIST4.browseRecordCache){
                 window.hWin.HEURIST4.browseRecordCache = {};
@@ -655,8 +656,11 @@ function browseRecords(_editing_input, $input){
             if(!window.hWin.HEURIST4.browseRecordTargets){
                 window.hWin.HEURIST4.browseRecordTargets = {};
             }
+            if(window.hWin.HEURIST4.browseRecordMax){
+                recordMax = window.hWin.HEURIST4.browseRecordMax;
+            }
             
-            if(window.hWin.HEURIST4.browseRecordCache[key]=='zero' || window.hWin.HEURIST4.browseRecordCache[key]>1000){
+            if(window.hWin.HEURIST4.browseRecordCache[key]=='zero' || window.hWin.HEURIST4.browseRecordCache[key] > recordMax){
   
                 __show_select_dialog();
                 

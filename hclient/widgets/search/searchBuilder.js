@@ -806,11 +806,20 @@ $.widget( "heurist.searchBuilder", {
 
                                     var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, 
                                                                                             allowed_fieldtypes, parentcode );
+                                                                                            
                                     if(res.length>1){
                                         data.result = res;
                                     }else{
                                         data.result = res[0].children;
                                     }
+                                    
+                                    var ptr_fld = window.hWin.HEURIST4.util.cloneJSON(data.node.data);
+                                    if(ptr_fld.type=='resource'){
+                                        ptr_fld.title = '<span style="font-size:smaller">Target record: '+ptr_fld.name+'</span>';
+                                        ptr_fld.lazy = false;
+                                        data.result.unshift(ptr_fld);
+                                    }
+                                                                                            
 
                                     return data;                                                   
                                     /* from server
@@ -1090,6 +1099,37 @@ console.log(aCodes);
      0    1    2   3    4
 */ 
 
+        function __convertLink(code){
+                       
+                var key;     
+                var dtid = code;
+                var linktype = dtid.substr(0,2);
+                var slink = '';
+                
+                if(linktype=='rt'){
+                    slink = "related_to:";
+                }else if(linktype=='rf'){
+                    slink = "relatedfrom:";
+                }else if(linktype=='lt'){
+                    slink = "linked_to:";
+                }else if(linktype=='lf'){
+                    slink = "linkedfrom:";
+                }
+                if(slink!=''){
+                    dtid = dtid.substr(2);
+                    key = slink+dtid;    
+                }else{
+                    /*if($Db.dty(dtid,'rty_Type')=='relmarker'){
+                        key = 'related_to:'+dtid;
+                    }else{
+                        key = 'f:'+dtid;    
+                    }*/
+                    key = 'f:'+dtid;    
+                } 
+                
+                return key;           
+        }
+
         var fields_query = [];
 
         var that = this;
@@ -1122,18 +1162,29 @@ console.log(aCodes);
                                          && is_relationship) continue; //ignore t:1 for relationships
                             
                                 var not_found = true;
-                                $.each(branch,function(m,item){
-                                   if(item['t']==codes[k]){
-                                       not_found = false; 
-                                       return false;
-                                   }else if(item['t']){
-                                        not_found = false; 
-                                        if(item['t'].split(',').indexOf(codes[k])<0){
-                                            item['t'] = item['t']+','+codes[k];
-                                        }
-                                        return false;
-                                   }
-                                });
+                                if($.isArray(branch)){
+                                
+                                    $.each(branch,function(m,item){
+                                       if(item['t']==codes[k]){
+                                           not_found = false; 
+                                           return false;
+                                       }else if(item['t']){
+                                            not_found = false; 
+                                            if(item['t'].split(',').indexOf(codes[k])<0){
+                                                item['t'] = item['t']+','+codes[k];
+                                            }
+                                            return false;
+                                       }
+                                    });
+                                
+                                }else{
+                                    /*@todo test
+                                    var newbranch = [{t:codes[k]},{ids:branch}];
+                                    branch = newbranch;   
+                                    fields_query = newbranch;   
+                                    not_found = false;                                  
+                                    */
+                                }
                                 
                                 if(not_found){
                                     branch.push({t:codes[k]});    
@@ -1142,38 +1193,20 @@ console.log(aCodes);
                         }else{
                             //odd element is field
                             
-                            var dtid = codes[k];
-                            var linktype = dtid.substr(0,2);
-                            var slink = '';
-                            
-                            if(linktype=='rt'){
-                                slink = "related_to:";
-                            }else if(linktype=='rf'){
-                                slink = "relatedfrom:";
-                            }else if(linktype=='lt'){
-                                slink = "linked_to:";
-                            }else if(linktype=='lf'){
-                                slink = "linkedfrom:";
-                            }
-                            if(slink!=''){
-                                dtid = dtid.substr(2);
-                                key = slink+dtid;    
-                            }else{
-                                /*if($Db.dty(dtid,'rty_Type')=='relmarker'){
-                                    key = 'related_to:'+dtid;
-                                }else{
-                                    key = 'f:'+dtid;    
-                                }*/
-                                key = 'f:'+dtid;    
-                            }
+                            key = __convertLink(codes[k]);
+
+                            is_relationship = key.indexOf('related_to:')==0
+                                            || key.indexOf('relatedfrom:')==0;
                         
                             //find
                             var not_found = true;
                             $.each(branch, function(i,item){
                                 if(item[key]){
-                                    is_relationship = (linktype=='rt')||(linktype=='rf');
-                                    
-                                    branch = item[key];
+                                    //is_relationship = (linktype=='rt')||(linktype=='rf');
+                                    if(!$.isArray(item[key])){
+                                        item[key] = [{ids:item[key]}];
+                                    }
+                                    branch = item[key];    
                                     not_found = false;
                                     return false;
                                 }
@@ -1182,7 +1215,7 @@ console.log(aCodes);
                             //add new branch 
                             if(not_found){
                                 
-                                is_relationship = (linktype=='rt')||(linktype=='rf');
+                                //is_relationship = (linktype=='rt')||(linktype=='rf');
                                 
                                 var newbranch = {};
                                 newbranch[key] = [];
@@ -1219,6 +1252,17 @@ console.log(aCodes);
                         }
                     }
                 
+                }
+                else{
+                   //key = __convertLink(codes[1]); 
+                }
+                
+                var old_key = Object.keys(value)[0];
+                var key = __convertLink(old_key); 
+                if(key.indexOf('linked_to')==0 || key.indexOf('linkedfrom')==0){
+                   var newvalue = {};
+                   newvalue[key] = value[old_key]; 
+                   value = newvalue;
                 }
                 
                 
