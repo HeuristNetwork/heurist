@@ -224,8 +224,9 @@ if(!(@$_REQUEST['field']>1)){
 
 
 //-----------------------------------------------
-//if REQUEST has parameter "field" - this is special request for content of particular field 
+// if REQUEST has parameter "field" - this is special request for content of particular field 
 // by default it returns value of DT_EXTENDED_DESCRIPTION - content of web page
+// @todo - remove this section - it is not USED anymore
 if(@$_REQUEST['field']){ 
         
 //error_log('set respone header in redirect '.$_REQUEST['field'].'  '.$_SERVER['REQUEST_URI']);
