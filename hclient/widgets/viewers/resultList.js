@@ -3809,16 +3809,18 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                                         var cnt_added = (curr_recset.length()-cnt_0);
                                         
                                         if(cnt_added>0){
-                                            //refresh
-                                            that.sortResultList.resultList('updateResultSet', curr_recset);           
-                                            that._sortResult_was_changed = true;
-                                            
                                             var msg = cnt_added+(rec_IDs.length>0?' of '+rec_IDs.length:'')
                                             +' record'+(cnt_added>1?'s':'')+' added';
                                             
-                                            window.hWin.HEURIST4.msg.showMsgFlash(msg);  
+                                            window.hWin.HEURIST4.msg.showMsgFlash(msg, 2000, null, trg);  
+                                            
+                                            //refresh
+                                            that.sortResultList.resultList('updateResultSet', curr_recset);           
+                                            that._sortResult_was_changed = true;
                                         }else{
-                                            window.hWin.HEURIST4.msg.showMsgFlash('Record'+(rec_IDs.length>1?'s':'')+' already in list');  
+                                            window.hWin.HEURIST4.msg.showMsgFlash('Record'
+                                                +(rec_IDs.length>1?'s':'')+' already in list'
+                                                , 2000, null, trg);  
                                         }
                                             
                                 }
