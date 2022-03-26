@@ -420,7 +420,7 @@ if($site_css!=null){
 
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
 
-                $('#btnOpenCMSeditor').html(isCMS_active?'Close CMS':'CMS');
+                $('#btnOpenCMSeditor').html(isCMS_active?'close editor':'website editor');
                 
                 if(isCMS_active){
                     //$('#btnOpenCMSeditor').hide();
@@ -928,7 +928,7 @@ function _openCMSeditor(event){
         //btn.hide();
     }
     
-    btn.html(isCMS_active?'Close CMS':'CMS');
+    btn.html(isCMS_active?'close editor':'website editor');
 }
 
 
