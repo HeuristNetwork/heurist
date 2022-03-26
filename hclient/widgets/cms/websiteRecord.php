@@ -213,12 +213,15 @@ if(!(@$_REQUEST['field']>1)){
     $website_title = __getValue($rec, DT_NAME);
     $isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU && 
                 defined('DT_CMS_PAGETYPE') &&
-                __getValue($rec, DT_CMS_PAGETYPE)==TRM_PAGETYPE_WEBPAGE); //ConceptCode::getTermLocalID('2-6254')
+                __getValue($rec, DT_CMS_PAGETYPE)==ConceptCode::getTermLocalID('2-6254')); //TRM_PAGETYPE_WEBPAGE 
+ 
+//$website_title  = $rec['rec_RecTypeID'].'  '.TRM_PAGETYPE_WEBPAGE.'=='.__getValue($rec, DT_CMS_PAGETYPE).' => '.$isWebPage;
+//    $isWebPage = true;
     
     if(!$isWebPage){ //for standalone webpage always without title
         $show_pagetitle = __getValue($rec, DT_CMS_PAGETITLE);
-        $show_pagetitle = ($show_pagetitle!==TRM_NO &&  // ConceptCode::getTermLocalID('2-531') 
-                           $show_pagetitle!==TRM_NO_OLD);    //ConceptCode::getTermLocalID('99-5447')
+        $show_pagetitle = ($show_pagetitle!==ConceptCode::getTermLocalID('2-531') &&  //TRM_NO
+                           $show_pagetitle!==ConceptCode::getTermLocalID('99-5447'));    //TRM_NO_OLD
     }
 }
 

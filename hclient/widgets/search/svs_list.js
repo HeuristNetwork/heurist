@@ -2364,7 +2364,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
     // groupID - current user or workgroup
     // svsID - saved search id
     // squery
-    , editSavedSearch: function(mode, groupID, svsID, squery, node, is_short){
+    , editSavedSearch: function(mode, groupID, svsID, squery, node, is_short, after_save_callback){
 
         var that = this;
         var currGroupId = 0;
@@ -2374,6 +2374,10 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
             if(currGroupId == window.hWin.HAPI4.currentUser.ugr_ID){
                  currGroupId = (node==null || that.treeviews['all']._id == node.tree._id)?'all':'bookmark';
                  isPrivate = true;
+            }
+            if(node==null){
+                var tree = that.treeviews[currGroupId];
+                node = tree.getNodeByKey(svsID);
             }
         }
 
@@ -2405,50 +2409,69 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                 svs_ID = response.new_svs_ID;
                 
                 that._applyTreeViewFilter( groupID );
-
-            }else if(node){ //edit is called from this widget only - otherwise we have to implement search node by svsID
-                //if group is changed move node to another tree
-                groupID = response.svs_UGrpID
-                if(groupID == window.hWin.HAPI4.currentUser.ugr_ID){
-                    groupID = response.domain?response.domain:'all'; //all or bookmarks
-                }else{
-                    isPrivate = false;
-                }
-
-                if( currGroupId != groupID){
-                    //remove from old group
-                    node.remove();
-                    if(!isPrivate){
-                        that._saveTreeData( currGroupId );   
+                
+            }else 
+            {
+                /*
+                if(Hul.isnull(node)){
+                    groupID = response.svs_UGrpID;
+                    if(response.svs_UGrpID == window.hWin.HAPI4.currentUser.ugr_ID){
+                        groupID = response.domain?response.domain:'all'; //all or bookmarks
                     }
-                    if(that.treeviews[currGroupId].count()<1){
-                        $("#addlink"+currGroupId).css('display', 'block');
-                    }
-                    
-                    //add to to new tree
                     var tree = that.treeviews[groupID];
-                    node = tree.rootNode;
-                    var new_node = node.addNode( { title:response.svs_Name, key: response.svs_ID}, 'child' );
-                    $(new_node.li).find('.fancytree-node').addClass('fancytree-match');
-                    
-                    that._saveTreeData( groupID );
-                    $("#addlink"+groupID).hide();
-                    
-                }else{
-                    node.setTitle(response.svs_Name);
-                    node.render(true);
-                    //edit - changed only title in treeview
-                    that._saveTreeData( groupID );
+                    node = tree.getNodeByKey(response.svs_ID);
                 }
+console.log(node);
+                */                
+            
+                if(node){ //edit is called from this widget only - otherwise we have to implement search node by svsID
+                    //if group is changed move node to another tree
+                    groupID = response.svs_UGrpID
+                    if(groupID == window.hWin.HAPI4.currentUser.ugr_ID){
+                        groupID = response.domain?response.domain:'all'; //all or bookmarks
+                    }else{
+                        isPrivate = false;
+                    }
 
-                that._saveTreeData( groupID );
-                
-                svs_ID = response.svs_ID;
-                
+                    if( currGroupId != groupID){
+                        //remove from old group
+                        node.remove();
+                        if(!isPrivate){
+                            that._saveTreeData( currGroupId );   
+                        }
+                        if(that.treeviews[currGroupId].count()<1){
+                            $("#addlink"+currGroupId).css('display', 'block');
+                        }
+                        
+                        //add to to new tree
+                        var tree = that.treeviews[groupID];
+                        node = tree.rootNode;
+                        var new_node = node.addNode( { title:response.svs_Name, key: response.svs_ID}, 'child' );
+                        $(new_node.li).find('.fancytree-node').addClass('fancytree-match');
+                        
+                        //that._saveTreeData( groupID );
+                        $("#addlink"+groupID).hide();
+                        
+                    }else{
+                        node.setTitle(response.svs_Name);
+                        node.render(true);
+                        //edit - changed only title in treeview
+                        //that._saveTreeData( groupID );
+                    }
+
+                    that._saveTreeData( groupID );
+                    
+                    svs_ID = response.svs_ID;
+                    
+                }
             }
             
             if(groupID && svs_ID>0){
                 that._activateMenuAndTruncate(groupID);
+                
+                if($.isFunction(after_save_callback)){
+                    after_save_callback.call( this, svs_ID );
+                }
             }
                 
             

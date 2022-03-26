@@ -347,6 +347,7 @@ regional['de'] = {
     
     resultList_action_delete_hint: 'Kartendokument löschen; assoziierte Ebenen der Karte und Datenquellen behalten.',
     'Password reminder': 'Passworterinnerung',
+    resultList_reorder_list_changed: 'Reorder list has been changed.',
     //END resultList
     
     //search - filters

@@ -489,7 +489,7 @@ regional['ru'] = {
    
     resultList_action_delete_hint: 'Delete map document. Associated map layers and data sources retain',
     'Password reminder': 'Пароль',
-   
+    resultList_reorder_list_changed: 'Список был изменен',
     //END resultList
 
     //search - filters

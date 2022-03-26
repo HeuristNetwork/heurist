@@ -361,6 +361,7 @@ regional['en'] = {
     
     resultList_action_delete_hint: 'Delete map document. Associated map layers and data sources retain',
     'Password reminder': '',
+    resultList_reorder_list_changed: 'Reorder list has been changed.',
     //END resultList
     
     //search - filters

@@ -1632,15 +1632,14 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         /**
         * Returns new recordSet that is the join from current and given recordset
         */
-        doUnite: function(recordset2, after_rec_id){
+        doUnite: function(recordset2, before_rec_id){
             if(recordset2==null){
                 return that;
             }
             
-            var after_idx = -1;
-            if(after_rec_id>0){
-                after_idx = window.hWin.HEURIST4.util.findArrayIndex(after_rec_id, order);
-                if(after_idx==order.length-1) after_idx = -1;
+            var insert_at = -1;
+            if(before_rec_id>0){
+                insert_at = window.hWin.HEURIST4.util.findArrayIndex(before_rec_id, order);
             }
             
             //join records
@@ -1654,9 +1653,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 //for (recid in records2){
                 if(recid && !records[recid]){ //there is not such record in target
                     records_new[recid] = records2[recid];
-                    if(after_idx>=0){
-                        after_idx++;
-                        order_new.splice(after_idx,0,recid);
+                    if(insert_at>=0){
+                        order_new.splice(insert_at,0,recid);
+                        insert_at++;
                     }else{
                         order_new.push(recid);    
                     }
