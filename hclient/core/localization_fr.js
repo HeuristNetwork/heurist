@@ -55,8 +55,7 @@ regional['fr'] = {
     'Remember me': 'Se souvenir de moi',
     'Forgotten your password?': 'Mot de passe oublié ?',
     'Click here to reset it': 'Réinitialiser votre mot de passe',
-    'Enter your username OR email address below and a new password will be emailed to you.':'Saisissez votre login ou votre adresse e-mail de récuperation"
-,
+    'Enter your username OR email address below and a new password will be emailed to you.':'Saisissez votre login ou votre adresse e-mail de récuperation',
     'Reset password': 'Réinitialiser le mot de passe',
     'Email to':'Contact',
     'User information has been saved successfully':'Les informations de l\'utilisateur ont été sauvegardées avec succès',
@@ -157,7 +156,7 @@ regional['fr'] = {
 
     'Delete? Please confirm': 'Supprimer ? Veuillez confirmer',
 
-    'select record': 'Selectionner un ,
+    'select record': 'Selectionner un' ,
 
     'Leave blank for no change': 'Laisser vide pour ne pas effectuer un changement',
     'Passwords are different': 'Les mots de passe ne correspondent pas',
@@ -294,7 +293,7 @@ regional['fr'] = {
         menu_structure_fieldtypes_hint: 'Parcourir et éditer les .... BASE FIELD DEFINITIONS .... utilisés dans les types d\'enregistrements (souvent utilisés par plusieurs types d\'enregistrements)',
         menu_structure_import_hint: 'Sélectionner et importer des types d\'enregistrement, des champs, des termes provenant d\'autres bases de données Heurist',
         menu_structure_summary_hint: 'Visualiser les connections internes entre les types d\'enregistrement dans la base de donnnées et ajouter des connections (liens et relations) entre eux',
-        menu_structure_refresh_hint: 'Rafraîchir et recharger le cache dans votre navigateur pour Heurist. Utilisez ceci si vous rencontrer des problèmes de mise à jour suite à des changements récents (notamment dans le cas des listes)'
+        menu_structure_refresh_hint: 'Rafraîchir et recharger le cache dans votre navigateur pour Heurist. Utilisez ceci si vous rencontrer des problèmes de mise à jour suite à des changements récents (notamment dans le cas des listes)',
 
     'Setup': '',
         menu_manage_dashboards: 'Barre de raccourcis',
@@ -403,7 +402,7 @@ regional['fr'] = {
     
     //END main menu
     
-    //resultList --------------------
+    // --------------------
     
     'Selected': 'Sélectionner',
         menu_selected_select_all: 'Tout sélectionner',
@@ -497,7 +496,7 @@ regional['fr'] = {
    
     resultList_action_delete_hint: 'Delete map document. Associated map layers and data sources retain',
     'Password reminder': 'Aide-mémoire pour le mot de passe',
-   
+    resultList_reorder_list_changed: 'Reorder list has been changed.',  //EN
     //END resultList
 
     //search - filters
@@ -550,7 +549,7 @@ regional['fr'] = {
     'Edit Title Mask': 'Éditer le masque de titre',
     
     //my preferences
-    'Define Symbology': 'Choix des symboles'',                
+    'Define Symbology': 'Choix des symboles',                
     'Define Heurist Theme': 'Choix du thème',
     'Configure Interface': 'Configurer l\'interface',
     'Mark columns to be visible. Drag to re-order': 'Cochez les colonnes qui doivent être visibles. Faites glisser pour réorganiser',
