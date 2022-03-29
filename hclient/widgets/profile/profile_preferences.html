@@ -24,6 +24,7 @@
     function initProfilePreferences(){
 
         var sel = $("#layout_language");
+        /* list of languages is hardcoded in html
         if(!(typeof regional === 'undefined') && sel.length==1){ //global variable defined in localization.js
 
             var key;
@@ -35,6 +36,8 @@
                 }
             }
         }
+        */
+        sel.val(window.hWin.HAPI4.getLocale());
 
         sel = $("#layout_id");
         if(sel.length==1){ //global variable defined in layout_default.js
@@ -132,12 +135,6 @@
         <select name="layout_id" id="layout_id" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
     </div>
 
-    <div style="display: none;">
-        <div class="header"><label for="layout_language">Interface language <i>(under implemented)</i></label></div>
-        <select name="layout_language" id="layout_language" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
-    </div>
-
-    
     <!-- we don't really want them changing this, can get into trouble, besides popus up UNDER form @14/4/18
     <div>
         <div class="header"><label>Theme (colours &amp; styles)</label></div>
@@ -329,6 +326,15 @@
 	<div>
         <div class="header"><label for="imageRecordEditor">Display images inline by default in the record editor</label></div>
         <input type="checkbox" name="imageRecordEditor" id="imageRecordEditor" class="text ui-widget-content ui-corner-all"/>
+    </div>
+ 
+    <div>
+        <div class="header"><label for="layout_language">Interface language</label></div>
+        <select name="layout_language" id="layout_language" class="text ui-widget-content ui-corner-all" style="min-width:300px">
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+        </select>
     </div>
     
 

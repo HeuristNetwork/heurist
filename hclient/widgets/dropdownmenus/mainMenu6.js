@@ -69,12 +69,15 @@ $.widget( "heurist.mainMenu6", {
     search_faceted: null,
     edit_svs_dialog: null,
 
-
+    _left_position: 91, //normal width for most languages, for German it is 115
 
     // the widget's constructor
     _create: function() {
 
         var that = this;
+        
+        this._left_position = ('de'== window.hWin.HAPI4.getLocale())?115:91;
+
         
         this.element.addClass('ui-menu6')
         .addClass('selectmenu-parent')
@@ -88,7 +91,8 @@ $.widget( "heurist.mainMenu6", {
         //91 200    
         this.divMainMenu = $('<div>')
         .addClass('mainMenu6')
-        .css({position:'absolute',width:'91px',top:'2px',left:'0px',bottom:'4px', //91
+        .css({position:'absolute',width: (this._left_position+'px'),
+                top:'2px',left:'0px',bottom:'4px', 
                 cursor:'pointer','z-index':104})
         .appendTo( this.element );
         
@@ -505,15 +509,16 @@ $.widget( "heurist.mainMenu6", {
             that.divMainMenu.find('#svs_list').hide();
             //that.divMainMenu.find('#filter_by_groups').show(); IJ 2020-11-23 always show in explore menu only
 
-            if(that.divMainMenu.width()>91)
-                that.divMainMenu.stop().effect('size',  { to: { width: 91 } }, is_instant===true?10:300, function(){ //91
+            if(that.divMainMenu.width()>that._left_position)
+                that.divMainMenu.stop().effect('size',  { to: { width: that._left_position } }, 
+                    is_instant===true?10:300, function(){ //91
                     that.divMainMenu.css({bottom:'4px',height:'auto'});
                     that._closeExploreMenuPopup();
                 });
 
             if (that.menues[that._active_section]) 
             {
-                that.menues[that._active_section].css({left:96});
+                that.menues[that._active_section].css({left:(that._left_position+5)});
             }   
             
             that._switch_SvsList( 0 );
@@ -702,11 +707,11 @@ $.widget( "heurist.mainMenu6", {
         
         if(menu_item && menu_item.parents('.ui-heurist-quicklinks').length==0 && 
                 (this._active_section=='explore' || this._active_section=='populate')){
-            explore_left = 302;
+            explore_left = that._left_position + 211;// 302;
         }else if(menu_item && menu_item.parents('.ui-heurist-quicklinks').length==1){
             explore_left = this._widthMenu+4;
         }else{
-            explore_left = (that.divMainMenu.width()>91)?(this._widthMenu+4):95; 
+            explore_left = ((that.divMainMenu.width()>that._left_position)?this._widthMenu:that._left_position)+4; 
         }
         
         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear previous delay before open
@@ -1135,6 +1140,7 @@ $.widget( "heurist.mainMenu6", {
             .addClass('ui-menu6-widgets ui-menu6-container ui-heurist-'+section) //ui-menu6-widgets to distinguish with introduction
             .appendTo( this.element );
             
+        this.containers[section].css('left',(this._left_position+211)+'px');
             
         if(section=='explore'){
 
@@ -1169,7 +1175,7 @@ $.widget( "heurist.mainMenu6", {
                     
             this.search_faceted = $('<div>')
                     .addClass('ui-menu6-container ui-heurist-explore')
-                    .css({left:'96px', width:'200px', 'z-index':102})
+                    .css({left:(this._left_position+5)+'px', width:'200px', 'z-index':102})
                     .hide()
                     .appendTo( this.element );
             
@@ -1301,7 +1307,7 @@ $.widget( "heurist.mainMenu6", {
             
             if(section=='design'){    
                     $(this.containers[section])
-                        .css({left:'304px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'});
+                        .css({left:(this._left_position+211)+'px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'});
             }
             
             //this.switchContainer(section, true);
@@ -1415,7 +1421,7 @@ $.widget( "heurist.mainMenu6", {
             if(force_show || (that.containers[section] && !that.containers[section].is(':empty'))){
                 that.containers[section].show();    
             }else if(that.introductions && that.introductions[section]){
-                that.introductions[section].show();    
+                that.introductions[section].css('left', (that._left_position+211)+'px').show();    
             }
             
             //change main background
@@ -1520,9 +1526,9 @@ $.widget( "heurist.mainMenu6", {
         }
         
         if(!(left_position>0)){
-            left_position = (that.divMainMenu.width()>91)?(this._widthMenu+4):95; 
+            left_position = ((that.divMainMenu.width()>this._left_position)?this._widthMenu:this._left_position) + 4; 
             if(this._active_section=='explore'){
-                left_position = 302;
+                left_position = this._left_position + 211; //302;
             }
         }
         if(!(top_position>0)){
@@ -1683,7 +1689,7 @@ $.widget( "heurist.mainMenu6", {
 			
         +'<div class="ui-heurist-title" style="font-size: large !important;width: 80px;padding-top: 6px;">'+sname+'</div>'
         +'</div></div>')            
-                .addClass('ui-menu6-container ui-heurist-'+section)
+                .addClass('ui-menu6-container AAA'+this._left_position+' ui-heurist-'+section)
                 .css({'background':'none'})
                 .appendTo( this.element );
                 
@@ -2108,7 +2114,7 @@ $.widget( "heurist.mainMenu6", {
                         .load( window.hWin.HRes('menu_'+section)+' #content' )
                         .appendTo( that.introductions[section] );
                 })
-                .css({left:'304px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'})  //,'z-index':104
+                .css({left:(that._left_position+211)+'px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'})  //,'z-index':104
                 .show();
                     
         this.containers[section].hide();
@@ -2161,7 +2167,8 @@ $.widget( "heurist.mainMenu6", {
 						})
 						.appendTo( that.introductions[section] );
                 })
-                .css({left:'304px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'})  //,'z-index':104
+                .css({left: ((that._left_position+211)+'px'),
+                      right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'})  //,'z-index':104
                 .show();
 
         this.containers[section].hide();

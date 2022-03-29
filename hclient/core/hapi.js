@@ -111,10 +111,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         // regional - global variable defined in localization.js
         if(!window.hWin.HR){
-            var lang = window.hWin.HEURIST4.util.getUrlParameter('lang');
-            window.hWin.HR = that.setLocale(lang);
-            window.hWin.HRA = that.HRA; //localize all elements with class slocale for given element
-            window.hWin.HRes = that.HRes; //returns url or content for localized resource (help, documentation)
+            window.hWin.HR = that.setLocale('en');
         }
         
         if(!$.isFunction(that.fancybox)){
@@ -145,7 +142,21 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         // Get current user if logged in, and global database settings
         // see usr_info.php sysinfo method  and then system->getCurrentUserAndSysInfo
         if(that.database){
-            that.SystemMgr.sys_info( _oninit );
+            that.SystemMgr.sys_info( function(success){
+                if(success){
+                    var lang = window.hWin.HEURIST4.util.getUrlParameter('lang');
+                    if(lang){
+                        //save in preferences
+                        window.hWin.HAPI4.save_pref('layout_language', lang);
+                    }else{
+                        lang = window.hWin.HAPI4.get_prefs_def('layout_language', 'en');
+                    }
+                    window.hWin.HR = that.setLocale(lang);
+                    window.hWin.HRA = that.HRA; //localize all elements with class slocale for given element
+                    window.hWin.HRes = that.HRes; //returns url or content for localized resource (help, documentation)
+                }
+                _oninit(success);
+            } );
         }else{
             if(_oninit){
                 _oninit(false);
