@@ -1064,7 +1064,7 @@ if($active_all || in_array('empty_fields', $active)) {
         $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
 
         if($total_count_rows<1){
-            print '<div><h3 class="res-valid">OK: All records don\'t have empty fields</h3></div>';
+            print '<div><h3 class="res-valid">OK: There are no fields containing null values</h3></div>';
             echo '<script>$(".empty_fields").css("background-color", "#6AA84F");</script>';
         }
         if($wascorrected>1){
