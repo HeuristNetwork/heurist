@@ -479,12 +479,6 @@ if(!($is_map_popup || $without_header)){
             overflow: visible;
         }        
 
-        H2 {
-            color: #6A7C99;
-            font-size: 14px;
-            line-height: 25px;
-            margin: 0;
-        }  
         #recID {
             float: right;
             font-size: 11px;
@@ -1273,22 +1267,20 @@ function print_public_details($bib) {
     usort($bds, "__sortResourcesByDate");
 
     if($is_map_popup){
-        echo '<div class="map_popup">';  
-    }else{  
+        print '<div class="map_popup">';
+    }
 
-        //print info about parent record
-        if(!$is_production) {
+    //print info about parent record
+    if(!$is_production) {
         foreach ($bds as $bd) {
             if(defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY){
+
                 print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
                 .'<div class=detailType>Parent record</div><div class="detail">'
                 .' '.$bd['val'].'</div></div>';
                 break;
             }
         }
-        }
-
-        //echo '<div class=detailRowHeader>Shared';
     }
     
     print '<div id="div_public_data">';
@@ -1458,7 +1450,7 @@ function print_public_details($bib) {
 
         $ele_id = ($bd['rst_DisplayOrder'] != '' || $bd['rst_DisplayOrder'] != null) ? 'data-order="' . $bd['rst_DisplayOrder'] . '"' : '';
 
-        print '<div class="detailRow fieldRow" '. ($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt) ? '' : $ele_id) .' style="border:none 1px #00ff00;'   //width:100%;
+        print '<div class="detailRow fieldRow" '. $ele_id .' style="border:none 1px #00ff00;'   //width:100%;
             .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none;':'')
             .($is_map_popup?'':'width:100%;')
             .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
@@ -1468,7 +1460,6 @@ function print_public_details($bib) {
         
     }
 
-    // </div>  
     if($is_map_popup){
         //echo '<div class=detailRow><div class=detailType><a href="#" onClick="$(\'.fieldRow\').show();$(event.target).hide()">more</a></div><div class="detail"></div></div>';
     }else{
@@ -1498,8 +1489,6 @@ function print_public_details($bib) {
 
         echo '<div class="detailRow fieldRow">&nbsp;</div>';
     }
-    
-    
 
     echo '</div></div>';            
 }
@@ -1541,9 +1530,10 @@ function print_relation_details($bib) {
     $link_cnt = 0;    
 
     if($is_map_popup){
-       print '<div class="map_popup">';
+        print '<div class="detailType fieldRow" style="display:none;line-height:21px">Related</div>';
+        print '<div class="map_popup">';
     }else{
-       print '<div class="detailRowHeader relatedSection" style="float:left">Related'; 
+        print '<div class="detailRowHeader relatedSection" style="float:left">Related'; 
     }
 
     $accessCondition = '(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '.
@@ -1579,7 +1569,7 @@ function print_relation_details($bib) {
 
 			$field_name = false;
 
-			if(!$is_map_popup && $relfields_details && count($relfields_details) > 0){
+			if($relfields_details && count($relfields_details) > 0){
 
 				for($i = 0; $i < count($relfields_details); $i++){
 
@@ -1629,9 +1619,9 @@ function print_relation_details($bib) {
 
 			print '<div class="detail" '. $extra_styling .'>';
 				if (@$bd['RelatedRecID']) {
-					if(true || $is_map_popup){  
-						print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
-					}
+
+					print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
+
 					print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
 							.strip_tags($recTitle,ALLOWED_TAGS).'</a>';
 				} else {
@@ -1663,7 +1653,7 @@ function print_relation_details($bib) {
 
 			$field_name = false;
 
-			if(!$is_map_popup && $relfields_details && count($relfields_details) > 0){
+			if($relfields_details && count($relfields_details) > 0){
 
 				for($i = 0; $i < count($relfields_details); $i++){
 
@@ -1712,9 +1702,9 @@ function print_relation_details($bib) {
 
 			print '<div class="detail" '. $extra_styling .'>';
 				if (@$bd['RelatedRecID']) {
-					if(true || $is_map_popup){  
-						print '<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
-					}
+
+					print '<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
+
 					print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
 						.strip_tags($recTitle,ALLOWED_TAGS).'</a>';
 				} else {

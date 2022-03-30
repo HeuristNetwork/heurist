@@ -1149,7 +1149,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
         
         if(!styles){
-            styles = {'background-color': "#000", opacity: '0.6', color: 'green', 'font-size': '25px', 'font-weight': 'bold'};
+            styles = {'background-color': "#000", opacity: '0.6', color: 'rgb(0, 190, 0)', 'font-size': '20px', 'font-weight': 'bold'};
         }
         window.hWin.HEURIST4.msg.coverall.css( styles );
         

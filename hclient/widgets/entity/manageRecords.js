@@ -3702,7 +3702,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     +'<img src="'+ph_gif
                         +'" width=36 height=36 class="rt-icon" style="padding:2px;background-size: 28px 28px;vertical-align:middle;margin: 2px 10px 2px 4px;'
                         +'background-image:url(\'' + rt_icon + '\');"/>'
-                    + '<span style="display:inline-block;vertical-align:middle;font-size:larger;font-weight:bold;max-width:100px;" '
+                    + '<span style="display:inline-block;vertical-align:middle;font-size:larger;font-weight:bold;max-width:25ex;" '
                     + 'class="truncate" title="'+ $Db.rty(this._currentEditRecTypeID,'rty_Name') +'">'
                         + $Db.rty(this._currentEditRecTypeID,'rty_Name')
                     + '</span>'
