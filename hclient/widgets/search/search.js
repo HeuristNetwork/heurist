@@ -149,7 +149,6 @@ $.widget( "heurist.search", {
 
 
         this.input_search = $( "<textarea>" )
-        .attr('readonly', true)
         .css({//'margin-right':'0.2em', 
             'height':'41px', 
             'max-height':'70px', 
@@ -192,12 +191,55 @@ $.widget( "heurist.search", {
         // AAAA
         this._on( this.input_search, {
             click: function(){ 
-                // Display textarea within popup, for more space, with explanation and filter help link
-                var $dlg;
-
                 if(this.input_search_prompt2.is(':visible')){
                     this.input_search_prompt2.css({visibility:'hidden'}); 
                 }
+            },
+            keyup: this._showhide_input_prompt, 
+            change: this._showhide_input_prompt
+        });
+
+        //disable because of initial search
+        if(this.options.btn_visible_newrecord){
+            window.hWin.HEURIST4.util.setDisabled(this.input_search, true); 
+            this.input_search.css({'width':'400px','height':'1.4em','max-width':'650px'});
+            this.div_search.css({'float':'left'});
+        }else{
+
+            if(this.options.is_h6style){
+                this.div_search_input.css({'width':'85%','min-width':'80px',height:'30px'}); //'max-width':'470px',  
+            }else{
+                this.div_search.css({'display':'table',height:'30px'});
+            }
+        }
+
+        //help link and quick access of saved filters
+        if(!this._is_publication && this.options.is_h6style){
+            var div_search_help_links = $('<div>')
+            //.css({position: 'absolute', top:'auto', 'font-size':'10px'})
+            .css({position: 'absolute',top:'85px','font-size':'10px'})
+            .appendTo(this.div_search_input);
+
+            var open_in_popup = $('<span title="Open search in popup, for more space">'
+                +'Open in popup <span class="ui-icon ui-icon-popup" style="font-size:0.8em" /></span>')
+            .addClass('graytext')
+            .css({'text-decoration':'none','outline':0, cursor:'pointer', 'display': 'inline-block', 'margin-right': '10px'})
+            .appendTo(div_search_help_links);
+
+            var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
+                +'filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')
+            .attr('id', 'search_help_link')
+            .addClass('graytext')
+            .css({'text-decoration':'none','outline':0, cursor:'pointer'})
+            .appendTo(div_search_help_links);
+
+            this._on( link, {  click: function(){
+                window.open('context_help/advanced_search.html','_blank');
+            } });
+
+            this._on( open_in_popup, {  click: function(){ // open search textarea in a popup, for more space, add more instructions and include filter help link
+
+                var $dlg;
 
                 var $help_link = this.div_search_input.find('#search_help_link').clone();
                 var org_val = this.input_search.val();
@@ -231,42 +273,7 @@ $.widget( "heurist.search", {
                 $dlg.find('#search_help_container').append($help_link);
 
                 $dlg.find('#search_help_link').on('click', function(){ window.open('context_help/advanced_search.html','_blank'); });
-            },
-            keyup: this._showhide_input_prompt, 
-            change: this._showhide_input_prompt
-        });
-
-        //disable because of initial search
-        if(this.options.btn_visible_newrecord){
-            window.hWin.HEURIST4.util.setDisabled(this.input_search, true); 
-            this.input_search.css({'width':'400px','height':'1.4em','max-width':'650px'});
-            this.div_search.css({'float':'left'});
-        }else{
-
-            if(this.options.is_h6style){
-                this.div_search_input.css({'width':'85%','min-width':'80px',height:'30px'}); //'max-width':'470px',  
-            }else{
-                this.div_search.css({'display':'table',height:'30px'});
-            }
-        }
-
-        //help link and quick access of saved filters
-        if(!this._is_publication && this.options.is_h6style){
-            var div_search_help_links = $('<div>')
-            //.css({position: 'absolute', top:'auto', 'font-size':'10px'})
-            .css({position: 'absolute',top:'85px','font-size':'10px'})
-            .appendTo(this.div_search_input);
-
-            var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
-                +'filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')
-            .attr('id', 'search_help_link')
-            .addClass('graytext')
-            .css({'text-decoration':'none','outline':0, cursor:'pointer'})
-            .appendTo(div_search_help_links);
-
-            this._on( link, {  click: function(){
-                window.open('context_help/advanced_search.html','_blank');
-            } });
+            }});
         }
 
 
