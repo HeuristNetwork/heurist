@@ -201,6 +201,14 @@ input.Temporal, .list_div {
     min-height: 20px;    
 }
 
+/* RECORD VIEWER ----------------------------------   */
+H2.rec_title {
+    color: #6A7C99;
+    font-size: 14px;
+    line-height: 25px;
+    margin: 0;
+} 
+
 /* INPUT FORM ----------------------------------   */
 fieldset {
     padding:5px;
