@@ -749,7 +749,29 @@ window.hWin.HEURIST4.geo = {
     
         return resdata; 
     },
-    
+
+    //
+    //
+    //
+    getParsedWkt: function(wkt, checkWkt=false){
+
+        if(checkWkt){
+            var matches = wkt.match(/\??(\S+)\s+(.*)/);
+
+            if(!matches){
+                return '';
+            }
+
+            if(matches.length > 2){
+                wkt = matches[2];
+            }else{
+                wkt = matches[1];
+            }
+        }
+
+        return parseWKT(wkt); //see wellknown.js
+    },
+
     //
     //
     //
@@ -766,9 +788,13 @@ window.hWin.HEURIST4.geo = {
         }else{
             wkt = matches[1];
         }
-               
-        var gjson =  parseWKT(wkt);  //see wellknown.js
+
+        var gjson = window.hWin.HEURIST4.geo.getParsedWkt(wkt, false);
         var resdata = window.hWin.HEURIST4.geo.prepareGeoJSON(gjson, null, 'google');
+
+        if($.isEmptyObject(resdata)){
+            return { type:'', summary:''};
+        }
 
         if(resdata.Point.length==1 && resdata.Polyline.length==0 && resdata.Polygon.length==0){
             
@@ -808,9 +834,8 @@ window.hWin.HEURIST4.geo = {
         }else{
             return { type:'', summary:''};
         }
-           
-        
     },
+
     //
     //
     //

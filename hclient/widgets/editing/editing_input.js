@@ -2841,21 +2841,32 @@ console.log('onpaste');
                 var $gicon = $('<span>').addClass('ui-icon ui-icon-globe')
                     .css({position:'absolute',margin:'4px 0 0 8px',cursor:'hand'})
                     .insertBefore($input);
-                
-                /* 2017-11-08 no more buttons
-                var $btn_digitizer_dialog = $( "<span>", {title: "Click to draw map location"})
-                        .addClass('smallicon ui-icon ui-icon-pencil')
-                        .appendTo( $inputdiv );
-                        //.button({icons:{primary: "ui-icon-pencil"},text:false});
-                var $link_digitizer_dialog = $( '<a>', {title: "Click to draw map location"})
-                        .text( window.hWin.HR('Edit'))
-                        .css('cursor','pointer')
-                        .appendTo( $inputdiv );
-                */
+
                 var geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(value);
             
                 that.newvalues[$input.attr('id')] = value;
-                $input.val(geovalue.type+'  '+geovalue.summary).css('cursor','hand');
+
+                if(geovalue.summary && geovalue.summary != ''){
+                    $input.val(geovalue.type+'  '+geovalue.summary).css('cursor','hand');
+                }else if(!window.hWin.HEURIST4.util.isempty(value)){
+                    var parsedWkt = window.hWin.HEURIST4.geo.getParsedWkt(value, true);
+                    if(parsedWkt == '' || parsedWkt == null){
+                        $input.val('');
+                        $('<span>').addClass('geo-badvalue').css({'display': 'inline-block', 'margin-left': '5px'}).text('Bad value: ' + value).appendTo($inputdiv);
+                    }else{
+                        if(parsedWkt.type == 'Point'){
+
+                            var invalid = '';
+                            if(Math.abs(parsedWkt.coordinates[0]) > 180){
+                                invalid = 'longitude is';
+                            }
+                            if(Math.abs(parsedWkt.coordinates[1]) > 90){
+                                invalid = (invalid != '') ? 'longitude and latitude are' : 'latitude is';
+                            }
+                            $('<span>').addClass('geo-badvalue').css({'display': 'inline-block', 'margin-left': '5px', color: 'red'}).text(invalid + ' outside of range').appendTo($inputdiv);
+                        }
+                    }
+                }
                       
                 __show_mapdigit_dialog = function (event){
                         event.preventDefault();
@@ -2906,7 +2917,9 @@ console.log('onpaste');
                                         $input.val(geovalue.summary).change();
                                     }else{
                                         $input.val(geovalue.type+'  '+geovalue.summary);
-                                        $input.change();    
+                                        $input.change();
+
+                                        $inputdiv.find('span.geo-badvalue').remove();
                                     }
                                     
                                     //$input.val(location.type+' '+location.wkt)
