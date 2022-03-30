@@ -508,24 +508,17 @@ function hEditing(_options) {
                 +'Modify structure</span> to enable them.').appendTo($div_hints);
         }
         if($container.find('ul[role="tablist"]').length>0 && recdata && recdata.entityName=='Records'){
+            
             var tab_groups = $container.find('ul[role="tablist"]');
-
             $.each(tab_groups, function(idx, group){
                 var $tabs = $(group).find('a');
-                var i = 0, max_width = 0;
+                var max_char = 30;
 
-                $tabs.css('width', 'auto');
-
-                for(; i < $tabs.length; i++){
-                    max_width = (max_width < $($tabs[i]).width()) ? $($tabs[i]).width() : max_width;
-                }
-				
-                if(max_width == 0){
-                    return;
-                }
-				
-                max_width += 15; // Add additional 'left padding'
-                $tabs.css('width', max_width+'px');
+                $tabs.css({
+                    'max-width': max_char+'ex',
+                    'width': 'auto',
+                    'margin-right': '20px'
+                }).addClass('truncate');
             });
 			
 			if($container.find('ul[role="tablist"]').length>1){
