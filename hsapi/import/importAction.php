@@ -54,6 +54,8 @@ class ImportAction {
     private static $rep_permission  = 0;
     private static $rep_unique_ids = array();
     //private static $imp_session;
+
+    private static $invalid_geo = 0;
     
 private static function initialize($fields_correspondence=null)
 {
@@ -804,7 +806,10 @@ public static function validateImport($params) {
         "count_warning"=>0, 
         "warning"=>array(),
         "utm_warning"=>0,
-        "geo_invalid"=>0
+        "geo_invalid"=>array(
+            "outOfBounds"=>array(),
+            "invalid"=>array()
+        )
     );
 
     //get rectype to import
@@ -1437,72 +1442,93 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         }
     }
 
-    //7. TODO Verify geo fields for UTM
-    if(true && is_array($geo_fields) && count($geo_fields)>0){
-        
+    //7. Verify geo fields, TODO: Verify geo fields for UTM
+    if(is_array($geo_fields) && count($geo_fields)>0){
+
         // northing, easting
-        $query = "select ".implode(',',$geo_fields)." from $import_table LIMIT 5";
-        
+        $query = "select ".implode(',',$geo_fields).", imp_ID from $import_table ";
+
         if(count($geo_fields)==1){
             $query = $query . ' WHERE '.$geo_fields[0].' > ""';    
+        }else{
+            $query = $query . ' LIMIT 5';
         }
-        
-        $query = $query . ' LIMIT 5';
-        
-        
+
         $res = $mysqli->query($query);
         $allInteger = true;
         $allOutWGS = true;
         if($res){
-            
             if(count($geo_fields)==1){ //WKT field
+
                 while ($row = $res->fetch_row()){
+
                     $wkt = $row[0];
-                    $geom = geoPHP::load($wkt, 'wkt');
-                    if($geom!=null && !$geom->isEmpty()){
-                        $bbox = $geom->getBBox();
-                        $allOutWGS = $allOutWGS 
-                            && (abs($bbox['minx'])>180) && (abs($bbox['miny'])>90)
-                            && (abs($bbox['maxx'])>180) && (abs($bbox['maxy'])>90);
-                        if (!$allOutWGS) break;
-                    }else{
-                        
-                        $valid_geo = false;
-                        $coords = explode(",", $wkt);
+                    $imp_id = $row[count($row)-1];
 
-                        if(count($coords) == 2){
+                    if(!preg_match('/\d/', $wkt)){
+                        array_push($imp_session['validation']['geo_invalid']['invalid'], $imp_id);
+                        continue;
+                    }
 
-                            $x = ltrim($coords[0]);
-                            $y = ltrim($coords[1]);
+                    $allOutWGS = true;
+                    $valid_geo = false;
 
-                            if(is_numeric($x) && is_numeric($y)){
+                    try{
 
-                                $constructed_geo = "POINT(" . $x . " " . $y . ")";
-                                $geo_len = strlen($constructed_geo);
-                                $test_geom = geoPHP::load($constructed_geo, 'wkt');
+                        $geom = geoPHP::load($wkt, 'wkt');
+                        if($geom!=null && !$geom->isEmpty()){
+                            $bbox = $geom->getBBox();
+                            $allOutWGS = $allOutWGS 
+                                && (abs($bbox['minx'])>180) && (abs($bbox['miny'])>90)
+                                && (abs($bbox['maxx'])>180) && (abs($bbox['maxy'])>90);
+                            if (!$allOutWGS){
+                                array_push($imp_session['validation']['geo_invalid']['outOfBounds'], $imp_id);
+                            }
+                        }else{
+                            // Attempt to convert to POINT(x,y)
+                            $valid_geo = self::validateGeoField($wkt, $imp_id, $import_table, $geo_fields[0]);
 
-                                if($test_geom!=null && !$test_geom->isEmpty()){
+                            if(!$valid_geo){
+                                array_push($imp_session['validation']['geo_invalid']['invalid'], $imp_id);
+                            }else{
 
-                                    $update_col = "ALTER TABLE $import_table MODIFY ".implode(',', $geo_fields)." varchar($geo_len)";
-
-                                    if($mysqli->query($update_col)){
-
-                                        $query = "UPDATE $import_table SET ".implode(',', $geo_fields)." = '" . $constructed_geo . "' WHERE imp_ID = '1'";
-
-                                        if($mysqli->query($query)){ 
-                                            $valid_geo = true;
-                                        }
+                                $geom = geoPHP::load($valid_geo, 'wkt');
+                                if($geom!=null && !$geom->isEmpty()){
+                                    $bbox = $geom->getBBox();
+                                    $allOutWGS = $allOutWGS 
+                                        && (abs($bbox['minx'])>180) && (abs($bbox['miny'])>90)
+                                        && (abs($bbox['maxx'])>180) && (abs($bbox['maxy'])>90);
+                                    if (!$allOutWGS){
+                                        array_push($imp_session['validation']['geo_invalid']['outOfBounds'], $imp_id);
                                     }
                                 }
                             }
                         }
 
+                    } catch (Exception $e){
+                        // Attempt to convert to POINT(x,y)
+                        $valid_geo = self::validateGeoField($wkt, $imp_id, $import_table, $geo_fields[0]);
+
                         if(!$valid_geo){
-                            $imp_session['validation']['geo_invalid'] = 1;
+                            array_push($imp_session['validation']['geo_invalid']['invalid'], $imp_id);
+                        }else{
+
+                            $geom = geoPHP::load($valid_geo, 'wkt');
+                            if($geom!=null && !$geom->isEmpty()){
+                                $bbox = $geom->getBBox();
+                                $allOutWGS = $allOutWGS 
+                                    && (abs($bbox['minx'])>180) && (abs($bbox['miny'])>90)
+                                    && (abs($bbox['maxx'])>180) && (abs($bbox['maxy'])>90);
+                                if (!$allOutWGS){
+                                    array_push($imp_session['validation']['geo_invalid']['outOfBounds'], $imp_id);
+                                }
+                            }
                         }
                     }
 
-                    $allInteger = $allOutWGS;
+                    if(!$allOutWGS){
+                        $allInteger = $allOutWGS;
+                    }
                 }
             }else{ //lat long fields
                 while ($row = $res->fetch_row()){
@@ -1521,12 +1547,11 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             $res->close();
         }
     }
-    
+
     mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
-    
-    return $imp_session;
-        
-    }
+
+    return $imp_session;   
+}
         
 
 /**
@@ -1929,8 +1954,81 @@ private static function validateDateField($query, $imp_session, $fields_checked,
     }
     return null;
 }
- 
- /**
+
+/**
+* Check whether value is valid, attempts to correct into POINT
+* 
+* @param mixed $wkt - Geo value to validate
+* @param int $rec_id - Record id within import table
+* @param mixed $table - Import table name
+* @param mixed $field - Import field name within table
+*/
+private static function validateGeoField($wkt, $rec_id, $table, $field){
+
+    $res = false;
+    $mysqli = self::$mysqli;
+
+    $coords = explode(",", $wkt);
+
+    if(count($coords) != 2){ // Values maybe separated via space instead
+        $coords = explode(" ", $wkt);
+    }
+
+    if(count($coords) == 3 && preg_replace('/[^0-9.]/', '', $coords[0]) == ''){ // First index maybe POINT, P, or something similar
+        array_shift($coords);
+    }
+
+    $x = '';
+    $y = '';
+
+    if(count($coords) == 2){
+
+        // Remove starting spaces
+        $x = ltrim($coords[0]);
+        $y = ltrim($coords[1]);
+
+        // Remove non-digits, excluding periods (.) and minus symbol from x and y
+        if(!is_numeric($x)){
+            $x = preg_replace('/[^-0-9.]/', '', $x);
+            $x = preg_replace('/-{2,}/', '-', $x);
+        }
+        if(!is_numeric($y)){
+            $y = preg_replace('/[^-0-9.]/', '', $y);
+            $y = preg_replace('/-{2,}/', '-', $y);
+        }
+
+        if(is_numeric($x) && is_numeric($y)){ // treat as a set of coords
+
+            $constructed_geo = "POINT (" . $x . " " . $y . ")"; // use a basic point
+            $geo_len = strlen($constructed_geo); // in case field needs enlarging within import table
+            $test_geom = geoPHP::load($constructed_geo, 'wkt');
+
+            if($test_geom!=null && !$test_geom->isEmpty()){
+
+                $maxw_query = 'SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS WHERE table_name = "'.$table.'" AND column_name = "'. $field .'"';
+                $field_max_width = mysql__select_value($mysqli, $maxw_query);
+
+                if($field_max_width && $field_max_width < $geo_len){
+                    $update_col = "ALTER TABLE $table MODIFY ".$field." varchar($geo_len)";
+                    $mysqli->query($update_col);
+                }
+
+                $update_table = "UPDATE $table SET ".$field." = '" . $constructed_geo . "' WHERE imp_ID = $rec_id";
+                $update_table_res = $mysqli->query($update_table); error_log($update_table);
+
+                if($update_table_res){
+                    $res = $constructed_geo;
+                }else{
+                    $res = false;
+                }
+            }
+        }
+    }
+
+    return $res;
+}
+
+/**
 * Split multivalue field
 *
 * @param array $values
@@ -2208,7 +2306,13 @@ public static function performImport($params, $mode_output){
     self::$rep_skipped_details = array();
     self::$rep_permission  = 0;
     self::$rep_unique_ids = array();
-    
+
+    $is_csv_import = 0;
+    if(array_key_exists('is_csv_import', $params)){
+        self::$invalid_geo = 0;
+        $is_csv_import = 1;
+    }
+
     $progress_session_id = @$params['session'];
     
     $imp_session = ImportSession::load(@$params['imp_ID']);
@@ -2617,7 +2721,13 @@ public static function performImport($params, $mode_output){
                                         $value = $geoType." ".$r_value;    
                                     }
                                 }else{
-                                    $value = null;   //wrong or not defined geo
+
+                                    if($is_csv_import != 1){
+                                        $value = null;   //wrong or not defined geo
+                                    }else{
+                                        $value = $r_value;
+                                        self::$invalid_geo++;
+                                    }
                                 }
                                 
                             }
@@ -2958,14 +3068,18 @@ public static function performImport($params, $mode_output){
         
         
         $import_report = array(                
-              'processed'=>self::$rep_processed,
-              'inserted'=>self::$rep_added,
-              'updated'=>self::$rep_updated,
-              'total'=>$tot_count,
-              'skipped'=>self::$rep_skipped,
-              'skipped_details'=>self::$rep_skipped_details,
-              'permission'=>self::$rep_permission
-            );   
+            'processed'=>self::$rep_processed,
+            'inserted'=>self::$rep_added,
+            'updated'=>self::$rep_updated,
+            'total'=>$tot_count,
+            'skipped'=>self::$rep_skipped,
+            'skipped_details'=>self::$rep_skipped_details,
+            'permission'=>self::$rep_permission
+        );   
+
+        if($is_csv_import == 1){
+            $import_report['invalid_geo'] = self::$invalid_geo;
+        }
 
         //update counts array                
         $new_counts = array( self::$rep_updated+self::$rep_added, self::$rep_processed, 0,0 );

@@ -3324,22 +3324,31 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             $('.step3 > .normal').hide();
                             $('.step3 > .skip_step').hide();
                             $('.step3 > .need_resolve').show();
-                        }else if(res['geo_invalid']>0){
-
-                            var col = window.hWin.HEURIST4.util.isempty(geo_col) ? 'A column' : 'The column "' + geo_col + '"';
-
-                            window.hWin.HEURIST4.msg.showMsgErr(col + ' contains invalid geospatial data, this data needs to formatted in WKT (Well-known text).<br><br>'
-                            +' If this field contains separate longitude and latitude data, please separate them into two different columns<br>'
-                            +'(one for Longitude and the other for Latitude).');
-
-                            $('.step3 > .normal').hide();
-                            $('.step3 > .skip_step').hide();
-
                         }else{
+
+                            if(res['geo_invalid'] && (res['geo_invalid']['invalid'].length > 0 || res['geo_invalid']['outOfBounds'].length > 0)){
+
+                                var hasInvalidGeo = res['geo_invalid']['invalid'].length > 0;
+                                var hasOOBGeo = res['geo_invalid']['outOfBounds'].length > 0;
+
+                                var msg = 'There appears to be data within the ' + geo_col + ' field that contains ' + ((hasInvalidGeo) ? 'invalid data (example. values without any coordinates) ' : '') 
+                                    + ((hasOOBGeo) ? ((hasInvalidGeo) ? 'and geo data out of bounds (invalid longitude and latitude values)' : 'out of bounds (invalid longitude and latitude values)') : '')
+                                    + '.<br>If you continue with the import these values will be added to there respective records as is.<br>'
+                                    + ' We highly recommend running Admin &gt; Verify integrity (after finishing the import) to find these fields and fix them manually.<br><br>';
+
+                                if(res['geo_invalid']['invalid'].length > 0){
+                                    msg += '<div style="margin-bottom: 5px;">Lines with invalid values: ' + res['geo_invalid']['invalid'].join(', ') + '</div>';
+                                }
+                                if(res['geo_invalid']['outOfBounds'].length > 0){
+                                    msg += '<div>Lines with out of bounds values: ' + res['geo_invalid']['outOfBounds'].join(', ') + '</div>';
+                                }
+
+                                window.hWin.HEURIST4.msg.showMsgDlg(msg, null, null, {title: 'Invalid geographical data', default_palette_class: 'ui-heurist-populate'});
+                            }
+
                             $('#prepareErrors').css('display','none');
                             _showStep(5);
                         }
-
                     }else{
                         _showStep(4);
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -3414,7 +3423,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             ignore_insert: $('#sa_insert').prop('checked')?0:1,
             ignore_update: $('#sa_update').prop('checked')?0:1,
             ignore_errors: $('#sa_ignore_errors').prop('checked')?1:0,
-            
+
+            is_csv_import: 1, // identify this request as a CSV import
+
             utm_zone  : UTMzone,
             recid_field: 'field_'+key_idx, //imp_session['columns'][key_idx]
             //0 - Retain existing values and append distinct new data as repeat values
@@ -3474,7 +3485,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         }
                           
                         msg = msg +'</td></tr></table>';
-                        
+
+                        // Add line about invalid geo fields
+                        if (imp_result['invalid_geo']>0){
+                            var t_msg = (imp_result['invalid_geo'] == 1) ? ' error' : ' errors';
+                            msg = msg +'<div style="color:red;">' + imp_result['invalid_geo'] + t_msg + ' encountered in geographical data fields. Please run Admin &gt; Verify integrity</div>';
+                        }
+
                         window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 
                                 'Import of '+$Db.rty(rtyID,'rty_Name')+' complete.');
                         

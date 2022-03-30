@@ -2104,8 +2104,15 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                     if($dtl_Value===false){
                         $err_msg = $geoValue; 
                         $isValid = ($validation_mode==0)?'ignore':false;
+                        if(!$isValid && $modeImport == 1){
+                            $dval['dtl_Value'] = $values[$eltID];
+                            $dval['dtl_UploadedFileID'] = null;
+                            $dval['dtl_Geo'] = null;
+                            array_push($insertValues, $dval);
+                            $isValid = 'ignore';
+                        }
                     }else{
-                        $isValid = true;    
+                        $isValid = true;
                     }
 
 
@@ -2255,28 +2262,38 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
 //
 //
 //
-function prepareGeoValue($mysqli, $dtl_Value){                        
+function prepareGeoValue($mysqli, $dtl_Value){
 
     $geoType = super_trim(substr($dtl_Value, 0, 2));
+    $hasGeoType = false;
+    $res = false;
+
     if($geoType=='p'||$geoType=='l'||$geoType=='pl'||$geoType=='c'||$geoType=='r'||$geoType=='m'){
         $geoValue = super_trim(substr($dtl_Value, 2));
+        $hasGeoType = true;
     }else{
         $geoValue = super_trim($dtl_Value);
         if(strpos($geoValue, 'GEOMETRYCOLLECTION')!==false || strpos($geoValue, 'MULTI')!==false){
             $geoType = "m";
+            $hasGeoType = true;
         }else if(strpos($geoValue,'POINT')!==false){
             $geoType = "p";
+            $hasGeoType = true;
         }else if(strpos($geoValue,'LINESTRING')!==false){
             $geoType = "l";
+            $hasGeoType = true;
         }else if(strpos($geoValue,'POLYGON')!==false){ //MULTIPOLYGON
             $geoType = "pl";
+            $hasGeoType = true;
         }
     }
 
-    $res = mysql__select_value($mysqli, "select ST_asWKT(ST_GeomFromText('".addslashes($geoValue)."'))");
+    if(preg_match('/\d/', $geoValue) && $hasGeoType){ // check that the value has ANY numbers (coordinates) and has an identified geo type
+        $res = mysql__select_value($mysqli, "select ST_asWKT(ST_GeomFromText('".addslashes($geoValue)."'))");
+    }
+
     if($res){
         return array($geoType, $geoValue);
-
     }else{
         return array(false, 'Geo WKT value '.substr(htmlspecialchars($geoValue),0,15).'... is not valid');
     }
