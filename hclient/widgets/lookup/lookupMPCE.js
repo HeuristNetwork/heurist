@@ -273,7 +273,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
         Return: VOID, closes classification tool
      */
     doAction: function(){
-        
+
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());    // use this function to show "in progress" animation and cover-all screen for long operation
 
         // assign values to be sent back to edit form - format is similar to this.options.edit_fields
@@ -281,20 +281,26 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
         this._context_on_close[this.id_map.DT_Category] = $('#category_field').val();
         this._context_on_close[this.id_map.DT_Basis] = $('#basis_field').val();
         this._context_on_close[this.id_map.DT_Notes] = $('#notes_field').val();
-        this._context_on_close[this.id_map.DT_Keywords] = this.project_keywords;
+        this._context_on_close[this.id_map.DT_Keywords] = (this.project_keywords.length == 0) ? null : this.project_keywords;
+
+        var idxRecent = (this.prev_works == null) ? -1 : this.prev_works.findIndex(id => id == this.options.edit_fields.rec_ID[0]);
+        var hasKeywords = !window.hWin.HEURIST4.util.isempty(this.project_keywords);
 
         /* Check if work can be added to list of recently viewed works */
-        if (this.prev_works != null && !window.hWin.HEURIST4.util.isempty(this.project_keywords) &&  this.prev_works.find(e => e == $('#work-code_field').text()) == null) {
+        if (idxRecent == -1 && hasKeywords) {
 
-            this.prev_works.unshift($('#work-code_field').text());
+            this.prev_works.unshift(this.options.edit_fields.rec_ID[0]);
 
             if (this.prev_works.length == 5) {
                 this.prev_works.splice(4, 1);
             }
 
-            localStorage.setItem("prev_classify", JSON.stringify(this.prev_works));        
+            localStorage.setItem("prev_classify", JSON.stringify(this.prev_works));
+        }else if(idxRecent != -1 && !hasKeywords){
+            this.prev_works.splice(idxRecent, 1);
+            localStorage.setItem("prev_classify", JSON.stringify(this.prev_works));
         }
-        
+
         window.hWin.HEURIST4.msg.sendCoverallToBack();  // use this function to hide cover-all/loading
 
         this._as_dialog.dialog('close');    // close popup
@@ -477,7 +483,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
 
             var work_title = $('#title_field').html();
 
-            var query_request = {q:'t:' + this.id_map.RT_Editions + ' linkedto:' + this.options.edit_fields.rec_ID, detail:"detail", limit: 10};
+            var query_request = {q:'t:' + this.id_map.RT_Editions + ' linkedto:' + this.options.edit_fields.rec_ID[0], detail:"detail", limit: 10};
 
             window.hWin.HAPI4.RecordMgr.search(query_request,
                 function( response ){
@@ -985,7 +991,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
             var ch_set;
 
             /* Which work will have it's keywords automatically set to checked, each work can only appear once in the list */
-            if (this.prev_works[0] != $('#work-code_field').text()) {
+            if (this.prev_works[0] != this.options.edit_fields.rec_ID[0]) {
                 ch_set = this.prev_works[0];
             } else if (this.prev_works.length != 1) {
                 ch_set = this.prev_works[1];
@@ -994,7 +1000,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
             /* Now retrieve and display the list */
             for (var i = 0; i < this.prev_works.length; i++) {
 
-                if (this.prev_works[i] == $('#work-code_field').text()) { continue; }
+                if (this.prev_works[i] == this.options.edit_fields.rec_ID[0]) { continue; }
 
                 /* Additional information is sent, depending on whether the work's keywords are to be checked or not  */
                 if (ch_set == this.prev_works[i]) {
@@ -1010,15 +1016,15 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
         }
 
         /* Check if current work can be added to the list of previously (recent) works */
-        if(this.prev_works.find(row => row == $('#work-code_field').text()) == null && !window.hWin.HEURIST4.util.isempty(this.project_keywords)){
-            this.prev_works.unshift($('#work-code_field').text());
+        if(this.prev_works.findIndex(id => id == this.options.edit_fields.rec_ID[0]) == -1 && !window.hWin.HEURIST4.util.isempty(this.project_keywords)){
+            this.prev_works.unshift(this.options.edit_fields.rec_ID[0]);
         }
 
         if(this.prev_works.length == 5){ 
             this.prev_works.splice(4, 1);
         }
 
-        localStorage.setItem("prev_classify", JSON.stringify(this.prev_works)); 
+        localStorage.setItem("prev_classify", JSON.stringify(this.prev_works));
     },
 
     /*
@@ -1039,7 +1045,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
             return;
         }
 
-        var query_request = {q:'t:' + this.id_map.RT_Work + ' f:' + this.id_map.DT_MPCEId + ':"' + id + '"', detail:'detail'};  /* Retrieve the record for supplied work code */
+        var query_request = {q:'t:' + this.id_map.RT_Work + ' ids:"' + id + '"', detail:'detail'};  /* Retrieve the record for supplied work code */
 
         window.hWin.HAPI4.RecordMgr.search(query_request,
             function( response ){
