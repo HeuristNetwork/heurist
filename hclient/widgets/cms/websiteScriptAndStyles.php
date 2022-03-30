@@ -913,21 +913,21 @@ function _openCMSeditor(event){
         editCMS_instance2.closeCMS();
         //btn.show();
     }else{
+
         // Hide cms editor button
-        $(event.target).hide();
+        //btn.hide();
 
         isCMS_active = true;
         if(!editCMS_instance2) editCMS_instance2 = editCMS2();
         editCMS_instance2.startCMS({record_id: current_page_id, 
-                                    //content: page_cache[current_page_id],  //html or json
-                                    container:'#main-content',
-                                    close: function(){
-                                        isCMS_active = false;
-                                        btn.show();
-                                    }}); //see editCMS2.js    
-        //btn.hide();
+            //content: page_cache[current_page_id],  //html or json
+            container:'#main-content',
+            close: function(){
+                isCMS_active = false;
+                //btn.show();
+        }}); //see editCMS2.js
     }
-    
+
     btn.html(isCMS_active?'close editor':'website editor');
 }
 

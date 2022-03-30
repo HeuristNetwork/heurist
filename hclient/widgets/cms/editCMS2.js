@@ -491,7 +491,7 @@ function editCMS2(){
         layoutMgr.layoutInit(_layout_content, _layout_container, {rec_ID:home_page_record_id});
 
         // Display cms editor button
-        body.find('#btnOpenCMSeditor').show();
+        body.find('#btnOpenCMSeditor').show().html('website editor');
 
         if($.isFunction(options.close)){
             options.close.call();
