@@ -2178,7 +2178,293 @@ if($active_all || in_array('defgroups', $active)) {
         
         
 } //END groups check
-        
+
+if($active_all || in_array('geo_values', $active)){ // Check for geo fields that don't have a dtl_Geo value
+
+    ?>
+    <div id="geo_values" style="top:110px"> <!-- Start of Geo field value check -->
+
+    <script>
+        $('#links').append('<li class="geo_values"><a href="#geo_values" style="white-space: nowrap;padding-right:10px;color:black;">Geo values</a></li>');
+        tabs_obj.tabs('refresh');
+    </script>
+
+    <?php
+
+    $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID, dtl_Value, dtl_Geo, ST_asWKT(dtl_Geo) AS wkt, dty_Name, rty_Name  
+              FROM Records 
+              LEFT JOIN recDetails ON rec_ID = dtl_RecID 
+              LEFT JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID 
+              LEFT JOIN defRecTypes ON rty_ID = rec_RecTypeID 
+              WHERE dty_Type = "geo"';
+
+    $res = $mysqli->query($query);
+
+    // missing dtl_Geo value or values missing geoType
+    $bibs1 = array();
+    $ids1 = array();
+    // values that are out of bounds
+    $bibs2 = array();
+    $ids2 = array();
+    // invalid coordinates
+    $bibs3 = array();
+    $ids3 = array();
+
+    while ($row = $res->fetch_assoc()){
+
+        if($row['dtl_Geo'] == null){ // Missing geo data
+            array_push($bibs1, $row);
+            array_push($ids1, $row['rec_ID']);
+            continue;
+        }
+
+        $geoType = super_trim(substr($dtl_Value, 0, 2));
+        $hasGeoType = false;
+        $res = false;
+
+        if($geoType=='p'||$geoType=='l'||$geoType=='pl'||$geoType=='c'||$geoType=='r'||$geoType=='m'){
+            $geoValue = super_trim(substr($dtl_Value, 2));
+            $hasGeoType = true;
+        }else{
+            $geoValue = super_trim($dtl_Value);
+            if(strpos($geoValue, 'GEOMETRYCOLLECTION')!==false || strpos($geoValue, 'MULTI')!==false){
+                $geoType = "m";
+                $hasGeoType = true;
+            }else if(strpos($geoValue,'POINT')!==false){
+                $geoType = "p";
+                $hasGeoType = true;
+            }else if(strpos($geoValue,'LINESTRING')!==false){
+                $geoType = "l";
+                $hasGeoType = true;
+            }else if(strpos($geoValue,'POLYGON')!==false){ //MULTIPOLYGON
+                $geoType = "pl";
+                $hasGeoType = true;
+            }
+        }
+
+        if(!$hasGeoType){ // invalid geo type
+            array_push($bibs1, $row);
+            array_push($ids1, $row['rec_ID']);
+            continue;
+        }
+
+        try{
+
+            $geom = geoPHP::load($row['wkt'], 'wkt');
+            if($geom!=null && !$geom->isEmpty()){ // Check that long (x) < 180 AND lat (y) < 90
+
+                $bbox = $geom->getBBox();
+                $allOutWGS = (abs($bbox['minx'])>180) && (abs($bbox['miny'])>90) 
+                          && (abs($bbox['maxx'])>180) && (abs($bbox['maxy'])>90);
+
+                if ($allOutWGS){
+                    array_push($bibs2, $row);
+                    array_push($ids2, $row['rec_ID']);
+                    continue;
+                }
+            }else{ // is invalid
+                array_push($bibs3, $row);
+                array_push($ids3, $row['rec_ID']);
+                continue;
+            }
+        }catch(Exception $e){ // it is very invalid, viewed as a string without numbers/numbers separated with a comma + no spaces
+            array_push($bibs3, $row);
+            array_push($ids3, $row['rec_ID']);
+            continue;
+        }
+    }
+
+    // Invalid wkt values
+    if(count($bibs3) == 0){
+        print '<h3 class="res-valid">OK: No invalid geospatial values</h3>';
+        echo '<script>$(".geo_values").css("background-color", "#6AA84F");</script>';
+    }else{
+        echo '<script>$(".geo_values").css("background-color", "#E60000");</script>';
+
+        ?>
+
+        <h3>Records with invalid geospatial values</h3>
+        <span>
+            <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $ids3) ?>'>
+                (show results as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+        </span>
+
+        <table>
+
+            <tr>
+                <td colspan="6">
+                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'invalid_geo');}">Mark all</label>
+                </td>
+            </tr>
+
+
+            <?php
+            $rec_id = null;
+            foreach ($bibs3 as $row) {
+                if($rec_id==null || $rec_id!=$row['rec_ID']) {
+                    ?>
+                    <tr>
+                        <td>
+                            <input type=checkbox name="invalid_geo" value=<?= $row['rec_ID'] ?>>
+                        </td>
+                        <td style="white-space: nowrap;">
+                            <a target=_new
+                                href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
+                                <?= $row['rec_ID'] ?>
+                                <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
+                                    src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
+                                <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                            </a>
+                        </td>
+
+                        <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>                      
+                        <?php
+                        $rec_id = $row['rec_ID'];
+                    }else{
+                        print '<tr><td colspan="3"></td>';
+                    }
+                    ?>
+
+                    <td><?= $row['dty_ID'] ?></td>
+                    <td width="100px" style="max-width:100px" class="truncate"><?= $row['dty_Name'] ?></td>
+                    <td><?= strip_tags($row['dtl_Value']) ?></td>
+                </tr>
+                <?php
+            }
+            ?>
+        </table>
+        <?php
+    }
+
+    // Missing wkt or general invalid value
+    if(count($bibs1) == 0){
+        print '<h3 class="res-valid">OK: No missing geospatial values</h3>';
+        echo '<script>$(".geo_values").css("background-color", "#6AA84F");</script>';
+    }else{
+        echo '<script>$(".geo_values").css("background-color", "#E60000");</script>';
+
+        ?>
+
+        <h3>Records missing geospatial values</h3>
+        <span>
+            <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $ids1) ?>'>
+                (show results as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+        </span>
+
+        <table>
+
+            <tr>
+                <td colspan="6">
+                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'invalid_geo');}">Mark all</label>
+                </td>
+            </tr>
+
+
+            <?php
+            $rec_id = null;
+            foreach ($bibs1 as $row) {
+                if($rec_id==null || $rec_id!=$row['rec_ID']) {
+                    ?>
+                    <tr>
+                        <td>
+                            <input type=checkbox name="invalid_geo" value=<?= $row['rec_ID'] ?>>
+                        </td>
+                        <td style="white-space: nowrap;">
+                            <a target=_new
+                                href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
+                                <?= $row['rec_ID'] ?>
+                                <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
+                                    src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
+                                <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                            </a>
+                        </td>
+
+                        <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>                      
+                        <?php
+                        $rec_id = $row['rec_ID'];
+                    }else{
+                        print '<tr><td colspan="3"></td>';
+                    }
+                    ?>
+
+                    <td><?= $row['dty_ID'] ?></td>
+                    <td width="100px" style="max-width:100px" class="truncate"><?= $row['dty_Name'] ?></td>
+                    <td><?= strip_tags($row['dtl_Value']) ?></td>
+                </tr>
+                <?php
+            }
+            ?>
+        </table>
+        <?php
+    }
+
+    // Value that is out of bounds, i.e. -90 > lat || lat > 90 || -180 > long || long > 180
+    if(count($bibs2) == 0){
+        print '<h3 class="res-valid">OK: All geospatial data is within bounds</h3>';
+        echo '<script>$(".geo_values").css("background-color", "#6AA84F");</script>';
+    }else{
+        echo '<script>$(".geo_values").css("background-color", "#E60000");</script>';
+
+        ?>
+
+        <h3>Records with geospatial data that is out of bounds</h3>
+        <span>
+            <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $ids2) ?>'>
+                (show results as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+        </span>
+
+        <table>
+
+            <tr>
+                <td colspan="6">
+                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'invalid_geo');}">Mark all</label>
+                </td>
+            </tr>
+
+
+            <?php
+            $rec_id = null;
+            foreach ($bibs2 as $row) {
+                if($rec_id==null || $rec_id!=$row['rec_ID']) {
+                    ?>
+                    <tr>
+                        <td>
+                            <input type=checkbox name="invalid_geo" value=<?= $row['rec_ID'] ?>>
+                        </td>
+                        <td style="white-space: nowrap;">
+                            <a target=_new
+                                href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
+                                <?= $row['rec_ID'] ?>
+                                <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
+                                    src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
+                                <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                            </a>
+                        </td>
+
+                        <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>                      
+                        <?php
+                        $rec_id = $row['rec_ID'];
+                    }else{
+                        print '<tr><td colspan="3"></td>';
+                    }
+                    ?>
+
+                    <td><?= $row['dty_ID'] ?></td>
+                    <td width="100px" style="max-width:100px" class="truncate"><?= $row['dty_Name'] ?></td>
+                    <td><?= strip_tags($row['dtl_Value']) ?></td>
+                </tr>
+                <?php
+            }
+            ?>
+        </table>
+        <?php
+    }
+
+    print '<br /><br /></div>';
+} //END geo_values check
         ?>
 
         </div>
