@@ -149,6 +149,7 @@ $.widget( "heurist.search", {
 
 
         this.input_search = $( "<textarea>" )
+        .attr('readonly', true)
         .css({//'margin-right':'0.2em', 
             'height':'41px', 
             'max-height':'70px', 
@@ -159,7 +160,6 @@ $.widget( "heurist.search", {
             'min-width':'80px', 'width':'100%', 'padding-right':'28px' })  //was width:sz_input, 'max-width':sz_input,  
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
-
 
         var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
 
@@ -191,7 +191,47 @@ $.widget( "heurist.search", {
 
         // AAAA
         this._on( this.input_search, {
-            click: function(){ this.input_search_prompt2.css({visibility:'hidden'}); },  //hide()
+            click: function(){ 
+                // Display textarea within popup, for more space, with explanation and filter help link
+                var $dlg;
+
+                if(this.input_search_prompt2.is(':visible')){
+                    this.input_search_prompt2.css({visibility:'hidden'}); 
+                }
+
+                var $help_link = this.div_search_input.find('#search_help_link').clone();
+                var org_val = this.input_search.val();
+
+                var msg = '<div class="heurist-helper1" style="font-size: 1em;">The search string is enclosed in [ ] and consists of a series of comma-separated specifications in { }'
+                        + '<br>giving a tag (generally a field ID, field name or special indicator) followed by a colon ( ; ) then a value or values.'
+                        + '<br>Tags and values are generally enclosed in double quotes ( " )</div><br>'
+                        + '<textarea style="padding: 5px; margin: 5px 0px; height: 200px; width: 500px;" class="text ui-widget-content ui-corner-all">' 
+                            + org_val 
+                        + '</textarea><br><div id="search_help_container"></div>';
+                        //+ '<br><div class="heurist-helper1">Please ensure that you\'ve closed all brackets ( [ and { ) and quotes ( " )</div>';
+
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, 
+                    function(){
+
+                        var new_val = $dlg.find('textarea').val();
+                        if(org_val != new_val){
+
+                            // Update value
+                            that.input_search.val(new_val);
+
+                            // Perform search
+                            that._doSearch();
+                        }
+
+                        $dlg.dialog('close');
+
+                    }, {yes: 'Search', no: 'Cancel'}, {title: 'Search filter', default_palette_class: 'ui-heurist-explore'}
+                );
+
+                $dlg.find('#search_help_container').append($help_link);
+
+                $dlg.find('#search_help_link').on('click', function(){ window.open('context_help/advanced_search.html','_blank'); });
+            },
             keyup: this._showhide_input_prompt, 
             change: this._showhide_input_prompt
         });
@@ -218,7 +258,8 @@ $.widget( "heurist.search", {
             .appendTo(this.div_search_input);
 
             var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
-                +'filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')                
+                +'filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')
+            .attr('id', 'search_help_link')
             .addClass('graytext')
             .css({'text-decoration':'none','outline':0, cursor:'pointer'})
             .appendTo(div_search_help_links);
