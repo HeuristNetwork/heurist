@@ -4978,6 +4978,7 @@ console.log('onpaste');
 
                 $input.css('width','auto');
                 $input = that._recreateSelector($input, value);
+                $input.hSelect('widget').css('width','auto');
                 that._on( $input, {change:that._onTermChange} );
                 that._showHideSelByImage( $input ); 
             });
@@ -5110,6 +5111,7 @@ console.log('onpaste');
                             .addClass('truncate enum_input')
                             .css({
                                 'max-width': '120px',
+                                'min-width': '120px',
                                 'display': 'inline-block',
                                 'margin-right': '15px'
                             })
