@@ -25,7 +25,7 @@ We transferred the help system from help builder software to a Heurist database 
 
 Heurist has a built-in capability to generate data-driven interactive websites. The CMS website pages are stored and edited directly in the database and can render media, searches, maps, blog pages etc. using the data. Heurist hosts dozens of research websites around the world, several of which are displayed below. You can see [featured projects](https://heuristnetwork.org/featured-projects) and [search our projects database](https://heuristnetwork.org/projects-search) at our website.
 
-![Projects Collage](/documentation_and_templates/project_thumbnail_collage.png "Projects Collage")
+![Projects Collage](/documentation_and_templates/assets/project_thumbnail_collage.png "Projects Collage")
 
 
 ## Contributing
