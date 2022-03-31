@@ -83,7 +83,7 @@ Thematic mapping
 * @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @version     6.0
 */
 
 /*  
@@ -2626,14 +2626,15 @@ $.widget( "heurist.mapping", {
                     
                     if(val=='legend'){
                         
-                        toolbar.find('.ui-icon-list').button()
+                        toolbar.find('.ui-icon-list').attr('title','Map Legend')
+                            .button()
                             .on({click:function(){that.mapManager.toggle();}});
                             
                     }else if(val=='bookmark'){
 
                         if(that.map_bookmark){
                             
-                            toolbar.find('.ui-icon-bookmark').attr('title','Bookmarks')
+                            toolbar.find('.ui-icon-bookmark').attr('title','Manage spatial bookmarks')
                                 .button()
                                 .on({click:function(){
                                     var ele = $('.bookmarks-container');
@@ -2680,7 +2681,7 @@ $.widget( "heurist.mapping", {
                             $(that.map_publish.getContainer()).hide();
                             that._on(
                             toolbar.find('.ui-icon-globe').button()
-                                .attr('title', window.hWin.HR('Print map')),
+                                .attr('title', window.hWin.HR('Publish map')),
                                 {click:function(){  
                                     window.hWin.HEURIST4.ui.showPublishDialog( {mode:'mapquery', mapwidget:this} );
                                 }});
@@ -2724,7 +2725,7 @@ $.widget( "heurist.mapping", {
                             $(that.map_geocoder.getContainer()).hide();
 
                             toolbar.find('.ui-icon-search').button()
-                                .attr('title', window.hWin.HR('Search'))
+                                .attr('title', window.hWin.HR('Search for a place'))
                                 .on({click:function(){  
                                     $(that.map_geocoder.getContainer()).show();
                                     that.map_geocoder._expand();
