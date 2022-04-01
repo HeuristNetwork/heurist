@@ -1980,7 +1980,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         $('<div style="line-height:2ex;padding-top:4px">'
                 +'<input type="radio" value="0" name="widthType">'
-                +'<input class="text ui-widget-content ui-corner-all" autocomplete="disabled" autocorrect="off" autocapitalize="none" spellcheck="false" style="min-width:22ex;width:10ex;">'
+                +'<input class="text ui-widget-content ui-corner-all" autocomplete="disabled" autocorrect="off" autocapitalize="none" spellcheck="false" type="number" min="3" style="max-width:7ex;width7ex;">'
+                +'<span style="width:50px;display:inline-block"/>'
                 +'<label style="text-align:left;line-height:12px;">'
                 +'<input type="radio" value="1" name="widthType" style="margin-top:0px">'
                 +'&nbsp;Max width</label>'
@@ -1992,10 +1993,11 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 var is_max = $ele.find('input[name="widthType"]:checked').val() == '1';
 
                 window.hWin.HEURIST4.util.setDisabled($input, is_max);
+                $input.val(is_max?'':40);
 
                 var val = is_max ? 0 : $input.val();
                 if(width != val){
-                    this._editing.setFieldValueByName('rst_DisplayWidth', val, true);
+                    this._editing.setFieldValueByName('rst_DisplayWidth', val, true); //hidden field
                 }
             }
         });
@@ -2144,6 +2146,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }
             
             if(fields['rst_DisplayWidth']>255) fields['rst_DisplayWidth'] = 255;
+            else if(fields['rst_DisplayWidth']=='') fields['rst_DisplayWidth'] = 40;
             
             
             this._stillNeedUpdateForRecID = recID;    
