@@ -61,13 +61,24 @@ $.widget( "heurist.app_storymap", {
     _resultList: null,
     _tabs: null, //tabs control
     _mapping: null,    // mapping widget
-    _currentElementID: 0,
     _L: null, //refrence to leaflet
+    
+    _cache_story_places: null,
+    
+    _currentElementID: 0,
+    _nativelayer_id: 0, //current layer for Story Element
+    _currentStoryID: 0,
+    
+    _terminateAnimation: false,
+    _animationResolve: null, 
+    _animationReject: null,
 
     // the constructor
     _create: function() {
 
         var that = this;
+        
+        this._cache_story_places = {};
         
         var cssOverview = {};
         
@@ -335,7 +346,7 @@ $.widget( "heurist.app_storymap", {
             var that = this;
 
             if(this.options.storyFields.length>0){
-                //search for fields
+                //search for story fields for given record
                 request = {q:{ids:recID}, detail:this.options.storyFields.join(',')};
 
                 window.hWin.HAPI4.RecordMgr.search(request,
@@ -363,6 +374,7 @@ $.widget( "heurist.app_storymap", {
                                 
                                 window.hWin.HAPI4.RecordMgr.search(request,
                                     function(response) {
+//console.log( response.data );                                        
                                         that._resultset = new hRecordSet(response.data);
                                         that._startNewStory(recID);        
                                     });
@@ -404,65 +416,48 @@ $.widget( "heurist.app_storymap", {
         }
     },
     
+    //
+    //
+    //
+    _stopAnimeAndClearMap: function(){
+
+        //stop animation        
+        if(this._animationResolve!=null){
+            this._terminateAnimation = true;
+        }
+        
+        //clear map
+        if(this._nativelayer_id>0){
+            var mapwidget = this._mapping.app_timemap('getMapping');
+            mapwidget.removeLayer( this._nativelayer_id );
+            this._nativelayer_id = -1;
+        }
+    },
+    
     // 1. Lods all map data (to remove?)
     // 2. loads list of story elements (this._resultset) into reulst list
     // 3. Render overview as smarty report or renderRecordData
     //
     _startNewStory: function(recID){
+      
+        this._stopAnimeAndClearMap();
         
         //find linked mapping
         if(this.options.map_widget_id){
             this._mapping = $('#'+this.options.map_widget_id)    
         }
         
-        if(this._mapping && this._mapping.length>0){
+        // mode A: load all places at once 
+        // mode B: loads places for every story element separately - use this
+        if(false && this._mapping && this._mapping.length>0){  
             
-            //adds links between start and end place
-            //start (1414-1092 or 2-134), transition (1414-1090) and end places (1414-1088 or 2-864)                    
-            /*
-            if(this._resultset.length()>0){
-                
-                this._resultset.each(function(rec_id, record){
-                    
-                    var pntBeg, pntEnd;
-                    //start, transition and end places
-                    if(this.DT_PLACE_START>0 && this.DT_PLACE_END>0){
-                        pntEnd = fld(record, this.DT_PLACE_END);   
-                        if(pntEnd){
-                            pntBeg = fld(record, this.DT_PLACE_START);
-                            if(pntBeg){
-                                //add new field - link path
-console.log(pntBeg);
-console.log(pntEnd);
-
-//LINESTRING (37.639204 55.730027,37.636628 55.729814)
-                            }
-                        } 
-                    }
-                    if(this.DT_PLACE_START2>0 && this.DT_PLACE_END2>0){
-                        pntEnd = fld(record, this.DT_PLACE_END2);   
-                        if(pntEnd){
-                            pntBeg = fld(record, this.DT_PLACE_START2);
-                            if(pntBeg){
-                                //add new field - link path
-                                
-                            }
-                        } 
-                    }
-                    
-                    
-                });
-            
-            }*/
-                
-            var res = this._mapping.app_timemap('updateDataset', this._resultset, 'Story Map');
+            var res = this._mapping.app_timemap('updateDataset', this._resultset, 'Whole Story Map');
             if(!res) {
-//console.log('NOT INTED');                 
                 var that = this;
                 this._mapping.app_timemap('option','onMapInit', function(){
                     var map = that._mapping.app_timemap('getMapping');
                     map.isMarkerClusterEnabled = false;
-                    that._mapping.app_timemap('updateDataset', that._resultset, 'Story Map');
+                    that._mapping.app_timemap('updateDataset', that._resultset, 'Whole Story Map');
                 });
             }else{
                 var map = this._mapping.app_timemap('getMapping');
@@ -552,9 +547,10 @@ console.log(pntEnd);
     _startNewStoryElement: function(recID){
 
         if(this._currentElementID != recID){
+          
+            this._stopAnimeAndClearMap();
+
             this._currentElementID = recID;
-            
-            
             
             if(this.options.reportElementMode=='slide'){   //one by one   
 
@@ -589,7 +585,38 @@ console.log(pntEnd);
                 
             }                    
             
+            if(this._mapping && this._mapping.length>0){
+                //this._animateStoryElement_A(recID);
+                this._animateStoryElement_B(recID);
             
+            
+
+            /*
+            if(actions.indexOf('fade_in')>=0){
+                var map = this._mapping.app_timemap('getMapping');
+                map.fadeInLayers( [recID] );
+            }
+            var map = this._mapping.app_timemap('getMapping');
+            var layers = map.findLayerByRecID( [recID] );
+            if(layers.length>0){
+                    console.log('Found: '+recID);  
+            }else{
+                console.log('NOT Found: '+recID);
+            } 
+            if(actions.indexOf('fade_in')>=0){
+                  this.fadeInLayerLeaflet(layers, 0, 1, 0.1, 100);     
+            }
+            */     
+            
+            }  
+        }
+    },
+    
+    //
+    // story element is geometry collection  - animate entire set - OLD MODE
+    //
+    _animateStoryElement_A: function(recID){
+        
             var actions = ['fade_in','fly_to','highlight'];
             //take list of required actions on story element change
             // zoom out - show entire bounds
@@ -605,8 +632,6 @@ console.log(pntEnd);
             var all_events = this._resultset.getOrder();
             
             var that = this;
-            
-            if(this._mapping && this._mapping.length>0){
             
             var map = this._mapping.app_timemap('getMapping');
             var nativemap = map.nativemap;
@@ -655,36 +680,508 @@ console.log(pntEnd);
             setTimeout(function(){
                 that.fadeInLayerLeaflet(nativemap, layers, 0, 1, 0.05, 100);     
             },delay);
+        
+    },
+    
+    //
+    // Every place is separate object on map - animate sequence - begin, transition, end places
+    // 1. find all resource fields that points to places
+    // 2. retrieve all places from server side as geojson
+    // 3. create links between points
+    // 4. update map
+    // 5. execute animation
+    _animateStoryElement_B: function(recID){
 
-            /*
-            if(actions.indexOf('fade_in')>=0){
-                var map = this._mapping.app_timemap('getMapping');
-                map.fadeInLayers( [recID] );
-            }
-            var map = this._mapping.app_timemap('getMapping');
-            var layers = map.findLayerByRecID( [recID] );
-            if(layers.length>0){
-                    console.log('Found: '+recID);  
-            }else{
-                console.log('NOT Found: '+recID);
-            } 
-            if(actions.indexOf('fade_in')>=0){
-                  this.fadeInLayerLeaflet(layers, 0, 1, 0.1, 100);     
-            }
-            */     
+        var that = this;
+
+        if ( that._cache_story_places[recID] ){ //cache is loaded already
             
-            }  
+            var pl = that._cache_story_places[recID]['places'];
+            if( pl.length==0){
+            }else{
+                //map is already cleared in _startNewStoryElement
+                that._animateStoryElement_B_step2(recID);
+            }
+            return;    
+        }
+
+        var request = {q: 'ids:'+recID, detail:'detail'};
+
+        window.hWin.HAPI4.RecordMgr.search(request,
+            function(response){
+
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                    // 1. find all resource fields that points to places               
+                    that._cache_story_places[recID] = {};
+                    that._cache_story_places[recID]['places'] = [];
+                    var RT_PLACE  = window.hWin.HAPI4.sysinfo['dbconst']['RT_PLACE'];
+                    if(response.data.count==1){
+                        var details = response.data.records[recID]['d'];
+                        var dty_ID;   
+                        for(dty_ID in details){
+                            var field = $Db.dty(dty_ID);
+                            if(field['dty_Type']=='resource'){
+                                var ptr = field['dty_PtrTargetRectypeIDs'];
+                                if(ptr && window.hWin.HEURIST4.util.findArrayIndex(RT_PLACE, ptr.split(','))>=0){
+                                    that._cache_story_places[recID][dty_ID] = details[dty_ID];   
+                                } 
+                            } 
+                        }
+                        //concatenate al places in proper order
+                        // Begin '2-134', Transition '1414-1090', End '2-864'
+                        let DT_BEGIN_PLACES = $Db.getLocalID('dty', '2-134');
+                        let DT_END_PLACES = $Db.getLocalID('dty', '2-864');
+                        if(DT_BEGIN_PLACES>0 && that._cache_story_places[recID][DT_BEGIN_PLACES]){
+                            that._cache_story_places[recID]['places'] = that._cache_story_places[recID][DT_BEGIN_PLACES];
+                        }
+                        for(dty_ID in that._cache_story_places[recID]){
+                            if(dty_ID!=DT_BEGIN_PLACES && dty_ID!=DT_END_PLACES && dty_ID!='places'){
+                                    that._cache_story_places[recID]['places'] = that._cache_story_places[recID]['places']
+                                    .concat(that._cache_story_places[recID][dty_ID]);
+                            }
+                        }
+                        if(DT_END_PLACES>0 && that._cache_story_places[recID][DT_END_PLACES]){
+                            that._cache_story_places[recID]['places'] = that._cache_story_places[recID]['places']
+                                    .concat(that._cache_story_places[recID][DT_END_PLACES]);
+                        }
+                        
+                        
+                        if (that._cache_story_places[recID]['places'].length==0){
+                            return;
+                        }
+
+//console.log(that._cache_story_places[recID]);
+
+                        // 2. retrieve all places from server side as geojson
+                        var server_request = {
+                            q: {ids:that._cache_story_places[recID]['places']},
+                            leaflet: true, 
+                            simplify: true, //simplify paths with more than 1000 vertices
+                            zip: 1,
+                            format:'geojson'};
+                        window.hWin.HAPI4.RecordMgr.search_new(server_request,
+                            function(response){
+
+                                var geojson_data = null;
+                                var timeline_data = [];
+                                var layers_ids = [];
+                                if(response['geojson'] && response['timeline']){
+                                    geojson_data = response['geojson'];
+                                    timeline_data = response['timeline'];   
+                                }else{
+                                    geojson_data = response;
+                                }
+//console.log(geojson_data);
+                                if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
+                                    || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
+                                {
+                                    that._cache_story_places[recID]['geojson'] = geojson_data;
+                                    that._cache_story_places[recID]['timeline'] = timeline_data;
+
+                                    // 3. create links between points
+                                    that._createPointLinks();
+                                    
+                                    // 4. update map
+                                    that._animateStoryElement_B_step2(recID);
+                                    
+
+                                }else {
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                                }
+
+
+                        });
+                    }
+
+                }else {
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            }
+        );  
+
+
+    },
+    
+    //
+    // 4. update map
+    //
+    _animateStoryElement_B_step2: function(recID){
+        var that = this;
+        
+//console.log(that._cache_story_places[recID]['geojson']);        
+        
+        var mapwidget = that._mapping.app_timemap('getMapping');
+        
+        if(window.hWin.HEURIST4.util.isnull(this._L)) this._L = mapwidget.getLeaflet();
+        
+        //this._currentStoryID = recID;
+        
+        mapwidget.isMarkerClusterEnabled = false;
+        this._nativelayer_id = mapwidget.addGeoJson(
+            {geojson_data: that._cache_story_places[this._currentElementID]['geojson'],
+                timeline_data: that._cache_story_places[this._currentElementID]['timeline'],
+                //layer_style: layer_style,
+                //popup_template: layer_popup_template,
+                dataset_name: 'Story Map',
+                preserveViewport: false });
+        //possible sequences
+        // gain: begin-visible, trans fade in, end-visible
+        // loses: trans-visible, trans fade out
+        // path grow: fade by 1 or group
+        // path move: fade in and out by 1 or group
+        
+        // json to describe animation
+        // [{scope:begin|trans|end|all, range:0~n, actions:[{ action: duration: , steps:},..]},....] 
+        
+        var anime = [{scope:'all',action:'hide'},{scope:'all',range:1,action:'fade_in',duration:1000}]; //show in sequence
+
+        //anime = [{scope:'all',range:1,action:'fade_out',duration:1000}]; //hide in sequence
+        //anime = [{scope:'all',action:'hide'},{scope:'all',range:1,action:'fade_in_out',duration:1000}];
+
+        anime = [{scope:'all',range:1,actions:[{action:'fly'}]}];
+        //anime = [{scope:'all',action:'hide'},{scope:'all',range:1,actions:[{action:'center'},{action:'fade_in'}]}];
+        anime = [{scope:'all',actions:[{action:'blink',duration:2000}]}];
+
+        //or several actions per scope
+        //var anime = [{scope:'all',range:1,actions:[{action:'fly'},{action:'fade_in',duration:500}]}];
+        
+        //var anime = [{scope:'all',range:1,action:'fade_in_out',duration:500}]; //show one by one
+        
+        
+        if(!window.hWin.HEURIST4.util.isempty(anime)){
+        
+            //start animation/actions
+            this._animateStoryElement_B_step3(anime);
         }
     },
     
+    //
+    // performs animation for current range
+    //
+    _animateStoryElement_B_step3: function(aSteps, step_idx, aRanges, range_idx, aActions, action_idx ){        
+
+//console.log(this._currentElementID+'  step_idx='+step_idx+' range_idx='+range_idx+'  action_idx='+action_idx);
+        
+        //find ranges of places for animation
+        if(window.hWin.HEURIST4.util.isempty(aRanges) || range_idx>=aRanges.length){ 
+            //ranges not defined or all ranges are executed - go to new step
+        
+            //1.loop for steps - fill aRanges for current step
+            step_idx = (step_idx>=0) ?step_idx+1:0;
+            
+            if(step_idx>=aSteps.length) return; //animation is completed
+            
+            var step = aSteps[step_idx];
+            
+            aActions = step['actions'];
+            if(!aActions && step['action']){
+                aActions = [{action:step['action']}];  
+                if(step['duration']>0){
+                    aActions[0]['duration'] = step['duration'];
+                }
+            } 
+            if(window.hWin.HEURIST4.util.isempty(aActions)){ //actions are not defined for this step
+                //actions are not defined - go to next step
+                this._animateStoryElement_B_step3(aSteps, step_idx );   
+                return;
+            }
+            
+            range_idx = 0;
+            action_idx = 0;
+            
+            //2.find places for current step
+            
+            var places, scope = null;
+            
+            //2a get scope - @todo array/combination of scopes
+            if(step['scope']=='begin'){
+                scope = '2-134';
+            }else if(step['scope']=='trans'){
+                scope = '1414-1090';
+            }else if(step['scope']=='end'){
+                scope = '2-864';
+            }else if( typeof step['scope'] === 'string' && step['scope'].indexOf('-')>0 ){ //dty concept code
+                scope = step['scope'];
+            }else if( $.isArray(step['scope']) ){
+                //array of record ids
+                places = step['scope'];
+            }else if( parseInt(step['scope'])>0 ){
+                //particular record 
+                places = [step['scope']]; 
+                
+            }else{ //if(step['scope']=='all'){ //default
+                scope = 'places'; //all places ids in proper order
+            }
+            
+            if(scope){
+                if(step['scope'].indexOf('-')>0){
+                    step['scope'] = $Db.getLocalID('dty', scope);
+                }
+                places = this._cache_story_places[this._currentElementID][scope];    
+            }
+            
+            //2b get ranges within scope
+            aRanges = []; //reset
+            var range = places.length;
+            if(step['range'] && step['range']>0 && step['range']<places.length){
+                range = step['range'];
+            
+                var start = 0, end = 0;
+                while (end<places.length){
+                    
+                    end = start+range;
+                    //if(end>=places.length) end = places.length-1;
+                    
+                    aRanges.push(places.slice(start, end));
+                    start = end;
+                    
+                    //if(end>=places.length-1) break;
+                }
+            }else{
+                aRanges.push(places);
+            }
+            
+            if(window.hWin.HEURIST4.util.isempty(aRanges)){ //ranges are not defined for this step
+                //rangess are not defined - go to next step
+                this._animateStoryElement_B_step3(aSteps, step_idx );   
+                return;
+            }
+
+        }//search for ranges for current step
+        
+        //3 execute action(s)    
+        if(action_idx>=aActions.length){ 
+            //all actions are executed
+            action_idx = 0;
+            this._animateStoryElement_B_step3(aSteps, step_idx, aRanges, range_idx+1, aActions, action_idx );
+            return;
+        }
+        
+        
+        var range_of_places = aRanges[range_idx];
+        
+        var mapwidget = this._mapping.app_timemap('getMapping');
+        var L = this._L;
+        var top_layer = mapwidget.all_layers[this._nativelayer_id];
+        
+        var layers = this._getPlacesForRange(top_layer, range_of_places);
+       
+        var action = aActions[action_idx];
+               
+//console.log(range_of_places);               
+//console.log('before anime '+layers.length);
+
+        // 
+        //take list of required actions on story element change
+        // ??zoom out - show entire bounds (all places within story element?)
+        // zoom - zoom to scope
+        // *fly - fly to scope
+        // center
+        // show
+        // hide
+        // *fade_in - show marker, path or poly
+        // *fade_in_out - show marker, path or poly
+        // blink
+        // gradient
+        // style - assign new style
+        // show popup
+        
+        // follow_path - move marker along path
+        // ant_path - css style
+        // show_report - popup on map
+
+
+        var that = this;
+
+        var promise = new Promise(function(_resolve, _reject){
+            
+            that._animationResolve = _resolve;
+            that._animationReject = _reject;
+               
+            if(!(action['duration']>0)) action['duration'] = 1000;
+            
+            switch (action['action']) {
+               case 'fade_in':
+                    that.actionFadeIn(mapwidget.nativemap, layers, 0, 1, 0.05, action['duration']);
+               break;
+               case 'fade_out':
+                    that.actionFadeIn(mapwidget.nativemap, layers, 1, 0, -0.05, action['duration']);
+               break;
+               case 'fade_in_out':
+                    that.actionFadeIn(mapwidget.nativemap, layers, 1, 0, -0.05, action['duration'], true);
+               break;
+               case 'hide':
+                    that.actionHide(layers);
+               break;
+               case 'show':
+                    that.actionShow(mapwidget.nativemap, layers);
+               break;
+               case 'fly':
+               case 'zoom':
+               case 'center':
+                    that.actionBounds(layers, action['action']);       
+               break;
+               case 'blink':
+
+                    if(!action['steps']) action['steps'] = 10;
+                    that.actionBlink(layers, action['steps'], action['duration']);
+               
+               break;
+               case 'gradient':
+                    //change color from one color to another
+                    if(!action['from']) action['from'] = '#ff0000';
+                    if(!action['to']) action['to'] = '#00ff00';
+                    if(!action['steps']) action['steps'] = 20;
+                    that.actionGradient(layers, action['from'], action['to'], action['steps'], action['duration']);
+               break;
+            }
+        });
+        
+        promise
+        .then(function(res){
+//console.log('after anim range_idx='+range_idx+'  action_idx='+action_idx);
+            that._animationResolve = null;
+            if(that._terminateAnimation){
+                that._terminateAnimation = false;
+            }else{
+                that._animateStoryElement_B_step3(aSteps, step_idx, aRanges, range_idx, aActions, action_idx+1 );    
+            }
+        },
+        function(res){ //termination
+            that._terminateAnimation = false;
+            that._animationResolve = null;
+            
+        });     
+        
+    },
+    
+    //
+    //
+    //
+    _getPlacesForRange: function(top_layer, range_of_places){
+
+        var layers = [];
+        var L = this._L;
+
+
+        top_layer.eachLayer(function(layer){
+              if (layer instanceof L.Layer && layer.feature)  //(!(layer.cluster_layer_id>0)) &&
+              {
+                    if(layer.feature.properties.rec_ID>0){
+                        var idx = window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, range_of_places);
+                        if(idx>=0) layers.push(layer);
+                    }
+
+                    /*                  
+                    if(layer.feature.properties.rec_ID==recID){
+                        layers.push(layer);
+                        if(hide_before_show){
+                            layer.remove();    
+                        }else if(layer._map==null){
+                            layer.addTo( nativemap );           
+                        }
+                    }else 
+                    if (window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, all_events)>=0)
+                    {
+                        layer.remove();
+                    }
+                    */
+              }
+        });        
+        
+        return layers;
+    },
+
+
+    //
+    //
+    //
+    actionBounds: function(layers, mode){
+        
+        var useRuler = (layers.length==1), bounds = [];
+        $.each(layers, function(i, layer){
+            bounds.push( mapwidget.getLayerBounds(layer, useRuler) );    
+        });
+        
+        //.nativemap
+        var mapwidget = this._mapping.app_timemap('getMapping');
+        var bounds = mapwidget._mergeBounds(bounds);
+        
+        if(mode=='center'){
+            mapwidget.nativemap.panTo(bounds.getCenter());    //setView
+        }else{
+            mapwidget.zoomToBounds(bounds, (mode=='fly')); //default 1.5 seconds   
+        }
+        
+        if($.isFunction(this._animationResolve)){
+            var that = this;
+            setTimeout(function(){
+                    if(that._terminateAnimation){
+console.log('animation terminated !!!');                        
+                        if($.isFunction(that._animationReject)) that._animationReject();
+                    }else{
+                        if ($.isFunction(that._animationResolve)) that._animationResolve();
+                    }                
+                }, 2000);                        
+        }
+    },
+    
+    //
+    //
+    //    
+    actionHide: function( layers ){        
+            //hide all layer elements
+            $.each(layers, function(i, layer){
+                      layer.remove();
+            });
+            if($.isFunction(this._animationResolve)) this._animationResolve();
+    },
+
+    //
+    //
+    //    
+    actionShow: function( nativemap, layers ){        
+            //hide all layer elements
+            $.each(layers, function(i, layer){
+                  if (layer._map==null){
+                      layer.addTo( nativemap )                    
+                  }
+            });
+            if($.isFunction(this._animationResolve)) this._animationResolve();
+    },
+
+    //
     // Fade-in function for Leaflet
-    fadeInLayerLeaflet: function(nativemap, layers, startOpacity, finalOpacity, opacityStep, delay) 
+    // if opacityStep<0 - fade out
+    // need_reverce - true - fade in and then out
+    actionFadeIn: function(nativemap, layers, startOpacity, finalOpacity, opacityStep, duration, need_reverce) 
     {
+        
+        var steps = Math.abs(finalOpacity-startOpacity)/Math.abs(opacityStep);
+        if(need_reverce) steps = steps * 2;
+        
+        var delay = action['duration']/steps;
+
+        
+        var that = this;
         var L = this._L;
         var opacity = startOpacity;
-        var timer = setTimeout(function changeOpacity() {
-            if (opacity < finalOpacity) {
-                $.each(layers,function(i, lyr){
+        function __changeOpacity() {
+            
+            var iOK = (opacityStep>0)
+                    ?(opacity < finalOpacity)
+                    :(finalOpacity < opacity);
+
+            if ( iOK ) {
+                $.each(layers, function(i, lyr){
+                    
+                    if(that._terminateAnimation){
+console.log('animation terminated');                        
+                        if($.isFunction(that._animationReject)) that._animationReject();
+                        return false;
+                    }
+                    
                     if(lyr instanceof L.Marker){
                         lyr.setOpacity( opacity );                        
                     }else{
@@ -695,11 +1192,198 @@ console.log(pntEnd);
                     }
                     if(lyr._map==null) lyr.addTo( nativemap )                    
                 });
-                opacity = opacity + opacityStep
+                opacity = opacity + opacityStep;
+                timer = setTimeout(__changeOpacity, delay);
+            }else{
+                if(need_reverce===true){
+                    need_reverce = false
+                    opacityStep = -opacityStep;
+                    timer = setTimeout(__changeOpacity, delay);
+                }else{
+                    if($.isFunction(that._animationResolve)) that._animationResolve();    
+                }
             }
+        }
+        __changeOpacity();
+        //var timer = setTimeout(, delay);
+    },
+    
+    actionGradient: function(layers, startColour, endColour, steps, duration){
 
-            timer = setTimeout(changeOpacity, delay);
-            }, delay)
+        var that = this;
+        var delay = duration/steps;
+        
+        var colors = window.hWin.HEURIST4.ui.getColourGradient(startColour, endColour, steps);
+        var color_step = 0;
+        
+        var mapwidget = this._mapping.app_timemap('getMapping');
+        var top_layer = mapwidget.all_layers[this._nativelayer_id];
+        
+        function __changeColor() {
+            if ( color_step<colors.length ) {
+                $.each(layers, function(i, lyr){
+                    
+                    if(that._terminateAnimation){
+console.log('animation terminated 2');                        
+                        if($.isFunction(that._animationReject)) that._animationReject();
+                        return false;
+                    }
+                    
+                    var clr = colors[color_step];
+                    
+                    var style = {color:clr, fillColor:clr};
+                    
+                    mapwidget.applyStyleForLayer(top_layer, lyr, style);
+                    
+                    //if(lyr._map==null) lyr.addTo( nativemap )                    
+                });
+                color_step++;
+                timer = setTimeout(__changeColor, delay);
+            }else{
+                if($.isFunction(that._animationResolve)) that._animationResolve();    
+            }                
+        }
+        
+        __changeColor();
+        
+        
+    },
+    
+    actionBlink: function(layers, steps, duration){
+        
+        var that = this;
+        var delay = duration/steps;
+        var count = 0;
+        var mapwidget = this._mapping.app_timemap('getMapping');
+        var is_visible = [];
+
+        var interval = window.setInterval(function() {
+            
+            $.each(layers, function(i, lyr){
+                
+                if(count==0){
+                    //keep initial visibility
+                    is_visible.push((lyr._map!=null));
+                }
+                if(lyr._map==null){
+                    lyr.addTo( mapwidget.nativemap );                      
+                }else{
+                    lyr.remove();
+                }
+            
+                if(that._terminateAnimation){
+                    clearInterval(interval);
+                    if($.isFunction(that._animationReject)) that._animationReject();
+                    return false;
+                }
+            });
+            
+            count++;
+            if(count>steps){
+                clearInterval(interval);
+                if($.isFunction(that._animationResolve)) that._animationResolve();    
+            }
+        },delay);
+        
+        //restore initial visibility
+        $.each(layers, function(i, lyr){
+            if(is_visible[i]){
+                if(lyr._map==null) lyr.addTo( mapwidget.nativemap );                    
+            }else{
+                lyr.remove()
+            }
+            
+        });
+        
+    },
+    
+    _createPointLinks: function(){
+
+
+        // Begin '2-134', Transition '1414-1090', End '2-864'
+        let DT_BEGIN_PLACES = $Db.getLocalID('dty', '2-134');
+        let DT_END_PLACES = $Db.getLocalID('dty', '2-864');
+        let DT_TRAN_PLACES = $Db.getLocalID('dty', '1414-1090');
+        
+        var recID = this._currentElementID;
+        
+        var gd = this._cache_story_places[recID]['geojson'];
+        //gather all verties
+        var begin_pnt = [], end_pnt = [], tran_pnt = [];
+        
+        function _fillPnts(ids, pnt){
+
+            if(!window.hWin.HEURIST4.util.isempty(ids))
+            for (var k=0; k<=ids.length; k++){
+                for (var i=0; i<gd.length; i++){
+                    if(gd[i]['id']==ids[k] && gd[i]['geometry']['type']=='Point'){
+                        pnt.push(gd[i]['geometry']['coordinates']);
+                        break;
+                    }
+                }
+            }
+            
+        }
+        
+        _fillPnts(this._cache_story_places[recID][DT_BEGIN_PLACES], begin_pnt);
+        _fillPnts(this._cache_story_places[recID][DT_END_PLACES], end_pnt);
+        _fillPnts(this._cache_story_places[recID][DT_TRAN_PLACES], tran_pnt);
+        
+        var path = null;
+        //create link path from begin to end place
+        if (begin_pnt.length>0 || end_pnt.length>0 || tran_pnt.length>0){
+            //$geovalues = array();
+            
+            //PAIRS: many start points and transition points - star from start points to first transition
+            if(begin_pnt.length>1 || end_pnt.length>1){
+                path = {geometry:{coordinates:[], type:'MultiLineString'}, id:'xxx', type:'Feature', properties:{rec_ID:0}};
+                
+                if(tran_pnt.length>0){
+
+                    //adds lines from start to first transition    
+                    if(begin_pnt.length>0){
+                        for(var i=0; i<begin_pnt.length; i++){
+                            path.geometry.coordinates.push([begin_pnt[i], tran_pnt[0]]);
+                        }                
+                    }
+                    //transition
+                    path.geometry.coordinates.push(tran_pnt);
+                    
+                    //lines from last transition to end points
+                    if(end_pnt.length>0){
+                        var last = tran_pnt.length-1;
+                        for(var i=0; i<end_pnt.length; i++){
+                            path.geometry.coordinates.push([tran_pnt[last], end_pnt[i]]);
+                        }                
+                    }
+                    
+                }else if(end_pnt.length==begin_pnt.length){ //PAIRS
+                    //adds lines from start to end
+                    for(var i=0; i<begin_pnt.length; i++){
+                        path.geometry.coordinates.push([begin_pnt[i], end_pnt[i]]);
+                    }                
+                }
+                
+                
+            }else{
+                path = {geometry:{coordinates:[], type:'LineString'}, id:'xxx', type:'Feature', properties:{rec_ID:0}};
+                
+                if(begin_pnt.length>0) path.geometry.coordinates.push(begin_pnt[0]);
+
+                if(tran_pnt.length>0)
+                    for(var i=0; i<tran_pnt.length; i++){
+                        path.geometry.coordinates.push(tran_pnt[i]);
+                    }                
+
+                if(end_pnt.length>0) path.geometry.coordinates.push(end_pnt[0]);
+            }
+            
+            
+            if(path.geometry.coordinates.length>0){
+                this._cache_story_places[recID]['geojson'].push(path);
+            }
+        }    
+    
     }
 
 });

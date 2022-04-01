@@ -22,7 +22,7 @@
 function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
 
     var _className = 'editCMS_WidgetCfg';
-    var isWebPage = false;
+    //var isWebPage = false;
     
     function _init(){
 
@@ -95,11 +95,15 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
         
         if(main_menu.length>0){
             pages = main_menu.navigation('getMenuContent','list');
-            pages.unshift({key:'',title:''});   
-            window.hWin.HEURIST4.ui.createSelector(selPage[0], pages);
-            isWebPage = false;
+            if(!pages){
+                selPage.parent().hide();
+            }else{
+                pages.unshift({key:'',title:''});   
+                window.hWin.HEURIST4.ui.createSelector(selPage[0], pages);
+            }
+            //isWebPage = false;
         }else{
-            isWebPage = true;
+            //isWebPage = true;
             selPage.parent().hide();
         }
         

@@ -324,3 +324,5 @@ function hexToFilter(hex) {
 
     return result.filter;  
 }  
+
+

@@ -95,6 +95,7 @@ public static function setSession($system){
 //              >1 and "q" is defined - save query request in session to result set returned, 
 //              >1 and "q" not defined and "draw" is defined - takes query from session
 //              1 - use "q" parameter
+//    columns - array of header and detail fields to be returned
 //
 //    leaflet - 0|1 returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
 //    simplify  0|1 simplify  paths with more than 1000 vertices 
@@ -447,7 +448,7 @@ XML;
                         if($col_name === 'typename'){
                             $need_rec_type = true;
                         }else{
-                             array_push($retrieve_detail_fields, $col_name);
+                            array_push($retrieve_detail_fields, $col_name);
                         }
                     }
                 }
@@ -554,7 +555,9 @@ XML;
         if($params['format']=='geojson'){
             
             $feature = self::_getGeoJsonFeature($record, (@$params['extended']==2), 
-                        @$params['simplify'], @$params['leaflet'], $find_places_for_geo);
+                                            @$params['simplify'], 
+                                            @$params['leaflet'], 
+                                            $find_places_for_geo);
             if(@$params['leaflet']){ //include only geoenabled features, timeline data goes in separate timeline array
                    if(@$feature['when']){
                         $timeline_data[] = array('rec_ID'=>$recID, 'when'=>$feature['when']['timespans'], 

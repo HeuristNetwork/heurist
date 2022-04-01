@@ -802,7 +802,7 @@ $.widget( "heurist.mapping", {
             return 0;
         }
         
-    },
+    }, //addGeoJson
 
     //
     //
@@ -1196,7 +1196,7 @@ $.widget( "heurist.mapping", {
         }
     },
     //
-    // apply style for given layer
+    // apply style for given top layer
     // it takes style from options.default_style, each feature may have its own style that overwrites layer's one
     //
     applyStyle: function(layer_id, newStyle) {
@@ -1226,8 +1226,6 @@ $.widget( "heurist.mapping", {
         // set default values -------       
         style = this.setStyleDefaultValues( style );
         
-        var myIcon = this._createMarkerIcon( style );
-
         //set default values ------- END
         
         affected_layer.options.default_style = style;
@@ -1359,30 +1357,15 @@ $.widget( "heurist.mapping", {
             
         }else{
             
-            function __childLayers(layer, feature){
-                if(layer instanceof L.LayerGroup){
-                    layer.eachLayer( function(child_layer){__childLayers(child_layer, feature) } );
-                }else if(layer instanceof L.Polyline && !(layer instanceof L.Polygon)){
-                    var use_style = window.hWin.HEURIST4.util.cloneJSON( style );
-                    use_style.fill = false;
-                    if(!layer.feature){
-                        layer.feature = {properties: feature.properties};
-                    } 
-                    layer.feature.default_style = use_style;
-                }else{
-                    if(!layer.feature){
-                        layer.feature = {properties: feature.properties};
-                    }
-                    layer.feature.default_style = style;        
-                }
-            }
+            this._assignStyleToFeature(affected_layer, style);
             
-            affected_layer.eachLayer( function(child_layer){__childLayers(child_layer, child_layer.feature) });
         }
+        
+        var myIcon = this._createMarkerIcon( style );
         
         //apply marker style
         $(this.all_markers[layer_id]).each(function(idx, layer){
-                
+            
                 var feature = layer.feature;
                 var markerStyle;
                 var setIcon;
@@ -1398,82 +1381,7 @@ $.widget( "heurist.mapping", {
                     setIcon = myIcon;
                 }
 
-                //define icon for record type                                        
-                if(markerStyle.iconType=='rectype' )
-                {
-                    
-                    var rty_ID = feature.properties.rec_RecTypeID;
-                    if(that.myIconRectypes[rty_ID+markerStyle.color]){
-                        setIcon = that.myIconRectypes[rty_ID+markerStyle.color];
-                    }else{
-                        var fsize = markerStyle.iconSize;
-                        if(markerStyle.color){
-                            setIcon = L.divIcon({  
-                                html: '<img src="'
-                                +window.hWin.HAPI4.iconBaseURL + rty_ID
-                                +'" style="width:'+fsize+'px;height:'+fsize+'px;filter:'
-                                +hexToFilter(markerStyle.color)+'"/>',
-                                iconSize:[fsize, fsize]
-                                //iconAnchor:[fsize/2, fsize/4]
-                            });
-                        }else{
-                            setIcon = L.icon({
-                                iconUrl: window.hWin.HAPI4.iconBaseURL + rty_ID, 
-                                    //+ '&color='+encodeURIComponent(markerStyle.color)
-                                    //+ '&bg='+encodeURIComponent('#ffffff')),
-                                iconSize: [fsize, fsize]                        
-                            });
-                        }
-                        
-                        
-                        
-                        that.myIconRectypes[rty_ID+markerStyle.color] = setIcon;
-                    }
-                }
-                
-                var new_layer = null;
-                if(layer instanceof L.Marker){
-                    if(markerStyle.iconType=='circle'){
-                        //change to circleMarker
-                        markerStyle.radius = markerStyle.iconSize/2;
-                        new_layer = L.circleMarker(layer.getLatLng(), markerStyle);    
-                        new_layer.feature = feature;
-                    }else{
-                        layer.setIcon(setIcon);    
-                        layer.setOpacity( markerStyle.opacity );
-                        //if(markerStyle.color)
-                        //    layer.valueOf()._icon.style.filter = hexToFilter(markerStyle.color);
-                    }
-
-                }else if(layer instanceof L.CircleMarker){
-                    if(markerStyle.iconType!='circle'){
-                        //change from circle to icon marker
-                        new_layer = L.marker(layer.getLatLng(), {icon:setIcon, opacity:markerStyle.opacity });
-                        new_layer.feature = feature;
-                    }else{
-                        markerStyle.radius = markerStyle.iconSize/2;
-                        layer.setStyle(markerStyle);
-                        //layer.setRadius(markerStyle.iconSize);                    
-                    }
-                }
-                
-                if(new_layer!=null){
-                    that.all_markers[layer_id][idx] = new_layer; 
-                    if(!that.isMarkerClusterEnabled){
-                        layer.parent_layer.addLayer(new_layer);
-                        layer.parent_layer.removeLayer(layer);
-                        layer.remove();
-                        layer = null;
-                    }
-                    new_layer.on('click', function(e){that._onLayerClick(e)});
-                 
-                    if(that.options.map_rollover){
-                        new_layer.bindTooltip(function (layer) {
-                            return layer.feature.properties.rec_Title;
-                        })
-                    }                
-
-                }
+                that.applyStyleForMarker(layer_id, layer, markerStyle, setIcon);
             
         });
      
@@ -1484,10 +1392,141 @@ $.widget( "heurist.mapping", {
                 this.all_clusters[layer_id].addTo( this.nativemap );
             }
         }
-
+        
+        //apply style for other than markers 
         affected_layer.setStyle(function(feature){ return that._stylerFunction(feature); });
         
     },
+    
+    //
+    // assign style to feature.default_style - to use in _stylerFunction 
+    //
+    _assignStyleToFeature: function(affected_layer, style)
+    {
+        function __childLayers(layer, feature){
+            if(layer instanceof L.LayerGroup){
+                layer.eachLayer( function(child_layer){__childLayers(child_layer, feature) } );
+            }else if(layer instanceof L.Polyline && !(layer instanceof L.Polygon)){
+                var use_style = window.hWin.HEURIST4.util.cloneJSON( style );
+                use_style.fill = false;
+                if(!layer.feature){
+                    layer.feature = {properties: feature.properties};
+                } 
+                layer.feature.default_style = use_style;
+            }else{
+                if(!layer.feature){
+                    layer.feature = {properties: feature.properties};
+                }
+                layer.feature.default_style = style;        
+            }
+        }
+        
+        if(affected_layer instanceof L.LayerGroup){
+            affected_layer.eachLayer( function(child_layer){__childLayers(child_layer, child_layer.feature) });
+        }else{
+            __childLayers(affected_layer, affected_layer.feature)
+        }
+    },
+    
+    //
+    // apply style for particular layer 
+    //
+    applyStyleForLayer: function(top_layer, layer, newStyle) {
+        
+        var style = this.setStyleDefaultValues(newStyle);
+        
+        this._assignStyleToFeature(layer, style);
+        
+        //for markers
+        this.applyStyleForMarker(top_layer, layer, style);
+        
+        //for other
+        var that = this;
+        top_layer.setStyle(function(feature){ return that._stylerFunction(feature); });
+        
+    },
+
+    applyStyleForMarker: function(top_layer, layer, markerStyle, setIcon) {
+        
+        var parent_id = 0;
+        if(top_layer) parent_id = top_layer._leaflet_id;
+
+        if(parent_id>0 && !this.all_markers[parent_id]) return;  //there is no markers for this parent layer
+        
+        var that = this;
+        
+        markerStyle = this.setStyleDefaultValues(markerStyle);
+        
+        if(!setIcon){
+            setIcon = this._createMarkerIcon( markerStyle );
+        }
+
+        //define icon for record type                                        
+        if(markerStyle.iconType=='rectype' )
+        {
+            var feature = layer.feature;
+            
+            var rty_ID = feature.properties.rec_RecTypeID;
+            if(that.myIconRectypes[rty_ID+markerStyle.color]){ //cache
+                setIcon = that.myIconRectypes[rty_ID+markerStyle.color];
+            }else{
+                var fsize = markerStyle.iconSize;
+                if(markerStyle.color){
+                    setIcon = L.divIcon({  
+                        html: '<img src="'
+                        +window.hWin.HAPI4.iconBaseURL + rty_ID
+                        +'" style="width:'+fsize+'px;height:'+fsize+'px;filter:'
+                        +hexToFilter(markerStyle.color)+'"/>',
+                        iconSize:[fsize, fsize]
+                        //iconAnchor:[fsize/2, fsize/4]
+                    });
+                }else{
+                    setIcon = L.icon({
+                        iconUrl: window.hWin.HAPI4.iconBaseURL + rty_ID, 
+                            //+ '&color='+encodeURIComponent(markerStyle.color)
+                            //+ '&bg='+encodeURIComponent('#ffffff')),
+                        iconSize: [fsize, fsize]                        
+                    });
+                }
+                
+                
+                
+                that.myIconRectypes[rty_ID+markerStyle.color] = setIcon;
+            }
+        }
+        
+        var new_layer = null;
+        if(layer instanceof L.Marker){
+            if(markerStyle.iconType=='circle'){
+                //change to circleMarker
+                markerStyle.radius = markerStyle.iconSize/2;
+                new_layer = L.circleMarker(layer.getLatLng(), markerStyle);    
+                new_layer.feature = layer.feature;
+            }else{
+                layer.setIcon(setIcon);    
+                layer.setOpacity( markerStyle.opacity );
+                //if(markerStyle.color)
+                //    layer.valueOf()._icon.style.filter = hexToFilter(markerStyle.color);
+            }
+
+        }else if(layer instanceof L.CircleMarker){
+            if(markerStyle.iconType!='circle'){
+                //change from circle to icon marker
+                new_layer = L.marker(layer.getLatLng(), {icon:setIcon, opacity:markerStyle.opacity });
+                new_layer.feature = layer.feature;
+            }else{
+                markerStyle.radius = markerStyle.iconSize/2;
+                layer.setStyle(markerStyle);
+                //layer.setRadius(markerStyle.iconSize);                    
+            }
+        }   
+        
+        if(new_layer!=null){ //replace old marker to new one
+            that._replaceMarker(parent_id, layer, new_layer);
+            //that.all_markers[parent_id][idx] = new_layer; 
+        }
+    },
+
     
     //
     // map layer (shape) on click event handler - highlight selection on timeline and map, opens popup
@@ -1974,7 +2013,7 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    //
+    // NOT USED
     //    
     findLayerByRecID: function(recIDs){
         
@@ -2038,7 +2077,7 @@ $.widget( "heurist.mapping", {
     },
 
     //
-    //
+    // NOT USED
     //
     fadeInLayers: function( _selection){
         var layers = this.findLayerByRecID( _selection );
@@ -2131,6 +2170,45 @@ $.widget( "heurist.mapping", {
         
         return selected_markers;
     },
+
+    //
+    // Replace marker
+    //    
+    _replaceMarker: function( parent_id, old_marker, new_marker ){
+
+        var is_found = false;    
+        for(var layer_id in this.all_markers) {
+            if(this.all_markers.hasOwnProperty(layer_id))
+            {
+                    var markers = this.all_markers[layer_id];
+                    $(markers).each(function(idx, layer){
+                        if(layer._leaflet_id == old_marker._leaflet_id){
+                            this.all_markers[layer_id][idx] = new_marker; 
+                            
+            
+                            if(!that.isMarkerClusterEnabled){
+                                layer.parent_layer.addLayer(new_marker);
+                                layer.parent_layer.removeLayer(layer);
+                                layer.remove();
+                                layer = null;
+                            }
+                            new_marker.on('click', function(e){that._onLayerClick(e)});
+                         
+                            if(that.options.map_rollover){
+                                new_marker.bindTooltip(function (layer) {
+                                    return layer.feature.properties.rec_Title;
+                                })
+                            }                
+                            is_found = true;
+                            return false;
+                        }
+                    });
+                    if(is_found) break;
+            }
+        }        
+        
+    },
+
     
     //
     //
