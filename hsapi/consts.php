@@ -391,7 +391,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     //'DT_CMS_ALT_TITLE' => array(3, 1009),
     'DT_CMS_SCRIPT' => array(2, 927),
     'DT_CMS_PAGETYPE' => array(2, 928), //menu (2-6253) or standalone (2-6254)
-    'DT_CMS_EXTFILES' => array(2, 939),
+    'DT_CMS_EXTFILES' => array(2, 939), //external links and scripts
     'DT_CMS_FOOTER' => array(2, 940),
     'DT_CMS_FOOTER_FIXED' => array(2, 941),    //fixed 2-532
     

@@ -3437,6 +3437,31 @@ $.widget( "heurist.mapping", {
             this.drawSetStyleTransparent();
         }
         
+    },
+    
+    //
+    //
+    //
+    injectLinks: function(links){
+        
+        if(!$.isArray(links)){
+            links = links.split("\n");
+        }
+        for(var i=0; i<links.length; i++){
+            if(links[i].indexOf('.js')>0){
+                var scr = document.createElement('script');
+                scr.type = 'text/javascript';
+                scr.src = (links[i].indexOf(window.hWin.HAPI4.baseURL)==0?'':window.hWin.HAPI4.baseURL)+links[i];
+                document.getElementsByTagName('head')[0].appendChild(scr);
+            }else{
+                var link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.type = 'text/css';
+                link.href = (links[i].indexOf(window.hWin.HAPI4.baseURL)==0?'':window.hWin.HAPI4.baseURL)+links[i];
+                document.getElementsByTagName('head')[0].appendChild(link);
+            }
+        }
+        
     }
     
 });

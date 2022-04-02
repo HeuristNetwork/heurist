@@ -63,7 +63,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                 {  container:'cms-add-widget-popup',
                     default_palette_class: 'ui-heurist-publish',
                     width: 800,
-                    height: 600,
+                    height: 700,
                     close: function(){
                         $dlg.dialog('destroy');       
                         $dlg.remove();
@@ -205,7 +205,10 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                 if(opts['mapdocument']>0){
                     $dlg.find('select[name="mapdocument"]').attr('data-mapdocument', opts['mapdocument']);        
                 }
-                
+                if(opts['custom_links']){
+                    $dlg.find('textarea[name="custom_links"]').val(opts['custom_links']);    
+                }
+
                 $dlg.find('button[name="basemap_filter"]')
                     .button()
                     .css('font-size','0.7em')
@@ -832,7 +835,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
             var mapdoc_id = $dlg.find('select[name="mapdocument"]').val();
             if(mapdoc_id>0) opts['mapdocument'] = mapdoc_id;
 
-            
+            opts['custom_links'] = $dlg.find('textarea[name="custom_links"]').val();    
         }
 
                 var cont = $dlg.find('div.'+widget_name);

@@ -47,7 +47,9 @@ $.widget( "heurist.app_timemap", {
         //only the first request call the server - all others requests will show/hide items only
         use_cache: false,
         
-        onMapInit: null   //event triggered when map is fully loaded/inited
+        onMapInit: null,   //event triggered when map is fully loaded/inited
+        
+        custom_links: null  //links to custom css and scripts to be injected into mao iframe
     },
 
     _events: null,
@@ -397,6 +399,13 @@ console.log(re);
                     if($.isFunction(this.options.onMapInit)){
                         this.options.onMapInit.call();
                     }
+                    
+                    //call special method to inject custom links (css and javascript) to iframe map document
+                    if(that.options.custom_links){
+                        //custom_links - urls to be injected as css and js
+                        mapping.mapping('injectLinks', that.options.custom_links);
+                    }
+                    
                 }
                 
                 this.map_inited = true;
