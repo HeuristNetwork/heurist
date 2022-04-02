@@ -103,7 +103,7 @@ if($is_included){
         $cache_missed = ((!$is_table_exist) || $missed_relationships>0 || $missed_links>0);
 
         if($cache_missed){
-            echo '<div><h3 class="error">Recreate Relationship cache to restore missed entries</h3></div>';        
+            echo '<div><h3 class="error">Recreate Relationship cache to restore missing entries</h3></div>';        
         }else{
             echo '<div><h3 class="res-valid">OK: Relationship cache is valid</h3></div>';        
         }

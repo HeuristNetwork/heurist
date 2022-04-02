@@ -252,7 +252,7 @@ console.log(response);
 
             var rectype_source = rectype['code'];
             if(!rectype_source){
-                rectype_source = '<span style="color:red">missed</span>';
+                rectype_source = '<span style="color:red">missing</span>';
                 sourceMissed++;
             }else if(rectype_source.indexOf('-')<0 || rectype_source.indexOf('0000-')==0 ){
                 cnt_local_rt++;
@@ -301,7 +301,7 @@ console.log(response);
 
                 var dt_source = detailtype['code'];
                 if(!dt_source){
-                    dt_source = '<span style="color:red">missed</span>';
+                    dt_source = '<span style="color:red">missing</span>';
                     sourceDtMissed++;
                 }else {
                     

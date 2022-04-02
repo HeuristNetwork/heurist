@@ -200,7 +200,7 @@ class DbDefFileExtToMimetype extends DbEntityBase
         }else{
             $this->system->addError(HEURIST_INVALID_REQUEST, 
                                  "Cannot delete from table ".$this->config['entityName'], 
-                                 'Record ID provided is wrong value');
+                                 'Record ID provided is an invalid value');
             return false;
         }
         return $ret;

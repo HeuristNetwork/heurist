@@ -413,7 +413,7 @@ if($active_all || in_array('dup_terms', $active)) {
                     $res = $mysqli->query( $query );
                     if(! $res )
                     {
-                        print "<div class='error'>Cannot clear missed inverse terms ids.</div>";
+                        print "<div class='error'>Cannot clear missing inverse terms ids.</div>";
                     }else{
                         $wasassigned2 = $mysqli->affected_rows;
                         $trmWithWrongInverse = array();

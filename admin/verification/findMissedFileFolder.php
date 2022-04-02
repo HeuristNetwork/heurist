@@ -62,7 +62,7 @@ if(!@$_REQUEST['mail']){
 
         <script>window.history.pushState({}, '', '<?php echo $_SERVER['PHP_SELF']; ?>')</script>  
         <div style="font-family:Arial,Helvetica;font-size:12px">
-                <h2>List of databases with missed or not-writeable folders</h2>
+                <h2>List of databases with missing or non-writeable folders</h2>
 <?php            
 }
 

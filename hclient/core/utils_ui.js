@@ -420,7 +420,7 @@ window.hWin.HEURIST4.ui = {
             if(useGroups===true  && grp_id>0 && vocabs[grp_id].length>1){
                 //add group header
                 var group_name = $Db.vcg(grp_id,'vcg_Name');
-                if(!group_name) group_name = 'Group# '+grp_id+' (missed)';
+                if(!group_name) group_name = 'Group# '+grp_id+' (missing)';
                 
                 var opt = window.hWin.HEURIST4.ui.addoption(selObj, grp_id, group_name);
                 $(opt).attr('disabled', 'disabled');

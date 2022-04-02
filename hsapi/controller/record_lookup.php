@@ -38,7 +38,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
     $params = $_REQUEST;
 
     if(!(@$params['service'])){
-        $system->error_exit_api('Service parameter is not defined or has wrong value'); //exit from script
+        $system->error_exit_api('Service parameter value is missing or invalid'); //exit from script
     }
     
     if( !$system->init(@$params['db']) ){  //@todo - we don't need db connection here - it is enough check the session

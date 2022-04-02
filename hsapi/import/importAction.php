@@ -495,7 +495,7 @@ public static function assignRecordIds($params){
     $match_mode = @$params['match_mode'] ?$params['match_mode']: 0;   //by fields 0, by id 1, skip match 2
     
     if(intval($rty_ID)<1 || !(intval($currentSeqIndex)>=0)){
-        self::$system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong value');
+        self::$system->addError(HEURIST_INVALID_REQUEST, 'Record type value is missing or invalid');
         return false;
     }
     

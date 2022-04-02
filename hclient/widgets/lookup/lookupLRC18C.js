@@ -387,7 +387,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                                         
                                     +(cnt_i>0
                                     ?(cnt_i+' record'+(cnt_i>1?'s are':' is')
-                                    +' skipped. Either record type is not set in mapping or missed in this database'):''));
+                                    +' skipped. Either record type is not set in mapping or is missing from this database'):''));
                                     
                                 }
                             }

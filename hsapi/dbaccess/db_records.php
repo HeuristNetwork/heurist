@@ -1448,7 +1448,7 @@ function isWrongAccessRights($system, $access){
     if ($access=='viewable' || $access=='hidden' || $access=='public' || $access=='pending') {
         return false;
     }else{
-        $system->addError(HEURIST_INVALID_REQUEST, 'Non owner visibility is not defined or has wrong value');
+        $system->addError(HEURIST_INVALID_REQUEST, 'Non-owner visibility value is missing or invalid');
         return true;
     }
 }
@@ -2242,9 +2242,9 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
     }else if (count($det_required)>0) {
 
         $system->addError(HEURIST_ACTION_BLOCKED, 'Required field'.(count($det_required)>1?'s':'')
-            .' not defined or '.
+            .' missing value or '.
             (count($det_required)>1?'have':'has')
-            .' wrong value: '.implode(',',array_values($det_required)));
+            .' invalid value: '.implode(',',array_values($det_required)));
 
     }else if (count($insertValues)<1) {
 

@@ -298,7 +298,7 @@ public static function findDupes( $params ){
     }
     
     if($compare_mode==0){
-        self::$system->addError(HEURIST_INVALID_REQUEST, 'Required parameter "fields" is missed or has wrong value and none field found');
+        self::$system->addError(HEURIST_INVALID_REQUEST, 'Required parameter "fields" value is missing or invalid and no field found');
         return false;
     }
     

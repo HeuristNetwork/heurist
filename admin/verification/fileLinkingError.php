@@ -350,7 +350,7 @@ $mysqli = $system->get_mysqli();
     }//for dbs
     
     if(file_exists($log_filename)){
-        echo '<a href="'.HEURIST_HTML_URL.'missed_files.log" target="_blank">Get log file with list of missed (not found) files</a><br><br>';
+        echo '<a href="'.HEURIST_HTML_URL.'missed_files.log" target="_blank">Get log file with list of missing (not found) files</a><br><br>';
     }            
             ?>
         </div>

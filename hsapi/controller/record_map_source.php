@@ -56,7 +56,7 @@
     $input_format = null;
 
     if(!(@$params['recID']>0)){
-        $system->error_exit_api('recID parameter is not defined or has wrong value'); //exit from script
+        $system->error_exit_api('recID parameter value is missing or invalid'); //exit from script
     }
     
     if( ! $system->init(@$params['db']) ){

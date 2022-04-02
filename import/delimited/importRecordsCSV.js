@@ -3468,7 +3468,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         }   
                         if (imp_result['skipped']>0){
                             
-                            var suggestions = 'If you see "missed data" message you may need to make fields optional.<br>'
+                            var suggestions = 'If you see "missing data" message you may need to make fields optional.<br>'
                             +'If record can not be updated due wrong resource or parent links run Verify integrity to fix problems with records<br><br>';
                             
                             msg = msg 

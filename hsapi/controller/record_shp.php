@@ -63,7 +63,7 @@ use Shapefile\ShapefileReader;
         $system->error_exit_api(); //exit from script
     }
     if(!(@$params['recID']>0)){
-        $system->error_exit_api('recID parameter is not defined or has wrong value'); //exit from script
+        $system->error_exit_api('recID parameter value is missing or invalid'); //exit from script
     }
     
     $need_simplify = (true || @$params['simplify']=='yes' || @$params['simplify']==1);
