@@ -652,7 +652,7 @@ window.hWin.HEURIST4.dbs = {
             }
 
             if($dtl_fields.length > 0){
-                $children.push({title: 'fields', folder: true, is_rec_fields: true, children: $dtl_fields});
+                $children.push({title: 'fields', folder: true, expanded:true, is_rec_fields: true, children: $dtl_fields});
             }
 
             if($mode<5 || $recursion_depth==0){
@@ -2157,7 +2157,7 @@ window.hWin.HEURIST4.dbs = {
                                 break;
                             }
 
-                            harchy.push(' . '+sFieldName+' &gt ');
+                            harchy.push(' . '+sFieldName+' > '); //&gt;
                             harchy_fields.push(sFieldName);
                         }else{
                             var from_rtid = codes[j+2];
