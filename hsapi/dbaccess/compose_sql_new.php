@@ -1864,7 +1864,7 @@ class HPredicate {
                 
                 $val = $this->getFieldValue();
 
-                if(!$this->field_list){
+                if($val=='' && !$this->field_list){
                     $val = "=0";
                     //@todo  findAnyField query
                     //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
@@ -1927,7 +1927,7 @@ class HPredicate {
 
             $val = $this->getFieldValue();
 
-            if(!$this->field_list){
+            if($val=='' && !$this->field_list){
                 $val = "=0";
                 //@todo  findAnyField query
                 //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
@@ -1992,7 +1992,7 @@ class HPredicate {
         }else{
             $val = $this->getFieldValue();
 
-            if(!$this->field_list){
+            if($val=='' && !$this->field_list){
                 $val = "=0";
                 //@todo  findAnyField query
                 //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
@@ -2111,7 +2111,7 @@ class HPredicate {
                 //related to/from list of record ids
                 $val = $this->getFieldValue();                
 
-                if(!$this->field_list){
+                if($val=='' && !$this->field_list){
                     $val = "!=0";
                     //@todo  findAnyField query
                     //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
@@ -2176,7 +2176,7 @@ class HPredicate {
         }else{
             $val = $this->getFieldValue();
 
-            if(!$this->field_list){
+            if($val=='' && !$this->field_list){
                 $val = "=0";
                 //@todo  findAnyField query
                 //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
