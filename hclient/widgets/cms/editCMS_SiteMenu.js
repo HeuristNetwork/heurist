@@ -535,8 +535,10 @@ console.log('!!! '+current_page_id);
                     
                     var details = {};
                     details['t:'+DT_NAME] = [ $dlg.find('#pageName').val() ];
-                    //details['t:'+DT_CMS_PAGETITLE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'] ];
                     details['t:'+DT_CMS_PAGETYPE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_MENUITEM'] ];
+                    if(DT_CMS_PAGETITLE>0 && window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO']){
+                        details['t:'+DT_CMS_PAGETITLE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'] ];
+                    }
                     
                     var template_name = $dlg.find('#pageContent').val();
                     var sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.json';
