@@ -395,6 +395,8 @@ console.log(re);
                                       source:that.element.attr('id'), search_realm:that.options.search_realm } );
 
                     });
+                
+                    this.map_inited = true;
                     
                     if($.isFunction(this.options.onMapInit)){
                         this.options.onMapInit.call();
@@ -408,7 +410,7 @@ console.log(re);
                     
                 }
                 
-                this.map_inited = true;
+                
             
             }else{
                 //google to remove
@@ -657,6 +659,10 @@ console.log(re);
         }else{
             return null;
         }
+    }
+    
+    , isMapInited: function(){
+        return this.map_inited;
     }
     /*
     , getNativeMap: function(){

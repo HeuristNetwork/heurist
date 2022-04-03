@@ -172,7 +172,7 @@ function editSymbology(current_value, mode_edit, callback){
         }},
         {"dtID": "iconSize",
             "dtFields":{
-                "dty_Type":"integer",
+                "dty_Type":"freetext",
                 "rst_DisplayName": "Icon size:"
                 //"rst_DefaultValue": 18,
         }}

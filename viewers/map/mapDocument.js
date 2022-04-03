@@ -400,7 +400,8 @@ function hMapDocument( _options )
     }
     
     //
-    //  returns sybology for given layer of map document, if layer not defined returns defaul symbology for map document
+    //  returns sybology for given layer of map document, if layer not defined 
+    //  if returns default symbology defined in map document
     //
     function _getSymbology( mapdoc_id, rec_id ){
         

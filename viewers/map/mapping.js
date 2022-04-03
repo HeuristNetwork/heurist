@@ -1845,7 +1845,11 @@ $.widget( "heurist.mapping", {
         
         if(!style) style = {};
         if(!style.iconType || style.iconType=='default') style.iconType = def_style.iconType;
-        style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :def_style.iconSize; //((style.iconType=='circle')?9:18);
+        if(style.iconType=='url' && typeof style.iconSize == 'string' && style.iconSize.indexOf(',')>0){
+            
+        }else{
+            style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :def_style.iconSize; //((style.iconType=='circle')?9:18);
+        }
         style.color = (style.color?style.color:def_style.color);   //light blue
         style.fillColor = (style.fillColor?style.fillColor:def_style.fillColor);   //light blue
         style.weight = style.weight>=0 ?style.weight :def_style.weight;
@@ -1887,9 +1891,21 @@ $.widget( "heurist.mapping", {
             
             var fsize = style.iconSize;
             
+console.log(fsize);            
+            if( typeof fsize == 'string' && fsize.indexOf(',')>0){
+                fsize = fsize.split(',');
+                style.iconWidth = fsize[0];
+                style.iconHeight = fsize[1];
+            }
+            if (style.iconWidth>0 && style.iconHeight>0){
+                fsize = [style.iconWidth, style.iconHeight];
+            }else{
+                fsize = [fsize, fsize];
+            }
+            
             myIcon = L.icon({
-                iconUrl: style.iconUrl,
-                iconSize: [fsize, fsize]
+                iconUrl: style.iconUrl
+                ,iconSize: fsize
                 /*iconAnchor: [22, 94],
                 popupAnchor: [-3, -76],
                 shadowUrl: 'my-icon-shadow.png',

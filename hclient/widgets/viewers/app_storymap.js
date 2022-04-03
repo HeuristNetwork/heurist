@@ -63,10 +63,13 @@ $.widget( "heurist.app_storymap", {
     _mapping: null,    // mapping widget
     _L: null, //refrence to leaflet
     
+
+    _cache_story_geo: {},
+    _cache_story_time: {},
     _cache_story_places: null,
     
     _currentElementID: 0,
-    _nativelayer_id: 0, //current layer for Story Element
+    _nativelayer_id: 0, //current layer for Story Elements
     _currentStoryID: 0,
     
     _terminateAnimation: false,
@@ -344,10 +347,13 @@ $.widget( "heurist.app_storymap", {
             
             var request;
             var that = this;
+            
+            let DT_STORY_ANIMATION = $Db.getLocalID('dty', '2-1090');
+
 
             if(this.options.storyFields.length>0){
                 //search for story fields for given record
-                request = {q:{ids:recID}, detail:this.options.storyFields.join(',')};
+                request = {q:{ids:this.options.storyRecordID}, detail:this.options.storyFields.join(',')};
 
                 window.hWin.HAPI4.RecordMgr.search(request,
                     function(response) {
@@ -366,7 +372,7 @@ $.widget( "heurist.app_storymap", {
                                 recIDs = recIDs.join(',');
                                 
                                 //returns story elements in exact order
-                                var request = {q:[{ids:recIDs},{sort:('set:'+recIDs)}], detail:'header'};
+                                var request = {q:[{ids:recIDs},{sort:('set:'+recIDs)}], detail:DT_STORY_ANIMATION};
                                 
                                 if(that.options.storyRectypes.length>0){
                                     request['q'].push({t:that.options.storyRectypes.join(',')});
@@ -425,7 +431,8 @@ $.widget( "heurist.app_storymap", {
         if(this._animationResolve!=null){
             this._terminateAnimation = true;
         }
-        
+    
+//console.log('REMOVE '+this._nativelayer_id);
         //clear map
         if(this._nativelayer_id>0){
             var mapwidget = this._mapping.app_timemap('getMapping');
@@ -434,7 +441,7 @@ $.widget( "heurist.app_storymap", {
         }
     },
     
-    // 1. Lods all map data (to remove?)
+    // 1. Loads all story elements time data
     // 2. loads list of story elements (this._resultset) into reulst list
     // 3. Render overview as smarty report or renderRecordData
     //
@@ -446,6 +453,12 @@ $.widget( "heurist.app_storymap", {
         if(this.options.map_widget_id){
             this._mapping = $('#'+this.options.map_widget_id)    
         }
+        
+        if(this._storylayer_id>0){
+            var mapwidget = this._mapping.app_timemap('getMapping');
+            mapwidget.removeLayer( this._storylayer_id );
+        }
+        
         
         // mode A: load all places at once 
         // mode B: loads places for every story element separately - use this
@@ -463,7 +476,6 @@ $.widget( "heurist.app_storymap", {
                 var map = this._mapping.app_timemap('getMapping');
                 map.isMarkerClusterEnabled = false;
             }
-            
         }
         
         //switch to Overview
@@ -532,12 +544,92 @@ $.widget( "heurist.app_storymap", {
                     
             }
             
+            
+            //Loads time data all story elements - into special layer "Whole Store Timeline"
+            this.updateTimeLine();
+            
+            
         }else{
             //clear 
             //this.options.storyRecordID = null;
             this.pnlOverview.html(top.HR('There is no story for selected record'));
         }
         
+    },
+    
+    //
+    // update Whole store timeline
+    //
+    updateTimeLine: function(){
+        
+        var that = this;
+        
+        if(that._cache_story_geo[that.options.storyRecordID]=='no data'){
+            //no time data for this story
+            
+            
+        }else if(that._cache_story_geo[that.options.storyRecordID] 
+                || that._cache_story_time[that.options.storyRecordID])
+        {
+            
+            if(!this._mapping.app_timemap('isMapInited')){
+                    
+                this._mapping.app_timemap('option','onMapInit', function(){
+                    that.updateTimeLine();
+                });
+                return;
+            }
+            
+            //update timeline
+            var mapwidget = this._mapping.app_timemap('getMapping');
+            mapwidget.isMarkerClusterEnabled = false;
+            
+            this._storylayer_id = mapwidget.addGeoJson(
+                {geojson_data: that._cache_story_geo[that.options.storyRecordID],
+                 timeline_data: that._cache_story_time[that.options.storyRecordID],
+                    //layer_style: layer_style,
+                    //popup_template: layer_popup_template,
+                 dataset_name: 'Story Timeline',
+                 preserveViewport: true });
+            
+        }else{
+            
+            var server_request = {
+                            q: {ids: this._resultset.getIds()},
+                            leaflet: true, 
+                            simplify: true, //simplify paths with more than 1000 vertices
+                            suppress_linked_places: 1, //do not load assosiated places
+                            zip: 1,
+                            format:'geojson'};
+            window.hWin.HAPI4.RecordMgr.search_new(server_request,
+                function(response){
+                    var geojson_data = null
+                    if(response['geojson']){
+                        geojson_data = response['geojson'];
+                    }else{
+                        geojson_data = response;
+                    }
+console.log(geojson_data);
+                    if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) ){
+                        that._cache_story_geo[that.options.storyRecordID] = geojson_data;
+                    }else{
+                        that._cache_story_geo[that.options.storyRecordID] = null;
+                    }
+                    
+                    if(response['timeline']){
+                        that._cache_story_time[that.options.storyRecordID] = response['timeline'];
+                    }else {
+                        that._cache_story_time[that.options.storyRecordID] = null;
+                    }   
+                    
+                    if(!(that._cache_story_geo[that.options.storyRecordID] 
+                        || that._cache_story_time[that.options.storyRecordID])){
+                        that._cache_story_geo[that.options.storyRecordID] = 'no data';     
+                    }
+                    
+                    that.updateTimeLine();
+                });
+        }
     },
 
     //
@@ -728,15 +820,19 @@ $.widget( "heurist.app_storymap", {
                                 } 
                             } 
                         }
-                        //concatenate al places in proper order
+                        //concatenate all places in proper order
                         // Begin '2-134', Transition '1414-1090', End '2-864'
                         let DT_BEGIN_PLACES = $Db.getLocalID('dty', '2-134');
+                        let DT_BEGIN_PLACES2 = $Db.getLocalID('dty', '1414-1092');
                         let DT_END_PLACES = $Db.getLocalID('dty', '2-864');
                         if(DT_BEGIN_PLACES>0 && that._cache_story_places[recID][DT_BEGIN_PLACES]){
                             that._cache_story_places[recID]['places'] = that._cache_story_places[recID][DT_BEGIN_PLACES];
                         }
+                        if(DT_BEGIN_PLACES2>0 && that._cache_story_places[recID][DT_BEGIN_PLACES2]){
+                            that._cache_story_places[recID]['places'] = that._cache_story_places[recID][DT_BEGIN_PLACES2];
+                        }
                         for(dty_ID in that._cache_story_places[recID]){
-                            if(dty_ID!=DT_BEGIN_PLACES && dty_ID!=DT_END_PLACES && dty_ID!='places'){
+                            if(dty_ID!=DT_BEGIN_PLACES && dty_ID!=DT_BEGIN_PLACES2 && dty_ID!=DT_END_PLACES && dty_ID!='places'){
                                     that._cache_story_places[recID]['places'] = that._cache_story_places[recID]['places']
                                     .concat(that._cache_story_places[recID][dty_ID]);
                             }
@@ -764,20 +860,20 @@ $.widget( "heurist.app_storymap", {
                             function(response){
 
                                 var geojson_data = null;
-                                var timeline_data = [];
+                                //var timeline_data = [];
                                 var layers_ids = [];
-                                if(response['geojson'] && response['timeline']){
+                                if(response['geojson']){
                                     geojson_data = response['geojson'];
-                                    timeline_data = response['timeline'];   
+                                    //not used timeline_data = response['timeline']; 
                                 }else{
                                     geojson_data = response;
                                 }
 //console.log(geojson_data);
-                                if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
-                                    || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
+                                if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) )
                                 {
+                                     
                                     that._cache_story_places[recID]['geojson'] = geojson_data;
-                                    that._cache_story_places[recID]['timeline'] = timeline_data;
+                                    //that._cache_story_places[recID]['timeline'] = timeline_data;
 
                                     // 3. create links between points
                                     that._createPointLinks();
@@ -820,11 +916,12 @@ $.widget( "heurist.app_storymap", {
         mapwidget.isMarkerClusterEnabled = false;
         this._nativelayer_id = mapwidget.addGeoJson(
             {geojson_data: that._cache_story_places[this._currentElementID]['geojson'],
-                timeline_data: that._cache_story_places[this._currentElementID]['timeline'],
+                timeline_data: null, //that._cache_story_places[this._currentElementID]['timeline'],
                 //layer_style: layer_style,
                 //popup_template: layer_popup_template,
                 dataset_name: 'Story Map',
                 preserveViewport: false });
+//console.log('ADDED '+this._nativelayer_id);                
         //possible sequences
         // gain: begin-visible, trans fade in, end-visible
         // loses: trans-visible, trans fade out
@@ -833,15 +930,25 @@ $.widget( "heurist.app_storymap", {
         
         // json to describe animation
         // [{scope:begin|trans|end|all, range:0~n, actions:[{ action: duration: , steps:},..]},....] 
-        
+
+        let DT_STORY_ANIMATION = $Db.getLocalID('dty', '2-1090');
+        var record = this._resultset.getRecord(recID);
+        var anime = this._resultset.fld(record, DT_STORY_ANIMATION);
+
+//console.log('Animation '+anime);        
+
+        /*        
         var anime = [{scope:'all',action:'hide'},{scope:'all',range:1,action:'fade_in',duration:1000}]; //show in sequence
 
-        //anime = [{scope:'all',range:1,action:'fade_out',duration:1000}]; //hide in sequence
-        //anime = [{scope:'all',action:'hide'},{scope:'all',range:1,action:'fade_in_out',duration:1000}];
+        anime = [{scope:'all',range:1,action:'fade_out',duration:1000}]; //hide in sequence
+        anime = [{scope:'all',action:'hide'},{scope:'all',range:1,action:'fade_in_out',duration:1000}];
 
         anime = [{scope:'all',range:1,actions:[{action:'fly'}]}];
-        //anime = [{scope:'all',action:'hide'},{scope:'all',range:1,actions:[{action:'center'},{action:'fade_in'}]}];
+        anime = [{scope:'all',action:'hide'},{scope:'all',range:1,actions:[{action:'center'},{action:'fade_in'}]}];
         anime = [{scope:'all',actions:[{action:'blink',duration:2000}]}];
+        
+        anime = [{"scope":"begin","actions":[{"action":"style","style":  }]}];
+        */
 
         //or several actions per scope
         //var anime = [{scope:'all',range:1,actions:[{action:'fly'},{action:'fade_in',duration:500}]}];
@@ -850,9 +957,12 @@ $.widget( "heurist.app_storymap", {
         
         
         if(!window.hWin.HEURIST4.util.isempty(anime)){
-        
-            //start animation/actions
-            this._animateStoryElement_B_step3(anime);
+            
+            anime = window.hWin.HEURIST4.util.isJSON(anime);
+            if(anime){        
+                //start animation/actions
+                this._animateStoryElement_B_step3(anime);
+            }
         }
     },
     
@@ -907,7 +1017,7 @@ $.widget( "heurist.app_storymap", {
                 //array of record ids
                 places = step['scope'];
             }else if( parseInt(step['scope'])>0 ){
-                //particular record 
+                //particular record id
                 places = [step['scope']]; 
                 
             }else{ //if(step['scope']=='all'){ //default
@@ -915,10 +1025,17 @@ $.widget( "heurist.app_storymap", {
             }
             
             if(scope){
-                if(step['scope'].indexOf('-')>0){
-                    step['scope'] = $Db.getLocalID('dty', scope);
+                var scope2 = scope;
+                if(scope.indexOf('-')>0){
+                    scope = $Db.getLocalID('dty', scope);
                 }
                 places = this._cache_story_places[this._currentElementID][scope];    
+                
+                //special case - we have to fields for begin places
+                if(window.hWin.HEURIST4.util.isempty(places) && scope2=='2-134'){
+                    scope = $Db.getLocalID('dty', '1414-1092');
+                    places = this._cache_story_places[this._currentElementID][scope];    
+                }
             }
             
             //2b get ranges within scope
@@ -978,12 +1095,12 @@ $.widget( "heurist.app_storymap", {
         // zoom - zoom to scope
         // *fly - fly to scope
         // center
-        // show
-        // hide
+        // *show
+        // *hide
         // *fade_in - show marker, path or poly
         // *fade_in_out - show marker, path or poly
-        // blink
-        // gradient
+        // *blink
+        // *gradient
         // style - assign new style
         // show popup
         
@@ -1265,17 +1382,19 @@ console.log('animation terminated 2');
                     //keep initial visibility
                     is_visible.push((lyr._map!=null));
                 }
-                if(lyr._map==null){
-                    lyr.addTo( mapwidget.nativemap );                      
-                }else{
-                    lyr.remove();
-                }
             
                 if(that._terminateAnimation){
                     clearInterval(interval);
                     if($.isFunction(that._animationReject)) that._animationReject();
                     return false;
                 }
+                
+                if(lyr._map==null){
+                    lyr.addTo( mapwidget.nativemap );                      
+                }else{
+                    lyr.remove();
+                }
+                
             });
             
             count++;
@@ -1297,11 +1416,14 @@ console.log('animation terminated 2');
         
     },
     
+    //
+    //
+    //
     _createPointLinks: function(){
-
 
         // Begin '2-134', Transition '1414-1090', End '2-864'
         let DT_BEGIN_PLACES = $Db.getLocalID('dty', '2-134');
+        let DT_BEGIN_PLACES2 = $Db.getLocalID('dty', '1414-1092');
         let DT_END_PLACES = $Db.getLocalID('dty', '2-864');
         let DT_TRAN_PLACES = $Db.getLocalID('dty', '1414-1090');
         
@@ -1326,6 +1448,7 @@ console.log('animation terminated 2');
         }
         
         _fillPnts(this._cache_story_places[recID][DT_BEGIN_PLACES], begin_pnt);
+        _fillPnts(this._cache_story_places[recID][DT_BEGIN_PLACES2], begin_pnt);
         _fillPnts(this._cache_story_places[recID][DT_END_PLACES], end_pnt);
         _fillPnts(this._cache_story_places[recID][DT_TRAN_PLACES], tran_pnt);
         

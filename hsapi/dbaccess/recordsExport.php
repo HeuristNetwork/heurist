@@ -168,7 +168,8 @@ public static function output($data, $params){
     //
     if($params['format']=='geojson'){
         
-        $find_places_for_geo = (self::$system->user_GetPreference('deriveMapLocation', 1)==1);
+        $find_places_for_geo =  (@$params['suppress_linked_places']!=1) 
+               && (self::$system->user_GetPreference('deriveMapLocation', 1)==1);
         
         //define constant for start and end places
         define('DT_PLACE_START', ConceptCode::getDetailTypeLocalID('2-134'));
