@@ -572,7 +572,7 @@ window.hWin.HEURIST4.dbs = {
                 
                 $res['children'] = $children;
                 
-            }else if($mode==5 || $mode==6) //-----------------------------------
+            }else if($mode==5 || $mode==6) //----------------------------------- for query builder and facet search tree
             {
                 //record type is array - add common fields only
                 
@@ -652,7 +652,7 @@ window.hWin.HEURIST4.dbs = {
             }
 
             if($dtl_fields.length > 0){
-                $children.push({title: 'fields', folder: true, expanded:true, is_rec_fields: true, children: $dtl_fields});
+                $children.push({title: 'fields', folder: true, expanded:(!parentcode), is_rec_fields: true, children: $dtl_fields});
             }
 
             if($mode<5 || $recursion_depth==0){
