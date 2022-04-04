@@ -767,8 +767,6 @@ $.widget( "heurist.editing_input", {
                     $(eid).width(Math.max(768, $input.width())).height($input.height()).val($input.val()); 
                     //html($.parseHTML(   
 
-                    $btn_edit_switcher.text('text');
-
                     var nw = $input.css('min-width');
 
                     tinymce.init({
@@ -812,7 +810,7 @@ $.widget( "heurist.editing_input", {
                             }
                             /*
                             editor.on('init', function(e) {
-                                 $('.tox-edit-area').css({border:'1px solid blue'});
+                                $('.tox-edit-area').css({border:'1px solid blue'});
                             });
                             */
 
@@ -828,9 +826,9 @@ $.widget( "heurist.editing_input", {
                                 }else{
                                     $input.val(newval);     
                                 }
-                                            
+
                                 //$input.val( ed.getContent() );
-                                that.onChange();            
+                                that.onChange();
                             });
                         },
                         plugins: [ //contextmenu, textcolor since v5 in core
@@ -846,7 +844,7 @@ $.widget( "heurist.editing_input", {
                         ]
                     });
                     $input.hide();
-                }
+                } // _showEditor()
 
                 var isCMS_content = (( 
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
@@ -855,7 +853,7 @@ $.widget( "heurist.editing_input", {
                          this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'] || 
                          this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER']));
 
-				var cur_action = 'text';
+                var cur_action = 'text';
 
                 if( isCMS_content ){
                     
@@ -892,7 +890,7 @@ $.widget( "heurist.editing_input", {
                     
                     $btn_edit_switcher.text('edit source');
                     
-                    var $btn_edit_switcher2 = $( '<span>edit wyswyg</span>', {title: 'Show rich text editor'})
+                    var $btn_edit_switcher2 = $( '<span>edit wysiwyg</span>', {title: 'Show rich text editor'})
                         .addClass('smallbutton')
                         .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
                         .insertAfter( $btn_edit_switcher );
@@ -907,9 +905,10 @@ $.widget( "heurist.editing_input", {
                         $label_edit_switcher.hide();
                         var eid = '#'+$input.attr('id')+'_editor';                    
                         if($input.is(':visible')){
+                            $btn_edit_switcher.text('text');
                             __showEditor(true); //show tinymce editor
                         }else{
-                            $btn_edit_switcher.text('wyswyg');
+                            $btn_edit_switcher.text('wysiwyg');
                             $input.show();
                             //tinymce.remove('#'+$input.attr('id'));
                             tinymce.remove(eid);
@@ -920,6 +919,7 @@ $.widget( "heurist.editing_input", {
                     this._on( $btn_edit_switcher2, { click: function(){
                         $btn_edit_switcher2.hide();
                         $label_edit_switcher.hide();
+                        $btn_edit_switcher.text('text');
                         __showEditor(true); //show tinymce editor
                     }});
 
@@ -962,26 +962,28 @@ $.widget( "heurist.editing_input", {
                             }
                         }
                     });
+
                 }else{
                     
-                    this._on( $btn_edit_switcher, { click: function(){
-                            
-                        var eid = '#'+$input.attr('id')+'_editor';                    
-                        if($input.is(':visible')){
-                            __showEditor(true); //show tinymce editor
-                        }else{
-                            $btn_edit_switcher.text('wyswyg');
-                            $input.show();
-                            tinymce.remove(eid);
-                            $(eid).parent().hide();
-                            __adjustTextareaHeight();
+                    this._on( $btn_edit_switcher, { 
+                        click: function(){
+                            var eid = '#'+$input.attr('id')+'_editor';                    
+                            if($input.is(':visible')){
+                                $btn_edit_switcher.text('text');
+                                __showEditor(true); //show tinymce editor
+                            }else{
+                                $btn_edit_switcher.text('wysiwyg');
+                                $input.show();
+                                tinymce.remove(eid);
+                                $(eid).parent().hide();
+                                __adjustTextareaHeight();
+                            }
                         }
-                    }});
+                    });
                 }
-                 
+
                 //what is visible initially
                 if( !isCMS_content && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_KML'] ) {
-
                     var nodes = $.parseHTML(value);
                     if(nodes && (nodes.length>1 || (nodes[0] && nodes[0].nodeName!='#text'))){ //if it has html show editor at once
                         setTimeout(function(){
@@ -991,7 +993,7 @@ $.widget( "heurist.editing_input", {
                             }else{
                                 cur_action = 'wysiwyg';
                                 $btn_edit_switcher.find('span').css('text-decoration', '');
-                                $btn_edit_switcher.find('span:container("wysiwyg")').css('text-decoration', 'underline');
+                                $btn_edit_switcher.find('span:contains("wysiwyg")').css('text-decoration', 'underline');
                             }
 
                             __showEditor(); 

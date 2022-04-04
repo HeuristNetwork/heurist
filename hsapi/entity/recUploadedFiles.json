@@ -94,7 +94,7 @@
                         "rst_DisplayName":"Description:",
                         "dty_Size":65535,
                         "rst_DisplayWidth":"70",
-                        "rst_DisplayHelpText": "A user-entered textual description of the file or image contents."
+                        "rst_DisplayHelpText": "A user-entered copyright noticve and/or textual description of the file or image contents. URLs are recognised."
                     }
                 },
                 {
