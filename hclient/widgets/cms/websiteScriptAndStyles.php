@@ -87,6 +87,8 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var isCMS_InHeuristUI = <?php echo (@$_REQUEST['edit']==4 ?'true':'false'); ?>;
     var isCMS_NewWebsite = <?php echo (@$_REQUEST['edit']==3 ?'true':'false'); ?>;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
+    var is_execute_homepage_custom_javascript = false;
+    var first_not_empty_page = 0;
 </script>
     
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
@@ -308,8 +310,11 @@ function onPageInit(success)
     $("#main-logo").click(function(event){
             //location.reload();
             var load_initially = home_page_record_id;
-            <?php if($isEmptyHomePage) echo 'if(not_empty_page){ load_initially=not_empty_page;}'; ?>
-            loadPageContent( load_initially );
+            <?php if($isEmptyHomePage){
+                echo 'if(typeof first_not_empty_page !== "undefined" && first_not_empty_page>0){ load_initially=first_not_empty_page;}';  
+            }?>
+            is_execute_homepage_custom_javascript = true;
+            loadPageContent( load_initially);
     });
     
     //fix bug for tinymce popups - it lost focus if it is called from dialog
@@ -323,12 +328,16 @@ function onPageInit(success)
         //init main menu in page header
         //add menu definitions to main-menu
 
+        //callback function from init menu
         function __onInitComplete(not_empty_page){
             //load given page or home page content
             var load_initially = home_page_record_id;
-            <?php if($isEmptyHomePage) echo 'if(not_empty_page){ load_initially=not_empty_page;}'; ?>
-            
-            loadPageContent( init_page_record_id>0 ?init_page_record_id :load_initially );
+            first_not_empty_page = not_empty_page; //assign to global
+            <?php if($isEmptyHomePage){
+                echo 'if(typeof first_not_empty_page !== "undefined" && first_not_empty_page>0){ load_initially=first_not_empty_page;}';  
+            }?>
+            is_execute_homepage_custom_javascript = true;
+            loadPageContent( init_page_record_id>0 ?init_page_record_id :load_initially);
         }
         
         var topmenu = $('#main-menu');
@@ -410,8 +419,8 @@ function loadPageContent(pageid, eventdata){
 
 <?php        
 //style from field DT_CMS_CSS of home record 
-if($site_css!=null){
-//        print 'supp_options = {heurist_resultListExt:{custom_css_for_frame:"'.htmlspecialchars(str_replace("\n",' ',$site_css)).'"}};';
+if($website_custom_css!=null){
+//        print 'supp_options = {heurist_resultListExt:{custom_css_for_frame:"'.htmlspecialchars(str_replace("\n",' ',$website_custom_css)).'"}};';
 }
 ?>          
         
@@ -454,8 +463,8 @@ if($site_css!=null){
 
                 afterPageLoad( document, pageid, eventdata); //execute custom script and custom css, assign page title 
             }        
-            
-            if(page_cache[pageid]){
+
+            if(page_cache[pageid]){ //this page has been already loaded
                 __loadPageContent();
             }else{
                 
@@ -481,7 +490,7 @@ if($site_css!=null){
                                }
                                //res[DT_NAME] = res[DT_NAME]
                                //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE]
-    //console.log(res);                           
+//console.log(res);                           
                                page_cache[pageid] = res;
                                __loadPageContent();
                            }else if(pageid!=home_page_record_id){ //load home page by default
@@ -552,15 +561,19 @@ function afterPageLoad(document, pageid, eventdata){
     
     
     //remove old style and custom style per page ===========================
-    if(DT_CMS_CSS>0){
-        if(previous_page_id>0 && page_cache[previous_page_id] && page_cache[previous_page_id][DT_CMS_CSS]){
+    if(DT_CMS_CSS>0){ 
+        if(previous_page_id>0 
+            && previous_page_id!=home_page_record_id
+            && page_cache[previous_page_id]
+            && $(page_cache[previous_page_id][DT_CMS_CSS]).is('style')){
             //remove previous
             var style = page_cache[previous_page_id][DT_CMS_CSS];
             //style.innerHTML = ''; 
             document.getElementsByTagName('head')[0].removeChild(style);
         }
     
-        if(page_cache[pageid][DT_CMS_CSS])
+        //custom website css from home page has beem added already
+        if(page_cache[pageid][DT_CMS_CSS] && pageid!=home_page_record_id)
         {
             
             if(typeof page_cache[pageid][DT_CMS_CSS]==='string'){
@@ -584,20 +597,23 @@ function afterPageLoad(document, pageid, eventdata){
     if(DT_CMS_SCRIPT>0){
         var func_name = 'afterPageLoad'+pageid;
     
-        var script_code = page_cache[pageid][DT_CMS_SCRIPT];
-        if(script_code && script_code !== false){ //false means it is already inited
-        
-            //add script to header
+        if(!$.isFunction(window[func_name])){
+            var script_code = page_cache[pageid][DT_CMS_SCRIPT];
+            if(script_code && script_code !== false){ //false means it is already inited
             
-            var script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.innerHTML = 'function '+func_name 
-            +'(document, pageid){\n'
-            //+' console.log("run script for '+pageid+'");\n'
-            +'try{\n' + script_code + '\n}catch(e){}}';
-            //s.src = "http://somedomain.com/somescript";
-            $("head").append(script);
-            
+                //add script to header
+                
+                var script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.innerHTML = 'function '+func_name 
+                +'(document, pageid){\n'
+                //+' console.log("run script for '+pageid+'");\n'
+                +'try{\n' + script_code + '\n}catch(e){}}';
+                //s.src = "http://somedomain.com/somescript";
+                $("head").append(script);
+                
+                //page_cache[pageid][DT_CMS_SCRIPT] = false;
+            }
         }
         
         if($.isFunction(window[func_name])){  //window[func_name] && 
@@ -608,6 +624,19 @@ function afterPageLoad(document, pageid, eventdata){
             window[func_name]( document, pageid, eventdata );
         }
     }
+    //execute custom javascript for home page =========================
+    if(pageid!=home_page_record_id && is_execute_homepage_custom_javascript){
+        var func_name = 'afterPageLoad'+home_page_record_id;
+        if($.isFunction(window[func_name])){
+            //script may have event listener that is triggered on page exit
+            //disable it
+            $( "#main-content" ).off( "onexitpage");
+            //execute the script
+            window[func_name]( document, pageid, eventdata );
+        }
+    }
+    is_execute_homepage_custom_javascript = false;
+    
 
     if(!is_embed){ 
         // add current page as url parameter in browser url
@@ -992,13 +1021,22 @@ div.CodeMirror{
 
 <?php        
 }
-//style from field DT_CMS_CSS of home record 
-if($site_css!=null){
-    print $site_css;
+//inject custom css and script for home page at once
+//for other pages script will be added and executed dynamically
+
+// style from field DT_CMS_CSS of home record 
+if($website_custom_css!=null){
+    print $website_custom_css;
 }
 ?>          
 </style>  
 <?php
+// javascript from field DT_CMS_SCRIPT of home record 
+if($website_custom_javascript!=null){
+    print '<script>function afterPageLoad'.$home_page_on_init.'(document, pageid){'."\n";
+    //print 'console.log("run script for HOME PAGE");'."\n";
+    print "try{\n".$website_custom_javascript."\n}catch(e){}}</script>";
+}
     
 //generate main menu on server side - for bootstrap menu     
 $mainmenu_content = null;

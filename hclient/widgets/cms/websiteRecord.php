@@ -223,6 +223,7 @@ if(!(@$_REQUEST['field']>1)){
         $show_pagetitle = ($show_pagetitle!==ConceptCode::getTermLocalID('2-531') &&  //TRM_NO
                            $show_pagetitle!==ConceptCode::getTermLocalID('99-5447'));    //TRM_NO_OLD
     }
+    
 }
 
 
@@ -309,7 +310,8 @@ if($external_files!=null){
     }
 }
 //custom styles - mainly to override positions/visibility for #main-xxx elements
-$site_css = __getValue($rec, DT_CMS_CSS);
+$website_custom_css = __getValue($rec, DT_CMS_CSS);
+$website_custom_javascript = __getValue($rec, DT_CMS_SCRIPT);
 
 //color scheme for website
 if($system->defineConstant('DT_SYMBOLOGY')){
