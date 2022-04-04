@@ -2193,13 +2193,14 @@ console.log(fsize);
     _replaceMarker: function( parent_id, old_marker, new_marker ){
 
         var is_found = false;    
+        var that = this;
         for(var layer_id in this.all_markers) {
             if(this.all_markers.hasOwnProperty(layer_id))
             {
                     var markers = this.all_markers[layer_id];
                     $(markers).each(function(idx, layer){
                         if(layer._leaflet_id == old_marker._leaflet_id){
-                            this.all_markers[layer_id][idx] = new_marker; 
+                            that.all_markers[layer_id][idx] = new_marker; 
                             
             
                             if(!that.isMarkerClusterEnabled){
