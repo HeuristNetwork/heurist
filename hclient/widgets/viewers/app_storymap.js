@@ -64,13 +64,14 @@ $.widget( "heurist.app_storymap", {
     _L: null, //refrence to leaflet
     
 
+    _currentStoryID: 0,
+    _storylayer_id: 0,
     _cache_story_geo: {},
     _cache_story_time: {},
     _cache_story_places: null,
     
     _currentElementID: 0,
     _nativelayer_id: 0, //current layer for Story Elements
-    _currentStoryID: 0,
     
     _terminateAnimation: false,
     _animationResolve: null, 
@@ -434,7 +435,7 @@ $.widget( "heurist.app_storymap", {
     
 //console.log('REMOVE '+this._nativelayer_id);
         //clear map
-        if(this._nativelayer_id>0){
+        if(this._nativelayer_id>0 && this._mapping.app_timemap('instance')){
             var mapwidget = this._mapping.app_timemap('getMapping');
             mapwidget.removeLayer( this._nativelayer_id );
             this._nativelayer_id = -1;
@@ -453,12 +454,13 @@ $.widget( "heurist.app_storymap", {
         if(this.options.map_widget_id){
             this._mapping = $('#'+this.options.map_widget_id)    
         }
-        
+
+        //remove previous story layer
         if(this._storylayer_id>0){
             var mapwidget = this._mapping.app_timemap('getMapping');
             mapwidget.removeLayer( this._storylayer_id );
+            this._storylayer_id = 0;
         }
-        
         
         // mode A: load all places at once 
         // mode B: loads places for every story element separately - use this
@@ -590,7 +592,7 @@ $.widget( "heurist.app_storymap", {
                     //layer_style: layer_style,
                     //popup_template: layer_popup_template,
                  dataset_name: 'Story Timeline',
-                 preserveViewport: true });
+                 preserveViewport: false });
             
         }else{
             
@@ -598,7 +600,7 @@ $.widget( "heurist.app_storymap", {
                             q: {ids: this._resultset.getIds()},
                             leaflet: true, 
                             simplify: true, //simplify paths with more than 1000 vertices
-                            suppress_linked_places: 1, //do not load assosiated places
+                            //suppress_linked_places: 1, //do not load assosiated places
                             zip: 1,
                             format:'geojson'};
             window.hWin.HAPI4.RecordMgr.search_new(server_request,
@@ -609,7 +611,7 @@ $.widget( "heurist.app_storymap", {
                     }else{
                         geojson_data = response;
                     }
-console.log(geojson_data);
+//console.log(geojson_data);
                     if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) ){
                         that._cache_story_geo[that.options.storyRecordID] = geojson_data;
                     }else{
@@ -640,6 +642,16 @@ console.log(geojson_data);
 
         if(this._currentElementID != recID){
           
+            if(this._storylayer_id>0){
+                var mapwidget = this._mapping.app_timemap('getMapping');
+                var lyr = mapwidget.all_layers[this._storylayer_id];        
+                if(lyr._map!=null){
+                    //lyr.addTo( mapwidget.nativemap );                      
+                    lyr.remove();
+                }
+            }
+            
+            
             this._stopAnimeAndClearMap();
 
             this._currentElementID = recID;
@@ -920,7 +932,7 @@ console.log(geojson_data);
                 //layer_style: layer_style,
                 //popup_template: layer_popup_template,
                 dataset_name: 'Story Map',
-                preserveViewport: false });
+                preserveViewport: true });
 //console.log('ADDED '+this._nativelayer_id);                
         //possible sequences
         // gain: begin-visible, trans fade in, end-visible
@@ -945,9 +957,11 @@ console.log(geojson_data);
 
         anime = [{scope:'all',range:1,actions:[{action:'fly'}]}];
         anime = [{scope:'all',action:'hide'},{scope:'all',range:1,actions:[{action:'center'},{action:'fade_in'}]}];
-        anime = [{scope:'all',actions:[{action:'blink',duration:2000}]}];
+        anime = [{"scope":"all","actions":[{"action":"blink","duration":2000}]}];
         
         anime = [{"scope":"begin","actions":[{"action":"style","style":  }]}];
+        
+[{"scope":"all","actions":[{"action":"zoom"},{"action":"blink","steps":10,"duration":2000}] }]        
         */
 
         //or several actions per scope
@@ -955,6 +969,7 @@ console.log(geojson_data);
         
         //var anime = [{scope:'all',range:1,action:'fade_in_out',duration:500}]; //show one by one
         
+        this.actionBounds( [mapwidget.all_layers[this._nativelayer_id]], 'fly' );
         
         if(!window.hWin.HEURIST4.util.isempty(anime)){
             
@@ -1101,7 +1116,7 @@ console.log(geojson_data);
         // *fade_in_out - show marker, path or poly
         // *blink
         // *gradient
-        // style - assign new style
+        // *style - assign new style
         // show popup
         
         // follow_path - move marker along path
@@ -1116,32 +1131,29 @@ console.log(geojson_data);
             that._animationResolve = _resolve;
             that._animationReject = _reject;
                
-            if(!(action['duration']>0)) action['duration'] = 1000;
-            
             switch (action['action']) {
                case 'fade_in':
-                    that.actionFadeIn(mapwidget.nativemap, layers, 0, 1, 0.05, action['duration']);
+                    that.actionFadeIn(mapwidget.nativemap, layers, 0, 1, 0.05, action['duration'], action['delay']);
                break;
                case 'fade_out':
-                    that.actionFadeIn(mapwidget.nativemap, layers, 1, 0, -0.05, action['duration']);
+                    that.actionFadeIn(mapwidget.nativemap, layers, 1, 0, -0.05, action['duration'], action['delay']);
                break;
                case 'fade_in_out':
-                    that.actionFadeIn(mapwidget.nativemap, layers, 1, 0, -0.05, action['duration'], true);
+                    that.actionFadeIn(mapwidget.nativemap, layers, 0, 1, 0.05, action['duration'], action['delay'], true);
                break;
                case 'hide':
-                    that.actionHide(layers);
+                    that.actionHide(layers); //, action['duration']
                break;
                case 'show':
-                    that.actionShow(mapwidget.nativemap, layers);
+                    that.actionShow(mapwidget.nativemap, layers); //, action['duration']
                break;
                case 'fly':
                case 'zoom':
                case 'center':
-                    that.actionBounds(layers, action['action']);       
+                    that.actionBounds(layers, action['action'], action['duration']);       
                break;
                case 'blink':
 
-                    if(!action['steps']) action['steps'] = 10;
                     that.actionBlink(layers, action['steps'], action['duration']);
                
                break;
@@ -1149,8 +1161,12 @@ console.log(geojson_data);
                     //change color from one color to another
                     if(!action['from']) action['from'] = '#ff0000';
                     if(!action['to']) action['to'] = '#00ff00';
-                    if(!action['steps']) action['steps'] = 20;
                     that.actionGradient(layers, action['from'], action['to'], action['steps'], action['duration']);
+               break;
+               case 'style':
+
+                    that.actionSetStyle(layers, action['style'], action['duration']);
+               
                break;
             }
         });
@@ -1212,17 +1228,19 @@ console.log(geojson_data);
 
 
     //
+    // fly, zoom, center
     //
-    //
-    actionBounds: function(layers, mode){
+    actionBounds: function(layers, mode, duration){
         
+        var mapwidget = this._mapping.app_timemap('getMapping');
         var useRuler = (layers.length==1), bounds = [];
+        
         $.each(layers, function(i, layer){
-            bounds.push( mapwidget.getLayerBounds(layer, useRuler) );    
+            var bnd = mapwidget.getLayerBounds(layer, useRuler);
+            bounds.push( bnd );    
         });
         
         //.nativemap
-        var mapwidget = this._mapping.app_timemap('getMapping');
         var bounds = mapwidget._mergeBounds(bounds);
         
         if(mode=='center'){
@@ -1230,6 +1248,8 @@ console.log(geojson_data);
         }else{
             mapwidget.zoomToBounds(bounds, (mode=='fly')); //default 1.5 seconds   
         }
+        
+        if(!(duration>0)) duration = 2000;
         
         if($.isFunction(this._animationResolve)){
             var that = this;
@@ -1240,7 +1260,7 @@ console.log('animation terminated !!!');
                     }else{
                         if ($.isFunction(that._animationResolve)) that._animationResolve();
                     }                
-                }, 2000);                        
+                }, duration);                        
         }
     },
     
@@ -1272,13 +1292,17 @@ console.log('animation terminated !!!');
     // Fade-in function for Leaflet
     // if opacityStep<0 - fade out
     // need_reverce - true - fade in and then out
-    actionFadeIn: function(nativemap, layers, startOpacity, finalOpacity, opacityStep, duration, need_reverce) 
+    // show_delay - delay before hide or after show
+    actionFadeIn: function(nativemap, layers, startOpacity, finalOpacity, opacityStep, duration, show_delay, need_reverce) 
     {
         
         var steps = Math.abs(finalOpacity-startOpacity)/Math.abs(opacityStep);
         if(need_reverce) steps = steps * 2;
         
-        var delay = action['duration']/steps;
+        if(!(duration>0)) duration = 1000;        
+        var delay = duration/steps;
+        
+        if(!show_delay) show_delay = 0;
 
         
         var that = this;
@@ -1298,7 +1322,7 @@ console.log('animation terminated');
                         if($.isFunction(that._animationReject)) that._animationReject();
                         return false;
                     }
-                    
+               
                     if(lyr instanceof L.Marker){
                         lyr.setOpacity( opacity );                        
                     }else{
@@ -1315,18 +1339,45 @@ console.log('animation terminated');
                 if(need_reverce===true){
                     need_reverce = false
                     opacityStep = -opacityStep;
-                    timer = setTimeout(__changeOpacity, delay);
+                    opacity = finalOpacity;
+                    finalOpacity = startOpacity;
+                    startOpacity = opacity; 
+                    //delay before hide
+                   
+                    timer = setTimeout(__changeOpacity, show_delay>0?show_delay:delay);
                 }else{
-                    if($.isFunction(that._animationResolve)) that._animationResolve();    
+                    if(opacityStep>0 && show_delay>0){
+                        //delay after show
+                        setTimeout(function(){
+                             if($.isFunction(that._animationResolve)) that._animationResolve();   
+                        }, show_delay);
+                    }else{
+                        if($.isFunction(that._animationResolve)) that._animationResolve();        
+                    }
+                    
+                    
                 }
             }
+        }//__changeOpacity
+        
+        if(opacityStep<0 && show_delay>0){
+            //delay before hide
+            setTimeout(__changeOpacity, show_delay);
+        }else{
+            __changeOpacity();    
         }
-        __changeOpacity();
-        //var timer = setTimeout(, delay);
+        
+        
     },
     
+    //
+    //
+    //
     actionGradient: function(layers, startColour, endColour, steps, duration){
 
+        if(!duration) duration = 2000;
+        if(!steps) steps = 20;
+        
         var that = this;
         var delay = duration/steps;
         
@@ -1367,6 +1418,9 @@ console.log('animation terminated 2');
     },
     
     actionBlink: function(layers, steps, duration){
+        
+        if(!duration) duration = 1000;
+        if(!steps) steps = 10;
         
         var that = this;
         var delay = duration/steps;
@@ -1413,6 +1467,39 @@ console.log('animation terminated 2');
             }
             
         });
+        
+    },
+    
+    //
+    //
+    //
+    actionSetStyle: function(layers, newStyle, delay){
+
+        if(newStyle){
+        
+        if(!delay) delay = 500;
+
+            var that = this;
+            var mapwidget = this._mapping.app_timemap('getMapping');
+            var top_layer = mapwidget.all_layers[this._nativelayer_id];
+            
+            setTimeout(function(){
+
+                $.each(layers, function(i, lyr){
+                    mapwidget.applyStyleForLayer(top_layer, lyr, newStyle);
+                });
+                
+                if(that._terminateAnimation){
+                    console.log('animation terminated actionSetStyle');                        
+                    if($.isFunction(that._animationReject)) that._animationReject();
+                    return false;
+                }else
+                    if($.isFunction(that._animationResolve)) that._animationResolve();            
+                }, delay);
+            
+        }else{
+            if($.isFunction(that._animationResolve)) that._animationResolve();            
+        }
         
     },
     

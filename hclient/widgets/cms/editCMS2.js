@@ -1320,7 +1320,7 @@ console.log('BLUR');
                         if(is_in_page){
                             //highlight in preview/page
                             node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
-                            node.setActive(true);
+                            if(node) node.setActive(true);
 
                             _layout_container.find('div[data-hid]').removeClass('cms-element-active'); //remove from all
                             _layout_container.find('div[data-hid='+ele_ID+']').addClass('cms-element-active');

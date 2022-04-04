@@ -1056,7 +1056,8 @@ $.widget( "heurist.mapping", {
                     this.nativemap.flyToBounds(bounds, fly_params);
                     
                     var that = this; //fly to bounds fits bounds wrong
-                    setTimeout(function(){that.nativemap.fitBounds(bounds, {maxZoom: maxZoom})},1550);      
+                    setTimeout(function(){
+                            that.nativemap.fitBounds(bounds, {maxZoom: maxZoom})},1700);      
             
                 }else{
                     this.nativemap.fitBounds(bounds, {maxZoom: maxZoom});      
