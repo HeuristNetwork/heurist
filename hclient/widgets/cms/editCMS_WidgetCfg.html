@@ -233,11 +233,34 @@
     </div>
     <div class="heurist_StoryMap">
         <div class="header"><label>Story mode:</label></div>
-        <select name="reportElementMode" class="text ui-widget-content ui-corner-all" title="">
+        <select name="reportElementMode" class="text ui-widget-content ui-corner-all" title="" style="margin-right:10px">
             <option value="vertical">List Vertical</option>
             <option value="slide">Slide</option>
         </select>
+        <span>
+        <label>Distinct story element:</label>
+        <select type="radio" name="reportElementDistinct" class="text ui-widget-content ui-corner-all" title="">
+            <option value="">None</option>
+            <option value="unveil">Veil others</option>
+            <option value="highlight">Highlight</option>
+        </select>
+        </span>
+
+        <span style="display:none">
+        <label>Slide transition:</label>
+        <select type="radio" name="reportElementSlideEffect" class="text ui-widget-content ui-corner-all" title="">
+            <option value="">Instant</option>
+            <option value="fade">Fade</option>
+            <option value="drop">Wipe</option>
+            <option value="blind">Blind</option>
+            <option value="clip">Clip</option>
+            <!-- option value="puff">Puff</option>
+            <option value="explode">Explode</option -->
+        </select>
+        </span>
+        
     </div>
+    
     <div class="heurist_StoryMap">
         <div class="header"><label>Map Unique ID</label></div>
         <input name="map_widget_id"/>

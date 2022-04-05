@@ -1091,7 +1091,7 @@ $.widget( "heurist.mapping", {
             this.all_layers[layer_id] = null;
             delete this.all_layers[layer_id];
             
-            if(this.removeTimelineGroup(layer_id) && !this.notimeline){
+            if( this.removeTimelineGroup(layer_id) && !this.notimeline){
                 //update timeline
                 this.vistimeline.timeline('timelineRefresh', this.timeline_items, this.timeline_groups);
             }

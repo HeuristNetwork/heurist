@@ -80,6 +80,7 @@ $.widget( "heurist.resultList", {
         rendererExpandDetails: null,  //name of smarty template or function to draw expanded details
         rendererExpandInFrame: true, 
         expandDetailsOnClick: true,
+        expandDetailsWithoutWarning: false,
 
         searchfull: null,  // custom function to search full data
         
@@ -2915,6 +2916,8 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
     , allowedPageSizeForRecContent: function( callback ){
 
         if(!this._currentRecordset) return true;
+
+        if(this.options.expandDetailsWithoutWarning) return false;
         
         var n = Math.min(this._currentRecordset.length(),this.options.pagesize);
         

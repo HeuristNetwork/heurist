@@ -93,7 +93,7 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
         
         var main_menu = $('#main-menu > div[widgetid="heurist_Navigation"]');
         
-        if(main_menu.length>0){
+        if(main_menu.length>0 && widget_name!='heurist_StoryMap'){
             pages = main_menu.navigation('getMenuContent','list');
             if(!pages){
                 selPage.parent().hide();
@@ -719,6 +719,21 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                 ele.parent().css('display','block');
                 ele.find('.header').css({'width':'150px','text-align':'right'});
                 */
+                
+                $dlg.find('select[name="reportElementMode"]')
+                .change(function(e){
+
+                    $dlg.find('select[name="reportElementSlideEffect"]').parent().hide();
+                    $dlg.find('select[name="reportElementDistinct"]').parent().hide();
+                    
+                    if($(e.target).val()=='vertical'){
+                        $dlg.find('select[name="reportElementDistinct"]').parent().show();
+                    }else if($(e.target).val()=='slide'){
+                        $dlg.find('select[name="reportElementSlideEffect"]').parent().show();
+                    }
+                    
+                })
+                .val(opts['reportElementMode']).change();
 
             }else
             if(widget_name=='heurist_resultListExt' && 
