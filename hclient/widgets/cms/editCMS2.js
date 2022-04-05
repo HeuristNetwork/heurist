@@ -1661,18 +1661,15 @@ console.log('BLUR');
                             layoutMgr.layoutInitCardinal(new_cfg, _layout_container);
                         }
                         
-                        if(mode=='save'){
-                            _saveLayoutCfg();
-                            page_was_modified = false;
-                        }else{
-                            page_was_modified = true;            
-                        }
+                        //save page
+                        _saveLayoutCfg(); 
+                        page_was_modified = false;
                         
                         _onPageChange();
                     }
                     
                     if(mode!='save'){
-                        //close
+                        //close element config
                         _hidePropertyView();
                     }
                     
@@ -1955,7 +1952,7 @@ console.log('BLUR');
     
     
     //
-    //  Save page configuration _layout_content) into RT_CMS_MENU record 
+    //  Save page configuration (_layout_content) into RT_CMS_MENU record 
     //
     function _saveLayoutCfg( callback ){
         

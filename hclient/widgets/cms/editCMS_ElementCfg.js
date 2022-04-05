@@ -261,14 +261,15 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         //save entire page (in background)
         cont.find('.btn-save-page').button().css('border-radius','4px').click(function(){
             _getCfgFromUI();
-            main_callback.call(this, l_cfg, 'save');
+            main_callback.call(this, l_cfg, 'save_close'); //save and close
         });
 
         
-        cont.find('.btn-ok').button().css('border-radius','4px').click(function(){
+        cont.find('.btn-save-element').button().css('border-radius','4px').click(function(){
             //5. save in layout cfg        
             _getCfgFromUI();
-            main_callback.call(this, l_cfg);
+            main_callback.call(this, l_cfg, 'save'); //save only
+            window.hWin.HEURIST4.util.setDisabled(cont.find('.btn-save-element'), true);
         });
         cont.find('.btn-cancel').css('border-radius','4px').button().click(function(){
             //6. restore old settings 
@@ -278,7 +279,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         });
         
         window.hWin.HEURIST4.util.setDisabled(cont.find('.btn-save-page'), already_changed!==true);
-        window.hWin.HEURIST4.util.setDisabled(cont.find('.btn-ok'), true);
+        window.hWin.HEURIST4.util.setDisabled(cont.find('.btn-save-element'), true);
         
         
         //direct editor        
@@ -561,7 +562,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
     //
     //
     function _enableSave(){
-        window.hWin.HEURIST4.util.setDisabled($container.find('.btn-ok'), false);
+        window.hWin.HEURIST4.util.setDisabled($container.find('.btn-save-element'), false);
         window.hWin.HEURIST4.util.setDisabled($container.find('.btn-save-page'), false);
     }
     
@@ -836,13 +837,13 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
     //    
     function _warningOnExit( callback ){
         
-        if(!$container.find('.btn-ok').prop('disabled')){
+        if(!$container.find('.btn-save-element').prop('disabled')){
             
             var $dlg;
             var _buttons = [
                 {text:window.hWin.HR('Save'), 
                     click: function(){
-                        $container.find('.btn-ok').click();
+                        $container.find('.btn-save-element').click();
                         $dlg.dialog('close');
                         if($.isFunction(callback)) callback.call(this);
                     }
@@ -889,7 +890,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
         },
         
         isModified: function(){
-            return !$container.find('.btn-ok').prop('disabled');
+            return !$container.find('.btn-save-element').prop('disabled');
         },
         
         onContentChange: function(){
