@@ -40,7 +40,7 @@ class ReportRecord {
     }    
 
     //
-    //
+    // return value of heurist constants for Record and Detail types
     //
     public function constant($name, $smarty_obj=null) {
         if(defined($name)){
@@ -52,6 +52,21 @@ class ReportRecord {
             
             return null;  
         }
+    }
+    
+    //
+    // Returns local code for given concept code
+    //
+    public function rty_id($conceptCode, $smarty_obj=null) {
+        return ConceptCode::getRecTypeLocalID($conceptCode);
+    }
+
+    public function dty_id($conceptCode, $smarty_obj=null) {
+        return ConceptCode::getDetailTypeLocalID($conceptCode);
+    }
+
+    public function trm_id($conceptCode, $smarty_obj=null) {
+        return ConceptCode::getTermLocalID($conceptCode);
     }
     
     //
