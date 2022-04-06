@@ -1715,7 +1715,7 @@ $.widget( "heurist.mapping", {
 
             that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight
             if($.isFunction(that.options.onselect)){
-                that.options.onselect.call(that, [layer.feature.properties.rec_ID]);
+                that.options.onselect.call(that, [layer.feature.properties.rec_ID] );
             }
 
             var info = layer.feature.properties.rec_Info; //popup info may be already prepared

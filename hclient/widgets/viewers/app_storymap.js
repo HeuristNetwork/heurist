@@ -63,6 +63,7 @@ $.widget( "heurist.app_storymap", {
     _resultList: null,
     _tabs: null, //tabs control
     _mapping: null,    // mapping widget
+    _mapping_onselect: null, //mapping event listener
     _L: null, //refrence to leaflet
     
 
@@ -283,6 +284,30 @@ $.widget( "heurist.app_storymap", {
     },
     
     //
+    //
+    //
+    _scrollToStoryElement: function(recID){
+        
+        if(this.options.reportOverviewMode=='tab' && this._tabs){
+            //switch to Overview
+            this._tabs.tabs('option', 'active', 1);   
+        }
+        
+        if(this.options.reportElementMode=='vertical'){
+            //scroll result list
+            this._resultList.resultList('scrollToRecordDiv', recID, true);
+                
+        }else{
+            var order = this._resultset.getOrder();
+            var idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
+            
+            this._onNavigateStatus( idx );    
+            this._startNewStoryElement( recID );
+        }
+        
+    },
+    
+    //
     // for slide - navigate between story elements
     //
     _onNavigate: function(is_forward){
@@ -464,8 +489,9 @@ $.widget( "heurist.app_storymap", {
 
         //find linked mapping
         if(this.options.map_widget_id){
-            this._mapping = $('#'+this.options.map_widget_id)    
+            this._mapping = $('#'+this.options.map_widget_id);
         }
+            
 
         //remove previous story layer
         if(this._storylayer_id>0){
@@ -482,11 +508,18 @@ $.widget( "heurist.app_storymap", {
         if(this.options.storyRecordID != recID) return; //story already changed to different one
         
         //loads list of story elements into reulst list
-        if(this.options.reportElementMode!='slide'){      
+        if(this.options.reportElementMode!='slide'){   
+            /*
+            if(this.options.reportElementMode=='vertical'){   
+                var ele = this._resultList.find('.div-result-list-content');
+                ele.empty(); //to reset scrollbar
+                ele[0].scrollTop = 0;
+            }*/
             this._resultList.resultList('updateResultSet', this._resultset);
             //add last stub element to allow proper onScroll event for last story element
             var rh = this._resultList.height();
             var rdiv = this._resultList.find('.recordDiv');
+            rdiv.css('padding','20px 0px');
             if(rdiv.length>1){
                 var rdiv0 = $(rdiv[0]);
                 rdiv = $(rdiv[rdiv.length-1]);
@@ -509,6 +542,7 @@ $.widget( "heurist.app_storymap", {
                 if(h)
                 k--;
             } */
+            
         }
         
         if(this._resultset && this._resultset.length()>0){
@@ -565,7 +599,7 @@ $.widget( "heurist.app_storymap", {
                         if(that.options.reportOverviewMode=='inline'){
                             //loads overview as first element in story list
                             
-                            if(that.options.reportElementMode=='slide'){      
+                            if(that.options.reportElementMode=='slide'){ //as first slide     
                                 that.pnlStoryReport.html(that.pnlOverview.html())
                             }else{
                                 var ele = that._resultList.find('.div-result-list-content');    
@@ -579,6 +613,15 @@ $.widget( "heurist.app_storymap", {
                                 ele2.find('div[data-recid]').css('max-height','100%');
                             }
                         }
+                        
+                        /*
+                        if(that.options.reportElementMode=='vertical'){
+                            var ele = that._resultList.find('.div-result-list-content');
+console.log('sctop '+ele.scrollTop()+'  '+ele.height());                            
+                            ele[0].scrollTop = 0;
+console.log('>sctop '+ele.scrollTop());                            
+                        }
+                        */
                                 
                     });   
                     
@@ -607,6 +650,26 @@ $.widget( "heurist.app_storymap", {
                 });
                 return;
             }
+            
+            if(!this._mapping_onselect){
+                
+                this._mapping_onselect = function( rec_ids ){
+                    //find selected record id among story elements    
+                    if(rec_ids.length>0){
+                        var rec = that._resultset.getById(rec_ids[0]);
+                        if(rec){
+                            that._scrollToStoryElement(rec_ids[0]);
+                            //that._startNewStoryElement(rec_ids[0]);
+                        }    
+                    }
+                    
+                }
+                
+                var mapwidget = this._mapping.app_timemap('getMapping');
+                mapwidget.options.onselect = this._mapping_onselect;
+            }
+            
+            
             
             if(this.options.storyRecordID != recID) return; //story already changed to different one
             

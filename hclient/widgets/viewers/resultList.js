@@ -2539,7 +2539,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
 
     },
     
-    scrollToRecordDiv: function(selected){
+    scrollToRecordDiv: function(selected, to_top_of_viewport){
         
         var rdiv;
         if($(selected).is('div.recordDiv')){
@@ -2554,7 +2554,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             var spos2 = rdiv.position().top; //relative position of record div
             var offh = spos2 + rdiv.height() - this.div_content.height() + 10;
            
-            if(spos2 < 0){
+            if(spos2 < 0 || to_top_of_viewport===true){ //above viewport
                 this.div_content.scrollTop(spos+spos2);
             }else if ( offh > 0 )
             {
