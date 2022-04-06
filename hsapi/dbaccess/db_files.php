@@ -149,7 +149,23 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
     }
     
     if(count($file_ids)>0){
+        
+        $mysqli = $system->get_mysqli();
 
+                    
+        foreach ($file_ids as $idx=>$testcase) {
+            if (is_string($testcase)){
+                if (ctype_alnum($testcase)) {
+                    $file_ids[$idx] = $mysqli->real_escape_string($testcase);
+                }else{
+                    $system->addError(HEURIST_INVALID_REQUEST, 
+                        'Wrong file id parametrer provided to fileGetFullInfo.',
+                        $mysqli->error);
+                    return false;
+                }
+            }
+        }
+        
         if(is_string($file_ids[0]) && strlen($file_ids[0])>15){
             
             $query = 'ulf_ObfuscatedFileID';
@@ -182,7 +198,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
         .' left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt where '
         .$query;
 
-        $mysqli = $system->get_mysqli();
+        
         $res = $mysqli->query($query);
 
         if ($res){

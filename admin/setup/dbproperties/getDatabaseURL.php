@@ -86,7 +86,12 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
             }
                 
         }else{
-            $error_msg = 'Database with ID#'.$database_id.' is not found in Heurist Master Index';
+            $err = $system2->get_mysqli()->error;
+            if(err){
+                $error_msg = 'Heurist Master Index database is not accessible at the moment. Please try later';
+            }else{
+                $error_msg = 'Database with ID#'.$database_id.' is not found in Heurist Master Index';    
+            }
         }
     }else{
         $error_msg = 'Database ID is not set or invalid. It must be an interger positive value.';    

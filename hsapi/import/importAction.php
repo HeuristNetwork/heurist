@@ -1238,7 +1238,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             }
         }
     }else{
-        $only_for_specified_id = "";
+        $only_for_specified_id = '';
     }
 
     //2. In DB: Verify that all required fields have values =============================================
@@ -1248,7 +1248,13 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     foreach ($query_reqs as $field){
         $query = "select imp_id, ".implode(",",$sel_query)
         ." from $import_table "
-        ." where ".$only_for_specified_id."(".$query_reqs_where[$k].")"; // implode(" or ",$query_reqs_where);
+        ." where ".$only_for_specified_id;
+        if(@$query_reqs_where[$k]){
+            $query = $query . ' ('.$query_reqs_where[$k].')'; // implode(" or ",$query_reqs_where);   
+        }else{
+            $query = $query . ' 1';
+        }
+        
         $k++;
         
         $wrong_records = self::getWrongRecords($query, $imp_session,
@@ -1288,6 +1294,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             return false;
        }
     }
+    
+    
     //3. In DB: Verify that enumeration fields have correct values =====================================
     mysql__update_progress(null, $progress_session_id, false, '3,7,validation of enumeration fields');
     
@@ -1306,7 +1314,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         if(true || in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
 
             $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table where ".$only_for_specified_id." 1";
+            ." from $import_table  where ".$only_for_specified_id." 1";
 
             $idx = array_search($field, $sel_query)+1;
             
@@ -1318,7 +1326,13 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
             $query = "select imp_id, ".implode(",",$sel_query)
             ." from $import_table left join ".$query_enum_join[$k]   //implode(" left join ", $query_enum_join)
-            ." where ".$only_for_specified_id."(".$query_enum_where[$k].")";  //implode(" or ",$query_enum_where);
+            ." where ".$only_for_specified_id;
+            
+            if(@$query_enum_where[$k]){
+                $query = $query . ' ('.$query_enum_where[$k].')'; // implode(" or ",$query_enum_where);   
+            }else{
+                $query = $query . ' 1';
+            }
             
             $wrong_records = self::getWrongRecords($query, $imp_session,
                 "Term list values read must match existing term labels OR standard codes defined for the field. Periods may be used as indicators of hierarchy (option in following screen if periods detected)",
@@ -1345,7 +1359,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
             $query = "select imp_id, ".implode(",",$sel_query)
             ." from $import_table where ".$only_for_specified_id." 1";
-
+            
             $idx = array_search($field, $sel_query)+1;
 
             $wrong_records = self::validateResourcePointers($mysqli, $query, $imp_session, 
@@ -1354,7 +1368,15 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
             ." from $import_table left join ".$query_res_join[$k]  //implode(" left join ", $query_res_join)
-            ." where ".$only_for_specified_id."(".$query_res_where[$k].")"; //implode(" or ",$query_res_where);
+            ." where ".$only_for_specified_id;
+            
+            if(@$query_res_where[$k]){
+                $query = $query . ' ('.$query_res_where[$k].')'; // implode(" or ",$query_res_where);   
+            }else{
+                $query = $query . ' 1';
+            }
+            
+            
             $wrong_records = self::getWrongRecords($query, $imp_session,
                 "Record pointer field values must reference an existing record in the database",
                 "Invalid Pointers", $field);
@@ -1389,7 +1411,14 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
             ." from $import_table "
-            ." where ".$only_for_specified_id."(".$query_num_where[$k].")";
+            ." where ".$only_for_specified_id;
+            
+            if(@$query_num_where[$k]){
+                $query = $query . '('.$query_num_where[$k].')';
+            }else{
+                $query = $query . ' 1';
+            }
+            
 
             $wrong_records = self::getWrongRecords($query, $imp_session,
                 "Numeric fields must be pure numbers, they cannot include alphabetic characters or punctuation",
@@ -1425,7 +1454,14 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
             ." from $import_table "
-            ." where ".$only_for_specified_id."(".$query_date_where[$k].")"; //implode(" or ",$query_date_where);
+            ." where ".$only_for_specified_id;
+            
+            if(@$query_date_where[$k]){
+                $query = $query . '('.$query_date_where[$k].')';
+            }else{
+                $query = $query . ' 1';
+            }
+            
             $wrong_records = self::getWrongRecords($query, $imp_session,
                 "Date values must be in dd-mm-yyyy, dd/mm/yyyy or yyyy-mm-dd formats",
                 "Invalid Dates", $field, 'warning');

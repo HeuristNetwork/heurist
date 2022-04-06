@@ -238,13 +238,27 @@
                     .'Please ask your database owner to add you to the group.');
             }else{
                 
+                $is_new = false;
                 if(is_array(@$record['svs_ID'])){
                     $rec_IDs = $record['svs_ID'];
                 }else if (@$record['svs_ID']>0){
                     $rec_IDs = array($record['svs_ID']);
                 }else{
                     $rec_IDs = array(-1); //new   
+                    $is_new = true;
                 }
+                
+                //svs_UGrpID is not defined
+                if(array_key_exists('svs_UGrpID', $record) && !($record['svs_UGrpID']>0)) //not defined or all|bookmark
+                {
+                    if($is_new){
+                        $record['svs_UGrpID'] = $system->get_user_id();
+                    }else{
+                        unset($record['svs_UGrpID']);
+                    }
+                }
+                
+                
                 
                 foreach($rec_IDs as $svs_ID){
                     $record['svs_ID'] = $svs_ID;                             
@@ -252,7 +266,7 @@
                     if(is_numeric($res)>0){
                         return $res; //returns affected record id
                     }else{
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot update saved filrer #'.$svs_ID.' in database', $res);
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot update saved filter #'.$svs_ID.' in database', $res);
                     }
                 }
 
@@ -276,6 +290,10 @@
                 'Cannot delete filter criteria. Current user must be an administrator for group');
             return false;
         }else{
+            
+            if(!$ugrID>0){
+                $ugrID = $system->get_user_id(); 
+            }
 
             $rec_ids = prepareIds($rec_ids);
 

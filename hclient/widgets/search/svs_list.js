@@ -2057,7 +2057,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
     },
 
     //
-    //
+    // NOT USED
     //
     _saveSearch: function(request, node){
 

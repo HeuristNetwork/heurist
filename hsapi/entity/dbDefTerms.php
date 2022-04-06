@@ -112,7 +112,7 @@ class DbDefTerms extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('trm_Code');
         if($pred!=null) array_push($where, $pred);
         
-        $pred = $this->searchMgr->getPredicate('trm_ParentTermID');
+        $pred = $this->searchMgr->getPredicate('trm_ParentTermID', true);
         if($pred!=null) array_push($where, $pred);
 
        

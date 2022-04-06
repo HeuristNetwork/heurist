@@ -238,7 +238,10 @@ public static function findDupes( $params ){
                     $compare_fields[] = $header_fields2[$v];
                  }else{
                     $exact_fields[] = $header_fields[$v];        
-                    $search_where[] = '('.$v.'=?)';  //$header_fields2[
+                    if($v=='rec_AddedBy'){
+                        $v = 'rec_AddedByUGrpID';
+                    } 
+                    $search_where[] = '('.$v.'=?)';  
                     $search_params = $search_params.'s';
                  }
              }else if(self::$distance>0 && (@$dty_IDs[$v]=='freetext' || @$dty_IDs[$v]=='blocktext')){
