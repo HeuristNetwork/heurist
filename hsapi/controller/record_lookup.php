@@ -114,6 +114,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
             $formatted_array = array();
 
             $author_idx = 0;
+            $publish_idx = 0;
 
             foreach ($details->recordData->children('info:lc/xmlns/marcxchange-v2', false)->record->controlfield as $key => $cf_ele) { // controlfield elements
                 $cf_tag = @$cf_ele->attributes()['tag'];
@@ -131,7 +132,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
                     continue;
                 }
 
-                if($df_tag == '245') { // Title / Type
+                if($df_tag == '200') { // Title / Type
 
                     foreach($df_ele->subfield as $sub_key => $sf_ele) {
 
@@ -139,97 +140,100 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
                         if($sf_code == 'a') {
                             $formatted_array['title'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'd'){
+                        }else if($sf_code == 'b'){
+
                             $formatted_array['type'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'f'){
 
                             if(array_key_exists('title', $formatted_array)){
-                                $formatted_array['title'] .= ' ' . (string)$sf_ele[0];
-                            }else{
-                                $formatted_array['title'] = (string)$sf_ele[0];
+                                $formatted_array['title'] .= ' [' . $formatted_array['type'] . ']';
+                            }
+                        }else{
+
+                            if(array_key_exists('title', $formatted_array)){
+                                $formatted_array['title'] .= ' , ' . (string)$sf_ele[0];
                             }
                         }
                     }
-                }else if($df_tag == '260') { // Publisher Location / Publisher Name / Year of Publication
+                }else if($df_tag == '210' || $df_tag == '214') { // Publisher Location / Publisher Name / Year of Publication
                     
                     $value = '';
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
 
-                        if($sf_code == 'a') {
+                        $str_val = str_replace(array('[', ']', '(', ')'), '', (string)$sf_ele[0]);
 
-                            $str_val = (string)$sf_ele[0];
-                            if($str_val[0] == '['){
-                                $formatted_array['publisher']['location'] = substr($str_val, 1, -1);
-                            }else{
-                                $formatted_array['publisher']['location'] = $str_val;
-                            }
-                        }else if($sf_code == 'c') {
-
-                            $str_val = (string)$sf_ele[0];
-                            if($str_val[0] == '['){
-                                $str_val = substr($str_val, 1, -1);
-                            }
-                            $formatted_array['publisher']['name'] = $str_val;
-                        }else if($sf_code == 'd') {
-                            $formatted_array['publisher']['date'] = (string)$sf_ele[0]; //preg_replace('/[^0-9]/', '', (string)$sf_ele[0]);
+                        if($sf_code == 'a'){
+                            $formatted_array['publisher'][$publish_idx]['location'][] = $str_val;
+                        }else if($sf_code == 'c'){
+                            $formatted_array['publisher'][$publish_idx]['name'][] = $str_val;
+                        }else if($sf_code == 'd'){
+                            $formatted_array['date'] = $str_val;
                         }
                     }
-                }else if($df_tag == '100' || $df_tag == '101' || $df_tag == '700') { // Creator
+
+                    $publish_idx ++;
+                }else if($df_tag == '700' || $df_tag == '702' || $df_tag == '710' || $df_tag == '716') { // Creator
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
 
-                        if($sf_code == '3') {
-                            $formatted_array['author'][$author_idx]['id'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'a') {
-                            $formatted_array['author'][$author_idx]['surname'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'm') {
-                            $formatted_array['author'][$author_idx]['firstname'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'd') {
-                            $formatted_array['author'][$author_idx]['active'] = (string)$sf_ele[0];
+                        if($df_tag == '710'){
+                            if($sf_code == '3') {
+                                $formatted_array['author'][$author_idx]['id'] = (string)$sf_ele[0];
+                            }else if($sf_code == 'c') {
+                                $formatted_array['author'][$author_idx]['surname'] = (string)$sf_ele[0];
+                            }else if($sf_code == 'a' || $sf_code == 'b') {
+                                $fname = (array_key_exists('firstname', $formatted_array['author'][$author_idx])) ? $formatted_array['author'][$author_idx]['firstname'].'. '.(string)$sf_ele[0] : (string)$sf_ele[0];
+                                $formatted_array['author'][$author_idx]['firstname'] = $fname;
+                            }
+                        }else{                        
+                            if($sf_code == '3') {
+                                $formatted_array['author'][$author_idx]['id'] = (string)$sf_ele[0];
+                            }else if($sf_code == 'a') {
+                                $formatted_array['author'][$author_idx]['surname'] = (string)$sf_ele[0];
+                            }else if($sf_code == 'b') {
+                                $formatted_array['author'][$author_idx]['firstname'] = (string)$sf_ele[0];
+                            }else if($sf_code == 'f') {
+                                $formatted_array['author'][$author_idx]['active'] = (string)$sf_ele[0];
+                            }
                         }
+
                     }
 
                     $author_idx ++;
-                }else if($df_tag == '020') { // ISBN
+                }else if($df_tag == '010') { // ISBN
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
 
                         if($sf_code == 'a') {
-                            $formatted_array['isbn'] = (string)$sf_ele[0];
-                            break;
+                            $formatted_array['isbn'][] = (string)$sf_ele[0];
                         }
                     }
-                }else if($df_tag == '280') { // Description
+                }else if($df_tag == '215') { // Description
 
                     $value = '';
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
 
-                        if($df_tag == '280'){
-
-                            if($sf_code == 'a' || $sf_code == 'c' || $sf_code == 'd'){
-                                $value = ($value == '') ? (string)$sf_ele[0] : ' ' . (string)$sf_ele[0];
-                            }
+                        if($sf_code == 'a' || $sf_code == 'c' || $sf_code == 'd'){
+                            $value = ($value == '') ? (string)$sf_ele[0] : ' ' . (string)$sf_ele[0];
                         }
                     }
 
                     if($value != '') {
 
                         if($df_tag == '280') {
-                            $formatted_array['description'] = $value;
+                            $formatted_array['description'][] = $value;
                         }
                     }
-                }else if($df_tag == '919') { // Language, e.g. fre or FR
+                }else if($df_tag == '101') { // Language, e.g. fre or FR 101
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
 
-                        if($sf_code == 'p') {
-                            $formatted_array['language'] = (string)$sf_ele[0];
-                            break;
+                        if($sf_code == 'a') { // a
+                            $formatted_array['language'][] = (string)$sf_ele[0];
                         }
                     }
                 }else if($df_tag == '327') { // Extended Description
@@ -238,8 +242,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
                         $sf_code = @$sf_ele->attributes()['code'];
 
                         if($sf_code == "a") {
-                            $formatted_array['ext_description'] = (string)$sf_ele[0];
-                            break;
+                            $formatted_array['ext_description'] = (array_key_exists('ext_description', $formatted_array)) ? $formatted_array['ext_description'] . ' ' . (string)$sf_ele[0] : (string)$sf_ele[0];
                         }
                     }
                 }
@@ -248,9 +251,8 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
             $results['result'][] = $formatted_array;
         }
 
-        // Add other details, can be used for more calls to retrieve all results (currently retrieves 500 records at max)
+        // Add other details
         $results['numberOfRecords'] = intval($xml_obj->children('http://www.loc.gov/zing/srw/', false)->numberOfRecords);
-        $results['nextStart'] = intval($xml_obj->children('http://www.loc.gov/zing/srw/', false)->nextRecordPosition);
 
         // Encode to json for response to JavaScript
         $remote_data = json_encode($results);

@@ -3887,7 +3887,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                                             if(recpointer_vals.length == 0 && recset['ext_url']){ // retrieve and delete external url
                                                 recpointer_vals.push([recset['ext_url']]);
-												delete recset['ext_url'];
+                                                delete recset['ext_url'];
                                             }
 
                                             //lookup dialog returns pairs - dtyID=>value
@@ -3920,7 +3920,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                                                 if(type == 'resource'){
                                                                     recpointer_vals.push([dt_id, newval[i]]);
                                                                 }else{
-                                                                    term_vals.push([dt_id, newval[i]]);
+
+                                                                    var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
+                                                                    var trm_id = $Db.getTermByLabel(vocab_id, newval[i]);
+
+                                                                    if(trm_id == null){
+                                                                        term_vals.push([dt_id, newval[i]]);
+                                                                    }else{
+                                                                        completed.push(trm_id);
+                                                                    }
                                                                 }
                                                             }
                                                         }else{
@@ -3932,7 +3940,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                                                 if(type == 'resource'){
                                                                     recpointer_vals.push([dt_id, newval]);
                                                                 }else{
-                                                                    term_vals.push([dt_id, newval]);
+                                                                    
+                                                                    var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
+                                                                    var trm_id = $Db.getTermByLabel(vocab_id, newval);
+
+                                                                    if(trm_id == null){
+                                                                        term_vals.push([dt_id, newval]);
+                                                                    }else{
+                                                                        completed.push(trm_id);
+                                                                    }
                                                                 }
                                                             }
                                                         }
@@ -4685,6 +4701,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             }
         };
         btn['Skip'] = function(){
+
+            new_terms[cur_term[0]].push('');
 
             $dlg.dialog('close');
             that.processTermFields(term_values, resource_values, completed_fields, new_terms);
