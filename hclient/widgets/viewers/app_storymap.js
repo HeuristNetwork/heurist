@@ -41,6 +41,8 @@ $.widget( "heurist.app_storymap", {
         reportElementMode: 'vertical', //vertical result list, carousel/slide, map popup
         reportElementDistinct: 'unveil', //none, heighlight, unveil (veil others)
         reportElementSlideEffect: '', 
+        reportElementMapMode:'linked',
+        reportElementMapFilter:'',
         reportElementCss: null,
 
         // timemap parameters
@@ -918,9 +920,17 @@ console.log('>sctop '+ele.scrollTop());
 
 //console.log(that._cache_story_places[recID]);
 
+                        var qq = {ids:that._cache_story_places[recID]['places']};
+                        
+                        if(that.options.reportElementMapMode=='filtered'){
+                            qq = window.hWin.HEURIST4.util.mergeTwoHeuristQueries( qq, that.options.reportElementMapFilter );
+                        }
+                        
+
+
                         // 2. retrieve all places from server side as geojson
                         var server_request = {
-                            q: {ids:that._cache_story_places[recID]['places']},
+                            q: qq,
                             leaflet: true, 
                             simplify: true, //simplify paths with more than 1000 vertices
                             zip: 1,
@@ -945,7 +955,9 @@ console.log('>sctop '+ele.scrollTop());
                                     //that._cache_story_places[recID]['timeline'] = timeline_data;
 
                                     // 3. create links between points
-                                    that._createPointLinks(recID);
+                                    if(that.options.reportElementMapMode!='all'){
+                                        that._createPointLinks(recID);
+                                    }
                                     
                                     // 4. update map
                                     that._animateStoryElement_B_step2(recID);

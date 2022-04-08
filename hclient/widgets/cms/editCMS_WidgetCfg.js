@@ -107,6 +107,12 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
             selPage.parent().hide();
         }
         
+        //find map widget on this page
+        //var main_menu = $('#main-content > div[widgetid="heurist_Navigation"]');
+        
+        //find any widget and take search_realm
+        
+        
         if(opts!==false){
             
             if(opts.search_page) {
@@ -650,6 +656,13 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
             }else
             if(widget_name=='heurist_StoryMap'){
                 
+                if(!opts['reportOverviewMode']) opts['reportOverviewMode'] = 'inline';
+                if(!opts['reportElementMode']) opts['reportElementMode'] = 'vertical';
+                if(!opts['reportElementMapMode']) opts['reportElementMapMode'] = 'linked';
+                
+                
+                $dlg.find('select[name="reportOverviewMode"]').val(opts['reportOverviewMode']);
+                
                 var $selectTemplate = $dlg.find('select[name="reportOverview"]'); 
 
                 window.hWin.HEURIST4.ui.createTemplateSelector( $selectTemplate
@@ -735,6 +748,19 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
                 })
                 .val(opts['reportElementMode']).change();
 
+                $dlg.find('select[name="reportElementMapMode"]')
+                .change(function(e){
+
+                    if($(e.target).val()=='filtered'){
+                        $dlg.find('input[name="reportElementMapFilter"]').parent().show();
+                    }else{
+                        $dlg.find('input[name="reportElementMapFilter"]').parent().hide();
+                    }
+                    
+                })
+                .val(opts['reportElementMapMode']).change();
+                
+                
             }else
             if(widget_name=='heurist_resultListExt' && 
                             $dlg.find('select[name="rep_template"]').find('options').length==0){
