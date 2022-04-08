@@ -818,7 +818,7 @@ $.widget( "heurist.search_faceted", {
                 +'<h4 style="display:inline-block;margin:0;">'+lbl+'</h4></div>'
                 +'<div style="padding-left:21px;display:inline-block;width:100%" class="spatial_filter">'  //padding:5px 0 20px 21px;
                     +'<div style="float:left;max-height:120px;">' //class="input-div" 
-                    +'<img class="map_snapshot" style="display:none;width:150"/>'
+                    +'<img class="map_snapshot" style="display:none;width:150px"/>'
                     +'</div>'
                     +'<div style="display:inline-block;">'
                         +'<button title="Click this button to set and apply spatial search limits" class="ui-button ui-corner-all ui-widget define_spatial" style="height:20px">'
