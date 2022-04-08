@@ -94,17 +94,20 @@ $.widget( "heurist.svs_list", {
             || (this.options.searchTreeMode>=0));
             
             
-        if( this.isPublished ){
+        if( this.isPublished )
+        {
             if(!(this.options.searchTreeMode>=0)) this.options.searchTreeMode = 0;
+            
             this.options.buttons_mode = (this.options.searchTreeMode==0);
             
-            if(this.options.searchTreeMode==2 
-                && !window.hWin.HAPI4.has_access() //not logged in
-                && !window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.allowed_UGrpID)){
-                
-                    this.options.allowed_UGrpID = [4]; //web searches - by default
-            }
+            if(this.options.searchTreeMode==2){   //full treeview
             
+                if(window.hWin.HAPI4.has_access()){ //logged in
+                    this.options.allowed_UGrpID = null;
+                }else{
+                    this.options.allowed_UGrpID = [4]; //web searches - by default
+                }
+            }
         }
             
         if(window.hWin.HAPI4.has_access() && this.options.buttons_mode){
