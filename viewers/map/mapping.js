@@ -642,18 +642,18 @@ $.widget( "heurist.mapping", {
         
         this._updatePanels();
         
-        if(layout_opts && layout_opts['maxZoom']){
+        if(layer_options && layer_options['maxZoom']){
 
             var idx = this.available_maxzooms.findIndex(arr => arr[0] == new_layer._leaflet_id);
             if(idx != -1){
-                this.available_maxzooms[idx] = [new_layer._leaflet_id, layout_opts['maxZoom']];
+                this.available_maxzooms[idx] = [new_layer._leaflet_id, layer_options['maxZoom']];
             }else{
-                this.available_maxzooms.push([new_layer._leaflet_id, layout_opts['maxZoom']]);
+                this.available_maxzooms.push([new_layer._leaflet_id, layer_options['maxZoom']]);
                 this.available_maxzooms.sort((a, b) => b[1] - a[1]);
             }
 
-            if(this.nativemap.getMaxZoom() < layout_opts['maxZoom']){
-                this.nativemap.setMaxZoom(layout_opts['maxZoom']);
+            if(this.nativemap.getMaxZoom() < layer_options['maxZoom']){
+                this.nativemap.setMaxZoom(layer_options['maxZoom']);
             }
         }
 
