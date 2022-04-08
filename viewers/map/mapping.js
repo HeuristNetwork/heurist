@@ -1060,7 +1060,7 @@ $.widget( "heurist.mapping", {
                             that.nativemap.fitBounds(bounds, {maxZoom: maxZoom})},1700);      
             
                 }else{
-                    this.nativemap.fitBounds(bounds, {maxZoom: maxZoom});      
+                    this.nativemap.fitBounds(bounds, {maxZoom: maxZoom, padding: L.point(50, 50)});   
                 }             
             }
     },
@@ -1286,7 +1286,7 @@ $.widget( "heurist.mapping", {
                            a.layer.spiderfy(); 
                         }
                     }else{
-                        a.layer.zoomToBounds({padding: [20, 20]});
+                        a.layer.zoomToBounds({padding: L.point(20, 20)});
                     }
                 });
                 
@@ -2143,6 +2143,7 @@ console.log(fsize);
         
         var that = this, bounds = [], bnd;
 
+        //var useRuler = false; //we use padding instead 
         var useRuler = (_selection.length==1);
         
         that.nativemap.eachLayer(function(top_layer){    
