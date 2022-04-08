@@ -260,20 +260,39 @@ $.widget( "heurist.resultList", {
                         
                         if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') ||
                             //new search from outside
-                            var new_title;
+                            var new_title = null;
                             if(data.qname>0 && window.hWin.HAPI4.currentUser.usr_SavedSearch && 
                                 window.hWin.HAPI4.currentUser.usr_SavedSearch[data.qname])
                             {
                                 that._currentSavedFilterID = data.qname;
                                 new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][_NAME];
                             }else{
+                                if(data.qname>0 && that.div_header!=null){
+                                    
+                                    window.hWin.HAPI4.SystemMgr.ssearch_get( {svsIDs:[data.qname]},
+                                        function(response){
+                                            if(response.status == window.hWin.ResponseStatus.OK){
+                                                that._currentSavedFilterID = data.qname;
+                                                
+                                                if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){
+                                                    window.hWin.HAPI4.currentUser.usr_SavedSearch = {};
+                                                }
+                                                window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID] = 
+                                                                    response.data[that._currentSavedFilterID];
+                                                
+                                                var new_title = response.data[that._currentSavedFilterID][0];
+                                                that.setHeaderText(new_title);
+                                            }
+                                    });
+                                    
+                                }
+                                
                                 that._currentSavedFilterID = 0;
                                 if(data.qname>0 || window.hWin.HEURIST4.util.isempty(data.qname)){
                                     new_title = window.hWin.HR('Filtered Result');            
                                 }else{
                                     new_title = window.hWin.HR(data.qname);
                                 }
-                                
                             }
                             
                             that.clearAllRecordDivs(new_title);
