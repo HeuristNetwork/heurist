@@ -115,6 +115,22 @@
     }
 },
 {
+    "service": "ESTC_works",
+    "rty_ID": "",
+    "label": "ESTC Works lookup",
+    "description": "Lookup ESTC Work records",
+    "dialog": "lookupESTC_works",
+    "fields": {
+      "title": "",
+      "extendedTitle": "",
+      "projectId": "",
+      "helsinkiTitle": "",
+      "helsinkiId": "",
+      "helsinkiIdAssignation": "",
+      "helsinkiRawData": ""
+    }
+},
+{
     "service": "bnfLibrary",
     "rty_ID": "",
     "label": "BnF Library - bibliographic records",
