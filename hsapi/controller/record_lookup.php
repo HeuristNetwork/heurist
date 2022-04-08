@@ -37,22 +37,53 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
     $params = $_REQUEST;
 
-    if(!(@$params['service'])){
-        $system->error_exit_api('Service parameter value is missing or invalid'); //exit from script
-    }
-    
-    if( !$system->init(@$params['db']) ){  //@todo - we don't need db connection here - it is enough check the session
-        //get error and response
-        $system->error_exit_api(); //exit from script
-    }else if ( $system->get_user_id()<1 ) {
-        $system->error_exit_api(null, HEURIST_REQUEST_DENIED); 
-        //$response = $system->addError(HEURIST_REQUEST_DENIED);
+    $is_estc = (@$params['serviceType'] == 'ESTC');
+
+    if(!(@$params['service'] || @$params['serviceType']) && !$is_estc){
+        $system->error_exit_api('Service parameter is not defined or has wrong value'); //exit from script
     }
 
-    $system->dbclose();
-    
-	// Perform external lookup / API request
-    $url = $params['service'];
+    $remote_data = false;
+    $url = '';
+
+    if($is_estc){
+
+        if(strpos(HEURIST_BASE_URL, HEURIST_MAIN_SERVER) !== false && array_key_exists('db', $_REQUEST)){ // currently on Sydney server
+
+            if(array_key_exists('entity', $_REQUEST)){ // look up defTerms
+                require_once (dirname(__FILE__).'/entityScrud.php');
+                exit();
+            }else{ // record search
+                require_once (dirname(__FILE__).'/record_search.php');
+                exit();
+            }
+        }else{ // on external server
+
+            if(array_key_exists('entity', $_REQUEST)){ // look up defTerms
+
+                $term_uri = (array_key_exists('trm_ID', $_REQUEST) ? '&trm_ID='.$_REQUEST['trm_ID'] : '&trm_ParentTermID='.$_REQUEST['trm_ParentTermID']);
+
+                $url = HEURIST_INDEX_BASE_URL.'hsapi/controller/entityScrud.php?db=ESTC_Helsinki_Bibliographic_Metadata&entity='.$_REQUEST['entity'].'&a='.$_REQUEST['a'].'&request_id='.$_REQUEST['request_id'].'&details='.$_REQUEST['details'].$term_uri;
+            }else{ // record search
+                $url = HEURIST_INDEX_BASE_URL.'hsapi/controller/record_search.php?db=ESTC_Helsinki_Bibliographic_Metadata&detail='.$_REQUEST['detail'].'&'.(is_array($_REQUEST['q'])?http_build_query(array('q' => $_REQUEST['q'])):'q='.$_REQUEST['q']);
+            }
+        }
+    }else{
+
+        if( !$system->init(@$params['db']) ){  //@todo - we don't need db connection here - it is enough check the session
+            //get error and response
+            $system->error_exit_api(); //exit from script
+        }else if ( $system->get_user_id()<1 ) {
+            $system->error_exit_api(null, HEURIST_REQUEST_DENIED); 
+            //$response = $system->addError(HEURIST_REQUEST_DENIED);
+        }
+
+        $system->dbclose();
+
+    	// Perform external lookup / API request
+        $url = $params['service'];
+    }
+
     $remote_data = loadRemoteURLContent($url, true);    
     if($remote_data===false){
         $system->error_exit_api('Cannot connect/load data from the service: '.$url, HEURIST_ERROR);    
@@ -368,6 +399,8 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
         //error_log(print_r($remote_data, TRUE)); //DEBUGGING
 		//$remote_data = json_encode($remote_data); // getRdf currently returns an error, so this isn't used
+    }else if($is_estc){
+        $remote_data = json_encode($remote_data);
     }
 
 	// Return response

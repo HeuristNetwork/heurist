@@ -86,11 +86,32 @@
 {
     "service": "ESTC",
     "rty_ID": "94",
-    "label": "ESTC lookup",
-    "description": "",
+    "label": "LRC18C lookup",
+    "description": "Imports records from the ESTC_Helsinki_Bibliographic_Metadata database, this lookup is for the Libraries_Readers_Culture_18C_Atlantic database only, use the ESTC Editions lookup for general use",
     "dialog": "lookupLRC18C",
     "fields": {
       "properties.edition": "1028"
+    }
+},
+{
+    "service": "ESTC_editions",
+    "rty_ID": "",
+    "label": "ESTC Editions lookup",
+    "description": "Lookup ESTC Book(Editions) records",
+    "dialog": "lookupESTC_editions",
+    "fields": {
+      "title": "",
+      "yearFirstVolume": "",
+      "yearLastVolume": "",
+      "summary": "",
+      "extendedTitle": "",
+      "numOfVolumes": "",
+      "numOfParts": "",
+      "imprintDetails": "",
+      "place": "",
+      "author": "",
+      "work": "",
+      "bookFormat": ""
     }
 },
 {
