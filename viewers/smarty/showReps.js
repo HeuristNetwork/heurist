@@ -986,7 +986,7 @@ function ShowReps() {
                 var $span = $(node.span);
                 var new_title = node.title;//debug + '('+node.data.code+'  key='+node.key+  ')';
 
-                if(node.data.type!='enum' && node.data.is_rec_fields == null){
+                if(node.data.type!='enum' && node.data.is_rec_fields == null && node.data.is_generic_fields == null){
                     var op = '';
                     if(node.data.type=='resource' || node.title=='Relationship'){ //resource
                         op = 'repeat';

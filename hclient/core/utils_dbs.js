@@ -364,7 +364,7 @@ window.hWin.HEURIST4.dbs = {
                         code:($recTypeId+_separator+'tag'), name:'Record Tags'});
                 }
                 
-                if(all_header_fields){
+                if(all_header_fields || $mode == 7){
                     $grouped = [];
                     
                     if($is_parent_relmarker){
