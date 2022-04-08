@@ -293,7 +293,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
             return;
         }
 
-        //window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
         var query_request = { 
             serviceType: 'ESTC',
