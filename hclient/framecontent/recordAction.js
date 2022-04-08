@@ -286,8 +286,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 +'<input id="cb_replace_all" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
                 +'</div>').change(function(){
 
-
-                    if ($(this).is(':checked')){
+                    if ($(this).find('input').is(':checked')){
                         $('#cb_whole_value').parent().hide();   
                         $('#fld-1').hide();
                     }else{
