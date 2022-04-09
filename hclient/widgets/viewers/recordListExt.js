@@ -24,7 +24,7 @@ $.widget( "heurist.recordListExt", {
 
     // default options
     options: {
-        widget_id: null, //user identificator to find this widget custom js script on web/CMS page
+        widget_id: null, //outdated: user identificator to find this widget custom js script on web/CMS page
         title: '',
         is_single_selection: false, //work with the only record - reloads content on every selection event
         recordset: null,
@@ -51,7 +51,7 @@ $.widget( "heurist.recordListExt", {
     // the constructor
     _create: function() {
 
-        if(this.options.widget_id){
+        if(this.options.widget_id){ //outdated
             this.element.attr('data-widgetid', this.options.widget_id);
         }
         

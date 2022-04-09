@@ -24,7 +24,7 @@ $.widget( "heurist.resultList", {
 
     // default options
     options: {
-        widget_id: null, //user identificator to find this widget custom js script on web/CMS page
+        widget_id: null, //outdated: user identificator to find this widget custom js script on web/CMS page
         is_h6style: false,
         view_mode: null, // 'list','icons','thumbs','thumbs3','horizontal','vertical','icons_list','record_content' 
         list_mode_is_table: false,
@@ -165,7 +165,7 @@ $.widget( "heurist.resultList", {
 
         var that = this;
         
-        if(this.options.widget_id){
+        if(this.options.widget_id){ //outdated
             this.element.attr('data-widgetid', this.options.widget_id);
         }
 

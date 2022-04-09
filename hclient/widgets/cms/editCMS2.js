@@ -1643,7 +1643,7 @@ console.log('BLUR');
         // mode - 0       take values from _edit_Element without saving in db
         //        'save'  save entire page in db
         //
-        _edit_Element = editCMS_ElementCfg(element_cfg, _layout_container, _panel_propertyView, function(new_cfg, mode){
+        _edit_Element = editCMS_ElementCfg(element_cfg, _layout_content, _layout_container, _panel_propertyView, function(new_cfg, mode){
 
                     //save
                     if(new_cfg){
@@ -1685,25 +1685,25 @@ console.log('BLUR');
     // 4. Update treeview
     //
     // @todo - store templates as json text 
-    function _layoutInsertElement(ele_id, widget_id, widget_name){
+    function _layoutInsertElement(ele_id, widget_type, widget_name){
         
         //border: 1px dotted gray; border-radius: 4px;margin: 4px;
         
         var new_ele = {name:'Text', type:'text', css:{'border':'1px dotted gray','border-radius':'4px','margin':'4px'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"};
         
-        if(widget_id=='group'){
+        if(widget_type=='group'){
             new_ele = {name:'Group', type:'group', css:{'border':'1px dotted gray','border-radius':'4px','margin':'4px'}, children:[ new_ele ]};
-        }else if(widget_id=='tabs'){
+        }else if(widget_type=='tabs'){
             
             new_ele = {name:'TabControl', type:'tabs', css:{}, children:[ 
                 {name:'Tab 1', type:'group', css:{}, children:[ new_ele ]},
                 {name:'Tab 2', type:'group', css:{}, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]}
             ]};
-        }else if(widget_id=='accordion'){    
+        }else if(widget_type=='accordion'){    
             new_ele = {name:'Accordion', type:'accordion', css:{}, children:[ 
                 {name:'Panel 1', type:'group', css:{}, children:[ new_ele ]}
             ]};
-        }else if(widget_id=='cardinal'){    
+        }else if(widget_type=='cardinal'){    
             
             new_ele = {name:'Cardinal', type:'cardinal', css:{position:'relative',
                         'min-height':'300px','min-width':'300px',
@@ -1716,13 +1716,13 @@ console.log('BLUR');
             {name:'East', type:'east', children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]}
             ]};
           
-        }else if(widget_id.indexOf('heurist_')===0){
+        }else if(widget_type.indexOf('heurist_')===0){
             
             //btn_visible_newrecord, btn_entity_filter, search_button_label, search_input_label
-            new_ele = {appid:widget_id, name:widget_name, css:{}, options:{}};
+            new_ele = {appid:widget_type, name:widget_name, css:{}, options:{}};
             
         }
-        else if(widget_id=='group_2'){
+        else if(widget_type=='group_2'){
             
             new_ele = {name:'2 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
                 children:[
@@ -1732,7 +1732,7 @@ console.log('BLUR');
             };
             
         }
-        else if(widget_id=='text_media'){
+        else if(widget_type=='text_media'){
             
             new_ele = {name:'Media and text', type:'group', css:{display:'flex', 'justify-content':'center'},
                 children:[
@@ -1742,7 +1742,7 @@ console.log('BLUR');
             };
             
         }
-        else if(widget_id=='text_banner'){
+        else if(widget_type=='text_banner'){
 
             var imgs = [
  'https://images.unsplash.com/photo-1524623243236-187b50e18f9f?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1228&q=80',
@@ -1765,7 +1765,7 @@ console.log('BLUR');
             
             
         }
-        else if(widget_id=='text_2'){
+        else if(widget_type=='text_2'){
             
             new_ele = {name:'2 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
                 children:[]
@@ -1779,7 +1779,7 @@ console.log('BLUR');
             new_ele.children.push(child);
             
         }
-        else if(widget_id=='text_3'){
+        else if(widget_type=='text_3'){
             
             new_ele = {name:'3 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
                 children:[]
@@ -1795,9 +1795,9 @@ console.log('BLUR');
             new_ele.children.push(child);
 
         }
-        else if(widget_id.indexOf('tpl_')==0){
+        else if(widget_type.indexOf('tpl_')==0){
             
-            _prepareTemplate(ele_id, widget_id);
+            _prepareTemplate(ele_id, widget_type);
             return;
         }
         

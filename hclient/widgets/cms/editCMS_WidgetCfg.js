@@ -17,9 +17,10 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 //
+// widget_cfg -json cfg for widget to be edited 
+// _layout_content- json cfg for website
 //
-//
-function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
+function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 
     var _className = 'editCMS_WidgetCfg';
     //var isWebPage = false;
@@ -107,13 +108,34 @@ function editCMS_WidgetCfg( widget_cfg, $dlg, main_callback ){
             selPage.parent().hide();
         }
         
-        //find map widget on this page
-        //var main_menu = $('#main-content > div[widgetid="heurist_Navigation"]');
-        
-        //find any widget and take search_realm
-        
-        
         if(opts!==false){
+            
+            //find map widget on this page
+            if(widget_name=='heurist_StoryMap'){
+                if(!opts.map_widget_id){
+                    var ele = layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_Map');
+                    //if(ele) console.log(ele.options); //ele.options.widget_id ele.dom_id
+                    
+                    if(ele && ele.options.search_realm=='' && ele.dom_id){
+                        opts.map_widget_id = ele.dom_id;
+                    }
+                }
+            }
+            
+            //find and assign prevail search group (except heurist_Map if heurist_StoryMap exists)
+            if(!opts.search_realm){ //not defined yet
+            
+                if(widget_name=='heurist_Map' && layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_StoryMap')!=null)
+                {
+                    
+                }else{
+                    var sg = layoutMgr.layoutContentFindMainRealm(_layout_content);    
+                    if(sg=='') sg = 'search_group_1';
+                    opts.search_realm = sg;
+                }
+            }
+            
+        
             
             if(opts.search_page) {
                 $(selPage).val(opts.search_page);        

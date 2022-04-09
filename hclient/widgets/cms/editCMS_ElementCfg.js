@@ -20,7 +20,7 @@
 //
 //
 //
-function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_callback, already_changed ){
+function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $container, main_callback, already_changed ){
 
     var _className = 'editCMS_ElementCfg';
     var element;
@@ -102,7 +102,7 @@ function editCMS_ElementCfg( element_cfg, _layout_container, $container, main_ca
                     l_cfg.options.widget_id = dom_id;
                 }
                 
-                editCMS_WidgetCfg(l_cfg, null, function(new_cfg){
+                editCMS_WidgetCfg(l_cfg, _layout_content, null, function(new_cfg){
                     //add new options 
                     if(JSON.stringify(l_cfg.options) != JSON.stringify(new_cfg)){
                         _enableSave();    

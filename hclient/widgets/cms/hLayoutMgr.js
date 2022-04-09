@@ -30,9 +30,11 @@ function hLayoutMgr(){
     var isEditMode = false;
     
     var _supp_options = null; //defined in layoutInit dynamic options with current status params
+    
+    var _main_layout_cfg = null;
 
     //
-    //
+    // assign unique key property for all layer elements (in array "key" in html "data-lid")
     //
     function _layoutInitKey(layout, i){
         
@@ -143,9 +145,64 @@ function hLayoutMgr(){
     function _layoutCreateDiv( layout, classes ){
 
         var $d = $(document.createElement('div'));
-        if(!layout.dom_id || layout.dom_id.indexOf('hl-')===0){
-            layout.dom_id = 'hl-' + layout.key;
+        
+        
+        if(layout.dom_id && layout.dom_id.indexOf('cms-tabs-')===0){
+            //assign unique identificator (for cardinal, tabs, accordion)
+            //id is reassigned on every page reload
+            layout.dom_id = 'cms-tabs-' + layout.key;  
+        }else if(!layout.dom_id){
+        
+        
+            if(layout.appid && _main_layout_cfg!=null){
+                //assign search_realm and map_widget_id
+                var widget_name = layout.appid;
+                if(!layout.options) layout.options = {};
+                //find map widget on this page
+                if(widget_name=='heurist_StoryMap'){
+                    if(!layout.options.map_widget_id){
+                        var ele = layoutMgr.layoutContentFindWidget(_main_layout_cfg, 'heurist_Map');
+                        //if(ele) console.log(ele.options); //ele.options.widget_id ele.dom_id
+                        
+                        if(ele && ele.options.search_realm=='' && ele.dom_id){
+                            layout.options.map_widget_id = ele.dom_id;
+                        }
+                    }
+                }
+                
+                //find and assign prevail search group (except heurist_Map if heurist_StoryMap exists)
+                if(!layout.options.search_realm){ //not defined yet
+                
+                    if(widget_name=='heurist_Map' && layoutMgr.layoutContentFindWidget(_main_layout_cfg, 'heurist_StoryMap')!=null)
+                    {
+                        
+                    }else{
+                        var sg = layoutMgr.layoutContentFindMainRealm(_main_layout_cfg);    
+                        if(sg=='') sg = 'search_group_1';
+                        layout.options.search_realm = sg;
+                    }
+                }
+            }
+         
+            // assign id for new content and widgety divs
+            // it is saved in configuration
+            var suffix = '', cnt = 0;
+            do{
+                if(layout.appid){
+                    layout.dom_id = 'cms-widget-' + layout.key + suffix;
+                }else{
+                    layout.dom_id = 'cms-content-' + layout.key + suffix;
+                }
+                //check that it is unique on this page
+                cnt++;
+                suffix = '_' + cnt;
+                if(cnt>1){
+                    console.log(layout.dom_id);
+                }
+            }while (body.find('#'+layout.dom_id).length>0);
+            
         }
+        
         
         $d.attr('id', layout.dom_id)
           .attr('data-hid', layout.key); //.attr('data-lid', layout.key);
@@ -338,7 +395,7 @@ function hLayoutMgr(){
         
         var $d, $parent;
         
-        layout.dom_id = 'hl-'+layout.key;
+        layout.dom_id = 'cms-tabs-'+layout.key;
         
         if(container.attr('id')==layout.dom_id){
             $d = container;    
@@ -403,7 +460,7 @@ function hLayoutMgr(){
               .appendTo($parent);
 
 
-            lpane.dom_id = 'hl-'+lpane.key;
+            lpane.dom_id = 'cms-tabs-'+lpane.key;
             var $d2 =_layoutCreateDiv(lpane, 'ui-layout-content2');  
               
             $d2.appendTo($d);
@@ -431,7 +488,7 @@ function hLayoutMgr(){
         
         var $d;
         
-        layout.dom_id = 'hl-'+layout.key;
+        layout.dom_id = 'cms-tabs-'+layout.key;
         
         if(container.attr('id')==layout.dom_id){
             $d = container;    
@@ -481,7 +538,7 @@ function hLayoutMgr(){
        
         var $d;
         
-        layout.dom_id = 'hl-'+layout.key;
+        layout.dom_id = 'cms-tabs-'+layout.key;
         
         if(container.attr('id')==layout.dom_id){
             $d = container;    
@@ -520,23 +577,23 @@ function hLayoutMgr(){
     }
     
     //
-    // Find element in array
+    // Find element in array by internal key property
     //
-    function _layoutContentFindElement(content, ele_id){
+    function _layoutContentFindElement(content, ele_key){
 
         if(!$.isArray(content)){
             if(content.children && content.children.length>0){
-                return _layoutContentFindElement(content.children, ele_id);    
+                return _layoutContentFindElement(content.children, ele_key);    
             }else{
                 return null;
             }
         }
         
         for(var i=0; i<content.length; i++){
-            if(content[i].key == ele_id){
+            if(content[i].key == ele_key){
                 return  content[i];
             }else if(content[i].children && content[i].children.length>0){
-                var res = _layoutContentFindElement(content[i].children, ele_id);    
+                var res = _layoutContentFindElement(content[i].children, ele_key);    
                 if(res) return res;
             }
         }
@@ -544,23 +601,23 @@ function hLayoutMgr(){
     }
     
     //
-    // widget_id - id in cfg_widgets sush as "heurist_SearchInput"
+    // Find widget bt application/widget name in cfg_widgets sush as "heurist_SearchInput"
     //
-    function _layoutContentFindWidget(content, widget_id){
+    function _layoutContentFindWidget(content, widget_name){
         
         if(!$.isArray(content)){
             if(content.children && content.children.length>0){
-                return _layoutContentFindWidget(content.children, widget_id);    
+                return _layoutContentFindWidget(content.children, widget_name);    
             }else{
                 return null;
             }
         }
         
         for(var i=0; i<content.length; i++){
-            if(content[i].appid == widget_id){
+            if(content[i].appid == widget_name){
                 return  content[i];
             }else if(content[i].children && content[i].children.length>0){
-                var res = _layoutContentFindWidget(content[i].children, widget_id);    
+                var res = _layoutContentFindWidget(content[i].children, widget_name);    
                 if(res) return res;
             }
         }
@@ -568,9 +625,65 @@ function hLayoutMgr(){
     }
 
     //
-    // Find parent element
     //
-    function _layoutContentFindParent(parent, ele_id){
+    //
+    function _layoutContentFindAllWidget(content){
+
+        var res = [];
+        
+        if(!$.isArray(content)){
+            if(content.children && content.children.length>0){
+                var res2 =  _layoutContentFindAllWidget(content.children);    
+                if(res2) res = res.concat(res2);
+            }else{
+                return null;
+            }
+        }
+        
+        for(var i=0; i<content.length; i++){
+            if(content[i].appid){
+                res.push(content[i]);
+            }else if(content[i].children && content[i].children.length>0){
+                var res2 = _layoutContentFindAllWidget(content[i].children);    
+                if(res2) res = res.concat(res2);
+            }
+        }
+        return res;
+    }
+    
+    //
+    //
+    //
+    function _layoutContentFindMainRealm(content){
+        //find all widgets on page
+        var res = {};
+        var widgets = _layoutContentFindAllWidget(content);
+        for(var i=0; i<widgets.length; i++){
+            if(!widgets[i].options.search_page && widgets[i].options.search_realm){
+                if(res[widgets[i].options.search_realm]>0){
+                    res[widgets[i].options.search_realm]++;
+                }else{
+                    res[widgets[i].options.search_realm]=1;
+                }
+            }
+        }
+        //find max usage
+        var max_usage = 0; 
+        var max_sg = ''
+        widgets = Object.keys(res);
+        for(var i=0; i<widgets.length; i++){
+            if(res[widgets[i]]>max_usage){
+                max_usage = res[widgets[i]];
+                max_sg = widgets[i];
+            }
+        }
+        return max_sg;
+    }
+
+    //
+    // Find parent element for given key
+    //
+    function _layoutContentFindParent(parent, ele_key){
         
         var children;
         if($.isArray(parent)){
@@ -581,10 +694,10 @@ function hLayoutMgr(){
         }
         
         for(var i=0; i<children.length; i++){
-            if(children[i].key == ele_id){
+            if(children[i].key == ele_key){
                 return  parent;
             }else if(children[i].children && children[i].children.length>0){
-                var res = _layoutContentFindParent(children[i], ele_id);    
+                var res = _layoutContentFindParent(children[i], ele_key);    
                 if(res) return res;
             }
         }
@@ -596,10 +709,10 @@ function hLayoutMgr(){
     //    
     function _layoutContentSaveElement(content, new_cfg){
             
-        var ele_id = new_cfg.key;
+        var ele_key = new_cfg.key;
         
         for(var i=0; i<content.length; i++){
-            if(content[i].key == ele_id){
+            if(content[i].key == ele_key){
                 content[i] = new_cfg;
                 return true 
             }else if(content[i].children && content[i].children.length>0){
@@ -768,6 +881,7 @@ function hLayoutMgr(){
         //
         layoutInit: function(layout, container, supp_options){
             _supp_options = supp_options;
+            _main_layout_cfg = layout;
             return _layoutInit(layout, container, true);
         },
         
@@ -786,16 +900,26 @@ function hLayoutMgr(){
             _layoutAddWidget(layout, container)            
         },
         
-        layoutContentFindElement: function(_layout_cfg, key){
-            return _layoutContentFindElement(_layout_cfg, key);    
+        layoutContentFindElement: function(_layout_cfg, ele_key){
+            return _layoutContentFindElement(_layout_cfg, ele_key);    
         },
         
-        layoutContentFindParent: function(parent, ele_id){
-            return _layoutContentFindParent(parent, ele_id);
+        layoutContentFindParent: function(parent, ele_key){
+            return _layoutContentFindParent(parent, ele_key);
         },
 
-        layoutContentFindWidget: function(_layout_cfg, widget_id){
-            return _layoutContentFindWidget(_layout_cfg, widget_id);    
+        //
+        //  Find widget bt application/widget name in cfg_widgets sush as "heurist_SearchInput"
+        //
+        layoutContentFindWidget: function(_layout_cfg, widget_name){
+            return _layoutContentFindWidget(_layout_cfg, widget_name);    
+        },
+        
+        //
+        // Find most used search realm for current layout
+        //
+        layoutContentFindMainRealm: function(_layout_cfg){
+            return _layoutContentFindMainRealm(_layout_cfg);
         },
         
         
