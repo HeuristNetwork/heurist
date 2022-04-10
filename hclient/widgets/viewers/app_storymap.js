@@ -38,7 +38,7 @@ $.widget( "heurist.app_storymap", {
         reportElement: null,  // smarty report to draw items in resultList
         //story/result list parameters
         reportOverviewMode: 'inline', // tab | header (separate panel on top), no
-        reportElementMode: 'vertical', //vertical result list, carousel/slide, map popup
+        reportElementMode: 'vertical', //vertical | slide 
         reportElementDistinct: 'unveil', //none, heighlight, unveil (veil others)
         reportElementSlideEffect: '', 
         reportElementMapMode:'linked',
@@ -103,7 +103,7 @@ $.widget( "heurist.app_storymap", {
                 [{"name":top.HR('Overview'),"type":"group","css":cssOverview,"folder":true,
                     "children":[{"name":"Overview content","type":"text","css":{},"content":"Overview content","dom_id":"pnlOverview"}]},
                  {"name":top.HR('Story'),"type":"group","css":{},"folder":true,
-                        "children":[{"appid":"heurist_resultList","name":"Story list","css":{"position":"relative","minWidth":150,"minHeight":400},
+                        "children":[{"appid":"heurist_resultList","name":"Story list","css":{"position":"relative","minWidth":150}, //"minHeight":400
                             "options":{
                                 "select_mode": "none",
                                 "support_collection":false,
@@ -162,28 +162,38 @@ $.widget( "heurist.app_storymap", {
             
             this._tabs.tabs('option','activate',function(event, ui){
                 if(that._resultset && that._resultset.length()>0 
-                    && !(that._currentElementID>0) && that._tabs.tabs('option','active')==1){
+                    && !(that._currentElementID>0) && that._tabs.tabs('option','active')==1)
+                {
+                    if(that.options.reportElementMode!='slide'){
+                        that._addStubSpaceForStoryList();
+                    }
                     that._onNavigateStatus(0);
                     that._startNewStoryElement( that._resultset.getOrder()[0] );
                 }
             });
             
-        }else if(this.options.reportOverviewMode=='header'){
-            this.pnlOverview.height(cssOverview.height);
-        }else 
-        if(this.options.reportOverviewMode=='inline'){
-            this._resultList.parent().height(this.element.height());
-            this._resultList.height('100%');    
+        }else{
+            this.pnlStory.css({'position':'absolute',top:0, bottom:'0px', left:0, right:0});
+            
+            if(this.options.reportOverviewMode=='header'){
+                this.pnlOverview.height(cssOverview.height);
+                this.pnlStory.css({top:(this.pnlOverview.height()+'px')});
+            }else 
+            if(this.options.reportOverviewMode=='inline'){
+                //this.pnlStory.height(this.element.height());
+                //this._resultList.height('100%');    
+            }
         }
         
-        if(this.options.reportElementMode=='slide'){
-            this.pnlStoryReport = $('<div>').css({width:'100%',height:'100%',overflow:'auto'})
+        if(this.options.reportElementMode=='slide')
+        {
+            this.pnlStoryReport = $('<div>').css({overflow:'auto'})
                 .appendTo(this.pnlStory);
                 
             var css = ' style="height:30px;line-height:30px;display:inline-block;'
                 +'text-decoration:none;text-align: center;font-weight: bold;color:black;'
                 
-            $('<div style="top:10px;right:10px;position:absolute;z-index: 800;border: 2px solid #ccc; background:white;'
+            var navbar = $('<div style="top:10px;right:10px;position:absolute;z-index: 800;border: 2px solid #ccc; background:white;'
                 +'background-clip: padding-box;border-radius: 4px;">' //;width:64px;
             +'<a id="btn-prev" '+css+'width:30px;border-right: 1px solid #ccc" href="#" '
                 +'title="Previous" role="button" aria-label="Previous">&lt;</a>'
@@ -193,11 +203,31 @@ $.widget( "heurist.app_storymap", {
                 +'title="Next" role="button" aria-label="Next">&gt;</a></div>')        
                 .appendTo(this.pnlStory);
                 
+            if(this.options.reportOverviewMode=='header'){
+                //navbar.css({top: this.pnlOverview.height()+10+'px'});
+                //this.pnlStoryReport.css({'position':'absolute',top:(this.pnlOverview.height()+'px'), bottom:0, left:0, right:0})
+            }else{
+                
+            }
+            this.pnlStoryReport.css({width:'100%',height:'100%'});   
+                
             this._on(this.pnlStory.find('#btn-prev'),{click:function(){ this._onNavigate(false); }});    
             this._on(this.pnlStory.find('#btn-next'),{click:function(){ this._onNavigate(true); }});    
                 
             this._resultList.hide();
-        }else{
+        }else{ 
+            //vertical
+            
+            if(this.options.reportOverviewMode=='header'){
+                this._resultList.css({'position':'absolute',top:0, bottom:0, left:0, right:0});
+                //this.pnlOverview.height()+'px')
+            }else{
+                this._resultList.height('100%');    
+            }
+            
+            
+            
+            
             //add pointer to show activate zone for story element switcher (see in onScroll event)
             $('<span>')
                 .addClass('ui-icon ui-icon-triangle-1-e')
@@ -347,22 +377,24 @@ $.widget( "heurist.app_storymap", {
     _onNavigateStatus: function(idx){
 
         var order = this._resultset.getOrder();
-        var dis_next = false, dis_prev = false;;    
+        var dis_next = false, dis_prev = false;
+        var len = order.length;
+        var is_inline = (this.options.reportOverviewMode=='inline');
         
-        if(idx>=order.length-1){
-          idx = order.length-1; 
+        if(idx >= len-1){
+          idx = len-1; 
           dis_next = true;      
         } 
-        if(idx < (this.options.reportOverviewMode=='inline'?0:1)){
-            idx = (this.options.reportOverviewMode=='inline')?-1:0;
+        if(idx < (is_inline?0:1)){
+            idx = is_inline?-1:0;
             dis_prev = true;      
         }
         
-        window.hWin.HEURIST4.util.setDisabled(this.element.find('#btn-prev'), dis_prev  );
-        window.hWin.HEURIST4.util.setDisabled(this.element.find('#btn-next'), dis_next);
+        window.hWin.HEURIST4.util.setDisabled(this.element.find('#btn-prev'), dis_prev );
+        window.hWin.HEURIST4.util.setDisabled(this.element.find('#btn-next'), dis_next );
         
         
-        this.element.find('#nav-status').text((idx+1)+' of '+order.length);
+        this.element.find('#nav-status').text((idx+1)+' of '+len);
     },
 
         
@@ -519,24 +551,7 @@ $.widget( "heurist.app_storymap", {
             }*/
             this._resultList.resultList('updateResultSet', this._resultset);
             //add last stub element to allow proper onScroll event for last story element
-            var rh = this._resultList.height();
-            var rdiv = this._resultList.find('.recordDiv');
-            rdiv.css('padding','20px 0px');
-            if(rdiv.length>1){
-                var rdiv0 = $(rdiv[0]);
-                rdiv = $(rdiv[rdiv.length-1]);
-                var that = this;
-                setTimeout(function(){ 
-                    if(rdiv0.height() < 101){
-                        rdiv0.css({'min-height':'100px'});
-                    }
-                    if(rdiv.height() < rh-100){
-                        that._resultList.find('.div-result-list-content').find('.stub_space').remove();
-                        $('<div>').addClass('stub_space').css({'min-height':(rh-100)+'px'})
-                            .appendTo(that._resultList.find('.div-result-list-content'));
-                    }
-                },2000);
-            }
+            this._addStubSpaceForStoryList( 2000 );
             /* var k = rdivs.length-1;
             var h = 0;
             while (k>0){
@@ -555,13 +570,42 @@ $.widget( "heurist.app_storymap", {
             //2. Loads time data all story elements - into special layer "Whole Store Timeline"
             this.updateTimeLine(recID);
             
-            
         }else{
             //clear 
             //this.options.storyRecordID = null;
             this.pnlOverview.html(top.HR('There is no story for selected record'));
         }
         
+    },
+    
+    //
+    // add last stub element to allow proper onScroll event for last story element
+    //
+    _addStubSpaceForStoryList: function( delay ){
+        
+        if(this._resultList.is(':visible')){
+            
+            if(!(delay>0)) delay = 10; 
+            
+            var rh = this._resultList.height();
+            var rdiv = this._resultList.find('.recordDiv');
+            rdiv.css('padding','20px 0px');
+            if(rdiv.length>1){
+                var rdiv0 = $(rdiv[0]);
+                rdiv = $(rdiv[rdiv.length-1]);
+                var that = this;
+                setTimeout(function(){ 
+                    if(rdiv0.height() < 101){
+                        rdiv0.css({'min-height':'100px'});
+                    }
+                    if(rdiv.height() < rh-100){
+                        that._resultList.find('.div-result-list-content').find('.stub_space').remove();
+                        $('<div>').addClass('stub_space').css({'min-height':(rh-100)+'px'})
+                            .appendTo(that._resultList.find('.div-result-list-content'));
+                    }
+                }, delay);
+            }
+        }
     },
 
     //
@@ -586,7 +630,10 @@ $.widget( "heurist.app_storymap", {
                         +'&db='+window.hWin.HAPI4.database;
             }
             
-            if(this.options.reportOverviewMode!='no'){
+            //reportOverviewMode: inline | tab | header | no
+            //reportElementMode: vertical | slide 
+            
+            if(this.options.reportOverviewMode!='no'){ //inline, tab, header
                 var that = this;
                 this.pnlOverview.addClass('loading').css({'overflow-y':'auto'})
                     .load(infoURL, function(){ 
@@ -602,14 +649,21 @@ $.widget( "heurist.app_storymap", {
                             //loads overview as first element in story list
                             
                             if(that.options.reportElementMode=='slide'){ //as first slide     
+                                that._onNavigateStatus( -1 );    
                                 that.pnlStoryReport.html(that.pnlOverview.html())
                             }else{
                                 var ele = that._resultList.find('.div-result-list-content');    
                                 $('<div class="recordDiv outline_suppress expanded" recid="0" tabindex="0">')
                                     .html(that.pnlOverview.html()).prependTo(ele);
                             }
+                            
+                        }else if(that.options.reportOverviewMode=='header'){
+                            
+                            that._onNavigateStatus( 0 );    
+                            that._startNewStoryElement( that._resultset.getOrder()[0] );
                                 
                         }else{
+                            //tab
                             var h = ele2[0].scrollHeight+10;
                             if(ele2.find('div[data-recid]').length>0){
                                 ele2.find('div[data-recid]').css('max-height','100%');
@@ -627,7 +681,13 @@ console.log('>sctop '+ele.scrollTop());
                                 
                     });   
                     
+            }else 
+            {
+                this._onNavigateStatus( 0 );    
+                this._startNewStoryElement( this._resultset.getOrder()[0] );
             }
+                        
+            
     },
         
     //
