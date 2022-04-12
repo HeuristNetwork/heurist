@@ -121,7 +121,10 @@ $.widget( "heurist.mapping", {
         map_rollover: false,
         map_popup_mode: 'standard',
         
-        zoomToPointInKM:5  //is set either from map documet DT_ZOOM_KM_POINT or from url parameters
+        zoomToPointInKM:5,  //is set either from map documet DT_ZOOM_KM_POINT or from url parameters
+        
+        default_style:null,
+        default_selection_style:null
     },
     
     /* expremental 
@@ -167,6 +170,7 @@ $.widget( "heurist.mapping", {
              fillColor: null, //same as color by default
              fillOpacity: 0.2},
     
+    selection_style: null,
 
     //storages
     all_layers: {},    // array of all loaded TOP layers by leaflet id   
@@ -344,6 +348,9 @@ $.widget( "heurist.mapping", {
         //map scale
         this.map_scale = L.control.scale({ position: 'bottomleft' }).addTo( this.nativemap );
         $(this.map_scale._container).css({'margin-left': '20px', 'margin-bottom': '20px'});
+        
+        //default selection style
+        this.selection_style = this.setStyleDefaultValues(null, true, true);
 
         //content for legend
         this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element, is_ui_main:is_ui_main});
@@ -1816,7 +1823,7 @@ $.widget( "heurist.mapping", {
     // assigns default values for style (size,color and marker type)
     // default values priority: widget options, topmost mapdocument, user preferences
     //
-    setStyleDefaultValues: function(style, suppress_prefs){
+    setStyleDefaultValues: function(style, suppress_prefs, is_selection_style){
         
         //take map style from user preferences
         var def_style;
@@ -1835,9 +1842,31 @@ $.widget( "heurist.mapping", {
                 def_style = window.hWin.HAPI4.get_prefs('map_default_style');
                 if(def_style) def_style = window.hWin.HEURIST4.util.isJSON(def_style);
             }
-            def_style = this.setStyleDefaultValues(def_style, true);
-        }else{
+            def_style = this.setStyleDefaultValues(def_style, true, is_selection_style);
+        }else if(is_selection_style){
             
+            if(this.options.default_selection_style){
+                //take default style from widget parameters
+                def_style = this.options.default_selection_style;
+            }
+            if(!def_style){
+                def_style = window.hWin.HAPI4.get_prefs('map_select_style');
+                if(def_style) def_style = window.hWin.HEURIST4.util.isJSON(def_style);
+            }
+            if(!def_style){
+                def_style = {iconType:'circle', color:'#62A7F8', fillColor:'#e6fdeb', weight:3, opacity:1, 
+                        dashArray: '',
+                        fillOpacity:0.3, iconSize:18, stroke:true, fill:true};
+            }
+            def_style.weight = def_style.weight>=0 ?def_style.weight :3;
+            def_style.opacity = def_style.opacity>=0 ?def_style.opacity :1;
+            def_style.fillOpacity = def_style.fillOpacity>=0 ?def_style.fillOpacity :0.3;
+            def_style.fill = true;
+            def_style.stroke = true;
+            
+console.log(def_style);            
+            
+        }else{
             //'#00b0f0' - lighy blue
             def_style = {iconType:'rectype', color:'#ff0000', fillColor:'#ff0000', weight:3, opacity:1, 
                     dashArray: '',
@@ -1967,9 +1996,9 @@ console.log(fsize);
         //change color for selected features
         if( feature.properties && this.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0){
             use_style = window.hWin.HEURIST4.util.cloneJSON( use_style );
-            use_style.color = '#62A7F8'; //'#ffff00';  //yellow for selection
-            use_style.fillColor = '#e6fdeb';
-            use_style.fillOpacity = 0.3;
+            use_style.color = this.selection_style.color; //'#62A7F8'; 
+            use_style.fillColor = this.selection_style.fillColor; //'#e6fdeb';
+            use_style.fillOpacity = this.selection_style.fillOpacity; //0.3;
         }
         
         return use_style;
@@ -2009,7 +2038,8 @@ console.log(fsize);
                 var radius = iconSize/2+3;
                 //iconSize = ((layer instanceof L.CircleMarker) ?(iconSize+2) :(iconSize/2+4));
                 
-                var new_layer = L.circleMarker(layer.getLatLng(), {color: '#62A7F8'} );   //'rgba(38,60,97,1)' rgba(255,255,0,0.3) yellow circle 
+                var new_layer = L.circleMarker(layer.getLatLng(), {color: this.selection_style.color} );//'#62A7F8'   
+                
                 new_layer.setRadius(radius);
                 new_layer.addTo( this.nativemap );
                 new_layer.bringToBack();
