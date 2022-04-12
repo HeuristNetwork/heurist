@@ -227,7 +227,7 @@ $.widget( "heurist.search", {
             .appendTo(div_search_help_links);
 
             var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
-                +'filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')
+                +'Simple filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')
             .attr('id', 'search_help_link')
             .addClass('graytext')
             .css({'text-decoration':'none','outline':0, cursor:'pointer'})
@@ -244,10 +244,13 @@ $.widget( "heurist.search", {
                 var $help_link = this.div_search_input.find('#search_help_link').clone();
                 var org_val = this.input_search.val();
 
-                var msg = '<div class="heurist-helper1" style="font-size: 1em;">The search string is enclosed in [ ] and consists of a series of comma-separated specifications in { }'
+                var msg = '<div class="heurist-helper1" style="font-size: 1em;">'
+                + 'The filter function accepts two types of filter string - a simple search format (see filter help)'
+                + '<br>and a JSon format which is built by the filter builders and is documented in the main Help files.'
+                + '<br><br>The JSon format is enclosed in [ ] and consists of a series of comma-separated specifications in { }'
                         + '<br>giving a tag (generally a field ID, field name or special indicator) followed by a colon ( ; ) then a value or values.'
                         + '<br>Tags and values are generally enclosed in double quotes ( " )</div><br>'
-                        + '<textarea style="padding: 5px; margin: 5px 0px; height: 200px; width: 500px;" class="text ui-widget-content ui-corner-all">' 
+                        + '<textarea style="padding: 5px; margin: 5px 0px; height: 150px; width: 500px;" class="text ui-widget-content ui-corner-all">' 
                             + org_val 
                         + '</textarea><br><div id="search_help_container"></div>';
                         //+ '<br><div class="heurist-helper1">Please ensure that you\'ve closed all brackets ( [ and { ) and quotes ( " )</div>';
