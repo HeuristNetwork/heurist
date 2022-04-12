@@ -115,7 +115,7 @@ $.widget( "heurist.app_storymap", {
                                 "show_url_as_link":true,
                                 "view_mode":"record_content",
                                 "rendererExpandDetails": this.options.reportElement,
-                                "empty_remark": top.HR('There is no story for selected record'),
+                                "empty_remark": top.HR('There are no visible story points for the selected record (they may exist but not made public)'),
                                 "onScroll": function(event){ that._onScroll(event, that) },
                                 "expandDetailsWithoutWarning": true,
                                 "show_toolbar":false,
@@ -573,7 +573,7 @@ $.widget( "heurist.app_storymap", {
         }else{
             //clear 
             //this.options.storyRecordID = null;
-            this.pnlOverview.html(top.HR('There is no story for selected record'));
+            this.pnlOverview.html(top.HR('There are no visible story points for the selected record (they may exist but not made public)'));
         }
         
     },
