@@ -1193,6 +1193,14 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             if(records[recID])
                 _setFieldValue(records[recID], fldName, value);  
         },
+
+        getFldById: function(recID, fldName){
+            if(records[recID]){
+                return _getFieldValue(records[recID], fldName);
+            }else{
+                return null;
+            }
+        },
         
         //
         // assign value of field from one record to another

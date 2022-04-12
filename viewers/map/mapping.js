@@ -1864,7 +1864,7 @@ $.widget( "heurist.mapping", {
             def_style.fill = true;
             def_style.stroke = true;
             
-console.log(def_style);            
+//console.log(def_style);            
             
         }else{
             //'#00b0f0' - lighy blue

@@ -1684,7 +1684,6 @@ class HPredicate {
         $cs_ids = $this->getUserIds($cs_ids);
         //$cs_ids = getCommaSepIds($this->value);
         if ($cs_ids) {  
-            
 
                 if(strpos($cs_ids, ',')>0){  //more than one
 
@@ -1948,9 +1947,24 @@ class HPredicate {
             ." AND $rl.rl_RelationID".$val;
             
         }else{
+            
+            $field_compare = '';
+            $several_ids = prepareIds($this->field_id); //getCommaSepIds - returns validated string
+            if(is_array($several_ids) && count($several_ids)>0){
+                
+                if(count($several_ids)>1){
+                    $field_compare = "$rl.rl_DetailTypeID IN (".implode(',',$several_ids).')';
+                }else{
+                    $field_compare = "$rl.rl_DetailTypeID = ".$this->field_id;
+                }
+                
+            }else{
+                $field_compare = "$rl.rl_RelationID IS NULL";
+            } 
         
-            $where = "r$p.rec_ID=$rl.rl_TargetID AND ".
-            (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID IS NULL")
+            $where = "r$p.rec_ID=$rl.rl_TargetID AND "
+            .$field_compare
+            //OLD (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID IS NULL")
             ." AND $rl.rl_SourceID".$val;
         }
 

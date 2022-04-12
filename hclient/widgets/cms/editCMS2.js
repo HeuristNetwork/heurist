@@ -641,12 +641,14 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         var key = $(tinymce.activeEditor.targetElm).attr('data-hid');
                         //update in _layout_content
                         var l_cfg = layoutMgr.layoutContentFindElement(_layout_content, key);
-                        var new_content = tinymce.activeEditor.getContent();
-                        
-                        page_was_modified = (page_was_modified || l_cfg.content!=new_content);
-                        _onPageChange();
-                        
-                        l_cfg.content = new_content;
+                        if(l_cfg){
+                            var new_content = tinymce.activeEditor.getContent();
+                            page_was_modified = (page_was_modified || l_cfg.content!=new_content);
+                            _onPageChange();
+                            l_cfg.content = new_content;
+                        }else{
+                            page_was_modified = false;
+                        }
                         //_panel_treePage.find('.fancytree-hover').removeClass('fancytree-hover');
                     }
                 });

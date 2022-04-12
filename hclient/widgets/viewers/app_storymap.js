@@ -35,6 +35,8 @@ $.widget( "heurist.app_storymap", {
         // general options
         storyRecordID: null, // record with story elements (it has links to)
         reportOverview: null, // smarty report for overview. It uses storyRecordID
+        reportOverviewMapFilter: null, //filter for events/story elements in initial map
+        
         reportElement: null,  // smarty report to draw items in resultList
         //story/result list parameters
         reportOverviewMode: 'inline', // tab | header (separate panel on top), no
@@ -61,13 +63,14 @@ $.widget( "heurist.app_storymap", {
         
     },
 
-    _resultset: null, // current story list
+    _resultset: null, // current story list - story elements
     _resultList: null,
     _tabs: null, //tabs control
     _mapping: null,    // mapping widget
     _mapping_onselect: null, //mapping event listener
     _L: null, //refrence to leaflet
     
+    _all_stories_id: 0,
 
     _storylayer_id: 0,
     _cache_story_geo: {},
@@ -248,23 +251,34 @@ $.widget( "heurist.app_storymap", {
         }else{
             //take from selected result list
             
-            this._events = window.hWin.HAPI4.Event.ON_REC_SELECT;
+            this._events = window.hWin.HAPI4.Event.ON_REC_SELECT
+                + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH;                       
             
             $(this.document).on(this._events, function(e, data) {
                 
+                if(!that._isSameRealm(data)) return;
+                
                 if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
                     
-                    if(data && data.source!=that.element.attr('id') && that._isSameRealm(data)) {
+                    if(data && data.source!=that.element.attr('id')) {
 
                         if(data.selection && data.selection.length==1){
                             
                             var recID = data.selection[0];
                         
-                            that._checkForStory(recID);
+                            that._checkForStory(recID); //load certain story
                         
                         }
                     }
+                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
+                
+                    var recset = data.recordset; //record in main result set (for example Persons)
+                    
+                    //find filtered Story Elements
+                    that.updateInitialMap( recset );
                 }
+                
+                
             });
         }
         
@@ -410,15 +424,14 @@ $.widget( "heurist.app_storymap", {
             if(!$.isArray(this.options.storyFields) && typeof this.options.storyFields === 'string'){
                 this.options.storyFields = this.options.storyFields.split(',');
             }
-            if(!$.isArray(this.options.storyRectypes) && typeof this.options.storyRectypes === 'string'){
+            if(!$.isArray(this.options.storyRectypes) && typeof this.options.storyRectypes === 'string'){ //NOT USED
                 this.options.storyRectypes = this.options.storyRectypes.split(',');
             }
             
             var request;
             var that = this;
             
-            let DT_STORY_ANIMATION = $Db.getLocalID('dty', '2-1090');
-
+            let DT_STORY_ANIMATION = $Db.getLocalID('dty', '2-1090'); //configuration field for animation
 
             if(this.options.storyFields.length>0){
                 //search for story fields for given record
@@ -519,8 +532,6 @@ $.widget( "heurist.app_storymap", {
     //
     _startNewStory: function(recID){
       
-        this._stopAnimeAndClearMap();
-
         //find linked mapping
         if(this.options.map_widget_id){
             this._mapping = $('#'+this.options.map_widget_id);
@@ -528,11 +539,16 @@ $.widget( "heurist.app_storymap", {
             
 
         //remove previous story layer
+        var mapwidget = this._mapping.app_timemap('getMapping');
+        if(this._all_stories_id>0){
+            mapwidget.removeLayer( this._all_stories_id );
+            this._all_stories_id = 0;
+        }
         if(this._storylayer_id>0){
-            var mapwidget = this._mapping.app_timemap('getMapping');
             mapwidget.removeLayer( this._storylayer_id );
             this._storylayer_id = 0;
         }
+        this._stopAnimeAndClearMap();
 
         //switch to Overview
         if(this._tabs){
@@ -689,7 +705,212 @@ console.log('>sctop '+ele.scrollTop());
                         
             
     },
+
+    //
+    //
+    //        
+    updateInitialMap: function( recset ){
         
+        var that = this;
+        
+        //find linked mapping
+        if(this.options.map_widget_id){
+            this._mapping = $('#'+this.options.map_widget_id);
+        }
+        
+        if(!this._mapping.app_timemap('isMapInited')){
+                
+            this._mapping.app_timemap('option','onMapInit', function(){
+                that.updateInitialMap( recset );
+            });
+            return;
+        }
+        
+        if(!this._mapping_onselect){ //assign event listener
+            
+            this._mapping_onselect = function( rec_ids ){
+                
+                if(that._all_stories_id>0){
+                    //initial map is loaded
+                    $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+                        {selection:rec_ids, source:that.element.attr('id'), 
+                            search_realm:that.options.search_realm} ); //highlight in main resultset
+                    that._checkForStory(rec_ids[0]); //load certain story
+                }else
+                //find selected record id among story elements    
+                if(rec_ids.length>0){
+                    var rec = that._resultset.getById(rec_ids[0]);
+                    if(rec){
+                        that._scrollToStoryElement(rec_ids[0]); //scroll to selected story element
+                    }    
+                }
+                
+            }
+            
+            var mapwidget = this._mapping.app_timemap('getMapping');
+            mapwidget.options.onselect = this._mapping_onselect;
+        }
+        
+        //clear map
+        var mapwidget = this._mapping.app_timemap('getMapping');
+        if(this._all_stories_id>0){
+            mapwidget.removeLayer( this._all_stories_id );
+            this._all_stories_id = 0;
+        }else if(this._storylayer_id>0){
+            mapwidget.removeLayer( this._storylayer_id );
+            this._storylayer_id = 0;
+        }else{
+            this._stopAnimeAndClearMap();
+        }
+        
+        if(recset.length()==0) return;
+        
+        if(recset.length()==1){
+            //select the only story at once
+            $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+                {selection:recset.getIds(), source:that.element.attr('id'), 
+                    search_realm:that.options.search_realm} );
+            that._checkForStory(recset.getIds()[0]); //load certain story
+            return;            
+        }
+        
+        //Find story elements ids
+        if(!$.isArray(this.options.storyFields) && typeof this.options.storyFields === 'string'){
+            this.options.storyFields = this.options.storyFields.split(',');
+        }
+        
+        //---------
+        // find all story elements
+        var request = {q:{ids:recset.getIds()}, detail:this.options.storyFields.join(',')};
+
+        window.hWin.HAPI4.RecordMgr.search(request,
+            function(response) {
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                    var storyIDs = [];
+                    var storiesByRecord = {};
+                    for (var recID in response.data.records){
+                        if(recID>0){
+                            var details = response.data.records[recID]['d'];
+                            storiesByRecord[recID] = [];
+                            for(var dty_ID in details){
+                                if(dty_ID>0){
+                                    storyIDs = storyIDs.concat(details[dty_ID]);
+                                    storiesByRecord[recID] = storiesByRecord[recID].concat(details[dty_ID]);
+                                }
+                            }
+                        }
+                    }//for
+                    
+                    //find filtered stories
+                    var query = [{ids:storyIDs}];
+
+                    if( !window.hWin.HEURIST4.util.isempty(that.options.reportOverviewMapFilter)){
+                        query = window.hWin.HEURIST4.util.mergeTwoHeuristQueries( query, that.options.reportOverviewMapFilter );    
+                    }
+                    
+        
+                    var server_request = {
+                                    q: query, 
+                                    leaflet: true, 
+                                    simplify: true, //simplify paths with more than 1000 vertices
+                                    //suppress_linked_places: 1, //do not load assosiated places
+                                    zip: 1,
+                                    format:'geojson'};
+                                    
+                    window.hWin.HAPI4.RecordMgr.search_new(server_request,
+                        function(response){
+                            var geojson_data = null
+                            if(response['geojson']){
+                                geojson_data = response['geojson'];
+                            }else{
+                                geojson_data = response;
+                            }
+//console.log(geojson_data);
+//console.log(response['timeline']);
+                            //REPLACE rec id and title to main result set
+                            function __findMainId(storyID){
+                                var rec = null;
+                                recset.each2(function(recID, record){
+                                    if(recID>0 && storiesByRecord[recID]){
+                                        var idx = window.hWin.HEURIST4.util.findArrayIndex(storyID, storiesByRecord[recID]);
+                                        if(idx>=0){
+                                            rec = record;
+                                            return false;
+                                        }
+                                    }
+                                });
+                                return rec;
+                            }
+                            
+                            if( !window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) ){
+                                geojson_data = null;
+                            }else{
+                                
+                                for(var i=0; i<geojson_data.length; i++){
+                                    var storyID = geojson_data[i].id
+                                    var record  = __findMainId(storyID);
+                                    if(record){
+                                        geojson_data[i].id = record['rec_ID'];
+                                        geojson_data[i]['properties'].rec_ID = record['rec_ID']; 
+                                        geojson_data[i]['properties'].rec_RecTypeID = record['rec_RecTypeID']; 
+                                        geojson_data[i]['properties'].rec_Title = record['rec_Title']; 
+                                    }
+                                }
+                            }
+
+                            if(response['timeline']){
+                                var aused = [];
+                                for(var i=0; i<response['timeline'].length; i++){
+                                    var storyID = response['timeline'][i]['rec_ID'];
+                                    //find original resulet set it
+                                    var record  = __findMainId(storyID);
+                                    if(record && aused.indexOf(record['rec_ID'])<0){
+                                        aused.push(record['rec_ID']);
+                                        response['timeline'][i]['rec_ID'] = record['rec_ID'];
+                                        response['timeline'][i]['rec_RecTypeID'] = record['rec_RecTypeID'];
+                                        response['timeline'][i]['rec_Title'] = record['rec_Title'];
+                                    }
+                                }
+                            }
+
+
+                            
+                            that._all_stories_id = mapwidget.addGeoJson(
+                                {geojson_data: geojson_data,
+                                 timeline_data: response['timeline'],
+                                    //layer_style: layer_style,
+                                    //popup_template: layer_popup_template,
+                                 dataset_name: 'All Stories',
+                                 preserveViewport: false });
+                        });                    
+                    
+                    
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+                
+            });
+        //----------
+        
+        /*
+        var field_ids = 'linkedfrom:'+this.options.storyFields.join(',');
+        var query = {};
+        query[field_ids] = {ids:recset.getIds()};
+        query = [query];
+        
+
+        if( !window.hWin.HEURIST4.util.isempty(that.options.reportOverviewMapFilter)){
+            query = window.hWin.HEURIST4.util.mergeTwoHeuristQueries( query, that.options.reportOverviewMapFilter );    
+        }
+
+//console.log(query);
+//console.log(recset);
+
+            */
+    },
+
+
     //
     // update Whole store timeline
     //
@@ -697,43 +918,25 @@ console.log('>sctop '+ele.scrollTop());
         
         var that = this;
         
+        if(this.options.storyRecordID != recID) return; //story already changed to different one
+        
         if(that._cache_story_geo[that.options.storyRecordID]=='no data'){
             //no time data for this story
             
-            
         }else if(that._cache_story_geo[that.options.storyRecordID] 
-                || that._cache_story_time[that.options.storyRecordID]) //loads from cache
+                || that._cache_story_time[that.options.storyRecordID]) 
         {
+            // loads from cache
             
             if(!this._mapping.app_timemap('isMapInited')){
-                    
+                   
+                /*    
                 this._mapping.app_timemap('option','onMapInit', function(){
                     that.updateTimeLine(recID);
                 });
+                */
                 return;
             }
-            
-            if(!this._mapping_onselect){
-                
-                this._mapping_onselect = function( rec_ids ){
-                    //find selected record id among story elements    
-                    if(rec_ids.length>0){
-                        var rec = that._resultset.getById(rec_ids[0]);
-                        if(rec){
-                            that._scrollToStoryElement(rec_ids[0]);
-                            //that._startNewStoryElement(rec_ids[0]);
-                        }    
-                    }
-                    
-                }
-                
-                var mapwidget = this._mapping.app_timemap('getMapping');
-                mapwidget.options.onselect = this._mapping_onselect;
-            }
-            
-            
-            
-            if(this.options.storyRecordID != recID) return; //story already changed to different one
             
             //update timeline
             var mapwidget = this._mapping.app_timemap('getMapping');
@@ -750,7 +953,7 @@ console.log('>sctop '+ele.scrollTop());
         }else{
             
             var server_request = {
-                            q: {ids: this._resultset.getIds()},
+                            q: {ids: this._resultset.getIds()}, //list of story elements/events
                             leaflet: true, 
                             simplify: true, //simplify paths with more than 1000 vertices
                             //suppress_linked_places: 1, //do not load assosiated places
@@ -772,7 +975,7 @@ console.log('>sctop '+ele.scrollTop());
                     }
                     
                     if(response['timeline']){
-                        that._cache_story_time[recID] = response['timeline'];
+                        that._cache_story_time[recID] = response['timeline']; //timeline data
                     }else {
                         that._cache_story_time[recID] = null;
                     }   
@@ -982,7 +1185,7 @@ console.log('>sctop '+ele.scrollTop());
 
                         var qq = {ids:that._cache_story_places[recID]['places']};
                         
-                        if(that.options.reportElementMapMode=='filtered'){
+                        if(that.options.reportElementMapMode=='filtered'){ //additional filter for places 
                             qq = window.hWin.HEURIST4.util.mergeTwoHeuristQueries( qq, that.options.reportElementMapFilter );
                         }
                         

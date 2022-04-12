@@ -3154,7 +3154,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         if(this.options.select_mode!='select_multi'){
             this.div_content.find('.recordSelector').hide();
             
-            if(this.options.view_mode == 'horizontal' || this.options.view_mode == 'vertical' || this.options.auto_select_first !== false){
+            if(this.options.view_mode == 'horizontal' || this.options.auto_select_first !== false){ // this.options.view_mode == 'vertical' || 
                 //always select first div for horizontal viewmode, or if auto_select_first is set
                 var ele = this.div_content.find('.recordDiv:first');//.addClass('selected');
                 if(ele.length>0) this._recordDivOnClick({target:ele[0]});
