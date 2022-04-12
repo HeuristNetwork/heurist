@@ -61,6 +61,8 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
                 exit();
             }else if($is_allowed && $ESTC_UserName && $ESTC_Password && $system->doLogin($ESTC_UserName, $ESTC_Password, 'shared')){ // search records
 
+                $system->getCurrentUserAndSysInfo(false);
+
                 require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
 
                 $remote_data = recordSearch($system, $_REQUEST);
