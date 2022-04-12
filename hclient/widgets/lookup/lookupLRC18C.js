@@ -27,7 +27,9 @@
 
 mapDict = {}
 $.widget("heurist.lookupLRC18C", $.heurist.recordAction, {
-    
+
+    allowed_dbs: ['Libraries_Readers_Culture_18C_Atlantic'],
+
     //defintions mapping
     // source rectype: target rectype
     mapping_defs:{
@@ -182,6 +184,19 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
 
     },
     recordList: null,
+
+    //
+    // Check that the current db has access to this look up
+    //
+    _init: function(){
+
+        if(this.allowed_dbs.indexOf(window.hWin.HAPI4.database) < 0){
+            window.hWin.HEURIST4.msg.showMsgErr('This look up is made for the Libraries_Readers_Culture_18C_Atlantic database only.');
+            return false;
+        }
+
+        this._super();
+    },
 
     //    
     //
@@ -341,9 +356,21 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                         var ids_ex  = response.data.exists; //skipped
                         if(!ids_ex) ids_ex = [];
 
+                        var query_request = { 
+                            serviceType: 'ESTC',
+                            org_db: window.hWin.HAPI4.database,
+                            db: 'ESTC_Helsinki_Bibliographic_Metadata',
+                            q: 'ids:"' + recpointers.join(',') + '"', 
+                            w: 'a',
+                            detail: 'header' 
+                        };
+
                         //find record titles
-                        window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+ids.join(','), w: "a", f:"header"},
+                        window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request,
                             function(response){
+
+                                response = window.hWin.HEURIST4.util.isJSON(response);
+
                                 if(response.status == window.hWin.ResponseStatus.OK){                        
                                     
                                     var sImported = '', sExisted = '';
@@ -508,12 +535,21 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        var query_request = {db: 'ESTC_Helsinki_Bibliographic_Metadata', q: query_string};
+        var query_request = { 
+            serviceType: 'ESTC',
+            org_db: window.hWin.HAPI4.database,
+            db: 'ESTC_Helsinki_Bibliographic_Metadata',
+            q: query_string, 
+            detail: 'detail' 
+        };
         var that = this;
-        query_request['detail'] = 'detail';
-        window.hWin.HAPI4.RecordMgr.search(query_request,
+
+        window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request,
             function (response) {
+
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
+                response = window.hWin.HEURIST4.util.isJSON(response);
+
                 if (response.status && response.status != window.hWin.ResponseStatus.OK) {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 } else {

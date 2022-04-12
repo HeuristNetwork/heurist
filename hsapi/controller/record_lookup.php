@@ -28,6 +28,10 @@
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
+    if(!defined('ESTC_ALLOWED_DBS')){ 
+        define('ESTC_ALLOWED_DBS', array('Libraries_Readers_Culture_18C_Atlantic', 'MPCE_Mapping_Print_Charting_Enlightenment', 'ESTC_Helsinki_Bibliographic_Metadata')); 
+    }
+
 detectLargeInputs('REQUEST record_lookup', $_REQUEST);
 detectLargeInputs('COOKIE record_lookup', $_COOKIE);
     
@@ -37,9 +41,9 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
     $params = $_REQUEST;
 
-    $is_estc = (@$params['serviceType'] == 'ESTC');
+    $is_estc = (@$params['serviceType'] == 'ESTC' && array_key_exists('db', $_REQUEST) && $_REQUEST['db'] == 'ESTC_Helsinki_Bibliographic_Metadata');
 
-    if(!(@$params['service'] || @$params['serviceType']) && !$is_estc){
+    if(!(@$params['service']) && !$is_estc){
         $system->error_exit_api('Service parameter is not defined or has wrong value'); //exit from script
     }
 
@@ -48,25 +52,38 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
     if($is_estc){
 
-        if(strpos(HEURIST_BASE_URL, HEURIST_MAIN_SERVER) !== false && array_key_exists('db', $_REQUEST)){ // currently on Sydney server
+        $is_allowed = in_array($_REQUEST['org_db'], ESTC_ALLOWED_DBS);
 
-            if(array_key_exists('entity', $_REQUEST)){ // look up defTerms
+        if(strpos(HEURIST_BASE_URL, HEURIST_MAIN_SERVER) !== false && $system->init(@$params['db'])){ // currently on Sydney server
+
+            if(array_key_exists('entity', $_REQUEST)){ // retrieve term info
                 require_once (dirname(__FILE__).'/entityScrud.php');
                 exit();
-            }else{ // record search
-                require_once (dirname(__FILE__).'/record_search.php');
-                exit();
+            }else if($is_allowed && $ESTC_UserName && $ESTC_Password && $system->doLogin($ESTC_UserName, $ESTC_Password, 'shared')){ // search records
+
+                require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
+
+                $remote_data = recordSearch($system, $_REQUEST);
+                $remote_data = json_encode($remote_data);
+            }else{ // doesn't have permission
+
+                $msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
+                $remote_data = array('status' => HEURIST_REQUEST_DENIED, 'message' => $msg, 'sysmsg' => '');
+                $remote_data = json_encode($remote_data);
             }
-        }else{ // on external server
 
-            if(array_key_exists('entity', $_REQUEST)){ // look up defTerms
+            header('Content-Type: application/json');
+            header('Content-Length: ' . strlen($remote_data));
+            exit($remote_data);
+        }else if($is_allowed){ // on external server, currently no external database has permission
 
-                $term_uri = (array_key_exists('trm_ID', $_REQUEST) ? '&trm_ID='.$_REQUEST['trm_ID'] : '&trm_ParentTermID='.$_REQUEST['trm_ParentTermID']);
+            $msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
+            $remote_data = array('status' => HEURIST_REQUEST_DENIED, 'message' => $msg, 'sysmsg' => '');
+            $remote_data = json_encode($remote_data);
 
-                $url = HEURIST_INDEX_BASE_URL.'hsapi/controller/entityScrud.php?db=ESTC_Helsinki_Bibliographic_Metadata&entity='.$_REQUEST['entity'].'&a='.$_REQUEST['a'].'&request_id='.$_REQUEST['request_id'].'&details='.$_REQUEST['details'].$term_uri;
-            }else{ // record search
-                $url = HEURIST_INDEX_BASE_URL.'hsapi/controller/record_search.php?db=ESTC_Helsinki_Bibliographic_Metadata&detail='.$_REQUEST['detail'].'&'.(is_array($_REQUEST['q'])?http_build_query(array('q' => $_REQUEST['q'])):'q='.$_REQUEST['q']);
-            }
+            header('Content-Type: application/json');
+            header('Content-Length: ' . strlen($remote_data));
+            exit($remote_data);
         }
     }else{
 

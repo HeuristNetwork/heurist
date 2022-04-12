@@ -3885,9 +3885,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                             var recpointer_vals = []; // list of search values for recpointer fields
                                             var term_vals = []; // list of label values for enum/term fields
 
-                                            if(recpointer_vals.length == 0 && recset['ext_url']){ // retrieve and delete external url
-                                                recpointer_vals.push([recset['ext_url']]);
+                                            if(recpointer_vals.length == 0 && recset['ext_url']){
+                                                recpointer_vals.push([recset['ext_url'], 'ext']);
                                                 delete recset['ext_url'];
+                                            }else{
+                                                recpointer_vals.push(['']);
                                             }
 
                                             //lookup dialog returns pairs - dtyID=>value
@@ -3971,6 +3973,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                                         if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
                                                     }
                                                 }
+                                            }
+
+                                            if(recpointer_vals.length == 1){ // check if array only has a link to the original record
+                                                recpointer_vals = [];
                                             }
 
                                             if(term_vals.length > 0){
@@ -4732,10 +4738,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         var url = '';
         var completed = '';
 
-        var hasValue = (resource_values != null && resource_values.length > 0);
+        var hasValue = (resource_values != null && resource_values.length > 1);
 
         if(hasValue && resource_values[0].length == 1){ // contains only the external record link
-            url = '<a href="' + resource_values[0][0] + '" target="_blank">View external record <span style="font-size:10px;" class="ui-icon ui-icon-extlink" /></a><br><br>';
+            if(resource_values[0][1] == 'ext'){ // external link
+                url = '<a href="' + resource_values[0][0] + '" target="_blank">View external record <span style="font-size:10px;" class="ui-icon ui-icon-extlink" /></a><br><br>';
+            }
         }
 
         // Add already assigned fields
