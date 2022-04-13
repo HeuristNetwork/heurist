@@ -83,6 +83,8 @@ $.widget( "heurist.app_storymap", {
     _terminateAnimation: false,
     _animationResolve: null, 
     _animationReject: null,
+    
+    _initial_div_message:null,
 
     // the constructor
     _create: function() {
@@ -104,7 +106,7 @@ $.widget( "heurist.app_storymap", {
             [{"name":"TabControl","type": (this.options.reportOverviewMode=='tab'?"tabs":"group"),
                 "css":{},"folder":true,"dom_id":"tabCtrl","children":
                 [{"name":top.HR('Overview'),"type":"group","css":cssOverview,"folder":true,
-                    "children":[{"name":"Overview content","type":"text","css":{},"content":"Overview content","dom_id":"pnlOverview"}]},
+                    "children":[{"name":"Overview content","type":"text","css":{},"content":"","dom_id":"pnlOverview"}]},
                  {"name":top.HR('Story'),"type":"group","css":{},"folder":true,
                         "children":[{"appid":"heurist_resultList","name":"Story list","css":{"position":"relative","minWidth":150}, //"minHeight":400
                             "options":{
@@ -118,7 +120,10 @@ $.widget( "heurist.app_storymap", {
                                 "show_url_as_link":true,
                                 "view_mode":"record_content",
                                 "rendererExpandDetails": this.options.reportElement,
-                                "empty_remark": top.HR('There are no visible story points for the selected record (they may exist but not made public)'),
+                                "empty_remark": 
+                        '<h3 class="not-found" style="color:teal;">'
+                        + top.HR('There are no visible story points for the selected record (they may exist but not made public)')
+                        + '</h3>',
                                 "onScroll": function(event){ that._onScroll(event, that) },
                                 "expandDetailsWithoutWarning": true,
                                 "show_toolbar":false,
@@ -136,6 +141,12 @@ $.widget( "heurist.app_storymap", {
         
         if(!layoutMgr) hLayoutMgr();
         layoutMgr.layoutInit(layout, this.element);
+        
+        this._initial_div_message = 
+        $('<div class="ent_wrapper" style="padding: 1em;background: white;"><br>'
+        +'<h3 class="not-found" style="color:teal;display:inline-block">No records match the filter criteria</h3></div>')
+        .appendTo(this.element);
+        
         
         //add overview panel
         this.pnlOverview = this.element.find('#pnlOverview');
@@ -156,7 +167,7 @@ $.widget( "heurist.app_storymap", {
                 
         
         this._tabs = this.element.find('.ui-tabs:first');
-        if(this._tabs.length>0 && this._tabs.tabs('instance')){
+        if(this._tabs.length>0 && this._tabs.tabs('instance')){  //TAB VIEW
             
             var h = this.element.find('.ui-tabs-nav:first').height(); //find('#tabCtrl').
             this.pnlOverview.height(this.element.height() - h);
@@ -175,7 +186,7 @@ $.widget( "heurist.app_storymap", {
                 }
             });
             
-        }else{
+        }else{  //INLINE
             this.pnlStory.css({'position':'absolute',top:0, bottom:'0px', left:0, right:0});
             
             if(this.options.reportOverviewMode=='header'){
@@ -273,6 +284,13 @@ $.widget( "heurist.app_storymap", {
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
                 
                     var recset = data.recordset; //record in main result set (for example Persons)
+                    
+                    
+                    that._initial_div_message.find('h3')
+                        .text(recset.length()>0
+                            ?'Please select a story in the list'
+                            :'No records match the filter criteria');
+                    that._initial_div_message.show();
                     
                     //find filtered Story Elements
                     that.updateInitialMap( recset );
@@ -418,6 +436,8 @@ $.widget( "heurist.app_storymap", {
     _checkForStory: function(recID, is_forced){
         
         if(this.options.storyRecordID != recID || is_forced){
+            
+            this._initial_div_message.hide();
             
             this.options.storyRecordID = recID;
         
@@ -593,7 +613,10 @@ $.widget( "heurist.app_storymap", {
         }else{
             //clear 
             //this.options.storyRecordID = null;
-            this.pnlOverview.html(top.HR('There are no visible story points for the selected record (they may exist but not made public)'));
+            this.pnlOverview.html(
+            '<h3 class="not-found" style="color:teal;">'
+            +top.HR('There are no visible story points for the selected record (they may exist but not made public)')
+            +'</h3>');
         }
         
     },
