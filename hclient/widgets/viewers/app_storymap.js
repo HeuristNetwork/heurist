@@ -1131,6 +1131,9 @@ console.log('>sctop '+ele.scrollTop());
             
             var pl = that._cache_story_places[recID]['places'];
             if( pl.length==0){
+                //no geodata, zoom to story element on timeline
+                var mapwidget = that._mapping.app_timemap('getMapping');
+                mapwidget.vistimeline.timeline('zoomToSelection', [recID]); //select and zoom 
             }else{
                 //map is already cleared in _startNewStoryElement
                 that._animateStoryElement_B_step2(recID);
@@ -1185,6 +1188,9 @@ console.log('>sctop '+ele.scrollTop());
                         
                         
                         if (that._cache_story_places[recID]['places'].length==0){
+                            //no geodata, zoom to story element on timeline
+                            var mapwidget = that._mapping.app_timemap('getMapping');
+                            mapwidget.vistimeline.timeline('zoomToSelection', [recID]); //select and zoom 
                             return;
                         }
 
@@ -1309,6 +1315,11 @@ console.log('>sctop '+ele.scrollTop());
         
         //var anime = [{scope:'all',range:1,action:'fade_in_out',duration:500}]; //show one by one
         
+        
+        //zoom to story element on timeline
+        mapwidget.vistimeline.timeline('zoomToSelection', [recID]); //select and zoom 
+        
+        //by default first action is fly to extent of story element
         this.actionBounds(recID, [mapwidget.all_layers[this._nativelayer_id]], 'fly' );
         
         if(!window.hWin.HEURIST4.util.isempty(anime)){
@@ -1461,7 +1472,7 @@ console.log('wait for stopping of previous animation');
         //take list of required actions on story element change
         // ??zoom out - show entire bounds (all places within story element?)
         // zoom - zoom to scope
-        // *fly - fly to scope
+        // *fly - fly to scope 
         // center
         // *show
         // *hide

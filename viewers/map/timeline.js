@@ -2,6 +2,7 @@
 * methods for timeline 
 * timelineRefresh - reloads timeline component
 * setSelection
+* zoomToSelection
 * 
 * _timelineZoomToAll
 * _timelineZoomToRange
@@ -171,15 +172,32 @@ $.widget( "heurist.timeline", {
         
         }    
         this.vis_timeline.setSelection(selection_vis);
-        
+       
         //scroll to first selected
         if(selection_vis.length>0){
             var tele = $(this.timeline_ele);
             var rdiv = tele.find('.vis-item.vis-selected:first'); 
-            var spos2 = rdiv.position().top; //relative position of record div
-            tele.scrollTop( spos2 );
+            if(rdiv.length>0){
+                var spos2 = rdiv.position().top; //relative position of record div
+                tele.scrollTop( spos2 );
+            }
+        }
+    },
+    
+    //
+    //
+    //
+    zoomToSelection: function(selected){
+        
+        if(selected && selected.length>0){
+            this.setSelection(selected);
         }
         
+        var sels = this.vis_timeline.getSelection();
+        if(sels && sels['length']>0){
+               var range = this.vis_timeline.getDataRangeHeurist(new vis.DataSet(this.vis_timeline.itemsData.get(sels)));
+               this._timelineZoomToRange(range);
+        }
     },
 
     //
