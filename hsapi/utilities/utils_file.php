@@ -1151,6 +1151,9 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     if(!function_exists("curl_init"))  {
         $glb_curl_code = HEURIST_SYSTEM_FATAL;
         $glb_curl_error = 'Can not init curl extension. Verify php installation';
+
+//error_log('CURL ERROR: '.$glb_curl_error);
+        
         return false;
     }
 
@@ -1201,7 +1204,8 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
         
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
-//error_log($url.' http code = '.$code.'  curl error='.$error);
+        $glb_curl_error = $url.' http code = '.$code.'  curl error='.$error;
+//error_log('CURL ERROR: '.$glb_curl_error);
 
         curl_close($ch);
         return false;
@@ -1210,6 +1214,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
             $glb_curl_code = HEURIST_SYSTEM_FATAL;
             $glb_curl_error = 'It does not return data. HTTP code '.$code;
+//error_log('CURL ERROR: '.$url.' curl error='.$glb_curl_error);
         }
         curl_close($ch);
         return $data;

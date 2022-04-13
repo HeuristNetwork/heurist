@@ -154,7 +154,11 @@ detectLargeInputs('COOKIE record_search', $_COOKIE);
                 }
                 $data = loadRemoteURLContent($reg_url);            
                 if($data==false){
-                    $system->addError(HEURIST_SYSTEM_CONFIG, "Cannot access Master Index database on ".HEURIST_INDEX_BASE_URL);
+                    $msg = 'Cannot access Master Index database on '.HEURIST_INDEX_BASE_URL;
+                    if(@$glb_curl_error){
+                        $msg = $msg.'(CURL ERROR: '.$glb_curl_error.')';
+                    }
+                    $system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     $response = $system->getError();
                 }else{
                     $response = json_decode($data, true);    
