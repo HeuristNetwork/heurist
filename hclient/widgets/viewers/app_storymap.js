@@ -509,18 +509,20 @@ $.widget( "heurist.app_storymap", {
     //
     _stopAnimeAndClearMap: function(){
 
-        //stop animation        
-        if(this._animationResolve!=null){ //animation active
-            this._terminateAnimation = this._currentElementID>0?this._currentElementID:true;
-        }
-        
-//console.log('REMOVE '+this._nativelayer_id);
-        //clear map
-        if(this._nativelayer_id>0 && this._mapping.app_timemap('instance')){
-            var mapwidget = this._mapping.app_timemap('getMapping');
+        if(this._mapping){
+            //stop animation        
+            if(this._animationResolve!=null){ //animation active
+                this._terminateAnimation = this._currentElementID>0?this._currentElementID:true;
+            }
             
-            mapwidget.removeLayer( this._nativelayer_id );
-            this._nativelayer_id = -1;
+    //console.log('REMOVE '+this._nativelayer_id);
+            //clear map
+            if(this._nativelayer_id>0 && this._mapping.app_timemap('instance')){
+                var mapwidget = this._mapping.app_timemap('getMapping');
+                
+                mapwidget.removeLayer( this._nativelayer_id );
+                this._nativelayer_id = -1;
+            }
         }
         
         this._currentElementID = 0;
@@ -539,14 +541,16 @@ $.widget( "heurist.app_storymap", {
             
 
         //remove previous story layer
-        var mapwidget = this._mapping.app_timemap('getMapping');
-        if(this._all_stories_id>0){
-            mapwidget.removeLayer( this._all_stories_id );
-            this._all_stories_id = 0;
-        }
-        if(this._storylayer_id>0){
-            mapwidget.removeLayer( this._storylayer_id );
-            this._storylayer_id = 0;
+        if(this._mapping){
+            var mapwidget = this._mapping.app_timemap('getMapping');
+            if(this._all_stories_id>0){
+                mapwidget.removeLayer( this._all_stories_id );
+                this._all_stories_id = 0;
+            }
+            if(this._storylayer_id>0){
+                mapwidget.removeLayer( this._storylayer_id );
+                this._storylayer_id = 0;
+            }
         }
         this._stopAnimeAndClearMap();
 
@@ -583,7 +587,7 @@ $.widget( "heurist.app_storymap", {
             //1. Render overview panel
             this.updateOverviewPanel(recID);
             
-            //2. Loads time data all story elements - into special layer "Whole Store Timeline"
+            //2. Loads time data for all story elements - into special layer "Whole Store Timeline"
             this.updateTimeLine(recID);
             
         }else{
@@ -625,7 +629,7 @@ $.widget( "heurist.app_storymap", {
     },
 
     //
-    //
+    // Loads Overview info
     //
     updateOverviewPanel: function(recID){
 
@@ -718,6 +722,8 @@ console.log('>sctop '+ele.scrollTop());
             this._mapping = $('#'+this.options.map_widget_id);
         }
         
+        if(!this._mapping) return; //there is not associated map widget
+        
         if(!this._mapping.app_timemap('isMapInited')){
                 
             this._mapping.app_timemap('option','onMapInit', function(){
@@ -725,6 +731,8 @@ console.log('>sctop '+ele.scrollTop());
             });
             return;
         }
+
+        var mapwidget = this._mapping.app_timemap('getMapping');
         
         if(!this._mapping_onselect){ //assign event listener
             
@@ -746,13 +754,10 @@ console.log('>sctop '+ele.scrollTop());
                 }
                 
             }
-            
-            var mapwidget = this._mapping.app_timemap('getMapping');
             mapwidget.options.onselect = this._mapping_onselect;
         }
         
         //clear map
-        var mapwidget = this._mapping.app_timemap('getMapping');
         if(this._all_stories_id>0){
             mapwidget.removeLayer( this._all_stories_id );
             this._all_stories_id = 0;
@@ -919,6 +924,8 @@ console.log('>sctop '+ele.scrollTop());
         var that = this;
         
         if(this.options.storyRecordID != recID) return; //story already changed to different one
+        
+        if(!this._mapping) return; //there is not associated map widget
         
         if(that._cache_story_geo[that.options.storyRecordID]=='no data'){
             //no time data for this story

@@ -571,7 +571,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
              
         }
         
-        
+        opts.keep_top_config = true;
         var res = layoutMgr.layoutInit(_layout_content, _layout_container, opts);
         
         if(res===false){

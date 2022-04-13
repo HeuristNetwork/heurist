@@ -98,9 +98,16 @@ function hLayoutMgr(){
             layout = [layout];    
         }
 
-        if(isFirstLevel===true && _supp_options && _supp_options.page_name){
-            layout[0].name  = 'Page'; //_supp_options.page_name;
+        if(isFirstLevel===true && _supp_options){
+            
+            if(_supp_options.page_name){
+                layout[0].name  = 'Page'; //_supp_options.page_name;
+            }
+            if(_supp_options.keep_top_config && isEditMode){
+                _main_layout_cfg = layout;
+            }
         }
+        
         
         for(var i=0; i<layout.length; i++){
             
@@ -163,9 +170,13 @@ function hLayoutMgr(){
                     if(!layout.options.map_widget_id){
                         var ele = layoutMgr.layoutContentFindWidget(_main_layout_cfg, 'heurist_Map');
                         //if(ele) console.log(ele.options); //ele.options.widget_id ele.dom_id
-                        
-                        if(ele && ele.options.search_realm=='' && ele.dom_id){
-                            layout.options.map_widget_id = ele.dom_id;
+                        if(ele && ele.dom_id){                        
+                            window.hWin.HEURIST4.msg.showMsgDlg('For full fnctionality Story map has to be linked with Map/timeline element. '
+                            +' Connect it to map widget "'+ele.dom_id+'" ?', 
+                            function(){ 
+                                ele.options.search_realm = '';
+                                layout.options.map_widget_id = ele.dom_id;
+                            },null,{default_palette_class: 'ui-heurist-publish'});
                         }
                     }
                 }
@@ -173,10 +184,25 @@ function hLayoutMgr(){
                 //find and assign prevail search group (except heurist_Map if heurist_StoryMap exists)
                 if(!layout.options.search_realm){ //not defined yet
                 
-                    if(widget_name=='heurist_Map' && layoutMgr.layoutContentFindWidget(_main_layout_cfg, 'heurist_StoryMap')!=null)
+                    var need_assign = true;
+                    
+                    if(widget_name=='heurist_Map')
                     {
+                        var ele = layoutMgr.layoutContentFindWidget(_main_layout_cfg, 'heurist_StoryMap');
+                        if(ele && !ele.options.map_widget_id != layout.dom_id){
+
+                            need_assign = false;        
+                            window.hWin.HEURIST4.msg.showMsgDlg('For full fnctionality Story map has to be linked with Map/timeline element. '
+                                +' Link map widget to Story map "'+ele.dom_id+'" ?', 
+                                function(){ 
+                                    layout.options.search_realm = '';
+                                    ele.options.map_widget_id = layout.dom_id;
+                            },null,{default_palette_class: 'ui-heurist-publish'});
+                        }
                         
-                    }else{
+                    }
+                    //assign search realm
+                    if(need_assign){
                         var sg = layoutMgr.layoutContentFindMainRealm(_main_layout_cfg);    
                         if(sg=='') sg = 'search_group_1';
                         layout.options.search_realm = sg;
@@ -881,7 +907,6 @@ function hLayoutMgr(){
         //
         layoutInit: function(layout, container, supp_options){
             _supp_options = supp_options;
-            _main_layout_cfg = layout;
             return _layoutInit(layout, container, true);
         },
         
