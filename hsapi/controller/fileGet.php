@@ -49,8 +49,21 @@ $system = new System(); //without db connection and session - just paths
 $system->initPathConstants($db);
     
 if($filename){ //download from scratch (for csv import)
-         
-        $file_read = HEURIST_FILESTORE_DIR.'scratch/'.$filename;
+
+        //remove slashes - prevents Local file disclosure
+        $filename = fileNameSanitize($filename, false);
+
+        chdir(HEURIST_FILESTORE_DIR);  // relatively db root         
+        $file_read = realpath(HEURIST_FILESTORE_DIR.'scratch/'.$filename);
+        
+        //realpath gives real path on remote file server
+        if(!(strpos($file_read, '/srv/HEURIST_FILESTORE/')===0 || 
+           strpos($file_read, '/misc/heur-filestore/')===0 ||
+           strpos($file_read, HEURIST_FILESTORE_DIR)===0))
+        {
+            print 'Temporary file (uploaded csv data) '.$filename. ' not found';                
+            exit();
+        }
 
         $content_type = null;//'image/'.$file_ext;
         
@@ -104,9 +117,9 @@ if($filename){ //download from scratch (for csv import)
             }
             
         }
-        download_file($file_read, null);
+        _download_file($file_read, null);
         
-}else{
+}else{  //download entity images (icons, thumbs) for entity folder in HEURIST_FILESTORE_DIR
     
         
         $content_type = 'image/png';  
@@ -145,7 +158,6 @@ if($filename){ //download from scratch (for csv import)
             
             $path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';
         } 
-        
         
         if($viewmode!='full'){
             $path = $path.$viewmode.'/';
@@ -213,11 +225,11 @@ if($filename){ //download from scratch (for csv import)
                 if(@$_REQUEST['color'] && $ext!='svg'){
                     UtilsImage::changeImageColor($filename, null, @$_REQUEST['color'], @$_REQUEST['circle'], @$_REQUEST['bg']);    
                 }else{
-                    download_file($filename, $content_type);    
+                    _download_file($filename, $content_type);    
                 }
             }
 
-        }else if($default_mode==3){ //check
+        }else if($default_mode==3){ //check existance
             
                 $response = array('status'=>HEURIST_OK, 'data'=>'not found');
                 header('Content-type: application/json;charset=UTF-8');
@@ -233,19 +245,19 @@ if($filename){ //download from scratch (for csv import)
                 //$filename = dirname(__FILE__).'/../../hclient/assets/cross-red.png';
                                 
                 if(file_exists($filename) && !is_dir($filename)){
-                    download_file($filename, $content_type);
+                    _download_file($filename, $content_type);
                     exit();
                 }
             }
                     
             if ($default_mode=='edit' || $default_mode==1){ //show invitation to add image
-                download_file(dirname(__FILE__).'/../../hclient/assets/100x100click.png', $content_type);
+                _download_file(dirname(__FILE__).'/../../hclient/assets/100x100click.png', $content_type);
             }else {
                 $content_type = 'image/gif';
                 if($viewmode = 'icon'){
-                    download_file(dirname(__FILE__).'/../../hclient/assets/16x16.gif', $content_type);
+                    _download_file(dirname(__FILE__).'/../../hclient/assets/16x16.gif', $content_type);
                 }else{
-                    download_file(dirname(__FILE__).'/../../hclient/assets/100x100.gif', $content_type);
+                    _download_file(dirname(__FILE__).'/../../hclient/assets/100x100.gif', $content_type);
                 }
             }
         
@@ -261,7 +273,10 @@ if($error){
     }
 }
 
-function download_file($filename, $content_type){
+//
+//
+// 
+function _download_file($filename, $content_type){
     
         ob_start();    
         if($content_type) header('Content-type: '.$content_type);
