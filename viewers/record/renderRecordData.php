@@ -1290,7 +1290,11 @@ function print_public_details($bib) {
         print '<script>';
         foreach ($thumbs as $thumb) {
             if(strpos($thumb['orig_name'],'_iiif')===0){
-                print 'rec_Files_IIIF.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
+                print 'rec_Files_IIIF.push({rec_ID:'.$bib['rec_ID']
+                                            .', id:"'.$thumb['nonce']
+                                            .'",mimeType:"'.$thumb['mimeType']
+                                            .'",filename:"'.htmlspecialchars($thumb['orig_name'])
+                                            .'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
                 //if($is_map_popup) break;
             }else{
                 print 'rec_Files.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';

@@ -955,7 +955,9 @@ function smarty_function_wrap($params, &$smarty)
                 }
                 
                 if(@$params['fancybox']){
-                    $sres .= ('<script>rec_Files.push({id:"'.$file_nonce
+                    $sres .= ('<script>rec_Files.push({'
+                            .'rec_ID:'.$fileinfo['rec_ID']
+                            .',id:"'.$file_nonce
                             .'",mimeType:"'.$mimeType
                             .'",filename:"'.htmlspecialchars($originalFileName)
                             .'",external:"'.htmlspecialchars($external_url).'"});</script>');

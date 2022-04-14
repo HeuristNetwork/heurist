@@ -29,10 +29,12 @@
 
         $url = $url . '/' .  $_SERVER['REQUEST_URI'];  
         
-        if(@$_REQUEST['manifest']){
+        if(@$_REQUEST['manifest'] || @$_REQUEST['iiif']){
             //load manifest directly
             $url = str_replace('hclient/widgets/viewers/miradorViewer.php','', $url);
-            $url = str_replace($_SERVER['QUERY_STRING'],'db='.$_REQUEST['db'].'&file='.$_REQUEST['manifest'],$url);
+            $url = str_replace($_SERVER['QUERY_STRING'],
+                'db='.$_REQUEST['db']
+                    .'&file='.($_REQUEST['manifest']?@$_REQUEST['manifest']:@$_REQUEST['iiif']),$url);
         }else{
             //create manifest dynamically
             $url = str_replace('hclient/widgets/viewers/miradorViewer.php','hsapi/controller/record_output.php', $url);

@@ -330,12 +330,24 @@ $.widget( "heurist.mediaViewer", {
 
                             var param = 'manifest';
                             if(filename == '_iiif_image'){
-                                param = 'q'; //it adds format=iiif in miradorViewer.php
-                                obf_recID = 'ids:'+rec_ID;
-                                if(rec_ID>0) $alink.attr('data-id', obf_recID);
+                                
+                                if(rec_ID>0){
+                                    //param = 'q'; //it adds format=iiif in miradorViewer.php
+                                    //obf_recID = 'ids:'+rec_ID;
+                                    //$alink.attr('data-id', obf_recID);  
+                                    param = 'q=ids:'+rec_ID;
+                                }else{
+                                    param = 'iiif_image='+obf_recID;
+                                } 
+                            }else{
+                                //param = 'manifest='+obf_recID;    
+                                param = 'iiif='+obf_recID;    
                             }
+                            
+                            
                             $alink
-                                .css('cursor','pointer')                            
+                                .css('cursor','pointer')
+                                .attr('data-id', obf_recID)                            
                                 .attr('data-iiif', param);
                             
                         
@@ -343,21 +355,27 @@ $.widget( "heurist.mediaViewer", {
                             external_url =  that.options.baseURL 
                                      + "hclient/widgets/viewers/miradorViewer.php?db=" 
                                      +  that.options.database
-                                     + '&' + param + '='+obf_recID;
-    //console.log(external_url);                        
+                                     + '&' + param; // + '='+obf_recID;
+    console.log(external_url);                        
                             //on thumbnail click
                             that._on($alink, {click:function(e){
                                 
+                                  var param, obf_recID;
+                                
                                   var ele = $(e.target)
-                                  ele = ele.is('a')?ele:ele.parent();
-                                  
-                                  var param  = ele.attr('data-iiif');
-                                  var obf_recID = ele.attr('data-id');
+                                  if(ele.attr('data-iiif')){
+                                      param  = ele.attr('data-iiif');
+                                      obf_recID = ele.attr('data-id');
+                                  }else{
+                                      ele = ele.parents('[data-iiif]');
+                                      param  = ele.attr('data-iiif');
+                                      obf_recID = ele.attr('data-id');
+                                  }
                                   
                                   var url =  that.options.baseURL 
                                         + "hclient/widgets/viewers/miradorViewer.php?db=" 
                                         +  that.options.database
-                                        + '&' + param + '='+obf_recID;
+                                        + '&' + param;// + '='+obf_recID;
                                      
                                     
                                   if(window.hWin && window.hWin.HEURIST4){

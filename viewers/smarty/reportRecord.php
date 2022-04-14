@@ -468,6 +468,8 @@ class ReportRecord {
                                     array_push($res, HEURIST_BASE_URL."?db=".HEURIST_DBNAME
                                             ."&file=".$value['file']['ulf_ObfuscatedFileID']);
                                 }
+                                //keep reference to record id
+                                $value['file']['rec_ID'] = $recID;
                                 
                                 //original value keeps the whole 'file' array
                                 array_push($origvalues, $value['file']);
