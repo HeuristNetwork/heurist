@@ -1857,7 +1857,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
                     callback: popup_options.callback,
                     beforeClose: function(){
                         //access manageRecord within frame within this popup and call close prefs
-                        if($.isFunction($dosframe[0].contentWindow.onBeforeClose)){
+                        if($dosframe && $.isFunction($dosframe[0].contentWindow.onBeforeClose)){
                                 $dosframe[0].contentWindow.onBeforeClose();
                         }
                     }

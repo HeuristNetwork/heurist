@@ -480,6 +480,37 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 					$('#records').find('#'+ids).prop('checked', true).change();
 				}
 			}).style('cursor', 'pointer');
+        }else{
+
+            // Display record in popup on click of record title
+            var startX, startY;
+            overlay.selectAll('text.info-mode')
+                .on('mousedown', function(event){
+                    startX = event.x;
+                    startY = event.y;
+                })
+                .on('mouseup', function(event){
+                    var diffX = Math.abs(startX - event.x);
+                    var diffY = Math.abs(startY - event.y);
+
+                    if(diffX < 1 && diffY < 1){
+                        window.hWin.HEURIST4.ui.openRecordInPopup(rec_ID, null, false);
+                    }
+                });
+
+            overlay.selectAll('text.nodelabel')
+                .on('mousedown', function(event){
+                    startX = event.x;
+                    startY = event.y;
+                })
+                .on('mouseup', function(event){
+                    var diffX = Math.abs(startX - event.x);
+                    var diffY = Math.abs(startY - event.y);
+
+                    if(diffX < 2 && diffY < 2){
+                        window.hWin.HEURIST4.ui.openRecordInPopup(rec_ID, null, false);
+                    }
+                });
         }
     }else{ // link information, onhover
       
