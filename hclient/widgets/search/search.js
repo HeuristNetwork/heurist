@@ -220,12 +220,6 @@ $.widget( "heurist.search", {
             .css({position: 'absolute',top:'85px','font-size':'10px'})
             .appendTo(this.div_search_input);
 
-            var open_in_popup = $('<span title="Open search in popup, for more space">'
-                +'Open in popup <span class="ui-icon ui-icon-popup" style="font-size:0.8em" /></span>')
-            .addClass('graytext')
-            .css({'text-decoration':'none','outline':0, cursor:'pointer', 'display': 'inline-block', 'margin-right': '10px'})
-            .appendTo(div_search_help_links);
-
             var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
                 +'Simple filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')
             .attr('id', 'search_help_link')
@@ -239,10 +233,21 @@ $.widget( "heurist.search", {
 
             this._on( open_in_popup, {  click: function(){ // open search textarea in a popup, for more space, add more instructions and include filter help link
 
-                var $dlg;
-
-                var $help_link = this.div_search_input.find('#search_help_link').clone();
                 var org_val = this.input_search.val();
+                var newline_matches = org_val.match(/\r|\n/); // check for newline characters
+
+                // Check for horizontal scrolling
+                this.input_search.css('white-space', 'nowrap');
+                var nw_scrollWidth = this.input_search[0].scrollWidth;
+                var nw_width = this.input_search.width();
+                this.input_search.css('white-space', '');
+
+                if(window.hWin.HEURIST4.util.isempty(org_val) || window.hWin.HEURIST4.util.isempty(newline_matches) || (nw_scrollWidth <= nw_width)){
+                    return;
+                }
+
+                var $dlg;
+                var $help_link = this.div_search_input.find('#search_help_link').clone();
 
                 var msg = '<div class="heurist-helper1" style="font-size: 1em;">'
                 + 'The filter function accepts two types of filter string - a simple search format (see filter help)'
@@ -253,7 +258,6 @@ $.widget( "heurist.search", {
                         + '<textarea style="padding: 5px; margin: 5px 0px; height: 150px; width: 500px;" class="text ui-widget-content ui-corner-all">' 
                             + org_val 
                         + '</textarea><br><div id="search_help_container"></div>';
-                        //+ '<br><div class="heurist-helper1">Please ensure that you\'ve closed all brackets ( [ and { ) and quotes ( " )</div>';
 
                 $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, 
                     function(){
