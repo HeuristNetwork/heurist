@@ -3552,9 +3552,33 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
     //
     //
     //
-    setOrderAndSaveAsFilter: function(){
-        
+    setOrderAndSaveAsFilter: function(bypass=false){
+
         var that = this;
+
+        if(this._query_request.q.indexOf('sortby:set') < 0 && bypass === false){
+            var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                'Do you want to use the current selection as the ordered list (which will be saved as a new filter),<br>'
+                + 'or create a new blank list?<br><br>'
+                + 'Records can be added to the list by doing further filters and dragging additional records into the list.',
+                {
+                    'Current records': function(){
+                        that._sortResultList_need_fill = true;
+                        that.setOrderAndSaveAsFilter(true);
+                        $dlg.dialog('close');
+                    },
+                    'Blank list': function(){
+                        that._sortResultList_need_fill = false;
+                        that.setOrderAndSaveAsFilter(true);
+                        $dlg.dialog('close');
+                    },
+                    'Cancel': function(){
+                        $dlg.dialog('close');
+                    }
+                }, {title: window.hWin.HR('New ordered list')}
+            );
+            return;
+        }
             
         this.setOrderManually(
             function(recordset, record){ 
@@ -3603,7 +3627,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 }
             }                   
         );
-    },    
+    },
     
     //
     //
@@ -3641,8 +3665,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                         +'<button id="btn-save-order" style="float:right">'+window.hWin.HR('Save')+'</button>'
                         +'</div>').appendTo(this.sortResultListDlg);
 
-                    this.sortResultListDlg.css('top',ele.find('ul').height()+4);                        
-                        
+                    this.sortResultListDlg.css('top',ele.find('ul').height()+4);
                     
                     function __closeReorderTab(){
                         var tabs = $(that.sortResultListDlg.parent());
@@ -3697,9 +3720,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             }else{
                 this.sortResultListDlg = $('<div>').appendTo(this.element);
             }
-            
-            
-            
+
             //init result list
             this.sortResultList = $('<div>').appendTo(this.sortResultListDlg)
                 .resultList({
@@ -3716,7 +3737,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                    entityName: this._entityName,
                    pagesize: 9999999999999,
                    renderer: renderer
-                   });     
+                });
         }
         
         if(this._sortResultList_need_fill){
@@ -3733,10 +3754,13 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             this.sortResultList.resultList('updateResultSet', page_recordset);
             this._sortResult_was_changed = false;
         }
-        
-        
+
+        if(this.sortResultList.resultList('getRecordSet') == null){
+            this.sortResultList.resultList('updateResultSet', new hRecordSet());
+        }
+
         if(this._is_sortResultList_tab_based){
-            
+
             this._sortResultList_need_fill = false;
             
             var tabs = $(this.sortResultListDlg.parent());
@@ -3753,105 +3777,141 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             
             //init drag and drop
             if(!this.options.draggable){
-                
-//console.log('INIT DND');                                        
-                
-            this.options.draggable = 
-                    function(){
+
+                this.options.draggable = 
+                        function(){
+
+                            that.element.find('.recordDiv').draggable({ // 
+                                        revert: 'invalid',
+                                        helper: function(){ 
+                                            
+                                            //get selection
+                                            var rec_ids = that.getSelected(true);
+                                            if (window.hWin.HEURIST4.util.isempty(rec_ids)){
+                                                rec_ids = [];
+                                            }
+                                            var r_id = ($(this).hasClass('recordDiv')
+                                                            ?$(this)
+                                                            :$(this).parent('.recordDiv')).attr('recid');
+                                            
+                                            if(r_id>0 && rec_ids.indexOf(r_id)<0){
+                                                rec_ids.push(r_id);
+                                            }
+                                            
+                                            if(rec_ids.length>0){
+                                                return $('<div class="rt_draggable ui-drag-drop" recid="'+
+                                                    rec_ids.join(',')
+                                                +'" style="width:300;padding:4px;text-align:center;font-size:0.8em;background:#EDF5FF"'
+                                                +'>'
+                                                +'Drop '+(rec_ids.length>1?(rec_ids.length+' selected records'):'record')
+                                                +' at desired position in list</div>'); 
+                                            }else{
+                                                return null;
+                                            }
+                                        },
+                                        stop: function(event, ui){
+
+                                            // Check that drop happened over list area
+                                            var ele = document.elementFromPoint(ui.position.left, ui.position.top);
+                                            if(ele == null || !$(ele).is('div.div-result-list-content.list')){
+                                                return;
+                                            }
+
+                                            var rec_IDs = $(ui.helper).attr('recid').split(',');
+                                            if(!window.hWin.HEURIST4.util.isempty(rec_IDs)){
+
+                                                var to_be_added = that._currentRecordset.getSubSetByIds(rec_IDs); // records to be added
+
+                                                var cur_recset = that.sortResultList.resultList('getRecordSet'); // existing records
+                                                var cur_cnt = cur_recset.length();
+                                                var add_cnt = 0;
+
+                                                if(cur_cnt > 0){
+                                                    cur_recset = cur_recset.doUnite(to_be_added, -1); // add to end
+                                                    add_cnt = cur_recset.length() - cur_cnt; // new count
+                                                }else{
+                                                    cur_recset = to_be_added; // replace empty recordset
+                                                    add_cnt = cur_recset.length(); // new count
+                                                }
+
+                                                if(add_cnt > 0){
+
+                                                    var msg = add_cnt + (rec_IDs.length > 0 ? ' of ' + rec_IDs.length : '')
+                                                        + ' record' + (add_cnt > 1 ? 's' : '') + ' added';
+
+                                                    window.hWin.HEURIST4.msg.showMsgFlash(msg, 2000);
+
+                                                    that.sortResultList.resultList('updateResultSet', cur_recset);
+                                                    that._sortResult_was_changed = true;
+                                                }else{
+                                                    window.hWin.HEURIST4.msg.showMsgFlash('Record'+(rec_IDs.length > 1 ? 's' : '') + ' already in list', 2000);
+                                                }
+                                            }
+                                        },
+                                        cursorAt:{top: 0, left: 5},                                    
+                                        zIndex:100,
+                                        appendTo:'body',
+                                        containment: 'window',
+                                        scope: 'sort_order_change'
+                                        //delay: 200
+                                    })
+                        };
+
+                this.options.draggable.call();
+
+                this.sortResultList.resultList('option','droppable',
+                function(){
+
+                        that.sortResultList.find('.recordDiv')
+                            .droppable({
+                                //accept: '.rt_draggable',
+                                scope: 'sort_order_change',
+                                hoverClass: 'ui-drag-drop',
+                                drop: function( event, ui ){
+
+                                    var trg = $(event.target).hasClass('recordDiv')
+                                                ?$(event.target)
+                                                :$(event.target).parents('.recordDiv');
+                                                
+                                    //var rec_IDs = $(ui.draggable).attr('recid').split(',');
+                                    var rec_IDs = $(ui.helper).attr('recid').split(',');
+                                    var before_rec_ID = trg.attr('recid');
                         
-                        that.element.find('.recordDiv').draggable({ // 
-                                    revert: 'invalid',
-                                    helper: function(){ 
-                                        
-                                        //get selection
-                                        var rec_ids = that.getSelected(true);
-                                        if (window.hWin.HEURIST4.util.isempty(rec_ids)){
-                                            rec_ids = [];
-                                        }
-                                        var r_id = ($(this).hasClass('recordDiv')
-                                                        ?$(this)
-                                                        :$(this).parent('.recordDiv')).attr('recid');
-                                        
-                                        if(r_id>0 && rec_ids.indexOf(r_id)<0){
-                                            rec_ids.push(r_id);
-                                        }
-                                        
-                                        if(rec_ids.length>0){
-                                            return $('<div class="rt_draggable ui-drag-drop" recid="'+
-                                                rec_ids.join(',')
-                                            +'" style="width:300;padding:4px;text-align:center;font-size:0.8em;background:#EDF5FF"'
-                                            +'>'
-                                            +'Drop '+(rec_ids.length>1?(rec_ids.length+' selected records'):'record')
-                                            +' at desired position in list</div>'); 
-                                        }else{
-                                            return null;
-                                        }
-                                    },
-                                    cursorAt:{top: 0, left: 5},                                    
-                                    zIndex:100,
-                                    appendTo:'body',
-                                    containment: 'window',
-                                    scope: 'sort_order_change'
-                                    //delay: 200
-                                })
-                    };
-                    
-            this.options.draggable.call();
-            
-            this.sortResultList.resultList('option','droppable',
-            function(){
-                    
-                    that.sortResultList.find('.recordDiv')  //.recordDiv, ,.recordDiv>.item
-                        .droppable({
-                            //accept: '.rt_draggable',
-                            scope: 'sort_order_change',
-                            hoverClass: 'ui-drag-drop',
-                            drop: function( event, ui ){
+                                    if(!window.hWin.HEURIST4.util.isempty(rec_IDs) && before_rec_ID>0){
 
-                                var trg = $(event.target).hasClass('recordDiv')
-                                            ?$(event.target)
-                                            :$(event.target).parents('.recordDiv');
+                                            //get subset
+                                            var to_be_added = that._currentRecordset.getSubSetByIds(rec_IDs);
                                             
-                                //var rec_IDs = $(ui.draggable).attr('recid').split(',');
-                                var rec_IDs = $(ui.helper).attr('recid').split(',');
-                                var before_rec_ID = trg.attr('recid');
-                    
-                                if(!window.hWin.HEURIST4.util.isempty(rec_IDs) && before_rec_ID>0){
-
-                                        //get subset
-                                        var to_be_added = that._currentRecordset.getSubSetByIds(rec_IDs);
-                                        
-                                        //merge
-                                        var curr_recset = that.sortResultList.resultList('getRecordSet');
-                                        
-                                        var cnt_0 = curr_recset.length();
-                                        
-                                        curr_recset = curr_recset.doUnite(to_be_added, before_rec_ID);
-                                        
-                                        var cnt_added = (curr_recset.length()-cnt_0);
-                                        
-                                        if(cnt_added>0){
-                                            var msg = cnt_added+(rec_IDs.length>0?' of '+rec_IDs.length:'')
-                                            +' record'+(cnt_added>1?'s':'')+' added';
+                                            //merge
+                                            var curr_recset = that.sortResultList.resultList('getRecordSet');
                                             
-                                            window.hWin.HEURIST4.msg.showMsgFlash(msg, 2000, null, trg);  
+                                            var cnt_0 = curr_recset.length();
                                             
-                                            //refresh
-                                            that.sortResultList.resultList('updateResultSet', curr_recset);           
-                                            that._sortResult_was_changed = true;
-                                        }else{
-                                            window.hWin.HEURIST4.msg.showMsgFlash('Record'
-                                                +(rec_IDs.length>1?'s':'')+' already in list'
-                                                , 2000, null, trg);  
-                                        }
+                                            curr_recset = curr_recset.doUnite(to_be_added, before_rec_ID);
                                             
-                                }
-                        }});
-            });
-            
-            var foo = this.sortResultList.resultList('option','droppable')
-            foo.call() 
-            
+                                            var cnt_added = (curr_recset.length()-cnt_0);
+                                            
+                                            if(cnt_added>0){
+                                                var msg = cnt_added+(rec_IDs.length>0?' of '+rec_IDs.length:'')
+                                                +' record'+(cnt_added>1?'s':'')+' added';
+                                                
+                                                window.hWin.HEURIST4.msg.showMsgFlash(msg, 2000, null, trg);  
+                                                
+                                                //refresh
+                                                that.sortResultList.resultList('updateResultSet', curr_recset);           
+                                                that._sortResult_was_changed = true;
+                                            }else{
+                                                window.hWin.HEURIST4.msg.showMsgFlash('Record'
+                                                    +(rec_IDs.length>1?'s':'')+' already in list'
+                                                    , 2000, null, trg);  
+                                            }
+                                                
+                                    }
+                            }});
+                });
+                
+                var foo = this.sortResultList.resultList('option','droppable')
+                foo.call();
             }
 
         } else {
@@ -3877,7 +3937,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 ]
                 });
         }        
-    },    
+    },
     
     //
     //

@@ -124,7 +124,9 @@ Heurist is research-led and responds rapidly to evolving user needs - we often t
 For more information email us at support@HeuristNetwork.org and visit our website at HeuristNetwork.org. We normally respond within hours, depending on time zones. We are actively developing new documentation and training resources for version 6 and can make advance copies available on request.                    
 EOD;
                             //sendEmail($usr_owner['ugr_eMail'], $email_title, $email_text, null);
-                            
+
+                            $usr_owner['ugr_eMail'] = filter_var($usr_owner['ugr_eMail'], FILTER_SANITIZE_EMAIL);
+
                             $email = new PHPMailer();
                             //$email->isHTML(true); 
                             $email->SetFrom('info@HeuristNetwork.org', 'Heurist');

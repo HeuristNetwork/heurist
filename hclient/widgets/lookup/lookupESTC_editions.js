@@ -113,6 +113,18 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
             'keypress': this.startSearchOnEnterPress
         });
 
+        // Set search button status based on the existence of input
+        this._on(this.element.find('input'), {
+            'keyup': function(event){
+                if($(event.target).val() != ''){
+                    window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), false);
+                }else{
+                    window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), true);
+                }
+            }
+        });
+        window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), true);
+
         //Populate Bookformat dropdown on lookup page
         var request = {
             serviceType: 'ESTC',

@@ -20,6 +20,8 @@
 
 $.widget( "heurist.lookupConfig", {
 
+    ESTC_allowed_dbs: ['Libraries_Readers_Culture_18C_Atlantic', 'MPCE_Mapping_Print_Charting_Enlightenment', 'ESTC_Helsinki_Bibliographic_Metadata'],
+
     // default options
     options: {
     
@@ -288,6 +290,20 @@ $.widget( "heurist.lookupConfig", {
         this._on(this.selectServiceType[0], {
             change: function(event, ui){
                 var service = that.selectServiceType.val(); // selected service
+
+                if((service == 'ESTC_editions' || service == 'ESTC_works' || service == 'ESTC') && this.ESTC_allowed_dbs.indexOf(window.hWin.HAPI4.database) < 0){ // check if current DB has access
+                    
+                    window.hWin.HEURIST4.msg.showMsgErr('For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this look up.');
+
+                    // Set back to default
+                    that.selectServiceType.val('');
+                    if(that.selectServiceType.hSelect('instance') != undefined){
+                        that.selectServiceType.hSelect('refresh');
+                    }
+
+                    return;
+                }
+
                 that._changeService( service ); // setup
             }
         });

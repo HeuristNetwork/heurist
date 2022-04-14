@@ -35,6 +35,10 @@ use PHPMailer\PHPMailer\Exception;
             $email_text =  json_encode($email_text);    
         }
        
+        // strip all whitespaces
+        $email_to = filter_var($email_to, FILTER_SANITIZE_EMAIL);
+        $email_from = filter_var($email_from, FILTER_SANITIZE_EMAIL);
+
         //send an email with attachment
         $email = new PHPMailer();
                 $email->CharSet = 'UTF-8';

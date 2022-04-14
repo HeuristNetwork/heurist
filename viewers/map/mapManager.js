@@ -131,6 +131,8 @@ function hMapManager( _options )
         
     mapDocuments = null, //hMapDocument for db map docs,  Note: mapdocument with index=0 is search results
     mapdoc_treeview = null,
+    mapdoc_select = null,
+    mapdoc_visible = {},
     btn_expand = null,
     btn_collapse = null,
     
@@ -432,6 +434,8 @@ function hMapManager( _options )
         
             }
             
+            that.populateMapDocuments(mapdoc_select); // update mapdoc dropdown
+
             //mapdoc_treeview.find('.ui-fancytree').show();
             mapdoc_treeview.find('.empty_msg').remove();
             var tree = mapdoc_treeview.fancytree("getTree");
@@ -552,8 +556,13 @@ function hMapManager( _options )
                                                 } 
                                             } 
                                         }
-                                        
-                                        
+
+                                        if(node.isSelected()){
+                                            mapdoc_visible[mapdoc_id] = node.title; // add to list
+                                        }else{
+                                            delete mapdoc_visible[mapdoc_id]; // remove from list
+                                        }
+
                                         /* Get a list of all selected nodes, and convert to a key array:
                                         var selKeys = $.map(data.tree.getSelectedNodes(), function(node){
                                         return node.key;
@@ -853,9 +862,7 @@ function hMapManager( _options )
                                 item.selected = false;
                                 parent_span.removeClass('fancytree-selected fancytree-partsel');
                                 
-                                that.openMapDocument(mapdoc_id);
-                                
-                                
+                                that.toggleMapDocument(mapdoc_id, true);
                         }else if(ele.hasClass('ui-icon-trash')){
                             
                             //mapdocument - remove from map and unload from memory
@@ -1056,10 +1063,105 @@ function hMapManager( _options )
         },
         
         //
+        //
+        //
+        populateMapDocuments: function($select){
+
+            if($select.hSelect('instance') != undefined){
+                $select.hSelect('destroy');
+            }
+            $select.empty();
+
+            mapdoc_select = $select;
+
+            mapDocuments.loadMapDocuments(function(resdata){
+                
+                window.hWin.HEURIST4.ui.addoption(mapdoc_select[0], '', 'None');
+
+                resdata.each2(function(id, record){
+                    window.hWin.HEURIST4.ui.addoption(mapdoc_select[0], record['rec_ID'], record['rec_Title']);
+                });
+
+                mapdoc_select.hSelect({
+                    'open': function(event, ui){ // get active mapdoc(s), highlight visible map doc(s)
+
+                        var selected_opts = Object.values(mapdoc_visible);
+                        var $menu_items = mapdoc_select.hSelect('menuWidget').find('li');
+                        for(var i = 0; i < $menu_items.length; i++){
+
+                            var title = $($menu_items[i]).find('div').text();
+
+                            if(selected_opts.indexOf(title) > -1){
+                                $($menu_items[i]).addClass('activated-mapdoc');
+                            }else{
+                                $($menu_items[i]).removeClass('activated-mapdoc');
+                            }
+                        }
+
+                        if(selected_opts.length < 2){
+                            mapdoc_select.removeClass('multi-select');
+                        }else{
+                            mapdoc_select.addClass('multi-select');
+                        }
+
+                        mapdoc_select.hSelect('menuWidget').css('width', '250px');
+                        mapdoc_select.hSelect('menuWidget').find('div.ui-menu-item-wrapper').addClass('truncate');
+                    },
+                    /*'change': function(event, ui){
+
+                    },*/
+                    'close': function(event, ui){ // check if we need to keep it open, only if multi-select
+
+                        var $selected_opt = $(event.currentTarget).is('li') ? $(event.currentTarget) : $(event.currentTarget).parent();
+
+                        if(mapdoc_select.hasClass('multi-select') && $selected_opt.hasClass('ui-menu-item')){
+                            mapdoc_select.hSelect('open');
+                        }
+                    },
+                    'select': function(event, ui){
+
+                        var $selected_opt = $(event.currentTarget).is('li') ? $(event.currentTarget) : $(event.currentTarget).parent();
+
+                        if(ui.item.value == ''){
+
+                            mapdoc_select.hSelect('menuWidget').find('.activated-mapdoc').removeClass('activated-mapdoc');
+
+                            that.toggleMapDocument(Object.keys(mapdoc_visible).join(','), false);
+                            mapdoc_visible = {};
+
+                            mapdoc_select.removeClass('multi-select');
+                        }else if($selected_opt.hasClass('activated-mapdoc')){ // disable selected option
+
+                            $selected_opt.removeClass('activated-mapdoc');
+                            that.toggleMapDocument(mapdoc_select.val(), false);
+                        }else{
+
+                            if(mapdoc_select.hasClass('multi-select')){ // enable selected option
+                                $selected_opt.addClass('activated-mapdoc');
+                                that.toggleMapDocument(mapdoc_select.val(), true);
+                            }else{ // disable previous selection, enabled current selection
+
+                                mapdoc_select.hSelect('menuWidget').find('.activated-mapdoc').removeClass('activated-mapdoc');
+
+                                that.toggleMapDocument(Object.keys(mapdoc_visible).join(','), false);
+                                mapdoc_visible = {};
+
+                                $selected_opt.addClass('activated-mapdoc');
+                                that.toggleMapDocument(mapdoc_select.val(), true);
+                            }
+                        }
+                    }
+                });
+
+                mapdoc_select.hSelect('widget').find('span.ui-selectmenu-text').text('Current result set');
+            });
+        },
+
+        //
         // select map document in treeview - it makes it visible or triggers loading of content
         //
-        openMapDocument: function(mapdoc_id){
-            
+        toggleMapDocument: function(mapdoc_id, show_doc=true){
+
             mapdoc_id = mapdoc_id.split(',');
             
             if($.isFunction($('body').fancytree)){
@@ -1069,13 +1171,12 @@ function hMapManager( _options )
 
                 tree.visit(function(node){
                     if( window.hWin.HEURIST4.util.findArrayIndex(node.key, mapdoc_id)>=0){
-                        node.setSelected( true );
+                        node.setSelected( show_doc );
                         selected++;
                         if(selected==mapdoc_id.length) return false;
                     }
                 });
             }
-            
         },
         
         //
