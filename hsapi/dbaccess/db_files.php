@@ -21,7 +21,7 @@
 * 
 * @todo move to utils_file.php
 * resolveFilePath  
-* downloadViaProxy
+* downloadViaProxy - Blocked because of possible Remote file disclosure
 * downloadFile
 * 
 * 
@@ -502,8 +502,17 @@ function resolveFilePath($path){
         return $path;
 }
 
-/**  @VERIFY 
-* download remote url as file - this is our proxy for download annotations and adelaide web site
+/**
+* @todo - to be removed 
+* Blocked because of possible Remote file disclosure
+* 
+* Download remote url as file - heurist acts as proxy to download remote resource 
+* 
+* Usage: 
+* 1. proxy http (unsecure) resources (registered in database)
+* 2. proxy for http tiled map image server
+* 3. adelaide web site styles (not used anymore)
+* 4. annotated template (not used anymore)
 * 
 * @param mixed $filename
 * @param mixed $mimeType
@@ -511,34 +520,19 @@ function resolveFilePath($path){
 * @param mixed $bypassProxy
 */
 function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true, $originalFileName=null){
-
-    //if(!file_exists($filename)){ // || filemtime($filename)<time()-(86400*30))
-
-    $rawdata = loadRemoteURLContent($url, $bypassProxy);
+/*
+    $rawdata = loadRemoteURLContent($url, $bypassProxy); //blocked
     
     if($rawdata!==false){
 
         fileSave($rawdata, $filename);
-            /*
-            if ($raw) {
-
-            if(file_exists($filename)){
-            unlink($filename);
-            }
-            $fp = fopen($filename, "w");
-            //$fp = fopen($filename, "x");
-            fwrite($fp, $raw);
-            //fflush($fp);    // need to insert this line for proper output when tile is first requestet
-            fclose($fp);
-            }
-            */
-        //}
 
         if(file_exists($filename)){
             downloadFile($mimeType, $filename, $originalFileName);
         }
     
     }
+*/    
 }
 
 /** @VERIFY
@@ -844,7 +838,7 @@ function getPlayerURL($mimeType, $url, $params=null){
         
     }else if( $mimeType == 'video/vimeo' || strpos($url, 'viemo.com')>0){
         
-        $hash = json_decode(loadRemoteURLContent("https://vimeo.com/api/oembed.json?url=".$url, false), true);
+        $hash = json_decode(loadRemoteURLContent("https://vimeo.com/api/oembed.json?url=".rawurlencode($url), false), true); //get vimeo video id
         $video_id = @$hash['video_id'];
         if($video_id>0){
            $url =  'https://player.vimeo.com/video/'.$video_id;
@@ -1067,8 +1061,8 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             }else if($file['fxm_MimeType'] == 'video/vimeo'){
 
                 $url = $file['ulf_ExternalFileReference'];
-
-                $hash = json_decode(loadRemoteURLContent("http://vimeo.com/api/oembed.json?url=".rawurlencode($url), false), true);
+                
+                $hash = json_decode(loadRemoteURLContent("https://vimeo.com/api/oembed.json?url=".rawurlencode($url), false), true); //get vimeo thumbnail
                 $thumb_url = @$hash['thumbnail_url'];
                 if($thumb_url){
                     $img = UtilsImage::getRemoteImage($thumb_url);    
@@ -1087,7 +1081,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
 
                 $url = $file['ulf_ExternalFileReference'];
 
-                $hash = json_decode(loadRemoteURLContent('https://soundcloud.com/oembed?format=json&url='
+                $hash = json_decode(loadRemoteURLContent('https://soundcloud.com/oembed?format=json&url='   //get soundcloud thumbnail
                                 .rawurlencode($url), false), true);
                 $thumb_url = @$hash['thumbnail_url'];
                 if($thumb_url){

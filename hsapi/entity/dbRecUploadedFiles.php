@@ -397,7 +397,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         
                         
                         //verify that url points to iiif manifest
-                        $iiif_manifest = loadRemoteURLContent($record['ulf_ExternalFileReference']);
+                        $iiif_manifest = loadRemoteURLContent($record['ulf_ExternalFileReference']); //check that json is iiif manifest
                         $iiif_manifest = json_decode($iiif_manifest, true);
                         if($iiif_manifest!==false && is_array($iiif_manifest))
                         {

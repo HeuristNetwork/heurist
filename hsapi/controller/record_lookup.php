@@ -103,7 +103,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
         $url = $params['service'];
     }
 
-    $remote_data = loadRemoteURLContent($url, true);    
+    $remote_data = loadRemoteURLContent($url, true); //perform request to external data service (record lookup)   
     if($remote_data===false){
         $system->error_exit_api('Cannot connect/load data from the service: '.$url, HEURIST_ERROR);    
     }

@@ -35,7 +35,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     .'admin/setup/dbproperties/getDatabaseURL.php?db='.HEURIST_INDEX_DATABASE
     .'&remote=1&id='.$database_id;
 
-    $data = loadRemoteURLContentSpecial($reg_url);
+    $data = loadRemoteURLContentSpecial($reg_url); //get registered database URL
 
     if (!$data) {
         $error_msg = "Unable to connect Heurist Master Index, possibly due to timeout or proxy setting<br /><br />".

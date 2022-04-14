@@ -152,7 +152,7 @@ detectLargeInputs('COOKIE record_search', $_COOKIE);
                     $reg_url = $reg_url.'&detail='
                         .(is_array($_REQUEST['detail'])?json_encode($_REQUEST['detail']):$_REQUEST['detail']);
                 }
-                $data = loadRemoteURLContent($reg_url);            
+                $data = loadRemoteURLContent($reg_url);  //search master index database for all regitered databases          
                 if($data==false){
                     $msg = 'Cannot access Master Index database on '.HEURIST_INDEX_BASE_URL;
                     if(@$glb_curl_error){

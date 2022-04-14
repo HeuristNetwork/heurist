@@ -182,6 +182,9 @@ if($response!=null){
     
     }else{
         
+        //sanitize $entity_name
+        $entity_name = fileNameSanitize($entity_name, false);
+        
         $entityDir = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
         
         $version = @$_REQUEST['version']!='icon'?'thumbnail':'icon';

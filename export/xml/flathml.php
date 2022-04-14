@@ -1396,7 +1396,7 @@ function makeFileContentNode($file) {
             }
             $xml = $xml->asXML();
         } else {
-            $xml = loadRemoteURLContent($file['URL']);
+            $xml = loadRemoteURLContent($file['URL']); //include remote xml into hml output
             if (!$xml) {
                 makeTag('error', null, ' Error while attemping to read '.$file['URL']);
                 return;

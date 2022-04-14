@@ -26,6 +26,7 @@ It is not used anywhere. This code either should be removed or re-implemented wi
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+exit(); //DISABLED
 
 // User must be system administrator or admin of the owners group for this database
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
@@ -39,6 +40,6 @@ if(@$_REQUEST['url']){
 
     $url = $_REQUEST['url'];
     $filename = HEURIST_UPLOAD_DIR."proxyremote_".str_replace("/","_",$url);
-    downloadViaProxy($filename, "text/html", $url, false);
+    downloadViaProxy($filename, "text/html", $url, false); //download annotated template - not used 
 }
 ?>

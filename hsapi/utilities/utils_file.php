@@ -729,8 +729,9 @@
         }
     }
     
-    //
-    //
+    // 
+    // 1) save version in System.php
+    // 2) save remote content
     //
     function fileSave($rawdata, $filename)
     {
@@ -770,23 +771,6 @@
         }
     }
 
-    /**
-    * save remote url as file and returns the size of saved file
-    *
-    * @param mixed $url
-    * @param mixed $filename
-    */
-    function saveURLasFile($url, $filename)
-    { //Download file from remote server
-        $rawdata = loadRemoteURLContent($url, false); //use proxy 
-        if($rawdata!==false){
-            return fileSave($rawdata, $filename); //returns file size
-        }else{
-            return 0;
-        }
-    }
-    
- 
     /**
      * Returns the target path as relative reference from the base path.
      *
@@ -1101,9 +1085,31 @@ function unzipArchiveFlat($zipfile, $destination){
     }
 }
         
-//-----------------------  LOAD REMOTE CONTENT (CURL)
+//-----------------------  LOAD REMOTE CONTENT (CURL) --------------------------
+
+
+/** @VERIFY
+* save remote url as file and returns the size of saved file
+*
+* @param mixed $url
+* @param mixed $filename
+*/
+function saveURLasFile($url, $filename)
+{ //Download file from remote server
+    $rawdata = loadRemoteURLContent($url, false); //use proxy 
+    if($rawdata!==false){
+        return fileSave($rawdata, $filename); //returns file size
+    }else{
+        return 0;
+    }
+}
+
 //
-// if the same server - try to include script instead of full request
+// if the same server - try to include script instead of CURL request
+//
+// 1. get registered database URL
+// 2. database registration
+// 3. get current db version
 //
 function loadRemoteURLContentSpecial($url){
 
@@ -1138,7 +1144,7 @@ function loadRemoteURLContent($url, $bypassProxy = true) {
     return loadRemoteURLContentWithRange($url, null, $bypassProxy);
 }
 
-//
+// @VERIFY
 //
 //
 function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout=30) {
@@ -1389,7 +1395,7 @@ function getScriptOutput($path, $print = FALSE)
 //----------------------------------------------- PARSING 
 
 //
-// try to read file and detect sepeartors
+// try to read file and detect separtors
 // return an aray with suggestions array('csv_delimiter'=>, 'csv_delimiter'=> , 'csv_enclosure'=>)
 //
 // Important: it works only in case file is UTF8

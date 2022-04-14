@@ -63,7 +63,7 @@
                     if (@$_REQUEST['detailtypes']) $remoteURL = $remoteURL.'&detailtypes='.$_REQUEST['detailtypes'];
                     if (@$_REQUEST['mode']) $remoteURL = $remoteURL.'&mode='.$_REQUEST['mode'];
 
-                    $data = loadRemoteURLContent($remoteURL);            
+                    $data = loadRemoteURLContent($remoteURL); //load defitions from remote database
                 
                     if($data==false){
                         

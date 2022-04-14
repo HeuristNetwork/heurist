@@ -979,7 +979,7 @@ $mysqli->commit();
                 $remoteURL = $remoteURL.'&rectypes=all&detailtypes=all';
            }
 
-           $defs = loadRemoteURLContent($remoteURL);            
+           $defs = loadRemoteURLContent($remoteURL); //load db definitions from remote database           
            $defs = json_decode(gzdecode($defs), true);
            if (!$defs || @$defs['status']!=HEURIST_OK) {
                 $this->system->addError(HEURIST_ERROR, $message);

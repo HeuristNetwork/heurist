@@ -913,6 +913,9 @@ XML;
     
 }
 
+//
+// read file by 10MB chunks
+//
 private static function readfile($file_path) {
     $file_size = self::get_file_size($file_path);
     $chunk_size = 10 * 1024 * 1024; // 10 MiB
@@ -1752,7 +1755,7 @@ private static function _getIiifCanvas($record){
         //get iiif image parameters
         if($fileinfo['ulf_OrigFileName']=='_iiif_image'){
             
-                $iiif_manifest = loadRemoteURLContent($fileinfo['ulf_ExternalFileReference']);
+                $iiif_manifest = loadRemoteURLContent($fileinfo['ulf_ExternalFileReference']); //retrieve iiif image.info to be included into manifest
                 $iiif_manifest = json_decode($iiif_manifest, true);
                 if($iiif_manifest!==false && is_array($iiif_manifest)){
                     

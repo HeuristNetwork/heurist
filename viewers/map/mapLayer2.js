@@ -176,7 +176,7 @@ function hMapLayer2( _options ) {
                     layer_url = layer_url + '/{z}/{x}/{y}'
                                 + ext;
                 }
-                
+                /* Blocked because of possible Remote file disclosure
                 if(layer_url.indexOf('http://')===0 && layer_url.indexOf('http://127.0.0.1')<0){
                     
                     var mimetype = 'image/'+ext;
@@ -187,7 +187,7 @@ function hMapLayer2( _options ) {
                             + '&mimetype=' + mimetype
                             + '&rurl=' + layer_url; //encodeURIComponent(layer_url);
                 }
-
+                */    
             }
             
             layer_options._extent = _getBoundingBox();

@@ -195,8 +195,9 @@ if($db){
                         
                         
                     }else
-                    if(strpos($external_url,'http')==0 || $_REQUEST['download']){
-                        
+                    if(false && (strpos($external_url,'http')==0 || $_REQUEST['download'])){
+                        //Blocked because of possible Remote file disclosure
+                        /*
                         if($fileExt){
                             $finfo = pathinfo($originalFileName);
                             $ext = @$finfo['extension'];
@@ -204,10 +205,11 @@ if($db){
                                 $originalFileName = $originalFileName.'.'.$fileExt;   
                             }
                         }
-                        //proxy http (unsecure) resources
+                        //proxy http (unsecure) resources (registered in database)
                         $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_proxyremote_");        
-                        downloadViaProxy($heurist_path, $mimeType, $external_url, false, $originalFileName);
+                        downloadViaProxy($heurist_path, $mimeType, $external_url, false, $originalFileName); //REMARKED proxy http (unsecure) resources
                         unlink($heurist_path);
+                        */
                     }else{
                         header('Location: '.$external_url);  //redirect to URL (external)    
                     }
@@ -226,24 +228,20 @@ if($db){
         $system->dbclose();
 
     }
+    /* Blocked because of possible Remote file disclosure
     else if (@$_REQUEST['rurl']){ //
-        //load remote content from uni adelaide 
-        if($db=='ExpertNation'){
-            $remote_path = 'http://global.adelaide.edu.au/v/style-guide2/includes/common/'.$_REQUEST['rurl'];
-            $mimetype = "text/html";
-        }else{
-            $remote_path = $_REQUEST['rurl'];
-            $mimetype = @$_REQUEST['mimetype'];    
-        }
+        
+        $remote_path = $_REQUEST['rurl'];
+        $mimetype = @$_REQUEST['mimetype'];    
         
         $system->initPathConstants($db);
         
         if(defined('HEURIST_SCRATCH_DIR')){
             $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_proxyremote_");        
-            downloadViaProxy($heurist_path, $mimetype, $remote_path, false);
+            downloadViaProxy($heurist_path, $mimetype, $remote_path, false); //REMARKED
             if(file_exists($heurist_path)) unlink($heurist_path);
         }
         
-    }
+    }*/
 }
 ?>

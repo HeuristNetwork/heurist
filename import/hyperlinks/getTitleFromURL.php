@@ -50,7 +50,7 @@ if(!$system->init(@$_REQUEST['db'])){
 
 	$url = str_replace(' ', '+', $url);
 
-	$data = loadRemoteURLContentWithRange($url, "0-10000");
+	$data = loadRemoteURLContentWithRange($url, "0-10000");//get title of webpage
 
 	if ($data){
 

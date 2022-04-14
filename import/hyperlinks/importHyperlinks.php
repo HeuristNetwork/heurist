@@ -62,7 +62,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 	} else if (@$_REQUEST['source'] == 'url') {
 		$_REQUEST['url'] = preg_replace('/#.*/', '', $_REQUEST['url']);
 
-        $src = loadRemoteURLContentWithRange($_REQUEST['url'], null, false, 120);
+        $src = loadRemoteURLContentWithRange($_REQUEST['url'], null, false, 120); //load external webpage to extract links
 
         if(!$src){
             $error = 'URL could not be retrieved. Verify your proxy setting in configuration file. <span style="font-weight: normal;">You might try saving the page you are importing, and then <a href="importHyperlinks.php">import from file</a>.</span>';

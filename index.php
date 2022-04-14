@@ -73,7 +73,7 @@ if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
     header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&'.$s);
     return;
     
-}else if (@$_REQUEST['file'] || @$_REQUEST['thumb'] || @$_REQUEST['rurl']){
+}else if (@$_REQUEST['file'] || @$_REQUEST['thumb']){
     //download file, thumb or remote url
     header( 'Location: hsapi/controller/file_download.php?'.$_SERVER['QUERY_STRING'] );
     return;

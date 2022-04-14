@@ -188,7 +188,7 @@ class UtilsImage {
 
         $img = null;
         
-        $data = loadRemoteURLContent($remote_url, false); //from utils_file.php
+        $data = loadRemoteURLContent($remote_url, false); //get_remote_image as raw data
         if($data){
             try{    
                 $img = imagecreatefromstring($data);

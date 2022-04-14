@@ -105,7 +105,7 @@
                 $originalFileName = @$kml_file['ulf_OrigFileName'];
                 
                 if($url){
-                    $file_content = loadRemoteURLContent($url, true);    
+                    $file_content = loadRemoteURLContent($url, true); //load remote KML into temp file   
                     if($file_content===false){
                       $system->error_exit_api('Cannot load remote file '.$url, HEURIST_ERROR);    
                     } 
