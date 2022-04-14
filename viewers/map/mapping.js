@@ -2908,6 +2908,7 @@ console.log(fsize);
         
         if(is_main_ui){
             var toolbar = $('#mapToolbarDiv');
+            var $mapdocSel = toolbar.find('#mapDocumentSel');
             this._on(toolbar.find('#btn_layout_map').button({text:'Map'}),
                 {click:function(e){  
                     this.nomap = !this.nomap;
@@ -2920,6 +2921,7 @@ console.log(fsize);
                     if(this.notimeline && this.nomap) this.nomap = false;
                     this._updatePanels()
                 }});
+            this.mapManager.populateMapDocuments($mapdocSel);
         }
         
             
