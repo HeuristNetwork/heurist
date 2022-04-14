@@ -301,7 +301,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                         if((dtFields['dty_Type'] == 'freetext' || dtFields['dty_Type'] == 'blocktext' || dtFields['dty_Type'] == 'float') 
 												&& dtFields['rst_DisplayWidth'] == 0){
 
-                                            var width = that.editForm.width() * 0.75;
+                                            var width = that.editForm.width() * ((this.options.rts_editor) ? 0.75 : 0.8);;
+
+                                            if(inpt.parents('fieldset').length > 0){ // check for parent fieldset
+                                                width = inpt.parents('fieldset').width() * ((this.options.rts_editor) ? 0.75 : 0.8);
+                                            }
+
                                             inpt.find('input, textarea').css({'min-width': width, width: width});
                                         }
                                     }else{
@@ -3166,12 +3171,18 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 this.editRecordType(true);
             }else if(max_length_fields.length > 0){
 
-                let maxw = this.editForm.width() * ((this.options.rts_editor) ? 0.75 : 0.8);
+                var popup_maxw = this.editForm.width() * ((this.options.rts_editor) ? 0.75 : 0.8);
 
                 for(var i = 0; i < max_length_fields.length; i++){
 
+                    var width = popup_maxw;
                     var field = this._editing.getFieldByName(max_length_fields[i]);
-                    field.find('input, textarea').css({'width': maxw, 'max-width': maxw});
+
+                    if(field.parents('fieldset').length > 0){ // check for parent fieldset
+                        width = field.parents('fieldset').width() * ((this.options.rts_editor) ? 0.75 : 0.8);
+                    }
+
+                    field.find('input, textarea').css({'width': width, 'max-width': width});
                 }
             }
 
