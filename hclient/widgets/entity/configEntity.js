@@ -21,6 +21,7 @@
 
 $.widget( "heurist.configEntity", {
 
+    
     // default options
     options: {
         entityName: null,

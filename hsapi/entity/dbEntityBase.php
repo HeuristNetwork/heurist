@@ -160,14 +160,20 @@ class DbEntityBase
         $entity_name = $this->config['entityName'];
         $rec_ID = @$action['rec_ID'];
         
+        //available values are hardcoded - prevent 
+        if($entity_name!='defRecTypes'){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Entity parameter is wrong or not defined');
+            $res = false;
+        }else if($folder==null || !in_array($folder, array('datatable','csvexport','crosstabs'))){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Folder parameter is wrong or not defined');
+            $res = false;
+        }else{
+        
         $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/'.$folder.'/'.($rec_ID>0?$rec_ID.'/':''); 
         
         if($operation=='list'){
             
-            if($folder==null){
-                $this->system->addError(HEURIST_INVALID_REQUEST, 'Can not get list of setting files. Folder parameter is not defined');
-                $res = false;
-            }else if($rec_ID=='all'){
+            if($rec_ID=='all'){
                 
                 if(file_exists($path)){
                 
@@ -206,24 +212,40 @@ class DbEntityBase
         }else if($operation=='put'){
             
             $filename = fileNameSanitize($filename);
+
+            //verify exetension for $filename
+            $path_parts = pathinfo($filename);
+            $ext = strtolower(@$path_parts['extension']);
             
             $sMsg = 'Can not save content the settings file. ';
             
             if($filename==null){
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
                 $res = false;
+            }else if($ext!='cfg'){
+                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Only cfg extension allowed for configuration file');
+                $res = false;
             }else if ($content==null){
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Content parameter is not defined');
                 $res = false;
             }else{
-                $swarn = folderCreate2($path, '', false);
-                if($swarn!=''){
-                    $this->system->addError(HEURIST_ERROR, $sMsg.$swarn);
+                
+                //verify that content is valid JSON
+                $config = json_decode($content, true);
+                if(!is_array($config)){
+                    $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Content is not valid json');
                     $res = false;
                 }else{
-                    $res = file_put_contents($path.$filename, $content);    
-                    if($res!==false){
-                        $res = $filename;
+                
+                    $swarn = folderCreate2($path, '', false);
+                    if($swarn!=''){
+                        $this->system->addError(HEURIST_ERROR, $sMsg.$swarn);
+                        $res = false;
+                    }else{
+                        $res = file_put_contents($path.$filename, $content);    
+                        if($res!==false){
+                            $res = $filename;
+                        }
                     }
                 }
             }
@@ -236,8 +258,17 @@ class DbEntityBase
             if(file_exists($path.$fileOld)){
                 
                 $filename = fileNameSanitize($filename);
+
+                //verify exetension for $filename
+                $path_parts = pathinfo($filename);
+                $ext = strtolower(@$path_parts['extension']);
+
+                
                 if($filename==null){
                     $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'New filename parameter is not defined');
+                    $res = false;
+                }else if($ext!='cfg'){
+                    $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Only cfg extension allowed for configuration file');
                     $res = false;
                 }else if(!copy($path.$fileOld, $path.$filename)){
                     $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg);
@@ -251,8 +282,6 @@ class DbEntityBase
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Settings file does not exist');
                 $res = false;
             }
-            
-            
             
         }else if($operation=='delete'){
          
@@ -268,6 +297,8 @@ class DbEntityBase
                 $res = unlink($path.$filename);    
             }
 
+        }
+        
         }
         
         return $res;
