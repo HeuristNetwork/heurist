@@ -182,7 +182,7 @@ class systemEmailExt {
 		if(!$email){
 			$this->cur_user['ugr_eMail'] = HEURIST_MAIL_TO_ADMIN;
 		}else{
-			$this->cur_user['ugr_eMail'] = $email->fetch_row()[0];
+			$this->cur_user['ugr_eMail'] = filter_var($email->fetch_row()[0], FILTER_SANITIZE_EMAIL);
 		}
 	}
 
@@ -280,6 +280,10 @@ class systemEmailExt {
 				while ($row = $res->fetch_row()) {
 
 					$db_name = substr($db,strlen(HEURIST_DB_PREFIX));
+
+					if($row[2]){
+						$row[2] = filter_var($row[2], FILTER_SANITIZE_EMAIL);
+					}
 
 					if (array_key_exists($row[2], $this->user_details)) { // check if user already has data in user_details array, note: only the first set of first/last name are used
 

@@ -65,7 +65,9 @@ function sendEmail_NewDatabase($user_record, $database_name, $source_database){
     }else{
         $message =  str_replace('&lt;FrenchNoteIfFrance&gt;','',$message);
     }
-    
+
+    $user_record['ugr_eMail'] = filter_var($user_record['ugr_eMail'], FILTER_SANITIZE_EMAIL);
+
     $email = new PHPMailer();
     $email->CharSet = 'UTF-8';
     $email->Encoding = 'base64';

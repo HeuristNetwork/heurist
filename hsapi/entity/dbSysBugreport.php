@@ -215,7 +215,10 @@ class DbSysBugreport extends DbEntityBase
         if(is_array($email_text)){
             $email_text =  json_encode($email_text);    
         }
-       
+
+        $email_from = filter_var($email_from, FILTER_SANITIZE_EMAIL);
+        $email_to = filter_var($email_to, FILTER_SANITIZE_EMAIL);
+
         //send an email with attachment
         $email = new PHPMailer();
         $email->isHTML(true); 
