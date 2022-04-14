@@ -502,7 +502,7 @@ function resolveFilePath($path){
         return $path;
 }
 
-/**
+/**  @VERIFY 
 * download remote url as file - this is our proxy for download annotations and adelaide web site
 * 
 * @param mixed $filename
@@ -541,7 +541,7 @@ function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true, $orig
     }
 }
 
-/**
+/** @VERIFY
 * direct file download - move to utils_file
 *
 * @param mixed $mimeType
@@ -695,7 +695,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
     
     $is_video = (strpos($mimeType,"video/")===0); // || @$params['video']
     $is_audio = (strpos($mimeType,"audio/")===0); // || @$params['audio']
-    $is_image = (strpos($mimeType,"image/")===0);
+    $is_image = (strpos($mimeType,"image/")===0 || strpos(@$params['var'][0]['ulf_OrigFileName'],'_iiif')===0);
     
     if($style==null) $style='';
 
