@@ -386,7 +386,16 @@ class DbRecUploadedFiles extends DbEntityBase
                     || strpos($record['ulf_ExternalFileReference'], 'info.json')!==false) */                    
                     //check iiif - either manifest of image
                     if($mimeType=='json' || $mimeType=='application/json'){
+/*
+We can register either info.json (reference to local or remote IIIF server that describes particular IIIF image) or manifest.json (that describes set of media and their appearance).  
 
+On registration if mime type is application/json we loads this file and check whether it is image info or manifest. For former case we store in ulf_OrigFileName “iiif_image”, for latter one “iiif”.
+
+When we open "iiif_image" in mirador viewer we generate manifest dynamically.
+@see miradorViewer.php
+*/
+                        
+                        
                         //verify that url points to iiif manifest
                         $iiif_manifest = loadRemoteURLContent($record['ulf_ExternalFileReference']);
                         $iiif_manifest = json_decode($iiif_manifest, true);
@@ -913,7 +922,7 @@ class DbRecUploadedFiles extends DbEntityBase
             return false;
         }
         
-        $filename = $newname.'.'.$type;
+        $filename = fileNameSanitize($newname.'.'.$type);
 
         file_put_contents(HEURIST_SCRATCH_DIR.$filename, $data);        
         
