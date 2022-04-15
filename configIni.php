@@ -62,10 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.2.32"; // sets current program version number, determined by Heurist development lead
+$version = "6.3.1"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// 6.3.1  15 april 2022 Security fixes, improvements to StoryMaps including new beahviours, and map header bar
 // 6.2.32 03 April 2022 // 6.2.31 26 March 2022 // 6.2.30 10 March 2022 // 6.2.29 25 Feb 2022
 // Continued work on StoryMaps, make relationships fully birdirectional, Specify target page and search_group for widget that will listen to source events, imporvemetns to external lookups notably prompted manual insertion of record pointers, improvements to web editing, option to uopdate names on structure download of existing concepts, improved records/fields tree in filter builders, title mask and custom reports including greater visibility of record title, filtered dropdown for term list fields, increase tree depth to 4 levels, improved stylesheet load order, vertical option for image gallery, new methodologyu for manual addition and sorting of records to/in a saved filter, fulltext search on record titles, French and German localisations - first draft, improvements to bulk emailer, choose record types to include in XML template, relationship markers in field order in record view and simplified rendering for greater readability, attempt to match field names in CSV import, workflow stages system, title mask editor icon next to construted title in edit form, checkboxes/radio buttons as an option for term lsit fields with <25 values, improve map popup to reduce appearance of horizontal scrollbar, trap and fix format errors in geo data in CSV importer, popup decent size edit box when click on filter field in Explore, 
 // 6.2.28 18 Feb 2022 Option to treat periods in terms as hierarchy or not, improved record pointer selection popup with tabs, simple divider within tabs in edit form, improve file bulk upload reporting, tidy up workflow managhement, first draft storymap, adding tabs from list in new record type, improve font sizes, 
