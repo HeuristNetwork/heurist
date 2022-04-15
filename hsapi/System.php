@@ -938,7 +938,7 @@ error_log(print_r($_REQUEST, true));
             }
 
             $message = 'Heurist was unable to process this request. '.$message;
-            $sysmsg = 'Although errors are emailed to the Heurist team (for servers maintained directly by the project), there are several thousand Heurist databases, so we are unable to review all automated reports. Please contact us if this error is causing you a problem, as this will help us identify important issues. We apologise for any inconvenience';
+            $sysmsg = 'Although errors are emailed to the Heurist team (for servers maintained directly by the project), there are several thousand Heurist databases, so we are unable to review all automated reports. If this is the first time you have seen this error, please try again in a few minutes in case it is a temporary network outage. Please contact us if this error persists and is causing you a problem, as this will help us identify important issues. We apologise for any inconvenience';
 
             //$root_folder.$curr_logfile."\n".
             error_log($Title.'  '.$sMsg);     
