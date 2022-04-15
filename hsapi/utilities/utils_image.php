@@ -105,7 +105,7 @@ class UtilsImage {
             if(defined('WEBSITE_THUMBNAIL_SERVICE') && WEBSITE_THUMBNAIL_SERVICE!=''){
             
                 $remote_path =  str_replace("[URL]", $siteURL, WEBSITE_THUMBNAIL_SERVICE);
-                $filesize = saveURLasFile($remote_path, $heurist_path);
+                $filesize = saveURLasFile($remote_path, $heurist_path); //save url screenshot in tep file
 
                 //check the dimension of returned thumbanil in case it is less than 50 - consider it as error
                 if(strpos($remote_path, substr(WEBSITE_THUMBNAIL_SERVICE,0,24))==0){

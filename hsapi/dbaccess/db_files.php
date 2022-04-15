@@ -21,8 +21,9 @@
 * 
 * @todo move to utils_file.php
 * resolveFilePath  
-* downloadViaProxy - Blocked because of possible Remote file disclosure
 * downloadFile
+* 
+* downloadViaProxy - Blocked because of possible Remote file disclosure
 * 
 * 
 * @package     Heurist academic knowledge management system
@@ -458,45 +459,45 @@ function resolveFilePath($path){
 
         if( $path ){
             
-        if(!file_exists($path) ){
-            chdir(HEURIST_FILESTORE_DIR);  // relatively db root
-            $fpath = realpath($path);
-            if(file_exists($fpath)){
-                return $fpath;
-            }else{
-                chdir(HEURIST_FILES_DIR);          // relatively file_uploads 
+            if(!file_exists($path) ){
+                chdir(HEURIST_FILESTORE_DIR);  // relatively db root
                 $fpath = realpath($path);
                 if(file_exists($fpath)){
                     return $fpath;
                 }else{
-                    //special case to support absolute path on file server
-                    if(strpos($path, '/srv/HEURIST_FILESTORE/')===0){
-                        $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $path);
-                        if(file_exists($fpath)){
-                            return $fpath;
-                        }
-                    }else
-                    if(strpos($path, '/misc/heur-filestore/')===0){
-                        $fpath = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $path);
-                        if(file_exists($fpath)){
-                            return $fpath;
-                        }
-                    }else
-                    if(strpos($path, '/data/HEURIST_FILESTORE/')===0){ //for huma-num
-                        $fpath = str_replace('/data/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $path);
-                        if(file_exists($fpath)){
-                            return $fpath;
+                    chdir(HEURIST_FILES_DIR);          // relatively file_uploads 
+                    $fpath = realpath($path);
+                    if(file_exists($fpath)){
+                        return $fpath;
+                    }else{
+                        //special case to support absolute path on file server
+                        if(strpos($path, '/srv/HEURIST_FILESTORE/')===0){
+                            $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $path);
+                            if(file_exists($fpath)){
+                                return $fpath;
+                            }
+                        }else
+                        if(strpos($path, '/misc/heur-filestore/')===0){
+                            $fpath = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $path);
+                            if(file_exists($fpath)){
+                                return $fpath;
+                            }
+                        }else
+                        if(strpos($path, '/data/HEURIST_FILESTORE/')===0){ //for huma-num
+                            $fpath = str_replace('/data/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $path);
+                            if(file_exists($fpath)){
+                                return $fpath;
+                            }
                         }
                     }
                 }
+            }else{
+                //current dir already set
+                $fpath = realpath($path);
+                if(file_exists($fpath)){
+                    return $fpath;
+                }
             }
-        }else{
-            //current dir already set
-            $fpath = realpath($path);
-            if(file_exists($fpath)){
-                return $fpath;
-            }
-        }
 
         }
         return $path;
@@ -535,8 +536,12 @@ function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true, $orig
 */    
 }
 
-/** @VERIFY
-* direct file download - move to utils_file
+/** 
+* Direct file download - move to utils_file
+* 
+* Usage in 2 cases only
+* 1) Download database backup (exportMyDataPopup)
+* 2) Download registered file from Heurist storage folder (file_download)
 *
 * @param mixed $mimeType
 * @param mixed $filename
@@ -591,11 +596,11 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
             unset($output);         
         }else{
             if(false && filesize($filename)<10*1024*1024){
-                readfile($filename);    
+                readfile($filename);  //if less than 10MB download at once  
             }else{
                 $handle = fopen($filename, "rb");
                 while (!feof($handle)) {
-                    echo fread($handle, 1000);
+                    echo fread($handle, 1000);  //by chunks
                 }            
             }
         }
@@ -645,11 +650,15 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
         }
     }    
     
+    
+    $need_remove_tmpfile = false;
+    
     if($is_local){
         
     }else if($external_url && strpos($originalFileName,'_tiled')!==0){
+        $need_remove_tmpfile = true;
         $filepath = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
-        saveURLasFile($external_url, $filepath);
+        saveURLasFile($external_url, $filepath); //save to temp in scratch folder
     }
     
     $file_zip = $downloadFileName.'.zip';
@@ -666,6 +675,9 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
                     recordLinksFileContent($system, $record));    
     
     $zip->close();
+    
+    //remove temp file
+    if($need_remove_tmpfile) unlink($filepath);
     
     //donwload
     $contentDispositionField = 'Content-Disposition: attachment; '

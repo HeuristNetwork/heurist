@@ -799,7 +799,7 @@ XML;
         }else{
             header( 'Content-Type: text/xml');
         }
-        unlink($tmp_destination);
+        fileDelete($tmp_destination);
         echo $output; 
         unset($output);   
         
@@ -877,7 +877,7 @@ XML;
             // remove the zip archive and temp files
             //unlink($file_zip_full); 
             //unlink($file_metadata_full);
-            unlink($tmp_destination);   
+            fileDelete($tmp_destination);   
             return true;
         }else{
             //$content = file_get_contents($tmp_destination);
@@ -904,7 +904,7 @@ XML;
                 http_response_code(404);
             }
             self::readfile($tmp_destination);
-            unlink($tmp_destination);
+            fileDelete($tmp_destination);
             
             return true;
 //            exit($content);

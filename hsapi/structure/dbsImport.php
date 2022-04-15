@@ -1665,7 +1665,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
             //print "<br>sourcce=".$sourceURL;
             //print "<br>path=".$targetPath;
 
-            saveURLasFile($sourceURL, $targetPath); //see utils_file
+            saveURLasFile($sourceURL, $targetPath); //save rty icon on import
         }
 
         //new  entity/defRecTypes/  --------------------------------------------
@@ -1685,7 +1685,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
             }
         }else{
             $sourceURL = $this->sourceIconURL.$thumb.$source_RtyID.'.png';
-            saveURLasFile($sourceURL, $targetPath); //see utils_file
+            saveURLasFile($sourceURL, $targetPath); //save rty icon on import
         }
 
                 

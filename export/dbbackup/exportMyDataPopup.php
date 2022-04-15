@@ -262,12 +262,12 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
             echo_flush2("Exporting database definitions as readable text<br>");
 
             $url = HEURIST_BASE_URL . "admin/describe/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
-            saveURLasFile($url, $folder."/Database_Structure.txt");
+            saveURLasFile($url, $folder."/Database_Structure.txt"); //save to HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME
 
             echo_flush2("Exporting database definitions as XML<br>");
             
             $url = HEURIST_BASE_URL . "admin/describe/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
-            saveURLasFile($url, $folder."/Database_Structure.xml");
+            saveURLasFile($url, $folder."/Database_Structure.xml"); //save to HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME
 
 
             if($system->is_admin()){

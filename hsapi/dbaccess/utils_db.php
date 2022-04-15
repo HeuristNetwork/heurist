@@ -1206,7 +1206,7 @@ if($i<5){
         $is_exist = file_exists($session_file);
         
         if($value=='REMOVE'){
-            if($is_exist) unlink($session_file);
+            if($is_exist) fileDelete($session_file);
         }else{
             //get    
             if($is_exist) $res = file_get_contents($session_file);

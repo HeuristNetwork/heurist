@@ -614,9 +614,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                     $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
                     $temp_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
-                    saveURLasFile($record['ulf_TempThumbUrl'], $temp_path);
-                    UtilsImage::createThumbnailFile($temp_path, $thumb_name);
-                        
+                    if(saveURLasFile($record['ulf_TempThumbUrl'], $temp_path)){ //save to temp in scratch folder
+                        UtilsImage::createThumbnailFile($temp_path, $thumb_name); //create thumbnail from remote image
+                        unlink($temp_path);       
+                    }
             }else
             //if there is file to be copied                        
             if(@$this->records[$rec_idx]['ulf_TempFile']){ 

@@ -69,7 +69,7 @@ if($db){
         }
 
     }
-    else if(@$_REQUEST['file'] || @$_REQUEST['ulf_ID']) { //ulf_ID need for backward support of old downloadFile.php
+    else if(@$_REQUEST['file'] || @$_REQUEST['ulf_ID']) { //ulf_ID is obfuscation id here
 
         $fileid = @$_REQUEST['file']? $_REQUEST['file'] :@$_REQUEST['ulf_ID'];
         $size = @$_REQUEST['size'];
@@ -160,7 +160,7 @@ if($db){
                     }
                     
                     if($_SERVER["SERVER_NAME"]=='127.0.0.1' &&  @$_REQUEST['fancybox']==1 && strpos($fileinfo['fullPath'],'file_uploads/')===0){
-                        //show in viewer directly
+                        //show in viewer directly - for localhost only!!!
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
                         header('Location: '.$direct_url);
                         
@@ -194,22 +194,6 @@ if($db){
                         }
                         
                         
-                    }else
-                    if(false && (strpos($external_url,'http')==0 || $_REQUEST['download'])){
-                        //Blocked because of possible Remote file disclosure
-                        /*
-                        if($fileExt){
-                            $finfo = pathinfo($originalFileName);
-                            $ext = @$finfo['extension'];
-                            if($ext==null || $ext==''){
-                                $originalFileName = $originalFileName.'.'.$fileExt;   
-                            }
-                        }
-                        //proxy http (unsecure) resources (registered in database)
-                        $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_proxyremote_");        
-                        downloadViaProxy($heurist_path, $mimeType, $external_url, false, $originalFileName); //REMARKED proxy http (unsecure) resources
-                        unlink($heurist_path);
-                        */
                     }else{
                         header('Location: '.$external_url);  //redirect to URL (external)    
                     }
@@ -228,20 +212,5 @@ if($db){
         $system->dbclose();
 
     }
-    /* Blocked because of possible Remote file disclosure
-    else if (@$_REQUEST['rurl']){ //
-        
-        $remote_path = $_REQUEST['rurl'];
-        $mimetype = @$_REQUEST['mimetype'];    
-        
-        $system->initPathConstants($db);
-        
-        if(defined('HEURIST_SCRATCH_DIR')){
-            $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_proxyremote_");        
-            downloadViaProxy($heurist_path, $mimetype, $remote_path, false); //REMARKED
-            if(file_exists($heurist_path)) unlink($heurist_path);
-        }
-        
-    }*/
 }
 ?>

@@ -366,7 +366,7 @@ function fileRetrievePath($fileinfo, $need_ext=null, $isArchive=false){
             //change tmp to required extension
             $filepath = substr($filepath,-3,3).$need_ext;    
         }*/
-        saveURLasFile($external_url, $filepath);
+        saveURLasFile($external_url, $filepath); //save remote shp to temp in scratch folder
     }    
     
     if(file_exists($filepath)){

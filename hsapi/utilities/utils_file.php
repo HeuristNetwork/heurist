@@ -729,9 +729,9 @@
         }
     }
     
-    // 
+    // Usage: 
     // 1) save version in System.php
-    // 2) save remote content
+    // 2) save remote content in temporary file in scratch folder
     //
     function fileSave($rawdata, $filename)
     {
@@ -1084,18 +1084,46 @@ function unzipArchiveFlat($zipfile, $destination){
         return false;
     }
 }
+
+//
+// Returns false if given file is not in heurist upload folder
+// Otherwise return real path
+//
+function isPathInHeuristUploadFolder($path){
+  
+    chdir(HEURIST_FILESTORE_DIR);  // relatively db root  or HEURIST_FILES_DIR??        
+    $path = realpath($path);
+
+    //realpath gives real path on remote file server
+    if(strpos($path, '/srv/HEURIST_FILESTORE/')===0 || 
+       strpos($path, '/misc/heur-filestore/')===0 ||     //heurx
+       strpos($path, '/data/HEURIST_FILESTORE/')===0 ||  //huma-num
+       strpos($path, HEURIST_FILESTORE_DIR)===0){
+           return $path;
+       }else{
+           return false;
+       }
+}
+
         
 //-----------------------  LOAD REMOTE CONTENT (CURL) --------------------------
 
 
-/** @VERIFY
-* save remote url as file and returns the size of saved file
+/**
+* Save remote url as file and returns the size of saved file
+* 
+* Usage
+* 1) save import from other database in temp file
+* 2) remote image to create thumbnail
+* 
+* Remote data are saved in scratch folder as temporary file
 *
 * @param mixed $url
 * @param mixed $filename
 */
 function saveURLasFile($url, $filename)
-{ //Download file from remote server
+{   
+    //Download file from remote server
     $rawdata = loadRemoteURLContent($url, false); //use proxy 
     if($rawdata!==false){
         return fileSave($rawdata, $filename); //returns file size
@@ -1106,7 +1134,7 @@ function saveURLasFile($url, $filename)
 
 //
 // if the same server - try to include script instead of CURL request
-//
+// usage:
 // 1. get registered database URL
 // 2. database registration
 // 3. get current db version
@@ -1144,8 +1172,8 @@ function loadRemoteURLContent($url, $bypassProxy = true) {
     return loadRemoteURLContentWithRange($url, null, $bypassProxy);
 }
 
-// @VERIFY
 //
+// $range - loads first n bytes (for example to detect title of web page)
 //
 function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout=30) {
     
@@ -1227,7 +1255,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     }
 }
 
-//
+// Detects mimetype for given url
 //
 // alternative2: get_headers()
 // alternative3: https://stackoverflow.com/questions/37731544/get-mime-type-by-url

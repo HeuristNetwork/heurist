@@ -498,7 +498,7 @@ public static function importRecordsFromDatabase($params){
     // save file that produced with record_output.php from source to temp file  
     $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_"); // . $file_id;
 
-    $filesize = saveURLasFile($remote_path, $heurist_path);
+    $filesize = saveURLasFile($remote_path, $heurist_path); //save json import from remote db to tempfile in scratch folder
 
 //2. import records
     if($filesize>0 && file_exists($heurist_path)){
@@ -529,7 +529,7 @@ public static function importRecordsFromDatabase($params){
             }
         }
         
-        unlink($heurist_path);
+        unlink($heurist_path); //remove temp file
         
         return $res;
     }else{
@@ -1099,9 +1099,10 @@ EOD;
                                 //$fileURL = @$value['url'];
                                 $remote_path = $file_URL = $source_url.'?db='.$source_db
                                         .'&file='.$value['ulf_ObfuscatedFileID']; //download
-                                saveURLasFile($remote_path, $tmp_file);
+                                saveURLasFile($remote_path, $tmp_file); //save imported image to temp file in scratch folder
                             }
 
+                            //register imported image
                             if(file_exists($tmp_file))
                                 $dtl_UploadedFileID = $file_entity->registerFile($tmp_file, null); //it returns ulf_ID
                                 

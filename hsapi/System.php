@@ -1828,7 +1828,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             }
             
             $version_in_session = date("Y-m-d").'|'.$version_last_check.'|'.$release;
-            fileSave($version_in_session, $fname);
+            fileSave($version_in_session, $fname); //save last version
         }
         
         return $version_last_check; 

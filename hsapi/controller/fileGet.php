@@ -53,13 +53,9 @@ if($filename){ //download from scratch (for csv import)
         //remove slashes - prevents Local file disclosure
         $filename = fileNameSanitize($filename, false);
 
-        chdir(HEURIST_FILESTORE_DIR);  // relatively db root         
-        $file_read = realpath(HEURIST_FILESTORE_DIR.'scratch/'.$filename);
+        $file_read = HEURIST_FILESTORE_DIR.'scratch/'.$filename;
         
-        //realpath gives real path on remote file server
-        if(!(strpos($file_read, '/srv/HEURIST_FILESTORE/')===0 || 
-           strpos($file_read, '/misc/heur-filestore/')===0 ||
-           strpos($file_read, HEURIST_FILESTORE_DIR)===0))
+        if(!isPathInHeuristUploadFolder( $file_read ))        
         {
             print 'Temporary file (uploaded csv data) '.$filename. ' not found';                
             exit();

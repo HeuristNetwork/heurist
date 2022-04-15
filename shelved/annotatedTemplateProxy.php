@@ -40,6 +40,6 @@ if(@$_REQUEST['url']){
 
     $url = $_REQUEST['url'];
     $filename = HEURIST_UPLOAD_DIR."proxyremote_".str_replace("/","_",$url);
-    downloadViaProxy($filename, "text/html", $url, false); //download annotated template - not used 
+    //downloadViaProxy($filename, "text/html", $url, false); download annotated template - not used 
 }
 ?>
