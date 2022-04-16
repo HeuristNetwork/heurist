@@ -136,7 +136,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
             
         }else{
             
-            screen.load('user_registration.html',
+            screen.load('startup/user_registration.html',
                 function(){
 
                     $('.registration-form').children('div').css('padding-top','5px');
