@@ -281,9 +281,11 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 this.element.parent().height(450);
             }
             
-
-            var pref_rectype = window.hWin.HAPI4.get_prefs('record-add-defaults')[0];
-            this.element.find('#sel_recordtype').val(pref_rectype).hSelect('refresh');
+            var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+            if($.isArray(add_rec_prefs) && add_rec_prefs.length>0){
+                var pref_rectype = add_rec_prefs[0];
+                this.element.find('#sel_recordtype').val(pref_rectype).hSelect('refresh');
+            }
         }else{
              //show record type list
             
