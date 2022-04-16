@@ -1426,7 +1426,9 @@ $.widget( "heurist.mainMenu6", {
             
             //change main background
             this.element.addClass('ui-heurist-'+section+'-fade');    
-            this.menues_explore_gap.addClass('ui-heurist-'+section+'-fade');
+            if(this.menues_explore_gap){
+                this.menues_explore_gap.addClass('ui-heurist-'+section+'-fade');    
+            }
             
         }else if(force_show || section=='explore'){
             that.containers[section].show();    
