@@ -1815,12 +1815,12 @@ class HPredicate {
         $p = $this->qlevel;
         $rl = "rl".$p."x".$this->index_of_predicate;
         
-        if(!is_array($this->value) && strpos($this->value, '-')===0){
-            $this->negate = true;
-            $this->value = substr($this->value, 1);
-        }
-        
         if($this->isEmptyValue()){
+
+            if(strpos($this->value, '-')===0){
+                $this->negate = true;
+                $this->value = substr($this->value, 1);
+            }
             
             $rd = "rd".$this->qlevel;
             
@@ -1884,8 +1884,22 @@ class HPredicate {
                 ." AND $rl.rl_TargetID".$val;
                 
             }else{
+                
+                $field_compare = "$rl.rl_RelationID IS NULL";
+                if($this->field_id){
+                    $several_ids = prepareIds($this->field_id); //getCommaSepIds - returns validated string
+                    if(is_array($several_ids) && count($several_ids)>0){
+                        
+                        if(count($several_ids)>1){
+                            $field_compare = "$rl.rl_DetailTypeID IN (".implode(',',$several_ids).')';
+                        }else{
+                            $field_compare = "$rl.rl_DetailTypeID = ".$this->field_id;
+                        }
+                    }
+                }
+                
                 $where = "r$p.rec_ID=$rl.rl_SourceID AND ".
-                (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID IS NULL")
+                $field_compare
                 ." AND $rl.rl_TargetID".$val;
             }
 
@@ -1948,19 +1962,18 @@ class HPredicate {
             
         }else{
             
-            $field_compare = '';
-            $several_ids = prepareIds($this->field_id); //getCommaSepIds - returns validated string
-            if(is_array($several_ids) && count($several_ids)>0){
-                
-                if(count($several_ids)>1){
-                    $field_compare = "$rl.rl_DetailTypeID IN (".implode(',',$several_ids).')';
-                }else{
-                    $field_compare = "$rl.rl_DetailTypeID = ".$this->field_id;
+            $field_compare = "$rl.rl_RelationID IS NULL";
+            if($this->field_id){
+                $several_ids = prepareIds($this->field_id); //getCommaSepIds - returns validated string
+                if(is_array($several_ids) && count($several_ids)>0){
+                    
+                    if(count($several_ids)>1){
+                        $field_compare = "$rl.rl_DetailTypeID IN (".implode(',',$several_ids).')';
+                    }else{
+                        $field_compare = "$rl.rl_DetailTypeID = ".$this->field_id;
+                    }
                 }
-                
-            }else{
-                $field_compare = "$rl.rl_RelationID IS NULL";
-            } 
+            }
         
             $where = "r$p.rec_ID=$rl.rl_TargetID AND "
             .$field_compare
@@ -2285,7 +2298,7 @@ class HPredicate {
     */
     function isEmptyValue(){
                                             //$this->value=='' ||
-        return !is_array($this->value) && ( strtolower($this->value)=='null'); // {"f:18":"NULL"}
+        return !is_array($this->value) && ( strtolower($this->value)=='null' || strtolower($this->value)=='-null'); // {"f:18":"NULL"}
     }
 
     
