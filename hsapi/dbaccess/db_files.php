@@ -699,9 +699,11 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
 
     $result = '';    
     
+    
     $is_video = (strpos($mimeType,"video/")===0); // || @$params['video']
     $is_audio = (strpos($mimeType,"audio/")===0); // || @$params['audio']
-    $is_image = (strpos($mimeType,"image/")===0 || strpos(@$params['var'][0]['ulf_OrigFileName'],'_iiif')===0);
+    $is_image = (strpos($mimeType,"image/")===0);
+    $is_iiif = (strpos(@$params['var'][0]['ulf_OrigFileName'],'_iiif')===0);
     
     if($style==null) $style='';
 
@@ -783,7 +785,24 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
         }
 
     }else 
-        if($is_image){
+    if( $is_iiif ){
+
+        if(($size==null || $size=='') && $style==''){
+            $size = ' height="640" width="800" ';
+        }
+        
+        $miradorViewer = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='
+                    .HEURIST_DBNAME;
+        if($params['var'][0]['ulf_OrigFileName']=='_iiif_image'){
+            $miradorViewer = $miradorViewer.'&q=ids:'.$params['var'][0]['rec_ID'];
+        }else{
+            $miradorViewer = $miradorViewer.'&iiif='.$fileid;
+        }
+        
+        $result = '<iframe '.$size.$style.' src="'.$miradorViewer.'" frameborder="0"></iframe>';                        
+        
+    }else
+    if($is_image){
 
             if(($size==null || $size=='') && $style==''){
                 $size = 'width="300"';
