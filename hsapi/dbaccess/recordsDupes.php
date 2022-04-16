@@ -289,7 +289,7 @@ public static function findDupes( $params ){
             //remove "as dXXX" otherwise CONCAT doesn't work
             foreach($exact_fields as $idx=>$fld){
                 $k = strpos($fld,' as ');
-                $exact_fields[$idx] = substr($exact_fields[$idx],0,$k);
+                if($k>0) $exact_fields[$idx] = substr($exact_fields[$idx],0,$k);
             }
             
             $exact_fields = ', '.(count($exact_fields)>1?'CONCAT('.implode('|',$exact_fields).')':$exact_fields[0]);
