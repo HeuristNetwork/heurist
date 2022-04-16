@@ -429,7 +429,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     function _showGetStarted(){
 
         var screen = $('.center-box.screen6');
-        screen.load('getting_started.html',
+        screen.load('startup/getting_started.html',
             function(){
                 
                 screen.find('img').each(function(i,img){
