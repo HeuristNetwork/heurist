@@ -36,10 +36,9 @@
                 'db='.$_REQUEST['db']
                     .'&file='.($_REQUEST['manifest']?@$_REQUEST['manifest']:@$_REQUEST['iiif']),$url);
         }else{
-            if(@$_REQUEST['iiif_image']){ //@todo
+            if(@$_REQUEST['iiif_image']){ //file obfuscatin id
                 //find record linked to this media 
-                $rec_ID = 0;
-                $url = $url.'&q=ids:'.$rec_ID;
+                $url = $url.'&q=*file @'.$_REQUEST['iiif_image'];
             }
             //create manifest dynamically
             $url = str_replace('hclient/widgets/viewers/miradorViewer.php','hsapi/controller/record_output.php', $url);

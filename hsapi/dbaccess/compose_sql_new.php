@@ -117,13 +117,18 @@ Compare predicates
         @    fulltext (any word)
         @-   no words
         @+   all words
-        OR
+    OR
         -   negate value
             <> between 
             OR
             = exact  (== case sensetive)
             > <  for numeric and dates only
 
+Valuew Prefixes to search record via registered files
+ ^  file size
+ @  obfuscation id
+ 
+            
 ================================================
 
 new simplified heurist query rules.
@@ -177,9 +182,6 @@ Sort keywords: sortby|sort|s    - sort order is applicable for first level query
 Logic operators:  any|all|not    -  by default predicates are logically connected by Conjunction (AND), to use Disjunction (OR) use "any" keyword with the following subquery
 
 any(London Paris Berlin)
-
-To test conversion
-https://heuristplus.sydney.edu.au/h6-ao/qparser.php
 
 To test new format in UI place * in the beginning of search string.
 
@@ -310,7 +312,7 @@ function parse_query_to_json($query){
                     $keyword = 'f';
                     $dty_id = @$match[2];
 
-                }else if(preg_match('/^(count|cnt|geo)(\d*)$/', $word, $match)>0){ //special base field
+                }else if(preg_match('/^(count|cnt|geo|file)(\d*)$/', $word, $match)>0){ //special base field
 
                     $keyword = $match[1];
                     $dty_id = @$match[2];
@@ -498,17 +500,6 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     return array("from"=>" FROM ".$query->from_clause, "where"=>$query->where_clause, "sort"=>$query->sort_clause, "limit"=>" LIMIT $limit", "offset"=>($offset>0? " OFFSET $offset " : ""));
 
 }
-
-//https://heuristplus.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q={"t":3}
-//https://heuristplus.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q={"f:1":"girls"}
-//https://heuristplus.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q={"all":[{"f:1":"girl"},{"t":"5"}]}
-
-//https://heuristplus.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q={"linked_to:15":{"t":"10"}}
-//https://heuristplus.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q=[{"t":3},{"linked_to:15":{"t":"10"}}]
-
-
-// [{"t":3},{"f:1":"?"},{"linked_to:15":[{"t":"10"},{"f:1":"?"}   ] } ]
-
                                                                   
 class HQuery {
 
@@ -1005,7 +996,7 @@ class HPredicate {
             'addedby','owner','access',
             'user','usr',
             'f','field',
-            'count','cnt','geo',
+            'count','cnt','geo', 'file',
             'lt','linked_to','linkedto','lf','linkedfrom',
             'related','rt','related_to','relatedto','rf','relatedfrom',
             'links','plain',
@@ -1207,6 +1198,12 @@ class HPredicate {
                 
                 return $this->predicateSpatial();
 
+            case 'file':
+            
+                $this->pred_type = 'field';
+                $this->field_type = 'file';
+                return $this->predicateField();
+            
             case 'count':
             case 'cnt':
             
@@ -1345,6 +1342,8 @@ class HPredicate {
         
         if($this->pred_type=='count' || $this->pred_type=='cnt'){
             $this->field_type = 'link'; //integer without quotes
+        }else if($this->field_type == 'file'){
+            
         }else if(intval($this->field_id)>0){
             //find field type - @todo from cache
             
@@ -1503,32 +1502,50 @@ class HPredicate {
             }
 
             
-            //old $res = $p."dtl_DetailTypeID=".$this->field_id." AND ".$p."dtl_Value ".$val;
-            if($this->fulltext){
-                $res = 'select dtl_RecID from recDetails where dtl_DetailTypeID';
-            }else{
-                $res = "exists (select dtl_ID from recDetails ".$p." where $recordID=".$p."dtl_RecID AND "
-                .$p.'dtl_DetailTypeID';
+            if($this->field_id>0){ //field id defined (for example "f:25")
                 
-                if($this->negate && ($this->field_type=='enum' || $this->field_type=='relationtype')){
-                    $res = 'NOT '.$res;       
+                if($this->fulltext){
+                    $res = 'select dtl_RecID from recDetails where dtl_DetailTypeID';
+                }else{
+                    $res = "exists (select dtl_ID from recDetails ".$p." where $recordID=".$p."dtl_RecID AND "
+                    .$p.'dtl_DetailTypeID';
+                    
+                    if($this->negate && ($this->field_type=='enum' || $this->field_type=='relationtype')){
+                        $res = 'NOT '.$res;       
+                    }
                 }
-            }
-            
-            if($several_ids && count($several_ids)>0){
-                $res = $res.(count($several_ids)>1
-                        ?' IN ('.implode(',',$several_ids).')'
-                        :'='.$several_ids[0]);
-                        
-            }else{
-                $res = $res.'='.$this->field_id;
-            }
-            
-            if($this->fulltext){
-                //execute fulltext search query
-                $res = $res.' AND MATCH(dtl_Value) '.$val;
-                $list_ids = mysql__select_list2($mysqli, $res);
                 
+                if($several_ids && count($several_ids)>0){
+                    $res = $res.(count($several_ids)>1
+                            ?' IN ('.implode(',',$several_ids).')'
+                            :'='.$several_ids[0]);
+                            
+                }else{
+                    $res = $res.'='.$this->field_id;
+                }
+                
+                if($this->fulltext){
+                    //execute fulltext search query
+                    $res = $res.' AND MATCH(dtl_Value) '.$val;
+                    $list_ids = mysql__select_list2($mysqli, $res);
+                    
+                    if($list_ids && count($list_ids)>0){
+                        $res = $recordID
+                            .(count($list_ids)>1
+                                ?' IN ('.implode(',',$list_ids).')'
+                                :'='.$list_ids[0]);
+                    }else{
+                        $res = '(1=0)'; //nothing found    
+                    }
+                    
+                }else{
+                    $res = $res.' AND '.$field_name.$val.')';        
+                }
+            }else{
+                //field id not defined - at the moment used for search via registered file
+                $res = 'select dtl_RecID from recDetails where '.$field_name.$val;
+                $list_ids = mysql__select_list2($mysqli, $res);
+
                 if($list_ids && count($list_ids)>0){
                     $res = $recordID
                         .(count($list_ids)>1
@@ -1538,10 +1555,7 @@ class HPredicate {
                     $res = '(1=0)'; //nothing found    
                 }
                 
-            }else{
-                $res = $res.' AND '.$field_name.$val.')';        
             }
-            
             
         }
 
@@ -2383,7 +2397,7 @@ class HPredicate {
                 $this->exact = true;
                 $this->value = substr($this->value, 1);
             }else if(strpos($this->value, '@')===0){
-                $this->fulltext = true;
+                $this->fulltext = true; //for detail type "file" - search by obfuscation id
                 $this->value = substr($this->value, 1);
             }else if(strpos($this->value, '<=')===0){
                 $this->lessthan = '<=';
@@ -2447,7 +2461,13 @@ class HPredicate {
             
             $value = $mysqli->real_escape_string($this->value);
             
+            //
+            if($this->fulltext){ //search obfuscation id
+
+                $this->fulltext = false;
+                $res = "ulf_ObfuscatedFileID = '".$this->value."'";
             
+            }else
             if(strpos($value,'^')===0){ //search file size
                 
                 $this->value = substr($this->value, 1);
