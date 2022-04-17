@@ -27,6 +27,9 @@
 
 if (!@$serverName) $serverName = null; // override default taken from request header SERVER_NAME
 
+
+if (!@$heuristReferenceServer) $heuristReferenceServer = null; // address of the "reference server", ie. the server where the master index and code updates are located 
+
 // ------ VALUES YOU SHOULD SET -------------------------------------------------------------------------------------------
 
 // ------ ESSENTIAL SETTINGS ------------------------------------------------------------------------------------------------

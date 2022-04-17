@@ -59,7 +59,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         this.options.innerTitle = false;
         
         //define it to load recordtypes from other server/database - if defined it allows selection only
-        if(this.options.import_structure){ //for example https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Reference_Set
+        if(this.options.import_structure){ //for example HEURIST_INDEX_BASE_URL?db=Heurist_Reference_Set
             if(this.options.select_mode=='manager') this.options.select_mode='select_single';
             this.options.use_cache = true;
             this.options.use_structure = true; //use HEURIST4.remote.rectypes for import structures    

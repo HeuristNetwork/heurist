@@ -929,12 +929,6 @@ $mysqli->commit();
         preg_match("/db=([^&]*).*$/", $database_url, $match);
         $remote_dbname = $match[1];
 
-        // Feb 2018 - catch references to old http server and convert to new server (https://heuristplus ... from 2019)
-        if(strpos($database_url, 'http://heurist.sydney.edu.au/')===0){
-            $remote_url = HEURIST_MAIN_SERVER.'/';
-        }
-
-
         if(!$remote_dbname || !$remote_url){
             $this->system->addError(HEURIST_ERROR, 
                 "Heurist Master Index returns incorrect data for registered database # ".$database_id.

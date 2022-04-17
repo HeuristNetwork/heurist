@@ -1136,6 +1136,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
            window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard', entity_dialog_options);
         
         }else
+        if(action == "menu-help-online"){
+            
+            window.open( window.hWin.HAPI4.sysinfo.referenceServerURL+'?db=Heurist_Help_System&website', target );
+            
+        }else
         if(action == "menu-help-bugreport"){
             
            window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport');

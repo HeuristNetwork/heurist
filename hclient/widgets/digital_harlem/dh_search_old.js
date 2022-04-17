@@ -96,8 +96,8 @@ $.widget( "heurist.dh_search", {
 
     //CHURCHES    {"t":"12"},{"linkedfrom:90":[{"t":"16"},{"f:89":"4042"}]}
 
-    //https://heuristplus.sydney.edu.au/h4/hsapi/controller/record_search.php?db=digital_harlem&qa={"t":"11","linkedfrom:73":{"ids":"688,949,1231,1401,1642,1987,2299,2317,2338,2447,2829,2938,3410,3731,4039,4306,38435"}}
-    //https://heuristplus.sydney.edu.au/h4/hsapi/controller/record_search.php?db=digital_harlem&qa={%22t%22:%2211%22,%22linkedfrom:73%22:%22688,949,1231,1401,1642,1987,2299,2317,2338,2447,2829,2938,3410,3731,4039,4306,38435%22}
+    //../hsapi/controller/record_search.php?db=digital_harlem&qa={"t":"11","linkedfrom:73":{"ids":"688,949,1231,1401,1642,1987,2299,2317,2338,2447,2829,2938,3410,3731,4039,4306,38435"}}
+    //../hsapi/controller/record_search.php?db=digital_harlem&qa={%22t%22:%2211%22,%22linkedfrom:73%22:%22688,949,1231,1401,1642,1987,2299,2317,2338,2447,2829,2938,3410,3731,4039,4306,38435%22}
 
     /*
     1. go trough all fields with isfacet=true

@@ -102,7 +102,7 @@ Element with this name will be used as layout container for widget initializatio
 All other elements (#main-xxx) are optional.
 
 */    
-    
+
 if(!defined('PDIR')) {
     define('PDIR','../../../');  //need for proper path to js and css           
 }

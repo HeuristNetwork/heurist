@@ -791,12 +791,14 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
             $size = ' height="640" width="800" ';
         }
         
+        $iiif_type = $params['var'][0]['ulf_OrigFileName']; //image or manifest
+        
         $miradorViewer = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='
                     .HEURIST_DBNAME;
-        if($params['var'][0]['ulf_OrigFileName']=='_iiif_image'){
+        if($iiif_type=='_iiif_image' && @$params['var'][0]['rec_ID']>0){
             $miradorViewer = $miradorViewer.'&q=ids:'.$params['var'][0]['rec_ID'];
         }else{
-            $miradorViewer = $miradorViewer.'&iiif='.$fileid;
+            $miradorViewer = $miradorViewer.'&'.substr($iiif_type,1).'='.$fileid;
         }
         
         $result = '<iframe '.$size.$style.' src="'.$miradorViewer.'" frameborder="0"></iframe>';                        

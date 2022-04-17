@@ -1,7 +1,7 @@
 /**
 * bookmarkletSource.js: The source for the bookmarklet: this file is here to provide a reference
 *                       for the source, but is not referenced by any other file. The code is
-*                       duplicatd in: hclient/widgets/profile/profile_preferences.html, editPreferences.html and utilsLoad.js
+*                       duplicatd in: hclient/widgets/profile/profile_preferences.html
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -20,4 +20,4 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-javascript:(function(){h='https://heuristplus.sydney.edu.au/heurist/';d=document;c=d.contentType;if(c=='text/html'||!c){if(d.getElementById('__heurist_bookmarklet_div'))return Heurist.init();s=d.createElement('script');s.type='text/javascript';s.src=(h+'import/bookmarklet/bookmarkletPopup.php?'+new Date().getTime()).slice(0,-8);d.getElementsByTagName('head')[0].appendChild(s);}else{e=encodeURIComponent;w=open(h+'hclient/framecontent/recordEdit.php?t='+e(d.title)+'&u='+e(location.href));window.setTimeout('w.focus()',200);}})();
+javascript:(function(){h='https://replace to current server url';d=document;c=d.contentType;if(c=='text/html'||!c){if(d.getElementById('__heurist_bookmarklet_div'))return Heurist.init();s=d.createElement('script');s.type='text/javascript';s.src=(h+'import/bookmarklet/bookmarkletPopup.php?'+new Date().getTime()).slice(0,-8);d.getElementsByTagName('head')[0].appendChild(s);}else{e=encodeURIComponent;w=open(h+'hclient/framecontent/recordEdit.php?t='+e(d.title)+'&u='+e(location.href));window.setTimeout('w.focus()',200);}})();

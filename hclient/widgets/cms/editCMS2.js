@@ -209,7 +209,8 @@ function editCMS2(){
                                     +'<span style="float:right" class="heurist-helper1 page_tree">'
                                         +'Click to edit</span>'
                                     +'<span style="display:none" class="heurist-helper1 element_edit">'
-+'<a href="https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">website help</a>'
++'<a href="'+window.hWin.HAPI4.sysinfo.referenceServerURL
++'?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">website help</a>'
                                     +'</span>'
                                         
                                 +'</div>'
@@ -1738,8 +1739,10 @@ console.log('BLUR');
             
             new_ele = {name:'Media and text', type:'group', css:{display:'flex', 'justify-content':'center'},
                 children:[
-                {name:'Media', type:'text', css:{flex:'0 1 auto'}, content:"<p><img src=\"https://heuristplus.sydney.edu.au/heurist/hclient/assets/v6/logo.png\" width=\"300\"</p>"},
-                {name:'Text', type:'text', css:{flex:'1 1 auto'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"}
+                {name:'Media', type:'text', css:{flex:'0 1 auto'}, 
+                    content:"<p><img src=\""+window.hWin.HAPI4.sysinfo.referenceServerURL+"hclient/assets/v6/logo.png\" width=\"300\"</p>"},
+                {name:'Text', type:'text', css:{flex:'1 1 auto'}, 
+                    content:"<p>Lorem ipsum dolor sit amet ...</p>"}
                 ]
             };
             

@@ -3,7 +3,7 @@
 
 /**
 * registerDB.php - Registers the current database with Heurist_Master_Index database, 
-* on the Heurist master server (heurist.sydney.edu.au as at 2016, heuristplus.sydney.edu.au as at 2019), stores
+* on the Heurist master server (HEURIST_MAIN_SERVER), stores
 * metadata in the index database, sets registration code in sysIdentification table.
 *
 * @package     Heurist academic knowledge management system
@@ -203,9 +203,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             $is_SpecialAdminUseOnly = strlen(@$passwordForServerFunctions)>6 && 
             @$cuser['ugr_Preferences']['userCompetencyLevel']==0 &&
             HEURIST_INDEX_DATABASE=='Heurist_Master_Index' && 
-            (strpos(HEURIST_SERVER_URL, HEURIST_MAIN_SERVER)===0 ||
-            strpos(HEURIST_SERVER_URL, 'http://heurist.sydney.edu.au')===0) &&
-            strpos(HEURIST_INDEX_BASE_URL, HEURIST_MAIN_SERVER)===0;
+            strpos(HEURIST_SERVER_URL, HEURIST_MAIN_SERVER)===0;  //we are on main reference server
             
 ?>
 

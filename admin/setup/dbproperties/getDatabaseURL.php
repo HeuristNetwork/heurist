@@ -52,7 +52,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
             $error_msg = "Heurist Master Index returns incorrect data for registered database # ".$database_id.
             " The page may contain an invalid database reference (0 indicates no reference has been set)";
         }else{
-            $database_url = __replaceToLastServe($data['rec_URL']);
+            $database_url = $data['rec_URL'];
         }
     }
 
@@ -72,17 +72,9 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
             'select rec_Title, rec_URL from Records where rec_RecTypeID='.HEURIST_INDEX_DBREC.' and rec_ID='  //22
             .$database_id);
         if ($rec!=null){
-            $database_url = __replaceToLastServe(@$rec['rec_URL']);
+            $database_url = @$rec['rec_URL'];
             if($database_url==null || $database_url==''){
                 $error_msg = 'Database URL is not set Heurist Master Index for database ID#'.$database_id;
-            }
-            //fix registration bug
-            if(strpos($database_url,'http:///heuristplus')===0){
-                $database_url = 'https://'.substr($database_url,8); 
-            }else if(strpos($database_url,'http:///')===0){
-                $database_url = 'http://'.substr($database_url,8); 
-            }else if(strpos($database_url,'https:///')===0){
-                $database_url = 'https://'.substr($database_url,9); 
             }
                 
         }else{
@@ -107,18 +99,5 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
         }
         print json_encode($res);
     }
-}
-
-// Feb 2019: Redirect old calls to new server/address.
-function __replaceToLastServe($url){
-    if($url!=null){
-        if(strpos($url, 'http://heurist.sydney.edu.au')!==false){
-            $url = str_replace( 'http://heurist.sydney.edu.au', HEURIST_MAIN_SERVER, $url);
-        }else if(strpos($url, 'http:///heuristplus.sydney.edu.au')!==false || strpos($url, 'http://heuristplus.sydney.edu.au')!==false){
-            $url = str_replace( 'http://', 'https://', $url);    
-        }
-         
-     }
-    return $url;
 }
 ?>

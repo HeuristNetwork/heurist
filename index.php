@@ -41,7 +41,8 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         
         //embed - when heurist is run on page on non-heurist server
         if(array_key_exists('embed', $_REQUEST)){
-            define('PDIR','https://heuristplus.sydney.edu.au/heurist/');
+            require_once(dirname(__FILE__).'/hsapi/System.php');
+            define('PDIR', HEURIST_INDEX_BASE_URL);
         }else{
             define('PDIR','');    
         }
@@ -498,7 +499,10 @@ var fin_time = new Date().getTime() / 1000;
         </script>
 
 <?php 
-if(strpos('heuristplus', $_SERVER["SERVER_NAME"])===false){
+//do not use google analitics on heurist reference site
+if($_SERVER["SERVER_NAME"]!='127.0.0.1' && 
+   strpos('heuristplus', $_SERVER["SERVER_NAME"])===false && 
+   strpos('heurisref', $_SERVER["SERVER_NAME"])===false){
 ?>     
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-132203312-1"></script>

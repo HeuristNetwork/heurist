@@ -61,7 +61,7 @@ It is not used anywhere. This code either should be removed or re-implemented wi
             function receiveMessage(event)
             {
                 var message;
-                if (event.origin !== "https://Heuristplus.sydney.edu.au"){
+                if (event.origin !== $heuristReferenceServer){
                 //if (false) {
                     message = 'Your server ("' + event.origin + '") is not authorised';
                 } else {

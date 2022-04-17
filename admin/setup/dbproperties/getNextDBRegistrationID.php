@@ -95,11 +95,11 @@ if (!$serverURL || !$dbReg || !$dbTitle || !$usrEmail || !$usrName || !$usrFirst
 }
 
 if(strpos($serverURL_lc,'http://')===false && strpos($serverURL_lc,'https://')===false){
-    $serverURL = 'http://'.$serverURL;
+    $serverURL = 'https://'.$serverURL;  //https by default
     $serverURL_lc = strtolower($serverURL);
 }
 
-if(strpos($serverURL_lc, '//localhost')>0 ||  strpos($serverURL_lc, '//127.0.0.1')>0){
+if(strpos($serverURL_lc, '//localhost')>0 ||  strpos($serverURL_lc, '//127.0.0.1')>0 || strpos($serverURL_lc, '//web.local')>0){
     echo '0,Impossible to register database from local server '.$serverURL;
     return;
 }
@@ -108,8 +108,7 @@ define("HEURIST_DB_DESCRIPTOR_RECTYPE", 22); // the record type for database (co
 
 if($newid>0){ 
 
-    if(!(strpos($serverURL_lc, HEURIST_MAIN_SERVER)===0
-        || strpos($serverURL_lc, 'http://heurist.sydney.edu.au')===0)){ 
+    if(!(strpos($serverURL_lc, HEURIST_MAIN_SERVER)===0)){ 
     
         echo '0,It is possible to assign arbitrary ID for databases on heurist servers only';
         return;

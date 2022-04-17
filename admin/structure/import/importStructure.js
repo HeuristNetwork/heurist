@@ -422,18 +422,7 @@ $.widget( "heurist.importStructure", {
             
 
             this._selectedDB = sDB_ID;
-/*
-            if(sURL.indexOf('http://heurist.sydney.edu.au/')==0 ||
-               sURL.indexOf('https://heuristplus.sydney.edu.au/')==0){
-                sURL = 'https://heuristplus.sydney.edu.au/heurist/'    
-            }
-*/            
-            if(sURL.indexOf('heurist.sydney.edu.au/')>0 ||
-               sURL.indexOf('heuristplus.sydney.edu.au/')>0){
-                sURL = 'https://heuristplus.sydney.edu.au/heurist/'    
-            }
 
-            
             this.element.find('#h_source_rty').text('Entities available in '+sDB_ID+':'+sDB);
 
             var options = {

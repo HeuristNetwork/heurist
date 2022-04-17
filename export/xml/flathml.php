@@ -1160,8 +1160,6 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         $record = recordSearchByID($system, $recID);//see db_recsearch
     }
 
-//https://heuristplus.sydney.edu.au/h5-ao/export/xml/flathml.php?q=ids%3A44519%20&rules=%5B%7B%22query%22%3A%22t%3A31%20linkedfrom%3A10-83%20%22%7D%2C%7B%22query%22%3A%22t%3A28%20linkedfrom%3A10-87%20%22%7D%2C%7B%22query%22%3A%22t%3A29%20linkedfrom%3A10-88%20%22%2C%22levels%22%3A%5B%7B%22query%22%3A%22t%3A25%20linkedfrom%3A29-78%20%22%7D%5D%7D%2C%7B%22query%22%3A%22t%3A33%20linkedfrom%3A10-95%20%22%2C%22levels%22%3A%5B%7B%22query%22%3A%22t%3A25%20linkedfrom%3A33-78%20%22%7D%2C%7B%22query%22%3A%22t%3A25%20linkedfrom%3A33-96%20%22%7D%2C%7B%22query%22%3A%22t%3A25%20linkedfrom%3A33-141%20%22%7D%5D%7D%2C%7B%22query%22%3A%22t%3A27%20linkedfrom%3A10-102%20%22%2C%22levels%22%3A%5B%7B%22query%22%3A%22t%3A26%20linkedfrom%3A27-97%20%22%2C%22levels%22%3A%5B%7B%22query%22%3A%22t%3A25%20linkedfrom%3A26-78%20%22%7D%5D%7D%5D%7D%2C%7B%22query%22%3A%22t%3A24%20linkedfrom%3A10-103%20%22%2C%22levels%22%3A%5B%7B%22query%22%3A%22t%3A25%20linkedfrom%3A24-78%20%22%7D%5D%7D%2C%7B%22query%22%3A%22t%3A24%20linkedfrom%3A10-79%20%22%2C%22levels%22%3A%5B%7B%22query%22%3A%22t%3A25%20linkedfrom%3A24-78%20%22%7D%5D%7D%2C%7B%22query%22%3A%22t%3A26%20linkedfrom%3A10-146%20%22%7D%2C%7B%22query%22%3A%22relatedfrom%3A10%20%22%7D%5D&a=1&db=ExpertNation&depth=1&stub=1
-
     $filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
 
     if (isset($filter) && !in_array($record['rec_RecTypeID'], $filter)) {
@@ -2065,9 +2063,9 @@ if($intofile){ // flags HuNI manifest + separate files per record
 
     /*  TODO: The schema locations are clearly rubbish
     openTag('hml', array(
-    'xmlns' => 'https://Heuristplus.sydney.edu.au/heurist/hml',
+    'xmlns' => '<?pho echo HEURIST_INDEX_BASE_URL;?>hml',
     'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-    'xsi:schemaLocation' => 'https://Heuristplus.sydney.edu.au/heurist/hml https://Heuristplus.sydney.edu.au/heurist/schemas/hml.xsd')
+    'xsi:schemaLocation' => '<?pho echo HEURIST_INDEX_BASE_URL;?>hml <?pho echo HEURIST_INDEX_BASE_URL;?>schemas/hml.xsd')
     );
     */
     makeTag('database', array('id' => $dbID ), HEURIST_DBNAME);

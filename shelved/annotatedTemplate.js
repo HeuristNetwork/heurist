@@ -177,9 +177,9 @@ window.attachEvent("onmessage", receiveMessage);
 function receiveMessage(event)
 {
 var message;
-//if (event.origin !== "https://Heuristplus.sydney.edu.au"){
+//if (event.origin !== $heuristReferenceServer){
 if (false) {
-message = 'Response: ("' + event.origin + '"), but not from Heuristplus.sydney.edu.au';
+message = 'Response: ("' + event.origin + '"), but not from Huerist Reference server';
 } else {
 
 var dv = jQuery('#HeuristRecTypeSource');

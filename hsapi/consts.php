@@ -21,15 +21,18 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
 // TODO: Rationalise the duplication of constants across /php/consts.php and /common/connect/initialise.php
 //       in particualr this duplication of HEURIST_MIN_DB_VERSION and any other explicit constants
 
 define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
 define('HEURIST_MIN_DBVERSION', "1.3.0"); //minimal version of db for current version of code
 
-define('HEURIST_MAIN_SERVER', 'https://heuristplus.sydney.edu.au');
-define('HEURIST_INDEX_BASE_URL', 'https://heuristplus.sydney.edu.au/heurist/'); //central index database url
+if(!@$heuristReferenceServer){
+    $heuristReferenceServer = 'https://heuristplus.sydney.edu.au';  //default value
+}
+
+define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
+define('HEURIST_INDEX_BASE_URL', $heuristReferenceServer.'/heurist/'); //central index database url
 define('HEURIST_INDEX_DBREC', 22);
 /*debug
 define('HEURIST_MAIN_SERVER', 'http://127.0.0.1');
@@ -37,7 +40,7 @@ define('HEURIST_INDEX_BASE_URL', 'http://127.0.0.1/h5-ao/'); //central index dat
 define('HEURIST_INDEX_DBREC', 49);
 */
 define('HEURIST_INDEX_DATABASE', 'Heurist_Master_Index');
-define('HEURIST_HELP', "https://heuristplus.sydney.edu.au/heurist/help");
+define('HEURIST_HELP', $heuristReferenceServer.'/heurist/help');
 
 if (@$httpProxy != '') {
     define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
@@ -95,13 +98,13 @@ if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path differ
 }
 
 define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
-define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configured name, eg. Heuristplus.sydney.edu.au
+define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configured name, eg. myheurist.net
 if(!defined('HEURIST_DIR')) define('HEURIST_DIR', @$_SERVER["DOCUMENT_ROOT"] . $installDir); //  eg. /var/www/html/HEURIST @todo - read simlink (realpath)
 define('HEURIST_SERVER_URL', $serverBaseURL);
-define('HEURIST_BASE_URL', $serverBaseURL . $installDir  ); // eg. https://heuristplus.sydney.edu.au/heurist/
+define('HEURIST_BASE_URL', $serverBaseURL . $installDir  ); // eg. https://myheurist.net/heurist/
 
 
-define('HEURIST_BASE_URL_PRO', $serverBaseURL . $installDir_pro ); // production url eg. https://heuristplus.sydney.edu.au/heurist/
+define('HEURIST_BASE_URL_PRO', $serverBaseURL . $installDir_pro ); // production url eg. https://myheurist.net/heurist/
 
 
 define('HEURIST_SCRATCHSPACE_DIR', sys_get_temp_dir());
