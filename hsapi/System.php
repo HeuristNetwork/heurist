@@ -1058,6 +1058,7 @@ error_log(print_r($_REQUEST, true));
                     "db_total_records"=>$this->get_system('sys_RecordCount'),
                     "db_usergroups"=> user_getAllWorkgroups($this->mysqli), //all groups- to fast retrieve group name
                     "baseURL"=>HEURIST_BASE_URL,
+                    //"serverURL"=>HEURIST_SERVER_URL,
                     "referenceServerURL"=>HEURIST_INDEX_BASE_URL,
                     "dbconst"=>$this->getLocalConstants( $include_reccount_and_dashboard_count ), //some record and detail types constants with local values specific for current db
                     "service_config"=>$this->get_system('sys_ExternalReferenceLookups'), //get 3d part web service mappings

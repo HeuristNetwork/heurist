@@ -357,7 +357,23 @@ content = content.replace('http://heurist.sydney.edu.au/heurist/',window.hWin.HA
             ele.empty()
             .css({"min-height": '430px', 'max-height': '430px'})
             .load(window.hWin.HAPI4.baseURL+'hclient/widgets/expertnation/udelaide_roll_images.html',
-                function(){ that.__initGalleryContainer(ele) } );
+                function(){ 
+
+                    //var serv = window.hWin.HAPI4.serverURL+'/HEURIST/';
+                    var serv = window.hWin.HAPI4.baseURL_pro.replace('/heurist/','/HEURIST/');
+                    var selector = '.gallery-slideshow > a[data-fancybox="home-roll-images"]';
+                    ele.find(selector).each(function(i,item){
+                       var v = $(item).attr('href');
+                       if(v.indexOf('HEURIST_FILESTORE/ExpertNation')==0){
+                           $(item).attr('href', serv+v);
+                           var item2 = $(item).find('img.bor-thumbnail');
+                           v = $(item).attr('src');
+                           item2.attr('src', serv+v);
+                       }
+                    });
+
+                    that.__initGalleryContainer(ele) 
+                } );
 
         }
 

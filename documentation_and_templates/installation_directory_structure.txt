@@ -23,8 +23,8 @@ SUMMARY:
     /var/www/html                           Optional: place simlinks in web root to shorten URL paths
 
                     heurist                 Simlink to .../HEURIST/heurist
-                    h6-xx                   Simlinks to .../HEURIST/h6-ao, h6-ij, etc.
-                    h6-alpha                Simlinks to the latest development version eg. h6-ao
+                    h6-xx                   Simlinks to developers versions
+                    h6-alpha                Simlinks to the latest development version
                     
     /var/www/html/HEURIST/                  All Heurist files are in this directory 
                                             (the file store, se below, is normally a simlink))
@@ -62,9 +62,8 @@ SUMMARY:
 ---------------------------------------------------------------------------------------------------------
 
 Heurist instances:      .../HEURIST/heurist
-                        .../HEURIST/h5-beta
-                        .../HEURIST/h5-alpha
-                        .../HEURIST/h5-ao
+                        .../HEURIST/h6-beta
+                        .../HEURIST/h6-alpha
                         .../HEURIST/h5-ij
 
             These are normally database-compatible, allowing switch between instances eg. to access

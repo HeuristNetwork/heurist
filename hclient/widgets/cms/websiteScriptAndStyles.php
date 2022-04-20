@@ -664,14 +664,6 @@ function afterPageLoad(document, pageid, eventdata){
         });
         s = spath + '?' + s.join('&'); 
         
-/* OLD       
-        var s = spath + '?db='
-                +window.hWin.HAPI4.database+'&website&id='+home_page_record_id;
-        if(pageid!=home_page_record_id){
-                s = s + '&pageid='+pageid;
-        }
-*/        
-        //http://127.0.0.1/h6-ao/?db=osmak_9b&website&id=7&noticeID=789
 
         window.history.pushState("object or string", "Title", s);
         

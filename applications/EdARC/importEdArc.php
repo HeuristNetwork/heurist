@@ -1,6 +1,5 @@
 <?php
 /**
-* http://127.0.0.1/h6-ao/applications/EdArc/importEdArc.php
 * import EdArc database structure
 * 
 * configuration is included into this script

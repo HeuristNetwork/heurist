@@ -45,7 +45,7 @@ $entities = array(
 'login'=>'System',
 'logout'=>'System'
 );
-//  http://127.0.0.1/h5-ao/api/fieldgroups/?db=osmak_5
+
 //records 
     //controlles:    
     //record_batch - batch actions for records

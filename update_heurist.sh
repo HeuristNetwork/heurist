@@ -15,6 +15,10 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 # See the License for the specific language governing permissions and limitations under the License.
 
+# installation source: Heurist reference server
+
+ref_server=http://139.99.198.79
+
 # -------------PRELIMINARIES ---------------------------------------------------------------------------------------------
 
 
@@ -23,12 +27,12 @@ if [ -z $1 ]
    then
       echo "Usage: ./update_heurist.sh hx.X.X.beta [sudo]"
       echo "Please supply version eg. hx.x.x.beta (this MUST exist as a tar.bz2 file "
-      echo "on https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION or script will not download the Heurist code package)"
+      echo "on $ref_server/HEURIST/DISTRIBUTION or script will not download the Heurist code package)"
       exit
    fi
 
 # Test download package is valid before we get half way and can't find it ...
-if ! curl -fs --range 0-100 https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null; then
+if ! curl -fs --range 0-100 $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null; then
         echo "The version parameter you supplied does not point to a Heurist installation package"
         echo "Please check for the latest version at HeuristNetwork.org/installation"
         echo "The parameter should be eg. h5.2.1.beta as given - DO NOT include the url path or .tar.bz2"
@@ -48,10 +52,10 @@ cd /var/www/html/HEURIST
 $2 mkdir -p temp
 cd temp
 
-echo "Fetching Heurist code from heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2"
+echo "Fetching Heurist code from $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2"
 echo
 $2 rm -f $1.tar.bz2
-$2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2
+$2 curl -O# $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2
 $2 tar -xjf $1.tar.bz2
 $2 rm -f $1.tar.bz2
 # remove existing directroy if present then make directory and copy over Heurist
@@ -65,17 +69,17 @@ echo
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
 $2 rm -f external_h5.tar.bz2
-$2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2
+$2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2
 $2 tar -xjf external_h5.tar.bz2
 $2 rm -f external_h5.tar.bz2
 
 $2 rm -f vendor.tar.bz2
-$2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/vendor.tar.bz2
+$2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/vendor.tar.bz2
 $2 tar -xjf vendor.tar.bz2
 $2 rm -f vendor.tar.bz2
 
 $2 rm -f help.tar.bz2
-$2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
+$2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
 $2 tar -xjf help.tar.bz2
 $2 rm -f help.tar.bz2
 
@@ -98,7 +102,7 @@ echo "Heurist unpacked"
 # We are therefore removing it pending investigation. Sept 2014
 # $2 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
 # cd /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
-# $2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2.tar.gz
+# $2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2.tar.gz
 # $2 tar -zxvf elasticsearch-1.3.2.tar.gz
 # cd  /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2
 # ./bin/elasticsearch -d

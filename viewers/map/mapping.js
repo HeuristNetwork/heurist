@@ -622,7 +622,7 @@ $.widget( "heurist.mapping", {
             new_layer = new MapTilerLayer(layer_url, layer_options).addTo(this.nativemap);  
 
             /*            
-              layer_url = 'http://127.0.0.1/h5-ao/external/php/tileserver.php?/index.json?/c:/xampp/htdocs/HEURIST_FILESTORE/tileserver/mapa/{z}/{x}/{y}.png';
+              layer_url = 'http://127.0.0.1/heurist/external/php/tileserver.php?/index.json?/c:/xampp/htdocs/HEURIST_FILESTORE/tileserver/mapa/{z}/{x}/{y}.png';
               new_layer = new HeuristTilerLayer(layer_url,
                layer_options).addTo(this.nativemap);         
             */

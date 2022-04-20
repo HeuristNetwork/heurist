@@ -2516,8 +2516,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
     showEditCMSwin: function( options ){
         
         var surl = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&website&pageid=';
-        //http://127.0.0.1/h6-ao/?db=osmak_9b&website&id=7&pageid=336#
-        
+       
         if( window.hWin.HEURIST4.util.isNumber( options ) ){
             surl = surl + options;
         }else{

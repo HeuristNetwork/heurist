@@ -4,7 +4,7 @@ Directory:	/redirects
 Overview:
 
 This directory contains redirector files to the functions which are called across servers,
-notably to the Heurist Master Index Server (HeuristPlus.sydney.edu.au).
+notably to the Heurist Master Index Server.
 
 By using these redirectors, we avoid dependency on scripts remaining in the same location  eg. if the program code is restructured or new versions are written. That means that a newer, restructured version of
 the code can be accessed by an older version on a remote server, without the latter seeing any difference.

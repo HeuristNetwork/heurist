@@ -16,6 +16,11 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 # See the License for the specific language governing permissions and limitations under the License.
 
+# installation source: Heurist reference server
+
+ref_server=http://139.99.198.79
+
+
 # -------------PRELIMINARIES ---------------------------------------------------------------------------------------------
 
 echo -e "\n\n\n\n\n\n\n\n\n\n\n\n"
@@ -27,7 +32,7 @@ if [ -z $1 ]
    then
       echo -e "\n\n"
       echo "Please supply version eg. h5.x.x.alpha (this MUST exist as a tar.bz2 file "
-      echo "on Heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION or script will not download the Heurist code package)."
+      echo "on $ref_server/HEURIST/DISTRIBUTION or script will not download the Heurist code package)."
       echo "If you are not the root user, supply 'sudo' as the second argument eg.  "
       echo
       echo "       ./install_heurist.sh h5.0.0.beta sudo"
@@ -35,7 +40,7 @@ if [ -z $1 ]
    fi
 
 # Test download package is valid before we get half way and can't find it ...
-curl --range 0-100 https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null 2>&1
+curl --range 0-100 $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null 2>&1
 
 rc=$?
 if [ $rc -ne 0 ]
@@ -74,8 +79,8 @@ $2 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT
 cd /var/www/html/HEURIST
 $2 mkdir temp
 cd /var/www/html/HEURIST/temp
-echo -e "Fetching Heurist code from Heuristplus.sydney.edu.au"
-$2 wget https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2
+echo -e "Fetching Heurist code from $ref_server"
+$2 wget $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2
 $2 tar -xjf $1.tar.bz2
 $2 rm -f $1.tar.bz2
 
@@ -86,15 +91,15 @@ $2 rm -rf $1
 
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
-$2 wget https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2
+$2 wget $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2
 $2 tar -xjf external_h5.tar.bz2
 $2 rm -f external_h5.tar.bz2
 
-$2 wget https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/vendor.tar.bz2
+$2 wget $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/vendor.tar.bz2
 $2 tar -xjf vendor.tar.bz2
 $2 rm -f vendor.tar.bz2
 
-$2 wget https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
+$2 wget $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
 $2 tar -xjf help.tar.bz2
 $2 rm -f help.tar.bz2
 

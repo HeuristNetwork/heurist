@@ -34,11 +34,7 @@ if(!@$heuristReferenceServer){
 define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
 define('HEURIST_INDEX_BASE_URL', $heuristReferenceServer.'/heurist/'); //central index database url
 define('HEURIST_INDEX_DBREC', 22);
-/*debug
-define('HEURIST_MAIN_SERVER', 'http://127.0.0.1');
-define('HEURIST_INDEX_BASE_URL', 'http://127.0.0.1/h5-ao/'); //central index database url
-define('HEURIST_INDEX_DBREC', 49);
-*/
+
 define('HEURIST_INDEX_DATABASE', 'Heurist_Master_Index');
 define('HEURIST_HELP', $heuristReferenceServer.'/heurist/help');
 
