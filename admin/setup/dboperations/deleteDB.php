@@ -117,7 +117,7 @@ If you got as far as creating a database but did not know how to proceed you are
 
 With a brand new interface in 2021, developed in collaboration with an experienced UX designer, Heurist is significantly easier to use than previous versions. The new interface (version 6) remains compatible with databases created more than 10 years ago - we believe in sustainability.
  
-Please contact us if you need your database re-enabled or visit one of our free servers to create a new database (heuristplus.Sydney.edu.au/heurist/startup worldwide or heurist.Huma-Num.fr/heurist/startup for European users).
+Please contact us if you need your database re-enabled or visit one of our free servers to create a new database (visit HeuristNetwork dot org).
  
 Heurist is research-led and responds rapidly to evolving user needs - we often turn around small user suggestions (and most bug-fixes) in a day and larger ones within a couple of weeks. We are still forging ahead with new capabilities such as enhancements to the integrated CMS website builder, new output formats, improved data exchange through XML, JSON, remote resource lookups and linked open data, and improved search, mapping and visualisation widgets (embeddable in websites). 
  
