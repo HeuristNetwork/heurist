@@ -1143,9 +1143,9 @@ if($active_all || in_array('date_values', $active)) {
 
         <?php
 
-        $res = $mysqli->query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_RecTypeID, a.rec_Title, a.rec_Added
-            from recDetails, defDetailTypes, Records a
-            where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
+        $res = $mysqli->query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_RecTypeID, a.rec_Title, a.rec_Added, rst_DisplayName
+            from recDetails, defDetailTypes, defRecStructure, Records a
+            where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (rst_DetailTypeID = dty_ID) and (rst_RecTypeID = a.rec_RecTypeID) and (a.rec_FlagTemporary!=1)
         and (dty_Type = "date") and (dtl_Value is not null)');
 
         $wassuggested = 0;
@@ -1288,7 +1288,8 @@ if($active_all || in_array('date_values', $active)) {
                                 <?= $row['dtl_RecID'] ?>
                                 <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                             </a></td>
-                        <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
+                        <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
+                        <td class="truncate" style="max-width:150px;min-width:50px"><?=strip_tags($row['rst_DisplayName']) ?></td>
                         <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
                         <td><?= ($row['new_value']=='remove'?'=>&nbsp;removed':('=>&nbsp;&nbsp;'.$row['new_value'])) ?></td>
                     </tr>
@@ -1321,6 +1322,7 @@ if($active_all || in_array('date_values', $active)) {
                                 <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                             </a></td>
                         <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
+                        <td class="truncate" style="max-width:150px;min-width:50px"><?=strip_tags($row['rst_DisplayName']) ?></td>
                         <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
                     </tr>
                     <?php
@@ -1343,7 +1345,8 @@ if($active_all || in_array('date_values', $active)) {
                                         <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                                     </a>
                                 </td>
-                                <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
+                                <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
+                                <td class="truncate" style="max-width:150px;min-width:50px"><?=strip_tags($row['rst_DisplayName']) ?></td>
                                 <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
                             </tr>
                             <?php
@@ -1415,7 +1418,8 @@ if($active_all || in_array('date_values', $active)) {
                             <?= $row['dtl_RecID'] ?>
                             <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                         </a></td>
-                    <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
+                    <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
+                    <td class="truncate" style="max-width:150px;min-width:50px"><?=strip_tags($row['rst_DisplayName']) ?></td>
                     <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
                     <td class="new_date"><?php print '=>&nbsp;&nbsp;'.$row['new_value']; ?></td>
                 </tr>
