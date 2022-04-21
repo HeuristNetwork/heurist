@@ -285,6 +285,9 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
 
             }
 
+            // remove old mysql dump - specifically the ones named HEURIST_DBNAME_FULL.sql
+            if(file_exists($folder.'/'.HEURIST_DBNAME_FULL.'.sql')) unlink($folder.'/'.HEURIST_DBNAME_FULL.'.sql');
+
             // Create a zipfile of the definitions and data which have been dumped to disk
             $destination = $folder.'.zip';
             if(file_exists($destination)) unlink($destination);
