@@ -21,7 +21,7 @@
 # See the License for the specific language governing permissions and limitations under the License.
 
 if [ -z $1 ]
-   then echo "Usage:   sudo ./copy_distribution_files.sh. h5.x.x.xxxx   - insert appropriate sub-versions and alpha or beta in x.x-xxxx"
+   then echo "Usage:   sudo ./copy_distribution_files.sh. h6.x.x   - insert appropriate sub-versions in x.x-xxxx, or specig h6-alpha or h6-beta"
    exit
    fi
 
@@ -69,8 +69,8 @@ cp -r *.* /var/www/html/HEURIST/heurist-build/$1
 # Remember to add any new directories here
 
 cp -r admin /var/www/html/HEURIST/heurist-build/$1
+cp -r api /var/www/html/HEURIST/heurist-build/$1
 cp -r applications /var/www/html/HEURIST/heurist-build/$1
-cp -r common /var/www/html/HEURIST/heurist-build/$1
 cp -r context_help /var/www/html/HEURIST/heurist-build/$1
 cp -r documentation_and_templates /var/www/html/HEURIST/heurist-build/$1
 cp -r export /var/www/html/HEURIST/heurist-build/$1
@@ -80,8 +80,11 @@ cp -r import /var/www/html/HEURIST/heurist-build/$1
 cp -r installers  /var/www/html/HEURIST/heurist-build/$1
 cp -r records  /var/www/html/HEURIST/heurist-build/$1
 cp -r redirects /var/www/html/HEURIST/heurist-build/$1
-cp -r viewers /var/www/html/HEURIST/heurist-build/$1
 cp -r startup /var/www/html/HEURIST/heurist-build/$1
+cp -r viewers /var/www/html/HEURIST/heurist-build/$1
+
+# No longer present at 20/4/22 - probably long gone ... 
+# cp -r common /var/www/html/HEURIST/heurist-build/$1
 
 echo
 echo NEW DIRECTOREIS? HAVE YOU UPDATED LIST?
@@ -132,4 +135,3 @@ echo Distribution $1.tar.bz2 built. DO NOT CHANGE THE NAME of the tar.bz2 file -
 echo of this name and the installation is dependant on the filename parameter to find this folder
 echo
 echo
-

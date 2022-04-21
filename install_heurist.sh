@@ -8,7 +8,7 @@
 # @copyright   (C) 2005-2019 University of Sydney
 # @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 # @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-# @version     5.0
+# @version     6
 
 # Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
@@ -34,7 +34,7 @@ if [ -z $1 ]
       echo "on $ref_server/HEURIST/DISTRIBUTION or script will not download the Heurist code package)."
       echo "If you are not the root user, supply 'sudo' as the second argument eg.  "
       echo
-      echo "       ./install_heurist.sh h5.0.0.beta sudo"
+      echo "       ./install_heurist.sh h6.1.1 sudo"
       exit
    fi
 
