@@ -305,7 +305,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     //
     // Add group headers to record viewer
     //
-    function createRecordGroups(groups){ console.log('called group create'); console.log(groups);
+    function createRecordGroups(groups){
 
         var $group_container = $('div#div_public_data');
         var $data = $group_container.find('div[data-order]');
