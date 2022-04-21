@@ -402,7 +402,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     //
     getSettings: function( mode_action ){
 
-            var header_fields = {id:'rec_ID',title:'rec_Title',url:'rec_URL',modified:'rec_Modified',tags:'rec_Tags'};
+            var header_fields = {ids:'rec_ID', title:'rec_Title', url:'rec_URL', modified:'rec_Modified', tag:'rec_Tags', 
+                typeid: 'rec_RecTypeID', typename: 'rec_RecTypeName', added: 'rec_Added', addedby: 'rec_AddedByUGrpID', 
+                owner: 'rec_OwnerUGrpID', access: 'rec_NonOwnerVisibility', notes: 'rec_ScratchPad'};
+
             function __removeLinkType(dtid){
                 if(header_fields[dtid]){
                     dtid = header_fields[dtid];

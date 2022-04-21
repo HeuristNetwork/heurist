@@ -385,6 +385,10 @@ function output_CSV($system, $data, $params){
     if($fields){
         foreach($fields as $rt=>$flds){
 
+            if($flds[1] == 'rec_ID'){ // flip, so rec id is first
+                list($flds[0], $flds[1]) = [$flds[1], $flds[0]];
+            }
+
             //always include ID field into output
             if($flds[0]!='rec_ID') array_unshift($flds, 'rec_ID');
             $fields[$rt] = $flds;
@@ -806,6 +810,8 @@ function output_CSV($system, $data, $params){
                 $value = recordSearchPersonalTags($system, $recID);
                 $value = ($value===null)?'':implode($csv_mvsep, $value);
 
+            }else if ($dt_id=='rec_RecTypeName'){
+                $value = $defRecTypes['names'][$rty_ID];
             }else{
                 $value = @$record[$dt_id]; //from record header
             }
@@ -962,7 +968,11 @@ function output_HeaderOnly($system, $data, $params)
     $terms_pickup = array();
     if($fields){
         foreach($fields as $rt=>$flds){
-            
+
+            if($flds[1] == 'rec_ID'){ // flip, so rec id is first
+                list($flds[0], $flds[1]) = [$flds[1], $flds[0]];
+            }
+
             //always include ID field into output
             if($flds[0]!='rec_ID') array_unshift($flds, 'rec_ID');
             $fields[$rt] = $flds;
