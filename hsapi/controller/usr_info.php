@@ -100,6 +100,17 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
         
 //        error_log('FAILED INIT SYSTEM');        
         
+    }else if($action == 'check_allow_cms'){ // check if CMS creation is allow on current server - $allowCMSCreation set in heuristConfigIni.php
+
+        if(isset($allowCMSCreation) && $allowCMSCreation == -1){
+
+            $msg = 'Due to security restrictions, website creation is blocked on this server.<br>Please ' . CONTACT_HEURIST_TEAM . ' if you wish to create a website.';
+
+            $system->addError(HEURIST_ACTION_BLOCKED, $msg);
+            $res = false;
+        }else{
+            $res = 1;
+        }
     }else{
         
         $mysqli = $system->get_mysqli();

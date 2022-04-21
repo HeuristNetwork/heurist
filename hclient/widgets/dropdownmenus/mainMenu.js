@@ -833,66 +833,88 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
         }else if(action == "menu-cms-create"){
 
-            var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+            window.hWin.HAPI4.SystemMgr.check_allow_cms({a:'check_allow_cms'}, function(response){
 
-            that._getCountWebSiteRecords(function(){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
 
-                if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
+                    that._getCountWebSiteRecords(function(){
 
-                    sMsg = 'You already have '+
-                    ((that.cms_home_records_count==1)?'a website'
-                        :(that.cms_home_records_count+' websites'))+
-                    '. Are you sure you want to create an additional site?';
+                        if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
 
-                    if(that.sMsgCmsPrivate!=''){
-                        sMsg = sMsg + that.sMsgCmsPrivate;    
-                    }
+                            sMsg = 'You already have '+
+                            ((that.cms_home_records_count==1)?'a website'
+                                :(that.cms_home_records_count+' websites'))+
+                            '. Are you sure you want to create an additional site?';
 
+                            if(that.sMsgCmsPrivate!=''){
+                                sMsg = sMsg + that.sMsgCmsPrivate;    
+                            }
+
+                        }else{
+                            sMsg = 'Are you sure you want to create a site?';
+                        }
+
+                        sMsg = sMsg 
+                        + '<p>Check the box if you wish to keep your website private '
+                        + '<br><input type="checkbox"> hide website (can be changed later)</p>';
+
+                        var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
+                            function(){ 
+                                var chb = $dlg.find('input[type="checkbox"]');
+                                var is_private = chb.is(':checked');
+                                
+                                popup_dialog_options.record_id = -1;
+                                popup_dialog_options.webpage_private = is_private;
+                                
+                                window.hWin.HEURIST4.ui.showEditCMSDialog(popup_dialog_options); 
+                            },
+                            window.hWin.HR('New website'),
+                            {default_palette_class: 'ui-heurist-publish'});
+
+                        }
+                    );
                 }else{
-                    sMsg = 'Are you sure you want to create a site?';
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
-
-                sMsg = sMsg 
-                + '<p>Check the box if you wish to keep your website private '
-                + '<br><input type="checkbox"> hide website (can be changed later)</p>';
-
-                var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
-                    function(){ 
-                        var chb = $dlg.find('input[type="checkbox"]');
-                        var is_private = chb.is(':checked');
-                        
-                        popup_dialog_options.record_id = -1;
-                        popup_dialog_options.webpage_private = is_private;
-                        
-                        window.hWin.HEURIST4.ui.showEditCMSDialog(popup_dialog_options); 
-                    },
-                    window.hWin.HR('New website'),
-                    {default_palette_class: 'ui-heurist-publish'});
-
-                }
-            );
+            });
 
         }
         else if(action == "menu-cms-create-page"){
             
-                that._create_WebPage( popup_dialog_options );    
+            window.hWin.HAPI4.SystemMgr.check_allow_cms({a:'check_allow_cms'}, function(response){
+
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    that._create_WebPage( popup_dialog_options );    
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
 
         }else if(action == 'menu-cms-edit-page' || action == 'menu-cms-view-page'){
-                
-                if(popup_dialog_options.record_id>0){
-                        window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options );                    
-                }else{
-                    that._getCountWebPageRecords(function( count ){
-                        if(count>0){ 
-                            //select
-                            that._select_WebPage( (action == 'menu-cms-view-page'), popup_dialog_options );    
-                        }else{
-                            //create
-                            that._create_WebPage( popup_dialog_options );    
-                        }
-                    });
-                }
-                    
+
+            if(popup_dialog_options.record_id>0){
+                window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options );                    
+            }else{
+                that._getCountWebPageRecords(function( count ){
+                    if(count>0){ 
+                        //select
+                        that._select_WebPage( (action == 'menu-cms-view-page'), popup_dialog_options );    
+                    }else{
+
+                        window.hWin.HAPI4.SystemMgr.check_allow_cms({a:'check_allow_cms'}, function(response){
+
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                //create
+                                that._create_WebPage( popup_dialog_options );
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                        });
+                    }
+                });
+            }
+
         }else if(action == 'menu-cms-edit'){
 
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
@@ -923,7 +945,16 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             popup_dialog_options.record_id = -1;
                             window.hWin.HEURIST4.msg.showMsgDlg(
                                     'New website will be created. Continue?',
-                                    function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options ); },
+                                    function(){
+                                        window.hWin.HAPI4.SystemMgr.check_allow_cms({a:'check_allow_cms'}, function(response){
+
+                                            if(response.status == window.hWin.ResponseStatus.OK){
+                                                window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options ); 
+                                            }else{
+                                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                                            }
+                                        });
+                                    },
                                     null,
                                     {default_palette_class: 'ui-heurist-publish'});
                         }
@@ -951,7 +982,16 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         popup_dialog_options.record_id = -1;
                         window.hWin.HEURIST4.msg.showMsgDlg(
                                 'New website will be created. Continue?',
-                                function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options ); },
+                                function(){ 
+                                    window.hWin.HAPI4.SystemMgr.check_allow_cms({a:'check_allow_cms'}, function(response){
+
+                                        if(response.status == window.hWin.ResponseStatus.OK){
+                                            window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options ); 
+                                        }else{
+                                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                                        }
+                                    });
+                                },
                                 null,
                                 {default_palette_class: 'ui-heurist-publish'});
                     }else{
@@ -1798,8 +1838,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     //create new web page
                     window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options );
                 }
-            },                    
-            window.hWin.HR('New standalone web page'),
+            },
+            {title: window.hWin.HR('New standalone web page'), yes: window.hWin.HR('Create'), no: window.hWin.HR('Cancel')},
             {default_palette_class: 'ui-heurist-publish'});
     },
     

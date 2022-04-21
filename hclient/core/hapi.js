@@ -888,6 +888,14 @@ prof =Profile
                 _callserver('usr_info', request, callback);
             },
             
+            // check if cms creation is enabled
+            check_allow_cms: function(request, callback){
+                if(!request || !request.a){
+                    request = {a:'check_allow_cms'};
+                }
+                _callserver('usr_info', request, callback);
+            },
+
             //manipulation with folders in database folder
             get_sysfolders: function(request, callback){
                 if(!request) request = {};

@@ -389,23 +389,21 @@ $.widget( "heurist.embedDialog", {
             }else{
                 
                 var that = this;
-                //create new web page
-                this.options.cms_popup_dialog_options.record_id = -2;
-                this.options.cms_popup_dialog_options.webpage_title = layout_name;
-                window.hWin.HEURIST4.ui.showEditCMSDialog( this.options.cms_popup_dialog_options );
-                /*
-                    callback: function(rec_id, rec_title){
-                        if(rec_id>0){
-                            window.hWin.HEURIST4.ui.addoption(that.selectRecordScope[0],
-                                        rec_id,rec_title);
-                            that.selectRecordScope.val(rec_id);
-                            that.doAction();
-                        }
-                });*/
-                this.closeDialog();
+                window.hWin.HAPI4.SystemMgr.check_allow_cms({a:'check_allow_cms'}, function(response){
+
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        //create new web page
+                        that.options.cms_popup_dialog_options.record_id = -2;
+                        that.options.cms_popup_dialog_options.webpage_title = layout_name;
+                        window.hWin.HEURIST4.ui.showEditCMSDialog( this.options.cms_popup_dialog_options );
+
+                        that.closeDialog();
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
             }
-            
-            
         }
     },
 
