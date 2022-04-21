@@ -7,7 +7,7 @@
 # @copyright   (C) 2005-2019 University of Sydney
 # @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 # @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-# @version     5.0
+# @version     6
 
 # Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
@@ -35,10 +35,10 @@ if [ -z $1 ]
 if ! curl -fs --range 0-100 $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null; then
         echo "The version parameter you supplied does not point to a Heurist installation package"
         echo "Please check for the latest version at HeuristNetwork.org/installation"
-        echo "The parameter should be eg. h5.2.1.beta as given - DO NOT include the url path or .tar.bz2"
+        echo "The parameter should be eg. h6.2.1 as given - DO NOT include the url path or .tar.bz2"
         echo "If you are not the root user, supply 'sudo' as the second argument eg.  "
         echo
-        echo "       ./update_heurist.sh h5.2.1.beta sudo"
+        echo "       ./update_heurist.sh h6.2.1 sudo"
         exit
 fi
 
