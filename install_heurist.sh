@@ -18,8 +18,7 @@
 
 # installation source: Heurist reference server
 
-ref_server=http://139.99.198.79
-
+ref_server=http://heuristref.net
 
 # -------------PRELIMINARIES ---------------------------------------------------------------------------------------------
 

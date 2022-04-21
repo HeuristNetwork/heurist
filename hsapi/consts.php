@@ -28,7 +28,7 @@ define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
 define('HEURIST_MIN_DBVERSION', "1.3.0"); //minimal version of db for current version of code
 
 if(!@$heuristReferenceServer){
-    $heuristReferenceServer = 'https://HeuristRef.net';  //default value
+    $heuristReferenceServer = 'http://heuristref.net';  //default value
 }
 
 define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
