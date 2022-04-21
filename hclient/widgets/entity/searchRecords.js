@@ -89,15 +89,14 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                         icon: is_browse?null:"ui-icon-plus"})
             .addClass('ui-button-action')
             .click(function(e) {
-                that._trigger( "onaddrecord", null, that.selectRectype.val() );
-                /*
-                if(!is_browse && that.selectRectype.val()>0){
-                    that._trigger( "onaddrecord", null, that.selectRectype.val() );
-                }else{
-                    that.btn_select_rt.click();
+
+                var search_val = that.input_search.val();
+                if(!window.hWin.HEURIST4.util.isempty(search_val)){
+                    window.hWin.HEURIST4.util.copyStringToClipboard(search_val);
                 }
-                */
-            });  
+
+                that._trigger( "onaddrecord", null, {'_rectype_id': that.selectRectype.val(), 'fill_in_data': search_val} );
+            }); 
         if(is_browse){
             this.element.find('#lbl_add_record').text('Select in list');
             this.btn_add_record.hide();

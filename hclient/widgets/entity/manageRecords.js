@@ -44,6 +44,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     // relmarker_field - if relationship record is opened from source or target record - constraints are applied
     // relmarker_is_inward
 
+    options: {
+        fill_in_data: null // initial fill in data, for new records
+    },
 
     usrPreferences:{},
     defaultPrefs:{
@@ -537,8 +540,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this._on( this.searchForm, {
                 "searchrecordsonstart": this._adjustResultListTop,
                 "searchrecordsonresult": this.updateRecordList,
-                "searchrecordsonaddrecord": function( event, _rectype_id ){
-                    this._currentEditRecTypeID = _rectype_id;
+                "searchrecordsonaddrecord": function( event, data){
+                    if(window.hWin.HEURIST4.util.isObject(data)){                    
+                        this._currentEditRecTypeID = data._rectype_id;
+                        this.options.fill_in_data = data.fill_in_data;
+                    }else{
+                        this._currentEditRecTypeID = data;
+                    }
                     this.addEditRecord(-1);
                 },
                 "searchrecordsonlinkscount": function( event, data ){
@@ -880,7 +888,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             if(recID<0){
                 popup_options = {selectOnSave: this.options.selectOnSave, 
                                  parententity: this.options.parententity,
-                                 new_record_params:{RecTypeID:this._currentEditRecTypeID}};
+                                 new_record_params:{RecTypeID:this._currentEditRecTypeID},
+                                 fill_in_data: this.options.fill_in_data};
                    
                 if(this.options.new_record_params){                 
                     if(this.options.new_record_params['ro']>=0 || this.options.new_record_params['ro']=='current_user') 
@@ -2555,7 +2564,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     });
                 }
             }
-            
+
+            // check if initial data can be filled in
+            var add_fill_data = this._currentEditID == -1 && !window.hWin.HEURIST4.util.isempty(this.options.fill_in_data);
+
             //pass structure and record details
             that._currentEditID = that._getField('rec_ID');;
             that._currentEditRecTypeID = rectypeID;
@@ -2855,8 +2867,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             s_fields.sort(function(a,b){ return a['rst_DisplayOrder']<b['rst_DisplayOrder']?-1:1});
 
             var group_fields = null;
-            var groupCount = 0, hasTabs = false, hasField = false;
-            var temp_group_details = [], max_length_fields = [];
+            var hasField = false; // check for any fields
+            var temp_group_details = [], hasTabs = false; // check if any groupings are set to tabs
+            var max_length_fields = []; // freetext, blobktext, and float fields that are set to max width
 
             for(var k=0; k<s_fields.length; k++){
 
@@ -2864,8 +2877,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 var simpleDetails = {};
 
                 if(dtFields['dty_Type']=='separator'){
-
-                    groupCount++;
 
                     if(group_fields!=null){
                         fields[fields.length-1].children = group_fields;
@@ -2899,6 +2910,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 }else{
 
                     hasField = true;
+
+                    if(add_fill_data && (dtFields['dty_Type'] == 'freetext' || dtFields['dty_Type'] == 'blocktext') && dtFields['rst_DefaultValue'] == ''
+                        && (dtFields['rst_RequirementType'] == 'required' || dtFields['rst_RequirementType'] == 'recommended')){
+
+                        dtFields['rst_DefaultValue'] = this.options.fill_in_data;
+                        add_fill_data = false;
+                    }
 
                     if(group_fields!=null){
                         group_fields.push({"dtID": dtFields['dt_ID'], "dtFields":dtFields});
@@ -2953,7 +2971,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             header_to_tabs_ignore = (header_to_tabs_ignore != null) ? JSON.parse(header_to_tabs_ignore) : {};
 
-            if(window.hWin.HAPI4.has_access(1) && !hasTabs && groupCount > 2
+            if(window.hWin.HAPI4.has_access(1) && !hasTabs && group_fields && Object.keys(group_fields).length > 2
                 && this.options.edit_structure == undefined && this.options.rts_editor == undefined){
 
                 if(header_to_tabs_ignore[window.hWin.HAPI4.database] == null 
