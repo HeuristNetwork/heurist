@@ -711,7 +711,23 @@ function afterPageLoad(document, pageid, eventdata){
         }
         
     });
-    
+
+    // Ensure each image source is correct for current server + database
+    $('img').each(function(idx, image){
+
+        var src = $(image).attr('src');
+        var file_id = $(image).attr('data-id');
+
+        if(!window.hWin.HEURIST4.util.isempty(src) && src.indexOf('&file=') > 0){
+            var query = src.slice(src.indexOf('?'));
+            file_id = window.hWin.HEURIST4.util.getUrlParameter('file', query);
+        }
+
+        if(!window.hWin.HEURIST4.util.isempty(file_id)){
+            $(image).attr('src', window.hWin.HAPI4.baseURL_pro + '?db=' + window.hWin.HAPI4.database + '&file=' + file_id + '&fancybox=1');
+        }
+    });
+
     //var ele = $('#mobilemenu');
     //_dout('MOBILE '+ele.find('a.extern').length);
     
