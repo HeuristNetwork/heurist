@@ -292,7 +292,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
             var with_mapdoc = !window.hWin.HEURIST4.util.isempty(mapdocument);
 
             if( with_mapdoc ){
-                mapwdiget.mapping('getMapManager').openMapDocument( mapdocument );
+                mapwdiget.mapping('getMapManager').toggleMapDocument( mapdocument ); //load map document
             }
         
             var request = window.hWin.HEURIST4.util.parseHeuristQuery(location.search );

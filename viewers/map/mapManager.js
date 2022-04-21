@@ -245,6 +245,7 @@ function hMapManager( _options )
         }
         */
         //
+        
     }
 
     

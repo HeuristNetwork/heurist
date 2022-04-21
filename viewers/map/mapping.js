@@ -48,7 +48,6 @@ Thematic mapping
 * 
 * 
 *     
-*   openMapDocument - opens given map document
 *   loadBaseMap
     addSearchResult - loads geojson data based on heurist query, recordset or json to current search (see addGeoJson)
     addRecordSet - converts recordset to geojson

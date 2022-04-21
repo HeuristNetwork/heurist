@@ -261,7 +261,7 @@ function editCMS_Manager( options ){
     //
     function closeCMSEditor()
     {
-        if(edit_dialog.dialog('instance')){
+        if(edit_dialog && edit_dialog.dialog('instance')){
             edit_dialog.dialog('close');     
         }else if(beforeCloseCMSEditor()){
             closeCMSEditorFinally();
@@ -272,10 +272,10 @@ function editCMS_Manager( options ){
     //
     //
     function closeCMSEditorFinally(){
-        if(edit_dialog.dialog('instance')){
+        if(edit_dialog && edit_dialog.dialog('instance')){
             edit_dialog.dialog('close');     
         }else{
-            edit_dialog.hide();
+            if(edit_dialog) edit_dialog.hide();
             if(options.container){
                 options.container.empty();
             }
