@@ -91,6 +91,7 @@ $system->defineConstant('DT_WORKFLOW_STAGE');
 $rec_id = intval(@$_REQUEST['recID']);
 
 $already_linked_ids = array();
+$group_details = array();
 
 // if we get a record id then see if there is a personal bookmark for it.
 if ($rec_id>0 && !@$_REQUEST['bkmk_id']) 
@@ -669,7 +670,7 @@ if ($bkm_ID>0 || $rec_id>0) {
 
 // this functions outputs common info.
 function print_details($bib) {
-    global $is_map_popup, $without_header, $ACCESSABLE_OWNER_IDS, $system;
+    global $is_map_popup, $without_header, $ACCESSABLE_OWNER_IDS, $system, $group_details;
 
     print_header_line($bib);
 
@@ -701,7 +702,8 @@ $_time_debug = $_time_debug2;
         if($is_map_popup){ // && $link_cnt>3 //linkRow
         ?>
         <div class="map_popup"><div class="detailRow moreRow"><div class=detailType>
-            <a href="#" oncontextmenu="return false;" onClick="$('.fieldRow').css('display','table-row');$('.moreRow').hide()" style="color:blue">more...</a>
+            <a href="#" oncontextmenu="return false;" 
+                onClick='$(".fieldRow").css("display","table-row");$(".moreRow").hide();createRecordGroups(<?php echo json_encode($group_details, JSON_FORCE_OBJECT); ?>);' style="color:blue">
             </div><div class="detail"></div></div></div>
         <?php
         }
@@ -982,7 +984,7 @@ function print_personal_details($bkmk) {
 // prints recDetails
 //
 function print_public_details($bib) {
-    global $system, $defTerms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT, $already_linked_ids;
+    global $system, $defTerms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT, $already_linked_ids, $group_details;
     
     $has_thumbs = false;
     
@@ -1464,31 +1466,31 @@ function print_public_details($bib) {
         
     }
 
+    $group_details = array();
+    $current_type = null;
+    $tabs_list = array();
+
+    $query = "SELECT rst_DisplayName, rst_DisplayOrder 
+              FROM defRecStructure
+              LEFT JOIN defDetailTypes ON rst_DetailTypeID = dty_ID
+              WHERE rst_RecTypeID = ". $bib['rec_RecTypeID'] ." AND dty_Type = 'separator' AND rst_RequirementType != 'forbidden'
+              ORDER BY rst_DisplayOrder";
+
+    $groups_res = $mysqli->query($query);
+
+    if($groups_res){
+
+        while ($group = $groups_res->fetch_row()) {
+            $group_details[] = array($group[0], $group[1]);
+        }
+
+    }
     if($is_map_popup){
         //echo '<div class=detailRow><div class=detailType><a href="#" onClick="$(\'.fieldRow\').show();$(event.target).hide()">more</a></div><div class="detail"></div></div>';
     }else{
 
-        $group_details = array();
-        $current_type = null;
-        $tabs_list = array();
-
-        $query = "SELECT rst_DisplayName, rst_DisplayOrder 
-                  FROM defRecStructure
-                  LEFT JOIN defDetailTypes ON rst_DetailTypeID = dty_ID
-                  WHERE rst_RecTypeID = ". $bib['rec_RecTypeID'] ." AND dty_Type = 'separator' AND rst_RequirementType != 'forbidden'
-                  ORDER BY rst_DisplayOrder";
-
-        $groups_res = $mysqli->query($query);
-
-        if($groups_res){
-
-            while ($group = $groups_res->fetch_row()) {
-                $group_details[] = array($group[0], $group[1]);
-            }
-
-            if(is_array($group_details) && count($group_details) > 0){
-                echo '<script>createRecordGroups(', json_encode($group_details, JSON_FORCE_OBJECT), ');</script>';
-            }
+        if(is_array($group_details) && count($group_details) > 0){
+            echo '<script>console.log("Why no call?");createRecordGroups(', json_encode($group_details, JSON_FORCE_OBJECT), ');</script>';
         }
 
         echo '<div class="detailRow fieldRow">&nbsp;</div>';

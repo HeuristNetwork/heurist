@@ -300,7 +300,50 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
                 //do not zoom to current search if mapdoc is defined - preserve viewport
                 mapwdiget.mapping('addSearchResult', request, 'Current results', with_mapdoc);
             }
-        
+    }
+
+    //
+    // Add group headers to record viewer
+    //
+    function createRecordGroups(groups){ console.log('called group create'); console.log(groups);
+
+        var $group_container = $('div#div_public_data');
+        var $data = $group_container.find('div[data-order]');
+
+        var $g_ele = null, $g_header = null;
+        var current_type = null;
+
+        if(groups == null || $data.length < 0 || $group_container.length < 0){
+            return;
+        }else{
+            $.each(groups, function(idx, group){
+
+                var group_name = group[0];
+                var order = group[1];
+
+                var next_group = groups[Number(idx)+1];
+                var key = (next_group == null) ? null : next_group[0];
+                var next_order = (key == null) ? null : next_group[1];
+                var $field_container = $('<fieldset>').attr('id', order);
+
+                $.each($data, function(idx, detail){
+
+                    var $detail = $(detail);
+                    var detail_order = $detail.attr('data-order');
+                    if(detail_order < order){ // detail belongs in previous group
+                        return;
+                    }else if(detail_order > order && (next_order == null || order < next_order)){
+                        $detail.appendTo($field_container);
+                    }else{ // detail belongs in next group
+                        return false;
+                    }
+                });
+
+                $('<h4>').attr('data-order', order).css({'margin': '5px 0px 2px 0px', 'font-size': '1.1em'}).text(group_name).appendTo($group_container);
+
+                $field_container.appendTo($group_container);
+            });
+        }
     }
 </script>
 
@@ -344,7 +387,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
                 <a class="ui-icon ui-icon-globe" style="width: 22px; height: 22px;padding:0px;display:inline-block;"></a>
                 <a class="ui-icon ui-icon-help" style="width: 22px; height: 22px;padding:0px;display:inline-block;"></a>
 
-                <span style="display:inline-block;margin-left: 20px;font-size: small;">
+                <span style="display:inline-block;margin-left: 10px;font-size: small;">
                     Legend <a class="ui-icon ui-icon-list" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 5px;"></a>
                 </span>
             </div>
