@@ -231,8 +231,7 @@ $.widget( "heurist.search", {
                 window.open('context_help/advanced_search.html','_blank');
             } });
 
-            /*
-            this._on( open_in_popup, {  click: function(){ // open search textarea in a popup, for more space, add more instructions and include filter help link
+            this._on( this.input_search, {  click: function(){ // open search textarea in a popup, for more space, add more instructions and include filter help link
 
                 var org_val = this.input_search.val();
                 var newline_matches = org_val.match(/\r|\n/); // check for newline characters
@@ -281,7 +280,7 @@ $.widget( "heurist.search", {
                 $dlg.find('#search_help_container').append($help_link);
 
                 $dlg.find('#search_help_link').on('click', function(){ window.open('context_help/advanced_search.html','_blank'); });
-            }});*/
+            }});
         }
 
 
