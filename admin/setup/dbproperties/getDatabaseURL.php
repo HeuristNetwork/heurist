@@ -28,7 +28,7 @@
 */
 require_once(dirname(__FILE__)."/../../../hsapi/System.php");
 
-$isOutSideRequest = (strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===false);
+$isOutSideRequest = (strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===false); //this is reference server
 if($isOutSideRequest){ //this is request from outside - redirect to master index    
 
     $reg_url = HEURIST_INDEX_BASE_URL 
@@ -40,6 +40,9 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     if (!$data) {
         $error_msg = "Unable to connect Heurist Master Index, possibly due to timeout or proxy setting<br /><br />".
         "URL requested: ".$reg_url;
+        
+//error_log('CURL ERROR: '.$url.' curl error='.$glb_curl_error);
+        
     }else{
 
         $data = json_decode($data, true);

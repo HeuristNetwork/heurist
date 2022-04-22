@@ -3,7 +3,8 @@
 /**
 * List of system constants
 *
-* (@todo ?? include this file into System.php )
+* Many of them are defined with values set in congigIni.php 
+* (and respectively in ../heuristConfigIni.php)
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -30,7 +31,7 @@ define('HEURIST_MIN_DBVERSION', "1.3.0"); //minimal version of db for current ve
 // The reference server is the location of the Heurist_Master_Index database, the Heurist_Help database, 
 // curated template databases and also code updates
 if(!@$heuristReferenceServer){
-    $heuristReferenceServer = 'http://heuristref.net';  //default value
+    $heuristReferenceServer = 'https://heuristref.net';  //default value
 }
 
 define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
@@ -47,9 +48,14 @@ if (@$httpProxy != '') {
     }
 }
 
+// server name or IP address of your Web server, null will pull SERVER_NAME from the request header
 if (!@$serverName) {
-    $serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");
-    define('HEURIST_DOMAIN', $_SERVER["SERVER_NAME"]);
+    if(@$_SERVER["SERVER_NAME"]){
+        $serverName = $_SERVER["SERVER_NAME"] . 
+        ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80" && $_SERVER["SERVER_PORT"] != "443") 
+                    ? ":" . $_SERVER["SERVER_PORT"] : "");
+        define('HEURIST_DOMAIN', $_SERVER["SERVER_NAME"]);
+    }
 }else{
     $k = strpos($serverName,":");
     define('HEURIST_DOMAIN', ($k>0)?substr($serverName,0,$k-1):$serverName );
@@ -95,7 +101,7 @@ if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path differ
     
 }
 
-define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
+if(@$_SERVER["REQUEST_URI"]) define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
 define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configured name, eg. myheurist.net
 if(!defined('HEURIST_DIR')) define('HEURIST_DIR', @$_SERVER["DOCUMENT_ROOT"] . $installDir); //  eg. /var/www/html/HEURIST @todo - read simlink (realpath)
 define('HEURIST_SERVER_URL', $serverBaseURL);
