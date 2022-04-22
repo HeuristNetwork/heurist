@@ -1490,7 +1490,7 @@ function print_public_details($bib) {
     }else{
 
         if(is_array($group_details) && count($group_details) > 0){
-            echo '<script>console.log("Why no call?");createRecordGroups(', json_encode($group_details, JSON_FORCE_OBJECT), ');</script>';
+            echo '<script>createRecordGroups(', json_encode($group_details, JSON_FORCE_OBJECT), ');</script>';
         }
 
         echo '<div class="detailRow fieldRow">&nbsp;</div>';
