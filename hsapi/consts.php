@@ -27,12 +27,14 @@
 define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
 define('HEURIST_MIN_DBVERSION', "1.3.0"); //minimal version of db for current version of code
 
+// The reference server is the location of the Heurist_Master_Index database, the Heurist_Help database, 
+// curated template databases and also code updates
 if(!@$heuristReferenceServer){
     $heuristReferenceServer = 'http://heuristref.net';  //default value
 }
 
 define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
-define('HEURIST_INDEX_BASE_URL', $heuristReferenceServer.'/heurist/'); //central index database url
+define('HEURIST_INDEX_BASE_URL', $heuristReferenceServer.'/heurist/'); //central index and template databases url
 define('HEURIST_INDEX_DBREC', 22);
 
 define('HEURIST_INDEX_DATABASE', 'Heurist_Master_Index');
