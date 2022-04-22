@@ -272,12 +272,14 @@ function editCMS_Manager( options ){
     //
     //
     function closeCMSEditorFinally(){
-        if(edit_dialog && edit_dialog.dialog('instance')){
-            edit_dialog.dialog('close');     
-        }else{
-            if(edit_dialog) edit_dialog.hide();
-            if(options.container){
-                options.container.empty();
+        if(edit_dialog){
+            if(edit_dialog.dialog('instance')){
+                edit_dialog.dialog('close');     
+            }else{
+                edit_dialog.hide();
+                if(options.container){
+                    options.container.empty();
+                }
             }
         }
         editCMS_instance = null;
@@ -287,19 +289,23 @@ function editCMS_Manager( options ){
     //
     //
     function beforeCloseCMSEditor(){
-        var preview_frame = edit_dialog.find('#web_preview');
-        if(preview_frame.length>0 && preview_frame[0].contentWindow.cmsEditing){
-            //check that everything is saved
-            var res = preview_frame[0].contentWindow.cmsEditing.onEditorExit(
-                function( need_close_explicitly ){
-                    //exit allowed
-                    if(need_close_explicitly!==false) closeCMSEditorFinally();
+        if(edit_dialog){
+            var preview_frame = edit_dialog.find('#web_preview');
+            if(preview_frame.length>0 && preview_frame[0].contentWindow.cmsEditing){
+                //check that everything is saved
+                var res = preview_frame[0].contentWindow.cmsEditing.onEditorExit(
+                    function( need_close_explicitly ){
+                        //exit allowed
+                        if(need_close_explicitly!==false) closeCMSEditorFinally();
 
-                    if($.isFunction(main_callback) && home_page_record_id>0){
-                        main_callback( home_page_record_id, home_page_record_title ); 
-                    }
-            });
-            return res;
+                        if($.isFunction(main_callback) && home_page_record_id>0){
+                            main_callback( home_page_record_id, home_page_record_title ); 
+                        }
+                });
+                return res;
+            }
+        }else{
+            return true;
         }
     }    
 
