@@ -1,16 +1,20 @@
 #! /bin/sh
 
-# If you get 'file not found' when you try to run this script, it is due to the file being converted to DoS format (ctrl-M line endings)
-# Use dos2unix copy_distribution_files.sh to fix.
+# Run as sudo
 
 # copy_distribution_files.sh: Creates a distribution package in heurist-build from a Heurist working directory
 # This file is intended for internal use of the development team and should normally be deleted from the install package.
 
+# GOTCHA: If you get 'file not found' when you try to run this script, it is due to the file being converted to DoS 
+# format (ctrl-M line endings). Use dos2unix copy_distribution_files.sh to fix.
+
+# ---------------------
+
 # @package     Heurist academic knowledge management system
 # @link        http://HeuristNetwork.org
-# @copyright   (C) 2005-2019 University of Sydney
+# @copyright   (C) 2005-2022 University of Sydney
 # @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-# @author      Artem Osmakov     <osmakov@gmail.com>
+# @author      Artem Osmakov   <osmakov@gmail.com>
 # @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 # @version     6.0
 
@@ -21,7 +25,7 @@
 # See the License for the specific language governing permissions and limitations under the License.
 
 if [ -z $1 ]
-   then echo "Usage:   sudo ./copy_distribution_files.sh. h6.x.x   - insert appropriate sub-versions in x.x-xxxx, or specig h6-alpha or h6-beta"
+   then echo "Usage:   sudo ./copy_distribution_files.sh. h6.x.x ( insert appropriate sub-versions or alpha or beta in .x.x)"
    exit
    fi
 
@@ -34,82 +38,76 @@ if [ -z $1 ]
 
 # RUN THIS FILE FROM AN hx-xx DIRECTORY CONTAINING DESIRED HEURIST CODE
 
-# Creates heurist-build directory in /var/www/html/HEURIST
+# Creates heurist-build directory in /var/www/html/HEURIST and places finale result in HEURIST/DISTRIBUTION
 
 
 echo -e "\n\n\n\n"
 echo -------------------------------------------------------------------------------------------------
 echo
-echo "Heurist distribution builder - run from /var/www/html/HEURIST/hx-xx program directory"
+echo "HEURIST DISTRIBUTION BUILDER"
+echo
+echo "Run from /var/www/html/HEURIST/hx-xx program directory using sudo"
+echo
+echo
+
+
+# PRELIMINARIES
+# -------------
+
+# Copy the standard install and update scripts to the DISTRIBUTION  directory
+echo Copying installer and update shellscripts from root of current instance
+echo The installer and update scripts are accessed directly to download and install tarballs
+cp *.sh /var/www/html/HEURIST/DISTRIBUTION
+cp installers/*.sh /var/www/html/HEURIST/DISTRIBUTION
+
+# update record type icons and icon library from Heurist_Core_Configuration database.
+# This ensures that when new record types are added to the core definitions text file 
+#(generated from this database) that you will not have a record type without an icon
+cp ../HEURIST_FILESTORE/Heurist_Core_Definitions/rectype-icons/*.* admin/setup/dbcreate/icons/defRecTypes/icon
+cp ../HEURIST_FILESTORE/Heurist_Core_Definitions/rectype-icons/thumb/*.* admin/setup/dbcreate/icons/defRecTypes/thumbnail
+
+
+
+# BUILD DISTRIBUTION IN heurist-build
+# -----------------------------------
 
 # File paths specified with explicit heurist-build to ensure it will only remove from this specific directory
 # and files in the subdirectory of this directory specified by the parameter
 
-# no effect if already exists
-mkdir /var/www/html/HEURIST/heurist-build
+# clean up the build directory and recreate
+sudo rm -rf /var/www/html/HEURIST/heurist-build
+mkdir ../heurist-build
 
-# added Ian J. 19 Dec 2020: update record type icons and icon library from Heurist_Core_Configuration database.
-# This ensures that when new record types are added to the core definitions text file (generated from this database)
-# that you will not have a record type without an icon
-cp /heur-filestore/Heurist_Core_Definitions/rectype-icons/*.* admin/setup/rectype-icons
-cp /heur-filestore/Heurist_Core_Definitions/rectype-icons/thumb/*.* admin/setup/rectype-icons/thumb
-
-echo
-echo removing existing heurist-build/$1
-rm -rf /var/www/html/HEURIST/heurist-build/$1
 
 echo
 echo copying files to /var/www/html/HEURIST/heurist-build/$1
 
-mkdir /var/www/html/HEURIST/heurist-build/$1
-
-# Copy all the files in the root of hx-xx
-cp -r *.* /var/www/html/HEURIST/heurist-build/$1
-
-# Remember to add any new directories here
-
-cp -r admin /var/www/html/HEURIST/heurist-build/$1
-cp -r api /var/www/html/HEURIST/heurist-build/$1
-cp -r applications /var/www/html/HEURIST/heurist-build/$1
-cp -r context_help /var/www/html/HEURIST/heurist-build/$1
-cp -r documentation_and_templates /var/www/html/HEURIST/heurist-build/$1
-cp -r export /var/www/html/HEURIST/heurist-build/$1
-cp -r hclient /var/www/html/HEURIST/heurist-build/$1
-cp -r hsapi /var/www/html/HEURIST/heurist-build/$1
-cp -r import /var/www/html/HEURIST/heurist-build/$1
-cp -r installers  /var/www/html/HEURIST/heurist-build/$1
-cp -r records  /var/www/html/HEURIST/heurist-build/$1
-cp -r redirects /var/www/html/HEURIST/heurist-build/$1
-cp -r startup /var/www/html/HEURIST/heurist-build/$1
-cp -r viewers /var/www/html/HEURIST/heurist-build/$1
-
-# No longer present at 20/4/22 - probably long gone ... 
-# cp -r common /var/www/html/HEURIST/heurist-build/$1
-
 echo
-echo NEW DIRECTOREIS? HAVE YOU UPDATED LIST?
-echo
+rm -rf /var/www/html/HEURIST/heurist-build/$1
+mkdir ../heurist-build/$1
+
+# Copy all the files in current codebase to hx.x.x as defined in parameter
+
+cp -r * ../heurist-build/$1
 
 # remove any superfluous files - add others as appropriate
-# add here as required ...
+
+rm ../heurist-build/$1/copy_distribution_files.sh
+rm ../heurist-build/$1/update_heurist.sh
+rm ../heurist-build/$1/install_heurist.sh
 
 # Now zip it all up as a tarball for distribution on the Heurist web site
 
 echo
 echo creating tarball /var/www/html/HEURIST/heurist-build/$1.tar.bz2
-rm -f /var/www/html/HEURIST/heurist-build/$1.tar.bz2
-tar -cjf /var/www/html/HEURIST/heurist-build/$1.tar.bz2 -C /var/www/html/HEURIST/heurist-build/ $1/
-rm -rf /var/www/html/HEURIST/heurist-build/$1/
+# Note: c=create j=bzip2 f=file
+tar -cjf ../heurist-build/$1.tar.bz2 -C ../heurist-build/ $1/
+rm -rf ../heurist-build/$1/
 
 # show what we have got in the directory
 echo
-ls -alt /var/www/html/HEURIST/heurist-build
-
-echo
-echo Copying installer and update shellscripts from root of current instance
-echo The installer and update scripts are accessed directly to download and install tarballs
-cp *.sh /var/www/html/HEURIST/DISTRIBUTION
-cp installers/*.sh /var/www/html/HEURIST/DISTRIBUTION
+echo tarball in the heurist-build directory:
+ls -alt ../heurist-build
 
 # avoid problems with shellscripts having DoS line endings
 # TODO: need to do the same for installer directory shellscripts
@@ -118,20 +116,35 @@ cp installers/*.sh /var/www/html/HEURIST/DISTRIBUTION
 
 # PHP extensions verification function
 # TODO: Why is this being zipped? What is the purpose? Who added it? Needs an explanation. [Ian 4 Oct 2016]
-zip -j /var/www/html/HEURIST/DISTRIBUTION/verifyInstallation.zip admin/verification/verifyInstallation.php
+# Perhaps to allow it to be downloaded on its own without runnign into php execution barrier
+zip -j ../DISTRIBUTION/verifyInstallation.zip admin/verification/verifyInstallation.php
 
 echo
-echo creating tarballs in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5, vendor, and help
- cd /var/www/html/HEURIST/HEURIST_SUPPORT
-tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external_h5/
-tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/vendor.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ vendor/
-tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ help/
+echo creating support library tarballs in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5, vendor, and help
 
-chown -R apache:apache /var/www/html/HEURIST/DISTRIBUTION
+# GOTCHA: If support directory not set up you get an error trying to tar into it
+mkdir /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT
+cd /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT
 
-sudo cp /var/www/html/HEURIST/heurist-build/$1.tar.bz2  /var/www/html/HEURIST/DISTRIBUTION
+
+tar -cjf ./external_h5.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external_h5/
+
+tar -cjf ./vendor.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ vendor/
+
+tar -cjf ./help.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ help/
+
+cp /var/www/html/HEURIST/heurist-build/$1.tar.bz2  /var/www/html/HEURIST/DISTRIBUTION
+
+chown -R apache:heurist /var/www/html/HEURIST/DISTRIBUTION
+
+# Cleanup
+rm -rf /var/www/html/HEURIST/heurist-build
+
+
 echo
-echo Distribution $1.tar.bz2 built. DO NOT CHANGE THE NAME of the tar.bz2 file - it extracts to a folder 
-echo of this name and the installation is dependant on the filename parameter to find this folder
+echo Distribution $1.tar.bz2 copied to .../HEURIST/DISTRIBUTION. 
+echo
+echo DO NOT CHANGE THE NAME of the tar.bz2 file - it extracts to a folder of this name  
+echo and the installation is dependant on the filename parameter to find this folder
 echo
 echo
