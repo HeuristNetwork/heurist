@@ -539,7 +539,7 @@ regional['fr'] = {
     'Filter by Group': 'filtrer par groupe',
     'Show All': 'Tout afficher',
     'Sort by': 'Trier par',
-    'All Find': 'Искать',
+    'All Find': 'Chercher',
     'Not finding the record type you require?': 'Vous ne trouvez pas le tyê d\'enregistrement dont vous avez besoin ?',
     'Define new record type': 'Définir un nouveau type d\'enregistrement',
     'Find by name, ID or concept code': 'Trouver par nom, ID ou code de concept',
