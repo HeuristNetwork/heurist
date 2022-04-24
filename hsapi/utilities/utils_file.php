@@ -1207,6 +1207,9 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     curl_setopt($ch, CURLOPT_HEADER, 0);    //don't include header in output
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // follow server header redirects
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
+    if(strpos($url, HEURIST_MAIN_SERVER)===0){
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+    }
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);    // timeout after ten seconds
     curl_setopt($ch, CURLOPT_MAXREDIRS, 5);    // no more than 5 redirections
 
