@@ -31,7 +31,8 @@ define('HEURIST_MIN_DBVERSION', "1.3.0"); //minimal version of db for current ve
 // The reference server is the location of the Heurist_Master_Index database, the Heurist_Help database, 
 // curated template databases and also code updates
 if(!@$heuristReferenceServer){
-    $heuristReferenceServer = 'https://heuristref.net';  //default value
+    //$heuristReferenceServer = 'https://heuristref.net';  //default value
+    $heuristReferenceServer = 'https://int-heuristweb-prod.intersect.org.au';
 }
 
 define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
