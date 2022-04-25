@@ -412,6 +412,8 @@ if($registrationRequired) //show user registration dialog at once
             <div id="loading" style="display:none">
                 <img alt="creation ..." src="<?php echo HEURIST_BASE_URL.'hclient/assets/mini-loading.gif'?>" width="16" height="16" />
                 <strong><span id="divProgress">&nbsp; Creation of database will take a few seconds </span></strong>
+                <br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                (if no message after a minute, reload page - database should have been created)
             </div>
 
             <div id="createDBForm" style="padding-top:5px;">
@@ -481,7 +483,14 @@ if($registrationRequired) //show user registration dialog at once
                     </div>
 
                     <div class="helper">       
-                        As creator of a database you becomes the database owner and can manage<br>the database and other database users.
+                        As creator of a database you become the database owner and can manage the database and other
+                        <br>database users, including creation of workgroups and modification of database structure.
+                        <br>
+                        <br>
+                        <b>Please use a <u>concise and informative name</u> of less than ~40 characters</b>
+                        <i> <br>(Please avoid very generic names such as JH_test. Aim for a concise subject such as 
+                            <br>JH_18CMonksLiguria or compact project names such USyd_CommunityEducationActivism60s70s)
+                        </i>
                     </div>
                 
                     <div class="entry-box">
@@ -499,9 +508,9 @@ if($registrationRequired) //show user registration dialog at once
                     </div>
                     
                     <div class="helper">                
-                        Do not use punctuation except underscore, names are case sensitive.<br><br> 
-                        <i>The user name prefix is editable, and may be left blank, but we suggest using a consistent prefix for
-                           personal databases so that they are easily identified and appear together in the search for databases.</i>
+                        Do not use punctuation except underscore. Names are case sensitive.<br><br> 
+                        <i>The user name prefix is editable, and may be left blank, but we suggest using a consistent prefix for personal databases so that they are easily identified 
+                        and appear together in the search for databases.</i>
                     </div>
 
                 </div>
