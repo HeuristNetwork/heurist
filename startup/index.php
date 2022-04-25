@@ -740,6 +740,7 @@ a{
             <div class="logo_intro" style="float:left"></div>
             <div style="float:left;font-style:italic;padding:34px">
                 Designed by researchers, for researchers, Heurist reduces complex relational structures to simple, logical choices
+                <br>and provides comprehensive tools to collect, manage, analyse, visualise, export, publish and archive information.
             </div>
             <div style="float:right;padding:34px">
                 <a href="https://heuristnetwork.org" target="_blank">Heurist Network website</a>
