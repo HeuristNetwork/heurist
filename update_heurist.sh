@@ -4,7 +4,7 @@
 
 # @package     Heurist academic knowledge management system
 # @link        http://HeuristNetwork.org
-# @copyright   (C) 2005-2019 University of Sydney
+# @copyright   (C) 2005-2022 University of Sydney
 # @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 # @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 # @version     6
@@ -17,7 +17,7 @@
 
 # installation source: Heurist reference server
 
-ref_server=http://heuristref.net
+ref_server=https://int-heuristweb-prod.intersect.org.au
 
 # -------------PRELIMINARIES ---------------------------------------------------------------------------------------------
 
@@ -25,18 +25,18 @@ ref_server=http://heuristref.net
 # Checking parameters and availability ...
 if [ -z $1 ]
    then
-      echo "Usage: ./update_heurist.sh hx.X.X.beta [sudo]"
-      echo "Please supply version eg. hx.x.x.beta (this MUST exist as a tar.bz2 file "
+      echo "Usage: ./update_heurist.sh hx.x.x sudo"
+      echo "Please supply version eg. hx.x.x. (this MUST exist as a tar.bz2 file "
       echo "on $ref_server/HEURIST/DISTRIBUTION or script will not download the Heurist code package)"
       exit
    fi
 
-# Test download package is valid before we get half way and can't find it ...
+# Test download package is valid before we get half way and can't find it ... s=silent
 if ! curl -fs --range 0-100 $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null; then
         echo "The version parameter you supplied does not point to a Heurist installation package"
         echo "Please check for the latest version at HeuristNetwork.org/installation"
         echo "The parameter should be eg. h6.2.1 as given - DO NOT include the url path or .tar.bz2"
-        echo "If you are not the root user, supply 'sudo' as the second argument eg.  "
+        echo "Supply 'sudo' as the second argument eg.  "
         echo
         echo "       ./update_heurist.sh h6.2.1 sudo"
         exit
@@ -56,9 +56,10 @@ echo "Fetching Heurist code from $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2"
 echo
 $2 rm -f $1.tar.bz2
 $2 curl -O# $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2
+# -j is bzip2 format
 $2 tar -xjf $1.tar.bz2
 $2 rm -f $1.tar.bz2
-# remove existing directroy if present then make directory and copy over Heurist
+# remove existing directory if present then make directory and copy over Heurist
 $2 rm -Rf /var/www/html/HEURIST/$1
 $2 mkdir /var/www/html/HEURIST/$1
 $2 cp -R $1/* /var/www/html/HEURIST/$1
@@ -83,13 +84,6 @@ $2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
 $2 tar -xjf help.tar.bz2
 $2 rm -f help.tar.bz2
 
-# No longer used
-$2 rm -f exemplars.tar.bz2
-
-# Simlink to this version in the root html directory
-cd /var/www/html
-$2 ln -s HEURIST/$1 $1
-
 # Place simlinks in instance directory
 cd /var/www/html/HEURIST/$1
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h5 external
@@ -108,26 +102,8 @@ echo "Heurist unpacked"
 # ./bin/elasticsearch -d
 
 
-# ------------------------------------------------------------------------------------------
-
 echo ""
 echo ""
-echo ""
-echo ""
-echo ""
-
-
 echo "---- Heurist update installed in /var/www/html/HEURIST/$1 -------------------------------------------"
-echo
-echo "If you do not have a shared heuristConfigIni.php file in /var/www/html/HEURIST (which you should have ...)"
-echo "you need to edit the configIni.php file in /var/www/html/HEURIST/$1"
-echo "See /var/www/html/HEURIST/$1/move_to_parent_as_heuristConfigIni.php for instructions"
-echo
-echo "Please test your new Heurist install from  https://yourserver/$1 and log in to a database;"
-echo "Use Database->Verify installation to check all is installed correctly and test major functions"
-echo "such as add record, add image, search, facet search, view record and map."
-echo 
-echo "When you have confirmed that the this Heurist upgrade is running correctly, make it the default by"
-echo "redirecting your /var/www/html/heurist symlink to point to /var/www/html/HEURIST/$1"
 echo
 echo

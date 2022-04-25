@@ -1,0 +1,68 @@
+# CRONTAB FILE FOR DEVELOPMENT SERVER
+
+# Update h6-alpha from Artem's development directory: build runs daily at 7am Sydney 
+0 07 * * * cd /var/www/html/HEURIST/h6-ao/;./copy_distribution_files.sh h6-alpha
+
+# The following creates a distribution h6-beta-in-waiting.tar.bz2 on Monday morning, 
+# and the following week moves this to h6-beta.tar.bz2
+
+
+# Update h6-beta from h6-beta-in-waiting weekly at 7:15am Monday Sydney time
+15 07 * * 1 cd /var/www/html/HEURIST/DISTRIBUTION/;rm h6-beta.tar.bz2;mv h6-beta-in-waiting.tar.bz2  h6-beta.tar.bz2
+
+# Update h6-beta-in-waiting: build runs weekly at 7.30am Monday Sydney time
+30 07 * * 1 cd /var/www/html/HEURIST/h6-ao/;./copy_distribution_files.sh h6-beta-in-waiting
+
+# -------------------------------------------------------------------------------
+
+
+# CRONTAB FILE FOR SATELLITE SERVER (single server installation, CET time zone)
+
+:MAILTO=ian.johnson@sydney.edu.au
+MAILTO=ian.johnson@sydney.edu.au
+
+# Monitor server metrics (hourly)
+5 * * * * /srv/scripts/alert_server.sh >/dev/null 2>&1
+
+# Update h6-alpha at 1am from reference server - build runs daily at 8am or later Sydney time
+0 01 * * * curl -lk https://int-heuristweb-prod.intersect.org.au/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h6-alpha
+
+# Update h6-beta at 1.15am from reference server - build runs daily at 8.15am or later Sydney time
+15 01 * * * curl -lk https://int-heuristweb-prod.intersect.org.au/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h6-beta
+
+
+# LOCAL BACKUPS
+
+#Ansible: Local backups for all databases
+45 23 * * * /srv/scripts/backup_all_dbs.sh
+
+# Creates archive copy of database dumps when bz2 files change
+0 3 * * * /srv/scripts/archive_bzip_dbs.sh >/dev/null 2>&1
+
+#Ansible: Check all database tables
+45 23 * * 0 /srv/scripts/check_required_tables_exist_all_databases.sh
+
+
+# AUTOMATED REPORTING ON USERS AND SETUP OF THE DATABASES
+
+# Email lists to support
+# set last item to * for daily, 0 for sunday, 1 for Monday mailout
+0 06 * * 1 /srv/scripts/run_checks_and_email_lists_to_support.sh >/dev/null 2>&1
+
+
+# SUMMARISATION AND MAILING OF ERRORS
+
+MAILTO=ian.johnson@sydney.edu.au,abed@sydney.edu.au
+
+#Ansible: Email PHP errors logs
+15 03 * * * /usr/bin/php -f /srv/scripts/php_error_log_sender.php
+
+#Ansible: Send Apache 404 errors
+45 02 * * 1 /srv/scripts/apache_error_log.sh
+
+
+# SECURITY PATCHING
+
+#Ansible: Apply security patches
+@daily yum -y -q -e 0 update --security
+0 21 * * * nice -n 10 /opt/snow/snowagent -w /opt/snow/ >/dev/null 2>&1
