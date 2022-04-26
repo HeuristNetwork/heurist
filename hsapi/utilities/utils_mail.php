@@ -149,7 +149,7 @@ use PHPMailer\PHPMailer\Exception;
 
     function checkSmtp(){
 
-        $smtpHost = 'localhost';
+        $smtpHost = '127.0.0.1'; //'localhost';
         $smtpPort = '25';
         $smtpTimeout = 5;
 
