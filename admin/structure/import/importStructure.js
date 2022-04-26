@@ -310,12 +310,17 @@ $.widget( "heurist.importStructure", {
                                 var recURL  = this.fld(record, 'rec_URL');
                                 var recDesc = this.fld(record, 'rec_Title');
                                 var isAllowClone = (this.fld(record, 398)!=6023)?1:0;
+                                var dbURL = '';
+                                var dbName = 'Broken registration';
 
-                                var splittedURL = recURL.split('?');
-                                var dbURL = splittedURL[0];
-                                var matches = recURL.match(/db=([^&]*).*$/);
-                                var dbName = (matches && matches.length>1)?matches[1]:'';
-
+                                if(recURL){
+                                    var splittedURL = recURL.split('?');
+                                    if(splittedURL && splittedURL.length>0){
+                                        dbURL = splittedURL[0];
+                                        var matches = recURL.match(/db=([^&]*).*$/);
+                                        dbName = (matches && matches.length>1)?matches[1]:'';
+                                    }
+                                }
                                 this.setFld(record, 'rec_URL', dbURL);
                                 this.setFld(record, 'rec_Title', dbName);
                                 this.setFld(record, 'rec_ScratchPad', recDesc);
@@ -411,6 +416,8 @@ $.widget( "heurist.importStructure", {
         var sDB_ID = db_ids.fld(record, 'rec_ID');
         var sURL  = db_ids.fld(record, 'rec_URL');
         var sDB   = db_ids.fld(record, 'rec_Title');
+        
+        if(!sURL) return;
 
         if(this._selectedDB != sDB_ID){
             
@@ -637,6 +644,8 @@ $.widget( "heurist.importStructure", {
 
             }else if(action=='clone'){
 
+                if(!recURL) return;
+                
                 var cloneURL = window.hWin.HAPI4.baseURL + 'admin/setup/dboperations/cloneDB.php'
                 +'?db='+window.hWin.HAPI4.database
                 +'&templatedb='+dbName;
