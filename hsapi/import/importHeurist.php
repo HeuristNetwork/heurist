@@ -68,7 +68,7 @@ private static function initialize($fields_correspondence=null)
 * @param mixed $filename - archive or temp  import file
 * @param mixed $type - type of file manifest of record data
 */
-private static function readDataFile($filename, $type=null, $validate=true){
+private static function _readDataFile($filename, $type=null, $validate=true){
    
    $data=null;
     try{
@@ -277,7 +277,12 @@ private static function hmlToJson($filename){
 					   'fileid'=>''.$xml_det->file->nonce);
 					   
 					   $file_url = ''.$xml_det->file->url;
-					   if($file_url && ($db_url=='' || $db_url==null || strpos($file_url, $db_url)===false)){
+                       //$db_url - source database url
+					   if($file_url && ($db_url=='' || $db_url==null 
+                                || strpos($file_url, $db_url)===false)
+                            &&  (strpos($file_url,'http://')===0
+                              || strpos($file_url,'https://')===0)
+                         ){
 							$detail['file']['ulf_ExternalFileReference'] = $file_url;
 					   }
 				   }
@@ -332,7 +337,7 @@ public static function getDefintions($filename){
 
     $res = false;
     
-    $data = self::readDataFile( $filename );
+    $data = self::_readDataFile( $filename );
     
     if($data!=null){
         
@@ -402,7 +407,7 @@ public static function importDefintions($filename, $session_id){
     $res = false;
     
     //read manifest
-    $data = self::readDataFile( $filename );
+    $data = self::_readDataFile( $filename );
     
     if($data!=null){
         
@@ -632,7 +637,7 @@ public static function importRecords($filename, $params){
     $home_page_id = 0;
     $page_id_for_blog = 0; //for cms init find record with DT_EXTENDED_DESCRIPTION=='BLOG TEMPLATE'
     
-    $data = self::readDataFile( $filename );
+    $data = self::_readDataFile( $filename );
     
     self::$system->defineConstant('DT_ORIGINAL_RECORD_ID');
     
@@ -728,7 +733,7 @@ EOD;
                 if($res2){
                     //mapping for fields and rectypes
                     $importDef->doMapping($mapping_defs); //need for getTargetIdBySourceId
-                    $defs = $importDef->getDefinitions(); //terms aready here
+                    $defs = $importDef->getDefinitions(); //terms aready here (target defs)
                     
                     $defs['rectypes'] = dbs_GetRectypeStructures(self::$system, null, 2);
                     $defs['detailtypes'] = dbs_GetDetailTypes(self::$system, null, 2);
@@ -745,6 +750,11 @@ EOD;
                 //get target definitions (this database)
                 $defs = $importDef->getDefinitions();
            
+            }
+            
+            $src_defs = $importDef->getDefinitions('source');
+            if(@$src_defs['databaseURL']){
+                $source_url = $src_defs['databaseURL'];
             }
                         
             if(!$res2){
@@ -1073,7 +1083,9 @@ EOD;
                        $value = $value['file'];
                        $dtl_UploadedFileID = null;
                        
-                       if(@$value['ulf_ExternalFileReference']){ //remote URL
+                       if(@$value['ulf_ExternalFileReference'] && 
+                            (strpos($value['ulf_ExternalFileReference'],'http://')===0
+                            || strpos($value['ulf_ExternalFileReference'],'https://')===0)){ //remote URL
                            
                             if(@$value['ulf_ID']>0) $value['ulf_ID']=0;
                            
@@ -1097,9 +1109,13 @@ EOD;
                             else
                             {
                                 //$fileURL = @$value['url'];
-                                $remote_path = $file_URL = $source_url.'?db='.$source_db
-                                        .'&file='.$value['ulf_ObfuscatedFileID']; //download
-                                saveURLasFile($remote_path, $tmp_file); //save imported image to temp file in scratch folder
+                                if(strpos($source_url,'?db=')===false){
+                                    $file_URL = $source_url.'?db='.$source_db;    
+                                }else{
+                                    $file_URL = $source_url;
+                                }
+                                $file_URL = $file_URL.'&file='.$value['ulf_ObfuscatedFileID']; //download
+                                saveURLasFile($file_URL, $tmp_file); //save imported image to temp file in scratch folder
                             }
 
                             //register imported image

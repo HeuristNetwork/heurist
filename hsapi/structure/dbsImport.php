@@ -88,7 +88,6 @@ class DbsImport {
         }
     }
     
-    
 // 1. get database url
 // 2. get definitions from remote database
 // 3. Find what defintions will be imported
@@ -171,11 +170,13 @@ $time_debug2 = $time_debug;
         }
         if(!(count($local_ids)>0 || $cCode)){
             $this->system->addError(HEURIST_ERROR, "Neither concept code nor local id is defined");
-            return false;
+            return false;   
         }
         
         $this->source_db_reg_id = $db_reg_id;
 
+//error_log('getting database url for id='.$db_reg_id);
+        
         // 1. get database url by database id
         $database_url = $this->_getDatabaseURL($db_reg_id);        
         
@@ -186,12 +187,17 @@ $time_debug = microtime(true);
         if(!$database_url){
             return false; //see $system->getError
         }        
-        
+    
+//error_log($database_url.'   id='.$db_reg_id);
         // 2. get definitions from remote database
         $this->source_defs  = $this->_getDatabaseDefinitions($database_url, $db_reg_id, ($entityTypeToBeImported=='term'));
+        
         if (!$this->source_defs) {
             return false; //see $system->getError
         }
+        
+        $this->source_defs['databaseURL'] = $database_url;
+        
 
 /* We require at least version 1.2 for database defintion */
         if(false && @$this->source_defs['terms']){
