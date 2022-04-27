@@ -1073,7 +1073,9 @@ $.widget( "heurist.mainMenu6", {
     //
     _closeSectionMenu: function( section ){
         
-        this.menues[section].css({'z-index':0}).hide(); 
+        if(this.menues[section]) {
+            this.menues[section].css({'z-index':0}).hide();
+        }
         this.menues_explore_gap.hide();
         //this.menues[section].css({'z-index':2,left:'200px'}).show(); 
         if(section=='explore'){
@@ -1438,7 +1440,7 @@ $.widget( "heurist.mainMenu6", {
             return;
         }
         
-        if(section == 'explore') {
+        if(section == 'explore' && that.containers[section]) {
             if(that.containers[section].hasClass('ui-layout-container'))
                  that.containers[section].layout().resizeAll();
             that._switch_SvsList( 0 );
