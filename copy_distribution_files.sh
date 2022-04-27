@@ -2,6 +2,9 @@
 
 # Run as sudo
 
+# If you can't run copy_distribution_files.sh it is probably due to it having acquired Windows line endings
+# Run    dos2unix copy_distribution_files.sh   to fix the problem
+
 # copy_distribution_files.sh: Creates a distribution package in heurist-build from a Heurist working directory
 # This file is intended for internal use of the development team and should normally be deleted from the install package.
 
