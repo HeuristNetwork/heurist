@@ -95,6 +95,12 @@ if (!@$websiteThumbnailYsize) $websiteThumbnailYsize = 300; // required
 // Optional: if set to -1 this will block creation of new websites with a message to contact sysadmin 
 // $allowCMSCreation = -1;
 
+// This allows selected databases on specific servers to access the 
+// ESTC lookup data on the reference server (covered by a strict use license)
+// $ESTC_UserName = "????"; // User name and password for access to the database
+// $ESTC_Password = "????";
+// $ESTC_PermittedDBs=""; // comma-separated list of database names on the server
+// $ESTC_ServerURL = "https://int-heuristweb-prod.intersect.org.au";
 
 
 ?>
