@@ -79,6 +79,9 @@ if (!@$indexServerPort) $indexServerPort = "9200";
 // The prefix may be left blank, in which case nothing is prepended. For practial management we strongly recommend a prefix.
 if (!@$dbPrefix) $dbPrefix = "hdb_"; // WE STRONGLY recommend retaining hdb_
 
+// Set $allowGoogleAnalytics to TRUE to permit Google analytics on Heurist
+$allowGoogleAnalytics = FALSE;
+
 // URL of 3d party website thumbnail service. Heurist can call any thumbnailing service which returns an
 // appropriate JPEG or GIF file when passed the URL of a web page. This may be a thumbnail of a security block page
 // if the URL is passworded. The thumbnailing service is called automatically when web pages are bookmarked.

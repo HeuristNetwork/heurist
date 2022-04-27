@@ -499,10 +499,8 @@ var fin_time = new Date().getTime() / 1000;
         </script>
 
 <?php 
-//do not use google analitics on heurist reference site
-if($_SERVER["SERVER_NAME"]!='127.0.0.1' && 
-   strpos('heuristplus', $_SERVER["SERVER_NAME"])===false && 
-   strpos('heurisref', $_SERVER["SERVER_NAME"])===false){
+// do not use google analytics unless requested in heuristConfigIni.php
+if($allowGoogleAnalytics){
 ?>     
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-132203312-1"></script>
