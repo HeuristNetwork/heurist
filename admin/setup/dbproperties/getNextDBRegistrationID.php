@@ -264,7 +264,7 @@ if($dbID>0) {
         $dbowner_Email = $dbowner['ugr_eMail'];
         $email_title = 'Database registration ID: '.$dbID.'. User ['.$indexdb_user_id.']';
 
-        sendEmail($dbowner_Email, $email_title, $email_text, null);
+        sendEmail($dbowner_Email, $email_title, $email_text);
         //END email -----------------------------------
 
         

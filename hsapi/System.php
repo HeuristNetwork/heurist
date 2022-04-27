@@ -30,9 +30,6 @@ require_once (dirname(__FILE__).'/utilities/utils_file.php');
 require_once (dirname(__FILE__).'/utilities/utils_mail.php');
 require_once (dirname(__FILE__).'/structure/dbsImport.php');
 
-//use PHPMailer\PHPMailer\PHPMailer;
-//use PHPMailer\PHPMailer\Exception;
-
 set_error_handler('boot_error_handler');    
 
 /**
@@ -652,7 +649,7 @@ error_log(print_r($_REQUEST, true));
                     ."may not have been mounted on the web server.";
 
             // Error needs extra attention, send an email now to Heurist team/Bug report
-            sendEmail(HEURIST_MAIL_TO_BUG, $title, $body, null, true, true);
+            sendEmail(HEURIST_MAIL_TO_BUG, $title, $body, true);
 
             $usr_msg = "Cannot access filestore directory for the database <b>". $dbname .
                        "</b><br/>The directory "
@@ -1283,8 +1280,8 @@ error_log(print_r($_REQUEST, true));
                     if($needSend){
 
                         $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Session folder access', 
-                                            'The sessions folder has become inaccessible' , null);
-                        if($rv=="ok"){
+                                            'The sessions folder has become inaccessible');
+                        if($rv){
                             if (file_exists($fname)) unlink($fname);
                             file_put_contents($fname, date_create('now')->format('Y-m-d H:i:s'));
                         }
@@ -1961,37 +1958,8 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 foreach($logs_to_be_emailed as $log_file){
                     $msg = $msg.'<br>'.file_get_contents($log_file);
                 }
-                sendPHPMailer('bugs@HeuristNetwork.org', 'Bug reporter', HEURIST_MAIL_TO_BUG, $msgTitle, $msg, null);
-
-                /*    
-                //send an email with attachment
-                $email = new PHPMailer();
-                $email->CharSet = 'UTF-8';
-                $email->Encoding = 'base64';
-                $email->isHTML(true); 
-                $email->SetFrom('bugs@HeuristNetwork.org', 'Bug reporter'); //'bugs@'.HEURIST_SERVER_NAME 
-                $email->Subject   = $msg;
-                    $email->AddAddress( HEURIST_MAIL_TO_BUG );        
-                
-                if(true){
-                    foreach($logs_to_be_emailed as $log_file){
-                        $msg = $msg.'<br>'.file_get_contents($log_file);
-                    }
-                }else{
-                    foreach($logs_to_be_emailed as $log_file){
-                        $email->addAttachment( $log_file );    
-                    }
-                }
-                $email->Body      = $msg;
-                
-                //SEND 
-                try{
-                    $email->send();
-                } catch (Exception $e) {
-                    error_log('Cannot send email. Please ask system administrator to verify that mailing is enabled on your server. '
-                     .$email->ErrorInfo);     
-                }                    
-                */
+                //'Bug reporter', 
+                sendEmail(HEURIST_MAIL_TO_BUG, $msgTitle, $msg, true);
             }
             
         
@@ -2028,28 +1996,10 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 . " so you may test them before full adoption. We recommend use of the alpha package"
                 . " by any confident user, as they bring bug-fixes, cosmetic improvements and new"
                 . " features. They are safe to use and we will respond repidly to any reported bugs.";
-
                 
-                sendPHPMailer('info@HeuristNetwork.org', 'Update notification', HEURIST_MAIL_TO_ADMIN, $title, $msg, null);
+                //Update notification
+                sendEmail(HEURIST_MAIL_TO_ADMIN, $title, $msg, true);
                 
-                /*
-                $email = new PHPMailer(true);
-                $email->isHTML(true);
-                //$email->From('info@HeuristNetwork.org');
-                //$email->FromName('Update notification');
-                $email->SetFrom('info@HeuristNetwork.org', 'Update notification');
-                $email->Subject = $title;
-                $email->Body = $msg;
-                $email->AddAddress( HEURIST_MAIL_TO_ADMIN );
-
-                try{
-                    $email->send();
-                } catch (Exception $e) {
-                    error_log('Cannot send email. Please ask system administrator to verify that mailing is enabled on your server. ' . $e->getMessage());
-                }
-                if($email->ErrorInfo)
-                */
-
                 return;
 
             }else{ // main release is less than installed version, maybe missed alpha or developemental version

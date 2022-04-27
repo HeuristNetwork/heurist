@@ -650,7 +650,7 @@ function dbs_GetRectypeConstraint($system) {
                             .', owner '.@$dbowner['ugr_FirstName'].' '.@$dbowner['ugr_LastName'].' '.@$dbowner['ugr_eMail'],
                             'db: '.$system->dbname().'\nOwner:'.@$dbowner['ugr_eMail']
                             .'\nUser was unable to load the database due to a corrupted terms tree. '
-                            .'Recursion in parent-term hierarchy '.$termID.'  '.$subTermID, null);
+                            .'Recursion in parent-term hierarchy '.$termID.'  '.$subTermID);
                         }
                     }
                 }
@@ -1021,7 +1021,7 @@ function dbs_GetRectypeConstraint($system) {
                                     'db: '.$dbname.'\nOwner:'.@$dbowner['ugr_eMail']
                                     .'User was unable to load the database due to a corrupted terms tree. '
                                     .'Recursion in parent-term hierarchy. Parent:'.implode('>',$parents)
-                                    .'  Child:'.$gChildID, null);
+                                    .'  Child:'.$gChildID);
                             }
                         }
                     }

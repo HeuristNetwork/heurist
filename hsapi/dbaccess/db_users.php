@@ -135,20 +135,24 @@
                 $res= mysql__insertupdate($mysqli, "sysUGrps", "ugr_", $record);
                 if(is_numeric($res)>0){
 
+                    //, "From: ".$dbowner_Email
+                    $dbowner_Email = user_getDbOwner($mysqli, 'ugr_eMail');
+                    
                     $email_title = 'Password reset';
                     $email_text = "Dear ".$user['ugr_FirstName'].",\n\n".
                     "Your Heurist password has been reset.\n\n".
                     "Your username is: ".$user['ugr_Name']."\n".
                     "Your new password is: ".$new_passwd."\n\n".
-                    "To change your password go to Profile -> My User Info in the top right menu.\nYou will first be asked to log in with the new password above.";
+                    "To change your password go to Profile -> My User Info in the top right menu.\nYou will first be asked to log in with the new password above.\n\n"
+                    ."Database Owner: ".$dbowner_Email;
 
-                    $dbowner_Email = user_getDbOwner($mysqli, 'ugr_eMail');
-
-                    $rv = sendEmail($user['ugr_eMail'], $email_title, $email_text, "From: ".$dbowner_Email);
-                    if($rv=="ok"){
+                    
+                    $rv = sendEmail($user['ugr_eMail'], $email_title, $email_text);
+                    if($rv){
                         return true;
                     }else{
-                        $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Password_Reset', $rv);
+                        $msg = $system->getError();
+                        $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Password_Reset', $msg?@$msg['message']:null);
                     }
 
                 }else{
@@ -665,9 +669,10 @@
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
 
-            $rv = sendEmail($dbowner_Email, $email_title, $email_text, null);
-            if($rv != 'ok'){
-                $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Registration', $rv);
+            $rv = sendEmail($dbowner_Email, $email_title, $email_text);
+            if(!$rv){
+                $msg = $system->getError();
+                $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Registration', $msg?@$msg['message']:null);
                 return false;
             }
         }else{
@@ -711,15 +716,19 @@
             }
 
             $email_text = $email_text."\n\nWe recommend visiting http://HeuristNetwork.org and the online Help ".
-            "pages, which provide comprehensive overviews and step-by-step instructions for using Heurist.";
+            "pages, which provide comprehensive overviews and step-by-step instructions for using Heurist.\n\n".
+            "Database Owner: ".$dbowner_Email;
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
 
-            $rv = sendEmail($ugr_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
+            $rv = sendEmail($ugr_eMail, $email_title, $email_text);
 
-            if($rv != 'ok'){
-                $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Approvement', $rv);
+            if(!$rv){
+                $msg = $system->getError();
+                $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Approvement', $msg?@$msg['message']:null);
+                return false;
             }
+            
         }else{
                 $system->addError(HEURIST_NOT_FOUND, 'User not found');
                 return false;

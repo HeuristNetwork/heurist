@@ -300,6 +300,8 @@ class DbUsrReminders extends DbEntityBase
                 $email_owner = $owner[0].' '.$owner[1].' <'.$owner[2].'>';
                 
                 if($is_notification){
+                    
+                    $email_from_name = 'Heurist notification';
                     $email_headers = 'From: '.$email_owner.' <no-reply@'.HEURIST_SERVER_NAME.'>';    
                     
                     //find associated records
@@ -310,6 +312,8 @@ class DbUsrReminders extends DbEntityBase
                     $email_title = '[HEURIST] Email from '.$owner[0].' '.$owner[1].' ('
                         .(count($bibs)>1?count($bibs).' references':'one reference').')';
                 }else{
+
+                    $email_from_name = 'Heurist reminder service';
                     $email_headers = 'From: Heurist reminder service <no-reply@'.HEURIST_SERVER_NAME.'>';        
                     
                     //find associated record
@@ -333,7 +337,8 @@ class DbUsrReminders extends DbEntityBase
                 foreach($recipients as $recipient) {
                     if($is_notification){
                         
-                        $email_text = $owner[0].' '.$owner[1].' would like to draw some records to your attention, with the following note:'. "\n\n"
+                        $email_text = $owner[0].' '.$owner[1].' <'.$owner[2]
+                                    .'> would like to draw some records to your attention, with the following note:'. "\n\n"
                                     . '"'.$record['rem_Message'] . '"' . "\n\n"
                                     . 'Access them and add them (if desired) to your Heurist records at:' . "\n\n"
                                     . HEURIST_BASE_URL.'?w=all&db='.HEURIST_DBNAME.'&q=ids:'.implode(',', $rec_IDs) . "\n\n"
@@ -373,11 +378,8 @@ class DbUsrReminders extends DbEntityBase
                         }
                     }
                     
-                    $res = sendEmail($recipient['email'], $email_title, $email_text, $email_headers, true);
-                    if($res!='ok'){
-                        $this->system->addError(HEURIST_SYSTEM_CONFIG, $res);
-                        return false;
-                    }
+                    //$res = sendEmail($recipient['email'], $email_title, $email_text, $email_headers, true);
+                    return sendPHPMailer(null, $email_from_name, $recipient['email'], $email_title, $email_text, null, false);
                     
                 }//for recipients
             

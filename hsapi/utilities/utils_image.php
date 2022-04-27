@@ -408,8 +408,8 @@ class UtilsImage {
                     
                         $errline_prev=$errline;
                         //database, record ID and name of bad image
-                        $res = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.HEURIST_DBNAME, 
-                        'File :'.$filename.' is corrupted. System message: '.$errstr, null);
+                        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.HEURIST_DBNAME, 
+                        'File :'.$filename.' is corrupted. System message: '.$errstr);
                         //ID#'.$file['ulf_ID'].'  
                     
                 }

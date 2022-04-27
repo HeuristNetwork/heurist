@@ -23,11 +23,6 @@ require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
-require_once (dirname(__FILE__).'/../../vendor/autoload.php');
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
 class DbSysBugreport extends DbEntityBase
 {
 
@@ -169,79 +164,16 @@ class DbSysBugreport extends DbEntityBase
             }
         }
         
-        if($this->_sendEmail('support@HeuristNetwork.org', 'Bug reporter', $toEmailAddress, 
+        if(sendPHPMailer(null, 'Bug reporter', $toEmailAddress, 
                 $bug_title, 
                 (true?$sMessage:$message),  //since 02 Dec 2021 we sent human readable message
-                $filename)){
+                $filename, true)){
             return array(1); //fake rec id
         }else{
             return false;
         }
-        
-        /*
-        $message =  json_encode($message);
-       
-        //send an email with attachment
-        $email = new PHPMailer();
-        $email->isHTML(true); 
-        $email->SetFrom('support@HeuristNetwork.org', 'Bug reporter'); //'bugs@'.HEURIST_SERVER_NAME 
-        $email->Subject   = $bug_title;
-        $email->Body      = $message;
-        $email->AddAddress( $toEmailAddress );        
-        if($filename!=null){
-            $email->addAttachment($filename);// , 'new.jpg'); 
-        }
-       
-        try{
-            $email->send();
-            return array(1); //fake rec id
-        } catch (Exception $e) {
-            $this->system->addError(HEURIST_SYSTEM_CONFIG, 
-                    'Cannot send email. Please ask system administrator to verify that mailing is enabled on your server'
-                    , $email->ErrorInfo);
-            return false;
-        }
-        */
     }  
-    
-    //
-    //
-    //    
-    private function _sendEmail($email_from, $email_from_name, $email_to, $email_title, $email_text, $email_attachment){
-
-        if(!$email_from) $email_from = 'info@HeuristNetwork.org';
-        if(!$email_from_name) $email_from_name = 'Heurist system';
-        
-        if(is_array($email_text)){
-            $email_text =  json_encode($email_text);    
-        }
-
-        $email_from = filter_var($email_from, FILTER_SANITIZE_EMAIL);
-        $email_to = filter_var($email_to, FILTER_SANITIZE_EMAIL);
-
-        //send an email with attachment
-        $email = new PHPMailer();
-        $email->isHTML(true); 
-        $email->SetFrom($email_from, $email_from_name); //'bugs@'.HEURIST_SERVER_NAME 
-        $email->Subject   = $email_title;
-        $email->Body      = $email_text;
-        $email->AddAddress( $email_to );        
-        if($email_attachment!=null){
-            $email->addAttachment($email_attachment);// , 'new.jpg'); 
-        }
-       
-        try{
-            $email->send();
-            return true;
-        } catch (Exception $e) {
-            $this->system->addError(HEURIST_SYSTEM_CONFIG, 
-                    'Cannot send email. Please ask system administrator to verify that mailing is enabled on your server'
-                    , $email->ErrorInfo);
-            return false;
-        }
-        
-    }
-    
+  
     //
     // this is response to emailForm widget 
     // it sends email to owner of database or to email specified in website_id record
@@ -312,8 +244,13 @@ class DbSysBugreport extends DbEntityBase
         $email_from = null;
         $email_from_name = null;
     
-        if($this->_sendEmail($email_from, $email_from_name, $email_to, $email_title, $email_text, null)){
-            return array(1); 
+    
+        if(sendPHPMailer(null, 'Bug reporter', $email_to, 
+                $email_title, 
+                $email_text,
+                null, true))
+        {
+                return array(1); 
         }else{
             return false;
         }
