@@ -1,0 +1,18 @@
+
+Directory:	/movetoparent
+
+Overview:	This directory contains files which should be placed in the parent directory
+            of the codebase during installation of Heurist
+
+            heuristConfigIni.php is CRITICAL, as it sets all the local configuration parameters
+            
+Updated: 	28 April 2022
+
+---------------------------------------------------------------------
+
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2019 University of Sydney
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     6

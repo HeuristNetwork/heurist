@@ -121,8 +121,8 @@ $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE
 $2 cp /var/www/html/HEURIST/$1/admin/setup/.htaccess_for_filestore /var/www/html/HEURIST/HEURIST_FILESTORE/.htaccess
 
 # set up override configIni files
-$2 mv /var/www/html/HEURIST/$1/move_to_parent_as_heuristConfigIni.php /var/www/html/HEURIST/heuristConfigIni.php
-$2 mv /var/www/html/HEURIST/$1/move_to_parent_as_index.html /var/www/html/HEURIST/index.html
+$2 mv /var/www/html/HEURIST/$1/movetoparent/heuristConfigIni.php /var/www/html/HEURIST/heuristConfigIni.php
+$2 mv /var/www/html/HEURIST/$1/movetoparent/index.html /var/www/html/HEURIST/index.html
 
 # one or other of these will fail harmlessly
 # on a two tier system you may need to map apache to nobody

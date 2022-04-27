@@ -21,7 +21,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    header( 'Location: /HEURIST/index.html');
+    header( 'Location: /HEURIST/startup');
 
     
 /*   This is the html alternative - not tested
