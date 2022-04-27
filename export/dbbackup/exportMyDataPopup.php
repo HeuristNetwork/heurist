@@ -78,14 +78,16 @@ if($mode=='2' && file_exists($folder.".zip") ){
             </p>
             <p>The MySQL dump will contain the complete database which can be reloaded on any up-to-date MySQL database server.
             </p>
-            <p>The output of the process will be made available as a link to a downloadable zip file.
+            <p>The output of the process will be made available as a link to a downloadable zip file
+            <br>but is also available to the system adminstrator as a file in the backup directory in the database.
             </p>
             <h3 class="ui-heurist-title">Warning</h3>
-            <p>Zipping databases and including lots of images or video may bog down the server and the file may not download
-            satisfactorily - in that case it may be better to ask your sysadmin to give you the files separately on a USB drive.</p>
+            <p>Zipping databases with large numbers of images or very large files such as high 
+            <br>resolution maps or video may bog down the server and the zip file may be too big to download.
+            <br>In that case you may need to ask your sysadmin to give you the files separately on a USB drive.</p>
             
-            <p>Attached files may be omitted by unchecking the first checkbox. This may also be useful for databases with 
-            lots of attached files which are already backed up elsewhere.
+            <p>Attached files may be omitted by unchecking the first checkbox. 
+            <br>This may also be useful for databases with lots of attached files which are already backed up elsewhere.
             </p>
 
 
@@ -104,14 +106,14 @@ if($mode=='2' && file_exists($folder.".zip") ){
                 <div class="input-row" style="padding-top:10px">
                     <label>
                         <input type="checkbox" name="includeresources" value="1" checked>
-                        Include attached (uploaded) files eg. images
+                        Include attached (uploaded) files eg. images (essential for full database archive).
                     </label> 
                 </div>
 
                 <div class="input-row">
                     <label title="Adds fully self-documenting HML (Heurist XML) file">
                         <input type="checkbox" name="include_hml" value="1" checked>
-                        Include HML
+                        Include HML (not required for transfer to a new server, but recommended for long-term archive)
                     </label>
                 </div>
                 
@@ -231,7 +233,7 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
             $_REQUEST['rev'] = 'no'; //do not include reverse pointers
             $_REQUEST['filename'] = $folder."/".HEURIST_DBNAME.".xml";
 
-            echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take some time for large databases)<br>");
+            echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take several minutes for large databases)<br>");
 
             $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
             if (is_file($to_include)) {
@@ -272,7 +274,7 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
 
             if($system->is_admin()){
                 // Do an SQL dump of the whole database
-                echo_flush2("Exporting SQL dump of the whole database<br>");
+                echo_flush2("Exporting SQL dump of the whole database (several minutes for large databases)<br>");
 
                 try{
                     $dump = new Mysqldump( HEURIST_DBNAME_FULL, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
