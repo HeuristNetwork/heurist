@@ -91,4 +91,10 @@ if (!@$websiteThumbnailUsername) $websiteThumbnailUsername = "";
 if (!@$websiteThumbnailPassword) $websiteThumbnailPassword = "";
 if (!@$websiteThumbnailXsize) $websiteThumbnailXsize = 500; // required
 if (!@$websiteThumbnailYsize) $websiteThumbnailYsize = 300; // required
+
+// Optional: if set to -1 this will block creation of new websites with a message to contact sysadmin 
+// $allowCMSCreation = -1;
+
+
+
 ?>
