@@ -493,7 +493,7 @@ $.widget( "heurist.mainMenu6", {
 
             that.coverAll.hide();
             
-            that.menues_explore_gap.hide();
+            if(that.menues_explore_gap) that.menues_explore_gap.hide();
             that.divMainMenu.find('.menu-text').hide();
             that.divMainMenu.find('ul').css({'padding-right':'30px'});
             that.divMainMenu.find('li.menu-explore').css({padding:'6px 2px 6px 30px',background:'none'});
@@ -1076,7 +1076,9 @@ $.widget( "heurist.mainMenu6", {
         if(this.menues[section]) {
             this.menues[section].css({'z-index':0}).hide();
         }
-        this.menues_explore_gap.hide();
+        if(this.menues_explore_gap){
+            this.menues_explore_gap.hide();    
+        }
         //this.menues[section].css({'z-index':2,left:'200px'}).show(); 
         if(section=='explore'){
             this._closeExploreMenuPopup();
