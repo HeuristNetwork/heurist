@@ -681,7 +681,8 @@ function afterPageLoad(document, pageid, eventdata){
         {
 //console.log(href);         
             var pageid = 0;
-            if(  (href.indexOf(window.hWin.HAPI4.baseURL)===0 || href[0] == '?')
+            if(  (href.indexOf(window.hWin.HAPI4.baseURL)===0 || href[0] == '?' 
+                || href.indexOf('../heurist/?')===0  || href.indexOf('./?')===0)
                 && window.hWin.HEURIST4.util.getUrlParameter('db',href) == window.hWin.HAPI4.database
                 && window.hWin.HEURIST4.util.getUrlParameter('id',href) == home_page_record_id)
             {

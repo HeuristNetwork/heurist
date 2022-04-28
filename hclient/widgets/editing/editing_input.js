@@ -780,9 +780,14 @@ $.widget( "heurist.editing_input", {
                         statusbar: true,        
                         resize: 'both', 
 
-                        relative_urls : false,
-                        remove_script_host : false,
-                        convert_urls : true, 
+                        //relative_urls : false,
+                        //remove_script_host : false,
+                        //convert_urls : true, 
+                        
+                        relative_urls : true,
+                        remove_script_host: false,
+                        //document_base_url : window.hWin.HAPI4.baseURL,
+                        urlconverter_callback : 'tinymceURLConverter',
 
                         entity_encoding:'raw',
                         inline_styles: true,
