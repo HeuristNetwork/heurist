@@ -108,7 +108,7 @@ Dear {$usr_owner['ugr_FirstName']} {$usr_owner['ugr_LastName']},
                     
 Your Heurist database {$dbname} has been archived. We would like to help you get (re)started.
 
-In order to conserve server space we have archived your database on {$server_name} since it has not been used for several months and/or no data has ever been created. 
+In order to conserve server space (or as part of moving to another server) we have archived your database on {$server_name} since it has not been used for several months and/or no data has ever been created and/or it is being recreated somewhere else. 
  
 If you got as far as creating a database but did not know how to proceed you are not alone, but those who persevere, even a little, will soon find the system easy to use and surprisingly powerful. We invite you to get in touch ( support@HeuristNetwork.org ) so that we can help you over that (small) initial hump and help you see how it fits with your research (or other use). 
 
