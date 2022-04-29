@@ -75,6 +75,8 @@ class RecordsBatch
     */
     private $rtyIDs;
     
+    private $dt_extended_description = 0;
+    
     /*
     passed     _tag _error
     noaccess    
@@ -143,7 +145,7 @@ class RecordsBatch
         $rtyID = @$this->data['rtyID'];
         $dtyID = $this->data['dtyID'];    //detail to be affected
         
-        if ($rtyID && !(ctype_digit($rtyID) && $rtyID>0)){
+        if (!($rtyID && (is_array($rtyID) || (ctype_digit($rtyID) && $rtyID>0)))){
             $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter record type id $rtyID");
             return false;
         }
@@ -182,8 +184,11 @@ class RecordsBatch
             $query = 'select count(*) from Records';
 
             $rty_ID = @$this->data['rtyID'];
-            if($rty_ID >0){
-                $query = ' WHERE rec_RecTypeID = '.$rty_ID;
+            if(is_array($rty_ID) & count($rty_ID)>0){
+                $query .= ' WHERE rec_RecTypeID in ('.getCommaSepIds($rty_ID).')';
+                $this->rtyIDs = $rty_ID;
+            }else if($rty_ID >0){
+                $query .= ' WHERE rec_RecTypeID = '.$rty_ID;
                 $this->rtyIDs = array($rty_ID);
             }
             
@@ -643,9 +648,16 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         
         //split value if exceeds 64K        
         $splitValues = array();
-        $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');
-        if(@$this->data['needSplit'] && $dtyID==DT_EXTENDED_DESCRIPTION){
-            
+        
+        if(@$this->data['dt_extended_description']>0){
+            $this->dt_extended_description = $this->data['dt_extended_description'];
+        }else if(!($this->dt_extended_description>0)){
+            $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');    
+            $this->dt_extended_description = DT_EXTENDED_DESCRIPTION;
+        }
+        
+        if(@$this->data['needSplit'] && $dtyID==$this->dt_extended_description){
+                //split replacement value
                $lim = checkMaxLength2($rval);
                //TEST $lim = 100;
                if($lim>0){
@@ -746,7 +758,8 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 if($this->rtyIDs && @$this->rtyIDs[0]>0){
                     
                     $query = $query.', Records '
-                            .'WHERE rec_ID=dtl_RecID AND  rec_RecTypeID = '.$this->rtyIDs[0]
+                            .'WHERE rec_ID=dtl_RecID AND  rec_RecTypeID '
+            .(count($this->rtyIDs)>1?('in ('.getCommaSepIds($this->rtyIDs).')'):('='.$this->rtyIDs[0]))
                             ." AND dtl_DetailTypeID = $dtyID and $searchClause";
                 }
             }else{
@@ -796,12 +809,12 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                             $rec_update['rec_ID'] = $recID;
                             $ret = mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
                             if (!is_numeric($ret)) {
-                                $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
+                                $sqlErrors[$recID] = 'Cannot update modify data. '.$ret;
                             }
                         }else{
                             array_push($undefinedFieldsRecIDs, $recID);
                         }
-                        if(count($valuesToBeDeleted)>0){
+                        if(count($valuesToBeDeleted)>0 && !@$this->data['debug']){
                             //remove the rest for replace all occurences
                             $sql = 'delete from recDetails where dtl_ID in ('.implode(',',$valuesToBeDeleted).')';
                             if ($mysqli->query($sql) === false) {
@@ -840,12 +853,17 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 }else{
                     $dtlVal = $row[2];
                     
+                    if($this->data['rVal']=='replaceAbsPathinCMS'){
+                        
+                        $newVal = $this->data['rVal']($recID, $dtlVal);
+                        
+                    }else
                     if (!$replace_all_occurences && $partialReplace) {// need to replace sVal with rVal
-                        $newVal = preg_replace("/".$this->data['sVal']."/",$this->data['rVal'],$dtlVal);
+                        $newVal = preg_replace("/".$this->data['sVal']."/i",$this->data['rVal'],$dtlVal);
                     }else{
                         $newVal = $this->data['rVal'];
                     }
-             
+                    
                     $dtl['dtl_ID'] = $dtlID;  //detail type id
                     
                     if(($basetype=='freetext' || $basetype=='blocktext')
@@ -865,12 +883,17 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                     }else{
                         $dtl['dtl_Value'] = $newVal;        
                     }
-                    $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);    
-            
-                    if (!is_numeric($ret)) {
-                        $sqlErrors[$recID] = $ret;
-                        continue;
+                    
+                    if(!@$this->data['debug']){
+                        
+                        $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);    
+                
+                        if (!is_numeric($ret)) {
+                            $sqlErrors[$recID] = $ret;
+                            continue;
+                        }
                     }
+                    
                     $recDetailWasUpdated = true;
 
                 }
