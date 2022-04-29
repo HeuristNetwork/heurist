@@ -86,10 +86,10 @@ if(defined('LOGIN_REQUIRED') && !$system->has_access()){
 //verify database version against minimal required
 if(defined('IS_INDEX_PAGE')){
     if(HEURIST_MIN_DBVERSION>
-        $system->get_system('sys_dbVersion').'.'
-            .$system->get_system('sys_dbSubVersion').'.'
-            .$system->get_system('sys_dbSubSubVersion')){
-                
+    $system->get_system('sys_dbVersion').'.'
+    .$system->get_system('sys_dbSubVersion').'.'
+    .$system->get_system('sys_dbSubSubVersion')){
+
         //header('Location: '.dirname(__FILE__).'/../../admin/setup/dbupgrade/upgradeDatabase.php');
         include 'admin/setup/dbupgrade/upgradeDatabase.php';
         exit();
@@ -113,15 +113,20 @@ if(defined('IS_INDEX_PAGE')){
 <html>
 <head>
 
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131444459-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-131444459-1');
-</script>
+<?php 
+// Do not use google analytics unless requested in heuristConfigIni.php
+if($allowGoogleAnalytics){
+    ?>   <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131444459-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-131444459-1'); // Also uses '132203312-1' in index.php
+    </script>
+    <?php
+}
+?>
 
 <title><?=(@$_REQUEST['db']?$_REQUEST['db']:'').'. '.HEURIST_TITLE ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -135,7 +140,7 @@ if(defined('IS_INDEX_PAGE')){
 <meta http-equiv="Content-Security-Policy" content="default-src https: data: http: 'unsafe-eval' 'unsafe-inline'; img-src https: data: http:;">
 -->
 <!--
- 'self' http://maps.nypl.org -->
+'self' http://maps.nypl.org -->
 
 <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
@@ -152,14 +157,14 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     ?>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
-    
+
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.fileupload.js"></script>
-    
+
     <?php
 }else{
-//    <script type="text/javascript" src="https://code.jquery.com/jquery-migrate-3.3.2.js"></script>
-//    <script src="https://code.jquery.com/jquery-3.5.1.js" crossorigin="anonymous"></script>
+    //    <script type="text/javascript" src="https://code.jquery.com/jquery-migrate-3.3.2.js"></script>
+    //    <script src="https://code.jquery.com/jquery-3.5.1.js" crossorigin="anonymous"></script>
     ?>
     <script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
@@ -187,9 +192,9 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_collection.js"></script>
 
 <?php if(@$_REQUEST['ll']=='DigitalHarlem' || @$_REQUEST['ll']=='DigitalHarlem1935'){ ?>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/dh_search_minimal.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/google_analytics.js"></script>
-<?php } ?>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/dh_search_minimal.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/google_analytics.js"></script>
+    <?php } ?>
 
 <!-- CSS -->
 <?php include dirname(__FILE__).'/initPageCss.php'; ?>
@@ -213,35 +218,35 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
         $(this).trigger( 'myOnShowEvent' );
         return this;
     }
-    
+
     //
     // overwrite datepicker method
     //
-    
+
     $.datepicker._gotoToday = function(event){
-        
+
         var target = $(event),
-            inst = this._getInst(target[0]);
-        
+        inst = this._getInst(target[0]);
+
         var date = new Date();
-        
+
         inst.selectedDay = date.getDate();
         inst.drawMonth = inst.selectedMonth = date.getMonth();
         inst.drawYear = inst.selectedYear = date.getFullYear();
-        
+
         $.datepicker._selectDate(event,
             $.datepicker._formatDate(inst, 
                 inst.selectedDay, inst.selectedMonth, inst.selectedYear));
-        
+
     }
-    
+
 
     var onAboutInit, onPageInit, isHapiInited = false;
 
     // if hAPI is not defined in parent(top most) window we have to create new instance
     $(document).ready(function() {
 
-_dout('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
+        _dout('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
         _time_debug = new Date().getTime() / 1000;
 
         // Standalone check
@@ -269,7 +274,7 @@ _dout('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000
         }
 
     });
-    
+
     //
     // debug output
     //
@@ -297,7 +302,7 @@ _dout('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000
             _time_debug = new Date().getTime() / 1000;
 
             if($.isEmptyObject(window.hWin.HAPI4.EntityMgr.getEntityData2('defRecTypes'))){
-                
+
                 if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && $.isFunction(onAboutInit)){
                     if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
                         onAboutInit();
@@ -343,15 +348,15 @@ _dout('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000
 
         var prefs = window.hWin.HAPI4.get_prefs();
         /*
-console.log('>>>'+prefs['layout_language']);        
+        console.log('>>>'+prefs['layout_language']);        
         prefs['layout_language'] = 'ru';    
         if(!window.hWin.HR){
-            //loads localization
-            window.hWin.HR = window.hWin.HAPI4.setLocale(prefs['layout_language']);
+        //loads localization
+        window.hWin.HR = window.hWin.HAPI4.setLocale(prefs['layout_language']);
         }
         */
         //DEBUG 
-//window.hWin.HR = window.hWin.HAPI4.setLocale('ru');
+        //window.hWin.HR = window.hWin.HAPI4.setLocale('ru');
 
         /* unfortunately dynamic addition of theme and style is not applied properly.
         Browser takes some time on its parsing while we have already created some ui elements, need timeout.
@@ -373,24 +378,24 @@ console.log('>>>'+prefs['layout_language']);
             layoutid = "H6Default";
             /*layoutid = window.hWin.HAPI4.get_prefs('layout_id');
             if(window.hWin.HEURIST4.util.isempty(layoutid)){
-                layoutid = "H5Default";
+            layoutid = "H5Default";
             }*/
         }
         if(!window.hWin.HAPI4.sysinfo['layout']){
             window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
 
             if(layoutid=='DigitalHarlem' || layoutid=='DigitalHarlem1935'){ //digital harlem - @todo move style to layout
-            /*
+                /*
                 $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/digital_harlem/dh_search_minimal.js').fail(function(){
-                    window.hWin.HEURIST4.msg.showMsgErr('Cannot load script for Digital Harlem search');
+                window.hWin.HEURIST4.msg.showMsgErr('Cannot load script for Digital Harlem search');
                 });
                 $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/digital_harlem/google_analytics.js').fail(function(){
-                    window.hWin.HEURIST4.msg.showMsgErr('Cannot include Google Analtyics script');
+                window.hWin.HEURIST4.msg.showMsgErr('Cannot include Google Analtyics script');
                 });
-            */    
+                */    
             }
         }
-        
+
         if(!(layoutid=='UAdelaide' || layoutid=='Beyond1914')){
             //A11 $('body').css({'font-size':'0.7em'});
         }
