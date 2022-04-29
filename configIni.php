@@ -175,6 +175,7 @@ $passwordForReservedChanges=""; // if blank, no-one can modify reserved fields, 
 $passwordForServerFunctions=""; // if blank, no-one can run server analysis functions - risk of overload - otherwise challenge
 
 $allowThumbnailsWebAccessdefault = true;
+$allowGoogleAnalytics = true;
 
 $defaultRootFileUploadPath ="";
 $defaultRootFileUploadURL = "";
