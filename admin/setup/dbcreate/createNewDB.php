@@ -266,12 +266,18 @@ if($registrationRequired) //show user registration dialog at once
                                 
                             }else{
                                 $("#createDBForm").show();
+
+<?php                                
+if($registrationRequired){ //show user registration dialog again after wrong captcha or values
+?>
                                 
                                 //either wrong captcha or invalid registration values
                                 if(response.status == window.hWin.ResponseStatus.ACTION_BLOCKED){
                                     doRegister();
                                 }
-                                
+<?php                                
+}
+?>                                
                                 window.hWin.HEURIST4.msg.showMsgErr(response, false);
                             }
                         }

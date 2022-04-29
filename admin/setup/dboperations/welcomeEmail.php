@@ -18,11 +18,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-require_once (dirname(__FILE__).'/../../../vendor/autoload.php');
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
 function sendEmail_NewDatabase($user_record, $database_name, $source_database){
     
     $fullName = $user_record['ugr_FirstName'].' '.$user_record['ugr_LastName'];
@@ -44,8 +39,6 @@ function sendEmail_NewDatabase($user_record, $database_name, $source_database){
         .$database_name.' by '.$fullName.' ['.$user_record['ugr_eMail'].']'
         .(($source_database!=null) ?$source_database:'');
 
-    //$rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null); 
-
     //send an email with attachment
     $message = file_get_contents(dirname(__FILE__).'/welcomeEmail.html');
     
@@ -65,30 +58,16 @@ function sendEmail_NewDatabase($user_record, $database_name, $source_database){
     }else{
         $message =  str_replace('&lt;FrenchNoteIfFrance&gt;','',$message);
     }
-
-    $user_record['ugr_eMail'] = filter_var($user_record['ugr_eMail'], FILTER_SANITIZE_EMAIL);
-
-    $email = new PHPMailer();
-    $email->CharSet = 'UTF-8';
-    $email->Encoding = 'base64';
-    $email->isHTML(true); 
-    $email->SetFrom('no-reply@HeuristNetwork.org', 'Heurist'); //'no-reply@'.HEURIST_SERVER_NAME
-    $email->Subject   = (($source_database!=null)?'CloneDB: ':'NewDB: ')
+    
+    $email_title = (($source_database!=null)?'CloneDB: ':'NewDB: ')
                     .'Getting up to speed with your Heurist database ('.$database_name.') on '.HEURIST_SERVER_NAME;
-    $email->Body      = $message;
-    $email->AddAddress( $user_record['ugr_eMail'] );
-    $email->AddAddress( HEURIST_MAIL_TO_ADMIN ); // 
-    $email->addAttachment(dirname(__FILE__).'/Heurist Welcome attachment.pdf');
-   
-    try{
-        $email->send();
+
+    if (sendEmail(array($user_record['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $message, 
+                                                    true, dirname(__FILE__).'/Heurist Welcome attachment.pdf')){
         return array(1); //fake rec id
-    } catch (Exception $e) {
-        $this->system->addError(HEURIST_SYSTEM_CONFIG, 
-                'Cannot send email. Please ask system administrator to verify that mailing is enabled on your server'
-                , $email->ErrorInfo);
+    }else{
         return false;
     }
-    
+ 
 }
 ?>

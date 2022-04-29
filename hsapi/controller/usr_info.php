@@ -73,7 +73,7 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
         
         if(@$_REQUEST['activity']=='impEmails'){
             $msg = 'Click on "Harvest EMail" in menu. DATABASE: '.@$_REQUEST['db'];
-            $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $msg, $msg, null);
+            $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $msg, $msg);
         }
         
         

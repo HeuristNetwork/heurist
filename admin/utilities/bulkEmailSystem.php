@@ -442,7 +442,9 @@ class systemEmailExt {
 		$mailer->CharSet = "UTF-8";
 		$mailer->Encoding = "base64";
         $mailer->isHTML(true);
-        $mailer->SetFrom($this->cur_user["ugr_eMail"], $this->cur_user["ugr_FullName"]);
+        //OLD $mailer->SetFrom($this->cur_user["ugr_eMail"], $this->cur_user["ugr_FullName"]);
+        
+        $mailer->SetFrom('no-reply@'.HEURIST_DOMAIN, 'Heurist system');
 
 		foreach ($this->user_details as $email => $details) {
 

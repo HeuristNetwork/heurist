@@ -174,10 +174,8 @@ if(!@$_REQUEST['mail']){
     
     if(@$_REQUEST['mail']){
         
-        $email_header = " <no-reply@".HEURIST_SERVER_NAME.">\r\nContent-Type: text/html;";
-        //
         $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'List of databases with missing/inaccessible folders', 
-                                            $rep, $email_header);
+                                            $rep, true);
         exit();
     }else{
         

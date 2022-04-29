@@ -322,7 +322,7 @@ function getImageFromFile($filename){
             
             }catch(Exception $e) {
                 $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Image corruption '.HEURIST_DBNAME, 
-                    $filename.'. System message: ' .$e->getMessage() , null);
+                    $filename.'. System message: ' .$e->getMessage());
             }
 
             
@@ -1046,7 +1046,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                 if($errorMsg){
                     //database, record ID and name of bad image
                     sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.HEURIST_DBNAME, 
-                            'File ID#'.$file['ulf_ID'].'  '.$filename.'. '.$errorMsg, null);
+                            'File ID#'.$file['ulf_ID'].'  '.$filename.'. '.$errorMsg);
                  
                     $img = UtilsImage::createFromString('Thumbnail not created. '.$errorMsg);
                     

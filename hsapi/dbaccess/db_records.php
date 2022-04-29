@@ -588,7 +588,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                 sendEmail(HEURIST_MAIL_TO_ADMIN, 
                     'DATABASE ERROR :'.$system->dbname().'Cannot save value - possibly bad encoding.',
                     ($syserror?'. System message:'.$syserror:'')."\n Record#: $recID \n"
-                    .print_r($values,true), null, true);
+                    .print_r($values,true));
                 **/
                 
                 return $system->addError(HEURIST_DB_ERROR, 'Cannot save value - possibly bad encoding.', $syserror);
@@ -731,8 +731,8 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         .' has been changed to "'.$stage_name
         .'"<br> by user: '.($user?$user:$system->get_user_id());
      
-        sendPHPMailer('info@HeuristNetwork.org', 'Heurist DB '.HEURIST_DBNAME.'. ID: '.$recID, //'Workflow stage update notification', 
-                    $swf_emails, $title, $msg, null);
+        sendPHPMailer(null, 'Heurist DB '.HEURIST_DBNAME.'. ID: '.$recID, //'Workflow stage update notification', 
+                    $swf_emails, $title, $msg, null, true);
     }
     
 
@@ -2057,7 +2057,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                         if($err_msg!=''){
                             //send email to heurist team about fail generation from url
                             sendEmail(HEURIST_MAIL_TO_ADMIN, 'The thumbnailer fails to return an image '.$system->dbname(),
-                                'The thumbnailer fails to return an image '.$record['URL'].'. '.$err_msg, null);      
+                                'The thumbnailer fails to return an image '.$record['URL'].'. '.$err_msg);      
                             $err_msg = '';
                             $dtl_Value = '';
                             $isValid = 'ignore';

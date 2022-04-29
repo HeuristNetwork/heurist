@@ -165,15 +165,15 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
 
                 if(count($warnings) == 2 && $warnings['revert']){
 
-                    sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database root folder', $warnings['message'], null);
+                    sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database root folder', $warnings['message']);
                     if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
-                        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Unable to create database root folder', $warnings['message'], null);
+                        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Unable to create database root folder', $warnings['message']);
                     }
                 }else{
 
-                    sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database sub directories', "Unable to create the sub directories within the database root directory,\nDatabase name: " . $database_name . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings: " . implode(",\n", $warnings), null);
+                    sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database sub directories', "Unable to create the sub directories within the database root directory,\nDatabase name: " . $database_name . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings: " . implode(",\n", $warnings));
                     if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
-                        sendEmail(HEURIST_MAIL_TO_ADMIN, "Unable to create the sub directories within the database root directory,\nDatabase name: " . $database_name . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings:\n" . implode(",\n", $warnings), null);
+                        sendEmail(HEURIST_MAIL_TO_ADMIN, "Unable to create the sub directories within the database root directory,\nDatabase name: " . $database_name . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings:\n" . implode(",\n", $warnings));
                     }
                 }
 

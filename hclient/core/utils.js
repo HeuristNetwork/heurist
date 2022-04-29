@@ -1410,3 +1410,18 @@ $.getMultiScripts = function(arr, path) {
 //constants for saved searches\
 const _NAME = 0, _QUERY = 1, _GRPID = 2;
 
+
+function tinymceURLConverter(url, node, on_save, name)
+{
+    if(url.indexOf(window.hWin.HAPI4.baseURL_pro)===0)
+    {
+        url = url.replace(window.hWin.HAPI4.baseURL_pro, './'); //'../heurist/');
+        
+    }else if(url.indexOf(window.hWin.HAPI4.baseURL)===0)
+    {
+        url = url.replace(window.hWin.HAPI4.baseURL, './'); //../heurist/');
+    }
+
+    // Return URL
+    return url;
+}   
