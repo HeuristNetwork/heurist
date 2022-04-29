@@ -49,8 +49,8 @@ echo
 echo
 
 cd /var/www/html/HEURIST
-$2 mkdir -p temp
-cd temp
+$2 mkdir -p temp_install_unzip
+cd temp_install_unzip
 
 echo "Fetching Heurist code from $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2"
 echo
@@ -101,6 +101,8 @@ echo "Heurist unpacked"
 # cd  /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2
 # ./bin/elasticsearch -d
 
+// Remove temporary unzip directory used during installation
+$2 rm -rf /var/www/html/HEURIST/temp_install_unzip/
 
 echo ""
 echo ""
