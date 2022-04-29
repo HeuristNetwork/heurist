@@ -499,19 +499,35 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 </script>
 
 <?php 
-// Do not use google analytics unless requested in heuristConfigIni.php
-if($allowGoogleAnalytics){
-    ?>     
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-132203312-1"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'UA-132203312-1'); // Also uses 'UA-131444459-1' in initPage.php
-    </script>
-    <?php  
-} 
+
+if($allowGoogleAnalytics) {
+    if ($_SERVER["SERVER_NAME"]='127.0.0.1'
+    || strpos('int-heuristweb-prod.intersect.org.au', $_SERVER["SERVER_NAME"]) 
+    || strpos('heuristref', $_SERVER["SERVER_NAME"])) {// Operating on Heurist reference server
+        ?>     
+        <!-- Heurist Reference Server, Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131444459-1"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'UA-131444459-1'); 
+        </script>
+        <?php  
+    } else {
+        ?>
+        <!-- Other Heurist server, Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-132203312-1"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'UA-132203312-1'); 
+        </script>
+        <?php  
+
+    }
+}
 ?>
 
 
