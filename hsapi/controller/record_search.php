@@ -84,7 +84,7 @@ detectLargeInputs('COOKIE record_search', $_COOKIE);
        
        unset($_REQUEST['remote']);
        $_REQUEST['db'] = HEURIST_INDEX_DATABASE;
-       if(!@$_REQUEST['q']) $_REQUEST['q'] = 't:22';
+       if(!@$_REQUEST['q']) $_REQUEST['q'] = '{"t":"'.HEURIST_INDEX_DBREC.'"}';
     }
     
     $response = array();
@@ -145,7 +145,7 @@ detectLargeInputs('COOKIE record_search', $_COOKIE);
         
         if(@$_REQUEST['remote'] == 'master'){
             
-                if(!@$_REQUEST['q']) $_REQUEST['q'] = 't:22'; //all registred db
+                if(!@$_REQUEST['q']) $_REQUEST['q'] = '{"t":"'.HEURIST_INDEX_DBREC.'"}'; //all registred db
             
                 $reg_url = HEURIST_INDEX_BASE_URL.'hsapi/controller/record_search.php?db='.HEURIST_INDEX_DATABASE.'&q='.$_REQUEST['q'];
                 if(@$_REQUEST['detail']){
@@ -153,6 +153,7 @@ detectLargeInputs('COOKIE record_search', $_COOKIE);
                         .(is_array($_REQUEST['detail'])?json_encode($_REQUEST['detail']):$_REQUEST['detail']);
                 }
                 $data = loadRemoteURLContent($reg_url);  //search master index database for all regitered databases          
+
                 if($data==false){
                     $msg = 'Cannot access Master Index database on '.HEURIST_INDEX_BASE_URL;
                     if(@$glb_curl_error){

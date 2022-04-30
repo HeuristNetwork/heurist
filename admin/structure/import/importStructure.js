@@ -309,7 +309,7 @@ $.widget( "heurist.importStructure", {
 
                                 var recURL  = this.fld(record, 'rec_URL');
                                 var recDesc = this.fld(record, 'rec_Title');
-                                var isAllowClone = (this.fld(record, 398)!=6023)?1:0;
+                                var isAllowClone = ( this.fld(record, 398)!=6023 )?1:0;
                                 var dbURL = '';
                                 var dbName = 'Broken registration';
 

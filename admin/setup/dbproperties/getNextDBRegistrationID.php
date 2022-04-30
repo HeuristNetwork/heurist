@@ -43,10 +43,9 @@ if(@$_REQUEST["db"]!='Heurist_Master_Index'){
     return;
 }
 
-    require_once (dirname(__FILE__).'/../../../hsapi/System.php');
-    require_once(dirname(__FILE__).'/../../../hsapi/utilities/utils_mail.php');
+require_once (dirname(__FILE__).'/../../../hsapi/System.php');
 
-    $connect_failure = false;
+$connect_failure = false;
     
 if(isset($system)){ //this is call from heurist server by include  loadRemoteURLContentSpecial->getScriptOutput
     
@@ -57,9 +56,7 @@ if(isset($system)){ //this is call from heurist server by include  loadRemoteURL
     
     // init main system class
     $system = new System();
-    
     $connect_failure = (!$system->init(@$_REQUEST['db'], false));
-    
 }
 
 if($connect_failure){
@@ -104,7 +101,8 @@ if(strpos($serverURL_lc, '//localhost')>0 ||  strpos($serverURL_lc, '//127.0.0.1
     return;
 }
 
-define("HEURIST_DB_DESCRIPTOR_RECTYPE", 22); // the record type for database (collection) descriptor records - fixed for Master database
+// the record type for database (collection) descriptor records - fixed for Master database
+$rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
 
 if($newid>0){ 
 
@@ -206,7 +204,7 @@ if($dbID>0) {
             'rec_URL'=>$mysqli->real_escape_string($serverURL),
             'rec_Added'=>date('Y-m-d H:i:s'),
             'rec_Title'=>$mysqli->real_escape_string($dbTitle),
-            'rec_RecTypeID'=> HEURIST_DB_DESCRIPTOR_RECTYPE,
+            'rec_RecTypeID'=> $rty_ID_registered_database,
             'rec_AddedByImport'=>0,
             'rec_OwnerUGrpID'=>$indexdb_user_id,
             'rec_NonOwnerVisibility'=>'public',
@@ -233,7 +231,7 @@ if($dbID>0) {
             mysql__insertupdate($mysqli, 'recDetails', 'dtl_', 
                 array(
                     'dtl_RecID'=>$dbID,
-                    'dtl_DetailTypeID'=>335,
+                    'dtl_DetailTypeID'=>ConceptCode::getDetailTypeLocalID(1176-335), //version
                     'dtl_Value'=>$dbVersion
                 )
             );

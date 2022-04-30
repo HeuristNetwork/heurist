@@ -37,7 +37,7 @@ if(!@$heuristReferenceServer){
 
 define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
 define('HEURIST_INDEX_BASE_URL', $heuristReferenceServer.'/heurist/'); //central index and template databases url
-define('HEURIST_INDEX_DBREC', 22);
+define('HEURIST_INDEX_DBREC', '1-22'); //concept code for record type "Registered Database" in Heurist_Master_Index
 
 define('HEURIST_INDEX_DATABASE', 'Heurist_Master_Index');
 define('HEURIST_HELP', $heuristReferenceServer.'/heurist/help');

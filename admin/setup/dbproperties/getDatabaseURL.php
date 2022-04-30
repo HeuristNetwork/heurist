@@ -70,10 +70,14 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     }
     $rec = array();
     if($database_id>0){
+        
+        $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
 
         $rec = mysql__select_row_assoc($system2->get_mysqli(),
-            'select rec_Title, rec_URL from Records where rec_RecTypeID='.HEURIST_INDEX_DBREC.' and rec_ID='  //22
+            'select rec_Title, rec_URL from Records where rec_RecTypeID='
+            .$rty_ID_registered_database.' and rec_ID='  //1-22
             .$database_id);
+            
         if ($rec!=null){
             $database_url = @$rec['rec_URL'];
             if($database_url==null || $database_url==''){
