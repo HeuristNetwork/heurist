@@ -762,8 +762,9 @@ prof =Profile
                 
                     activity = activity.replace('_','');
                     
+                    //our internal log function it is shelved for now. Since Jan 2019 we use Google Tags
                     var request = {a:'usr_log', activity:activity, suplementary:suplementary, user: window.hWin.HAPI4.user_id()};
-                    _callserver('usr_info', request);
+                    //_callserver('usr_info', request);
                 
                 }
             }
