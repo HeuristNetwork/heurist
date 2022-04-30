@@ -498,18 +498,33 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
         if(!$modeImport) $mysqli->query('set @suppress_update_trigger=1');
 
-        $query = "UPDATE Records set rec_Modified=?, rec_RecTypeID=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=?,"
-        ."rec_URL=?, rec_ScratchPad=?, rec_FlagTemporary=? "
-        ." where rec_ID=".$recID;
-
-        $stmt = $mysqli->prepare($query);
-
+        $query = 'UPDATE Records set rec_Modified=?, rec_RecTypeID=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=?,rec_FlagTemporary=? ';
+        
         $rec_mod = date('Y-m-d H:i:s');
-        $rec_url = sanitizeURL(@$record['URL']);
-        $rec_spad = @$record['ScratchPad'];
         $rec_temp = (@$record['FlagTemporary']==1)?1:0;
 
-        $stmt->bind_param('siisssi', $rec_mod, $rectype, $owner_grps[0], $access, $rec_url, $rec_spad, $rec_temp);
+        //$stmt->bind_param('siisssi', $rec_mod, $rectype, $owner_grps[0], $access, $rec_temp, $rec_url, $rec_spad);
+        
+        $params = array('siisi', $rec_mod, $rectype, $owner_grps[0], $access, $rec_temp);
+        
+        $rec_url = sanitizeURL(@$record['URL']);
+        if($rec_url){
+            $params[0] = $params[0].'s';
+            $params[] = $rec_url;
+            $query = $query.', rec_URL=?';
+        }
+        $rec_spad = @$record['ScratchPad'];
+        if($rec_spad){
+            $params[0] = $params[0].'s';
+            $params[] = $rec_spad;
+            $query = $query.', rec_ScratchPad=?';
+        }
+
+        $query = $query.' where rec_ID='.$recID;
+
+        $stmt = $mysqli->prepare($query);
+        
+        call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
 
         if(!$stmt->execute()){
             $syserror = $mysqli->error;

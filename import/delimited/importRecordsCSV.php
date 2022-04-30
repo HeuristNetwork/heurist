@@ -1,7 +1,8 @@
 <?php
 
     /**
-    * Import terms from CSV
+    * Import records from CSV - user interface
+    * For server side see importController and importAction
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org

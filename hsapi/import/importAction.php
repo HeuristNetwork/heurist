@@ -2184,8 +2184,8 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
     $record['RecTypeID'] = $recordType;
     $record['AddedByImport'] = 1;
     $record['no_validation'] = $ignore_errors?'ignore_all':true; //if true - don't check resouces and enums
-    $record['URL'] = @$details['URL'];
-    $record['ScratchPad'] = @$details['ScratchPad'];
+    if(@$details['URL']) $record['URL'] = @$details['URL'];
+    if(@$details['ScratchPad']) $record['ScratchPad'] = @$details['ScratchPad'];
     $record['details'] = $details;
     
     //DEBUG 
