@@ -1436,7 +1436,7 @@ $.widget( "heurist.mainMenu6", {
             
         }else if(force_show || section=='explore'){
             that.containers[section].show();    
-        }else if(editCMS_instance && section=='publish'){
+        }else if(typeof editCMS_instance !=='undefined' && section=='publish'){
             editCMS_instance.closeCMS();
         }else{
             return;
