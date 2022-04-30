@@ -115,6 +115,23 @@ if(defined('IS_INDEX_PAGE')){
 <html>
 <head>
 
+<title><?=(@$_REQUEST['db']?$_REQUEST['db']:'').'. '.HEURIST_TITLE ?></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+<meta content="telephone=no" name="format-detection">
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--
+<meta http-equiv="Content-Security-Policy" content="default-src https: data: http: 'unsafe-eval' 'unsafe-inline'; img-src https: data: http:;">
+-->
+<!--
+'self' http://maps.nypl.org -->
+
+<link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
+
 <?php 
 // Do not use google analytics unless requested in heuristConfigIni.php
 if($allowGoogleAnalytics && !$isLocalHost) {
@@ -146,23 +163,6 @@ if($allowGoogleAnalytics && !$isLocalHost) {
 }
 ?>
 
-
-<title><?=(@$_REQUEST['db']?$_REQUEST['db']:'').'. '.HEURIST_TITLE ?></title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
-<meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
-<meta content="telephone=no" name="format-detection">
-
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!--
-<meta http-equiv="Content-Security-Policy" content="default-src https: data: http: 'unsafe-eval' 'unsafe-inline'; img-src https: data: http:;">
--->
-<!--
-'self' http://maps.nypl.org -->
-
-<link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
-<link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
 <script>
     var _time_debug = new Date().getTime() / 1000;
