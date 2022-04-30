@@ -261,7 +261,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 
             }).fail(function(error) {
                 // one or more scripts failed to load
-                console.log('Can not load localization.js');
+                console.log('Cannot load localization.js');
                 onHapiInit(false);
 
             }).always(function() {

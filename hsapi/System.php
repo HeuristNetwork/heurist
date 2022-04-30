@@ -873,7 +873,7 @@ error_log(print_r($_REQUEST, true));
         }else if($status==HEURIST_NOT_FOUND){
             $code = 404; //Not Found - resource was not found.
         }else if($status==HEURIST_ACTION_BLOCKED) {  
-            $code = 409; //can not add an existing object already exists or constraints violation
+            $code = 409; //cannot add an existing object already exists or constraints violation
         }else{
             //HEURIST_ERROR, HEURIST_UNKNOWN_ERROR, HEURIST_DB_ERROR, HEURIST_SYSTEM_CONFIG, HEURIST_SYSTEM_FATAL
             $code = 500; //An unexpected internal error has occurred. Please contact Support for more information.

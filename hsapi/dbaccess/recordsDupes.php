@@ -94,7 +94,7 @@ public static function setIgnoring( $params ){
                     
                     if(!$res){
                         $response = self::$system->addError(HEURIST_DB_ERROR, 
-                                'Set group as ignoring. Can not execute query', self::$mysqli->error);
+                                'Set group as ignoring. Cannot execute query', self::$mysqli->error);
                         return false;
                     }
             
@@ -117,7 +117,7 @@ public static function setIgnoring( $params ){
                 
                 if(!$res){
                     $response = self::$system->addError(HEURIST_DB_ERROR, 
-                            'Set group as ignoring. Can not execute query', self::$mysqli->error);
+                            'Set group as ignoring. Cannot execute query', self::$mysqli->error);
                     return false;
                 }
             }
@@ -346,7 +346,7 @@ public static function findDupes( $params ){
     if(!$res){
         
         $response = self::$system->addError(HEURIST_DB_ERROR, 
-                'Search duplications. Can not execute main query', self::$mysqli->error);
+                'Search duplications. Cannot execute main query', self::$mysqli->error);
         return false;
     }
 
@@ -467,7 +467,7 @@ public static function findDupes( $params ){
             //4. prepare query
             $stmt = self::$mysqli->prepare($search_query);
             if(!$stmt){
-                    self::$system->addError(HEURIST_DB_ERROR, 'Can not prepare query to find duplication records', 
+                    self::$system->addError(HEURIST_DB_ERROR, 'Cannot prepare query to find duplication records', 
                         self::$mysqli->error);
                     return false;
             }
@@ -518,7 +518,7 @@ public static function findDupes( $params ){
                 $group = null;            
                 call_user_func_array(array($stmt, 'bind_param'), referenceValues($row));
                 if(!$stmt->execute()){
-                    self::$system->addError(HEURIST_DB_ERROR, 'Can not execute query to find duplication records', 
+                    self::$system->addError(HEURIST_DB_ERROR, 'Cannot execute query to find duplication records', 
                         self::$mysqli->error);
                     return false;
                 }

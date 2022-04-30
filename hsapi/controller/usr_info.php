@@ -172,7 +172,7 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
                       }else{
                           $res = rename($folder_name, HEURIST_FILESTORE_DIR.$new_name);    
                           if(!$res){
-                              $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Can not rename folder "'
+                              $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Cannot rename folder "'
                                     .$dir_name.'" to name "'.$new_name.'"');
                           }
                       }
@@ -182,10 +182,10 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
                       
                       if(!file_exists($folder_name)){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$dir_name.'" does not exist');                          }else if (count(scandir($folder_name))>2){
-                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Non empty folder "'.$dir_name.'" can not be removed');                      }else{
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Non empty folder "'.$dir_name.'" cannot be removed');                      }else{
                           $res = folderDelete2($folder_name, true);        
                           if(!$res){
-                              $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder "'.$dir_name.'" can not be removed');
+                              $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder "'.$dir_name.'" cannot be removed');
                           }
                       }
                       
@@ -195,7 +195,7 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
                       }else{
                          $res = folderCreate($folder_name, true);
                          if(!$res){
-                              $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder "'.$dir_name.'" can not be created');
+                              $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder "'.$dir_name.'" cannot be created');
                          }
                       }
                   }

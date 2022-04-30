@@ -50,7 +50,7 @@ INITIALIZATION workflow:
     d. If database configuration permits only:
        After widgets initialization it loads javascript (field 2-927) and incapsulate 
        this code into afterPageLoad function. The purpose of this script is additional 
-       configuration of widgets on page (that can not be set via cms editor) - mainly
+       configuration of widgets on page (that cannot be set via cms editor) - mainly
        addition of event listeners.
 
 

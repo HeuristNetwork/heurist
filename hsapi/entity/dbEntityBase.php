@@ -197,7 +197,7 @@ class DbEntityBase
             
         }else if($operation=='get'){
             
-            $sMsg = 'Can not get content of settings file. ';
+            $sMsg = 'Cannot get content of settings file. ';
             
             if($filename==null){
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
@@ -217,7 +217,7 @@ class DbEntityBase
             $path_parts = pathinfo($filename);
             $ext = strtolower(@$path_parts['extension']);
             
-            $sMsg = 'Can not save content the settings file. ';
+            $sMsg = 'Cannot save content the settings file. ';
             
             if($filename==null){
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
@@ -252,7 +252,7 @@ class DbEntityBase
             
         }else if($operation=='rename'){
             
-            $sMsg = 'Can not rename the settings file. ';
+            $sMsg = 'Cannot rename the settings file. ';
             
             $fileOld = @$action['fileOld'];
             if(file_exists($path.$fileOld)){
@@ -285,7 +285,7 @@ class DbEntityBase
             
         }else if($operation=='delete'){
          
-            $sMsg = 'Can not remove the settings file. ';
+            $sMsg = 'Cannot remove the settings file. ';
             
             if($filename==null){
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');

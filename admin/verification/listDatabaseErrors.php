@@ -2119,7 +2119,7 @@ if($active_all || in_array('defgroups', $active)) {
                     
                     print '<div><h3 class="res-valid">'.$cnt2.' record types have been placed to "Trash" group</h3></div>';
                 }else{
-                    echo '<div><h3 class="error">Can not find record type "Trash" group. </h3></div>';                    
+                    echo '<div><h3 class="error">Cannot find record type "Trash" group. </h3></div>';                    
                 }
             }else{
                 echo '<div><h3 class="res-valid">OK: All Record Types belong to existing groups</h3></div>';        
@@ -2142,7 +2142,7 @@ if($active_all || in_array('defgroups', $active)) {
                     
                     print '<div><h3 class="res-valid">'.$cnt2.' field types have been placed to "Trash" group</h3></div>';
                 }else{
-                    echo '<div><h3 class="error">Can not find field type "Trash" group.</h3></div>';                    
+                    echo '<div><h3 class="error">Cannot find field type "Trash" group.</h3></div>';                    
                 }
             }else{
                 echo '<div><h3 class="res-valid">OK: All Base Field Types belong to existing groups</h3></div>';        
@@ -2165,7 +2165,7 @@ if($active_all || in_array('defgroups', $active)) {
                     
                     print '<div><h3 class="res-valid">'.$cnt2.' vocabularies have been placed to "Trash" group</h3></div>';
                 }else{
-                    echo '<div><h3 class="error">Can not vocabularies "Trash" group.</h3></div>';                    
+                    echo '<div><h3 class="error">Cannot vocabularies "Trash" group.</h3></div>';                    
                 }
             }else{
                 echo '<div><h3 class="res-valid">OK: All Vocabularies belong to existing groups</h3></div>';        

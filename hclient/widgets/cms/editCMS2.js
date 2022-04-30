@@ -134,7 +134,7 @@ function editCMS2(){
                 }).fail(function(error) {
                     // one or more scripts failed to load
                     window.hWin.HEURIST4.msg.showMsg_ScriptFail();
-                    //console.log('Can not load tinyMCE and CodeMirror scripts');
+                    //console.log('Cannot load tinyMCE and CodeMirror scripts');
 
                 }).always(function() {
                     // always called, both on success and error
@@ -1398,7 +1398,7 @@ console.log('BLUR');
         
         
         if(parentnode.isRootNode()){
-            //can not remove root element
+            //cannot remove root element
             window.hWin.HEURIST4.msg.showMsgFlash('It is not possible remove root element');
             return;    
             

@@ -890,7 +890,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
             // note google refuses kml from localhost
             if(fileURL.indexOf('://localhost')>0)
-                console.log("Note: KML file can not be loaded from localhost: " + fileURL);
+                console.log("Note: KML file cannot be loaded from localhost: " + fileURL);
             // Display on Google Maps
             kmlLayer = new google.maps.KmlLayer({
                 url: fileURL,

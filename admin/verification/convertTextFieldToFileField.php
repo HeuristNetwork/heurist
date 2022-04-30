@@ -144,7 +144,7 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
                     $k++;
                     $m++;
                 }else{
-                    print 'Can not register url '.$url.' for detail id '.$dtl_ID;
+                    print 'Cannot register url '.$url.' for detail id '.$dtl_ID;
                     exit();
                 }
                 

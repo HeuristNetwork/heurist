@@ -597,7 +597,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                                 if(@$int_fields[$k]){
                                     self::prepareIntegerField($field, $k, $check_keyfield_K, $err_keyfields, $int_fields);
                                 }
-                                if($check_keyfield_K){ //key field can not be size less than 6
+                                if($check_keyfield_K){ //key field cannot be size less than 6
                                     $field_sizes[$k] = max($field_sizes[$k], 9);
                                 }                 
                             }

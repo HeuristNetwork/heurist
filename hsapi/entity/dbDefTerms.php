@@ -698,14 +698,14 @@ class DbDefTerms extends DbEntityBase
                                 }
 
                             }
-                            //3. term can not be removed if it has real children (not reference)
+                            //3. term cannot be removed if it has real children (not reference)
                             if($old_parent>0){
-                                // can not delete term if it is a real parent
+                                // cannot delete term if it is a real parent
                                 $parent_id = mysql__select_value($mysqli, 
                                             'SELECT trm_ParentTermID FROM defTerms where trm_ID='.$trm_ID);
                                 if($parent_id == $old_parent){
                                     $this->system->addError(HEURIST_ACTION_BLOCKED,
-                                         'Term can not be orphaned. ('.$old_parent.')');
+                                         'Term cannot be orphaned. ('.$old_parent.')');
                                     $ret =false;
                                     break;
                                 }
