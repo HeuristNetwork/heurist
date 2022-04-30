@@ -137,9 +137,11 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
                     $res = convertTemplate($template_body, 1); //to local codes
                     
                     if(is_array($res) && @$res['details_not_found']){
-                        //error
-                        error_log('Cant convert gpl template '.$dir.$filename
-                            .'. Local details not found '.print_r($res['details_not_found'],true)); 
+                        //error except Harvard Bibliography (since many databases do not have biblio defs by default)
+                        if($filename!='Harvard Bibliography.gpl'){
+                            error_log('Cant convert gpl template '.$dir.$filename
+                                .'. Local details not found '.print_r($res['details_not_found'],true)); 
+                        }
                         
                     }else if(is_array($res) && @$res['template']) {
                         $name = substr($filename, 0, -4);
