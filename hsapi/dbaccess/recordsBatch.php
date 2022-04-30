@@ -1276,7 +1276,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
                                                 //$pagetext = Encoding::fixUTF8($pagetext);
                                                 if(mb_detect_encoding($pagetext, 'UTF-8', true)===false){
-                                                    $pagetext = 'Page '.$page_cnt.' can not be converted to UTF-8';
+                                                    $pagetext = 'Page '.$page_cnt.' cannot be converted to UTF-8';
                                                 }    
                                             }
 

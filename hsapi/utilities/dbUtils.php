@@ -190,7 +190,7 @@ class DbUtils {
             
             $archOK = createZipArchive($source, $folders_to_copy, $destination, $verbose);
             if(!$archOK){
-                $msg = $msg_prefix."Can not create archive with database folder. Failed to zip $source to $destination";
+                $msg = $msg_prefix."Cannot create archive with database folder. Failed to zip $source to $destination";
                 self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
                 if($verbose) echo '<br/>'.$msg;
                 self::$db_del_in_progress = null;
@@ -223,7 +223,7 @@ class DbUtils {
             $filename = HEURIST_FILESTORE_ROOT.'DELETED_DATABASES_LOG.csv';
             $fp = fopen($filename, 'a'); //open for add
             if($fp===false){
-                error_log( 'Can not open file '.$filename );    
+                error_log( 'Cannot open file '.$filename );    
             }else{
                 $row = array($database_name,  
                     $owner_user['ugr_LastName'],

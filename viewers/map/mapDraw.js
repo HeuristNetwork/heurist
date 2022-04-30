@@ -109,7 +109,7 @@
                 simplePointsToWKT(sCoords, type, UTMzone, callback); 
             }).fail(function(error) {
                 // one or more scripts failed to load
-                window.hWin.HEURIST4.msg.showMsgErr('Can not load geodesy-master scripts');
+                window.hWin.HEURIST4.msg.showMsgErr('Cannot load geodesy-master scripts');
             }).always(function() {
                 // always called, both on success and error
             });

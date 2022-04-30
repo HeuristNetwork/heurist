@@ -404,7 +404,7 @@ function calculateImageExtentFromWorldFile(_editing){
                                     if(extentWKT){
                                         _editing.setFieldValueByName(dtId_Geo, 'pl '+extentWKT);
                                     }else{
-                                        window.hWin.HEURIST4.msg.showMsgErr( 'Can not calculate image extent. Verify your worldfile parameters' );
+                                        window.hWin.HEURIST4.msg.showMsgErr( 'Cannot calculate image extent. Verify your worldfile parameters' );
                                     }
 
                                 }else{

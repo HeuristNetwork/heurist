@@ -257,7 +257,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
     $res = $mysqli->query('select rec_ID, rec_Title, rec_RecTypeID from Records where !rec_FlagTemporary '
                 .($recTypeIDs?'and rec_RecTypeID in ('.$recTypeIDs.')':'').' order by rand()');
     if(!$res){
-        $system->addError(HEURIST_DB_ERROR, 'Can not retrieve records to update title', $mysqli->error);
+        $system->addError(HEURIST_DB_ERROR, 'Cannot retrieve records to update title', $mysqli->error);
         return false;
     }
 

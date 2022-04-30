@@ -712,12 +712,12 @@
         if(folderCreate($path['dirname'], true)){
             if (!copy($s1,$s2)) {
                 // "copy failed";
-                error_log( 'Can not copy file '.$s1.'  to '.$s2 );    
+                error_log( 'Cannot copy file '.$s1.'  to '.$s2 );    
                 return false;
             }
         }else{
            //can't create folder or it is not writeable 
-           error_log( 'Can not create folder '.$path['dirname'] );    
+           error_log( 'Cannot create folder '.$path['dirname'] );    
            return false;
         }
         return true;
@@ -755,14 +755,14 @@
             try{
                 $fp = fopen($filename,'a'); //open for add
                 if($fp===false){
-                    error_log( 'Can not open file '.$filename );    
+                    error_log( 'Cannot open file '.$filename );    
                 }else{
                     fwrite($fp, $rawdata);
                     fclose($fp);
                 }
             
             }catch(Exception  $e){
-                error_log( 'Can not open file '.$filename.'  Error:'.Exception::getMessage() );
+                error_log( 'Cannot open file '.$filename.'  Error:'.Exception::getMessage() );
             }
 
             return filesize($filename);
@@ -1008,7 +1008,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
     } catch (Exception  $e){
         error_log( Exception::getMessage() );
         if($verbose) {
-            echo "<br/>Can not create zip archive ".$destination.' '.Exception::getMessage();
+            echo "<br/>Cannot create zip archive ".$destination.' '.Exception::getMessage();
         }
         return false;
     }                            
@@ -1184,7 +1184,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
 
     if(!function_exists("curl_init"))  {
         $glb_curl_code = HEURIST_SYSTEM_FATAL;
-        $glb_curl_error = 'Can not init curl extension. Verify php installation';
+        $glb_curl_error = 'Cannot init curl extension. Verify php installation';
 
 //error_log('CURL ERROR: '.$glb_curl_error);
         

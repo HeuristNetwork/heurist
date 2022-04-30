@@ -48,7 +48,7 @@
             $_REQUEST['db'] = $match[1];
        }else{
                 if(@$match[1]==null || $match[1]==''){
-                     $data = __getErrMsg($remoteURL, HEURIST_ERROR, 'Can not detect database parameter in registration URL');
+                     $data = __getErrMsg($remoteURL, HEURIST_ERROR, 'Cannot detect database parameter in registration URL');
                      $data = json_encode($data); 
                 }else{
            
@@ -95,7 +95,7 @@
         
         if($remoteURL!=null){
             
-            //can not connect to registered database on the same server
+            //cannot connect to registered database on the same server
             $response = __getErrMsg($remoteURL, $response['status'], $response['message']);
             
         }

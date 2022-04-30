@@ -1407,7 +1407,7 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
     $parents = mysql__select_list2($system->get_mysqli(), $query);
     if(is_array($parents) && count($parents)>0){
         if($level>5){
-            $system->addError(HEURIST_ERROR, 'Can not find parent CMS Home record. It appears that menu items refers recursively');         
+            $system->addError(HEURIST_ERROR, 'Cannot find parent CMS Home record. It appears that menu items refers recursively');         
             return false;
         }
         
@@ -1432,7 +1432,7 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
         
         return recordSearchFindParent($system, $parent_ID, $target_recTypeID, $allowedDetails, $level+1);
     }else{
-        $system->addError(HEURIST_ERROR, 'Can not find parent CMS Home record');         
+        $system->addError(HEURIST_ERROR, 'Cannot find parent CMS Home record');         
         return false;
     }
 }
@@ -1456,7 +1456,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
                     $res = $response['data']['records'][0];                                                        
                 }else{
                     return $system->addError(HEURIST_ERROR, 
-                        'Can not find website home record');                    
+                        'Cannot find website home record');                    
                 }
                 
             }else{

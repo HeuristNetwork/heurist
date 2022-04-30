@@ -102,7 +102,7 @@ detectLargeInputs('COOKIE entityScrud', $_COOKIE);
                 
                 /*
                 $system->addError(HEURIST_SYSTEM_CONFIG, 'Your data definitions (names, descriptions) contain invalid characters. '
-                .'Or system can not convert them properly. '.$e->getMessage());
+                .'Or system cannot convert them properly. '.$e->getMessage());
                 print json_encode( $system->getError() );
                 */
             }            
@@ -125,7 +125,7 @@ detectLargeInputs('COOKIE entityScrud', $_COOKIE);
                 }
                 
                 $msg = 'Your data definitions (names, descriptions) contain invalid characters (non UTF-8). '
-                .'Or system can not convert them properly.';
+                .'Or system cannot convert them properly.';
                 
                 if($wrong_string){
                     $msg = $msg . ' Invalid character in string: '.$wrong_string;

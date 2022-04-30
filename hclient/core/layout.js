@@ -165,7 +165,7 @@ function hLayout(args) {
     
     /**
     *  Creates "free" layout from html elements attributes heurist-app-id and heurist-app-options
-    *  supp_options - additional options that can not be set via configuration in html - such as event listeners
+    *  supp_options - additional options that cannot be set via configuration in html - such as event listeners
     * 
     *  
     */
