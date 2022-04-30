@@ -1800,7 +1800,9 @@ function check($text) {
 //----------------------------------------------------------------------------//
 
 if (!@$ARGV) {
-    @apache_setenv('no-gzip', 1);
+    if(function_exists('apache_setenv')){
+        @apache_setenv('no-gzip', 1);    
+    }
 }
 if (@$_REQUEST['mode'] != '1') { //not include
     @ini_set('zlib.output_compression', 0);
