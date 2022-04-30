@@ -693,8 +693,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             // activity logging
             //
             ,user_log: function(activity, suplementary){
-                
-                if(gtag && $.isFunction(gtag)){ //google log function
+               
+                if(typeof gtag !== 'undefined' && $.isFunction(gtag)){ //google log function
 /*                    
 Category
 Action

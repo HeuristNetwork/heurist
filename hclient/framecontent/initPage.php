@@ -37,6 +37,8 @@ if(defined('IS_INDEX_PAGE')){
 }else{
     if(!defined('PDIR')) define('PDIR','../../');  //need for proper path to js and css
     define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
+    
+    $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
 }
 
 $error_msg = '';
@@ -115,18 +117,35 @@ if(defined('IS_INDEX_PAGE')){
 
 <?php 
 // Do not use google analytics unless requested in heuristConfigIni.php
-if($allowGoogleAnalytics){
-    ?>   <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131444459-1"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'UA-131444459-1'); // Also uses '132203312-1' in index.php
-    </script>
-    <?php
+if($allowGoogleAnalytics && !$isLocalHost) {
+    if (strpos('int-heuristweb-prod.intersect.org.au', $_SERVER["SERVER_NAME"]===0) 
+        || strpos('heuristref', $_SERVER["SERVER_NAME"])===0) {// Operating on Heurist reference server
+        ?>     
+        <!-- Heurist Reference Server, Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131444459-1"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'UA-131444459-1'); 
+        </script>
+        <?php  
+    } else {
+        ?>
+        <!-- Other Heurist server, Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-132203312-1"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'UA-132203312-1'); 
+        </script>
+        <?php  
+
+    }
 }
 ?>
+
 
 <title><?=(@$_REQUEST['db']?$_REQUEST['db']:'').'. '.HEURIST_TITLE ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -153,7 +172,7 @@ if($allowGoogleAnalytics){
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 <?php
-if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')){
+if($isLocalHost){
     ?>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>

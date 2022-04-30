@@ -19,6 +19,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+$isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
+
 //redirection
 if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)){
 
@@ -130,7 +132,7 @@ define('PDIR','');
 
 require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
 
-if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
+if($isLocalHost){
     print '<script type="text/javascript" src="external/jquery.fancytree/jquery.fancytree-all.min.js"></script>';
 }else{
     print '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>';
@@ -255,7 +257,7 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/platform.js"></script>
 
 <?php
-if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')){
+if($isLocalHost){
     ?>
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/js/datatable/datatables.min.css"/>
     <script type="text/javascript" src="<?php echo PDIR;?>external/js/datatable/datatables.min.js"></script>        
@@ -497,39 +499,6 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     } //onInitCompleted_PerformSearch
 
 </script>
-
-<?php 
-
-if($allowGoogleAnalytics) {
-    if ($_SERVER["SERVER_NAME"]='127.0.0.1'
-    || strpos('int-heuristweb-prod.intersect.org.au', $_SERVER["SERVER_NAME"]) 
-    || strpos('heuristref', $_SERVER["SERVER_NAME"])) {// Operating on Heurist reference server
-        ?>     
-        <!-- Heurist Reference Server, Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131444459-1"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'UA-131444459-1'); 
-        </script>
-        <?php  
-    } else {
-        ?>
-        <!-- Other Heurist server, Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-132203312-1"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'UA-132203312-1'); 
-        </script>
-        <?php  
-
-    }
-}
-?>
-
 
 </head>
 <body style="background-color:#c9c9c9;">
