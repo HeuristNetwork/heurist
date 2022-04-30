@@ -58,7 +58,7 @@ user, usr:   user id  - bookmarked by user
 tag, keyword, kwd:   tag
 
 id, ids:  id
-t, type:  record type id
+t, type:  record type id (for rectype allowed name or concept code also)
 f, field:   field id
 cnt:field id  search for number of field instances
 
@@ -1188,7 +1188,16 @@ class HPredicate {
                     $in = ($this->negate)? 'not in' : 'in';
                     $res = "$in (" . $this->value . ")";
                 }
-                else {
+                else if (preg_match('/^\d+-\d+$/', $this->value)) {
+                    $local_rtyid = ConceptCode::getRecTypeLocalID($this->value);
+                    if($local_rtyid>0){
+                        $res = "$eq $local_rtyid";
+                    }else{
+                        $res = "=0"; //localcode not found
+                    }
+                }
+                else
+                {
                     $res = "$eq (select rft.rty_ID from defRecTypes rft where rft.rty_Name = '".$mysqli->real_escape_string($this->value)."' limit 1)";
                 }
                 $res = "r".$this->qlevel.".rec_RecTypeID ".$res;
