@@ -969,9 +969,6 @@ function _openCMSeditor(event){
     btn.html(isCMS_active?'close editor':'website editor');
 }
 
-
-var gtag = null;//google log - DO NOT REMOVE
-
 //
 // Init HAPI 
 //

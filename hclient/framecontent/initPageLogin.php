@@ -133,8 +133,6 @@ function verify_credentials( show_warning ){
     }        
 }
 
-var gtag = null;//google log - DO NOT REMOVE
-
 //
 //init hapi    
 //
