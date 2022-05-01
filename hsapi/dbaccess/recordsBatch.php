@@ -145,13 +145,13 @@ class RecordsBatch
         $rtyID = @$this->data['rtyID'];
         $dtyID = $this->data['dtyID'];    //detail to be affected
         
-        if (!($rtyID && (is_array($rtyID) || (ctype_digit($rtyID) && $rtyID>0)))){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter record type id $rtyID");
+        if ($rtyID && !((is_array($rtyID) || (ctype_digit($rtyID) && $rtyID>0))) ){
+            $this->system->addError(HEURIST_ERROR, "Wrong parameter record type id $rtyID");
             return false;
         }
 
         if(!(ctype_digit($dtyID) && $dtyID>0)){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter detail type id $dtyID");
+            $this->system->addError(HEURIST_ERROR, "Wrong parameter detail type id $dtyID");
             return false;
         }
         
