@@ -60,7 +60,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
 <html>
 
     <head>
-        <title>Register Database with Heurist Master Index</title>
+        <title>Register Database with Heurist Reference Index</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
         
@@ -101,7 +101,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
     <!-- Database registration form -->
 
     <body class="popup" onload="onKeyUpDbDescription()">
-        <!-- <div class="banner"><h2>Register Database with Heurist Master Index</h2></div> -->
+        <!-- <div class="banner"><h2>Register Database with Heurist Reference Index</h2></div> -->
         <div id="page-inner" style="overflow-y: auto;overflow-x: hidden;">
             <!-- <h3>Registration</h3> -->
 <?php
@@ -298,7 +298,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
 
             <div class="detailRow">
                 <div class="detailType" style="width: 180px !important;">Database &gt; <u>Register</u></div>
-                <div class="detail">Register the database with the Heurist Master Index.<br />
+                <div class="detail">Register the database with the Heurist Reference Index.<br />
                     This will give your database a unique code and allow Heurist to check for new versions of
                     the software and database formats. <br/>It also allows other databases to import structural elements
                     (record types, field types and terms) but does NOT confer any form of access to data in this database</div>

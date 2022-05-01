@@ -14,7 +14,7 @@
 */
 
 /**
-* getDatabaseURL.php - requests URL for registered DB by its ID from Heurist Master Index
+* getDatabaseURL.php - requests URL for registered DB by its ID from Heurist Reference Index
 *
 * this script may be inited via http, otherwise it is included and $database_id already defined
 *
@@ -38,7 +38,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     $data = loadRemoteURLContentSpecial($reg_url); //get registered database URL
 
     if (!$data) {
-        $error_msg = "Unable to connect Heurist Master Index, possibly due to timeout or proxy setting<br /><br />".
+        $error_msg = "Unable to connect Heurist Reference Index, possibly due to timeout or proxy setting<br /><br />".
         "URL requested: ".$reg_url;
         
 //error_log('CURL ERROR: '.$url.' curl error='.$glb_curl_error);
@@ -52,7 +52,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
         if(@$data['error_msg']){
             $error_msg = $data['error_msg'];
         }else if(!@$data['rec_URL']){
-            $error_msg = "Heurist Master Index returns incorrect data for registered database # ".$database_id.
+            $error_msg = "Heurist Reference Index returns incorrect data for registered database # ".$database_id.
             " The page may contain an invalid database reference (0 indicates no reference has been set)";
         }else{
             $database_url = $data['rec_URL'];
@@ -82,15 +82,15 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
         if ($rec!=null){
             $database_url = @$rec['rec_URL'];
             if($database_url==null || $database_url==''){
-                $error_msg = 'Database URL is not set Heurist Master Index for database ID#'.$database_id;
+                $error_msg = 'Database URL is not set Heurist Reference Index for database ID#'.$database_id;
             }
                 
         }else{
             $err = $system2->get_mysqli()->error;
             if(err){
-                $error_msg = 'Heurist Master Index database is not accessible at the moment. Please try later';
+                $error_msg = 'Heurist Reference Index database is not accessible at the moment. Please try later';
             }else{
-                $error_msg = 'Database with ID#'.$database_id.' is not found in Heurist Master Index';    
+                $error_msg = 'Database with ID#'.$database_id.' is not found in Heurist Reference Index';    
             }
         }
     }else{

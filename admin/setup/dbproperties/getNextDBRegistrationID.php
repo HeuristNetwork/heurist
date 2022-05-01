@@ -248,7 +248,7 @@ if($dbID>0) {
 
         //send email to administrator about new database registration
         $email_text =
-        "There is a new Heurist database registration on the Heurist Master Index\n\n".
+        "There is a new Heurist database registration on the Heurist Reference Index\n\n".
         "Database Title:     ".htmlspecialchars($dbTitle, ENT_QUOTES, 'UTF-8')."\n".
         "Registration ID:    ".$dbID."\n". // was $indexdb_user_id, which is always 0 b/cnot yet logged in to master index
         "DB Format Version:  ".$dbVersion."\n\n".
