@@ -35,10 +35,10 @@
 
 // TO DO: WE NEED SOME MECHANISM TO AVOID DENIAL OF SERVICE ATTACK WHICH REPEATEDLY REQUESTS REGISTRATIONS
 
-// TODO: We may need to hobble/delete some of the functionality on Heurist_Master_Index to avoid people
+// TODO: We may need to hobble/delete some of the functionality on Heurist_Reference_Index to avoid people
 // creating unwanted records or importing random crap into it
 
-if(@$_REQUEST["db"]!='Heurist_Master_Index'){
+if(@$_REQUEST["db"]!='Heurist_Reference_Index'){
     echo '0,This script allowed for Master Index database only';
     return;
 }

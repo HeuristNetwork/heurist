@@ -1790,7 +1790,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             $rawdata = null;
             
             //send request to main server at HEURIST_INDEX_BASE_URL
-            // Heurist_Master_Index is the refernece standard for current database version
+            // Heurist_Reference_Index is the refernece standard for current database version
             // Maybe this should be changed to Heurist_Sandpit?. Note: sandpit no longer needed, or used, from late 2015
 
             if(strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===0){ //same domain

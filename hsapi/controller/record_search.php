@@ -6,7 +6,7 @@
     * 
     * parameters
     * db - heurist database
-    * remote=master - request to Heurist_Master_Index
+    * remote=master - request to Heurist_Reference_Index
     * a  - action 
     *       minmax - seach numeric min and max value for "dt" (field) or "rt" (record type)
     *       getfacets -   finds all possible facet values for current query and calculates counts for every value 
