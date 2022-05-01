@@ -10,21 +10,30 @@ private function __construct() {}
 
 private static $initialized = false;
 private static $system = null;
+private static $database_id = null;
 
-private static function initialize()
+private static function initialize($system2=null)
 {
-    if (self::$initialized)
-        return;
+    if($system2!=null){
+        self::$system = $system2;
+    }
+    else if (self::$initialized){
+        return;   
+    }else{
+        
+        global $system;
+        self::$system = $system;
+    }
 
-    global $system;
-    
-    self::$system = $system;
     self::$initialized = true;
     
-    if(!defined('HEURIST_DBID')){
-        define('HEURIST_DBID', $system->get_system('sys_dbRegisteredID'));
-    }
+    self::$database_id = self::$system->get_system('sys_dbRegisteredID'); 
 }
+
+public static function setSystem($system2){
+    self::initialize($system2);
+}
+
 
 /**
 * translate a local id for a given table to it's concept ID
@@ -32,7 +41,7 @@ private static function initialize()
 * @param     string $tableName name of table
 * @param     string $fieldNamePrefix column name prefix used in $tableName table
 * @return    string concept id (dbID-origID) or null if no HEURIST DBID
-* @uses      HEURIST_DBID
+* @uses      self::$database_id
 */
 private static function getConceptID($lclID, $tableName, $fieldNamePrefix) {
     
@@ -47,8 +56,8 @@ private static function getConceptID($lclID, $tableName, $fieldNamePrefix) {
         //return "".$ids[0]."-".$ids[1];
         if ($ids && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
             return "" . $ids[0] . '-' . $ids[1];
-        } else if (HEURIST_DBID) {
-            return '' . HEURIST_DBID . '-' . $lclID;
+        } else if (self::$database_id) {
+            return '' . self::$database_id . '-' . $lclID;
         } else {
             return '0000-'.$lclID;
         }
@@ -103,7 +112,7 @@ public static function getOntologyConceptID($lclOntID) {
 * @param     string $tableName name of table
 * @param     string $fieldNamePrefix column name prefix used in $tableName table
 * @return    int id or null if not found
-* @uses      HEURIST_DBID
+* @uses      self::$database_id
 */
 private static function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
     
@@ -112,7 +121,7 @@ private static function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
     $ids = explode('-', $conceptID);
     $res_id = null;
     if ($ids && (count($ids) == 1 && is_numeric($ids[0])) 
-            || (count($ids) == 2 && is_numeric($ids[1]) && ( (!($ids[0] > 0)) || $ids[0] == HEURIST_DBID)) ) 
+            || (count($ids) == 2 && is_numeric($ids[1]) && ( (!($ids[0] > 0)) || $ids[0] == self::$database_id)) ) 
     {
         //local or defined in this database
         

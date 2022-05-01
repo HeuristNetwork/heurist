@@ -71,6 +71,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     $rec = array();
     if($database_id>0){
         
+        ConceptCode::setSystem($system2);
         $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
 
         $rec = mysql__select_row_assoc($system2->get_mysqli(),
