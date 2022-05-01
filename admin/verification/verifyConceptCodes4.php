@@ -30,14 +30,13 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-//print 'disabled'; 
-//exit(); 
+print 'disabled'; 
+exit(); 
  
 //define('OWNER_REQUIRED', 1);   
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/recordsBatch.php');
 
 /*
 if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
@@ -105,7 +104,7 @@ if(false){
 }else if(false){
     __setTermYesNo();
 }else {
-    __correctAbsPaths();
+   
 }
 
 //
@@ -637,95 +636,4 @@ function getLocalCode($db_id, $id){
     $query = 'select trm_ID from defTerms where trm_OriginatingDBID='.$db_id.' and trm_IDInOriginatingDB='.$id;
     return mysql__select_value($mysqli, $query);
 }
-//-----------------------
-/*
- https://heuristplus.sydney.edu.au  and https://heurist.huma-num.fr 
- using variants 
- /heurist/, /h5-alpha/, /h5-ao/, /h5/, h6-alpha/, /h6-ao/, /h6/ 
- with a relative path which I think is simply ./
-*/ 
-
-function __correctAbsPaths(){
-
-    global $system, $mysqli, $databases; 
-
-    $dbRecDetails = new RecordsBatch($system, null);
-    
-    //$databases = array('amade_testnewsystem');
-    //$databases = array('osmak_9c');
-    
-    foreach ($databases as $idx=>$db_name){
-
-        mysql__usedatabase($mysqli, $db_name);
-
-/*
-    *       recIDs - list of records IDS to be processed or 'ALL'
-    *       rtyID  - filter by record type
-    *       dtyID  - detail field to be added,replaced or deleted
-    *       for addition: val: | geo: | ulfID: - value to be added
-    *       for edit sVal - search value (if missed - replace all occurences),  rVal - replace value,  subs= 1 | 0
-    *       for delete: sVal, subs= 1 | 0   
-    *       tag  = 0|1  - add system tag to mark processed records
-*/        
-
-        $query = 'select rty_ID from defRecTypes where rty_OriginatingDBID=99 and rty_IDInOriginatingDB in (51, 52)';
-        $rty_IDs = mysql__select_list2($mysqli, $query);
-
-        $query = 'select dty_ID from defDetailTypes where dty_OriginatingDBID=2 and dty_IDInOriginatingDB=4';
-        $dty_ID = mysql__select_value($mysqli, $query);
-
-        $data = array(
-        'recIDs'=>'ALL',
-        'rtyID'=>$rty_IDs,
-        'dtyID'=>$dty_ID,
-        'dt_extended_description'=>$dty_ID,
-        'sVal'=>'https://heurist',
-        'rVal'=>'replaceAbsPathinCMS',
-        'subs'=>1, //substring
-        'debug'=>1,
-        'tag'=>0
-        );
-        
-        print '<h4>'.$db_name.'</h4><br>';
-        
-        $dbRecDetails->setData($data);
-        $res = $dbRecDetails->detailsReplace();
-     
-        print '<hr>';   
-    }//for
-    
-}
-
-function replaceAbsPathinCMS($recID, $val){
-    
-//print '<xmp>BEFORE '.$val.'</xmp><br><hr><br>';
-
-$servers = array('https:\/\/heuristplus.sydney.edu.au', 'https:\/\/heurist.huma-num.fr', 'https:\/\/heuristest.fdm.uni-hamburg.de:443');
-$paths0 = array('\/HEURIST', '\/html', ''); 
-$paths = array('heurist', 'h5-alpha', 'h5-ao', 'h5', 'h6-alpha', 'h6-ao', 'h6');
-
-$cnt = 0;
-
-foreach ($servers as $srv) {
-    foreach ($paths0 as $path0) {
-        foreach ($paths as $path) {
-            $s = '/'.$srv.$path0.'\/'.$path.'\//i';
-            $res = preg_replace($s, './', $val);    
-            if($res!=null && $val != $res){
-                $val = $res;
-                $cnt++;
-            }
-        }
-    }
-}
-//report
-print 'RecID: '.$recID.'. Replaced '.$cnt.' instances<br>';
-
-//print '<xmp>AFTER '.$val.'</xmp><br><hr><br>';
-
-             
-return $val;    
-    
-}
-
 ?>

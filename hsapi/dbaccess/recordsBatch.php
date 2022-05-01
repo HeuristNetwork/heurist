@@ -915,7 +915,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             
         }//while records
         
-        $res->close();
+        if($res) $res->close();
         
         //update record title
         foreach ($processedRecIDs as $recID){

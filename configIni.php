@@ -191,6 +191,7 @@ $websiteThumbnailPassword = "";
 //name of template file in /hclient/widgets/cms/templates. If it is not defined it takes cmsTemplate.php
 $default_CMS_Template = '';
 
+$absolutePathsToRemoveFromWebPages = null;
 // system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
 // the configIni.php in the installation does not need to be configured. This allows unconfigured ConfigIni.php files
 // to exist in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.

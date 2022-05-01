@@ -99,5 +99,9 @@ if (!@$websiteThumbnailYsize) $websiteThumbnailYsize = 300; // required
 // $ESTC_PermittedDBs=""; // comma-separated list of database names on the server
 // $ESTC_ServerURL = "https://int-heuristweb-prod.intersect.org.au";
 
-
+// Add paths to any servers previously used (since 2020), in the form https://server.domain,http://server.domain, … 
+// which may have been incorporated in web pages and which should be replaced by local relative paths
+// These paths are used in conjunction with Admin > Server management > Fix absolute paths in web page content
+// if (!@$absolutePathsToRemoveFromWebPages) $absolutePathsToRemoveFromWebPages = array('https://heuristplus.sydney.edu.au');
+$absolutePathsToRemoveFromWebPages = null;
 ?>
