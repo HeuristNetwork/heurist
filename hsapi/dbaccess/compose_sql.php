@@ -181,7 +181,9 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
 
     // 4a. SPECIAL CASE for _BROKEN_
     if($needbroken){
-        $where_clause = '(to_days(now()) - to_days(rec_URLLastVerified) >= 8) '. ($where_clause? ' and '.$where_clause :'');
+        $where_clause = ' (rec_URLErrorMessage is not null) '
+        . ($where_clause? ' and '.$where_clause :'');
+        //'(to_days(now()) - to_days(rec_URLLastVerified) >= 8) '
     }
     // 4b. SPECIAL CASE for _NOTLINKED_
     if($neednotlinked){ 

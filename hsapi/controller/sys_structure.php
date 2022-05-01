@@ -69,7 +69,7 @@
                         
                         //Server not found 
                         //No response from server
-                        $data = __getErrMsg($remoteURL_original, $glb_curl_code, $glb_curl_error);
+                        $data = __getErrMsg($remoteURL_original, $glb_curl_code, $remoteURL.' '.$glb_curl_error);
                         $data = json_encode($data); 
                     }else{
                         header('Content-Encoding: gzip');

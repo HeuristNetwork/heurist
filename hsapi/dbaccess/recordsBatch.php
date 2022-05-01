@@ -184,7 +184,7 @@ class RecordsBatch
             $query = 'select count(*) from Records';
 
             $rty_ID = @$this->data['rtyID'];
-            if(is_array($rty_ID) & count($rty_ID)>0){
+            if(is_array($rty_ID) && count($rty_ID)>0){
                 $query .= ' WHERE rec_RecTypeID in ('.getCommaSepIds($rty_ID).')';
                 $this->rtyIDs = $rty_ID;
             }else if($rty_ID >0){

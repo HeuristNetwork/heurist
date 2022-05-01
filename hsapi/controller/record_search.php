@@ -157,7 +157,7 @@ detectLargeInputs('COOKIE record_search', $_COOKIE);
                 if($data==false){
                     $msg = 'Cannot access Master Index database on '.HEURIST_INDEX_BASE_URL;
                     if(@$glb_curl_error){
-                        $msg = $msg.'(CURL ERROR: '.$glb_curl_error.')';
+                        $msg = $msg.'(CURL ERROR: '.$reg_url.' '.$glb_curl_error.')';
                     }
                     $system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     $response = $system->getError();

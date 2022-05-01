@@ -1241,7 +1241,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
         
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
-        $glb_curl_error = $url.' http code = '.$code.'  curl error='.$error;
+        $glb_curl_error = 'http code = '.$code.'  curl error='.$error;
 //error_log('CURL ERROR: '.$glb_curl_error);
 
         curl_close($ch);
