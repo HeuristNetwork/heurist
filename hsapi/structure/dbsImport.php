@@ -267,7 +267,7 @@ $time_debug = microtime(true);
         
         if (count($def_ids)==0 || $wrong_id>0) { //definition not found in source database
             $smsg = ($wrong_id!=null) ?$wrong_id :'concept code '.$cCode;
-            $this->system->addError(HEURIST_ERROR, 'Unable to get '.$entityTypeToBeImported. ' definition with '.$smsg.' in database #'.$db_reg_id);
+            $this->system->addError(HEURIST_ERROR, 'Unable to get '.$entityTypeToBeImported. ' definition with '.$smsg.' from registered database #'.$db_reg_id);
             return false; //see $system->getError
         }
         
