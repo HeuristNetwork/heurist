@@ -35,15 +35,14 @@
 
 // TO DO: WE NEED SOME MECHANISM TO AVOID DENIAL OF SERVICE ATTACK WHICH REPEATEDLY REQUESTS REGISTRATIONS
 
-// TODO: We may need to hobble/delete some of the functionality on Heurist_Reference_Index to avoid people
+// TODO: We may need to hobble/delete some of the functionality on Heurist Reference Index db (HEURIST_INDEX_DATABASE) to avoid people
 // creating unwanted records or importing random crap into it
+require_once (dirname(__FILE__).'/../../../hsapi/System.php');
 
-if(@$_REQUEST["db"]!='Heurist_Reference_Index'){
+if(@$_REQUEST["db"]!=HEURIST_INDEX_DATABASE){
     echo '0,This script allowed for Master Index database only';
     return;
 }
-
-require_once (dirname(__FILE__).'/../../../hsapi/System.php');
 
 $connect_failure = false;
     

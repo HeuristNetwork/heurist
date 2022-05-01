@@ -937,7 +937,7 @@ $mysqli->commit();
 
         if(!$remote_dbname || !$remote_url){
             $this->system->addError(HEURIST_ERROR, 
-                "Heurist Master Index returns incorrect data for registered database # ".$database_id.
+                "Heurist Reference Index returns incorrect data for registered database # ".$database_id.
                 " The page may contain an invalid database reference");
             return false;
         }
@@ -947,7 +947,7 @@ $mysqli->commit();
             .'<ol><li>the database is no longer online;</li>'
             .'<li>the registration in the Heurist master index is missing or points to the wrong URL '
             .$remote_url
-            .'<br>(check registration in Heurist Master Index);</li>'
+            .'<br>(check registration in Heurist Reference Index);</li>'
             .((strpos($remote_url, HEURIST_SERVER_URL)===0)
                 ?'<li>a sql server error in contacting the database;</li>'
                 :'<li>a proxy error in contacting the database;</li>')

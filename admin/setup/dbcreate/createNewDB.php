@@ -410,7 +410,7 @@ if($registrationRequired){ //show user registration dialog again after wrong cap
             if($registrationRequired){
                 print '<div class="logo" style="background-color:#2e3e50;width:100%;margin-bottom:20px"></div>';
             }else{
-                //<div class="banner"><h2>Register Database with Heurist Master Index</h2></div>
+                //<div class="banner"><h2>Register Database with Heurist Reference Index</h2></div>
             }
 ?>
 

@@ -1472,7 +1472,7 @@ window.hWin.HEURIST4.dbs = {
                 if(is_ui===true){
                   return '<span '
                     +'title="Concept IDs are attributed when a database is registered with the '
-                    +'Heurist Master Index using Design > Setup > Register. In the meantime only local codes are defined.">'
+                    +'Heurist Reference Index using Design > Setup > Register. In the meantime only local codes are defined.">'
                     +'0000-'+local_id+'</span>';
                 }else{
                     return '0000-'+local_id;    

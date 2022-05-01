@@ -48,7 +48,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
         $data = json_decode($data, true);
 
         // Artem TODO: What circumstance would give rise to this? Explain how the data is 'wrong'/'incorrect'
-        // Artem: cannot connect to Heurist_Reference_Index, Records table is corrupted, $database_id is not found 
+        // Artem: cannot connect to Master Reference Database, Records table is corrupted, $database_id is not found 
         if(@$data['error_msg']){
             $error_msg = $data['error_msg'];
         }else if(!@$data['rec_URL']){
@@ -63,7 +63,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     //on this server
 
     $system2 = new System();
-    $system2->init('hdb_Heurist_Master_Index', true, false); //init without paths and consts
+    $system2->init(HEURIST_INDEX_DATABASE, true, false); //init without paths and consts
 
     if(@$_REQUEST['remote']){ 
         $database_id = @$_REQUEST["id"];   

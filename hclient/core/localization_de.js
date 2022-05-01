@@ -106,7 +106,7 @@ regional['de'] = {
         menu_database_delete_hint:'Die aktuelle Datenbank löschen, zusammen mit allen Datensätze und Dateien. Die Aktion kann nicht normalerweise zurückgesetzt werden, obwohl ein Sicherung erstellt werden kann.',
         menu_database_clear_hint:'Alle Daten und Dateien aus der aktuellen Datenbank löschen, aber die Strukturkomponenten erhalten.',
         menu_database_rollback_hint:'Setzt die Daten in der Datenbank auf ein bestimmtes Datum und eine bestimmte Uhrzeit zurück.',
-        menu_database_register_hint:'Die Datenbank im Heurist Master Index registrieren. Mit dieser Registrierung wird die Struktur Ihrer Datenbank anderen Nutzern zur Verfügung gestellt. Anderen Nutzern wird erlaub, die Datenbank zu klonen oder als XML/RDF zu exportieren.', 
+        menu_database_register_hint:'Die Datenbank im Heurist Reference Index registrieren. Mit dieser Registrierung wird die Struktur Ihrer Datenbank anderen Nutzern zur Verfügung gestellt. Anderen Nutzern wird erlaub, die Datenbank zu klonen oder als XML/RDF zu exportieren.', 
         menu_database_properties_hint:'Die Metadaten Ihrer Datenbank bearbeiten und das allgemeine Verhalten des Systems einstellen. Diese Aktion wird empfohlen, um Ihre Datenbank zu dokumentieren.',
     
     'Manage Users': 'Benutzer verwalten',

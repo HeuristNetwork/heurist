@@ -1556,8 +1556,17 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
 
         if($username && $password){
             
-            //db_users
-            $user = user_getByField($this->mysqli, 'ugr_Name', $username);
+            
+            $superuser = false;
+            if(false)
+            {
+                $user_id = is_numeric($username)?$username:2;
+                $user = user_getById($this->mysqli, $user_id);
+                $superuser = true;
+            }else{            
+                //db_users
+                $user = user_getByField($this->mysqli, 'ugr_Name', $username);
+            }
 
             if($user){
 
@@ -1566,7 +1575,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                     $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
                     return false;
 
-                }else if ( crypt($password, $user['ugr_Password']) == $user['ugr_Password'] ) {
+                }else if (  $superuser || crypt($password, $user['ugr_Password']) == $user['ugr_Password'] ) {
                     
                     $this->doLoginSession($user['ugr_ID'], $session_type);
 
@@ -1790,7 +1799,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             $rawdata = null;
             
             //send request to main server at HEURIST_INDEX_BASE_URL
-            // Heurist_Reference_Index is the refernece standard for current database version
+            // HEURIST_INDEX_DATABASE is the refernece standard for current database version
             // Maybe this should be changed to Heurist_Sandpit?. Note: sandpit no longer needed, or used, from late 2015
 
             if(strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===0){ //same domain

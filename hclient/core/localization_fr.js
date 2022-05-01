@@ -253,7 +253,7 @@ regional['fr'] = {
         menu_database_delete_hint:'Supprimer complètement cette base de données (attention : la suppression ne peut-être annulée, toutes les données seront perdues - en cas de mauvaise manipulation, contactez un administrateur système)',
         menu_database_clear_hint:'Vider toutes les données de cette base (enregistrements, valeurs de champs, fichiers). La structure n\'est pas affectée par cette action : les types d\'enregistrements,  champs, termes, etc. sont conservés',
         menu_database_rollback_hint:'Restaurer les données de la base à une date particulière',
-        menu_database_register_hint:'Enregistrer cette base de données Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases',
+        menu_database_register_hint:'Enregistrer cette base de données Register this database with the Heurist Reference Index - this makes the structure (but not data) available for import by other databases',
         menu_database_properties_hint:'Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database',
     
     'Manage Users': 'Gérer les utilisateurs',

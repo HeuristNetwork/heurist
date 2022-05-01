@@ -249,7 +249,7 @@ regional['ru'] = {
         menu_database_delete_hint:'Удалить текущую базу полностью _ не может быть отменено, хотя данные будут скопированы в дамп и могут быть восстановлены сисадмином',
         menu_database_clear_hint:'Clear all data (records, values, attached files) from the current database. Database structure _ record types, fields, terms, constraints _ is unaffected',
         menu_database_rollback_hint:'Selectively roll back the data in the database to a specific date and time',
-        menu_database_register_hint:'Зарегистировать эту базу в Heurist Master Index _ это сделает доступным импорт элементов структуры (но не данных) в других базах',
+        menu_database_register_hint:'Зарегистировать эту базу в Heurist Reference Index _ это сделает доступным импорт элементов структуры (но не данных) в других базах',
         menu_database_properties_hint:'Редактировать описание базы данных и определить некторые глобальные установить . Recommended to provide a self_documenting database',
         
     'Manage Users': 'Пользователи',

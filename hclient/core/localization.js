@@ -119,7 +119,7 @@ regional['en'] = {
         menu_database_delete_hint:'Delete the current database completely - cannot be undone, although data is copied to a backup which could be reloaded by a system administrator',
         menu_database_clear_hint:'Clear all data (records, values, attached files) from the current database. Database structure - record types, fields, terms, constraints - is unaffected',
         menu_database_rollback_hint:'Selectively roll back the data in the database to a specific date and time',
-        menu_database_register_hint:'Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases',
+        menu_database_register_hint:'Register this database with the Heurist Reference Index - this makes the structure (but not data) available for import by other databases',
         menu_database_properties_hint:'Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database',
     
     'Manage Users': '',

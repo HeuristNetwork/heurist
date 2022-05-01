@@ -2,7 +2,7 @@
 //@TODO to hclient
 
 /**
-* registerDB.php - Registers the current database with Heurist_Reference_Index database, 
+* registerDB.php - Registers the current database with Heurist Reference Index database (HEURIST_INDEX_DATABASE), 
 * on the Heurist master server (HEURIST_MAIN_SERVER), stores
 * metadata in the index database, sets registration code in sysIdentification table.
 *
@@ -157,7 +157,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
                 
             // Check if database has already been registered
             }else if ($isAlreadyRegistred)
-            { // already registered, display info and link to Heurist_Reference_Index edit
+            { // already registered, display info and link to HEURIST_INDEX_DATABASE edit
             
                 $edit_url = HEURIST_INDEX_BASE_URL.'?fmt=edit&recID='.$dbID.'&db='.HEURIST_INDEX_DATABASE;
 ?>
@@ -202,7 +202,6 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             
             $is_SpecialAdminUseOnly = strlen(@$passwordForServerFunctions)>6 && 
             @$cuser['ugr_Preferences']['userCompetencyLevel']==0 &&
-            HEURIST_INDEX_DATABASE=='Heurist_Reference_Index' && 
             strpos(HEURIST_SERVER_URL, HEURIST_MAIN_SERVER)===0;  //we are on main reference server
             
 ?>
@@ -419,7 +418,7 @@ function registerDatabase() {
                             echo '<div class=wrap><div class="ui-state-error">Unable to set all values for originating DB information for '.HEURIST_DBNAME.' - one of the update queries failed. Please report a bug to Heurist team</div></div>';
                         }
                         ?>
-                        <script> // automatically call Heurist_Reference_Index metadata edit form for this database
+                        <script> // automatically call Heurist Reference Index metadata edit form for this database
                             //need reload local defintitions and sysinfo on client side    
                             if(window.hWin){
                                 window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
