@@ -1390,7 +1390,25 @@ $.widget( "heurist.mainMenu6", {
                         container: that.containers['publish']});
             });            
         }*/
-        
+
+        if(this.menues[section].find('ul.accordionContainer').length > 0){ // check if current menu has any accordion groupings
+
+            this.menues[section].find('ul.accordionContainer').accordion({
+                header: '.accordionHeader',
+                collapsible: true,
+                active: false,
+                beforeActivate: function(event, ui){
+
+                    $(ui.newPanel).css({ // remove special styling of accordion content
+                        'background': 'none',
+                        'border': 'none',
+                        'height': ''
+                    });
+                }
+            });
+
+            this.menues[section].find('li.accordionHeader').css('padding', '0px 0px 8px');
+        }
     },
     
     //

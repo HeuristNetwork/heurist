@@ -26,7 +26,14 @@
     <span class="ui-icon ui-icon-circle-b-help" style="float:right;margin:0px;padding-right:8px;"></span></div>
 <div style="top:37px;position:absolute;width:100%;">
 
-    <ul style="list-style-type:none;margin:0;padding:12px">
+    <ul style="list-style-type:none;margin:0;padding:12px;" class="heurist-export-menu6">
+
+        <li style="padding:0px 6px 8px;" class="ui-heurist-title slocale">Safeguard</li>
+
+        <li data-action="menu-manage-archive"/>
+    </ul>
+
+    <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;">
 
         <li style="padding:0px 6px 8px;" class="ui-heurist-title slocale">Website</li>
 
@@ -35,13 +42,15 @@
         <li data-action="menu-cms-view"/>
     </ul>
 
-    <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;">
+    <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;" class="accordionContainer">
 
-        <li style="padding:0px 6px 8px;" class="ui-heurist-title slocale">Standalone page</li>
+        <li style="padding:0px 6px 8px;" class="ui-heurist-title slocale accordionHeader">Standalone web page</li>
+        <div>
+            <li data-action="menu-cms-create-page"/>
+            <li data-action="menu-cms-edit-page"/>
+            <li data-action="menu-cms-view-page"/>
+        </div>
 
-        <li data-action="menu-cms-create-page"/>
-        <li data-action="menu-cms-edit-page"/>
-        <li data-action="menu-cms-view-page"/>
     </ul>
     
 
@@ -125,13 +134,6 @@
         <li data-action="menu-export-gephi"/>
         <li data-action="menu-export-iiif"/>
         
-    </ul>
-
-    <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;" class="heurist-export-menu6">
-
-        <li style="padding:0px 6px 8px;" class="ui-heurist-title slocale">Safeguard</li>
-
-        <li data-action="menu-manage-archive"/>
     </ul>
     
 </div>
