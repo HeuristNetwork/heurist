@@ -2230,7 +2230,7 @@ $.widget( "heurist.editing_input", {
                     .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input ); 
                 
                 /* Image and Player (enalrged image) container */
-                $input_img = $('<br/><div class="image_input ui-widget-content ui-corner-all thumb_image" style="margin-bottom:2px;border:none;">'
+                $input_img = $('<br/><div class="image_input ui-widget-content ui-corner-all thumb_image" style="margin:5px 0px;border:none;background:transparent;">'
                 + '<img id="img'+f_id+'" class="image_input" style="max-width:none;">'
                 + '<div id="player'+f_id+'" style="min-height:100px;min-width:200px;display:none;"></div>'
                 + '</div>')
@@ -2241,7 +2241,7 @@ $.widget( "heurist.editing_input", {
 				$small_text = $('<br /><div class="smallText" style="display:block;color:gray;font-size:smaller;">'
                     + 'Click image to freeze in place</div>')
                 .clone()
-                .prependTo( $inputdiv )
+                .insertAfter( $clear_container )
                 .hide();
 
                 /* urls for downloading and loading the thumbnail */
@@ -2311,7 +2311,7 @@ $.widget( "heurist.editing_input", {
                 function __showImagePreview(event){
 
                     var imgAvailable = !window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src'));
-                    var invalidURL = $inputdiv.find('div.smallText').text().includes("This file cannot be rendered");
+                    var invalidURL = $inputdiv.find('div.smallText').hasClass('invalidImg');
 
                     if((imgAvailable || invalidURL) && isClicked == 0){
                         if (hideTimer) {
@@ -2337,10 +2337,11 @@ $.widget( "heurist.editing_input", {
 
                 /* Input element's mouse out handler, attached and dettached depending on user preferences */
                 function __hideImagePreview(event){
-                        if (showTimer) {
-                            window.clearTimeout(showTimer);
-                            showTimer = 0;
-                        }
+                    if (showTimer) {
+                        window.clearTimeout(showTimer);
+                        showTimer = 0;
+                    }
+
                     if($input_img.is(':visible')){
                         
                         //var ele = $(event.target);
@@ -2366,7 +2367,7 @@ $.widget( "heurist.editing_input", {
 
                     var elem = event.target;
                     
-                    if (isClicked==0){
+                    if (isClicked==0 && !$(elem.parentNode.parentNode).find('div.smallText').hasClass('invalidImg')){
                         isClicked=1;
                         
                         that._off($input_img,'mouseout');
@@ -2416,7 +2417,11 @@ $.widget( "heurist.editing_input", {
 
                     $(event.target.parentNode).hide();
 
-                    $input_img.hide();
+                    if($(event.target.parentNode).find('div.smallText').hasClass('invalidImg')){
+                        $input_img.hide().css('cursor', '');
+                    }else{
+                        $input_img.hide().css('cursor', 'pointer');
+                    }
                 });
 
 				/* Show Thumbnail handler */
@@ -2426,16 +2431,15 @@ $.widget( "heurist.editing_input", {
                     $(event.target.parentNode.parentNode).find('.hideTumbnail').show();
 				});
 
-				/* Check User Preferences, displays thumbnail inline by default if set */
-                if (window.hWin.HAPI4.get_prefs_def('imageRecordEditor', 0)!=0 && value.ulf_ID)
-                {
+                /* Check User Preferences, displays thumbnail inline by default if set */
+                if (window.hWin.HAPI4.get_prefs_def('imageRecordEditor', 0)!=0 && value.ulf_ID) {
                     $input_img.show();
                     $dwnld_anchor.show();
 
                     $dwnld_anchor.appendTo( $inputdiv );
 
                     $input_img.css('cursor', 'zoom-in');
-					
+                    
                     $small_text.hide();
 
                     $input.off("mouseout");
@@ -2443,112 +2447,99 @@ $.widget( "heurist.editing_input", {
                     isClicked=1;
                 }
 
-                        var __show_select_dialog = null;
-                        /* 2017-11-08 no more buttons
-                        var $btn_rec_search_dialog = $( "<span>", {title: "Click to search and select"})
-                        .addClass('smallicon ui-icon '+icon_for_button)
-                        .appendTo( $inputdiv );
-                        */
-                        //.button({icons:{primary: icon_for_button},text:false});
-                         
-                        var isTiledImage = this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
-                            && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL'];
-                         
-                        var popup_options = {
-                            isdialog: true,
-                            select_mode: 'select_single',
-                            additionMode: isTiledImage?'tiled':'any',  //AAAA
-                            edit_addrecordfirst: true, //show editor at once
-                            select_return_mode:select_return_mode, //ids or recordset(for files)
-                            filter_group_selected:null,
-                            filter_groups: this.configMode.filter_group,
-                            default_palette_class: 'ui-heurist-populate',
-                            onselect:function(event, data){
+                var __show_select_dialog = null;
+                 
+                var isTiledImage = this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
+                    && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL'];
+                 
+                var popup_options = {
+                    isdialog: true,
+                    select_mode: 'select_single',
+                    additionMode: isTiledImage?'tiled':'any',  //AAAA
+                    edit_addrecordfirst: true, //show editor at once
+                    select_return_mode:select_return_mode, //ids or recordset(for files)
+                    filter_group_selected:null,
+                    filter_groups: this.configMode.filter_group,
+                    default_palette_class: 'ui-heurist-populate',
+                    onselect:function(event, data){
 
-                             if(data){
+                     if(data){
+                        
+                            if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                var recordset = data.selection;
+                                var record = recordset.getFirstRecord();
                                 
-                                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                        var recordset = data.selection;
-                                        var record = recordset.getFirstRecord();
-                                        
-                                        var newvalue = {ulf_ID: recordset.fld(record,'ulf_ID'),
-                                                        ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
-                                                        ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
-                                                        ulf_MimeExt: recordset.fld(record,'fxm_MimeType'),
-                                                        ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID')};
-                                        
-                                        that.newvalues[$input.attr('id')] = newvalue;
-                                        that._findAndAssignTitle($input, newvalue);
-                                        
-                                        /*
-                                        that.newvalues[$input.attr('id')] = recordset.fld(record,'ulf_ID');
-                                        
-                                        var rec_Title = recordset.fld(record,'ulf_ExternalFileReference');
-                                        if(window.hWin.HEURIST4.util.isempty(rec_Title)){
-                                            rec_Title = recordset.fld(record,'ulf_OrigFileName');
-                                        }
-                                        window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title, 10);
-
-                                        //url for thumb
-                                        $inputdiv.find('.image_input > img').attr('src',
-                                            window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
-                                            recordset.fld(record,'ulf_ObfuscatedFileID'));
-                                        */
-                                        //if(newvalue.ulf_OrigFileName) $input.change();
-                                    }
+                                var newvalue = {ulf_ID: recordset.fld(record,'ulf_ID'),
+                                                ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
+                                                ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
+                                                ulf_MimeExt: recordset.fld(record,'fxm_MimeType'),
+                                                ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID')};
                                 
-                             }//data
+                                that.newvalues[$input.attr('id')] = newvalue;
+                                that._findAndAssignTitle($input, newvalue);
+                                
+                                /*
+                                that.newvalues[$input.attr('id')] = recordset.fld(record,'ulf_ID');
+                                
+                                var rec_Title = recordset.fld(record,'ulf_ExternalFileReference');
+                                if(window.hWin.HEURIST4.util.isempty(rec_Title)){
+                                    rec_Title = recordset.fld(record,'ulf_OrigFileName');
+                                }
+                                window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title, 10);
 
+                                //url for thumb
+                                $inputdiv.find('.image_input > img').attr('src',
+                                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+                                    recordset.fld(record,'ulf_ObfuscatedFileID'));
+                                */
+                                //if(newvalue.ulf_OrigFileName) $input.change();
                             }
-                        };//popup_options
                         
+                     }//data
 
-                        that._findAndAssignTitle($input, value);
+                    }
+                };//popup_options
 
-                        __show_select_dialog = function(event){
-                            
-                                if(that.is_disabled) return;
+                that._findAndAssignTitle($input, value);
 
-                                event.preventDefault();
-                                
-                                var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+this.configMode.entity, 
-                                    {width: null,  //null triggers default width within particular widget
-                                    height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+                __show_select_dialog = function(event){
                     
-                                popup_options.width = usrPreferences.width;
-                                popup_options.height = usrPreferences.height;
-                                var sels = this.newvalues[$(event.target).attr('id')];
-                                if(!sels && this.options.values && this.options.values[0]){
-                                     sels = this.options.values[0];    //take selected value from options
-                                } 
+                        if(that.is_disabled) return;
 
-                                if($.isPlainObject(sels)){
-                                    popup_options.selection_on_init = [sels.ulf_ID];
-                                }else if(!window.hWin.HEURIST4.util.isempty(sels)){
-                                    popup_options.selection_on_init = sels.split(',');
-                                } else {
-                                    popup_options.selection_on_init = null;    
-                                }                                                                                       
-                                //init dialog to select related uploaded files
-                                window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);
-                        }
+                        event.preventDefault();
                         
-                        if(__show_select_dialog!=null){
-                            //no more buttons this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
-                            this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
-                            this._on( $gicon, { click: __show_select_dialog } );
-                        }
-                        
-                        if(this.isFileForRecord && value){
-                            //assign value at once
-                            this.newvalues[$input.attr('id')] = value;
-                            /*
-                            if($.isPlainObject(value) && value.ulf_ID>0){
-                                this.newvalues[$input.attr('id')] = value.ulf_ID;   
-                            }else if (parseInt(value)>0){
-                                this.newvalues[$input.attr('id')] = value;
-                            }*/
-                        }
+                        var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+this.configMode.entity, 
+                            {width: null,  //null triggers default width within particular widget
+                            height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+            
+                        popup_options.width = usrPreferences.width;
+                        popup_options.height = usrPreferences.height;
+                        var sels = this.newvalues[$(event.target).attr('id')];
+                        if(!sels && this.options.values && this.options.values[0]){
+                             sels = this.options.values[0];    //take selected value from options
+                        } 
+
+                        if($.isPlainObject(sels)){
+                            popup_options.selection_on_init = [sels.ulf_ID];
+                        }else if(!window.hWin.HEURIST4.util.isempty(sels)){
+                            popup_options.selection_on_init = sels.split(',');
+                        } else {
+                            popup_options.selection_on_init = null;    
+                        }                                                                                       
+                        //init dialog to select related uploaded files
+                        window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);
+                }
+                
+                if(__show_select_dialog!=null){
+                    //no more buttons this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
+                    this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
+                    this._on( $gicon, { click: __show_select_dialog } );
+                }
+                
+                if(this.isFileForRecord && value){
+                    //assign value at once
+                    this.newvalues[$input.attr('id')] = value;
+                }
             }
             else
             if( this.detailType=='folder' ){ //----------------------------------------------------
@@ -3427,69 +3418,85 @@ console.log('onpaste');
                 window.hWin.HEURIST4.ui.setValueAndWidth(ele, '');
                 return;
             }
-        
+
             if($.isPlainObject(value) && value.ulf_ObfuscatedFileID){
-        
+
                 var rec_Title = value.ulf_ExternalFileReference;
                 if(window.hWin.HEURIST4.util.isempty(rec_Title)){
                     rec_Title = value.ulf_OrigFileName;
                 }
                 window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title, 10);
-                
+
                 //url for thumb
-                if(!window.hWin.HEURIST4.util.isempty(value['ulf_ExternalFileReference'])){ // check if external source can be rendered
+                if(!window.hWin.HEURIST4.util.isempty(value['ulf_ExternalFileReference']) && value.ulf_MimeExt == 'youtube'){ // retrieve youtube thumbnail
+
+                    var youtube_id = window.hWin.HEURIST4.util.get_youtube_id(value.ulf_ExternalFileReference);
+
+                    if(youtube_id){
+
+                        ele.parent().find('.image_input > img').attr('src', 'https://img.youtube.com/vi/'+ youtube_id +'/default.jpg');
+                        ele.parent().find('.smallText').text("Click image to freeze in place").css({
+                            "font-size": "smaller", 
+                            "color": "grey", 
+                            "position": "", 
+                            "top": ""
+                        })
+                        .removeClass('invalidImg');
+
+                        that.newvalues[ele.attr('id')] = value;
+                    }else{
+
+                        ele.parent().find('.image_input > img').removeAttr('src');
+                        ele.parent().find('.smallText').text("Unable to retrieve youtube thumbnail").css({
+                            "font-size": "larger", 
+                            "color": "black", 
+                            "position": "relative", 
+                            "top": "60px"
+                        })
+                        .addClass('invalidImg');
+
+                        ele.parent().find('.hideTumbnail').click();
+                    }
+
+                    ele.change();
+                }else{ // check if image that can be rendered
 
                     window.hWin.HAPI4.checkImage("Records", value["ulf_ObfuscatedFileID"], null, function(response) {
 
                         if(response.data && response.status == window.hWin.ResponseStatus.OK) {
-                            
+
                             ele.parent().find('.image_input > img').attr('src',
 								window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
 									value.ulf_ObfuscatedFileID);
 
                             if($.isPlainObject(response.data) && response.data.width > 0 && response.data.height > 0) {
-                                
 
                                 ele.parent().find(".smallText").text("Click image to freeze in place").css({
                                     "font-size": "smaller", 
                                     "color": "grey", 
                                     "position": "", 
-                                    "bottom": ""
-                                });
+                                    "top": ""
+                                })
+                                .removeClass('invalidImg');
 
                                 that.newvalues[ele.attr('id')] = value;
-                            } else {
-                                
+                            }else{
+
                                 ele.parent().find('.image_input > img').removeAttr('src');
                                 ele.parent().find(".smallText").text("This file cannot be rendered").css({
                                     "font-size": "larger", 
                                     "color": "black", 
                                     "position": "relative", 
-                                    "bottom": "60px"
-                                });
+                                    "top": "60px"
+                                })
+                                .addClass('invalidImg');
+
+                                ele.parent().find('.hideTumbnail').click();
                             }
                             ele.change();
                         }
-
                     });
-                }else{ // local source
-
-                    ele.parent().find('.image_input > img').attr('src',
-                        window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
-                            value.ulf_ObfuscatedFileID);
-
-                    ele.parent().find(".smallText").text("Click image to freeze in place").css({
-                        "font-size": "smaller", 
-                        "color": "grey", 
-                        "position": "", 
-                        "bottom": ""
-                    });
-                            
-                    this.newvalues[ele.attr('id')] = value;
-                     
-                    ele.change();
                 }
-                
             }else{
                  //call server for file details
                  var recid = ($.isPlainObject(value))?value.ulf_ID :value;

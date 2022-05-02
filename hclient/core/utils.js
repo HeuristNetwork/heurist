@@ -1324,6 +1324,16 @@ window.hWin.HEURIST4.util = {
 
         document.addEventListener('copy', handler, true);
         document.execCommand('copy');
+    },
+
+    //
+    // Retrieve youtube id from url
+    //
+    get_youtube_id: function(url){
+
+        var matches = url.match(/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/);
+
+        return matches[1];
     }
     
 }//end util
