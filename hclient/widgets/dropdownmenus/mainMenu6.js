@@ -1402,7 +1402,8 @@ $.widget( "heurist.mainMenu6", {
                     $(ui.newPanel).css({ // remove special styling of accordion content
                         'background': 'none',
                         'border': 'none',
-                        'height': ''
+                        'height': '',
+                        'font-size': '14px'
                     });
                 }
             });
