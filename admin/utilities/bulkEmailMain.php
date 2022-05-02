@@ -68,8 +68,8 @@ $current_db = HEURIST_DB_PREFIX . $_REQUEST['db'];
 
 $email_rectype_id = ConceptCode::getRecTypeLocalID("2-9");
 if (empty($email_rectype_id)) {
-
-    print "Unable to retrieve the id for the Email record type";
+    print "Unable to retrieve the id for the Email record type.<br>Please download this record type from the Heurist Core Definitions database, available via Design > Browser templates.";
+    exit();
 }
 
 $query = "SELECT rec_ID, rec_Title FROM Records WHERE rec_RecTypeID = " 
@@ -79,7 +79,7 @@ $query = "SELECT rec_ID, rec_Title FROM Records WHERE rec_RecTypeID = "
 $email_list = $mysqli->query($query);
 if (!$email_list) { 
     print "Either unable to retrieve Email records from the current database, Error => " . $mysqli->error. ", Query => " .$query; 
-    return; 
+    exit();
 }
 
 while($email = $email_list->fetch_row()){
@@ -106,7 +106,7 @@ if(!$has_emails || empty($emails)) {
     . "##dburl## &rarr; Database URL,<br>" 
     . "##records## &rarr; Record Count, and<br>" 
     . "##lastmodified## &rarr; Date of the Last Modified Record<br>";
-    return;
+    exit();
 }
 ?>  
 <html>
