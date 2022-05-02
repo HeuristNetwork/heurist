@@ -185,7 +185,10 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
             
             //copy resource folders
             if(@$_REQUEST['include_docs']=='1'){
-                $folders_to_copy = $system->getSystemFolders( 1 );
+                $folders_to_copy = folderSubs(HEURIST_FILESTORE_DIR, array('backup', 'scratch', 'file_uploads', 'filethumbs'));
+                
+                //limited set
+                //$folders_to_copy = $system->getSystemFolders( 1 );
 
                 echo_flush2("<br><br>Exporting system folders<br>");
             }

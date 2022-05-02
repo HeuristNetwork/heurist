@@ -61,6 +61,7 @@
     
     getRelativePath
     folderRecurseCopy
+    folderSubs - list of subfolders
     
     ===
     createZipArchive
@@ -879,7 +880,36 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
     return $res;
 }   
 
-   
+
+/**
+* Gets list of subfolders for given folder
+* 
+* @param mixed $src
+*/
+function folderSubs($src, $exclude=null) {
+    $res = array();
+
+    $src =  $src . ((substr($src,-1)=='/')?'':'/');
+
+    $dir = opendir($src);
+    if($dir!==false){
+
+
+            while(false !== ( $file = readdir($dir)) ) {
+                if (( $file != '.' ) && ( $file != '..' ) && is_dir($src . $file)) {
+
+                        if(is_array($exclude) && in_array($file, $exclude)){
+                            continue;
+                        }
+                        
+                        $res[] = $src.$file.'/';
+                }
+            }
+        closedir($dir);
+    }
+
+    return $res;
+}   
     
 //------------------------------------------    
 /**

@@ -29,6 +29,10 @@ $arg_database = null;
 $arg_include_docs = true;
 
 if (@$argv) {
+    
+//example
+// php -f /var/www/html/heurist/export/dbbackup/buildArchivePackagesCMD.php -- -db=database_1,database_2
+// php -f buildArchivePackagesCMD.php -- -db=osmak_9,osmak_9c,osmak_9d
 
     // handle command-line queries
     $ARGV = array();
@@ -143,7 +147,12 @@ foreach ($arg_database as $idx=>$db_name){
     //copy resource folders
     if($arg_include_docs){
         //Exporting system folders
-        $folders_to_copy = $system->getSystemFolders( 1, $db_name );
+        
+        //get all folders except backup, scratch, file_uploads and filethumbs
+        $folders_to_copy = folderSubs($database_folder, array('backup', 'scratch', 'file_uploads', 'filethumbs'));
+        
+        // this is limited set of folder
+        //$folders_to_copy = $system->getSystemFolders( 1, $db_name );
     }
 
     if(!$arg_skip_files){

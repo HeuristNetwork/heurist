@@ -164,7 +164,7 @@ class RecordsBatch
     private function _validateParamsAndCounts()
     {
         if (!( $this->system->get_user_id()>0 )) { //not logged in
-            $this->system->addError(HEURIST_REQUEST_DENIED);
+            $this->system->addError(HEURIST_REQUEST_DENIED, 'Not logged in');
             return false;
         }
         
@@ -184,9 +184,11 @@ class RecordsBatch
             $query = 'select count(*) from Records';
 
             $rty_ID = @$this->data['rtyID'];
-            if(is_array($rty_ID) && count($rty_ID)>0){
-                $query .= ' WHERE rec_RecTypeID in ('.getCommaSepIds($rty_ID).')';
-                $this->rtyIDs = $rty_ID;
+            if(is_array($rty_ID)){
+                if(count($rty_ID)>0){
+                    $query .= ' WHERE rec_RecTypeID in ('.getCommaSepIds($rty_ID).')';
+                    $this->rtyIDs = $rty_ID;
+                }
             }else if($rty_ID >0){
                 $query .= ' WHERE rec_RecTypeID = '.$rty_ID;
                 $this->rtyIDs = array($rty_ID);
