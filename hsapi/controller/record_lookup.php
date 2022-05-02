@@ -28,10 +28,6 @@
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
-    if(!defined('ESTC_ALLOWED_DBS')){ 
-        define('ESTC_ALLOWED_DBS', array('Libraries_Readers_Culture_18C_Atlantic', 'MPCE_Mapping_Print_Charting_Enlightenment', 'ESTC_Helsinki_Bibliographic_Metadata')); 
-    }
-
 detectLargeInputs('REQUEST record_lookup', $_REQUEST);
 detectLargeInputs('COOKIE record_lookup', $_COOKIE);
     
@@ -41,7 +37,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
     $params = $_REQUEST;
 
-    $is_estc = (@$params['serviceType'] == 'ESTC' && array_key_exists('db', $_REQUEST) && $_REQUEST['db'] == 'ESTC_Helsinki_Bibliographic_Metadata');
+    $is_estc = (@$params['serviceType'] == 'ESTC' && array_key_exists('db', $params) && $params['db'] == 'ESTC_Helsinki_Bibliographic_Metadata');
 
     if(!(@$params['service']) && !$is_estc){
         $system->error_exit_api('Service parameter is not defined or has wrong value'); //exit from script
@@ -52,40 +48,38 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
     if($is_estc){
 
-        $is_allowed = in_array($_REQUEST['org_db'], ESTC_ALLOWED_DBS);
+        $is_allowed = (isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, @$params['org_db']) !== false);
 
-        if(strpos(HEURIST_BASE_URL, HEURIST_MAIN_SERVER) !== false && $system->init(@$params['db'])){ // currently on Sydney server
+        if(strpos(HEURIST_BASE_URL, $ESTC_ServerURL) !== false && $system->init(@$params['db'])){ // currently on server where ESTC DB is located
 
-            if(array_key_exists('entity', $_REQUEST)){ // retrieve term info
+            if(array_key_exists('entity', $params)){ // retrieve term info
                 require_once (dirname(__FILE__).'/entityScrud.php');
                 exit();
             }else if($is_allowed && $ESTC_UserName && $ESTC_Password && $system->doLogin($ESTC_UserName, $ESTC_Password, 'shared')){ // search records
 
-                $system->getCurrentUserAndSysInfo(false);
-
                 require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
 
-                $remote_data = recordSearch($system, $_REQUEST);
-                $remote_data = json_encode($remote_data);
+                $response = recordSearch($system, $params);
+                $response = json_encode($response);
             }else{ // doesn't have permission
 
                 $msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
-                $remote_data = array('status' => HEURIST_REQUEST_DENIED, 'message' => $msg, 'sysmsg' => '');
-                $remote_data = json_encode($remote_data);
+                $response = array('status' => HEURIST_REQUEST_DENIED, 'message' => $msg, 'sysmsg' => '');
+                $response = json_encode($response);
             }
 
             header('Content-Type: application/json');
-            header('Content-Length: ' . strlen($remote_data));
-            exit($remote_data);
-        }else if($is_allowed){ // on external server, currently no external database has permission
+            header('Content-Length: ' . strlen($response));
+            exit($response);
+        }else{ // on external server, currently no external DBs have permission
 
             $msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
-            $remote_data = array('status' => HEURIST_REQUEST_DENIED, 'message' => $msg, 'sysmsg' => '');
-            $remote_data = json_encode($remote_data);
+            $response = array('status' => HEURIST_REQUEST_DENIED, 'message' => $msg, 'sysmsg' => '');
+            $response = json_encode($response);
 
             header('Content-Type: application/json');
-            header('Content-Length: ' . strlen($remote_data));
-            exit($remote_data);
+            header('Content-Length: ' . strlen($response));
+            exit($response);
         }
     }else{
 
@@ -103,7 +97,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
         $url = $params['service'];
     }
 
-    $remote_data = loadRemoteURLContent($url, true); //perform request to external data service (record lookup)   
+    $remote_data = loadRemoteURLContent($url, true);    
     if($remote_data===false){
         $system->error_exit_api('Cannot connect/load data from the service: '.$url, HEURIST_ERROR);    
     }
