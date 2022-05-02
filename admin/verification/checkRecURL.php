@@ -29,15 +29,17 @@ $has_broken_url = false;
 
 if($is_included){
 
-    print '<div style="padding:10px"><h3 id="relationship_cache_msg">Check Records URL</h3><br>';
+    print '<div style="padding:10px"><h3 id="records_url_msg">Check Records URL</h3><br>';
     
 }else{
+    define('PDIR','../../');
+    
     require_once (dirname(__FILE__).'/../../hsapi/System.php');
     
     $system = new System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
-        print $system->getError();
+        print $system->getError()['message'];
         return;
     }
     if(!$system->is_admin()){ //  $system->is_dbowner()
@@ -51,7 +53,7 @@ if($is_included){
     </head>
     <body class="popup">
         <div class="banner">
-            <h2>Check Records URL</h2>
+            <h3>Check Records URL</h3>
         </div>
         <div id="page-inner">
 <?php    
@@ -75,7 +77,8 @@ if ($res){
         $rec_id = $row[0];
         $rec_url = $row[1];
 
-        $data = loadRemoteURLContentWithRange($rec_url, "0-1000");
+        //timeout 10 seconds (default 30)
+        $data = loadRemoteURLContentWithRange($rec_url, "0-1000", true, 10);
 
         if ($data){
             $passed_cnt++;
@@ -100,9 +103,11 @@ if ($res){
         __updateRecords_lastverified();
     }
 
+    echo '<p>Processed: '.$passed_cnt.' records</p>';
+    
     if($broken_cnt>0){
         $has_broken_url = true;
-        print '<div style="padding:5px;color:red">There are <b>'.$broken_cnt
+        print '<div style="padding-top:20px;color:red">There are <b>'.$broken_cnt
         .'</b> records with broken url. Search "_BROKEN_" for details</div>';
 
         //echo '<div><h3 class="error"> XXX Records have broken URL</h3></div>';        

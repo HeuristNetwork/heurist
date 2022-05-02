@@ -7,12 +7,14 @@ if($is_included){
     print '<div style="padding:10px"><h3 id="relationship_cache_msg">Check Relationship cache</h3><br>';
     
 }else{
+    define('PDIR','../../');
+    
     require_once (dirname(__FILE__).'/../../hsapi/System.php');
     
     $system = new System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
-        print $system->getError();
+        print $system->getError()['message'];
         return;
     }
     if(!$system->is_admin()){ //  $system->is_dbowner()
