@@ -904,7 +904,7 @@ $mysqli->commit();
     }
     
     //
-    // returns database URL by its ID in master index database see getDatabaseURL
+    // returns database URL by its ID in reference index database see getDatabaseURL
     // @todo move it to special class?
     //
     private function _getDatabaseURL($database_id){
@@ -937,22 +937,24 @@ $mysqli->commit();
 
         if(!$remote_dbname || !$remote_url){
             $this->system->addError(HEURIST_ERROR, 
-                "Heurist Reference Index returns incorrect data for registered database # ".$database_id.
-                " The page may contain an invalid database reference");
+                "Heurist Reference Index returns incorrect data for registered database # ".$database_id."<br>"
+                ."The page may contain an invalid database reference<br>"
+                ."URL requested: ".$database_url."<br><br>");
             return false;
         }
         
         $message = '<p>Unable to contact the selected source database (ID # '.$database_id
             .'). This might indicate one of the following:</p>' 
             .'<ol><li>the database is no longer online;</li>'
-            .'<li>the registration in the Heurist master index is missing or points to the wrong URL '
+            .'<li>the registration in the Heurist reference index is missing or points to the wrong URL '
             .$remote_url
             .'<br>(check registration in Heurist Reference Index);</li>'
             .((strpos($remote_url, HEURIST_SERVER_URL)===0)
                 ?'<li>a sql server error in contacting the database;</li>'
                 :'<li>a proxy error in contacting the database;</li>')
             .'<li>network timeout.</li></ol> '
-            .'<p>If you cannot determine the problem, please '.CONTACT_HEURIST_TEAM.' with the URL to the target database</p>';
+            .'<p>If you cannot determine the problem, please '.CONTACT_HEURIST_TEAM.' and include the URL below<br>'
+            .'URL requested: ' . $database_url . '</p>';
         
         
         if(strpos($remote_url, HEURIST_SERVER_URL)===0){ //same server
@@ -973,19 +975,24 @@ $mysqli->commit();
           
         }else{
         //2b. if remote server - call sys_strcture.php with loadRemoteURLContentWithRange
-        
-           $remoteURL = $remote_url.'hsapi/controller/sys_structure.php?mode=2&terms=all&db='.$remote_dbname;
-           if(!$only_terms){
-                $remoteURL = $remoteURL.'&rectypes=all&detailtypes=all';
-           }
 
-           $defs = loadRemoteURLContent($remoteURL); //load db definitions from remote database           
-           $defs = json_decode(gzdecode($defs), true);
-           if (!$defs || @$defs['status']!=HEURIST_OK) {
+            $remoteURL = $remote_url.'hsapi/controller/sys_structure.php?mode=2&terms=all&db='.$remote_dbname;
+            if(!$only_terms){
+                $remoteURL = $remoteURL.'&rectypes=all&detailtypes=all';
+            }
+
+            $defs = loadRemoteURLContent($remoteURL);
+            if(!$defs){ // unable to connect to Heurist Reference Index
+                $this->system->addError(HEURIST_ERROR, "Unable to connect Heurist Reference Index, possibly due to timeout or proxy setting<br>"
+                    ."URL requested: " . $database_url . "<br><br>");
+            }
+
+            $defs = json_decode(gzdecode($defs), true);
+            if(!$defs || @$defs['status']!=HEURIST_OK){
                 $this->system->addError(HEURIST_ERROR, $message);
                 return false;
-           }
-           $defs = $defs['data'];
+            }
+            $defs = $defs['data'];
         }
         if (!($defs['terms']  &&  ($only_terms || ($defs['rectypes'] && $defs['detailtypes'])))) {
             $this->system->addError(HEURIST_ERROR, "Structure definitions read from source database # $database_id are invalid. Please "
