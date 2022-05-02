@@ -908,70 +908,226 @@ $.widget( "heurist.mainMenu6", {
         }, delay);
         
     },    
-    
+
+    //
+    // List user's favourite filters
+    //
+    populateFavouriteFilters: function(favourite_filters){
+
+        var that = this;
+
+        var $favourite_container = this.menues.explore.find('ul.favourite-filters');
+
+        if(!favourite_filters){
+            favourite_filters = window.hWin.HAPI4.get_prefs_def('favourite_filters', ['']);
+        }
+
+        if($favourite_container.find('li').length > 0){ // clear list
+            $favourite_container.find('li').remove();
+            this.menues.explore.find('.favour-help').show();
+        }
+
+        if($favourite_container.length > 0 && favourite_filters[0] != ''){
+
+            if(!this.svs_list){
+                this.getSvsList();
+            }
+
+            var cont_height = this.menues.explore.height() - $favourite_container.position().top - 50;
+            $favourite_container.css('height', cont_height + 'px');
+
+            for(var filter of favourite_filters){
+
+                var $remove_btn = $('<span>')
+                                 .addClass('smallbutton ui-icon ui-icon-redo')
+                                 .attr('title', 'Remove filter from favourites')
+                                 .attr('data-fid', filter[0])
+                                 .css({
+                                    'display': 'none',
+                                    'float': 'right',
+                                    'margin-top': '1px',
+                                    'color': 'black'
+                                 });
+
+                var $txt = $('<span>')
+                            .addClass('truncate')
+                            .css({
+                                'font-size': '13px',
+                                'display': 'inline-block',
+                                'max-width': '85%'
+                            })
+                            .attr('title', filter[1])
+                            .text(filter[1]);
+
+
+                $('<li>')
+                .addClass('fancytree-node')
+                .attr('data-fid', filter[0])
+                .css({
+                    'padding': '6px',
+                    'cursor': 'pointer'
+                })
+                .append($txt) // attach text
+                .append($remove_btn) // attach remove btn
+                .appendTo($favourite_container);
+            }
+
+            if($favourite_container.find('li').length > 0){
+
+                this._on($favourite_container.find('li'), {
+                    click: function(event){
+
+                        var $ele = $(event.target);
+                        if($ele.is('span') && !$ele.hasClass('smallbutton')){ // filter text clicked
+                            $ele = $ele.parents('li.fancytree-node');
+                        }
+                        var id = $ele.attr('data-fid');
+
+                        if($ele.is('li.fancytree-node')){
+                            this.svs_list.svs_list('doSearchByID', id, $ele.text()); // perform filter
+                        }else if($ele.is('span')){
+
+                            // remove from list and preferences
+                            $ele.parent().remove(); // remove from list
+
+                            if(favourite_filters.length > 1){
+                                // remove from prefs
+                                var idx = favourite_filters.findIndex(filter => filter[0] == id);
+                                favourite_filters.splice(idx, 1);
+                            }else{
+                                favourite_filters = [''];
+                                this.menues.explore.find('.favour-help').show();
+                            }
+
+                            window.hWin.HAPI4.save_pref('favourite_filters', favourite_filters); // save prefs
+                        }
+                    },
+                    mouseover: function(event){
+
+                        if($(event.target).hasClass('smallbutton')){
+                            $(event.target).css('display', 'inline-block');
+                        }else if($(event.target).hasClass('truncate')){
+                            $(event.target).parent().find('span.smallbutton').css('display', 'inline-block');
+                        }else{
+                            $(event.target).find('span.smallbutton').css('display', 'inline-block');
+                        }
+                    },
+                    mouseout: function(event){
+                        $favourite_container.find('span.smallbutton').hide();
+                    }
+                });
+
+                $favourite_container.sortable({
+                    stop: function(event, ui){
+                        
+                        var new_order = [];
+
+                        $favourite_container.find('li').each(function(idx, ele){
+                            var $ele = $(ele);
+                            new_order.push([$ele.attr('data-fid'), $ele.find('span.truncate').text()]);
+                        });
+
+                        window.hWin.HAPI4.save_pref('favourite_filters', new_order); // save prefs
+                    }
+                });
+
+                this.menues.explore.find('.favour-help').hide();
+            }
+        }
+    },
+
     //
     // mode - filter mode - 0 all , 1 - filters only, 2 rules only
     //
     _init_SvsList: function(cont, mode){  //, group_ID
         
-                if(!cont.svs_list('instance')){
-                    var that = this;
-                    
-                    cont.svs_list({
-                        is_h6style: true,
-                        hide_header: false,
-                        container_width: 300,
-                        filter_by_type: mode,
-                        onClose: function(noptions) { 
-                            //!!! that.switchContainer('explore'); 
+        if(!cont.svs_list('instance')){
+            var that = this;
+            
+            cont.svs_list({
+                is_h6style: true,
+                hide_header: false,
+                container_width: 300,
+                filter_by_type: mode,
+                onClose: function(noptions) { 
+                    //!!! that.switchContainer('explore'); 
 
-                            if(noptions==null){
-                                //close faceted search
-                                that._onCloseSearchFaceted();
-                            }else{
-                                noptions.onclose = function(){ that._onCloseSearchFaceted(); };
-                                noptions.is_h6style = true;
-                                noptions.maximize = true;
+                    if(noptions==null){
+                        //close faceted search
+                        that._onCloseSearchFaceted();
+                    }else{
+                        noptions.onclose = function(){ that._onCloseSearchFaceted(); };
+                        noptions.is_h6style = true;
+                        noptions.maximize = true;
 
-                                //open faceted search
-                                that.search_faceted.show();
+                        //open faceted search
+                        that.search_faceted.show();
 //BBB                                that.containers['explore'].css({left:'332px'}); //move to the right
 //BBB                                that.containers['explore'].layout().resizeAll();  //update layout
 
-                                if(that.search_faceted.search_faceted('instance')){ 
-                                    that.search_faceted.search_faceted('option', noptions ); //assign new parameters
-                                }else{
-                                    //not created yet
-                                    that.search_faceted.search_faceted( noptions );
-                                }
-                                
-                                that._closeExploreMenuPopup();
-                                that._collapseMainMenuPanel(true);
+                        if(that.search_faceted.search_faceted('instance')){ 
+                            that.search_faceted.search_faceted('option', noptions ); //assign new parameters
+                        }else{
+                            //not created yet
+                            that.search_faceted.search_faceted( noptions );
+                        }
+                        
+                        that._closeExploreMenuPopup();
+                        that._collapseMainMenuPanel(true);
 
-                            } 
-                        },
-                        //show all groups! allowed_UGrpID:group_ID,
-                        menu_locked: function(is_locked, is_mouseleave){ 
-                            if(!is_mouseleave){
-                                that._resetCloseTimers();
-                                that._explorer_menu_locked = is_locked; 
-                            }
-                        }                            
-                        //mouseover: function() { that._resetCloseTimers()},
-                    });
-                    
-                    this._on(cont,{mouseenter: this._resetCloseTimers}); 
-                    
-                }else{
-                    //cont.svs_list('option', 'allowed_UGrpID', group_ID);                        
-                    cont.svs_list('option', 'filter_by_type', mode);
+                    } 
+                },
+                //show all groups! allowed_UGrpID:group_ID,
+                menu_locked: function(is_locked, is_mouseleave){ 
+                    if(!is_mouseleave){
+                        that._resetCloseTimers();
+                        that._explorer_menu_locked = is_locked; 
+                    }
+                },
+                handle_favourites: function(filter_id, filter_name, is_drop=false){
+
+                    var hasChanged = false;
+
+                    var cur_favs = window.hWin.HAPI4.get_prefs_def('favourite_filters', ['']);
+                    if(cur_favs[0] == '' || cur_favs.findIndex(filter => filter[0] == filter_id) == -1){ // add new
+                        if(cur_favs[0] == ''){
+                            cur_favs[0] = [filter_id, filter_name];
+                        }else{
+                            cur_favs.push([filter_id, filter_name]);
+                        }
+
+                        hasChanged = true;
+                    }else if(!is_drop){ // remove existing
+
+                        // remove from prefs
+                        var idx = cur_favs.findIndex(filter => filter[0] == filter_id);
+                        var removed = cur_favs.splice(idx, 1); console.log(cur_favs);
+
+                        if(cur_favs.length == 0){
+                            cur_favs = [''];
+                        }
+
+                        hasChanged = true;
+                    }
+
+                    if(hasChanged){ // save and re-make list
+                        window.hWin.HAPI4.save_pref('favourite_filters', cur_favs);
+                        that.populateFavouriteFilters(cur_favs);
+                    }
                 }
-                
-                this.svs_list = cont;
-                
-                return cont;        
+                //mouseover: function() { that._resetCloseTimers()},
+            });
+            
+            this._on(cont,{mouseenter: this._resetCloseTimers}); 
+            
+        }else{
+            cont.svs_list('option', 'filter_by_type', mode);
+        }
+
+        this.svs_list = cont;
+
+        return cont;
     },
-    
     
     //
     // mode = 0 - in menues['explore'],  1 in ui-heurist-quicklinks
@@ -1014,7 +1170,7 @@ $.widget( "heurist.mainMenu6", {
         
         this.svs_list.show();
     },
-    
+
     //
     //
     //    
@@ -1029,7 +1185,7 @@ $.widget( "heurist.mainMenu6", {
         return this._init_SvsList(cont, 1);
      
     },
-    
+
     //
     //
     //

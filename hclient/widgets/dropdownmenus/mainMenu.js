@@ -486,7 +486,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             this.doLogin();
         }else {
             this._performInitialSearch();
-            
+
+            // Setup user favourite filters, give mainMenu time to load completely
+            setTimeout(function(){ $('.ui-menu6').mainMenu6('populateFavouriteFilters'); }, 2000);
+
             var query = window.hWin.location.search.substring(1);
             var vars = query.split('&');
             //!window.hWin.HEURIST4.util.getUrlParameter('nometadatadisplay', window.hWin.location.search) 
@@ -2067,6 +2070,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
                     $(that.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
                     that._performInitialSearch();
+
+                    $('.ui-menu6').mainMenu6('populateFavouriteFilters'); // show user's favourite filters
 
                     var query = window.hWin.location.search.substring(1);
                     var vars = query.split('&');

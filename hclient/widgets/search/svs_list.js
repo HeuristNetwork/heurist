@@ -42,7 +42,9 @@ $.widget( "heurist.svs_list", {
         hide_header: false,  //todo rename - inline main menu
         container_width:0,
         
-        filter_by_type: 1  //0 all, 1 filters only, 2 rules only
+        filter_by_type: 1,  //0 all, 1 filters only, 2 rules only
+
+        handle_favourites: null // function to add/remove favourite filters
     },
 
     isPublished: false,
@@ -1532,20 +1534,64 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
             };
 
             fancytree_options['filter'] = 
-                  {
-                    //autoApply: true,   // Re-apply last filter if lazy data is loaded
-                    autoExpand: false, // Expand all branches that contain matches while filtered
-                    counter: false,     // Show a badge with number of matching child nodes near parent icons
-                    fuzzy: false,      // Match single characters in order, e.g. 'fb' will match 'FooBar'
-                    hideExpandedCounter: true,  // Hide counter badge if parent is expanded
-                    hideExpanders: false,       // Hide expanders if all child nodes are hidden by filter
-                    //highlight: true,   // Highlight matches by wrapping inside <mark> tags
-                    leavesOnly: true, // Match end nodes only
-                    nodata: true,      // Display a 'no data' status node if result is empty
-                    mode: 'hide'       // dimm Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
-                  };
-            
-            
+            {
+                //autoApply: true,   // Re-apply last filter if lazy data is loaded
+                autoExpand: false, // Expand all branches that contain matches while filtered
+                counter: false,     // Show a badge with number of matching child nodes near parent icons
+                fuzzy: false,      // Match single characters in order, e.g. 'fb' will match 'FooBar'
+                hideExpandedCounter: true,  // Hide counter badge if parent is expanded
+                hideExpanders: false,       // Hide expanders if all child nodes are hidden by filter
+                //highlight: true,   // Highlight matches by wrapping inside <mark> tags
+                leavesOnly: true, // Match end nodes only
+                nodata: true,      // Display a 'no data' status node if result is empty
+                mode: 'hide'       // dimm Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
+            };
+
+            if($.isFunction(that.options.handle_favourites)){ // add extra dragging handle for saving filters as a favourite
+
+                fancytree_options['dnd']['draggable'] = {
+                    helper: function(event){
+
+                        var sNode = $.ui.fancytree.getNode(event.target);
+
+                        return $('<div class="fancytree-drag-helper"><span class="fancytree-drag-helper-img" /></div>')
+                                    .append($(sNode.span).find('span.fancytree-title').clone())
+                                    .data('ftSourceNode', sNode);
+                    },
+                    start: function(event, ui){
+                        if($.isFunction(that.options.menu_locked)){
+                            that.options.menu_locked.call( that, true );
+                        }
+                    },
+                    stop: function(event, ui){
+
+                        if($.isFunction(that.options.menu_locked)){ // wait 2.5 seconds to disable menu lock
+                            setTimeout(function(){ that.options.menu_locked.call( that, false ); }, 2000);
+                        }
+
+                        var $ele = $(document.elementFromPoint(ui.position.left, ui.position.top));
+                        var node = ui.helper.data('ftSourceNode');
+
+                        var procFavourites = !node.folder && node.key;
+
+                        if(procFavourites && ($ele.is('ul.favourite-filters-container') || $ele.parents('ul.favourite-filters-container').length > 0)){
+
+                            var name = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key][_NAME];
+                            if(window.hWin.HEURIST4.util.isempty(name)){
+                                name = node.title;
+                            }
+
+                            that.options.handle_favourites.call(that, node.key, name, true);
+                        }
+                    },
+                    appendTo: 'body',
+                    containment: 'window',
+                    revert: 'invalid',
+                    cursorAt: {top: 0, left: 5},
+                    zIndex: 2001
+                };
+            }
+
             tree.fancytree(fancytree_options)
             //.css({'height':'100%','width':'100%'})
             .on("nodeCommand", function (event, data){
@@ -1678,48 +1724,17 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                         case "addSibling":
                             node.editCreateNode("after", "New node");
                             break;
-                        /*  copy/paste actions disabled since 2017-07-29                        
-                        case "cut":
-                        CLIPBOARD = {mode: data.cmd, data: node};
-                        break;
-                        case "copy":
-                        CLIPBOARD = {
-                        mode: data.cmd,
-                        data: node.toDict(function(n){
-                        delete n.key;
-                        })
-                        };
-                        break;
-                        case "clear":
-                        CLIPBOARD = null;
-                        break;
-                        case "paste":
-                        if(CLIPBOARD){
 
-                        if( CLIPBOARD.mode === "cut" ) {
-                        // refNode = node.getPrevSibling();
-                        CLIPBOARD.data.moveTo((!node.folder)?node.parent:node, "child");
-                        CLIPBOARD.data.setActive();
-                        that._saveTreeData( groupID );
+                        case "favourite":
 
-                        } else if( CLIPBOARD.mode === "copy" ) {
-                        //get svsID and and save as new 
+                            var name = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key][_NAME];
+                            if(window.hWin.HEURIST4.util.isempty(name)){
+                                name = node.title;
+                            }
 
-                        var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[CLIPBOARD.data.key];
-                        var request = {svs_ID: -1,
-                        svs_Name: svs[_NAME]+' (copy)',
-                        svs_Query: svs[_QUERY],
-                        svs_UGrpID: groupID,
-                        isfaceted: CLIPBOARD.data.data.isfaceted};
+                            that.options.handle_favourites.call(this, node.key, name);
+                            break;
 
-                        //ssearch_save
-                        that._saveSearch(request, node);
-
-                        //node.addChildren(CLIPBOARD.data).setActive();
-                        }
-                        }
-                        break;
-                        */                            
                         default:
                             alert("This command not handled: " + data.cmd);
                             return;
@@ -1781,6 +1796,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
             arr_menu.push({title: "----"});
             arr_menu.push({title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" });
             arr_menu.push({title: "Delete", cmd: "remove", uiIcon: "ui-icon-trash" });
+            arr_menu.push({title: "Favourite", cmd: "favourite", uiIcon: 'ui-icon-star-b'});
 
             /*
             * Context menu (https://github.com/mar10/jquery-ui-contextmenu)
@@ -1801,8 +1817,25 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                     }
                 },
                 beforeOpen: function(event, ui) {
+
                     var node = $.ui.fancytree.getNode(ui.target);
                     tree.contextmenu("enableEntry", "paste", node.folder && !!CLIPBOARD);
+
+                    var showFavourite = $.isFunction(that.options.handle_favourites) && !node.folder && node.key;
+                    tree.contextmenu('enableEntry', 'favourite', showFavourite);
+                    tree.contextmenu('showEntry', 'favourite', showFavourite);
+
+                    if(showFavourite){ // check if filter is already favourited
+
+                        var cur_fav = window.hWin.HAPI4.get_prefs_def('favourite_filters', ['']);
+
+                        if(cur_fav[0] != '' && cur_fav.findIndex(filter => filter[0] == node.key) != -1){
+                            tree.contextmenu('updateEntry', 'favourite', {title: 'Unfaviourite', uiIcon: 'ui-icon-star'});
+                        }else{
+                            tree.contextmenu('updateEntry', 'favourite', {title: 'Faviourite', uiIcon: 'ui-icon-star-b'});
+                        }
+                    }
+
                     node.setActive();
                 },
                 select: function(event, ui) {
