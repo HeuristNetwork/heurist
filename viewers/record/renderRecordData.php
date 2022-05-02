@@ -666,6 +666,11 @@ if ($bkm_ID>0 || $rec_id>0) {
 </html>
 <?php	
  }
+flush();
+ob_flush();
+sleep(2);
+exit(0);
+ 
 /***** END OF OUTPUT *****/
 
 // this functions outputs common info.
@@ -711,7 +716,8 @@ $_time_debug = $_time_debug2;
         if(!$is_map_popup){
             print_private_details($bib);
             print_other_tags($bib);
-        //print_text_details($bib);
+            
+            //print_text_details($bib);
         }
         
 
@@ -1013,6 +1019,8 @@ function print_public_details($bib) {
 
     $bds_res = $mysqli->query($query);
 
+//ok so far
+
     if($bds_res){
         
         $bds = array();
@@ -1021,7 +1029,7 @@ function print_public_details($bib) {
             $bds_temp[] = $bd;    
         }
         $bds_res->close();
-        
+  
         //get linked records with file fields
         $query = 'select 999 as rst_DisplayOrder, d2.dtl_ID, dt2.dty_ID, "Linked media" as name, '
                 .'d2.dtl_Value as val, '
@@ -1035,6 +1043,10 @@ function print_public_details($bib) {
         .' AND rec_ID = d2.dtl_RecID and rec_RecTypeID != '.$relRT
         .' and (rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '.
             ($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")');
+
+//print $query;            
+            
+if(false){        
         
         $bds_res = $mysqli->query($query);     
         if($bds_res){   
@@ -1043,6 +1055,7 @@ function print_public_details($bib) {
             }
             $bds_res->close();
         }
+}        
         
         foreach ($bds_temp as $bd) {
 
@@ -1268,6 +1281,7 @@ function print_public_details($bib) {
     
     usort($bds, "__sortResourcesByDate");
 
+
     if($is_map_popup){
         print '<div class="map_popup">';
     }
@@ -1409,12 +1423,10 @@ function print_public_details($bib) {
             }
             
         }//for
-        ?>
-    </div>
+    
+    print '</div>';
 
-
-<!--    <div id="div_public_data" style="float:left;<?php echo (($has_thumbs)?'max-width:900px':'')?>"> -->
-    <?php
+//<div id="div_public_data" style="float:left; echo (($has_thumbs)?'max-width:900px':'')">
 
     //print url first
     $url = $bib['rec_URL'];
