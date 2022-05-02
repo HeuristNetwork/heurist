@@ -86,6 +86,7 @@ function __correctAbsPaths(){
     
     //$databases = array('amade_testnewsystem');
     //$databases = array('osmak_9c');
+    //$databases = array('CBAP_Uncovering_Pacific_Pasts');    
     
     foreach ($databases as $idx=>$db_name){
 
@@ -121,8 +122,13 @@ function __correctAbsPaths(){
         
         print '<h4>'.$db_name.'</h4><br>';
         
+        print 'Rectypes: '.implode(',',$rty_IDs).' Field: '.$dty_ID.'<br>';
+        
         $dbRecDetails->setData($data);
         $res = $dbRecDetails->detailsReplace();
+        if(!$res){
+            print 'ERROR: '.$system->getError()['message'];
+        }
      
         print '<hr>';   
     }//for
@@ -162,10 +168,11 @@ foreach ($servers as $srv) {
         }
     }
 }
+//print '<xmp>AFTER '.$val.'</xmp><br><hr><br>';
+
 //report
 print '<br>RecID: '.$recID.'. Replaced '.$cnt.' entries<br>';
 
-//print '<xmp>AFTER '.$val.'</xmp><br><hr><br>';
 
              
 return $val;    
