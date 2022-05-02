@@ -86,46 +86,49 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         var that = this;
         
         this.recordList.resultList({
-                show_toolbar:false,
-                sortable: true,
-                onSortStop: function(){
-                    that._onActionListener(null, 'save-order');
-                    //that._toolbar.find('#btnApplyOrder').show();
-                },
-                droppable: function(){   //change group for record type
-                    
-                    that.recordList.find('.recordDiv')  //.recordDiv, ,.recordDiv>.item
-                        .droppable({
-                            //accept: '.rt_draggable',
-                            scope: 'rtg_change',  
-                            hoverClass: 'ui-drag-drop',
-                            drop: function( event, ui ){
+            show_toolbar:false,
+            sortable: true,
+            onSortStop: function(){
+                that._onActionListener(null, 'save-order');
+                //that._toolbar.find('#btnApplyOrder').show();
+            },
+            droppable: function(){   //change group for record type
+                
+                that.recordList.find('.recordDiv')  //.recordDiv, ,.recordDiv>.item
+                    .droppable({
+                        //accept: '.rt_draggable',
+                        scope: 'rtg_change',  
+                        hoverClass: 'ui-drag-drop',
+                        drop: function( event, ui ){
 
-                                var trg = $(event.target).hasClass('recordDiv')
-                                            ?$(event.target)
-                                            :$(event.target).parents('.recordDiv');
-                                            
-                                var rty_ID = $(ui.draggable).parent().attr('recid');
-                                var rtg_ID = trg.attr('recid');
-                                
-                                if(rty_ID>0 && rtg_ID>0 && that.options.reference_rt_manger){
-
-                                        var params = {rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID };
+                            var trg = $(event.target).hasClass('recordDiv')
+                                        ?$(event.target)
+                                        :$(event.target).parents('.recordDiv');
                                         
-                                        var trash_id = $Db.getTrashGroupId('rtg');
-                                        //if source group is trash - change "show in list" to true
-                                        if($Db.rty(rty_ID,'rty_RecTypeGroupID') == trash_id){
-                                            //from target
-                                            params['rty_ShowInLists'] = 1;
-                                        }else if(rtg_ID == trash_id){
-                                            params['rty_ShowInLists'] = 0;
-                                        }
-                                    
-                                        that.options.reference_rt_manger
-                                            .manageDefRecTypes('changeRectypeGroup', params);
+                            var rty_ID = $(ui.draggable).parent().attr('recid');
+                            var rtg_ID = trg.attr('recid');
+                            
+                            if(rty_ID>0 && rtg_ID>0 && that.options.reference_rt_manger){
+
+                                var params = {rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID };
+                                
+                                var trash_id = $Db.getTrashGroupId('rtg');
+                                //if source group is trash - change "show in list" to true
+                                if($Db.rty(rty_ID,'rty_RecTypeGroupID') == trash_id){
+                                    //from target
+                                    params['rty_ShowInLists'] = 1;
+                                }else if(rtg_ID == trash_id){
+                                    params['rty_ShowInLists'] = 0;
                                 }
-                        }});
-                }
+                            
+                                that.options.reference_rt_manger
+                                    .manageDefRecTypes('changeRectypeGroup', params);
+                            }
+                    }});
+            },
+            sortable_opts: {
+                axis: 'y'
+            }
         });
         
 
@@ -183,18 +186,6 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         }
         
         that._loadData();
-
-        if(this.options.select_mode == 'manager'){
-
-            this._on(this.recordList.find('.div-result-list-content'), {'scroll': function(event){
-
-                var $ele = $(event.target);
-
-                if($ele.scrollLeft() !== 0){
-                    $ele.scrollLeft(0);
-                }
-            }});
-        }
 
         return true;
     },    

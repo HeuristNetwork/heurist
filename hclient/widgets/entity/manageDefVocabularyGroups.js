@@ -69,37 +69,40 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
         var that = this;
         
         this.recordList.resultList({
-                show_toolbar:false,
-                sortable: true,
-                empty_remark: 'No vocabulary groups. Add new group',
-                onSortStop: function(){
-                    that._onActionListener(null, 'save-order');
-                    //that._toolbar.find('#btnApplyOrder').show();
-                },
-                droppable: function(){
-                    
-                    that.recordList.find('.recordDiv')  //.recordDiv, ,.recordDiv>.item
-                        .droppable({
-                            //accept: '.rt_draggable',
-                            scope: 'vcg_change',
-                            hoverClass: 'ui-drag-drop',
-                            drop: function( event, ui ){
+            show_toolbar:false,
+            sortable: true,
+            empty_remark: 'No vocabulary groups. Add new group',
+            onSortStop: function(){
+                that._onActionListener(null, 'save-order');
+                //that._toolbar.find('#btnApplyOrder').show();
+            },
+            droppable: function(){
+                
+                that.recordList.find('.recordDiv')  //.recordDiv, ,.recordDiv>.item
+                    .droppable({
+                        //accept: '.rt_draggable',
+                        scope: 'vcg_change',
+                        hoverClass: 'ui-drag-drop',
+                        drop: function( event, ui ){
 
-                                var trg = $(event.target).hasClass('recordDiv')
-                                            ?$(event.target)
-                                            :$(event.target).parents('.recordDiv');
-                                            
-                    var trm_ID = $(ui.draggable).parent().attr('recid');
-                    var vcg_ID = trg.attr('recid');
-                            if(trm_ID>0 && vcg_ID>0 && that.options.reference_vocab_manger){
-                                
-                                    var params = {trm_ID:trm_ID, trm_VocabularyGroupID:vcg_ID};
-                                
-                                    that.options.reference_vocab_manger
-                                        .manageDefTerms('changeVocabularyGroup',params);
-                            }
-                        }});
-                }
+                            var trg = $(event.target).hasClass('recordDiv')
+                                        ?$(event.target)
+                                        :$(event.target).parents('.recordDiv');
+                                        
+                var trm_ID = $(ui.draggable).parent().attr('recid');
+                var vcg_ID = trg.attr('recid');
+                        if(trm_ID>0 && vcg_ID>0 && that.options.reference_vocab_manger){
+                            
+                            var params = {trm_ID:trm_ID, trm_VocabularyGroupID:vcg_ID};
+                        
+                            that.options.reference_vocab_manger
+                                .manageDefTerms('changeVocabularyGroup',params);
+                        }
+                    }});
+            },
+            sortable_opts: {
+                axis: 'y'
+            }
         });
 
         //specify add new/save order buttons above record list
@@ -127,18 +130,6 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
         this._defineActionButton2(btn_array[0], this.searchForm.find('.action-buttons'));
         
         this._loadData();
-
-        if(this.options.select_mode == 'manager'){
-
-            this._on(this.recordList.find('.div-result-list-content'), {'scroll': function(event){
-
-                var $ele = $(event.target);
-
-                if($ele.scrollLeft() !== 0){
-                    $ele.scrollLeft(0);
-                }
-            }});
-        }
 
         return true;
     },    

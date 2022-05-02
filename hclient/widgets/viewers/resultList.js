@@ -85,6 +85,7 @@ $.widget( "heurist.resultList", {
         searchfull: null,  // custom function to search full data
         
         sortable: false, //allows drag and sort entries
+        sortable_opts: null, //contains extra options for sortable function
         onSortStop: null,
         draggable: null, // callback function to init dragable - it is called after 
                          // finish render and assign draggable widget for all record divs
@@ -3301,23 +3302,32 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         
         if(this.options.sortable){
             var that = this;
-            this.div_content.sortable({stop:function(event, ui){
-                
-                var rec_order = that._currentRecordset.getOrder();
-                var idx = that.current_page*that.options.pagesize;
-                //var len = Math.min(that._currentRecordset.length(), idx+that.options.pagesize);
-                //var pagesize = this.options.pagesize;
-                
-                that.div_content.find('.recordDiv').each(function(index, rdiv){
-                    var rec_id = $(rdiv).attr('recid');
-                    rec_order[idx+index] = rec_id;
-                });
-                that._currentRecordset.setOrder(rec_order);
-                
-                if($.isFunction(that.options.onSortStop)){
-                    that.options.onSortStop.call(that, this.div_content);    
+
+            if(this.options.sortable_opts == null){
+                this.options.sortable_opts = {};
+            }
+
+            $.extend(this.options.sortable_opts, {
+                stop:function(event, ui){
+
+                    var rec_order = that._currentRecordset.getOrder();
+                    var idx = that.current_page*that.options.pagesize;
+                    //var len = Math.min(that._currentRecordset.length(), idx+that.options.pagesize);
+                    //var pagesize = this.options.pagesize;
+
+                    that.div_content.find('.recordDiv').each(function(index, rdiv){
+                        var rec_id = $(rdiv).attr('recid');
+                        rec_order[idx+index] = rec_id;
+                    });
+                    that._currentRecordset.setOrder(rec_order);
+
+                    if($.isFunction(that.options.onSortStop)){
+                        that.options.onSortStop.call(that, this.div_content);    
+                    }
                 }
-            }});
+            });
+
+            this.div_content.sortable(this.options.sortable_opts);
             //$allrecs.draggable({containment:this.div_content});    
         }
         if($.isFunction(this.options.draggable)){

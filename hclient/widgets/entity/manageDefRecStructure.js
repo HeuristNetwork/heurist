@@ -412,6 +412,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         },500);
                     }
                     
+                },
+                draggable:{
+                    axis: 'y'
                 }
             };
 /*            

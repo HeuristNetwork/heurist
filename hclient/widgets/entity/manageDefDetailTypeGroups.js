@@ -85,49 +85,52 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         var that = this;
         
         this.recordList.resultList({
-                show_toolbar:false,
-                sortable: true,
-                onSortStop: function(){
-                    that._onActionListener(null, 'save-order');
-                    //that._toolbar.find('#btnApplyOrder').show();
-                },
-                droppable: function(){
-                    
-                    that.recordList.find('.recordDiv')  //.recordDiv, ,.recordDiv>.item
-                        .droppable({
-                            //accept: '.rt_draggable',
-                            scope: 'dtg_change',
-                            hoverClass: 'ui-drag-drop',
-                            drop: function( event, ui ){
+            show_toolbar:false,
+            sortable: true,
+            onSortStop: function(){
+                that._onActionListener(null, 'save-order');
+                //that._toolbar.find('#btnApplyOrder').show();
+            },
+            droppable: function(){
+                
+                that.recordList.find('.recordDiv')  //.recordDiv, ,.recordDiv>.item
+                    .droppable({
+                        //accept: '.rt_draggable',
+                        scope: 'dtg_change',
+                        hoverClass: 'ui-drag-drop',
+                        drop: function( event, ui ){
 
-                                var trg = $(event.target).hasClass('recordDiv')
-                                            ?$(event.target)
-                                            :$(event.target).parents('.recordDiv');
-                                            
-                                var dty_ID = $(ui.draggable).parent().attr('recid');
-                                var dtg_ID = trg.attr('recid');
-                    
-                                if(dty_ID>0 && dtg_ID>0 && that.options.reference_dt_manger){
+                            var trg = $(event.target).hasClass('recordDiv')
+                                        ?$(event.target)
+                                        :$(event.target).parents('.recordDiv');
                                         
-                                        var params = {dty_ID:dty_ID, dty_DetailTypeGroupID:dtg_ID };
-                                        
-                                        var trash_id = $Db.getTrashGroupId('dtg');
-                                        //if source group is trash - change "show in list" to true
-                                        if($Db.dty(dty_ID,'dty_DetailTypeGroupID') == trash_id){
-                                            //from target
-                                            params['dty_ShowInLists'] = 1;
-                                        }else if(dtg_ID == trash_id){
-                                            params['dty_ShowInLists'] = 0;
-                                        }
+                            var dty_ID = $(ui.draggable).parent().attr('recid');
+                            var dtg_ID = trg.attr('recid');
+                
+                            if(dty_ID>0 && dtg_ID>0 && that.options.reference_dt_manger){
                                     
-                                        that.options.reference_dt_manger
-                                            .manageDefDetailTypes('changeDetailtypeGroup',params);
-                                            
-                                            
-                                            
-                                }
-                        }});
-                }
+                                    var params = {dty_ID:dty_ID, dty_DetailTypeGroupID:dtg_ID };
+                                    
+                                    var trash_id = $Db.getTrashGroupId('dtg');
+                                    //if source group is trash - change "show in list" to true
+                                    if($Db.dty(dty_ID,'dty_DetailTypeGroupID') == trash_id){
+                                        //from target
+                                        params['dty_ShowInLists'] = 1;
+                                    }else if(dtg_ID == trash_id){
+                                        params['dty_ShowInLists'] = 0;
+                                    }
+                                
+                                    that.options.reference_dt_manger
+                                        .manageDefDetailTypes('changeDetailtypeGroup',params);
+                                        
+                                        
+                                        
+                            }
+                    }});
+            },
+            sortable_opts: {
+                axis: 'y'
+            }
         });
         
         
@@ -152,18 +155,6 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
 
         that._loadData();
 
-        if(this.options.select_mode == 'manager'){
-
-            this._on(this.recordList.find('.div-result-list-content'), {'scroll': function(event){
-
-                var $ele = $(event.target);
-
-                if($ele.scrollLeft() !== 0){
-                    $ele.scrollLeft(0);
-                }
-            }});
-        }
-        
         return true;
     },    
     
