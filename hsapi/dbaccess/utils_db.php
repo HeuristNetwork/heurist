@@ -252,7 +252,8 @@
             $res->close();
         }//if
 
-        natcasesort($result); //AO: Ian wants case insensetive order
+        natcasesort($result); // case insensetive order
+        $result = array_values($result); // correct array indexes, for json object
 
         return $result;
 
