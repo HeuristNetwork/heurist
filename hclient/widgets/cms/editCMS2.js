@@ -178,23 +178,29 @@ function editCMS2(){
                                 
                                     +'<a href="#" class="btn-website-edit" style="padding-left:20px">'
                                         +'<span class="ui-icon ui-icon-pencil"/>&nbsp;Configure website layout</a>'
-                                    +'<span style="display:inline-block;padding:7px 0 0 40px" class="heurist-helper1" '
+                                    +'<br>'
+                                    +'<a href="#" class="btn-website-url" style="padding:5px 20px;display:inline-block;">'
+                                        +'<span class="ui-icon" />Get website URL</a>'
+
+                                    +'<span style="display:block;border-top:1px solid gray;padding:4px 8px;margin:4px 0px;">'
+
+                                    +'<span style="display:inline-block;padding-top:7px" class="heurist-helper1" '
                                         +'title="Select menu item and Dblclick (or F2) to edit menu title in place. Drag and drop to reorder menu">'
                                         +'Drag menu items to re-order</span><br>'
-                                    +'<span style="display:inline-block;padding:7px 0 7px 40px" class="heurist-helper1">'
+                                    +'<span style="display:inline-block;padding-top:7px" class="heurist-helper1">'
                                         +'Click to edit the page</span>'
-                                        
-                                    +'<div style="border-top:1px solid gray;padding:4px 8px;margin:4px 0px;">'                                            
-                                    +'<a href="#" title="Edit website home page" '
-                                        +'class="btn-website-homepage" style="text-decoration:none;">'
-                                        +'<span class="ui-icon ui-icon-home"/>&nbsp;Home page</a>'
-                                    +'<span  title="Add top level menu" class="btn-website-addpage ui-icon ui-icon-plus" '
-                                        +'style="display:none;float:right;cursor:pointer;color:black;padding-top:3px;"></span>'
+
+                                    +'<div style="padding:4px 8px;margin:4px 0px;">'
+                                        +'<a href="#" title="Edit website home page" '
+                                            +'class="btn-website-homepage" style="text-decoration:none;">'
+                                            +'<span class="ui-icon ui-icon-home"/>&nbsp;Home page</a>'
+                                        +'<span  title="Add top level menu" class="btn-website-addpage ui-icon ui-icon-plus" '
+                                            +'style="display:none;float:right;cursor:pointer;color:black;padding-top:3px;"></span>'
                                     +'</div>'     
                                         
                                 +'</div>'
                                 
-                                +'<div class="treeWebSite ent_content_full" style="top:95px;padding:0px 10px;"/>' //treeview - edit website menu
+                                +'<div class="treeWebSite ent_content_full" style="top:115px;padding:0px 10px;"/>' //treeview - edit website menu
                             +'</div>'
                             +'<div id="treePage" style="font-size:1em;top:43px" class="ent_wrapper">'
                             
@@ -278,6 +284,10 @@ function editCMS2(){
                     editor_panel.find('.btn-website-homepage').click(_editHomePage);
                     editor_panel.find('.btn-website-edit').click(_editHomePageRecord);
                     editor_panel.find('.btn-website-addpage').click(_addNewRootMenu); // button({icon:'ui-icon-plus'}).
+                    editor_panel.find('.btn-website-url').click(function(){ // save website url to clipboard
+                        window.hWin.HEURIST4.util.copyStringToClipboard(window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database+'&website');
+                        window.hWin.HEURIST4.msg.showMsgFlash('Website URL saved to clipboard', 3000);
+                    });
 
                     editor_panel.find('.btn-website-homepage').parent()
                     .addClass('fancytree-node')

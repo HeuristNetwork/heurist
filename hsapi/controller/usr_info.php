@@ -104,7 +104,7 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
 
         if(isset($allowCMSCreation) && $allowCMSCreation == -1){
 
-            $msg = 'Due to security restrictions, website creation is blocked on this server.<br>Please ' . CONTACT_HEURIST_TEAM . ' if you wish to create a website.';
+            $msg = 'Due to security restrictions, website creation is blocked on this server.<br>Please ' . CONTACT_SYSADMIN . ' if you wish to create a website.';
 
             $system->addError(HEURIST_ACTION_BLOCKED, $msg);
             $res = false;
