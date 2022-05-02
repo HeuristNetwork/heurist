@@ -2092,8 +2092,20 @@ $.widget( "heurist.editing_input", {
                     //$input.focusout( __url_input_state ); 
                     __url_input_state(true);               
                 
-            }
-            else if(this.detailType=="integer" || this.detailType=="year"){//-----------------------------------------
+            }else if(this.detailType=="freetext" && ($input.val().indexOf('http://')==0 || $input.val().indexOf('https://')==0)){ // add link to external url
+
+                var $btn_extlink = $('<span>')
+                                    .attr('title', 'Open URL in new window')
+                                    .addClass('smallicon ui-icon ui-icon-extlink')
+                                    .css({
+                                        'font-size': 'small',
+                                        'color': 'blue'
+                                    })
+                                    .appendTo( $inputdiv )
+
+                this._on($btn_extlink, {click: function(){ window.open($input.val(), '_blank'); }} );
+
+            }else if(this.detailType=="integer" || this.detailType=="year"){//-----------------------------------------
 
                  
                 $input.keypress(function (e) {
