@@ -184,7 +184,7 @@ A:link {
                             <?php
                             /** RETRIEVING RECORDS WITH CONNECTIONS */
                             // Building query
-                            $query = "SELECT d.rty_ID as id, rg.rtg_Name grp, d.rty_Name as title, sum(if(r.rec_FlagTemporary!=1, 1, 0)) as count 
+                            $query = "SELECT d.rty_ID as id, rg.rtg_Name grp, rg.rtg_ID as grp_id, d.rty_Name as title, sum(if(r.rec_FlagTemporary!=1, 1, 0)) as count 
                                       FROM defRecTypes d LEFT OUTER JOIN Records r ON r.rec_RectypeID=d.rty_ID,
                                       defRecTypeGroups rg 
                                       WHERE rg.rtg_ID=d.rty_RecTypeGroupID
@@ -205,7 +205,8 @@ A:link {
                                     $grp_name = $row['grp'];
                                     ?>
                             <tr class="row">
-                                <td colspan="6" style="padding-left:10px"><h2><?php echo htmlspecialchars($row["grp"]);?></h2></td>
+                                <td colspan="5" style="padding-left:10px"><h2><?php echo htmlspecialchars($row["grp"]);?></h2></td>
+                                <td align="center"><input type="checkbox" class="group_chkbox" title="Check all record types within group" data-id="<?php echo $row["grp_id"]; ?>"></td>
                             </tr>
                                     <?php
                                 }
@@ -234,10 +235,10 @@ A:link {
 
                                 // Show
                                 if($row["count"] > 0 && $count < 10) {  //this record type has records
-                                    echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record' name='" .$title. "' checked='true'></td>";
+                                    echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record rectype_grp_". $row["grp_id"] ."' name='" .$title. "' checked='true'></td>";
                                     $count++;
                                 }else{
-                                    echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record $first_grp' name='" .$title. "'></td>";
+                                    echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record $first_grp rectype_grp_". $row["grp_id"] ."' name='" .$title. "'></td>";
                                 }
                                 echo "</tr>";
                             }                      
@@ -345,6 +346,25 @@ A:link {
                         filterData();
                     });
 
+                    // Listen to the 'group_chkbox' checkboxes, toggles all checkboxes within a record type group
+                    $('.group_chkbox').change(function(){
+
+                        var group_id = $(this).attr('data-id');
+                        var checked = $(this).prop('checked');
+
+                        if(group_id){
+                            $('input.rectype_grp_'+group_id).prop('checked', checked);
+
+                            // Update localstorage
+                            $(".show-record").each(function(e) {
+                                var name = $(this).attr("name");
+                                // Set 'checked' attribute and store it
+                                putSetting(name, checked?1:0);
+                            });
+
+                            filterData();
+                        }
+                    });
 
                     /** VISUALIZING */
                     // Parses the data
