@@ -185,7 +185,13 @@ class DbUtils {
             // Zip $source to $destination
             $destination = $archiveFolder.$database_name.'_'.time().'.zip'; 
             
-            $folders_to_copy = self::$system->getSystemFolders( 2, $database_name );
+            $filestore_dir = HEURIST_FILESTORE_ROOT.$database_name.'/';
+            $folders_to_copy = folderSubs($filestore_dir, array('backup', 'scratch', 'documentation_and_templates'));
+            foreach($folders_to_copy as $idx=>$folder_name){
+                $folders_to_copy[$idx] = str_replace('\\', '/', realpath($folder_name));
+            }
+            
+            //$folders_to_copy = self::$system->getSystemFolders( 2, $database_name );
             $folders_to_copy[] = realpath($db_dump_file);
             
             $archOK = createZipArchive($source, $folders_to_copy, $destination, $verbose);
