@@ -306,7 +306,7 @@ $mysqli = $system->get_mysqli();
                 $res['res_fullpath'] = resolveFilePath(@$res['db_fullpath']);
             }
             
-            //missed link from recDetails - orphaned files       
+            //missed link from recDetails - orphaned files - file is not used in heurist records      
             $query2 = "SELECT dtl_RecID from recDetails where dtl_UploadedFileID=".$res['ulf_ID'];
             $res2 = $mysqli->query($query2);
             $currentRecID = null;

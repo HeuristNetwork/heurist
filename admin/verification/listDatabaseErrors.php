@@ -2224,7 +2224,6 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
 
         $geoType = super_trim(substr($dtl_Value, 0, 2));
         $hasGeoType = false;
-        $res = false;
 
         if($geoType=='p'||$geoType=='l'||$geoType=='pl'||$geoType=='c'||$geoType=='r'||$geoType=='m'){
             $geoValue = super_trim(substr($dtl_Value, 2));
@@ -2277,6 +2276,7 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
             continue;
         }
     }
+    if($res) $res->close();
 
     // Invalid wkt values
     if(count($bibs3) == 0){

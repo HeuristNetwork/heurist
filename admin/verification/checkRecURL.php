@@ -61,14 +61,13 @@ if($is_included){
 
 $mysqli = $system->get_mysqli();
 
-
-//count of relations 
-$query = 'SELECT rec_ID, rec_URL FROM Records WHERE(rec_URL!="") AND (rec_URL IS NOT NULL)';
-
 $passed_cnt = 0;
 $passed_rec_ids = array();
 $broken_cnt = 0;
 
+
+$query = 'SELECT rec_ID, rec_URL FROM Records WHERE(rec_URL!="") AND (rec_URL IS NOT NULL)';
+    
 $res = $mysqli->query($query);
 if ($res){
     $result = array();

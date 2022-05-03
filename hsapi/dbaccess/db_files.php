@@ -455,17 +455,26 @@ function getPrevailBackgroundColor($filename){
 * 
 * @param mixed $path
 */
-function resolveFilePath($path){
+function resolveFilePath($path, $db_name=null){
 
         if( $path ){
             
             if(!file_exists($path) ){
-                chdir(HEURIST_FILESTORE_DIR);  // relatively db root
+                
+                if($db_name!=null){
+                    $dir_folder = HEURIST_FILESTORE_ROOT . $db_name . '/';
+                    $db_folder_files = $dir_folder . 'file_uploads/';
+                }else{
+                    $db_folder = HEURIST_FILESTORE_DIR;
+                    $db_folder_files = HEURIST_FILES_DIR;
+                }
+                
+                chdir($dir_folder);  // relatively db root
                 $fpath = realpath($path);
                 if(file_exists($fpath)){
                     return $fpath;
                 }else{
-                    chdir(HEURIST_FILES_DIR);          // relatively file_uploads 
+                    chdir($db_folder_files);          // relatively file_uploads 
                     $fpath = realpath($path);
                     if(file_exists($fpath)){
                         return $fpath;
