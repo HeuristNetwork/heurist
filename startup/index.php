@@ -126,7 +126,6 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     //
     function _showRegistration(){
 
-     console.log('!!!!');   
         var screen = $('.center-box.screen2');
         
         if(screen.children().length>0){ //is(':empty')
@@ -136,7 +135,9 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
             
         }else{
             
-            screen.load('startup/user_registration.html',
+            var sForm = (document.location.pathname.indexOf('startup/')>0
+                            ?'':'startup/')+'user_registration.html';
+            screen.load(sForm,
                 function(){
 
                     $('.registration-form').children('div').css('padding-top','5px');
@@ -428,8 +429,11 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     //
     function _showGetStarted(){
 
+        var sForm = (document.location.pathname.indexOf('startup/')>0
+                            ?'':'startup/')+'getting_started.html';
+        
         var screen = $('.center-box.screen6');
-        screen.load('startup/getting_started.html',
+        screen.load(sForm,
             function(){
                 
                 screen.find('img').each(function(i,img){
