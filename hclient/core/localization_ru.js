@@ -231,6 +231,7 @@ regional['ru'] = {
     'Save filter': 'Добавить фильтр',
     'Advanced': 'Дополнительно',
     'Rules': 'Каскадный поиск',
+    'Favourites': '',
     
     //admin menu
     'Database': 'База данных',
@@ -338,7 +339,7 @@ regional['ru'] = {
         'Current Page': 'Текущая страница',
        'Page Editor': 'Редактор страницы',
        
-    'Standalone page': 'Отдельная веб страница',
+    'Standalone web page': 'Отдельная веб страница',
         menu_cms_create_page: 'Создать',
         menu_cms_edit_page: 'Править',
         menu_cms_view_page: 'Просмотр',

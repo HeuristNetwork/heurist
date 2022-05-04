@@ -88,6 +88,7 @@ regional['de'] = {
     'Advanced': 'Erweitert',
     'Rules': 'Regeln',
     'Set as subset': 'Als Teilmenge definieren',
+    'Favourites': '',
     
     //admin menu
     'Database': 'Datenbank',
@@ -194,7 +195,7 @@ regional['de'] = {
         'Current Page': 'Aktuelle Seite',
         'Page Editor': 'Seiten-Editor',
         
-    'Standalone page': 'Eigenständige Webseite',
+    'Standalone web page': 'Eigenständige Webseite',
         menu_cms_create_page: 'Erstellen',
         menu_cms_edit_page: 'Bearbeiten',
         menu_cms_view_page: 'Ansehen',

@@ -90,17 +90,18 @@ regional['en'] = {
     add_new_record2: 'New', //in main menu - prefix add new record
     
     //explore menu
-        'Filters': '',
-        'Recent': '',
-        'All': '',
-        'Entities': '',
-        'Saved filters': '',
-        'Build': '',
-        'Filter builder': '',
-        'Facets builder': '',
-        'Save filter': '',
-        'Advanced': '',
-        'Rules': '',
+    'Filters': '',
+    'Recent': '',
+    'All': '',
+    'Entities': '',
+    'Saved filters': '',
+    'Build': '',
+    'Filter builder': '',
+    'Facets builder': '',
+    'Save filter': '',
+    'Advanced': '',
+    'Rules': '',
+    'Favourites': '',
     
     //admin menu
     'Database': '',
@@ -208,7 +209,7 @@ regional['en'] = {
         'Current Page': '',
         'Page Editor': '',
         
-    'Standalone page': '',
+    'Standalone web page': '',
         menu_cms_create_page: 'Create',
         menu_cms_edit_page: 'Edit',
         menu_cms_view_page: 'View',

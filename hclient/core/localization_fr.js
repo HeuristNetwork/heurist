@@ -235,6 +235,7 @@ regional['fr'] = {
     'Save filter': 'Enregistrer le filtre',
     'Advanced': 'Avancé',
     'Rules': 'Règles',
+    'Favourites': '',
     
     //admin menu
     'Database': 'Base de données',
@@ -342,7 +343,7 @@ regional['fr'] = {
         'Current Page': 'Page actuelle',
         'Page Editor': 'Éditeur de page',
         
-    'Standalone page': 'Page unique',
+    'Standalone web page': 'Page unique',
         menu_cms_create_page: 'Créer',
         menu_cms_edit_page: 'Éditer',
         menu_cms_view_page: 'Consulter',
