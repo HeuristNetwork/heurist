@@ -33,6 +33,7 @@ if($is_included){
     
 }else{
     define('PDIR','../../');
+    set_time_limit(0);
     
     require_once (dirname(__FILE__).'/../../hsapi/System.php');
     
