@@ -1592,7 +1592,6 @@ $.widget( "heurist.resultList", {
             }
             
         }
-
         // Show a key icon and popup if there is a password reminder string
         var html_pwdrem = '';
         var pwd = window.hWin.HEURIST4.util.htmlEscape(fld('bkm_PwdReminder'));
@@ -1676,6 +1675,7 @@ $.widget( "heurist.resultList", {
             
         }                        
                                 
+                                
         // construct the line or block
         var html = '<div class="recordDiv '+this.options.recordDivClass
         +'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">' //id="rd'+recID+'" 
@@ -1693,10 +1693,23 @@ $.widget( "heurist.resultList", {
 
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
         + '<div title="'+(is_logged?'dbl-click to edit: ':'')+recTitle_strip_all+'" class="recordTitle">' //  '+rectypeTitleClass+'
-        +   sCount  
-        +     (this.options.show_url_as_link && fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
-            + recTitle_strip1 + "</a>") :recTitle_strip2)  
-        + '</div>'
+        +   sCount;
+        
+        if(this.options.show_url_as_link && fld('rec_URL')){
+            if(window.hWin.HEURIST4.util.isempty(fld('rec_URLErrorMessage'))){
+                html = html + '<a href="'+fld('rec_URL')+'" target="_blank">'+ recTitle_strip1 + '</a>';
+            }else{
+                html = html + '<span class="ui-icon ui-icon-alert" title="'
+                + window.hWin.HEURIST4.util.htmlEscape(fld('rec_URLErrorMessage'))
+                +'"></span>'+recTitle_strip1;
+            }
+        }else{
+            html = html + recTitle_strip2;
+        }
+            
+            
+            
+        html = html + '</div>'
 
         
         //action button container

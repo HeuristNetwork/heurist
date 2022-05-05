@@ -1802,9 +1802,10 @@ function recordSearch($system, $params)
         .'rec_OwnerUGrpID,'
         .'rec_NonOwnerVisibility,'
         .'rec_Modified,'
-        .'bkm_PwdReminder ';
-        /*.'rec_URLLastVerified,'
-        .'rec_URLErrorMessage,'
+        .'bkm_PwdReminder,'
+        .'rec_URLErrorMessage';
+        /*
+        .'rec_URLLastVerified,'
         .'bkm_PwdReminder ';*/
 
 

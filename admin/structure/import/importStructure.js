@@ -291,7 +291,7 @@ $.widget( "heurist.importStructure", {
                 if(that.options.source_database_id>0){
                     query_request['q'] = 'ids:'+that.options.source_database_id;
                 }
-                query_request['detail'] = '398'; //Allow Clone?
+                query_request['detail'] = '398'; //Allow Clone?  @todo - concept code
 
                 window.hWin.HAPI4.RecordMgr.search(query_request, 
                     function( response ){
@@ -309,10 +309,10 @@ $.widget( "heurist.importStructure", {
 
                                 var recURL  = this.fld(record, 'rec_URL');
                                 var recDesc = this.fld(record, 'rec_Title');
-                                var isAllowClone = ( this.fld(record, 398)!=6023 )?1:0;
+                                var isAllowClone = ( this.fld(record, 398)!=6023 )?1:0; //@todo - concept code
                                 var dbURL = '';
-                                var dbName = 'Broken registration';
-
+                                var dbName = 'Broken registration (Db URL is not defined)';
+                                
                                 if(recURL){
                                     var splittedURL = recURL.split('?');
                                     if(splittedURL && splittedURL.length>0){
@@ -321,6 +321,13 @@ $.widget( "heurist.importStructure", {
                                         dbName = (matches && matches.length>1)?matches[1]:'';
                                     }
                                 }
+                                var url_Error = this.fld(record, 'rec_URLErrorMessage');
+                                if( !window.hWin.HEURIST4.util.isempty( url_Error ) ){
+console.log(url_Error);                                    
+                                    dbName = dbName + ' (unavailable)';
+                                    dbURL = '';
+                                }
+                                
                                 this.setFld(record, 'rec_URL', dbURL);
                                 this.setFld(record, 'rec_Title', dbName);
                                 this.setFld(record, 'rec_ScratchPad', recDesc);
@@ -417,7 +424,7 @@ $.widget( "heurist.importStructure", {
         var sURL  = db_ids.fld(record, 'rec_URL');
         var sDB   = db_ids.fld(record, 'rec_Title');
         
-        if(!sURL) return;
+        if(!sURL) return; //missed
 
         if(this._selectedDB != sDB_ID){
             
@@ -689,14 +696,24 @@ $.widget( "heurist.importStructure", {
         
         var w = this.recordList_dbs.width()-550;
         if(w<150) w = 150;
+        
+            var url_Error = fld('rec_URLErrorMessage');
+            if(!window.hWin.HEURIST4.util.isempty(url_Error)){
+                url_Error = 'The indexed database is currently inaccessible. It returned '
+                                +window.hWin.HEURIST4.util.htmlEscape(url_Error);
+            }else{
+                url_Error = '';
+            }
+        
 
         var recTitleContent = '<div class="item" style="width:3em">'+recID+'</div>'
-        +'<div class="item" style="width:25em;'+(recID<1000?'font-weight:bold':'')
-        +'">'+dbName+'</div>'
+        +'<div class="item" style="width:25em;'+(recID<1000?'font-weight:bold;':'')+ (url_Error?'color:lightgray':'') + '"'
+        + ' title="' + url_Error + '"'
+        + '>'+dbName+'</div>'
         +'<div class="item" style="width:4em">'
         +((recID<1000 && recAllowClone==1)?'<span data-key="clone" style="cursor:pointer;text-decoration:underline">clone</span>'
             :'')+'</div>'
-        +'<div class="item" style="width:'+w+'px"  title="'+recTitle+'">'+recTitle+'</div>';  //  
+        +'<div class="item" style="width:'+w+'px"  title="'+recTitle+'">'+recTitle+'</div>';  //  description
         /*+'<div class="item" style="width:2em;padding-left:4px"><a href="'
         +recURL+'?db='+dbName+'" target="_blank" title="'
         +window.hWin.HEURIST4.util.htmlEscape(recURL)+'">'
@@ -706,7 +723,6 @@ $.widget( "heurist.importStructure", {
         +'<div class="item" style="width:2em;padding-left:4px">'
         +'<span class="ui-icon ui-icon-copy" style="font-size:0.9em">'
         +'</span></div>';*/
-
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
         + html_thumb
