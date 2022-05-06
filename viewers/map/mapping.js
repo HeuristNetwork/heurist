@@ -1078,6 +1078,7 @@ $.widget( "heurist.mapping", {
         return maxZoom2; 
     },
 
+    _zoom_timeout: 0,
     //
     // zoom map to given bounds
     //
@@ -1088,7 +1089,11 @@ $.widget( "heurist.mapping", {
                     bounds = L.latLngBounds(bounds);
                 }
             }
-             
+            
+            if(this._zoom_timeout>0){
+                clearTimeout(this._zoom_timeout);   
+                this._zoom_timeout = 0;
+            }
                         
             if(bounds && bounds.isValid()){
                 
@@ -1102,36 +1107,29 @@ $.widget( "heurist.mapping", {
                     maxZoom = this.userDefinedMinZoom;  
                 }
 
-                /*
-                if(this.options.zoomMaxInKM>0){
-                        var ll = bounds.getCenter();
-                        var ruler = cheapRuler(ll.lat);
-                        var bbox = ruler.bufferPoint([ll.lng, ll.lat], this.options.zoomMaxInKM/2);
-                        //w, s, e, n
-                        var corner1 = L.latLng(bbox[1], bbox[0]),
-                            corner2 = L.latLng(bbox[3], bbox[2]);
-                        var bbox2 = L.latLngBounds(corner1, corner2);            
-                
-                        var maxZoom2 = this.nativemap.getBoundsZoom(bbox2);
-                        
-console.log(maxZoom2+"<"+maxZoom);                        
-                        if(maxZoom2<maxZoom) maxZoom = maxZoom2;
-                }*/
-                
                 if(window.hWin.HEURIST4.util.isObject(fly_params) && fly_params['maxZoom'] && fly_params['maxZoom'] > maxZoom){
                     fly_params['maxZoom'] = maxZoom;
                 }
 
                 if(fly_params){
-                    
+                    var duration = 5;
                     if(fly_params===true){
-                        fly_params = {animate:true, duration:1.5, maxZoom: maxZoom};
+                        fly_params = {animate:true, duration:duration, maxZoom: maxZoom};
+                    }else{
+                        if(fly_params.duration>0){
+                            duration = fly_params.duration;
+                        }else{
+                            fly_params.duration = duration;
+                        }
                     }
                     this.nativemap.flyToBounds(bounds, fly_params);
                     
                     var that = this; //fly to bounds fits bounds wrong
-                    setTimeout(function(){
-                            that.nativemap.fitBounds(bounds, {maxZoom: maxZoom})},1700);      
+                    this._zoom_timeout = setTimeout(function(){
+                            that.nativemap.fitBounds(bounds, {maxZoom: maxZoom});
+                            that._zoom_timeout = 0;
+                    }
+                    ,duration*1000+200);      
             
                 }else{
                     this.nativemap.fitBounds(bounds, {maxZoom: maxZoom, padding: L.point(50, 50)});   
