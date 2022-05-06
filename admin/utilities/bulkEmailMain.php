@@ -88,7 +88,7 @@ while($email = $email_list->fetch_row()){
         continue;
     }
 
-    $emails[$email[0]] = $email[1];
+    $emails[$email[0]] = $email[1]; //id -> title
 
     $has_emails = true;
 }
@@ -249,7 +249,7 @@ if(!$has_emails || empty($emails)) {
 
             window.history.pushState({}, '', '<?php echo $_SERVER['PHP_SELF']; ?>');
 
-            var all_emails = <?php echo json_encode($emails)?>; // Object of Email records
+            var all_emails = <?php echo json_encode($emails)?>; // Object of Email records id->title
 
             var current_db = "<?php echo $current_db ?>";
 

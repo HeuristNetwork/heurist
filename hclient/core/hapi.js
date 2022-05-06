@@ -1562,14 +1562,14 @@ prof =Profile
             // 
             refreshEntityData:function(entityNames, callback){
 
-var s_time = new Date().getTime() / 1000;
+//var s_time = new Date().getTime() / 1000;
                 
                  //'multi':1,   
                 _callserver('entityScrud', {a:'structure', 'entity':entityNames, 'details':'full'},
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
 
-var fin_time = new Date().getTime() / 1000;
+//var fin_time = new Date().getTime() / 1000;
 //console.log('DEBUG refreshEntityData '+response.data+'  '+(fin_time-s_time));                    
                             
                             for(var entityName in response.data){
@@ -1596,19 +1596,18 @@ var fin_time = new Date().getTime() / 1000;
 
                 if($.isEmptyObject(entity_data[entityName]) || force_reload==true){
 
-//console.log('getEntityData '+entityName);
                     var det = 'list';
                     if(entityName=='defRecStructure'){
                         det = 'full';   
                     }
 
-var s_time = new Date().getTime() / 1000;
+//var s_time = new Date().getTime() / 1000;
                     
                     _callserver('entityScrud', {a:'search', 'entity':entityName, 'details':det},
                        function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
 
-var fin_time = new Date().getTime() / 1000;
+//var fin_time = new Date().getTime() / 1000;
 //console.log('DEBUG getEntityData '+response.data.entityName+'  '+(fin_time-s_time));                    
                                 
                                 entity_data[response.data.entityName] = new hRecordSet(response.data);    

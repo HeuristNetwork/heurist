@@ -195,7 +195,7 @@ class DbDefRecTypes extends DbEntityBase
                 $conds = $this->_getRecordOwnerConditions($usr_ID);
                 $query2 = $query2 . $conds[0];
                 $where2 = $where2 . ' AND '.$conds[1];      
-            }else{
+            }else{  
                 $where2 = $where2 . 'AND (not r0.rec_FlagTemporary)';
             }
 
