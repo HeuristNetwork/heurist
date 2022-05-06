@@ -916,6 +916,11 @@ $.widget( "heurist.mainMenu6", {
 
         var that = this;
 
+        if(!(this.menues && this.menues.explore)){
+            setTimeout(function(){ that.populateFavouriteFilters(favourite_filters); }, 1000);
+            return;
+        }
+        
         var $favourite_container = this.menues.explore.find('ul.favourite-filters');
 
         if(!favourite_filters){
