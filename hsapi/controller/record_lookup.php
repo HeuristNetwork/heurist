@@ -48,39 +48,46 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
     if($is_estc){
 
-        $is_allowed = (isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, @$params['org_db']) !== false);
+        $is_allowed = (isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, @$params['org_db']) !== false); // allowed to access records
 
-        if(strpos(HEURIST_BASE_URL, $ESTC_ServerURL) !== false && $system->init(@$params['db'])){ // currently on server where ESTC DB is located
+        if(isset($ESTC_ServerURL) && strpos(HEURIST_BASE_URL, $ESTC_ServerURL) !== false){ // currently on server where ESTC DB is located
 
-            if(array_key_exists('entity', $params)){ // retrieve term info
-                require_once (dirname(__FILE__).'/entityScrud.php');
-                exit();
-            }else if($is_allowed && $ESTC_UserName && $ESTC_Password && $system->doLogin($ESTC_UserName, $ESTC_Password, 'shared')){ // search records
+            $is_inited = $system->init(@$params['db']);
 
-                require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
+            if($is_inited !== false){
 
-                $response = recordSearch($system, $params);
-                $response = json_encode($response);
-            }else{ // doesn't have permission
+                if(array_key_exists('entity', $params)){ // retrieve term info
+                    require_once (dirname(__FILE__).'/entityScrud.php');
+                    exit();
+                }else if($is_allowed){ // search records
 
-                $msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
-                $response = array('status' => HEURIST_REQUEST_DENIED, 'message' => $msg, 'sysmsg' => '');
-                $response = json_encode($response);
+                    $is_logged_in = $system->doLogin($ESTC_UserName, $ESTC_Password, 'shared');
+
+                    if($is_logged_in){ // logged in, begin search
+                        $system->getCurrentUserAndSysInfo(false);
+
+                        require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
+                        $response = recordSearch($system, $params);
+                    }else{ // unable to login, cannot access records
+                        $msg = '<br>Please contact the Heurist team if this problem persists.';
+                        $response = $system->getError();
+                        $response['message'] .= $msg;
+                    }
+                }else{ // doesn't have permission
+                    $msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
+                    $response = array('status' => HEURIST_REQUEST_DENIED, 'message' => $msg, 'sysmsg' => '');
+                }
+            }else{ // cannot access ESTC DB
+                $response = $system->getError();
             }
-
-            header('Content-Type: application/json');
-            header('Content-Length: ' . strlen($response));
-            exit($response);
-        }else{ // on external server, currently no external DBs have permission
-
-            $msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
-            $response = array('status' => HEURIST_REQUEST_DENIED, 'message' => $msg, 'sysmsg' => '');
-            $response = json_encode($response);
-
-            header('Content-Type: application/json');
-            header('Content-Length: ' . strlen($response));
-            exit($response);
+        }else{ // on external server
+            $msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.&nbsp;';
+            $response = array('status' => HEURIST_REQUEST_DENIED, 'message' => $msg);
         }
+        $response = json_encode($response);
+        header('Content-Type: application/json');
+        header('Content-Length: ' . strlen($response));
+        exit($response);
     }else{
 
         if( !$system->init(@$params['db']) ){  //@todo - we don't need db connection here - it is enough check the session
