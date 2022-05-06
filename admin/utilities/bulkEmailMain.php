@@ -94,10 +94,12 @@ while($email = $email_list->fetch_row()){
 }
 
 if(!$has_emails || empty($emails)) {
-    print "<br><br>This function sends bulk emails based on text in a selected <strong>Email</strong> record<br><br>"
-    . "The Email record to be used must contain a title field and a short summary field - the latter will be used as the email's body.<br><br>" 
-    . $_REQUEST['db'] . " contains no valid Email records.<br><br>"
-    . "<strong>Please create an Email record in the database containing the text<br>you want to send out, using ##...## markers for values to be inserted.</strong><br><br>"
+    print "<br><br>This function sends bulk emails based on text in a selected <i>Email</i> record<br><br>"
+    . "<strong>" . $_REQUEST['db'] . " contains no valid Email records.</strong><br><br>"
+    . "<strong>Please create an Email record in the database containing the text<br>"
+    . "you want to send out, using ##xxxx## markers for values to be inserted.</strong><br><br>"
+    . "The Email record to be used must contain a title field and a short summary field - the latter will be used as the email's body. The title and body can be edited before sending. <br>"
+    . "If you want to create your email on-the-fly simply create a dummy record with placeholders for title and body to enable this function. <br><br>" 
     . "Placeholders that will be replaced with proper values (case insensitive):<br><br>"
     . "##firstname## &rarr; User's First Name,<br>"
     . "##lastname## &rarr; User's Last Name,<br>" 
@@ -247,7 +249,7 @@ if(!$has_emails || empty($emails)) {
 
             window.history.pushState({}, '', '<?php echo $_SERVER['PHP_SELF']; ?>');
 
-            var all_emails = <?php echo json_encode($emails); ?>; // Object of Email records
+            var all_emails = <?php echo json_encode($emails)?>; // Object of Email records
 
             var current_db = "<?php echo $current_db ?>";
 
