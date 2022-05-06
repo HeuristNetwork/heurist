@@ -1803,7 +1803,7 @@ function recordSearch($system, $params)
         .'rec_NonOwnerVisibility,'
         .'rec_Modified,'
         .'bkm_PwdReminder,'
-        .'rec_URLErrorMessage';
+        .'rec_URLErrorMessage '; //don't forget trailing space
         /*
         .'rec_URLLastVerified,'
         .'bkm_PwdReminder ';*/
@@ -2177,6 +2177,8 @@ function recordSearch($system, $params)
         $response = $system->addError(HEURIST_ACTION_BLOCKED, 
         '<h4>Uninterpretable Heurist query/filter</h4>'
         .'There is an error '.$sMsg.' syntax generating invalid SQL. Please check for misspelled keywords or incorrect syntax. See help for assistance.<br><br>'
+        
+        //.$params['q'].'  '.$query.'<br><br>'
  
         .'If you think the filter is correct, please make a bug report (link under Help menu at top right) or email the Heurist team, including the text of your filter.');
         
