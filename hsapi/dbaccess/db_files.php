@@ -465,10 +465,10 @@ function resolveFilePath($path, $db_name=null){
                     $dir_folder = HEURIST_FILESTORE_ROOT . $db_name . '/';
                     $db_folder_files = $dir_folder . 'file_uploads/';
                 }else{
-                    $db_folder = HEURIST_FILESTORE_DIR;
+                    $dir_folder = HEURIST_FILESTORE_DIR;
                     $db_folder_files = HEURIST_FILES_DIR;
                 }
-                
+            
                 chdir($dir_folder);  // relatively db root
                 $fpath = realpath($path);
                 if(file_exists($fpath)){
