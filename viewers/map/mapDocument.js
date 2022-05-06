@@ -63,7 +63,7 @@ function hMapDocument( _options )
     DT_NAME = 0,
     
     DT_ZOOM_KM_POINT = 0,
-    DT_MINIMUM_MAP_ZOOM = 0, //bounds for mapoc and visibility for layers
+    DT_MINIMUM_MAP_ZOOM = 0, //bounds for mapdoc and visibility for layers
     DT_MAXIMUM_MAP_ZOOM = 0,
     
     map_documents = null, //recordset - all loaded documents
