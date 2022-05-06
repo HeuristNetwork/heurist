@@ -91,9 +91,21 @@ detectLargeInputs('COOKIE entityScrud', $_COOKIE);
             try{
                         
                $res = json_encode($response, JSON_THROW_ON_ERROR);
-               
-               print $res;    
-            
+
+               if(false && strlen($res)>20000){
+                   ob_start(); 
+                   echo json_encode($res);
+                   $output = gzencode(ob_get_contents(),6); 
+                   ob_end_clean(); 
+                   header('Content-Encoding: gzip');
+                   echo $output; 
+                   unset($output); 
+               }else{
+                   echo $res;     
+                   unset($res);     
+               }
+    
+    
             } catch (JsonException $e) {
                 
                 $res = json_encode($response, JSON_INVALID_UTF8_IGNORE );
@@ -113,7 +125,6 @@ detectLargeInputs('COOKIE entityScrud', $_COOKIE);
             if(!$res){
                 
                 //
-                
                 //find wrong value
                 $wrong_string = null;
                 try{
@@ -130,7 +141,6 @@ detectLargeInputs('COOKIE entityScrud', $_COOKIE);
                 if($wrong_string){
                     $msg = $msg . ' Invalid character in string: '.$wrong_string;
                 }
-                    
                 
                 $system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                 print json_encode( $system->getError() );

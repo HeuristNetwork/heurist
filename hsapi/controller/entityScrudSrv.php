@@ -80,6 +80,8 @@
     function entityRefreshDefs( $system, $entities, $need_config ){
         
         if($entities=='all' || $entities==null){
+            
+            //set_time_limit(120);
             $entities = array('rty','dty','rst','trm','rtg','dtg','vcg','swf');  //
         }else if(!is_array($entities)){
             $entities = explode(',',$entities);
@@ -107,7 +109,6 @@
             if($entity_name == 'defTerms'){
                 $res[$entity_name]['trm_Links'] = $entity->getTermLinks();
             }
-            
         }
         return $res;
     }

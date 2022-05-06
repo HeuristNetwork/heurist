@@ -886,10 +886,11 @@ if($active_all || in_array('target_parent', $active)) {
             .' AND dty_Type="resource" AND (rst_CreateChildIfRecPtr IS NULL OR rst_CreateChildIfRecPtr!=1) ORDER BY child.dtl_RecID';
 
             $res = $mysqli->query( $query2 );
-
+            
             $bibs2 = array();
             $prec_ids2 = array();
             $det_ids = array();
+            if($res){
             while ($row = $res->fetch_assoc()){
                 if($row['rec_FlagTemporary']==1) continue;
                 if(in_array( $row['child_d_id'], $det_ids)) continue;
@@ -904,7 +905,9 @@ if($active_all || in_array('target_parent', $active)) {
                 }
                 */
             }//while
-
+            }else{
+                print "<div class='error'>Cannot execute query \"find children without reverse pointer in parent record\".</div>";
+            }
             //print $query2; 
             //print '<br>'.count($bibs2);
 

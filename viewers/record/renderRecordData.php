@@ -1017,7 +1017,7 @@ function print_public_details($bib) {
     $bds_temp = array();
     $thumbs = array();
 
-    $bds_res = $mysqli->query($query);
+    $bds_res = $mysqli->query($query); //0.8 sec
 
 //ok so far
 
@@ -1046,7 +1046,7 @@ function print_public_details($bib) {
 
 //print $query;            
             
-if(false){        
+if(false){  //this query fails for maria db        
         
         $bds_res = $mysqli->query($query);     
         if($bds_res){   

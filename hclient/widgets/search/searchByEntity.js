@@ -32,7 +32,7 @@ $.widget( "heurist.searchByEntity", {
         
         search_realm: null,
         
-        menu_locked: null ////callback to prevent close in h6
+        menu_locked: null // callback to prevent close in h6
     },
 
     selected_rty_ids:[], //
@@ -46,6 +46,8 @@ $.widget( "heurist.searchByEntity", {
     usage_btn: null, //by usage selector
     usage_select: null, 
     usage_select_options: null,
+    
+    _waiting_server_response: false,
 
     // the constructor
     _create: function() {
@@ -220,10 +222,14 @@ console.log(data);
             if( $Db.needUpdateRtyCount==0 ){
                 $Db.needUpdateRtyCount = -1;    
                 this.recreateRectypeSelectors();
-            }else if( $Db.needUpdateRtyCount>0 ){
+            }else if( $Db.needUpdateRtyCount>0 && !this._waiting_server_response){
                 var that = this;
+                
                 $Db.needUpdateRtyCount = -1;    
+                this._waiting_server_response = true;
+                
                 $Db.get_record_counts(function(){
+                    that._waiting_server_response = false;
                     that.recreateRectypeSelectors();
                 });
             }
@@ -452,6 +458,7 @@ console.log(data);
     //
     recreateRectypeSelectors: function(){
 
+        if(this._waiting_server_response || !$Db.rty()) return;
 
         //selector to filter by entity
         if(this.options.use_combined_select || this.options.by_usage){

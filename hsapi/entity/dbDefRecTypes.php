@@ -27,6 +27,8 @@ require_once (dirname(__FILE__).'/dbEntitySearch.php');
 
 class DbDefRecTypes extends DbEntityBase
 {
+    private $where_for_count = null;
+    private $rty_counts = null;
 
     /**
     *  search users
@@ -92,13 +94,29 @@ class DbDefRecTypes extends DbEntityBase
             .'rty_Status,rty_OriginatingDBID,rty_IDInOriginatingDB,rty_ShowInLists,rty_RecTypeGroupID,rty_ReferenceURL,'
             .'rty_ShowURLOnEditForm,rty_ShowDescriptionOnEditForm,rty_Modified';
 
-            $needCount = true;
+            $needCount = false; //now we calculate counts beforehand and use $calculatedFields to add column rty_RecCount 
 
+            $usr_ID = $this->system->get_user_id();
 
+            $this->where_for_count = array();
+            if(($usr_ID>0) || ($usr_ID===0)){
+                $conds = $this->_getRecordOwnerConditions($usr_ID);
+                $this->where_for_count[0] = $conds[0];
+                $this->where_for_count[1] =  ' AND '.$conds[1];      
+            }else{
+                $this->where_for_count[0] = '';
+                $this->where_for_count[1] = 'AND (not r0.rec_FlagTemporary)';
+            }
+            
+            $query2 = 'SELECT rec_RecTypeID,count(*) FROM Records WHERE (not rec_FlagTemporary) GROUP BY rec_RecTypeID';
+            $this->rty_counts = mysql__select_assoc2($this->system->get_mysqli(), $query2);
+            
+        
             $calculatedFields = function ($fields, $row=null) {
 
                 if($row==null){
                     array_push($fields, 'rty_CanonicalTitleMask');
+                    array_push($fields, 'rty_RecCount');
                     return $fields;   
                 }else{
 
@@ -113,6 +131,20 @@ class DbDefRecTypes extends DbEntityBase
                     }else{
                         array_push($row, '');
                     }
+                    
+                    $idx = array_search('rty_RecCount', $fields);
+                    if($idx!==false){
+                        
+                            if(@$this->rty_counts[$row[0]]>0){
+                                $cnt = $this->rty_counts[$row[0]];
+                            }else{
+                                $cnt = 0;
+                            }
+                            array_push($row, $cnt);
+                    }else{
+                        array_push($row, '');
+                    }
+                    
 
                     return $row;
                 }
@@ -150,6 +182,7 @@ class DbDefRecTypes extends DbEntityBase
                 }
             }
         }  
+
 
         if($needCount){ //find count of records by rectype
 

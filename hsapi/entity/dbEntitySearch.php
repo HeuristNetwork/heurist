@@ -436,7 +436,7 @@ class DbEntitySearch
                     foreach($_flds as $fld){
                         array_push($fields, $fld->name);
                     }
-                    //add calculated fields
+                    //add calculated fields to header
                     if($calculatedFields!=null){
                         $fields = $calculatedFields($fields); //adds names of calulated fields
                     }
