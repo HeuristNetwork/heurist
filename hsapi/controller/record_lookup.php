@@ -50,7 +50,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
         $is_allowed = (isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, @$params['org_db']) !== false); // allowed to access records
 
-        if(isset($ESTC_ServerURL) && strpos(HEURIST_BASE_URL, $ESTC_ServerURL) !== false){ // currently on server where ESTC DB is located
+        if(strpos(HEURIST_BASE_URL, HEURIST_MAIN_SERVER) !== false){ // currently on server where ESTC DB is located, $ESTC_ServerURL
 
             $is_inited = $system->init(@$params['db']);
 
