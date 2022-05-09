@@ -229,6 +229,12 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     if(opts.layout_params['maxzoom']>0){
                         $dlg.find('input[name="map_maxzoom"]').val(opts.layout_params['maxzoom']);        
                     }
+                    if(opts.layout_params['minzoom']>0){
+                        $dlg.find('input[name="map_minzoom"]').val(opts.layout_params['minzoom']);        
+                    }
+                    if(opts.layout_params['pntzoom']>0){
+                        $dlg.find('input[name="map_pntzoom"]').val(opts.layout_params['pntzoom']);        
+                    }
                 }
                 if(opts['mapdocument']>0){
                     $dlg.find('select[name="mapdocument"]').attr('data-mapdocument', opts['mapdocument']);        
@@ -881,6 +887,12 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             
             if($dlg.find('input[name="map_maxzoom"]').val()>0){
                 layout_params['maxzoom'] = $dlg.find('input[name="map_maxzoom"]').val();
+            }
+            if($dlg.find('input[name="map_minzoom"]').val()>0){
+                layout_params['minzoom'] = $dlg.find('input[name="map_minzoom"]').val();
+            }
+            if($dlg.find('input[name="map_pntzoom"]').val()>0){
+                layout_params['pntzoom'] = $dlg.find('input[name="pnt_maxzoom"]').val();
             }
 
   

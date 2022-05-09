@@ -2599,8 +2599,7 @@ $.widget( "heurist.mapping", {
         this.options.map_rollover = __parseval(params['map_rollover']);
         this.options.default_style = window.hWin.HEURIST4.util.isJSON(params['style']);
         
-        //it may be overwritten by map document
-        //this.options.zoomToPointInKM
+        //these settings may be overwritten by map document
         if(params['maxzoom']>0){
             this.options.zoomMaxInKM = parseFloat(params['maxzoom']); 
             if(this.options.zoomMaxInKM>0){
@@ -2624,6 +2623,13 @@ $.widget( "heurist.mapping", {
                 }
             }
         } 
+        
+        if(params['pntzoom']>0){
+            this.options.zoomToPointInKM = parseFloat(params['pntzoom']); 
+            if(!(this.options.zoomToPointInKM>0)){
+                this.options.zoomToPointInKM  = 1; //default value
+            }
+        }
 
         //special case - till thematic map is not developed - for custom style
         /* expremental 

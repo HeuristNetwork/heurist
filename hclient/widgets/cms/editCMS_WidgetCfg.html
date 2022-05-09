@@ -391,9 +391,12 @@
             <label>Zoom limits&nbsp;</label>
         </div>
         <div>
-            <p><label>Block zoom-in below&nbsp;&nbsp;</label>
-            <input name="map_maxzoom" type="number" min="1" value="2" placeholder="2" style="width:40px"> km
-            </p>
+            <label>Block zoom-in below&nbsp;&nbsp;</label>
+            <input name="map_maxzoom" type="number" min="0" value="0" placeholder="" style="width:40px"> km,
+            <label>&nbsp;&nbsp;above&nbsp;&nbsp;</label>
+            <input name="map_minzoom" type="number" min="0" value="0" placeholder="" style="width:40px"> km,
+            <label>&nbsp;&nbsp;&nbsp;&nbsp;Zoom to point&nbsp;&nbsp;</label>
+            <input name="map_pntzoom" type="number" min="0" value="5" placeholder="" style="width:40px"> km
         </div>
     </div>
 
