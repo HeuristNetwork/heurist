@@ -26,8 +26,6 @@
 
 $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
 
-    allowed_dbs: ['Libraries_Readers_Culture_18C_Atlantic', 'MPCE_Mapping_Print_Charting_Enlightenment', 'ESTC_Helsinki_Bibliographic_Metadata'],
-
     options: {
         height: 540,
         width: 820,
@@ -46,19 +44,6 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
         add_new_record: false, //if true it creates new record on selection
     },
     recordList: null,
-
-    //
-    // Check that the current db has access to this look up
-    //
-    _init: function(){
-
-        if(this.allowed_dbs.indexOf(window.hWin.HAPI4.database) < 0){
-            window.hWin.HEURIST4.msg.showMsgErr('For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this look up.');
-            return false;
-        }
-
-        this._super();
-    },
 
     //    
     //

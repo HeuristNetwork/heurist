@@ -897,6 +897,14 @@ prof =Profile
                 _callserver('usr_info', request, callback);
             },
 
+            // check if current server + db has access to ESTC lookups
+            check_allow_estc: function(request, callback){
+                if(!request){
+                    request = {a:'check_allow_estc', db: window.hWin.HAPI4.database};
+                }
+                _callserver('usr_info', request, callback);
+            },
+
             //manipulation with folders in database folder
             get_sysfolders: function(request, callback){
                 if(!request) request = {};

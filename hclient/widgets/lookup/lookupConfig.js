@@ -20,8 +20,6 @@
 
 $.widget( "heurist.lookupConfig", {
 
-    ESTC_allowed_dbs: ['Libraries_Readers_Culture_18C_Atlantic', 'MPCE_Mapping_Print_Charting_Enlightenment', 'ESTC_Helsinki_Bibliographic_Metadata'],
-
     // default options
     options: {
     
@@ -291,20 +289,23 @@ $.widget( "heurist.lookupConfig", {
             change: function(event, ui){
                 var service = that.selectServiceType.val(); // selected service
 
-                if((service == 'ESTC_editions' || service == 'ESTC_works' || service == 'ESTC') && this.ESTC_allowed_dbs.indexOf(window.hWin.HAPI4.database) < 0){ // check if current DB has access
-                    
-                    window.hWin.HEURIST4.msg.showMsgErr('For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this look up.');
-
-                    // Set back to default
-                    that.selectServiceType.val('');
-                    if(that.selectServiceType.hSelect('instance') != undefined){
-                        that.selectServiceType.hSelect('refresh');
-                    }
-
-                    return;
+                if(service == 'ESTC_editions' || service == 'ESTC_works' || service == 'ESTC'){
+                    var req = {
+                        a: 'check_allow_estc',
+                        db: window.hWin.HAPI4.database,
+                        ver: service
+                    };
+                    window.hWin.HAPI4.SystemMgr.check_allow_estc(req, function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            that._changeService( service ); // setup
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                            return false;
+                        }
+                    });
+                }else{
+                    that._changeService( service ); // setup
                 }
-
-                that._changeService( service ); // setup
             }
         });
 
@@ -342,7 +343,7 @@ $.widget( "heurist.lookupConfig", {
             // mouse leaves container
             this.element.find('.ent_wrapper:first').on('mouseleave', function(event) {
 
-                if($(event.target).is('div') && (that._is_modified || that._services_modified)){
+                if($(event.target).is('div') && (that._is_modified || that._services_modified) && !that._isNewCfg){
                     that._closeHandler(false, true, $(event.target));
                 }
             } );

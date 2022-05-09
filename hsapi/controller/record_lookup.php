@@ -48,43 +48,37 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
     if($is_estc){
 
-        $is_allowed = (isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, @$params['org_db']) !== false); // allowed to access records
+        $is_allowed = (isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, @$_REQUEST['org_db']) !== false && isset($ESTC_UserName) && isset($ESTC_Password));
+        $def_err_msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
 
-        if(strpos(HEURIST_BASE_URL, HEURIST_MAIN_SERVER) !== false){ // currently on server where ESTC DB is located, $ESTC_ServerURL
+        if(strpos(HEURIST_BASE_URL, HEURIST_MAIN_SERVER) !== false){ // currently on server where ESTC DB is located
+
+            if(array_key_exists('entity', $params)){ // retrieve term info
+                require_once (dirname(__FILE__).'/entityScrud.php');
+                exit();
+            }
 
             $is_inited = $system->init(@$params['db']);
+            if($is_inited !== false && $is_allowed){ // search records
 
-            if($is_inited !== false){
+                $is_logged_in = $system->doLogin($ESTC_UserName, $ESTC_Password, 'shared');
 
-                if(array_key_exists('entity', $params)){ // retrieve term info
-                    require_once (dirname(__FILE__).'/entityScrud.php');
-                    exit();
-                }else if($is_allowed){ // search records
-
-                    $is_logged_in = $system->doLogin($ESTC_UserName, $ESTC_Password, 'shared');
-
-                    if($is_logged_in){ // logged in, begin search
-                        $system->getCurrentUserAndSysInfo(false);
-
-                        require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
-                        $response = recordSearch($system, $params);
-                    }else{ // unable to login, cannot access records
-                        $msg = '<br>Please contact the Heurist team if this problem persists.';
-                        $response = $system->getError();
-                        $response['message'] .= $msg;
-                    }
-                }else{ // doesn't have permission
-                    $msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
-                    $response = array('status' => HEURIST_REQUEST_DENIED, 'message' => $msg, 'sysmsg' => '');
+                if($is_logged_in){ // logged in, begin search
+                    $system->getCurrentUserAndSysInfo(false);
+                    require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
+                    $response = recordSearch($system, $params);
+                }else{ // unable to login, cannot access records
+                    $response = $system->getError();
                 }
             }else{ // cannot access ESTC DB
-                $response = $system->getError();
+                $response = $is_allowed ? $system->getError() : array('status' => HEURIST_REQUEST_DENIED, 'message' => $def_err_msg);
             }
-        }else{ // on external server
-            $msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.&nbsp;';
-            $response = array('status' => HEURIST_REQUEST_DENIED, 'message' => $msg);
+        }else{ // isset($ESTCServerURL), on external server, currently disabled
+            $response = array('status' => HEURIST_REQUEST_DENIED, 'message' => $def_err_msg);
         }
+
         $response = json_encode($response);
+
         header('Content-Type: application/json');
         header('Content-Length: ' . strlen($response));
         exit($response);

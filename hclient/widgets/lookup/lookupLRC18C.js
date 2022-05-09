@@ -28,8 +28,6 @@
 mapDict = {}
 $.widget("heurist.lookupLRC18C", $.heurist.recordAction, {
 
-    allowed_dbs: ['Libraries_Readers_Culture_18C_Atlantic'],
-
     //defintions mapping
     // source rectype: target rectype
     mapping_defs:{
@@ -184,19 +182,6 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
 
     },
     recordList: null,
-
-    //
-    // Check that the current db has access to this look up
-    //
-    _init: function(){
-
-        if(this.allowed_dbs.indexOf(window.hWin.HAPI4.database) < 0){
-            window.hWin.HEURIST4.msg.showMsgErr('This look up is made for the Libraries_Readers_Culture_18C_Atlantic database only.');
-            return false;
-        }
-
-        this._super();
-    },
 
     //    
     //

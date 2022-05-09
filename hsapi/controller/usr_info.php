@@ -200,6 +200,43 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
                       }
                   }
               }
+        }else if($action == 'check_allow_estc'){ // check if the ESTC or LRC18C lookups are allowed for current server+database
+
+            $msg = '';
+
+            if(isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, @$_REQUEST['db']) !== false){
+                if(@$_REQUEST['ver'] == 'ESTC'){ // is original LRC18C lookup, both ESTC and LRC18C DBs need to be on the same server
+
+                    if(@$_REQUEST['db'] == 'Libraries_Readers_Culture_18C_Atlantic'){ // check if current db is the LRC18C DB
+
+                        $query = "SHOW DATABASES WHERE `database` = '". HEURIST_DB_PREFIX ."ESTC_Helsinki_Bibliographic_Metadata'";
+                        $res = $mysqli->query($query);
+
+                        if($res){
+                            $row = $res->fetch_row();
+                            if($row && $row[0]){
+                                $res = 1;
+                            }
+                            $res->close();
+                        }
+                        if($res != 1){
+                            $msg = 'This lookup requires the ESTC_Helsinki_Bibliographic_Metadata database to be on this server.<br>Please use the alternative ESTC_editions or ESTC_works lookups instead.';
+                        }
+                    }else{
+                        $msg = 'This lookup is made for the Libraries_Readers_Culture_18C_Atlantic database only.';
+                    }
+                }
+                if($msg == ''){
+                    $res = 1;
+                }else{
+                    $system->addError(HEURIST_ACTION_BLOCKED, $msg);
+                    $res = false;
+                }
+            }else{
+                $msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
+                $system->addError(HEURIST_ACTION_BLOCKED, $msg);
+                $res = false;
+            }
         }else        
         if ( $system->get_user_id()<1 &&  !in_array($action,$quest_allowed)) {
 

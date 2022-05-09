@@ -3874,6 +3874,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                                 var cfg = window.hWin.HAPI4.sysinfo['service_config'][srvname];
                                 var dialog_name = cfg.dialog;
+                                var service_name = cfg.service;
 
                                 if(dialog_name == 'recordLookup' || dialog_name == 'lookupTCL'){
                                     dialog_name = 'lookupTLC';
@@ -3883,141 +3884,164 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                     dialog_name = dialog_name.replace('recordLookup', 'lookup');
                                 }
 
-                            window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, //'recordLookup'
-                                { mapping: cfg, 
-                                  edit_fields: this._editing.getValues(true),
-                                  edit_record: this._currentEditRecordset,
-                                  path: 'widgets/lookup/',
-                                  onClose:function(recset){
-                                    if(recset){
-                                        
-                                        if( window.hWin.HEURIST4.util.isRecordSet(recset) ){
-                                        
-                                            var rec = recset.getFirstRecord();
-                                            // loop all fields in selected values
-                                            // find field in edit form
-                                            // assign value
-                                            var fields = recset.getFields();
-                                            for(var k=2; k<fields.length; k++){
-                                                var dt_id = cfg.fields[fields[k]];
-                                                if(dt_id>0)
-                                                {
-                                                    var newval = recset.fld(rec, fields[k]);
-                                                    newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
-                                                    that._editing.setFieldValueByName( dt_id, newval );
-                                                    //var ele_input = that._editing.getFieldByName(dt_id );
+                                var dlg_opts = { 
+                                    mapping: cfg, 
+                                    edit_fields: this._editing.getValues(true),
+                                    edit_record: this._currentEditRecordset,
+                                    path: 'widgets/lookup/',
+                                    onClose:function(recset){
+                                        if(recset){
+                                            
+                                            if( window.hWin.HEURIST4.util.isRecordSet(recset) ){
+                                            
+                                                var rec = recset.getFirstRecord();
+                                                // loop all fields in selected values
+                                                // find field in edit form
+                                                // assign value
+                                                var fields = recset.getFields();
+                                                for(var k=2; k<fields.length; k++){
+                                                    var dt_id = cfg.fields[fields[k]];
+                                                    if(dt_id>0)
+                                                    {
+                                                        var newval = recset.fld(rec, fields[k]);
+                                                        newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
+                                                        that._editing.setFieldValueByName( dt_id, newval );
+                                                        //var ele_input = that._editing.getFieldByName(dt_id );
+                                                    }
                                                 }
-                                            }
-                                        }else{
-
-                                            var assigned_fields = []; // list of fields assigned
-                                            var recpointer_vals = []; // list of search values for recpointer fields
-                                            var term_vals = []; // list of label values for enum/term fields
-
-                                            if(recpointer_vals.length == 0 && recset['ext_url']){
-                                                recpointer_vals.push([recset['ext_url'], 'ext']);
-                                                delete recset['ext_url'];
                                             }else{
-                                                recpointer_vals.push(['']);
-                                            }
+                                                //lookup dialog returns pairs - dtyID=>value
+                                                var dtyIds = Object.keys(recset);
 
-                                            //lookup dialog returns pairs - dtyID=>value
-                                            var dtyIds = Object.keys(recset);
+                                                var assigned_fields = []; // list of fields assigned
+                                                var recpointer_vals = []; // list of search values for recpointer fields
+                                                var hadRecpointers = false;
+                                                var term_vals = []; // list of label values for enum/term fields
 
-                                            for(var k=0; k<dtyIds.length; k++){
+                                                if(recpointer_vals.length == 0 && recset['ext_url']){
+                                                    recpointer_vals.push([recset['ext_url'], 'ext']);
+                                                }else if(recpointer_vals.length == 0 && recset['heurist_url']){
+                                                    recpointer_vals.push([recset['heurist_url'], 'heurist']);
+                                                }else{
+                                                    recpointer_vals.push(['']);
+                                                }
 
-                                                var dt_id = dtyIds[k];
+                                                for(var k=0; k<dtyIds.length; k++){
 
-                                                if(dt_id>0){
+                                                    var dt_id = dtyIds[k];
 
-                                                    var newval = recset[dt_id];
-                                                    var type = $Db.dty(dt_id, 'dty_Type');
-                                                    var extra_processing = false;
+                                                    if(dt_id>0){
 
-                                                    if(type == 'resource' || type == 'enum'){
+                                                        var newval = recset[dt_id];
+                                                        var type = $Db.dty(dt_id, 'dty_Type');
+                                                        var extra_processing = false;
 
-                                                        var completed = []; // completed recpointers/terms
+                                                        if(type == 'resource' || type == 'enum'){
 
-                                                        if(window.hWin.HEURIST4.util.isArray(newval)){
+                                                            var completed = []; // completed recpointers/terms
 
-                                                            for(var i = 0; i < newval.length; i++){
+                                                            if(window.hWin.HEURIST4.util.isArray(newval)){
 
-                                                                if(Number.isInteger(+newval[i])){ // is fine
-                                                                    completed.push(newval[i]);
-                                                                    continue;
-                                                                }
+                                                                for(var i = 0; i < newval.length; i++){
 
-                                                                // needs additional handling
-                                                                if(type == 'resource'){
-                                                                    recpointer_vals.push([dt_id, newval[i]]);
-                                                                }else{
+                                                                    if(Number.isInteger(+newval[i])){ // is fine
+                                                                        completed.push(newval[i]);
+                                                                        continue;
+                                                                    }
 
-                                                                    var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
-                                                                    var trm_id = $Db.getTermByLabel(vocab_id, newval[i]);
-
-                                                                    if(trm_id == null){
-                                                                        term_vals.push([dt_id, newval[i]]);
+                                                                    // needs additional handling
+                                                                    if(type == 'resource'){
+                                                                        recpointer_vals.push([dt_id, newval[i]]);
+                                                                        hadRecpointers = true;
                                                                     }else{
-                                                                        completed.push(trm_id);
+
+                                                                        var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
+                                                                        var trm_id = $Db.getTermByLabel(vocab_id, newval[i]);
+
+                                                                        if(trm_id == null){
+                                                                            term_vals.push([dt_id, newval[i]]);
+                                                                        }else{
+                                                                            completed.push(trm_id);
+                                                                        }
                                                                     }
                                                                 }
-                                                            }
-                                                        }else{
-
-                                                            if(Number.isInteger(+newval)){
-                                                                completed.push(newval);
                                                             }else{
 
-                                                                if(type == 'resource'){
-                                                                    recpointer_vals.push([dt_id, newval]);
+                                                                if(Number.isInteger(+newval)){
+                                                                    completed.push(newval);
                                                                 }else{
-                                                                    
-                                                                    var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
-                                                                    var trm_id = $Db.getTermByLabel(vocab_id, newval);
 
-                                                                    if(trm_id == null){
-                                                                        term_vals.push([dt_id, newval]);
+                                                                    if(type == 'resource'){
+                                                                        recpointer_vals.push([dt_id, newval]);
+                                                                        hadRecpointers = true;
                                                                     }else{
-                                                                        completed.push(trm_id);
+                                                                        
+                                                                        var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
+                                                                        var trm_id = $Db.getTermByLabel(vocab_id, newval);
+
+                                                                        if(trm_id == null){
+                                                                            term_vals.push([dt_id, newval]);
+                                                                        }else{
+                                                                            completed.push(trm_id);
+                                                                        }
                                                                     }
                                                                 }
                                                             }
-                                                        }
 
-                                                        if(completed.length > 0){
-                                                            that._editing.setFieldValueByName(dt_id, completed);
+                                                            if(completed.length > 0){
+                                                                that._editing.setFieldValueByName(dt_id, completed);
+
+                                                                var fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
+                                                                if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
+                                                            }
+                                                        }else{
+                                                            if(!$.isArray(newval)){
+                                                                newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
+                                                                newval = [newval];
+                                                            }
+
+                                                            that._editing.setFieldValueByName( dt_id, newval );
 
                                                             var fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
                                                             if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
-                                                        }
-                                                    }else{
-                                                        if(!$.isArray(newval)){
-                                                            newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
-                                                            newval = [newval];
-                                                        }
-
-                                                        that._editing.setFieldValueByName( dt_id, newval );
-
-                                                        var fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
-                                                        if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
+                                                        } 
                                                     }
                                                 }
-                                            }
 
-                                            if(recpointer_vals.length == 1){ // check if array only has a link to the original record
-                                                recpointer_vals = [];
-                                            }
+                                                if(recpointer_vals.length > 0 && !hadRecpointers){
+                                                    recpointer_vals = [];
+                                                }
 
-                                            if(term_vals.length > 0){
-                                                that.processTermFields(term_vals, recpointer_vals, assigned_fields, {});
-                                            }else{
-                                                that.processResourceFields(recpointer_vals, assigned_fields);
+                                                if(term_vals.length > 0){
+                                                    that.processTermFields(term_vals, recpointer_vals, assigned_fields, {});
+                                                }else{
+                                                    that.processResourceFields(recpointer_vals, assigned_fields);
+                                                }
                                             }
                                         }
                                     }
-                                }});
-                        }});
-                        
+                                };
+
+                                if(service_name == 'ESTC_editions' || service_name == 'ESTC_works' || service_name == 'ESTC'){
+
+                                    var req = {
+                                        a: 'check_allow_estc',
+                                        db: window.hWin.HAPI4.database,
+                                        ver: service_name
+                                    };
+                                    window.hWin.HAPI4.SystemMgr.check_allow_estc(req, function(response){
+                                        if(response.status == window.hWin.ResponseStatus.OK){
+                                            window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, dlg_opts);
+                                        }else{
+                                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                                            return false;
+                                        }
+                                    });
+                                }else{
+                                    window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, dlg_opts);
+                                }
+                            }
+                        });
                     }
                 }
             }
