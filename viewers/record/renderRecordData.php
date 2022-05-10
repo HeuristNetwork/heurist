@@ -244,6 +244,26 @@ if(!($is_map_popup || $without_header)){
             }
 
             //
+            // Display cms content within popup, when link clicked
+            //
+            function handleCMSContent(){
+                var $eles = $('.cmsContent');
+
+                if($eles.length > 0){
+
+                    $eles.each(function(idx, ele){
+                        var $ele = $(ele);
+
+                        $('<div class="detail" style="cursor:pointer;text-decoration:underline;" title="Click to popup content">Web page content</div>').on('click', function(){
+                            window.hWin.HEURIST4.msg.showElementAsDialog({'element': $ele[0], 'default_palette_class': 'ui-heurist-explore', 'title': 'Web page content'});
+                        }).insertBefore($ele);
+
+                        $ele.hide();
+                    })
+                }
+            }
+
+            //
             //
             //
             function showHidePrivateInfo( event ){
@@ -1473,6 +1493,13 @@ if(false){  //this query fails for maria db
             if(!(mysql__select_value($mysqli, $query)>0)) continue; //not in structure
         }
 
+        $is_cms_content = !$is_map_popup &&  
+                          (defined('RT_CMS_MENU') && $bib['rec_RecTypeID']==RT_CMS_MENU ||
+                           defined('RT_CMS_HOME') && $bib['rec_RecTypeID']==RT_CMS_HOME) &&
+                           (defined('DT_EXTENDED_DESCRIPTION') && $bd['dty_ID']==DT_EXTENDED_DESCRIPTION || 
+                            defined('DT_CMS_HEADER') && $bd['dty_ID']==DT_CMS_HEADER || 
+                            defined('DT_CMS_FOOTER') && $bd['dty_ID']==DT_CMS_FOOTER) ? ' cmsContent' : '';
+
         $ele_id = ($bd['rst_DisplayOrder'] != '' || $bd['rst_DisplayOrder'] != null) ? 'data-order="' . $bd['rst_DisplayOrder'] . '"' : '';
 
         print '<div class="detailRow fieldRow" '. $ele_id .' style="border:none 1px #00ff00;'   //width:100%;
@@ -1480,7 +1507,7 @@ if(false){  //this query fails for maria db
             .($is_map_popup?'':'width:100%;')
             .$font_size
             .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
-        .'</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'
+        .'</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').$is_cms_content.'">'
         .' '.$bd['val'].'</div></div>';
         $prevLbl = $bd['name'];
         
@@ -1510,7 +1537,7 @@ if(false){  //this query fails for maria db
     }else{
 
         if(is_array($group_details) && count($group_details) > 0){
-            echo '<script>createRecordGroups(', json_encode($group_details, JSON_FORCE_OBJECT), ');</script>';
+            echo '<script>createRecordGroups(', json_encode($group_details, JSON_FORCE_OBJECT), ');handleCMSContent();</script>';
         }
 
         echo '<div class="detailRow fieldRow">&nbsp;</div>';

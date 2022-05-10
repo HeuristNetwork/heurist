@@ -905,11 +905,16 @@ $.widget( "heurist.editing_input", {
                         .insertBefore($input);
                     $input.hide();
                     
-                    $btn_edit_switcher.text('edit source');
+                    $btn_edit_switcher.text('edit source').css({
+                        'text-decoration': 'underline',
+                        'display': 'inline-block',
+                        'margin': '2px 10px 0px',
+                        'cursor': 'pointer'
+                    });
                     
-                    var $btn_edit_switcher2 = $( '<span>edit wysiwyg</span>', {title: 'Show rich text editor'})
+                    var $btn_edit_switcher2 = $( '<div>edit wysiwyg</div>', {title: 'Show rich text editor'})
                         .addClass('smallbutton')
-                        .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                        .css({'line-height': '20px', 'vertical-align': 'top', cursor: 'pointer', 'text-decoration': 'underline', 'display': 'inline-block'})
                         .insertAfter( $btn_edit_switcher );
                     var $label_edit_switcher = $('<span>Advanced users:</span>')
                         .css({'line-height': '20px','vertical-align':'top'}).addClass('smallbutton')
