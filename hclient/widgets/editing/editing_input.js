@@ -149,8 +149,13 @@ $.widget( "heurist.editing_input", {
             .css({'vertical-align':'top'})  //, 'line-height':'initial'
             .html('<label>' + lblTitle + '</label>')
             .appendTo( this.element );
-            
-//(this.detailType=="blocktext" || (this.detailType=='file' && this.configMode.entity!='records')  )?'top':''            
+
+            // Apply user pref font size
+            var usr_font_size = window.hWin.HAPI4.get_prefs_def('userFontSize', 0);
+            if(usr_font_size != 0){
+                usr_font_size = (usr_font_size < 8) ? 8 : (usr_font_size > 18) ? 18 : usr_font_size;
+                this.header.css('font-size', usr_font_size+'px');
+            }
         }
         
         var is_sortable = false;
@@ -673,6 +678,13 @@ $.widget( "heurist.editing_input", {
         value = window.hWin.HEURIST4.util.isnull(value)?'':value;
 
         var $inputdiv = $( "<div>" ).addClass('input-div').insertBefore(this.error_message); //was this.input_prompt
+
+        // Apply user pref font size
+        var usr_font_size = window.hWin.HAPI4.get_prefs_def('userFontSize', 0);
+        if(usr_font_size != 0){
+            usr_font_size = (usr_font_size < 8) ? 8 : (usr_font_size > 18) ? 18 : usr_font_size;
+            $inputdiv.css('font-size', usr_font_size+'px');
+        }
 
         if(this.detailType=='blocktext'){//----------------------------------------------------
 

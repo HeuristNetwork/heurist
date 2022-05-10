@@ -1455,6 +1455,13 @@ if(false){  //this query fails for maria db
         $always_visible_dt[] = DT_GEO_OBJECT;                                                 
     }
 
+    $usr_font_size = $system->user_GetPreference('userFontSize', 0);
+    $font_size = '';
+    if(!$is_map_popup && $usr_font_size != 0){
+        $usr_font_size = ($usr_font_size < 8) ? 8 : ($usr_font_size > 18) ? 18 : $usr_font_size;
+        $font_size = 'font-size: ' . $usr_font_size . 'px;';
+    }
+
     $prevLbl = null;
     foreach ($bds as $bd) {
         if (defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) continue;
@@ -1471,6 +1478,7 @@ if(false){  //this query fails for maria db
         print '<div class="detailRow fieldRow" '. $ele_id .' style="border:none 1px #00ff00;'   //width:100%;
             .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none;':'')
             .($is_map_popup?'':'width:100%;')
+            .$font_size
             .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
         .'</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'
         .' '.$bd['val'].'</div></div>';
@@ -1568,6 +1576,13 @@ function print_relation_details($bib) {
 
     $extra_styling = (!$is_map_popup) ? 'style="max-width: max-content;"' : '';
 
+    $usr_font_size = $system->user_GetPreference('userFontSize', 0);
+    $font_size = '';
+    if(!$is_map_popup && $usr_font_size != 0){
+        $usr_font_size = ($usr_font_size < 8) ? 8 : ($usr_font_size > 18) ? 18 : $usr_font_size;
+        $font_size = 'font-size: ' . $usr_font_size . 'px;';
+    }
+
     if($from_res){
 		while ($reln = $from_res->fetch_assoc()) {
 			
@@ -1625,7 +1640,7 @@ function print_relation_details($bib) {
                 $recTitle = 'record id ' . $relatedRecID;
             }
 
-			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2 linkRow
+			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.$font_size.($is_map_popup?'display:none':'').'">'; // && $link_cnt>2 linkRow
 			$link_cnt++;
 			//		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
 
@@ -1709,7 +1724,7 @@ function print_relation_details($bib) {
                 $recTitle = 'record id ' . $relatedRecID;
             }
 
-			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2linkRow
+			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.$font_size.($is_map_popup?'display:none':'').'">'; // && $link_cnt>2 linkRow
 			$link_cnt++;
 
 			if($field_name === false && array_key_exists('RelTerm',$bd)){
@@ -1802,21 +1817,28 @@ function print_linked_details($bib, $link_cnt)
     <?php
        }
     }
-    
-        while ($row = $res->fetch_assoc()) {
 
-            print '<div class="detailRow fieldRow"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2 linkRow
-            $link_cnt++;
+    $usr_font_size = $system->user_GetPreference('userFontSize', 0);
+    $font_size = '';
+    if(!$is_map_popup && $usr_font_size != 0){
+        $usr_font_size = ($usr_font_size < 8) ? 8 : ($usr_font_size > 18) ? 18 : $usr_font_size;
+        $font_size = 'font-size: ' . $usr_font_size . 'px;';
+    }
+
+    while ($row = $res->fetch_assoc()) {
+
+        print '<div class="detailRow fieldRow" style="'.$font_size.($is_map_popup?'display:none':'').'">'; // && $link_cnt>2 linkRow
+        $link_cnt++;
+        
+            print '<div style="display:table-cell;width:28px;height:21px;text-align: right;padding-right:4px">'
+                    .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$row['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>';
+
+            print '<div style="display: table-cell;vertical-align:top;'
+            .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
+                .strip_tags($row['rec_Title'],ALLOWED_TAGS).'</a></div>';
             
-                print '<div style="display:table-cell;width:28px;height:21px;text-align: right;padding-right:4px">'
-                        .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$row['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>';
-                        
-                print '<div style="display: table-cell;vertical-align:top;'
-                .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
-                    .strip_tags($row['rec_Title'],ALLOWED_TAGS).'</a></div>';
-                
-            print '</div>';
-        }
+        print '</div>';
+    }
         
     print '</div>';
     return $link_cnt;
