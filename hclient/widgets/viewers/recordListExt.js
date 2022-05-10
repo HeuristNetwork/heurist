@@ -34,7 +34,7 @@ $.widget( "heurist.recordListExt", {
         
         reload_for_recordset: false, //refresh every time recordset is changed - for smarty report from CMS
         search_realm: null,
-        search_initial: null,  //NOT USED query string or svs_ID for initial search
+        search_initial: null,  //Query or svs_ID for initial search
         
         custom_css_for_frame: null,
         record_with_custom_styles: 0, //record id with custom css and style links DT_CMS_CSS and DT_CMS_EXTFILES
@@ -43,8 +43,8 @@ $.widget( "heurist.recordListExt", {
         
     },
 
-    _current_url: null,
-    _query_request: null, //keep current query request
+    _current_url: null, //keeps current url - see loadURL 
+    _query_request: null, //keeps current query request
     _events: null,
     _dataTable: null,
 
@@ -135,21 +135,24 @@ that._dout('myOnShowEvent');
                 that._refresh();
             }
         });
-        //if(!this.options.is_single_selection){
             
-            if(this.options.is_frame_based){
-                this.dosframe.on('load', function(){
-                    that.onLoadComplete();
-                });
-            }
-        //}
+        if(this.options.is_frame_based){
+            this.dosframe.on('load', function(){
+                that.onLoadComplete();
+            });
+        }
         
-
-
+        if(this.options.search_initial){
+that._dout('>>'+this.options.search_initial);            
+            this.doSearch( this.options.search_initial );
+            this.options.search_initial = null;
+        }        
+        
     }, //end _create
 
     //
-    //
+    // Used when it reloads contents for every selection or for every update of recordset
+    // see reload_for_recordset and is_single_selection
     //
     loadURL: function( newurl ){
         
@@ -168,12 +171,16 @@ this._dout('load '+this.options.is_frame_based+'  '+newurl);
         
     },
     
+    //
+    // Callback event listener on load of content into div_content or iframe
+    //
     onLoadComplete: function(){
         this.loadanimation(false);
         if(!this.options.reload_for_recordset && this.options.is_frame_based && !this.options.is_single_selection){
 this._dout('onLoadComplete refresh again');                
               this._refresh();
         }
+        
         if($.isFunction(this.options.onLoadComplete)){
             this.options.onLoadComplete.call(this);
         }
@@ -189,10 +196,17 @@ this._dout('onLoadComplete refresh again');
             fdoc.getElementsByTagName('head')[0].appendChild(style);
             
         }
-        
-        
 //2020-03-08        
         //this._trigger( 'loadcomplete2', null, null );
+    },
+    
+    // 
+    // Execute search and update dataset independently
+    //
+    doSearch: function(query){
+        var request = {q:query, w: 'a', detail: 'ids', 
+                        source: 'init', search_realm: this.options.search_realm };
+        window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
     },
     
     //
@@ -241,6 +255,7 @@ this._dout('update dataset '+request.q);
             console.log(msg);
         }
         */
+        console.log(msg);
     },
     
     /*
@@ -325,7 +340,7 @@ this._dout('refresh vis='+this.element.is(':visible'));
 
             this.loadURL( this.options.url );
 
-        }else{ //content has been loaded already
+        }else{ //content has been loaded already ===============================
 
             var query_string_all = null,
             query_string_sel = null,
@@ -340,7 +355,7 @@ this._dout('refresh vis='+this.element.is(':visible'));
             window.hWin.HEURIST4.currentQuery_sel_waslimited = false;
             window.hWin.HEURIST4.currentQuery_all_waslimited = false;
 */
-            if(this.options.reload_for_recordset)
+            if(this.options.reload_for_recordset) //reloads content entirely
             {
                 var newurl = window.hWin.HAPI4.baseURL +  this.options.url.replace("[query]", query_string_main);
                 
@@ -364,6 +379,7 @@ this._dout('refresh vis='+this.element.is(':visible'));
             }
 
             if(this.options.is_frame_based){
+                //there is heurist apps in iframe - smarty report, crosstabs analysis or mapping
 
                 var showReps = this.dosframe[0].contentWindow.showReps;
                 if(showReps){

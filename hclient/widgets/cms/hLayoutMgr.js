@@ -297,7 +297,9 @@ function hLayoutMgr(){
         if(old_widget.length>0){
             //parent_ele = old_widget.parent();
             //var prev_sibling = old_widget.prev();
-            old_widget.replaceWith($d);
+            $d.insertBefore(old_widget);
+            old_widget.remove();
+            //old_widget.replaceWith($d);
         }else{
             $d.appendTo(container);    
         }
