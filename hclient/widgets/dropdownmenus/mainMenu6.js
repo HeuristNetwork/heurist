@@ -959,7 +959,8 @@ $.widget( "heurist.mainMenu6", {
                             .css({
                                 'font-size': '13px',
                                 'display': 'inline-block',
-                                'max-width': '85%'
+                                'max-width': '85%',
+                                'vertical-align': 'text-top'
                             })
                             .attr('title', filter[1])
                             .text(filter[1]);
@@ -979,8 +980,12 @@ $.widget( "heurist.mainMenu6", {
 
             if($favourite_container.find('li').length > 0){
 
+                var block_filter = false;
+
                 this._on($favourite_container.find('li'), {
                     click: function(event){
+
+                        if(block_filter) { return; } // user current re-ordering favourite filters
 
                         var $ele = $(event.target);
                         if($ele.is('span') && !$ele.hasClass('smallbutton')){ // filter text clicked
@@ -1010,11 +1015,11 @@ $.widget( "heurist.mainMenu6", {
                     mouseover: function(event){
 
                         if($(event.target).hasClass('smallbutton')){
-                            $(event.target).css('display', 'inline-block');
+                            $(event.target).show();
                         }else if($(event.target).hasClass('truncate')){
-                            $(event.target).parent().find('span.smallbutton').css('display', 'inline-block');
+                            $(event.target).parent().find('span.smallbutton').show();
                         }else{
-                            $(event.target).find('span.smallbutton').css('display', 'inline-block');
+                            $(event.target).find('span.smallbutton').show();
                         }
                     },
                     mouseout: function(event){
@@ -1023,6 +1028,9 @@ $.widget( "heurist.mainMenu6", {
                 });
 
                 $favourite_container.sortable({
+                    start: function(event, ui){
+                        block_filter = true; // disable filtering
+                    },
                     stop: function(event, ui){
                         
                         var new_order = [];
@@ -1033,6 +1041,8 @@ $.widget( "heurist.mainMenu6", {
                         });
 
                         window.hWin.HAPI4.save_pref('favourite_filters', new_order); // save prefs
+
+                        setTimeout(function(){ block_filter = false; }, 1000); // re-enable filtering
                     }
                 });
 
