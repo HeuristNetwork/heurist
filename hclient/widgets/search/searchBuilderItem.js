@@ -532,6 +532,8 @@ Whole value = EQUAL
                 {key:'<=^',title:'size(kb)<='},
                 {key:'>=^',title:'size(kb)>='}
                 ]);
+            }else if(dty_ID=='url'){
+                eqopts.push({key:'-',title:'not equals'}); // - negate
             }
         }
 
