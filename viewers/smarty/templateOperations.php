@@ -90,6 +90,15 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
                     smartyLocalIDsToConceptIDs($template_file);
                     break;
 
+                case 'check':
+                    // check if the template exists
+                    if($template_file && file_exists($dir.$template_file)){
+                        header("Content-type: text/javascript");
+                        print json_encode(array("ok"=>"Template file exists"));
+                    }else{
+                        throw new Exception("Template file does not exist");
+                    }
+                    break;
             }
 
         }

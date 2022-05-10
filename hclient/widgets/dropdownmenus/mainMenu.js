@@ -1495,9 +1495,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             for(var i=0;i<map_controls.length;i++){
                 prefs['mctrl_'+map_controls[i]] = 1;
             }
-            
+
+            // Map popup record view
             window.hWin.HEURIST4.ui.createTemplateSelector( $dlg.find('#map_template'), [{key:'',title:'Standard map popup template'},{key:'none',title:'Disable popup'}],
                             window.hWin.HAPI4.get_prefs_def('map_template', null));
+
+            // Main record view
+            window.hWin.HEURIST4.ui.createTemplateSelector( $dlg.find('#main_recview'), [{key:'default',title:'Standard record view'}],
+                            window.hWin.HAPI4.get_prefs_def('main_recview', 'default'));
 
             //from prefs to ui
             allFields.each(function(){
