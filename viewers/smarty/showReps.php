@@ -362,6 +362,8 @@ function executeSmartyTemplate($system, $params){
             header("Content-type: text/html;charset=UTF-8");
         }
         $smarty->display($template_file);
+
+        $system->user_LogActivity('custRep', array(implode(' ',$results), count($results)), null, TRUE); // log activity, rec ids separated by spaces
     } catch (Exception $e) {
         smarty_error_output($system, 'Exception on execution: '.$e->getMessage());
         //echo 'Exception on execution: ', $e->getMessage(), "\n";

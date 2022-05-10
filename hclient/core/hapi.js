@@ -758,7 +758,7 @@ prof =Profile
                     gtag('event', evt_action, {'event_category': evt_category, 'event_label': evt_label});
                 }
                 
-                if(activity.indexOf('search')<0 && activity.indexOf('edit')<0){
+                if(activity.indexOf('search')<0 && activity.indexOf('edit')<0 && activity.indexOf('editRec') == -1){
                 
                     activity = activity.replace('_','');
                     

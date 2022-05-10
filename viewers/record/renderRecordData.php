@@ -740,8 +740,7 @@ $_time_debug = $_time_debug2;
             //print_text_details($bib);
         }
         
-
-    
+        $system->user_LogActivity('viewRec', $bib['rec_ID'], null, TRUE); // log action
     }else{
         
         print 'Sorry, your group membership does not allow you to view the content of this record';
