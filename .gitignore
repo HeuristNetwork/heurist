@@ -215,8 +215,10 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
+external/
 ext/
 vendor/
+help/
 
 #PHPStorm
 .idea/*
