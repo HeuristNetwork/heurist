@@ -97,7 +97,13 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             var fele = this.element.find('.ent_wrapper:first');
             fele.css({top:'36px',bottom:'40px'});
             $('<div class="ui-heurist-header">'+this.options.title+'</div>').insertBefore(fele);    
-            this.toolbar = $('<div class="ent_footer button-toolbar ui-heurist-header" style="height:20px"></div>').insertAfter(fele);    
+
+            var toolbar_height = '20px';
+            if(navigator.userAgent.indexOf('Firefox') >= 0){
+                toolbar_height = '40px';
+            }
+            this.toolbar = $('<div class="ent_footer button-toolbar ui-heurist-header" style="height:'+ toolbar_height +'"></div>').insertAfter(fele);    
+
             //append action buttons
             this.toolbar.empty();
             var btns = this._getActionButtons();
@@ -128,6 +134,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             }
         });
         this.element.find('#selectAll_container').css("padding-left", "21px").hide();
+        this.element.find('#chkJoinRecTypes_container').css({
+            "display": "inline-block",
+            "margin-left": "10px"
+        }).hide();
 
         return true;
     },
@@ -515,9 +525,11 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         if(rtyID==''){
             $('.rtt-tree').parent().hide();
             this.element.find('#selectAll_container').hide();
+            this.element.find('#chkJoinRecTypes_container').hide();
         }else{
             $('.rtt-tree').parent().show();
             this.element.find('#selectAll_container').show();
+            this.element.find('#chkJoinRecTypes_container').show();
             if(rtyID>0){
                 this.selectedFields = [];
             }
