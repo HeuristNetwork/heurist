@@ -302,8 +302,11 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MIME_TYPE' => array(2, 29),
     'DT_IMAGE_TYPE' => array(2, 30),
     'DT_MAP_IMAGE_LAYER_SCHEMA' => array(2, 31),
-    'DT_MINMUM_ZOOM_LEVEL' => array(2, 32),
+    'DT_MINIMUM_ZOOM_LEVEL' => array(2, 32), //used for layers visibility
     'DT_MAXIMUM_ZOOM_LEVEL' => array(2, 33),
+    'DT_MINIMUM_ZOOM' => array(3, 1085),   // zoom in km 
+    'DT_MAXIMUM_ZOOM' => array(3, 1086),   // used for map documents and tile layers
+    
     'DT_SERVICE_URL' => array(2, 34),
     'DT_ORIGINAL_RECORD_ID' => array(2, 36),
     'DT_FILE_RESOURCE' => array(2, 38),
@@ -365,8 +368,6 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_LATITUDE_CENTREPOINT' => array(3, 1075),    //deprecated
     'DT_MINOR_SPAN' => array(3, 1076),              //deprecated
     'DT_MAP_BOOKMARK' => array(3, 1082),
-    'DT_MINIMUM_MAP_ZOOM' => array(3, 1077), // from Jan 2017 uses DT_MINIMUM_ZOOM and DT_MAXIMUM_ZOOM for both maps and layers
-    'DT_MAXIMUM_MAP_ZOOM' => array(3, 1078), // prior Jan 2017 some databases used one, some used the other. Either now used for setting.
     'DT_SYMBOLOGY_POINTMARKER' => array(3, 1091),  //outdated
     'DT_SYMBOLOGY' => array(3, 1092),  //MAIN field that stores ALL styles for map symbology
     'DT_ZOOM_KM_POINT' => array(2, 925), //area to zoom in on point selection (per map space document)
@@ -377,8 +378,6 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_OPACITY' => array(3, 1090),         // outdated
     'DT_ORDERING_HIERARCHY' => array(2, 1082), // field used to define drag-drop ordering of records
     'DT_DATA_SOURCE' => array(3, 1083),
-    'DT_MINIMUM_ZOOM' => array(3, 1085), // from Jan 2017 uses DT_MINIMUM_ZOOM and DT_MAXIMUM_ZOOM for both maps and layers
-    'DT_MAXIMUM_ZOOM' => array(3, 1086), // prior Jan 2017 some databases used one, some used the other. Either now used for setting.
     // Shape
     'DT_ZIP_FILE' => array(3, 1072),
     'DT_SHAPE_FILE' => array(3, 1069),

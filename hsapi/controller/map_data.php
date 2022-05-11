@@ -250,25 +250,14 @@ function getRecordDetails($system, $record) {
                 // Latitude centrepoint
                 $record->lat = floatval($value);
 
-
-                /* ZOOM - from 2017 DT_MINIMUM_ZOOM and DT_MAXIMUM_ZOOM are used for both maps and map layers, 
-                but older databases may have set DT_MINIMUM_MAP_ZOOM or DT_MAXIMUM_MAP_ZOOM for either maps or for layers */
                 
             }else if(defined('DT_SYMBOLOGY_POINTMARKER') && $type == DT_SYMBOLOGY_POINTMARKER) {
                 //marker icon url 
                 $record->iconMarker = $fileID; //getFileURL($system, $fileID);
 
-            }else if(defined('DT_MAXIMUM_MAP_ZOOM') && $type == DT_MAXIMUM_MAP_ZOOM) {
-                // Maximum zoom
-                $record->maxZoom = floatval($value);
-
             }else if(defined('DT_MAXIMUM_ZOOM') && $type == DT_MAXIMUM_ZOOM) {
                 // Maximum zoom
                 $record->maxZoom = floatval($value);
-
-            }else if(defined('DT_MINIMUM_MAP ZOOM') && $type == DT_MINIMUM_MAP_ZOOM) {
-                // Minimum zoom
-                $record->minZoom = floatval($value);
 
             }else if(defined('DT_MINIMUM_ZOOM') && $type == DT_MINIMUM_ZOOM) {
                 // Minimum zoom

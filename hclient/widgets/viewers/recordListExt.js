@@ -255,7 +255,6 @@ this._dout('update dataset '+request.q);
             console.log(msg);
         }
         */
-        console.log(msg);
     },
     
     /*
