@@ -230,7 +230,7 @@ $.widget( "heurist.search", {
             this._on( link, {  click: function(){
                 window.open('context_help/advanced_search.html','_blank');
             } });
-
+            
             this._on( this.input_search, {  click: function(){ // open search textarea in a popup, for more space, add more instructions and include filter help link
 
                 var org_val = this.input_search.val();
@@ -239,10 +239,12 @@ $.widget( "heurist.search", {
                 // Check for horizontal scrolling
                 this.input_search.css('white-space', 'nowrap');
                 var nw_scrollWidth = this.input_search[0].scrollWidth;
-                var nw_width = this.input_search.width();
+                var nw_width = this.input_search.width();                
                 this.input_search.css('white-space', '');
 
-                if(window.hWin.HEURIST4.util.isempty(org_val) || window.hWin.HEURIST4.util.isempty(newline_matches) || (nw_scrollWidth <= nw_width)){
+                if(window.hWin.HEURIST4.util.isempty(org_val) 
+                    || (window.hWin.HEURIST4.util.isempty(newline_matches) 
+                        && (nw_scrollWidth <= nw_width))){ 
                     return;
                 }
 
