@@ -1481,7 +1481,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
             //default
             prefs['userCompetencyLevel'] = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
-            prefs['userFontSize'] = window.hWin.HAPI4.get_prefs_def('userFontSize', 14);
+            prefs['userFontSize'] = window.hWin.HAPI4.get_prefs_def('userFontSize', 12);
             prefs['searchQueryInBrowser'] = window.hWin.HAPI4.get_prefs_def('searchQueryInBrowser', 1);
             prefs['mapcluster_on'] = window.hWin.HAPI4.get_prefs_def('mapcluster_on', 1);
             prefs['mapcluster_zoom'] = window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 12);
@@ -1495,9 +1495,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             for(var i=0;i<map_controls.length;i++){
                 prefs['mctrl_'+map_controls[i]] = 1;
             }
-            
+
+            // Map popup record view
             window.hWin.HEURIST4.ui.createTemplateSelector( $dlg.find('#map_template'), [{key:'',title:'Standard map popup template'},{key:'none',title:'Disable popup'}],
                             window.hWin.HAPI4.get_prefs_def('map_template', null));
+
+            // Main record view
+            window.hWin.HEURIST4.ui.createTemplateSelector( $dlg.find('#main_recview'), [{key:'default',title:'Standard record view'}],
+                            window.hWin.HAPI4.get_prefs_def('main_recview', 'default'));
 
             //from prefs to ui
             allFields.each(function(){
@@ -1510,6 +1515,25 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 };
             });
             
+            //change font size example
+            $dlg.find('#userFontSizeExample')
+                .css('font-size', prefs['userFontSize']+'px')
+                .position({
+                    my: 'left+15 center',
+                    at: 'right center',
+                    of: $dlg.find('#userFontSize')
+                });
+
+            $dlg.find('#userFontSize').on('change', function(){ 
+                var size = $dlg.find('#userFontSize').val();
+                $dlg.find('#userFontSizeExample')
+                    .css('font-size', size+'px')
+                    .position({
+                        my: 'left+15 center',
+                        at: 'right center',
+                        of: $dlg.find('#userFontSize')
+                    });
+            });
 
             //custom/user heurist theme
             var custom_theme_div = $dlg.find('#custom_theme_div');

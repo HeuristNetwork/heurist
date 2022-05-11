@@ -758,7 +758,7 @@ prof =Profile
                     gtag('event', evt_action, {'event_category': evt_category, 'event_label': evt_label});
                 }
                 
-                if(activity.indexOf('search')<0 && activity.indexOf('edit')<0){
+                if(activity.indexOf('search')<0 && activity.indexOf('edit')<0 && activity.indexOf('editRec') == -1){
                 
                     activity = activity.replace('_','');
                     
@@ -1906,7 +1906,7 @@ prof =Profile
                  search_result_pagesize:100,
                  search_detail_limit: 2000,
                  userCompetencyLevel: 2, //'beginner',
-                 userFontSize: 14, //px
+                 userFontSize: 12, //px
                  deriveMapLocation: true,
                  help_on: true, 
                  optfields: true,

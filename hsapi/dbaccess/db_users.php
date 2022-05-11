@@ -268,7 +268,7 @@
         'search_result_pagesize' => 100,
         'search_detail_limit' => 2000,
         'userCompetencyLevel' => 2, //'beginner'
-        'userFontSize' => 14, //px
+        'userFontSize' => 12, //px
 
         'deriveMapLocation ' => true,
 

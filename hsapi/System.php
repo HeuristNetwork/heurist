@@ -1699,20 +1699,27 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
     //
     //
     //    
-    public function user_LogActivity($action, $suplementary = '', $user_id=null){
+    public function user_LogActivity($action, $suplementary = '', $user_id=null, $date_only=false){
         
-         if($user_id==null){
-             $this->login_verify( false );
-             $user_id = $this->get_user_id();
-         }
+        if($user_id==null){
+            $this->login_verify( false );
+            $user_id = $this->get_user_id();
+        }
         
-         $now = new DateTime();
-         $info =  array($user_id, $action, $now->format('Y-m-d H:i:s'), $suplementary);
-        
-         file_put_contents ( HEURIST_FILESTORE_DIR.'userInteraction.log' , implode(',', $info)."\n", FILE_APPEND );
-        
-    }
+        $now = new DateTime();
 
+        $timestamp = $date_only ? $now->format('Y-m-d') : $now->format('Y-m-d H:i:s');
+
+        $info = array($user_id, $action, $timestamp);
+
+        if(is_array($suplementary)){
+            $info = array_merge($info, $suplementary);
+        }else{
+            array_push($info, $suplementary);
+        }
+
+        file_put_contents ( HEURIST_FILESTORE_DIR.'userInteraction.log' , implode(',', $info)."\n", FILE_APPEND );
+    }
 
     /**
     * Loads system settings (default values) from sysIdentification

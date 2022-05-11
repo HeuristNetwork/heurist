@@ -48,7 +48,13 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
             var fele = this.element.find('.ent_wrapper:first');
             fele.css({top:'36px',bottom:'40px'});
             $('<div class="ui-heurist-header">'+this.options.title+'</div>').insertBefore(fele);    
-            this.toolbar = $('<div class="ent_footer button-toolbar ui-heurist-header" style="height:20px"></div>').insertAfter(fele);    
+
+            var toolbar_height = '20px';
+            if(navigator.userAgent.indexOf('Firefox') >= 0){
+                toolbar_height = '40px';
+            }
+            this.toolbar = $('<div class="ent_footer button-toolbar ui-heurist-header" style="height:'+ toolbar_height +'"></div>').insertAfter(fele);
+
             //append action buttons
             this.toolbar.empty();
             this.element.find('.kml-buttons').empty();

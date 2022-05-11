@@ -121,7 +121,49 @@ that._dout('search finised');
                         //that.option("selection", sel);
                     }
 that._dout('selected');                    
-                    that._refresh();
+
+                    var smarty_template = window.hWin.HAPI4.get_prefs_def('main_recview', 'default'); // default = standard record viewer
+                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(that.options.selection) && that.options['url'] 
+                        && that.options['url'].indexOf('renderRecordData') != -1 && smarty_template != 'default'){
+
+                        var recIDs_list = that.options.selection;
+
+                        if(recIDs_list.length>0){
+                            var recID = recIDs_list[recIDs_list.length-1];
+
+                            // check if the custom report exists
+                            var req_url = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
+                            var request = {mode: 'check', template: smarty_template, db: window.hWin.HAPI4.database}; 
+
+                            window.hWin.HEURIST4.util.sendRequest(req_url, request, null, function(response){
+
+                                if(response && response.ok){
+
+                                    newurl = 'viewers/smarty/showReps.php?publish=1&debug=0'
+                                        + '&q=ids:' + recID
+                                        + '&db=' + window.hWin.HAPI4.database
+                                        + '&template=' + encodeURIComponent(smarty_template);
+
+                                    if(that._current_url != newurl){    
+                                        that.loadURL(newurl);
+                                    }
+                                }else{
+
+                                    var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                                        "You have specified a custom report format '"+ smarty_template.slice(0, -4) +"' to use in this view,<br>"
+                                        + "however this format no longer exists.<br><br>Please go to Design > My preferences to choose a new format.", 
+                                        null,
+                                        {ok: 'Close', title: 'Custom format unavailable'},
+                                        {default_palette_class: 'ui-heurist-explore'}
+                                    );
+
+                                    that._refresh(); // display normal record view - custom report missing
+                                }
+                            });
+                        }
+                    }else{
+                        that._refresh();
+                    }
                 }
             }
             //that._refresh();
