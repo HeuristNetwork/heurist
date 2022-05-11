@@ -133,11 +133,11 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 });
             }
         });
-        this.element.find('#selectAll_container').css("padding-left", "21px").hide();
+        this.element.find('#selectAll_container').css("padding-left", "21px");
         this.element.find('#chkJoinRecTypes_container').css({
             "display": "inline-block",
             "margin-left": "10px"
-        }).hide();
+        });
 
         return true;
     },
@@ -522,7 +522,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         $('#divSaveSettings').hide();
         $('#divLoadSettings').hide();
         
-        if(rtyID==''){
+        if(rtyID=='' || rtyID==null){
             $('.rtt-tree').parent().hide();
             this.element.find('#selectAll_container').hide();
             this.element.find('#chkJoinRecTypes_container').hide();
