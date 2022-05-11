@@ -49,7 +49,8 @@ $.widget( "heurist.app_timemap", {
         
         onMapInit: null,   //event triggered when map is fully loaded/inited
         
-        custom_links: null  //links to custom css and scripts to be injected into mao iframe
+        custom_links: null,  //links to custom css and scripts to be injected into mao iframe
+        current_search_filter: null  //additional filter for current search result
     },
 
     _events: null,
@@ -147,10 +148,20 @@ console.log(re);
                     that.recordset_changed = true;
                     that.map_curr_search_inited = false;
                     
-                    that.option("recordset", data.recordset); //hRecordSet
+                    if(that.options.current_search_filter){
+                        //data.recordset
+                        var sub_query = window.hWin.HEURIST4.util.mergeHeuristQuery(
+                                    data.recordset.getIds(2000), that.options.current_search_filter);
+                                    
+                        var sub_request = {q: sub_query, w: 'all', detail:'ids', id:window.hWin.HEURIST4.util.random()};
+                        that.option("recordset", sub_request); 
+                    }else{
+                        that.option("recordset", data.recordset); //hRecordSet
+                    }
+                        
                     that._refresh();
                     that.loadanimation(false);
-
+                        
                     // Search start
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
 

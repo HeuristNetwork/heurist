@@ -1432,7 +1432,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         },
         
         //
-        //  returns subset by rerquest/filter
+        //  returns subset by request/filter
         //
         // request:  { "sort:fieldName":-1|1 , fieldName:=value, fieldName:value, fieldName:'NULL' }
         // structure [{dtID:fieldname, dtFields:{dty_Type: } }]

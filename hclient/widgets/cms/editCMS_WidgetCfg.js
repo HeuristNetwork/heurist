@@ -242,6 +242,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 if(opts['custom_links']){
                     $dlg.find('textarea[name="custom_links"]').val(opts['custom_links']);    
                 }
+                if(opts['current_search_filter']){
+                    $dlg.find('input[name="current_search_filter"]').val(opts['current_search_filter']);    
+                }
 
                 $dlg.find('button[name="basemap_filter"]')
                     .button()
@@ -892,7 +895,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 layout_params['minzoom'] = $dlg.find('input[name="map_minzoom"]').val();
             }
             if($dlg.find('input[name="map_pntzoom"]').val()>0){
-                layout_params['pntzoom'] = $dlg.find('input[name="pnt_maxzoom"]').val();
+                layout_params['pntzoom'] = $dlg.find('input[name="map_pntzoom"]').val();
             }
 
   
@@ -910,7 +913,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             var mapdoc_id = $dlg.find('select[name="mapdocument"]').val();
             if(mapdoc_id>0) opts['mapdocument'] = mapdoc_id;
 
-            opts['custom_links'] = $dlg.find('textarea[name="custom_links"]').val();    
+            opts['custom_links'] = $dlg.find('textarea[name="custom_links"]').val(); 
+            opts['current_search_filter'] = $dlg.find('input[name="current_search_filter"]').val();   
         }
 
                 var cont = $dlg.find('div.'+widget_name);
