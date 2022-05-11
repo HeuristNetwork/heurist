@@ -120,12 +120,13 @@ $.widget( "heurist.mapping", {
         map_rollover: false,
         map_popup_mode: 'standard',
         
-        zoomToPointInKM: 1,  //is set either from map documet DT_ZOOM_KM_POINT or from url parameters
+        zoomToPointInKM: 5,  //is set either from map documet DT_ZOOM_KM_POINT or from url parameters
         zoomMaxInKM: 0,
         zoomMinInKM: 0,
         
         default_style:null,
         default_selection_style:null
+        
     },
     
     /* expremental 
@@ -2389,14 +2390,14 @@ $.widget( "heurist.mapping", {
     //
     getLayerBounds: function (layer, useRuler){
         
-        if(layer instanceof L.Marker || layer instanceof L.CircleMarker){    
-            var ll = layer.getLatLng();
+        var that = this;
+
+        function __extendBoundsForPoint(ll){
             
-            //if field 2-925 is set (zoom to point in km) use it
-            if(useRuler){ //zoom to single point
+            if(useRuler && that.options.zoomToPointInKM>0){ //zoom to single point
             
                 var ruler = cheapRuler(ll.lat);
-                var bbox = ruler.bufferPoint([ll.lng, ll.lat], this.options.zoomToPointInKM);   //0.01          
+                var bbox = ruler.bufferPoint([ll.lng, ll.lat], that.options.zoomToPointInKM);   //0.01          
                 //w, s, e, n
                 var corner1 = L.latLng(bbox[1], bbox[0]),
                     corner2 = L.latLng(bbox[3], bbox[2]);
@@ -2407,8 +2408,25 @@ $.widget( "heurist.mapping", {
                     corner2 = L.latLng(ll.lat+0.02, ll.lng+0.02);
                 return L.latLngBounds(corner1, corner2);            
             }
+        }
+        
+        if(layer instanceof L.Marker || layer instanceof L.CircleMarker){    
+            var ll = layer.getLatLng();
+            
+            //if field 2-925 is set (zoom to point in km) use it
+            return __extendBoundsForPoint(ll);
+            
         }else{
-            return layer.getBounds();
+            var bnd = layer.getBounds();
+            if(bnd){
+                var p1 = bnd.getSouthWest();
+                var p2 = bnd.getNorthEast();
+                if(Math.abs(p1.lat-p2.lat)<0.01 && Math.abs(p1.lng-p2.lng)<0.01){
+                    return __extendBoundsForPoint(p1);
+                }
+            }
+            
+            return bnd;
         }
     },
     
@@ -2676,7 +2694,7 @@ $.widget( "heurist.mapping", {
         if(params['pntzoom']>0){
             this.options.zoomToPointInKM = parseFloat(params['pntzoom']); 
             if(!(this.options.zoomToPointInKM>0)){
-                this.options.zoomToPointInKM  = 1; //default value
+                this.options.zoomToPointInKM  = 5; //default value
             }
         }
 
