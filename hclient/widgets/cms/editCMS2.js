@@ -112,7 +112,7 @@ function editCMS2(){
         //
         if($(this.document).find('.editStructure').length==0){
             
-            //add timymce and codemirror
+            //add tinymce and codemirror
             if(typeof tinymce === 'undefined'){
 
                 _loadTinyMCE(function(){_startCMS(_options)});
@@ -1667,6 +1667,8 @@ console.log('BLUR');
                     //save
                     if(new_cfg){
                         
+                        new_cfg.content = element_cfg.content;
+                        
                         layoutMgr.layoutContentSaveElement(_layout_content, new_cfg); //replace element to new one
 
                         //update treeview                    
@@ -1998,9 +2000,6 @@ console.log('BLUR');
         }
         __cleanLayout(newval);
 
-//console.log(newval);        
-
-        
         var newname = newval[0].name;
         
         // if page consist one group and one text without css - save only content of this text
