@@ -127,13 +127,26 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 var message = login_dialog.find('.messages');
 
                 if(isreset){
+                    
                     var rusername = $dlg.find('#reset_username');
                     if(window.hWin.HEURIST4.msg.checkLength( rusername, "username", null, 1, 0 ))
                     {
+                        login_dialog.parents('.ui-dialog').find('#btn_login2').hide();
+                        
+                        window.hWin.HEURIST4.msg.bringCoverallToFront(login_dialog.parents('.ui-dialog'),null,'sending...'); 
+                        
                         window.hWin.HAPI4.SystemMgr.reset_password({username: rusername.val()}, function(response){
+                            
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Password_Reset'), null, ""); // Title was an unhelpful and inelegant "Info"
+                                
+                                $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Password_Reset'), null, ""); // Title was an unhelpful and inelegant "Info"
+                                
+                                $dlg2.dialog('option','close',function(){ login_dialog.dialog('close'); });
+                                
                             }else{
+                                login_dialog.parents('.ui-dialog').find('#btn_login2').show();
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                         });

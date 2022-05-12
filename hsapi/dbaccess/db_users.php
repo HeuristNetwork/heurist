@@ -125,39 +125,40 @@
 
             }else{
                 //do not update password if mail is not enabled
-                if(!checkSmtp()){
+                if(false && !checkSmtp()){ //disabled - this function is very slow on intersect server
                     $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Recovery');
                     return false;
                 }
 
                 $new_passwd = generate_passwd();
-                $record = array("ugr_ID"=>$user['ugr_ID'], "ugr_Password"=>hash_it($new_passwd) );
-                $res= mysql__insertupdate($mysqli, "sysUGrps", "ugr_", $record);
-                if(is_numeric($res)>0){
 
-                    //, "From: ".$dbowner_Email
-                    $dbowner_Email = user_getDbOwner($mysqli, 'ugr_eMail');
-                    
-                    $email_title = 'Password reset';
-                    $email_text = "Dear ".$user['ugr_FirstName'].",\n\n".
-                    "Your Heurist password has been reset.\n\n".
-                    "Your username is: ".$user['ugr_Name']."\n".
-                    "Your new password is: ".$new_passwd."\n\n".
-                    "To change your password go to Profile -> My User Info in the top right menu.\nYou will first be asked to log in with the new password above.\n\n"
-                    ."Database Owner: ".$dbowner_Email;
+                //, "From: ".$dbowner_Email
+                $dbowner_Email = user_getDbOwner($mysqli, 'ugr_eMail');
+                
+                $email_title = 'Password reset';
+                $email_text = "Dear ".$user['ugr_FirstName'].",\n\n".
+                "Your Heurist password has been reset.\n\n".
+                "Your username is: ".$user['ugr_Name']."\n".
+                "Your new password is: ".$new_passwd."\n\n".
+                "To change your password go to Profile -> My User Info in the top right menu.\nYou will first be asked to log in with the new password above.\n\n"
+                ."Database Owner: ".$dbowner_Email;
 
+                
+                $rv = sendEmail($user['ugr_eMail'], $email_title, $email_text);
+                if($rv){
                     
-                    $rv = sendEmail($user['ugr_eMail'], $email_title, $email_text);
-                    if($rv){
-                        return true;
+                    $record = array("ugr_ID"=>$user['ugr_ID'], "ugr_Password"=>hash_it($new_passwd) );
+                    $res= mysql__insertupdate($mysqli, "sysUGrps", "ugr_", $record);
+                    if(is_numeric($res)>0){
+                            return true;
                     }else{
-                        $msg = $system->getError();
-                        $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Password_Reset', $msg?@$msg['message']:null);
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot update record in database', $res);        
                     }
-
                 }else{
-                    $system->addError(HEURIST_DB_ERROR, 'Cannot update record in database', $res);
+                    $msg = $system->getError();
+                    $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Password_Reset', $msg?@$msg['message']:null);
                 }
+
             }
 
         }else{
