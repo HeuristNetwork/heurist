@@ -302,10 +302,12 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MIME_TYPE' => array(2, 29),
     'DT_IMAGE_TYPE' => array(2, 30),
     'DT_MAP_IMAGE_LAYER_SCHEMA' => array(2, 31),
-    'DT_MINIMUM_ZOOM_LEVEL' => array(2, 32), //used for layers visibility
+    'DT_MINIMUM_ZOOM_LEVEL' => array(2, 32), //used for tile layers only 
     'DT_MAXIMUM_ZOOM_LEVEL' => array(2, 33),
-    'DT_MINIMUM_ZOOM' => array(3, 1085),   // zoom in km 
-    'DT_MAXIMUM_ZOOM' => array(3, 1086),   // used for map documents and tile layers
+    // zoom in km used for map documents (map zoom ranges) and layers (visibility range)
+    //note that minimum in km turns to maximum in native zoom  
+    'DT_MINIMUM_ZOOM' => array(3, 1086), //in UI this field acts as maximum zoom in km
+    'DT_MAXIMUM_ZOOM' => array(3, 1085), //in UI this field acts as minimum zoom in km  
     
     'DT_SERVICE_URL' => array(2, 34),
     'DT_ORIGINAL_RECORD_ID' => array(2, 36),

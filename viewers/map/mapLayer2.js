@@ -43,7 +43,8 @@ function hMapLayer2( _options ) {
     var _nativelayer_id = 0;
     
     var is_inited = false,
-        is_visible = false;
+        is_visible = false,
+        is_outof_range = false;
 
     //
     //
@@ -245,7 +246,7 @@ function hMapLayer2( _options ) {
     // parses shp+dbf files and converts them to geojson 
     //
     function _addSHP() {
-
+        
         var layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
         var rec_ID = _recordset.fld(_record, 'rec_ID');
                     
@@ -514,8 +515,11 @@ function hMapLayer2( _options ) {
         //
         setVisibility:function(visiblity_set){
             
+            
             var was_invisible = !is_visible;
             is_visible = (window.hWin.HEURIST4.util.isArrayNotEmpty(visiblity_set) || visiblity_set === true);
+
+            if(is_outof_range) return;
             
             var status = null;
            
@@ -537,6 +541,63 @@ function hMapLayer2( _options ) {
             //trigger callback
             _triggerLayerStatus( status );
             
+        },
+        
+        //
+        //
+        //
+        setVisibilityForZoomRange:function(current_zoom){
+            
+            if(is_inited){
+                
+                var _rec = options.rec_layer || _record;
+                if(_rec['maxzoom']==-1 && _rec['minzoom']==-1) return;
+
+                var is_in_range = true;
+                
+                if(_rec['maxzoom']>0 || _rec['minzoom']>=0){ //already defined
+                    
+                    is_in_range = (_rec['maxzoom']>=current_zoom)
+                            && (_rec['minzoom']==-1 || current_zoom>=_rec['minzoom']);
+                    
+                }else{
+                    _rec['maxzoom'] = -1;
+                    _rec['minzoom'] = -1;
+                    var dty_id = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM'];
+                    var layer_bnd = (_rec['layer']).getBounds();
+                    
+                    if(dty_id>0){
+                        var val = parseFloat(_recordset.fld(_rec, dty_id));
+                        if(val>0.01){ //old default value
+                            _rec['maxzoom'] = options.mapwidget.mapping('convertZoomToNative', val, layer_bnd);
+                        }
+                    }
+                    dty_id = window.hWin.HAPI4.sysinfo['dbconst']['DT_MINIMUM_ZOOM'];
+                    if(dty_id>0){
+                        var val = parseFloat(_recordset.fld(_rec, dty_id));
+                        if(val>0 && val!=20 && val!=90){ //old default value
+                            _rec['minzoom'] = options.mapwidget.mapping('convertZoomToNative', val, layer_bnd);
+                        }
+                    }
+                    
+                    that.setVisibilityForZoomRange( current_zoom );
+                    return;
+                }
+            
+                var status = null;
+                if(is_in_range){
+                    is_outof_range = false;
+                    status =  (is_visible)?'visible':'hidden';
+                    options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, is_visible);
+                }else{
+                    status = 'out';
+                    is_outof_range = true;
+                    options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, false);
+                }
+            
+                //trigger callback
+                _triggerLayerStatus( status );
+            }//inited
         },
         
         //

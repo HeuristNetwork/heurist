@@ -63,7 +63,7 @@ function hMapDocument( _options )
     DT_NAME = 0,
     
     DT_ZOOM_KM_POINT = 0,
-    DT_MINIMUM_ZOOM = 0, //bounds for mapdoc and visibility for layers
+    DT_MINIMUM_ZOOM = 0, //bounds for mapdoc and visibility for layers in km
     DT_MAXIMUM_ZOOM = 0,
     
     map_documents = null, //recordset - all loaded documents
@@ -302,7 +302,7 @@ function hMapDocument( _options )
     }
 
     //
-    //
+    // Converts min/max zoom in km to nativemap zoom levels and assign to map
     //
     function _defineZooms( mapdoc_id ){
         if(mapdoc_id!='temp'){
@@ -314,19 +314,22 @@ function hMapDocument( _options )
                 }
             }
             
-            if(DT_MAXIMUM_ZOOM>0){
-                var val = parseFloat(map_documents.fld(record2, DT_MAXIMUM_ZOOM));
-                if(val>0 && val!=90){
+            if(DT_MAXIMUM_ZOOM >0){
+                var val = parseFloat(map_documents.fld(record2,DT_MAXIMUM_ZOOM  ));
+                if(val>0.01){
                     var zoomNative = options.mapwidget.mapping('convertZoomToNative', val);
-                    if(zoomNative>=0){
+                    if(zoomNative>0){
                         options.mapwidget.mapping('defineMaxZoom', 'doc'+mapdoc_id, zoomNative);
                     }
                 }
             }
-            if(DT_MINIMUM_ZOOM>0){
-                var val = parseFloat(map_documents.fld(record2, DT_MINIMUM_ZOOM));
-                if(val>0.01){
-                    var minzoom = val;    
+            if(DT_MINIMUM_ZOOM >0){
+                var val = parseFloat(map_documents.fld(record2,DT_MINIMUM_ZOOM ));
+                if(val>0 && val!=90){ //90 old def value when this field was in degrees
+                    var zoomNative = options.mapwidget.mapping('convertZoomToNative', val);
+                    if(zoomNative>=0){
+                        options.mapwidget.mapping('defineMinZoom', 'doc'+mapdoc_id, zoomNative);
+                    }
                 }
             }
         }
@@ -646,7 +649,7 @@ function hMapDocument( _options )
         },
         
         //
-        // adds arbitrary recorset
+        // adds arbitrary recordset
         // it is used in Digital Harlem and Expert Nation when recordset is generated and prepared in custom way on client side
         // it converts given recordset to geojson and pass it to to mapping.addGeoJson
         //
@@ -724,7 +727,7 @@ function hMapDocument( _options )
                     var record = records[idx];
                     var rtype = resdata.fld(record, 'rec_RecTypeID');
                     if( (rtype==RT_MAP_LAYER || rtype==RT_TLCMAP_DATASET) && record['layer']){
-                        (record['layer']).setVisibility( is_visibile );
+                        (record['layer']).setVisibility( is_visibile ); //set all layers visible
                     }
                 }
             }
@@ -733,9 +736,51 @@ function hMapDocument( _options )
                 _defineZooms( mapdoc_id );
             }else{
                 options.mapwidget.mapping('defineMaxZoom', 'doc'+mapdoc_id, -1); //remove
+                options.mapwidget.mapping('defineMinZoom', 'doc'+mapdoc_id, -1); //remove
             }
             
         },
+
+
+        //
+        // update layer visibility for all active map documents according to current zoom 
+        // this method is called from zoomend event of native map
+        //
+        updateLayerVisibility: function( current_zoom, mapdoc_id ){
+            
+            if(!(DT_MAXIMUM_ZOOM>0 && DT_MINIMUM_ZOOM>0)) return;
+
+            function __updateLayers(resdata){
+                var idx, records = resdata.getRecords();
+                for(idx in records){
+                    if(idx)
+                    {
+                        var record = records[idx];
+                        var rtype = resdata.fld(record, 'rec_RecTypeID');
+                        if( (rtype==RT_MAP_LAYER || rtype==RT_TLCMAP_DATASET) && record['layer'])
+                        {
+                            (record['layer']).setVisibilityForZoomRange( current_zoom );
+                        }
+                    }
+                }
+            }
+            
+            if(mapdoc_id>0){
+                var resdata = map_documents_content[mapdoc_id];
+                __updateLayers(resdata);
+            }else{ 
+                //loop trough all 
+                var m_ids = Object.keys(map_documents_content);
+                for(var k in m_ids){
+                    if(m_ids[k]!='temp'){
+                        var resdata = map_documents_content[ m_ids[k] ];
+                        __updateLayers(resdata);
+                    }
+                }
+            }
+
+        },
+
         
         //
         // remove map document data and remove it from map
@@ -761,6 +806,7 @@ function hMapDocument( _options )
          
             if(mapdoc_id!='temp'){
                 options.mapwidget.mapping('defineMaxZoom', 'doc'+mapdoc_id, -1); //remove
+                options.mapwidget.mapping('defineMinZoom', 'doc'+mapdoc_id, -1); //remove
             }
             
         },

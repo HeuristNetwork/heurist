@@ -144,6 +144,7 @@ $.widget( "heurist.mapping", {
     
     
     available_maxzooms: [], //name of restrictions(widget, basemap, layer id, mapdoc id) => max zoom level, min zoom level
+    available_minzooms: [], 
 
     //record from search results mapdoc
     current_query_layer:null, 
@@ -316,6 +317,18 @@ $.widget( "heurist.mapping", {
         this.nativemap = L.map( map_element_id, {zoomControl:false, tb_del:true} )
             .on('load', function(){ } );
 
+        this.nativemap.on('zoomend', function (e) {
+            if(that.mapManager){
+                var md = that.mapManager.getMapDocuments();
+                if(md) {
+                    var currZoom = that.nativemap.getZoom();
+                    md.updateLayerVisibility(currZoom);   
+                }
+            }
+        });
+                        
+                        
+            
         //init basemap layer        
 /*        
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
@@ -505,9 +518,13 @@ $.widget( "heurist.mapping", {
                 //var layer_maxZoom = (provider['options'] && provider['options']['maxZoom']) ? provider['options']['maxZoom'] : 18;
                 var layer_maxZoom = (this.basemaplayer['options'] && this.basemaplayer['options']['maxZoom']) ? 
                                         this.basemaplayer['options']['maxZoom'] : 18;
+                
+                var layer_minZoom = (this.basemaplayer['options'] && this.basemaplayer['options']['minZoom']) ? 
+                                        this.basemaplayer['options']['minZoom'] : 0;
 
                 this.defineMaxZoom('basemap', layer_maxZoom);
-
+                this.defineMinZoom('basemap', layer_minZoom);
+                
             }            
             
         }   
@@ -644,9 +661,15 @@ $.widget( "heurist.mapping", {
         
         this._updatePanels();
         
-        if(layer_options && layer_options['maxZoom'])
-        {
-            this.defineMaxZoom(new_layer._leaflet_id, layer_options['maxZoom']);
+        if(layer_options){
+            if(layer_options['maxZoom']>0)
+            {
+                this.defineMaxZoom(new_layer._leaflet_id, layer_options['maxZoom']); //from tile layer
+            }
+            if(layer_options['minZoom']>=0)
+            {
+                this.defineMinZoom(new_layer._leaflet_id, layer_options['minZoom']); //from tile layer
+            }
         }
 
         return new_layer._leaflet_id;
@@ -1059,7 +1082,7 @@ $.widget( "heurist.mapping", {
     
     //
     // Sets maximum possible zoom
-    // layer_name - name of restrictions(widget, basemap, layyer
+    // layer_name - name of restrictions(widget, basemap, layer id, mapdoc id)
     //
     defineMaxZoom: function(layer_name, layer_maxZoom)
     {                
@@ -1094,59 +1117,40 @@ $.widget( "heurist.mapping", {
     
 
     //
-    // Converts zoom in km to native and assigns to map
-    // is_mapdcoument - if true, do not change current minmax native map zooms
+    // Sets minimum possible zoom
+    // layer_name - name of restrictions(widget, basemap, layer id, mapdoc id)
     //
-    /*
-    defineMinMaxZooms: function(maxzoom, minzoom, is_mapdcoument){        
-        
-            if(maxzoom>0){ //in km
-                maxzoom = parseFloat(maxzoom); 
-                if(maxzoom>0){
-                    this.options.zoomMaxInKM = maxzoom;
-                    maxzoom = this.convertZoomToNative(maxzoom, null); //in native zoom
-                }
-                
-                if(!is_mapdcoument && !(maxzoom>0)){
-                    this.options.zoomMaxInKM = 0;
-                    maxzoom = 18;        
-                }
-                
-                if(maxzoom>0){
-                    if(!is_mapdocument) this.userDefinedMaxZoom_keep = this.userDefinedMaxZoom;
-                    
-                    this.nativemap.setMaxZoom( maxzoom ); 
-                    this.userDefinedMaxZoom = maxzoom;
-                }
-            }
-
-            if(minzoom>0){ //in km
-                minzoom = parseFloat(minzoom);  
-                if(minzoom>0 && (this.options.zoomMaxInKM==0 || minzoom>this.options.zoomMaxInKM))
-                {
-                    this.options.zoomMinInKM = minzoom;
-                    minzoom = this.convertZoomToNative(minzoom, null); //in native zoom
+    defineMinZoom: function(layer_name, layer_minZoom)
+    {                
+            var idx = this.available_minzooms.findIndex(arr => arr[0] == layer_name); //find restrictions for basemap
+            
+            if(layer_minZoom<0){ //remove this layer
+                if(idx != -1){
+                    this.available_minzooms.splice(idx, 1);
                 }else{
-                    minzoom = -1;
+                    return;
                 }
-                
-                if(!is_mapdcoument && !(minzoom>=0)){
-                    this.options.zoomMinInKM = 0;
-                    minzoom = 0;
-                }
-                
-                if(minzoom>=0){
-                    if(!is_mapdocument) this.userDefinedMinZoom_keep = this.userDefinedMinZoom;
-                    
-                    this.nativemap.setMinZoom( minzoom ); 
-                    this.userDefinedMinZoom = minzoom;
-                }       
-                if(!is_mapdcoument) {
-                    this.nativemap.setView([20, 20], minzoom);
+            }else {
+                if(idx != -1){ 
+                    //found - update min zoom value
+                    if(this.available_minzooms[idx][1]==layer_minZoom) return; //the same value - no changes
+                    this.available_minzooms[idx] = [layer_name, layer_minZoom]; 
+                }else{ 
+                    // add min zoom value
+                    this.available_minzooms.push([layer_name, layer_minZoom]);
                 }
             }
-    },
-*/
+            
+            if(this.available_minzooms.length>0){
+                //sort desc
+                this.available_minzooms.sort((a, b) => b[1] - a[1]);
+                //take first - max restriction
+                this.nativemap.setMinZoom(this.available_minzooms[0][1]);
+            }else{
+                this.nativemap.setMinZoom(0);
+            }
+    },    
+
     _zoom_timeout: 0,
     //
     // zoom map to given bounds
@@ -1168,7 +1172,7 @@ $.widget( "heurist.mapping", {
                 
                 var maxZoom = this.nativemap.getMaxZoom();
                 
-                var nativeZoom = this.convertZoomToNative(this.options.zoomMaxInKM, bounds); //for current lat
+                var nativeZoom = this.convertZoomToNative(this.options.zoomMaxInKM, bounds); //adjust for current lat
                 if(nativeZoom>=0 && nativeZoom<maxZoom){
                     maxZoom = nativeZoom;
                 } 
@@ -1239,7 +1243,8 @@ $.widget( "heurist.mapping", {
 
             this._updatePanels();
 
-            this.defineMaxZoom(layer_id, -1);
+            this.defineMaxZoom(layer_id, -1); //on layer remove
+            this.defineMinZoom(layer_id, -1);
         }
     },
 
@@ -2677,17 +2682,23 @@ $.widget( "heurist.mapping", {
         this.options.default_style = window.hWin.HEURIST4.util.isJSON(params['style']);
         
         //these settings may be overwritten by map document, by basemap or by tiled layer
-        if(params['maxzoom']>0){ // || params['minzoom']>0){
-            var zoomNative = this.convertZoomToNative(params['maxzoom']);
-            if(zoomNative>=0){
-                this.options.zoomMaxInKM = params['maxzoom'];
-                this.defineMaxZoom('widget',zoomNative);
-            }
-
-        }else if(this.options.zoomMaxInKM>0){ //|| this.options.zoomMinInKM>0){
+        if(params['maxzoom']>0){
+            this.options.zoomMaxInKM = params['maxzoom'];
+        }
+        if(params['minzoom']>0){
+            this.options.zoomMinInKM = params['minzoom'];
+        }
+        
+        if(this.options.zoomMaxInKM>0){
             var zoomNative = this.convertZoomToNative(this.options.zoomMaxInKM);
+            if(zoomNative>0){
+                this.defineMaxZoom('widget', zoomNative); //on widget init
+            }
+        }
+        if(this.options.zoomMinInKM>0){
+            var zoomNative = this.convertZoomToNative(this.options.zoomMinInKM);
             if(zoomNative>=0){
-                this.defineMaxZoom('widget',zoomNative);
+                this.defineMinZoom('widget', zoomNative);
             }
         }
         
@@ -2895,7 +2906,7 @@ $.widget( "heurist.mapping", {
                                }
                         });     
                         
-                    }
+                    }//draw events
                     
                 }
                 
