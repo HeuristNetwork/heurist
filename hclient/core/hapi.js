@@ -1331,6 +1331,7 @@ prof =Profile
             //
             ,load_shp_as_geojson: function(request, callback){
                 request['format'] = 'geojson'; //or wkt
+                request['api'] = 0; //not api request
                 // start search
                 _callserver('record_shp', request, callback);
             }

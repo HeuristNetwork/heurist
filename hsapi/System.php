@@ -850,12 +850,10 @@ error_log(print_r($_REQUEST, true));
     }
 
 
-    public function error_exit_api( $message=null, $error_code=null) {
+    public function error_exit_api( $message=null, $error_code=null, $is_api=true) {
         
         $this->dbclose();
         
-        header("Access-Control-Allow-Origin: *");
-        header('Content-type: application/json;charset=UTF-8');
         if($message){
             if($error_code==null){
                 $error_code = HEURIST_INVALID_REQUEST;
@@ -865,22 +863,30 @@ error_log(print_r($_REQUEST, true));
         
         $response = $this->getError();
         
-        $status = @$response['status'];
-        if($status==HEURIST_INVALID_REQUEST){
-            $code = 400; // Bad Request - the request could not be understood or was missing required parameters. 
-        }else if($status==HEURIST_REQUEST_DENIED) {
-            $code = 403; // Forbidden - access denied
-        }else if($status==HEURIST_NOT_FOUND){
-            $code = 404; //Not Found - resource was not found.
-        }else if($status==HEURIST_ACTION_BLOCKED) {  
-            $code = 409; //cannot add an existing object already exists or constraints violation
-        }else{
-            //HEURIST_ERROR, HEURIST_UNKNOWN_ERROR, HEURIST_DB_ERROR, HEURIST_SYSTEM_CONFIG, HEURIST_SYSTEM_FATAL
-            $code = 500; //An unexpected internal error has occurred. Please contact Support for more information.
+        header("Access-Control-Allow-Origin: *");
+        header('Content-type: application/json;charset=UTF-8');
+
+        if($is_api){
+            
+            $status = @$response['status'];
+            if($status==HEURIST_INVALID_REQUEST){
+                $code = 400; // Bad Request - the request could not be understood or was missing required parameters. 
+            }else if($status==HEURIST_REQUEST_DENIED) {
+                $code = 403; // Forbidden - access denied
+            }else if($status==HEURIST_NOT_FOUND){
+                $code = 404; //Not Found - resource was not found.
+            }else if($status==HEURIST_ACTION_BLOCKED) {  
+                $code = 409; //cannot add an existing object already exists or constraints violation
+            }else{
+                //HEURIST_ERROR, HEURIST_UNKNOWN_ERROR, HEURIST_DB_ERROR, HEURIST_SYSTEM_CONFIG, HEURIST_SYSTEM_FATAL
+                $code = 500; //An unexpected internal error has occurred. Please contact Support for more information.
+            }
+            
+            http_response_code($code);     
         }
-        http_response_code($code);     
-        
+            
         print json_encode( $response );
+        
         exit();
     }
     

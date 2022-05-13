@@ -57,13 +57,14 @@ use Shapefile\ShapefileReader;
     $system = new System();
     
     $params = $_REQUEST;
+    $is_api = (@$_REQUEST['api']!=0);
     
     if( ! $system->init(@$params['db']) ){
         //get error and response
-        $system->error_exit_api(); //exit from script
+        $system->error_exit_api(null, null, $is_api); //exit from script
     }
     if(!(@$params['recID']>0)){
-        $system->error_exit_api('recID parameter value is missing or invalid'); //exit from script
+        $system->error_exit_api('recID parameter value is missing or invalid', null, $is_api); //exit from script
     }
     
     $need_simplify = (true || @$params['simplify']=='yes' || @$params['simplify']==1);
@@ -97,7 +98,7 @@ use Shapefile\ShapefileReader;
     if( count($fields) == 0 ){
         $system->error_exit_api('Database '.$params['db']
                     .' does not have field definitions for shp, zip or simple resource file'
-                    , HEURIST_SYSTEM_CONFIG); //exit from script
+                    , HEURIST_SYSTEM_CONFIG, $is_api); //exit from script
     }
     $isZipArchive = false;
     
@@ -140,7 +141,7 @@ use Shapefile\ShapefileReader;
                 $file_zip_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "arc");
                 $zip = new ZipArchive();
                 if (!$zip->open($file_zip_full, ZIPARCHIVE::CREATE)) {
-                    $system->error_exit_api("Cannot create zip $file_zip_full");
+                    $system->error_exit_api("Cannot create zip $file_zip_full", null, $is_api);
                 }else{
                     if(!$dbf_file){
                         $dbf_file = substr($shp_file,0,strlen($shp_file)-3).'dbf';
@@ -193,7 +194,7 @@ use Shapefile\ShapefileReader;
                         //if provide only shapefile, it finds other automatically
                         $shapeFile = new ShapefileReader($shp_file, array(Shapefile::OPTION_IGNORE_FILE_SHX=>true, Shapefile::OPTION_IGNORE_FILE_DBF=>true));
                     }else{
-                        $system->error_exit_api('Cannot process shp file', HEURIST_ERROR);
+                        $system->error_exit_api('Cannot process shp file', HEURIST_ERROR, null);
                     }
                     
                     //$json = array();
@@ -293,10 +294,10 @@ use Shapefile\ShapefileReader;
                     // Print detailed error information
 error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());                    
                     //.$e->getCode().' ('.$e->getErrorType().'): '
-                    $system->error_exit_api('Cannot process shp file: '.$e->getMessage(), HEURIST_ERROR);
+                    $system->error_exit_api('Cannot process shp file: '.$e->getMessage(), HEURIST_ERROR, $is_api);
                 } catch (Exception $e) {
 error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());                    
-                    $system->error_exit_api('Cannot init ShapeFile library: '.$e->getMessage(), HEURIST_ERROR);
+                    $system->error_exit_api('Cannot init ShapeFile library: '.$e->getMessage(), HEURIST_ERROR, $is_api);
                 }                
                 
             }
@@ -305,7 +306,7 @@ error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());
 'Cannot process shp file. Please ask the owner of the layer data source record (id:'
 .$params['recID']
 .') to check that the file exists, is readable and has not been corrupted.',
-            HEURIST_NOT_FOUND); 
+            HEURIST_NOT_FOUND, $is_api); 
     }
     
     $system->dbclose();
@@ -314,6 +315,8 @@ error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());
 //
 //
 function checkWGS($system, $orig_points, $check_number_or_all=3){
+    
+    global $is_api;
 
     $cnt = 0;
     foreach ($orig_points as $point) {
@@ -324,7 +327,7 @@ function checkWGS($system, $orig_points, $check_number_or_all=3){
 'Cannot process shp file. Heurist uses WGS84 (World Geographic System) '
 .'to support the plotting of maps worldwide. This shapefile is not in this format '
 .'and will not therefore display on maps. '
-.'Please use a GIS or other converter to convert to WGS84', HEURIST_ERROR);  
+.'Please use a GIS or other converter to convert to WGS84', HEURIST_ACTION_BLOCKED, $is_api);  
         }       
                  
         if( $check_number_or_all===true || $cnt < $check_number_or_all ){
