@@ -101,9 +101,12 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
         // Set search button status based on the existence of input
         this._on(this.element.find('input'), {
             'keyup': function(event){
+
+                var $inputs_with_value = that.element.find('input').filter(function(){ return $(this).val(); });
+
                 if($(event.target).val() != ''){
                     window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), false);
-                }else{
+                }else if($inputs_with_value.length == 0){
                     window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), true);
                 }
             }
@@ -288,8 +291,10 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
                     var recordset = new hRecordSet(response.data);
                     recordset.each2(function(id, record){
                         for(var i in dlg_response){
-                            if(dlg_response[i] == id){
-                                dlg_response[i] = [record['rec_Title']];
+                            for(var j = 0; j < dlg_response[i].length; j++){
+                                if(dlg_response[i][j] == id){
+                                    dlg_response[i][j] = record['rec_Title'];
+                                }
                             }
                         }
                     });
@@ -316,8 +321,10 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
                                 var recordset = new hRecordSet(response.data);
                                 recordset.each2(function(id, record){
                                     for(var i in dlg_response){
-                                        if(dlg_response[i] == id){
-                                            dlg_response[i] = [record['trm_Label']];
+                                        for(var j = 0; j < dlg_response[i].length; j++){
+                                            if(dlg_response[i][j] == id){
+                                                dlg_response[i][j] = record['trm_Label'];
+                                            }
                                         }
                                     }
                                 });

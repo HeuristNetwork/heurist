@@ -53,7 +53,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
         if(strpos(HEURIST_BASE_URL, HEURIST_MAIN_SERVER) !== false){ // currently on server where ESTC DB is located
 
-            if(array_key_exists('entity', $params)){ // retrieve term info
+            if(array_key_exists('entity', $params)){ // retrieve entity info (term lookup)
                 require_once (dirname(__FILE__).'/entityScrud.php');
                 exit();
             }
@@ -68,13 +68,25 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
                     require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
                     $response = recordSearch($system, $params);
                 }else{ // unable to login, cannot access records
-                    $response = $system->getError();
+                    $response = array('status' => HEURIST_ERROR, 'message' => 'We are unable to access the records within the ESTC database at this moment.<br>Please contact the Heurist team.');
                 }
             }else{ // cannot access ESTC DB
                 $response = $is_allowed ? $system->getError() : array('status' => HEURIST_REQUEST_DENIED, 'message' => $def_err_msg);
             }
-        }else{ // isset($ESTCServerURL), on external server, currently disabled
-            $response = array('status' => HEURIST_REQUEST_DENIED, 'message' => $def_err_msg);
+        }else if(isset($ESTC_ServerURL)){ // external server
+
+            $url = $ESTC_ServerURL . '/h6-alpha/hsapi/controller/record_lookup.php?'.http_build_query($_REQUEST); // forward request to ESTC server
+
+            $response = loadRemoteURLContentWithRange($url, null, true, 60); // perform external request, timeout at 60 seconds
+            if($response===false){
+                $msg = 'We are having trouble performing your request on the ESTC server.<br>'
+                    . 'Please try norrowing down the search with more specific criteria before running this request again.<br><br>'
+                    . 'If this problem persists, please contact the Heurist team.<br>'
+                    . 'Request URL: ' . $url;
+                $response = array('status' => HEURIST_ERROR, 'message' => $msg);
+            }
+        }else{ // no access
+            $response = array('status' => HEURIST_REQUEST_DENIED, 'message' => 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.');
         }
 
         $response = json_encode($response);
