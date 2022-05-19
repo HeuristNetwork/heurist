@@ -36,6 +36,8 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
     $system = new System();
 
     $params = $_REQUEST;
+    
+    $is_debug = (@$params['dbg']==1);
 
     $is_estc = (@$params['serviceType'] == 'ESTC' && array_key_exists('db', $params) && $params['db'] == 'ESTC_Helsinki_Bibliographic_Metadata');
 
@@ -51,6 +53,8 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
         $is_allowed = (isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, @$_REQUEST['org_db']) !== false && isset($ESTC_UserName) && isset($ESTC_Password));
         $def_err_msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
 
+if($is_debug) print HEURIST_BASE_URL.'  '.HEURIST_MAIN_SERVER.'<br>';
+        
         if(strpos(HEURIST_BASE_URL, HEURIST_MAIN_SERVER) !== false){ // currently on server where ESTC DB is located
 
             if(array_key_exists('entity', $params)){ // retrieve entity info (term lookup)
@@ -59,6 +63,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
             }
 
             $is_inited = $system->init(@$params['db']);
+            
             if($is_inited !== false && $is_allowed){ // search records
 
                 $is_logged_in = $system->doLogin($ESTC_UserName, $ESTC_Password, 'shared');
@@ -66,9 +71,13 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
                 if($is_logged_in){ // logged in, begin search
                     $system->getCurrentUserAndSysInfo(false);
                     require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
+                    
+if($is_debug) print print_r($params['q'], true).'<br>';
+                    
                     $response = recordSearch($system, $params);
+                    
                 }else{ // unable to login, cannot access records
-                    $response = array('status' => HEURIST_ERROR, 'message' => 'We are unable to access the records within the ESTC database at this moment.<br>Please contact the Heurist team.');
+                    $response = array('status' => HEURIST_ERROR, 'message' => 'We are unable to access the records within the ESTC database at this moment.<br>Please contact the Heurist team. Query is: '.json_encode($params['q']));
                 }
             }else{ // cannot access ESTC DB
                 $response = $is_allowed ? $system->getError() : array('status' => HEURIST_REQUEST_DENIED, 'message' => $def_err_msg);
