@@ -1831,7 +1831,7 @@ class HPredicate {
     */
     function predicateLinkedTo(){
     
-        global $top_query, $params_global;
+        global $top_query, $params_global, $mysqli;
         $not_nested = (@$params_global['nested']===false);
 
         $this->field_type = "link";
@@ -1876,7 +1876,16 @@ class HPredicate {
                         $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
                         $top_query->top_limb->addTable($this->query->from_clause);
                     }else{
-                        $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
+                        $sub_query = 'SELECT rec_ID FROM '.$this->query->from_clause.' WHERE '.$this->query->where_clause;
+                        $ids = mysql__select_list2($mysqli, $sub_query);
+                        if(is_array($ids) && count($ids)>0){
+                            //if(count($ids)>2000)
+                            $val = ' IN ('.implode(',',$ids).')';
+                        }else{
+                            $val = ' =0';
+                        }
+                        
+                        //OLD $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
                     }
                     
                 }else{
