@@ -48,6 +48,7 @@ $.widget( "heurist.app_storymap", {
         reportElementCss: null,
 
         // timemap parameters
+        keepCurrentTime: true, //keep current time on story change and load appropriate element
         use_internal_timemap: false,
         mapDocumentID: null //map document to be loaded (3-1019)
         
@@ -78,6 +79,8 @@ $.widget( "heurist.app_storymap", {
     _cache_story_places: null,
     
     _currentElementID: 0,
+    _initialElementID: 0,
+    _currentTime: null,
     _nativelayer_id: 0, //current layer for Story Elements
     
     _terminateAnimation: false,
@@ -85,6 +88,9 @@ $.widget( "heurist.app_storymap", {
     _animationReject: null,
     
     _initial_div_message:null,
+    
+    _expected_onScroll_timeout: 0,
+    _expected_onScroll: 0,
 
     // the constructor
     _create: function() {
@@ -181,8 +187,10 @@ $.widget( "heurist.app_storymap", {
                     if(that.options.reportElementMode!='slide'){
                         that._addStubSpaceForStoryList();
                     }
-                    that._onNavigateStatus(0);
-                    that._startNewStoryElement( that._resultset.getOrder()[0] );
+                    if(that._initialElementID==0){
+                        that._onNavigateStatus(0);
+                        that._startNewStoryElement( that._resultset.getOrder()[0] );
+                    }
                 }
             });
             
@@ -336,30 +344,49 @@ $.widget( "heurist.app_storymap", {
     // Change current story element - resultList listener
     //     
     _onScroll: function(event, that) {
+        //if(this._disable_onScroll) return;
+        
         var ele = $(event.target); //this.div_content;
         $.each(ele.find('.recordDiv'), function(i,item){
             var tt = $(item).position().top;
             var h = -($(item).height()-50);
             if(tt>h && tt<50){
-                that._startNewStoryElement( $(item).attr('recid') );
-                return false; //$(item).attr('recid');
+                if(that._expected_onScroll>0 && that._expected_onScroll!=$(item).attr('recid')){
+
+                }else{
+                    that._startNewStoryElement( $(item).attr('recid') );
+                }
+                return false;
             }
         });
     },
     
     //
-    //
+    // scroll to story element after selection on map
     //
     _scrollToStoryElement: function(recID){
         
         if(this.options.reportOverviewMode=='tab' && this._tabs){
-            //switch to Overview
+            //switch to Story
             this._tabs.tabs('option', 'active', 1);   
         }
         
         if(this.options.reportElementMode=='vertical'){
+            if(this._expected_onScroll_timeout>0){
+                clearTimeout(this._expected_onScroll_timeout);
+                this._expected_onScroll_timeout = 0;
+            }
+            
             //scroll result list
+            this._expected_onScroll = recID;
             this._resultList.resultList('scrollToRecordDiv', recID, true);
+            //sometimes it is called before addition of stub element at the end of list
+            if(this._currentElementID!=recID){
+                var that = this;
+                this._expected_onScroll_timeout =  setTimeout(function(){that._scrollToStoryElement(that._expected_onScroll)},300);
+                return;
+            }
+            this._expected_onScroll = 0;
                 
         }else{
             var order = this._resultset.getOrder();
@@ -436,8 +463,26 @@ $.widget( "heurist.app_storymap", {
     _checkForStory: function(recID, is_forced){
         
         if(this.options.storyRecordID != recID || is_forced){
+
+            var that = this;
             
             this._initial_div_message.hide();
+            
+            this._currentTime = null;
+            
+            if(this.options.keepCurrentTime && this.options.storyRecordID>0 && this._currentElementID>0){
+                
+                if(this._cache_story_time && this._cache_story_time[this.options.storyRecordID]){
+
+                    var story_time = this._cache_story_time[this.options.storyRecordID];
+                    $.each(story_time, function(i,item){
+                        if(item.rec_ID == that._currentElementID){
+                            that._currentTime = item.when[0];
+                        } 
+                    });
+                }
+            }
+            
             
             this.options.storyRecordID = recID;
         
@@ -449,7 +494,6 @@ $.widget( "heurist.app_storymap", {
             }
             
             var request;
-            var that = this;
             
             let DT_STORY_ANIMATION = $Db.getLocalID('dty', '2-1090'); //configuration field for animation
 
@@ -553,7 +597,7 @@ $.widget( "heurist.app_storymap", {
     // 3. Render overview as smarty report or renderRecordData
     //
     _startNewStory: function(recID){
-      
+        
         //find linked mapping
         if(this.options.map_widget_id){
             this._mapping = $('#'+this.options.map_widget_id);
@@ -641,18 +685,21 @@ $.widget( "heurist.app_storymap", {
                     if(rdiv0.height() < 101){
                         rdiv0.css({'min-height':'100px'});
                     }
-                    if(rdiv.height() < rh-100){
-                        that._resultList.find('.div-result-list-content').find('.stub_space').remove();
-                        $('<div>').addClass('stub_space').css({'min-height':(rh-100)+'px'})
-                            .appendTo(that._resultList.find('.div-result-list-content'));
+                    var stub_height = (rdiv.height() < rh-100)? rh-100 :0;
+                    
+                    that._resultList.find('.div-result-list-content').find('.stub_space').remove();
+                    if(stub_height>0){
+                        $('<div>').addClass('stub_space').css({'min-height':stub_height+'px'})
+                                .appendTo(that._resultList.find('.div-result-list-content'));
                     }
+                    
                 }, delay);
             }
         }
     },
 
     //
-    // Loads Overview info
+    // Loads Overview info (called after loading of story)
     //
     updateOverviewPanel: function(recID){
 
@@ -702,8 +749,10 @@ $.widget( "heurist.app_storymap", {
                             
                         }else if(that.options.reportOverviewMode=='header'){
                             
-                            that._onNavigateStatus( 0 );    
-                            that._startNewStoryElement( that._resultset.getOrder()[0] );
+                            if(that._initialElementID==0){
+                                that._onNavigateStatus( 0 );    
+                                that._startNewStoryElement( that._resultset.getOrder()[0] );
+                            }
                                 
                         }else{
                             //tab
@@ -712,6 +761,12 @@ $.widget( "heurist.app_storymap", {
                                 ele2.find('div[data-recid]').css('max-height','100%');
                             }
                         }
+
+                        if(that._initialElementID>0){
+                            that._scrollToStoryElement( that._initialElementID );
+                            that._initialElementID = 0;   
+                        }
+
                         
                         /*
                         if(that.options.reportElementMode=='vertical'){
@@ -726,8 +781,13 @@ console.log('>sctop '+ele.scrollTop());
                     
             }else 
             {
-                this._onNavigateStatus( 0 );    
-                this._startNewStoryElement( this._resultset.getOrder()[0] );
+                if(this._initialElementID>0){
+                    this._scrollToStoryElement( this._initialElementID );
+                    this._initialElementID = 0;   
+                }else{
+                    this._onNavigateStatus( 0 );    
+                    this._startNewStoryElement( this._resultset.getOrder()[0] );
+                }
             }
                         
             
@@ -979,6 +1039,41 @@ console.log('>sctop '+ele.scrollTop());
                     //popup_template: layer_popup_template,
                  dataset_name: 'Story Timeline',
                  preserveViewport: false });
+                
+            //
+            //     
+            if(this._currentTime!=null){
+
+                var start0 = that._currentTime[0];
+                var end0 = that._currentTime[3] ?that._currentTime[3] :start0;
+                
+                $.each(that._cache_story_time[that.options.storyRecordID],function(i,item){
+               
+                    if(item.when && item.when[0]){
+                    
+                        var start = item.when[0][0];
+                        var end = item.when[0][3] ?item.when[0][3] :start;
+                    
+                        //intersection
+                        var res = false;
+                        if(start == end){
+                            res = (start>=start0 && start<=end0);
+                        }else{
+                            res = (start==start0) || 
+                                (start > start0 ? start <= end0 : start0 <= end);
+                        }                    
+                        
+                        if(res){
+                            that._initialElementID = item.rec_ID;
+                            //open story element
+                            //setTimeout(function(){that._scrollToStoryElement( item.rec_ID )}, 1000);
+                            return false;                        
+                        }
+                    }
+                });
+                
+            }     
+                 
             
         }else{
             
@@ -1355,7 +1450,12 @@ console.log('>sctop '+ele.scrollTop());
                     if(that._terminateAnimation!==false){ 
                         //do not start new animation - waiting for termination of previous animation
 console.log('wait for stopping of previous animation');
-                        setTimeout(__startNewAnimation, 500);                        
+                        if(that._currentElementID==recID){
+                            setTimeout(__startNewAnimation, 500);                        
+                        }else{
+                            that._terminateAnimation = false;
+                        }
+                            
                     }else if(that._currentElementID==recID){
                         //start animation/actions
                         that._animateStoryElement_B_step3(recID, anime);
