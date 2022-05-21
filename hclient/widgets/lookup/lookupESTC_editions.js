@@ -101,9 +101,12 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
         // Set search button status based on the existence of input
         this._on(this.element.find('input'), {
             'keyup': function(event){
+
+                var $inputs_with_value = that.element.find('input').filter(function(){ return $(this).val(); });
+
                 if($(event.target).val() != ''){
                     window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), false);
-                }else{
+                }else if($inputs_with_value.length == 0){
                     window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), true);
                 }
             }
@@ -202,6 +205,45 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
             var record = sels.getFirstRecord();
             var details = record.d;
 
+            if(!details){
+                var sel_Rec_ID = sels.fld(record, 'rec_ID'); 
+                var query_request = { 
+                    serviceType: 'ESTC',
+                    org_db: window.hWin.HAPI4.database,
+                    db: 'ESTC_Helsinki_Bibliographic_Metadata',
+                    q: 'ids:' + sel_Rec_ID, 
+                    detail: 'detail' 
+                };
+                
+                window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+
+                window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, function(response){
+                    
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                    
+                    response = window.hWin.HEURIST4.util.isJSON(response);
+
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        
+                        var recordset = new hRecordSet(response.data);
+                        var record = recordset.getFirstRecord();
+                        if(!record || !record.d){
+                            window.hWin.HEURIST4.msg.showMsgErr(
+                            'We are having trouble performing your request on the ESTC server. '
+                            +'Impossible obtain details for selected record '+sel_Rec_ID);
+                        }else{
+                            var recset = that.recordList.resultList('getRecordSet');
+                            recset.addRecord2(sel_Rec_ID, record);
+                            that.doAction();        
+                        }
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+                return;
+            }
+            
+            
             var recpointers = [];
             var term_id = '';
 
@@ -256,7 +298,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
                         break;
                 }
             }
-
+            
             if(details[259]){ // Place - Rec Pointer
                 recpointers.push(details[259]);
             }
@@ -278,6 +320,8 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
                 q: 'ids:"' + recpointers.join(',') + '"', 
                 detail: 'detail' 
             };
+            
+            window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
             window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, function(response){
 
@@ -288,8 +332,10 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
                     var recordset = new hRecordSet(response.data);
                     recordset.each2(function(id, record){
                         for(var i in dlg_response){
-                            if(dlg_response[i] == id){
-                                dlg_response[i] = [record['rec_Title']];
+                            for(var j = 0; j < dlg_response[i].length; j++){
+                                if(dlg_response[i][j] == id){
+                                    dlg_response[i][j] = record['rec_Title'];
+                                }
                             }
                         }
                     });
@@ -316,8 +362,10 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
                                 var recordset = new hRecordSet(response.data);
                                 recordset.each2(function(id, record){
                                     for(var i in dlg_response){
-                                        if(dlg_response[i] == id){
-                                            dlg_response[i] = [record['trm_Label']];
+                                        for(var j = 0; j < dlg_response[i].length; j++){
+                                            if(dlg_response[i][j] == id){
+                                                dlg_response[i][j] = record['trm_Label'];
+                                            }
                                         }
                                     }
                                 });
@@ -385,15 +433,15 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
             query['f:254'] = '@'+this.element.find('#estc_no').val();
         }
         sort_by_key = "'sortby'"
-        query[sort_by_key.slice(1, -1)] = 'f:9:'
+        //query[sort_by_key.slice(1, -1)] = 'f:9:'  It kills MariaDB database
 
-        var missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
+        var missingSearch = (Object.keys(query).length <= 1); // query has t and sortby keys at minimum
 
         if(missingSearch){
             window.hWin.HEURIST4.msg.showMsgFlash('Please specify some criteria to narrow down the search...', 1000);
             return;
         }
-
+        
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
         var query_request = { 
@@ -401,7 +449,8 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
             org_db: window.hWin.HAPI4.database,
             db: 'ESTC_Helsinki_Bibliographic_Metadata',
             q: query, 
-            detail: 'detail' 
+            limit: 1000,
+            detail: 'header' 
         };
 
         window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, function(response){
@@ -410,6 +459,15 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
             response = window.hWin.HEURIST4.util.isJSON(response);
 
             if(response.status && response.status == window.hWin.ResponseStatus.OK){
+                
+                if(response.data.count>response.data.reccount){
+                    window.hWin.HEURIST4.msg.showMsgDlg('Your request generated '
+                    + response.data.count+' results. Only first '
+                    + response.data.reccount 
+                    + ' have been retrieved. You may specify more restrictive criteria '
+                    + ' to narrow the result.');        
+                    response.data.count = response.data.reccount;
+                }
                 that._onSearchResult(response);
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);

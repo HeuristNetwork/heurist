@@ -244,6 +244,26 @@ if(!($is_map_popup || $without_header)){
             }
 
             //
+            // Display cms content within popup, when link clicked
+            //
+            function handleCMSContent(){
+                var $eles = $('.cmsContent');
+
+                if($eles.length > 0){
+
+                    $eles.each(function(idx, ele){
+                        var $ele = $(ele);
+
+                        $('<div class="detail" style="cursor:pointer;text-decoration:underline;" title="Click to popup content">Web page content</div>').on('click', function(){
+                            window.hWin.HEURIST4.msg.showElementAsDialog({'element': $ele[0], 'default_palette_class': 'ui-heurist-explore', 'title': 'Web page content'});
+                        }).insertBefore($ele);
+
+                        $ele.hide();
+                    })
+                }
+            }
+
+            //
             //
             //
             function showHidePrivateInfo( event ){
@@ -720,8 +740,7 @@ $_time_debug = $_time_debug2;
             //print_text_details($bib);
         }
         
-
-    
+        $system->user_LogActivity('viewRec', $bib['rec_ID'], null, TRUE); // log action
     }else{
         
         print 'Sorry, your group membership does not allow you to view the content of this record';
@@ -1455,6 +1474,13 @@ if(false){  //this query fails for maria db
         $always_visible_dt[] = DT_GEO_OBJECT;                                                 
     }
 
+    $usr_font_size = $system->user_GetPreference('userFontSize', 0);
+    $font_size = '';
+    if(!$is_map_popup && $usr_font_size != 0){
+        $usr_font_size = ($usr_font_size < 8) ? 8 : ($usr_font_size > 18) ? 18 : $usr_font_size;
+        $font_size = 'font-size: ' . $usr_font_size . 'px;';
+    }
+
     $prevLbl = null;
     foreach ($bds as $bd) {
         if (defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) continue;
@@ -1466,13 +1492,21 @@ if(false){  //this query fails for maria db
             if(!(mysql__select_value($mysqli, $query)>0)) continue; //not in structure
         }
 
+        $is_cms_content = !$is_map_popup &&  
+                          (defined('RT_CMS_MENU') && $bib['rec_RecTypeID']==RT_CMS_MENU ||
+                           defined('RT_CMS_HOME') && $bib['rec_RecTypeID']==RT_CMS_HOME) &&
+                           (defined('DT_EXTENDED_DESCRIPTION') && $bd['dty_ID']==DT_EXTENDED_DESCRIPTION || 
+                            defined('DT_CMS_HEADER') && $bd['dty_ID']==DT_CMS_HEADER || 
+                            defined('DT_CMS_FOOTER') && $bd['dty_ID']==DT_CMS_FOOTER) ? ' cmsContent' : '';
+
         $ele_id = ($bd['rst_DisplayOrder'] != '' || $bd['rst_DisplayOrder'] != null) ? 'data-order="' . $bd['rst_DisplayOrder'] . '"' : '';
 
         print '<div class="detailRow fieldRow" '. $ele_id .' style="border:none 1px #00ff00;'   //width:100%;
             .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none;':'')
             .($is_map_popup?'':'width:100%;')
+            .$font_size
             .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
-        .'</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'
+        .'</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').$is_cms_content.'">'
         .' '.$bd['val'].'</div></div>';
         $prevLbl = $bd['name'];
         
@@ -1502,7 +1536,7 @@ if(false){  //this query fails for maria db
     }else{
 
         if(is_array($group_details) && count($group_details) > 0){
-            echo '<script>createRecordGroups(', json_encode($group_details, JSON_FORCE_OBJECT), ');</script>';
+            echo '<script>createRecordGroups(', json_encode($group_details, JSON_FORCE_OBJECT), ');handleCMSContent();</script>';
         }
 
         echo '<div class="detailRow fieldRow">&nbsp;</div>';
@@ -1568,6 +1602,13 @@ function print_relation_details($bib) {
 
     $extra_styling = (!$is_map_popup) ? 'style="max-width: max-content;"' : '';
 
+    $usr_font_size = $system->user_GetPreference('userFontSize', 0);
+    $font_size = '';
+    if(!$is_map_popup && $usr_font_size != 0){
+        $usr_font_size = ($usr_font_size < 8) ? 8 : ($usr_font_size > 18) ? 18 : $usr_font_size;
+        $font_size = 'font-size: ' . $usr_font_size . 'px;';
+    }
+
     if($from_res){
 		while ($reln = $from_res->fetch_assoc()) {
 			
@@ -1625,7 +1666,7 @@ function print_relation_details($bib) {
                 $recTitle = 'record id ' . $relatedRecID;
             }
 
-			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2 linkRow
+			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.$font_size.($is_map_popup?'display:none':'').'">'; // && $link_cnt>2 linkRow
 			$link_cnt++;
 			//		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
 
@@ -1709,7 +1750,7 @@ function print_relation_details($bib) {
                 $recTitle = 'record id ' . $relatedRecID;
             }
 
-			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2linkRow
+			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.$font_size.($is_map_popup?'display:none':'').'">'; // && $link_cnt>2 linkRow
 			$link_cnt++;
 
 			if($field_name === false && array_key_exists('RelTerm',$bd)){
@@ -1802,21 +1843,28 @@ function print_linked_details($bib, $link_cnt)
     <?php
        }
     }
-    
-        while ($row = $res->fetch_assoc()) {
 
-            print '<div class="detailRow fieldRow"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2 linkRow
-            $link_cnt++;
+    $usr_font_size = $system->user_GetPreference('userFontSize', 0);
+    $font_size = '';
+    if(!$is_map_popup && $usr_font_size != 0){
+        $usr_font_size = ($usr_font_size < 8) ? 8 : ($usr_font_size > 18) ? 18 : $usr_font_size;
+        $font_size = 'font-size: ' . $usr_font_size . 'px;';
+    }
+
+    while ($row = $res->fetch_assoc()) {
+
+        print '<div class="detailRow fieldRow" style="'.$font_size.($is_map_popup?'display:none':'').'">'; // && $link_cnt>2 linkRow
+        $link_cnt++;
+        
+            print '<div style="display:table-cell;width:28px;height:21px;text-align: right;padding-right:4px">'
+                    .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$row['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>';
+
+            print '<div style="display: table-cell;vertical-align:top;'
+            .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
+                .strip_tags($row['rec_Title'],ALLOWED_TAGS).'</a></div>';
             
-                print '<div style="display:table-cell;width:28px;height:21px;text-align: right;padding-right:4px">'
-                        .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$row['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>';
-                        
-                print '<div style="display: table-cell;vertical-align:top;'
-                .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
-                    .strip_tags($row['rec_Title'],ALLOWED_TAGS).'</a></div>';
-                
-            print '</div>';
-        }
+        print '</div>';
+    }
         
     print '</div>';
     return $link_cnt;

@@ -149,8 +149,13 @@ $.widget( "heurist.editing_input", {
             .css({'vertical-align':'top'})  //, 'line-height':'initial'
             .html('<label>' + lblTitle + '</label>')
             .appendTo( this.element );
-            
-//(this.detailType=="blocktext" || (this.detailType=='file' && this.configMode.entity!='records')  )?'top':''            
+
+            // Apply user pref font size
+            var usr_font_size = window.hWin.HAPI4.get_prefs_def('userFontSize', 0);
+            if(usr_font_size != 0){
+                usr_font_size = (usr_font_size < 8) ? 8 : (usr_font_size > 18) ? 18 : usr_font_size;
+                this.header.css('font-size', usr_font_size+'px');
+            }
         }
         
         var is_sortable = false;
@@ -674,6 +679,13 @@ $.widget( "heurist.editing_input", {
 
         var $inputdiv = $( "<div>" ).addClass('input-div').insertBefore(this.error_message); //was this.input_prompt
 
+        // Apply user pref font size
+        var usr_font_size = window.hWin.HAPI4.get_prefs_def('userFontSize', 0);
+        if(usr_font_size != 0){
+            usr_font_size = (usr_font_size < 8) ? 8 : (usr_font_size > 18) ? 18 : usr_font_size;
+            $inputdiv.css('font-size', usr_font_size+'px');
+        }
+
         if(this.detailType=='blocktext'){//----------------------------------------------------
 
             $input = $( "<textarea>",{rows:2}) //min number of lines
@@ -893,11 +905,16 @@ $.widget( "heurist.editing_input", {
                         .insertBefore($input);
                     $input.hide();
                     
-                    $btn_edit_switcher.text('edit source');
+                    $btn_edit_switcher.text('edit source').css({
+                        'text-decoration': 'underline',
+                        'display': 'inline-block',
+                        'margin': '2px 10px 0px',
+                        'cursor': 'pointer'
+                    });
                     
-                    var $btn_edit_switcher2 = $( '<span>edit wysiwyg</span>', {title: 'Show rich text editor'})
+                    var $btn_edit_switcher2 = $( '<div>edit wysiwyg</div>', {title: 'Show rich text editor'})
                         .addClass('smallbutton')
-                        .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                        .css({'line-height': '20px', 'vertical-align': 'top', cursor: 'pointer', 'text-decoration': 'underline', 'display': 'inline-block'})
                         .insertAfter( $btn_edit_switcher );
                     var $label_edit_switcher = $('<span>Advanced users:</span>')
                         .css({'line-height': '20px','vertical-align':'top'}).addClass('smallbutton')

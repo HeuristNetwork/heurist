@@ -1228,6 +1228,13 @@ function hMapManager( _options )
         getMapDocumentRecordset: function(mapdoc_id){
             return mapDocuments.getMapDocumentRecordset(mapdoc_id);
         },
+        
+        //
+        //
+        //
+        getMapDocuments: function(){
+            return mapDocuments;
+        },
 
         //
         // returns list of mapdocuments ids

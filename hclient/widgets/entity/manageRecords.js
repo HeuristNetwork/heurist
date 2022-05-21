@@ -4313,7 +4313,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         //        
         this.onEditFormChange();
         
-        window.hWin.HAPI4.SystemMgr.user_log('edit_Record');
+        window.hWin.HAPI4.SystemMgr.user_log('editRec', this._currentEditID); // log action
         
         if($.isFunction(this.options.onInitEditForm)){
             this.options.onInitEditForm.call();

@@ -1672,10 +1672,16 @@ $.widget( "heurist.resultList", {
                 }
                 sCount = '<span style="margin-right:10px">'+sCount+'</span>';
             }
-            
-        }                        
-                                
-                                
+        }                   
+
+        // Apply user pref font size
+        var usr_font_size = window.hWin.HAPI4.get_prefs_def('userFontSize', 0);
+        var title_font_size = '';
+        if(usr_font_size != 0){
+            usr_font_size = (usr_font_size < 8) ? 8 : (usr_font_size > 18) ? 18 : usr_font_size;
+            title_font_size = ' style="font-size: '+usr_font_size+'px"';
+        }
+
         // construct the line or block
         var html = '<div class="recordDiv '+this.options.recordDivClass
         +'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">' //id="rd'+recID+'" 
@@ -1692,7 +1698,7 @@ $.widget( "heurist.resultList", {
 
 
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
-        + '<div title="'+(is_logged?'dbl-click to edit: ':'')+recTitle_strip_all+'" class="recordTitle">' //  '+rectypeTitleClass+'
+        + '<div title="'+(is_logged?'dbl-click to edit: ':'')+recTitle_strip_all+'" class="recordTitle" '+title_font_size+'>' //  '+rectypeTitleClass+'
         +   sCount;
         
         if(this.options.show_url_as_link && fld('rec_URL')){

@@ -101,7 +101,7 @@ use PHPMailer\PHPMailer\Exception;
     }
     
     // 
-    // Uses php native mail function
+    // Uses php native mail function (in send_email.php only)
     //	
     function sendEmail_old($email_to, $email_title, $email_text, $email_header, $is_utf8=false, $use_html=false){
 

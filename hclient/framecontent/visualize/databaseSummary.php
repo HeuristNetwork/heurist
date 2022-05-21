@@ -155,9 +155,9 @@ A:link {
         
     </head>
 
-    <body class="popup" style="background-color: #FFF;">
+    <body class="popup" style="background-color: #FFF;padding: 0px;margin: 0px;">
     
-        <div class="ent_wrapper">
+        <div class="ent_wrapper" style="height: 100%;">
 
             <div class="ui-layout-west">
 

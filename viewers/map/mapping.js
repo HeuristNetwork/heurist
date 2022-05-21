@@ -120,12 +120,13 @@ $.widget( "heurist.mapping", {
         map_rollover: false,
         map_popup_mode: 'standard',
         
-        zoomToPointInKM: 1,  //is set either from map documet DT_ZOOM_KM_POINT or from url parameters
+        zoomToPointInKM: 5,  //is set either from map documet DT_ZOOM_KM_POINT or from url parameters
         zoomMaxInKM: 0,
         zoomMinInKM: 0,
         
         default_style:null,
         default_selection_style:null
+        
     },
     
     /* expremental 
@@ -142,9 +143,9 @@ $.widget( "heurist.mapping", {
     mapManager: null,    //legend
     
     
-    userDefinedMaxZoom: 0, //custom max zoom defined via options.zoomMaxInKM
-    userDefinedMinZoom: 0,
-    
+    available_maxzooms: [], //name of restrictions(widget, basemap, layer id, mapdoc id) => max zoom level, min zoom level
+    available_minzooms: [], 
+
     //record from search results mapdoc
     current_query_layer:null, 
     
@@ -235,8 +236,6 @@ $.widget( "heurist.mapping", {
     {name:'None'}
     ],
 
-    available_maxzooms: [],
-
     // ---------------    
     // the widget's constructor
     //
@@ -318,6 +317,18 @@ $.widget( "heurist.mapping", {
         this.nativemap = L.map( map_element_id, {zoomControl:false, tb_del:true} )
             .on('load', function(){ } );
 
+        this.nativemap.on('zoomend', function (e) {
+            if(that.mapManager){
+                var md = that.mapManager.getMapDocuments();
+                if(md) {
+                    var currZoom = that.nativemap.getZoom();
+                    md.updateLayerVisibility(currZoom);   
+                }
+            }
+        });
+                        
+                        
+            
         //init basemap layer        
 /*        
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
@@ -504,24 +515,16 @@ $.widget( "heurist.mapping", {
                     this.applyBaseMapFilter();
                 }
 
-                var cur_maxZoom = this.nativemap.getMaxZoom();
-                var layer_maxZoom = (provider['options'] && provider['options']['maxZoom']) ? provider['options']['maxZoom'] : 18;
-
-                if(this.userDefinedMaxZoom>0 && layer_maxZoom < this.userDefinedMaxZoom){
+                //var layer_maxZoom = (provider['options'] && provider['options']['maxZoom']) ? provider['options']['maxZoom'] : 18;
+                var layer_maxZoom = (this.basemaplayer['options'] && this.basemaplayer['options']['maxZoom']) ? 
+                                        this.basemaplayer['options']['maxZoom'] : 18;
                 
-                if(cur_maxZoom < layer_maxZoom){ //increase possible zoom
-                    this.nativemap.setMaxZoom(layer_maxZoom);
+                var layer_minZoom = (this.basemaplayer['options'] && this.basemaplayer['options']['minZoom']) ? 
+                                        this.basemaplayer['options']['minZoom'] : 0;
 
-                    var idx = this.available_maxzooms.findIndex(arr => arr[0] == 'basemap');
-                    if(idx != -1){ // update max zoom value
-                        this.available_maxzooms[idx] = ['basemap', layer_maxZoom];
-                    }else{ // add max zoom value
-                        this.available_maxzooms.push(['basemap', layer_maxZoom]);
-                        this.available_maxzooms.sort((a, b) => b[1] - a[1]);
-                    }
-                }
+                this.defineMaxZoom('basemap', layer_maxZoom);
+                this.defineMinZoom('basemap', layer_minZoom);
                 
-                }
             }            
             
         }   
@@ -658,25 +661,19 @@ $.widget( "heurist.mapping", {
         
         this._updatePanels();
         
-        if(layer_options && layer_options['maxZoom']){
-
-            var idx = this.available_maxzooms.findIndex(arr => arr[0] == new_layer._leaflet_id);
-            if(idx != -1){
-                this.available_maxzooms[idx] = [new_layer._leaflet_id, layer_options['maxZoom']];
-            }else{
-                this.available_maxzooms.push([new_layer._leaflet_id, layer_options['maxZoom']]);
-                this.available_maxzooms.sort((a, b) => b[1] - a[1]);
+        if(layer_options){
+            if(layer_options['maxZoom']>0)
+            {
+                this.defineMaxZoom(new_layer._leaflet_id, layer_options['maxZoom']); //from tile layer
             }
-
-            if(this.userDefinedMaxZoom>0 && layer_options['maxZoom'] < this.userDefinedMaxZoom){
-                if(this.nativemap.getMaxZoom() < layer_options['maxZoom']){
-                    this.nativemap.setMaxZoom(layer_options['maxZoom']);
-                }
+            if(layer_options['minZoom']>=0)
+            {
+                this.defineMinZoom(new_layer._leaflet_id, layer_options['minZoom']); //from tile layer
             }
         }
 
         return new_layer._leaflet_id;
-    },
+    }, //addTileLayer
     
     //
     // adds image overlay to map
@@ -1049,13 +1046,18 @@ $.widget( "heurist.mapping", {
     },
     
     //
+    // Converts zoom in km to nativemap zoom (0-22)
     //
-    //
-    _defineMaxZoom: function( zoomInKM, bounds){
+    convertZoomToNative: function( zoomInKM, bounds){
         
-        var maxZoom2 = 0;
+        var nativeZoom = -1;
+        
+        if(typeof zoomInKM == 'string'){ //in km
+            zoomInKM = parseFloat(zoomInKM); 
+        }
         
         if(zoomInKM>0){
+            
             var ll;
             if(!bounds){
                 ll = L.latLng(45, 0);
@@ -1071,12 +1073,83 @@ $.widget( "heurist.mapping", {
                 corner2 = L.latLng(bbox[3], bbox[2]);
             var bbox2 = L.latLngBounds(corner1, corner2);            
     
-            maxZoom2 = this.nativemap.getBoundsZoom(bbox2);
+            nativeZoom = this.nativemap.getBoundsZoom(bbox2);
             
         }
         
-        return maxZoom2; 
+        return nativeZoom; 
     },
+    
+    //
+    // Sets maximum possible zoom
+    // layer_name - name of restrictions(widget, basemap, layer id, mapdoc id)
+    //
+    defineMaxZoom: function(layer_name, layer_maxZoom)
+    {                
+            var idx = this.available_maxzooms.findIndex(arr => arr[0] == layer_name); //find restrictions for basemap
+            
+            if(layer_maxZoom<0){ //remove this layer
+                if(idx != -1){
+                    this.available_maxzooms.splice(idx, 1);
+                }else{
+                    return;
+                }
+            }else {
+                if(idx != -1){ 
+                    //found - update max zoom value
+                    if(this.available_maxzooms[idx][1]==layer_maxZoom) return; //the same value - no changes
+                    this.available_maxzooms[idx] = [layer_name, layer_maxZoom]; 
+                }else{ 
+                    // add max zoom value
+                    this.available_maxzooms.push([layer_name, layer_maxZoom]);
+                }
+            }
+            
+            if(this.available_maxzooms.length>0){
+                //sort asc
+                this.available_maxzooms.sort((a, b) => a[1] - b[1]);
+                //take first - lowest restriction
+                this.nativemap.setMaxZoom(this.available_maxzooms[0][1]);
+            }else{
+                this.nativemap.setMaxZoom(18);
+            }
+    },
+    
+
+    //
+    // Sets minimum possible zoom
+    // layer_name - name of restrictions(widget, basemap, layer id, mapdoc id)
+    //
+    defineMinZoom: function(layer_name, layer_minZoom)
+    {                
+            var idx = this.available_minzooms.findIndex(arr => arr[0] == layer_name); //find restrictions for basemap
+            
+            if(layer_minZoom<0){ //remove this layer
+                if(idx != -1){
+                    this.available_minzooms.splice(idx, 1);
+                }else{
+                    return;
+                }
+            }else {
+                if(idx != -1){ 
+                    //found - update min zoom value
+                    if(this.available_minzooms[idx][1]==layer_minZoom) return; //the same value - no changes
+                    this.available_minzooms[idx] = [layer_name, layer_minZoom]; 
+                }else{ 
+                    // add min zoom value
+                    this.available_minzooms.push([layer_name, layer_minZoom]);
+                }
+            }
+            
+            if(this.available_minzooms.length>0){
+                //sort desc
+                this.available_minzooms.sort((a, b) => b[1] - a[1]);
+                //take first - max restriction
+                this.nativemap.setMinZoom(this.available_minzooms[0][1]);
+            }else{
+                this.nativemap.setMinZoom(0);
+            }
+    },    
 
     _zoom_timeout: 0,
     //
@@ -1099,13 +1172,13 @@ $.widget( "heurist.mapping", {
                 
                 var maxZoom = this.nativemap.getMaxZoom();
                 
-                var maxZoom2 = this._defineMaxZoom(this.options.zoomMaxInKM, bounds);
-                if(maxZoom2>0 && maxZoom2<maxZoom){
-                    maxZoom = maxZoom2;
+                var nativeZoom = this.convertZoomToNative(this.options.zoomMaxInKM, bounds); //adjust for current lat
+                if(nativeZoom>=0 && nativeZoom<maxZoom){
+                    maxZoom = nativeZoom;
                 } 
-                if(this.userDefinedMinZoom>0 && maxZoom<this.userDefinedMinZoom){
-                    maxZoom = this.userDefinedMinZoom;  
-                }
+                //if(this.userDefinedMinZoom>=0 && maxZoom<this.userDefinedMinZoom){
+                //    maxZoom = this.userDefinedMinZoom;  
+                //}
 
                 if(window.hWin.HEURIST4.util.isObject(fly_params) && fly_params['maxZoom'] && fly_params['maxZoom'] > maxZoom){
                     fly_params['maxZoom'] = maxZoom;
@@ -1170,16 +1243,8 @@ $.widget( "heurist.mapping", {
 
             this._updatePanels();
 
-            var idx = this.available_maxzooms.findIndex(arr => arr[0] == layer_id);
-            if(idx != -1){ // remove from available max zooms
-                this.available_maxzooms.splice(idx, 1);
-            }
-
-            if(idx == 0){ // check if max fzoom needs updating
-                if(this.userDefinedMaxZoom>0 && this.available_maxzooms[idx][1] < this.userDefinedMaxZoom){
-                    this.nativemap.setMaxZoom(this.available_maxzooms[idx][1]);
-                }
-            }
+            this.defineMaxZoom(layer_id, -1); //on layer remove
+            this.defineMinZoom(layer_id, -1);
         }
     },
 
@@ -2330,14 +2395,14 @@ $.widget( "heurist.mapping", {
     //
     getLayerBounds: function (layer, useRuler){
         
-        if(layer instanceof L.Marker || layer instanceof L.CircleMarker){    
-            var ll = layer.getLatLng();
+        var that = this;
+
+        function __extendBoundsForPoint(ll){
             
-            //if field 2-925 is set (zoom to point in km) use it
-            if(useRuler){ //zoom to single point
+            if(useRuler && that.options.zoomToPointInKM>0){ //zoom to single point
             
                 var ruler = cheapRuler(ll.lat);
-                var bbox = ruler.bufferPoint([ll.lng, ll.lat], this.options.zoomToPointInKM);   //0.01          
+                var bbox = ruler.bufferPoint([ll.lng, ll.lat], that.options.zoomToPointInKM);   //0.01          
                 //w, s, e, n
                 var corner1 = L.latLng(bbox[1], bbox[0]),
                     corner2 = L.latLng(bbox[3], bbox[2]);
@@ -2348,8 +2413,25 @@ $.widget( "heurist.mapping", {
                     corner2 = L.latLng(ll.lat+0.02, ll.lng+0.02);
                 return L.latLngBounds(corner1, corner2);            
             }
+        }
+        
+        if(layer instanceof L.Marker || layer instanceof L.CircleMarker){    
+            var ll = layer.getLatLng();
+            
+            //if field 2-925 is set (zoom to point in km) use it
+            return __extendBoundsForPoint(ll);
+            
         }else{
-            return layer.getBounds();
+            var bnd = layer.getBounds();
+            if(bnd){
+                var p1 = bnd.getSouthWest();
+                var p2 = bnd.getNorthEast();
+                if(Math.abs(p1.lat-p2.lat)<0.01 && Math.abs(p1.lng-p2.lng)<0.01){
+                    return __extendBoundsForPoint(p1);
+                }
+            }
+            
+            return bnd;
         }
     },
     
@@ -2599,35 +2681,31 @@ $.widget( "heurist.mapping", {
         this.options.map_rollover = __parseval(params['map_rollover']);
         this.options.default_style = window.hWin.HEURIST4.util.isJSON(params['style']);
         
-        //these settings may be overwritten by map document
+        //these settings may be overwritten by map document, by basemap or by tiled layer
         if(params['maxzoom']>0){
-            this.options.zoomMaxInKM = parseFloat(params['maxzoom']); 
-            if(this.options.zoomMaxInKM>0){
-                this.userDefinedMaxZoom = this._defineMaxZoom(this.options.zoomMaxInKM, null);
-                
-                if(this.userDefinedMaxZoom>0){
-                   this.nativemap.setMaxZoom( this.userDefinedMaxZoom ); 
-                }
+            this.options.zoomMaxInKM = params['maxzoom'];
+        }
+        if(params['minzoom']>0){
+            this.options.zoomMinInKM = params['minzoom'];
+        }
+        
+        if(this.options.zoomMaxInKM>0){
+            var zoomNative = this.convertZoomToNative(this.options.zoomMaxInKM);
+            if(zoomNative>0){
+                this.defineMaxZoom('widget', zoomNative); //on widget init
             }
         }
-
-        if(params['minzoom']>0){
-            this.options.zoomMinInKM = parseFloat(params['minzoom']);  
-            if(this.options.zoomMinInKM>0 && (this.options.zoomMaxInKM==0 ||
-                   this.options.zoomMinInKM>this.options.zoomMaxInKM))
-            {
-                this.userDefinedMinZoom = this._defineMaxZoom(this.options.zoomMinInKM, null);
-                if(this.userDefinedMinZoom>0){
-                   this.nativemap.setMinZoom( this.userDefinedMinZoom ); 
-                   this.nativemap.setView([20, 20], this.userDefinedMinZoom);
-                }
+        if(this.options.zoomMinInKM>0){
+            var zoomNative = this.convertZoomToNative(this.options.zoomMinInKM);
+            if(zoomNative>=0){
+                this.defineMinZoom('widget', zoomNative);
             }
-        } 
+        }
         
         if(params['pntzoom']>0){
             this.options.zoomToPointInKM = parseFloat(params['pntzoom']); 
             if(!(this.options.zoomToPointInKM>0)){
-                this.options.zoomToPointInKM  = 1; //default value
+                this.options.zoomToPointInKM  = 5; //default value
             }
         }
 
@@ -2828,7 +2906,7 @@ $.widget( "heurist.mapping", {
                                }
                         });     
                         
-                    }
+                    }//draw events
                     
                 }
                 

@@ -250,7 +250,7 @@ if(!$has_emails || empty($emails)) {
             window.history.pushState({}, '', '<?php echo $_SERVER['PHP_SELF']; ?>');
 
             var all_emails = <?php echo json_encode($emails)?>; // Object of Email records id->title
-
+            
             var current_db = "<?php echo $current_db ?>";
 
             function exportCSV(isValid) {
@@ -408,7 +408,7 @@ if(!$has_emails || empty($emails)) {
                 ];
 
                 window.hWin.HEURIST4.ui.createSelector(select.get(0), options);
-                window.hWin.HEURIST4.ui.initHSelect(select, true); // was false, but apparently the menu widget will not open
+                //window.hWin.HEURIST4.ui.initHSelect(select, true); // was false, but apparently the menu widget will not open
 
                 if(select.hSelect("instance")!=undefined) {
                     select.hSelect("widget").css({"margin-top": "5px", "min-width": "15em", "width": "310px"});
@@ -420,7 +420,7 @@ if(!$has_emails || empty($emails)) {
             }
 
             function setupEmailSelection() {
-
+                
                 var $email_selection = $("#emailOutline");
 
                 var options = [
@@ -435,11 +435,15 @@ if(!$has_emails || empty($emails)) {
                 });
 
                 window.hWin.HEURIST4.ui.createSelector($email_selection.get(0), options);
+                /*
                 window.hWin.HEURIST4.ui.initHSelect($email_selection, true); // was false, but apparently the menu widget will not open
 
                 if($email_selection.hSelect("instance")!=undefined) {
                     $email_selection.hSelect("widget").css({"min-width": "20em"});
+                }else{
+console.log('FAIL');                                    
                 }
+                */
 
                 $email_selection.on({
                     change: function(event) {
@@ -461,8 +465,8 @@ if(!$has_emails || empty($emails)) {
                 var modifySel = $("#recModifiedSel");
                 var modifyLogic = $("#recModifiedLogic");
 
-                window.hWin.HEURIST4.ui.initHSelect(modifySel.get(0), true); // was false, but apparently the menu widget will not open
-                window.hWin.HEURIST4.ui.initHSelect(modifyLogic.get(0), true); // was false, but apparently the menu widget will not open
+                //window.hWin.HEURIST4.ui.initHSelect(modifySel.get(0), true); // was false, but apparently the menu widget will not open
+                //window.hWin.HEURIST4.ui.initHSelect(modifyLogic.get(0), true); // was false, but apparently the menu widget will not open
 
                 window.hWin.HEURIST4.util.setDisabled($("#recModified"), true);
                 window.hWin.HEURIST4.util.setDisabled($("#recModifiedLogic-button"), true);
@@ -820,8 +824,8 @@ if(!$has_emails || empty($emails)) {
 
                     <div class="non-selectable" style="margin-bottom: 20px;"> 
                         Email record containing the email outline 
-                        
-                        <select id="emailOutline" name="emailId"></select>
+                        <br>
+                        <select id="emailOutline" name="emailId" style="width: 99%;"></select>
                     </div>
                     
                     <div style="margin-bottom: 20px;">

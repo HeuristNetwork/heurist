@@ -2163,6 +2163,11 @@ function recordSearch($system, $params)
     //if($is_ids_only && $system->dbname()=='ExpertNation') 
     //error_log($params['use_user_wss']);
     //error_log($query);
+    if(@$_REQUEST['dbg']==1) {
+        print $query;
+        exit();
+    }
+        
 
     $res = $mysqli->query($query);
     if (!$res){

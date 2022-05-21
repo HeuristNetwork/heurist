@@ -1572,7 +1572,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                         var $ele = $(document.elementFromPoint(ui.position.left, ui.position.top));
                         var node = ui.helper.data('ftSourceNode');
 
-                        var procFavourites = !node.folder && node.key;
+                        var procFavourites = !node.folder && node.key && !node.data.url;
 
                         if(procFavourites && ($ele.is('ul.favourite-filters-container') || $ele.parents('ul.favourite-filters-container').length > 0)){
 
@@ -1821,7 +1821,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                     var node = $.ui.fancytree.getNode(ui.target);
                     tree.contextmenu("enableEntry", "paste", node.folder && !!CLIPBOARD);
 
-                    var showFavourite = $.isFunction(that.options.handle_favourites) && !node.folder && node.key;
+                    var showFavourite = $.isFunction(that.options.handle_favourites) && !node.folder && node.key && !node.data.url;
                     tree.contextmenu('enableEntry', 'favourite', showFavourite);
                     tree.contextmenu('showEntry', 'favourite', showFavourite);
 
