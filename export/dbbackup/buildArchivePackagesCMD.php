@@ -2,13 +2,13 @@
 
 /**
 * Creates archive packages for one, several or all databases.
-* It is possible to expost some or all data as an HML or zip file
-* Include uploaded/registered files parameter
+* Writes the archive packages in _BATCH_PROCESS_ARCHIVE_PACKAGE
+* See default argument values below to see what is/can be exported
 * Runs from shell only
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2020 University of Sydney
+* @copyright   (C) 2005-2022 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -23,16 +23,21 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$arg_skip_files = false;
-$arg_skip_hml = true;
-$arg_database = null;
-$arg_include_docs = true;
+// Default values for arguments
+$arg_database = null;  
+$arg_skip_files = false;    // include all the uploaded files
+$arg_include_docs = true;   // include full documentation to make the archive interpretable
+$arg_skip_hml = true;       // don't include HML as this function is primarily intended for database transfer 
+                            // and HML is voluminous. HML should be included if this is intended as longer term archive.
 
 if (@$argv) {
     
-//example
-// php -f /var/www/html/heurist/export/dbbackup/buildArchivePackagesCMD.php -- -db=database_1,database_2
-// php -f buildArchivePackagesCMD.php -- -db=osmak_9,osmak_9c,osmak_9d
+// example:
+//  sudo php -f /var/www/html/heurist/export/dbbackup/buildArchivePackagesCMD.php -- -db=database_1,database_2
+//  sudo php -f buildArchivePackagesCMD.php -- -db=osmak_9,osmak_9c,osmak_9d
+
+// TODO: It would be good if this had a parameter option to also delete the database for use when transferring to a new server
+// TODO: WARNING: AT THIS TIME (21 May 2022) IT DOES NOT REPORT AN ERROR IF THERE IS NO FILESTORE FOLDER
 
     // handle command-line queries
     $ARGV = array();
