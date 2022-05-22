@@ -705,13 +705,13 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                            //window.hWin.HEURIST4.util.stopEvent(e);
                            //return false;
                     }
+
+                    $(editor.bodyElement).css('padding-left', '5px'); // add space between content and body outline
                 });
-                /*
-                editor.on('blur', function (e) {
-console.log('BLUR');                    
-                        
+                editor.on('blur', function (e) { 
+                    $(editor.bodyElement).css('padding-left', ''); // remove space
                 });
-                */
+
                 editor.ui.registry.addButton('customHeuristMedia', {
                       icon: 'image',
                       text: 'Add Media',
