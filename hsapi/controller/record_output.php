@@ -831,7 +831,9 @@ function output_CSV($system, $data, $params){
             }else {
                 $record_row[] = $value;
 
-                if (count($resource_titles)>0){
+                if (count($resource_titles)>0 || 
+                    ($dt_type == 'resource' && $include_resource_titles && count($resource_titles)==0)){ // add record titles
+
                     $record_row[] = implode($csv_mvsep,$resource_titles);    
                 }else if (count($file_urls)>0){
                     $record_row[] = implode($csv_mvsep,$file_urls);    
