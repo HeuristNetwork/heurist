@@ -1280,115 +1280,138 @@ $.widget( "heurist.editing_input", {
             }
             
             //allow edit terms only for true defTerms enum and if not DT_RELATION_TYPE
-            if(window.hWin.HEURIST4.util.isempty(allTerms)) 
-                //&& (allTerms!='relation'))  //'this.options.dtID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']))
-            {
-                
+            if(window.hWin.HEURIST4.util.isempty(allTerms)) {
                 allTerms = this.f('rst_FilteredJsonTermIDTree');
-                
-                if (!(window.hWin.HEURIST4.util.isempty(allTerms) &&
-                    this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']))
-                { 
 
-                var isVocabulary = !isNaN(Number(allTerms)); 
+                if (!(window.hWin.HEURIST4.util.isempty(allTerms) && 
+                    this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'])) {
 
-                var $btn_termsel = $( '<span>', {title: 'Select Term By Picture'})
-                .addClass('smallicon ui-icon ui-icon-image')
-                .css({'margin-top': '2px'})
-                .appendTo( $inputdiv );
+                    var isVocabulary = !isNaN(Number(allTerms)); 
 
-                this._showHideSelByImage($input);
+                    var $btn_termsel = $( '<span>', {title: 'Select Term By Picture'})
+                    .addClass('smallicon ui-icon ui-icon-image')
+                    .css({
+                        'margin-top': '2px',
+                        'cursor': 'pointer'
+                    })
+                    .appendTo( $inputdiv )
+                    .hide();
 
-                this._on( $btn_termsel, { click: function(){
+                    var all_term_ids = $Db.trm_TreeData(allTerms, 'set');
 
-                    if(this.is_disabled) return;
-                    
-                    var all_term_ids = $.map($input.find('option'), function(e) { return e.value; });
-                    
-                    //@todo - rewrite to $Db.trm select_single
-                    
-                    var request = {};
-                    request['a']          = 'search'; //action
-                    request['entity']     = 'defTerms';//this.options.entity.entityName;
-                    request['details']    = 'list'; //'id';
-                    request['request_id'] = window.hWin.HEURIST4.util.random();
-                    request['trm_ID'] = all_term_ids;
-                    request['withimages'] = 1;
-                    
-                    var that = this;   
-                                                                 
-                    //select term by image
-                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                        function(response){
+                    var trm_img_req = {
+                        'a': 'search',
+                        'entity': 'defTerms',
+                        'details': 'list',
+                        'trm_ID': all_term_ids,
+                        'withimages': 1,
+                        'request_id': window.hWin.HEURIST4.util.random()
+                    };
+
+                    window.hWin.HAPI4.EntityMgr.doRequest(trm_img_req, function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            var recset = new hRecordSet(response.data);
+                            if(recset.length() > 0){
+                                $btn_termsel.hide();
+                            }else{
+                                $btn_termsel.hide();
+                            }
+                        }
+                    });
+
+                    this._on( $btn_termsel, { click: function(){
+
+                        if(this.is_disabled) return;
+
+                        trm_img_req['trm_ID'] = $Db.trm_TreeData(allTerms, 'set');
+
+                        //@todo - rewrite to $Db.trm select_single
+
+                        //select term by image
+                        window.hWin.HAPI4.EntityMgr.doRequest(trm_img_req, function(response){ // check for terms with images
+
                             if(response.status == window.hWin.ResponseStatus.OK){
                                 var recset = new hRecordSet(response.data);
                                 if(recset.length()>0){                                  
-                                
-                                    window.hWin.HEURIST4.ui.showEntityDialog('DefTerms', 
-                                        {select_mode:'images', recordset:recset,
+
+                                    var selectmode = that.enum_buttons == 'checkbox' ? 'select_multi' : 'select_single';
+                                    var dlg_title = 'Term selection for ' + that.f('rst_DisplayName');
+
+                                    window.hWin.HEURIST4.ui.showEntityDialog('defTerms', {
+                                        empty_remark: 'No terms available',
+                                        title: dlg_title,
+                                        hide_searchForm: true,
+                                        select_mode: selectmode, 
+                                        view_mode: 'icon',
+                                        initial_filter: Number(allTerms),
+                                        default_palette_class: 'ui-heurist-populate',
                                         onselect:function(event, data){
-                                            if(data && data.selection && data.selection.length>0){
-                                                $input.val(data.selection[0]);
-                                                if($input.hSelect('instance')!==undefined) $input.hSelect('refresh');
-                                                that.onChange();
+                                            if(data && data.selection && data.selection.length > 0){
+
+                                                if(data.selection.length > 1 || selectmode == 'select_multi'){
+                                                    that.setValue(data.selection, false);
+                                                }else{
+                                                    $input.val(data.selection[0]);
+                                                    if($input.hSelect('instance') !== undefined) $input.hSelect('refresh');
+                                                    that.onChange();
+                                                }
                                             }
                                         }
-                                        });
+                                    });
                                                                     
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgFlash('No terms images defined');
+                                    that.input_cell.find('.ui-icon-image').hide(); // hide icon, accidental showing
                                 }
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                         });
+                    }});
 
-                }});
+                    var vocab_id = Number(allTerms);
 
-                var vocab_id = Number(allTerms);
-
-                if(window.hWin.HAPI4.is_admin()){            
-                    
-                    var $btn_termedit2 = $( '<span>', {title: 'Edit term tree'})
-                    .addClass('smallicon ui-icon ui-icon-gear btn_add_term')
-                    .css({'margin-top':'2px',cursor:'pointer'})
-                    .appendTo( $inputdiv );
-                    
-                    this._on( $btn_termedit2,{ click: function(){ this._openManageTerms(vocab_id); }});
+                    if(window.hWin.HAPI4.is_admin()){            
                         
-                }
-            
+                        var $btn_termedit2 = $( '<span>', {title: 'Edit term tree'})
+                        .addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                        .css({'margin-top':'2px',cursor:'pointer'})
+                        .appendTo( $inputdiv );
+                        
+                        this._on( $btn_termedit2,{ click: function(){ this._openManageTerms(vocab_id); }});
+                            
+                    }
                 
-                var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
-                .addClass('smallicon ui-icon ui-icon-plus btn_add_term')
-                .css({'margin-top':'2px',cursor:'pointer','font-size':'11px'})
-                .appendTo( $inputdiv );
-
-                //
-                // open add term popup
-                //
-                this._on( $btn_termedit, { click: function(){
                     
-                if(this.is_disabled) return;
-                
-                //add new term to specified vocabulary
-                var rg_options = {
-                         isdialog: true, 
-                         select_mode: 'manager',
-                         edit_mode: 'editonly',
-                         height: 240,
-                         rec_ID: -1,
-                         trm_VocabularyID: vocab_id,
-                         onClose: function(){
-                            that._recreateEnumField(vocab_id);
-                         }
-                    };
+                    var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
+                    .addClass('smallicon ui-icon ui-icon-plus btn_add_term')
+                    .css({'margin-top':'2px',cursor:'pointer','font-size':'11px'})
+                    .appendTo( $inputdiv );
 
-                    window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options); // it recreates  
+                    //
+                    // open add term popup
+                    //
+                    this._on( $btn_termedit, { click: function(){
+                        
+                    if(this.is_disabled) return;
+                    
+                    //add new term to specified vocabulary
+                    var rg_options = {
+                            isdialog: true, 
+                            select_mode: 'manager',
+                            edit_mode: 'editonly',
+                            height: 240,
+                            rec_ID: -1,
+                            trm_VocabularyID: vocab_id,
+                            onClose: function(){
+                                that._recreateEnumField(vocab_id);
+                            }
+                        };
 
-                    return;
-                }} ); //end btn onclick
+                        window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options); // it recreates  
 
+                        return;
+                    }} ); //end btn onclick
                 }
             }//allow edit terms only for true defTerms enum
             
@@ -3740,23 +3763,7 @@ console.log('onpaste');
         
         window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
     },
-    
-    //
-    //
-    //
-    _showHideSelByImage: function($input){
-            var hasImage = ($input.find('option[term-img=1]').length>0);
-            
-            var $btn_termsel = $input.parent().find('.ui-icon-image');
-            
-            if(hasImage) {
-                $input.css({'margin-right': '-44px', 'padding-right': '30px'});
-                $btn_termsel.show();   
-            }else{
-                $input.css({'margin-right': 0, 'padding-right': 0});
-                $btn_termsel.hide();   
-            }
-    },
+
     //
     // recreate SELECT for enum/relation type
     //
@@ -5036,9 +5043,29 @@ console.log('onpaste');
                 $input = that._recreateSelector($input, value);
                 $input.hSelect('widget').css('width','auto');
                 that._on( $input, {change:that._onTermChange} );
-                that._showHideSelByImage( $input ); 
             });
         }
+
+        // Show/Hide select by picture
+        var trm_img_req = {
+            'a': 'search',
+            'entity': 'defTerms',
+            'details': 'list',
+            'trm_ID': child_terms,
+            'withimages': 1,
+            'request_id': window.hWin.HEURIST4.util.random()
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(trm_img_req, function(response){
+            if(response.status == window.hWin.ResponseStatus.OK){
+                var recset = new hRecordSet(response.data);
+                if(recset.length() > 0){
+                    that.input_cell.find('.ui-icon-image').show();
+                }else{
+                    that.input_cell.find('.ui-icon-image').hide();
+                }
+            }
+        });
     },
 
     //

@@ -699,7 +699,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this.vocabularies_sel = 
             window.hWin.HEURIST4.ui.createVocabularySelect(sel[0], {useGroups:true, 
                 domain: this.options.filter_groups,
-                defaultTermID: this.options.initial_filter });
+                defaultTermID: this.options.initial_filter});
             this._on(this.vocabularies_sel, {
                 change:function(event){
                     this.options.trm_VocabularyID = $(event.target).val();
@@ -710,10 +710,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this.options.trm_VocabularyID = this.options.initial_filter;
 
             this.options.recordList = {
-                empty_remark: 'Select vocabulary',
+                empty_remark: this.options.empty_remark ? this.options.empty_remark : 'Select vocabulary',
                 show_toolbar: false,
-                view_mode: 'list',
-                pagesize: 999999};
+                view_mode: this.options.view_mode ? this.options.view_mode : 'list',
+                pagesize: 999999
+            };
 
             this.options.trm_VocabularyID = this.options.initial_filter;
             //this._onActionListener(null, 'viewmode-tree');
@@ -729,6 +730,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
 
         this.recordList.resultList( this.options.recordList );
+        if(this.options.hide_searchForm){
+            c1.hide();
+            this.recordList.css('top', '0px');
+        }
 
         that._loadData(true);
 
