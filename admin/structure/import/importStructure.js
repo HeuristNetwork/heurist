@@ -850,10 +850,16 @@ console.log(url_Error);
     //  MAIN METHOD
     //
     startImport: function(){
-        
-        
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
-        
+
+        var style = {'font-size': '16px', 'background-color': '#FFF', 'opacity': 1};
+        var msg = 'Downloading structure...<br><br>'
+                + 'This may take a couple of minutes if there are a number of record type linked to the one requested.<br>'
+                + 'This is a very complex procedure and sensitive to errors in the configuration of the source database.<br><br>'
+                + 'Please report a bug if it fails (either with or without a message)<br>'
+                + 'including the database and record type you are trying to download, so that we can investigate and fix.';
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, style, msg);
+
         var that = this;
         
         window.hWin.HAPI4.SystemMgr.import_definitions(this._selectedDB, this._selectedRtyID, this._is_rename_target,
