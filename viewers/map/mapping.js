@@ -55,8 +55,8 @@ Thematic mapping
     addGeoJson - adds geojson layer to map, apply style and trigger timeline update
     addTileLayer - adds image tile layer to map
     addImageOverlay - adds image overlay to map
-    updateTimelineData - add/replace timeline layer_data in this.timeline_items and triggers timelineRefresh
-    applyStyle
+    updateTimelineData - adds/replaces timeline layer_data in this.timeline_items and triggers timelineRefresh
+    applyStyle - applies style for given top layer
     getStyle
     
     setFeatureSelection - triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
@@ -1336,7 +1336,7 @@ $.widget( "heurist.mapping", {
         }
     },
     //
-    // apply style for given top layer
+    // applies style for given top layer
     // it takes style from options.default_style, each feature may have its own style that overwrites layer's one
     //
     applyStyle: function(layer_id, newStyle) {

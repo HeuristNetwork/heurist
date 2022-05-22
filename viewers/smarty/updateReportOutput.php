@@ -19,7 +19,7 @@
 *
 * takes a report ID (rps_ID in usrReportSchedule) and writes out the report (html and js files)
 * to the location specified for that ID.
-* An ID of 0 should trigger sequential refreshing of all the reports
+* If ID is 0 it should trigger sequential refreshing of all the reports
 *
 * parameters
 * 'id' - key field value in usrReportSchedule
