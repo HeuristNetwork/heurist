@@ -104,7 +104,7 @@ if(false){
 }else if(false){
     __setTermYesNo();
 }else {
-   
+    __renameDegreeToKM();
 }
 
 //
@@ -195,6 +195,44 @@ function __updateDatabase(){
     print '[end report]';    
 }
 
+//------------------------------
+//
+//  
+function __renameDegreeToKM(){
+    global $mysqli, $databases; 
+
+    print 'renameDegreeToKM<br>';
+    
+    
+    //$query1 = 'UPDATE defRecStructure SET rst_DisplayName = REPLACE(rst_DisplayName, "degrees", "km"), rst_DefaultValue="" '
+    //.'where rst_DisplayName like "%degrees%"';
+    
+    $query1 = 'UPDATE defRecStructure SET rst_DisplayName = REPLACE(rst_DisplayName, "degrees", "km"), rst_DefaultValue="" '
+    .'where rst_DetailTypeID in (select dty_ID from defDetailTypes where dty_OriginatingDBID=3 and dty_IDInOriginatingDB in (1085,1086))';
+    
+    $query2 = 'UPDATE defDetailTypes SET dty_NameInOriginatingDB = REPLACE(dty_NameInOriginatingDB, "degrees", "km"), '
+    .'dty_Name = REPLACE(dty_Name, "degrees", "km") WHERE dty_ID>0';
+
+    
+    foreach ($databases as $idx=>$db_name){
+
+        mysql__usedatabase($mysqli, $db_name);
+
+        if(hasTable($mysqli, 'defRecStructure')){
+            
+            $res1 = $mysqli->query($query1);
+            $res2 = $mysqli->query($query2); 
+            $res2 = true;
+                if($res1 && $res2){
+                    print $db_name.'<br>';
+                }else{
+                    print $db_name.' Cannot modify defRecStructure, defDetailTypes: '.$mysqli->error;
+                    return false;
+                }
+        }
+    }//for
+    print '[end report]';    
+}
 
 //------------------------------
 //
