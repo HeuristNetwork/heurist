@@ -2304,40 +2304,43 @@ $.widget( "heurist.editing_input", {
 					
                     /* new file values */
                     var val = that.newvalues[$input.attr('id')];
-                    var n_id = val['ulf_ID'];
-                    var n_nonce = val['ulf_ObfuscatedFileID'];
-                    var n_dwnld_link = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&debug=2&download=1&file='+n_nonce;
-                    var n_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+n_nonce+'&mode=tag&origin=recview';
 
                     if(window.hWin.HEURIST4.util.isempty(val) || !(val.ulf_ID >0)){
                         $input.val('');
+                    }else{
+                        var n_id = val['ulf_ID'];
+                        var n_nonce = val['ulf_ObfuscatedFileID'];
+                        var n_dwnld_link = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&debug=2&download=1&file='+n_nonce;
+                        var n_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+n_nonce+'&mode=tag&origin=recview';
+                    
+                        if(f_id != n_id){// If the image has been changed from original/or has been newly added
+
+                            $container = $(event.target.parentNode);
+
+                            $show = $($container.find('a#lnk'+f_id)[0]);
+                            $dwnld = $($container.find('a#dwn'+f_id)[0]);
+                            $player = $($container.find('div#player'+f_id)[0]);
+                            $thumbnail = $($container.find('img#img'+f_id)[0]);
+
+                            $show.attr({'id':'lnk'+n_id});
+
+                            $dwnld.attr({'id':'dwn'+n_id, 'href':n_dwnld_link});
+
+                            $player.attr({'id':'player'+n_id});
+
+                            $thumbnail.attr({'id':'img'+n_id});                       
+
+                            f_id = n_id;
+                            f_nonce = n_nonce;
+                            dwnld_link = n_dwnld_link;
+                            url = n_url;
+                        }
+                        
                     }
+                    
                     //clear thumb rollover
                     if(window.hWin.HEURIST4.util.isempty($input.val())){
                         $input_img.find('img').attr('src','');
-                    }
-
-                    if(f_id != n_id){// If the image has been changed from original/or has been newly added
-
-                        $container = $(event.target.parentNode);
-
-                        $show = $($container.find('a#lnk'+f_id)[0]);
-                        $dwnld = $($container.find('a#dwn'+f_id)[0]);
-                        $player = $($container.find('div#player'+f_id)[0]);
-                        $thumbnail = $($container.find('img#img'+f_id)[0]);
-
-                        $show.attr({'id':'lnk'+n_id});
-
-                        $dwnld.attr({'id':'dwn'+n_id, 'href':n_dwnld_link});
-
-                        $player.attr({'id':'player'+n_id});
-
-                        $thumbnail.attr({'id':'img'+n_id});                       
-
-                        f_id = n_id;
-                        f_nonce = n_nonce;
-                        dwnld_link = n_dwnld_link;
-                        url = n_url;
                     }
 
                     that.onChange(); 
