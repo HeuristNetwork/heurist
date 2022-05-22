@@ -385,7 +385,7 @@ class DbRecUploadedFiles extends DbEntityBase
                     || strpos($record['ulf_ExternalFileReference'], 'manifest.json')!==false
                     || strpos($record['ulf_ExternalFileReference'], 'info.json')!==false) */                    
                     //check iiif - either manifest of image
-                    if($mimeType=='json' || $mimeType=='application/json'){
+                    if($mimeType=='json' || $mimeType=='application/json'|| $mimeType=='application/ld+json'){
 /*
 We can register either info.json (reference to local or remote IIIF server that describes particular IIIF image) or manifest.json (that describes set of media and their appearance).  
 
@@ -993,7 +993,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                $fields['ulf_MimeExt'] = 'bin';
            }
        }
-       $fields['ulf_UploaderUGrpID'] = 2; 
+       $fields['ulf_UploaderUGrpID'] = $this->system->get_user_id(); 
 
        $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
                 

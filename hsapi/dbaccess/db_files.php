@@ -48,7 +48,7 @@ require_once (dirname(__FILE__).'/../utilities/utils_file.php');
 require_once (dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
 
 /**
-* register file in recUploadedFiles
+* Register file in recUploadedFiles - used for import CSV, index directory
 * 
 * @param mixed $system
 * @param mixed $fullname

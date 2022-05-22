@@ -1397,7 +1397,8 @@ function recognizeMimeTypeFromURL($mysqli, $url){
             
             if($mimeType){
 
-                if($mimeType == 'application/json'){
+                if($mimeType=='application/json' ||  $mimeType=='application/ld+json'){
+                    $mimeType = 'application/json';
                     $extension = 'json';
                     $force_add = "('json','application/json', '0','','JSON','')";    
                 }

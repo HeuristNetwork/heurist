@@ -2817,8 +2817,12 @@ public static function performImport($params, $mode_output){
                                 if($fres>0){
                                     $ulf_ID = $fres;
                                 }else if($is_url) {
-                                    //otherwise register as new 
+                                    //otherwise register as new external resource
                                     
+                                    $entity = new DbRecUploadedFiles(self::$system, null);
+                                    $ulf_ID = $entity->registerURL( $r_value );
+                                    
+                                    /*
                                     $extension = null;
                                     //detect mime type
 
@@ -2885,6 +2889,7 @@ public static function performImport($params, $mode_output){
                                             self::$rep_skipped_details[] = ($recordId>0?('record#'.$recordId):'new record')
                                                     .': Impossible register external URL. Memtype is not defined or not registered in Database';
                                     }
+                                */
                                 }
                                 
                                 $value = $ulf_ID;
