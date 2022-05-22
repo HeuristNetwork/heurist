@@ -236,6 +236,17 @@ if($dbID>0) {
             );
         }
 
+        //Write db name as detail
+        if($dbReg){
+            mysql__insertupdate($mysqli, 'recDetails', 'dtl_', 
+                array(
+                    'dtl_RecID'=>$dbID,
+                    'dtl_DetailTypeID'=>ConceptCode::getDetailTypeLocalID("1176-469"),
+                    'dtl_Value'=>$dbReg
+                )
+            );   
+        }
+
         // Write the record bookmark into the bookmarks table. This allos the user registering the database
         // to see thir lsit of databases as My Bookmarks
         mysql__insertupdate($mysqli, 'usrBookmarks', 'bkm_', 
