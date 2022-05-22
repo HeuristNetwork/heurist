@@ -307,6 +307,10 @@ if($isLocalHost){
         ?>
 
         var lt = window.hWin.HAPI4.sysinfo['layout'];
+        
+        window.hWin.HAPI4.is_publish_mode = (lt=='Beyond1914' ||  lt=='UAdelaide' ||
+            lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' );
+        
         if(lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch'){
             $('#layout_panes').css({'height':'100%',width:'100%',position:'absolute'});
             $(window.hWin.document.body).css({'margin':'0px',overflow:'hidden'});
@@ -364,9 +368,7 @@ if($isLocalHost){
             }
         }
 
-        var lt = window.hWin.HAPI4.sysinfo['layout'];
-        if(! (lt=='Beyond1914' ||  lt=='UAdelaide' ||
-            lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' ))
+        if(!window.hWin.HAPI4.is_publish_mode)
         {                
 
             if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
@@ -461,6 +463,7 @@ if($isLocalHost){
         //    showTipOfTheDay(false);
         //}
 
+        var lt = window.hWin.HAPI4.sysinfo['layout'];
         if(lt=='WebSearch'){
             var active_tab = '<?php echo str_replace("'","\'",@$_REQUEST['views']);?>';
             if(active_tab){

@@ -2146,8 +2146,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             //window.hWin.HEURIST4.ui.showEditCMSDialog( cms_record_id );    
 
         }else 
-        if(!(lt=='Beyond1914' ||  lt=='UAdelaide' ||
-            lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){
+        if(!window.hWin.HAPI4.is_publish_mode){
 
                 if(window.hWin.HAPI4.sysinfo['db_total_records']>0){      
                     var init_search = window.hWin.HEURIST4.util.getUrlParameter('q', window.hWin.location.search);
@@ -2185,8 +2184,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     //    
     _dashboardVisibility: function(is_startup){
 
-        var lt = window.hWin.HAPI4.sysinfo['layout']; 
-        if  ((!(lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch'))
+        if (!window.hWin.HAPI4.is_publish_mode
             && (window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0))
         {
             

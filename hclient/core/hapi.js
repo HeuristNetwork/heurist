@@ -33,6 +33,7 @@ Properties:
     iconBaseURL - url for record type icon (rty_ID to be added)
     database - current database name
     sysinfo
+    is_publish_mode - false if Heurist is inited via main index.php and layout is not from the set of application (DH, EN, WebSearch)
 
 Localization routines (assigned to window.hWin)
 
@@ -1045,9 +1046,7 @@ prof =Profile
             versionCheck: function(){
 
                 //@todo define parameter in layout "production=true"
-                var lt = window.hWin.HAPI4.sysinfo['layout'];
-                if(! (lt=='Beyond1914' ||  lt=='UAdelaide' ||
-                    lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){
+                if(!window.hWin.HAPI4.is_publish_mode){
 
                     var version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null); 
                     var need_exit = false;
@@ -1254,6 +1253,19 @@ prof =Profile
             */
             ,search: function(request, callback){
 
+                if(!window.hWin.HAPI4.is_publish_mode && request['verify_credentials']!='ok'){
+                    window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
+console.log('OKK');                        
+                        request['verify_credentials'] = 'ok';
+                        that.search(request, callback);
+                    }, 0); 
+                    return;
+                }
+                
+                if(request['verify_credentials']){
+                    request['verify_credentials'] = null;
+                    delete request['verify_credentials'];
+                }
 
                 if(!$.isFunction(callback)){   
                     // it happens only of calback function is not set
@@ -1754,6 +1766,7 @@ prof =Profile
         iconBaseURL: '',
         database: '',
         currentUser: _guestUser,
+        is_publish_mode: true,
         sysinfo: {},
 
         Event: {
@@ -1791,9 +1804,8 @@ prof =Profile
             if(false){ //disabled: verify credentials if user is idle
             
                 if(that.currentUser['ugr_ID']>0){
-                    var lt = window.hWin.HAPI4.sysinfo['layout'];
-                    if(!(lt=='Beyond1914' ||  lt=='UAdelaide' ||
-                        lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){
+                    
+                    if(!window.hWin.HAPI4.is_publish_mode){
 
                         if(window.hWin.HEURIST4 && window.hWin.HEURIST4.ui)                        
                             window.hWin.HEURIST4.ui.onInactiveStart(5000, function(){  //300000 5 minutes 

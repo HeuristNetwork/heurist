@@ -185,7 +185,9 @@ $.widget( "heurist.search_faceted", {
     // the widget's constructor
     _create: function() {
         
-        if(this.element.parents('.mceNonEditable').length>0){
+        if(this.element.parents('.mceNonEditable').length>0 
+        || this.element.parent().attr('data-heurist-app-id') || this.element.hasClass('cms-element'))
+        {
             this.options.is_publication = true;
         }
         
