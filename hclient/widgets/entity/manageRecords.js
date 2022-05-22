@@ -807,39 +807,44 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               click: function() { that._navigateToRec(1); }},
                               
                         {text:window.hWin.HR('Dupe'), id:'btnRecDuplicate',
-                                css:{'margin-left':'1em'},
-                                click: function(event) { 
+                            css:{'margin-left':'1em'},
+                            click: function(event) { 
 
-                                    that._saveEditAndClose( null, function(){ 
-                                    
+                                function duplicate_record(){ 
                                     var btn = $(event.target);                        
                                     btn.hide();
-                                    
+
                                     var dlged = that._getEditDialog();
                                     if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
-                                    
+
                                     window.hWin.HAPI4.RecordMgr.duplicate({id: that._currentEditID}, 
                                         function(response){
 
                                             window.hWin.HEURIST4.msg.sendCoverallToBack();
-                                            
+
                                             btn.css('display','inline-block');  //restore button visibility
                                             if(response.status == window.hWin.ResponseStatus.OK){
                                                 window.hWin.HEURIST4.msg.showMsgFlash(
                                                     window.hWin.HR('Record has been duplicated'));
                                                 var new_recID = ''+response.data.added;
                                                 that._initEditForm_step3(new_recID);
-                                                
+                                                  
                                                 var dlged = that._getEditDialog();
                                                 dlged.find('.coverall-div-bare').remove();
-                                                
+
                                             }else{
                                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                                             }
-                                        }); 
-                                        
-                                    });
-                                }},
+                                        }
+                                    );
+                                }
+
+                                if(that._editing.isModified()){
+                                    that._saveEditAndClose( null, duplicate_record);
+                                }else{
+                                    duplicate_record();
+                                }
+                            }},
                         {text:window.hWin.HR('New'), id:'btnRecSaveAndNew',
                               css:{'margin-left':'0.5em','margin-right':'10em'},
                               click: function() { 
