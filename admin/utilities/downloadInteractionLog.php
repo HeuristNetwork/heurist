@@ -73,13 +73,13 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
             break;
     }
 
-    // Prepare user filtering by workgroups - requires testing first
+    // Prepare user filtering by workgroups
     $users = null;
-    /*if(array_key_exists('workGroups', $_REQUEST) && $_REQUEST['workGroups'] != ''){
-        $query = 'SELECT DISTINCT ugl_UserID FROM sysUsrGrpLinks WHERE ugl_GroupID IN ('. implode(',', $_REQUEST['workGroups']) .')';
+    if(array_key_exists('workGroups', $_REQUEST) && $_REQUEST['workGroups'] != ''){
+        $query = 'SELECT DISTINCT ugl_UserID FROM sysUsrGrpLinks WHERE ugl_GroupID IN ('. $_REQUEST['workGroups'] .')';
 
         $users = mysql__select_list2($system->get_mysqli(), $query);
-    }*/
+    }
 
     // Prepare date period filtering
     $today = new DateTime();
@@ -125,7 +125,7 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
             continue;
         }
 
-        // Apply user filter - requires testing first
+        // Apply user filter
         if($users != null && !in_array($line_chunks[0], $users)){
             continue;
         }
