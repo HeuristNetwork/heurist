@@ -107,21 +107,25 @@ if(@$_REQUEST['mode']=='2'){
 
         $targetdbname = $_REQUEST['targetdbname'];
 
-        // Avoid illegal chars in db name
-        $hasInvalid = preg_match('[\W]', $targetdbname);
-        if ($hasInvalid) {
-            $sErrorMsg = "<p><hr></p><p>&nbsp;</p><p>Requested database copy name: <b>$targetdbname</b></p>".
-            "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name</p>";
-        } // rejecting illegal characters in db name
-        else{
-            list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
+        if(strlen($targetdbname)>64){
+                $sErrorMsg = 'Database name '.$targetdbname.' is too long. Max 64 characters allowed');
+        }else{
+            // Avoid illegal chars in db name
+            $hasInvalid = preg_match('[\W]', $targetdbname);
+            if ($hasInvalid) {
+                $sErrorMsg = "<p><hr></p><p>&nbsp;</p><p>Requested database copy name: <b>$targetdbname</b></p>".
+                "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name</p>";
+            } // rejecting illegal characters in db name
+            else{
+                list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
 
-            $dblist = mysql__select_list2($mysqli, 'show databases');
-            if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
-                $sErrorMsg = "<div class='ui-state-error'>Warning: database '".$targetdbname
-                ."' already exists. Please choose a different name<br/></div>";
-            }else{
-                ob_start();
+                $dblist = mysql__select_list2($mysqli, 'show databases');
+                if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
+                    $sErrorMsg = "<div class='ui-state-error'>Warning: database '".$targetdbname
+                    ."' already exists. Please choose a different name<br/></div>";
+                }else{
+                    ob_start();
+                }
             }
         }
     }
@@ -310,7 +314,7 @@ if(@$_REQUEST['mode']=='2'){
         </p>
         <h3 class="ui-heurist-title">Enter a name for the cloned database:</h3>
         <div style="margin-left: 40px;">
-            <input type='text' name='targetdbname' id='targetdbname' size="40" onkeypress="{onKeyPress(event)}"/>
+            <input type='text' name='targetdbname' id='targetdbname' size="40" maxlength="64" onkeypress="{onKeyPress(event)}"/>
             <input type='submit' id='submitBtn' 
                 value='Clone "<?=($isCloneTemplate)?$_REQUEST['templatedb']:HEURIST_DBNAME?>"'
                 class="ui-button-action"/>

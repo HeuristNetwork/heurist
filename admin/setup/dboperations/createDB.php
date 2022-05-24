@@ -127,6 +127,22 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         $database_name = $uName . trim($_REQUEST['dbname']);
         $database_name_full = HEURIST_DB_PREFIX . $database_name; // all databases have common prefix then user prefix
         
+        if(strlen($database_name_full)>64){
+                $system->addError(HEURIST_ACTION_BLOCKED, 
+                        'Database name '.$database_name_full.' is too long. Max 64 characters allowed');
+                print json_encode($system->getError());
+                exit();
+        }
+        $hasInvalid = preg_match('[\W]', $database_name_full);
+        if ($hasInvalid) {
+                $system->addError(HEURIST_ACTION_BLOCKED, 
+                        'Database name '.$database_name_full
+                        .' is invalid. Only letters, numbers and underscores (_) are allowed in the database name');
+                print json_encode($system->getError());
+                exit();
+        }
+        
+        
         //verify that database with such name already exists
         $dblist = mysql__select_list2($mysqli, 'show databases');
         if (array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){

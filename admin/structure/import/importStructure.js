@@ -323,7 +323,7 @@ $.widget( "heurist.importStructure", {
                                 }
                                 var url_Error = this.fld(record, 'rec_URLErrorMessage');
                                 if( !window.hWin.HEURIST4.util.isempty( url_Error ) ){
-console.log(url_Error);                                    
+//DEBUG console.log(url_Error);                                    
                                     dbName = dbName + ' (unavailable)';
                                     dbURL = '';
                                 }

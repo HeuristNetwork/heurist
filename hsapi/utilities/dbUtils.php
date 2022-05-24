@@ -483,6 +483,19 @@ class DbUtils {
         
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
         
+        if(strlen($database_name_full)>64){
+                self::$system->addError(HEURIST_ACTION_BLOCKED, 
+                        'Database name '.$database_name_full.' is too long. Max 64 characters allowed');
+                return false;
+        }
+        $hasInvalid = preg_match('[\W]', $database_name_full);
+        if ($hasInvalid) {
+                self::$system->addError(HEURIST_ACTION_BLOCKED, 
+                        'Database name '.$database_name_full
+                        .' is invalid. Only letters, numbers and underscores (_) are allowed in the database name');
+                return false;
+        }
+        
         if($dumpfile==null){
             $dumpfile = HEURIST_DIR."admin/setup/dbcreate/blankDBStructure.sql";
         }
