@@ -1051,7 +1051,7 @@ $.widget( "heurist.mainMenu6", {
 
                 this.menues.explore.find('.favour-help').hide();
             }else{
-                var cont_height = this.menues.explore.height() - $favourite_container.position().top - 80;
+                var cont_height = this.menues.explore.height() - $favourite_container.position().top - 100;
                 $favourite_container.css('height', cont_height + 'px');
             }
         }
