@@ -887,85 +887,60 @@ window.hWin.HEURIST4.dbs = {
         return $def;
     }
     //========================= end internal 
-        
+
         if(fieldtypes==null){
             fieldtypes = ['integer','date','freetext','year','float','enum','resource','relmarker','relationtype'];
         }else if(!$.isArray(fieldtypes) && fieldtypes!='all'){
             fieldtypes = fieldtypes.split(',');
         }
-        
+
         var res = [];
 
-/*        
-        if($mode==5){ //with reverse links
-            var def = __getRecordTypeTree(rectypeids, 0, $mode, fieldtypes, null);
+        rectypeids = (!$.isArray(rectypeids)?rectypeids.split(','):rectypeids);    
 
-            if(def!==null) {
-                if(parentcode!=null){
-                    if(def['code']){
-                        def['code'] = parentcode+_separator+def['code'];
-                    }else{
-                        def['code'] = parentcode;
-                    }
+        //create hierarchy tree 
+        for (var k=0; k<rectypeids.length; k++) {
+            var rectypeID = rectypeids[k];
+            
+            var $is_parent_relmarker = false;
+            if(parentcode!=null){
+                var codes = parentcode.split(_separator);
+                if(codes.length>0){
+                    var lastcode = codes[codes.length-1];
+                    $is_parent_relmarker = (lastcode.indexOf('rt')==0 || lastcode.indexOf('rf')==0);
                 }
-                if($.isArray(def['children'])){
-                    def = __assignCodes(def);
-                    res.push( def );
-                }                    
             }
-        
-        } else {
-*/        
-            rectypeids = (!$.isArray(rectypeids)?rectypeids.split(','):rectypeids);    
             
+            var def = __getRecordTypeTree(rectypeID, 0, $mode, fieldtypes, null, $is_parent_relmarker);
             
-            //create hierarchy tree 
-            for (var k=0; k<rectypeids.length; k++) {
-                var rectypeID = rectypeids[k];
-                
-                var $is_parent_relmarker = false;
-                if(parentcode!=null){
-                    var codes = parentcode.split(_separator);
-                    if(codes.length>0){
-                        var lastcode = codes[codes.length-1];
-                        $is_parent_relmarker = (lastcode.indexOf('rt')==0 || lastcode.indexOf('rf')==0);
-                    }
-                }
-                
-                var def = __getRecordTypeTree(rectypeID, 0, $mode, fieldtypes, null, $is_parent_relmarker);
-                
-                    if(def!==null) {
-                        if(parentcode!=null){
-                            if(def['code']){
-                                def['code'] = parentcode+_separator+def['code'];
-                            }else{
-                                def['code'] = parentcode;
-                            }
+                if(def!==null) {
+                    if(parentcode!=null){
+                        if(def['code']){
+                            def['code'] = parentcode+_separator+def['code'];
+                        }else{
+                            def['code'] = parentcode;
                         }
-                        //debug $def['title'] = @$def['code'].$def['title'];   
-                        //asign codes
-                        if($.isArray(def['children'])){
-                            //def['children'].unshift({});
-                            def = __assignCodes(def);
-                            res.push( def );
-                        }                    
                     }
-            }
-            
-            
-            for (var i=0; i<recTypesWithParentLink.lengthl; i++){
-                var $details = $Db.rst($recTypeId);
-                $details.removeRecord(DT_PARENT_ENTITY); //remove fake parent link    
-            }
-            
-            if(rectypeids.length==1 && $mode==3){
-                res = res[0]['children'];            
-            }
-            
-//        }
+                    //debug $def['title'] = @$def['code'].$def['title'];   
+                    //asign codes
+                    if($.isArray(def['children'])){
+                        //def['children'].unshift({});
+                        def = __assignCodes(def);
+                        res.push( def );
+                    }                    
+                }
+        }
 
-        return res;    
+        for (var i=0; i<recTypesWithParentLink.length; i++){
+            var $details = $Db.rst(recTypesWithParentLink[i]);
+            $details.removeRecord(DT_PARENT_ENTITY); //remove fake parent link    
+        }
         
+        if(rectypeids.length==1 && $mode==3){
+            res = res[0]['children'];            
+        }
+
+        return res;
     },    
     
     // use in search_faceted.js  
