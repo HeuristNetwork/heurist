@@ -174,13 +174,10 @@ $time_debug2 = $time_debug;
         }
         
         $this->source_db_reg_id = $db_reg_id;
-
-//error_log('getting database url for id='.$db_reg_id);
         
         // 1. get database url by database id
         $database_url = $this->_getDatabaseURL($db_reg_id);        
         
-
 if(_DBG) error_log('get db url '.(microtime(true)-$time_debug));        
 $time_debug = microtime(true);        
         
@@ -439,11 +436,6 @@ $time_debug2 = $time_debug;
             return true;
         }
         
-        
-        
-if(_DBG) error_log('Terms '.(microtime(true)-$time_debug));        
-$time_debug = microtime(true);        
-        
         $group_ft_ids = array();
         $group_rt_ids = array();
         $def_rts = $this->source_defs['rectypes']['typedefs'];
@@ -610,8 +602,6 @@ foreach ($this->imp_recordtypes as $rtyID){
         
     }
 }//for
-if(_DBG) error_log('Recordtypes '.(microtime(true)-$time_debug).'   '.count($this->imp_recordtypes));        
-$time_debug = microtime(true);        
 
 
 // ------------------------------------------------------------------------------------------------
@@ -750,8 +740,6 @@ foreach ($this->imp_fieldtypes as $ftId){
         return false;
     }
 }//for addition base/detail fields
-if(_DBG) error_log('Fields '.(microtime(true)-$time_debug).'   '.count($this->imp_fieldtypes));        
-$time_debug = microtime(true);        
 
 // ------------------------------------------------------------------------------------------------
 
@@ -848,8 +836,6 @@ foreach ($this->imp_recordtypes as $rtyID){
         }
     }
 }
-if(_DBG) error_log('Structures '.(microtime(true)-$time_debug));        
-$time_debug = microtime(true);        
 
 // ------------------------------------------------------------------------------------------------
 
@@ -882,7 +868,7 @@ if(_DBG) error_log('Total '.(microtime(true)-$time_debug2));
 $mysqli->commit();        
             
             return true;
-    }
+    }//doImport
     
     
     //
@@ -956,7 +942,6 @@ $mysqli->commit();
             .'<p>If you cannot determine the problem, please '.CONTACT_HEURIST_TEAM.' and include the URL below<br>'
             .'URL requested: ' . $database_url . '</p>';
         
-        
         if(strpos($remote_url, HEURIST_SERVER_URL)===0){ //same server
 
           $defs = array();  
@@ -966,13 +951,12 @@ $mysqli->commit();
             $this->system->addError(HEURIST_ERROR, $message);
             return false;          
           }
-          
+
           if(!$only_terms){
             $defs['rectypes'] = dbs_GetRectypeStructures($system2, null, 2 );
             $defs['detailtypes'] = dbs_GetDetailTypes($system2, null, 2 );
           }
           $defs["terms"] = dbs_GetTerms($system2);
-          
         }else{
         //2b. if remote server - call sys_strcture.php with loadRemoteURLContentWithRange
 

@@ -65,7 +65,7 @@ public static function saveToTempFile($content, $extension='csv'){
 // -3  file with the same name cannot be deleted
     
     if($res!==true){
-        self::$system->addError(HEURIST_ERROR, 'Cant save temporary file. '.$res);                
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cant save temporary file. '.$res);                
         return false;
     }
 
@@ -74,7 +74,7 @@ public static function saveToTempFile($content, $extension='csv'){
     $res = file_put_contents($upload_file_name, trim($content));
     unset($content);
     if(!$res){
-        self::$system->addError(HEURIST_ERROR, 'Cant save temporary file '.$upload_file_name);                
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cant save temporary file '.$upload_file_name);                
         return false;
     }
     
@@ -106,7 +106,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
     else if (! is_readable($upload_file_name)) $s = ' is not readable';
         
     if($s){
-        self::$system->addError(HEURIST_ERROR, 'Temporary file (uploaded csv data) '.$upload_file_name. $s);                
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Temporary file (uploaded csv data) '.$upload_file_name. $s);                
         return false;
     }
   
@@ -117,7 +117,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
     
     $handle = @fopen($upload_file_name, "r");
     if (!$handle) {
-        self::$system->addError(HEURIST_ERROR, 'Can\'t open temporary file (uploaded csv data) '.$upload_file_name);                          return false;
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Can\'t open temporary file (uploaded csv data) '.$upload_file_name);                          return false;
         return false;
     }
 
@@ -129,7 +129,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
     $line = fgets($handle, 1000000);
     fclose($handle);
     if(!$line){
-        self::$system->addError(HEURIST_ERROR, 'Empty header line');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Empty header line');
         return false;
     }
     
@@ -156,7 +156,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
              $line = mb_convert_encoding( $line, 'UTF-8');
         }
         if(!$line){
-            self::$system->addError(HEURIST_ERROR, 'Your file can\'t be converted to UTF-8. '
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Your file can\'t be converted to UTF-8. '
                 .'Please open it in any advanced editor and save with UTF-8 text encoding');
             return false;
         }
@@ -169,7 +169,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
             $content = mb_convert_encoding( $content, 'UTF-8');
         }
         if(!$content){
-            self::$system->addError(HEURIST_ERROR, 'Your file can\'t be converted to UTF-8. '
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Your file can\'t be converted to UTF-8. '
                 .'Either select the appropriate encoding from the list or open it in any advanced editor and save with UTF-8 text encoding');
             return false;
         }
@@ -178,7 +178,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
         $res = file_put_contents($encoded_file_name, $content);
         unset($content);
         if(!$res){
-            self::$system->addError(HEURIST_ERROR, 
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 
                 'Cant save temporary file (with UTF-8 encoded csv data) '.$encoded_file_name);
             return false;
         }
@@ -224,7 +224,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
         }else if (! file_exists($encoded_filename)) $s = ' does not exist';
         else if (! is_readable($encoded_filename)) $s = ' is not readable';
         if($s){
-            self::$system->addError(HEURIST_ERROR, 'Temporary file '.$encoded_filename. $s);                
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Temporary file '.$encoded_filename. $s);                
             return false;
         }
         
@@ -271,12 +271,12 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
         //get filename for prepared filename with converted dates and removed spaces
         $prepared_filename = tempnam(HEURIST_FILESTORE_DIR.'scratch/', $encoded_filename);  //HEURIST_SCRATCH_DIR
         if (!is_writable($prepared_filename)) {
-            self::$system->addError(HEURIST_ERROR, 'Cannot save prepared data: '.$prepared_filename);                
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot save prepared data: '.$prepared_filename);                
             return false;
             
         }
         if (!$handle_wr = fopen($prepared_filename, 'w')) {
-            self::$system->addError(HEURIST_ERROR, 'Cannot open file to save prepared data: '.$prepared_filename);                
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot open file to save prepared data: '.$prepared_filename);                
             return false;
         }
     }
@@ -322,7 +322,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
         //@
         $xmlobj->loadXML($kml_content);
         if ($xmlobj === false) {
-            self::$system->addError(HEURIST_ERROR, 'Invalid KML '.($is_kml_data?'data':('file '.$encoded_filename)));                
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Invalid KML '.($is_kml_data?'data':('file '.$encoded_filename)));                
             return false;
         }
         
@@ -495,7 +495,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
         }else{
             $handle = @fopen($encoded_filename, "r");
             if (!$handle) {
-                self::$system->addError(HEURIST_ERROR, 'Temporary file '.$encoded_filename.' could not be read');                
+                self::$system->addError(HEURIST_ACTION_BLOCKED, 'Temporary file '.$encoded_filename.' could not be read');                
                 return false;
             }
         }
@@ -532,7 +532,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                     fclose($handle);
                     if($handle_wr) fclose($handle_wr);
                     
-                    self::$system->addError(HEURIST_ERROR, 
+                    self::$system->addError(HEURIST_ACTION_BLOCKED, 
                         "Too many columns ".$len."  This probably indicates that you have selected the wrong separator or end-of-line type.");                
                     return false;
                 }            
@@ -625,7 +625,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                         $line = implode(',', $newfields)."\n";
 
                         if (fwrite($handle_wr, $line) === FALSE) {
-                            self::$system->addError(HEURIST_ERROR, "Cannot write to file $prepared_filename");                
+                            self::$system->addError(HEURIST_ACTION_BLOCKED, "Cannot write to file $prepared_filename");                
                             return false;
                         }
                         
@@ -936,7 +936,7 @@ private static function saveToDatabase($preproc){
     }
     
     if($row_size>50000){ 
-        self::$system->addError(HEURIST_UNKNOWN_ERROR, 
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 
             'Cannot create import table. Rows exceeding 64 KBytes. This limit is set by MySQL and cannot be changed. '
             .'Remove unused columns. ('.$row_size.')');                
         return false;
