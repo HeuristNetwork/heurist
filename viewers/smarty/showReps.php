@@ -932,6 +932,7 @@ function smarty_function_wrap($params, &$smarty)
                 $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
                 $file_desc = htmlspecialchars(strip_tags($fileinfo['ulf_Description']));
                 $mimeType = $fileinfo['fxm_MimeType'];
+                $sourceType = $fileinfo['ulf_PreferredSource'];
                     
                 $file_playerURL = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce.'&mode=tag';
                 $file_thumbURL  = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&thumb='.$file_nonce;
@@ -939,7 +940,9 @@ function smarty_function_wrap($params, &$smarty)
                             
                 if($mode=="link") {
 
-                    $sname = (!$originalFileName || $originalFileName=='_remote' || strpos($originalFileName,'_iiif')===0)?$external_url:$originalFileName;
+                    $sname = (!$originalFileName || $originalFileName=='_remote' || strpos($originalFileName,'_iiif')===0)
+                        ?$external_url:$originalFileName;
+                        
                     $sres = $sres."<a href='".$file_URL."' target='_blank' title='".$file_desc."' $style>".$sname."</a>";
                     
                 }else 

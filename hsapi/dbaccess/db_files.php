@@ -192,7 +192,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
         }
 
         $query = 'select ulf_ID, concat(ulf_FilePath,ulf_FileName) as fullPath, ulf_ExternalFileReference,'
-        .'fxm_MimeType, ulf_Parameters, ulf_OrigFileName, ulf_FileSizeKB,'
+        .'fxm_MimeType, ulf_PreferredSource, ulf_OrigFileName, ulf_FileSizeKB,'
         .' ulf_ObfuscatedFileID, ulf_Description, ulf_Added, ulf_MimeExt'
         //.($all_fields?', ulf_Thumbnail':'') we don't store thumbnail in databae anymore
         .' from recUploadedFiles '
@@ -262,7 +262,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
         $query = $query
             .' and (dtl_UploadedFileID is not null)'    // no dty_ID of zero so undefined are ignored
             ." and (fxm_MimeType like 'image%' or fxm_MimeType='video/youtube' or fxm_MimeType='video/vimeo'  or fxm_MimeType='audio/soundcloud' "
-            ." or ulf_OrigFileName LIKE '_iiif%')"
+            ." or ulf_OrigFileName LIKE '_iiif%' or or ulf_PreferredSource LIKE 'iiif%')"
             .' limit 1';
         $fileid = mysql__select_value($system->get_mysqli(), $query);
     }
@@ -624,7 +624,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
     $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
     $mimeType = $fileinfo['fxm_MimeType'];  // fxm_MimeType
-    $params = $fileinfo['ulf_Parameters'];  // not used anymore
+    $source_type = $fileinfo['ulf_PreferredSource']; 
     $originalFileName = $fileinfo['ulf_OrigFileName'];
     $fileSize = $fileinfo['ulf_FileSizeKB'];
     $fileExt = $fileinfo['ulf_MimeExt'];
@@ -664,7 +664,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     
     if($is_local){
         
-    }else if($external_url && strpos($originalFileName,'_tiled')!==0){
+    }else if($external_url && strpos($originalFileName,'_tiled')!==0 && $source_type!='tiled'){
         $need_remove_tmpfile = true;
         $filepath = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
         saveURLasFile($external_url, $filepath); //save to temp in scratch folder
@@ -676,7 +676,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     $zip = new ZipArchive();
     if (!$zip->open($file_zip_full, ZIPARCHIVE::CREATE)) {
         $system->error_exit_api("Cannot create zip $file_zip_full");
-    }else if(strpos($originalFileName,'_tiled')!==0) {
+    }else if(strpos($originalFileName,'_tiled')!==0 && $source_type!='tiled' ) {
         $zip->addFile($filepath, $originalFileName);
     }
 
@@ -702,17 +702,20 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
 
 //
 // output the appropriate html tag to view media content
-// $params - array of special parameters for audio/video playback AND for IIIF 
+// $params - array of special parameters for audio/video playback AND for IIIF (from smarty)
 //
 function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null, $style=null){ 
 
     $result = '';    
-    
+    $is_iiif = false;
     
     $is_video = (strpos($mimeType,"video/")===0); // || @$params['video']
     $is_audio = (strpos($mimeType,"audio/")===0); // || @$params['audio']
     $is_image = (strpos($mimeType,"image/")===0);
-    $is_iiif = (strpos(@$params['var'][0]['ulf_OrigFileName'],'_iiif')===0);
+    if($params && is_array($params)){
+        $is_iiif = (strpos(@$params['var'][0]['ulf_OrigFileName'],'_iiif')===0 ||
+                    strpos(@$params['var'][0]['ulf_PreferredSource'],'iiif')===0);
+    }
     
     if($style==null) $style='';
 
@@ -804,7 +807,8 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
         
         $miradorViewer = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='
                     .HEURIST_DBNAME;
-        if($iiif_type=='_iiif_image' && @$params['var'][0]['rec_ID']>0){
+        if(($iiif_type=='_iiif_image' || $params['var'][0]['ulf_PreferredSource']=='iiif_image')
+            && @$params['var'][0]['rec_ID']>0){
             $miradorViewer = $miradorViewer.'&q=ids:'.$params['var'][0]['rec_ID'];
         }else{
             $miradorViewer = $miradorViewer.'&'.substr($iiif_type,1).'='.$fileid;
@@ -951,6 +955,7 @@ function fileGetWidthHeight($fileinfo){
     $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
     $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
     $originalFileName = $fileinfo['ulf_OrigFileName'];
+    $sourceType = $fileinfo['ulf_PreferredSource'];
     
     $type_media = null;
     $ext = null;
@@ -960,7 +965,7 @@ function fileGetWidthHeight($fileinfo){
 
     $image = null;
     
-    if(strpos($originalFileName,'_tiled')!==0 && $type_media=='image'){
+    if(strpos($originalFileName,'_tiled')!==0 && $sourceType!='tiled' && $type_media=='image'){
     
         if(file_exists($filepath)){
             
@@ -1077,7 +1082,8 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
         }
         else if(@$file['ulf_ExternalFileReference']){  //remote 
         
-            if(@$file['ulf_OrigFileName'] && strpos($file['ulf_OrigFileName'],'_tiled')===0){
+            if(@$file['ulf_OrigFileName'] && 
+                (strpos($file['ulf_OrigFileName'],'_tiled')===0 || @$file['ulf_PreferredSource']=='tiled') )  {
                 
                 $img = UtilsImage::createFromString('tiled images stack'); //from string
         

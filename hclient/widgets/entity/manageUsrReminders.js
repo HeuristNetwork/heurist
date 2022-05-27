@@ -80,7 +80,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
                                     that.addEditRecord( recset.getOrder()[0] );
                                 }
                                 else {
-                                    //nothing found - add new bookmark
+                                    //nothing found - add new reminder
                                     that.addEditRecord(-1);
                                 }                            
                             }else{

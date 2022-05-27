@@ -512,7 +512,9 @@ function dbs_GetRectypeConstraint($system) {
             $query.= " if(trm_OriginatingDBID, concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))), '') as trm_ConceptID";
         }
         $query.= " from defTerms order by trm_Domain, trm_Label";
+
         $res = $mysqli->query($query);
+        
         $terms = array('termsByDomainLookup' =>  array('relation' => array(),
             'enum' => array()),
             'commonFieldNames' => array_slice(__getTermColNames(), 1),
@@ -544,6 +546,7 @@ function dbs_GetRectypeConstraint($system) {
                 'relation' => __getTermTree($system, "relation", "exact"), 
                 'enum' => __getTermTree($system, "enum", "exact"));
 
+
         $vcgGroups = array();//'groupIDToIndex' => array());
         $matches_refs = array(); 
                 
@@ -554,6 +557,7 @@ function dbs_GetRectypeConstraint($system) {
             $query = 'SELECT trm_ParentTermID, trm_ID FROM defTerms ORDER BY trm_ParentTermID';
         }
         $res = $mysqli->query($query);
+        
         $matches = array();
         if ($res){
             while ($row = $res->fetch_row()){
@@ -567,7 +571,6 @@ function dbs_GetRectypeConstraint($system) {
             $res->close();
             $terms['trm_Links'] = $matches;
         }
-        
                     
         if($dbVer==1 && $dbVerSub>2){
             //get vocabulary groups 
@@ -601,6 +604,7 @@ function dbs_GetRectypeConstraint($system) {
             }else{
                 error_log('DATABASE: '.$system->dbname().'. Error retrieving terms by reference '.$mysqli->error);
             }
+            
         }//$dbVer==1 && $dbVerSub>2
         else{
             $vcgGroups[1] = array('vcg_ID'=>1, 'vcg_Name'=>'General');        

@@ -160,7 +160,6 @@ ini_set('max_execution_time', 0);
                         .$response['report']['rectypes'].'</table>');
                         
                 sendEmail(HEURIST_MAIL_TO_ADMIN, 'Download templates', $sText, true);
-            
             }
             
 
