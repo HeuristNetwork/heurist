@@ -261,6 +261,9 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
                     case 'title':
                         dlg_response[dty_ID] = details[1] ? details[1] : '';
                         break;
+                    case 'estcID':
+                        dlg_response[dty_ID] = details[254] ? details[254] : '';
+                        break;
                     case 'yearFirstVolume':
                         dlg_response[dty_ID] = details[9] ? details[9] : '';
                         break;
