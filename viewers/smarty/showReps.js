@@ -915,7 +915,7 @@ function ShowReps() {
         
         //generate treedata from rectype structure
         var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 7, rty_ID, 
-                        ['ID','title','typeid','typename','modified','url','tags','all'] );
+                        ['ID','title','typeid','typename','modified','url','tags','all','parent_link'] );
 
         treedata[0].expanded = true; //first expanded
 
@@ -1000,7 +1000,7 @@ function ShowReps() {
                     }
                 }
 
-                if(data.node.parent && data.node.parent.data.type == 'resource'){ // add left border+margin
+                if(data.node.parent && data.node.parent.data.type == 'resource' || data.node.parent.data.type == 'relmarker'){ // add left border+margin
                     $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
                 }
                 

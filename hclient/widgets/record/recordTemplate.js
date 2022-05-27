@@ -260,7 +260,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                 },
                 renderNode: function(event, data){
 
-                    if(data.node.parent && data.node.parent.data.type == 'resource'){ // add left border+margin
+                    if(data.node.parent && data.node.parent.data.type == 'resource' || data.node.parent.data.type == 'relmarker'){ // add left border+margin
                         $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
                     }
                 },

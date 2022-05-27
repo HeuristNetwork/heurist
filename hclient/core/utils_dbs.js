@@ -439,6 +439,7 @@ window.hWin.HEURIST4.dbs = {
                             //$ffr['dty_Type'] = 'resource';
                             $ffr['rst_DisplayHelpText'] = 'Reverse pointer to parent record';
                             $ffr['rst_RequirementType'] = 'optional';
+                            $ffr['rst_DisplayOrder'] = '0'; // place at top
                                   
                             $details.addRecord(DT_PARENT_ENTITY, $ffr)
                             
@@ -704,14 +705,23 @@ window.hWin.HEURIST4.dbs = {
             case 'relationtype':
 
                 $res = {};
-                if($mode==3 || $mode==7){
+                if($mode==3){ // title mask
 
                     $res['children'] = [
                         {key:'term',title: 'Term',code: 'term'},       
                         {key:'code',title: 'Code',code: 'code'},       
+                        {key:'conceptid',title: 'Con-ID',code: 'conceptid'},       
+                        {key:'internalid',title: 'Int-ID',code: 'internalid'}
+                    ];
+                }else if($mode == 7){ // smarty
+
+                    $res['children'] = [
+                        {key: 'label',title: 'Label', code: 'label'},
+                        {key:'term',title: 'Term',code: 'term'},       
+                        {key:'code',title: 'Code',code: 'code'},       
                         {key:'conceptid',title: 'Concept ID',code: 'conceptid'},       
                         {key:'internalid',title: 'Internal ID',code: 'internalid'}
-                                ];
+                    ];
                 }
                 break;
 
