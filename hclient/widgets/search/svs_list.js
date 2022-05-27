@@ -2246,6 +2246,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                                     that._adjustAccordionTop();
                                     if(that.isPublished){
                                         that.element.css('overflow-y','auto');
+                                    }
                                 }
                             };
                         }
