@@ -100,7 +100,9 @@
     "description": "Lookup ESTC Book(Editions) records",
     "dialog": "lookupESTC_editions",
     "fields": {
+      "orginialID": "",
       "title": "",
+      "estcID": "",
       "yearFirstVolume": "",
       "yearLastVolume": "",
       "summary": "",
