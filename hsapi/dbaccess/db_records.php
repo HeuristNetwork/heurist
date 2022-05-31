@@ -29,6 +29,7 @@ recordDelete
 isWrongAccessRights - validate parameter values
 recordCanChangeOwnerwhipAndAccess  - Verifies access right value and is the current user able to change ownership for given record
 
+recordUpdateCalcFields
 recordUpdateTitle
 recordUpdateOwnerAccess
 _prepareDetails - validate records detail (need to combine with validators in fileParse)
@@ -38,12 +39,17 @@ require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/db_users.php');
 require_once (dirname(__FILE__).'/db_structure.php');
 require_once (dirname(__FILE__).'/db_recsearch.php');
-require_once(dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
-require_once(dirname(__FILE__).'/../entity/dbDefRecTypes.php');
+require_once (dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
+require_once (dirname(__FILE__).'/../entity/dbDefRecTypes.php');
 require_once (dirname(__FILE__).'/../utilities/titleMask.php');
 require_once (dirname(__FILE__).'/../utilities/utils_image.php');
 require_once (dirname(__FILE__).'/../../records/index/elasticSearch.php');
 require_once (dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
+//require_once (dirname(__FILE__).'/../../viewers/smarty/showReps.php');
+
+require_once(dirname(__FILE__).'/../../viewers/smarty/smartyInit.php');
+require_once(dirname(__FILE__).'/../../viewers/smarty/reportRecord.php');
+
 
 $recstructures = array();
 $detailtypes   = array();
@@ -248,7 +254,8 @@ function recordAdd($system, $record, $return_id_only=false){
 *   1) _prepareDetails
 *   2) add or update header
 *   3) remove old details, add new details
-*   4) recordUpdateTitle 
+*   4) recordUpdateCalcFields 
+*   5) recordUpdateTitle 
 *
 * @param mixed $system
 * @param mixed $record
@@ -356,7 +363,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         if(!$detailValues){
             return $system->getError();
         }
-
+        
         //prepare header and details for special update modes
         if(!$is_insert && $update_mode>1){ //if 0 or 1 - it overwrites current version of record completely
             $detailValues = prepareRecordForUpdate($system, $record, $detailValues, $update_mode);
@@ -674,6 +681,10 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             if($keep_autocommit===true) $mysqli->autocommit(TRUE);
         }
         return $system->addError(HEURIST_DB_ERROR, 'Cannot save details(3)', $syserror);
+    }
+    
+    if(true){
+        recordUpdateCalcFields( $system, $recID, $rectype );    
     }
 
     $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']);
@@ -1594,6 +1605,119 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
 
 }
 
+//
+//
+//
+function recordUpdateCalcFields($system, $recID, $rectype=null)
+{
+
+    $mysqli = $system->get_mysqli();
+    
+    //find record type if not defined
+    
+    if(!(isset($rectype) && $rectype>0)){
+        $rectype = mysql__select_value($mysqli, 'select rec_RecTypeID from Records where rec_ID='.$recID);
+        if(!($rectype>0)){
+            $system->addError(HEURIST_DB_ERROR, 'Cannot get record for calculation fields update. Rec#'.$recID);
+            return false;
+        }
+    }
+        
+    //find calculation fields for this record type
+    // dty_ID => cfn_FunctionSpecification
+    $formulae = mysql__select_assoc2($mysqli,
+        'SELECT rst_DetailTypeID, cfn_FunctionSpecification FROM defRecStructure, defCalcFunctions '
+        .' WHERE rst_RecTypeID='.$rectype
+        .' AND cfn_ID=rst_CalcFunctionID');
+        
+    if(!$formulae || count($formulae)==0){
+        return false;
+    }
+    
+    //@todo calculation field can not be repeatable
+        
+    foreach($formulae  as $dty_ID => $formula){
+        
+        $params['template_body'] = $formula;
+        $params['emptysetmessage'] = 'record not found';
+        $params['snippet'] = 1;
+        $params['publish'] = 4;
+        $params['recordset'] = array('records'=>array($recID), 'reccount'=>1 );
+        
+        $new_value = executeSmarty($system, $params);
+
+        $query = 'DELETE FROM recDetails '
+            .' WHERE dtl_RecID='.$recID.' AND dtl_DetailTypeID='.$dty_ID;
+        $mysqli->query($query);
+        
+        //$query = 'UPDATE recDetails SET dtl_Value=? '
+        //    .' WHERE dtl_RecID='.$recID.' AND dtl_DetailTypeID='.$dty_ID;
+
+        $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) '
+        .' VALUES ('.$recID.', '.$dty_ID.', ? )';
+        $stmt = $mysqli->prepare($query);
+
+        $stmt->bind_param('s', $new_value);
+        if(!$stmt->execute()){
+            $syserror = $mysqli->error;
+            $stmt->close();
+            $system->addError(HEURIST_DB_ERROR, "Cannot save calculated field $dty_ID for record # $recID", $syserror);
+            return false;
+        }
+        $stmt->close();
+    }//foreach
+
+}
+
+//
+//
+//
+function executeSmarty($system, $params){
+  global $smarty;
+  
+  if(!isset($smarty) || $smarty==null){
+      initSmarty(); //global function from smartyInit.php
+      if(!isset($smarty) || $smarty==null){
+            return 'init error';
+      }
+  }
+
+  $content = (array_key_exists('template_body',$params)?$params['template_body']:null);
+
+  $template_folder = $smarty->getTemplateDir();
+  if(is_array($template_folder)) $template_folder = $template_folder[0];
+  
+  //$user = $system->getCurrentUser(); '_'.$user['ugr_Name']
+  $template_file = $template_folder.'calc_fld_'.uniqid().'.tpl'; 
+  //$template_file = tempnam($template_folder);
+  //$file = fopen ($template_folder.$template_file, "w"); //@todo - try temp file
+  $file = fopen ($template_file, "w");
+  fwrite($file, $content);
+  fclose ($file);
+
+
+  $heuristRec = new ReportRecord();
+
+  $smarty->assignByRef('heurist', $heuristRec);
+
+  $smarty->assign('results', $params['recordset']['records']); //assign 
+  $smarty->assign('template_file', $template_file);
+  $smarty->assign('r', $heuristRec->getRecord($params['recordset']['records'][0]));
+
+  //ini_set( 'display_errors' , 'false'); // 'stdout' );
+  $smarty->error_reporting = 0;
+  $smarty->debugging = false;
+
+
+  try{
+      $output = $smarty->fetch($template_file);
+
+  } catch (Exception $e) {
+      $output = 'Exception on calc field execution: '.$e->getMessage();
+  }
+  unlink($file);
+  return $output;
+}
 
 /**
 * Calculate and update title mask

@@ -45,15 +45,13 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         }else{
             this.options.edit_mode = 'popup'; 
             this.options.list_header = true; //show header for resultList
+            if(this.options.select_mode == 'select_single'){
+                this.options.width = 790;
+                this.options.height = 600;
+            }
         }
 
         this._super();
-
-        if(this.options.select_mode == 'single'){
-            this.options.width = 790;
-            this.options.height = 600;
-        }
-
     },
     
     //  
@@ -225,7 +223,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
                 + fld2('cfn_Name','120ex');
         
         // add edit/remove action buttons
-        if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
+        if(true || (this.options.select_mode=='manager' && this.options.edit_mode=='popup')){
             html = html 
                 + '<div class="logged-in-only" style="width:60px;display: inline-block">'
                 + '<div title="Click to edit calculation" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit"  style="height:16px">'

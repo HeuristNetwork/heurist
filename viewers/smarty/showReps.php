@@ -69,7 +69,11 @@ $dtTerms = null;
 $gparams = null;
 $loaded_recs = array();
 $max_allowed_depth = 2;
+
+//'publish' - 0 vsn 3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only)
+//    3 - redirect the existing report (use already publshed output), if it does not exist publish=1
 $publishmode = 0;
+
 $execution_counter = 0;
 $execution_total_counter = 0;
 $is_jsallowed = true;
@@ -189,7 +193,7 @@ function executeSmartyTemplate($system, $params){
         if(@$qresult['status']==HEURIST_OK){
             $qresult = $qresult['data'];
         }else{
-           smarty_error_output( $system, null ); 
+            smarty_error_output( $system, null );  //output error
         }
     }
 
@@ -197,18 +201,23 @@ function executeSmartyTemplate($system, $params){
     // EMPTY RESULT SET - EXIT
     if( !$qresult ||  !array_key_exists('records', $qresult) || !(intval(@$qresult['reccount'])>0) ){
     
-        if ($emptysetmessage) {
-            $error = $emptysetmessage; // allows publisher of URL to customise the message if no records retrieved
-        } else {
+        if($publishmode==4){
+            return $emptysetmessage?$emptysetmessage:'';
+        }else{
+            
+            if ($emptysetmessage) {
+                $error = $emptysetmessage; // allows publisher of URL to customise the message if no records retrieved
+            } else {
 
-            if($publishmode>0){
-                $error = "<b><font color='#ff0000'>Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</font></b>";
-            }else{
-                $error = "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
+                if($publishmode>0){
+                    $error = "<b><font color='#ff0000'>Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</font></b>";
+                }else{
+                    $error = "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
+                }
             }
+            
+            smarty_error_output( $system, $error );
         }
-        
-        smarty_error_output( $system, $error );
         exit();
     }
 
@@ -236,7 +245,7 @@ function executeSmartyTemplate($system, $params){
     
     //verify that template has new features
     //need to detect $heurist->getRecord - if it is not found this is old version - show error message
-    if(strpos($content, '{foreach $results as ')>0 && strpos($content, '$heurist->getRecord(')===false){
+    if($publishmode!=4 && strpos($content, '{foreach $results as ')>0 && strpos($content, '$heurist->getRecord(')===false){
             
            $error = '<p>To improve performance we have made some small changes to the report template specifications (July 2016).</p>'. 
                     '<p>Please edit the report and add  <b>{$r = $heurist->getRecord($r)}</b><br/>'
@@ -283,7 +292,7 @@ function executeSmartyTemplate($system, $params){
     
     $smarty->assignByRef('heurist', $heuristRec);
     
-    $smarty->assign('results', $results); //assign 
+    $smarty->assign('results', $results); //assign record ids
     $smarty->assign('template_file', $template_file);
 
     //$smarty->getvar()
@@ -309,8 +318,9 @@ function executeSmartyTemplate($system, $params){
         }else{
             $smarty->debugging = ($replevel=="3");
         }
-
-        $smarty->debug_tpl = dirname(__FILE__).'/debug_html.tpl';
+        if($replevel>0){
+            $smarty->debug_tpl = dirname(__FILE__).'/debug_html.tpl';    
+        }
 
         //save temporary template
         //this is user name $template_file = "_temp.tpl";
@@ -319,11 +329,22 @@ function executeSmartyTemplate($system, $params){
         $template_file = "_".$user['ugr_Name'].".tpl";
         $template_folder = $smarty->getTemplateDir();
         if(is_array($template_folder)) $template_folder = $template_folder[0];
-        $file = fopen ($template_folder.$template_file, "w");
+        $file = fopen ($template_folder.$template_file, "w"); //@todo - try temp file
         fwrite($file, $template_body);
         fclose ($file);
 
         //$smarty->display('string:'.$template_body);
+        if($publishmode=4){ //output into variable - for calculation fields
+            //$smarty->registerFilter('output', 'smarty_output_filter_strip_js');
+            try{
+                $output = $smarty->fetch($template_file);
+
+            } catch (Exception $e) {
+                $output = 'Exception on calc field execution: '.$e->getMessage();
+            }
+            unlink($file);
+            return $output;
+        }
     }
     else
     {	// usual way - from file
@@ -363,7 +384,11 @@ function executeSmartyTemplate($system, $params){
         }
         $smarty->display($template_file);
 
-        $system->user_LogActivity('custRep', array(implode(' ',$results), count($results)), null, TRUE); // log activity, rec ids separated by spaces
+        if(!$is_snippet_output && !@$template_body){
+            // log activity, rec ids separated by spaces
+            $system->user_LogActivity('custRep', array(implode(' ',$results), count($results)), null, TRUE); 
+        }
+        
     } catch (Exception $e) {
         smarty_error_output($system, 'Exception on execution: '.$e->getMessage());
         //echo 'Exception on execution: ', $e->getMessage(), "\n";

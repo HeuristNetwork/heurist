@@ -1986,6 +1986,7 @@ $.widget( "heurist.resultList", {
             if(this.options.renderer){
                 //custom handler
                 this._trigger( "onaction", null, {action:action, recID:selected_rec_ID, target:$target});
+                return;
 
             }else if (action=='edit'){
 
