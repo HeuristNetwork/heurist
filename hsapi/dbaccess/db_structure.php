@@ -1370,7 +1370,7 @@ function dbs_GetRectypeConstraint($system) {
             "resource" => "Record pointer",
             "relmarker" => "Relationship marker",
             "separator" => "Heading (no data)",
-            "calculated" => "Calculated (not yet impl.)",
+            "calculated" => "Calculated",
             // Note=> the following types are no longer deinable but may be required for backward compatibility
             "relationtype" => "Relationship type",
             //"fieldsetmarker" => "Field set marker",

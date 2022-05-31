@@ -66,6 +66,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysBugreport.js"></script>
 
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefCalcFunctions.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefCalcFunctions.js"></script>
+        
         <script type="text/javascript" src="<?php echo PDIR;?>admin/structure/import/importStructure.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordLookupCfg.js"></script>
         
@@ -462,6 +465,7 @@ print $targetPath.'<br>';
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <label>Entity:
                         <select id="entity-sel">
+                            <option value="DefCalcFunctions">Calc functions</option>
                             <option value="SysWorkflowRules">Workflow Rules</option>
                             <option value="SysBugreport">Bug report</option>
                             <option value="Records">Records</option>

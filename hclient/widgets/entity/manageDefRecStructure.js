@@ -1799,7 +1799,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                            if(dt_type=='relmarker' || dt_type=='resource'){
                                this._recreateResourceSelector();
                            }
-
+                           
                            var maxval = parseInt(this._editing.getValue('rst_MaxValues')[0]);
                            var res = 'repeatable';
                            if(maxval==1){
@@ -1907,7 +1907,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this._editing.setFieldValueByName('rst_DefaultValue_resource', defval, false); //recreates
         
     },
-    
+
     //
     //
     //
