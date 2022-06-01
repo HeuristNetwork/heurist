@@ -70,12 +70,21 @@ if($is_debug) print HEURIST_BASE_URL.'  '.HEURIST_MAIN_SERVER.'<br>';
 
                 if($is_logged_in){ // logged in, begin search
                     $system->getCurrentUserAndSysInfo(false);
+                    
+                    if(array_key_exists('action', $params)){ // import record for LRC18C lookup
+    
+                        if($params['action'] == 'import_records'){ // perform standard record import action, user on ESTC server
+                            require_once(dirname(__FILE__).'/importController.php');
+                            exit();
+                        }else if($params['action'] == 'record_output'){ // retrieve record from record_output, user on external server
+                            require_once(dirname(__FILE__).'/record_output.php');
+                            exit();
+                        }
+                    }
+    
                     require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
-                    
 if($is_debug) print print_r($params['q'], true).'<br>';
-                    
                     $response = recordSearch($system, $params);
-                    
                 }else{ // unable to login, cannot access records
                     $response = array('status' => HEURIST_ERROR, 'message' => 'We are unable to access the records within the ESTC database at this moment.<br>Please contact the Heurist team. Query is: '.json_encode($params['q']));
                 }
@@ -84,9 +93,50 @@ if($is_debug) print print_r($params['q'], true).'<br>';
             }
         }else if(isset($ESTC_ServerURL)){ // external server
 
-            $url = $ESTC_ServerURL . '/h6-alpha/hsapi/controller/record_lookup.php?'.http_build_query($_REQUEST); // forward request to ESTC server
+            $base_url = $ESTC_ServerURL . '/h6-alpha/hsapi/controller/record_lookup.php?';
 
-            $response = loadRemoteURLContentWithRange($url, null, true, 60); // perform external request, timeout at 60 seconds
+            if(array_key_exists('action', $params) && @$params['action'] == 'import_records'){
+
+                $params['action'] = 'record_output';
+                $params['format'] = 'json';
+                $params['depth'] = '0';
+                $url = $base_url.http_build_query($params); // forward request to ESTC server
+
+                // save file that produced with record_output.php from source to temp file  
+                $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
+
+                $filesize = saveURLasFile($url, $heurist_path); // perform external request and save results to temp file
+
+                if($filesize>0 && file_exists($heurist_path)){
+                    //read temp file, import record
+                    require_once (dirname(__FILE__).'/../import/importHeurist.php'); 
+                    
+                    $params2 = array(
+                        'session' => @$params['session'],
+                        'is_cms_init' => 0,
+                        'make_public' => (@$params['make_public']!=0),
+                        'owner_id' => $system->get_user_id(),
+                        'mapping_defs' => @$params['mapping']
+                    );
+                    
+                    $res = ImportHeurist::importRecords($heurist_path, $params2);
+                    if(is_bool($res) && $res === false){
+                        $response = $system->getError();
+                    }else{
+                        $response = array("status"=>HEURIST_OK, "data"=> $res);
+                    }
+
+                    unlink($heurist_path);
+                }else{
+                    $response = array('status' => HEURIST_ERROR, 'message' => 'Cannot download records from '.$params['source_db'].'. <br>'.$remote_path.' to '.$heurist_path.'<br><br>URL request: ' . $url);
+                }
+
+            }else{
+
+                $url = $base_url.http_build_query($params); // forward request to ESTC server
+                $response = loadRemoteURLContentWithRange($url, null, true, 60);
+            }
+
             if($response===false){
                 $msg = 'We are having trouble performing your request on the ESTC server.<br>'
                     . 'Please try norrowing down the search with more specific criteria before running this request again.<br><br>'
