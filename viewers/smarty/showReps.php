@@ -386,7 +386,8 @@ function executeSmartyTemplate($system, $params){
 
         if(!$is_snippet_output && !@$template_body){
             // log activity, rec ids separated by spaces
-            $system->user_LogActivity('custRep', array(implode(' ',$results), count($results)), null, TRUE); 
+            log_smarty_activity($results);
+            //$system->user_LogActivity('custRep', array(implode(' ',$results), count($results)), null, TRUE); 
         }
         
     } catch (Exception $e) {
@@ -1091,5 +1092,20 @@ function getVariableNameForSmarty($name, $is_fieldtype = true){
     $goodname = str_replace('__','_',$goodname);
 
     return $goodname;
+}
+
+//
+// Log record ids used in smarty reports, ignore if more than 25 records are used
+//
+function log_smarty_activity($rec_ids){
+
+    if(count($rec_ids) > 25){ // check id count
+        return;
+    }
+
+    // log each id one at a time
+    for ($i=0; $i < count($rec_ids); $i++) {     
+        $system->user_LogActivity('custRep', array($rec_ids, count($rec_ids)), null, TRUE);
+    }
 }
 ?>

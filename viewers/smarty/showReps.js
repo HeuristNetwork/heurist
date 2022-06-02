@@ -1062,7 +1062,7 @@ function ShowReps() {
         var s = _nodep.title;
         var key = _nodep.key;
 
-        if(key=='term' || key=='code' || key=='conceptid' || key=='internalid'){
+        if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid'){
             s = _nodep.parent.title + '.' + s;
         }
 
