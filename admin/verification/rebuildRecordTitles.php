@@ -227,7 +227,7 @@ if(@$_REQUEST['recTypeIDs']){
         <hr>
         <div style="color: green;padding-top:10px;">
             If the titles of other record types depend on these titles,
-            you should run Management > Rebuild record titles to rebuild all record titles in the database
+            you should run Admin > Rebuild record titles to rebuild all record titles in the database
         </div>
 <?php
 }

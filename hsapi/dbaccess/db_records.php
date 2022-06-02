@@ -1606,118 +1606,329 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
 }
 
 //
+// $recID - record(s) to be updated. It it is omitted it updates all records for $rty_ID
+// $rty_ID - record type(s)
+// if both parameters are null it updates all calculated fields for entire database
 //
-//
-function recordUpdateCalcFields($system, $recID, $rectype=null)
+function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session_id=null)
 {
-
     $mysqli = $system->get_mysqli();
     
-    //find record type if not defined
+    $rectypes = null;
+    $rec_count = 0;
     
-    if(!(isset($rectype) && $rectype>0)){
-        $rectype = mysql__select_value($mysqli, 'select rec_RecTypeID from Records where rec_ID='.$recID);
-        if(!($rectype>0)){
-            $system->addError(HEURIST_DB_ERROR, 'Cannot get record for calculation fields update. Rec#'.$recID);
-            return false;
+    if($recID!=null && is_array($recID) && count($recID)>0){ //for selected set of records
+        //group records by rectype
+        $query = 'select rec_RecTypeID, rec_ID from Records where rec_ID in ('
+                        .implode(',',$recID).') ORDER BY rec_RecTypeID';
+             
+        $rectypes = array();           
+        $rty_ID = null;
+        $res = $mysqli->query($query);
+        if ($res){
+            while ($row = $res->fetch_row()){
+                if($rty_ID != $row[0]){
+                    if($rty_ID){
+                        $rec_count = $rec_count + count(@$rectypes[$rty_ID]);   
+                    }
+                    $rty_ID = $row[0];
+                    $rectypes[$rty_ID] = array();
+                }       
+                array_push($rectypes[$rty_ID], $row[1]);
+            }
+            $res->close();
+        }
+        if($rty_ID) $rec_count = $rec_count + count(@$rectypes[$rty_ID]);
+        
+    }else if($recID>0){
+        
+        //find record type if not defined
+        if(!(isset($rty_ID) && $rty_ID>0)){
+            $rty_ID = mysql__select_value($mysqli, 'select rec_RecTypeID from Records where rec_ID='.$recID);
+            if(!($rty_ID>0)){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot get record for calculation fields update. Rec#'.$recID);
+                return false;
+            }
+        }
+        
+        $rectypes = array($rty_ID=>array($recID));
+        $rec_count = 1;     
+    }else //record is not defined - update all records 
+    {
+        
+        if($rty_ID!=null && !is_array($rty_ID)){
+            $rty_ID = prepareIds($rty_ID);
+        }
+        
+        if($rty_ID==null || count($rty_ID)==0){
+            //all rectypes - entire database
+            $rty_ID = mysql__select_list2($mysqli, 'SELECT rty_ID FROM defRecTypes'); 
+            $rec_count = mysql__select_value($mysqli, 'SELECT count(rec_ID) FROM Records WHERE (NOT rec_FlagTemporary)'); 
+        }else{
+            $rec_count = mysql__select_value($mysqli, 'SELECT count(rec_ID) FROM Records '
+            .'WHERE (rec_RecTypeID IN ('.implode(',',$rty_ID).')) AND (NOT rec_FlagTemporary)'); 
+        }
+        $rectypes = array();
+        foreach ($rty_ID as $id){
+            $rectypes[$id] = '*';
         }
     }
-        
-    //find calculation fields for this record type
-    // dty_ID => cfn_FunctionSpecification
-    $formulae = mysql__select_assoc2($mysqli,
-        'SELECT rst_DetailTypeID, cfn_FunctionSpecification FROM defRecStructure, defCalcFunctions '
-        .' WHERE rst_RecTypeID='.$rectype
-        .' AND cfn_ID=rst_CalcFunctionID');
-        
-    if(!$formulae || count($formulae)==0){
-        return false;
-    }
     
-    //@todo calculation field can not be repeatable
-        
-    foreach($formulae  as $dty_ID => $formula){
-        
-        $params['template_body'] = $formula;
-        $params['emptysetmessage'] = 'record not found';
-        $params['snippet'] = 1;
-        $params['publish'] = 4;
-        $params['recordset'] = array('records'=>array($recID), 'reccount'=>1 );
-        
-        $new_value = executeSmarty($system, $params);
+    if($progress_session_id && $rec_count>100){
+        mysql__update_progress(null, $progress_session_id, true, '0,'.$rec_count);    
+    }else{
+        $progress_session_id = 0;
+    }
 
-        $query = 'DELETE FROM recDetails '
-            .' WHERE dtl_RecID='.$recID.' AND dtl_DetailTypeID='.$dty_ID;
-        $mysqli->query($query);
+    $progress_count = 0;
+    
+    $updates = array(); // record ids 
+    $cleared = array(); // record ids 
+    $errors  = array(); // formulae errors 
+    
+    $updated_count = 0;   // updated fields
+    $cleared_count = 0;   // cleared fields
+    $unchanged_count = 0; // unchanged fields
+    
+    $heuristRec = new ReportRecord(); //helper class - to obtain access to heurist data from smarty report
+    
+    foreach ($rectypes as $rty_ID => $record_ids){    
         
-        //$query = 'UPDATE recDetails SET dtl_Value=? '
-        //    .' WHERE dtl_RecID='.$recID.' AND dtl_DetailTypeID='.$dty_ID;
-
-        $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) '
-        .' VALUES ('.$recID.', '.$dty_ID.', ? )';
-        $stmt = $mysqli->prepare($query);
-
-        $stmt->bind_param('s', $new_value);
-        if(!$stmt->execute()){
-            $syserror = $mysqli->error;
-            $stmt->close();
-            $system->addError(HEURIST_DB_ERROR, "Cannot save calculated field $dty_ID for record # $recID", $syserror);
-            return false;
+        //find calculation fields for this record type
+        // dty_ID => cfn_FunctionSpecification
+        $formulae = mysql__select_assoc2($mysqli,
+            'SELECT rst_DetailTypeID, cfn_FunctionSpecification FROM defRecStructure, defCalcFunctions '
+            .' WHERE rst_RecTypeID='.$rty_ID
+            .' AND cfn_ID=rst_CalcFunctionID');
+            
+        //there are not calculation fields for this record type
+        if(!$formulae || count($formulae)==0){ 
+            
+            if($record_ids=='*'){
+               $cnt = mysql__select_value($mysqli, 'SELECT count(rec_ID) FROM Records '
+                .'WHERE (rec_RecTypeID='.$rty_ID.') AND (NOT rec_FlagTemporary)'); 
+               $progress_count = $progress_count + $cnt;
+            }else{
+               $progress_count = $progress_count + count($record_ids);
+            }
+            
+            continue; //no formulae for this record type
         }
-        $stmt->close();
-    }//foreach
+        
+        $keep = $progress_count;
+        
+        //@todo calculation field can not be repeatable
+        foreach($formulae  as $dty_ID => $formula){
+            
+            $idx = 0;
+            $rows = null;
+            $mode = null;
+            if($record_ids=='*'){
+                $query = 'SELECT rec_ID FROM Records WHERE (rec_RecTypeID='.$rty_ID.') AND (NOT rec_FlagTemporary)';                
+                $rows = $mysqli->query($query);
+                $mode = 'string:';
+            }else if (count($record_ids)>1){
+                $mode = 'string:';
+            }
+            
+            $params = array();
+            $params['template'] = $formula;
+            
+            $progress_count = $keep; //reset - each record can have several calculated fields
+            
+            while(true){ //loop for records
+                
+                if($record_ids=='*'){
+                     $row = $rows->fetch_row();
+                     if($row){
+                         $recID = $row[0];
+                     }else{
+                         break;
+                     }
+                }else{
+                    if($idx<count($record_ids)){
+                         $recID = $record_ids[$idx];
+                         $idx++;
+                    }else{
+                         break;
+                    }
+                }
+                
+                $params['records'] = array($recID);
+                
+                $new_value = executeSmarty($system, $params, $mode, $heuristRec);
 
+                if(is_array($new_value)){
+                    if($new_value[0]=='fatal'){  //fatal smarty error
+                        if($progress_session_id>0){
+                            mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
+                        }
+                        return array('message'=>$new_value[1]);
+                    }else{
+                        //formula has errors - skip
+                        $errors[$rty_ID.'.'.$dty_ID] = $new_value[1];
+                        break; 
+                    }
+                }
+                
+                $current_value = mysql__select_value($mysqli,
+                    'SELECT dtl_Value FROM recDetails '
+                    .' WHERE dtl_RecID='.$recID.' AND dtl_DetailTypeID='.$dty_ID);
+                    
+                if($current_value==$new_value){
+                    $unchanged_count++;
+                }else{
+    
+                    if($current_value!=null && $current_value!=''){
+                        $query = 'DELETE FROM recDetails '
+                            .' WHERE dtl_RecID='.$recID.' AND dtl_DetailTypeID='.$dty_ID;
+                        $mysqli->query($query);
+                    }
+                    
+                    //$query = 'UPDATE recDetails SET dtl_Value=? '
+                    //    .' WHERE dtl_RecID='.$recID.' AND dtl_DetailTypeID='.$dty_ID;
+
+                    if($new_value!=null && $new_value!=''){
+                        $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) '
+                        .' VALUES ('.$recID.', '.$dty_ID.', ? )';
+                        $stmt = $mysqli->prepare($query);
+
+                        $stmt->bind_param('s', $new_value);
+                        if(!$stmt->execute()){
+                            $syserror = $mysqli->error;
+                            $stmt->close();
+                            $system->addError(HEURIST_DB_ERROR, "Cannot save calculated field $dty_ID for record # $recID", $syserror);
+                            return false;
+                        }
+                        $stmt->close();
+                        
+                        //if(!in_array($recID,$updates)) 
+                        $updates[] = $recID;
+                        $updated_count++;
+                    }else{
+                        $cleared[] = $recID;
+                        $cleared_count++;
+                    }
+                }
+                $progress_count++;
+                
+                if($progress_session_id && ($progress_count % 100 == 0)){
+                    $session_val = $progress_count.','.$rec_count;
+                    $current_val = mysql__update_progress(null, $progress_session_id, false, $session_val);
+                    if($current_val && $current_val=='terminate'){
+                        mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
+                        return array('message'=>'Operation has been terminated by user');
+                    }
+                }
+                
+            }//while records
+        }//for formulae
+        
+    }//for record types
+    
+    if($rec_count>1){
+
+        //remove session file
+        if($progress_session_id>0){
+            mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
+        }
+        
+        $q_updates = '';
+        $q_cleared = '';
+        
+        if(count($cleared)>1000){
+            $q_updates = 'ids:'.array_slice($updates, 0, 1000);
+        }else if(count($updates)>0){
+            $q_updates = 'ids:'.implode(',',$updates);
+        }
+        if(count($cleared)>1000){
+            $q_cleared = 'ids:'.array_slice($cleared, 0, 1000);
+        }else if(count($blanks)>0){
+            $q_cleared = 'ids:'.implode(',',$cleared);
+        }
+        
+        return array(
+            // fields
+            'fld_changed'=>$updated_count, 
+            'fld_same'=>$unchanged_count, 
+            'fld_cleared'=>$cleared_count, 
+            //records
+            'rec_updates'=>count($updates),
+            'rec_cleared'=>count($cleared),
+            'rec_processed'=>$progress_count,
+            'rec_total'=>$rec_count,
+            //errors in formula  rty_ID.dty_ID - message
+            'errors'=>$errors,
+            //queries
+            'q_updates'=>$q_updates, 'q_cleared'=>$q_cleared);
+    }else{
+            return array('errors'=>$errors);
+    }
 }
 
 //
+// $params - array
+//     template - string with code
+//     records - record ids
+//     mode - eval or string (re-use) 
 //
-//
-function executeSmarty($system, $params){
+function executeSmarty($system, $params, $mode=null, $heuristRec=null){
   global $smarty;
   
   if(!isset($smarty) || $smarty==null){
       initSmarty(); //global function from smartyInit.php
       if(!isset($smarty) || $smarty==null){
-            return 'init error';
+            return array('fatal', 'Smarty init error');
       }
   }
 
-  $content = (array_key_exists('template_body',$params)?$params['template_body']:null);
+  $content = (array_key_exists('template',$params)?$params['template']:null);
+  
+  if($content==null || $content=='') return array('error', 'Formula not defined');
+  
+  $record_ids = @$params['records'];
+  
+  if($record_ids==null || count($record_ids)<1) return '';
+  
+  $mode = $mode ?$mode:'eval:'; //string: - use complied or eval: - compile every time
 
+  /*
   $template_folder = $smarty->getTemplateDir();
   if(is_array($template_folder)) $template_folder = $template_folder[0];
   
   //$user = $system->getCurrentUser(); '_'.$user['ugr_Name']
   $template_file = $template_folder.'calc_fld_'.uniqid().'.tpl'; 
-  //$template_file = tempnam($template_folder);
-  //$file = fopen ($template_folder.$template_file, "w"); //@todo - try temp file
   $file = fopen ($template_file, "w");
   fwrite($file, $content);
   fclose ($file);
-
-
-  $heuristRec = new ReportRecord();
+  */
+  
+  if($heuristRec==null) $heuristRec = new ReportRecord();
 
   $smarty->assignByRef('heurist', $heuristRec);
 
-  $smarty->assign('results', $params['recordset']['records']); //assign 
-  $smarty->assign('template_file', $template_file);
-  $smarty->assign('r', $heuristRec->getRecord($params['recordset']['records'][0]));
-
-  //ini_set( 'display_errors' , 'false'); // 'stdout' );
+  $smarty->assign('results', $record_ids); //assign 
   $smarty->error_reporting = 0;
   $smarty->debugging = false;
-
+  //$smarty->assign('template_file', $template_file);
+  //$smarty->registerFilter('output', 'smarty_remove_temp_template');
+  
+  $smarty->assign('r', $heuristRec->getRecord($record_ids[0]));
 
   try{
-      $output = $smarty->fetch($template_file);
+      $output = $smarty->fetch($mode.$content);
 
   } catch (Exception $e) {
-      $output = 'Exception on calc field execution: '.$e->getMessage();
+      $output = array('error', 'Exception on field calculation: '.$e->getMessage());
   }
-  unlink($file);
-  return $output;
+  //unlink($file);
+  return $output; //new value
 }
+/*
+function smarty_remove_temp_template($tpl_source, Smarty_Internal_Template $template){
+    
+}
+*/
 
 /**
 * Calculate and update title mask

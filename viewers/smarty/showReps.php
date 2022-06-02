@@ -290,6 +290,14 @@ function executeSmartyTemplate($system, $params){
     //we have access to 2 methods getRecord and getRelatedRecords
     $heuristRec = new ReportRecord();
     
+      if(!isset($smarty) || $smarty==null){
+          initSmarty(); //global function from smartyInit.php
+          if(!isset($smarty) || $smarty==null){
+               smarty_error_output($system, 'Cannot init Smarty report engine');
+               exit();
+          }
+      }
+    
     $smarty->assignByRef('heurist', $heuristRec);
     
     $smarty->assign('results', $results); //assign record ids
@@ -329,7 +337,7 @@ function executeSmartyTemplate($system, $params){
         $template_file = "_".$user['ugr_Name'].".tpl";
         $template_folder = $smarty->getTemplateDir();
         if(is_array($template_folder)) $template_folder = $template_folder[0];
-        $file = fopen ($template_folder.$template_file, "w"); //@todo - try temp file
+        $file = fopen ($template_folder.$template_file, "w"); 
         fwrite($file, $template_body);
         fclose ($file);
 
