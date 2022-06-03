@@ -337,12 +337,26 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                 
                 //avoid sync on every request
                 this.mapping_defs['import_vocabularies'] = window.hWin.HEURIST4.dbs.vocabs_already_synched?0:1;
+
+/* Artem old            
+                var request = { action: 'import_records',
+                    source_db: 'ESTC_Helsinki_Bibliographic_Metadata',
+                    q: 'ids:'+sels.join(','), 
+                    rules: '[{"query":"t:10 linkedfrom:30-15"},{"query":"t:12 linkedfrom:30-259"},{"query":"t:49 linkedfrom:30-284"}]',
+                    mapping: this.mapping_defs,
+                    //session: session_id,
+                    id: window.hWin.HEURIST4.util.random()
+                };
+                window.hWin.HAPI4.doImportAction(request, function( response ){
+                
+*/            
             
                 var request = { 
                     serviceType: 'ESTC',
                     action: 'import_records',
                     source_db: 'ESTC_Helsinki_Bibliographic_Metadata',
                     org_db: window.hWin.HAPI4.database,
+                    db: window.hWin.HAPI4.database,
                     q: 'ids:'+sels.join(','), 
                     rules: '[{"query":"t:10 linkedfrom:30-15"},{"query":"t:12 linkedfrom:30-259"},{"query":"t:49 linkedfrom:30-284"}]',
                     mapping: this.mapping_defs,
@@ -350,11 +364,9 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                     id: window.hWin.HEURIST4.util.random()
                 };
 
-                //create default set of records for website see importController
-                window.hWin.HAPI4.lookup_external_service(request, function( response ){
+                window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function( response ){
 
                     response = window.hWin.HEURIST4.util.isJSON(response);
-                
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
                         var target_dty_ID = that.options.mapping.fields['properties.edition']
@@ -365,12 +377,14 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                         var ids = response.data.ids;  //all
                         var ids_ex  = response.data.exists; //skipped
                         if(!ids_ex) ids_ex = [];
-
+                        
+                        var rec_ids = ids.concat(ids_ex);
+                        
                         var query_request = { 
                             serviceType: 'ESTC',
                             org_db: window.hWin.HAPI4.database,
                             db: 'ESTC_Helsinki_Bibliographic_Metadata',
-                            q: 'ids:"' + recpointers.join(',') + '"', 
+                            q: 'ids:"' + rec_ids.join(',') + '"', 
                             w: 'a',
                             detail: 'header' 
                         };
@@ -431,6 +445,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                         window.hWin.HEURIST4.dbs.vocabs_already_synched = true;
                         
                     }else{
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });

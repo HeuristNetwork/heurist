@@ -1197,7 +1197,7 @@ if($i<5){
     //
     function mysql__update_progress($mysqli, $session_id, $is_init, $value){
         
-        if($session_id==null) return null;
+        if($session_id==null || $session_id==0) return null;
         
         if(!defined('HEURIST_SCRATCH_DIR')) return null;
         

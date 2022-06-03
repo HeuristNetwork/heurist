@@ -605,10 +605,11 @@ public static function importRecords($filename, $params){
     
     self::initialize();
     
+    $is_debug = @$params['dbg'] == 1;
     $session_id  = @$params['session'];
     $is_cms_init = (@$params['is_cms_init']===true || @$params['is_cms_init']==1);
     $make_public = !(@$params['make_public']===false || @$_REQUEST['make_public']===0);
-    $owner_id = @$params['onwer_id']>0 ?$params['onwer-id'] :1;
+    $owner_id = @$params['onwer_id']>0 ?$params['onwer_id'] :1;
     $mapping_defs = @$params['mapping_defs'];
     
     $unique_field_id = @$params['unique_field_id'];
@@ -718,7 +719,7 @@ EOD;
         }else{
         
             $importDef = new DbsImport( self::$system );
-            
+
             if($mapping_defs!=null){
         
                 //for import records by mapping we check and import affected vocabularies only
@@ -796,7 +797,7 @@ EOD;
         $mysqli->query('SET FOREIGN_KEY_CHECKS = 0');
         
         self::$system->defineConstant('DT_PARENT_ENTITY');
-        
+
         foreach($records as $record_src){
             
             $is_blog_record = false;
@@ -1452,6 +1453,8 @@ EOD;
             
     }//$data
 
+//if($is_debug) print print_r($res,true).'<br>';
+    
     //finish progress session
     mysql__update_progress($mysqli, $session_id, false, 'REMOVE');
         

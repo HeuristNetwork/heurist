@@ -24,7 +24,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
@@ -36,18 +35,22 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
     $system = new System();
 
     $params = $_REQUEST;
-    
+
     $is_debug = (@$params['dbg']==1);
 
-    $is_estc = (@$params['serviceType'] == 'ESTC' && array_key_exists('db', $params) && $params['db'] == 'ESTC_Helsinki_Bibliographic_Metadata');
+    $is_estc = (@$params['serviceType'] == 'ESTC' && 
+                (@$params['db'] == 'ESTC_Helsinki_Bibliographic_Metadata'
+                ||
+                @$params['action'] == 'import_records')
+                );
 
-    if(!(@$params['service']) && !$is_estc){
+    if(!@$params['service'] && !$is_estc){
         $system->error_exit_api('Service parameter is not defined or has wrong value'); //exit from script
     }
 
     $remote_data = false;
     $url = '';
-
+    
     if($is_estc){
 
         $is_allowed = (isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, @$_REQUEST['org_db']) !== false && isset($ESTC_UserName) && isset($ESTC_Password));
@@ -63,7 +66,7 @@ if($is_debug) print HEURIST_BASE_URL.'  '.HEURIST_MAIN_SERVER.'<br>';
             }
 
             $is_inited = $system->init(@$params['db']);
-            
+
             if($is_inited !== false && $is_allowed){ // search records
 
                 $is_logged_in = $system->doLogin($ESTC_UserName, $ESTC_Password, 'shared');
@@ -83,7 +86,7 @@ if($is_debug) print HEURIST_BASE_URL.'  '.HEURIST_MAIN_SERVER.'<br>';
                     }
     
                     require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
-if($is_debug) print print_r($params['q'], true).'<br>';
+//if($is_debug) print print_r($params['q'], true).'<br>';
                     $response = recordSearch($system, $params);
                 }else{ // unable to login, cannot access records
                     $response = array('status' => HEURIST_ERROR, 'message' => 'We are unable to access the records within the ESTC database at this moment.<br>Please contact the Heurist team. Query is: '.json_encode($params['q']));
@@ -96,25 +99,39 @@ if($is_debug) print print_r($params['q'], true).'<br>';
             $base_url = $ESTC_ServerURL . '/h6-alpha/hsapi/controller/record_lookup.php?';
 
             if(array_key_exists('action', $params) && @$params['action'] == 'import_records'){
+                
+                $base_url = $ESTC_ServerURL . '/h6-alpha/hsapi/controller/record_lookup.php?';  //record_output
+                $params2 = array();
+                $params2['action'] = 'record_output';
+                $params2['serviceType'] = 'ESTC';
+                $params2['format'] = 'json';
+                $params2['depth'] = '0';
+                $params2['db'] = 'ESTC_Helsinki_Bibliographic_Metadata';
+                $params2['org_db'] = $params['org_db'];
+                $params2['q'] = $params['q'];
+                $params2['rules'] = @$params['rules'];
+                $url = $base_url.http_build_query($params2); // forward request to ESTC server
+                
+if($is_debug) print 'record_output url: '.$url.'  <br>';                   
 
-                $params['action'] = 'record_output';
-                $params['format'] = 'json';
-                $params['depth'] = '0';
-                $url = $base_url.http_build_query($params); // forward request to ESTC server
-
+                
                 // save file that produced with record_output.php from source to temp file  
                 $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
-
+                
                 $filesize = saveURLasFile($url, $heurist_path); // perform external request and save results to temp file
 
+                
+if($is_debug)print 'CONTENT '.$filesize;
+
+                
                 if($filesize>0 && file_exists($heurist_path)){
                     //read temp file, import record
+                    $is_inited = $system->init(@$params['db']);
+              
                     require_once (dirname(__FILE__).'/../import/importHeurist.php'); 
                     
                     $params2 = array(
-                        'session' => @$params['session'],
-                        'is_cms_init' => 0,
-                        'make_public' => (@$params['make_public']!=0),
+                        'dbg' => ($is_debug?1:0),
                         'owner_id' => $system->get_user_id(),
                         'mapping_defs' => @$params['mapping']
                     );
@@ -126,7 +143,10 @@ if($is_debug) print print_r($params['q'], true).'<br>';
                         $response = array("status"=>HEURIST_OK, "data"=> $res);
                     }
 
+if($is_debug) print print_r($response, true).'!!!!!<br>';
+
                     unlink($heurist_path);
+                    
                 }else{
                     $response = array('status' => HEURIST_ERROR, 'message' => 'Cannot download records from '.$params['source_db'].'. <br>'.$remote_path.' to '.$heurist_path.'<br><br>URL request: ' . $url);
                 }

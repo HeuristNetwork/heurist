@@ -2165,7 +2165,7 @@ function recordSearch($system, $params)
     //error_log($query);
     if(@$_REQUEST['dbg']==1) {
         print $query;
-        exit();
+        //exit();
     }
         
 
