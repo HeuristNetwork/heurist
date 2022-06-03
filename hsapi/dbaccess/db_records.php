@@ -1726,9 +1726,9 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
             if($record_ids=='*'){
                 $query = 'SELECT rec_ID FROM Records WHERE (rec_RecTypeID='.$rty_ID.') AND (NOT rec_FlagTemporary)';                
                 $rows = $mysqli->query($query);
-                $mode = 'string:';
+                //$mode = 'string:';
             }else if (count($record_ids)>1){
-                $mode = 'string:';
+                //$mode = 'string:';
             }
             
             $params = array();
@@ -1774,7 +1774,9 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                 $current_value = mysql__select_value($mysqli,
                     'SELECT dtl_Value FROM recDetails '
                     .' WHERE dtl_RecID='.$recID.' AND dtl_DetailTypeID='.$dty_ID);
-                    
+                
+                if($new_value!=null) $new_value = trim($new_value);    
+                
                 if($current_value==$new_value){
                     $unchanged_count++;
                 }else{

@@ -32,6 +32,16 @@
         $srcURL = 'rebuildRecordTitles.php?db='.$_REQUEST['db'];    
     }
     $sTitle = 'Recalculation of composite record titles';
+ 
+ }else
+ if(@$_REQUEST['type']=='calcfields'){
+    if(@$_REQUEST['recTypeIDs']){
+        $srcURL = 'rebuildCalculatedFields.php?recTypeIDs='.$_REQUEST['recTypeIDs'].'&db='.$_REQUEST['db'];    
+    }else{
+        $srcURL = 'rebuildCalculatedFields.php?db='.$_REQUEST['db'];    
+    }
+    $sTitle = 'Recalculation of calculated fields';
+ 
  }else
  if(@$_REQUEST['type']=='files'){
     $srcURL = 'listUploadedFilesErrors.php?db='.$_REQUEST['db'];

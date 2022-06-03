@@ -1107,13 +1107,15 @@ function getVariableNameForSmarty($name, $is_fieldtype = true){
 //
 function log_smarty_activity($rec_ids){
 
-    if(count($rec_ids) > 25){ // check id count
-        return;
-    }
+    if($system){
+        if(count($rec_ids) > 25){ // check id count
+            return;
+        }
 
-    // log each id one at a time
-    for ($i=0; $i < count($rec_ids); $i++) {     
-        $system->user_LogActivity('custRep', array($rec_ids, count($rec_ids)), null, TRUE);
+        // log each id one at a time
+        for ($i=0; $i < count($rec_ids); $i++) {     
+            $system->user_LogActivity('custRep', array($rec_ids, count($rec_ids)), null, TRUE);
+        }
     }
 }
 ?>

@@ -634,7 +634,12 @@ class ReportRecord {
             if(is_array($query)){
                 $query = json_encode($query);
             }
-            $query = str_replace('[ID]', $rec_ID, $query);
+            if(strpos($query,'[ID]')!==false)
+                $query = str_replace('[ID]', $rec_ID, $query);
+        }else{
+            if(strpos($query,'[ID]')!==false){
+                return null;
+            }
         }
         
         $params = array('detail'=>'ids', 'q'=>$query, 'needall'=>1);
@@ -691,6 +696,11 @@ class ReportRecord {
         }
         
         if(count($select)>0){
+            
+            if(!$ids || count($ids)<1){
+                $ids = array(0);
+            }
+            
             //@todo make chunks if count($ids)>10000?
             $query = 'SELECT '.implode(',',$select)
                         .' FROM '.implode(' ',$from)

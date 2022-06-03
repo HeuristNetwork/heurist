@@ -105,21 +105,35 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
             window.hWin.HEURIST4.msg.hideProgress();
                         
             if(response.status == window.hWin.ResponseStatus.OK){
-                $('#changed_count').text(response.data['changed_count']);
-                $('#same_count').text(response.data['same_count']);
-                $('#blank_count').text(response.data['blank_count']);
-                $('#total_count').text(response.data['total_count']);
+                $('#rec_total').text(response.data['rec_total']);
+                $('#rec_processed').text(response.data['rec_processed']);
+                $('#fld_changed').text(response.data['fld_changed']);
+                $('#fld_cleared').text(response.data['fld_cleared']);
+                $('#fld_same').text(response.data['fld_same']);
+
                 if(response.data['q_updates']){
                     $('#q_updates').attr('href', sURL + response.data['q_updates'] ).show();
                 }else{
                     $('#q_updates').hide();
                 }
-                if(response.data['q_blanks']){
-                    $('#q_blanks').attr('href', sURL + response.data['q_blanks'] ).show();
+                if(response.data['q_cleared']){
+                    $('#q_blanks').attr('href', sURL + response.data['q_cleared'] ).show();
                 }else{
                     $('#q_blanks').hide();
-                    $('#q_blanks_info').hide();
                 }
+
+                if(response.data['errors']){
+                    
+                    var sErrors = '';
+                    for(var key in response.data['errors']){
+                        sErrors = sErrors + key+'  '+response.data['errors'][key]+'<br>';
+                    }
+                    $('#formulae_errors_info').html(sErrors);
+                    
+                }else{
+                    $('#formulae_errors').hide();
+                }
+                
                 
                 $('.result_div').show();
                 $('.header_info').hide();
@@ -197,9 +211,9 @@ if($init_client){
             
             <div class="progress_div" style="background:white;min-height:40px;width:100%"></div>
 
-            <div class="result_div" style="display:<?php $init_client?:'none':'block'?>;">
-                <div><span id=total_count><?php echo @$res['rec_total']?></span> records in total</div>
-                <div><span id=total_count><?php echo @$res['rec_processed']?></span> records processed</div>
+            <div class="result_div" style="display:<?php $init_client?'none':'block'?>;">
+                <div><span id=rec_total><?php echo @$res['rec_total']?></span> records in total</div>
+                <div><span id=rec_processed><?php echo @$res['rec_processed']?></span> records processed</div>
                 <div><span id=fld_changed><?php echo @$res['fld_changed']?></span> fields updated in 
                                 <span id=rec_updates><?php echo @$res['rec_updates']?></span> records</div>
                 <div><span id=fld_cleared><?php echo @$res['fld_cleared']?></span> fields cleared in 
@@ -218,10 +232,14 @@ if($init_client){
                 if($q_errors){
                 ?>
                     <br><br>
-                    <span id="formulae_errors_info">
-                        <br/>There are errors in calculations execution. This is generally due to a faulty in formula
+                    <span id="formulae_errors">
+                        <p>
+                        There are errors in calculations execution. This is generally due to a faulty in formula
                         <br/>or faulty data in individual records. Affected fields have not been changed.
+                        </p>
+                        <span id="formulae_errors_info">
                         <?php echo $q_errors;?>
+                        </span>
                     </span>
                 <?php
                 }
