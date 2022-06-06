@@ -270,6 +270,7 @@ regional['fr'] = {
         menu_structure_verify: 'Vérifier l\'intégrité des données ',
         menu_structure_duplicates: 'Chercher les doublons',
         menu_manage_rectitles: 'Rconstruire les titres des enregistrements',
+        menu_manage_calcfields: 'Rebuild calculation fields', //@translate
         menu_interact_log: 'Interaction log',
         menu_profile_files_hint: 'Gérer les fichiers importés et enregistrer des ressources distantes',
         menu_profile_preferences_hint: 'Menu des préférences d\'environnement',

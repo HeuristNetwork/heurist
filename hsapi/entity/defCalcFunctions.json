@@ -67,7 +67,7 @@
                     "dtFields":{
                         "dty_Type":"resource",
                         "rst_DisplayName":"Record type(s):",
-                        "rst_DisplayHelpText": "The set of record types which are particiapated in calculations. Any update of record of specified type will affect recaclulation of fields across the database", 
+                        "rst_DisplayHelpText": "The set of record types which are participated in calculations. Any update of record of specified type will rebuild this field across the database", 
                         "rst_FieldConfig": {"entity":"DefRecTypes","csv":true}
                     }
                 }

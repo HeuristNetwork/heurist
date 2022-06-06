@@ -123,6 +123,7 @@ regional['de'] = {
         menu_structure_verify: 'Integrität überprüfen',
         menu_structure_duplicates: 'Doppelte Datensäzte suchen',
         menu_manage_rectitles: 'Titel der Datensätze wieder zuweisen',
+        menu_manage_calcfields: 'Rebuild calculation fields', //@translate
         menu_interact_log: 'Interaction log',
         menu_profile_files_hint: 'Hochgeladene Dateien und externe Medienquellen verwalten.',
         menu_profile_preferences_hint: 'Einstellungen dieser Datenbank ändern.',

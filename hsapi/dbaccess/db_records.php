@@ -683,15 +683,25 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         return $system->addError(HEURIST_DB_ERROR, 'Cannot save details(3)', $syserror);
     }
     
-    if(true){
-        recordUpdateCalcFields( $system, $recID, $rectype );    
-    }
-
     $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']);
     $rty_counts = null;
 
-    if(!$is_insert && !$modeImport){
+    if(!$is_insert && !$modeImport)
+    {
         $mysqli->query('set @suppress_update_trigger=1');
+
+        if(true){
+            recordUpdateCalcFields( $system, $recID, $rectype );  //update calculated fields in this record
+            
+            //check that this record my affect other records with calculated fields
+            //1. cfn_RecTypeIDs -> cfn_ID
+            //2. defRecStructure where rst_CalcFunctionID  -> rst_RecTypeID+rst_DetailTypeID 
+            $aff_rectypes = findAffectedCalcFields( $system, $rectype );
+            if(count($aff_rectypes)>0){
+                recordUpdateCalcFields( $system, null, $aff_rectypes);    
+            }
+            
+        }
 
         removeReverseChildToParentPointer($system, $recID, $rectype);    
 
@@ -1606,7 +1616,30 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
 }
 
 //
-// $recID - record(s) to be updated. It it is omitted it updates all records for $rty_ID
+// check that this record my affect other records with calculated fields
+// 1. cfn_RecTypeIDs -> cfn_ID
+// 2. defRecStructure where rst_CalcFunctionID  -> rst_RecTypeID+rst_DetailTypeID 
+//
+function findAffectedCalcFields( $system, $rty_ID ){
+    
+    $mysqli = $system->get_mysqli();
+
+    $query = 'SELECT cfn_ID FROM defCalcFunctions WHERE find_in_set('.$rty_ID.',cfn_RecTypeIDs) <> 0';
+    $field_ids = mysql__select_list2($mysqli, $query);
+
+    if(count($field_ids)>0){
+        
+        $query = 'SELECT rst_RecTypeID WHERE rst_CalcFunctionID IN ('.implode(',',$field_ids).')';
+        $rectype_ids = mysql__select_list2($mysqli, $query);
+        
+        if(count($rectype_ids)>0){
+            recordUpdateCalcFields($system, null, $rectype_ids);
+        }
+    }
+}
+
+//
+// $recID - record(s) to be updated. If it is omitted it updates all records for $rty_ID
 // $rty_ID - record type(s)
 // if both parameters are null it updates all calculated fields for entire database
 //

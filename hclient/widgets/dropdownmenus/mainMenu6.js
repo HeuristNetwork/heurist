@@ -328,7 +328,7 @@ $.widget( "heurist.mainMenu6", {
                     }
                 }else{  //ON_STRUCTURE_CHANGE
                     //if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){}
-                    //refresh list of rectypes afrer structure edit
+                    //refresh list of rectypes after structure edit
                     that._updateDefaultAddRectype();
                     window.hWin.HEURIST4.browseRecordCache = {};
                     window.hWin.HEURIST4.browseRecordTargets = {};

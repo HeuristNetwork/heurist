@@ -266,6 +266,7 @@ regional['ru'] = {
         menu_structure_verify: 'Проверка целостности данных',
         menu_structure_duplicates: 'Найти повторения',
         menu_manage_rectitles: 'Обновить заголовки',
+        menu_manage_calcfields: 'Обновить вычисляемые поля',
         menu_interact_log: 'Interaction log',
         menu_profile_files_hint: 'Управление загружеными файлами и удаленными медиа ресурсами',
         menu_profile_preferences_hint: 'Показать и редактировать настройки профиля',
