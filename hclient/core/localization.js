@@ -136,6 +136,7 @@ regional['en'] = {
         menu_structure_verify: 'Verify integrity',
         menu_structure_duplicates: 'Find duplicate records',
         menu_manage_rectitles: 'Rebuild record titles',
+        menu_manage_calcfields: 'Rebuild calculation fields',
         menu_interact_log: 'Interaction log',
         menu_profile_files_hint: 'Manage uploaded files and registered remote media resources',
         menu_profile_preferences_hint: 'Display preferences relating to behaviours related to this database',

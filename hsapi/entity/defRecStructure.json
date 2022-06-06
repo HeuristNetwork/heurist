@@ -391,6 +391,17 @@
                             "rst_DisplayName": "Semantic/Reference URI:",
                             "rst_DisplayHelpText": "The URI to a semantic definition or web page describing this field used within this record type" 
                         }
+                    },
+                    {
+                        "dtID": "rst_CalcFunctionID",
+                        "dtFields":{
+                            "dty_Type":"resource",
+                            "rst_Class":"freetext blocktext integer float enum date",
+                            "rst_DisplayWidth":60,
+                            "rst_DisplayName":"Formula:",
+                            "rst_DisplayHelpText":"Define formula if value of this field will be calculated",
+                            "rst_FieldConfig": {"entity":"DefCalcFunctions"}
+                        }
                     }
                 ]}                
      ]

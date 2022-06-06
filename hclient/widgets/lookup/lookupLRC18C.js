@@ -248,19 +248,29 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
         window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), true);
 
         //Populate Bookformat dropdown on lookup page
-        var request = {db:'ESTC_Helsinki_Bibliographic_Metadata', a:'search', 'entity':'defTerms', 'details':'list', 'trm_ParentTermID': 5430};
+        var request = {
+            serviceType: 'ESTC',
+            db:'ESTC_Helsinki_Bibliographic_Metadata',
+            a: 'search', 
+            entity: 'defTerms', 
+            details: 'list', 
+            request_id: window.hWin.HEURIST4.util.random(),
+            trm_ParentTermID: 5430
+        };
 
         var selBf = this.element.find('#select_bf').empty();
         window.hWin.HEURIST4.ui.addoption(selBf[0], 0, 'select...'); //first option
 
-        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-            function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
-                    var recordset = new hRecordSet(response.data);
-                    recordset.each2(function(trm_ID, term){
-                         window.hWin.HEURIST4.ui.addoption(selBf[0], trm_ID, term['trm_Label']);
-                    });
-                }
+        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+
+            response = window.hWin.HEURIST4.util.isJSON(response);
+
+            if(response.status == window.hWin.ResponseStatus.OK){
+                var recordset = new hRecordSet(response.data);
+                recordset.each2(function(trm_ID, term){
+                     window.hWin.HEURIST4.ui.addoption(selBf[0], trm_ID, term['trm_Label']);
+                });
+            }
         });
 
         //by default action button is disabled
@@ -327,7 +337,8 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                 
                 //avoid sync on every request
                 this.mapping_defs['import_vocabularies'] = window.hWin.HEURIST4.dbs.vocabs_already_synched?0:1;
-            
+
+/* Artem old            
                 var request = { action: 'import_records',
                     source_db: 'ESTC_Helsinki_Bibliographic_Metadata',
                     q: 'ids:'+sels.join(','), 
@@ -336,12 +347,26 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                     //session: session_id,
                     id: window.hWin.HEURIST4.util.random()
                 };
-
-                //create default set of records for website see importController
                 window.hWin.HAPI4.doImportAction(request, function( response ){
-                    
-                    window.hWin.HEURIST4.msg.sendCoverallToBack();
                 
+*/            
+            
+                var request = { 
+                    serviceType: 'ESTC',
+                    action: 'import_records',
+                    source_db: 'ESTC_Helsinki_Bibliographic_Metadata',
+                    org_db: window.hWin.HAPI4.database,
+                    db: window.hWin.HAPI4.database,
+                    q: 'ids:'+sels.join(','), 
+                    rules: '[{"query":"t:10 linkedfrom:30-15"},{"query":"t:12 linkedfrom:30-259"},{"query":"t:49 linkedfrom:30-284"}]',
+                    mapping: this.mapping_defs,
+                    //session: session_id,
+                    id: window.hWin.HEURIST4.util.random()
+                };
+
+                window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function( response ){
+
+                    response = window.hWin.HEURIST4.util.isJSON(response);
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
                         var target_dty_ID = that.options.mapping.fields['properties.edition']
@@ -352,12 +377,14 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                         var ids = response.data.ids;  //all
                         var ids_ex  = response.data.exists; //skipped
                         if(!ids_ex) ids_ex = [];
-
+                        
+                        var rec_ids = ids.concat(ids_ex);
+                        
                         var query_request = { 
                             serviceType: 'ESTC',
                             org_db: window.hWin.HAPI4.database,
                             db: 'ESTC_Helsinki_Bibliographic_Metadata',
-                            q: 'ids:"' + recpointers.join(',') + '"', 
+                            q: 'ids:"' + rec_ids.join(',') + '"', 
                             w: 'a',
                             detail: 'header' 
                         };
@@ -409,7 +436,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                             }
                         );
 
-
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
                         //pass mapped values and close dialog
                         that._context_on_close = {};
                         that._context_on_close[target_dty_ID] = ids[0];
@@ -418,6 +445,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                         window.hWin.HEURIST4.dbs.vocabs_already_synched = true;
                         
                     }else{
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });
@@ -434,6 +462,9 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
     /* Get the user input from lookupLRC18C.html and build the query string */
     /* Then lookup ESTC database if the query produces any search results */
     _doSearch: function () {
+
+        var that = this;
+
         edition_name = "";
         edition_date = "";
         edition_author = "";
@@ -480,7 +511,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                 query['f:254'] = '@'+this.element.find('#estc_no').val();
             }
             sort_by_key = "'sortby'"
-            query[sort_by_key.slice(1, -1)] = 'f:9:'
+            //query[sort_by_key.slice(1, -1)] = 'f:9:'  It kills MariaDB database
 
             query_string = query;
 
@@ -520,10 +551,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
             query_string = 't:30 ' + edition_name + edition_date + edition_author + edition_work + edition_place + book_format + estc_no + vol_count + vol_parts;
         }
 
-        console.log("Query String is")
-        console.log(query_string);
-
-        var missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
+        var missingSearch = (Object.keys(query).length <= 1); // query has t and sortby keys at minimum
 
         if(missingSearch){
             window.hWin.HEURIST4.msg.showMsgFlash('Please specify some criteria to narrow down the search...', 1000);
@@ -536,22 +564,30 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
             serviceType: 'ESTC',
             org_db: window.hWin.HAPI4.database,
             db: 'ESTC_Helsinki_Bibliographic_Metadata',
-            q: query_string, 
-            detail: 'detail' 
+            q: query, 
+            limit: 1000,
+            detail: 'header' 
         };
-        var that = this;
 
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request,
-            function (response) {
+        window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, function(response){
 
-                window.hWin.HEURIST4.msg.sendCoverallToBack();
-                response = window.hWin.HEURIST4.util.isJSON(response);
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+            response = window.hWin.HEURIST4.util.isJSON(response);
 
-                if (response.status && response.status != window.hWin.ResponseStatus.OK) {
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                } else {
-                    that._onSearchResult(response);
+            if(response.status && response.status == window.hWin.ResponseStatus.OK){
+                
+                if(response.data.count>response.data.reccount){
+                    window.hWin.HEURIST4.msg.showMsgDlg('Your request generated '
+                    + response.data.count+' results. Only first '
+                    + response.data.reccount 
+                    + ' have been retrieved. You may specify more restrictive criteria '
+                    + ' to narrow the result.');        
+                    response.data.count = response.data.reccount;
                 }
+                that._onSearchResult(response);
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
         });
     },    
     

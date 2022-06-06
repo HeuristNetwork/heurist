@@ -25,7 +25,7 @@
 * 'id' - key field value in usrReportSchedule
 * 'mode' - if publish>0: js or html (default)
 * 'publish' - 0 vsn 3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only)
-*                 3 - redirect the existing report, if it does not exist publish=1
+*                 3 - redirect the existing report (use already publshed output), if it does not exist publish=1
 *
 * If publish=1 then the script displays a web page with a report on the process
 * (success or errors as below). If not set, then the errors (file can't be written, can't find template,

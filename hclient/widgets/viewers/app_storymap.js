@@ -50,7 +50,9 @@ $.widget( "heurist.app_storymap", {
         // timemap parameters
         keepCurrentTime: true, //keep current time on story change and load appropriate element
         use_internal_timemap: false,
-        mapDocumentID: null //map document to be loaded (3-1019)
+        mapDocumentID: null, //map document to be loaded (3-1019)
+        
+        zoomAnimationTime: 5000 //default value is 5000ms, it can be overwritten by animation parameters per story element
         
         //by default story element loads linked or internal places, or linked map layers
         //if story element has start (1414-1092 or 2-134), transition (1414-1090) and end places (1414-1088 or 2-864) they are preferable
@@ -1413,7 +1415,7 @@ console.log('>sctop '+ele.scrollTop());
 
 //console.log('Animation '+anime);        
 
-        /*        
+        /*  examples:     
         var anime = [{scope:'all',action:'hide'},{scope:'all',range:1,action:'fade_in',duration:1000}]; //show in sequence
 
         anime = [{scope:'all',range:1,action:'fade_out',duration:1000}]; //hide in sequence
@@ -1435,6 +1437,8 @@ console.log('>sctop '+ele.scrollTop());
         
         
         //zoom to story element on timeline
+        // @todo  It would be brilliant if 
+        // the current time were calculated as a proportion of the change in time between start and end of the Story Element, perhaps in increments of say 1/20t
         mapwidget.vistimeline.timeline('zoomToSelection', [recID]); //select and zoom 
         
         //by default first action is fly to extent of story element
@@ -1727,28 +1731,44 @@ console.log('wait for stopping of previous animation');
             var bnd = mapwidget.getLayerBounds(layer, useRuler);
             bounds.push( bnd );    
         });
-        
+
         //.nativemap
         var bounds = mapwidget._mergeBounds(bounds);
         
+        //
         if(mode=='center'){
             mapwidget.nativemap.panTo(bounds.getCenter());    //setView
         }else{
-            mapwidget.zoomToBounds(bounds, (mode=='fly')); //default 1.5 seconds   
-        }
+            if(!(duration>0)){
+                duration = this.options.zoomAnimationTime>=0
+                            ?this.options.zoomAnimationTime
+                            :5000;
+                if(duration==0 && mode=='fly') mode = 'zoom'; //if duration is zero mode is "zoom"
+            } 
+            if(mode == 'fly'){
+                mode = {animate:true, duration:duration/1000};
+            }else{
+                mode = false;
+            }
+            
+            mapwidget.zoomToBounds(bounds, mode);
+        }        
         
-        if(!(duration>0)) duration = 2000;
         
         if($.isFunction(this._animationResolve)){
-            var that = this;
-            setTimeout(function(){
-                    if(that._terminateAnimation===true || that._terminateAnimation==recID){
-console.log('animation terminated actionBounds');                        
-                        if($.isFunction(that._animationReject)) that._animationReject();
-                    }else{
-                        if ($.isFunction(that._animationResolve)) that._animationResolve();
-                    }                
-                }, duration);                        
+            if(duration==0){
+                this._animationResolve();
+            }else{
+                var that = this;
+                setTimeout(function(){
+                        if(that._terminateAnimation===true || that._terminateAnimation==recID){
+    console.log('animation terminated actionBounds');                        
+                            if($.isFunction(that._animationReject)) that._animationReject();
+                        }else{
+                            if ($.isFunction(that._animationResolve)) that._animationResolve();
+                        }                
+                    }, duration);                        
+            }
         }
     },
     

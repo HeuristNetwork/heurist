@@ -1367,7 +1367,6 @@ function outputXInclude($record) {
     closeTag('xi:include');
 }
 
-
 function outputRecordStub($recordStub) {
     global $RTN;
     openTag('record', array('isStub' => 1));
@@ -1384,10 +1383,10 @@ function makeFileContentNode($file) {
 
     if (@$file['fxm_MimeType'] === "application/xml") { // && file_exists($filename)) {
 
-        $fiilename = resolveFilePath($file['fullPath']);
-        if ( !($file['ulf_OrigFileName'] == '_remote' || strpos($file['ulf_OrigFileName'],'_iiif')===0 ) && file_exists($fiilename)) {
+        $filename = resolveFilePath($file['fullPath']);
+        if ( !($file['ulf_OrigFileName'] == '_remote' || strpos($file['ulf_OrigFileName'],'_iiif')===0 ) && file_exists($filename)) { //@todo check preferred source
 
-            $xml = simplexml_load_file( $fiilename );
+            $xml = simplexml_load_file( $filename );
             if (!$xml) {
                 makeTag('error', null, " Error while attemping to read $filename .");
                 return;
@@ -1481,11 +1480,11 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
             //including resources disabled since 2016-12-13
             if (false && @$_REQUEST['includeresources'] == '1' && @$_REQUEST['mode'] == '1') {
 
-                $fiilename = resolveFilePath($file['fullPath']);
+                $filename = resolveFilePath($file['fullPath']);
 
-                if (file_exists($fiilename)) {
+                if (file_exists($filename)) {
 
-                    $file['URL'] = $fiilename; //relative path to db root    
+                    $file['URL'] = $filename; //relative path to db root    
 
                     //if path is relative then we copy file
                     if(@$file['ulf_FilePath']==null || $file['ulf_FilePath']=='' || substr($file['ulf_FilePath'],1)!='/'){

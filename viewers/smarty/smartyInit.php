@@ -23,61 +23,73 @@
     //smarty is already included via composer autoload in showReps.php    
     //define('SMARTY_DIR', HEURIST_DIR.'external/Smarty-3.0.7/libs/'); 
     //require_once(SMARTY_DIR.'Smarty.class.php');
-
-    $smarty = new Smarty();
+    $smarty = null;
     
-    //check folder existance and create new folders if they are missing
-    if(!folderCreate(HEURIST_SMARTY_TEMPLATES_DIR, true)){
-        die('Failed to create folder for smarty templates');
-    }
-    if(!folderCreate(HEURIST_SMARTY_TEMPLATES_DIR.'configs/', true)){
-        die('Failed to create configs folder for smarty templates');
-    }
-    if(!folderCreate(HEURIST_SMARTY_TEMPLATES_DIR.'templates_c/', true)){
-        die('Failed to create templates_c folder for smarty templates');
-    }
-    if(!folderCreate(HEURIST_SMARTY_TEMPLATES_DIR.'cache/', true)){
-        die('Failed to create cache folder for smarty templates');
-    }
+    initSmarty();
 
-    $smarty->setTemplateDir(HEURIST_SMARTY_TEMPLATES_DIR);
-    $smarty->setCompileDir(HEURIST_SMARTY_TEMPLATES_DIR.'templates_c');
-    $smarty->setCacheDir(HEURIST_SMARTY_TEMPLATES_DIR.'cache');
-    $smarty->setConfigDir(HEURIST_SMARTY_TEMPLATES_DIR.'configs');    
+
+function initSmarty(){
+    global $smarty;
     
-    $smarty->registerResource("string", array("str_get_template",
-        "str_get_timestamp",
-        "str_get_secure",
-        "str_get_trusted"));
+    if(defined('HEURIST_SMARTY_TEMPLATES_DIR')){
+    
+        $smarty = new Smarty();
+        
+        //check folder existance and create new folders if they are missing
+        if(!folderCreate(HEURIST_SMARTY_TEMPLATES_DIR, true)){
+            die('Failed to create folder for smarty templates');
+        }
+        if(!folderCreate(HEURIST_SMARTY_TEMPLATES_DIR.'configs/', true)){
+            die('Failed to create configs folder for smarty templates');
+        }
+        if(!folderCreate(HEURIST_SMARTY_TEMPLATES_DIR.'templates_c/', true)){
+            die('Failed to create templates_c folder for smarty templates');
+        }
+        if(!folderCreate(HEURIST_SMARTY_TEMPLATES_DIR.'cache/', true)){
+            die('Failed to create cache folder for smarty templates');
+        }
 
-    function str_get_template ($tpl_name, &$tpl_source, &$smarty_obj)
-    {
-        $tpl_source = $tpl_name;
-        $tpl_name = "from_str_test";
-        // return true on success, false to generate failure notification
-        return true;
+        $smarty->setTemplateDir(HEURIST_SMARTY_TEMPLATES_DIR);
+        $smarty->setCompileDir(HEURIST_SMARTY_TEMPLATES_DIR.'templates_c');
+        $smarty->setCacheDir(HEURIST_SMARTY_TEMPLATES_DIR.'cache');
+        $smarty->setConfigDir(HEURIST_SMARTY_TEMPLATES_DIR.'configs');    
+        
+        $smarty->registerResource("string", array("str_get_template",
+            "str_get_timestamp",
+            "str_get_secure",
+            "str_get_trusted"));
+            
     }
+}
+        
+function str_get_template ($tpl_name, &$tpl_source, &$smarty_obj)
+{
+    $tpl_source = $tpl_name;
+    $tpl_name = "from_str_test";
+    // return true on success, false to generate failure notification
+    return true;
+}
 
-    function str_get_timestamp($tpl_name, &$tpl_timestamp, &$smarty_obj)
-    {
-        // do database call here to populate $tpl_timestamp
-        // with unix epoch time value of last template modification.
-        // This is used to determine if recompile is necessary.
-        $tpl_timestamp = time(); // this example will always recompile!
-        // return true on success, false to generate failure notification
-        return true;
-    }
+function str_get_timestamp($tpl_name, &$tpl_timestamp, &$smarty_obj)
+{
+    // do database call here to populate $tpl_timestamp
+    // with unix epoch time value of last template modification.
+    // This is used to determine if recompile is necessary.
+    $tpl_timestamp = time(); // this example will always recompile!
+    // return true on success, false to generate failure notification
+    return true;
+}
 
-    function str_get_secure($tpl_name, &$smarty_obj)
-    {
-        // assume all templates are secure
-        return true;
-    }
+function str_get_secure($tpl_name, &$smarty_obj)
+{
+    // assume all templates are secure
+    return true;
+}
 
-    function str_get_trusted($tpl_name, &$smarty_obj)
-    {
-        // not used for templates
-    }
+function str_get_trusted($tpl_name, &$smarty_obj)
+{
+    // not used for templates
+}
 
 
 ?>

@@ -38,6 +38,7 @@
     require_once (dirname(__FILE__).'/../entity/dbDefDetailTypes.php');
     require_once (dirname(__FILE__).'/../entity/dbDefRecTypes.php');
     require_once (dirname(__FILE__).'/../entity/dbDefRecStructure.php');
+    require_once (dirname(__FILE__).'/../entity/dbDefCalcFunctions.php');
     require_once (dirname(__FILE__).'/../entity/dbSysArchive.php');
     require_once (dirname(__FILE__).'/../entity/dbSysBugreport.php');
     require_once (dirname(__FILE__).'/../entity/dbSysDashboard.php');

@@ -1255,7 +1255,6 @@ prof =Profile
 
                 if(!window.hWin.HAPI4.is_publish_mode && request['verify_credentials']!='ok'){
                     window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
-console.log('OKK');                        
                         request['verify_credentials'] = 'ok';
                         that.search(request, callback);
                     }, 0); 

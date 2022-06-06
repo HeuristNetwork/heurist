@@ -1154,6 +1154,8 @@ $.widget( "heurist.mapping", {
     _zoom_timeout: 0,
     //
     // zoom map to given bounds
+    // fly_params - true, false or {animate:true, duration:duration, maxZoom: maxZoom}
+    //   default duration is 5 seconds, maxZoom from options.zoomMaxInKM and native map getMaxZoom
     //
     zoomToBounds: function(bounds, fly_params){
         
@@ -1180,7 +1182,7 @@ $.widget( "heurist.mapping", {
                 //    maxZoom = this.userDefinedMinZoom;  
                 //}
 
-                if(window.hWin.HEURIST4.util.isObject(fly_params) && fly_params['maxZoom'] && fly_params['maxZoom'] > maxZoom){
+                if(window.hWin.HEURIST4.util.isObject(fly_params) && (!fly_params['maxZoom'] || fly_params['maxZoom'] > maxZoom)){
                     fly_params['maxZoom'] = maxZoom;
                 }
 

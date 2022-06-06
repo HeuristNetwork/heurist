@@ -1,5 +1,7 @@
 <?php
 /**
+* helper class - to obtain access to heurist data from smarty report
+
 The reason is our last changes in access to records. From now the query for smarty returns only list of record IDs. Consequently all relations and pointer fields contain record ID only. As a result the performance has been increased significantly.
 Thus, we need to obtain all records data in code of report template. To achieve this goal we provide $heurist object. This object has 3 public methods
 
@@ -18,12 +20,25 @@ require_once(dirname(__FILE__).'/../../hsapi/utilities/Temporal.php');
 require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 //require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
+/*
+public methods
+   constant - returns value of heurist constants
+   rty_id, dty_id, trm_id - returns local code for given concept code
+   getRecord - returns full info for given record ID in heurist smarty format 
+   getRelatedRecords
+   getLinkedRecords
+
+   getRecords - returns records ids for given query 
+   getRecordsAggr - returns aggregation values
+   
+*/
 class ReportRecord {
     
        protected $loaded_recs;
-       protected $rtStructs;
-       protected $dtStructs;
-       protected $dtTerms;
+
+       protected $rty_Names;
+       protected $dty_Types;
+       protected $dtTerms = null;
        protected $dbsTerms;
        protected $system;
     
@@ -31,16 +46,17 @@ class ReportRecord {
        global $system; 
        
        $this->system = $system;
-       $this->rtStructs = dbs_GetRectypeStructures($system, null, 2);
-       $this->dtStructs = dbs_GetDetailTypes($system);
+       $this->rty_Names = dbs_GetRectypeNames($system->get_mysqli());
+       $this->dty_Types = dbs_GetDetailTypes($system, null, 4);
+       /* loads on first request
        $this->dtTerms = dbs_GetTerms($system);
        $this->dbsTerms = new DbsTerms($system, $this->dtTerms);
-       
-       $this->loaded_recs = array();
+       */
+       $this->loaded_recs = array(); //cache
     }    
 
     //
-    // return value of heurist constants for Record and Detail types
+    // returns value of heurist constants for Record and Detail types
     //
     public function constant($name, $smarty_obj=null) {
         if(defined($name)){
@@ -235,8 +251,6 @@ class ReportRecord {
             return $res;
     }
     
-    
-
     //
     // convert record array to array to be assigned to smarty variable
     //
@@ -271,8 +285,7 @@ class ReportRecord {
                     if($key=='rec_RecTypeID'){ //additional field
                         $recTypeID = $value;
                         $record['recTypeID'] = $recTypeID;
-                        $record['recTypeName'] = $this->rtStructs['typedefs'][$value]['commonFields']
-                                                            [ $this->rtStructs['typedefs']['commonNamesToIndex']['rty_Name'] ];
+                        $record['recTypeName'] = $this->rty_Names[$recTypeID];
                     }else if ($key=='rec_Tags'){ 
                         
                         $record['rec_Tags'] = $value;
@@ -332,13 +345,9 @@ class ReportRecord {
     //
     private function getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recID){
 
-        $dtNames = $this->dtStructs['names'];
-        $rtNames = $this->rtStructs['names'];
-        $dty_fi = $this->dtStructs['typedefs']['fieldNamesToIndex'];
-        $rt_structure = null;
-        $issingle = true;
+        $issingle = false;
 
-        if($dtKey<1 || $dtNames[$dtKey]){
+        if($dtKey<1 || $this->dty_Types[$dtKey]){
 
             if($dtKey<1){
                 $dt_label = "Relationship";
@@ -347,43 +356,38 @@ class ReportRecord {
                 $dtDef = "dummy";
 
             }else{
-                $rt_structure = $this->rtStructs['typedefs'][$recTypeID]['dtFields'];
-                $rst_fi = $this->rtStructs['typedefs']['dtFieldNamesToIndex'];
-                $dtlabel_index = $rst_fi['rst_DisplayName'];
-                $dtmaxval_index = $rst_fi['rst_MaxValues'];
-                if(array_key_exists($dtKey, $rt_structure)){
-                    $dt_label = $rt_structure[$dtKey][ $dtlabel_index ];
-                    //$dtname = getVariableNameForSmarty($dt_label);
-                }
-                $dtname = "f".$dtKey; // TODO: what is this: Artem 2013-12-09 getVariableNameForSmarty($dtNames[$dtKey]);
-
-                $dtDef = @$this->dtStructs['typedefs'][$dtKey]['commonFields'];
+                $dtname = "f".$dtKey;
             }
 
 
             if(is_array($dtValue)){ //complex type - need more analize
                 $res = null;
 
-                if($dtDef){
-
-                    if($dtKey<1){
-                        $detailType =  "relmarker";
+                if($dtKey<1){
+                    $detailType =  "relmarker";
+                }else{
+                    $detailType =  $this->dty_Types[ $dtKey  ];
+                    /*
+                    //detect single or repeatable - if repeatable add as array for enum and pointers
+                    $dt_maxvalues = @$rt_structure[$dtKey][$dtmaxval_index];
+                    if($dt_maxvalues){
+                        $issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)===1);
                     }else{
-                        $detailType =  $dtDef[ $dty_fi['dty_Type']  ];
-                        //detect single or repeatable - if repeatable add as array for enum and pointers
-                        $dt_maxvalues = @$rt_structure[$dtKey][$dtmaxval_index];
-                        if($dt_maxvalues){
-                            $issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)===1);
-                        }else{
-                            $issingle = false;
-                        }
                         $issingle = false;
                     }
+                    */
+                    $issingle = false;
+                }
 
 
-                    switch ($detailType) {
+                switch ($detailType) {
                         case 'enum':
                         case 'relationtype':
+                        
+                            if($this->dtTerms==null){
+                                $this->dtTerms = dbs_GetTerms($system);
+                                $this->dbsTerms = new DbsTerms($system, $this->dtTerms);
+                            }
 
                             $domain = ($detailType=="enum")?"enum":"relation";
 
@@ -544,110 +548,6 @@ class ReportRecord {
                             }
                             break;
                             
-/* OLD WAY
-                            //@todo - parsing will depend on depth level
-                            // if there are not mentions about this record type in template (based on obtained array of variables)
-                            // we will create href link to this record
-                            // otherwise - we have to obtain this record (by ID) and add subarray
-
-                            $res = array();
-                            $rectypeID = null;
-                            $prevID = null;
-                            $order_sub = 0;
-
-                            foreach ($dtValue as $key => $value){
-
-                                if($recursion_depth<$max_allowed_depth && 
-                                        (array_key_exists('id',$value) || array_key_exists('RelatedRecID',$value)))
-                                {
-
-                                    //this is record ID
-                                    if(array_key_exists('RelatedRecID',$value)){
-                                        $recordID = $value['RelatedRecID']['rec_ID'];
-                                    }else{
-                                        $recordID = $value['id'];
-                                    }
-
-                                    
-                               
-                                    $res0 = null;
-                                    //get full record info
-                                    if(@$this->loaded_recs[$recordID]){
-                                        
-                                        //already loaded
-                                        $res0 = $this->loaded_recs[$recordID];
-
-                                        $rectypeID = $res0['recTypeID'];
-
-                                      
-                                        
-                                    }else{
-
-                                        $record = loadRecord($recordID, false, true); //from search/getSearchResults.php
-                                        
-                                        if(true){  //load linked records dynamically
-                                            $res0 = getRecordForSmarty($record, $recursion_depth+1, $order_sub); //@todo - need to
-                                            $order_sub++;
-                                    
-                                            
-                                        }
-                                        if($rectypeID==null && $res0 && @$res0['recRecTypeID']){
-                                                $rectypeID = $res0['recRecTypeID'];
-                                        }
-                                    }
-                                    
-                                    
-                                    if($res0){
-
-                                            //unset rel fields to avoid conflict if this records was already loaded
-                                            if(@$res0["recRelationType"] ) unset($res0["recRelationType"]);
-                                            if(@$res0["recRelationNotes"] ) unset($res0["recRelationNotes"]);
-                                            if(@$res0["recRelationStartDate"] ) unset($res0["recRelationStartDate"]);
-                                            if(@$res0["recRelationEndDate"] ) unset($res0["recRelationEndDate"]);
-                                            
-                                            //add relationship specific variables
-                                            if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
-                                                $res0["recRelationType"] = $value['RelTerm'];
-
-                                                if(array_key_exists('Notes', $value)){
-                                                    $res0["recRelationNotes"] = $value['Notes'];
-                                                }
-                                                if(array_key_exists('StartDate', $value)){
-                                                    $res0["recRelationStartDate"] = temporalToHumanReadableString($value['StartDate']);
-                                                }
-                                                if(array_key_exists('EndDate', $value)){
-                                                    $res0["recRelationEndDate"] = temporalToHumanReadableString($value['EndDate']);
-                                                }
-                                            }
-                                            
-                                            $this->loaded_recs[$recordID] = $res0;
-                                            //$res0["recOrder"] = count($res);
-                                            array_push($res, $res0);
-
-                                    }
-
-                                }
-                            }//for each repeated value
-
-                            if( count($res)>0 && array_key_exists($rectypeID, $rtNames))
-                            {
-    //DEBUG2 if($recID==5434)    error_log('recid '.$recID.'   '.print_r($res, true));                            
-
-                                if(@$dtname){
-
-                                    if($issingle){
-                                        $res = array( $dtname =>$res[0] );
-                                    }else{
-                                        $res = array( $dtname =>$res[0], $dtname."s" =>$res );
-                                    }
-                                }
-
-                            }else{
-                                $res = null;
-                            }
-
-                            break;
-*/                            
                         default:
                             // repeated basic detail types
                             $res = "";
@@ -665,10 +565,7 @@ class ReportRecord {
                             }
 
 
-                    }
-                    //it depends on detail type - need specific behaviour for each type
-                    //foreach ($value as $dtKey => $dtValue){}
-                }//end switch
+                    }//end switch
 
                 return $res;
             }
@@ -719,5 +616,115 @@ class ReportRecord {
     public function getRecordTags($recID){
         
     }
+    
+    //
+    // returns record ids for given query 
+    //
+    public function getRecords($query, $current_rec=null){
+        
+        $rec_ID = 0;
+        if(is_array($current_rec) && $current_rec['recID']){
+            $rec_ID = $current_rec['recID'];
+        }else{
+            $rec_ID = $current_rec;
+        }
+        
+        if($rec_ID>0){
+            //replace placeholder [ID] in query to current query id
+            if(is_array($query)){
+                $query = json_encode($query);
+            }
+            if(strpos($query,'[ID]')!==false)
+                $query = str_replace('[ID]', $rec_ID, $query);
+        }else{
+            if(strpos($query,'[ID]')!==false){
+                return null;
+            }
+        }
+        
+        $params = array('detail'=>'ids', 'q'=>$query, 'needall'=>1);
+        
+        $response = recordSearch($this->system, $params);
+        
+        if(@$response['status']==HEURIST_OK){
+            return $response['data']['records'];
+        }else{
+            return null;
+        }
+        
+    }
+    
+    //
+    // returns aggregation values
+    // $query_or_ids - heurist query or ids list 
+    // $functions - array of pairs (field_id, avg|count|sum)
+    //
+    public function getRecordsAggr($functions, $query_or_ids, $current_rec=null){
+        
+        $ids = prepareIds($query_or_ids);
+        if(count($ids)<1){
+            $ids = $this->getRecords( $query_or_ids, $current_rec );
+        }
+        
+        //calculate aggregation values
+        $select = array();
+        $from = array('Records ');
+        $result = array();
+        $idx = 0;
+        
+        if(count($functions)==2 && !is_array($functions[0])){
+            $functions = array($functions);
+        }
+        
+        foreach($functions as $idx2 =>$func){
+            
+            $dty_ID = @$func[0];
+            $func = @$func[1];
+            
+            if($func=='avg' || $func=='sum' || $func=='count'){
+                if($dty_ID>0){
+                    array_push($select, $func.'(d'.$idx.'.dtl_Value)' );
+                    array_push($from, ' JOIN recDetails d'.$idx.' ON rec_ID=d'.$idx.'.dtl_RecID AND d'.$idx.'.dtl_DetailTypeID='.$dty_ID );
+                }else{
+                    $func = 'count';
+                    $dty_ID = '*';
+                    array_push($select, 'count(rec_ID)' );
+                }
+                array_push($result, array($dty_ID, $func, 0));
+                $idx++;
+            }
+        }
+        
+        if(count($select)>0){
+            
+            if(!$ids || count($ids)<1){
+                $ids = array(0);
+            }
+            
+            //@todo make chunks if count($ids)>10000?
+            $query = 'SELECT '.implode(',',$select)
+                        .' FROM '.implode(' ',$from)
+                        .' WHERE rec_ID IN ('.implode(',',$ids).')';
+            
+            $res = mysql__select_row($this->system->get_mysqli(), $query);
+            
+            if($res!=null){
+                
+                if(count($res)==1){
+                    return $res[0];
+                }else{
+                    //returns
+                    foreach($res as $idx =>$val){
+                       $result[$idx][2] = $val;
+                    }
+                    return $result;
+                }
+            }
+
+        }
+        return null;    
+        
+    }
+    
 }
 ?>

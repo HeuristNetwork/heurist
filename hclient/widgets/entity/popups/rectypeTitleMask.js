@@ -443,11 +443,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                         $(data.node.li).css('display', 'inline-block');
                         $(data.node.span.childNodes[0]).css('display', 'none');
 
-                        if(data.node.key == 'conceptid'){
-                            $(data.node.span.childNodes[3]).text('Con-ID');
-                        }else if(data.node.key == 'internalid'){
-                            $(data.node.span.childNodes[3]).text('Int-ID');
-                        }else if(data.node.key == 'term'){
+                        if(data.node.key == 'term'){
                             $(data.node.parent.ul).css({'transform': 'scale(0.8)', 'padding': '0px', 'position': 'relative', 'left': '-12px'});
                         }
                     }

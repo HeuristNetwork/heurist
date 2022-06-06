@@ -1197,7 +1197,7 @@ if($i<5){
     //
     function mysql__update_progress($mysqli, $session_id, $is_init, $value){
         
-        if($session_id==null) return null;
+        if($session_id==null || $session_id==0) return null;
         
         if(!defined('HEURIST_SCRATCH_DIR')) return null;
         
@@ -1350,10 +1350,44 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                     }
                     
             }
+
+            if($dbVerSubSub<5){
+                
+                $query = "ALTER TABLE `recUploadedFiles` "
+                ."CHANGE COLUMN `ulf_PreferredSource` `ulf_PreferredSource` enum('local','external','iiif','iiif_image','tiled') "
+                ."NOT NULL default 'local' COMMENT 'Preferred source of file if both local file and external reference set'";
+
+                $res = $mysqli->query($query);
+                if(!$res){
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify recUploadedFiles to change ulf_PreferredSource', $mysqli->error);
+                    return false;
+                }
+                
+                if(hasTable($mysqli, 'defCalcFunctions')){
+                    $query = 'DROP TABLE IF EXISTS defCalcFunctions';
+                    $res = $mysqli->query($query);
+                }
+                
+                $query = "CREATE TABLE defCalcFunctions (
+                  cfn_ID smallint(3) unsigned NOT NULL auto_increment COMMENT 'Primary key of defCalcFunctions table',
+                  cfn_Name varchar(63) NOT NULL COMMENT 'Descriptive name for function',
+                  cfn_Domain enum('calcfieldstring','pluginphp') NOT NULL default 'calcfieldstring' COMMENT 'Domain of application of this function specification',
+                  cfn_FunctionSpecification text COMMENT 'A function or chain of functions, or some PHP plugin code',
+                  cfn_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
+                  cfn_RecTypeIDs varchar(250) default NULL COMMENT 'CSV list of Rectype IDs that participate in formula',
+                  PRIMARY KEY  (cfn_ID)
+                ) ENGINE=InnoDB COMMENT='Specifications for generating calculated fields, plugins and'";
+
+                $res = $mysqli->query($query);
+                if(!$res){
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot create defCalcFunctions table', $mysqli->error);
+                    return false;
+                }
+            }
             
             //update version
-            if($dbVerSubSub<4){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=4 WHERE 1');
+            if($dbVerSubSub<5){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=5 WHERE 1');
             }
             
             

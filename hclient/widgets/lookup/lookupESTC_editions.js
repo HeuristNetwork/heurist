@@ -258,6 +258,9 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
 
                 // defintions mapping can be found in the original version => lookupLRC18C.js
                 switch (field_name) {
+                    case 'originalID':
+                        dlg_response[dty_ID] = sels.fld(record, 'rec_ID');
+                        break;
                     case 'title':
                         dlg_response[dty_ID] = details[1] ? details[1] : '';
                         break;

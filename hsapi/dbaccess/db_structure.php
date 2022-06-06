@@ -351,15 +351,19 @@
     * @param mixed $mysqli
     * @param mixed $rty_IDs
     */
-    function dbs_GetRectypeNames($mysqli, $rty_IDs){
+    function dbs_GetRectypeNames($mysqli, $rty_IDs=null){
         
-        $rty_IDs = prepareIds($rty_IDs);
+        $query = 'select rty_ID, rty_Name from defRecTypes';
         
-        $labels = array();
-        if ($rty_IDs) {
-            $labels = mysql__select_assoc2($mysqli, 
-                'select rty_ID, rty_Name from defRecTypes where rty_ID in ('.implode(',', $rty_IDs).')');
+        if($rty_IDs){
+            $rty_IDs = prepareIds($rty_IDs);
+            
+            $labels = array();
+            if ($rty_IDs && count($rty_IDs)>0) {
+                    $query = $query.' where rty_ID in ('.implode(',', $rty_IDs).')';
+            }
         }
+        $labels = mysql__select_assoc2($mysqli, $query); 
         return $labels;
         
     }
@@ -512,7 +516,9 @@ function dbs_GetRectypeConstraint($system) {
             $query.= " if(trm_OriginatingDBID, concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))), '') as trm_ConceptID";
         }
         $query.= " from defTerms order by trm_Domain, trm_Label";
+
         $res = $mysqli->query($query);
+        
         $terms = array('termsByDomainLookup' =>  array('relation' => array(),
             'enum' => array()),
             'commonFieldNames' => array_slice(__getTermColNames(), 1),
@@ -544,6 +550,7 @@ function dbs_GetRectypeConstraint($system) {
                 'relation' => __getTermTree($system, "relation", "exact"), 
                 'enum' => __getTermTree($system, "enum", "exact"));
 
+
         $vcgGroups = array();//'groupIDToIndex' => array());
         $matches_refs = array(); 
                 
@@ -554,6 +561,7 @@ function dbs_GetRectypeConstraint($system) {
             $query = 'SELECT trm_ParentTermID, trm_ID FROM defTerms ORDER BY trm_ParentTermID';
         }
         $res = $mysqli->query($query);
+        
         $matches = array();
         if ($res){
             while ($row = $res->fetch_row()){
@@ -567,7 +575,6 @@ function dbs_GetRectypeConstraint($system) {
             $res->close();
             $terms['trm_Links'] = $matches;
         }
-        
                     
         if($dbVer==1 && $dbVerSub>2){
             //get vocabulary groups 
@@ -601,6 +608,7 @@ function dbs_GetRectypeConstraint($system) {
             }else{
                 error_log('DATABASE: '.$system->dbname().'. Error retrieving terms by reference '.$mysqli->error);
             }
+            
         }//$dbVer==1 && $dbVerSub>2
         else{
             $vcgGroups[1] = array('vcg_ID'=>1, 'vcg_Name'=>'General');        
@@ -1168,6 +1176,7 @@ function dbs_GetRectypeConstraint($system) {
     *         1 - only structure
     *         2 - full, both headers and structures
     *         3 - ids only
+    *         4 - assoc dty_ID => dty_Type  
     */
     function dbs_GetDetailTypes($system, $dettypeids=null, $imode=2){
 
@@ -1224,6 +1233,16 @@ function dbs_GetRectypeConstraint($system) {
             }
             $res = mysql__select_list($mysqli, 'defDetailTypes', 'dty_ID', $where_exp);
             return $res;
+        }else if($imode==4){ //dty_ID => dty_Type
+        
+            $query = 'SELECT dty_ID, dty_Name FROM defDetailTypes';
+            if($where_exp!=null && $where_exp != ''){
+                $query = $query.' WHERE '.$where_exp;    
+            }
+            
+            $res = mysql__select_assoc2($mysqli, $query);
+            return $res;
+        
         }else{
 
             $query = "select dtg_ID, dtg_Name, " . join(",", getDetailTypeColNames());
@@ -1366,7 +1385,7 @@ function dbs_GetRectypeConstraint($system) {
             "resource" => "Record pointer",
             "relmarker" => "Relationship marker",
             "separator" => "Heading (no data)",
-            "calculated" => "Calculated (not yet impl.)",
+            "calculated" => "Calculated",
             // Note=> the following types are no longer deinable but may be required for backward compatibility
             "relationtype" => "Relationship type",
             //"fieldsetmarker" => "Field set marker",

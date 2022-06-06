@@ -157,7 +157,7 @@ $.widget( "heurist.svs_list", {
                         
                         
         }else{
-            this.element.css({'overflow-y':'auto','font-size':'0.8em'});
+            this.element.css({'overflow-y':'auto','font-size':'0.8em'}).attr('data-fid','svs-list');
             
             this.div_header = $( "<div>" ).css({'width':'100%', 'padding-top':'1em', 'font-size':'0.9em'}) 
                                     .appendTo( this.search_tree );
@@ -355,7 +355,8 @@ $.widget( "heurist.svs_list", {
         this._refresh();
         }*/
         if(key=='onclose_search' && this.search_faceted && 
-            $.isFunction(this.search_faceted.search_faceted) && this.search_faceted.search_faceted('instance')){
+            $.isFunction(this.search_faceted.search_faceted) && this.search_faceted.search_faceted('instance'))
+        {
             this.search_faceted.search_faceted('option', 'onclose', value);
         }else if(key=='allowed_UGrpID' || key=='hide_header'){
             this._refresh();
@@ -2221,7 +2222,11 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                     if(that.options.is_h6style){
                         context_on_exit = noptions;
                     }else {
-
+                        
+                        if(this.isPublished){
+                            this.element.css('overflow-y','hidden');
+                        }
+                        
                         this.search_faceted.show();
                         this.search_tree.hide();
                     
@@ -2239,6 +2244,9 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                                     that.search_faceted.hide();
                                     that.search_tree.show();
                                     that._adjustAccordionTop();
+                                    if(that.isPublished){
+                                        that.element.css('overflow-y','auto');
+                                    }
                                 }
                             };
                         }

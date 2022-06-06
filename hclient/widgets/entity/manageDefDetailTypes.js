@@ -1219,6 +1219,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this._recreateTermsPreviewSelector();
             
     },
+
     
     //
     //

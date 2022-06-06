@@ -71,8 +71,6 @@ detectLargeInputs('COOKIE record_output', $_COOKIE);
    
     $response = array();
 
-    $system = new System();
-
     //global variable to keep defs
     $defRecTypes = null;
     $defDetailtypes = null;
@@ -85,10 +83,16 @@ detectLargeInputs('COOKIE record_output', $_COOKIE);
         $params = $_REQUEST;
     }
     
+    $is_debug = (@$params['dbg']==1);
     
-    if( ! $system->init(@$params['db']) ){
-        //get error and response
-        $system->error_exit_api(); //exit from script
+    if(!isset($system) || $system==null){
+    
+        $system = new System();
+
+        if( ! $system->init(@$params['db']) ){
+            //get error and response
+            $system->error_exit_api(); //exit from script
+        }
     }
 
     set_time_limit(0); //no limit
@@ -220,7 +224,6 @@ detectLargeInputs('COOKIE record_output', $_COOKIE);
                 exit();
             }
         }
-        
         
         $response = recordSearch($system, $search_params);
     }

@@ -276,6 +276,7 @@ $.widget( "heurist.search_faceted", {
 
         
         this.facets_list_container = $( "<div>" )
+        .attr('data-fid','facets_list_container')
         .css({"top":((this.div_title)?'6em':'2em'),"bottom":0,"position":"absolute"}) //was top 3.6
         .appendTo( this.element );
         
@@ -287,7 +288,7 @@ $.widget( "heurist.search_faceted", {
 
         this.facets_list = $( "<div>" )
         .addClass('svs-list-container')
-        .css({"overflow-y":"auto","overflow-x":"hidden","height":"100%"}) //"font-size":"0.9em",
+        .css({"overflow-x":"hidden","overflow-y":"auto","height":"100%"}) //"font-size":"0.9em", 
         .appendTo( this.facets_list_container );
 
         //was this.document

@@ -41,7 +41,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         
         for (var key in $Db.baseFieldType)
         if(!window.hWin.HEURIST4.util.isempty($Db.baseFieldType[key])){
-            if(key!='calculated' && (filter_types.length==0 || filter_types.indexOf(key)>=0))
+            if( key!='calculated' &&  (filter_types.length==0 || filter_types.indexOf(key)>=0))
                 vals.push({key:key,title:$Db.baseFieldType[key]});
         }
 

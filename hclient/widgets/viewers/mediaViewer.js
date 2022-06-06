@@ -251,7 +251,7 @@ $.widget( "heurist.mediaViewer", {
                 
                 if(this.options.showLink){
                     $('<br>').appendTo(this.mediacontent);
-                    if(external_url || filename === '_iiif' || filename === '_remote') //filename === '_iiif' || filename === '_remote' || filename.indexOf('_tiled')===0 || 
+                    if(external_url || filename === '_iiif' || filename === '_remote')  //@todo check preferred source
                     {
                         if(!external_url) external_url = fileURL; 
                         

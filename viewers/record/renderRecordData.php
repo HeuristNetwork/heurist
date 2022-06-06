@@ -1199,7 +1199,7 @@ if(false){  //this query fails for maria db
                     $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
                     $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
                     $mimeType = $fileinfo['fxm_MimeType'];  // fxm_MimeType
-                    $params = $fileinfo['ulf_Parameters'];  // not used anymore
+                    $sourceType = $fileinfo['ulf_PreferredSource'];  
                     $originalFileName = $fileinfo['ulf_OrigFileName'];
                     $fileSize = $fileinfo['ulf_FileSizeKB'];
                     $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
@@ -1215,8 +1215,9 @@ if(false){  //this query fails for maria db
                         //'url' => $file_URL, //download
                         'external_url' => $external_url,      //external url
                         //'mediaType'=>$filedata['mediaType'], 
+                        'params'=>null, 
                         'orig_name'=>$originalFileName,
-                        'params'=>$params,
+                        'sourceType'=>$sourceType,
                         'mimeType'=>$mimeType, 
                         'file_size'=>$fileSize,
                         'thumb' => $file_thumbURL,
@@ -1225,13 +1226,7 @@ if(false){  //this query fails for maria db
                         'linked' => ($bd['name']=='Linked media')
                     ));
                     
-                    /*
-                    if($originalFileName==='_iiif'){
-                        $originalFileName = 'IIIF Manifest';
-                    }else if($originalFileName==='_iiif_image'){
-                        $originalFileName = 'IIIF Image';
-                    }*/
-                    
+                     
                     $bd['val'] = '<a target="_surf" href="'.htmlspecialchars($external_url?$external_url:$file_URL).'">';
 
                     if($file_description!=null && $file_description!=''){
