@@ -95,6 +95,11 @@ if($isWebPage){ //set in websiteRecord.php
     </nav>
     <div id="main-content-container" class="container">
         <header class="bor-header">
+            <a href="javascript:window.location.reload(true)" class="bor-logo">
+                <h1 class="bor-header-title sr-only">Beyond 1939</h1>
+                <div class="bor-header-sub-title sr-only">The University of Sydney and World War II</div>
+            </a>
+            <div class="col-lg-12 bor-search-body">Searchbox Placeholder</div>
         </header>
         <div id="main-content"></div>
         <footer class="bor-footer">
