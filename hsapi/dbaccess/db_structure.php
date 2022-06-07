@@ -1195,7 +1195,7 @@ function dbs_GetRectypeConstraint($system) {
         */
 
         $dtStructs = array();
-
+        
         if($imode==0 || $imode==2){
             $dtG = getDetailTypeGroups($mysqli);
             $dtStructs['groups'] = $dtG;
@@ -1235,7 +1235,7 @@ function dbs_GetRectypeConstraint($system) {
             return $res;
         }else if($imode==4){ //dty_ID => dty_Type
         
-            $query = 'SELECT dty_ID, dty_Name FROM defDetailTypes';
+            $query = 'SELECT dty_ID, dty_Type FROM defDetailTypes';
             if($where_exp!=null && $where_exp != ''){
                 $query = $query.' WHERE '.$where_exp;    
             }

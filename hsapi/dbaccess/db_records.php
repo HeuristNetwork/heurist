@@ -44,8 +44,7 @@ require_once (dirname(__FILE__).'/../entity/dbDefRecTypes.php');
 require_once (dirname(__FILE__).'/../utilities/titleMask.php');
 require_once (dirname(__FILE__).'/../utilities/utils_image.php');
 require_once (dirname(__FILE__).'/../../records/index/elasticSearch.php');
-require_once (dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
-//require_once (dirname(__FILE__).'/../../viewers/smarty/showReps.php');
+//require_once (dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
 
 require_once(dirname(__FILE__).'/../../viewers/smarty/smartyInit.php');
 require_once(dirname(__FILE__).'/../../viewers/smarty/reportRecord.php');
@@ -2256,7 +2255,6 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
     if($system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }*/
     if($system->defineConstant('DT_CMS_EXTFILES')){ array_push($not_purify, DT_CMS_EXTFILES); }
     // $purifier = getHTMLPurifier();
-
     //2. verify (value, termid, file id, resource id) and prepare details (geo field). verify required field presence
 
     $insertValues = array();

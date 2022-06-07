@@ -301,7 +301,7 @@ function executeSmartyTemplate($system, $params){
     $smarty->assignByRef('heurist', $heuristRec);
     
     $smarty->assign('results', $results); //assign record ids
-    $smarty->assign('template_file', $template_file);
+    
 
     //$smarty->getvar()
 
@@ -342,7 +342,7 @@ function executeSmartyTemplate($system, $params){
         fclose ($file);
 
         //$smarty->display('string:'.$template_body);
-        if($publishmode=4){ //output into variable - for calculation fields
+        if($publishmode==4){ //output into variable - for calculation fields
             //$smarty->registerFilter('output', 'smarty_output_filter_strip_js');
             try{
                 $output = $smarty->fetch($template_file);
@@ -386,6 +386,8 @@ function executeSmartyTemplate($system, $params){
     }
     $execution_counter = -1;
     $execution_total_counter = count($results);
+    
+    $smarty->assign('template_file', $template_file);    
     try{
         if($outputfile==null && $publishmode==1 && !$is_included){
             header("Content-type: text/html;charset=UTF-8");

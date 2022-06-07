@@ -2041,7 +2041,6 @@ $.widget( "heurist.editing_input", {
                     if(this.configMode.popup_options){
                          popup_options2  = $.extend(popup_options, this.configMode.popup_options);
                     }
-console.log(popup_options2);                    
                     //init dialog to select related entities
                     window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options2);
             }

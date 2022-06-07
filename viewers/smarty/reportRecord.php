@@ -385,8 +385,8 @@ class ReportRecord {
                         case 'relationtype':
                         
                             if($this->dtTerms==null){
-                                $this->dtTerms = dbs_GetTerms($system);
-                                $this->dbsTerms = new DbsTerms($system, $this->dtTerms);
+                                $this->dtTerms = dbs_GetTerms($this->system);
+                                $this->dbsTerms = new DbsTerms($this->$system, $this->dtTerms);
                             }
 
                             $domain = ($detailType=="enum")?"enum":"relation";

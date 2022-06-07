@@ -1400,7 +1400,7 @@ this_id       : "term"
                                 _varname = '';
                             }else if(key.indexOf('rec_')!==0)
                             {
-                                if(key=='term' || key=='code' || key=='conceptid' || key=='internalid'){ //terms
+                                if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid'){ //terms
                                     if( inloop!=1 ){
                                         _varname = ('.'+key);
                                     }
