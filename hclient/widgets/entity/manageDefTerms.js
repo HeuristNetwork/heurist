@@ -931,7 +931,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         var recID = recordset.fld(record, 'trm_ID');
 
         var sBold = '';
-        var sWidth = '212';
+        var sWidth = '250';
         var sPad = '';
         var sRef = '';
         var sHint = '';
@@ -944,11 +944,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         if(this.options.auxilary=='vocabulary'){
             sBold = 'font-weight:bold;';
             if(recordset.fld(record, 'trm_Domain')=='relation'){
-                sWidth = '167';
+                sWidth = '205';
             }
             sWidth = 'max-width:'+sWidth+'px;min-width:'+sWidth+'px;';
 
-            recTitle = '<div class="item truncate" style="'+sWidth+sBold+'">'
+            recTitle = '<div class="item truncate" style="'+sWidth+sBold+'" title="'+sLabel+'">'
             + sLabel+'</div>'; //recID+':'+
 
             html = '<div class="recordDiv rt_draggable white-borderless" style="padding-right:0" recid="'+recID+'">'
@@ -1107,6 +1107,42 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         return html;
 
+    },
+
+    //
+    //
+    //
+    _onPageRender: function(){
+
+        if(this.options.edit_mode == 'popup'){
+
+            var record_divs = this.recordList.find('.recordDiv');
+            if(this.options.auxilary=='vocabulary'){ // add mouseenter/mouseleave
+                
+                this._on(record_divs, {
+                    'mouseenter': function(event){ // reduce size
+
+                        var trm_id = $(event.target).attr('recid');
+                        var widths = ($Db.trm(trm_id, 'trm_Domain')=='relation' ? '178' : '225') + 'px';
+
+                        $(event.target).find('.item.truncate').css({
+                            'max-width': widths,
+                            'min-width': widths
+                        });
+                    },
+                    'mouseleave': function(event){ // increase size
+
+                        var trm_id = $(event.target).attr('recid');
+                        var widths = ($Db.trm(trm_id, 'trm_Domain')=='relation' ? '205' : '250') + 'px';
+
+                        $(event.target).find('.item.truncate').css({
+                            'max-width': widths,
+                            'min-width': widths
+                        });
+                    }
+                });
+            }
+        }
     },
 
     //
