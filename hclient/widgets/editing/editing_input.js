@@ -3219,6 +3219,31 @@ console.log('onpaste');
                     }});
         }
 
+        // Semantic url links, separated by semi-colons, for RecTypes, Vocab+Terms, DetailTypes
+        if(this.options.dtID && (typeof this.options.dtID === 'string' || this.options.dtID instanceof String)
+            && this.options.dtID.indexOf('ReferenceURL') !== -1){
+
+            $btn_extlink = $( '<span>', {title: 'Open URL(s) in new window'})
+                .addClass('smallicon ui-icon ui-icon-extlink')
+                .appendTo( $inputdiv );
+
+            that._on($btn_extlink, { 
+                click: function(){
+                    var cur_val = $input.val();
+                    if(!window.hWin.HEURIST4.util.isempty(cur_val)){ // check for value
+                        var urls = cur_val.split(';');
+                        urls = urls.map((url, idx) => { 
+                            if(!window.hWin.HEURIST4.util.isempty(url)){
+                                url = url.trim();
+                                window.open(url);
+                                return url;
+                            }
+                        });
+                    }
+                } 
+            });
+        }
+
         this.inputs.push($input);
         
         var dwidth = this.f('rst_DisplayWidth');
