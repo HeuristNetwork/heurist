@@ -194,7 +194,11 @@ function recordSearchFacets($system, $params){
         if($fieldid=="rectype" || $fieldid=="typeid"){
             $select_field = "r0.rec_RecTypeID";
         }else if($fieldid=='typename'){
-            //@todo!!!!!
+
+            $select_field = "rty_Name";
+            $detail_link   = ", defRecTypes ";
+            $details_where = " AND (rty_ID = r0.rec_RecTypeID) ";
+            
         }else if($fieldid=='recTitle' || $fieldid=='title'){
             $select_field = "r0.rec_Title";
             $dt_type = "freetext";
