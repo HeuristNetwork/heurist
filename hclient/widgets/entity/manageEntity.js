@@ -21,7 +21,7 @@
 // METHODS
 //        
 //_initControls - add panels and init ui elements
-//_onActionListener - central listener for action events
+//_onActionListener - central listener for action events (it assigned for custom button created with _defineActionButton or buttons in resultList)
 //_defineActionButton
 //_rendererActionButton  - renderer buttons on item for resultlist
 //_recordListHeaderRenderer  - renderer of header for resultlist
@@ -528,7 +528,7 @@ $.widget( "heurist.manageEntity", {
     pre_action_timer:null,
     
     _onActionListener: function(event, action){
-        
+
         if(window.hWin.HAPI4.is_callserver_in_progress()) {
             return;
         }
@@ -554,6 +554,7 @@ $.widget( "heurist.manageEntity", {
              }
              this.pre_action = {action:action, recID:recID};
              this.pre_action_timer = setTimeout(function(){that.pre_action=null},500);
+             
              
              if(action=='add'){
                     this.addEditRecord(-1);

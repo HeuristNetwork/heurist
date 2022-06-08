@@ -70,8 +70,9 @@ $gparams = null;
 $loaded_recs = array();
 $max_allowed_depth = 2;
 
-//'publish' - 0 vsn 3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only)
-//    3 - redirect the existing report (use already publshed output), if it does not exist publish=1
+//'publish' - 0  Heurist User Interface (smarty tab),  1 - publish,  2 - no browser output (save into file only)
+//    3 - redirect to the existing report (use already publshed output), if it does not exist, recreate it (publish=1)
+//    4 - execute smarty from string (for calculated fields and title mask). It is nearly same as 0
 $publishmode = 0;
 
 $execution_counter = 0;
@@ -184,10 +185,9 @@ function executeSmartyTemplate($system, $params){
             }
         }
 
-    }else { //search with h4 search engine and got list of ids
+    }else { //search record ids with query params
 
         $params['detail'] = 'ids'; // return ids only
-        //$params['vo']     = 'h3';  // in h3 format
         $qresult = recordSearch($system, $params); //see db_recsearch.php
 
         if(@$qresult['status']==HEURIST_OK){
@@ -202,7 +202,7 @@ function executeSmartyTemplate($system, $params){
     if( !$qresult ||  !array_key_exists('records', $qresult) || !(intval(@$qresult['reccount'])>0) ){
     
         if($publishmode==4){
-            return $emptysetmessage?$emptysetmessage:'';
+            echo $emptysetmessage?$emptysetmessage:'';
         }else{
             
             if ($emptysetmessage) {
@@ -279,8 +279,20 @@ function executeSmartyTemplate($system, $params){
     }
     //end pre-parsing of template
 
+    
+    if(!isset($smarty) || $smarty==null){
+        initSmarty(); //global function from smartyInit.php
+        if(!isset($smarty) || $smarty==null){
+            smarty_error_output($system, 'Cannot init Smarty report engine');
+            exit();
+        }
+    }
+
+    
     if($publishmode==0 && $session_id!=null){
         mysql__update_progress($mysqli, $session_id, true, '0,0');
+    }else{
+        $session_id = null;
     }
 
     //convert to array that will assigned to smarty variable
@@ -289,14 +301,6 @@ function executeSmartyTemplate($system, $params){
 
     //we have access to 2 methods getRecord and getRelatedRecords
     $heuristRec = new ReportRecord();
-    
-      if(!isset($smarty) || $smarty==null){
-          initSmarty(); //global function from smartyInit.php
-          if(!isset($smarty) || $smarty==null){
-               smarty_error_output($system, 'Cannot init Smarty report engine');
-               exit();
-          }
-      }
     
     $smarty->assignByRef('heurist', $heuristRec);
     
@@ -342,16 +346,19 @@ function executeSmartyTemplate($system, $params){
         fclose ($file);
 
         //$smarty->display('string:'.$template_body);
-        if($publishmode==4){ //output into variable - for calculation fields
+        if($publishmode==4){ //test for calculation fields
+            $need_output_filter = false;
+            $smarty->assign('r', $heuristRec->getRecord($results[0]));
             //$smarty->registerFilter('output', 'smarty_output_filter_strip_js');
             try{
                 $output = $smarty->fetch($template_file);
-
+                
             } catch (Exception $e) {
                 $output = 'Exception on calc field execution: '.$e->getMessage();
             }
             unlink($file);
-            return $output;
+            echo $output;
+            exit();
         }
     }
     else
@@ -381,7 +388,7 @@ function executeSmartyTemplate($system, $params){
     //$smarty->registerFilter('pre','smarty_pre_filter'); //before compilation: remove script tags
     $smarty->registerFilter('post','smarty_post_filter'); //after compilation: to add progress support
 
-    if($publishmode==0 && $session_id!=null){
+    if($session_id>0){
         mysql__update_progress($mysqli, $session_id, true, '0,'.count($results));
     }
     $execution_counter = -1;
@@ -405,7 +412,7 @@ function executeSmartyTemplate($system, $params){
         //echo 'Exception on execution: ', $e->getMessage(), "\n";
     }
 
-    if($publishmode==0 && $session_id!=null){
+    if($session_id>0){
         mysql__update_progress($mysqli, $session_id, false, 'REMOVE');
     }
     $mysqli->close();        
@@ -1056,7 +1063,7 @@ function smarty_error_output($system, $error_msg){
         $error_msg = add_javascript_wrap4($error_msg, null);
     }
 
-    if($publishmode>0 && $outputfile!=null){ //save empty output into file
+    if($publishmode>0 && $publishmode<4 && $outputfile!=null){ //save empty output into file
         save_report_output2($error_msg."<div style=\"padding:20px;font-size:110%\">Currently there are no results</div>");
     }else{
         echo $error_msg;    

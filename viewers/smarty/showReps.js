@@ -32,7 +32,7 @@
 * @version 2011.0509
 */
 
-function ShowReps() {
+function ShowReps( is_snippet_editor ) {
 
     var _className = "ShowReps",
     _originalFileName,
@@ -48,7 +48,9 @@ function ShowReps() {
     _currentRecordset = null,
     _currentQuery = null,
 
-    _add_variable_dlg = null;
+    _add_variable_dlg = null,
+    
+    _is_snippet_editor = (is_snippet_editor===true);
     
     
     var top_repcontainer = '36px';
@@ -125,15 +127,23 @@ function ShowReps() {
     function _updateReps(context) {
 
         window.hWin.HEURIST4.msg.sendCoverallToBack();
-
-        var iframe = document.getElementById("rep_container_frame");
-        iframe.contentWindow.document.open();
-        iframe.contentWindow.document.write(context);
-        iframe.contentWindow.document.close();
         
-        //document.getElementById('rep_container').innerHTML = context;
+        if(_is_snippet_editor){
+            
+            document.getElementById('snippet_output').innerHTML = context;
+            
+        }else{
 
-        _needSelection = (context && context.indexOf("Select records to see template output")>0);
+            var iframe = document.getElementById("rep_container_frame");
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(context);
+            iframe.contentWindow.document.close();
+            
+            //document.getElementById('rep_container').innerHTML = context;
+
+            _needSelection = (context && context.indexOf("Select records to see template output")>0);
+            
+        }
     }
 
 
@@ -154,8 +164,10 @@ function ShowReps() {
             document.getElementById('cbUseAllRecords1').value = _sQueryMode;
         }
 
-        _reload_templates();
-
+        if(!_is_snippet_editor){
+            _reload_templates();    
+        }
+        
 
         window.onbeforeunload = _onbeforeunload;
         
@@ -379,6 +391,7 @@ function ShowReps() {
         if(_iseditor && _keepTemplateValue && _keepTemplateValue!=codeEditor.getValue()){
             return "Template was changed. Are you sure you wish to exit and lose all modifications?!!!";
         }
+        _hideProgress();
     }
 
 
@@ -586,7 +599,44 @@ function ShowReps() {
         }
     }
 
+    /**
+    * Save formula for calculated field
+    * 
+    * @param mode - 2 save and close, 0 - just close
+    * @param unconditionally
+    * 
+    * @returns {Object}
+    */
+    function _operationSnippetEditor(mode) {
 
+        if(mode===0){ //for close
+
+            if(_keepTemplateValue!=codeEditor.getValue()){ 
+
+                var $dlgm = window.hWin.HEURIST4.msg.showMsgDlg(
+                    'Formula was changed. Are you sure you wish to exit and lose all modifications?',
+                    {'Save': function() {
+                        _operationSnippetEditor(2);
+                        $dlgm.dialog( 'close' );
+                        },
+                        'Discard': function() {  //exit without save
+                            window.close();
+                            $dlgm.dialog( 'close' );
+                        },
+                        'Cancel':function() {
+                            $dlgm.dialog( 'close' );
+                        }
+                    },
+                    'Warning');
+            }else{
+                window.close();
+            }
+
+        }else if(mode==2){
+            window.close( codeEditor.getValue() );
+        }
+        
+    }
 
     /**
     * Close editor
@@ -594,6 +644,11 @@ function ShowReps() {
     */
     function _operationEditor(mode, unconditionally) {
 
+        if(_is_snippet_editor){
+            _operationSnippetEditor(mode);
+            return;
+        }
+        
         if(mode>0){
 
             var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
@@ -670,7 +725,7 @@ function ShowReps() {
                         }else if(template_file!=null){
                             _originalFileName = template_file;//_onGetTemplate(obj);
 
-                            window.hWin.HEURIST4.msg.showMsgFlash("Template '"+template_file+"' has been saved", 1000);
+                            window.hWin.HEURIST4.msg.showMsgFlash('Template "'+template_file+'" has been saved', 1000);
                             
                         }
 
@@ -751,31 +806,45 @@ function ShowReps() {
         if(template_body && template_body.length>10){
 
 
+            window.hWin.HEURIST4.msg.bringCoverallToFront($(document).find('body'));
+            
             var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php";
 
             var request = {};
 
-            if(_currentRecordset!=null){
-                //if(_currentRecordset['recIDs']) _currentRecordset = _currentRecordset['recIDs'];
-                request['recordset'] = JSON.stringify(_currentRecordset);
-            }else{
-                request = window.hWin.HEURIST4.util.cloneJSON(_currentQuery);
-            }
-
-            if(debug_limit>0){
-                request['limit'] = debug_limit;
-            }
 
             request['replevel'] = replevel;
             request['template_body'] = template_body;
             
-            window.hWin.HEURIST4.msg.bringCoverallToFront($(document).find('body'));
+            if(_is_snippet_editor){
+                var rec_ID = $('#listRecords').val();
+                if(!(rec_ID>0)){
+                    window.hWin.HEURIST4.msg.showMsgErr('Select record to test on');
+                    return;
+                }
+                request['publish'] = 4;
+                request['recordset'] = {records:[$('#listRecords').val()], reccount:1};
+                
+            }else{
+                //_showProgress();    
+                if(_currentRecordset!=null){
+                    //if(_currentRecordset['recIDs']) _currentRecordset = _currentRecordset['recIDs'];
+                    request['recordset'] = JSON.stringify(_currentRecordset);
+                }else{
+                    request = window.hWin.HEURIST4.util.cloneJSON(_currentQuery);
+                }
+
+                if(debug_limit>0){
+                    request['limit'] = debug_limit;
+                }
+                
+            }
             
-            _showProgress();
+            _hideProgress();
 
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
                 function(context) {
-                    _hideProgress();
+                    //_hideProgress();
                     _updateReps(context);
                 }, 'auto');
 
@@ -805,7 +874,94 @@ function ShowReps() {
             ele.click();
         }
     }
+
+    /**
+    * Special layour for edit small smarty template for calculated fields and record title masks (in future)
+    * 
+    */
+    function _initSnippetEditor(template_body, rty_IDs)
+    {
+        _is_snippet_editor = true;
+        
+        _initEditorMode('', template_body);
+        
+        _keepTemplateValue = template_body;
+        
+ 
+        var mylayout = $('#layout_container').layout();
+        mylayout.sizePane('north', '100%');
+        mylayout.hide('center');    
+        $('.ui-layout-resizer').hide();
+        
+        $('#editorcontainer').css({background:'none'});
+        $('.actionButtons').css({'right':0, left:'280px', top:'50%',padding:'10px'});
+        $('#templateTree').css({'bottom':0, top:'0px'});
+        $('#templateCode').css({'bottom':'50%', margin:'10px'});
+        $('#edTemplateName').parent().hide();
+        $('#selInsertPattern').parent().hide();
+        $('#btnSaveAs').hide();
+        $('#btnSave').attr('title','');
+        
+        $('<label>'+window.hWin.HR('Record to test')+': </label>').insertBefore($('#divDebugReportLimit'));
+        $('<select id="listRecords">').insertBefore($('#divDebugReportLimit'));
+        $('#divDebugReportLimit').hide();
+
+        $('<div id="snippet_output">')
+            .css({border: '1px solid blue',height:'230px',widht:'100%','margin-top':'10px',overflow:'auto',padding:'10px'})
+            .appendTo($('.actionButtons'));
+        
+        var rtSelect = $('#rectype_selector').css('max-width','150px');
+        var $rec_select = window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), rty_IDs, 
+                (rty_IDs && rty_IDs.length==1)?null:window.hWin.HR('select record type'), true );
+        if(rty_IDs && rty_IDs.length==1){
+            _loadRecordTypeTreeView();
+            _loadTestRecords()
+        }else{
+            $rec_select.change(function(event){
+                _loadRecordTypeTreeView();
+                _loadTestRecords();
+            }); 
+        }
+        
+        
+        //_doExecuteFromEditor
+    }
     
+    //
+    // Load limited list of records of giveb record types (to test template)
+    //
+    function _loadTestRecords()
+    {
+        var rty_ID = $('#rectype_selector').val();
+        //load list of records for testing 
+        if(rty_ID>0){
+        var request = {q: 't:'+rty_ID, w: 'all', detail:'header', limit:100 };
+         
+            window.hWin.HAPI4.RecordSearch.doSearchWithCallback( request, function( recordset )
+            {
+                if(recordset!=null){
+                    
+                    // it returns several record of given record type to apply tests
+                    //fill list of records
+                    var sel = $('#listRecords')[0];
+                    //clear selection list
+                    while (sel.length>1){
+                        sel.remove(1);
+                    }
+
+                    var recs = recordset.getRecords();
+                    for(var rec_ID in recs) 
+                    if(rec_ID>0){
+                        window.hWin.HEURIST4.ui.addoption(sel, rec_ID, 
+                            window.hWin.HEURIST4.util.stripTags(recordset.fld(recs[rec_ID], 'rec_Title')));
+                    }
+
+                    sel.selectedIndex = 0;
+                    
+                }
+            });
+        }
+    }
     
     /**
     * change visibility
@@ -859,6 +1015,7 @@ function ShowReps() {
             mylayout.hide('north');    
         }
         
+        if(_is_snippet_editor) return;
         
         
         //reload templates list
@@ -870,24 +1027,26 @@ function ShowReps() {
         var container_ele = $(window.hWin.document).find('div[layout_id="FAP2"]');
         
         //resize global cardinal layout
-        if(iseditor){
-            _kept_width = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'], container_ele );
-            window.hWin.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
-            
-            //maximize width
-            window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', 
-                    ['east', (top?top.innerWidth:window.innerWidth)-150 ], container_ele);  
-            _doExecuteFromEditor();
-        }else if(isviewer){
-            if(_kept_width>0)
-                window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', _kept_width], container_ele);  //restore width
+        if( window.hWin.HAPI4.LayoutMgr && window.hWin.HAPI4.LayoutMgr.cardinalPanel){
+            if(iseditor){
+                _kept_width = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'], container_ele );
+                window.hWin.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
                 
-            window.hWin.HAPI4.LayoutMgr.cardinalPanel('open', 'west');
-            
-            var sel = document.getElementById('selTemplates');
-            if(sel.selectedIndex>=0){
-                var template_file = sel.options[sel.selectedIndex].value;
-                _reload(template_file);
+                //maximize width
+                window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', 
+                        ['east', (top?top.innerWidth:window.innerWidth)-150 ], container_ele);  
+                _doExecuteFromEditor();
+            }else if(isviewer){
+                if(_kept_width>0)
+                    window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', _kept_width], container_ele);  //restore width
+                    
+                window.hWin.HAPI4.LayoutMgr.cardinalPanel('open', 'west');
+                
+                var sel = document.getElementById('selTemplates');
+                if(sel.selectedIndex>=0){
+                    var template_file = sel.options[sel.selectedIndex].value;
+                    _reload(template_file);
+                }
             }
         }
     }
@@ -919,6 +1078,10 @@ function ShowReps() {
 
         treedata[0].expanded = true; //first expanded
 
+        if(_is_snippet_editor){
+            //hide root - record type title
+            treedata = treedata[0];
+        }
 
         treediv.fancytree({
             checkbox: false,
@@ -956,8 +1119,12 @@ function ShowReps() {
                 if(ele.is('a')){
                     
                     if(ele.text()=='insert'){
-                        //insert-popup
-                        _showInsertPopup2( data.node, ele );
+                        if(_is_snippet_editor){
+                            _insertSelectedVars2(data.node, 0, false, 0);
+                        }else{
+                            //insert-popup
+                            _showInsertPopup2( data.node, ele );
+                        }
                     }else{
                         _closeInsertPopup();
                         
@@ -1952,6 +2119,10 @@ this_id       : "term"
 
         initEditorMode: function(template_file, template_body){
             _initEditorMode(template_file, template_body);
+        },
+        
+        initSnippetEditor: function(template_body, rty_IDs){
+            _initSnippetEditor(template_body, rty_IDs);    
         },
 
         operationEditor:  function (action){

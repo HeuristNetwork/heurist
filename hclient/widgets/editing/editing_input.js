@@ -89,7 +89,7 @@ $.widget( "heurist.editing_input", {
             }
 
         }
-
+        
         if(this.options.dtFields==null){ //field description is not defined
             return;
         }
@@ -3244,6 +3244,40 @@ console.log('onpaste');
             });
         }
 
+        //for calculated field
+        if(window.hWin.HAPI4.is_admin() && this.options.dtFields && this.options.dtFields['rst_CalcFunctionID']>0){            
+            
+            var $btn_calcfield = $( '<span>', {title: 'Edit calculated field formula'})
+            .addClass('smallicon ui-icon ui-icon-calculator-b btn_add_term')
+            .css({'margin-top':'2px',cursor:'pointer'})
+            .appendTo( $inputdiv );
+            
+            var that = this;
+            
+            this._on( $btn_calcfield,{ click: function(){ 
+                window.hWin.HEURIST4.dbs.editCalculatedField( this.options.dtFields['rst_CalcFunctionID'],
+                    function(){
+                        //refresh value
+                        if(!(that.options.recID>0)) return;
+
+                        var request = request = {q: 'ids:'+that.options.recID, w: 'all', detail:[that.options.dtID] };
+
+                        window.hWin.HAPI4.RecordSearch.doSearchWithCallback( request, function( recordset )
+                            {
+                                if ( recordset!=null ){
+                                    var val = recordset.fld(recordset.getFirstRecord(), that.options.dtID);
+                                    that.setValue(val);
+                                    that.options.values = that.getValues();
+                                }
+                        });
+                        
+                        
+                    } );
+            }});
+                            
+        }
+        
+        
         this.inputs.push($input);
         
         var dwidth = this.f('rst_DisplayWidth');

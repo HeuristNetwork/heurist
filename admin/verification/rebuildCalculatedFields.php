@@ -122,15 +122,15 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
                     $('#q_blanks').hide();
                 }
 
+                var sErrors = '';
                 if(response.data['errors']){
                     
-                    var sErrors = '';
                     for(var key in response.data['errors']){
                         sErrors = sErrors + key+'  '+response.data['errors'][key]+'<br>';
                     }
                     $('#formulae_errors_info').html(sErrors);
-                    
-                }else{
+                }
+                if(!sErrors){
                     $('#formulae_errors').hide();
                 }
                 

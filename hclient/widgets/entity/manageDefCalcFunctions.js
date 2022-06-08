@@ -225,11 +225,19 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         // add edit/remove action buttons
         if(true || (this.options.select_mode=='manager' && this.options.edit_mode=='popup')){
             html = html 
-                + '<div class="logged-in-only" style="width:60px;display: inline-block">'
+                + '<div class="logged-in-only" style="width:90px;display: inline-block">'
                 + '<div title="Click to edit calculation" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit"  style="height:16px">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                 + '</div>'
-                +'<div title="Click to delete calculation" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete"  style="height:16px">'
+/*                
+                + this._defineActionButton({key:'edit-formula',label:'Formula', title:'', icon:'ui-icon-calculator-b'}, 
+                                null,'icon_text');
+*/                
+                + '<div title="Click to edit calculation formula" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit-formula"  style="height:16px">'
+                +     '<span class="ui-button-icon-primary ui-icon ui-icon-calculator-b"></span><span class="ui-button-text"></span>'
+                + '</div>'
+                
+                +'<div title="Click to delete calculation" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete"  style="height:16px;padding-left:20px">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
                 + '</div></div>';
         }
@@ -239,6 +247,21 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
 
         return html;
         
-    }    
+    },
+    
+    //
+    // extend for edit formula
+    //
+    _onActionListener: function(event, action){
+
+        if(action && action.action=='edit-formula'){
+
+            window.hWin.HEURIST4.dbs.editCalculatedField(action.recID)
+     
+        }else{
+            this._super( event, action );
+        }
+
+    },
     
 });
