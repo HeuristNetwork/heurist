@@ -223,7 +223,7 @@ function hMultiSelect(){
 			// Get all Base Fields belonging to this group
 			$Db.dty().each2(function(dID, field){
 
-			    if(field['dty_DetailTypeGroupID'] == gID){
+			    if(field['dty_DetailTypeGroupID'] == gID && $Db.getConceptID('dty', dID) != '2-247'){
 			    	var type = getTypeName(field['dty_Type']);
 
 			    	arr.push([dID, field['dty_Name'], type, field['dty_HelpText']]);
@@ -348,7 +348,7 @@ function hMultiSelect(){
 					// Check if there is a customised instance with the search string
 					var in_other_array = isInArray(searched, fieldnames[name]);
 
-					if(name.toLowerCase().indexOf(searched) >= 0 || in_other_array) {
+					if((name.toLowerCase().indexOf(searched) >= 0 || in_other_array) && $Db.getConceptID('dty', id) != '2-247') {
 
 						var main_ele;
 
@@ -499,8 +499,6 @@ function hMultiSelect(){
 	}
 
 	function _setupElements() {
-
-		$('#field-search').hide();
 
 		$('.tabs').tabs({
 			beforeActivate: function(e, ui){
