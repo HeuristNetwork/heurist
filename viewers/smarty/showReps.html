@@ -339,7 +339,7 @@ ul#rep_list.menu li ul {
                 <div id="progressbar">
                     <div class="progress-label">Loading data...</div>
                 </div>
-                <div id="progres    s_stop" style="float:right;">Stop</div>
+                <div id="progress_stop" style="float:right;">Stop</div>
             </div>
             <div id="toolbardiv" style="width:100%;height:38px;padding:6px">
                 <div style="padding:5px;display:none;">
@@ -388,8 +388,8 @@ ul#rep_list.menu li ul {
             <h3>Template <span id="edTemplateName"></span></h3>
 
             <div style="position:absolute;top:4px;right:20px;">
-                <button onClick="doEditor(2)" title="Save, Close and Execute the updated template">Save</button>
-                <button onClick="doEditor(1)">Save As</button>
+                <button onClick="doEditor(2)" id="btnSave" title="Save, Close and Execute the updated template">Save</button>
+                <button onClick="doEditor(1)" id="btnSaveAs">Save As</button>
                 <!--        <button onClick="doEditor(3)">Delete</button>
                 -->
                 <button onClick="doEditor(0)">Close Editor</button>
@@ -408,7 +408,7 @@ ul#rep_list.menu li ul {
                     <div style="margin:10px 0px;">
                         <label style="font-weight:bold;width:auto;">Select Type</label><select id="rectype_selector"></select>
                     </div>
-                    <span class="heurist-helper3">Position cursor in text on left <br/>
+                    <span class="heurist-helper3">Position cursor in text on right <br/>
                     before selecting actions below</span>
 
                     <div style="margin-top: 4px;">
@@ -434,12 +434,14 @@ ul#rep_list.menu li ul {
 
             <div class="actionButtons">
                 <div style="display:inline-block;">
+                    <span id="divDebugReportLimit">
                     truncate output at
                     <select id="cbDebugReportLimit" title="If some record types are only represented later in the data, use a tighter filter or Collected  > Add, then Collected > Show as search to create a smaller resultset.">
                         <option value="50" selected="selected">50 records</option>
                         <option value="250">250 records</option>
                         <option value="-1">As set in preferences</option>
                     </select>
+                    </span>
                     <select id="cbErrorReportLevel">
                         <option value="0" selected="selected">Ignore errors</option>
                         <option value="1">Show warnings</option>
@@ -572,14 +574,27 @@ console.log(e)
             }
 
             //
+            //
+            //            
+            function assignParameters(params){
+
+                if(params['content']){
+                    window.showReps.initSnippetEditor( params['content'], params['rty_IDs'] );    
+                }
+                
+            }
+
+            //
             //  starts initialization on load completion of this window
             function loadHandler(){
                 if(is_inited) return;
                 
                 is_inited = true;
                 
-                window.showReps = new ShowReps();
-
+                var is_snippet_editor = (window.hWin.HEURIST4.util.getUrlParameter('snippet', location.search)==1);
+                
+                window.showReps = new ShowReps( is_snippet_editor );
+                
                 //window.showReps.onResize(this.innerWidth);
 
                 $("#btnRepPrint2").button({text:false, icons: { primary: "ui-icon-print" }}).click(onPrint);

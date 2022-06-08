@@ -1550,7 +1550,7 @@ $.widget( "heurist.search_faceted_wiz", {
                        harchy_fields.push("Record ID"); 
                     }else if(dtid=='typeid' || dtid=='t'){
                        harchy_fields.push("Type ID"); 
-                    }else if(dtid=='typename'){
+                    }else if(dtid=='typename'){ //record type name rty_Name
                        harchy_fields.push("Type Name"); 
                     }else if(dtid=='addedby'){
                        harchy_fields.push("Creator"); 

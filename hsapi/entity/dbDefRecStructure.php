@@ -83,6 +83,9 @@ class DbDefRecStructure extends DbEntityBase
 
         $pred = $this->searchMgr->getPredicate('rst_DetailTypeID');
         if($pred!=null) array_push($where, $pred);
+        
+        $pred = $this->searchMgr->getPredicate('rst_CalcFunctionID');
+        if($pred!=null) array_push($where, $pred);
 
         $needCheck = false;
         $is_structure = false;
@@ -98,6 +101,10 @@ class DbDefRecStructure extends DbEntityBase
 
             $this->data['details'] = 'rst_ID,rst_DisplayName';
 
+        }else if(@$this->data['details']=='rectype'){
+
+            $this->data['details'] = 'rst_ID,rst_RecTypeID,rst_DetailTypeID';
+            
         }else if(@$this->data['details']=='list'){
         
             $is_structure = true;

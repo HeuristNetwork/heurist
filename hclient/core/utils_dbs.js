@@ -716,7 +716,7 @@ window.hWin.HEURIST4.dbs = {
                 }else if($mode == 7){ // smarty
 
                     $res['children'] = [
-                        {key: 'label',title: 'Label', code: 'label'},
+                        //replaced with "term" {key: 'label',title: 'Label', code: 'label'},
                         {key:'term',title: 'Term',code: 'term'},       
                         {key:'code',title: 'Code',code: 'code'},       
                         {key:'conceptid',title: 'Concept ID',code: 'conceptid'},       
@@ -2211,9 +2211,106 @@ window.hWin.HEURIST4.dbs = {
         });
         
         return res;
+    },
+    
+    
+    //
+    // Direct edit of calculated field formula
+    //
+    editCalculatedField: function(cfn_ID, main_callback){
+
+        if(!(cfn_ID>0)) return;
+
+        var request = {};
+        request['cfn_ID']  = cfn_ID;
+        request['a']          = 'search'; //action
+        request['entity']     = 'defCalcFunctions';
+        request['details']    = 'full';
+        request['request_id'] = window.hWin.HEURIST4.util.random();
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    var recset = new hRecordSet(response.data);
+                    if(recset.length()>0){
+
+                        var cfn_record = recset.getFirstRecord();
+                        var cfn_Content = recset.fld(cfn_record, 'cfn_FunctionSpecification');
+
+                        //finds affected record types
+                        var request = {};
+                        request['rst_CalcFunctionID']  = cfn_ID;
+                        request['a']          = 'search'; //action
+                        request['entity']     = 'defRecStructure';
+                        request['details']    = 'rectype';
+                        request['request_id'] = window.hWin.HEURIST4.util.random();
+                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                            function(response){
+                                if(response.status == window.hWin.ResponseStatus.OK){
+
+                                    var rectypes = null;
+                                    var recset = new hRecordSet(response.data);
+                                    if(recset.length()>0){
+                                        rectypes = [];
+                                        recset.each2(function(id, rec){
+                                            rectypes.push(rec['rst_RecTypeID']);
+                                        });
+                                    }
+
+                                    window.hWin.HEURIST4.msg.showDialog( 
+                                        window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.html?db=' + window.hWin.HAPI4.database,
+                                        {width:900, height:700, 
+                                            title: 'Edit formula for calculation field', 
+                                            default_palette_class: 'ui-heurist-design', 
+                                            params:{content: cfn_Content, rty_IDs:rectypes, rec_ID:0}, 
+                                            callback: function(context){
+                                                if(!context) return;
+
+                                                //save new formula
+                                                var request = {
+                                                    'a'          : 'save',
+                                                    'entity'     : 'defCalcFunctions',
+                                                    'request_id' : window.hWin.HEURIST4.util.random(),
+                                                    'fields'     : {cfn_ID:cfn_ID, cfn_FunctionSpecification:context}
+                                                };
+                                                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                                                    function(response){
+                                                        if(response.status == window.hWin.ResponseStatus.OK){
+                                                            //update caclulated fields
+                                                            if(rectypes && rectypes.length>0){
+
+                                                                var sURL = window.hWin.HAPI4.baseURL + 'admin/verification/longOperationInit.php?type=calcfields&db='
+                                                                +window.hWin.HAPI4.database+"&recTypeIDs="+rectypes.join(',');
+
+                                                                window.hWin.HEURIST4.msg.showDialog(sURL, {
+
+                                                                    "close-on-blur": false,
+                                                                    "no-resize": true,
+                                                                    height: 400,
+                                                                    width: 550,
+                                                                    afterclose: main_callback
+                                                                });                                                            
+
+                                                            }
+                                                        }else{
+                                                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                                                        }
+                                                });
+
+                                    }})
+
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }});
+
+
+
+                    }                            
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+        });           
     }
-    
-    
 
 }//end dbs
 
