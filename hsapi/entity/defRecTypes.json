@@ -112,18 +112,6 @@
                     }
                 },
                 {
-                    "dtID": "rty_Thumb",
-                    "dtFields":{
-                        "dty_Type":"file",
-                        "rst_DisplayName":"Thumbnail (~64x64):",
-                        "rst_DisplayHelpText": "Image to represent this record type", 
-                        "rst_FieldConfig":{"entity":"defRecTypes", "accept":".png,.jpg,.gif,.svg", "size":64, 
-                             "use_assets":["admin/setup/iconLibrary/64px/","admin/setup/iconLibrary/svg/"],
-                        "css":{"display":"inline-block","width":"45%"}},
-                        "dty_Role":"virtual"
-                    }
-                },
-                {
                     "dtID": "rty_Icon",
                     "dtFields":{
                         "dty_Type":"file",
@@ -131,6 +119,18 @@
                         "rst_DisplayHelpText": "Icon to represent this record type", 
                         "rst_FieldConfig":{"entity":"defRecTypes", "accept":".png,.jpg,.gif,.svg", "size":16, "version":"icon",
                         "use_assets":["admin/setup/iconLibrary/16px/","admin/setup/iconLibrary/svg/"],
+                        "css":{"display":"inline-block","width":"45%"}},
+                        "dty_Role":"virtual"
+                    }
+                },
+                {
+                    "dtID": "rty_Thumb",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"Thumbnail (~64x64):",
+                        "rst_DisplayHelpText": "Image to represent this record type", 
+                        "rst_FieldConfig":{"entity":"defRecTypes", "accept":".png,.jpg,.gif,.svg", "size":64, 
+                             "use_assets":["admin/setup/iconLibrary/64px/","admin/setup/iconLibrary/svg/"],
                         "css":{"display":"inline-block","width":"45%"}},
                         "dty_Role":"virtual"
                     }
