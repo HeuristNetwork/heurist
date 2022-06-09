@@ -1265,7 +1265,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             +$Db.rty(this._currentEditID,'rty_Name')+'</h1></div>').insertBefore(edit_ele);            
         }
         
-        var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
+        var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true' || this._currentEditID == -1);
         ele = $('<div style="position:absolute;right:6px;top:4px;"><label><input type="checkbox" '
                         + (ishelp_on?'checked':'')+'/>'
                         + window.hWin.HR('explanations')
@@ -1285,8 +1285,50 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         this.editForm.find('div.header').css({'min-widht':160, width:160});
         
         this._adjustEditDialogHeight();
+
+        if(this.options.select_mode=='manager'){
+            this.mergeIconThumbnailFields();
+        }
     },   
-    
+
+    //
+    // Combine Icon and Thumbnail fields into one, in popup form
+    //
+    mergeIconThumbnailFields: function(){
+        // fields
+        var $icon = this._editing.getFieldByName('rty_Icon');
+        var $thumb = this._editing.getFieldByName('rty_Thumb');
+
+        var thumb_header = $thumb.find('div.header.optional > label').text(); // thumbnail header
+
+        // Alter icon field
+        $icon.css('width', '');
+        $icon.find('div.image_input').css({
+            'min-width': '50px',
+            'min-height': '50px'
+        }); // make visual smaller
+        $icon.find('span.upload-file-text').text('Upload icon file'); // change upload file text
+        $icon.find('div.header.optional').append($('<br><label>'+ thumb_header +'</label>')); // add thumbnail header text to icon header
+        $icon.find('div.heurist-helper1').text('Images to represent this record type');
+
+        // Move thumbnail field
+        var $thumb_img = $thumb.find('div.image_input');
+        $thumb_img.css('margin-left', '25px').insertAfter($icon.find('div.image_input.fileupload'));
+        var $icon_links = $icon.find('span.upload-file-text').parent().append($('<br><br>')); // prepare field for upload file for thumbnail field
+        $thumb.find('span.upload-file-text').text('Upload thumbnail file').parent().insertAfter($icon_links); // change upload file text and move to upload file for icon field
+        $thumb.hide();
+
+        // link fields
+        $icon.editing_input('linkIconThumbnailFields', $thumb_img, $thumb);
+        $thumb.editing_input('linkIconThumbnailFields', $icon.find('div.image_input'), $icon);
+        // link clear buttons
+        this._on($icon.find('span.btn_input_clear'), {
+            'click': function(){
+                $thumb.find('span.btn_input_clear').click();
+            }
+        });
+    },
+
     onEditFormChange: function(changed_element){
         
        this._super(changed_element);

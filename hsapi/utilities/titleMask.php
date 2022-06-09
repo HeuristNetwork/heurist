@@ -235,48 +235,75 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
         $replacements['[['] = '[';
         $replacements[']]'] = ']';
 
-        // Check if there are any conditional parts in the title mask, or a character limit
-		// Works by checking if the preceding field has a value, if it does the first part within the {} will print with the value following it
-		// otherwise the second part of the {} will be printed
-		// Character limit involves placing the character max before the first '\' part (before the 'if' section)
-        if(preg_match_all("/\[[^\[\]]+?\]\s?{\d*?\s?\\\\[^\\\\]*?\s*\\\\?[^\\\\]*?}/", $mask, $conditions_mask)){
+        // Check if there are any conditional parts in the title mask
+        /* Two versions:
+         * Old format: Checks if the preceeding field has a value, if it has a value append it to the first section; otherwise print the second section or remove completely
+         * New format: The conditional field/s are placed with the output string, e.g. {\Full name: [Given name] [Last name] \...}, 
+         *              all fields needs to have a value to print out that string, a section without a field (except the first section) will be printed out if reached
+         */
+        if(preg_match_all("/(?:\[[^\[\]]+?\])?\s?{\d*\s?(?:\\\\[^\\\\\}]*\s?)+}/", $mask, $conditions_mask)){ // get all conditional strings
 
             foreach ($conditions_mask[0] as $key => $cond_str) {
 
                 $cond_field = array();
                 $cond_mask = array();
-                $cond_replace = '';
-                // Get the 'if', preceding field
-                preg_match("/\[[^\[\]]+?\]/", $cond_str, $cond_field);
-                // Get the 'then' and 'else' parts, each preceding by a backslash
-                preg_match("/{\d*?\s?\\\\[^\\\\]*?\s*\\\\?[^\\\\]*?}/", $cond_str, $cond_mask);
+                $cond_replace = null;
+                $str_maxlen = 0;
 
-                $cond_parts = explode('\\', $cond_mask[0]);
+                // retrieve conditional sections
+                preg_match("/{\d*\s?(?:\\\\[^\\\\]*\s?)+}/", $cond_str, $cond_mask);
 
-                $new_str_maxlen = 0;
-                $new_str = array_key_exists($cond_field[0], $replacements) ? $replacements[$cond_field[0]] : '';
+                $cond_mask[0] = trim($cond_mask[0], ' {}'); // remove curly brackets
 
-                if(!empty($new_str)){
-
-                    if(strlen($cond_parts[0]) > 1){
-
-                        $new_str_maxlen = intval(substr($cond_parts[0], 1));
-
-                        if($new_str_maxlen > 0 && strlen($new_str) > $new_str_maxlen){
-                            $cond_replace = $cond_parts[1] . ' ' . substr($new_str, 0, $new_str_maxlen) . '...';
-                        }else{
-                            $cond_replace = $cond_parts[1] . ' ' . $new_str;
-                        }
-                    }else{
-                        $cond_replace = $cond_parts[1] . ' ' . $new_str;
-                    }
-                }else if($cond_parts[2] == '}'){
-                    $cond_replace = '';
-                }else{
-                    $cond_replace = rtrim($cond_parts[2], '}');
+                $cond_parts = explode("\\", $cond_mask[0]); // split apart
+                if(is_numeric($cond_parts[0]) || empty($cond_parts[0])){
+                    $str_maxlen = intval($cond_parts[0]);
+                    array_shift($cond_parts);
                 }
 
-                $mask = str_ireplace($cond_str, $cond_replace, $mask);
+                if(strpos($cond_parts[0], '[') !== false && strpos($cond_parts[0], ']') !== false){ // new method
+
+                    foreach ($cond_parts as $cond_part) { // process each section, checking for each field value
+                        preg_match_all("/(?:\[[^\[\]]+?\])+/", $cond_part, $cond_fields);
+
+                        $is_valid = true;
+                        foreach ($cond_fields[0] as $cond_field) {
+                            if(!array_key_exists($cond_field, $replacements)){
+                                $is_valid = false;
+                                break;
+                            }
+
+                            $new_str = ($str_maxlen > 0 && strlen($replacements[$cond_field]) > $str_maxlen ? substr($replacements[$cond_field], 0, $str_maxlen) . '...' : $new_str);
+                            $con_part = str_ireplace($cond_field, $new_str, $con_part);
+                        }
+
+                        if($is_valid){
+                            $cond_replace = $cond_part;
+                            break;
+                        }
+                    }
+
+                    if($cond_replace === null){ // default, replace with empty
+                        $cond_replace = '';
+                    }
+                }else if(count($cond_parts) == 2){ // original method
+
+                    // retrieve proceeding field
+                    preg_match("/\[[^\[\]]+?\]/", $cond_str, $cond_field);
+                    $new_str = array_key_exists($cond_field[0], $replacements) ? $replacements[$cond_field[0]] : '';
+
+                    if(!empty($new_str)){
+                        $cond_replace = $cond_parts[0] . ' ' . ($str_maxlen > 0 && strlen($new_str) > $str_maxlen ? substr($new_str, 0, $str_maxlen) . '...' : $new_str);
+                    }else if(empty($cond_parts[1])){
+                        $cond_replace = '';
+                    }else{
+                        $cond_replace = $cond_parts[1];
+                    }
+                }
+
+                if($cond_replace !== null){ // replace part 
+                    $mask = str_ireplace($cond_str, $cond_replace, $mask);
+                }
             }
         }
     }

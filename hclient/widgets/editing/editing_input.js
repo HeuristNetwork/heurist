@@ -65,6 +65,9 @@ $.widget( "heurist.editing_input", {
 
     is_disabled: false,
     new_value: '', // value for new input
+
+    linkedImgInput: null, // invisible textbox that holds icon/thumbnail value
+    linkedImgContainer: null, // visible div container displaying icon/thumbnail
     
     // the constructor
     _create: function() {
@@ -2750,11 +2753,18 @@ $.widget( "heurist.editing_input", {
                 $.each(data.files, function (index, file) {
                     if(file.error){ //it is not possible we should cought it on server side - just in case
                         $input_img.find('img').prop('src', '');
+                        if(that.linkedImgContainer !== null){
+                            that.linkedImgContainer.find('img').prop('src', '');
+                        }
+
                         window.hWin.HEURIST4.msg.showMsgErr(file.error);
                     }else{
 
                         if(file.ulf_ID>0){ //file is registered at once and it returns ulf_ID
                             that.newvalues[$input.attr('id')] = file.ulf_ID;
+                            if(that.linkedImgInput !== null){
+                                that.newvalues[that.linkedImgInput.attr('id')] = file.ulf_ID;
+                            }
                         }else{
                             
                             //var urlThumb = window.hWin.HAPI4.getImageUrl(that.configMode.entity, 
@@ -3209,7 +3219,31 @@ console.log('onpaste');
                     }});
         }
 
-        
+        // Semantic url links, separated by semi-colons, for RecTypes, Vocab+Terms, DetailTypes
+        if(this.options.dtID && (typeof this.options.dtID === 'string' || this.options.dtID instanceof String)
+            && this.options.dtID.indexOf('ReferenceURL') !== -1){
+
+            $btn_extlink = $( '<span>', {title: 'Open URL(s) in new window'})
+                .addClass('smallicon ui-icon ui-icon-extlink')
+                .appendTo( $inputdiv );
+
+            that._on($btn_extlink, { 
+                click: function(){
+                    var cur_val = $input.val();
+                    if(!window.hWin.HEURIST4.util.isempty(cur_val)){ // check for value
+                        var urls = cur_val.split(';');
+                        urls = urls.map((url, idx) => { 
+                            if(!window.hWin.HEURIST4.util.isempty(url)){
+                                url = url.trim();
+                                window.open(url);
+                                return url;
+                            }
+                        });
+                    }
+                } 
+            });
+        }
+
         //for calculated field
         if(window.hWin.HAPI4.is_admin() && this.options.dtFields && this.options.dtFields['rst_CalcFunctionID']>0){            
             
@@ -3364,7 +3398,15 @@ console.log('onpaste');
         return $input.attr('id');
 
     }, //addInput
-    
+
+    //
+    // Link to image fields together, to perform actions (e.g. add, change, remove) on both fields, mostly for icon and thumbnail fields
+    //
+    linkIconThumbnailFields: function($img_container, $img_input){
+        this.linkedImgContainer = $img_container;
+        this.linkedImgInput = $img_input;
+    },
+
     //
     //
     //
@@ -3397,8 +3439,13 @@ console.log('onpaste');
                                 s_url = s_url.replace('-'+repl+'.png','-'+toval+'.png')
                             }
                             
-                            ele.editing_input('setValue', s_path.replace(repl,toval) );    
-                            ele.find('.image_input').find('img').attr('src', s_url.replace(repl,toval)); 
+                            if(ele && ele.find('.image_input').length > 0){// elements in correct location
+                                ele.editing_input('setValue', s_path.replace(repl,toval) );    
+                                ele.find('.image_input').find('img').prop('src', s_url.replace(repl,toval)); 
+                            }else if(that.linkedImgContainer !== null && that.linkedImgInput !== null){
+                                that.linkedImgInput.val(s_path.replace(repl,toval));
+                                that.linkedImgContainer.find('img').prop('src', s_url.replace(repl,toval));
+                            }
                         }
                     }
                 }
@@ -4178,6 +4225,14 @@ console.log('onpaste');
                 
                 if(that.detailType=='file'){
                     that.input_cell.find('img.image_input').prop('src','');
+
+                    if(that.linkedImgInput !== null){
+                        that.linkedImgInput.val('');
+                        that.newvalues[that.linkedImgInput.attr('id')] = '';
+                    }
+                    if(that.linkedImgContainer !== null){
+                        that.linkedImgContainer.find('img').prop('src', '');
+                    }
                 }else if(that.detailType=='resource'){
                     
                     $input.parent().find('.sel_link').hide();

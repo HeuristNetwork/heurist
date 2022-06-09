@@ -4587,7 +4587,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             top_fieldset.append(
                 '<div style="display: table; margin-bottom: 7px">'
                     + '<div class="header" style="vertical-align: top; display: table-cell; font-size: 1.3em; font-weight: bold; text-align: left; width: auto;">'
-                        + '<span style="color: red; font-weight: bold;">DATABASE ADMINISTRATOR OVERRIDE</span> (you do not own this record)'
+                        + '<span style="color: red; font-weight: bold;">You don\'t own this record</span> (you can edit it because you are a database administrator)'
                     + '</div>'
                 + '</div>');
         }

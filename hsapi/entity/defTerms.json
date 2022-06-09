@@ -126,7 +126,7 @@
                         "dtFields":{
                             "dty_Type":"blocktext",
                             "dty_Size":250,
-                            "rst_DisplayWidth":60,
+                            "rst_DisplayWidth":50,
                             "rst_DisplayName":"Semantic / Reference URI:",
                             "rst_DisplayHelpText": "The URI to a semantic definition or web page describing the term"
                         }

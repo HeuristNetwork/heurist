@@ -1121,7 +1121,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 if( $Db.dty(dty_ID, 'dty_ShowInLists')!='0'
                     && field_type!='separator'
                     && (!aUsage || !aUsage.getById(dty_ID))
-                    && (field_name.toLowerCase().indexOf( entered )>=0) )
+                    && (field_name.toLowerCase().indexOf( entered )>=0)
+                    && (field_name.toLowerCase().indexOf( entered )>=0)
+                    && $Db.getConceptID('dty', dty_ID) != '2-247' )
                 {
 
                     var ele;
@@ -1967,8 +1969,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         var that = this;
 
         if(this.element.find('#base-field-warning').length == 0){ // Check if message already exists
+
+            var font_size = (navigator.userAgent.indexOf('Firefox') >= 0) ? '0.95em' : '1.2em';
+
             this.element.append('<div id="base-field-warning" style="position:relative;background:rgb(0,0,0,0.6);z-index:60000;height:100%;">'
-                + '<div style="background:lightgrey;border:2px solid black;color:black;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);height:200px;width:510px;font-size:1.2em;padding:20px;">'
+                + '<div style="background:lightgrey;border:2px solid black;color:black;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);height:200px;width:510px;font-size:'+font_size+';padding:20px;">'
                 + 'The base fields editing function is provided for completeness and for<br/>advanced data management. Most users will not need to use it.<br/><br/>'
                 + '<strong>We strongly recommend NOT using this function to create new<br/>base fields. It is much more intuitive to create them <em>in situ</em> while<br/>designing your record structure.</strong><br/></br>'
                 + 'Recommended: Design > <span style="text-decoration:underline;cursor:pointer" onclick="$(\'li[data-action=menu-structure-rectypes]\').click();">Record Types</span><br/><br/>'

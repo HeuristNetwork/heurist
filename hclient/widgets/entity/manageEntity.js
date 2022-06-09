@@ -393,32 +393,35 @@ $.widget( "heurist.manageEntity", {
             
                 this.options.resultList = $.extend(this.options.resultList, 
                 {
-                       recordDivEvenClass: 'recordDiv_blue',
-                       eventbased: false, //do not listent global events
-                       multiselect: (this.options.select_mode!='select_single'), //@todo replace to select_mode
+                    recordDivEvenClass: 'recordDiv_blue',
+                    eventbased: false, //do not listent global events
+                    multiselect: (this.options.select_mode!='select_single'), //@todo replace to select_mode
 
-                       select_mode: this.options.select_mode,
-                       selectbutton_label: this.options.selectbutton_label,
-                       
-                       entityName: this._entityName,
-                       //view_mode: this.options.view_mode?this.options.view_mode:null,
-                       supress_load_fullrecord: (this.options.edit_mode == 'editonly'),
-                       
-                       pagesize:(this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
-                       empty_remark: 
-                            (this.options.select_mode!='manager' || this.options.entityName!='records')
-                            ?this.options.entity.empty_remark  //'<div style="padding:1em 0 1em 0">'++'</div>'
-                            :'',
-                       searchfull: function(arr_ids, pageno, callback){
-                           that._recordListGetFullData(arr_ids, pageno, callback);
-                       },//this._recordListGetFullData,    //search function 
-                       renderer: function(recordset, record){ 
-                                return that._recordListItemRenderer(recordset, record);  //custom render for particular entity type
-                            },
-                       rendererHeader: this.options.list_header ?function(){
-                                return that._recordListHeaderRenderer();  //custom header for list mode (table header)
-                                }:null
-                               
+                    select_mode: this.options.select_mode,
+                    selectbutton_label: this.options.selectbutton_label,
+
+                    entityName: this._entityName,
+                    //view_mode: this.options.view_mode?this.options.view_mode:null,
+                    supress_load_fullrecord: (this.options.edit_mode == 'editonly'),
+
+                    pagesize:(this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
+                    empty_remark: 
+                        (this.options.select_mode!='manager' || this.options.entityName!='records')
+                        ?this.options.entity.empty_remark  //'<div style="padding:1em 0 1em 0">'++'</div>'
+                        :'',
+                    searchfull: function(arr_ids, pageno, callback){
+                        that._recordListGetFullData(arr_ids, pageno, callback);
+                    },//this._recordListGetFullData,    //search function 
+
+                    renderer: function(recordset, record){ 
+                        return that._recordListItemRenderer(recordset, record);  //custom render for particular entity type
+                    },
+                    rendererHeader: this.options.list_header ?function(){
+                        return that._recordListHeaderRenderer();  //custom header for list mode (table header)
+                    } : null,
+                    onPageRender: this._onPageRender ? function(){
+                        that._onPageRender(); //event on loading record list/page
+                    } : null
                 });                
 
                 //init record list

@@ -200,7 +200,7 @@ $.widget( "heurist.searchBuilder", {
         var ch = this.btnAddSortItem.position().top + 24;   
             
         ch = this.pnl_Rectype.height() + ch + 115; 
-        if(ch<450) ch = 450;
+        if(ch<500) ch = 500;
 
         var topPos = 0;
         if(this.options.is_dialog){        
@@ -561,8 +561,31 @@ $.widget( "heurist.searchBuilder", {
                 this._on(this.search_conjunction, {change:this._doCompose});
                 
                 this._on(this.pnl_Rectype.find('#btn-clear').button(), { click:this.clearAll });
-                
-                                
+
+                // ruleset accordion headers
+                this.rulesetSection = this.pnl_Items.find('#ruleset_accordion').accordion({heightStyle: 'content', active: false, collapsible: true});
+
+                this._on(this.rulesetSection.find("#svs_RulesOnly"),{
+                    'change': function(event){
+                        this.rulesetSection.find("#divRulesOnly").css('display', $(event.target).is(':checked') ? 'inline-block' : 'none');
+                    }
+                });
+
+                this.rulesetSection.find("#svs_Rules_edit")
+                .button({icons: {primary: "ui-icon-pencil"}, text:false})
+                .attr('title', window.hWin.HR('Edit RuleSet'))
+                .css({'height':'16px', 'width':'16px'})
+                .click(function( event ) {
+                    that._editRules();
+                });
+
+                this.rulesetSection.find("#svs_Rules_clear")
+                .button({icons: {primary: "ui-icon-close"}, text:false})
+                .attr('title', window.hWin.HR('Clear RuleSet'))
+                .css({'height':'16px', 'width':'16px'})
+                .click(function( event ) {
+                    that.rulesetSection.find('#svs_Rules').val('');
+                });
             }
             
             
@@ -1020,6 +1043,8 @@ $.widget( "heurist.searchBuilder", {
         this._doCompose();
         
         var query = this.pnl_Result.text();
+        var ruleset = this.rulesetSection.find('textarea').val();
+        var ruleset_only = this.rulesetSection.find("#svs_RulesOnly");
         
         if(query){
             
@@ -1053,8 +1078,15 @@ $.widget( "heurist.searchBuilder", {
                     request.source = this.element.attr('id');
                     request.search_realm = this.options.search_realm;
                     request.search_page = this.options.search_page;
-                    
-                    window.hWin.HAPI4.RecordSearch.doSearch( this, request );
+
+                if(!window.hWin.HEURIST4.util.isempty(ruleset)){
+                    request.rules = ruleset;
+                }
+                if(ruleset_only.is(':checked')){
+                    request.rulesonly = this.rulesetSection.find('#svs_RulesOnly1').is(':checked')?1:2;
+                }
+
+                window.hWin.HAPI4.RecordSearch.doSearch( this, request );
             }
             
             this.closeDialog();
@@ -1330,6 +1362,42 @@ console.log(aCodes);
 
         sortby_header = sortby_header.substring(0, sortby_header.length - 2);
         this.sortbySection.find('#sortby_header #sortby_values').text(sortby_header);
+    }
+
+    //
+    // Show ruleset editor popup
+    //
+    ,_editRules: function() {
+
+        var that = this;
+        var ruleset = this.rulesetSection.find('textarea').val();
+
+        var url = window.hWin.HAPI4.baseURL+ "hclient/widgets/search/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
+        if(!window.hWin.HEURIST4.util.isempty(ruleset)){
+            url = url + '&rules=' + encodeURIComponent(ruleset);
+        }else if (this.select_main_rectype.val()>0){
+            url = url + '&rty_ID=' + this.select_main_rectype.val();
+        }
+        
+        if($.isFunction(this.options.menu_locked)){
+            this.options.menu_locked.call( this, true, false); //lock
+        }
+
+        window.hWin.HEURIST4.msg.showDialog(url, { 
+            is_h6style:this.options.is_h6style, 
+            closeOnEscape:true, width:1200, height:600, 
+            title:'Ruleset Editor', 
+            close:function(){
+                if($.isFunction(this.options.menu_locked)){
+                    this.options.menu_locked.call( this, false, false); //unlock
+                }
+            },
+            callback: function(res){ console.log(res);
+                if(!window.hWin.HEURIST4.util.isempty(res)) {
+                    that.rulesetSection.find('textarea').val( JSON.stringify(res.rules) ); //assign new rules
+                }
+            }
+        });
     }
 });
 

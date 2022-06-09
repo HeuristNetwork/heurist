@@ -48,7 +48,7 @@
 -->
 
 
-<fieldset id="pnl_Items" style="position:absolute;left:0px;right:0;top:106px;bottom:0px;padding-top:10px;overflow-y: auto;">
+<fieldset id="pnl_Items" style="position:absolute;left:0px;right:0;top:106px;bottom:0px;padding:10px 0px 5px;margin: 0px;overflow-y: auto;">
 
     <div class="btn_field_add search_conjunction" style="visibility:hidden;position: absolute;top: 52px;">
         <span style="margin-left: 43px;color:#6A7C99;font-size:0.8em;">
@@ -64,7 +64,7 @@
     </div>
 
     <hr/>
-
+    <!-- Sortby section -->
     <div id="sortby_accordion" style="font-size: unset;">
         <h3 id="sortby_header" style="margin-left: 40px;">Sorted by: <span id="sortby_values">record title</span></h3>
 
@@ -74,7 +74,35 @@
             </div>
         </div>
     </div>
-   
+
+    <hr/>
+    <!-- Ruleset section -->
+    <div id="ruleset_accordion" style="font-size: unset;">
+        <h3 id="ruleset_header" style="margin-left: 40px;">Ruleset:</h3>
+
+        <div id="ruleset_body" style="width: 550px;margin-left: 65px;background: none;border: none;">
+            <div class="header" ><label for="svs_RulesOnly">Show expansion only</label></div>
+            <input type="checkbox" id="svs_RulesOnly" class="text ui-widget-content ui-corner-all" style="margin:0 4px 4px 0"/>
+            <label style="font-size: smaller; margin-top: 2px;" for="svs_RulesOnly">
+                Exclude results from the initial filter, only show results from expansion rules
+            </label><br>
+
+            <div id="divRulesOnly" style="display:none;padding-left: 25px;height: 20px;">
+                <label style="font-size: smaller"><input type="radio" name="svs_RulesOnly" id="svs_RulesOnly1" checked value="1" style="margin:0 0 20px 0"/>&nbsp;return all expansion results</label>
+                <label style="font-size: smaller;padding-left: 10px;"><input type="radio" name="svs_RulesOnly" id="svs_RulesOnly2" value="2" style="margin:0 0 20px 0"/>&nbsp;only return last level of expansion</label>
+            </div>
+
+            <textarea name="svs_Rules" id="svs_Rules" rows="5" class="text ui-widget-content ui-corner-all" 
+                style="margin-top:0.4em;width:500px" readonly="readonly">
+            </textarea>
+
+            <div id="svs_btnset" style="float:right;padding-left:0.4em">
+                <div id="svs_Rules_edit"  style="margin-top:0.4em;display:block"></div>
+                <div id="svs_Rules_clear" style="margin-top:0.4em"></div>
+            </div>
+        </div>
+    </div>
+
 </fieldset>
 
 <div id="pnl_CoverAll" style="display:block;position:absolute;left:0px;right:0;top:80px;bottom:0px;background:gray;opacity:0.2"></div>
