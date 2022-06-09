@@ -159,7 +159,7 @@ error_log(print_r($_REQUEST, true));
     //
     private function init_db_connection(){
         
-        $res = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
+        $res = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DB_PORT);
         if ( is_array($res) ){
             //connection to server failed
             $this->addError($res[0], $res[1]);
@@ -1822,7 +1822,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
 
             if(strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===0){ //same domain
        
-                $mysql_indexdb = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
+                $mysql_indexdb = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DB_PORT);
                 if ( !is_array($mysql_indexdb) && mysql__usedatabase($mysql_indexdb, HEURIST_INDEX_DATABASE)){
                     
                     $system_settings = getSysValues($mysql_indexdb);

@@ -114,7 +114,7 @@ require_once (dirname(__FILE__).'/../../hsapi/dbaccess/utils_db.php');
             
             
             print "<br><hr><br><h3>MySQL database server</h3><br />";
-            $mysqli = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
+            $mysqli = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DB_PORT);
             if ( is_array($mysqli) ){
                 //connection to server failed
                 print '<p style="color:red">'.$mysqli[1].'</p><br />';

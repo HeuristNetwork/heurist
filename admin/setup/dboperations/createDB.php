@@ -63,7 +63,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         if($isSystemInited){
             $mysqli = $system->get_mysqli();
         }else{
-            $dbcon = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
+            $dbcon = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DB_PORT);
             if ( is_array($dbcon) ){
                 //connection to server failed
                 $system->addError($dbcon[0], $dbcon[1]);

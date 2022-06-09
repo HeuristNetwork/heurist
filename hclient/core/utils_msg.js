@@ -79,7 +79,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }
             msg = window.hWin.HR(msg);
 
-            dlg_title = response.error_title;
+            dlg_title = response.error_title?response.error_title:'';
 
             if(response.sysmsg && response.status!=window.hWin.ResponseStatus.REQUEST_DENIED){
                 //sysmsg for REQUEST_DENIED is current user id - it allows to check if session is expired

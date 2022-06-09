@@ -134,6 +134,7 @@ returnErrorMsgPage(1, "MySql user password may not contain special characters. T
 define('ADMIN_DBUSERNAME', $dbAdminUsername); //user with all rights so we can create databases, etc.
 define('ADMIN_DBUSERPSWD', $dbAdminPassword);
 define('HEURIST_DB_PREFIX', $dbPrefix);
+define('HEURIST_DB_PORT', $dbPort);
 
 //---------------------------------
 $date = new DateTime();

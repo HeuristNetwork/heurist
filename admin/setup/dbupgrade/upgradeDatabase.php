@@ -329,7 +329,7 @@ if(!defined('PDIR')){
         }
 
 /* OLD APPROACH
-        $cmdline="mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D".DATABASE." < ".$filename;
+        $cmdline="mysql -h".HEURIST_DBSERVER_NAME." --port=".HEURIST_DB_PORT." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D".DATABASE." < ".$filename;
         $output2 = exec($cmdline . ' 2>&1', $output, $res2);
 
         if ($res2 != 0 ) {

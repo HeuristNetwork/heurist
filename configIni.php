@@ -152,39 +152,40 @@ $version = "6.3.4"; // sets current program version number, determined by Heuris
 
 // *** DO NOT SET THESE UNLESS YOU KNOW WHAT YOU ARE DOING ***
 //     they override the values set in ../heuristConfigIni.php
-$dbHost = "";
-$dbAdminUsername = "";
-$dbAdminPassword = "";
+$dbHost = '';
+$dbPort = null;  //'3306'
+$dbAdminUsername = '';
+$dbAdminPassword = '';
 //$serverName = "null";
-$dbPrefix = "";
+$dbPrefix = '';
 
 // Elastic Search (Lucene) server
-$indexServerAddress = ""; 
-$indexServerPort = "";
+$indexServerAddress = ''; 
+$indexServerPort = '';
 
-$httpProxy = "";
-$httpProxyAuth = "";
-$indexServerAddress="";
-$indexServerPort="";
+$httpProxy = '';
+$httpProxyAuth = '';
+$indexServerAddress='';
+$indexServerPort='';
 
-$passwordForDatabaseCreation=""; // normally blank = any logged in user can create
-$passwordForDatabaseDeletion=""; // if less than 15 characters no one can delete db except db owner
+$passwordForDatabaseCreation=''; // normally blank = any logged in user can create
+$passwordForDatabaseDeletion=''; // if less than 15 characters no one can delete db except db owner
 //  if set (>14 characters) db admin can delete with password challenge
 
-$passwordForReservedChanges=""; // if blank, no-one can modify reserved fields, otherwise challenge
-$passwordForServerFunctions=""; // if blank, no-one can run server analysis functions - risk of overload - otherwise challenge
+$passwordForReservedChanges=''; // if blank, no-one can modify reserved fields, otherwise challenge
+$passwordForServerFunctions=''; // if blank, no-one can run server analysis functions - risk of overload - otherwise challenge
 
 $allowThumbnailsWebAccessdefault = true;
 $allowGoogleAnalytics = true;
 
-$defaultRootFileUploadPath ="";
-$defaultRootFileUploadURL = "";
-$sysAdminEmail = "";
-$infoEmail = "";
-$bugEmail = "";
-$websiteThumbnailService = "";
-$websiteThumbnailUsername = "";
-$websiteThumbnailPassword = "";
+$defaultRootFileUploadPath ='';
+$defaultRootFileUploadURL = '';
+$sysAdminEmail = '';
+$infoEmail = '';
+$bugEmail = '';
+$websiteThumbnailService = '';
+$websiteThumbnailUsername = '';
+$websiteThumbnailPassword = '';
 // $websiteThumbnailXsize = 500;
 // $websiteThumbnailYsize = 300;
 

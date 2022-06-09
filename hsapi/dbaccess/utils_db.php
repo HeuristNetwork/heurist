@@ -62,7 +62,7 @@
     *
     * @return a MySQL link identifier on success or array with code and error message on failure.
     */
-    function mysql__connection($dbHost, $dbUsername, $dbPassword){
+    function mysql__connection($dbHost, $dbUsername, $dbPassword, $dbPort=null){
 
         if(null==$dbHost || $dbHost==""){
             return array(HEURIST_SYSTEM_FATAL, "Database server is not defined. Check your configuration file");
@@ -71,7 +71,7 @@
         try{
             $mysqli = mysqli_init();
             $mysqli -> options(MYSQLI_OPT_LOCAL_INFILE, 1);
-            $mysqli -> real_connect($dbHost, $dbUsername, $dbPassword);
+            $mysqli -> real_connect($dbHost, $dbUsername, $dbPassword, null, $dbPort);
             //if (!$mysqli->set_charset("utf8mb4")) {
             //    return array(HEURIST_SYSTEM_FATAL, 'Error loading character set utf8mb4', $mysqli->error);
             //}       
