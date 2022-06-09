@@ -365,9 +365,6 @@ $.widget( "heurist.mapping", {
         this.map_scale = L.control.scale({ position: 'bottomleft' }).addTo( this.nativemap );
         $(this.map_scale._container).css({'margin-left': '20px', 'margin-bottom': '20px'});
         
-        //default selection style
-        this.selection_style = this.setStyleDefaultValues(null, true, true);
-
         //content for legend
         this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element, is_ui_main:is_ui_main});
         
@@ -1978,6 +1975,10 @@ $.widget( "heurist.mapping", {
             }
             def_style = this.setStyleDefaultValues(def_style, true, is_selection_style);
         }else if(is_selection_style){
+            //options for selection style
+            // 1. from widget parameters
+            // 2. from user preferences
+            // 3. default (light blue)
             
             if(this.options.default_selection_style){
                 //take default style from widget parameters
@@ -2613,7 +2614,7 @@ $.widget( "heurist.mapping", {
     updateLayout: function(){
         
         var params = this.options.layout_params;
-        
+       
         function __parseval(val){
             if(val===false || val===true) return val;
             if(!window.hWin.HEURIST4.util.isempty(val)){
@@ -2682,6 +2683,11 @@ $.widget( "heurist.mapping", {
         
         this.options.map_rollover = __parseval(params['map_rollover']);
         this.options.default_style = window.hWin.HEURIST4.util.isJSON(params['style']);
+        this.options.default_selection_style = window.hWin.HEURIST4.util.isJSON(params['selection_style']);
+        
+        //default selection style
+        this.selection_style = this.setStyleDefaultValues(null, true, true);
+        
         
         //these settings may be overwritten by map document, by basemap or by tiled layer
         if(params['maxzoom']>0){

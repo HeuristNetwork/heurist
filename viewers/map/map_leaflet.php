@@ -227,6 +227,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
                     +window.hWin.HAPI4.baseURL+'hclient/widgets/expertnation/expertnation.css?t='+(new Date().getTime())+'">'));
         }        
         
+        //since 2022-06-09 layout_params as passed via option on map init   
         
         function __gp(name){
             return window.hWin.HEURIST4.util.getUrlParameter(name, location.search);
@@ -267,7 +268,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         layout_params['minzoom'] = __gp('minzoom');
         layout_params['pntzoom'] = __gp('pntzoom');
         layout_params['style'] = window.hWin.HEURIST4.util.isJSON(__gp('style')); //default style
-
+        
         mapping = $('#mapping').mapping({
             element_layout: '#mapping',
             element_map: '#map',

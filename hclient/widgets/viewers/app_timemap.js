@@ -281,12 +281,16 @@ console.log(re);
 
                 if(this.options.layout_params){
             
+                    if(!this.options.leaflet){ //for leafleat we assign parameters onMapInit
+                    
                     for(var key in this.options.layout_params){
                         if(key=='style' && window.hWin.HEURIST4.util.isJSON(this.options.layout_params[key])){
                             url = url + '&'+key + '=' +  encodeURIComponent(JSON.stringify( this.options.layout_params[key] ));
                         }else{
                             url = url + '&'+key + '=' + this.options.layout_params[key];    
                         }
+                    }
+                    
                     }
 
                 }else{
@@ -318,7 +322,6 @@ console.log(re);
                 if(this.options.search_initial){
                     url = url + '&q='+encodeURIComponent(this.options.search_initial); 
                 }
-                
                 (this.mapframe).attr('src', url);
                 
             }
@@ -362,6 +365,12 @@ console.log(re);
             if(this.map_inited && cnt_call>0) return;
             
             if(this.options.leaflet){ //LEAFLET
+            
+                if(!this.map_inited){ //once
+                            
+                    mapping.mapping('option', {'layout_params':this.options.layout_params});        
+                }    
+                
             
                 if(!that.map_curr_search_inited && that.options.recordset){
 
