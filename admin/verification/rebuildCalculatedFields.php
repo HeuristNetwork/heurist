@@ -41,11 +41,13 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');
 $init_client = (@$_REQUEST['verbose']!=1);
 
 if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client side
-    
-    $res = recordUpdateCalcFields($system, null, @$_REQUEST['recTypeIDs'], @$_REQUEST['session']);
+
     
     if(@$_REQUEST['session']>0)
     {
+        $system->setResponseHeader();
+        $res = recordUpdateCalcFields($system, null, @$_REQUEST['recTypeIDs'], @$_REQUEST['session']);
+        
         //2b. response to client side
         if( is_bool($res) && !$res ){
             $response = $system->getError();
@@ -53,9 +55,10 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
             $response = array("status"=>HEURIST_OK, "data"=> $res);
         }
         
-        $system->setResponseHeader();
         print json_encode($response);
         exit();
+    }else{
+        $res = recordUpdateCalcFields($system, null, @$_REQUEST['recTypeIDs']);
     }
 }
 
@@ -135,6 +138,7 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
                 }
                 
                 
+                $('#info_div').show();
                 $('.result_div').show();
                 $('.header_info').hide();
             }else{
@@ -211,7 +215,7 @@ if($init_client){
             
             <div class="progress_div" style="background:white;min-height:40px;width:100%"></div>
 
-            <div class="result_div" style="display:<?php $init_client?'none':'block'?>;">
+            <div class="result_div" style="display:<?php echo $init_client?'none':'block'?>;">
                 <div><span id=rec_total><?php echo @$res['rec_total']?></span> records in total</div>
                 <div><span id=rec_processed><?php echo @$res['rec_processed']?></span> records processed</div>
                 <div><span id=fld_changed><?php echo @$res['fld_changed']?></span> fields updated in 
@@ -249,8 +253,8 @@ if($init_client){
 
 if(@$_REQUEST['recTypeIDs']){
 ?>
+        <div id="info_div" style="color: green;padding-top:10px;display:<?php echo $init_client?'none':'block'?>;">
         <hr>
-        <div style="color: green;padding-top:10px;">
             If the fields of other record types depend on updated records,
             you should run Admin > Rebuild calculated fields to rebuild all calculated fields in the database
         </div>

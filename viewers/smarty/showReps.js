@@ -903,7 +903,7 @@ function ShowReps( is_snippet_editor ) {
         $('#btnSave').attr('title','');
         
         $('<label>'+window.hWin.HR('Record to test')+': </label>').insertBefore($('#divDebugReportLimit'));
-        $('<select id="listRecords">').insertBefore($('#divDebugReportLimit'));
+        $('<select id="listRecords">').css('max-width','260px').insertBefore($('#divDebugReportLimit'));
         $('#divDebugReportLimit').hide();
 
         $('<div id="snippet_output">')
