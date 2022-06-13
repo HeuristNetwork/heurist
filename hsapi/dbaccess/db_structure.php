@@ -1,6 +1,8 @@
 <?php
     require_once (dirname(__FILE__).'/../utilities/titleMask.php');
     require_once (dirname(__FILE__).'/../utilities/utils_mail.php');
+    require_once(dirname(__FILE__).'/../../viewers/smarty/reportActions.php');
+
 //@TODO convert to class
 
     /**
@@ -103,7 +105,7 @@
 
         $mysqli = $system->get_mysqli();
         $dbID = $system->get_system('sys_dbRegisteredID');
-        
+
         /*ARTEM $cacheKey = DATABASE . ":AllRecTypeInfo";
         if ($useCachedData) {
         $rtStructs = getCachedData($cacheKey);
@@ -132,14 +134,14 @@
             "dty_TermIDTreeNonSelectableIDs",
             "dty_FieldSetRectypeID",
             "dty_Type");
-       //add dty_ConceptID     
-            if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
-                $dty_ConceptID = "if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(dty_ID as char(5)))) as dty_ConceptID";
-            } else {
-                $dty_ConceptID = "if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), '') as dty_ConceptID";
-            }
-            array_push($colNames, $dty_ConceptID); 
-            
+        //add dty_ConceptID     
+        if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
+            $dty_ConceptID = "if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(dty_ID as char(5)))) as dty_ConceptID";
+        } else {
+            $dty_ConceptID = "if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), '') as dty_ConceptID";
+        }
+        array_push($colNames, $dty_ConceptID); 
+
         $query = "select " . join(",", $colNames) .
         " from defRecStructure".
         " left join defDetailTypes on rst_DetailTypeID = dty_ID".
@@ -159,7 +161,7 @@
         $ind_CanonicalTitleMask = array_search('rty_CanonicalTitleMask', $columns);
         $ind_Name = array_search('rty_Name', $columns);
         $ind_Plural = array_search('rty_Plural', $columns);
-        
+
         if($imode!=1){
             $rtStructs['groups'] = dbs_GetRectypeGroups($mysqli);
         }
@@ -181,22 +183,49 @@
 
             if($res){
                 while ($row = $res->fetch_row()) {
+                    $vals = array_slice($row, 2);
                     if (!array_key_exists($row[0], $rtStructs['typedefs'])) {
-                        $rtStructs['typedefs'][$row[0]] = array('dtFields' => array($row[1] => array_slice($row, 2)));
+                        $rtStructs['typedefs'][$row[0]] = array('dtFields' => array($row[1] => $vals));
                         $rtStructs['dtDisplayOrder'][$row[0]] = array();
                     } else {
-                        $rtStructs['typedefs'][$row[0]]['dtFields'][$row[1]] = array_slice($row, 2);
+                        $rtStructs['typedefs'][$row[0]]['dtFields'][$row[1]] = $vals;
                     }
                     array_push($rtStructs['dtDisplayOrder'][$row[0]], $row[1]);
+
                 }
                 $res->close();
             }else{
                 error_log('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
             }
 
+
+
+            if( true ){ //has calculation field
+                //load calculation fields
+                $colNames = array('cfn_ID','cfn_Name','cfn_Domain','cfn_FunctionSpecification','cfn_Modified','cfn_RecTypeIDs');
+                $cfields = array();
+                $query = 'SELECT DISTINCT '.implode(',', $colNames).' FROM defCalcFunctions, defRecStructure WHERE cfn_ID=rst_CalcFunctionID';
+                $rtStructs['calcfields'] = array();
+                //$rtStructs['calcfields']['fieldNames'] = $colNames;
+                //$rtStructs['calcfields']['values'] = mysql__select_all($mysqli, $query, 1);
+
+                $repAction = new ReportActions($system, null);
+                
+                $res = $mysqli->query($query);
+                if($res){
+                    while ($row = $res->fetch_assoc()) {
+                        $cfn_code = $row['cfn_FunctionSpecification'];
+                        //convert to concept codes
+                        $row['cfn_FunctionSpecification'] = $repAction->convertTemplate($cfn_code, 0);
+                        
+                        $rtStructs['calcfields'][$row['cfn_ID']]  = $row; //array_slice($row, 1);
+                    }
+                }
+                
+            }
         }
 
-        
+
         // get rectypes ordered by the RecType Group order, then by Group Name, then by rectype order in group and then by rectype name
         $query = "select rty_ID, rtg_ID, rtg_Name, " . join(",", $columns);
         $query = preg_replace("/rty_ConceptID/", "", $query);
@@ -216,13 +245,13 @@
         $querywhere.
         " order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name";
 
-        
+
         $res = $mysqli->query($query);
         if($res){
             while ($row = $res->fetch_row()) {
-                
+
                 $rtyID = $row[0];
-                
+
                 if($imode!=1){
                     $rtg_ID = $row[1];
                     if(!@$rtStructs['groups']['groupIDToIndex'][$rtg_ID]){
@@ -244,7 +273,7 @@
                     $mask_concept_codes = $commonFields[$ind_TitleMask];
                     $commonFields[$ind_CanonicalTitleMask] = $mask_concept_codes; //keep
                     $commonFields[$ind_TitleMask] = TitleMask::execute($mask_concept_codes, $rtyID, 2, null, _ERR_REP_SILENT);
-                    
+
                     $rtStructs['typedefs'][$rtyID]['commonFields'] = $commonFields;
                 }
                 $rtStructs['names'][$rtyID] = $commonFields[$ind_Name];

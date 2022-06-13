@@ -72,6 +72,8 @@
                         $data = __getErrMsg($remoteURL_original, $glb_curl_code, $remoteURL.' '.$glb_curl_error);
                         $data = json_encode($data); 
                     }else{
+//$defs = json_decode(gzdecode($data), true);
+                        
                         header('Content-Encoding: gzip');
                     }
                 }

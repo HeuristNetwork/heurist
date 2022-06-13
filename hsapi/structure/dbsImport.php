@@ -53,6 +53,9 @@ class DbsImport {
     private $sourceIconURL = null; //url to copy rectype icons
     private $source_db_name;
 
+    private $src_CalcFields = null; 
+    
+    
     //report data
     private $rectypes_upddated;
     private $rectypes_added;
@@ -421,7 +424,7 @@ $time_debug2 = $time_debug;
         $this->broken_terms = array();
         $this->broken_terms_reason = array();
         
-        // I. Add Terms (whole vocabulary)
+// I. Add Terms (whole vocabulary)
         $stub = array();//stub for $all_terms_in_vocab
         if(! ($this->_importVocabulary(null, "enum", $stub) && 
               $this->_importVocabulary(null, "relation", $stub)) ){
@@ -440,6 +443,7 @@ $time_debug2 = $time_debug;
         $group_rt_ids = array();
         $def_rts = $this->source_defs['rectypes']['typedefs'];
         $def_dts = $this->source_defs['detailtypes']['typedefs'];
+        $def_calcfields = $this->source_defs['rectypes']['calcfields'];
         
         $trg_rectypes = $this->target_defs['rectypes'];
         $trg_detailtypes = $this->target_defs['detailtypes'];
@@ -451,7 +455,7 @@ $idx_rt_grp = $def_rts['commonNamesToIndex']['rty_RecTypeGroupID'];
 
 foreach ($this->imp_recordtypes as $recId){
 
-    $rt_name = @$this->source_defs['rectypes']['names'][$recId];
+    $rt_name = @$this->source_defs['rectypes']['names'][$recId]; //get rectype in source
     if(!@$def_rts[$recId]){
         if(!$rt_name){
             $this->error_exit2("Can't find record type #'".$recId."'. in source database");
@@ -536,11 +540,14 @@ $idx_ccode       = $def_rts['commonNamesToIndex']['rty_ConceptID'];
 $idx_titlemask   = $def_rts['commonNamesToIndex']['rty_TitleMask'];
 $idx_titlemask_canonical = $def_rts['commonNamesToIndex']['rty_CanonicalTitleMask'];
 
+$cfn_tobeimported = array();
+
+
 foreach ($this->imp_recordtypes as $rtyID){
 
     $def_rectype = $def_rts[$rtyID]['commonFields'];
-
     $new_rtyID = @$this->rectypes_correspondence[$rtyID];
+    
     if($new_rtyID>0){ 
         //already  exists - update fields only - add missed fields
         // and overwrite name - if "rename" option is ON
@@ -601,6 +608,8 @@ foreach ($this->imp_recordtypes as $rtyID){
         }
         
     }
+    
+    
 }//for
 
 
@@ -672,7 +681,6 @@ $idx_origin_dbid = $def_dts['fieldNamesToIndex']['dty_OriginatingDBID'];
 $idx_origin_id   = $def_dts['fieldNamesToIndex']['dty_IDInOriginatingDB'];
 $idx_origin_name   = $def_dts['fieldNamesToIndex']['dty_NameInOriginatingDB'];
 $idx_ccode       = $def_dts['fieldNamesToIndex']['dty_ConceptID'];
-
 
 if($this->rename_target_entities){
     //rename fields that are already in target database
@@ -757,6 +765,7 @@ $idx_name = $def_rts2['rst_DisplayName'];
 $idx_desc = $def_rts2['rst_DisplayHelpText'];
 $idx_desc2 = $def_rts2['rst_DisplayExtendedDescription'];
 $idx_ref = $def_rts2['rst_SemanticReferenceURL'];
+$idx_calcfield  = $def_rts2['rst_CalcFunctionID'];    
 
 
 $dtFieldNames = $def_rts['dtFieldNames'];
@@ -788,7 +797,16 @@ foreach ($this->imp_recordtypes as $rtyID){
                 $fields[$trg_dty_id][$idx_ref] = $def_field[$idx_ref]==null?'':$def_field[$idx_ref];
             }
             
+            $cfn_ID = $def_field[$idx_calcfield];
+            $fields[$trg_dty_id][$idx_calcfield] = 0; //reset
             
+            if($cfn_ID>0 && @$def_calcfields[$cfn_ID]){
+                if(@$cfn_tobeimported[$cfn_ID]){
+                    array_push($cfn_tobeimported[$cfn_ID], array($target_RtyID=>$trg_dty_id));
+                }else{
+                    $cfn_tobeimported[$cfn_ID] = array(array($target_RtyID=>$trg_dty_id));
+                }
+            }
         }
         //clear term trees and resource constraints; assign default value for terms
         foreach ($fields as $ftId => $def_field){
@@ -835,7 +853,7 @@ foreach ($this->imp_recordtypes as $rtyID){
 
         }
     }
-}
+}//foreach
 
 // ------------------------------------------------------------------------------------------------
 
@@ -864,6 +882,99 @@ foreach ($this->imp_recordtypes as $rtyID){
 
 TitleMask::set_fields_correspondence(null);
 if(_DBG) error_log('Total '.(microtime(true)-$time_debug2));           
+
+// ------------------------------------------------------------------------------------------------
+
+// VII. Import calculated fields
+if(count($cfn_tobeimported)>0){
+
+$cfn_entity = new DbDefCalcFunctions($this->system, array('entity'=>'defCalcFunctions'));
+
+$repAction = new ReportActions($this->system, null);
+
+$cfn_names = mysql__select_list2($mysqli, 'SELECT cfn_Name FROM defCalcFunctions');
+
+foreach($cfn_tobeimported as $cfn_ID => $rty_IDs){ //$rty_IDs $rty_ID=>$dty_ID
+
+        $cfn_code = @$def_calcfields[$cfn_ID]['cfn_FunctionSpecification'];
+            
+        //1. convert smarty report from concept to local codes
+        $cfn_code = $repAction->convertTemplate($cfn_code, 1);
+        if(@$cfn_code['template']) $cfn_code = $cfn_code['template'];
+        
+//           $cfn_values[$idx_cfn_code] = convertCalcField( $cfn_values[$idx_cfn_code] );
+        
+        //2. check if the same code already exists
+        $id = mysql__select_value($mysqli, 
+            'SELECT cfn_ID FROM defCalcFunctions WHERE cfn_FunctionSpecification="'
+            .$mysqli->real_escape_string($cfn_code).'"');
+            
+        if($id>0){ //code is the same 
+        
+            $new_cfn_ID = $id;
+            
+        }else{
+        
+            //3. convert record types 
+            $cfn_rectypes_new = array();
+            $cfn_rectypes = @$def_calcfields[$cfn_ID]['cfn_RecTypeIDs'];
+            $idx_ccode   = $def_rts['commonNamesToIndex']['rty_ConceptID'];
+
+            if($cfn_rectypes){
+                $cfn_rectypes = explode(',', $cfn_rectypes);
+                foreach ($cfn_rectypes as $rtyID){
+                    $trg_ID = @$this->rectypes_correspondence[$rtyID];
+                    if(!($trg_ID>0)){
+                        $ccode = @$def_rts[$rtyID]['commonFields'][$idx_ccode];
+                        if($ccode){
+                            $trg_ID = ConceptCode::getRecTypeLocalID($ccode);    
+                        }
+                    }
+                    if($trg_ID>0){
+                        $cfn_rectypes_new[] = $trg_ID;        
+                    }
+                }
+            }
+            $cfn_rectypes_new = implode(',', $cfn_rectypes_new);
+            
+            
+            //4. save calc field in database
+            //fields:[fldname:value,fieldname2:values,.....]
+            $cfn_values = $def_calcfields[$cfn_ID];
+            $cfn_values['cfn_ID'] = -1;
+            $cfn_values['cfn_Name'] = $this->doDisambiguate($cfn_values['cfn_Name'], $cfn_names);
+            $cfn_names[] = $cfn_values['cfn_Name'];
+            $cfn_values['cfn_FunctionSpecification'] = $cfn_code;
+            $cfn_values['cfn_RecTypeIDs'] = $cfn_rectypes_new;
+            $cfn_values = array('entity'=>'defCalcFunctions', 'fields'=>$cfn_values);
+            
+            $cfn_entity->setData($cfn_values);
+            $cfn_entity->setRecords(null); //reset
+            $new_cfn_ID = $cfn_entity->save();   //register remote url - it returns ulf_ID
+            
+        }
+        
+        if($new_cfn_ID===false){
+            $error = $this->system->getError();
+            $ret = '';
+            if(@$error['message']){
+                $ret = substr($error['message'],0,100);
+            }
+            $this->error_exit2("Can't update calculation field# ".$cfn_ID.". ".$ret);
+            return false;
+        }
+
+        //5. Update record type
+        foreach($rty_IDs as $idx=>$codes){
+            $rty_ID = array_keys($codes)[0];
+            $dty_ID = $codes[$rty_ID];
+            $query = 'UPDATE defRecStructure SET rst_CalcFunctionID='
+                .$new_cfn_ID.' WHERE rst_RecTypeID='.$rty_ID.' AND rst_DetailTypeID='.$dty_ID;
+            $mysqli->query( $query );
+        }
+    
+}//foreach calc fields
+}
 
 $mysqli->commit();        
             
