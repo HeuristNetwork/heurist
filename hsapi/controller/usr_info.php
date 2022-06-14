@@ -39,7 +39,7 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
     
     $error = $system->dbname_check(@$_REQUEST['db']);
 
-    if(!$error){
+    if($error){
         $system->addError(HEURIST_INVALID_REQUEST, $error);
         $res = false;
   
