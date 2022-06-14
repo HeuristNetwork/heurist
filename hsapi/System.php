@@ -98,6 +98,7 @@ class System {
             return false;
         }
 
+        
         //dbutils?
         $connection_ok = $this->init_db_connection();
         if($connection_ok!==false){
@@ -793,6 +794,21 @@ error_log(print_r($_REQUEST, true));
     public function dbname(){
         return $this->dbname;
     }
+
+
+    public function dbname_check($db){
+        
+        $error = null;
+
+        if($db){
+            if(preg_match('/[^A-Za-z0-9_\$]/', $db)){ //validatate database name
+                $error = 'Database parameter is wrong';
+            }
+        }else{
+            $error = 'Database parameter not defined';
+        }
+        return $error;   
+    }
     
     /**
     * set dbname and dbname_full properties
@@ -801,20 +817,20 @@ error_log(print_r($_REQUEST, true));
     */
     public function set_dbname_full($db, $dbrequired=true){
         
-        if($db){
-            
-            //list($this->dbname_full, $this->dbname) = DbUtils::databaseGetNames($db
-            list($this->dbname_full, $this->dbname ) = mysql__get_names( $db );
-            
-        }else{
+        $error = $this->dbname_check($db);
+        
+        if($error){
             $this->dbname = null;
             $this->dbname_full = null;
             
             if($dbrequired){
-                $this->addError(HEURIST_INVALID_REQUEST, "Database parameter not defined");
+                $this->addError(HEURIST_INVALID_REQUEST, $error);
                 $this->mysqli = null;
                 return false;
             }
+        }else{
+            //list($this->dbname_full, $this->dbname) = DbUtils::databaseGetNames($db
+            list($this->dbname_full, $this->dbname ) = mysql__get_names( $db );
         }
         return true;
     }
@@ -1569,8 +1585,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             
             
             $superuser = false;
-            if(false)
-            {
+            if(false){
                 $user_id = is_numeric($username)?$username:2;
                 $user = user_getById($this->mysqli, $user_id);
                 $superuser = true;

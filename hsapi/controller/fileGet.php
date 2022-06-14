@@ -38,14 +38,15 @@ version - thumb or thumbnail|icon|full (thumb is default)
 //main purpose - download entity images
 $db = @$_REQUEST['db'];
 $filename = @$_REQUEST['file'];
+$entity_name = @$_REQUEST['entity'];
 
 $error = null;
 
-if(!$db){
-    $error = "Db parameter is not defined";
-}
-
 $system = new System(); //without db connection and session - just paths
+$error = $system->dbname_check($db);
+
+if(!$error){
+
 $system->initPathConstants($db);
     
 if($filename){ //download from scratch (for csv import)
@@ -261,7 +262,7 @@ if($filename){ //download from scratch (for csv import)
         exit();
 }
 
-if($error){
+}else {
     if(!$entity_name){ //print error as text
         print $error;
     }else{ //@todo return error image

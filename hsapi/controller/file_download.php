@@ -49,7 +49,9 @@ detectLargeInputs('COOKIE file_download', $_COOKIE);
 $system = new System(); //without connection
 $db = @$_REQUEST['db'];
 
-if($db){
+$error = $system->dbname_check($db);
+
+if(!$error){
     
     $fileid = @$_REQUEST['thumb'];
     if($fileid){ 

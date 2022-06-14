@@ -36,7 +36,14 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
     $action = @$_REQUEST['a']; //$system->getError();
     
     $system = new System();
-        
+    
+    $error = $system->dbname_check(@$_REQUEST['db']);
+
+    if(!$error){
+        $system->addError(HEURIST_INVALID_REQUEST, $error);
+        $res = false;
+  
+    }else
     if($action=='verify_credentials'){ //just check only if logged in (db connection not required)
         
         $res = $system->verify_credentials(@$_REQUEST['db']);
