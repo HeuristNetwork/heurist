@@ -359,7 +359,7 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
                 
                 $url = @$_REQUEST['url'];
                 
-                $res = recognizeMimeTypeFromURL($mysqli, $url);
+                $res = recognizeMimeTypeFromURL($mysqli, $url, false);
                 
             } else {
 

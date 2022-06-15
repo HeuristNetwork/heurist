@@ -1013,7 +1013,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
            if(@$ext['extension']){
                $fields['ulf_MimeExt'] = $ext['extension'];
            }else{
-               $fields['ulf_MimeExt'] = 'bin';
+               $fields['ulf_MimeExt'] = 'bin';  //default value
            }
        }
        $fields['ulf_UploaderUGrpID'] = $this->system->get_user_id(); 

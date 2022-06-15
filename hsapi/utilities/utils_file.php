@@ -1341,7 +1341,7 @@ error_log('http code = '.$code.'  curl error='.$error);
 //
 // recognize mime type from url, update ext table if missed and returns extension
 //
-function recognizeMimeTypeFromURL($mysqli, $url){ 
+function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){ 
                
     
         $url = filter_var($url, FILTER_SANITIZE_URL);
@@ -1377,6 +1377,7 @@ function recognizeMimeTypeFromURL($mysqli, $url){
             $mimeType = loadRemoteURLContentType($url); 
             
         }
+        
         
         if($mimeType!=null && $mimeType!==false){
             
@@ -1419,7 +1420,9 @@ function recognizeMimeTypeFromURL($mysqli, $url){
             }
         }
         //if extension not found apply bin: application/octet-stream - generic mime type
-        if($extension==null) $extension = 'bin';   
+        if($extension==null && $use_default_ext) {
+            $extension = 'bin';    
+        }
         $res = array('extension'=>$extension, 'needrefresh'=>$needrefresh);
         
         return $res;

@@ -73,9 +73,11 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
         exit();
     }
     
+    $type_2 = 'external';
     $type_ = '_remote';
     if($orig_db_id==2 && $orig_id==34){
         $type_ = '_tiled@';    
+        $type_2 = 'tiled';
     }
     
     $mysqli = $system->get_mysqli();
@@ -132,8 +134,8 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
                 $ext = ($type_=='_remote') ? recognizeMimeTypeFromURL($mysqli, $url) :'png'; //@todo check preferred source
                 
                 $query = 'insert into '.$db_name.'.recUploadedFiles '
-                .'(ulf_OrigFileName,ulf_ObfuscatedFileID,ulf_UploaderUGrpID,ulf_ExternalFileReference,ulf_MimeExt) '
-                .' values ("'.$type_.'","'.$nonce.'",2,"'.$url.'","'.$ext.'")';
+                .'(ulf_OrigFileName,ulf_ObfuscatedFileID,ulf_UploaderUGrpID,ulf_ExternalFileReference,ulf_MimeExt,ulf_PreferredSource) '
+                .' values ("'.$type_.'","'.$nonce.'",2,"'.$url.'","'.$ext.'","'.$type_2.'")';
                 $mysqli->query($query);
                 $ulf_ID = $mysqli->insert_id;
                 

@@ -43,8 +43,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         this.options.use_cache = false;
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
-        this.options.edit_height = 640;
+        this.options.edit_height = 700;
         this.options.edit_width = 950;
+        this.options.height = 800;
         
         //this.options.edit_addrecordfirst = true; //special behaviour - show editor first
         
@@ -58,8 +59,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             this.options.width = (isNaN(this.options.width) || this.options.width<815)?900:this.options.width;                    
             //this.options.edit_mode = 'none'
         }
-        this.options.height = (isNaN(this.options.height) || this.options.height<815)?900:this.options.height;                    
-    
+        this.options.height = (isNaN(this.options.height) || this.options.height<800)
+                        ?(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95:this.options.height;                    
+
         this._super();
     },
     
@@ -388,7 +390,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         if(!isLocal){ //remote - detect mimetype when URL is changed
             var that = this;
             var ele = that._editing.getFieldByName('ulf_ExternalFileReference');
-            ele.editing_input('option', 'change', function(){
+            var inpt = ele.editing_input('getInputs');
+            //ele.editing_input('option', 'change', function(){
+            this._on($(inpt[0]), {'blur':function(){
             
                 var ele = that._editing.getFieldByName('ulf_ExternalFileReference');    
              
@@ -433,7 +437,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     */
                 }
                 
-            });
+            }});
             
             ele.editing_input('focus');
         }else{
@@ -452,7 +456,81 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 
     },    
     
+    _getValidatedValues: function(){
+        
+        var res = this._super();
+        
+        var val = this._editing.getValue('ulf_ExternalFileReference');
+        var isLocal = window.hWin.HEURIST4.util.isempty(val[0]);
+        if(!isLocal && res){
+            
+            var mimeext = this._editing.getValue('ulf_MimeExt');
+            var err_msg = this._validateExt( mimeext[0] );        
+            if(err_msg){
+                window.hWin.HEURIST4.msg.showMsgErr( err_msg );
+                res = null;
+            }
+        }
+        
+        return res;
+    },
     
+    _validateExt: function( ext ){
+        
+        var msg_error = '';
+        if(ext==null) ext = '';
+
+        if(!ext){
+
+            msg_error = '<b>Inaccessible web resource</b>The URL you have entered does not point to an accessible web resource. '
+        +'It could be incorrect, or the URL is not openly accessible.';
+
+        }else if (ext=='html' || ext=='htm'){
+
+            msg_error = '<b>URL points to a web page</b>'
+            +'The URL points to a web page or web application rather than a remote file. '
+            +'The URL must point to a FILE resource; web pages are not supported by this field type.'
+            +'Web page URLs should simply be entered as a text string which will be correctly interpreted if it uses http:// or https:// ';
+
+        }else{
+
+            //allowed extensions
+            var allowed_ext = window.hWin.HAPI4.sysinfo.media_ext+',soundcloud,vimeo,youtube,json'.split(',');
+
+            if(allowed_ext.indexOf(ext)<0){
+
+                msg_error = 
+                '<b>Unsupported file type</b>'
+                +'<p>The URL you have entered does not appear to point to a file type that we currently support. It must point to a FILE resource which can be rendered eg an image, streaming data source or data file. If you would like this file type supported, please contact the Heurist team (by email or Bug reporter at top of page).</p>'
+                +'Currently supported file types include: <ul><li>'
+                +'Web compatible images (JPG, PNG, GIF, JPEG2000; note that other image formats may be supported but cannot be rendered in web pages without special software) </li>'
+                +'<li>Composite image resources (Tiled image stacks, IIIF Manifests) </li>'
+                +'<li>Media files in common formats (MPG, MPEG4, AVI, Quiktime etc.) </li>'
+                +'<li>Streaming media such as YouTube, Vimeo, SoundCloud </li>'
+                +'<li>PDF and other text files, spreadsheets </li>'
+                +'<li>Vector GIS data (Shapefiles, KML, CSV) </li></ul>';
+
+
+
+                // if(ext=='bin'){
+                // ele2.editing_input('showErrorMsg', 'Cannot retrieve content type for given url '
+                // +' or mimetype was not found among allowed types.'
+                //    +' Generic mimetype has been selected. Please select or add mimetype manually.');
+
+                /*
+                window.hWin.HEURIST4.msg.showMsgDlg();
+                */    
+            }else{
+                msg_error =  ''; 
+            }
+        }
+
+        return msg_error;
+    },
+    
+    //
+    //
+    //
     _requestMimeTypeByURL:function(){
         
         if(this._additionMode=='tiled'){
@@ -467,8 +545,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
 
   
+        window.hWin.HEURIST4.msg.showMsgFlash('Getting resource type', false);
+  
         var that = this;
-        
+
         var url = that._previousURL;
 
         that._requestForMimeType_Timeout = 0;
@@ -478,35 +558,41 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             
             that._requestForMimeType = false;
             var ele2 = that._editing.getFieldByName('ulf_MimeExt');
-             
+            
+            var ext = '';
             if(response.status == window.hWin.ResponseStatus.OK){
-                var ext = response.data.extension;
+                ext = response.data.extension;
                 
                 if(response.data.needrefresh){
                     var cfg = ele2.editing_input('getConfigMode');
                     window.hWin.HAPI4.EntityMgr.clearEntityData( cfg.entity );
                 }
                 
-                ele2.editing_input('setValue', ext );
-                ele2.show();
-                that.onEditFormChange();
-                
-                if(ext=='bin'){
-                    ele2.editing_input('showErrorMsg', 'Cannot retrieve content type for given url '
-                    +' or mimetype was not found among allowed types.'
-                        +' Generic mimetype has been selected. Please select or add mimetype manually.');
-                    
-                    /*
-                    window.hWin.HEURIST4.msg.showMsgDlg();
-                    */    
-                }else{
-                    ele2.editing_input('showErrorMsg', ''); //hide
-                }
-            }else{
-                ele2.editing_input('showErrorMsg', 'Cannot retrieve content type for given url.'
-                +' Please enter it manaully');
             }
-            //that.onEditFormChange();
+            if(ext==null) ext = '';
+             
+            var msg_error = that._validateExt( ext );
+            
+            ele2.editing_input('setValue', ext );
+            ele2.show();
+            that.onEditFormChange();
+            
+            
+            if(msg_error){
+                ele2.editing_input('showErrorMsg', msg_error);    
+            }else{
+                ele2.editing_input('showErrorMsg', ''); //hide
+            }
+            /*
+            var ele = that._toolbar;
+            if(ele){
+                ele.find('#btnRecSave').css('visibility', msg_error?'hidden':'visible');
+            }*/
+            
+    
+            window.hWin.HEURIST4.msg.closeMsgFlash();
+            
+            
         });
         
         

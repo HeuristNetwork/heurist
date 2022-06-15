@@ -1093,6 +1093,8 @@ error_log(print_r($_REQUEST, true));
                     'host_logo'=>$host_logo,
                     'host_url'=>$host_url,
                     
+                    'media_ext'=>$this->get_system('sys_MediaExtensions'),
+                    
                     'pwd_DatabaseCreation'=> (strlen(@$passwordForDatabaseCreation)>6), 
                     'pwd_DatabaseDeletion'=> (strlen(@$passwordForDatabaseDeletion)>15), //delete for db statistics
                     'pwd_ReservedChanges' => (strlen(@$passwordForReservedChanges)>6),  //allow change reserved fields 
