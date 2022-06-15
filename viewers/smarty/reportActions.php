@@ -74,7 +74,7 @@ class ReportActions {
 
                     // gpl->tpl
                     $template_body = file_get_contents($this->dir.$filename);
-                    $res = convertTemplate($template_body, 1); //to local codes
+                    $res = $this->convertTemplate($template_body, 1); //to local codes
                     
                     if(is_array($res) && @$res['details_not_found']){
                         //error except Harvard Bibliography (since many databases do not have biblio defs by default)
@@ -297,7 +297,7 @@ class ReportActions {
             }//for vars
             
             if(count($replacements)>0){
-                   $new_exp = "{".array_str_replace(array_keys($replacements), array_values($replacements), $exp)."}";
+                   $new_exp = "{".$this->array_str_replace(array_keys($replacements), array_values($replacements), $exp)."}";
                    if($matches[0][$i] != $new_exp){
                         $replacements_exp[$matches[0][$i]] = $new_exp;
                    }
@@ -306,7 +306,7 @@ class ReportActions {
         
         
         if(count($replacements_exp)>0){
-             $template = array_str_replace(array_keys($replacements_exp), array_values($replacements_exp), $template);
+             $template = $this->array_str_replace(array_keys($replacements_exp), array_values($replacements_exp), $template);
         }
 
         if($mode==1){
