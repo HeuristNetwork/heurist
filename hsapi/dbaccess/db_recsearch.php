@@ -414,6 +414,10 @@ function recordSearchFacets($system, $params){
 
 
         //count query
+        if($grouporder_clause!='' && strpos($grouporder_clause,'ORDER BY')>0){  //mariadb hates "order by" in the same time with "group by"
+            $grouporder_clause = substr($grouporder_clause,0,strpos($grouporder_clause,'ORDER BY')-1);
+        }
+        
         $query =  $select_clause.$qclauses["from"].$detail_link." WHERE ".$qclauses["where"].$details_where.$grouporder_clause;
 
         /*
@@ -423,7 +427,9 @@ function recordSearchFacets($system, $params){
         */
 
         //
-
+//if(HEURIST_DBNAME=='digital_harlem'){
+    //error_log($query);    
+//}        
 
         $res = $mysqli->query($query);
         if (!$res){
