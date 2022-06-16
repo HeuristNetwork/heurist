@@ -2798,8 +2798,10 @@ $.widget( "heurist.mapping", {
             controls = __splitval(params['controls']);
         }
         controls.push('zoom'); //zoom is always visible
-        controls.push('addmapdoc'); //add map doc is always visible for "non published" ui
-        controls.push('help');
+        if(!this.options.isPublished){
+            controls.push('addmapdoc'); //add map doc is always visible for "non published" ui
+            controls.push('help');
+        }
         
         var that = this;
         function __controls(val){
@@ -3080,12 +3082,9 @@ $.widget( "heurist.mapping", {
         //__controls('scale');
         if(controls.indexOf('draw')>=0){
              __controls('draw');   
-        }else
-        if(!this.options.isPublished){
-            __controls('publish');
-            __controls('addmapdoc');    
         }
-
+        __controls('publish');
+        __controls('addmapdoc');    
         __controls('help');
         
         
