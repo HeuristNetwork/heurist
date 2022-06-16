@@ -46,7 +46,7 @@ if(isset($_POST['data'])) {
             // Check if the e-mail address is valid
             if(filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
                 // Send e-mail
-                $result = sendEmail_old($recipient, $subject, $message, $header); // utils_mail.php
+                $result = sendEmail_native($recipient, $subject, $message, $header); // utils_mail.php
                 $response .= $recipient . " --> " . $result . "\n";
             }else{
                 $response .= $recipient . " --> invalid e-mail address\n";

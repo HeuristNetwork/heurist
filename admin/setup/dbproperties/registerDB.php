@@ -329,8 +329,49 @@ function registerDatabase() {
                 $dbVersion = $system->get_system('sys_dbVersion').'.'
                                         .$system->get_system('sys_dbSubVersion').'.'
                                         .$system->get_system('sys_dbSubSubVersion');
+                                        
+                $params = array('db'=>HEURIST_INDEX_DATABASE,
+                'dbReg'=>HEURIST_DBNAME,
+                'dbVer'=>$dbVersion,
+                'dbTitle'=>$dbDescription,
+                'usrPassword'=>$dbowner['ugr_Password'],
+                'usrName'=>$dbowner['ugr_Name'],
+                'usrFirstName'=>$dbowner['ugr_FirstName'],
+                'usrLastName'=>$dbowner['ugr_LastName'],
+                'usrEmail'=>$dbowner['ugr_eMail'],
+                'serverURL'=>$serverURL
+                );
+                if($dbNewID!=null && intval($dbNewID)>0){
+                    $params['newid'] = $dbNewID;
+                }
 
-                                        //HEURIST_INDEX_BASE_URL
+                if(strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===0){    
+                
+                    $data = DbUtils::databaseNextRegisterID($params);
+
+                    $mysqli = $system->get_mysqli();
+                    //restore connection back to currrent database
+                    mysql__usedatabase($mysqli, HEURIST_DBNAME); 
+                    
+                }else{
+                    
+                    $reg_url =   HEURIST_INDEX_BASE_URL
+                       .'admin/setup/dbproperties/getNextDBRegistrationID.php?'
+                       .http_build_query($params);
+                       
+                    $data = loadRemoteURLContentWithRange($reg_url, null, true);
+                    
+                    if (!isset($data) || $data==null) {
+                        
+                        echo '<p class="ui-state-error">'
+                            .'Unable to connect Heurist master index, possibly due to timeout or proxy setting<br />'
+                            ."URL requested: <a href='$reg_url'>$reg_url</a></p>";
+                        return false;
+                    }
+                    
+                }                                   
+
+                /*
                 $reg_url =   HEURIST_INDEX_BASE_URL
                 .'admin/setup/dbproperties/getNextDBRegistrationID.php' .
                 "?db=".HEURIST_INDEX_DATABASE."&dbReg=" . $heuristDBname . "&dbVer=" . $dbVersion .
@@ -338,29 +379,11 @@ function registerDatabase() {
                 "&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName .
                 "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail
                 ."&serverURL=" . rawurlencode($serverURL);
-                
-                if($dbNewID!=null && intval($dbNewID)>0){
-                    $reg_url = $reg_url.'&newid='.$dbNewID;
-                }
-
                 $data = loadRemoteURLContentSpecial($reg_url); //without proxy
-                
-                if (!isset($data) || $data==null) {
-                    
-                    echo '<p class="ui-state-error">'
-                        .'Unable to connect Heurist master index, possibly due to timeout or proxy setting<br />'
-                        ."URL requested: <a href='$reg_url'>$reg_url</a></p>";
-                    return false;
-                }
+                */
                 
                 $dbID = intval($data);
                 
-                $mysqli = $system->get_mysqli();
-                //restore connection
-                mysql__usedatabase($mysqli, HEURIST_DBNAME); 
-                
-                 // correct return of data is just the registration number. we probably need a
-
                 if ($dbID == 0) { // Unable to allocate a new database identifier
                     $decodedData = explode(',', $data);
 

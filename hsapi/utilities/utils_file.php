@@ -1170,7 +1170,7 @@ function saveURLasFile($url, $filename)
 // 3. get current db version
 //
 function loadRemoteURLContentSpecial($url){
-
+    
     if(strpos($url, HEURIST_SERVER_URL)===0){
         
         //if requested url is on the same server 
@@ -1188,7 +1188,7 @@ function loadRemoteURLContentSpecial($url){
         parse_str($parsed['query'], $_REQUEST);
 
         $out = getScriptOutput($path);
-        
+     
         return $out;
     }else{
         return loadRemoteURLContentWithRange($url, null, true);
