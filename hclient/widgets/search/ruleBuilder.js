@@ -103,7 +103,7 @@ $.widget( "heurist.ruleBuilder", {
         this.btn_cancel = $( "<button>", {text:'Cancel'} ).appendTo(this.element);*/
 
         //(this.options.level<3)?'12em':
-        this.div_btn2 =  $('<div>').css({'width':'55px'}).appendTo(this.element); //,'margin-left':'0.5em'
+        this.div_btn2 =  $('<div>').css({'width':'60px'}).appendTo(this.element); //,'margin-left':'0.5em'
 
         this.btn_edit = $( "<button>", {text:'Filter'})
         .attr('title', 'Create additional filter' )

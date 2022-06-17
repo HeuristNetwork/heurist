@@ -77,13 +77,13 @@ $.widget( "heurist.searchBuilder", {
         if(ht>700) ht = 700;
 
         //this.options.is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
-
+console.log('!!!!!');
         if(this.options.is_dialog){
         
             this._dialog = this.element.dialog({
                 autoOpen: false,
                 height: 450,
-                width:750,
+                width:950,
                 modal: this.options.is_modal,
 
                 resizable: true, //!is_h6style,
@@ -187,7 +187,13 @@ $.widget( "heurist.searchBuilder", {
         }else{
             this.pnl_Items.find('.search_conjunction').css('visibility','hidden');    
         }
-
+        
+        if(this.options.is_for_rules){
+            var sele = this.element.find('#sortby_accordion');
+            sele.hide();
+            sele.prev().hide();
+            sele.next().hide();
+        }else
         if(this.sort_array.length==0){
             this.addSortItem();
         }else{

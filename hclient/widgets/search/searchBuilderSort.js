@@ -188,7 +188,10 @@ $.widget( "heurist.searchBuilderSort", {
     // Get label of selected value
     getLabel: function(){
 
-        var label = this.select_fields.hSelect('widget').text();
+        var label 
+        if(this.select_fields.hSelect('instance')){
+            label = this.select_fields.hSelect('widget').text();    
+        }
         if(label == 'select...' || label == ''){
             return '';
         }
