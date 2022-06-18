@@ -76,7 +76,18 @@
         <input name="init_svsID" type="hidden" value=""/>
         <div id="init_svsID" style="display:table-row"></div>
     </div>
-        
+
+    <div class="heurist_SearchTree">
+        <div id="simple_search_header" class="header" style="padding:10px 0.4em"><label>Search everything header:&nbsp;</label></div>
+        <label><input name="simple_search_header" value="" /></label>
+        <span class="heurist-helper1"> Customise search everything header text </span>
+    </div>
+
+    <div class="heurist_SearchTree">
+        <div id="simple_search_text" class="header" style="padding:10px 0.4em"><label>Search everything text:&nbsp;</label></div>
+        <label><input name="simple_search_text" value="" /></label>
+        <span class="heurist-helper1"> Customise search everything field text </span>
+    </div>
 
     <!-- result list -->    
     <div  class="heurist_resultList">
@@ -485,6 +496,27 @@
         <i>Filter is applied to the current resultset </i>
     </div>
     
+    <div class="heurist_resultList heurist_resultListExt heurist_resultListDataTable">
+        <div class="header" style="vertical-align:top">
+            <label>No data message</label>
+        </div>
+        <textarea id="empty_remark" rows="3" style="width:500px"/>
+        <br>
+        <span class="heurist-helper1">
+            Message to be shown if query returns no records
+        </span>
+    </div>
+
+    <div class="heurist_resultList heurist_resultListExt heurist_resultListDataTable">
+        <div class="header" style="vertical-align:top">
+            <label>Place holder text</label>
+        </div>
+        <textarea id="placeholder_text" rows="3" style="width:500px"/>
+        <br>
+        <span class="heurist-helper1">
+            Message to display while no record or search has been selected
+        </span>
+    </div>
     
     <div Xclass="heurist_Navigation heurist_Search heurist_SearchTree heurist_resultList heurist_resultListExt heurist_resultListDataTable heurist_resultListCollection heurist_Map">
         <div class="header"><label>Search group&nbsp;</label></div>

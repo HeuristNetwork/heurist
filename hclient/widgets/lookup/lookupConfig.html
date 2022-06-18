@@ -1,3 +1,15 @@
+<style type="text/css">
+    .lookup_data span.truncate{
+        display: inline-block;
+
+        padding-left: 15px; 
+        max-width: 300px;
+
+        vertical-align: middle;
+        cursor: default;
+    }
+</style>
+
 <div class="ent_wrapper">
 
     <div class="ui-heurist-header"></div>
@@ -65,13 +77,21 @@
                     </div>
                 </fieldset>
                 
-                <div style="padding-left:20px;" class="service_details" id="service_mapping">
+                <div style="padding-left:20px;display: inline-block;" class="service_details" id="service_mapping">
                     <h4>Map the result fields to Heurist record fields</h4>
-                    
-                    <table id="tbl_matches" style="font-size:1em;">
+
+                    <div id="example_records" style="display: inline-block;text-align: center;width: 15px;">
+
+                        Search example records: 
+                        <span class="ui-icon ui-icon-arrowthick-1-w" style="cursor: pointer;" />
+                        <span id="current_idx">1</span> 
+                        <span class="ui-icon ui-icon-arrowthick-1-e" style="cursor: pointer;" />
+
+                    </div>
+
+                    <table id="tbl_matches" style="font-size:1em;" data-idx="0">
                     
                     </table>
-                
                 </div>
                 
                 <div style="text-align: center;padding: 20px;">

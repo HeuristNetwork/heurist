@@ -39,14 +39,17 @@ $.widget( "heurist.recordListExt", {
         custom_css_for_frame: null,
         record_with_custom_styles: 0, //record id with custom css and style links DT_CMS_CSS and DT_CMS_EXTFILES
         
-        onLoadComplete: null  //callback
+        onLoadComplete: null,  //callback
         
+        placeholder_text: null //text to display while no record/recordset is loaded
     },
 
     _current_url: null, //keeps current url - see loadURL 
     _query_request: null, //keeps current query request
     _events: null,
     _dataTable: null,
+
+    placeholder_ele: null, //element holding the placeholder text
 
     // the constructor
     _create: function() {
@@ -189,7 +192,13 @@ that._dout('>>'+this.options.search_initial);
             this.doSearch( this.options.search_initial );
             this.options.search_initial = null;
         }        
-        
+
+        if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)){
+            this.placeholder_ele = $('<div>')
+                .css('white-space', 'pre-wrap')
+                .prependTo(this.element)
+                .html(this.options.placeholder_text);
+        }
     }, //end _create
 
     //
@@ -320,6 +329,10 @@ this._dout('update dataset '+request.q);
             var id = this.element.attr('id');
             $(".header"+id).html(this.options.title);
             $('a[href="#'+id+'"]').html(this.options.title);
+        }
+
+        if(this.placeholder_ele != null){
+            this.placeholder_ele.hide();
         }
 
 this._dout('refresh vis='+this.element.is(':visible'));            

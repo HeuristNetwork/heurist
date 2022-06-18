@@ -55,7 +55,8 @@ $.widget( "heurist.lookupConfig", {
     selectRecordType:null, //selector for rectypes
     selectServiceType: null, //selector for lookup service types
     serviceList: null, //left panel list
-    
+
+    example_results: {},    
     
     // the widget's constructor
     _create: function() {
@@ -287,6 +288,7 @@ $.widget( "heurist.lookupConfig", {
         // on change handler
         this._on(this.selectServiceType[0], {
             change: function(event, ui){
+
                 var service = that.selectServiceType.val(); // selected service
 
                 if(service == 'ESTC_editions' || service == 'ESTC_works' || service == 'ESTC'){
@@ -351,6 +353,23 @@ $.widget( "heurist.lookupConfig", {
         
         //show hide hints and helps according to current level
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
+
+        this._on(this.element.find('#example_records .ui-icon'), {
+            'click': function(event){
+                var idx = that.element.find('#tbl_matches').attr('data-idx');
+
+                if($(event.target).hasClass('ui-icon-arrowthick-1-e')){
+                    idx = idx == 9 ? 0 : parseInt(idx) + 1;
+                }else{
+                    idx = idx == 0 ? 9 : parseInt(idx) - 1;
+                }
+
+                that.element.find('#current_idx').text(parseInt(idx)+1);
+                that.element.find('#tbl_matches').attr('data-idx', idx);
+
+                that._displayTestResults(that.selectServiceType.val());
+            }
+        });
 
         return true;
     },
@@ -627,7 +646,7 @@ $.widget( "heurist.lookupConfig", {
             tbl.empty();
 
             $.each(this._current_cfg.fields, function(field, code){
-                $('<tr><td>'+field+'</td><td><select data-field="'+field+'"/></td></tr>').appendTo(tbl);
+                $('<tr><td>'+field+'</td><td><select data-field="'+field+'"/></td><td class="lookup_data" data-field="'+field+'"></td></tr>').appendTo(tbl);
             });
 
             var rty_ID = this._current_cfg.rty_ID>0 ?$Db.getLocalID('rty',this._current_cfg.rty_ID) :'';
@@ -711,11 +730,10 @@ $.widget( "heurist.lookupConfig", {
             }
 
             if(!$.isEmptyObject(this._current_cfg) || this.selectServiceType.val()){
-
                 this.element.find('.service_details').show();
             }else{
-
                 this.element.find('.service_details').hide();
+                this.element.find('#example_records').hide();
             }
 
             if(this.selectRecordType.val()){
@@ -726,6 +744,7 @@ $.widget( "heurist.lookupConfig", {
 
                 this.element.find('#service_mapping').hide();
                 this.btnApply.hide();
+                this.element.find('#example_records').hide();
             }
         }
             
@@ -761,6 +780,209 @@ $.widget( "heurist.lookupConfig", {
         this._fillConfigForm(null, cfg0);
     },
 
+    _displayTestResults: function(service_name){
+
+        var that = this;
+
+        var handled_services = ['bnfLibrary', 'bnfLibraryAut', 'tlcmap', 'geoName', 'postalCodeSearch']; // 'nomisma' 
+
+        if(handled_services.indexOf(service_name) == -1 || window.hWin.HEURIST4.util.isempty(this.selectRecordType.val())){
+            this.element.find('#example_records').hide();
+            return;
+        }
+
+        if(!this.example_results[service_name]){
+            // Retrieve data
+            var url = '';
+            var serviceType = service_name;
+            var request = {};
+            switch (service_name) {
+                case 'bnfLibrary':
+                    url = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&maximumRecords=10&startRecord=1&query='+encodeURIComponent('(bib.anywhere any "Vincent")');
+                    serviceType = 'bnflibrary_bib';
+                    break;
+                case 'bnfLibraryAut':
+                    url = 'http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=intermarcxchange&maximumRecords=10&startRecord=1&query='+encodeURIComponent('(aut.anywhere any "Vincent")');
+                    serviceType = 'bnflibrary_aut';
+                    break;
+                case 'nomisma':
+                    url = 'http://nomisma.org/apis/getMints?id=denarius'; // getMints, getHoards, getFindspots
+                    request['search_type'] = 'mint';
+                    break;
+                case 'tlcmap':
+                    url = 'http://tlcmap.org/ghap/search?format=csv&paging=10&fuzzyname=London';
+                    break;
+                case 'geoName':
+                    url = 'http://api.geonames.org/searchJSON?username=osmakov&maxRows=10&name=London';
+                    serviceType = 'geonames';
+                    break;
+                case 'postalCodeSearch':
+                    url = 'http://api.geonames.org/postalCodeLookupJSON?username=osmakov&maxRows=10&placename=London';
+                    serviceType = 'geonames';
+                    break;
+                default:
+                    break;
+            }
+
+            if(url == ''){
+                return;
+            }
+
+            request = {
+                'service': url, // request url
+                'serviceType': serviceType // requesting service, otherwise no
+            };
+
+            window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+
+                if(service_name.indexOf('bnfLibrary') != -1){
+                    that.example_results[service_name] = response.result;
+                }else if(service_name == 'geoName'){
+                    that.example_results[service_name] = response.geonames;
+                }else if(service_name == 'postalCodeSearch'){
+                    that.example_results[service_name] = response.postalcodes;
+                }else{
+                    that.example_results[service_name] = response;
+                }
+
+                that._displayTestResults(service_name);
+                return;
+            });
+
+            return;
+        }
+
+        // Display data
+        var $tbl_cells = this.element.find('.lookup_data');
+
+        var idx = this.element.find('#tbl_matches').attr('data-idx');
+        var data = this.example_results[service_name] ? this.example_results[service_name][idx] : null;
+
+        if(data){
+
+            $.each($tbl_cells, function(idx, cell){
+                var $cell = $(cell);
+                var field = $cell.attr('data-field');
+                var value = null;
+
+                if(!field){
+                    return;
+                }
+
+                if(field.indexOf('.') != -1){
+
+                    var fld_parts = field.split('.');
+                    value = data[fld_parts[0]];
+                    for(var i = 1; i < fld_parts.length; i++){
+                        value = value[fld_parts[i]];
+                        if(window.hWin.HEURIST4.util.isempty(value)){
+                            break;
+                        }
+                    }
+
+                }else{
+                    value = data[field];
+                }
+
+                if(value){
+
+                    if(service_name.indexOf('bnfLibrary') != -1){
+
+                        if(field == 'author' || field == 'publisher'){
+
+                            var main_str = '';
+
+                            for(var idx in value){
+
+                                var cur_string = '';
+                                var cur_obj = value[idx];
+
+                                if(cur_obj.hasOwnProperty('firstname') && cur_obj['firstname'] != ''){
+                                    cur_string = cur_obj['firstname'];
+                                }
+                                if(cur_obj.hasOwnProperty('surname') && cur_obj['surname'] != ''){
+                                    cur_string = (cur_string != '') ? cur_obj['surname'] + ', ' + cur_string : cur_obj['surname'];
+                                }
+                                if(cur_obj.hasOwnProperty('active') && cur_obj['active'] != ''){
+                                    cur_string += ' (' + cur_obj['active'] + ')';
+                                }
+
+                                if(cur_obj.hasOwnProperty('location') && cur_obj['location'] != ''){
+                                    cur_string = cur_obj['location'];
+                                }
+                                if(cur_obj.hasOwnProperty('name') && cur_obj['name'] != ''){
+                                    if(!cur_string){
+                                        cur_string = cur_obj['name'];
+                                    }else{
+
+                                        var pub_name_length = cur_obj['name'].length;
+                                        for(var j = 0; j < completed_val.length; j++){
+
+                                            if(j < pub_name_length){ // use current name
+                                                cur_string = cur_obj['name'][j] + ' [' + cur_string + ']';
+                                            }else{ // use last available
+                                                cur_string = cur_obj['name'][pub_name_length-1] + ' [' + cur_string + ']';
+                                            }
+                                        }
+                                    }
+                                    cur_string = (cur_string != '') ? cur_obj['name'] + ', ' + cur_string : cur_obj['name'];
+                                }
+
+                                if(!cur_string){
+                                    main_str += 'Missing '+field+'; ';
+                                }else{
+                                    main_str += cur_string + '; ';
+                                }
+                            }
+
+                            value = main_str;
+                        }
+                    }else if(service_name == 'tlcmap'){
+
+                        if(field == 'geometry'){
+
+                            value = {"type": "Feature", "geometry": value};
+                            var wkt = stringifyMultiWKT(value);    
+                            if(window.hWin.HEURIST4.util.isempty(wkt)){
+                                value = '';
+                            }else{
+                                var typeCode = 'm';
+                                if(wkt.indexOf('GEOMETRYCOLLECTION')<0 && wkt.indexOf('MULTI')<0){
+                                    if(wkt.indexOf('LINESTRING')>=0){
+                                        typeCode = 'l';
+                                    }else if(wkt.indexOf('POLYGON')>=0){
+                                        typeCode = 'pl';
+                                    }else {
+                                        typeCode = 'p';
+                                    }
+                                }
+                                value = typeCode+' '+wkt;
+                            }
+                        }
+                    }
+
+                    if($.isPlainObject(value)){
+                        value = window.hWin.HEURIST4.util.htmlEscape(Object.values(isPlainObject).join(' '));
+                    }else if(window.hWin.HEURIST4.util.isArray(value) && value.length >= 1){
+                        value = window.hWin.HEURIST4.util.htmlEscape(value.join('; '));
+                    }else{
+                        value = window.hWin.HEURIST4.util.htmlEscape(value?value:'');
+                    }
+
+                    if(!window.hWin.HEURIST4.util.isempty(value)){
+                        $cell.html('<span style="display: inline-block; padding-left: 10px">&lArr;</span><span title="'+value+'" class="truncate">'+value+'</span>');
+                    }
+                }
+            });
+
+            this.element.find('#example_records').position({
+                'my': 'left+37 bottom-7', 
+                'at': 'left top', 
+                'of': $tbl_cells[0]
+            }).show();
+        }
+    },
+
     //
     // create map fields dropdowns
     //
@@ -772,7 +994,6 @@ $.widget( "heurist.lookupConfig", {
         
         var that = this;
         
-        
         $.each(tbl.find('select'), function(i,selObj){
 
             
@@ -782,8 +1003,7 @@ $.widget( "heurist.lookupConfig", {
             }
             $(selObj).empty();
         });
-        
-        
+
         if(rty_ID>0){
             $.each(tbl.find('select'), function(i, ele){
                 
@@ -834,6 +1054,7 @@ $.widget( "heurist.lookupConfig", {
             this.serviceList.find('li[data-service-id="new"]').html(s);
         }
         
+        this._displayTestResults(this.selectServiceType.val());
     },
     
     //

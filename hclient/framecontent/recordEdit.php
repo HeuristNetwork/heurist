@@ -190,6 +190,25 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         
         <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
 
+        <!-- Calendar picker -->
+        <script type="text/javascript" src="../../../external/jquery.calendars-1.2.1/jquery.calendars.js"></script>
+        <script type="text/javascript" src="../../../external/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="../../../external/jquery.calendars-1.2.1/jquery.calendars.picker.css">
+        <script type="text/javascript" src="../../../external/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
+
+        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.taiwan.js"></script>
+        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.thai.js"></script>
+        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.julian.js"></script>
+        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.persian.js"></script>
+        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.islamic.js"></script>
+        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.ummalqura.js"></script>
+        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.hebrew.js"></script>
+        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.ethiopian.js"></script>
+        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
+        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
+        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
+
         <script type="text/javascript">
             var $container;
             // Callback function on page initialization

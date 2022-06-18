@@ -44,7 +44,10 @@ $.widget( "heurist.svs_list", {
         
         filter_by_type: 1,  //0 all, 1 filters only, 2 rules only
 
-        handle_favourites: null // function to add/remove favourite filters
+        handle_favourites: null, // function to add/remove favourite filters
+
+        simple_search_header: 'Simple search', // header text for 'search everything' filter
+        simple_search_text: 'Search everything:' // field label for the simple search filter
     },
 
     isPublished: false,
@@ -1080,8 +1083,12 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
 
             //position:absolute;bottom:0px;
             if(!this.direct_search_div){
+
+                var header_label = !window.hWin.HEURIST4.util.isempty(this.options.simple_search_header) ? this.options.simple_search_header : 'Simple search';
+                var field_text = !window.hWin.HEURIST4.util.isempty(this.options.simple_search_text) ? this.options.simple_search_text : 'Search everything:';
+
                 this.direct_search_div = $('<div style="height:8.5em;padding:4px;width:100%">'
-                    +'<h4 style="padding:20px 0px;margin:0">Simple search</h4><label>Search everything:</label>'
+                    +'<h4 style="padding:20px 0px;margin:0">'+ header_label +'</h4><label>'+ field_text +'</label>'
                     +'&nbsp;<input id="search_query" style="display:inline-block;width:40%" type="search" value="">'
                     +'&nbsp;<button id="search_button"/></div>')
                 .insertAfter(this.accordeon);

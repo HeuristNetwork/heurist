@@ -112,9 +112,10 @@ $.widget( "heurist.resultList", {
         aggregate_values: null, //supplementary values per record id - usually to store counts, sum, avg 
         aggregate_link: null,    //link to assigned to aggregate value label
 		
-		blog_result_list: false,	//whether the result list is used for blog records, limiting pagesize if it is
+		blog_result_list: false,    //whether the result list is used for blog records, limiting pagesize if it is
 
-		auto_select_first: false   //automatically select first record within result list
+        auto_select_first: false,   //automatically select first record within result list
+        placeholder_text: null      //text to display while no recordset is loaded
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -450,11 +451,9 @@ $.widget( "heurist.resultList", {
                         source:'init', search_realm: this.options.search_realm };
             window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
             
-        }else if(false){
-            this.updateResultSet(recordset); // render records if search in this realm has been performed earlier
-        }
-        
-    
+        }else if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)){
+            this.div_content.html(this.options.placeholder_text);
+        }    
     }, //end _create
     
     //

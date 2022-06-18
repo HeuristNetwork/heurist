@@ -192,7 +192,15 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
     
     //trim ? 
     $value = str_replace('?','',$value);
-    
+
+    if(substr_count($value, '-') == 3 && $value[0] == '-'){ // remove padding 0's
+        $parts = explode('-', $value);
+        if(count($parts) == 4 && empty($parts[0]) && strlen($parts[1]) == 6){
+            $new_year_val = str_pad(intval($parts[1]), 4, 0, STR_PAD_LEFT);
+            $value = str_replace($parts[1], $new_year_val, $value);
+        }
+    }
+
     if( preg_match('/^-?\d+$/', $value) ){ //YEAR only digits with possible minus
         $date = array('year'=>$value);
     }else{
