@@ -468,17 +468,19 @@ $.widget( "heurist.search_faceted", {
             this.btn_close.hide(); 
         }else{
             
-             var facets = this.options.params.facets;
-             var hasHistory = false, facet_index, len = facets?facets.length:0;
-             for (facet_index=0;facet_index<len;facet_index++){
-                  if( !window.hWin.HEURIST4.util.isempty(facets[facet_index].history) ){
-                      hasHistory = true;
-                      break;
-                  }
-             }
-            
-            
-            if(hasHistory && !this.options.params.ui_spatial_filter) {
+            var facets = this.options.params.facets;
+            var hasHistory = false, facet_index, len = facets?facets.length:0;
+            for (facet_index=0;facet_index<len;facet_index++){
+                if( !window.hWin.HEURIST4.util.isempty(facets[facet_index].history) ){
+                    hasHistory = true;
+                    break;
+                }
+            }
+
+            var query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
+            var isform_empty = this._fillQueryWithValues(query);
+ 
+            if((hasHistory || !isform_empty) && !this.options.params.ui_spatial_filter) {
                 //if(this.div_title) this.div_title.css('width','45%');
                 if(this.options.showresetbutton && this.btn_reset){
                     this.btn_reset.show()   
