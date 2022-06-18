@@ -35,6 +35,9 @@ $.widget( "heurist.resultListDataTable", {
         show_search:false,
         show_counter:true,
         show_export_buttons:false,
+
+        emptyTableMsg: null,
+        placeholder_text: null,
         
         search_initial:null,
         
@@ -49,6 +52,10 @@ $.widget( "heurist.resultListDataTable", {
     selConfigs: null,
 
     hidden_cols: null, // datatable columns ids that are set to hidden
+
+    no_records_message: null, // element containing the 'no records' message
+
+    placeholder_ele: null, 
 
     // the constructor
     _create: function() {
@@ -89,7 +96,7 @@ $.widget( "heurist.resultListDataTable", {
                 if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS)
                 {
                     if(!window.hWin.HAPI4.has_access()){ //logout
-    that._dout('credentials');                    
+    that._dout('credentials');
                         that.options.recordset = null;
                         that._refresh();
                     }
@@ -100,7 +107,7 @@ $.widget( "heurist.resultListDataTable", {
                 
                 if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ 
 
-    that._dout('search finished');                
+    that._dout('search finished');
     
                     that._current_query = data.query;
                     that.options.recordset = data.recordset; //hRecordSet
@@ -119,7 +126,7 @@ $.widget( "heurist.resultListDataTable", {
 
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
 
-    that._dout('selected');                    
+    that._dout('selected');
                         var sel = window.hWin.HAPI4.getSelection(data.selection, true)
                         that.options.selection = sel;
                         that._refresh();
@@ -129,6 +136,24 @@ $.widget( "heurist.resultListDataTable", {
         
         }
         
+        if(!window.hWin.HEURIST4.util.isempty(this.options.emptyTableMsg)){
+            if(this.options.dataTableParams['language'] == null){
+                this.options.dataTableParams['language'] = {};
+            }
+            this.options.dataTableParams['language']['emptyTable'] = this.options.emptyTableMsg;
+
+            this.no_records_message = $('<div>')
+                .css('white-space', 'pre-wrap')
+                .html(this.options.emptyTableMsg)
+                .appendTo(this.div_content)
+                .hide();
+        }
+        if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)){
+            this.placeholder_ele = $('<div>')
+                .css('white-space', 'pre-wrap')
+                .prependTo(this.div_content)
+                .html(this.options.placeholder_text);
+        }
 
         this.element.on("myOnShowEvent", function(event){
             if( event.target.id == that.element.attr('id')){
@@ -144,8 +169,6 @@ that._dout('myOnShowEvent');
                         source:'init', search_realm: this.options.search_realm };
             window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
         }
-        
-        
     }, //end _create
 
     //
@@ -178,6 +201,10 @@ that._dout('myOnShowEvent');
         this._dout('refresh vis='+this.element.is(':visible'));            
 
         if(this.options.recordset && this.element.is(':visible')){
+
+            if(this.placeholder_ele != null){
+                this.placeholder_ele.hide();
+            }
 
             this.loadanimation(false);
 
@@ -289,6 +316,7 @@ that._dout('myOnShowEvent');
                                             }else{
                                                 return (data > 0) ? $Db.trm(data,'trm_Label') : data;
                                             }
+
                                         }else{
                                             return data;
                                         }
@@ -337,9 +365,18 @@ this._dout('reload datatable '+this.options.serverSide);
                         this.options.dataTableParams['processing'] = false;
                         this.options.dataTableParams['serverSide'] = false;                    
                         this.options.dataTableParams['ajax'] = queryURL + '&datatable=1&q=' + queryStr;
-                        this._dataTable = this.div_datatable.DataTable( this.options.dataTableParams );        
+                        this._dataTable = this.div_datatable.DataTable( this.options.dataTableParams );
                     }
 
+                    if(this.no_records_message != null){
+                        // hide 'no records' message
+                        this.no_records_message.hide();
+                    }
+                }else{
+                    if(this.no_records_message != null){
+                        // show 'no records' message
+                        this.no_records_message.show();
+                    }
                 }
             }
 

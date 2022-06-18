@@ -202,10 +202,10 @@ function executeSmartyTemplate($system, $params){
     if( !$qresult ||  !array_key_exists('records', $qresult) || !(intval(@$qresult['reccount'])>0) ){
     
         if($publishmode==4){
-            echo $emptysetmessage?$emptysetmessage:'';
+            echo ($emptysetmessage && $emptysetmessage != 'def') ? $emptysetmessage : '';
         }else{
             
-            if ($emptysetmessage) {
+            if ($emptysetmessage && $emptysetmessage != 'def') {
                 $error = $emptysetmessage; // allows publisher of URL to customise the message if no records retrieved
             } else {
 

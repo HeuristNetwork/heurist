@@ -285,16 +285,22 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 //
                 // assign paramters
                 //
-                if(widget_name=='heurist_resultListExt'){
+                if(widget_name=='heurist_resultListExt'){ // custom report
                     if(opts['template']){
                         $dlg.find('select[name="rep_template"]').attr('data-template', opts['template']);        
                     }
-                }else if(widget_name=='heurist_resultList'){
+                    $dlg.find('#empty_remark').val(opts['emptysetmessage']);
+                    $dlg.find('#placeholder_text').val(opts['placeholder_text']);
+                }else if(widget_name=='heurist_resultList'){ // standard result list
                     if(opts['rendererExpandDetails']){
                         $dlg.find('select[name="rendererExpandDetails"]').attr('data-template', opts['rendererExpandDetails']);        
                     }
-                }else if(widget_name=='heurist_resultListDataTable'){
+                    $dlg.find('#empty_remark').val(opts['empty_remark']);
+                    $dlg.find('#placeholder_text').val(opts['placeholder_text']);
+                }else if(widget_name=='heurist_resultListDataTable'){ // datatable
                     $dlg.find('#dataTableParams').val(opts['dataTableParams']);
+                    $dlg.find('#empty_remark').val(opts['emptyTableMsg']);
+                    $dlg.find('#placeholder_text').val(opts['placeholder_text']);
                 }
             }
 
@@ -978,16 +984,20 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 if(widget_name=='heurist_resultListExt'){
                     opts['template'] = $dlg.find('select[name="rep_template"]').val();
                     opts['reload_for_recordset'] = true;
-                    opts['url'] = 'viewers/smarty/showReps.php?publish=1&debug=0&template='
-                    +encodeURIComponent(opts['template'])+'&[query]';
+                    opts['emptysetmessage'] = $dlg.find('#empty_remark').val() == '' ? 'def' : $dlg.find('#empty_remark').val();
+                    opts['url'] = 'viewers/smarty/showReps.php?publish=1&debug=0'
+                    +'&emptysetmessage='+encodeURIComponent(opts['emptysetmessage'])
+                    +'&template='+encodeURIComponent(opts['template'])
+                    +'&[query]';
                 }else if(widget_name=='heurist_resultList'){
                     opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'];
                     if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){
                         opts['recordview_onselect']  = 'inline'; //default value    
-                    } 
+                    }
+                    opts['empty_remark'] = $dlg.find('#empty_remark').val();
                 }else if(widget_name=='heurist_resultListDataTable'){
-
                     opts['dataTableParams'] = $dlg.find('#dataTableParams').val();
+                    opts['emptyTableMsg'] = $dlg.find('#empty_remark').val();
                 }
 
                 var selval = opts.searchTreeMode;
