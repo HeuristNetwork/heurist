@@ -619,7 +619,7 @@ private static function _searchInCache(){
     foreach (self::$cache_id as $idx=>$curr_recid){
 
         $group = array();
-        $group2 = array();
+        //$group2 = array();
         
         $str1 = self::$cache_str[$idx];
         
@@ -666,7 +666,7 @@ private static function _searchInCache(){
                         $d = levenshtein($str1, $str2);
                         if($d<=$dist){
                             $group[] = self::$cache_id[$idx2];
-                            $group2[self::$cache_id[$idx2]] = '('.$d.'  '.$dist.')';
+                            //$group2[self::$cache_id[$idx2]] = '('.$d.'  '.$dist.')';
                         }
                     }
                 }
@@ -689,7 +689,7 @@ private static function _searchInCache(){
                             .implode(',',$group).')');
                             
                 foreach ($group as $recid=>$title){
-                    $group[$recid] = @$group2[$recid].'   '.$title;
+                    $group[$recid] = $title;    //@$group2[$recid].'   '.$title;
                 }
                             
                             
