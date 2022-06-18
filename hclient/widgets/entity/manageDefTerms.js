@@ -1049,14 +1049,19 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 sstyle = 'style="background:transparent;border:none;"';
             }
 
+            var alt_btn_content = '&nbsp;';
+            if(this.options.edit_mode == 'popup'){
+                alt_btn_content = '<span class="ui-icon ui-icon-triangle-1-e" style="color: gray;" />'
+            }
+
             html = '<div class="recordDiv densed '+sclass+(!(ref_lvl>0)?' rt_draggable':'')
             +'" '+sstyle+' recid="'+recID+'"'+parents+'>'
             + ($Db.trm_HasChildren(recID)
                 ?this._defineActionButton(
                     {key:'expand',label:'Show/hide children',            
-                        title:'', icon:'ui-icon-triangle-1-s',class:null},
+                        title:'', icon:'ui-icon-triangle-1-s', class: 'has_child_terms'},
                     null,'icon_text',exp_btn_style)
-                :'<div style="'+exp_btn_style+'">&nbsp;</div>') 
+                : '<div style="'+exp_btn_style+'" class="no_child_terms">'+ alt_btn_content +'</div>') 
             + '<div class="recordSelector" style="display:inline-block;"><input type="checkbox" /></div>'
             + html_thumb + recTitle;
 
@@ -1141,6 +1146,29 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         });
                     }
                 });
+            }else if(this.options.auxilary=='term'){
+
+                if(record_divs.find('.has_child_terms').length == 0){
+                    record_divs.find('.no_child_terms').css('visibility', 'hidden');
+                }else{
+
+                    $.each(record_divs, function(idx, term_div){
+
+                        var parent_ids = $(term_div).attr('data-parent');
+                        var child_divs = record_divs.parent().find('[data-parent^="'+ parent_ids +'"]').filter(
+                            function(i, ele){
+                                if($(ele).attr('data-parent') == parent_ids){
+                                    return false;
+                                }
+                                return true;
+                            }
+                        );
+
+                        if(child_divs.length == 0){
+                            $(term_div).find('div:first-child').css('visibility', 'hidden');
+                        }
+                    });
+                }
             }
         }
     },
