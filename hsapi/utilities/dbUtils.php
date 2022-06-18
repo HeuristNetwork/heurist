@@ -394,7 +394,7 @@ class DbUtils {
                     return false;
             }
             
-            $db_dump_file = DbUtils::databaseDump( $verbose, $database_name );
+            $db_dump_file = DbUtils::databaseDump( $verbose, $database_name, true );
             
             if ($db_dump_file===false) {
                     $msg = $msg_prefix.'Failed to dump database to a .sql file';
@@ -480,7 +480,7 @@ class DbUtils {
     * @param mixed $db
     * @param mixed $verbose
     */
-     public static function databaseDump( $verbose=true, $database_name=null) {
+    public static function databaseDump( $verbose=true, $database_name=null, $with_triggers=true) {
         
         self::initialize();
         
@@ -509,9 +509,21 @@ class DbUtils {
             
             if(true){
                 
+                if($with_triggers){
+                    $dump_options = array(
+                            'add-drop-table' => true,
+                            'skip-triggers' => false,
+                            'add-drop-trigger' => true,
+                            'databases' => true,
+                            'add-drop-database' => true);
+                }else{
+                    $dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false);
+                }
+                
                 try{
                     $dump = new Mysqldump( $database_name_full, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 
-                            'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
+                            'mysql', $dump_options);
+                            
                     $dump->start($filename);
                 } catch (Exception $e) {
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $e->getMessage());

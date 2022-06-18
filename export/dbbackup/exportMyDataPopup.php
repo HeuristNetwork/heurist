@@ -280,7 +280,17 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
                 echo_flush2("Exporting SQL dump of the whole database (several minutes for large databases)<br>");
 
                 try{
-                    $dump = new Mysqldump( HEURIST_DBNAME_FULL, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
+                    $dump = new Mysqldump( HEURIST_DBNAME_FULL, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', 
+                    array('skip-triggers' => true,  'add-drop-trigger' => false));
+/*                    
+                            array(
+                            'add-drop-table' => true,
+                            'single-transaction' => true,
+                            'skip-triggers' => false,
+                            'add-drop-trigger' => true,
+                            'databases' => true,
+                            'add-drop-database' => true));
+*/                    
                     $dump->start($folder."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql");
                 } catch (Exception $e) {
                     if(file_exists($progress_flag)) unlink($progress_flag);
