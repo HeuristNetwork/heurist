@@ -435,12 +435,18 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
 
                             var selval = __getSearchTreeMode();
 
+                            $dlg.find('#simple_search_header').parent().css('display','none');
+                            $dlg.find('#simple_search_text').parent().css('display','none');
+
                             if(selval==0){
                                 //buttons
                                 $dlg.find('#allowed_UGrpID').css('display','table-row');
                                 $dlg.find('#allowed_svsIDs').css('display','table-row');
                                 $dlg.find('#allowed_UGrpID').editing_input('setDisabled', false);
                                 $dlg.find('#allowed_svsIDs').editing_input('setDisabled', false);
+
+                                $dlg.find('#simple_search_header').parent().css('display','table-row');
+                                $dlg.find('#simple_search_text').parent().css('display','table-row');
                             }else if(selval==1){
                                 //tree
                                 $dlg.find('#allowed_UGrpID').css('display','table-row');
