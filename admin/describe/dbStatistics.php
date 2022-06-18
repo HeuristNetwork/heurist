@@ -119,6 +119,9 @@ if($is_csv){
 
 $i = 0;
 foreach ($dbs as $db){
+    
+    //DEBUG 
+    //if(strpos($db, 'osmak')<0) continue;
 
     //ID  Records     Files(MB)    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
 //error_log(substr($db, 4)); 
@@ -434,11 +437,15 @@ if($is_csv){
                             {position: { my: "left top", at: "left+150 top+150", of: window }});                        
                         return false;
                     }
-                    $("#div-pw").show();
-                    $("#authorized").hide();
+                    $("#div-pw").show(); //show password input
+                    var ele = $("#authorized");
+                    ele.find('div.reps').remove(); //clear
+                    ele.find('div.ui-state-error').remove();
+                    ele.hide();
+                    
                     var submit = document.getElementById("pw-check");
                     submit.disabled = false;
-
+                    
                     // Verify user
                     var $dlg = $("#db-verification").dialog({
                         autoOpen: false,
@@ -473,7 +480,9 @@ if($is_csv){
                                 //submit.parentNode.removeChild(submit);
                                 $("#div-pw").hide();
                                 var ele = $("#authorized");
-                                ele.find('div.reps').remove();
+                                ele.css({'background-image': 'url(../../hclient/assets/loading-animation-white.gif)',
+                                    'background-position': 'center', 'background-repeat': 'no-repeat'});
+                                ele.find('div.reps').remove(); //clear
                                 ele.find('div.ui-state-error').remove();
                                 ele.show();
                                 updateProgress(0);
@@ -490,15 +499,15 @@ if($is_csv){
                 /**
                 * Posts a delete request to the server for the database at the given index
                 */
-                function postDeleteRequest(i) {
-                    if(i < databases.length) {
+                function postDeleteRequest(current_index) {
+                    if(current_index < databases.length) {
                         // Delete database
-                        if('<?php echo HEURIST_DBNAME;?>'==databases[i]){
+                        if('<?php echo HEURIST_DBNAME;?>'==databases[current_index]){
 
-                            $("#authorized").append("<div>Current db "+databases[i] 
-                            +" is skipped</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
-                            postDeleteRequest(i+1);
-                            updateProgress(i+1);
+                            $("#authorized").append('<div class="reps">Current db '+databases[current_index] 
+                            +' is skipped</div><div  class="reps" style="margin-top: 5px; width: 100%; border-bottom: 1px solid black;"></div>');
+                            updateProgress(current_index+1);
+                            postDeleteRequest(current_index+1);
                             
                         }else{
                         
@@ -506,32 +515,44 @@ if($is_csv){
                             var request = {pwd: password, 
                                            create_archive: 1,
                                            db: '<?php echo HEURIST_DBNAME;?>',
-                                           database: databases[i]};
+                                           database: databases[current_index]};
                         
-                            window.hWin.HEURIST4.util.sendRequest(url, request, null,
-                                function(response){
-                                    if(response.status == window.hWin.ResponseStatus.OK){
-                                        $("#authorized").append('<div class="reps">'+databases[i]
-                                        +"</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
-                                        postDeleteRequest(i+1);
-                                        updateProgress(i+1);
-                                    }else{
-                                        
-                                        var msg = window.hWin.HEURIST4.msg.showMsgErr(response, false,
-                                            {position: { my: "left top", at: "left+150 top+150", of: window }});
-                                        
-                                        $("#authorized").append('<div class="ui-state-error" style="padding:4px;">'
-                                                    +databases[i]+' '+msg +"</div>");
-                                        
+                            if(false){ //DEBUG
+                                
+                                    $("#authorized").append('<div class="reps">DEBUG: '+databases[current_index]
+                                    +'</div><div class="reps" style="margin-top: 5px; width: 100%; border-bottom: 1px solid black;"></div>');
+                                    updateProgress(current_index+1);
+                                    setTimeout(function(){postDeleteRequest(current_index+1)}, 5000);
+                                
+                            }else{
+                        
+                                window.hWin.HEURIST4.util.sendRequest(url, request, null,
+                                    function(response){
+                                        if(response.status == window.hWin.ResponseStatus.OK){
+                                            $("#authorized").append('<div class="reps">'+databases[current_index]
+                                            +'</div><div class="reps" style="margin-top: 5px; width: 100%; border-bottom: 1px solid black;"></div>');
+                                            postDeleteRequest(current_index+1);
+                                            updateProgress(current_index+1);
+                                        }else{
+                                            
+                                            var msg = window.hWin.HEURIST4.msg.showMsgErr(response, false,
+                                                {position: { my: "left top", at: "left+150 top+150", of: window }});
+                                            
+                                            $("#authorized").append('<div class="ui-state-error" style="padding:4px;">'
+                                                        +databases[current_index]+' '+msg +"</div>");
+                                            
+                                        }
                                     }
-                                }
-                            );
+                                );
+                            }
                         }
                         
                     }else{
                         // All post-requests have finished.
-                        $("#authorized").append("<div style='margin-top: 10px'>The selected databases have been deleted!</div>");
-                        $("#authorized").append("<div style='font-weight: bold'>Please reload the page if you want to do delete more databases</div>");
+                        var ele = $("#authorized");
+                        ele.css({'background-image':'none'});
+                        ele.append('<div  class="reps" style="margin-top: 10px">The selected databases have been deleted!</div>');
+                        $("#authorized").append('<div  class="reps" style="font-weight: bold">Please reload the page if you want to do delete more databases</div>');
                     }
                 }
 
