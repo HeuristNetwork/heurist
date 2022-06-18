@@ -466,6 +466,8 @@ var TemporalPopup = (function () {
         var calendar_name = temporal.getStringForCode("CLD");
         if(!calendar_name){
             calendar_name = "gregorian";
+        }else{
+        	calendar_name = calendar_name.toLowerCase();
         }
 
         var type = temporal.getType();
