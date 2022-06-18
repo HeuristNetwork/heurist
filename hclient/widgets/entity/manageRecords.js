@@ -4839,7 +4839,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 var field_name = $Db.rst(this._currentEditRecTypeID, cur_details[0], 'rst_DisplayName');
 
-                msg += '<div style="display: table-row;background: rgba(65, 105, 225, 0.8);color: black;" class="recordDiv" data-value="" '
+                msg += '<div style="display: table-row;color: black;opacity: 1;" class="recordDiv" data-value="" '
                             +'data-dtid="'+ cur_details[0] +'" data-index="'+ todo_count +'">'
                         + '<div style="'+ field_style +'" class="truncate" title="'+ field_name +'">'+ field_name +'</div>'
                         + '<div style="'+ val_style +'" class="truncate" title="'+ cur_details[1] +'">'+ cur_details[1] +'</div>'
@@ -4878,6 +4878,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     $ele = $ele.parents('.recordDiv');
                 }
 
+                $ele.css('background', 'rgba(65, 105, 225, 0.8)'); // highlight selection
+
                 // Retrieve important details
                 var dt_id = $ele.attr('data-dtid');
                 var ptr_rectypes = $Db.dty(dt_id, 'dty_PtrTargetRectypeIDs');
@@ -4903,15 +4905,23 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                     onInitFinished: function(event){
 
+                        var size = init_value.length;
                         var that_searchForm = this;
                         setTimeout(function(){ 
-                            that_searchForm.searchForm.find('#input_search').val(init_value); 
+                            that_searchForm.searchForm.find('#input_search').val(init_value).attr('size', (size > 55) ? 55 : size).css({
+                                'width': '',
+                                'max-width': '',
+                                'min-width': '',
+                                'padding-right': '5px'
+                            }); 
                             that_searchForm.searchForm.find('#btn_search_start').click();
                         }, 500);
                     },
 
                     // Process selected record set
                     onselect: function(event, data){
+
+                        $ele.css('background', ''); // remove higlight
 
                         if(!data || !data.selection) return;
 
@@ -4931,6 +4941,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         $ele.attr('data-value', rec_ID);
                         $($ele.find('div')[1]).attr('title', rec_Title).text(rec_Title);
                         window.hWin.HEURIST4.util.setDisabled($ele, true); // set to disabled
+                        $ele.css('background', 'gray');
 
                         complete_count ++;
 
@@ -4945,6 +4956,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                                 $n_ele.click();
                             }
+                        }
+                    },
+
+                    beforeClose: function(event, ui){
+                        if(!$ele.hasClass('ui-state-disabled')){ // remove highlighting
+                            $ele.css('background', '');
                         }
                     }
                 };
