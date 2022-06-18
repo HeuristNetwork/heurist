@@ -405,7 +405,7 @@ class DbUtils {
             }
         
             // Zip $source to $destination
-            $destination = $archiveFolder.$database_name.'_'.time().'.zip'; 
+            $destination = $archiveFolder.$database_name.'_'.time(); 
             
             $filestore_dir = HEURIST_FILESTORE_ROOT.$database_name.'/';
             $folders_to_copy = folderSubs($filestore_dir, array('backup', 'scratch', 'documentation_and_templates'));
@@ -416,14 +416,26 @@ class DbUtils {
             //$folders_to_copy = self::$system->getSystemFolders( 2, $database_name );
             $folders_to_copy[] = realpath($db_dump_file);
             
-            $archOK = createZipArchive($source, $folders_to_copy, $destination, $verbose);
+            
+            if( true ){
+                
+                $destination = $destination.'.tar'; 
+                
+                $archOK = createBz2Archive($source, $folders_to_copy, $destination, $verbose);
+                
+            }else{
+                $destination = $destination.'.zip'; 
+                
+                $archOK = createZipArchive($source, $folders_to_copy, $destination, $verbose);
+            }
             if(!$archOK){
-                $msg = $msg_prefix."Cannot create archive with database folder. Failed to zip $source to $destination";
+                $msg = $msg_prefix."Cannot create archive with database folder. Failed to archive $source to $destination";
                 self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
                 if($verbose) echo '<br/>'.$msg;
                 self::$db_del_in_progress = null;
                 return false;
             }
+            
         }
             
         if($archOK){
@@ -513,6 +525,7 @@ class DbUtils {
                     $dump_options = array(
                             'add-drop-table' => true,
                             'skip-triggers' => false,
+                            'single-transaction' => true,
                             'add-drop-trigger' => true,
                             'databases' => true,
                             'add-drop-database' => true);

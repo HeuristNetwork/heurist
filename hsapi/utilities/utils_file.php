@@ -68,6 +68,8 @@
     unzipArchive
     unzipArchiveFlat
     
+    createBz2Archive
+    
     ===
     loadRemoteURLContentSpecial tries to avoid curl if url on the same domain
     
@@ -1114,6 +1116,136 @@ function unzipArchiveFlat($zipfile, $destination){
         return false;
     }
 }
+
+//
+//
+//
+function createBz2Archive($source, $only_these_folders, $destination, $verbose=true) {
+    
+    if (!function_exists('bzopen') ) {
+        echo "<br/>PHP Bz2 extension is not accessible";
+        return false;
+    }
+    if (!file_exists($source)) {
+        echo "<br/>".$source." was not found";
+        return false;
+    }
+    
+    $numFiles = 0;
+    
+    $phar = new PharData($destination);
+
+    if (false === $phar) {
+        if($verbose) echo "<br/>Failed to create bz2 file at ".$destination;
+        return false;
+    }
+
+    try{
+
+    $source = str_replace('\\', '/', realpath($source));
+
+    if (is_dir($source) === true) {
+
+        chdir($source);
+        
+        $parent_dir = '';
+        //$root_dir = $source;
+        if( is_array($only_these_folders) ){
+            foreach ($only_these_folders as $idx=>$folder) {
+                $folder = str_replace('\\', '/', $folder);
+                if(strpos( $folder, $source )!==0){
+                    $folder = $source."/".$folder;    
+                }
+                $only_these_folders[$idx] = $folder;
+//error_log($folder);
+            }
+        }
+        
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
+
+        foreach ($files as $file) {
+
+            $file = str_replace('\\', '/', $file);
+
+            // Ignore "." and ".." folders
+            if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
+                continue;
+                
+            if( is_dir($file) && substr($file,-1)!='/' ){
+                $file = $file.'/';
+            }
+
+            //ignore files that are not in list of specified folders
+            $is_filtered = true;
+            if( is_array($only_these_folders) ){
+                $is_filtered = false;
+//error_log($file);
+                foreach ($only_these_folders as $folder) {
+                    if( strpos( $file, $folder )===0 ){
+                        $is_filtered = true;
+                        break;
+                    }
+                }
+            }
+
+            if(!$is_filtered) continue; //exclude not in $only_these_folders
+
+//error_log('OK '.$file);
+
+            // Determine real path
+            $file = realpath($file);
+
+            $file2 = str_replace('\\', '/', $file);
+            
+            if (is_dir($file) === true) { // Directory
+                //remove root path
+                $newdir = str_replace($source.'/', '', $file2.'/');
+//error_log($newdir);                    
+                $phar->addEmptyDir( $newdir );
+            }
+            else if (is_file($file) === true) { // File
+                $newfile = str_replace($source.'/', '', $file2); //without folder name
+//error_log($file.'  >> '.$newfile);                    
+
+                $phar->addFile($file, $newfile);
+                
+                $numFiles++;
+
+                //$phar->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
+            }
+        }//recursion
+        
+    } else if (is_file($source) === true) {
+        $phar->addFile($source, basename($source));
+        $numFiles++;
+        //$phar->addFromString(basename($source), file_get_contents($source));
+    }
+
+    $phar->compress(Phar::BZ2);
+    
+    if(file_exists($destination.'.bz2')){
+        $size = filesize($destination.'.bz2') / pow(1024, 2);
+        
+        unlink($destination);
+
+        if($verbose) {
+            echo "<br/>Successfully dumped data from ". $source ." to ".$destination.'.bz2';
+            echo "<br/>The archive file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
+        }
+    }else{
+        return false;    
+    }
+    return true;
+    
+    } catch (Exception  $e){
+        error_log( Exception::getMessage() );
+        if($verbose) {
+            echo "<br/>Cannot create archive archive ".$destination.' '.Exception::getMessage();
+        }
+        return false;
+    }                            
+}
+
 
 //
 // Returns false if given file is not in heurist upload folder
