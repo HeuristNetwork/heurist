@@ -356,16 +356,26 @@ class DbUtils {
             return false;
         }
         
-        self::$db_del_in_progress = $database_name; 
+        self::$db_del_in_progress = null;
         
+        if($database_name==null){
+            $msg = 'Database parameter not defined';
+            $system->addError(HEURIST_INVALID_REQUEST, $msg);
+            if($verbose) echo '<br>'.$msg;
+            return false;
+        }
+
         $mysqli = self::$mysqli;
         $system = self::$system;
         
-        if($database_name==null) $database_name = HEURIST_DBNAME;
+        if($database_name==null && defined('HEURIST_DBNAME')) $database_name = HEURIST_DBNAME;
+        
+        self::$db_del_in_progress = $database_name; 
+        
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
         $msg_prefix = "Unable to delete <b> $database_name </b>. ";
         
-        if($database_name!=HEURIST_DBNAME){ //switch to database
+        if(defined('HEURIST_DBNAME') && $database_name!=HEURIST_DBNAME){ //switch to database
            $connected = mysql__usedatabase($mysqli, $database_name_full);
         }else{
            $connected = true;
@@ -405,7 +415,8 @@ class DbUtils {
             }
         
             // Zip $source to $destination
-            $destination = $archiveFolder.$database_name.'_'.time(); 
+            $datetime1 = date_create('now');
+            $destination = $archiveFolder.$database_name.'_'.$datetime1->format('Y-m-d_H_i_s'); 
             
             $filestore_dir = HEURIST_FILESTORE_ROOT.$database_name.'/';
             $folders_to_copy = folderSubs($filestore_dir, array('backup', 'scratch', 'documentation_and_templates'));
@@ -443,7 +454,7 @@ class DbUtils {
             //get owner info
             $owner_user = user_getDbOwner($mysqli);
 
-            if(true){
+            if(true){ //TEMP
                 // Delete database from MySQL server
                 if(!mysql__drop_database($mysqli, $database_name_full)){
 

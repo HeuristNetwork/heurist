@@ -1238,9 +1238,9 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
     return true;
     
     } catch (Exception  $e){
-        error_log( Exception::getMessage() );
+        error_log( $e->getMessage() );
         if($verbose) {
-            echo "<br/>Cannot create archive archive ".$destination.' '.Exception::getMessage();
+            echo "<br/>Cannot create archive archive ".$destination.' '.$e->getMessage;
         }
         return false;
     }                            
