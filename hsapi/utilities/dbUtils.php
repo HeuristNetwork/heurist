@@ -417,7 +417,7 @@ class DbUtils {
             $folders_to_copy[] = realpath($db_dump_file);
             
             
-            if( true ){
+            if( extension_loaded('bz2') ){
                 
                 $destination = $destination.'.tar'; 
                 

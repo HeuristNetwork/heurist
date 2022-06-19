@@ -102,6 +102,7 @@ require_once (dirname(__FILE__).'/../../hsapi/dbaccess/utils_db.php');
             //if (extension_loaded("SPL")) {print "SPL ok<br />";} else {print "SPL MISSING<br />";}
 
             if (extension_loaded("zip")) {print "zip ok<br />";} else {print "zip MISSING<br />";}
+            if (extension_loaded("bz2")) {print "bz2 ok<br />";} else {print "bz2 MISSING, optional, preferred for database archiving<br />";}
             // zip loads but unzip doesn't, but unzip is installed anyway (possibly with zip?)
             // if (extension_loaded("unzip")) {print "unzip ok<br />";} else {print "unzip MISSING<br />";}
 

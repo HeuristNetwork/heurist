@@ -1122,7 +1122,7 @@ function unzipArchiveFlat($zipfile, $destination){
 //
 function createBz2Archive($source, $only_these_folders, $destination, $verbose=true) {
     
-    if (!function_exists('bzopen') ) {
+    if (!extension_loaded('bz2')) {
         echo "<br/>PHP Bz2 extension is not accessible";
         return false;
     }
