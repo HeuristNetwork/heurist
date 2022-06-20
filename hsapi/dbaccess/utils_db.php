@@ -1302,6 +1302,8 @@ error_log('UPDATED '.$session_id.'  '.$value);
                 }    
                 
                 if(!hasColumn($mysqli, 'defTerms', 'trm_Label', null, 'varchar(250)')){
+                    
+                    $mysqli->query('update defTerms set trm_Label = substr(trm_Label,1,250)');
 
                     $query = "ALTER TABLE `defTerms` "
                     ."CHANGE COLUMN `trm_Label` `trm_Label` VARCHAR(250) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank' ,"
