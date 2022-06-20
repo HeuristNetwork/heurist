@@ -77,7 +77,6 @@ $.widget( "heurist.searchBuilder", {
         if(ht>700) ht = 700;
 
         //this.options.is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
-console.log('!!!!!');
         if(this.options.is_dialog){
         
             this._dialog = this.element.dialog({

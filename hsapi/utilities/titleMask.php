@@ -736,16 +736,25 @@ private static function __get_dt_field($rt, $search_fieldname, $mode, $result_fi
 private static function __get_rt_id( $rt_search ){
     
         $query = 'SELECT rty_ID, rty_Name, rty_OriginatingDBID, rty_IDInOriginatingDB FROM defRecTypes where ';
+        $where = '';
         
-        if (mb_strpos($rt_search,'-')>0){
-            $pos = mb_strpos($rt_search,'-');
-            $query = $query . 'rty_OriginatingDBID ='.mb_substr($rt_search,0,$pos)
-                .' AND rty_IDInOriginatingDB ='.mb_substr($rt_search,$pos+1);
-        }else if($rt_search>0){
-            $query = $query . 'rty_ID='.$rt_search;    
-        }else{
-            $query = $query . 'LOWER(rty_Name)="'.mb_strtolower($rt_search, 'UTF-8').'"';    
+        $pos = mb_strpos($rt_search,'-');
+        if ($pos>0){
+            $db_oid = mb_substr($rt_search,0,$pos);
+            $oid = mb_substr($rt_search,$pos+1);
+            if(is_numeric($db_oid) && $db_oid>=0 && is_numeric($oid) && $oid>0){
+                $where = 'rty_OriginatingDBID ='.$db_oid
+                    .' AND rty_IDInOriginatingDB ='.$oid;
+            }
+        }                
+        if($where==''){
+            if($rt_search>0){
+                $where = 'rty_ID='.$rt_search;    
+            }else{
+                $where = 'LOWER(rty_Name)="'.mb_strtolower($rt_search, 'UTF-8').'"';    
+            }
         }
+        $query = $query . $where;
         
         $res = self::$mysqli->query($query);
         if($res){
