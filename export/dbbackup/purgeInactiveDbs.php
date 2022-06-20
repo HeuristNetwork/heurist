@@ -116,7 +116,7 @@ if(!$arg_no_action){
         exit("Failed to create backup folder $backup_root \n");
     }
     if (!folderCreate($backup_imports, true)) {
-        exit("Failed to create backup folder $backup_imports \n");
+        exit("Failed to create backup$backup_sysarch folder $backup_imports \n");
     }
     if (!folderCreate($backup_sysarch, true)) {
         exit("Failed to create backup folder $backup_sysarch \n");
@@ -322,8 +322,6 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
                                   'skip-triggers' => true,  
                                   'add-drop-trigger' => false));
                         $dumpfile = $backup_imports2."/".fileNameSanitize($file_name).'.sql';  //.$db_name.' '
-                        $dumpfile = 
-                        
                         $dump->start($dumpfile);
             
                         $cnt_dumped++;            
@@ -348,22 +346,55 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
                 $mysqli->query($query);
                 echo '   done'.$eol;
             }else{
-                echo "Cannot create archive with database folder. Failed to archive $backup_imports2 to $destination".$eol;
+                echo "Cannot create archive with import tables. Failed to archive $backup_imports2 to $destination".$eol;
             }
             //remove folder
             folderDelete($backup_imports2);
             
             }
             }//cnt>0
+        }//sif list
+        
+        
+        $arc_count = mysql__select_value($mysqli, 'SELECT count(arc_ID) FROM sysArchive'); //sif_TempDataTable, 
+        if($arc_count>50000){
+            
+            if($arg_no_action){
+                    echo '.....  sysArchive has '.$arc_count.' entries. To be archived'.$eol;;
+            }else{
+                    try{
+                        $dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', 
+                            array('include-tables' => array('sysarchive'),
+                                  'skip-triggers' => true,  
+                                  'add-drop-trigger' => false));
+                        $dumpfile = $backup_sysarch."/".$db_name.'_'.$datetime1->format('Y-m-d').'.sql';  //.$db_name.' '
+                        
+                        $dump->start($dumpfile);
+            
+                        $destination = $backup_sysarch."/".$db_name.' '.$datetime1->format('Y-m-d').'.tar';
+                        $archOK = createBz2Archive($dumpfile, null, $destination, false);
+
+                        if($archOK){
+                            //clear table
+                            $query = 'DELETE FROM sysArchive WHERE arc_ID>0';
+                            $mysqli->query($query);
+                            echo '..... sysArchive dumped ('.$arc_count.' entries)'.$eol;
+                        }else{
+                            echo "Cannot create archive sysArchive table. Failed to archive $dumpfile to $destination".$eol;
+                        }
+                        unlink($dumpfile);                        
+                        
+                    } catch (Exception $e) {
+                        //if(file_exists($progress_flag)) unlink($progress_flag);
+                        echo "Error: unable to generate MySQL database dump for sysArchive table in $db_name.".$e->getMessage()."\n";
+                    }
+            }   
+            
         }
+        
     }
 
 
-    $folder = $backup_root.$db_name.'/';
-    $backup_zip = $backup_root.$db_name.'.zip'; 
-    $database_folder = $upload_root.$db_name.'/';
-
-    //var_dump($folders_to_copy); 
 
     //echo "   ".$db_name." OK \n"; //.'  in '.$folder
 }//for
