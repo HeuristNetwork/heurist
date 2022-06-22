@@ -975,11 +975,7 @@ $.widget( "heurist.lookupConfig", {
                 }
             });
 
-            this.element.find('#example_records').position({
-                'my': 'left+37 bottom-7', 
-                'at': 'left top', 
-                'of': $tbl_cells[0]
-            }).show();
+            this.element.find('#example_records').show();
         }
     },
 
