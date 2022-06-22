@@ -463,7 +463,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 		$warnings = array();
         $warnings = DbUtils::databaseCreateFolders($targetdbname);
 
-        if(count($warnings) > 0){ // Catch if db root directory or any sub directory couldn't be created
+        if(is_array($warnings) && count($warnings) > 0){ // Catch if db root directory or any sub directory couldn't be created
 
             DbUtils::databaseDrop(false, $targetdbname_full, false);
 

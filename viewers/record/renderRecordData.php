@@ -1414,7 +1414,8 @@ if(false){  //this query fails for maria db
                 }
             }else{  //for usual image
                 print '<img src="'.htmlspecialchars($thumb['thumb']).'" '
-                    .(($is_map_popup || $without_header)?''
+                    .(($is_map_popup || $without_header)
+                        ?''
                         :'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
             }
             print '<br/><div class="download_link">';
@@ -1490,7 +1491,8 @@ if(false){  //this query fails for maria db
     $usr_font_size = $system->user_GetPreference('userFontSize', 0);
     $font_size = '';
     if(!$is_map_popup && $usr_font_size != 0){
-        $usr_font_size = ($usr_font_size < 8) ? 8 : ($usr_font_size > 18) ? 18 : $usr_font_size;
+        $usr_font_size = ($usr_font_size < 8) ? 8 
+                                              : (($usr_font_size > 18) ? 18 : $usr_font_size);
         $font_size = 'font-size: ' . $usr_font_size . 'px;';
     }
 
@@ -1512,7 +1514,7 @@ if(false){  //this query fails for maria db
                             defined('DT_CMS_HEADER') && $bd['dty_ID']==DT_CMS_HEADER || 
                             defined('DT_CMS_FOOTER') && $bd['dty_ID']==DT_CMS_FOOTER) ? ' cmsContent' : '';
 
-        $ele_id = ($bd['rst_DisplayOrder'] != '' || $bd['rst_DisplayOrder'] != null) ? 'data-order="' . $bd['rst_DisplayOrder'] . '"' : '';
+        $ele_id = ($bd['rst_DisplayOrder'] != '' || $bd['rst_DisplayOrder'] != null) ? ('data-order="' . $bd['rst_DisplayOrder']) . '"' : '';
 
         print '<div class="detailRow fieldRow" '. $ele_id .' style="border:none 1px #00ff00;'   //width:100%;
             .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none;':'')
@@ -1618,7 +1620,8 @@ function print_relation_details($bib) {
     $usr_font_size = $system->user_GetPreference('userFontSize', 0);
     $font_size = '';
     if(!$is_map_popup && $usr_font_size != 0){
-        $usr_font_size = ($usr_font_size < 8) ? 8 : ($usr_font_size > 18) ? 18 : $usr_font_size;
+        $usr_font_size = ($usr_font_size < 8) ? 8 
+                                              : (($usr_font_size > 18) ? 18 : $usr_font_size);
         $font_size = 'font-size: ' . $usr_font_size . 'px;';
     }
 
@@ -1860,7 +1863,8 @@ function print_linked_details($bib, $link_cnt)
     $usr_font_size = $system->user_GetPreference('userFontSize', 0);
     $font_size = '';
     if(!$is_map_popup && $usr_font_size != 0){
-        $usr_font_size = ($usr_font_size < 8) ? 8 : ($usr_font_size > 18) ? 18 : $usr_font_size;
+        $usr_font_size = ($usr_font_size < 8) ? 8 
+                                              : (($usr_font_size > 18) ? 18 : $usr_font_size);
         $font_size = 'font-size: ' . $usr_font_size . 'px;';
     }
 

@@ -461,7 +461,7 @@ XML;
             }
         }
         
-        if(count($retrieve_detail_fields)==0){
+        if(!is_array($retrieve_detail_fields) || count($retrieve_detail_fields)==0){
             $retrieve_detail_fields = false;
         }
         
@@ -1218,7 +1218,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
 
             $val = array('ID'=>$dty_ID,'value'=>$val);
 
-            if(@$value['id']>0){ //resource
+            if(is_array($value) && @$value['id']>0){ //resource
                 $val['resourceTitle']     = @$value['title'];
                 $val['resourceRecTypeID'] = @$value['type'];
             }

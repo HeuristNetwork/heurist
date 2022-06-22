@@ -179,7 +179,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                 
                 mysql__drop_database($mysqli, $database_name_full);
 
-                if(count($warnings) == 2 && $warnings['revert']){
+                if(is_array($warnings) && count($warnings) == 2 && $warnings['revert']){
 
                     sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database root folder', $warnings['message']);
                     if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){

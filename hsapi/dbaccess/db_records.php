@@ -180,7 +180,7 @@ function recordAdd($system, $record, $return_id_only=false){
 
     //ActioN!
 
-    if(@$record['ID']>0){
+    if(is_numeric(@$record['ID']) && @$record['ID']>0){
         //case: insert csv with predefined ID
         $rec_id = $record['ID'];
         $recid1 = 'rec_ID, ';
@@ -209,7 +209,7 @@ function recordAdd($system, $record, $return_id_only=false){
     //DateTime('now')->format('Y-m-d H:i:s') is same as date('Y-m-d H:i:s')
     $data_add = date('Y-m-d H:i:s');
 
-    if(@$record['ID']>0){
+    if(is_numeric(@$record['ID']) && @$record['ID']>0){
         //case: insert csv with predefined ID
         $stmt->bind_param('iiiisssssiis', $rec_id, $currentUserId, $rectype, $owner_grps[0], $access,
             $rec_url, $rec_scr, $data_add, $data_add, $rec_imp, $rec_temp, $rec_title);
@@ -696,7 +696,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             //1. cfn_RecTypeIDs -> cfn_ID
             //2. defRecStructure where rst_CalcFunctionID  -> rst_RecTypeID+rst_DetailTypeID 
             $aff_rectypes = findAffectedCalcFields( $system, $rectype );
-            if(count($aff_rectypes)>0){
+            if($aff_rectypes!=null && count($aff_rectypes)>0){
                 recordUpdateCalcFields( $system, null, $aff_rectypes);    
             }
             
@@ -711,11 +711,11 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         $mask = mysql__select_value($mysqli,"select rty_TitleMask from defRecTypes where rty_ID=".RT_RELATION);
 
         $relRecs = recordGetRelationship($system, $recID, null, array('detail'=>'ids'));
-        if(count($relRecs)>0){
+        if($relRecs!=null && count($relRecs)>0){
             $relRecsIDs = $relRecs;
         }
         $relRecs = recordGetRelationship($system, null, $recID, array('detail'=>'ids'));
-        if(count($relRecs)>0){
+        if($relRecs!=null && count($relRecs)>0){
             $relRecsIDs = array_merge($relRecsIDs, $relRecs);
         }
         //reset temporary flag for all relationship records
@@ -729,7 +729,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
         //recordGetLinkedRecords - get all linked and related records and update them
         $links = recordGetLinkedRecords($system, $recID);
-        if(count($links)>0){
+        if($links!=null && count($links)>0){
             //find title masks
             $links_rectypes = array_unique(array_values($links));
             $masks = mysql__select_assoc2($mysqli,'select rty_ID, rty_TitleMask from defRecTypes where rty_ID in ('
@@ -845,7 +845,7 @@ function recordDelete($system, $recids, $need_transaction=true,
         if($check_source_links && count($allowed_recids)>0){
             $links = recordSearchRelated($system, $allowed_recids, -1, 'ids', 1);
 
-            if($links['status']==HEURIST_OK && count(@$links['data']['reverse'])>0){
+            if($links['status']==HEURIST_OK && @$links['data']['reverse']!=null && count(@$links['data']['reverse'])>0){
                 return array('status'=>HEURIST_OK, 
                     'data'=> array( 'source_links_count'=>count($links['data']['reverse']),
                         'source_links'=>implode(',',$links['data']['reverse']) ));
@@ -2215,7 +2215,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
         if(preg_match("/^t:\\d+$/", $dtyID)){ //old format with t:NNN
             $dtyID = substr($dtyID, 2);
         }
-        if($dtyID>0){
+        if(is_numeric($dtyID) && $dtyID>0){
             $details2[$dtyID] = is_array($pairs)?$pairs:array($pairs);    
         }
     }
