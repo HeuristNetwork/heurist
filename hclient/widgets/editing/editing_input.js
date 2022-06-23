@@ -3439,12 +3439,21 @@ console.log('onpaste');
                                 s_url = s_url.replace('-'+repl+'.png','-'+toval+'.png')
                             }
                             
+                            var s_path2 = s_path.replace(repl,toval)
+                            var s_url2 = s_url.replace(repl,toval)
+                            
                             if(ele && ele.find('.image_input').length > 0){// elements in correct location
-                                ele.editing_input('setValue', s_path.replace(repl,toval) );    
-                                ele.find('.image_input').find('img').prop('src', s_url.replace(repl,toval)); 
-                            }else if(that.linkedImgContainer !== null && that.linkedImgInput !== null){
-                                that.linkedImgInput.val(s_path.replace(repl,toval));
-                                that.linkedImgContainer.find('img').prop('src', s_url.replace(repl,toval));
+                                ele.find('.image_input').find('img').prop('src', s_url2); 
+                                
+                            }else if(that.linkedImgContainer !== null && that.linkedImgInput !== null)
+                            {
+                                if(ele){
+                                    ele.editing_input('setValue', s_path2 );
+                                    ele.hide();
+                                } 
+                                
+                                that.linkedImgInput.val( s_path2 );
+                                that.linkedImgContainer.find('img').prop('src', s_url2 );
                             }
                         }
                     }
