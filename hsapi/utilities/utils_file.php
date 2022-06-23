@@ -1255,6 +1255,8 @@ function isPathInHeuristUploadFolder($path){
   
     chdir(HEURIST_FILESTORE_DIR);  // relatively db root  or HEURIST_FILES_DIR??        
     $path = realpath($path);
+    
+    $path = str_replace('\\','/',$path);
 
     //realpath gives real path on remote file server
     if(strpos($path, '/srv/HEURIST_FILESTORE/')===0 || 
@@ -1741,7 +1743,7 @@ function fileNameSanitize($filename, $beautify=true) {
         [<>:"/\\|?*]|            # file system reserved https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
         [\x00-\x1F]|             # control characters http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%28v=vs.85%29.aspx
         [\x7F\xA0\xAD]|          # non-printing characters DEL, NO-BREAK SPACE, SOFT HYPHEN
-        [#\[\]@!$&\'()+,;=]|     # URI reserved https://tools.ietf.org/html/rfc3986#section-2.2
+        [#\[\]@!$&\'+(),;=]|       # URI reserved https://tools.ietf.org/html/rfc3986#section-2.2 
         [{}^\~`]                 # URL unsafe characters https://www.ietf.org/rfc/rfc1738.txt
         ~x',
         '-', $filename);
