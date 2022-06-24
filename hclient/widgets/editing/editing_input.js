@@ -4853,13 +4853,12 @@ console.log('onpaste');
                 temporal = null;
             }
             var cal_name = temporal ? temporal.getField('CLD') : null;
+            var tDate = temporal ? temporal.getTDate("DAT") : null;
 
-            if(!window.hWin.HEURIST4.util.isempty($input.val()) && cal_name && cal_name.toLowerCase() !== 'gregorian'){
+            if(!window.hWin.HEURIST4.util.isempty($input.val()) && tDate && cal_name && cal_name.toLowerCase() !== 'gregorian'){
 
                 // change calendar to current type
-                calendar = $.calendars.instance(cal_name);
-
-                var tDate = temporal.getTDate("DAT");
+                calendar = $.calendars.instance(cal_name);                
 
                 if(tDate && tDate.getYear()){
                     var hasMonth = tDate.getMonth();
@@ -4870,6 +4869,11 @@ console.log('onpaste');
 
                     defDate = translateDate({'year': tDate.getYear(), 'month': month, 'day': day}, g_calendar, calendar);
                 }
+            }else if(tDate){
+                // remove padding zeroes from year
+                var year = Number(tDate.getYear());
+                defDate = tDate.toString('yyyy-MM-dd');
+                defDate = defDate.replace(tDate.getYear(), year);
             }
 
             $tinpt.val(defDate);
@@ -4890,6 +4894,11 @@ console.log('onpaste');
                     var value = $tinpt.val();
                     var val_parts = value != '' ? value.split('-') : '';
                     var new_temporal = new Temporal();
+
+                    if(val_parts.length == 4 && val_parts[0] == ''){ // for BC years
+                        val_parts.shift();
+                        val_parts[0] = '-'+val_parts[0];
+                    }
 
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(val_parts) && val_parts.length == 3 && cur_cal.local.name.toLowerCase() != 'gregorian'){
 
@@ -4921,6 +4930,12 @@ console.log('onpaste');
                             replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
                 showTrigger: '<span class="smallicon ui-icon ui-icon-calendar" style="display:inline-block" data-picker="'+$input.attr('id')+'" title="Show calendar" />'}
             );
+
+            this._on($input, {
+                'blur': function(event){ //update to changed value
+                    $tinpt.val($input.val());
+                }
+            });
         }else{ // we use jquery datepicker for general use
 
                 /*var $tinpt = $('<input type="hidden" data-picker="'+$input.attr('id')+'">')
@@ -5039,46 +5054,49 @@ console.log('onpaste');
                         class:'ui-heurist-populate-fade',
                         //is_h6style: true,
                         default_palette_class: 'ui-heurist-populate',
-                        callback: function(str){ console.log(str);
+                        callback: function(str){
                             if(!window.hWin.HEURIST4.util.isempty(str) && that.newvalues[$input.attr('id')] != str){
                                 $input.val(str);    
                                 $input.change();
                             }
 
-                            var new_temporal = null;
-                            var new_cal = null;
-                            var new_date = null;
-                            try {
-                                new_temporal = Temporal.parse(str);
-                                new_cal = new_temporal.getField('CLD');
-                                new_cal = $.calendars.instance(new_cal);
-                                new_date = new_temporal.getTDate("DAT");
-                            } catch(e) {
-                                new_cal = null;
-                                new_date = null;
-                            }
+                            if($.isFunction($('body').calendarsPicker) && $tinpt.hasClass('hasCalendarsPicker')){
 
-                            // Update calendar for calendarPicker
-                            if(new_cal && new_date && typeof $tinpt !== 'undefined' && $tinpt.hasClass('hasCalendarsPicker')){
-
-                                if(new_date.getYear()){
-                                    var hasMonth = new_date.getMonth();
-                                    var hasDay = new_date.getDay();
-
-                                    var month = hasMonth ? new_date.getMonth() : 1;
-                                    var day = hasDay ? new_date.getDay() : 1;
-
-                                    new_date = translateDate({'year': new_date.getYear(), 'month': month, 'day': day}, g_calendar, new_cal);
-                                    new_date = new_date.formatDate('yyyy-mm-dd', new_cal);
+                                var new_temporal = null;
+                                var new_cal = null;
+                                var new_date = null;
+                                try {
+                                    new_temporal = Temporal.parse(str);
+                                    new_cal = new_temporal.getField('CLD');
+                                    new_cal = $.calendars.instance(new_cal);
+                                    new_date = new_temporal.getTDate("DAT");
+                                } catch(e) {
+                                    new_cal = null;
+                                    new_date = null;
                                 }
-
-                                var cur_cal = $tinpt.calendarsPicker('option', 'calendar');
-                                if(cur_cal.local.name.toLowerCase() != new_cal.local.name.toLowerCase()){
-                                    $tinpt.calendarsPicker('option', 'calendar', new_cal);
-                                }
-
-                                if(typeof new_date == 'string'){
-                                    $tinpt.val(new_date);
+    
+                                // Update calendar for calendarPicker
+                                if(new_cal && new_date && typeof $tinpt !== 'undefined'){
+    
+                                    if(new_date.getYear()){
+                                        var hasMonth = new_date.getMonth();
+                                        var hasDay = new_date.getDay();
+    
+                                        var month = hasMonth ? new_date.getMonth() : 1;
+                                        var day = hasDay ? new_date.getDay() : 1;
+    
+                                        new_date = translateDate({'year': new_date.getYear(), 'month': month, 'day': day}, g_calendar, new_cal);
+                                        new_date = new_date.formatDate('yyyy-mm-dd', new_cal);
+                                    }
+    
+                                    var cur_cal = $tinpt.calendarsPicker('option', 'calendar');
+                                    if(cur_cal.local.name.toLowerCase() != new_cal.local.name.toLowerCase()){
+                                        $tinpt.calendarsPicker('option', 'calendar', new_cal);
+                                    }
+    
+                                    if(typeof new_date == 'string'){
+                                        $tinpt.val(new_date);
+                                    }
                                 }
                             }
                         }
