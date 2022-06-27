@@ -1497,8 +1497,12 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             }
 
             // Map popup record view
-            window.hWin.HEURIST4.ui.createTemplateSelector( $dlg.find('#map_template'), [{key:'',title:'Standard map popup template'},{key:'none',title:'Disable popup'}],
-                            window.hWin.HAPI4.get_prefs_def('map_template', null));
+            window.hWin.HEURIST4.ui.createTemplateSelector( $dlg.find('#map_template'), 
+                [{key:'',title:'Standard map popup template'},
+                 {key:'standard',title:'Standard record info (in popup)'},
+                 {key:'none',title:'Disable popup'}
+                 ],
+                 window.hWin.HAPI4.get_prefs_def('map_template', null));
 
             // Main record view
             window.hWin.HEURIST4.ui.createTemplateSelector( $dlg.find('#main_recview'), [{key:'default',title:'Standard record view'}],

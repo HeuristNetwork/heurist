@@ -118,7 +118,7 @@ $.widget( "heurist.mapping", {
         isPublished: false,
         
         map_rollover: false,
-        map_popup_mode: 'standard',
+        map_popup_mode: 'standard', //,'dialog'
         
         zoomToPointInKM: 5,  //is set either from map documet DT_ZOOM_KM_POINT or from url parameters
         zoomMaxInKM: 0,
@@ -162,7 +162,7 @@ $.widget( "heurist.mapping", {
     
     //popup element
     main_popup: null,
-    mapPopUpTemplate: null,
+    mapPopUpTemplate: null,  //name of popup template (from map params)
     
     currentDrawMode:'none',  //full,image,filter 
     
@@ -1670,8 +1670,9 @@ $.widget( "heurist.mapping", {
     //
     // map layer (shape) on click event handler - highlight selection on timeline and map, opens popup
     //
-    // content of popup can be retrieved by rec_ID via renderRecordData.php script
-    // field rec_Info can have url, content or be calculated field (function)
+    // content of popup can be retrieved by rec_ID via 
+    //  1. renderRecordData.php script
+    //  2. field rec_Info can have url, content or be calculated field (function)
     // 
     _onLayerClick: function(event){
         
@@ -1755,7 +1756,12 @@ $.widget( "heurist.mapping", {
     },
 
     //
-    //  highlight and show info popup
+    // highlight and show info popup
+    //  see that.options.map_popup_mode - show in map popup or in jquery dialog
+    // content can be taken from
+    //   1. rec_Info field
+    //   2. layer.options.popup_template
+    //   3. mapPopUpTemplate
     //
     _onLayerSelect: function(layer, latlng){
 
@@ -1764,7 +1770,7 @@ $.widget( "heurist.mapping", {
 
         function __showPopup(content, latlng){
             
-            if(that.options.map_popup_mode=='standard'){
+            if(that.options.map_popup_mode=='standard'){ //show in map popup control
                 
                 that.main_popup.setLatLng(latlng)
                             .setContent(content)
@@ -1873,7 +1879,7 @@ $.widget( "heurist.mapping", {
                                 :window.hWin.HAPI4.database;
                     
                 
-                if(that.mapPopUpTemplate || layer.options.popup_template){
+                if((that.mapPopUpTemplate && that.mapPopUpTemplate!='standard') || layer.options.popup_template){
                     
                     popupURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?snippet=1&publish=1&debug=0&q=ids:'
                             + layer.feature.properties.rec_ID
@@ -1885,7 +1891,8 @@ $.widget( "heurist.mapping", {
                             +layer.feature.properties.rec_ID
                             +'&db='+db;
                     
-                    if(that.options.map_popup_mode=='dialog'){
+                    if(that.options.map_popup_mode=='dialog' || that.mapPopUpTemplate=='standard'){
+                        that.options.map_popup_mode='dialog';
                         popupURL = popupURL + '&ll=WebSearch';
                     }else{
                         popupURL = popupURL+'&mapPopup=1&ll='+window.hWin.HAPI4.sysinfo['layout'];    
