@@ -1322,7 +1322,7 @@ class HPredicate {
             .' where r'.$this->qlevel.'.rec_ID='.$p.'dtl_RecID AND ';
         
         if($this->isEmptyValue()){
-            $res = $res.$p.'dtl_Geo IS NULL)'; //not defined
+            $res = ' NOT '.$res.$p.'dtl_Geo IS NOT NULL)'; //not defined
         }else if($this->value==''){  
             $res = $res.$p.'dtl_Geo IS NOT NULL)'; //any not null value
         }else {
