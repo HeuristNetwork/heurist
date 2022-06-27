@@ -29,12 +29,14 @@ $arg_skip_files = false;    // include all the uploaded files
 $arg_include_docs = true;   // include full documentation to make the archive interpretable
 $arg_skip_hml = true;       // don't include HML as this function is primarily intended for database transfer 
                             // and HML is voluminous. HML should be included if this is intended as longer term archive.
+$with_triggers = true;
 
 if (@$argv) {
     
 // example:
 //  sudo php -f /var/www/html/heurist/export/dbbackup/buildArchivePackagesCMD.php -- -db=database_1,database_2
 //  sudo php -f buildArchivePackagesCMD.php -- -db=osmak_9,osmak_9c,osmak_9d
+//  sudo php -f /var/www/html/h6-alpha/export/dbbackup/buildArchivePackagesCMD.php -- -db=all -nofiles -nodocs
 
 // TODO: It would be good if this had a parameter option to also delete the database for use when transferring to a new server
 // TODO: WARNING: AT THIS TIME (21 May 2022) IT DOES NOT REPORT AN ERROR IF THERE IS NO FILESTORE FOLDER
@@ -62,6 +64,7 @@ if (@$argv) {
     if (@$ARGV['-db']) $arg_database = $ARGV['-db'];   
     if (@$ARGV['-nofiles']) $arg_skip_files = true;
     if (@$ARGV['-hml']) $arg_skip_hml = false;
+    if (@$ARGV['-nodocs']) $arg_include_docs = false;
 
 
 
@@ -122,6 +125,21 @@ $fp = fopen($progress_flag,'w');
 fwrite($fp, '1');
 fclose($fp);            
 
+
+if($with_triggers){
+    $dump_options = array(
+            'add-drop-table' => true,
+            'skip-triggers' => false,
+            'single-transaction' => true,
+            'add-drop-trigger' => true,
+            'databases' => true,
+            'add-drop-database' => true);
+}else{
+    $dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false);
+}
+
+
+
 set_time_limit(0); //no limit
 
 foreach ($arg_database as $idx=>$db_name){
@@ -135,17 +153,24 @@ foreach ($arg_database as $idx=>$db_name){
     $database_folder = $upload_root.$db_name.'/';
 
     if(file_exists($folder)){
-        $res = folderDelete2($folder, true);
+        $res = folderDelete2($folder, true); //remove previous backup
         if(!$res){
             if(file_exists($progress_flag)) unlink($progress_flag);
             exit("Cannot clear existing backup folder $folder \n");
         }
     }
+    
+    if(!file_exists($database_folder)){
+        echo "skipped (database folder is missed)\n";
+        continue;
+    }
+
+    
     if (!folderCreate($folder, true)) {
         if(file_exists($progress_flag)) unlink($progress_flag);
         exit("Failed to create folder $folder in which to create the backup \n");
     }
-
+    
     echo "files.. ";
     $folders_to_copy = null;
 
@@ -233,7 +258,7 @@ foreach ($arg_database as $idx=>$db_name){
 
     // Do an SQL dump of the whole database
     try{
-        $dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
+        $dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', $dump_options);
         $dump->start($folder."/".$db_name."_MySQL_Database_Dump.sql");
     } catch (Exception $e) {
         if(file_exists($progress_flag)) unlink($progress_flag);
