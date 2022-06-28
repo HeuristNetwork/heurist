@@ -179,7 +179,7 @@ window.hWin.HEURIST4.dbs = {
      * Returns label and code for term by id
      * @param {number} termID 
      * @param {number} withcode 
-     * @returns {string} 
+     * @returns {string} Term name and its code if any
      */
 
     getTermValue: function(termID, withcode){
@@ -206,7 +206,8 @@ window.hWin.HEURIST4.dbs = {
      * @function getInverseTermById
      * get inverse term id
      * @param {number} termID 
-     * @returns {number}
+     * @returns {string|number} 
+     * empty string if term is not found. invtermID if inverse term is found or termID if it is not  
      */
     
     getInverseTermById: function(termID){
