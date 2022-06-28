@@ -102,9 +102,13 @@ window.hWin.HEURIST4.dbs = {
     
     vocabs_already_synched: false, //set to true after first direct import by mapping to avoid sync on every request
 
-    //
-    // return vocabulary for given term - real vocabulary (not by reference)
-    //    
+    /** 
+     * @function getTermVocab
+     * return vocabulary for given term - real vocabulary (not by reference)
+     * @param {number} trm_ID - Term ID
+     * @returns {number} trm_ID - Vocab ID
+     * 
+    */
     getTermVocab: function(trm_ID){
         var trm_ParentTermID;
         do{
@@ -119,11 +123,14 @@ window.hWin.HEURIST4.dbs = {
         return trm_ID;        
     },
 
-    //
-    // return false if given term belongs to vocabulary, otherwise returns level of reference
-    // 0 - first level - parent is either vocab or "real" terms
-    // 1 or more - parent is term by reference also.
-    //
+    /** 
+     * @function isTermByReference
+     * @param {number} vocab_id - Vocab ID
+     * @param {number} trm_ID - Term ID
+     * @returns  {(false|number)} false if given term belongs to vocabulary, otherwise number for a level of reference 
+     * (0 - first level - parent is either vocab or "real" terms, 1 or more - parent is term by reference also)
+     * 
+    */
     isTermByReference: function(vocab_id, trm_ID){
         
         var real_vocab_id = $Db.getTermVocab(trm_ID);
@@ -134,6 +141,13 @@ window.hWin.HEURIST4.dbs = {
         
         var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
 
+        /**
+         * @function __checkParents
+         * @param {number} recID 
+         * @param {number} lvl 
+         * @returns {(number|boolean)}  number if term has children, false if term has not 
+         */
+        
         function __checkParents(recID, lvl){
             
             var children = t_idx[recID]; //array of children ids trm_Links (including references)    
@@ -159,9 +173,15 @@ window.hWin.HEURIST4.dbs = {
         return __checkParents(vocab_id, 0);
     },
     
-    //
-    // Returns label and code for term by id
-    //
+
+    /**
+     * @function getTermvalue
+     * Returns label and code for term by id
+     * @param {number} termID 
+     * @param {number} withcode 
+     * @returns {string} 
+     */
+
     getTermValue: function(termID, withcode){
         
         var term = $Db.trm(termID);
@@ -182,9 +202,13 @@ window.hWin.HEURIST4.dbs = {
         return termName+(withcode ?termCode :'');
     },
     
-    //
-    // get inverse term id
-    //
+    /**
+     * @function getInverseTermById
+     * get inverse term id
+     * @param {number} termID 
+     * @returns {number}
+     */
+    
     getInverseTermById: function(termID){
         var term = $Db.trm(termID);
         if(term){
@@ -195,9 +219,14 @@ window.hWin.HEURIST4.dbs = {
         return '';
     },
     
-    //
-    // Returns hex color by label or code for term by id
-    //
+    /**
+     * @function getColorFromTermValue
+     * Returns hex color by label or code for term by id
+     * @param {number} termID 
+     * @returns {string}
+     */
+
+    
     getColorFromTermValue: function(termID){
 
         var termName, termCode='';
@@ -252,6 +281,16 @@ window.hWin.HEURIST4.dbs = {
        children:[{key: field#, type: fieldtype, title:'', code , name, conceptCode, dtyID_local, children:[]},... ]
      
     */
+
+    /**
+     * @function createRectypeStructureTree
+     * @param {*} db_structure 
+     * @param {*} $mode 
+     * @param {*} rectypeids 
+     * @param {*} fieldtypes 
+     * @param {*} parentcode 
+     * @returns 
+     */
     createRectypeStructureTree: function( db_structure, $mode, rectypeids, fieldtypes, parentcode ) {
         
         var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
@@ -262,8 +301,20 @@ window.hWin.HEURIST4.dbs = {
         
         var recTypesWithParentLink = [];
         
-    //-------------------- internal functions    
+        //-------------------- internal functions    
+
+    /**
+     * @function __getRecordTypeTree
+     * @param {number} $recTypeId 
+     * @param {number} $recursion_depth 
+     * @param {number} $mode 
+     * @param {Array} $fieldtypes 
+     * @param {Array} $pointer_fields 
+     * @param {boolean} $is_parent_relmarker 
+     * @returns {{key: number, title: string,type: string, conceptCode:number, rtyID_local: number, code: string, children: Array} Object}
+     */    
         
+
     function __getRecordTypeTree($recTypeId, $recursion_depth, $mode, $fieldtypes, $pointer_fields, $is_parent_relmarker){
             
             var $res = {};
@@ -452,6 +503,12 @@ window.hWin.HEURIST4.dbs = {
                     
                     // add details --------------------------------
                     if($details)
+
+                    /**
+                     * @param {number} $dtID
+                     * @param {number}  $dtValue
+                     * @returns {Array}
+                     */
                     $details.each2(function($dtID, $dtValue){
                         //@TODO forbidden for import????
                         if($dtValue['rst_RequirementType']!='forbidden'){
@@ -506,7 +563,12 @@ window.hWin.HEURIST4.dbs = {
                     //add resource and relation at the end of result array
                     $dtl_fields = $dtl_fields.concat($children_links);
 
-                    //sort by rst_DisplayOrder
+                    /**
+                     * sort by rst_DisplayOrder
+                     * @param {number} a
+                     * @param {number} b
+                     * @returns {number}
+                     */
                     $dtl_fields.sort(function(a,b){
                         return (a['display_order']<b['display_order'])?-1:1;
                     });
@@ -640,7 +702,13 @@ window.hWin.HEURIST4.dbs = {
                         }
                     });//for details
                     
-                    //sort bt rst_DisplayOrder
+                    
+                    /**
+                     * sort bt rst_DisplayOrder
+                     * @param {number} a
+                     * @param {number} b
+                     * @returns {number}
+                     */
                     $children.sort(function(a,b){
                         return (a['display_order']<b['display_order'])?-1:1;
                     });
@@ -1069,28 +1137,43 @@ window.hWin.HEURIST4.dbs = {
         return $Db.getset('defTerms', rec_ID, fieldName, newValue);        
     },
 
+    /**
+     * @function swf
+     * @param {number} rec_ID 
+     * @param {string} fieldName 
+     * @param {*} newValue 
+     * @returns 
+     */
     swf: function(rec_ID, fieldName, newValue){
         return $Db.getset('sysWorkflowRules', rec_ID, fieldName, newValue);        
     },
     
-    //
-    //  get structures for all record types
-    //
+    
+    /**
+     * @function rst_idx2
+     * get structures for all record types
+     * @returns 
+     */
     rst_idx2: function(){
         return window.hWin.HAPI4.EntityMgr.getEntityData2('rst_Index');
     },
     
-    // BASED on rectype structure
-    //
-    // Returns
-    // direct:   rty_ID:[{all:[],dty_ID:[rty_ID,rty_ID,....],  }]
-    // reverse:
-    // parents:  {child_rty_ID:[parents rtyIDs,...],....}
-    // rel_direct:
-    // rel_reverse:
-    //
-    // forbidden fields are ignored
-    //
+    
+    /**
+     * @function rst_links
+     * 
+     * BASED on rectype structure
+     *
+     *  Returns
+     * direct:   rty_ID:[{all:[],dty_ID:[rty_ID,rty_ID,....],  }]
+     *  reverse:
+     *  parents:  {child_rty_ID:[parents rtyIDs,...],....}
+     * rel_direct:
+     * rel_reverse:
+     *
+     * forbidden fields are ignored
+     * @returns {{direct: Object, reverse: Object, parents: Object, rel_direct: Object, rel_reverse: Object } Object}
+     */
     rst_links: function(){
 
         var rst_reverse_parent = {};  //linked FROM rectypes as a child (list of parent rectypes)
@@ -1181,9 +1264,12 @@ window.hWin.HEURIST4.dbs = {
         
     },
 
-    //
-    // returns links by basefield - disregard usage of field
-    //
+
+    /**
+     * @function rst_links_base
+     * returns links by basefield - disregard usage of field
+     * @returns {Array} links
+     */
     rst_links_base: function(){
         
         var links = {};
@@ -1210,9 +1296,13 @@ window.hWin.HEURIST4.dbs = {
         return links;
     },    
     
-    //
-    // returns usage (list of rty_ID) for given field
-    //     
+
+    /**
+     * @function rst_usage
+     * returns usage (list of rty_ID) for given field
+     * @param {number} dty_ID 
+     * @returns {Array} usage
+     */
     rst_usage: function(dty_ID){
        
         var usage = [];
@@ -1225,9 +1315,15 @@ window.hWin.HEURIST4.dbs = {
         return usage;
     },
     
-    //
-    //
-    //
+
+    /**
+     * @function: rst
+     * @param {number} rec_ID record ID
+     * @param {number} dty_ID 
+     * @param {string} fieldName Field name
+     * @param {} newValue 
+     * @returns {null|}
+     */
     rst: function(rec_ID, dty_ID, fieldName, newValue){
         
         //fieldnames for backward capability
@@ -1251,7 +1347,14 @@ window.hWin.HEURIST4.dbs = {
         
     },
     
-    
+    /**
+     * @function getset 
+     * @param {string} entityName 
+     * @param {number} rec_ID 
+     * @param {string} fieldName 
+     * @param {*} newValue 
+     * @returns {null|}
+     */
     getset: function(entityName, rec_ID, fieldName, newValue){
         if(typeof newValue == 'undefined'){
             return $Db.get(entityName, rec_ID, fieldName);        
