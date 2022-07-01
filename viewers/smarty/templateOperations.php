@@ -57,6 +57,8 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
                 case 'save':
                     
                     //add extension and save in default template directory
+                    $template_body = urldecode($template_body);
+                    
                     $res = $repAction->saveTemplate($template_body, $template_file);
 
                     print json_encode($res);

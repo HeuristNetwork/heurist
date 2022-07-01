@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * templateActions.php: operations with Smarty template files - save, delete, get, list, serve, convert global <-> local
+    * reportActions.php: operations with Smarty template files - save, delete, get, list, serve, convert global <-> local
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org

@@ -224,8 +224,8 @@ function recordAdd($system, $record, $return_id_only=false){
 
 
     if(!$newId){
-
-        $response = $system->addError(HEURIST_DB_ERROR, "Cannot add record", $syserror);
+    //HEURIST_DB_ERROR
+        $response = $system->addError(HEURIST_ACTION_BLOCKED , 'Cannot add record '.$syserror, $syserror);
 
     }else {
 

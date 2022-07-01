@@ -256,8 +256,21 @@ function ShowReps( is_snippet_editor ) {
                 return;
             }
             //if(_currentRecordset['recIDs']) _currentRecordset = _currentRecordset['recIDs'];
+            
+            //limit to  records  smarty-output-limit
+            var recset;
+            if(_currentRecordset.recordCount>0){
+                var limit = window.hWin.HAPI4.get_prefs_def('smarty-output-limit',50);
+                if(limit>2000) limit = 2000;
+                recset = {recIDs:_currentRecordset.recIDs.slice(0, limit-1), recordCount:limit , resultCount:limit};
+            }else{
+                recset = _currentRecordset;
+            }
 
-            request = {db:window.hWin.HAPI4.database, template:template_file, recordset:JSON.stringify(_currentRecordset), session:session_id};
+            request = {db:window.hWin.HAPI4.database, 
+                       template:template_file, 
+                       recordset:JSON.stringify(recset), 
+                       session:session_id};
 
         }else{
             return; //use global recordset only
@@ -679,7 +692,7 @@ function ShowReps( is_snippet_editor ) {
                 if(template_body && template_body.length>10){
                     request['mode'] = 'save';
                     request['template'] = template_file;
-                    request['template_body'] = template_body;
+                    request['template_body'] = encodeURIComponent(template_body);
 
                     _keepTemplateValue = template_body;
                 }else{
