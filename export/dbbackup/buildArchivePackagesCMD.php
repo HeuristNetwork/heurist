@@ -29,7 +29,8 @@ $arg_skip_files = false;    // include all the uploaded files
 $arg_include_docs = true;   // include full documentation to make the archive interpretable
 $arg_skip_hml = true;       // don't include HML as this function is primarily intended for database transfer 
                             // and HML is voluminous. HML should be included if this is intended as longer term archive.
-$with_triggers = true;
+$with_triggers = false;
+$backup_root = null; 
 
 if (@$argv) {
     
@@ -135,7 +136,12 @@ if($with_triggers){
             'databases' => true,
             'add-drop-database' => true);
 }else{
-    $dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false);
+    $dump_options = array('databases' => true,
+                'add-drop-database' => true,
+                'add-drop-table' => true,
+                'single-transaction' => true,
+                'skip-triggers' => true,  
+                'add-drop-trigger' => false);
 }
 
 
