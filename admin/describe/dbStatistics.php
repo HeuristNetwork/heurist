@@ -117,6 +117,8 @@ if($is_csv){
                     "date_mod", "date_struct_mod","owner");
 }
 
+$broken_dbs = array();
+
 $i = 0;
 foreach ($dbs as $db){
     
@@ -125,63 +127,68 @@ foreach ($dbs as $db){
 
     //ID  Records     Files(MB)    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
 //error_log(substr($db, 4)); 
-    if(!hasTable($mysqli, 'sysIdentification',$db)) continue;
-
-    $record_row = array (substr($db, 4),
-    mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1"),
-    mysql__select_val("select count(*) from ".$db.".Records where (not rec_FlagTemporary)"),
-    //0,mysql__select_val("select count(*) from ".$db.".recDetails"),
-    /* Removed Ian 10/12/16 to speed up - very slow on USyd server with very large # of DBs. See additional comment-outs below
-    mysql__select_val("select count(*) from ".$db.".defRecTypes").",".
-    mysql__select_val("select count(*) from ".$db.".defDetailTypes").",".
-    mysql__select_val("select count(*) from ".$db.".defTerms").",".
-    mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='workgroup'").",".
-    mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='user'").",".
-    */
-    mysql__select_val("select concat_ws('.',cast(sys_dbVersion as char),cast(sys_dbSubVersion as char)) "
-        ." from ".$db.".sysIdentification where 1"),
-    /*
-    mysql__select_val("SELECT Round(Sum(data_length + index_length) / 1024 / 1024, 1)"
-    ." FROM information_schema.tables where table_schema='".$db."'").",".
-    round( (dirsize(HEURIST_FILESTORE_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",".
-    */
-    mysql__select_val("select max(rec_Modified)  from ".$db.".Records"),
-    //mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps") );
-    mysql__select_value($mysqli, "select max(rst_Modified) from ".$db.".defRecStructure") );
-
-    $owner = mysql__select_row($mysqli, "SELECT concat(ugr_FirstName,' ',ugr_LastName),ugr_eMail,ugr_Organisation ".
-        "FROM ".$db.".sysUGrps where ugr_id=2");
-        
-    //$sz = folderSize( HEURIST_FILESTORE_ROOT.substr($db, 4).'/');
-    //$record_row[3] = $sz>0?round($sz/1048576):0;
-        
-    if($is_csv){    
-        $record_row[] = $owner[0];
-        $record_row[] = $owner[1];
-        $record_row[] = $owner[2];
-        
-        
-        fputcsv($fd, $record_row, ',', '"');
-    }else{
-        $record_row[] = implode(' ', $owner);
-        
-        $record_row[4] = strtotime($record_row[4]); 
-        $record_row[5] = strtotime($record_row[5]); 
-        
-        //$record_row[] = $sysadmin;
-       
-        $aitem_quote = function($n)
-        {
-            return is_numeric($n) ?$n :('"'.str_replace('"','\"',$n).'"');
-        };        
-        
-        $record_row[] = $record_row[0]; //add dbname to the end
-        
-        $record_row = array_map($aitem_quote, $record_row);
-        $arr_databases[] = implode(',',$record_row);//'"'.implode('","',  str_replace('"','',$record_row)   ).'"';
-    }
     
-    $i++;
+    if(!hasTable($mysqli, 'sysIdentification',$db) || !hasTable($mysqli, 'Records',$db)){
+      
+      $broken_dbs[] = substr($db, 4);
+    }else{
+
+        $record_row = array (substr($db, 4),
+        mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1"),
+        mysql__select_val("select count(*) from ".$db.".Records where (not rec_FlagTemporary)"),
+        //0,mysql__select_val("select count(*) from ".$db.".recDetails"),
+        /* Removed Ian 10/12/16 to speed up - very slow on USyd server with very large # of DBs. See additional comment-outs below
+        mysql__select_val("select count(*) from ".$db.".defRecTypes").",".
+        mysql__select_val("select count(*) from ".$db.".defDetailTypes").",".
+        mysql__select_val("select count(*) from ".$db.".defTerms").",".
+        mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='workgroup'").",".
+        mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='user'").",".
+        */
+        mysql__select_val("select concat_ws('.',cast(sys_dbVersion as char),cast(sys_dbSubVersion as char)) "
+            ." from ".$db.".sysIdentification where 1"),
+        /*
+        mysql__select_val("SELECT Round(Sum(data_length + index_length) / 1024 / 1024, 1)"
+        ." FROM information_schema.tables where table_schema='".$db."'").",".
+        round( (dirsize(HEURIST_FILESTORE_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",".
+        */
+        mysql__select_val("select max(rec_Modified)  from ".$db.".Records"),
+        //mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps") );
+        mysql__select_value($mysqli, "select max(rst_Modified) from ".$db.".defRecStructure") );
+
+        $owner = mysql__select_row($mysqli, "SELECT concat(ugr_FirstName,' ',ugr_LastName),ugr_eMail,ugr_Organisation ".
+            "FROM ".$db.".sysUGrps where ugr_id=2");
+            
+        //$sz = folderSize( HEURIST_FILESTORE_ROOT.substr($db, 4).'/');
+        //$record_row[3] = $sz>0?round($sz/1048576):0;
+            
+        if($is_csv){    
+            $record_row[] = $owner[0];
+            $record_row[] = $owner[1];
+            $record_row[] = $owner[2];
+            
+            
+            fputcsv($fd, $record_row, ',', '"');
+        }else{
+            $record_row[] = implode(' ', $owner);
+            
+            $record_row[4] = strtotime($record_row[4]); 
+            $record_row[5] = strtotime($record_row[5]); 
+            
+            //$record_row[] = $sysadmin;
+           
+            $aitem_quote = function($n)
+            {
+                return is_numeric($n) ?$n :('"'.str_replace('"','\"',$n).'"');
+            };        
+            
+            $record_row[] = $record_row[0]; //add dbname to the end
+            
+            $record_row = array_map($aitem_quote, $record_row);
+            $arr_databases[] = implode(',',$record_row);//'"'.implode('","',  str_replace('"','',$record_row)   ).'"';
+        }
+        
+        $i++;
+    }
     //if($i>10) break;
 }//foreach
 
@@ -268,6 +275,14 @@ if($is_csv){
 
             <table style="width:98%" class="div_datatable display">
             </table>
+            <div style="padding-top:20px;">
+            <?php
+                if(count($broken_dbs)>0){
+                    echo '<h4>Broken databases (missed sysIdentification or Records tables)</h4>';
+                    echo implode('<br>',$broken_dbs);
+                }
+            ?>
+            </div>
         </div>
 
         <?php
