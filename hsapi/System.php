@@ -1039,8 +1039,11 @@ error_log(print_r($_REQUEST, true));
                 }
             }
             
-            //host organization logo and url
+            //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
             $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.jpg");
+            if(!file_exists($host_logo)){
+                $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.png");
+            }
             $host_url = null;
             if(file_exists($host_logo)){
                 $host_logo = HEURIST_BASE_URL.'?logo=host';

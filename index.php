@@ -119,8 +119,13 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
 }else if (@$_REQUEST['logo']){
     $host_logo = realpath(dirname(__FILE__)."/../organisation_logo.jpg");
+    $mime_type = 'jpg';
+    if(!file_exists($host_logo)){
+        $host_logo = realpath(dirname(__FILE__)."/../organisation_logo.png");
+        $mime_type = 'png';
+    }
     if(file_exists($host_logo)){
-        header("Content-type: image/jpg");
+        header('Content-type: image/'.$mime_type);
         readfile($host_logo);
         return;
     }

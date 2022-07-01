@@ -76,6 +76,18 @@
                    open: function( event, ui ) {
                        $dlg = window.hWin.HEURIST4.msg.getPopupDlg();
                        $dlg.find('.version').text('version '+window.hWin.HAPI4.sysinfo['version']);
+                       if(window.hWin.HAPI4.sysinfo.host_logo){
+
+$('<div style=\'height:40px;padding-left:4px;float:right\'><a href=\''
++(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
++'\' target=\'_blank\' style=\'text-decoration:none;color:black;\'>'
++'<label>at: &nbsp;</label>'
++'<img src=\''+window.hWin.HAPI4.sysinfo.host_logo
++'\' height=\'35\' align=\'center\'></a></div>')
+                                .appendTo($dlg.find('div.host_info'));
+                            
+                            
+                       }                       
                    }});
 /*                   
                     var dlg = $('#heurist-about');
