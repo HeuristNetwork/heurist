@@ -37,6 +37,7 @@ exit();
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_db_load_script.php');
 
 /*
 if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
@@ -103,8 +104,10 @@ if(false){
     findMissedTermLinks();
 }else if(false){
     __setTermYesNo();
-}else {
+}else  if(false){
     __renameDegreeToKM();
+}else{
+    __recreateProceduresTriggers();
 }
 
 //
@@ -666,6 +669,31 @@ function __setTermYesNo(){
         }
         
     }
+    
+}
+
+function __recreateProceduresTriggers(){
+    
+    global $mysqli, $databases; 
+    
+    print 'Recreate procedures and triggers<br>';    
+    
+    foreach ($databases as $idx=>$db_name){
+
+        print $db_name.'<br>';
+        
+        mysql__usedatabase($mysqli, $db_name);
+        
+        $res = false;
+        if(db_script('hdb_'.$db_name, dirname(__FILE__).'/../setup/dbcreate/addProceduresTriggers.sql', false)){
+            $res = true;
+            if(db_script('hdb_'.$db_name, dirname(__FILE__).'/../setup/dbcreate/addFunctions.sql', false)){
+                $res = true;    
+            }else{
+                exit();
+            }
+        }
+    }//foreach
     
 }
 
