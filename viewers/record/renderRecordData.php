@@ -1204,7 +1204,6 @@ if(false){  //this query fails for maria db
                     $fileSize = $fileinfo['ulf_FileSizeKB'];
                     $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
                     $file_description = $fileinfo['ulf_Description'];
-                    
 
                     $file_playerURL = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce.'&mode=tag';
                     $file_thumbURL  = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&offer_download=1&thumb='.$file_nonce;
@@ -1223,15 +1222,17 @@ if(false){  //this query fails for maria db
                         'thumb' => $file_thumbURL,
                         'player' => $file_playerURL,
                         'nonce' => $file_nonce,
-                        'linked' => ($bd['name']=='Linked media')
+                        'linked' => ($bd['name']=='Linked media'),
+                        'description' => $file_description
                     ));
                     
                      
                     $bd['val'] = '<a target="_surf" href="'.htmlspecialchars($external_url?$external_url:$file_URL).'">';
 
+                    /* 2022-06 Moved file desc to popup linked from 'credits'
                     if($file_description!=null && $file_description!=''){
                         $bd['val'] = $bd['val'].htmlspecialchars($file_description).'<br>';
-                    }
+                    }*/
                     $bd['val'] .= '<span class="external-link" style="vertical-align: bottom;"></span>';
                     if(strpos($originalFileName,'_iiif')===0){
                         $bd['val'] = $bd['val'].'<img src="'.HEURIST_BASE_URL.'hclient/assets/iiif_logo.png" style="width:16px"/>';
@@ -1448,7 +1449,16 @@ if(false){  //this query fails for maria db
                                 . '" class="external-link image_tool" target="_surf">download'
                                 . (@$thumb['linked']?' (linked media)':'').'</a></div>';
             }
-            
+
+            if(@$thumb['description'] != null && @$thumb['description'] != ''){
+                if(filter_var($thumb['description'], FILTER_VALIDATE_URL)){ // just a url
+                    print '<a href="'.htmlspecialchars($thumb['description']).'" target="_blank">&copy; credits</a>';
+                }else{
+                    print '<span style="cursor: pointer; color: #2080C0;" '
+                        . 'onClick="window.hWin.HEURIST4.msg.showMsgDlg(\''.htmlspecialchars($thumb['description']).'\', null, \'Credits for '.htmlspecialchars($thumb['orig_name']).'\')">&copy; credits</a>';
+                }
+            }
+
             print '</div>';
             if($is_map_popup){
                 print '<br>';
