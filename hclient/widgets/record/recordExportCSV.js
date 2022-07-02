@@ -86,12 +86,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
         // Initialize field advanced pane.
         this._resetAdvancedControls();
-        this.hideAdvancedPane();
-
-        this.element.find('.export-advanced-button').on('click', function () {
-            that.toggleAdvancedPane();
-        });
-        
+        //this.hideAdvancedPane();
         
         if(!this.options.isdialog && this.options.is_h6style){
             var fele = this.element.find('.ent_wrapper:first');
@@ -114,7 +109,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         
         this.element.find('.export-to-bottom-button').on('click', function () {
             var container = $(this).parent();
-			container.scrollTop(container[0].scrollHeight);
+            container.scrollTop(container[0].scrollHeight);
         });
 
         this.element.find('#selectAll').on("click", function(e){
@@ -133,11 +128,11 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 });
             }
         });
-        this.element.find('#selectAll_container').css("padding-left", "21px");
+        /*this.element.find('#selectAll_container').css("padding-left", "21px");
         this.element.find('#chkJoinRecTypes_container').css({
             "display": "inline-block",
             "margin-left": "10px"
-        });
+        });*/
 
         return true;
     },
@@ -352,7 +347,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 return;
             }
             
-            var settings = this.getSettings(true);            
+            var settings = this.getSettings(true);
             if(!settings) return;
            
             var request = {
@@ -450,9 +445,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 
                 //window.hWin.HEURIST4.util.findArrayIndex( dtid, selectedFields[rtid] )<0
                 if( selectedFields[rtid].indexOf( dtid )<0 ) {
-                    
-                    selectedFields[rtid].push(dtid);    
-                    
+                    selectedFields[rtid].push(dtid);
                     //add resource field for parent recordtype
                     __addSelectedField(ids, lvl+2, rtid);
                 }
@@ -524,12 +517,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         
         if(rtyID=='' || rtyID==null){
             $('.rtt-tree').parent().hide();
-            this.element.find('#selectAll_container').hide();
-            this.element.find('#chkJoinRecTypes_container').hide();
+            this.element.find('#export_format_container').hide();
         }else{
             $('.rtt-tree').parent().show();
-            this.element.find('#selectAll_container').show();
-            this.element.find('#chkJoinRecTypes_container').show();
+            this.element.find('#export_format_container').show();
             if(rtyID>0){
                 this.selectedFields = [];
             }
@@ -621,7 +612,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 },
                 select: function(e, data) {
                     if (data.node.isSelected()) {
-                        that._addFieldAdvancedOptions(data.node.title, data.node.data.type, data.node.data.code);
+                        that._addFieldAdvancedOptions(data.node.title, data.node.data.type, data.node.data.code, data.node.li);
                     } else {
                         that._removeFieldAdvancedOptionsByCode(data.node.data.code);
                     }
@@ -636,23 +627,34 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
                     var setDefaults = !data.node.isExpanded();
 
-                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
+                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length > 0){
                         
                         if(!isExpander){
                             data.node.setExpanded(!data.node.isExpanded());
                         }
-
                         if(setDefaults){
                             for(var i=0; i<data.node.children.length; i++){
                                 var node = data.node.children[i];
                                 if(node.key=='rec_ID' || node.key=='rec_Title'){
-                                    node.setSelected(true);
+                                    setTimeout(function(tree_node){ 
+                                        tree_node.setSelected(true); 
+                                    }, 1000, node);
                                 }
                             }
                         }
 
                     }else if(data.node.lazy && !isExpander) {
                         data.node.setExpanded(true);
+                    }
+
+                    if(isExpander || data.node.children && data.node.children.length > 0){
+                        setTimeout(function(){ // wait for nodes to load
+                            var selected_nodes = treediv.fancytree('getTree').getSelectedNodes();
+                            for(var j = 0; j < selected_nodes.length; j++){
+                                //var cur_li = selected_nodes[j]['li'];
+                                that._displayAdvOption(selected_nodes[j]['data']['code'], $(selected_nodes[j]['li']).is(':visible'));
+                            }
+                        }, 250, null);
                     }
                 },
                 dblclick: function(e, data) {
@@ -695,33 +697,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      * @private
      */
     _resetAdvancedControls: function () {
-        this.element.find('.export-advanced-list tbody').html('');
+        this.element.find('.export-advanced-list').html('');
         this.element.find('.export-advanced-list').hide();
-    },
-
-    /**
-     * Show the advanced pane.
-     */
-    showAdvancedPane: function () {
-        this.element.find('.export-advanced-container').show();
-    },
-
-    /**
-     * Hide the advanced pane.
-     */
-    hideAdvancedPane: function () {
-        this.element.find('.export-advanced-container').hide();
-    },
-
-    /**
-     * Toggle the advanced pane.
-     */
-    toggleAdvancedPane: function () {
-        if (this.element.find('.export-advanced-container').is(":visible")) {
-            this.hideAdvancedPane();
-        } else {
-            this.showAdvancedPane();
-        }
     },
 
     /**
@@ -733,11 +710,24 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      */
     _populateFieldAdvancedTotalSelectOptions: function (totalSelectElement, isNumeric) {
         $(totalSelectElement).html('');
-        $(totalSelectElement).append('<option value="" selected>None</option>');
+        $(totalSelectElement).append('<option value="" selected>Value</option>');
         $(totalSelectElement).append('<option value="group">Group By</option>');
         $(totalSelectElement).append('<option value="count">Count</option>');
         if (isNumeric) {
             $(totalSelectElement).append('<option value="sum">Sum</option>');
+        }
+    },
+
+    _displayAdvOption: function(fieldCode, showField){
+        var $ele = this.element.find('div[data-field-code="'+ fieldCode +'"]');
+        if($ele.length == 0){
+            return;
+        }
+
+        if(showField){
+            $ele.show();
+        }else{
+            $ele.hide();
         }
     },
 
@@ -749,14 +739,20 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      * @param {string} fieldCode The code of the field.
      * @private
      */
-    _addFieldAdvancedOptions: function (fieldName, fieldType, fieldCode) {
+    _addFieldAdvancedOptions: function (fieldName, fieldType, fieldCode, selectedItem) {
+
+        if(this.element.find('div[data-field-code="'+ fieldCode +'"]').length != 0){
+            this._displayAdvOption(fieldCode, true);
+            return;
+        }
+
         var content = this._getTemplateContent('templateAdvancedFieldOptions', {
             "fieldName": fieldName,
             "fieldType": fieldType,
             "fieldCode": fieldCode
         });
         var fieldElement = $(content);
-        this.element.find('.export-advanced-list tbody').append(fieldElement);
+        this.element.find('.export-advanced-list').append(fieldElement);
         this._populateFieldAdvancedTotalSelectOptions(fieldElement.find('.export-advanced-list-item-total-select')[0], fieldType === 'float');
         this.element.find('.export-advanced-list-item-total-select').on('change', function () {
             var itemElement = $(this).closest('.export-advanced-list-item');
@@ -765,6 +761,29 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 itemElement.find('.export-advanced-list-item-percentage').show();
             } else {
                 itemElement.find('.export-advanced-list-item-percentage').hide();
+            }
+        });
+
+        var pos_top = selectedItem.offsetTop;
+        fieldElement.css({
+            'position': 'absolute',
+            'top': pos_top+'px',
+            'left': '30px'
+        });
+
+        this._on(fieldElement.find('.ui-icon'), {
+            'click': function(event){
+                var val = null;
+                if($(event.target).hasClass('ui-icon-circle-b-arrow-n')){
+                    val = 'asc';
+                }else if($(event.target).hasClass('ui-icon-circle-b-arrow-s')){
+                    val = 'desc';
+                }else if($(event.target).hasClass('ui-icon-minus')){
+                    val = '';
+                }
+                if(val || val == ''){
+                    this._handleSortByField($(event.target).parent().attr('data-code'), false, val);
+                }
             }
         });
     },
@@ -783,6 +802,57 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         });
     },
 
+    _handleSortByField: function(code, isGet, new_value=''){
+
+        var iconSet = $('div[data-code="'+code+'"]');
+        if(iconSet.length == 0){
+            return null;
+        }
+
+        var value = iconSet.attr('data-value');
+
+        if(!value && value != ''){
+
+            if(iconSet.find('span.ui-icon-circle-arrow-n').length == 1){
+                value = 'asc';
+            }else if(iconSet.find('span.ui-icon-circle-arrow-s').length == 1){
+                value = 'desc';
+            }else{
+                value = '';
+            }
+            iconSet.attr('data-value', value);
+        }
+
+        if(isGet){
+            return value;
+        }
+
+        iconSet.attr('data-value', new_value);
+        new_value = !new_value || new_value == '' || (new_value != 'asc' && new_value != 'desc') ? '' : new_value;
+
+        if(value == new_value){
+            return value;
+        }
+
+        if(value == 'asc'){
+            iconSet.find('span.ui-icon-circle-arrow-n').removeClass('ui-icon-circle-arrow-n').addClass('ui-icon-circle-b-arrow-n');
+        }else if(value == 'desc'){
+            iconSet.find('span.ui-icon-circle-arrow-s').removeClass('ui-icon-circle-arrow-s').addClass('ui-icon-circle-b-arrow-s');
+        }else{
+            iconSet.find('span.ui-icon-minusthick').removeClass('ui-icon-minusthick').addClass('ui-icon-minus');
+        }
+
+        if(new_value == 'asc'){
+            iconSet.find('span.ui-icon-circle-b-arrow-n').removeClass('ui-icon-circle-b-arrow-n').addClass('ui-icon-circle-arrow-n');
+        }else if(new_value == 'desc'){
+            iconSet.find('span.ui-icon-circle-b-arrow-s').removeClass('ui-icon-circle-b-arrow-s').addClass('ui-icon-circle-arrow-s');
+        }else{
+            iconSet.find('span.ui-icon-minus').removeClass('ui-icon-minus').addClass('ui-icon-minusthick');
+        }
+
+        return new_value;
+    },
+
     /**
      * Get the advanced options from the UI controls.
      *
@@ -794,6 +864,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      * @private
      */
     _getFieldAdvancedOptions: function () {
+        var that = this;
         if (this.element.find('.export-advanced-list-item').length > 0) {
             var options = {};
             this.element.find('.export-advanced-list-item').each(function () {
@@ -802,7 +873,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 if (totalSelectValue) {
                     option.total = totalSelectValue;
                 }
-                var sortSelectValue = $(this).find('.export-advanced-list-item-sort-select').val();
+                var sortSelectValue = that._handleSortByField($(this).attr('data-field-code'), true);
                 if (sortSelectValue) {
                     option.sort = sortSelectValue;
                 }
@@ -823,6 +894,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      * @private
      */
     _setFieldAdvancedOptions: function (options) {
+        var that = this;
         if (options) {
             this.element.find('.export-advanced-list-item').each(function () {
                 var fieldCode = $(this).data('field-code');
@@ -836,7 +908,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                         }
                     }
                     if (option.hasOwnProperty('sort')) {
-                        $(this).find('.export-advanced-list-item-sort-select').val(option.sort);
+                        that._handleSortByField($(this).attr('data-code'), false, option.sort);
                     }
                     if (option.hasOwnProperty('use_percentage') && option.use_percentage) {
                         $(this).find('.export-advanced-list-item-percentage-checkbox').prop('checked', true);
