@@ -398,7 +398,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             var ugl_GroupID = this.searchForm.find('#input_search_group').val();
                 
             if(ugl_GroupID>0){
-                html = html + '<div class="rec_actions user-list" style="top:4px;width:150px;right:2px;position:absolute">'
+                html = html + '<div class="rec_actions user-list" style="top:4px;width:160px;right:2px;position:absolute">'
                 if(recID==2 && ugl_GroupID==window.hWin.HAPI4.sysinfo.db_managers_groupid){
                     html = html + '<div style="min-width:88px;text-align:center">admin</div>';
                 }else 

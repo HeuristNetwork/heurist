@@ -316,7 +316,10 @@ if($step=="1"){  // info about current status
         }
         if(count($transfer_errors)>0){
             print "<strong>Data not transfered</strong><br>";
-            print "<em>The following fields in Zotero have been mapped into the Heurist database but will<br>not be saved as the record type does not contain a field to hold them. If you fell that<br>any of these fields are needed, you may add the indicated base field to the record<br>type. Contact the Heurist team (support at HeuristNetwork.org) if you require help<br>with this.</em><br>";
+            print "<em>The following fields in Zotero have been mapped into the Heurist database but will<br>"
+                . "not be saved as the record type does not contain a field to hold them. If you feel that<br>"
+                . "any of these fields are needed, you may add the indicated base field to the record<br>"
+                . "type. Contact the Heurist team (support at HeuristNetwork.org) if you require help<br>with this.</em><br>";
             print "<br><table>".implode("", $transfer_errors)."</table><br>";
         }
         if(count($mapping_rt_errors2)>0){
@@ -324,7 +327,7 @@ if($step=="1"){  // info about current status
             print "<br><br>".implode("<br />",$mapping_rt_errors2).'</p>';
         }
 
-        print "<p style='color: red;margin-top: 0px;'>Please import them from the Heurist_Reference_Set database (# 3) using Database > Structure > From Databases</p>";
+        print "<p style='color: red;margin-top: 0px;'>Please import them from the Heurist_Bibliographic database (# 6) using Design > Browse templates</p>";
     }
 
     if(count($successful_rows)>0){

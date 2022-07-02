@@ -670,20 +670,26 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     }
                 });
 
-                /* 2022-03-14: Caused toolbar to cover content currently being edited
                 editor.on('click', function (e) {
-                    setTimeout(function(){
-                        var ele = $('body').find('.tox-toolbar-dock-transition');
-                        if(ele.length>0){
-                            var top = parseInt(ele.css('top'));
-                            var top2 = $('body').find('#main-content-container').position().top - 40;
+
+                    var $toolbar = $('body').find('.tox-toolbar-dock-transition');
+                    if($toolbar.length > 0 && $toolbar.width() < 400){
+                        $toolbar.css('width', '400px');
+                    }
+
+                    /*setTimeout(function(){
+                        var $content = $('body').find('#main-content-container');
+                        if($toolbar.length>0){
+
+
+                            var top = parseInt($toolbar.css('top'));
+                            var top2 = $content.position().top - $toolbar.height();
                             if(top<top2){
-                                ele.css({top:top2+'px'});  
+                                $toolbar.css({top:top2+'px'});  
                             } 
                         }
-                    },200);                            
-                
-                });*/
+                    },200);*/
+                });
                     
                 editor.on('focus', function (e) {
                     if(current_edit_mode=='page'){

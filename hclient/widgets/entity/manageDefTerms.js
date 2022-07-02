@@ -1051,7 +1051,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             var alt_btn_content = '&nbsp;';
             if(this.options.edit_mode == 'popup'){
-                alt_btn_content = '<span class="ui-icon ui-icon-triangle-1-e" style="color: gray;" />'
+                alt_btn_content = '<span class="ui-icon ui-icon-triangle-1-e" style="color: black;opacity: 0.2;" />';
             }
 
             html = '<div class="recordDiv densed '+sclass+(!(ref_lvl>0)?' rt_draggable':'')
@@ -1061,7 +1061,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     {key:'expand',label:'Show/hide children',            
                         title:'', icon:'ui-icon-triangle-1-s', class: 'has_child_terms'},
                     null,'icon_text',exp_btn_style)
-                : '<div style="'+exp_btn_style+'" class="no_child_terms">'+ alt_btn_content +'</div>') 
+                    : '<div style="'+exp_btn_style+'" class="no_child_terms" title="Drag terms onto this term or create with + icon to create child terms">'
+                        + alt_btn_content 
+                     +'</div>') 
             + '<div class="recordSelector" style="display:inline-block;"><input type="checkbox" /></div>'
             + html_thumb + recTitle;
 
