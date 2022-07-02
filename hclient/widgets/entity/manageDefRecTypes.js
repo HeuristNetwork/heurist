@@ -1163,7 +1163,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
             //hide title mask
             ele = this._editing.getFieldByName('rty_TitleMask');
-            ele.editing_input('setValue', 'record [ID]');
+            ele.editing_input('setValue', 'Please edit any <b>XXXXX</b> record to choose fields for the constructed title'); //'record [ID]'
             ele.hide();
             
         }else{
@@ -1452,6 +1452,27 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         }
     },
+
+    _saveEditAndClose: function(fields, afterAction, onErrorAction){
+
+        if(window.hWin.HAPI4.is_callserver_in_progress()) {
+            //prevent repeatative call
+            return;   
+        }
+
+        if(!fields){
+            fields = this._getValidatedValues(); 
+            fields['isfull'] = 1;
+        }
+
+        if(fields==null) return; //validation failed
+
+        if(fields['rty_TitleMask'] && fields['rty_TitleMask'].indexOf('<b>XXXXX</b>') != -1) { // add rectype name to default title mask
+            fields['rty_TitleMask'] = fields['rty_TitleMask'].replace('XXXXX', fields['rty_Name']);
+        }
+
+        this._super(fields, afterAction, onErrorAction);
+    },
     
     //
     // update list after save (refresh)
@@ -1477,8 +1498,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(this.it_was_insert){
             this.searchForm.searchDefRecTypes('startSearch'); //refresh
 
-            if(this.options.select_mode=='select_multi'){ // Select new rectype, for multi select
+            if(this.options.select_mode=='select_multi'){ // auto select new rectype, and force close
                 this.recordList.find('div[recid="'+ recID +'"]').click();
+                this._selectAndClose();
             }
 
             this._addInitialTabs(recID);

@@ -728,30 +728,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               
                               ];    
                 }else if(this.options.edit_structure==true){
-
-                    function checkTitleMask(){ // Check if title mask is the default, request user to change it
-                        var title_mask = $Db.rty(that._currentEditRecTypeID, 'rty_TitleMask');
-
-                        if(title_mask == 'record [ID]'){
-
-                            window.hWin.HEURIST4.msg.showMsgDlg(
-                                'The title mask is used to construct the record title from the data in the record.<br/>'
-                                    + 'Constructed record titles are very important: they are used to represent the record in<br/>'
-                                    + 'search results and record pointer fields, and can also be used in record filters and<br/>'
-                                    + 'custom report formats.<br/><br/>'
-                                    + 'To avoid an uninformative title we strongly recommend having at least one required field in<br/>'
-                                    + 'the title mask or several fields of which one will always be filled in.<br/><br/>'
-                                    + 'Please define the title mask before exiting.', 
-                                function(){ that.editRecordTypeTitle(); that.closeEditDialog(); },
-                                {title:'Default title mask', yes:'OK', no:'Cancel'},
-                                {default_palette_class: 'ui-heurist-design'});
-
-                            return;
-                        }
-
-                        that.closeEditDialog();
-                    }
-
+                    // Check if rectype has fields
                     btns = [ 
                         {text:window.hWin.HR('Save'), id:'btnRecSave', //AndClose
                           css:{'margin-left':'0.5em'},
@@ -785,10 +762,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                     btns, 
                                     {title:'No fields defined', no:window.hWin.HR('Continue editing'), yes:window.hWin.HR('Exit with no fields')},
                                     {default_palette_class: 'ui-heurist-design'}); 
+                            }else{
+                                that.closeEditDialog();
                             }
-                            else{
-								checkTitleMask();
-                            } 
                           }
                         }
                     ];
@@ -3190,8 +3166,39 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 });
             }
 
-            if(!hasField && window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false){ // open modify structure, if able when there are no fields
-                this.editRecordType(true);
+            if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false){
+
+                if(!hasField){ // open modify structure, if able when there are no fields
+                    this.editRecordType(true);
+                }else if(this.options.edit_structure == undefined && this.options.rts_editor == undefined){ // check for default title mask
+
+                    var title_mask = $Db.rty(that._currentEditRecTypeID, 'rty_TitleMask');
+                    var match_result = title_mask.match(/(?:\[\d+\-\d+\]|\[\S+\])/g); // check for fields in title mask
+
+                    if(title_mask == 'record [ID]' || !match_result){
+
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                            'You have not yet selected the fields used to create the <b>Constructed title</b><br><br>'
+
+                            +'The <b>Constructed title</b> is like the reference you might find in the bibliography at the end<br>'
+                            +'it uses important fields to uniquely identify and summarise the bibliographic reference, or in this case<br>'
+                            +'the database record in question.<br><br>'
+
+                            +'<b>Constructed titles</b> are used to represent records when they are listed in search results<br>'
+                            +'and as the visible representation of the record referenced in a pointer field or relationship marker.<br>'
+                            +'They can also be used in reports and visualisations, searches, sorting or in the constructed title<br>'
+                            +'of connected records.<br><br>'
+
+                            +'We strongly recommend putting a little thought into this, as well-designed constructed titles can<br>'
+                            +'greatly improve the clarity and ease of use of the database.<br>'
+                            +'We recommend you read the <a href="https://heuristref.net/heurist/?db=Heurist_Help_System&website&id=39&pageid=773" target="_blank">help for Constructed titles</a>', 
+                            { 'Proceed': function(){ that.editRecordTypeTitle(); } },
+                            {title:'Constructed title not yet configured', yes:'Proceed'},
+                            {default_palette_class: 'ui-heurist-design'});
+
+                        return;
+                    }
+                }
             }else if(max_length_fields.length > 0){
 
                 var popup_maxw = this.editForm.width() * ((this.options.rts_editor) ? 0.75 : 0.8);
