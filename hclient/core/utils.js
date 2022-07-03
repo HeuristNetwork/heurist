@@ -380,7 +380,7 @@ window.hWin.HEURIST4.util = {
     },
 
     //
-    // both parameter should be JSON array or Object
+    // both parameter should be JSON array or Object (rules are ignored)
     //
     mergeHeuristQuery: function(){
         
@@ -399,40 +399,75 @@ window.hWin.HEURIST4.util = {
         
         return res_query;
     },
-
+    
     mergeTwoHeuristQueries: function(query1, query2){
-        
-        var sPlain1 = false, sPlain2 = false;
-        
-        if(jQuery.type(query1) === "string"){
-            var notJson = true;
-            try{
-                //query1 = JSON.parse(query1);
-                var query1a = window.hWin.HEURIST4.util.isJSON(query1);
-                if( query1a ){
-                    query1 = query1a;
-                    notJson = false;
-                }
-            }catch (ex2){
-            }
-            if(notJson){
-                if(window.hWin.HEURIST4.util.isempty(query1)){
-                    query1 = {};    
+
+        //return object  {q:, rules:, plain:}
+        function __prepareQuery(query){
+            
+            var query_a, rules = false, sPlain = false;
+            var isJson = false;
+            
+            var query_a = window.hWin.HEURIST4.util.isJSON(query);
+            if( query_a ){
+                query = query_a; //converted to json    
+                
+                if(query_a['q']){
+                    query = query_a['q'];
+                    if(query_a['rules']){
+                        rules = query_a['rules'];    
+                    }
+                    query_a = window.hWin.HEURIST4.util.isJSON(query);
+                    if( query_a ){
+                        query = query_a;
+                        isJson = true;
+                    }
                 }else{
-                    sPlain1 = query1;
-                    query1 = {plain: encodeURIComponent(query1)}; //query1.split('"').join('\\\"')};    
+                    isJson = true;    
                 }
             }
+                    
+            if(!isJson){
+                if(window.hWin.HEURIST4.util.isempty(query)){
+                    query = {};    
+                }else{
+                    sPlain = query;
+                    query = {plain: encodeURIComponent(query)}; //query1.split('"').join('\\\"')};    
+                }
+            }
+            var res = {q:query};    
+            if(rules){
+                res['rules'] = rules;
+            }
+            if(sPlain){
+                res['plain'] = sPlain;
+            }else{
+                res['plain'] = false;
+            }
+            
+            return res;
         }
-        
+
+/*        
+        var sPlain1 = false, sPlain2 = false;
         if(jQuery.type(query2) === "string"){
             var notJson = true;
             try{
                 //query2 = JSON.parse(query2);
                 var query2a = window.hWin.HEURIST4.util.isJSON(query2);
                 if( query2a ){
-                    query2 = query2a;
-                    notJson = false;
+                    if(query2a['q']){
+                        query2 = query2a['q'];    
+                        if(query2a['rules']){
+                            rules2 = query2a['rules'];    
+                        }
+                        if(window.hWin.HEURIST4.util.isJSON(query2)){
+                            notJson = false;
+                        }
+                    }else{
+                        query2 = query2a;
+                        notJson = false;
+                    }
                 }
             }catch (ex2){
             }
@@ -445,11 +480,17 @@ window.hWin.HEURIST4.util = {
                 }
             }
         }
-        
-        if(sPlain1!==false && sPlain1 !== false)
+*/        
+
+        var q1 = __prepareQuery(query1);
+        var q2 = __prepareQuery(query2);
+
+        if(q1['plain'] && q2['plain'])
         {
-            return sPlain1+' '+sPlain2;
+            return q1['plain']+' '+q2['plain'];
         }else{
+            var query1 = q1['q'], query2 = q2['q'];
+            
             if(window.hWin.HEURIST4.util.isnull(query1) || $.isEmptyObject(query1)){
                 return query2;
             }
@@ -561,7 +602,7 @@ window.hWin.HEURIST4.util = {
     // get combination query and rules as json array for map query layer
     // Returns current search request as stringified JSON
     //    
-    hQueryStringify: function(request){
+    hQueryStringify: function(request, query_only){
         
         var res = {};
         
@@ -577,33 +618,37 @@ window.hWin.HEURIST4.util = {
             }
         }
         
-        if(!window.hWin.HEURIST4.util.isempty(request.rules)){
-            //cleanRules?
-            var r = window.hWin.HEURIST4.util.isJSON(request.rules);
-            if(r!==false){
-                if(r.facets) return ''; //faceted search not allowed for map queries
-                res['rules'] = r; //JSON.stringify(r);
-            }else{
-                res['rules'] = request.rules;
+        if(query_only===true){
+            res = res['q'];  
+        }else{ 
+        
+            if(!window.hWin.HEURIST4.util.isempty(request.rules)){
+                //cleanRules?
+                var r = window.hWin.HEURIST4.util.isJSON(request.rules);
+                if(r!==false){
+                    if(r.facets) return ''; //faceted search not allowed for map queries
+                    res['rules'] = r; //JSON.stringify(r);
+                }else{
+                    res['rules'] = request.rules;
+                }
+            }
+
+            if(!window.hWin.HEURIST4.util.isempty(request.w) && !(request.w=='a' || request.w=='all')){
+                    res['w'] = request.w;
+            }
+            
+            if(request.rulesonly==1 || request.rulesonly==true){
+                    res['rulesonly'] = 1;
+            }else if(request.rulesonly==2){
+                    res['rulesonly'] = 2;
+            }
+
+            if(request.database){
+                    res['db'] = request.database;
+            }else if(request.db){
+                    res['db'] = request.db;
             }
         }
-
-        if(!window.hWin.HEURIST4.util.isempty(request.w) && !(request.w=='a' || request.w=='all')){
-                res['w'] = request.w;
-        }
-        
-        if(request.rulesonly==1 || request.rulesonly==true){
-                res['rulesonly'] = 1;
-        }else if(request.rulesonly==2){
-                res['rulesonly'] = 2;
-        }
-
-        if(request.database){
-                res['db'] = request.database;
-        }else if(request.db){
-                res['db'] = request.db;
-        }
-        
         
         return JSON.stringify(res);;
     },

@@ -150,7 +150,6 @@ $.widget( "heurist.search_faceted", {
         showclosebutton: true,
         showresetbutton: true,
         search_realm: null,
-        preliminary_filter:null,
         svs_ID: null,
         onclose: null,// callback
         is_publication: false,
@@ -743,7 +742,7 @@ $.widget( "heurist.search_faceted", {
                             (this._use_sup_filter)?this.options.params.sup_filter:'', 
                             //this.options.params.add_filter,
                             this._prepareSpatial(this.options.params.spatial_filter));
-        
+                            
         //this._current_query = null;
        // create list of queries to search facet values 
         this._initFacetQueries();
@@ -1615,7 +1614,6 @@ $.widget( "heurist.search_faceted", {
                                         (this._use_sup_filter)?this.options.params.sup_filter:'',   //suplementary filter defined in wiz
                                         this.options.params.add_filter,
                                         this._prepareSpatial(this.options.params.spatial_filter));  //dynaminc addition filter
-
                         
                     }else{
                         
