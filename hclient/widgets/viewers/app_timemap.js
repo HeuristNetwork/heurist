@@ -313,8 +313,10 @@ console.log(re);
                 // search_initial - initial query
                 // published  - 0|1
                 
-                if(!window.hWin.HEURIST4.util.isempty(this.options.published)){
+                if(!window.hWin.HEURIST4.util.isempty(this.options.published)) {
                     url = url + '&published='+this.options.published; 
+                } else if(this.options.layout_params && this.options.layout_params.ui_main) {
+                    url = url + '&ui_main=1'; 
                 }
                 if(this.options.mapdocument>0){
                     url = url + '&mapdocument='+this.options.mapdocument; 

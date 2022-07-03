@@ -293,8 +293,8 @@ $.widget( "heurist.mapping", {
                 //if(mapping) mapping.setTimelineMinheight();
                 that._adjustLegendHeight();
             };
-            
-            if(is_ui_main){
+        
+            if(is_ui_main){ //show toolbar as north panel
                 
                 window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane',
                                     ['east', (top ?  '75%' : window.innerWidth)]);
@@ -2784,8 +2784,8 @@ $.widget( "heurist.mapping", {
         
         if(this.options.element_layout){
             
-            var is_main_ui = params['ui_main']; //if true show separate toolbar for mp controls
-            
+            var is_main_ui = params['ui_main']; //if true show separate toolbar for map controls
+           
             if(is_main_ui){
                 layout_opts.north__size = 36;
             }else if(__parseval(params['noheader'])){ //outdated
@@ -2795,6 +2795,11 @@ $.widget( "heurist.mapping", {
             var mylayout = $(this.options.element_layout).layout(layout_opts);
             if(this.notimeline){
                 mylayout.hide('south');
+            }
+            if(is_main_ui){
+                mylayout.show('north');
+            }else{
+                mylayout.hide('north');
             }
         }
         
