@@ -3096,51 +3096,61 @@ function recordLinksFileContent($system, $record){
 // find geo in linked places 
 // @todo - use as place record type defined in $system->user_GetPreference('deriveMapLocation', 1)
 //
-function recordSearchGeoDetails($system, $recID) {
+function recordSearchGeoDetails($system, $recID, $find_places_for_geo) {
 
-    $details = array();        
-    if($system->defineConstant('RT_PLACE') && $system->defineConstant('DT_GEO_OBJECT')){
+    $details = array();    
+    
+    if($system->defineConstant('DT_GEO_OBJECT')){
+    
+        if ($find_places_for_geo===true && $system->defineConstant('RT_PLACE')){
+            $find_places_for_geo = array(RT_PLACE);
+        }
+        
+        if(is_array($find_places_for_geo) && count($find_places_for_geo)>0){
 
-        //$recID = $record["rec_ID"];     
-        $squery = 'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo) as dtl_Geo, '
-        .'rl_TargetID,dtl_ID,rl_DetailTypeID'
-        .' FROM recDetails, recLinks, Records '
-        .' WHERE dtl_DetailTypeID='. DT_GEO_OBJECT
-        .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID='.RT_PLACE //@todo use other than Place rectype
-        //'in ('. join(',', $rectypes_as_place)
-        .' AND rl_SourceID = '.$recID
-        .' ORDER BY rl_ID'; 
-        //'in (' . join(',', $chunk_rec_ids) . ')';
+            //$recID = $record["rec_ID"];     
+            $squery = 'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo) as dtl_Geo, '
+            .'rl_TargetID,dtl_ID,rl_DetailTypeID'
+            .' FROM recDetails, recLinks, Records '
+            .' WHERE dtl_DetailTypeID='. DT_GEO_OBJECT
+            .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID'
+                   .(count($find_places_for_geo)==1
+                        ?('='.$find_places_for_geo[0])
+                        :(' IN ('.implode(',',$find_places_for_geo).')'))
+            .' AND rl_SourceID = '.$recID
+            .' ORDER BY rl_ID'; 
+            //'in (' . join(',', $chunk_rec_ids) . ')';
 
-        $mysqli = $system->get_mysqli();
-        $res = $mysqli->query($squery);
+            $mysqli = $system->get_mysqli();
+            $res = $mysqli->query($squery);
 
 
-        if($res){
-            while ($rd = $res->fetch_assoc()) {
+            if($res){
+                while ($rd = $res->fetch_assoc()) {
 
-                if ($rd["dtl_Value"]  &&  $rd["dtl_Geo"]) {
-                    $detailValue = array(
-                        "geo" => array(
-                            "type" => $rd["dtl_Value"],
-                            "wkt" => $rd["dtl_Geo"],
-                            "placeID" => $rd["rl_TargetID"],
-                            "pointerDtyID" => $rd["rl_DetailTypeID"]
-                        )
-                    );
-                    $details[$rd["dtl_DetailTypeID"]][$rd["dtl_ID"]] = $detailValue;
+                    if ($rd["dtl_Value"]  &&  $rd["dtl_Geo"]) {
+                        $detailValue = array(
+                            "geo" => array(
+                                "type" => $rd["dtl_Value"],
+                                "wkt" => $rd["dtl_Geo"],
+                                "placeID" => $rd["rl_TargetID"],
+                                "pointerDtyID" => $rd["rl_DetailTypeID"]
+                            )
+                        );
+                        $details[$rd["dtl_DetailTypeID"]][$rd["dtl_ID"]] = $detailValue;
+                    }
                 }
-            }
-            $res->close();
+                $res->close();
 
-            /*
-            if(!@$record["details"]){
-            $record["details"] = $details;
-            }else{
-            $record["details"] = array_merge($record["details"],$details);
-            }
-            */
+                /*
+                if(!@$record["details"]){
+                $record["details"] = $details;
+                }else{
+                $record["details"] = array_merge($record["details"],$details);
+                }
+                */
 
+            }
         }
     }
     return $details;

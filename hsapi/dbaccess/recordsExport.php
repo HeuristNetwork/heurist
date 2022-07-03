@@ -170,6 +170,24 @@ public static function output($data, $params){
         
         $find_places_for_geo =  (@$params['suppress_linked_places']!=1) 
                && (self::$system->user_GetPreference('deriveMapLocation', 1)==1);
+               
+        if($find_places_for_geo){
+            
+            //list of rectypes that are sources for geo location
+            $rectypes_as_place = self::$system->get_system('sys_TreatAsPlaceRefForMapping');
+            if($rectypes_as_place){
+                $rectypes_as_place = prepareIds($rectypes_as_place);
+            }else {
+                $rectypes_as_place = array();
+            }
+            //Place always in this array
+            if(self::$system->defineConstant('RT_PLACE')){
+                if(!in_array(RT_PLACE, $rectypes_as_place)){
+                    array_push($rectypes_as_place, RT_PLACE);
+                }
+            }
+            $find_places_for_geo = $rectypes_as_place;
+        }
         
         //define constant for start and end places
         define('DT_PLACE_START', ConceptCode::getDetailTypeLocalID('2-134'));
@@ -1119,9 +1137,11 @@ private static function _getExtentFromWkt($wkt)
 // $extended - include concept codes, term code and labels
 // $simplify - simplify paths with more than 1000 vertices
 // $leaflet_minimum_fields  - only header fields rec_ID, RecTypeID, rec_Title and description if details are defined
-// $find_places_for_geo - if true it searches linked places for geo
+// $find_places_for_geo - if true it searches linked places for geo 
+//                        or it is array of rectypes defined in sys_TreatAsPlaceRefForMapping + RT_PLACE
 //
-private static function _getGeoJsonFeature($record, $extended=false, $simplify=false, $leaflet_minimum_fields=false, $find_places_for_geo=false){
+private static function _getGeoJsonFeature($record, $extended=false, $simplify=false, $leaflet_minimum_fields=false, 
+                $find_places_for_geo=false){
 
     if($extended){
         if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
@@ -1254,14 +1274,15 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         unset($res['properties']['details']);
     }
     
-    if(count($geovalues)==0 && $find_places_for_geo){
+    if(count($geovalues)==0 && 
+        ($find_places_for_geo===true || (is_array($find_places_for_geo) && count($find_places_for_geo)>0)) ){
         
         //this record does not have geo value - find it in related/linked places
         $point0 = array();
         $point1 = array();
         $points = array();
         
-        $geodetails = recordSearchGeoDetails(self::$system, $record['rec_ID']);    
+        $geodetails = recordSearchGeoDetails(self::$system, $record['rec_ID'], $find_places_for_geo);    
         foreach ($geodetails as $dty_ID=>$field_details) {
             foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
                     $wkt = $value['geo']['wkt'];
