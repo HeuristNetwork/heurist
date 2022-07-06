@@ -662,9 +662,9 @@ function browseRecords(_editing_input, $input){
             
             if(window.hWin.HEURIST4.browseRecordCache[key]=='zero' || window.hWin.HEURIST4.browseRecordCache[key] > recordMax){
   
-                __show_select_dialog();
+                __show_select_dialog(); //show usual dialog
                 
-            }else if(!window.hWin.HEURIST4.browseRecordCache[key]){
+            }else if(!window.hWin.HEURIST4.browseRecordCache[key]){ //cache does not exist - search for it
             
                     $inputdiv.find('.sel_link2 > .ui-button-icon').removeClass('ui-icon-triangle-1-e');
                     $inputdiv.find('.sel_link2 > .ui-button-icon').addClass('ui-icon-loading-status-circle rotate');
@@ -801,39 +801,9 @@ function browseRecords(_editing_input, $input){
                         $(opt).attr('icon-url', icon);
                         $(opt).attr('data-rty', item['rec_RecTypeID']);
                     });
-
-//console.log('init hselect '+key);                    
-                    $(that.selObj).css('max-width','300px');
-                    that.selObj = window.hWin.HEURIST4.ui.initHSelect(that.selObj, false,null,
-                        function(){
-                            var ele = that.selObj.hSelect('menuWidget');
-                            ele.css('max-width', '500px');
-                            ele.find('div.ui-menu-item-wrapper').addClass('truncate');
-                            ele.find('.rt-icon').css({width:'12px',height:'12px','margin-right':'10px'});
-                            ele.find('.rt-icon2').css({'margin-right':'0px'});
-
-                            openSearchMenu(that, that.selObj, false);
-                        }
-                    );
                     
-                }else{
-                    that._off($(that.selObj), 'change');    
-                }
-                
-                var $inpt_ele = $inputdiv.find('.sel_link2');
-                if($inpt_ele.is(':hidden') && $inputdiv.find('.link-div').length == 1){
-                    $inpt_ele = $inputdiv.find('.link-div');
-                }
-
-                that.selObj.val('');
-                that.selObj.hSelect('open');
-                that.selObj.hSelect('widget').hide();
-                that.selObj.hSelect('menuWidget')
-                        .position({my: "left top", at: "left bottom", of: $inpt_ele});
-                
-
-                that._on($(that.selObj),{change:function(event){
-                        
+//console.log('init hselect '+key);                    
+                    function __onSelectMenu( event ){
                         var targetID = $(event.target).val();
                         if(!targetID) return;
 
@@ -868,8 +838,38 @@ function browseRecords(_editing_input, $input){
                             }
                         }
                         
-                    }});
+                    }
 
+                    $inputdiv.addClass('selectmenu-parent');
+                    $(that.selObj).css('max-width','300px');
+                    that.selObj = window.hWin.HEURIST4.ui.initHSelect(that.selObj, false, null,
+                        function(){ //onOpenMenu
+                            var ele = that.selObj.hSelect('menuWidget');
+                            ele.css('max-width', '500px');
+                            ele.find('div.ui-menu-item-wrapper').addClass('truncate');
+                            ele.find('.rt-icon').css({width:'12px',height:'12px','margin-right':'10px'});
+                            ele.find('.rt-icon2').css({'margin-right':'0px'});
+
+                            openSearchMenu(that, that.selObj, false);
+                        },
+                        __onSelectMenu
+                    );
+                    
+                }else{
+                    that._off($(that.selObj), 'change');    
+                }
+                
+                var $inpt_ele = $inputdiv.find('.sel_link2');
+                if($inpt_ele.is(':hidden') && $inputdiv.find('.link-div').length == 1){
+                    $inpt_ele = $inputdiv.find('.link-div');
+                }
+
+                that.selObj.val('');
+                that.selObj.hSelect('open');
+                that.selObj.hSelect('widget').hide();
+                that.selObj.hSelect('menuWidget')
+                        .position({my: "left top", at: "left bottom", of: $inpt_ele});
+                //that._on($(that.selObj),{change:f(){}});
                 
             }
         }

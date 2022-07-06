@@ -1104,9 +1104,9 @@ window.hWin.HEURIST4.ui = {
     },
     
     //
+    //  onSelectMenu - in case defined use this callback instead of trigger
     //
-    //
-    initHSelect: function(selObj, useHtmlSelect, apply_style, onOpenMenu){            
+    initHSelect: function(selObj, useHtmlSelect, apply_style, onOpenMenu, onSelectMenu){            
 
         //var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
         ////depth>1 || (optgroup==null && depth>0
@@ -1129,12 +1129,14 @@ window.hWin.HEURIST4.ui = {
             
         }else{
             
-            var parent_ele = null;
-            if ( selObj[0].ownerDocument.location !== window.location ){
-                var win = selObj[0].ownerDocument.defaultView || selObj[0].ownerDocument.parentWindow;
-                parent_ele = $(win.frameElement).parents('.ui-dialog');
-            }
-            if(!parent_ele){
+            var parent_ele = selObj.parents('.selectmenu-parent');
+            if(!parent_ele || parent_ele.length==0){
+                
+                if ( selObj[0].ownerDocument.location !== window.location ){ //inside iframe
+                    var win = selObj[0].ownerDocument.defaultView || selObj[0].ownerDocument.parentWindow;
+                    parent_ele = $(win.frameElement).parents('.ui-dialog');
+                }
+            
                 parent_ele = selObj.parents('.ui-dialog');
                 if(!parent_ele || parent_ele.length==0) {
                     
@@ -1165,7 +1167,7 @@ window.hWin.HEURIST4.ui = {
                 selObj.hSelect("destroy"); 
             }
             
- //console.log(parent_ele);
+ 
             var menu = selObj.hSelect(       
               { style: 'dropdown',
                 position: (navigator.userAgent.indexOf('Firefox')<0)?{collision: "flip"}:{},
@@ -1179,7 +1181,13 @@ window.hWin.HEURIST4.ui = {
                 change: function( event, data ) {
  
                         selObj.val(data.item.value);//change value for underlaying html select
-                        selObj.trigger('change');
+                        
+                        
+                        if($.isFunction(onSelectMenu)){
+                            onSelectMenu.call(this, event);
+                        }else{
+                            selObj.trigger('change');    
+                        }
                 },
                 open: function(event, ui){
                     //console.log(menu.hSelect( "menuWidget" ).width());
