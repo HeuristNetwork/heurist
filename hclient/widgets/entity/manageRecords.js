@@ -3173,7 +3173,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 }else if(this.options.edit_structure == undefined && this.options.rts_editor == undefined){ // check for default title mask
 
                     var title_mask = $Db.rty(that._currentEditRecTypeID, 'rty_TitleMask');
-                    var match_result = title_mask.match(/(?:\[\d+\-\d+\]|\[\S+\])/g); // check for fields in title mask
+                    var match_result = title_mask.match(/\[([^\]]+)\]/g); // check for fields in title mask
 
                     if(title_mask == 'record [ID]' || !match_result){
 

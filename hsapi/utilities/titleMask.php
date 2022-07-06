@@ -108,6 +108,7 @@ class TitleMask {
  public static function check($mask, $rt, $checkempty) {
      
     self::initialize(); 
+    // \[([^]]+)\]  - works in php     \[([^\]]+)\] - is js
 
     if (! preg_match_all('/\\[\\[|\\]\\]|\\[\\s*([^]]+)\\s*\\]/', $mask, $matches))
     {
