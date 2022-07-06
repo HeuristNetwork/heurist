@@ -995,15 +995,18 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                     +'&emptysetmessage='+encodeURIComponent(opts['emptysetmessage'])
                     +'&template='+encodeURIComponent(opts['template'])
                     +'&[query]';
+                    opts['placeholder_text'] = $dlg.find('#placeholder_text').val();
                 }else if(widget_name=='heurist_resultList'){
                     opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'];
                     if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){
                         opts['recordview_onselect']  = 'inline'; //default value    
                     }
                     opts['empty_remark'] = $dlg.find('#empty_remark').val();
+                    opts['placeholder_text'] = $dlg.find('#placeholder_text').val();
                 }else if(widget_name=='heurist_resultListDataTable'){
                     opts['dataTableParams'] = $dlg.find('#dataTableParams').val();
                     opts['emptyTableMsg'] = $dlg.find('#empty_remark').val();
+                    opts['placeholder_text'] = $dlg.find('#placeholder_text').val();
                 }
 
                 var selval = opts.searchTreeMode;
