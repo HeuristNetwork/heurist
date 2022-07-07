@@ -3414,12 +3414,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                            NonOwnerVisibility: fields['rec_NonOwnerVisibility'],
                            NonOwnerVisibilityGroups: fields['rec_NonOwnerVisibilityGroups'],
                            ScratchPad: fields['rec_ScratchPad'],
-                           'details': fields};
+                           //'details': fields,  //without encoding
+                           'details': encodeURIComponent(JSON.stringify(fields)), 
+                           'details_encoded': 1};
         
             if(fields['no_validation']){
                 request['no_validation'] = 1;
             }
-        
+       
             //keep current overflow position
             this._keepYPos = this.editForm.scrollTop();
         

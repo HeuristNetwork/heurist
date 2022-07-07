@@ -357,6 +357,10 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
     // recDetails data
     if ( @$record['details'] ) {
+        
+        if(@$record['details_encoded']==1){
+            $record['details'] = json_decode(urldecode($record['details']), true);
+        }
 
         $detailValues = _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $modeImport);
         if(!$detailValues){
@@ -1517,7 +1521,7 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
     $current_owner_groups = null;
     if($record["rec_OwnerUGrpID"]>0){ //not everyone
         $isEveryOne = false;
-        $query = 'select rcp_UGrpID from usrRecPermissions where rcp_Level="edit" AND rec_ID = '.$recID; //not used
+        $query = 'select rcp_UGrpID from usrRecPermissions where rcp_Level="edit" AND rcp_RecID = '.$recID; //not used
         $current_owner_groups = mysql__select_list2($mysqli, $query);
 
     }
@@ -1980,13 +1984,15 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
     $mask = null;
     $rectype = null;
 
-    if($rectype_or_mask>0){
+    if(is_numeric($rectype_or_mask) && $rectype_or_mask>0){
         $rectype = $rectype_or_mask;
     }else if($rectype_or_mask!=null){
         $mask = $rectype_or_mask;
     }
 
     if($mask == null){
+        
+        
 
         if(!(isset($rectype) && $rectype>0)){
             $rectype = mysql__select_value($mysqli, "select rec_RecTypeID from Records where rec_ID=".$recID);
@@ -1996,7 +2002,7 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
             }
         }
 
-        $mask = mysql__select_value($mysqli,"select rty_TitleMask from defRecTypes where rty_ID=".$rectype);
+        $mask = mysql__select_value($mysqli, 'select rty_TitleMask from defRecTypes where rty_ID='.$rectype);
         if(!$mask){
             $system->addError(HEURIST_DB_ERROR, 'Cannot get title mask for record type', $mysqli->error);
             return false;
