@@ -463,9 +463,17 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
     
     if($is_jsallowed){
         
-        if(!$is_snippet_output){ //full html output. inside iframe - add all styles and scripts to header at once7
+        if(!$is_snippet_output){ //full html output. inside iframe - add all styles and scripts to header at once
         
-            $head = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+            $head = '';
+            $close_tags = '';
+        
+            if(strpos($tpl_source, '<html>')===false){
+                $open_tags = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>';
+                $close_tags = '</body></html>';
+            }
+        
+            $head = '';
                 
             //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
             if($record_with_custom_styles>0){
@@ -523,81 +531,103 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                 .'</script>');
             }
 
-            $head .= '</head><body class="smarty-report">';
-            $tpl_source = $head.$tpl_source.'</body></head>';
+            //$head .= '</head><body class="smarty-report">';
             
-        }else{ //html snippet output (without head)
+            $tpl_source = $open_tags.$tpl_source.$close_tags;
+            
+            $tpl_source = str_replace('<body>','<body class="smarty-report">', $tpl_source);
+            $tpl_source = str_replace('</head>',$head.'</head>', $tpl_source);
+            
+            
+        }else{ //html snippet output (without head) ----------------------------
         
-        //check if need to init mediaViewer
-        if(strpos($tpl_source,'fancybox-thumb')>0){
-            
-            $tpl_source = 
-                    '<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>'
-                    .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-ui.js"></script>'
-                    .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.js"></script>'
-                    .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/core/detectHeurist.js"></script>'
-                    .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/widgets/viewers/mediaViewer.js"></script>'
-.'<script>'
-.'var rec_Files=[];</script>'
-        .$tpl_source;
-            
-            $tpl_source .= (
-                '<script>$(document).ready(function() {'
-                
-.'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend","<link rel=\"stylesheet\" href=\"'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.css\" />");'                
-                
-                    .'$("body").mediaViewer({rec_Files:rec_Files, showLink:false, selector:".fancybox-thumb", '
-                    .'database:"'.HEURIST_DBNAME.'", baseURL:"'.HEURIST_BASE_URL.'"});'    
-                  .'});'
-                .'</script>');
-        }
+            $head = '';
         
-        //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
-        if($record_with_custom_styles>0){
-            //find record with css fields
-            $css_fields = array();
-            if($system->defineConstant('DT_CMS_CSS')){
-                array_push($css_fields, DT_CMS_CSS);
-            }
-            if($system->defineConstant('DT_CMS_EXTFILES')){
-                array_push($css_fields, DT_CMS_EXTFILES);
-            }
-            if(count($css_fields)>0){
-                $record = recordSearchByID($system, $record_with_custom_styles,$css_fields,'rec_ID');
-                if($record && @$record['details']){
-
-                    if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
-                       //add to begining 
-                       $tpl_source = '<style>'.recordGetField($record, DT_CMS_CSS).'</style>'.$tpl_source;
-                       
-                       $tpl_source = $tpl_source.'<script>if(document.body){
-                            document.body.classList.add("smarty-report");
-                       } </script>';
-                    }
+            //check if need to init mediaViewer
+            if(strpos($tpl_source,'fancybox-thumb')>0){
+                
+                $head = 
+                        '<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>'
+                        .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-ui.js"></script>'
+                        .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.js"></script>'
+                        .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/core/detectHeurist.js"></script>'
+                        .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/widgets/viewers/mediaViewer.js"></script>'
+    .'<script>'
+    .'var rec_Files=[];</script>';
+                
+                $head .= (
+                    '<script>$(document).ready(function() {'
                     
-                    if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
-                        //add to header
-                        $external_files = @$record['details'][DT_CMS_EXTFILES];
-                        if($external_files!=null){
-                            if(!is_array($external_files)){
-                                $external_files = array($external_files);
-                            }
-                            if(count($external_files)>0){
-            $tpl_source = $tpl_source.'<script>(function() {';
-                                foreach ($external_files as $ext_file){
-                                    if(strpos($ext_file,'<link')===0){ // || strpos($ext_file,'<script')===0
-            $tpl_source = $tpl_source.'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend",\''
-                                    .$ext_file //str_replace('"','\"',$ext_file)
-                                    .'\');';                                        }
+    .'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend","<link rel=\"stylesheet\" href=\"'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.css\" />");'                
+                    
+                        .'$("body").mediaViewer({rec_Files:rec_Files, showLink:false, selector:".fancybox-thumb", '
+                        .'database:"'.HEURIST_DBNAME.'", baseURL:"'.HEURIST_BASE_URL.'"});'    
+                      .'});'
+                    .'</script>');
+            }
+            
+            //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
+            if($record_with_custom_styles>0){
+                //find record with css fields
+                $css_fields = array();
+                if($system->defineConstant('DT_CMS_CSS')){
+                    array_push($css_fields, DT_CMS_CSS);
+                }
+                if($system->defineConstant('DT_CMS_EXTFILES')){
+                    array_push($css_fields, DT_CMS_EXTFILES);
+                }
+                if(count($css_fields)>0){
+                    $record = recordSearchByID($system, $record_with_custom_styles,$css_fields,'rec_ID');
+                    if($record && @$record['details']){
+
+                        if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
+                           //add to begining 
+                           $head = '<style>'.recordGetField($record, DT_CMS_CSS).'</style>'.$head;
+                           
+                           $head = $head.'<script>if(document.body){
+                                document.body.classList.add("smarty-report");
+                           } </script>';
+                        }
+                        
+                        if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
+                            //add to header
+                            $external_files = @$record['details'][DT_CMS_EXTFILES];
+                            if($external_files!=null){
+                                if(!is_array($external_files)){
+                                    $external_files = array($external_files);
                                 }
-                                
-            $tpl_source = $tpl_source.' })();</script>';
+                                if(count($external_files)>0){
+                                    foreach ($external_files as $ext_file){
+                                        if(strpos($ext_file,'<link')===0){ // || strpos($ext_file,'<script')===0
+                                            $head = $head .$ext_file;
+                                        }
+                                    }
+/*                                    
+                $head = $head.'<script>(function() {';
+                                    foreach ($external_files as $ext_file){
+                                        if(strpos($ext_file,'<link')===0){ // || strpos($ext_file,'<script')===0
+                $head = $head.'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend",\''
+                                        .$ext_file //str_replace('"','\"',$ext_file)
+                                        .'\');';                                        }
+                                    }
+                                    
+                $head = $head.' })();</script>';
+*/                
+                                }
                             }
                         }
                     }
                 }
             }
-        }
+
+            //
+            if(strpos($tpl_source, '<head>')>0){
+                $tpl_source = str_replace('</head>',$head.'</head>', $tpl_source);    
+            }else{
+                $tpl_source = $head.$tpl_source;
+            }            
+            
+            
         }
         
         return $tpl_source;

@@ -70,6 +70,10 @@ class ReportRecord {
         }
     }
     
+    public function baseURL(){
+        return HEURIST_BASE_URL;
+    }
+    
     //
     // Returns local code for given concept code
     //
