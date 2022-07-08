@@ -1,7 +1,7 @@
 <?php
 
 /**
-* Delete/archive any database not updated for more than: 
+* Reports (default) or purge/archive any database not updated for more than: 
 *           3 months with 10 records or less
 *           6 months with 50 records or less
 *           one year with 200 records or less 
@@ -43,12 +43,14 @@
 // Default values for arguments
 $arg_no_action = true;  
 $eol = "\n";
+$tabs = "\t\t";
+$tabs0 = '';
 
 if (@$argv) {
     
 // example:
-//  sudo php -f /var/www/html/heurist/export/dbbackup/purgeInactiveDbs.php -- -action
-//  sudo php -f purgeInactiveDbs.php -- -action  -  action, otherwise only report 
+//  sudo php -f /var/www/html/heurist/export/dbbackup/reportInactiveDbs.php -action
+//  sudo php -f reportInactiveDbs.php -action  -  action, otherwise only report 
 
 // TODO: It would be good if this had a parameter option to also delete the database for use when transferring to a new server
 // TODO: WARNING: AT THIS TIME (21 May 2022) IT DOES NOT REPORT AN ERROR IF THERE IS NO FILESTORE FOLDER
@@ -61,8 +63,8 @@ if (@$argv) {
                 $ARGV[$argv[$i]] = $argv[$i + 1];
                 ++$i;
             } else {
-                if(strpos($argv[$i],'-action')===0){
-                    $ARGV['-action'] = true;
+                if(strpos($argv[$i],'-purge')===0){
+                    $ARGV['-purge'] = true;
                 }else{
                     $ARGV[$argv[$i]] = true;    
                 }
@@ -74,17 +76,18 @@ if (@$argv) {
         }
     }
     
-    if (@$ARGV['-action']) $arg_no_action = false;
-
-
+    if (@$ARGV['-purge']) $arg_no_action = false;
 
 }else{
+    //report only
     $arg_no_action = true;
-    $eol = "<br>";
-    
+    $eol = "</div><br>";
+    $tabs0 = '<div style="min-width:300px;display:inline-block;">';
+    $tabs = "</div>".$tabs0;
     //exit('This function must be run from the shell');
 }
 
+$arg_no_action = true;
 
 
 require_once(dirname(__FILE__).'/../../hsapi/System.php');
@@ -153,9 +156,6 @@ foreach ($databases as $idx=>$db_name){
         continue;
     }
 
-    //"processing ".
-    echo $db_name.' '; //.'  in '.$folder
-  
 /*    
 * Delete/archive any database not updated for more than: 
 *           3 months with 10 records or less
@@ -168,7 +168,7 @@ foreach ($databases as $idx=>$db_name){
     $query = 'SELECT count(rec_ID) as cnt, max(rec_Modified) as mdate FROM Records';
     $vals = mysql__select_row_assoc($mysqli, $query);
     if($vals==null){
-        echo 'cannot execute query for Records table'."\n";
+        echo $tabs0.$db_name.' cannot execute query for Records table'.$eol;
         continue;
     }
     if(@$vals['cnt']==0){
@@ -179,18 +179,23 @@ foreach ($databases as $idx=>$db_name){
     $datetime2 = date_create($vals['mdate']);
     
     if(!$datetime2){
-        echo 'cannot detect modification date'."\n";
+        echo $tabs0.$db_name.' cannot detect modification date'.$eol;
         continue;
     }
+
+    //"processing ".
+    //echo $db_name.' '; //.'  in '.$folder
+    $report = '';
     
     $interval = date_diff($datetime1, $datetime2);    
     $diff = $interval->format('%y')*12 + $interval->format('%m');
+
     
     if(($vals['cnt']<11 && $diff>=3) || ($vals['cnt']<51 && $diff>=6) || ($vals['cnt']<201 && $diff>=12)){
         //archive and drop database
-        echo ' '.$vals['cnt'].' records '.$diff.' months. ';
+        $report = $diff.' months, n='.$vals['cnt'];
         if($arg_no_action){
-            echo ' TO BE ARCHIVED'.$eol; 
+            $report .= ' ARCHIVE'; 
         }else{
             $usr_owner = user_getByField($mysqli, 'ugr_ID', 2);
             
@@ -220,10 +225,10 @@ EOD;
 sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $email_text);                
                 
                 
-                echo 'ARCHIVED'.$eol; 
+                $report .= ' ARCHIVED'; 
                 $cnt_archived++;
             }else{
-                echo $system->getError()['message'].$eol;
+                $report .= ('ERROR: '.$system->getError()['message']);
             }
         }
     }else{
@@ -236,10 +241,11 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
             
             $email_list[] = $db_name.'  '.$usr_owner.'  '
                 .$vals['cnt'].' records. Last update: '.$datetime2->format('Y-m-d').' ('.$diff.' months ago)';
-            echo ' '.$vals['cnt'].' records '.$diff.' months. EMAIL'.$eol;
+                
+            $report =  $diff.' months, n='.$vals['cnt'].' EMAIL';
         }else{
             //echo ' '.$vals['cnt'].' records '.$diff.' months. OK'."\n";
-            echo $eol;
+            //no report for db without action echo $eol;
         }
 /*        
 * Dump and bz2 import tables that are 
@@ -298,7 +304,7 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
             if(count($sif_purge)>0){
                 
                         
-            echo '.....  '.count($sif_purge).' import tables to be archived'.$eol;
+            $report .= (' ... '.count($sif_purge).' import tables, archive');
             
             if(!$arg_no_action){
 
@@ -307,7 +313,7 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
             $backup_imports2 = $backup_imports."/".$db_name;
             if (!folderCreate($backup_imports2, true)) {
                 if(file_exists($progress_flag)) unlink($progress_flag);
-                exit("Failed to create backup folder $backup_imports2 \n");
+                exit("$db_name Failed to create backup folder $backup_imports2 \n");
             }
             
             $cnt_dumped = 0;
@@ -325,9 +331,10 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
                         $dump->start($dumpfile);
             
                         $cnt_dumped++;            
+                        $report .= 'd';
                     } catch (Exception $e) {
                         //if(file_exists($progress_flag)) unlink($progress_flag);
-                        echo "Error: unable to generate MySQL database dump for import table  $db_name.".$e->getMessage()."\n";
+                       $report .= (" Error: unable to generate MySQL database dump for import table  $db_name.".$e->getMessage());
                     }
                 }
             }//foreach
@@ -344,9 +351,9 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
                 $mysqli->query($query);
                 $query = 'DELETE FROM sysImportFiles WHERE sif_ID IN ('.implode(',', array_keys($sif_purge)).')';
                 $mysqli->query($query);
-                echo '   done'.$eol;
+                $report .= ('   done');
             }else{
-                echo "Cannot create archive with import tables. Failed to archive $backup_imports2 to $destination".$eol;
+                $report .= " Cannot create archive import tables. Failed to archive $backup_imports2 to $destination";
             }
             //remove folder
             folderDelete($backup_imports2);
@@ -360,7 +367,7 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
         if($arc_count>50000){
             
             if($arg_no_action){
-                    echo '.....  sysArchive has '.$arc_count.' entries. To be archived'.$eol;;
+                    $report .= (' ... sysArchive, n='.$arc_count.', archive');
             }else{
                     try{
                         $dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', 
@@ -378,22 +385,25 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
                             //clear table
                             $query = 'DELETE FROM sysArchive WHERE arc_ID>0';
                             $mysqli->query($query);
-                            echo '..... sysArchive dumped ('.$arc_count.' entries)'.$eol;
+                            $report .= (' ... sysArchive, n='.$arc_count.', archived');
                         }else{
-                            echo "Cannot create archive sysArchive table. Failed to archive $dumpfile to $destination".$eol;
+                            $report .= ("Cannot create archive sysArchive table. Failed to archive $dumpfile to $destination");
                         }
                         unlink($dumpfile);                        
                         
                     } catch (Exception $e) {
                         //if(file_exists($progress_flag)) unlink($progress_flag);
-                        echo "Error: unable to generate MySQL database dump for sysArchive table in $db_name.".$e->getMessage()."\n";
+                        $report .= ("Error: unable to generate MySQL database dump for sysArchive table in $db_name.".$e->getMessage());
                     }
             }   
             
         }
         
     }
-
+    
+    if($report!=''){
+        echo $tabs0.$db_name.$tabs.$report.$eol;
+    }
 
 
     //echo "   ".$db_name." OK \n"; //.'  in '.$folder
@@ -402,10 +412,10 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
 if(file_exists($progress_flag)) unlink($progress_flag);
 
 if(!$arg_no_action){
-    echo $eol.'Archived '.$cnt_archived.' databases'.$eol;    
+    echo $tabs0.'Archived '.$cnt_archived.' databases'.$eol;    
 }
 
-echo ($eol.'finished'.$eol.$eol);
+echo ($tabs0.'finished'.$eol);
 
 if(count($email_list)>0){
     
