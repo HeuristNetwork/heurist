@@ -653,7 +653,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         //main report entry
                         var lbl_key = 'record_action_'+key;
                         var lbl = window.hWin.HR(lbl_key);
-                        if(lbl==lbl_key){
+                        if(lbl==lbl_key){ //not translated
                             //not found - try to find specified for particular action
                             lbl = window.hWin.HR(lbl_key+'_'+action_type);
                         }

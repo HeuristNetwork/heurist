@@ -2091,10 +2091,16 @@ prof =Profile
                 if(_regional && _regional[key]){
                     return _regional[key];
                 }else{
-                    if(key.indexOf('menu_')==0){
+                    //if not found take from english version
+                    if(_region!='en' && regional['en'] && regional['en'][key]){
+
+                        return regional['en'][key];
+                        
+                    }else if(key.indexOf('menu_')==0){
+                        
                         return '';
                     }else{
-                        return res;    
+                        return res; //returns itself   
                     }
                 }
             }
