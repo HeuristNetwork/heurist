@@ -371,7 +371,7 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
             }else{
                     try{
                         $dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', 
-                            array('include-tables' => array('sysarchive'),
+                            array('include-tables' => array('sysArchive'),
                                   'skip-triggers' => true,  
                                   'add-drop-trigger' => false));
                         $dumpfile = $backup_sysarch."/".$db_name.'_'.$datetime1->format('Y-m-d').'.sql';  //.$db_name.' '
