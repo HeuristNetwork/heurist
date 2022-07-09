@@ -114,9 +114,16 @@ define('HEURIST_FILESTORE_ROOT', $upload_root );
 if (!folderCreate($backup_root, true)) {
     exit("Failed to create backup folder $backup_root \n");
 }
+
+
+//flag that backup in progress
+$action = 'backupDBs';
+if(!isActionInProgress($action, 30)){
+    exit("It appears that backup operation has been started already. Please try this function later");        
+}
+/*
 //set semaphore file
 $progress_flag = $backup_root.'inprogress.info';
-
 //flag that backup in progress
 if(file_exists($progress_flag)){
     //if(file_exists($progress_flag)) unlink($progress_flag);
@@ -125,6 +132,7 @@ if(file_exists($progress_flag)){
 $fp = fopen($progress_flag,'w');
 fwrite($fp, '1');
 fclose($fp);            
+*/
 
 
 if($with_triggers){

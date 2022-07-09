@@ -1783,4 +1783,62 @@ function fileNameBeautify($filename) {
     return $filename;
 }
 
+
+//
+// Working with semaphore file for particulat long action
+//
+function isActionInProgress($action, $range_minutes){
+    
+    $progress_flag = HEURIST_FILESTORE_ROOT.'_operation_locks.info';
+    
+    //flag that backup in progress
+    if(file_exists($progress_flag)){
+
+        $datetime2 = date_create('now');
+
+        $reading = fopen($progress_flag, 'r');
+        $writing = fopen('myfile.tmp', 'w');
+
+        $replaced = false;
+        $not_allowed = false;
+
+        while (!feof($reading)) {
+            $line = fgets($reading);
+            if (strpos($line, $action)===0) {
+                
+                $datetime1 = date_create(trim(substr($line, strlen($action))));
+                $interval = date_diff($datetime1, $datetime2);                    
+                
+                $allowed = ($interval->format('%y')>0 ||
+                $interval->format('%m')>0 || $interval->format('%d')>0 || 
+                $interval->format('%h')>0 || $interval->format('%i')>$range_minutes);
+                
+                if($allowed){
+                    $line = $action.' '.$datetime2->format('Y-m-d H:i:s')."\n";
+                    $replaced = true;
+                }else{
+                    $not_allowed = true;
+                    break;
+                }
+            }
+            fputs($writing, $line);
+        }
+        fclose($reading); fclose($writing);
+        // might as well not overwrite the file if we didn't replace anything
+        if ($replaced) 
+        {
+            rename('myfile.tmp', $progress_flag);
+        } else {
+            unlink('myfile.tmp');
+        }        
+        if($not_allowed){
+            return false;
+        }
+    }else{
+        $fp = fopen($progress_flag,'w');
+        fwrite($fp, $action.' '. date_create('now')->format('Y-m-d H:i:s'));
+        fclose($fp);            
+    }
+    return true;
+}
 ?>

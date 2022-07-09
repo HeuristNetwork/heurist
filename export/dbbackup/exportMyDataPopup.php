@@ -145,16 +145,21 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
         }else{
             
             //flag that backup in progress
+            $action = 'exportDB';
+            if(!isActionInProgress($action, 2)){
+                exit("It appears that backup operation has been started already. Please try this function later");        
+            }
+            
+            /*
             if(file_exists($progress_flag)){
                print 'It appears that backup opearation has been started already. Please try this function later'; 
                if(file_exists($progress_flag)) unlink($progress_flag);
                exit();
             }
-            
-            
             $fp = fopen($progress_flag,'w');
             fwrite($fp, '1');
             fclose($fp);            
+            */
             
             set_time_limit(0); //no limit
             

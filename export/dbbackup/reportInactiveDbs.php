@@ -87,8 +87,6 @@ if (@$argv) {
     //exit('This function must be run from the shell');
 }
 
-$arg_no_action = true;
-
 
 require_once(dirname(__FILE__).'/../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
@@ -124,20 +122,12 @@ if(!$arg_no_action){
     if (!folderCreate($backup_sysarch, true)) {
         exit("Failed to create backup folder $backup_sysarch \n");
     }
+    
+    $action = 'purgeOldDBs';
+    if(!isActionInProgress($action, 15)){
+        exit("It appears that backup operation has been started already. Please try this function later\n");        
+    }
 }
-
-//set semaphore file
-$progress_flag = $backup_root.'inprogress.info';
-
-//flag that backup in progress
-if(file_exists($progress_flag)){
-    //if(file_exists($progress_flag)) unlink($progress_flag);
-    exit("It appears that purge/backup operation has been started already. Please try this function later $progress_flag \n");
-}
-
-$fp = fopen($progress_flag,'w');
-fwrite($fp, '1');
-fclose($fp);            
 
 set_time_limit(0); //no limit
 
@@ -312,7 +302,6 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
             // Do an SQL dump for import tables
             $backup_imports2 = $backup_imports."/".$db_name;
             if (!folderCreate($backup_imports2, true)) {
-                if(file_exists($progress_flag)) unlink($progress_flag);
                 exit("$db_name Failed to create backup folder $backup_imports2 \n");
             }
             
@@ -333,7 +322,6 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
                         $cnt_dumped++;            
                         $report .= 'd';
                     } catch (Exception $e) {
-                        //if(file_exists($progress_flag)) unlink($progress_flag);
                        $report .= (" Error: unable to generate MySQL database dump for import table  $db_name.".$e->getMessage());
                     }
                 }
@@ -392,7 +380,6 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
                         unlink($dumpfile);                        
                         
                     } catch (Exception $e) {
-                        //if(file_exists($progress_flag)) unlink($progress_flag);
                         $report .= ("Error: unable to generate MySQL database dump for sysArchive table in $db_name.".$e->getMessage());
                     }
             }   
@@ -409,7 +396,6 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
     //echo "   ".$db_name." OK \n"; //.'  in '.$folder
 }//for
 
-if(file_exists($progress_flag)) unlink($progress_flag);
 
 if(!$arg_no_action){
     echo $tabs0.'Archived '.$cnt_archived.' databases'.$eol;    
@@ -440,4 +426,5 @@ function exclusion_list(){
     }
     return $res;
 }
+
 ?>
