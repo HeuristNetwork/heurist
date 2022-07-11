@@ -129,9 +129,11 @@ if($_is_new_cms_editor){
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_WidgetCfg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_ElementCfg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SiteMenu.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/hLayoutMgr.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/imgFilter.js"></script>
-    
+<!--
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_Init.js"></script>
+ -->    
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/hLayoutMgr.js"></script>
 <style>
 .tox-toolbar{
     background-color: #b4eeff !important;
@@ -269,7 +271,7 @@ if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in website
 
 <script>
 function _dout(msg){      
-    //console.log(msg);
+//    console.log(msg);
 }
 
 // global 
@@ -301,7 +303,7 @@ function onPageInit(success)
     
     $('#main-menu').hide();
     
-    hLayoutMgr(); //init globa var
+    hLayoutMgr(); //init global var
     
     //cfg_widgets is from layout_defaults.js
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
@@ -314,7 +316,7 @@ function onPageInit(success)
                 echo 'if(typeof first_not_empty_page !== "undefined" && first_not_empty_page>0){ load_initially=first_not_empty_page;}';  
             }?>
             is_execute_homepage_custom_javascript = true;
-            loadPageContent( load_initially);
+            loadPageContent( load_initially );
     });
     
     //fix bug for tinymce popups - it lost focus if it is called from dialog
@@ -392,8 +394,7 @@ function initMainMenu( afterInitMainMenu ){
 // eventdata - event to be triggered after page load (to perform intial search)
 //
 function loadPageContent(pageid, eventdata){
-    
-    _dout('loadPageContent');
+    _dout('loadPageContent '+pageid);
     /* @todo
     var args = null; //arguments that will be passed to afterPageLoad
     
@@ -404,7 +405,6 @@ function loadPageContent(pageid, eventdata){
         args = [pageid];
     }
     */
-    
     
     if(pageid>0){
         //window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
@@ -434,7 +434,7 @@ if($website_custom_css!=null){
                 if(isCMS_active){
                     //$('#btnOpenCMSeditor').hide();
                     if(!editCMS_instance2) {
-                        editCMS_instance2 = editCMS2();   
+                        editCMS_instance2 = editCMS2(this.document);    //editCMS_Init
                     }
 
                     if (! editCMS_instance2.startCMS({record_id:pageid, container:'#main-content',
@@ -956,7 +956,7 @@ function _openCMSeditor(event){
         //btn.hide();
 
         isCMS_active = true;
-        if(!editCMS_instance2) editCMS_instance2 = editCMS2();
+        if(!editCMS_instance2) editCMS_instance2 = editCMS2(this.document); //editCMS_Init
         editCMS_instance2.startCMS({record_id: current_page_id, 
             //content: page_cache[current_page_id],  //html or json
             container:'#main-content',

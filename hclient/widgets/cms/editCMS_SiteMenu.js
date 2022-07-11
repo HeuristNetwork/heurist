@@ -105,7 +105,7 @@ title: "Overview"
                     if(keep_expanded_nodes.indexOf(node.key)>=0){
                         node.setExpanded(true);
                     }
-                    node.setSelected((node.key==current_page_id));
+                    node.setSelected((node.key==window.hWin.current_page_id));
             });
 
         }else{
@@ -142,13 +142,13 @@ title: "Overview"
                         //node - target node
                         var source_parent = data.otherNode.parent.key;//data.otherNode.data.parent_id;
                         if(!(source_parent>0))
-                            source_parent = home_page_record_id;
+                            source_parent = window.hWin.home_page_record_id;
 
                         data.otherNode.moveTo(node, data.hitMode);
 
                         var target_parent = data.otherNode.parent.key;
                         if(!(target_parent>0))
-                            target_parent = home_page_record_id;
+                            target_parent = window.hWin.home_page_record_id;
                         data.otherNode.data.parent_id = target_parent;
 
                         var request = {actions:[]};
@@ -158,7 +158,7 @@ title: "Overview"
                             request.actions.push(
                                 {a: 'delete',
                                     recIDs: source_parent,
-                                    dtyID: source_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
+                                    dtyID: source_parent==window.hWin.home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
                                     sVal:data.otherNode.key});
 
                         }
@@ -167,7 +167,7 @@ title: "Overview"
                         request.actions.push(
                             {a: 'delete',
                                 recIDs: target_parent,
-                                dtyID: target_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU});
+                                dtyID: target_parent==window.hWin.home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU});
 
                         for (var i=0; i<data.otherNode.parent.children.length; i++){
 
@@ -175,7 +175,7 @@ title: "Overview"
                             request.actions.push(
                                 {a: 'add',
                                     recIDs: target_parent,
-                                    dtyID: target_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
+                                    dtyID: target_parent==window.hWin.home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
                                     val:menu_node.key}                                                   
                             );
                         }                    
@@ -183,7 +183,7 @@ title: "Overview"
                         //window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
                         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
                             //window.hWin.HEURIST4.msg.sendCoverallToBack();
-                            if(response.status == hWin.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                                 was_something_edited = true;
                                 window.hWin.HEURIST4.msg.showMsgFlash('saved');
                                 //reload main menu
@@ -251,7 +251,7 @@ title: "Overview"
                 var item_li = $(item.li), 
                 menu_id = item.key, 
 
-                is_top = (item.data.parent_id==home_page_record_id);
+                is_top = (item.data.parent_id==window.hWin.home_page_record_id);
 
                 if($(item).find('.svs-contextmenu3').length==0){
 
@@ -309,8 +309,8 @@ title: "Overview"
                                                     page_cache[page_id] = null; //remove from cache
                                                     delete page_cache[page_id];
                                                     
-                                                    if(page_id == current_page_id){
-                                                        _refreshCurrentPage(current_page_id);
+                                                    if(page_id == window.hWin.current_page_id){
+                                                        _refreshCurrentPage(window.hWin.current_page_id);
                                                     }
                                                     
                                                     var node = $container.fancytree('getTree').getNodeByKey(''+page_id);
@@ -326,7 +326,7 @@ title: "Overview"
                                     }});
                                 }
                                 
-                                if( (menuid == current_page_id)
+                                if( (menuid == window.hWin.current_page_id)
                                     && editCMS2.warningOnExit(function(){ __editPageRecord(menuid) }))
                                 {                                    
                                      return;
@@ -339,7 +339,7 @@ title: "Overview"
 
                                 editCMS2.switchMode('page');
                                 //open page structure 
-                                if( menuid != current_page_id ){
+                                if( menuid != window.hWin.current_page_id ){
                                     _refreshCurrentPage( menuid );
                                 }
 
@@ -368,7 +368,7 @@ title: "Overview"
                                             item.remove();    
                                             
                                             //after deletion select home page
-                                            current_page_id = home_page_record_id;
+                                            window.hWin.current_page_id = window.hWin.home_page_record_id;
                                             _refreshMainMenu( false ); //after delete
                                         });
                                     }
@@ -452,7 +452,7 @@ title: "Overview"
             rVal:    newvalue};
 
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-            if(response.status == hWin.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
                 //refresh treeview
                 if($container.fancytree('instance')){                                 
                     var node = $container.fancytree('getTree').getNodeByKey(''+rec_id);
@@ -468,7 +468,7 @@ title: "Overview"
                 
                 if($.isFunction(callback)) callback.call();
             }else{
-                hWin.HEURIST4.msg.showMsgErr(response);
+                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });                                        
 
@@ -479,7 +479,7 @@ title: "Overview"
     //
     function _highlightCurrentPage(){
         
-        if(current_page_id==home_page_record_id){
+        if(window.hWin.current_page_id==window.hWin.home_page_record_id){
             $('.btn-website-homepage').css({'text-decoration':'underline'});
         }else
         if( $container.fancytree('instance')){
@@ -488,7 +488,7 @@ title: "Overview"
                 $('.btn-website-homepage').css({'text-decoration':'none'});
                 
                 tree.visit(function(node){
-                    if(node.key==current_page_id){
+                    if(node.key==window.hWin.current_page_id){
                         $(node.li).find('.fancytree-title').css({'text-decoration':'underline'});    
                     }else{
                         $(node.li).find('.fancytree-title').css({'text-decoration':'none'});
@@ -498,9 +498,9 @@ title: "Overview"
         
 
             /*
-            var node = tree.getNodeByKey(''+current_page_id);
+            var node = tree.getNodeByKey(''+window.hWin.current_page_id);
             if(node){
-console.log('!!! '+current_page_id);                
+console.log('!!! '+window.hWin.current_page_id);                
                node.setSelected(true); 
                $(node.li).css({'color':'red'});
             }
@@ -571,7 +571,7 @@ console.log('!!! '+current_page_id);
                         }
                         
                         if(template_name=='blog'){
-                            layoutMgr.prepareTemplate(template_json, ___continue_addition);
+                            window.hWin.layoutMgr.prepareTemplate(template_json, ___continue_addition);
                         }else{
                             ___continue_addition(template_json)
                         }
@@ -648,7 +648,7 @@ console.log('!!! '+current_page_id);
         
         if(!callback){
                 callback = function(new_page_id){
-                        current_page_id = new_page_id;
+                        window.hWin.current_page_id = new_page_id;
                         _refreshMainMenu(); //after addition of new page
                 };
         }
@@ -664,11 +664,11 @@ console.log('!!! '+current_page_id);
 
         var request = {a: 'add',
             recIDs: parent_id,
-            dtyID:  (parent_id==home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
+            dtyID:  (parent_id==window.hWin.home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
             val:    menu_id};
 
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-            if(response.status == hWin.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
                 //refresh treeview
                 if($.isFunction(callback)) callback.call( this, menu_id );
             }else{
@@ -686,17 +686,17 @@ console.log('!!! '+current_page_id);
         //delete detail from parent menu
         var request = {a: 'delete',
             recIDs: parent_id,
-            dtyID:  (parent_id==home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
+            dtyID:  (parent_id==window.hWin.home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
             sVal:   menu_id};
 
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-            if(response.status == hWin.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
                 if(records_to_del && records_to_del.length>0){
 
                     //delete children 
                     window.hWin.HAPI4.RecordMgr.remove({ids:records_to_del},
                         function(response){
-                            if(response.status == hWin.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                                 //refresh treeview
                                 if($.isFunction(callback)) callback.call();
                             }else{
@@ -704,7 +704,7 @@ console.log('!!! '+current_page_id);
                             }
                         }      
                     );
-
+//
                 }else{
                     //refresh treeview
                     if($.isFunction(callback)) callback.call();
@@ -722,7 +722,7 @@ console.log('!!! '+current_page_id);
     function _refreshMainMenu( need_refresh_tree ){
         
         //call global function from websiteScriptAndStyles
-        initMainMenu( function(){
+        window.hWin.initMainMenu( function(){
             if(need_refresh_tree!==false){
                 _initControls();
             }
@@ -736,9 +736,10 @@ console.log('!!! '+current_page_id);
     //
     function _refreshCurrentPage(page_id){
         
-        if(!(page_id>0)) page_id = current_page_id;
+        if(!(page_id>0)) page_id = window.hWin.current_page_id;
         
-        loadPageContent(page_id); //call global function from websiteScriptAndStyles
+        //call global function from websiteScriptAndStyles
+        window.hWin.loadPageContent(page_id); 
     
     }
 
@@ -746,7 +747,7 @@ console.log('!!! '+current_page_id);
     // reload entire website 
     //
     function _refreshWebsite(){
-        location.reload();
+        window.hWin.location.reload();
     }
         
 
