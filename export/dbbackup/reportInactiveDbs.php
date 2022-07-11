@@ -93,15 +93,14 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
 require_once(dirname(__FILE__).'/../../hsapi/utilities/dbUtils.php');
 require_once(dirname(__FILE__).'/../../external/php/Mysqldump.php');
 
-
 //retrieve list of databases
 $system = new System();
 if( !$system->init(null, false, false) ){
     exit("Cannot establish connection to sql server\n");
 }
-
 $mysqli = $system->get_mysqli();
 $databases = mysql__getdatabases4($mysqli, false);   
+//DEBUG $databases = array('ACD_Basins','ACD_Candlesticks');
 
 $upload_root = $system->getFileStoreRootFolder();
 $backup_root = $upload_root.'DELETED_DATABASES/';
@@ -121,6 +120,8 @@ if(!$arg_no_action){
     }
     if (!folderCreate($backup_sysarch, true)) {
         exit("Failed to create backup folder $backup_sysarch \n");
+    }else{
+        //echo $backup_sysarch.' exists'."\n";
     }
     
     $action = 'purgeOldDBs';
@@ -212,7 +213,7 @@ Heurist is research-led and responds rapidly to evolving user needs - we often t
 For more information email us at support@HeuristNetwork.org and visit our website at HeuristNetwork.org. We normally respond within hours, depending on time zones. We are actively developing new documentation and training resources for version 6 and can make advance copies available on request.                    
 EOD;
                             
-sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $email_text);                
+sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $email_text);                
                 
                 
                 $report .= ' ARCHIVED'; 
@@ -300,7 +301,7 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
 
             //dump and archive
             // Do an SQL dump for import tables
-            $backup_imports2 = $backup_imports."/".$db_name;
+            $backup_imports2 = $backup_imports.$db_name;
             if (!folderCreate($backup_imports2, true)) {
                 exit("$db_name Failed to create backup folder $backup_imports2 \n");
             }
@@ -329,7 +330,7 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
             
             $archOK = true;
             if($cnt_dumped>0){
-                $destination = $backup_imports."/".$db_name.' '.$datetime1->format('Y-m-d').'.tar';
+                $destination = $backup_imports.$db_name.' '.$datetime1->format('Y-m-d').'.tar';
                 $archOK = createBz2Archive($backup_imports2, null, $destination, false);
             }
             
@@ -358,17 +359,35 @@ sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $e
                     $report .= (' ... sysArchive, n='.$arc_count.', archive');
             }else{
                     try{
+                        $dumpfile = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d').'.sql';  //.$db_name.' '
+                        
                         $dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', 
                             array('include-tables' => array('sysArchive'),
                                   'skip-triggers' => true,  
                                   'add-drop-trigger' => false));
-                        $dumpfile = $backup_sysarch."/".$db_name.'_'.$datetime1->format('Y-m-d').'.sql';  //.$db_name.' '
+
+                        //echo $db_name.' purge sysArchive to '.$dumpfile;
                         
                         $dump->start($dumpfile);
             
-                        $destination = $backup_sysarch."/".$db_name.' '.$datetime1->format('Y-m-d').'.tar';
-                        $archOK = createBz2Archive($dumpfile, null, $destination, false);
+                        //echo $db_name.' ... dumped ';
+                        
+                        
+                        $destination = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d');
+                        
+                        if( extension_loaded('bz2') ){
+            
+                            $destination = $destination.'.tar';
 
+                            //echo ' ... archived to '.$destination."\n";
+
+                            $archOK = createBz2Archive($dumpfile, null, $destination, false);
+                        }else{
+                            
+                            $destination = $destination.'.zip'; 
+                            $archOK = createZipArchive($dumpfile, null, $destination, false);
+                        }
+                        
                         if($archOK){
                             //clear table
                             $query = 'DELETE FROM sysArchive WHERE arc_ID>0';

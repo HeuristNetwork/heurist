@@ -1194,7 +1194,6 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
 
             // Determine real path
             $file = realpath($file);
-
             $file2 = str_replace('\\', '/', $file);
             
             if (is_dir($file) === true) { // Directory
@@ -1216,6 +1215,18 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
         }//recursion
         
     } else if (is_file($source) === true) {
+        
+        $size_mb = filesize($source) / pow(1024, 2);
+        if($size_mb>128){
+            if($size_mb>256){
+                ini_set('memory_limit','1024M');
+            }else{
+                ini_set('memory_limit','256M');//'2048M');
+            }
+        }
+        
+        if($verbose) echo "Add file ".basename($source)."\n";        
+        
         $phar->addFile($source, basename($source));
         $numFiles++;
         //$phar->addFromString(basename($source), file_get_contents($source));
@@ -1223,16 +1234,18 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
 
     $phar->compress(Phar::BZ2);
     
-    if(file_exists($destination.'.bz2')){
-        $size = filesize($destination.'.bz2') / pow(1024, 2);
+    if(file_exists($destination.'.bz2')){ //
         
         unlink($destination);
 
+        $size = filesize($destination.'.bz2') / pow(1024, 2);
+        
         if($verbose) {
-            echo "<br/>Successfully dumped data from ". $source ." to ".$destination.'.bz2';
+            echo "<br/>Successfully dumped data from ". $source ." to ".$destination;
             echo "<br/>The archive file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
         }
     }else{
+        echo "Arhive not created\n";
         return false;    
     }
     return true;
@@ -1240,7 +1253,7 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
     } catch (Exception  $e){
         error_log( $e->getMessage() );
         if($verbose) {
-            echo "<br/>Cannot create archive ".$destination.' '.$e->getMessage;
+            echo "<br/>Cannot create archive ".$destination.' '.$e->getMessage();
         }
         return false;
     }                            
