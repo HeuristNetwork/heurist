@@ -96,6 +96,7 @@ public static function setSession($system){
 //              >1 and "q" not defined and "draw" is defined - takes query from session
 //              1 - use "q" parameter
 //    columns - array of header and detail fields to be returned
+//    detail_mode  0|1|2  - 0- no details, 1 - inline, 2 - fill in "details" subarray
 //
 //    leaflet - 0|1 returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
 //    simplify  0|1 simplify  paths with more than 1000 vertices 
@@ -574,8 +575,9 @@ XML;
         if($params['format']=='geojson'){
             
             $feature = self::_getGeoJsonFeature($record, (@$params['extended']==2), 
-                                            @$params['simplify'], 
-                                            @$params['leaflet'], 
+                                            @$params['simplify'],  //simplify
+                                            //mode for details if leaflet - description only
+                                            @$params['leaflet']?0:@$params['detail_mode'], 
                                             $find_places_for_geo);
             if(@$params['leaflet']){ //include only geoenabled features, timeline data goes in separate timeline array
                    if(@$feature['when']){
@@ -1136,13 +1138,19 @@ private static function _getExtentFromWkt($wkt)
 // 
 // $extended - include concept codes, term code and labels
 // $simplify - simplify paths with more than 1000 vertices
-// $leaflet_minimum_fields  - only header fields rec_ID, RecTypeID, rec_Title and description if details are defined
+// $detail_mode - 0  - only header fields rec_ID, RecTypeID, rec_Title and description if details are defined (for leaflet output)
+//                1  - details inline
+//                2  - all details in "details" subarray          
 // $find_places_for_geo - if true it searches linked places for geo 
 //                        or it is array of rectypes defined in sys_TreatAsPlaceRefForMapping + RT_PLACE
 //
-private static function _getGeoJsonFeature($record, $extended=false, $simplify=false, $leaflet_minimum_fields=false, 
+private static function _getGeoJsonFeature($record, $extended=false, $simplify=false, $detail_mode=2, 
                 $find_places_for_geo=false){
 
+    if(!($detail_mode==0 || $detail_mode==1 || $detail_mode==2)){
+        $detail_mode=2;
+    }
+                    
     if($extended){
         if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
         $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
@@ -1268,9 +1276,16 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
     } //for all details of record
 
     
-    if($leaflet_minimum_fields){
+    if($detail_mode==0){ //for leaflet - header and description only
         if($ext_description) $res['properties']['description'] = $ext_description;
         $res['properties']['details'] = null;
+        unset($res['properties']['details']);
+    }else if($detail_mode==1){
+        //details are inline
+        $det = $res['properties']['details'];
+        for($k=0; $k<count($det); $k++){
+            $res['properties'][$det[$k]['fieldName']] = $det[$k]['value'];
+        }
         unset($res['properties']['details']);
     }
     

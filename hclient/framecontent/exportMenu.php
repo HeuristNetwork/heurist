@@ -101,6 +101,10 @@ require_once(dirname(__FILE__)."/initPage.php");
                 title="Generate GeoJSON-T for current set of search results (current query)">
                 <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span>
                 GeoJSON</a>
+                &nbsp;&nbsp;<label style="font-size:smaller;">Details: </labels>
+                <label style="font-size:smaller;"><input type="radio" name="detail_mode" value="0"/>No</label>&nbsp;
+                <label style="font-size:smaller;"><input type="radio" name="detail_mode" value="1"/>Inline</label>&nbsp;
+                <label style="font-size:smaller;"><input type="radio" name="detail_mode" value="2" checked/>Full</label>
         </div>
         
         <div id="menu-export-kml" class="export-item">

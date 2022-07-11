@@ -382,11 +382,13 @@ function hexportMenu( container ) {
                         if(opts.save_as_file==='mirador'){
                                 script = 'hclient/widgets/viewers/miradorViewer.php'
                         }
-                }else{
+                }else {
                         params = params + '&format='+opts.format+'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
                     
                         if(opts.format=='gephi' && $('#limitGEPHI').is(':checked')){
                             params = params + '&limit=1000';    
+                        }else if(opts.format=='geojson'){
+                            params = params + '&detail_mode='+$('input[name="detail_mode"]:checked').val();        
                         }
                 }
             }
