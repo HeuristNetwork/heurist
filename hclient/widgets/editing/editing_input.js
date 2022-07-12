@@ -1882,6 +1882,7 @@ $.widget( "heurist.editing_input", {
                     isdialog: true,
                     width: 440,
                     selection_on_init:sels?sels.split(','):[],
+                    parent_dialog: this.element.closest('div[role="dialog"]'),
                     onselect:function(event, data){
                         
                         if(data && data.selection){

@@ -127,7 +127,20 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
         
         if(this.options.edit_mode=='editonly'){
+
             this._initEditorOnly();
+
+            if(this.options.isdialog && this._as_dialog != null && this.options.parent_dialog != null){
+
+                var parent_pos = this.options.parent_dialog.position();
+                parent_pos['top'] += 50;
+                parent_pos['left'] += 130;
+
+                this._as_dialog.css({
+                    top: parent_pos['top'],
+                    left: parent_pos['left']
+                });
+            }
             return;
         }
         

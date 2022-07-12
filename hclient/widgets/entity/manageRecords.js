@@ -360,10 +360,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             function __modifyStructureAction(){
                                 
                                 that._editing.setModified(0);
-                                
+
                                 if(action=='field'){    
+
+                                    var rec_dlg = that.options.isdialog && that._as_dialog != null ? that._as_dialog.parent() : null; 
+
                                     that.options.rts_editor.manageDefRecStructure(
-                                        'showBaseFieldEditor', -1, dt_id);
+                                        'showBaseFieldEditor', -1, dt_id, null, rec_dlg);
                                 }else if(action=='block'){
                                     
                                     that.options.rts_editor.manageDefRecStructure(
@@ -1179,7 +1182,18 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }
             }
         }//!isOpenAready
-            
+
+        if(this.options.edit_structure && this.options.isdialog && this._as_dialog != null && this.options.parent_dialog != null){ // move popup position
+
+            var parent_pos = this.options.parent_dialog.position();
+            parent_pos['top'] += 40;
+            parent_pos['left'] += 25;
+
+            this._as_dialog.parent().css({
+                top: parent_pos['top'] + 'px', 
+                left: parent_pos['left'] + 'px'
+            });
+        }
         this._initEditForm_step3(recID); 
     },
     

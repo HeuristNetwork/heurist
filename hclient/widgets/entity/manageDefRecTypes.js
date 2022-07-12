@@ -1035,9 +1035,13 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 }else if(action=='editstr'){
                     //edit structure (it opens fake record and switches to edit structure mode)
                     var new_record_params = {RecTypeID: recID};
-                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
-                        {new_record_params:new_record_params, edit_structure:true});
+                    var opts = {new_record_params:new_record_params, edit_structure:true};
 
+                    if(this.it_was_insert && this.options.parent_dialog !== null){
+                        opts['parent_dialog'] = this.options.parent_dialog;
+                    }
+
+                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, opts);
                 }else if(action=='show_in_list' || action=='hide_in_list'){
                     
                     //window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
@@ -1568,6 +1572,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             for(var j = 0; j < $checked_opts.length; j++){
                 headings.push($($checked_opts[j]).val());
             }
+
+            $dlg.dialog('close');
 
             if(headings.length > dty_ids.length){ // not enough ids for selected number of headers, create new separators
                 that._makeAdditionalHeaders(rty_ID, headings, dty_ids.length, $Db.dty(dty_ids[0], 'dty_DetailTypeGroupID'));
