@@ -1788,6 +1788,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             var idx = cb.val();//attr('id').substr(8);
             if(cb.is(':checked')){
                 $('#sa_dt_'+idx).parent().show();
+                autoMapField(idx);
             }else{
                 $('#sa_dt_'+idx).parent().hide();
             }
@@ -1879,7 +1880,129 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             });
         
         
-    }    
+    }
+
+    //
+    // Attempt to automatically loosely match fields, excat matches happen earlier
+    //
+    function autoMapField(idx){
+
+        var $select = $('#sa_dt_'+idx);
+        if($select.length == 0 || !window.hWin.HEURIST4.util.isempty($select.val())){ // check if select already has value
+            return;
+        }
+
+        var mapped_fields = [];
+        var $selected_fields = $("select[id^='sa_dt_']").filter(function(){ 
+            if($(this).val() != ''){
+                mapped_fields.push($(this).val());
+            }
+            return $(this).val() != ''; 
+        }); // retrieve selects w/ value
+
+        var $options = $select.find('option');
+        var fcol_name = imp_session['columns'][idx];
+
+        var hs_rating = 0; // highest similarity rating
+        var hs_value = 0; // option value of highest similarity rating
+
+        $.each($options, function(i, option){
+
+            if(mapped_fields.indexOf(option.value) !== -1){ // skip option
+                return true;
+            }
+
+            var rec_column_parts = option.text.split(' [');
+            var rcol_name = '';
+
+            if(rec_column_parts.length > 2){
+                for(var j = 0; j < rec_column_parts.length-1; j++){
+                    rcol_name += rec_column_parts[j];
+                }
+            }else{
+                rcol_name = rec_column_parts[0];
+            }
+
+            if(rcol_name.toLowerCase() == fcol_name.toLowerCase()){ // excat match, missed earlier
+
+                $select.val(option.value);
+
+                if($select.hSelect("instance") != undefined){
+                    $select.hSelect("refresh");
+                }
+
+                hs_value = 0;
+                hs_rating = 0;
+
+                return false;
+            }else if(fcol_name.length >= 4 || fcol_name.length == rcol_name.length){
+                // perform partial matching, based on the Sørensen–Dice Coefficient
+
+                var rcol_bigrams = [];
+                var fcol_bigrams = [];
+                var bigger_len = (rcol_name.length > fcol_name.length) ? rcol_name.length : fcol_name.length;
+
+                // Create bigrams of both column names
+                for(var i = 0; i < bigger_len; i++){
+
+                    if(i < rcol_name.length){
+                        rcol_bigrams.push(rcol_name.substring(i, i + 2).toLowerCase());
+                    }
+                    if(i < fcol_name.length){
+                        fcol_bigrams.push(fcol_name.substring(i, i + 2).toLowerCase());
+                    }
+                }
+
+                var shared_bigrams = rcol_bigrams.filter(bigram => fcol_bigrams.includes(bigram));
+                var sdc_rating = (2 * shared_bigrams.length / (rcol_bigrams.length + fcol_bigrams.length) * 100).toFixed(2);
+
+                if(sdc_rating >= 60 && sdc_rating > hs_rating){
+                    hs_rating = sdc_rating;
+                    hs_value = option.value;
+                }else if(hs_rating == 0 && fcol_name.length < rcol_name.length && rcol_name.indexOf(fcol_name) !== -1){ // check if word chunk appears
+                    hs_rating = 50;
+                    hs_value = option.value;
+                }
+            }
+        });
+
+        if(hs_value != 0 && hs_rating != 0){
+            $select.val(hs_value);
+        }
+
+        if($select.hSelect("instance") != undefined){
+            $select.hSelect("refresh");
+        }else{
+            window.hWin.HEURIST4.ui.initHSelect($select, false, null, function(){
+
+                var ele_id = $(this).attr('id');
+
+                var $widget = $('span[id="'+ ele_id +'-button"]');
+                var $menu = $('ul[id="'+ ele_id +'-menu"]');
+                var $menu_parent = $menu.parent();
+
+                // Get parent containers bottom/end
+                var div_h = parseFloat($('#divFieldMapping').css('height'));
+                var div_t = parseFloat($('#divFieldMapping').position().top);
+                var div_b = div_h+div_t;
+
+                // Get select menu bottom/end
+                var menu_h = parseFloat($menu_parent.css('height'));
+                var menu_t = parseFloat($menu_parent.position().top);
+                var menu_b = menu_h+menu_t;
+
+                var widget_t = parseFloat($widget.position().top) + div_t;
+                var menu_mh = parseFloat($menu.css('max-height'));
+
+                if(div_b < menu_b || menu_t < widget_t){ // flip menu to top
+                    $menu.css('max-height', (widget_t-20)+'px');
+                    $menu_parent.position({my: 'left bottom', at: 'left top', of: $widget});
+                }else if(widget_t < menu_b){ // Add height to menu to bottom of page
+                    $menu.css('max-height', (menu_mh + (div_b-menu_b-10))+'px');
+                }
+            });
+        }
+    }
 
     //
     // _adjustButtonPos
@@ -2005,8 +2128,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         var allowed2 = ['resource'];
         var topitems2 = [{key:'',title:(currentStep==3)?'Matching - select field ...':'select field ...'}]; 
 
-        var exact_matches = []; // track which records have an exact match, skip 
-        var assigned_columns = {}; // track temp assigned columns
+        var exact_matches = [];
 
         $.each(sels, function (idx, item){
             var $item = $(item);
@@ -2037,8 +2159,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                      show_dt_name:true, 
                      show_parent_rt:true, 
                      show_latlong:(currentStep==4), 
-                     show_required:(currentStep==4)});    
-                    
+                     show_required:(currentStep==4)});
+
                if(sel.hSelect("instance")!=undefined){
                     sel.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
                }
@@ -2053,9 +2175,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     // Compare fieldnames with column names within CSV data
                     var options = $item.find('option');
                     var fcol_name = imp_session['columns'][idx];
-
-                    var hs_rating = 0; // highest similarity rating
-                    var hs_value = 0; // option value of highest similarity rating
 
                     $.each(options, function(i, option){
 
@@ -2082,63 +2201,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 sel.hSelect("refresh");
                             }
 
-                            if(assigned_columns.hasOwnProperty(option.value)){
-                                var $ele = assigned_columns[option.value];
-
-                                $ele.val('');
-
-                                if($ele.hSelect("instance") != undefined){
-                                    $ele.hSelect("refresh");
-                                }
-
-                                delete assigned_columns[option.value];
-                            }
-
                             exact_matches.push(option.value);
 
                             return false;
-                        }else if(fcol_name.length >= 4 || fcol_name.length == rcol_name.length){
-                            // perform partial matching, based on the Sørensen–Dice Coefficient
-
-                            if(assigned_columns.hasOwnProperty(option.value)){ // skip
-                                return true;
-                            }
-
-                            var rcol_bigrams = [];
-                            var fcol_bigrams = [];
-                            var bigger_len = (rcol_name.length > fcol_name.length) ? rcol_name.length : fcol_name.length;
-
-                            // Create bigrams of both column names
-                            for(var i = 0; i < bigger_len; i++){
-
-                                if(i < rcol_name.length){
-                                    rcol_bigrams.push(rcol_name.substring(i, i + 2).toLowerCase());
-                                }
-                                if(i < fcol_name.length){
-                                    fcol_bigrams.push(fcol_name.substring(i, i + 2).toLowerCase());
-                                }
-                            }
-
-                            var shared_bigrams = rcol_bigrams.filter(bigram => fcol_bigrams.includes(bigram));
-                            var sdc_rating = (2 * shared_bigrams.length / (rcol_bigrams.length + fcol_bigrams.length) * 100).toFixed(2);
-
-                            if(sdc_rating > 70 && sdc_rating > hs_rating){
-                                hs_rating = sdc_rating;
-                                hs_value = option.value;
-                            }
                         }
                     });
-
-                    if(hs_value != 0 && hs_rating != 0){
-                        $item.val(hs_value);
-
-                        if(sel.hSelect("instance") != undefined){
-                            sel.hSelect("refresh");
-                        }
-
-                        assigned_columns[hs_value] = $item;
-                    }
-			   }
+               }
                
                $(sel).change(function(){
                     if(currentStep==5){
@@ -3003,7 +3071,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             window.hWin.HAPI4.doImportAction(request, 
                     function(response){
                         window.hWin.HEURIST4.msg.hideProgress();
-                        
+
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
                             _showStep(3);
@@ -3585,7 +3653,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
             //HEADER - field names
             var j, i=0, fieldnames = Object.keys(mapping_flds);
-            
+
             if(mode=="update"){
                 s = s + '<th style="text-align:left">Record ID</th>';
             }else if(fieldnames.length==0) {
@@ -4274,7 +4342,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         for(var i=0;i<newvalues.length;i++){
 
             var lbl = null;
-			
+
             if(!window.hWin.HEURIST4.util.isempty(newvalues[i])){
                 lbl = newvalues[i].trim();
             }
@@ -4293,13 +4361,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     skip_long++;
                     continue;
                 }
-				
+
                 if(lbl.indexOf('.') >= 0){
                     hasPeriod = '.';
                 }
 
             _prepareddata.push({trm_Label:lbl, trm_ParentTermID:trm_ParentTermID, trm_Domain:'enum'});
-				
+
             }else{
                 skip_na++;
             }
