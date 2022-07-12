@@ -430,7 +430,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 //take last two - these are rt:dt
                 var rtid = ids[ids.length-lvl-1];
                 var dtid = __removeLinkType(ids[ids.length-lvl]);
-                
+
                 if(!selectedFields[rtid]){
                     selectedFields[rtid] = [];    
                 }
@@ -445,10 +445,14 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 
                 //window.hWin.HEURIST4.util.findArrayIndex( dtid, selectedFields[rtid] )<0
                 if( selectedFields[rtid].indexOf( dtid )<0 ) {
-                    selectedFields[rtid].push(dtid);
-                    //add resource field for parent recordtype
-                    __addSelectedField(ids, lvl+2, rtid);
-                }
+                    if(dtid == 'rec_Title' || dtid == 'rec_ID'){ // place title and id fields at the start
+                        selectedFields[rtid].unshift(dtid);
+                    }else{
+                        selectedFields[rtid].push(dtid);
+                    }
+                } 
+                //add resource field for parent recordtype
+                __addSelectedField(ids, lvl+2, rtid);
             }
             
             //get selected fields from treeview
@@ -574,6 +578,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                                     node.setSelected(true);
                                 }
                             }
+                        }else{
+
                         }
                         return false;
                     }
@@ -627,34 +633,30 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
                     var setDefaults = !data.node.isExpanded();
 
-                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length > 0){
-                        
-                        if(!isExpander){
-                            data.node.setExpanded(!data.node.isExpanded());
-                        }
-                        if(setDefaults){
-                            for(var i=0; i<data.node.children.length; i++){
-                                var node = data.node.children[i];
-                                if(node.key=='rec_ID' || node.key=='rec_Title'){
-                                    setTimeout(function(tree_node){ 
-                                        tree_node.setSelected(true); 
-                                    }, 1000, node);
-                                }
-                            }
-                        }
-
+                    if($(e.originalEvent.target).is('span') && !isExpander && data.node.children && data.node.children.length > 0){
+                        data.node.setExpanded(!data.node.isExpanded());
                     }else if(data.node.lazy && !isExpander) {
                         data.node.setExpanded(true);
                     }
-
-                    if(isExpander || data.node.children && data.node.children.length > 0){
-                        setTimeout(function(){ // wait for nodes to load
-                            var selected_nodes = treediv.fancytree('getTree').getSelectedNodes();
-                            for(var j = 0; j < selected_nodes.length; j++){
-                                //var cur_li = selected_nodes[j]['li'];
-                                that._displayAdvOption(selected_nodes[j]['data']['code'], $(selected_nodes[j]['li']).is(':visible'));
+                },
+                expand: function(e, data) {
+                    if(data.node.children.length > 0){
+                        for(var i = 0; i < data.node.children.length; i++){
+                            var node = data.node.children[i];
+                            if(node.key=='rec_ID' || node.key=='rec_Title'){
+                                node.setSelected(true);
                             }
-                        }, 250, null);
+                        }
+                    }
+                    var selected_nodes = treediv.fancytree('getTree').getSelectedNodes();
+                    for(var j = 0; j < selected_nodes.length; j++){
+                        that._displayAdvOption(selected_nodes[j]['data']['code'], $(selected_nodes[j]['li']).is(':visible'), selected_nodes[j]['li']);
+                    }
+                },
+                collapse: function(e, data) {
+                    var selected_nodes = treediv.fancytree('getTree').getSelectedNodes();
+                    for(var j = 0; j < selected_nodes.length; j++){
+                        that._displayAdvOption(selected_nodes[j]['data']['code'], $(selected_nodes[j]['li']).is(':visible'), selected_nodes[j]['li']);
                     }
                 },
                 dblclick: function(e, data) {
@@ -718,7 +720,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         }
     },
 
-    _displayAdvOption: function(fieldCode, showField){
+    _displayAdvOption: function(fieldCode, showField, item){
         var $ele = this.element.find('div[data-field-code="'+ fieldCode +'"]');
         if($ele.length == 0){
             return;
@@ -729,6 +731,15 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         }else{
             $ele.hide();
         }
+
+        if(item){
+            var pos_top = item.offsetTop;
+            $ele.css({
+                'position': 'absolute',
+                'top': pos_top+'px',
+                'left': '20px'
+            });
+        }
     },
 
     /**
@@ -737,12 +748,13 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      * @param {string} fieldName The field label to display.
      * @param {string} fieldType The type of the field.
      * @param {string} fieldCode The code of the field.
+     * @param {Object} item The selected node
      * @private
      */
-    _addFieldAdvancedOptions: function (fieldName, fieldType, fieldCode, selectedItem) {
+    _addFieldAdvancedOptions: function (fieldName, fieldType, fieldCode, item) {
 
         if(this.element.find('div[data-field-code="'+ fieldCode +'"]').length != 0){
-            this._displayAdvOption(fieldCode, true);
+            this._displayAdvOption(fieldCode, true, item);
             return;
         }
 
@@ -764,11 +776,11 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             }
         });
 
-        var pos_top = selectedItem.offsetTop;
+        var pos_top = item.offsetTop;
         fieldElement.css({
             'position': 'absolute',
             'top': pos_top+'px',
-            'left': '30px'
+            'left': '20px'
         });
 
         this._on(fieldElement.find('.ui-icon'), {
