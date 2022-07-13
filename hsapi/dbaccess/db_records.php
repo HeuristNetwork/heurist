@@ -360,8 +360,11 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         
         if(@$record['details_encoded']==1){
             $record['details'] = json_decode(urldecode($record['details']), true);
+        }else if(@$record['details_encoded']==2){
+            $record['details'] = json_decode(str_replace( ' xxx_style=', ' style=', 
+                        str_replace( '^^/', '../', $record['details'])));
         }
-
+        
         $detailValues = _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $modeImport);
         if(!$detailValues){
             return $system->getError();

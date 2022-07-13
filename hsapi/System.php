@@ -1012,8 +1012,13 @@ error_log(print_r($_REQUEST, true));
     * it always reload user info from database
     */
     public function getCurrentUserAndSysInfo( $include_reccount_and_dashboard_count=false ){
-        global $passwordForDatabaseCreation,$passwordForDatabaseDeletion,$passwordForReservedChanges,$passwordForServerFunctions;
+        global $passwordForDatabaseCreation, $passwordForDatabaseDeletion,
+               $passwordForReservedChanges, $passwordForServerFunctions,
+               $needEncodeRecordDetails;
    
+        if(!isset($needEncodeRecordDetails)){
+            $needEncodeRecordDetails = 0;
+        }
         
         try{
             
@@ -1097,6 +1102,8 @@ error_log(print_r($_REQUEST, true));
                     'host_url'=>$host_url,
                     
                     'media_ext'=>$this->get_system('sys_MediaExtensions'),
+                    
+                    'need_encode'=>$needEncodeRecordDetails, 
                     
                     'pwd_DatabaseCreation'=> (strlen(@$passwordForDatabaseCreation)>6), 
                     'pwd_DatabaseDeletion'=> (strlen(@$passwordForDatabaseDeletion)>15), //delete for db statistics

@@ -62,6 +62,8 @@ class RecordsBatch
     *       for edit sVal - search value (if missed - replace all occurences),  rVal - replace value,  subs= 1 | 0
     *       for delete: sVal, subs= 1 | 0   
     *       tag  = 0|1  - add system tag to mark processed records
+    *       encoded = 0|1 - val or rVal should be decoded
+    *                   2 - restore "../" from ^^/
     */    
     private $data;  
 
@@ -107,7 +109,7 @@ class RecordsBatch
     }
     
     //
-    // Fills the list of exclusions for purrifier
+    // Fills the list of exclusions for purifier
     // And inits HTML purifier 
     //
     private function _initPutifier(){
@@ -443,6 +445,14 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             return false;
         }
         
+        if(@$this->data['val']!=null){
+            if(@$this->data['encoded']==1){
+                $this->data['val'] = urldecode( $this->data['val'] );
+            }else if(@$this->data['encoded']==2){
+                $this->data['val'] = str_replace( '^^/', '../', $this->data['val'] );
+            }
+        }
+        
         if(!$this->_validateParamsAndCounts()){
             return false;
         }else if (count(@$this->recIDs)==0){
@@ -631,6 +641,15 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         if (@$this->data['rVal']==null){
             $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed. New value not defined");
             return false;
+        }
+        
+        if(@$this->data['rVal']!=null){
+            if(@$this->data['encoded']==1){
+                $this->data['rVal'] = urldecode( $this->data['rVal'] );
+            }else if(@$this->data['encoded']==2){
+                $this->data['rVal'] = str_replace( ' xxx_style=', ' style=', 
+                                str_replace( '^^/', '../', $this->data['rVal'] ));
+            }
         }
         
         if(!$this->_validateParamsAndCounts()){

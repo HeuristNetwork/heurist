@@ -577,6 +577,19 @@ window.hWin.HEURIST4.util = {
         
         return res;
     },
+    
+    //
+    // Replace ../  to ^^/
+    //
+    encodeFolderUp: function (str) {
+        return str.replace(/(\.\.\/)/g, '^^/').replace(/( style=)/g,' xxx_style=');
+    },
+    
+    fixedEncodeURIComponent: function (str) {
+      return encodeURIComponent(str).replace(/[.!'()*]/g, function(c) {
+            return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+      });
+    },    
 
     //
     // returns json or false

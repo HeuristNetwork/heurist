@@ -3414,9 +3414,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                            NonOwnerVisibility: fields['rec_NonOwnerVisibility'],
                            NonOwnerVisibilityGroups: fields['rec_NonOwnerVisibilityGroups'],
                            ScratchPad: fields['rec_ScratchPad'],
-                           //'details': fields,  //without encoding
-                           'details': encodeURIComponent(JSON.stringify(fields)), 
-                           'details_encoded': 1};
+                           'details': fields}; //it will be encoded in RecordMgr.saveRecord
         
             if(fields['no_validation']){
                 request['no_validation'] = 1;

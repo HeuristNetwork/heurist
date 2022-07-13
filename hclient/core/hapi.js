@@ -1164,6 +1164,21 @@ prof =Profile
             */
             ,saveRecord: function(request, callback){
                 if(request) request.a = 's';
+                
+                var need_encode = window.hWin.HAPI4.sysinfo['need_encode'];
+                
+                if(request.details && need_encode>0){
+                    
+                    var f_encode = null;
+                    if(need_encode==2){
+                        f_encode = window.hWin.HEURIST4.util.encodeFolderUp;
+                    }else  if(need_encode==1){
+                        f_encode = encodeURIComponent;
+                    }
+
+                    request.details = f_encode(JSON.stringify(request.details));
+                    request.details_encoded = need_encode;
+                }
 
                 _callserver('record_edit', request, function(response){_triggerRecordUpdateEvent(response, callback);});
             }
@@ -1232,6 +1247,25 @@ prof =Profile
             * @param callback
             */
             ,batch_details: function(request, callback){
+
+                var f_encode = null;
+                var need_encode = window.hWin.HAPI4.sysinfo['need_encode'];
+                if(need_encode==2){
+                    f_encode = window.hWin.HEURIST4.util.encodeFolderUp;
+                }else  if(need_encode==1){
+                    f_encode = encodeURIComponent;
+                }
+                
+                if(f_encode != null){
+                    if(request.val){
+                        request.val = f_encode(request.val);
+                    }
+                    if(request.rVal){
+                        request.rVal = f_encode(request.rVal);
+                        
+                    }
+                    request.encoded = need_encode;
+                }
                 
                 _callserver('record_batch', request, function(response){_triggerRecordUpdateEvent(response, callback);});
             }
