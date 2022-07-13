@@ -127,7 +127,20 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
         
         if(this.options.edit_mode=='editonly'){
+
             this._initEditorOnly();
+
+            if(this.options.isdialog && this._as_dialog != null && this.options.parent_dialog != null){
+
+                var parent_pos = this.options.parent_dialog.position();
+                parent_pos['top'] += 50;
+                parent_pos['left'] += 130;
+
+                this._as_dialog.css({
+                    top: parent_pos['top'],
+                    left: parent_pos['left']
+                });
+            }
             return;
         }
         
@@ -1794,11 +1807,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     },
     
     _onSaveError: function(response){
-      
-            if(response.sysmsg && response.sysmsg.reccount){
-     
-                var res = response.sysmsg;    
-                
+
+        var that = this;
+
+        if(response.sysmsg){
+ 
+            var res = response.sysmsg;                
+            if(res.reccount){ // attempted to delete vocab, is in use
+
                 var sMsg = response.message;
                 sMsg += '<p><a href="'+window.hWin.HAPI4.baseURL+'?db='
                             + window.hWin.HAPI4.database+'&q=ids:' + res['records'].join(',')
@@ -1806,12 +1822,111 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     +'List of '+res.reccount+' records which use this vocabulary</a></p>';
                 
                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Vocabulary in use'},
-                    {default_palette_class:this.options.default_palette_class});        
+                    {default_palette_class:this.options.default_palette_class});
+            }else if(this._currentEditID = -1 && res.dty_id){ // attempted to create new field, name is already used
 
-                
-            }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response);    
+                var cannotEdit = $Db.dty(res.dty_id, 'dty_Status') == 'reserved' && !window.hWin.HAPI4.sysinfo['pwd_ReservedChanges'];
+
+                var msg = 'The name you have specified for the new field is already in use for an existing base field.<br><br>';
+
+                if(!cannotEdit){
+
+                    if($Db.rst_usage(res.dty_id).length == 0){ // check if in use
+                        msg += '<span id="btnDelete">DELETE</span> <span style="margin-left: 20px">Delete the existing base field (it has not been used)</span><br><br>';
+                    }
+
+                    msg += '<span id="btnRename">RENAME</span> <span style="margin-left: 20px">Rename the existing base field so you can reuse the name</span><br><br>'
+                        + 'Simply close this popup to edit the name for the new field.';
+                }else{ // reserved and no special password
+                    msg += 'The existing field is a reserved type and so cannot be edited at this time, please close this popup give your new base field a different name.';
+                }
+
+                var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Name already in use'}, {default_palette_class: 'ui-heurist-design', dialogId: 'basefield-dup-name'});
+
+                $dlg.find('#btnDelete').button().css('width', '50px').on('click', function(){
+
+                    var request = {
+                        'a'          : 'delete',
+                        'entity'     : that.options.entity.entityName,
+                        'request_id' : window.hWin.HEURIST4.util.random(),
+                        'recID'      : res.dty_id
+                    };
+
+                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                        function(response){ console.log('delete done ', response);
+                            if(response.status == window.hWin.ResponseStatus.OK){
+
+                                if(that.options.use_cache){
+                                    that._cachedRecordset.removeRecord( res.dty_id );
+                                }
+
+                                $dlg.dialog('close');
+                                that._saveEditAndClose();
+
+                                if(that.searchForm){
+                                    that.searchForm.searchDefDetailTypes('startSearch');
+                                }
+                                that._triggerRefresh('dty');
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                        }
+                    );
+                });
+
+                $dlg.find('#btnRename').button().css('width', '50px').on('click', function(){
+
+                    var $rdlg = window.hWin.HEURIST4.msg.showMsgDlg('Please enter a new name: <input class="text ui-corner-all" style="width: 150px" />', 
+                        null, null, {
+                            default_palette_class: 'ui-heurist-design', 
+                            labels: {'ok': 'Proceed', 'cancel': 'Cancel', title: 'Rename existing base field'}, 
+                            dialogId: 'rename-basefield',
+                            buttons: {
+                                'Proceed': function(){
+                                    var new_name = $rdlg.find('input').val();
+
+                                    if(window.hWin.HEURIST4.util.isempty(new_name)){
+                                        window.hWin.HEURIST4.msg.showMsgFlash('Please enter a new name', 1500);
+                                        return;
+                                    }
+
+                                    that._currentEditID = res.dty_id;
+                                    that._saveEditAndClose({dty_Name: new_name, dty_ID: res.dty_id}, 
+                                        function(id, flds){ console.log('rename done ', id, flds);
+
+                                            $Db.dty().setRecord(id, flds);
+
+                                            if(that.options.use_cache){
+                                                that._cachedRecordset.setRecord(id, flds);
+                                            }
+
+                                            $rdlg.dialog('close');
+                                            $dlg.dialog('close');
+
+                                            that._currentEditID = -1;
+                                            that._saveEditAndClose();
+                                        }, 
+                                        function(response){ console.log('renamed failed ', response);
+                                            if(!response.sysmsg){
+                                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                                            }
+                                            if(response.sysmsg.dty_id){
+                                                window.hWin.HEURIST4.msg.showMsgFlash('Name already taken', 2500);
+                                            }
+                                        }
+                                    );
+                                },
+                                'Cancel': function(){
+                                    $rdlg.dialog('close');
+                                }
+                            }
+                        }
+                    );
+                });
             }
+        }else{
+            window.hWin.HEURIST4.msg.showMsgErr(response);    
+        }
     },
     
     
@@ -1976,7 +2091,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 + '<div style="background:lightgrey;border:2px solid black;color:black;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);height:200px;width:510px;font-size:'+font_size+';padding:20px;">'
                 + 'The base fields editing function is provided for completeness and for<br/>advanced data management. Most users will not need to use it.<br/><br/>'
                 + '<strong>We strongly recommend NOT using this function to create new<br/>base fields. It is much more intuitive to create them <em>in situ</em> while<br/>designing your record structure.</strong><br/></br>'
-                + 'Recommended: Design > <span style="text-decoration:underline;cursor:pointer" onclick="$(\'li[data-action=menu-structure-rectypes]\').click();">Record Types</span><br/><br/>'
+                + 'Recommended: Design > <span style="text-decoration:underline;cursor:pointer" onclick="window.hWin.HAPI4.LayoutMgr.executeCommand(\'mainMenu\', \'menuActionById\', \'menu-structure-rectypes\');">Record Types</span><br/><br/>'
                 + 'Click outside this box for access to base fields manager'
                 + '</div></div>'); // Add message
 

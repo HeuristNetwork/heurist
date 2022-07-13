@@ -253,7 +253,8 @@ class DbDefDetailTypes extends DbEntityBase
                         "SELECT dty_ID FROM ".$this->config['tableName']."  WHERE dty_Name='"
                         .$mysqli->real_escape_string( $this->records[$idx]['dty_Name'])."'");
                 if($res>0 && $res!=@$this->records[$idx]['dty_ID']){
-                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type cannot be saved. The provided name already exists');
+
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type cannot be saved. The provided name already exists', array('dty_id' => $res));
                     return false;
                 }
             }

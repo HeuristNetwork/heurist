@@ -31,6 +31,7 @@ require_once(dirname(__FILE__).'/../../external/php/Mysqldump.php');
 
 
 $folder = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME;
+$folder_sql = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_sql';
 $progress_flag = HEURIST_FILESTORE_DIR.'backup/inprogress.info';
 
 $mode = @$_REQUEST['mode'];
@@ -39,8 +40,10 @@ $mode = @$_REQUEST['mode'];
 if($mode=='2' && file_exists($folder.".zip") ){
     downloadFile('application/zip', $folder.".zip"); //see db_files.php
     exit();
+}else if($mode=='3' && file_exists($folder_sql.".zip")){
+    downloadFile('application/zip', $folder_sql.".zip", HEURIST_DBNAME.".zip");
+    exit();
 }
-
 
 ?>
 <html>
@@ -162,7 +165,10 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
             */
             
             set_time_limit(0); //no limit
-            
+
+            $separate_sql_zip = true;
+
+            // 
             if(file_exists($folder)){
                 echo_flush2("<br>Clear folder ".$folder."<br>");
                 //clean folder
@@ -179,6 +185,19 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
                 $message = 'Failed to create folder '.$folder.'<br/> in which to create the backup. Please consult your sysadmin.';                
                 report_message($message, true);
                 exit();
+            }
+
+            // Just SQL dump
+            if(file_exists($folder_sql)){
+                $res = folderDelete2($folder_sql, true);
+                if(!$res){
+                    print 'It appears that backup opearation has been started already. Please try this function later';
+                    if(file_exists($progress_flag)) unlink($progress_flag);
+                    exit();
+                }
+            }
+            if(!folderCreate($folder_sql, true)){
+                $separate_sql_zip = false; // hide option
             }
 
             ?>
@@ -297,6 +316,10 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
                             'add-drop-database' => true));
 */                    
                     $dump->start($folder."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql");
+
+                    if($separate_sql_zip){ // copy sql dump to separate directory
+                        $separate_sql_zip = fileCopy($folder."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql", $folder_sql."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql");
+                    }
                 } catch (Exception $e) {
                     if(file_exists($progress_flag)) unlink($progress_flag);
                     print '</div><script>document.getElementById("divProgress").style.display="none";</script>';
@@ -309,10 +332,19 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
             if(file_exists($folder.'/'.HEURIST_DBNAME_FULL.'.sql')) unlink($folder.'/'.HEURIST_DBNAME_FULL.'.sql');
 
             // Create a zipfile of the definitions and data which have been dumped to disk
-            $destination = $folder.'.zip';
+            $destination = $folder.'.zip'; // Complete archive
             if(file_exists($destination)) unlink($destination);
             
             $res = createZipArchive($folder, null, $destination, true);
+
+            $res_sql = false;
+            if($separate_sql_zip){
+
+                $destination_sql = $folder.'_sql.zip'; // SQL dump only
+                if(file_exists($destination_sql)) unlink($destination_sql);
+
+                $res_sql = createZipArchive($folder.'_sql', null, $destination_sql, true);
+            }
             
             /* command line version
             $cmdline = "zip -r ".$folder.".zip *"; //archive everything within folder, keep folder strcuture
@@ -330,6 +362,13 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
 <br><br><div class='lbl_form'></div>
     <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.zip?db=<?php echo HEURIST_DBNAME;?>&mode=2"
         target="_blank" style="color:blue; font-size:1.2em">Click here to download your data as a zip archive</a>
+
+<?php if($res_sql){ ?>
+    <br><br>
+    <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.zip?db=<?php echo HEURIST_DBNAME;?>&mode=3"
+        target="_blank" style="color:blue; font-size:1.2em">Click here to download the SQL zip file only</a> 
+    <span class="heurist-helper1">(for db transfer on tiered servers)</span>
+<?php } ?>
 
 <span class="heurist-helper1">
 <br><br>Note: If this file fails to download properly (eg. "Failed … file incomplete") the file is too large to download. Please ask your system administrator (<?php echo HEURIST_MAIL_TO_ADMIN; ?>) to send it to you via a large file transfer service</span>        

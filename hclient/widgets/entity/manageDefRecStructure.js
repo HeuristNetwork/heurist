@@ -901,14 +901,15 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     // arg1 - not defined or not integer - use current 
     // arg2 - add new field after dty_ID 
     // allow_proceed - flag to ask user first
+    // parent_dialog - parent dialog/popup
     //
-    showBaseFieldEditor: function( arg1, arg2, allow_proceed ){
+    showBaseFieldEditor: function( arg1, arg2, allow_proceed, parent_dialog ){
         
         var that = this;
         
         if(allow_proceed!==true){
             this._allowActionIfModified( function(){ 
-                that.showBaseFieldEditor( arg1, arg2, true );                            
+                that.showBaseFieldEditor( arg1, arg2, true, parent_dialog );
             } );
             return;
         }
@@ -927,7 +928,11 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 edit_mode: 'editonly', //only edit form is visible, list is hidden
                 rec_ID: (dtyID>0)?dtyID:-1
             };
-        
+
+        if(parent_dialog != null){
+            popup_options['parent_dialog'] = parent_dialog;
+        }
+
         var that = this;
         
         if(!(dtyID>0)){ //new field

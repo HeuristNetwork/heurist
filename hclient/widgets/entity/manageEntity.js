@@ -133,7 +133,9 @@ $.widget( "heurist.manageEntity", {
         
         add_to_begin: false,
         
-        default_palette_class: null
+        default_palette_class: null,
+
+        parent_dialog: null // reference to parent dialog/popup for current popup screen placement
     },
     
     //system name of entity  - define it to load entity config from server

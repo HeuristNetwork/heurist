@@ -220,11 +220,13 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 + (ext_options && ext_options['password']?'type="password"':'') 
                 + ' style="max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em"/>';    
         }
-        
+
+        var dlg_id = ext_options && ext_options['dialogId'] ? ext_options['dialogId'] : 'dialog-common-messages';
+
         return window.hWin.HEURIST4.msg.showMsgDlg( message,
         function(){
             if($.isFunction(callbackFunc)){
-                var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();      
+                var $dlg = window.hWin.HEURIST4.msg.getMsgDlg(dlg_id);      
                 var ele = $dlg.find('#dlg-prompt-value');
                 var val = '';
                 if(ele.attr('type')!='checkbox' || ele.is(':checked')){

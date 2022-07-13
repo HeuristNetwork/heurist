@@ -840,6 +840,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
                 if(response.status == window.hWin.ResponseStatus.OK){
                     var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+                    var RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
 
                     that._getCountWebSiteRecords(function(){
 
@@ -854,8 +855,20 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                 sMsg = sMsg + that.sMsgCmsPrivate;    
                             }
 
-                        }else{
+                        }else if(RT_CMS_HOME > 0 && RT_CMS_MENU > 0){
                             sMsg = 'Are you sure you want to create a site?';
+                        }else{
+                            // construct missing part of msg
+                            var missing = RT_CMS_HOME > 0 ? 'CMS_Home (Concept-ID: 99-51)' : '';
+                            missing = RT_CMS_MENU > 0 && missing == '' ? 'CMS Menu-Page (Concept-ID: 99-52)' : RT_CMS_MENU > 0 ? missing + ' and CMS Menu-Page (Concept-ID: 99-52)' : missing;
+                            missing += (RT_CMS_HOME <= 0 && RT_CMS_MENU <= 0 ? ' record types' : ' record type');
+
+                            window.hWin.HEURIST4.msg.showMsgErr(
+                                'Your database is missing the ' + missing + '.<br>'
+                                +'These record types can be downloaded from the Heurist_Bibliographic database (# 6) using Design > Browse templates.<br>'
+                                +'You will need to refresh your window after downloading the record type(s) for the additions to take affect.'
+                            );
+                            return;
                         }
 
                         sMsg = sMsg 
