@@ -123,9 +123,14 @@ if(!$arg_no_action){
     }else{
         //echo $backup_sysarch.' exists'."\n";
     }
+
+    echo 'Deleted databases: '.$backup_root."\n";
+    echo 'Archieved import tables: '.$backup_imports."\n";
+    echo 'Archieved sysArchive tables: '.$backup_sysarch."\n";
+
     
     $action = 'purgeOldDBs';
-    if(!isActionInProgress($action, 15)){
+    if(!isActionInProgress($action, 1)){
         exit("It appears that backup operation has been started already. Please try this function later\n");        
     }
 }
@@ -321,7 +326,6 @@ sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $
                         $dump->start($dumpfile);
             
                         $cnt_dumped++;            
-                        $report .= 'd';
                     } catch (Exception $e) {
                        $report .= (" Error: unable to generate MySQL database dump for import table  $db_name.".$e->getMessage());
                     }
@@ -335,6 +339,7 @@ sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $
             }
             
             if($archOK){
+                $report .= 'd';
                 //drop tables
                 $query = 'DROP TABLE IF EXISTS '.implode(',', $sif_purge);
                 $mysqli->query($query);
