@@ -59,6 +59,8 @@ class systemEmailExt {
 
 	private $records; // array of records+last modified information
 
+    private $use_native_mail_function = false;
+    
 	private $log; // log of emails, to be placed within a note record within the databases, extended version of receipt
 	private $receipt; // receipt for all email transactions, is saved into current db as a note record with the Notes title (not rec_Title) set to "Heurist System Email Receipt"  
 	private $error_msg; // error message
@@ -138,6 +140,10 @@ class systemEmailExt {
 		$this->log = "";
 		$this->receipt = null;
 		$this->error_msg = "";
+        
+        if(@$data["use_native"]==1){
+            $this->use_native_mail_function = true;    
+        }
 
 		$rtn = $this->createUserList(); // save user information; first and last name, email, and list of databases
 
@@ -485,15 +491,35 @@ class systemEmailExt {
 			$mailer->Body = $body;
 			$mailer->AddAddress( $email );
 
-			try {
-			    $mailer->send();
-			} catch (phpmailerException $e) {
-			    $this->set_error($e->errorMessage());
-			    $email_rtn = -3;
-			} catch (Exception $e) {
-			    $this->set_error($e->getMessage());
-			    $email_rtn = -3;
-			}
+            if($this->use_native_mail_function){ //use php native mail
+            
+                $email_header = 'From: Heurist system <no-reply@'.HEURIST_DOMAIN.'>'
+                        ."\r\nContent-Type: text/html;charset=utf-8\r\n";
+                        
+                $title = '=?utf-8?B?'.base64_encode($title).'?=';
+            
+                $rv = mail($email, $title, $body, $email_header);
+                if(!$rv){
+                    $this->set_error('Unknown error');
+                    $email_rtn = -3;
+                }
+                
+//error_log('native mail : '.$email.'  '.$email_rtn);                    
+            
+            }else{
+            
+			    try {
+                
+			        $mailer->send();
+			    } catch (phpmailerException $e) {
+			        $this->set_error($e->errorMessage());
+			        $email_rtn = -3;
+			    } catch (Exception $e) {
+			        $this->set_error($e->getMessage());
+			        $email_rtn = -3;
+			    }
+            
+            }
 
 			$status_msg = "";
 			if ($email_rtn == 0) {
@@ -502,6 +528,8 @@ class systemEmailExt {
 				$status_msg = "Failed, Error Message: " . $this->get_error();
 			}
 
+//error_log('mailer : '.$email.'  '.$email_rtn.' '.$email->ErrorInfo);    
+            
 			$this->log .= "Values: {databases: {".$db_listed."}, email: $email, name: " .$details['first_name']. " " .$details["last_name"]
 					   .", record_count: {".$records_listed."}, last_modified: {".$lastmod_listed."} },"
 					   ."Timestamp: " . date("Y-m-d H:i:s") . ", Status: " . $status_msg
@@ -515,15 +543,15 @@ class systemEmailExt {
 					$this->set_error("phpMailer has stopped sending emails due to an error with the email system, Error => " . $this->error_msg);
 				}
 
-				$this->save_receipt($email_rtn, $this->email_subject, $this->email_body);
+				$this->save_receipt($email_rtn, $this->email_subject, $this->email_body, $user_cnt);
 
 				return $email_rtn;
 			}
 
-			$user_cnt += 1;
+			$user_cnt++;
 		}
 
-		$this->save_receipt($email_rtn, $this->email_subject, $this->email_body);
+		$this->save_receipt($email_rtn, $this->email_subject, $this->email_body, $user_cnt);
 
 		return $email_rtn;
 	}
@@ -634,6 +662,7 @@ class systemEmailExt {
 
 	public function set_error($msg) {
 		$this->error_msg = $msg;
+//error_log($msg);        
 	}
 
 	public function get_error() {

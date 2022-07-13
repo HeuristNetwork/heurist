@@ -862,6 +862,9 @@ console.log('FAIL');
                         Please enter the System Manager password to comfirm:&nbsp;
 
                         <input type="password" name="pwd" autocomplete="off" id="sm_pwd" />
+                        
+                        
+                        <label><input type="checkbox" name="use_native" checked id="use_native" value="1"/>use native mail</label>
 
                     </div>
                     

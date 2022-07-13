@@ -59,11 +59,24 @@ use PHPMailer\PHPMailer\Exception;
         
         //send an email with attachment
         $email = new PHPMailer();
-                $email->CharSet = 'UTF-8';
-                $email->Encoding = 'base64';
+        
+        /*
+        $mail->IsSMTP(); 
+        $mail->SMTPAuth   = true; 
+        $mail->Port       = 25; 
+        $mail->Host       = "xx.xxx.x.x"; // SMTP server
+        $mail->Username   = "myemail@mydomain.local";  
+        $mail->Password   = <myemailpassword>;        
+        
+        $mail->From = 'contacto@45norte.com';
+        $mail->addReplyTo($_POST['inputEmail'], $_POST['inputName']); //recipient
+        */
+        
+        $email->CharSet = 'UTF-8';
+        $email->Encoding = 'base64';
         $email->isHTML( $is_html ); 
         $email->SetFrom($email_from, $email_from_name); 
-        $email->Subject   = $email_title;
+        $email->Subject   = '=?UTF-8?B?'.base64_encode($email_title).'?=';
         $email->Body      = $email_text;
         
         foreach($email_to as $email_address){
@@ -131,11 +144,11 @@ use PHPMailer\PHPMailer\Exception;
 
             if(!$email_header){
                 $email_header = "From: HEURIST";
-                if(defined('HEURIST_SERVER_NAME')){
+                if(defined('HEURIST_DOMAIN')){
                     if(defined('HEURIST_DBNAME')){
                         $email_header = $email_header." (".HEURIST_DBNAME.")";
                     }
-                    $email_header = $email_header." <no-reply@".HEURIST_SERVER_NAME.">";
+                    $email_header = $email_header." <no-reply@".HEURIST_DOMAIN.">";
                 }
             }
 
