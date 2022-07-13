@@ -62,10 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.3.4"; // sets current program version number, determined by Heurist development lead
+$version = "6.3.5"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// 6.3.5  13 July 2022 - changes to be listed
 // 6.3.2  20 April 2022 Change hardcoded references to Sydney server 
 // 6.3.1  15 april 2022 Security fixes, improvements to StoryMaps including new beahviours, and map header bar
 // 6.2.32 03 April 2022 // 6.2.31 26 March 2022 // 6.2.30 10 March 2022 // 6.2.29 25 Feb 2022
