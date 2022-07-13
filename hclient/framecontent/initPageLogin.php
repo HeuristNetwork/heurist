@@ -93,7 +93,7 @@ function verify_credentials( show_warning ){
         
     }else{
         
-        msg = 'To perform this operation you have to be logged in';
+        msg = 'To perform this operation you have to be logged in (you may have been logged out due to lack of activity - if so, please reload the page)';
         
         if(requiredLevel==window.hWin.HAPI4.sysinfo.db_managers_groupid){
            msg += ' as database administrator';// of group "Database Managers"' 

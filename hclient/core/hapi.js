@@ -465,7 +465,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             var response = {};
                             response.sysmsg = 0;
                             response.status = window.hWin.ResponseStatus.REQUEST_DENIED;
-                            response.message = 'To perform this operation you have to be logged in';
+                            response.message = 'To perform this operation you have to be logged in (you may have been logged out due to lack of activity - if so, please reload the page)';
                             
                             if(requiredMembership>0){
                                var sGrpName = '';

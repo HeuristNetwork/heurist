@@ -332,8 +332,8 @@ regional['fr'] = {
     //publish menu
     'Website': 'Site web',
         menu_cms_create: 'Créer',
-        menu_cms_edit: 'Éditer (ancienne version)',
-        menu_cms_edit_new: 'Éditer (nouvelle version)',
+        menu_cms_edit: 'Éditer',
+        menu_cms_edit_new: 'Éditer',
         menu_cms_view: 'Consulter',
         menu_cms_embed: 'Page unique',
         menu_cms_create_hint: 'Créer un nouveau site web (CMS) qui sera enregistré dans cette base de données, composé de widgets pour accéder aux données dans la base',

@@ -2482,7 +2482,7 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
         <div>
             <br>
             <a href="longOperationInit.php?type=files&db=<?php echo HEURIST_DBNAME;?>" 
-                target="_blank">Find duplicate and unused uploaded files (slow)</a>
+                target="_blank"><b>FILE CHECKER</b> Finds missing, duplicate and unused uploaded files</a>
         </div>
 
 
