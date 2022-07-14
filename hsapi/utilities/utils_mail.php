@@ -76,7 +76,7 @@ use PHPMailer\PHPMailer\Exception;
         $email->Encoding = 'base64';
         $email->isHTML( $is_html ); 
         $email->SetFrom($email_from, $email_from_name); 
-        $email->Subject   = '=?UTF-8?B?'.base64_encode($email_title).'?=';
+        $email->Subject   = $email_title; //'=?UTF-8?B?'.base64_encode($email_title).'?=';
         $email->Body      = $email_text;
         
         foreach($email_to as $email_address){
