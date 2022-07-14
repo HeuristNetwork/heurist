@@ -750,7 +750,7 @@ $.widget( "heurist.ruleBuilder", {
             if(linktype>0 && dty_ID>0){
                 link = link+':'+dty_ID;
             }
-            var query = {"t":rt_target};
+            var query = (rt_target>0)?{"t":rt_target}:{};
             query[link] = [{"t":rt_source}];
             
             //additional filter
