@@ -2482,11 +2482,13 @@ class HPredicate {
             if (preg_match('/^\d+(?:,\d*)+$/', $this->value)){   //numeric comma separated
                 $res = ' in (select trm_ID from defTerms where trm_ID in ('
                     .$this->value.') or trm_ParentTermID in ('.$this->value.'))';
-            }else if(intval($this->value)>0){
+            }else if(preg_match('/^\d+$/', trim($this->value)) && intval($this->value)){   //integer
+            
+                $int_v = intval($this->value);
                 $res = ' in (select trm_ID from defTerms where trm_ID='
-                    .$this->value;
+                    .$int_v;
                 if(!$this->exact){
-                    $res = $res . ' or trm_ParentTermID='.$this->value;   
+                    $res = $res . ' or trm_ParentTermID='.$int_v;   
                 }
                 $res = $res.')';
                     
@@ -2506,7 +2508,7 @@ class HPredicate {
         // it is better to use kwd keyword instead of f:tag
         if($this->field_id=='tag'){
             
-            if(intval($this->value)>0){
+            if(preg_match('/^\d+$/', trim($this->value)) && intval($this->value)>0){
                 $res = '(SELECT rtl_RecID FROM usrRecTagLinks where rtl_TagID='.$this->value.')';
             }else{
                 $res = '(SELECT rtl_RecID FROM usrRecTagLinks, usrTags where rtl_TagID=tag_ID AND tag_Text="'
