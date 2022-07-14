@@ -20,7 +20,7 @@
 */
 
 define('PDIR','../../');  //need for proper path to js and css    
-
+ 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
 require_once(dirname(__FILE__).'/bulkEmailSystem.php');
@@ -252,6 +252,17 @@ if(!$has_emails || empty($emails)) {
             var all_emails = <?php echo json_encode($emails)?>; // Object of Email records id->title
             
             var current_db = "<?php echo $current_db ?>";
+            
+            function getDbList(){
+                    var checked_dbs = $("#dbSelection").find(".dbListCB:checked");
+                    var dbs = [];
+                    checked_dbs.each(function(idx, ele){
+                        dbs.push($(ele).attr("id"));
+                    });
+
+                    //input[name="databases"]
+                    $('#db_list').val(dbs.join(','));
+            }
 
             function exportCSV(isValid) {
 
@@ -260,6 +271,8 @@ if(!$has_emails || empty($emails)) {
                 $("input[name='exportCSV']").val(true);
 
                 if(isValid) {
+                    getDbList();
+                    
                     var data = {};
 
                     $.map($("#emailOptions").serializeArray(), function(obj, idx) {
@@ -360,7 +373,7 @@ if(!$has_emails || empty($emails)) {
 
                     $db_selection.append(
                         "<div class='label non-selectable' title='"+ name +"'> "
-                      + "   <input type='checkbox' class='dbListCB' name='databases[]' value='"+ value +"' id='"+ value +"'><label for='"+ value +"'>" + name + "</label>"
+                      + '  <label><input type="checkbox" class="dbListCB" id="'+value+'" value="'+ value +'">' + name + "</label>"
                       + "</div>"
                     );
                 });
@@ -641,9 +654,9 @@ console.log('FAIL');
                 var data = {
                     db: current_db,
                     user_count: $("#userSel").val(),
-                    db_list: dbs
+                    db_list: dbs.join(',')
                 };
-
+                
                 $.ajax({
                     url: 'bulkEmailOther.php',
                     type: 'POST',
@@ -677,7 +690,7 @@ console.log('FAIL');
             }
 
             function verifySystemAdminPwd() {
-
+                
                 var data = {
                     db: current_db,
                     sysadmin_pwd: $("#sm_pwd").val()
@@ -702,6 +715,9 @@ console.log('FAIL');
                         
                         if(response.status == "ok"){
                             if(response.data == true){
+                                
+                                getDbList();
+                                
                                 $("#emailOptions").submit();
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgFlash("The System Administrator password is incorrect.<br>Please re-enter it.", 5000);
@@ -877,6 +893,8 @@ console.log('FAIL');
                 </div>
 
                 <input name="db" value="<?php echo $_REQUEST['db']; ?>" style="display: none;" readonly />
+                <!-- <textarea id="db_list" name="databases" style="display: none;"></textarea> -->
+                <input id="db_list" name="databases" type="hidden" />
                 <input name="exportCSV" value="false" style="display: none;" readonly />
 
             </form>

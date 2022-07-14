@@ -60,6 +60,7 @@ class systemEmailExt {
 	private $records; // array of records+last modified information
 
     private $use_native_mail_function = false;
+    private $debug_run = false;
     
 	private $log; // log of emails, to be placed within a note record within the databases, extended version of receipt
 	private $receipt; // receipt for all email transactions, is saved into current db as a note record with the Notes title (not rec_Title) set to "Heurist System Email Receipt"  
@@ -87,10 +88,19 @@ class systemEmailExt {
 			$this->set_error("No current database has been provided<br>Please contact the Heurist team if this problem persists.");
 			return -1;
 		}
+        
+        $this->databases = null;
 
-		if (isset($data["databases"]) && is_array($data["databases"]) && count($data["databases"]) >= 1) { // Get list of Databases
-			$this->databases = $this->validateDatabases($data["databases"]);
-		} else {
+		if (isset($data["databases"])){
+            if(!is_array($data["databases"])){
+                $data["databases"] = explode(',',$data["databases"]);
+            }
+            if(count($data["databases"]) >= 1) { // Get list of Databases
+			    $this->databases = $this->validateDatabases($data["databases"]);
+            }
+		}
+
+        if(!(is_array($this->databases) && count($this->databases)>0)){
 			// Here databases is not an array
 			$provided_dbs = is_array($data["databases"]) ? "" : "<br>databases => " . $data["databases"];
 			$this->set_error("No valid databases have been provided, these databases are required to retrieve a list of users, the last modified records and record count values." . $provided_dbs);
@@ -486,47 +496,64 @@ class systemEmailExt {
 			$body = str_ireplace($this->substitute_vals, $replace_with, $this->email_body);
 
 			$title = (isset($this->email_subject) ? $this->email_subject : "Heurist email about databases: " . $db_url_listed);
+            $status_msg = '';
 
-			$mailer->Subject = $title;
-			$mailer->Body = $body;
-			$mailer->AddAddress( $email );
-
-            if($this->use_native_mail_function){ //use php native mail
             
+
+            if($this->debug_run){
+
+                $status_msg = 'OK';
+
+            }else if($this->use_native_mail_function){ //use php native mail
+
                 $email_header = 'From: Heurist system <no-reply@'.HEURIST_DOMAIN.'>'
-                        ."\r\nContent-Type: text/html;charset=utf-8\r\n";
-                        
+                ."\r\nContent-Type: text/html;charset=utf-8\r\n";
+
                 $title = '=?utf-8?B?'.base64_encode($title).'?=';
-            
+
                 $rv = mail($email, $title, $body, $email_header);
                 if(!$rv){
                     $this->set_error('Unknown error');
                     $email_rtn = -3;
                 }
-                
-//error_log('native mail : '.$email.'  '.$email_rtn);                    
-            
+
+                //error_log('native mail : '.$email.'  '.$email_rtn);                    
+
             }else{
-            
-			    try {
-                
-			        $mailer->send();
-			    } catch (phpmailerException $e) {
-			        $this->set_error($e->errorMessage());
-			        $email_rtn = -3;
-			    } catch (Exception $e) {
-			        $this->set_error($e->getMessage());
-			        $email_rtn = -3;
-			    }
-            
+
+                try {
+                    $mailer->AddAddress( $email );
+                } catch (Exception $e) {
+                    $email_rtn = -2;
+                    $status_msg = 'Failed, Error Message: Invalid email '.$email;
+                    $this->set_error( $status_msg );
+                    error_log($status_msg.'  '.$db_listed);                        
+                }
+                if($email_rtn == 0){
+
+                    $mailer->Subject = $title;
+                    $mailer->Body = $body;
+
+                    try {
+                        $mailer->send();
+                    } catch (phpmailerException $e) {
+                        $this->set_error($e->errorMessage());
+                        $email_rtn = -3;
+                    } catch (Exception $e) {
+                        $this->set_error($e->getMessage());
+                        $email_rtn = -3;
+                    }
+
+                }
             }
 
-			$status_msg = "";
-			if ($email_rtn == 0) {
-				$status_msg = "Sent, Sent Message: " . $body;
-			} else {
-				$status_msg = "Failed, Error Message: " . $this->get_error();
-			}
+            if ($email_rtn == 0) {
+                $status_msg = "Sent, Sent Message: " . $body;
+            } else {
+                $status_msg = "Failed, Error Message: " . $this->get_error();
+            }
+
+
 
 //error_log('mailer : '.$email.'  '.$email_rtn.' '.$email->ErrorInfo);    
             
@@ -541,7 +568,9 @@ class systemEmailExt {
 
 				if ($email_rtn == -3){
 					$this->set_error("phpMailer has stopped sending emails due to an error with the email system, Error => " . $this->error_msg);
-				}
+				}else if($email_rtn == -2){
+                    continue;
+                }
 
 				$this->save_receipt($email_rtn, $this->email_subject, $this->email_body, $user_cnt);
 

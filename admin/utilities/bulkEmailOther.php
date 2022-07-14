@@ -218,6 +218,9 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 	$user_request = $_REQUEST['user_count'];
 	$dbs = $_REQUEST['db_list'];
+    if(!is_array($dbs)){
+        $dbs = explode(',', $dbs);
+    }
 
 	$data = 0;
 	$email_list = array();
