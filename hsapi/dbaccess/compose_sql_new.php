@@ -2242,7 +2242,7 @@ class HPredicate {
     */
     function predicateLinks(){
         
-        global $top_query, $params_global;
+        global $top_query, $params_global, $mysqli;
         $not_nested = (@$params_global['nested']===false);
         
 
