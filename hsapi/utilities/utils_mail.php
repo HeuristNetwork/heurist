@@ -37,7 +37,7 @@ use PHPMailer\PHPMailer\Exception;
         
         global $system;
 
-        if(!$email_from) $email_from = 'no-reply@'.HEURIST_DOMAIN;
+        if(!$email_from) $email_from = 'no-reply@'.(defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN);
         if(!$email_from_name) $email_from_name = 'Heurist system. ('.HEURIST_SERVER_NAME.')';
         
         if(is_array($email_text)){
@@ -148,7 +148,7 @@ use PHPMailer\PHPMailer\Exception;
                     if(defined('HEURIST_DBNAME')){
                         $email_header = $email_header." (".HEURIST_DBNAME.")";
                     }
-                    $email_header = $email_header." <no-reply@".HEURIST_DOMAIN.">";
+                    $email_header = $email_header." <no-reply@".(defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN).">";
                 }
             }
 

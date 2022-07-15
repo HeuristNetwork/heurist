@@ -63,6 +63,11 @@ if (!@$serverName) {
     define('HEURIST_DOMAIN', ($k>0)?substr($serverName,0,$k-1):$serverName );
 }
 
+if (!@$mailDomain) {
+    define('HEURIST_MAIL_DOMAIN', HEURIST_DOMAIN);
+}else{
+    define('HEURIST_MAIL_DOMAIN', $mailDomain);
+}
 
 
 $isSecure = false;
