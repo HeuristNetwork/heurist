@@ -26,7 +26,7 @@
 // configIni.php file in each copy of Heurist
 
 if (!@$serverName) $serverName = null; // override default taken from request header SERVER_NAME
-
+if (!@$mailDomain) $mailDomain = null; // You may need to set mail domain if it does not use server domain
 
 if (!@$heuristReferenceServer) $heuristReferenceServer = null; // address of the "reference server", ie. the server where the master index and code updates are located 
 
