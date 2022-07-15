@@ -439,6 +439,7 @@ class DbUtils {
                 
                 $archOK = createZipArchive($source, $folders_to_copy, $destination, $verbose);
             }
+            
             if(!$archOK){
                 $msg = $msg_prefix."Cannot create archive with database folder. Failed to archive $source to $destination";
                 self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
@@ -464,25 +465,32 @@ class DbUtils {
                     return false;
                 }
 
-                if($verbose) echo "<br/>Database ".$database_name." has been dropped";
+                if($verbose) {
+                    echo "<br/>Database ".$database_name." has been dropped";
+                }
+                
                 // Delete $source folder
                 folderDelete($source);
-                if($verbose) echo "<br/>Folder ".$source." has been deleted";
-            }
+                //change current folder
+                chdir(HEURIST_FILESTORE_ROOT);
+                if($verbose) {
+                    echo "<br/>Folder ".$source." has been deleted";   
+                }
 
-            //add to log file
-            $filename = HEURIST_FILESTORE_ROOT.'DELETED_DATABASES_LOG.csv';
-            $fp = fopen($filename, 'a'); //open for add
-            if($fp===false){
-                error_log( 'Cannot open file '.$filename );    
-            }else{
-                $row = array($database_name,  
-                    $owner_user['ugr_LastName'],
-                    $owner_user['ugr_FirstName'],
-                    $owner_user['ugr_eMail'],
-                date_create('now')->format('Y-m-d H:i:s'));
-                fputcsv($fp, $row); 
-                fclose($fp);
+                //add to log file
+                $filename = HEURIST_FILESTORE_ROOT.'DELETED_DATABASES_LOG.csv';
+                $fp = fopen($filename, 'a'); //open for add
+                if($fp===false){
+                    error_log( 'Cannot open file '.$filename );    
+                }else{
+                    $row = array($database_name,  
+                        $owner_user['ugr_LastName'],
+                        $owner_user['ugr_FirstName'],
+                        $owner_user['ugr_eMail'],
+                    date_create('now')->format('Y-m-d H:i:s'));
+                    fputcsv($fp, $row); 
+                    fclose($fp);
+                }
             }
 
             self::$db_del_in_progress = null;

@@ -49,8 +49,8 @@ $tabs0 = '';
 if (@$argv) {
     
 // example:
-//  sudo php -f /var/www/html/heurist/export/dbbackup/reportInactiveDbs.php -action
-//  sudo php -f reportInactiveDbs.php -action  -  action, otherwise only report 
+//  sudo php -f /var/www/html/h6-alpha/export/dbbackup/reportInactiveDbs.php -- -purge
+//  sudo php -f reportInactiveDbs.php -- -purge  -  action, otherwise only report 
 
 // TODO: It would be good if this had a parameter option to also delete the database for use when transferring to a new server
 // TODO: WARNING: AT THIS TIME (21 May 2022) IT DOES NOT REPORT AN ERROR IF THERE IS NO FILESTORE FOLDER
@@ -88,6 +88,8 @@ if (@$argv) {
 }
 
 
+require_once(dirname(__FILE__).'/../../configIni.php'); // read in the configuration file
+require_once(dirname(__FILE__).'/../../hsapi/consts.php');
 require_once(dirname(__FILE__).'/../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
 require_once(dirname(__FILE__).'/../../hsapi/utilities/dbUtils.php');
@@ -98,6 +100,12 @@ $system = new System();
 if( !$system->init(null, false, false) ){
     exit("Cannot establish connection to sql server\n");
 }
+
+if(!defined('HEURIST_MAIL_DOMAIN')) define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');
+if(!defined('HEURIST_SERVER_NAME')) define('HEURIST_SERVER_NAME', 'heurist.huma-num.fr');
+
+print 'Mail: '.HEURIST_MAIL_DOMAIN.'   Domain: '.HEURIST_SERVER_NAME."\n";
+
 $mysqli = $system->get_mysqli();
 $databases = mysql__getdatabases4($mysqli, false);   
 //DEBUG $databases = array('ACD_Basins','ACD_Candlesticks');
@@ -130,12 +138,21 @@ if(!$arg_no_action){
 
     
     $action = 'purgeOldDBs';
-    if(!isActionInProgress($action, 1)){
+    if(false && !isActionInProgress($action, 1)){
         exit("It appears that backup operation has been started already. Please try this function later\n");        
     }
 }
 
+/*TMP
+//Arche_RECAP
+//AmateurS1
+//$databases = array('ARNMP_COMET','ArScAn_Material','arthur_base','arvin_stamps');
+$databases = array('AmateurS1');
+//$databases = array('ARNMP_COMET');
+*/
+
 set_time_limit(0); //no limit
+ini_set('memory_limit','1024M');
 
 $datetime1 = date_create('now');
 $cnt_archived = 0;
@@ -186,7 +203,6 @@ foreach ($databases as $idx=>$db_name){
     $interval = date_diff($datetime1, $datetime2);    
     $diff = $interval->format('%y')*12 + $interval->format('%m');
 
-    
     if(($vals['cnt']<11 && $diff>=3) || ($vals['cnt']<51 && $diff>=6) || ($vals['cnt']<201 && $diff>=12)){
         //archive and drop database
         $report = $diff.' months, n='.$vals['cnt'];
@@ -197,7 +213,6 @@ foreach ($databases as $idx=>$db_name){
             
             $res = DbUtils::databaseDrop( false, $db_name, true );
             if($res){
-                
                     $server_name = HEURIST_SERVER_NAME;
                     $email_title = 'Your Heurist database '.$db_name.' has been archived';
                     $email_text = <<<EOD
@@ -219,7 +234,6 @@ For more information email us at support@HeuristNetwork.org and visit our websit
 EOD;
                             
 sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $email_text);                
-                
                 
                 $report .= ' ARCHIVED'; 
                 $cnt_archived++;
@@ -282,7 +296,7 @@ sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $
                 
                 $interval = date_diff($datetime1, $datetime2);    
                 $diff = $interval->format('%y')*12 + $interval->format('%m');                
-                
+            
                 if($diff>$diff2){
                     $sif_purge[$sif_id] = $imp_table;
                 }
@@ -293,9 +307,11 @@ sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $
                 $sif_list[$sif_id] = $file_name;
             }//foreach
             
+            /*TMP!*/
             if($sif_count-count($sif_purge)>20){ //still more than 20
                 $sif_purge = $sif_purge2;
             }
+            
             
             if(count($sif_purge)>0){
                 
@@ -313,6 +329,11 @@ sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $
             
             $cnt_dumped = 0;
             
+            //$sif_purge = array( 3 => 'import20210531163600');
+            $arc_cnt = 0;
+            $cnt_dumped = 10;
+            if(false){
+            
             foreach($sif_purge as  $sif_id => $sif_table){
                 
                 if(hasTable($mysqli,$sif_table)){
@@ -324,6 +345,19 @@ sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $
                                   'add-drop-trigger' => false));
                         $dumpfile = $backup_imports2."/".fileNameSanitize($file_name).'.sql';  //.$db_name.' '
                         $dump->start($dumpfile);
+                        
+                        /*
+                        if($summary_size>256){
+                            $destination = $backup_imports.$db_name.' '.$datetime1->format('Y-m-d')
+                                    .($arc_cnt>0?('_'.$arc_cnt):'').'.tar';
+                            $archOK = createBz2Archive($backup_imports2, null, $destination, false);
+                            
+                            $arc_cnt++;
+                            if(!$archOK){
+                                $report .= " Cannot create archive import tables. Failed to archive $backup_imports2 to $destination";
+                                break;
+                            }
+                        }*/
             
                         $cnt_dumped++;            
                     } catch (Exception $e) {
@@ -331,6 +365,7 @@ sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $
                     }
                 }
             }//foreach
+            }
             
             $archOK = true;
             if($cnt_dumped>0){
@@ -351,12 +386,13 @@ sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $
             }
             //remove folder
             folderDelete($backup_imports2);
+            chdir($upload_root);
             
-            }
+            }//no action
             }//cnt>0
         }//sif list
         
-        
+        if(true){
         $arc_count = mysql__select_value($mysqli, 'SELECT count(arc_ID) FROM sysArchive'); //sif_TempDataTable, 
         if($arc_count>50000){
             
@@ -408,6 +444,7 @@ sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $
                     }
             }   
             
+        }
         }
         
     }

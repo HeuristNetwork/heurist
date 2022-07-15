@@ -379,7 +379,7 @@
             foreach ($objects as $object) {
                 if ($object != '.' && $object != '..') {
                     if (filetype($dir.'/'.$object) == 'dir') {
-                        folderDelete($dir.'/'.$object); //delte files
+                        folderDelete($dir.'/'.$object); //delete files
                     } else {
                         unlink($dir.'/'.$object);
                     }
@@ -1232,23 +1232,24 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
         //$phar->addFromString(basename($source), file_get_contents($source));
     }
 
-    $phar->compress(Phar::BZ2);
-    
-    if(file_exists($destination.'.bz2')){ //
+        $phar->compress(Phar::BZ2);
         
-        unlink($destination);
+        if(file_exists($destination.'.bz2')){ //
+            
+            unlink($destination);
 
-        $size = filesize($destination.'.bz2') / pow(1024, 2);
-        
-        if($verbose) {
-            echo "<br/>Successfully dumped data from ". $source ." to ".$destination;
-            echo "<br/>The archive file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
+            $size = filesize($destination.'.bz2') / pow(1024, 2);
+            
+            if($verbose) {
+                echo "<br/>Successfully dumped data from ". $source ." to ".$destination;
+                echo "<br/>The archive file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
+            }
+        }else{
+            echo "Arhive not created\n";
+            return false;    
         }
-    }else{
-        echo "Arhive not created\n";
-        return false;    
-    }
-    return true;
+        
+        return true;
     
     } catch (Exception  $e){
         error_log( $e->getMessage() );
