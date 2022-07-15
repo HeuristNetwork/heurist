@@ -135,11 +135,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 var parent_pos = this.options.parent_dialog.position();
                 parent_pos['top'] += 50;
                 parent_pos['left'] += 130;
-
+/*
                 this._as_dialog.css({
                     top: parent_pos['top'],
                     left: parent_pos['left']
                 });
+*/                
             }
             return;
         }
