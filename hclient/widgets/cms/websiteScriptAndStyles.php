@@ -286,6 +286,15 @@ var DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITL
 //
 function onPageInit(success)
 {
+    try{
+        //bootstrap workaround
+        $.fn.button.noConflict();
+        $.fn.tooltip.noConflict();
+    }catch{
+        
+    }
+    
+    
     DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
     DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
     DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
