@@ -175,6 +175,12 @@ var svg;        // The SVG where the visualisation will be executed on
                  zoomBtn(false);
             }
         );
+
+        $('#btnFitToExtent').button({icons:{primary:'ui-icon-fullscreen'},text:false}).click(
+            function(){
+                 zoomToFit();
+            }
+        );
  
         return this;
     };
@@ -557,6 +563,39 @@ function onZoom( transform ){
     if(isNaN(scale) || !isFinite(scale) || scale==0) scale = 1;
 
     updateOverlays();
+}
+
+//
+// Fit current extent 
+//
+function zoomToFit(){
+
+    var fullWidth = $("#divSvg").width();
+    var fullHeight = $("#divSvg").height();
+    
+    const box = d3.select("#container").node().getBBox();
+    
+    var width  = box.width,
+        height = box.height;
+        
+    var midX = box.x + width / 2,
+        midY = box.y + height / 2;
+        
+    if (width == 0 || height == 0) return; // nothing to fit
+    var scale = 0.85 / Math.max(width / fullWidth, height / fullHeight);
+    var translate = [
+        fullWidth  / 2 - scale * midX,
+        fullHeight / 2 - scale * midY
+    ];    
+    
+
+    var zoom = this.zoomBehaviour; 
+
+    //reset
+    zoom.scale(scale)
+        .translate(translate);    
+    var transform = "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")";   
+    onZoom(transform);
 }
 
 //handle the zoom buttons
