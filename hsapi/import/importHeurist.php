@@ -2,7 +2,7 @@
 
 /**
 * ImportHeurist.php - import records and definitions from Heurist exchange json or xml file
-* (see user interface in importRecords.php)
+* (see user interface in importController.php)
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

@@ -2328,6 +2328,15 @@ private static function getImportValue($rec_id, $import_table){
 * create or update records
 *
 * @param mixed $params
+*         is_csv_import  
+*         session
+*         imp_ID  - import session id
+*         download_files - download remote files and register
+*         sa_rectype
+*         utm_zone  
+*         seq_index
+*         recid_field
+*         mapping
 */
 public static function performImport($params, $mode_output){
     
@@ -2403,6 +2412,8 @@ public static function performImport($params, $mode_output){
     $field_indexes = array();
     $sel_query = array();
     $mapping = array();
+    
+    
     
     //get field mapping and selection query from _REQUEST(params)
     if(@$params['mapping']){    //new way
@@ -2791,6 +2802,7 @@ public static function performImport($params, $mode_output){
                                     $is_url = true;
                                     $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'
                                                             .self::$mysqli->real_escape_string($r_value).'"';
+                                                            
                                 }else{
                                     
                                     $k = strpos($r_value,'uploaded_files/');
@@ -2820,7 +2832,16 @@ public static function performImport($params, $mode_output){
                                     //otherwise register as new external resource
                                     
                                     $entity = new DbRecUploadedFiles(self::$system, null);
-                                    $ulf_ID = $entity->registerURL( $r_value );
+                                    
+                                    if(false){  //true || @$params['download_files']){
+                                        //download and register
+                                        $ulf_ID = $entity->donwloaAndRegisterdURL($r_value, null); //it returns ulf_ID    
+                                    }else{
+                                        $ulf_ID = $entity->registerURL( $r_value );    
+                                    }
+                                                            
+                                    
+                                    
                                     
                                     /*
                                     $extension = null;

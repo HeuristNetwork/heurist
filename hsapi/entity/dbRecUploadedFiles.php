@@ -958,7 +958,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             original_name, type, name, size, url (get_download_url), 
     * 
     * 
-    * @param mixed $needclean - remove file from temp lcoation after reg
+    * @param mixed $needclean - remove file from temp location after reg
     * @returns record or false
     */
     public function registerFile($file, $newname, $needclean = true, $tiledImageStack=false){
@@ -989,6 +989,29 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
            return false;
        }        
        
+    }
+
+    /**
+    * Download url to server and register as local file
+    * 
+    * @param mixed $url
+    */
+    public function donwloaAndRegisterdURL($url){
+        
+        $orig_name = basename($url);
+        if(strpos($orig_name,'%')!==false){
+            $orig_name = urldecode($orig_name);
+        }
+        $tmp_file = HEURIST_SCRATCH_DIR.$orig_name;
+        
+        if(saveURLasFile($url, $tmp_file)>0){
+            $ulf_ID = $this->registerFile($tmp_file, null);
+            if($ulf_ID && is_array($ulf_ID)) $ulf_ID = $ulf_ID[0];
+            return $ulf_ID;
+        }else{
+            return false;
+        }
+
     }
     
     /**
