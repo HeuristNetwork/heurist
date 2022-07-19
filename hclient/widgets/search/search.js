@@ -254,12 +254,15 @@ $.widget( "heurist.search", {
                 var msg = '<div class="heurist-helper1" style="font-size: 1em;">'
                 + 'The filter function accepts two types of filter string - a simple search format (see filter help)'
                 + '<br>and a JSon format which is built by the filter builders and is documented in the main Help files.'
+                + '<br>We recommend using the filter builder to get started and then editing the result incrementally.'
                 + '<br><br>The JSon format is enclosed in [ ] and consists of a series of comma-separated specifications in { }'
-                        + '<br>giving a tag (generally a field ID, field name or special indicator) followed by a colon ( ; ) then a value or values.'
-                        + '<br>Tags and values are generally enclosed in double quotes ( " )</div><br>'
-                        + '<textarea style="padding: 5px; margin: 5px 0px; height: 150px; width: 500px;" class="text ui-widget-content ui-corner-all">' 
-                            + org_val 
-                        + '</textarea><br><div id="search_help_container"></div>';
+                + '<br>giving a tag (generally a field ID, field name or special indicator) followed by a colon ( : ) then a 
+                + '<br>value or values. Tags and values are generally enclosed in double quotes ( " ).'
+                + '<br>Values may be repeated within a specification as in [{"t":"107,95"},{"f:36":"1275,3426"}]' 
+                +'</div><br>'
+                + '<textarea style="padding: 5px; margin: 5px 0px; height: 100px; width: 500px;" class="text ui-widget-content ui-corner-all">' 
+                    + org_val 
+                + '</textarea><br><div id="search_help_container"></div>';
 
                 $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, 
                     function(){
