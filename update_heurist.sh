@@ -50,6 +50,7 @@ echo
 
 cd /var/www/html/HEURIST
 $2 mkdir -p temp_install_unzip
+$2 chmod a+rwx temp_install_unzip
 cd temp_install_unzip
 
 echo "Fetching Heurist code from $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2"
@@ -67,6 +68,14 @@ $2 cp -R $1/* /var/www/html/HEURIST/$1
 echo
 echo Obtaining updated support files - external and help files
 echo
+
+# Ensure correct ownership and mode of HEURIST_SUPPORT (added 19/7/22)
+# Worst case this won't set group if heurist group does not exist
+$2 chown -R apache /var/www/html/HEURIST/HEURIST_SUPPORT
+$2 chgrp -R heurist /var/www/html/HEURIST/HEURIST_SUPPORT
+$2 chmod -R ug+rwx /var/www/html/HEURIST/HEURIST_SUPPORT
+
+# Update support files
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
 $2 rm -f external_h5.tar.bz2
@@ -83,6 +92,13 @@ $2 rm -f help.tar.bz2
 $2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
 $2 tar -xjf help.tar.bz2
 $2 rm -f help.tar.bz2
+
+
+# Ensure correct ownership of instance just installed (added 19/7/22)
+# Worst case this won't set group if heurist group does not exist
+$2 chown -R apache /var/www/html/HEURIST/$1
+$2 chgrp -R heurist /var/www/html/HEURIST/$1
+$2 chmod -R ug+rwx /var/www/html/HEURIST/$1
 
 # Place simlinks in instance directory
 cd /var/www/html/HEURIST/$1
@@ -101,7 +117,7 @@ echo "Heurist unpacked"
 # cd  /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2
 # ./bin/elasticsearch -d
 
-// Remove temporary unzip directory used during installation
+# Remove temporary unzip directory used during installation
 $2 rm -rf /var/www/html/HEURIST/temp_install_unzip/
 
 echo ""
