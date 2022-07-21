@@ -10,7 +10,7 @@ function _prepareTemplateBlog(new_element_json, callback){
             {"var":75132,"code":"7:1","title":"Title of post","help":"","isfacet":"0","multisel":false,"orderby":null,"type":"freetext","order":3}],"rectypes":["7"],"version":2,"rules":"","rulesonly":0,"sup_filter":"","ui_title":"Project blog","ui_viewmode":"","search_on_reset":true,"ui_prelim_filter_toggle":false,"ui_prelim_filter_toggle_mode":0,"ui_prelim_filter_toggle_label":"Apply preliminary filter","ui_spatial_filter":false,"ui_spatial_filter_init":false,"ui_spatial_filter_label":"Map Search","ui_spatial_filter_initial":"","ui_additional_filter":false,"ui_additional_filter_label":"Search everything","ui_exit_button":true,"ui_exit_button_label":"","domain":"all","title_hierarchy":false,"viewport":null,"sort_order":"-a","ui_temporal_filter_initial":"after:\"1 week ago\""};
 
     //@todo - create unique name for filter (counter)
-    var request = {svs_Name: 'Blog navigation - DO NOT DELETE',
+    var request = {svs_Name: 'Blog navigation (keep if blog required)',
                 svs_Query: JSON.stringify(sfilter),
                 svs_UGrpID: '4'}; //Website filters
                 
