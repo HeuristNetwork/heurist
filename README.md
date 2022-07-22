@@ -42,13 +42,13 @@ The main branch is `h6-dev`. This is occasionally merged with `master` for archi
 
 ## Issues and feature requests
 
-Please note, we do not use gitHub issues. Please visit our [job tracking system](https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Job_Tracker&website) developed in Heurist. You can raise an issue or request a feature there: first click the Add Job link at top left, then use login guest + guest (or request a personal login via the link on the login page). We are planning to integrate the job tracking system with Github by the end of 2022.
+Please note, we do not use gitHub issues. Please visit our [job tracking system](https://HeuristRef.net/heurist/?db=Heurist_Job_Tracker&website) developed in Heurist. You can raise an issue or request a feature there: first click the Add Job link at top left, then use login guest + guest (or request a personal login via the link on the login page). We are planning to integrate the job tracking system with Github by the end of 2022.
 
 Issues and feature requests can also be submitted via the Issue tracker link in any Heurist database (Help > Bug report/feature request) - this also saves additional information about your use environment which may help resolve the issue.
 
 ## Online Help
 
-Comprehensive help for the new version (6) is being built in a dedicated Heurist database, and is available [here](https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Help_System&website).
+Comprehensive help for the new version (6) is being built in a dedicated Heurist database, and is available [here](https://HeuristRef.net/heurist/?db=Heurist_Help_System&website).
 
 ## Installation
 
