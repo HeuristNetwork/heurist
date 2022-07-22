@@ -38,8 +38,10 @@ if (!@$heuristReferenceServer) $heuristReferenceServer = null; // address of the
 // The default installation of MySql gives you "root" as the master user with whatever password you set up for this,
 // but you can specify another user and password with full access if preferred. Password cannot be null
 // MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
-if (!@$dbAdminUsername) $dbAdminUsername = "";  // required
-if (!@$dbAdminPassword) $dbAdminPassword = ""; // required
+// Values can be assigned to environment variable or defined here
+if (!@$dbAdminUsername) $dbAdminUsername = getenv("DB_ADMIN_USERNAME") ?getenv("DB_ADMIN_USERNAME") : "";  // required
+if (!@$dbAdminPassword) $dbAdminPassword = getenv("DB_ADMIN_PASSWORD") ?getenv("DB_ADMIN_PASSWORD") : "";  // required
+
 
 // [folders]
 
