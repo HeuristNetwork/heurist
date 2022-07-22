@@ -202,7 +202,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             xhrFields: {
                   withCredentials: true
             }, 
-/* DEPRECATED                       
+/* DEPRECATED  */
             error: function( jqXHR, textStatus, errorThrown ) {
                 
                 _is_callserver_in_progress = false;
@@ -224,7 +224,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 }
                 //message:'Error connecting server '+textStatus});
             },
-*/            
             success: function( response, textStatus, jqXHR ){
 
                 _is_callserver_in_progress = false;
@@ -1165,20 +1164,7 @@ prof =Profile
             ,saveRecord: function(request, callback){
                 if(request) request.a = 's';
                 
-                var need_encode = window.hWin.HAPI4.sysinfo['need_encode'];
-                
-                if(request.details && need_encode>0){
-                    
-                    var f_encode = null;
-                    if(need_encode==2){
-                        f_encode = window.hWin.HEURIST4.util.encodeFolderUp;
-                    }else  if(need_encode==1){
-                        f_encode = encodeURIComponent;
-                    }
-
-                    request.details = f_encode(JSON.stringify(request.details));
-                    request.details_encoded = need_encode;
-                }
+                window.hWin.HEURIST4.util.encodeRequest(request, ['details']);
 
                 _callserver('record_edit', request, function(response){_triggerRecordUpdateEvent(response, callback);});
             }
@@ -1247,25 +1233,8 @@ prof =Profile
             * @param callback
             */
             ,batch_details: function(request, callback){
-
-                var f_encode = null;
-                var need_encode = window.hWin.HAPI4.sysinfo['need_encode'];
-                if(need_encode==2){
-                    f_encode = window.hWin.HEURIST4.util.encodeFolderUp;
-                }else  if(need_encode==1){
-                    f_encode = encodeURIComponent;
-                }
                 
-                if(f_encode != null){
-                    if(request.val){
-                        request.val = f_encode(request.val);
-                    }
-                    if(request.rVal){
-                        request.rVal = f_encode(request.rVal);
-                        
-                    }
-                    request.encoded = need_encode;
-                }
+                window.hWin.HEURIST4.util.encodeRequest(request, ['rVal','val']);
                 
                 _callserver('record_batch', request, function(response){_triggerRecordUpdateEvent(response, callback);});
             }
@@ -1335,6 +1304,8 @@ prof =Profile
                 //    request.limit = window.hWin.HAPI4.get_prefs('search_detail_limit'); //if needall is set it is ignored on server side
                 //}
                 
+                window.hWin.HEURIST4.util.encodeRequest(request, ['q']);
+                
                 // start search
                 _callserver('record_search', request, callback);    //standard search
 
@@ -1345,6 +1316,8 @@ prof =Profile
             //
             ,search_new: function(request, callback){
                 // start search
+                //window.hWin.HEURIST4.util.encodeRequest(request, ['q']);
+                
                 _callserver('record_output', request, callback);    //standard search
             }
 
@@ -1391,6 +1364,7 @@ prof =Profile
             */
             ,search_related: function(request, callback){
                 if(request && !request.a) request.a = 'related';
+                
                 _callserver('record_search', request, callback);    //standard search
             }
 
@@ -1407,6 +1381,9 @@ prof =Profile
             //
             ,get_facets: function(request, callback){
                 if(request && !request.a) request.a = 'getfacets';
+                
+                window.hWin.HEURIST4.util.encodeRequest(request, ['q','count_query']);
+                
                 _callserver('record_search', request, callback);
             }
 			

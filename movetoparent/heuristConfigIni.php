@@ -104,4 +104,11 @@ if (!@$websiteThumbnailYsize) $websiteThumbnailYsize = 300; // required
 // These paths are used in conjunction with Admin > Server management > Fix absolute paths in web page content
 // if (!@$absolutePathsToRemoveFromWebPages) $absolutePathsToRemoveFromWebPages = array('https://heuristplus.sydney.edu.au');
 $absolutePathsToRemoveFromWebPages = null;
+
+//
+// On some servers the severe restrictions can be activated. They may prevent sending to server json, html or js code snippets
+// In other words it forbids any request which is suspected as malicious
+// To workaround set this value to "1" to encode json requests for record edit
+//
+if (!@$needEncodeRecordDetails) $needEncodeRecordDetails = 0; 
 ?>
