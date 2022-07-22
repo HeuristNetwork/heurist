@@ -62,7 +62,7 @@ class RecordsBatch
     *       for edit sVal - search value (if missed - replace all occurences),  rVal - replace value,  subs= 1 | 0
     *       for delete: sVal, subs= 1 | 0   
     *       tag  = 0|1  - add system tag to mark processed records
-    *       encoded = 0|1 - val or rVal should be decoded
+    *       details_encoded = 0|1 - val or rVal should be decoded
     *                   2 - restore "../" from ^^/
     */    
     private $data;  
@@ -446,10 +446,11 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         }
         
         if(@$this->data['val']!=null){
-            if(@$this->data['encoded']==1){
+            if(@$this->data['details_encoded']==1){
+                $this->data['val'] = json_decode(str_replace( ' xxx_style=', ' style=', 
+                        str_replace( '^^/', '../', urldecode($this->data['val']))));
+            }else if(@$this->data['details_encoded']==2){
                 $this->data['val'] = urldecode( $this->data['val'] );
-            }else if(@$this->data['encoded']==2){
-                $this->data['val'] = str_replace( '^^/', '../', $this->data['val'] );
             }
         }
         

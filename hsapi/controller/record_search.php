@@ -87,6 +87,29 @@ detectLargeInputs('COOKIE record_search', $_COOKIE);
        if(!@$_REQUEST['q']) $_REQUEST['q'] = '{"t":"'.HEURIST_INDEX_DBREC.'"}';
     }
     
+
+    if(@$_REQUEST['details_encoded']==1){
+        
+        if(@$_REQUEST['q']){
+            $_REQUEST['q'] = str_replace( ' xxx_style=', ' style=', 
+                        str_replace( '^^/', '../', urldecode($_REQUEST['q'])));
+        }
+                    
+        if(@$_REQUEST['count_query']){
+            $_REQUEST['count_query'] = json_decode(str_replace( ' xxx_style=', ' style=', 
+                        str_replace( '^^/', '../', urldecode($_REQUEST['count_query']))),true);
+        }
+
+    }else if(@$_REQUEST['details_encoded']==2){
+        
+        if(@$_REQUEST['q']){
+            $_REQUEST['q'] = urldecode($_REQUEST['q']);
+        }
+        if(@$_REQUEST['count_query']){
+            $_REQUEST['count_query'] = json_decode(urldecode($_REQUEST['count_query']), true);
+        }
+    }
+    
     $response = array();
 
     $system = new System();

@@ -579,10 +579,41 @@ window.hWin.HEURIST4.util = {
     },
     
     //
+    //
+    //
+    encodeRequest: function(request, params){
+        
+        var need_encode = window.hWin.HAPI4.sysinfo['need_encode'];
+        if(need_encode>0){
+            var f_encode = null;
+            
+            if(need_encode==2){
+                f_encode = encodeURIComponent;
+            }else  if(need_encode==1){
+                f_encode = window.hWin.HEURIST4.util.encodeSuspectedSequences;
+            }
+                
+            if(f_encode != null){
+                for(var i=0; i<params.length; i++){
+                    if(request[params[i]]){
+                        request[params[i]] = f_encode(request[params[i]]);
+                    }
+                }
+                
+            }
+            request.details_encoded = need_encode;
+        }
+    },
+    
+    //
     // Replace ../  to ^^/
     //
-    encodeFolderUp: function (str) {
-        return str.replace(/(\.\.\/)/g, '^^/').replace(/( style=)/g,' xxx_style=');
+    encodeSuspectedSequences: function (val) {
+        
+        if(typeof val !== 'string' && ($.isArray(val) || $.isPlainObject(val))) {
+            val = JSON.stringify(val);
+        }
+        return encodeURIComponent(val.replace(/(\.\.\/)/g, '^^/').replace(/( style=)/g,' xxx_style='));
     },
     
     fixedEncodeURIComponent: function (str) {

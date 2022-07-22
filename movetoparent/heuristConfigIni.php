@@ -38,8 +38,10 @@ if (!@$heuristReferenceServer) $heuristReferenceServer = null; // address of the
 // The default installation of MySql gives you "root" as the master user with whatever password you set up for this,
 // but you can specify another user and password with full access if preferred. Password cannot be null
 // MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
-if (!@$dbAdminUsername) $dbAdminUsername = "";  // required
-if (!@$dbAdminPassword) $dbAdminPassword = ""; // required
+// Values can be assigned to environment variable or defined here
+if (!@$dbAdminUsername) $dbAdminUsername = getenv("DB_ADMIN_USERNAME") ?getenv("DB_ADMIN_USERNAME") : "";  // required
+if (!@$dbAdminPassword) $dbAdminPassword = getenv("DB_ADMIN_PASSWORD") ?getenv("DB_ADMIN_PASSWORD") : "";  // required
+
 
 // [folders]
 
@@ -104,4 +106,11 @@ if (!@$websiteThumbnailYsize) $websiteThumbnailYsize = 300; // required
 // These paths are used in conjunction with Admin > Server management > Fix absolute paths in web page content
 // if (!@$absolutePathsToRemoveFromWebPages) $absolutePathsToRemoveFromWebPages = array('https://heuristplus.sydney.edu.au');
 $absolutePathsToRemoveFromWebPages = null;
+
+//
+// On some servers the severe restrictions can be activated. They may prevent sending to server json, html or js code snippets
+// In other words it forbids any request which is suspected as malicious
+// To workaround set this value to "1" to encode json requests for record edit
+//
+if (!@$needEncodeRecordDetails) $needEncodeRecordDetails = 0; 
 ?>
