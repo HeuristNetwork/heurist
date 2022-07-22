@@ -710,7 +710,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 });
 
                 editor.on('click', function (e) {
-
+                    //adjust tinymce toolbar
                     var $toolbar = _ws_body.find('.tox-toolbar-dock-transition'); //$('body')
                     if($toolbar.length > 0 && $toolbar.width() < 400){
                         $toolbar.css('width', '400px');
@@ -1126,6 +1126,10 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"/>Drag</span>'))               
             + '<span data-action="edit" style="'+(false && is_intreeview?'':'display:block;')+'padding:4px" title="Edit style and properties">'
             +'<span class="ui-icon ui-icon-pencil"/>Style</span>';               
+            
+            if(node.data.type=='text'){
+                actionspan += '<span data-action="translate" style="'+(false && is_intreeview?'':'display:block;')+'padding:4px"><span class="ui-icon ui-icon-translate" title="Add a new translation"/>Translate</span>';
+            }
 
             //hide element for cardinal and delete for its panes                     
             if(node.data.type!='cardinal'){
@@ -1196,6 +1200,24 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                             _layoutInsertElement(ele_ID, selected_element, selected_name);    
                         })
 
+                    }else if(action=='translate'){
+                        //define new translation - show popup to select language
+                        window.hWin.HEURIST4.msg.showPrompt('<p>Select language to translate content: '
++"<select id=\'dlg-prompt-value\' class=\'text ui-corner-all\'"
++" style=\'max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em\' autocomplete=\'off\'>"
++        
+"<option value=\'en\'>English</option><option value=\'fr\'>French</option><option value=\'de\'>German</option><option value=\'zh\'>Mandarin</option><option value=\'es\'>Spanish</option><option value=\'ar\'>Arabic</option><option value=\'\'>Armenian</option><option value=\'sr\'>Bosnian</option><option value=\'id\'>Bahasa-Indonesian</option><option value=\'\'>Bengali</option><option value=\'\'>Bulgarian</option><option value=\'\'>Burmese</option><option value=\'\'>Cantonese</option><option value=\'\'>Croatian</option><option value=\'\'>Czech</option><option value=\'\'>Danish</option><option value=\'\'>Dutch</option><option value=\'\'>Estonian</option><option value=\'\'>Farsi</option><option value=\'\'>Finnish</option><option value=\'\'>Greek</option><option value=\'\'>Hebrew</option><option value=\'\'>Hindi</option><option value=\'\'>Hungarian</option><option value=\'\'>Italian</option><option value=\'\'>Japanese</option><option value=\'\'>Khmer</option><option value=\'\'>Korean</option><option value=\'\'>Latvian</option><option value=\'\'>Lithuanian</option><option value=\'\'>Malay</option><option value=\'\'>Norwegian</option><option value=\'\'>Polish</option><option value=\'\'>Portuguese</option><option value=\'\'>Romanian</option><option value=\'\'>Russian</option><option value=\'\'>Slovak</option><option value=\'\'>Slovenian</option><option value=\'\'>Swahili Swedish</option><option value=\'\'>Tagalog</option><option value=\'\'>Taiwanese</option><option value=\'\'>Thai</option><option value=\'\'>Turkish</option><option value=\'\'>Ukrainian</option><option value=\'\'>Urdu</option><option value=\'\'>Vietnamese</option>"
++"</select></p>",
+function(value){
+    if(value){
+        //change or add content of specified language
+            
+        _ws_body.layout().open(options.editor_pos);    
+    }            
+},
+'Select language for content',{default_palette_class: default_palette_class});
+                        
+                        
                     }else if(action=='edit'){
 
                         //add new group/separator
@@ -1569,6 +1591,25 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         page_was_modified = true;
         _onPageChange();
     }
+
+    //
+    // switch to different language version or create new one
+    //
+    function _layoutTranslateElement(ele_id, lang_id){
+        
+        if(_edit_Element){ //already opened - save previous
+            /*
+            if(_layout_container.find('div.cms-element-editing').attr('data-hid')==ele_id) return; //same
+            
+            //save previous element
+            if(_edit_Element.warningOnExit(function(){_layoutTranslateElement(ele_id, lang_id);})) return;
+            
+            _layout_container.find('div[data-hid]').removeClass('cms-element-editing headline marching-ants marching');                   
+            */
+        }     
+        
+    }
+
     
     //
     // Opens element/widget property editor  (editCMS_ElementCfg/WidgetCfg)

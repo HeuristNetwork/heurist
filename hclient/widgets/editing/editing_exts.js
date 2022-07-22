@@ -3,6 +3,7 @@
 *  1) editSymbology - edit map symbol properties 
 *  2) calculateImageExtentFromWorldFile - calculate image extents from worldfile
 *  3) browseRecords - browse records for resource fields 
+*  4) translationSupport 
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -882,4 +883,44 @@ function browseRecords(_editing_input, $input){
         that._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
         return __show_select_dialog;
     }
+}
+
+
+//
+// Opens popup dialog with ability to define translations for field values
+//
+function translationSupport(_editing_input){
+
+    if(!$.isFunction($('body')['editTranslations'])){
+        $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/editing/editTranslations.js', 
+            function() {  //+'?t='+(new Date().getTime())
+                if($.isFunction($('body')['editTranslations'])){
+                    translationSupport( _editing_input );
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr('Widget editTranslations not loaded. Verify your configuration');
+                }
+        });
+    }else{
+        //open popup
+        var that = _editing_input;    
+
+        var _dlg = $('<div/>').hide().appendTo( that.element );                            
+
+
+
+        var values = that.getValues();
+
+        _dlg.editTranslations({
+            values: values,
+            fieldtype: that.detailtype,
+            onclose:function(res){
+                if(res){
+                    that.setValue(res);
+                }
+                _dlg.remove();
+        }});
+
+    }
+
+
 }

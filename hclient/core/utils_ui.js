@@ -46,6 +46,8 @@ initHSelect - converts HTML select to jquery selectmenu
 getRecordTitle - retuns of title for given record id
 createTemplateSelector - fills with names of smarty templates
 
+createLanguageSelect
+
 ENTITY
 
 openRecordEdit  - open add/edit record form/dialog
@@ -2234,6 +2236,31 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
                 }
             });
         
+    },
+
+    //
+    //  @todo - load from database
+    //    
+    createLanguageSelect: function($select, topOptions, defValue, showName){
+        
+            var context = [{code:'en',name:'English'},
+            {code:'fr',name:'French'},{code:'zh',name:'Mandarin'},{code:'es',name:'Spanish'},{code:'ar',name:'Arabic'},{code:'en',name:'German'}];
+            
+            $select.empty();
+
+            var opts = topOptions?topOptions:[];
+            if(context && context.length>0){
+                for (var i=0; i<context.length; i++){
+                    opts.push({key:context[i].code, title:showName?context[i].name:context[i].code});
+                } // for
+            }
+            
+            window.hWin.HEURIST4.ui.fillSelector($select[0], opts);
+            if(defValue){
+                $select.val( defValue );
+            }
+            window.hWin.HEURIST4.ui.initHSelect($select[0], false);
+
     },
 
     //

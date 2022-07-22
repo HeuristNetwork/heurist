@@ -1053,7 +1053,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     * WARNING for multivalues it returns first value ONLY
     * @todo - obtain fieldtype codes from server side
     */
-    function _getFieldValue(record, fldname){
+    function _getFieldValue(record, fldname, lang){
 
         
         if( (!$.isPlainObject(record)) && !isnull(record) && records[record]){
@@ -1085,7 +1085,26 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             return d[fldname][0];    
                         }
                         */
-                        return d[fldname][0];
+                        
+                        if(lang){
+                            var def_val = '';
+                            for(var i=0; i<d[fldname].length; i++){
+                                var val = d[fldname][i];
+                                
+                                if(val.substr(2,1)==':'){
+                                    if(val.substr(0,2)==lang){
+                                        return val.substr(3).trim();
+                                    }
+                                }else {
+                                    def_val = val;
+                                }
+                            }
+                            return def_val?def_val:d[fldname][0];
+                        }else{
+                            return d[fldname][0];    
+                        }
+                        
+                        
                         
                     }
                 }else if(fldname=="dtl_StartDate"){
@@ -1173,8 +1192,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         /**
         * Returns field value by fieldname for given record
         */
-        fld: function(record, fldName){
-            return _getFieldValue(record, fldName);
+        fld: function(record, fldName, lang){
+            return _getFieldValue(record, fldName, lang);
         },
 
         values: function(record, fldName){

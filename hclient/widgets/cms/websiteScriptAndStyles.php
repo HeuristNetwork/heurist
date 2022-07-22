@@ -377,6 +377,9 @@ function initMainMenu( afterInitMainMenu ){
     
     _dout('initMainMenu');
     
+    var weblang = window.hWin.HEURIST4.util.getUrlParameter('weblang');
+    if(!weblang) weblang = 'en';
+    
     var topmenu = $('#main-menu');
 
     var lopts = {  
@@ -386,7 +389,8 @@ function initMainMenu( afterInitMainMenu ){
                 orientation: 'horizontal',
                 toplevel_css: {background:'none'}, //bg_color 'rgba(112,146,190,0.7)'
                 onInitComplete: afterInitMainMenu,
-                onmenuselect: loadPageContent
+                onmenuselect: loadPageContent,
+                language: weblang
                 };
     
     lopts = {heurist_Navigation:lopts};

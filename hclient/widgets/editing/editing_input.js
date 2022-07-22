@@ -174,8 +174,15 @@ $.widget( "heurist.editing_input", {
 
         }else{
 
+if(that.options.dtID==1) 
+console.log('>>>> '+that.options.dtID+'  '+lblTitle);
+            //hardcoded list of fields and record types where multivalues mean translation (multilang support)
+            var is_translation = this.f('rst_MultiLang') || 
+               (that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']
+                && that.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']);
+            
             //saw TODO this really needs to check many exist
-            var repeatable = (Number(this.f('rst_MaxValues')) != 1)? true : false;
+            var repeatable = (Number(this.f('rst_MaxValues')) != 1  || is_translation)? true : false;
             
             if(!repeatable || this.options.suppress_repeat){  
                 //spacer
@@ -191,15 +198,18 @@ $.widget( "heurist.editing_input", {
                 var btn_cont = $('<span>')
                     .css({display:'table-cell', 'vertical-align':'top', //'padding-top':'2px',
                             'min-width':'22px',  'border-color':'transparent'})
-                    .appendTo( this.element )
-            
+                    .appendTo( this.element );
+                    
                 this.btn_add = $( "<span>")
-                    .addClass("smallbutton editint-inout-repeat-button ui-icon ui-icon-circlesmall-plus")
+                    .addClass('smallbutton editint-inout-repeat-button ui-icon ui-icon-'
+                        +(is_translation?'translate':'circlesmall-plus'))
                     .appendTo( btn_cont )
                 //.button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
                 .attr('tabindex', '-1')
-                .attr('title', 'Add another ' + lblTitle +' value' )                    
-                .css({display:'block', 'font-size':'1.9em', cursor:'pointer', //'vertical-align':'top', //'padding-top':'2px',
+                .attr('title', 'Add another ' + lblTitle +(is_translation?' translation':' value' ))                    
+                .css({display:'block', 
+                'font-size': (is_translation?'1em':'1.9em'), cursor:'pointer', 
+                //'vertical-align':'top', //'padding-top':'2px',
                     'min-width':'22px','margin-top': '5px',
 //outline_suppress does not work - so list all these props here explicitely                
                     outline: 'none','outline-style':'none', 'box-shadow':'none'
@@ -217,19 +227,27 @@ $.widget( "heurist.editing_input", {
 
                         if(this.is_disabled) return;
 
-                        if(window.hWin.HEURIST4.util.isempty(this.new_value) && this.new_value != '') this.new_value = '';
-
-                        if( !(Number(this.f('rst_MaxValues'))>0)  || this.inputs.length < this.f('rst_MaxValues')){
-                            this._addInput(this.new_value);
-                            this._refresh();
+                        if(is_translation){
                             
-                            if($.isFunction(this.options.onrecreate)){
-                                this.options.onrecreate.call(this);
+                            if(typeof translationSupport!=='undefined' && $.isFunction(translationSupport)){
+                                __show_select_function = translationSupport(this); //see editing_exts
+                            }
+                            
+                        }else{
+                            
+                            if(window.hWin.HEURIST4.util.isempty(this.new_value) && this.new_value != '') this.new_value = '';
+
+                            if( !(Number(this.f('rst_MaxValues'))>0)  || this.inputs.length < this.f('rst_MaxValues')){
+                                this._addInput(this.new_value);
+                                this._refresh();
+                                
+                                if($.isFunction(this.options.onrecreate)){
+                                    this.options.onrecreate.call(this);
+                                }
                             }
                             
                         }
-                    }
-                });
+                }});
             }
             
             

@@ -30,7 +30,8 @@ $.widget( "heurist.navigation", {
        aftermenuselect: null,
        toplevel_css:null,  //css for top level items
        expand_levels:0,  //expand levels for treeview
-       onInitComplete: null
+       onInitComplete: null,
+       language: 'en'
     },
     
     menuData: null, //hRecordSet
@@ -148,7 +149,7 @@ $.widget( "heurist.navigation", {
         });
     },
     
-    //
+    // recursive function
     // resdata - result of request to server side
     // orientation - treeview, horizontal, vertical, list
     //
@@ -195,7 +196,7 @@ $.widget( "heurist.navigation", {
                 this.ids_recurred.push(menuitems[i]);
             }else{
             
-                var menuName = resdata.fld(record, DT_NAME);
+                var menuName = resdata.fld(record, DT_NAME, this.options.language);
                 var menuTitle = resdata.fld(record, DT_SHORT_SUMMARY);
                 var menuIcon = resdata.fld(record, DT_THUMBNAIL);
 
