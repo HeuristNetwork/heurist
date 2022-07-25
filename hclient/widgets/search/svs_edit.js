@@ -98,10 +98,12 @@ function hSvsEdit(args) {
             if(isEdit){
                 svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
             }
+            
+            var request = {};
 
             if(isEdit && !window.hWin.HEURIST4.util.isnull(svs)){
 
-                var request = window.hWin.HEURIST4.util.parseHeuristQuery(svs[_QUERY]);
+                request = window.hWin.HEURIST4.util.parseHeuristQuery(svs[_QUERY]);
                 domain  = request.w;
                 svs_ugrid.val(svs[_GRPID]==window.hWin.HAPI4.currentUser.ugr_ID ?domain:svs[_GRPID]);
 
@@ -127,6 +129,8 @@ function hSvsEdit(args) {
                 
                 svs_notes.val( request.notes );
                 svs_viewmode.val( request.viewmode );
+                
+                if(!request.name) request.name = svs[_NAME];
 
 
             }else{ //add new saved search
@@ -178,7 +182,10 @@ function hSvsEdit(args) {
                 //svs_ugrid.parent().show();
                 svs_ugrid.attr('disabled', !(allowChangeGroupID || window.hWin.HEURIST4.util.isempty(groupID)) );
             }
-
+            
+            translationToUI(request, $dlg, 'ui_name', 'svs_Name', false);
+            translationToUI(request, $dlg, 'ui_notes', 'svs_Notes', true);
+            
             for (var i=0; i<Object.keys(keep_values).length; i++){
                 var key = Object.keys(keep_values)[i];
                 var ele = $dlg.find('#'+key);
@@ -334,6 +341,14 @@ function hSvsEdit(args) {
             
             var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
             var qsearch = svs[_QUERY];
+            var r = window.hWin.HEURIST4.util.parseHeuristQuery(qsearch);
+            var mode = 'saved';
+            if(r==3){
+                mode = 'faceted';
+            }else if(window.hWin.HEURIST4.util.isempty(r.q)){
+                mode = 'rules';
+            }
+            /*  OLD WAY           
             var mode = 'faceted';
             try {
                 facet_params = $.parseJSON(qsearch);
@@ -342,6 +357,7 @@ function hSvsEdit(args) {
                 var hasrules = _hasRules(qsearch);
                 mode = hasrules==2?'rules':'saved';
             }
+            */
         }
         
         //if not defined get last used
@@ -552,15 +568,25 @@ function hSvsEdit(args) {
                             rules_only = $dlg.find('#svs_RulesOnly1').is(':checked')?1:2;
                         }
 
+                        var params = {};
+                        translationFromUI(params, $dlg, 'ui_name', 'svs_Name', false);
+                        translationFromUI(params, $dlg, 'ui_notes', 'svs_Notes', true);
+                        params = $.extend(params, {q:svs_query.val(), 
+                                    w:domain, 
+                                    rules:rules, 
+                                    rulesonly:rules_only, 
+                                    viewmode:svs_viewmode.val()  });
                         
                         var request = {  //svs_ID: svsID, //?svs_ID:null,
                             svs_Name: svs_name.val(),
-                            svs_Query: window.hWin.HEURIST4.util.composeHeuristQuery2({q:svs_query.val(), 
+                            svs_Query: JSON.stringify(params),
+                            
+                            /*window.hWin.HEURIST4.util.composeHeuristQuery2({q:svs_query.val(), 
                                     w:domain, 
                                     rules:rules, 
                                     rulesonly:rules_only, 
                                     notes:svs_notes.val(),
-                                    viewmode:svs_viewmode.val()  }, false),
+                                    viewmode:svs_viewmode.val()  }, false),*/
                                     
                             svs_UGrpID: svs_ugrid,
                             domain:domain};

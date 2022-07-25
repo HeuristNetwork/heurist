@@ -153,7 +153,8 @@ $.widget( "heurist.search_faceted", {
         svs_ID: null,
         onclose: null,// callback
         is_publication: false,
-        respect_relation_direction: false
+        respect_relation_direction: false,
+        language: 'xx'  //use default
     },
     
     _current_query_request_id:null,
@@ -183,6 +184,8 @@ $.widget( "heurist.search_faceted", {
     
     // the widget's constructor
     _create: function() {
+        
+        if(!this.options.language) this.options.language = 'xx'; //"xx" means use current language
         
         if(this.element.parents('.mceNonEditable').length>0 
         || this.element.parent().attr('data-heurist-app-id') || this.element.hasClass('cms-element'))
@@ -249,9 +252,8 @@ $.widget( "heurist.search_faceted", {
         .button().hide(); //@todo
 
         
-        var lbl = this.options.params.ui_exit_button_label
-                        ?this.options.params.ui_exit_button_label
-                        :window.hWin.HR(this.options.is_h6style?'Close':'Show all available searches');
+        var lbl = window.hWin.HRJ('ui_exit_button_label', this.options.params, this.options.language);
+        if(!lbl) lbl = (window.hWin.HR(this.options.is_h6style?'Close':'Show all available searches'));
         
         this.btn_close = $( "<button>", { 
                     title:window.hWin.HR("Close this facet search and return to the list of saved searches") })
@@ -404,13 +406,16 @@ $.widget( "heurist.search_faceted", {
             this.doReset();
         }
     },
-
+    
     _refreshTitle: function(){    
         var new_title = '';
         if(this.div_title) {
             
-            if(this.options.params.ui_title){ //from settings
-                new_title = this.options.params.ui_title;
+            var stitle = window.hWin.HRJ('ui_title', this.options.params, this.options.language) ||
+                         window.hWin.HRJ('ui_name', this.options.params, this.options.language);
+            
+            if(stitle){ //from settings
+                new_title = stitle;
             }else{
                 var svsID = this.options.query_name;
                 if(svsID > 0){
@@ -813,9 +818,8 @@ $.widget( "heurist.search_faceted", {
        
        if(this.options.params.ui_spatial_filter){
            
-           var lbl = that.options.params.ui_spatial_filter_label
-                        ?that.options.params.ui_spatial_filter_label
-                        :window.hWin.HR('Map Search');
+           var lbl = window.hWin.HRJ('ui_spatial_filter_label', this.options.params, this.options.language);
+           if(!lbl) lbl = window.hWin.HR('Map Search'); 
                         
            var ele = $("<div>").html(
            '<div class="header" title="" style="vertical-align: top; display: block; width: 100%; padding: 5px;">'
@@ -928,9 +932,8 @@ $.widget( "heurist.search_faceted", {
 
        if(this.options.params.ui_additional_filter){
            
-           var lbl = that.options.params.ui_additional_filter_label
-                        ?that.options.params.ui_additional_filter_label
-                        :window.hWin.HR('Search everything');
+           var lbl = window.hWin.HRJ('ui_additional_filter_label', this.options.params, this.options.language);
+           if(!lbl) lbl = window.hWin.HR('Search everything'); 
                         
                         
            var w = that.element.width();
@@ -998,7 +1001,9 @@ $.widget( "heurist.search_faceted", {
            
            if(!window.hWin.HEURIST4.util.isnull(field['var']) && field['code'] ){
                
-             if(!field['help']) field['help'] = '';
+             var facet_title = window.hWin.HEURIST4.util.htmlEscape(window.hWin.HRJ('title', field, that.options.language));
+             var facet_rollover = window.hWin.HEURIST4.util.htmlEscape(window.hWin.HRJ('help', field, that.options.language));
+             if(!facet_rollover) facet_rollover = '';
                
              if(field['isfacet']!=that._FT_INPUT){
                     
@@ -1007,13 +1012,13 @@ $.widget( "heurist.search_faceted", {
                     //inpt.find('.editint-inout-repeat-button').hide();
                     
                     $("<div>",{id: "fv_"+field['var'] }).html(      //!!!!
-                        '<div class="header" title="'+field['help']+'">'   // style="width: 100%; background-color: lightgray; padding: 5px; width:100%"
+                        '<div class="header" title="'+facet_rollover+'">'   // style="width: 100%; background-color: lightgray; padding: 5px; width:100%"
                               +(that.options.params.title_hierarchy?harchy:'')
                               +'<h4 style="display:inline-block;margin:0;">'
-                              + field['title'] + '</h4>'+  //field['order']+'  '+
-                              ((field['help'])?'<span class="bor-tooltip ui-icon ui-icon-circle-help" '
+                              + facet_title + '</h4>'+  //field['order']+'  '+
+                              ((facet_rollover)?'<span class="bor-tooltip ui-icon ui-icon-circle-help" '
                               +'style="width:17px;height:17px;margin-left:4px;display:inline-block;vertical-align:text-bottom;" title="'
-                              +field['help']+'"></span>':'')+
+                              +facet_rollover+'"></span>':'')+
                         '</div>'+
                         '<div class="input-cell" style="display:block;"></div>').appendTo($fieldset);    //width:100%
                   
@@ -1038,7 +1043,7 @@ $.widget( "heurist.search_faceted", {
                                 values: [''],
                                 readonly: false,
                                 title:  (that.options.params.title_hierarchy?harchy:'')
-                                        + "<span style='font-weight:bold'>" + field['title'] + "</span>",
+                                        + "<span style='font-weight:bold'>" + facet_title + "</span>",
                                 detailtype: (field['type'] == 'blocktext') ? 'freetext' : field['type'],//overwrite detail type from db (for example freetext instead of memo)
                                 showclear_button: false,
                                 showedit_button: false,
@@ -1053,7 +1058,7 @@ $.widget( "heurist.search_faceted", {
                            rst_RequirementType: 'optional',
                            rst_MaxValues: 1,   //non repeatable
                            rst_DisplayWidth:0
-                           //rst_DisplayHelpText: field['help']
+                           //rst_DisplayHelpText: facet_rollover
                        };
                    }
 
@@ -1064,9 +1069,9 @@ $.widget( "heurist.search_faceted", {
                     inpt.appendTo($fieldset);
                     that._input_fields['$X'+field['var']] = inpt;
                     
-                    inpt.find('.header').attr('title', field['help'])
+                    inpt.find('.header').attr('title', facet_rollover)
                         .css('display','block')
-                        .html('<h4 style="display:inline-block;margin:0;">'+field['title']+'</h4>');
+                        .html('<h4 style="display:inline-block;margin:0;">'+facet_title+'</h4>');
                                                                         
                     //@todo make as event listeneres
                     //assign event listener
@@ -3102,6 +3107,8 @@ $.widget( "heurist.search_faceted", {
             dty_ID = dty_ID.substr(2);    
         }
         
+        var facet_title = window.hWin.HEURIST4.util.htmlEscape(window.hWin.HRJ('title', field, this.options.language));
+        
         var ed_options = {
             varid: field['var'],  //content_id+"_"+
             recID: -1,
@@ -3110,7 +3117,7 @@ $.widget( "heurist.search_faceted", {
             
             values: [''],
             readonly: false,
-            title:  "<span style='font-weight:bold'>" + field['title'] + "</span>",
+            title:  "<span style='font-weight:bold'>" + facet_title + "</span>",
             showclear_button: false,
             suppress_prompts: true,  //supress help, error and required features
             suppress_repeat: true,

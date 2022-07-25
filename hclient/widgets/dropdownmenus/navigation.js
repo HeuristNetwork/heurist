@@ -31,7 +31,7 @@ $.widget( "heurist.navigation", {
        toplevel_css:null,  //css for top level items
        expand_levels:0,  //expand levels for treeview
        onInitComplete: null,
-       language: 'en'
+       language: 'xx'   //"xx" means take default - without code: prefix
     },
     
     menuData: null, //hRecordSet
@@ -52,6 +52,9 @@ $.widget( "heurist.navigation", {
     _create: function() {
 
         var that = this;
+        
+console.log('>>'+this.options.language);        
+        if(!this.options.language) this.options.language = 'xx'; //"xx" means use current language
 
         if(this.element.parent().attr('data-heurist-app-id') || this.element.attr('data-heurist-app-id')){
             //this is CMS publication - take bg from parent
@@ -197,7 +200,7 @@ $.widget( "heurist.navigation", {
             }else{
             
                 var menuName = resdata.fld(record, DT_NAME, this.options.language);
-                var menuTitle = resdata.fld(record, DT_SHORT_SUMMARY);
+                var menuTitle = resdata.fld(record, DT_SHORT_SUMMARY, this.options.language);
                 var menuIcon = resdata.fld(record, DT_THUMBNAIL);
 
                 var recType = resdata.fld(record, 'rec_RecTypeID');

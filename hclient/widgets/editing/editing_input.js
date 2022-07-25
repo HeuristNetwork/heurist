@@ -230,7 +230,7 @@ console.log('>>>> '+that.options.dtID+'  '+lblTitle);
                         if(is_translation){
                             
                             if(typeof translationSupport!=='undefined' && $.isFunction(translationSupport)){
-                                __show_select_function = translationSupport(this); //see editing_exts
+                                translationSupport(this); //see editing_exts
                             }
                             
                         }else{

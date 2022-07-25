@@ -394,6 +394,8 @@ function hLayoutMgr(){
             }
         }
         
+        var weblang = window.hWin.HEURIST4.util.getUrlParameter('weblang');
+        if(weblang) layout.options['language'] = weblang;
         
         if (app && app.script && app.widgetname) { //widgetname - function name to init widget
 

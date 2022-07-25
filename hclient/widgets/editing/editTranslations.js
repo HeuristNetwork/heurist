@@ -1,6 +1,5 @@
 /**
-* Widget to select image (thumbs and icons) from image library
-* Used in editing_input and as popup for selected records in rec_list
+* Widget to define translations 
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -22,16 +21,17 @@ $.widget( "heurist.editTranslations", {
 
     // default options
     options: {
-        isdialog: true, //show in dialog or embedded
+        is_dialog: true, //show in dialog or embedded
         
         fieldtype: 'freetext', //or blocktext
 
         values: [''],  //array of values 
         
-        onclose: null,
+        onclose: null
+        
     },
     
-    _as_dialog:null, //reference to itself as dialog (see options.isdialog)
+    _as_dialog:null, //reference to itself as dialog (see options.is_dialog)
     
     _was_changed: false,
 
@@ -44,17 +44,17 @@ $.widget( "heurist.editTranslations", {
         this._container = $('<div class="ent_content_full" style="top:0;padding:10px"/>')
                     .appendTo( $('<div class="ent_wrapper">').appendTo(this.element) );
 
-        if(this.options.isdialog){
+        if(this.options.is_dialog){
             
             var $dlg;
             
             var arrButtons = {};
             arrButtons[window.hWin.HR('Apply')] = function() {
                 that._onCloseDialog();
-                $dlg.dialog( "close" );
+                if(that._as_dialog && that._as_dialog.dialog('instance')) that._as_dialog.dialog( "close" );
             };
             arrButtons[window.hWin.HR('Cancel')] = function() {
-                $dlg.dialog( "close" );
+                if(that._as_dialog && that._as_dialog.dialog('instance')) that._as_dialog.dialog( "close" );
             };
 
             $dlg = this.element.dialog({
@@ -101,10 +101,56 @@ $.widget( "heurist.editTranslations", {
 
         }//for
         
+        this._adjustDimension();
+        
         this._on(this._btn_add, {click:function(){
-            this._createEntry('', false);
+            //take defaul value
+            var ele = this.element.find('[data-def=1]');
+            
+            this._createEntry(ele.val(), false);
+            this._adjustDimension();
         }});
     },        
+    
+    //
+    ///
+    //
+    _adjustDimension: function(){
+        
+        
+        var ch = this.element.find('div.ent_content_full')[0].scrollHeight;
+ 
+        if(ch<150) ch = 150;
+
+        var topPos = 0;
+        if(this.options.is_dialog){        
+            var pos = this._as_dialog.dialog('option', 'position');
+            if(pos && pos.of && !(pos.of instanceof Window)){
+                var offset = $(pos.of).offset();
+                topPos = (offset?offset.top:0)+40;
+            }
+            
+            ch = ch + 80;
+
+            //var dh =  this._dialog.dialog('option', 'height');
+
+            var ht = Math.min(ch, window.innerHeight-topPos);
+
+            //console.log(ch+'  new '+ht);                   
+            
+            this._as_dialog.dialog('option', 'height', ht);    
+        }else{
+            topPos = this.element.parent().offset().top + 10;
+            
+            if(ch > window.innerHeight-topPos){
+                ch = window.innerHeight-topPos;
+            }
+            
+            this.element.parent().height(ch);
+        }
+                
+    },
+    
 
     //
     //
@@ -137,7 +183,7 @@ $.widget( "heurist.editTranslations", {
                 
                 var _is_default = window.hWin.HEURIST4.util.isempty(lang);
             }
-console.log('>>>'+value);            
+//console.log('>>>'+value);            
             
             
             if(this.options.fieldtype=='blocktext')
@@ -157,6 +203,7 @@ console.log('>>>'+value);
             
             input_ele.uniqueId()
                         .addClass('text ui-widget-content ui-corner-all')
+                        .css({width:'680px'})
                         .val(value)
                         .keyup(function(){that._was_changed=true;})
                         .change(function(){that._was_changed=true;})
@@ -175,6 +222,17 @@ console.log('>>>'+value);
                 +'<label>Default language</label></div>')
                     .appendTo( this.sel_container );
             }else{
+                var ind = -1;
+
+                //find last seleted
+                if(!check_default){
+                    var ele = this.element.find('select:last');
+                    if(ele.length>0){
+                        ind = ele[0].selectedIndex;
+                        if(ind<0) ind = 0;
+                    }
+                }
+                
                 // 2. field selector for field or links tokens
                 var sel = $( '<select>' )
                     .attr('title', 'Select language' )
@@ -184,7 +242,14 @@ console.log('>>>'+value);
                     .hide()
                     .appendTo( this.sel_container );
                     
+                    
                 window.hWin.HEURIST4.ui.createLanguageSelect(sel, null, lang, false);
+                
+                if(ind>=0){
+                    sel[0].selectedIndex = ind + 1;
+                    sel.hSelect('refresh');
+                }
+                
             }
 
 

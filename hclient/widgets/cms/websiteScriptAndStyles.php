@@ -378,8 +378,9 @@ function initMainMenu( afterInitMainMenu ){
     _dout('initMainMenu');
     
     var weblang = window.hWin.HEURIST4.util.getUrlParameter('weblang');
-    if(!weblang) weblang = 'en';
-    
+
+console.log(weblang);
+
     var topmenu = $('#main-menu');
 
     var lopts = {  

@@ -518,9 +518,10 @@ window.hWin.HEURIST4.util = {
         
         var type = -1;
         
-        var domain = null, rules = '', rulesonly = 0, notes = '', primary_rt = null, viewmode = '', db='';
+        var query = '', domain = null, rules = '', rulesonly = 0, notes = '', primary_rt = null, viewmode = '', db='';
         if(qsearch){
             
+            var res = {};
             
             if(typeof qsearch === 'string' && qsearch.indexOf('?')==0){ //this is query in form of URL params 
                 domain  = window.hWin.HEURIST4.util.getUrlParameter('w', qsearch);
@@ -528,8 +529,10 @@ window.hWin.HEURIST4.util = {
                 rulesonly = window.hWin.HEURIST4.util.getUrlParameter('rulesonly', qsearch);
                 notes   = window.hWin.HEURIST4.util.getUrlParameter('notes', qsearch);
                 viewmode = window.hWin.HEURIST4.util.getUrlParameter('viewmode', qsearch);
-                qsearch = window.hWin.HEURIST4.util.getUrlParameter('q', qsearch);
+                query = window.hWin.HEURIST4.util.getUrlParameter('q', qsearch);
                 db = window.hWin.HEURIST4.util.getUrlParameter('db', qsearch);
+                
+                res.ui_notes = notes;
                 
             }else{ //it may be aquery in form of json
             
@@ -547,7 +550,7 @@ window.hWin.HEURIST4.util = {
                         rules = r.rules;
                     }
                     if(r.q){
-                        qsearch = r.q;
+                        query = r.q;
                     }
                     if(r.db){
                         db = r.db;
@@ -555,12 +558,21 @@ window.hWin.HEURIST4.util = {
                     domain = r.w?r.w:'all';
                     primary_rt = r.primary_rt; 
                     rulesonly = r.rulesonly;
+                    
+                    //localized name and note
+                    $(Object.keys(r)).each(function(i,key){
+                        if(key.indexOf('ui_name')==0 || key.indexOf('ui_notes')==0){
+                            res[key] = r[key];
+                        }
+                    });
+                    
+                    
                 }
             }
             
         }
         
-        if(window.hWin.HEURIST4.util.isempty(qsearch)){
+        if(window.hWin.HEURIST4.util.isempty(query)){
             type = window.hWin.HEURIST4.util.isempty(rules) ?-1:2; //empty, rulesonly 
         }else {
             type = window.hWin.HEURIST4.util.isempty(rules) ?0:1; //searchonly, both
@@ -568,8 +580,8 @@ window.hWin.HEURIST4.util = {
         
         domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
         
-        var res = {q:qsearch, w:domain, domain:domain, rules:rules, rulesonly:rulesonly, notes:notes, 
-                        primary_rt:primary_rt, viewmode:viewmode, type:type};    
+        res = $.extend(res, {q:query, w:domain, domain:domain, rules:rules, rulesonly:rulesonly, 
+                            primary_rt:primary_rt, viewmode:viewmode, type:type});    
         
         if(!window.hWin.HEURIST4.util.isempty(db)){
             res.db = db;

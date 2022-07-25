@@ -2244,7 +2244,8 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
     createLanguageSelect: function($select, topOptions, defValue, showName){
         
             var context = [{code:'en',name:'English'},
-            {code:'fr',name:'French'},{code:'zh',name:'Mandarin'},{code:'es',name:'Spanish'},{code:'ar',name:'Arabic'},{code:'en',name:'German'}];
+            {code:'fr',name:'French'},{code:'zh',name:'Mandarin'},{code:'es',name:'Spanish'},
+            {code:'ar',name:'Arabic'},{code:'de',name:'German'}];
             
             $select.empty();
 

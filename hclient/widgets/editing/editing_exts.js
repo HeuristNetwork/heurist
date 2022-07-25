@@ -889,38 +889,203 @@ function browseRecords(_editing_input, $input){
 //
 // Opens popup dialog with ability to define translations for field values
 //
-function translationSupport(_editing_input){
+function translationSupport(_input_or_values, is_text_area, callback){
 
     if(!$.isFunction($('body')['editTranslations'])){
         $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/editing/editTranslations.js', 
             function() {  //+'?t='+(new Date().getTime())
                 if($.isFunction($('body')['editTranslations'])){
-                    translationSupport( _editing_input );
+                    translationSupport( _input_or_values, is_text_area, callback );
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr('Widget editTranslations not loaded. Verify your configuration');
                 }
         });
     }else{
         //open popup
-        var that = _editing_input;    
-
-        var _dlg = $('<div/>').hide().appendTo( that.element );                            
-
-
-
-        var values = that.getValues();
+        var that = _input_or_values;    
+        var _dlg, values, fieldtype;
+        
+        if($.isArray(that)){
+            values = that;
+            _dlg = $('<div/>').hide().appendTo($('body'));
+            fieldtype = is_text_area?'blocktext':'freetext';
+        }else{ //editing_input
+            _dlg = $('<div/>').hide().appendTo( that.element );                               
+            values = that.getValues();
+            fieldtype = that.detailtype
+        }
 
         _dlg.editTranslations({
             values: values,
-            fieldtype: that.detailtype,
+            fieldtype: fieldtype,
             onclose:function(res){
                 if(res){
-                    that.setValue(res);
+                    if($.isFunction(callback)){
+                        callback.call(this, res);
+                    }else{
+                        that.setValue(res);    
+                    }
                 }
                 _dlg.remove();
         }});
 
     }
 
+
+}
+
+
+//
+// obtains values from input and textarea elements with data-lang attribute
+// and assigns them to json params with key+language suffix
+// data-lang='xx' means default languge - key will be without suffix
+// 
+// params - json array to be modified
+// $container - container element
+// keyname - key in params
+// name - name of element
+//
+function translationFromUI(params, $container, keyname, name, is_text_area){
+    
+    //clear previous values, except default
+    $(Object.keys(params)).each(function(i, key){
+
+        var key2 = key;        
+        if(key.indexOf(':')==key.length-3){
+            key2 = key.substring(0, key.length-3);
+            if(key2 == keyname){
+                delete params[key];
+            }
+        }
+    });
+    
+    //find all elements with given name
+    var ele_type = is_text_area?'textarea':'input';
+    
+    $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
+        item = $(item);
+        var lang = item.attr('data-lang');
+        if(lang=='xx') lang = ''
+        else lang = ':'+lang;
+        
+        var value = item.val().trim();
+        if(!window.hWin.HEURIST4.util.isempty(value) || lang===''){
+            params[keyname+lang] = value;    
+        }
+    });
+}
+
+//
+//  Assign values from params to UI and initialize "translation" button
+//
+function translationToUI(params, $container, keyname, name, is_text_area){
+    
+    var def_ele = null;
+    
+    var ele_type = is_text_area?'textarea':'input';
+    
+    //find element assign data-lang for default, remove others
+    //remove all except default
+    $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
+        var lang  = $(item).attr('data-lang');
+        if(lang=='xx' || !lang){
+            def_ele = $(item);
+        }else{
+            $(item).remove(); //remove non-default
+        }
+    });
+    
+    if(!def_ele) return;
+    
+    if(!params) params = {}; 
+    if(!params[keyname]){
+      params[keyname] = def_ele.val();  
+    } 
+    
+    var sTitle = '';
+    
+    //init input element for default value and button
+    def_ele.attr('data-lang','xx').val(params[keyname]);
+    
+    if($container.find('span[name="'+name+'"]').length==0){//button
+    
+        var btn_add = $( "<span>")
+            .attr('data-lang','xx')
+            .attr('name',name)
+            .addClass('smallbutton editint-inout-repeat-button ui-icon ui-icon-translate')
+            .insertAfter( def_ele )
+        .attr('tabindex', '-1')
+        .attr('title', 'Define translation' )
+        .css({display:'inline-block', 
+        'font-size': '1em', cursor:'pointer', 
+            'min-width':'22px',
+            outline: 'none','outline-style':'none', 'box-shadow':'none'
+        });
+        
+        if(is_text_area){
+            btn_add.css({'vertical-align':'top'});    
+        }
+        
+        btn_add.on({click: function(e){
+            
+            var values = [];
+            //$(e.target).attr('data-lang')
+            $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
+                var lang  = $(item).attr('data-lang');
+                if(lang=='xx' || !lang){
+                    values.push($(item).val())
+                }else{
+                    values.push(lang+':'+$(item).val());
+                }
+            });
+            
+            translationSupport( values, is_text_area, function(res){
+                
+                var res2 = {};
+                for(var i=0; i<res.length; i++){
+                    var keyname2=keyname, value = res[i];
+                    
+                    if(!window.hWin.HEURIST4.util.isempty(value) && value.substr(2,1)==':'){
+                        keyname2 = keyname2+':'+value.substr(0,2);
+                        value = value.substr(3).trim();
+                    }else{
+                        value = value.trim();
+                    }
+                    if(!window.hWin.HEURIST4.util.isempty(value)){
+                        res2[keyname2] = value;
+                    }
+                }
+                if(!res2[keyname]) res2[keyname] = '';
+                
+                translationToUI(res2, $container, keyname, name, is_text_area);
+            });
+            
+        }});
+    }
+    
+    
+    //add new hidden lang elements
+    $(Object.keys(params)).each(function(i, key){
+        if(key==keyname){
+            
+        }else if(keyname==key.substring(0,key.length-3)){ // key.indexOf(keyname+':')===0){
+            var lang = key.substring(key.length-2);
+            
+            var ele = $('<'+ele_type+'>')
+                .attr('name',name).attr('data-lang',lang)
+                
+                .val(params[key]).insertAfter(def_ele);
+                
+            if(is_text_area){
+                ele.css('display','none');
+            }else{
+                ele.attr('type','hidden');
+            }
+                
+            sTitle += (lang+':'+params[key]+'\n');
+        }
+    });    
+    
+    def_ele.attr('title',sTitle);
 
 }

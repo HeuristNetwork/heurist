@@ -1085,7 +1085,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             return d[fldname][0];    
                         }
                         */
-                        
+                        //"xx" means take default - without code: prefix                        
                         if(lang){
                             var def_val = '';
                             for(var i=0; i<d[fldname].length; i++){
@@ -1093,10 +1093,13 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 
                                 if(val.substr(2,1)==':'){
                                     if(val.substr(0,2)==lang){
-                                        return val.substr(3).trim();
+                                        def_val = val.substr(3).trim();
+                                        break;
                                     }
-                                }else {
+                                }else if(lang=='xx'){
+                                    //without prefix
                                     def_val = val;
+                                    break;
                                 }
                             }
                             return def_val?def_val:d[fldname][0];

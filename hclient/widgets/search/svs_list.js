@@ -47,7 +47,9 @@ $.widget( "heurist.svs_list", {
         handle_favourites: null, // function to add/remove favourite filters
 
         simple_search_header: 'Simple search', // header text for 'search everything' filter
-        simple_search_text: 'Search everything:' // field label for the simple search filter
+        simple_search_text: 'Search everything:', // field label for the simple search filter
+        
+        language: 'xx'  //use default
     },
 
     isPublished: false,
@@ -76,6 +78,8 @@ $.widget( "heurist.svs_list", {
         if(tab_td.length>0){
             $(tab_td[0]).css('height','1px');
         }
+        
+        if(!this.options.language) this.options.language = 'xx'; //"xx" means use current language
         
         if(this.options.allowed_svsIDs && !$.isArray(this.options.allowed_svsIDs)){
             if($.isNumeric(this.options.allowed_svsIDs)){
@@ -1051,12 +1055,18 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                     }
                 }
 
-                
-                var sname = this.loaded_saved_searches[svsID][_NAME];
+
+                var sname = window.hWin.HRJ('ui_name', params, this.options.language);
+                if(Hul.isempty(sname)){
+                    sname = this.loaded_saved_searches[svsID][_NAME];
+                } 
                 
                 if(sname.toLowerCase().indexOf('placeholder')===0) continue;
 
+                var shint = window.hWin.HRJ('ui_notes', params, this.options.language);
+
                 $('<button>', {text: sname, 'data-svs-id':svsID})
+                .attr('title', shint)
                 .css({'width':'100%','margin-top':'0.8em','max-width':'300px','text-align':'left'})
                 .button({icons:{primary: iconBtn}}).on("click", function(event){
 
@@ -1386,7 +1396,6 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                             s_hint2 = node.title;
                             squery = node.data.url;
                         }else{
-                            s_hint2 = node.key+':'+node.title;
                             if(window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key]){
                                 squery = svs[_QUERY];
                                 /*if(!node.data.isfaceted){
@@ -1394,11 +1403,24 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                                     prms = Hul.parseHeuristQuery(qsearch);
                                 }*/
                             }
+                            s_hint2 = node.key+':'+node.title;
                         }
+
                         var prms = Hul.parseHeuristQuery(squery);
                         
-                        if(!Hul.isempty(prms.notes)){
-                            s_hint2 = s_hint2 + '\nNotes: '+prms.notes;
+                        var s = window.hWin.HRJ('ui_name', prms, that.options.language);
+                        
+                        if(!Hul.isempty(s)){
+                            node.title = s;
+                        }else if(svs && svs[_NAME]){
+                            node.title = svs[_NAME];
+                        } 
+                        s_hint2 = node.key+':'+node.title
+                        
+                        s = window.hWin.HRJ('ui_notes', prms, that.options.language);
+                        
+                        if(!Hul.isempty(s)){
+                            s_hint2 = s_hint2 + '\nNotes: '+s;
                         }
                         if(!Hul.isempty(prms.q)){
                             s_hint2 = s_hint2 + '\nFilter: '+prms.q;
@@ -1427,12 +1449,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                                 s_hint = 'Broken filter. Remove and re-create it';
                         }
 
-                        if(s==''){
-                            //$span.find("> span.fancytree-title").text(node.title);
-                        }else{
-                            node.title = svs[_NAME] + ' ' + s;
-                            $span.find("> span.fancytree-title").html(node.title);
-                        }
+                        $span.find("> span.fancytree-title").html(node.title+' '+s);
                         $span.attr('title', s_hint2)
                         $span.attr('filter_type', prms.type);
                         
@@ -2199,6 +2216,11 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
             
             var context_on_exit = null;
             
+            var s = window.hWin.HRJ('ui_name', params, this.options.language);
+            if(!Hul.isempty(s)){
+                 qname = s;
+            } 
+            
             if(params.type==3){ //isfaceted
 
                 /*if(facet_params==null){
@@ -2223,7 +2245,8 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                         params:params, 
                         showclosebutton: this.showclosebutton,
                         showresetbutton: (this.options.showresetbutton!==false),
-                        search_realm:this.options.search_realm};
+                        search_realm:this.options.search_realm,
+                        language: this.options.language};
                     
                     
                     if(that.options.is_h6style){

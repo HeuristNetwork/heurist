@@ -559,7 +559,7 @@ $.widget( "heurist.mapping", {
                             return this.options._extent;  
                         }});
         
-        if(layer_options['IIIF']){
+        if(layer_options['IIIF']){ //not implemented
         
                 HeuristTilerLayer = L.TileLayer.Iiif.extend({
                         getBounds: function(){

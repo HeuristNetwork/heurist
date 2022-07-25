@@ -40,6 +40,7 @@ Localization routines (assigned to window.hWin)
     HR  returns localized string
     HRA = localize all elements with class slocale for given element
     HRes = returns url or loads content for localized resource
+    HRJ = returns localized value for json (options in widget)
 
 LayoutMgr   hLayout object (@todo replace to new version from CMS)
 
@@ -155,6 +156,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     window.hWin.HR = that.setLocale(lang);
                     window.hWin.HRA = that.HRA; //localize all elements with class slocale for given element
                     window.hWin.HRes = that.HRes; //returns url or content for localized resource (help, documentation)
+                    window.hWin.HRJ = that.HRJ; // returns localized value for json (options in widget)
                 }
                 _oninit(success);
             } );
@@ -2132,6 +2134,18 @@ prof =Profile
                     $(this).attr('title', window.hWin.HR($(this).attr('slocale-title')));
                 });
             }
+        },
+        
+        //
+        // returns localized value for json (options in widget)
+        //
+        HRJ: function(name, options, lang){
+            
+            var def_value = options[name];
+            
+            var loc_value = options[name+':'+((lang && lang!='xx')?lang:_region)];
+            
+            return loc_value?loc_value:def_value;
         },
         
         //

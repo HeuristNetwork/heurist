@@ -149,7 +149,7 @@ function hMapLayer2( _options ) {
 
             var layer_options = {minZoom:minZoom , maxZoom:maxZoom, extension:ext};
             
-            if(layer_url.indexOf('/info.json')>0){  //ccode1=='2-???' IIIF image
+            if(layer_url.indexOf('/info.json')>0){  //ccode1=='2-???' IIIF image not implemented
                 
                 layer_options['IIIF'] = true;
             

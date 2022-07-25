@@ -1005,6 +1005,13 @@ $.widget( "heurist.search_faceted_wiz", {
                 
             }
             
+            //init localization
+            translationToUI(this.options.params, $dlg, 'ui_name', 'svs_Name', false);
+            translationToUI(this.options.params, $dlg, 'ui_title', 'svs_Title', false);
+            translationToUI(this.options.params, $dlg, 'ui_additional_filter_label', 'svs_AdditionalFilterLabel', false);
+            translationToUI(this.options.params, $dlg, 'ui_spatial_filter_label', 'svs_SpatialFilterLabel', false);
+            translationToUI(this.options.params, $dlg, 'ui_exit_button_label', 'svs_ExitButtonLabel', false);
+            
             if(sa_order.hSelect("instance")!=undefined){
                 sa_order.hSelect("refresh"); 
             }
@@ -1772,8 +1779,12 @@ $.widget( "heurist.search_faceted_wiz", {
                     else
                         facets[k].title = harchy_fields[l-2]+'>'+harchy_fields[l-1]; 
                 }
-                listdiv.find('#facet_Title'+idd).val(facets[k].title);
-                listdiv.find('#facet_Help'+idd).val(facets[k].help);
+                //listdiv.find('#facet_Title'+idd).val(facets[k].title);
+                //listdiv.find('#facet_Help'+idd).val(facets[k].help);
+                
+                translationToUI(facets[k], listdiv, 'title', 'facet_Title'+idd, false);
+                translationToUI(facets[k], listdiv, 'help', 'facet_Help'+idd, false);
+
                 
                 listdiv.find('input[data-sort="count"][data-id="'+idd+'"]').prop('checked', (facets[k].orderby=='count'));
                 listdiv.find('input[data-sort="desc"][data-id="'+idd+'"]').prop('checked', (facets[k].orderby=='desc'));
@@ -1915,9 +1926,16 @@ $.widget( "heurist.search_faceted_wiz", {
             var k, len = this.options.params.facets.length;
             for (k=0;k<len;k++){
                 var idd = this.options.params.facets[k]['var'];
-                var title = listdiv.find('#facet_Title'+idd).val();
-                if(title!='') this.options.params.facets[k].title = title;
-                this.options.params.facets[k].help = listdiv.find('#facet_Help'+idd).val();
+                
+                //var title = listdiv.find('#facet_Title'+idd).val();
+                //if(title!='') this.options.params.facets[k].title = title; //not allow empty valu
+                //this.options.params.facets[k].help = listdiv.find('#facet_Help'+idd).val();
+                
+                var keep_title = this.options.params.facets[k].title;
+                translationFromUI(this.options.params.facets[k], listdiv, 'title', 'facet_Title'+idd, false);
+                translationFromUI(this.options.params.facets[k], listdiv, 'help', 'facet_Help'+idd, false);
+                if(this.options.params.facets[k].title=='') this.options.params.facets[k].title=keep_title;
+                
                 this.options.params.facets[k].isfacet = listdiv.find('button.ui-heurist-btn-header1[data-idx="'+idd+'"]').attr('data-value');
 
                 this.options.params.facets[k].orderby = null;    
@@ -2067,7 +2085,6 @@ $.widget( "heurist.search_faceted_wiz", {
             this.options.params.sup_filter = svs_filter.val();
         }
 
-        this.options.params.ui_title =  $dlg.find('#svs_Title').val();
         this.options.params.ui_viewmode = $dlg.find('#svs_ViewMode').val();
         this.options.params.search_on_reset = $dlg.find('#svs_SearchOnReset').is(':checked');
          
@@ -2086,6 +2103,16 @@ $.widget( "heurist.search_faceted_wiz", {
         
         this.options.params.ui_exit_button = $dlg.find('#svs_ExitButton').is(':checked');
         this.options.params.ui_exit_button_label = $dlg.find('#svs_ExitButtonLabel').val();
+        
+        //localized paramerers
+        //this.options.params.ui_title =  $dlg.find('#svs_Title').val();
+        translationFromUI(this.options.params, $dlg, 'ui_name', 'svs_Name', false);
+        translationFromUI(this.options.params, $dlg, 'ui_title', 'svs_Title', false);
+        translationFromUI(this.options.params, $dlg, 'ui_additional_filter_label', 'svs_AdditionalFilterLabel', false);
+        translationFromUI(this.options.params, $dlg, 'ui_spatial_filter_label', 'svs_SpatialFilterLabel', false);
+        translationFromUI(this.options.params, $dlg, 'ui_exit_button_label', 'svs_ExitButtonLabel', false);
+        
+console.log(this.options.params);        
 
         var s = $dlg.find('.sa_sortby').val();
         if(s!=''){
