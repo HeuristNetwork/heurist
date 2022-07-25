@@ -132,8 +132,9 @@
                     <select id="sel_resource_fields" class="ft_selfield"></select>
                     <select id="sel_relmarker_fields" class="ft_selfield" style='background:red'></select>
                 </div>
+                <span class="heurist-helper1" style="display: inline-block;padding: 5px 0 0 20px;">Only pointers towards the selected target entity type are shown</span>
                 
-		        <div style="text-align:center;width:100%;padding-top:2em;">
+		        <div style="text-align:right;width:100%;padding-top:2em;">
 		            <button type="button" id="btnSelect" disabled="disabled">
 		                Create link
 		            </button>
