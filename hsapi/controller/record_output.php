@@ -97,7 +97,10 @@ detectLargeInputs('COOKIE record_output', $_COOKIE);
 
     set_time_limit(0); //no limit
 
-    
+    if(@$params['file_refs']){
+        downloadFileReferences($system, $params['ids']);
+    }
+
     if(!@$params['format']) $params['format'] = 'json';
     
     $search_params = array();
@@ -1658,6 +1661,81 @@ function valueToNumeric($value) {
         $value = intval($value);
     }
     return $value;
+}
+
+/**
+ * Write file references out into CSV format
+ * 
+ * @param string|array $ids File ids to include (comma separated string or array)
+ * 
+ * @return file CSV file containing output
+ */
+function downloadFileReferences($system, $ids){
+
+    if(empty($ids)){
+        header('Content-type: application/json');
+        echo json_encode(array('status'=>HEURIST_INVALID_REQUEST, 'message'=>'No file ids have been provided'));
+        exit();
+    }
+
+    if(is_array($ids)){ // change comma separated list into array
+        $ids = implode(',', $ids);
+    }
+
+    // open output handler
+    $fd = fopen('php://output', 'w');
+    if(!$fd){
+
+        header('Content-type: application/json');
+        echo 'Unable to open temporary output for writing CSV.<br>Please contact the Heurist team.';
+        exit();
+    }
+
+    // retrieve file details
+    $mysqli = $system->get_mysqli();
+    $file_query = 'SELECT ulf_ID, ulf_FileName, ulf_ExternalFileReference, ulf_ObfuscatedFileID, ulf_FilePath FROM recUploadedFiles WHERE ulf_ID IN ('. $ids .')';
+
+    $file_refs = mysql__select_all($mysqli, $file_query, 1);
+    if(!$file_refs){
+
+        fclose($fd);
+
+        header('Content-type: application/json');
+        echo json_encode(array('status'=>HEURIST_ERROR, 'message'=>'File record details could not be retrieved from database'));
+        exit();
+    }
+
+    // return setup
+    $filename = HEURIST_DBNAME . '_File_References.csv';
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="' . $filename . '";');
+    header("Pragma: no-cache;");
+    header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
+
+    // write results
+    fputcsv($fd, array("ID", "Name", "Path", "Obfuscated URL", "Record Usage"));
+
+    foreach ($file_refs as $id => $details) {
+
+        $name = !empty($details[0]) ? $details[0] : $details[1];
+        $path = !empty($details[3]) ? $details[3] . $name : 'External Source';
+        $obf_url = empty($details[2]) ? 'missing' : HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME . '&file=' . $details[2];
+
+        $usage_query = 'SELECT dtl_RecID FROM recDetails WHERE dtl_UploadedFileID = ' . $id;
+        $recs = mysql__select_list2($mysqli, $usage_query);
+        if(!$recs || count($recs) == 0){
+            fputcsv($fd, array($id, $name, $path, $obf_url, 0));
+        }else{
+            fputcsv($fd, array($id, $name, $path, $obf_url, implode('|', $recs)));
+        }
+    }
+
+    rewind($fd);
+    $output = stream_get_contents($fd);
+    fclose($fd);
+
+    header('Content-Length: ' . strlen($output));
+    exit($output);
 }
 
 ?>
