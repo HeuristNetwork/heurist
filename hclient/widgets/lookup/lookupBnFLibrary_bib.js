@@ -30,7 +30,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
     // default options
     options: {
     
-        height: 520,
+        height: 700,
         width:  800,
         modal:  true,
         
@@ -61,10 +61,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         var that = this;
 
         // Extra field styling
-        this.element.find('#search_container > div > div > .header.recommended').css({width:'65px', 'min-width':'65px', display: 'inline-block'});
-        this.element.find('#separate_fields > .header.recommended').css({width:'65px', 'min-width':'65px'});
-        this.element.find('#btn_container').position({my: 'left top', at: 'right top', of: '#search_container'});
-        this.element.find('#rec_filter_fields').css({'display': 'inline-block', 'float': 'right'}).position({my: 'left top', at: 'left bottom', of: '#btn_container'});
+        this.element.find('.header.recommended').css({width:'65px', 'min-width':'65px', display: 'inline-block'});
+        this.element.find('.bnf_form_field').css({display:'inline-block', 'margin-top': '7.5px'});
+
         // Action button styling
         this.element.find('#btnStartSearch').addClass("ui-button-action");
 
@@ -91,6 +90,10 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
         // Init record list
         this.recordList = this.element.find('#div_result');
+
+        var pos_top = this.element.find('#ent_header').position().top + parseFloat(this.element.find('#ent_header').css('height'));
+        this.recordList.css('top', (pos_top+30)+'px');
+
         this.recordList.resultList( this.options.resultList );
         this.recordList.resultList('option', 'pagesize', this.options.pagesize); // so the pagesize doesn't get set to a different value
 
@@ -546,7 +549,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
             that.toggleCover(''); // hide loading cover
 
-            if(window.hWin.HEURIST4.util.isJSON(response)){
+            if(window.hWin.HEURIST4.util.isJSON(response)){ 
 
                 if(response.result != null){ // Search result
                     that._onSearchResult(response);

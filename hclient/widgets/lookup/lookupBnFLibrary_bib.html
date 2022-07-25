@@ -10,81 +10,90 @@
 -->
 
 <!-- Search Container -->
-<div id="ent_header" style="height:7em; padding: 0.2em; width: 100%;">
-    <fieldset style="display:inline-block; float: left;" id="search_container">
+<div id="ent_header" style="height: 7em; max-height: 7em; overflow-y: auto; padding: 0.2em 0; max-width: 775px; min-width: 335px;">
 
-        <div style="padding: 0.2em; width: 100%;" class="input" id="query_form">
+    <fieldset style="display:inline-block; width: 610px;">
 
-            <div>
-                <!-- Any -->
-                <div class="header recommended" style="text-align: right;">
-                    <label for="inpt_any">Any Field:</label>
-                </div>
-                <select id="inpt_any_link">
-                    <option value="any">ANY</option>
-                    <option value="all" selected>ALL</option>
-                    <option value="adj">ADJ</option>
-                </select>
-                <input id="inpt_any" class="text ui-widget-content ui-corner-all" style="max-width:30em;"/>
-                <select id="inpt_any_logic">
-                    <option value="and" selected>AND</option>
-                    <option value="or">OR</option>
-                </select>
+        <!-- Any -->
+        <div class="bnf_form_field">
 
-                <!-- Title -->
-                <div class="header recommended" style="text-align: right;">
-                    <label for="inpt_title">Title:</label>
-                </div>
-                <select id="inpt_title_link">
-                    <option value="any">ANY</option>
-                    <option value="all" selected>ALL</option>
-                    <option value="adj">ADJ</option>
-                </select>
-                <input id="inpt_title" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
-                <select id="inpt_title_logic">
-                    <option value="and" selected>AND</option>
-                    <option value="or">OR</option>
-                </select>
-
+            <div class="header recommended" style="text-align: right;">
+                <label for="inpt_any">Any Field:</label>
             </div>
+            <select id="inpt_any_link">
+                <option value="any">ANY</option>
+                <option value="all" selected>ALL</option>
+                <option value="adj">ADJ</option>
+            </select>
+            <input id="inpt_any" class="text ui-widget-content ui-corner-all" style="max-width:30em;"/>
+            <select id="inpt_any_logic">
+                <option value="and" selected>AND</option>
+                <option value="or">OR</option>
+            </select>
 
-            <div id="separate_fields" style="margin-top: 10px;">
-                <!-- Author -->
-                <div class="header recommended" style="text-align: right;">
-                    <label for="inpt_author">Author:</label>
-                </div>
-                <select id="inpt_author_link">
-                    <option value="any">ANY</option>
-                    <option value="all" selected>ALL</option>
-                    <option value="adj">ADJ</option>
-                </select>
-                <input id="inpt_author" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
-                <select id="inpt_author_logic">
-                    <option value="and" selected>AND</option>
-                    <option value="or">OR</option>
-                </select>
+        </div>
 
-                <!-- Record ID -->
-                <div class="header recommended" style="text-align: right;">
-                    <label for="inpt_recordid">Record ID:</label>
-                </div>
-                <select id="inpt_recordid_link">
-                    <option value="any">ANY</option>
-                    <option value="all" selected>ALL</option>
-                    <option value="adj">ADJ</option>
-                </select>
-                <input id="inpt_recordid" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
-            <!-- There is no field after record id
-                <select id="inpt_recordid_logic">
-                    <option value="and" selected>AND</option>
-                    <option value="or">OR</option>
-                </select>
-            -->
+        <!-- Title -->
+        <div class="bnf_form_field">
 
+            <div class="header recommended" style="text-align: right;">
+                <label for="inpt_title">Title:</label>
             </div>
+            <select id="inpt_title_link">
+                <option value="any">ANY</option>
+                <option value="all" selected>ALL</option>
+                <option value="adj">ADJ</option>
+            </select>
+            <input id="inpt_title" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
+            <select id="inpt_title_logic">
+                <option value="and" selected>AND</option>
+                <option value="or">OR</option>
+            </select>
 
-            <div id="rec_filter_fields" style="margin-top: 10px;">
-                <!--<div class="header optional" style="display: inline-block;">
+        </div>
+
+        <!-- Author -->
+        <div class="bnf_form_field">
+
+            <div class="header recommended" style="text-align: right;">
+                <label for="inpt_author">Author:</label>
+            </div>
+            <select id="inpt_author_link">
+                <option value="any">ANY</option>
+                <option value="all" selected>ALL</option>
+                <option value="adj">ADJ</option>
+            </select>
+            <input id="inpt_author" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
+            <select id="inpt_author_logic">
+                <option value="and" selected>AND</option>
+                <option value="or">OR</option>
+            </select>
+
+        </div>
+
+        <!-- Record ID -->
+        <div class="bnf_form_field">
+
+            <div class="header recommended" style="text-align: right;">
+                <label for="inpt_recordid">Record ID:</label>
+            </div>
+            <select id="inpt_recordid_link">
+                <option value="any">ANY</option>
+                <option value="all" selected>ALL</option>
+                <option value="adj">ADJ</option>
+            </select>
+            <input id="inpt_recordid" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
+        <!-- There is no field after record id
+            <select id="inpt_recordid_logic">
+                <option value="and" selected>AND</option>
+                <option value="or">OR</option>
+            </select>
+        -->
+
+        </div>
+
+            <!--<div id="rec_filter_fields" style="margin-top: 10px;">
+                <div class="header optional" style="display: inline-block;">
                     <label for="inpt_doctype">Searching for </label>
 
 
@@ -109,33 +118,33 @@ and recovery of show notes (v: show)
                     </select>
 
                     <label for="inpt_doctype"> records</label>
-                </div>-->
-
-                <div class="header optional" style="display: inline-block;margin-left: 20px;">
-                    <label for="rec_limit">Search for </label>
-
-                    <select id="rec_limit">
-                        <option value="10">10</option>
-                        <option value="20" selected>20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="200">200</option>
-                        <option value="500">500</option>
-                    </select>
-
-                    <label for="rec_limit"> records</label>
                 </div>
-            </div>
-
-        </div>
+            </div>-->
 
     </fieldset>
 
-    <div style="display: inline-block;" id="btn_container">
+    <div style="display: inline-block; margin: 10px 0 0 10px;" id="btn_container">
         <button id="btnStartSearch">Search</button>
+
+        <div class="header optional" style="margin-top: 10px;" id="rec_limit_container">
+            <label for="rec_limit">Search for </label>
+
+            <select id="rec_limit">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="500">500</option>
+            </select>
+
+            <label for="rec_limit"> records</label>
+        </div>
     </div>
+
+
 </div>
 
 <!-- Result List Container -->
-<div id="div_result" class="ent_content_full" style="display: none;top:9em">
+<div id="div_result" class="ent_content_full" style="display: none;">
 </div>
