@@ -281,11 +281,13 @@ regional['ru'] = {
     //design menu
     'Modify': 'Изменить структуру',
         menu_structure_rectypes: 'Типы записей',
+        menu_import_csv_rectypes: 'Import from CSV', //@translate
         menu_structure_vocabterms: 'Словари',
         menu_structure_fieldtypes: 'Базовые поля',
+        menu_import_csv_fieldtypes: 'Import from CSV', //@translate
         menu_structure_import: 'Импорт шаблонов',
         menu_structure_workflowstages: 'Стадии работы',
-        menu_lookup_config: 'External lookups', // needs replacing
+        menu_lookup_config: 'External lookups', //@translate
         menu_structure_summary: 'Визуализация',
         menu_structure_refresh: 'Перегрузить структуру',
     
