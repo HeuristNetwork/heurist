@@ -2385,22 +2385,21 @@ $.widget( "heurist.search_faceted", {
                                                 col_gap = 0;
                                             }
 
-                                            var max_height = 0;
+                                            var max_height = 0, max_value = 0;
 
+                                            for(var i = 0; i < data.length; i++){
+                                                var count = data[i][2];
+                                                if(max_value < count) max_value = count;
+                                            }
                                             // Adding individual columns
                                             for(var i = 0; i < data.length; i++){
-
                                                 var count = data[i][2];
-                                                var col_height = 0;
+                                                var height = 0;
 
                                                 if(count > 0){
-                                                    col_height = (50 * (count / count_max));
-
-                                                    // Column heights limits
-                                                    if(col_height <= 4){
-                                                        col_height = 5;
-                                                    }else if(col_height > 50){
-                                                        col_height = 50;
+                                                    height = (count / max_value) * 50;
+                                                    if(height < 10){
+                                                        height = 10;
                                                     }
                                                 }
 
@@ -2410,15 +2409,15 @@ $.widget( "heurist.search_faceted", {
                                                     'width': col_width+'px', 
                                                     'margin-right': col_gap+'px', 
                                                     'display': 'inline-block', 
-                                                    'height': col_height+'px',
-                                                    'visibility': (col_height == 0) ? 'hidden' : 'visible',
+                                                    'height': height+'px',
+                                                    'visibility': (height == 0) ? 'hidden' : 'visible',
                                                     'margin-top': 'auto'
                                                 }).appendTo($diagram);
-
-                                                if(max_height < col_height) max_height = col_height;
                                             }
 
-                                            if(max_height != 0) $slide_range.parent().parent().css('margin-top', max_height + 5);
+                                            var $slide_handles = $slide_range.parent().find('.ui-slider-handle');
+                                            $facet_values.find('.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($slide_handles[0])});
+                                            $facet_values.find('.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($slide_handles[1])});
                                         }
                                     });
                                 }
@@ -2612,14 +2611,14 @@ $.widget( "heurist.search_faceted", {
                             }
 
                             var ele2 = $('<div>'
-                            +'<span class="ui-icon ui-icon-triangle-1-w-stop" '
+                            +'<span class="ui-icon ui-icon-triangle-1-w-stop" title="Reset to minimum date"'
                                 +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
-                            +'<span class="ui-icon ui-icon-triangle-1-w" '
+                            +'<span class="ui-icon ui-icon-triangle-1-w" title="Half step"'
                                 +'style="cursor:pointer;font-size:smaller;float:left;color:gray;position:absolute;"/>'
-                            +'<div style="height:0.4em;margin:2px 0px 0px 2px;float:left;width:'+(w-62)+'px"/>'
-                            +'<span class="ui-icon ui-icon-triangle-1-e" '
+                            +'<div style="height:0.4em;margin:2px 0px 0px 2px;float:left;width:'+(w-50)+'px"/>'
+                            +'<span class="ui-icon ui-icon-triangle-1-e" title="Half step"'
                                 +'style="cursor:pointer;font-size:smaller;float:left;color:gray;position:absolute;"/>'
-                            +'<span class="ui-icon ui-icon-triangle-1-e-stop" '
+                            +'<span class="ui-icon ui-icon-triangle-1-e-stop" title="Reset to maximum date"'
                                 +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/></div>'
                             ).appendTo($facet_values);
                                         
@@ -2630,8 +2629,8 @@ $.widget( "heurist.search_faceted", {
                                 .attr('facet_index',facet_index)
                                 .slider({
                                     range: true,
-                                    min: (mmin-delta<field.mmin0)?field.mmin0:(mmin-delta),  //field.mmin0
-                                    max: (mmax+delta>field.mmax0)?field.mmax0:(mmax+delta),
+                                    min: field.mmin0, //(mmin-delta<field.mmin0)?field.mmin0:(mmin-delta)
+                                    max: field.mmax0, //(mmax+delta>field.mmax0)?field.mmax0:(mmax+delta)
                                     values: [ mmin, mmax ],
                                     slide: __updateSliderLabel,
                                     stop: __onSlideStop,
@@ -2641,23 +2640,8 @@ $.widget( "heurist.search_faceted", {
                                     create: function(){
                                         $(this).find('.ui-slider-handle').css({width:'4px',background:'black'});
 
-                                        var left_step = ele2.find('span.ui-icon-triangle-1-w')
-                                                            .position({my: 'right center', at: 'left bottom', of: $($(this).find('.ui-slider-handle')[0])});
-
-                                        var right_step = ele2.find('span.ui-icon-triangle-1-e')
-                                                             .position({my: 'left center', at: 'right bottom', of: $($(this).find('.ui-slider-handle')[1])});
-
-                                        left_step.css({
-                                            'z-index': 10,
-                                            top: parseFloat(left_step.css('top')) + 3,
-                                            left: parseFloat(left_step.css('left')) + 2
-                                        });
-
-                                        right_step.css({
-                                            'z-index': 10,
-                                            top: parseFloat(right_step.css('top')) + 3,
-                                            left: parseFloat(right_step.css('left')) - 2
-                                        });
+                                        //var left_step = ele2.find('span.ui-icon-triangle-1-w').position({my: 'right center', at: 'left bottom', of: $($(this).find('.ui-slider-handle')[0])});
+                                        //var right_step = ele2.find('span.ui-icon-triangle-1-e').position({my: 'left center', at: 'right bottom', of: $($(this).find('.ui-slider-handle')[1])});
                                     }
                                 });
                                     
@@ -2682,10 +2666,10 @@ $.widget( "heurist.search_faceted", {
 
                                  
                             if(mmin==field.mmin0){
-                                ele2.find('span.ui-icon-triangle-1-w-stop').css('visibility','hidden');
-                            }                                    
+                                ele2.find('span.ui-icon-triangle-1-w-stop, span.ui-icon-triangle-1-w').css('visibility','hidden');
+                            }
                             if(mmax==field.mmax0){
-                                ele2.find('span.ui-icon-triangle-1-e-stop').css('visibility','hidden');
+                                ele2.find('span.ui-icon-triangle-1-e-stop, span.ui-icon-triangle-1-e').css('visibility','hidden');
                             }
                                  
                             //show initial values
