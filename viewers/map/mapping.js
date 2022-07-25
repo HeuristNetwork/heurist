@@ -506,7 +506,8 @@ $.widget( "heurist.mapping", {
 
             if(provider['name']!=='None'){
                 this.basemaplayer = L.tileLayer.provider(provider['name'], provider['options'] || {})
-                    .addTo(this.nativemap);        
+                    .addTo(this.nativemap);
+                this.basemaplayer.bringToBack(); // ensure base map is beneath all map documents
 
                 if(this.basemaplayer_filter){
                     this.applyBaseMapFilter();

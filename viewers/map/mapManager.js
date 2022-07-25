@@ -415,33 +415,33 @@ function hMapManager( _options )
     //
     function _addToMapDocumentTree( resdata ){
         
-            if(resdata==null){
+        if(resdata==null){
 
-                var $res = {};  
-                $res['key'] = 99999999;
-                $res['title'] = 'temp';
-                $res['type'] = 'mapdocument';
-                $res['lazy'] = true;
-                    
-            }else{
+            var $res = {};  
+            $res['key'] = 99999999;
+            $res['title'] = 'temp';
+            $res['type'] = 'mapdocument';
+            $res['lazy'] = true;
+                
+        }else{
 
-                var rec = resdata.getFirstRecord();
-            
-                var $res = {};  
-                $res['key'] = resdata.fld(rec, 'rec_ID');
-                $res['title'] = resdata.fld(rec, 'rec_Title');
-                $res['type'] = 'mapdocument';
-                $res['lazy'] = true;
+            var rec = resdata.getFirstRecord();
         
-            }
-            
-            that.populateMapDocuments(mapdoc_select); // update mapdoc dropdown
+            var $res = {};  
+            $res['key'] = resdata.fld(rec, 'rec_ID');
+            $res['title'] = resdata.fld(rec, 'rec_Title');
+            $res['type'] = 'mapdocument';
+            $res['lazy'] = true;
+        }
 
-            //mapdoc_treeview.find('.ui-fancytree').show();
-            mapdoc_treeview.find('.empty_msg').remove();
-            var tree = mapdoc_treeview.fancytree("getTree");
-            tree.getRootNode().addChildren( [$res] ).setSelected(true);
-        
+        if(mapdoc_select !== null){
+            that.populateMapDocuments(mapdoc_select);
+        }
+
+        //mapdoc_treeview.find('.ui-fancytree').show();
+        mapdoc_treeview.find('.empty_msg').remove();
+        var tree = mapdoc_treeview.fancytree("getTree");
+        tree.getRootNode().addChildren( [$res] ).setSelected(true);
     }
     
     //
@@ -541,11 +541,21 @@ function hMapManager( _options )
                                             if(!node.isExpanded() && !mapDocuments.isLoaded(mapdoc_id)){
                                                 node.setExpanded(true); //load content - init lazy load - see lazyLoad ->  mapDocuments.openMapDocument
                                             }else{
-
                                                 mapDocuments.setMapDocumentVisibility(mapdoc_id, node.isSelected());
                                             }
-                                            //
-                                            //mapDocuments.openMapDocument(node.key, dfd);
+
+                                            if(mapdoc_select !== null){
+
+                                                var selected_opts = Object.values(mapdoc_visible);
+                                                selected_opts = selected_opts.length == 0 ? ['Current result set'] : selected_opts;
+                                                mapdoc_select.hSelect('widget').attr('title', selected_opts.join(', '));
+
+                                                if(selected_opts.length == 1){
+                                                    mapdoc_select.hSelect('widget').find('span.ui-selectmenu-text').text(selected_opts[0]);
+                                                }else{
+                                                    mapdoc_select.hSelect('widget').find('span.ui-selectmenu-text').text(selected_opts.length+' documents displayed');
+                                                }
+                                            }
                                         }else if(node.data.type=='layer'){
                                             
                                             var mapdoc_id = node.data.mapdoc_id;
@@ -1068,9 +1078,14 @@ function hMapManager( _options )
         //
         populateMapDocuments: function($select){
 
+            if($select == null || $select.length == 0){
+                return;
+            }
+
             if($select.hSelect('instance') != undefined){
                 $select.hSelect('destroy');
             }
+
             $select.empty();
 
             mapdoc_select = $select;
@@ -1150,6 +1165,16 @@ function hMapManager( _options )
                                 $selected_opt.addClass('activated-mapdoc');
                                 that.toggleMapDocument(mapdoc_select.val(), true);
                             }
+                        }
+
+                        var selected_opts = Object.values(mapdoc_visible);
+                        selected_opts = selected_opts.length == 0 ? ['Current result set'] : selected_opts;
+                        mapdoc_select.hSelect('widget').attr('title', selected_opts.join(', '));
+
+                        if(selected_opts.length == 1){
+                            mapdoc_select.hSelect('widget').find('span.ui-selectmenu-text').text(selected_opts[0]);
+                        }else{
+                            mapdoc_select.hSelect('widget').find('span.ui-selectmenu-text').text(selected_opts.length+' documents displayed');
                         }
                     }
                 });
