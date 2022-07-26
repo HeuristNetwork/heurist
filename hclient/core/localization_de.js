@@ -138,8 +138,10 @@ regional['de'] = {
     //design menu
     'Modify': 'Ändern',
         menu_structure_rectypes: 'Datentypen',
+        menu_import_csv_rectypes: 'Import from CSV', //@translate
         menu_structure_vocabterms: 'Vordefinierte Vokabulare',
         menu_structure_fieldtypes: 'Datenfeld', //double check Grundfelder
+        menu_import_csv_fieldtypes: 'Import from CSV', //@translate
         menu_structure_import: 'Templates durchsuchen',
         menu_lookup_config: 'Externe Lookups',
         menu_structure_summary: 'Visualisieren',

@@ -46,6 +46,7 @@ $.widget( "heurist.svs_list", {
 
         handle_favourites: null, // function to add/remove favourite filters
 
+        simple_search_allowed: 1, // enable 'search everything' filter
         simple_search_header: 'Simple search', // header text for 'search everything' filter
         simple_search_text: 'Search everything:', // field label for the simple search filter
         
@@ -1092,7 +1093,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
             $(this.accordeon).css({'overflow':'hidden',position:'unset','padding':'4px'});
 
             //position:absolute;bottom:0px;
-            if(!this.direct_search_div){
+            if(!this.direct_search_div && this.options.simple_search_allowed){
 
                 var header_label = !window.hWin.HEURIST4.util.isempty(this.options.simple_search_header) ? this.options.simple_search_header : 'Simple search';
                 var field_text = !window.hWin.HEURIST4.util.isempty(this.options.simple_search_text) ? this.options.simple_search_text : 'Search everything:';

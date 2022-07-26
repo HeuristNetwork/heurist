@@ -31,7 +31,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
     options: {
     
         height: 750,
-        width:  500,
+        width:  530,
         modal:  true,
         
         title:  "Search the Bibliothèque nationale de France's authoritative records",
@@ -61,10 +61,9 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
         var that = this;
 
         // Extra field styling
-        this.element.find('#search_container > div > div > .header.recommended').css({width:'75px', 'min-width':'75px', display: 'inline-block'});
-        this.element.find('#btn_container').position({my: 'left top', at: 'right top', of: '#search_container'});
-        //this.element.find('#rec_filter_fields').position({my: 'left+10 bottom-20', at: 'right bottom', of: '#search_container'});
-        //$('#rec_filter_fields').position({my: 'left+10 bottom-20', at: 'right bottom', of: '#search_container'})
+        this.element.find('.header.recommended').css({width:'75px', 'min-width':'75px', 'max-width': '80px', display: 'inline-block'}).addClass('truncate');
+        this.element.find('.bnf_form_field').css({display:'inline-block', 'margin-top': '2.5px'});
+
         // Action button styling
         this.element.find('#btnStartSearch').addClass("ui-button-action");
 
@@ -91,6 +90,10 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
 
         // Init record list
         this.recordList = this.element.find('#div_result');
+
+        var pos_top = this.element.find('#ent_header').position().top + parseFloat(this.element.find('#ent_header').css('height'));
+        this.recordList.css('top', (pos_top+30)+'px');
+
         this.recordList.resultList( this.options.resultList );
         this.recordList.resultList('option', 'pagesize', this.options.pagesize); // so the pagesize doesn't get set to a different value
         

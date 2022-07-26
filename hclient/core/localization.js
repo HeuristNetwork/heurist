@@ -151,8 +151,10 @@ regional['en'] = {
     //design menu
     'Modify': '',
         menu_structure_rectypes: 'Record types',
+        menu_import_csv_rectypes: 'Import from CSV',
         menu_structure_vocabterms: 'Vocabularies',
         menu_structure_fieldtypes: 'Base fields',
+        menu_import_csv_fieldtypes: 'Import from CSV',
         menu_structure_import: 'Browse templates',
         menu_structure_workflowstages: 'Workflow stages',
         menu_lookup_config: 'External lookups',

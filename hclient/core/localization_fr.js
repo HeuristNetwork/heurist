@@ -285,8 +285,10 @@ regional['fr'] = {
     //design menu
     'Modify': 'Modifier',
         menu_structure_rectypes: 'Types d\'enregistrements',
+        menu_import_csv_rectypes: 'Import from CSV', //@translate
         menu_structure_vocabterms: 'Vocabulaires',
         menu_structure_fieldtypes: 'Champs',
+        menu_import_csv_fieldtypes: 'Import from CSV', //@translate
         menu_structure_import: 'Parcourir les modèles',
         menu_lookup_config: 'External lookups',
         menu_structure_summary: 'Visualiser',

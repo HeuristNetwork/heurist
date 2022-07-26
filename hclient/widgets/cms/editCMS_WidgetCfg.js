@@ -430,182 +430,202 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
             }else
             if(widget_name=='heurist_SearchTree'){
 
-                        var ele_rb = $dlg.find('input[name="searchTreeMode"]')
-                        .change(function(e){
+                var ele_rb = $dlg.find('input[name="searchTreeMode"]')
+                .change(function(e){
 
-                            var selval = __getSearchTreeMode();
+                    var selval = __getSearchTreeMode();
 
+                    $dlg.find('#simple_search_header').parent().css('display','none');
+                    $dlg.find('#simple_search_text').parent().css('display','none');
+
+                    if(selval==0){
+                        //buttons
+                        $dlg.find('#allowed_UGrpID').css('display','table-row');
+                        $dlg.find('#allowed_svsIDs').css('display','table-row');
+                        $dlg.find('#allowed_UGrpID').editing_input('setDisabled', false);
+                        $dlg.find('#allowed_svsIDs').editing_input('setDisabled', false);
+
+                        var is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
+                        if(is_vis){
+                            $dlg.find('#simple_search_header').parent().css('display','table-row');
+                            $dlg.find('#simple_search_text').parent().css('display','table-row');
+                        }else{
                             $dlg.find('#simple_search_header').parent().css('display','none');
                             $dlg.find('#simple_search_text').parent().css('display','none');
-
-                            if(selval==0){
-                                //buttons
-                                $dlg.find('#allowed_UGrpID').css('display','table-row');
-                                $dlg.find('#allowed_svsIDs').css('display','table-row');
-                                $dlg.find('#allowed_UGrpID').editing_input('setDisabled', false);
-                                $dlg.find('#allowed_svsIDs').editing_input('setDisabled', false);
-
-                                $dlg.find('#simple_search_header').parent().css('display','table-row');
-                                $dlg.find('#simple_search_text').parent().css('display','table-row');
-                            }else if(selval==1){
-                                //tree
-                                $dlg.find('#allowed_UGrpID').css('display','table-row');
-                                $dlg.find('#allowed_svsIDs').css('display','none');
-                                $dlg.find('#allowed_UGrpID').editing_input('setDisabled', false);
-                                $dlg.find('#allowed_svsIDs').editing_input('setDisabled', true);
-                                $dlg.find('input[name="allowed_svsIDs"]').val('');
-                            }else{
-                                //full
-                                $dlg.find('#allowed_UGrpID').css('display','none');
-                                $dlg.find('#allowed_svsIDs').css('display','none');
-                                $dlg.find('#allowed_UGrpID').editing_input('setDisabled', true);
-                                $dlg.find('#allowed_svsIDs').editing_input('setDisabled', true);
-                                $dlg.find('input[name="allowed_UGrpID"]').val('');
-                                $dlg.find('input[name="allowed_svsIDs"]').val('');
-                            }
-
-                        });
-                        var selval = __getSearchTreeMode();
-                        if(window.hWin.HEURIST4.util.isempty(selval)
-                            || !(selval==0 || selval==1 || selval==2)){
-                            selval = 0;
-                            $dlg.find('#heurist_SearchTreeMode1').prop('checked',true);
                         }
+                    }else if(selval==1){
+                        //tree
+                        $dlg.find('#allowed_UGrpID').css('display','table-row');
+                        $dlg.find('#allowed_svsIDs').css('display','none');
+                        $dlg.find('#allowed_UGrpID').editing_input('setDisabled', false);
+                        $dlg.find('#allowed_svsIDs').editing_input('setDisabled', true);
+                        $dlg.find('input[name="allowed_svsIDs"]').val('');
+                    }else{
+                        //full
+                        $dlg.find('#allowed_UGrpID').css('display','none');
+                        $dlg.find('#allowed_svsIDs').css('display','none');
+                        $dlg.find('#allowed_UGrpID').editing_input('setDisabled', true);
+                        $dlg.find('#allowed_svsIDs').editing_input('setDisabled', true);
+                        $dlg.find('input[name="allowed_UGrpID"]').val('');
+                        $dlg.find('input[name="allowed_svsIDs"]').val('');
+                    }
+                });
 
-                        //visible for buttons and tree mode
-                        var ele = $dlg.find('#allowed_UGrpID');
-                        if(!ele.editing_input('instance')){
+                var selval = __getSearchTreeMode();
+                if(window.hWin.HEURIST4.util.isempty(selval)
+                    || !(selval==0 || selval==1 || selval==2)){
+                    selval = 0;
+                    $dlg.find('#heurist_SearchTreeMode1').prop('checked',true);
+                }
 
-                            var init_val = $dlg.find('input[name="allowed_UGrpID"]').val();
-                            if(init_val=='' && selval!=2 && $dlg.find('input[name="allowed_svsIDs"]').val()==''){
-                                init_val==5;//web search  by default
-                            }
+                //visible for buttons and tree mode
+                var ele = $dlg.find('#allowed_UGrpID');
+                if(!ele.editing_input('instance')){
 
-                            var ed_options = {
-                                recID: -1,
-                                dtID: ele.attr('id'), 
-                                values: [init_val], 
-                                readonly: false,
-                                showclear_button: true,
-                                dtFields:{
-                                    dty_Type:"resource", rst_MaxValues:1,
-                                    rst_DisplayName: 'EITHER Show all filters in these workgroups', 
-                                    rst_DisplayHelpText:'',
-                                    rst_FieldConfig: {entity:'sysGroups', csv:true}
-                                },
-                                change:function(){
-                                    $dlg.find('#allowed_svsIDs').editing_input('setValue','');
-                                    $dlg.find('#init_svsID').editing_input('setValue','');
-                                    __restFilterForInitSearch();
-                                }
-                            };
+                    var init_val = $dlg.find('input[name="allowed_UGrpID"]').val();
+                    if(init_val=='' && selval!=2 && $dlg.find('input[name="allowed_svsIDs"]').val()==''){
+                        init_val==5;//web search  by default
+                    }
 
-                            ele.editing_input(ed_options);
-                            //ele.editing_input('setValue','5'); 
-                            ele.parent().css('display','block');
-                            ele.find('.header').css({'width':'150px','text-align':'right'});
-
+                    var ed_options = {
+                        recID: -1,
+                        dtID: ele.attr('id'), 
+                        values: [init_val], 
+                        readonly: false,
+                        showclear_button: true,
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:1,
+                            rst_DisplayName: 'EITHER Show all filters in these workgroups', 
+                            rst_DisplayHelpText:'',
+                            rst_FieldConfig: {entity:'sysGroups', csv:true}
+                        },
+                        change:function(){
+                            $dlg.find('#allowed_svsIDs').editing_input('setValue','');
+                            $dlg.find('#init_svsID').editing_input('setValue','');
+                            __restFilterForInitSearch();
                         }
+                    };
 
-                        //visible for buttons mode only
-                        ele = $dlg.find('#allowed_svsIDs');
-                        if(!ele.editing_input('instance')){
+                    ele.editing_input(ed_options);
+                    //ele.editing_input('setValue','5'); 
+                    ele.parent().css('display','block');
+                    ele.find('.header').css({'width':'150px','text-align':'right'});
+                }
 
-                            var ed_options = {
-                                recID: -1,
-                                dtID: ele.attr('id'), 
-                                values: [$dlg.find('input[name="allowed_svsIDs"]').val()],
-                                readonly: false,
-                                showclear_button: true,
-                                dtFields:{
-                                    dty_Type:"resource", rst_MaxValues:1,
-                                    rst_DisplayName: 'OR Choose specific filters', rst_DisplayHelpText:'',
-                                    rst_FieldConfig: {entity:'usrSavedSearches', csv:true}
-                                },
-                                change:function(){
-                                    $dlg.find('#allowed_UGrpID').editing_input('setValue','');
-                                    $dlg.find('#init_svsID').editing_input('setValue','');
-                                    __restFilterForInitSearch();
-                                }
-                            };
+                //visible for buttons mode only
+                ele = $dlg.find('#allowed_svsIDs');
+                if(!ele.editing_input('instance')){
 
-                            ele.editing_input(ed_options);
-                            ele.parent().css('display','block');
-                            ele.find('.header').css({'width':'150px','text-align':'right'});
-
+                    var ed_options = {
+                        recID: -1,
+                        dtID: ele.attr('id'), 
+                        values: [$dlg.find('input[name="allowed_svsIDs"]').val()],
+                        readonly: false,
+                        showclear_button: true,
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:1,
+                            rst_DisplayName: 'OR Choose specific filters', rst_DisplayHelpText:'',
+                            rst_FieldConfig: {entity:'usrSavedSearches', csv:true}
+                        },
+                        change:function(){
+                            $dlg.find('#allowed_UGrpID').editing_input('setValue','');
+                            $dlg.find('#init_svsID').editing_input('setValue','');
+                            __restFilterForInitSearch();
                         }
+                    };
 
-                        ele = $dlg.find('#init_svsID');
-                        if(!ele.editing_input('instance')){
+                    ele.editing_input(ed_options);
+                    ele.parent().css('display','block');
+                    ele.find('.header').css({'width':'150px','text-align':'right'});
+                }
 
-                            var ed_options = {
-                                recID: -1,
-                                dtID: ele.attr('id'), 
-                                values: [$dlg.find('input[name="init_svsID"]').val()],
-                                readonly: false,
-                                showclear_button: true,
-                                dtFields:{
-                                    dty_Type:"resource", rst_MaxValues:1,
-                                    rst_DisplayName: 'Trigger this filter on page load', rst_DisplayHelpText:'',
-                                    rst_FieldConfig: {entity:'usrSavedSearches', csv:false} 
-                                }
-                            };
+                ele = $dlg.find('#init_svsID');
+                if(!ele.editing_input('instance')){
 
-
-                            ele.editing_input(ed_options);
-                            ele.parent().css('display','block');
-                            ele.find('.header').css({'width':'150px','text-align':'right'});
-
+                    var ed_options = {
+                        recID: -1,
+                        dtID: ele.attr('id'), 
+                        values: [$dlg.find('input[name="init_svsID"]').val()],
+                        readonly: false,
+                        showclear_button: true,
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:1,
+                            rst_DisplayName: 'Trigger this filter on page load', rst_DisplayHelpText:'',
+                            rst_FieldConfig: {entity:'usrSavedSearches', csv:false} 
                         }
+                    };
 
 
-                        function __getSearchTreeMode(){
-                            var ele_rb = $dlg.find('input[name="searchTreeMode"]')
-                            var selval = '';
-                            $.each(ele_rb, function(idx, item){
-                                item = $(item);
-                                if(item.is(':checked')){
-                                    selval = item.prop('value');
-                                    return false;
-                                }
-                            });
-                            return selval
+                    ele.editing_input(ed_options);
+                    ele.parent().css('display','block');
+                    ele.find('.header').css({'width':'150px','text-align':'right'});
+                }
+
+                function __getSearchTreeMode(){
+                    var ele_rb = $dlg.find('input[name="searchTreeMode"]')
+                    var selval = '';
+                    $.each(ele_rb, function(idx, item){
+                        item = $(item);
+                        if(item.is(':checked')){
+                            selval = item.prop('value');
+                            return false;
                         }
+                    });
+                    return selval
+                }
 
-                        function __restFilterForInitSearch(){
+                function __restFilterForInitSearch(){
 
-                            var ifilter = null; 
-                            var val = $dlg.find('#allowed_svsIDs').editing_input('getValues');
-                            // $dlg.find('input[name="allowed_svsIDs"]').val();
-                            if(!window.hWin.HEURIST4.util.isempty(val) && val[0]!=''){
-                                if($.isArray(val)) val = val.join(',');
-                                ifilter = {svs_ID:val};
-                            }else{
-                                val = $dlg.find('#allowed_UGrpID').editing_input('getValues');
-                                //$dlg.find('input[name="allowed_UGrpID"]').val();
-                                if(!window.hWin.HEURIST4.util.isempty(val) && val[0]!=''){
-                                    if($.isArray(val)) val = val.join(',');
-                                    ifilter = {svs_UGrpID:val};
-                                }
-                            }
-
-
-                            ele.editing_input({
-                                dtFields:{
-                                    dty_Type:"resource", rst_MaxValues:1,
-                                    rst_DisplayName: 'Initial filter', rst_DisplayHelpText:'',
-                                    rst_FieldConfig: {entity:'usrSavedSearches', csv:false,
-                                        initial_filter:ifilter, search_form_visible:(ifilter==null)    
-                                    } 
-                                }
-                            }); 
+                    var ifilter = null; 
+                    var val = $dlg.find('#allowed_svsIDs').editing_input('getValues');
+                    // $dlg.find('input[name="allowed_svsIDs"]').val();
+                    if(!window.hWin.HEURIST4.util.isempty(val) && val[0]!=''){
+                        if($.isArray(val)) val = val.join(',');
+                        ifilter = {svs_ID:val};
+                    }else{
+                        val = $dlg.find('#allowed_UGrpID').editing_input('getValues');
+                        //$dlg.find('input[name="allowed_UGrpID"]').val();
+                        if(!window.hWin.HEURIST4.util.isempty(val) && val[0]!=''){
+                            if($.isArray(val)) val = val.join(',');
+                            ifilter = {svs_UGrpID:val};
                         }
-
-                        __restFilterForInitSearch();
-
-                        ele_rb.change();
+                    }
 
 
+                    ele.editing_input({
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:1,
+                            rst_DisplayName: 'Initial filter', rst_DisplayHelpText:'',
+                            rst_FieldConfig: {entity:'usrSavedSearches', csv:false,
+                                initial_filter:ifilter, search_form_visible:(ifilter==null)    
+                            } 
+                        }
+                    }); 
+                }
+
+                __restFilterForInitSearch();
+
+                ele_rb.change();
+
+                $dlg.find('input[name="simple_search_allowed"]').change(function(){
+                    var is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
+                    if(is_vis){
+                        $dlg.find('#simple_search_header').parent().css('display','table-row');
+                        $dlg.find('#simple_search_text').parent().css('display','table-row');
+                    }else{
+                        $dlg.find('#simple_search_header').parent().css('display','none');
+                        $dlg.find('#simple_search_text').parent().css('display','none');
+                    }
+                });
+
+                var is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
+                if(is_vis){
+                    $dlg.find('#simple_search_header').parent().css('display','table-row');
+                    $dlg.find('#simple_search_text').parent().css('display','table-row');
+                }else{
+                    $dlg.find('#simple_search_header').parent().css('display','none');
+                    $dlg.find('#simple_search_text').parent().css('display','none');
+                }
             }else
             if(widget_name=='heurist_Map' && 
                 $dlg.find('select[name="mapdocument"]').find('options').length==0){

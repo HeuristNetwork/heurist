@@ -138,7 +138,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 "searchrecuploadedfilesonaddext": function() { this._additionMode='remote'; this.addEditRecord(-1); },
                 "searchrecuploadedfilesonaddpopup": function() {this._additionMode='local'; this.addEditRecord(-1); },
                 "searchrecuploadedfilesonaddany": function() { this._additionMode='any'; this.addEditRecord(-1); },
-                "searchrecuploadedfilesonaddlocal": this._uploadFileAndRegister   //browse, register and exit at once
+                "searchrecuploadedfilesonaddlocal": this._uploadFileAndRegister,   //browse, register and exit at once
+                "searchrecuploadedfilesondownload": this._downloadFileRefs
                 });
         
         return true;
@@ -964,6 +965,22 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             
             
         }
-    }    
+    },
+
+    //
+    // Download file references for current resultset
+    //
+    _downloadFileRefs: function(){
+
+        var ids = this.recordList ? this.recordList.resultList('getRecordSet').getIds() : [];
+
+        if(ids.length == 0){
+            window.hWin.HEURIST4.msg.showMsgFlash('No files in current search', 2000);
+            return;
+        }
+
+        var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_output.php?db=' + window.hWin.HAPI4.database + '&file_refs=1&ids=' + ids.join(',');
+        window.open(url, '_blank');
+    }
     
 });

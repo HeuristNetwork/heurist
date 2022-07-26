@@ -1,5 +1,5 @@
 /**
-* Search header for DefTerms manager
+* Search header for Record Uploaded Files manager
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -72,26 +72,8 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     window.hWin.HEURIST4.ui.showEntityDialog('defFileExtToMimetype',
                                                 {edit_mode:'inline', width:900});
                 }); 
-                
-            
-            /*    
-            this.btn_add_record_any.css({'min-width':'9em','z-index':2})
-                    .button({label: window.hWin.HR("Add any"),icons: {
-                            primary: "ui-icon-plus"
-                    }})
-                .click(function(e) {
-                    that._trigger( "onaddany" );
-                }); */
-                
-            /*
-            if(this.options.edit_mode=='inline'){
-                this.btn_add_record_loc.parent().css({'float':'left','border-bottom':'1px lightgray solid',
-                'width':'100%', 'min-height': '2.4em', 'margin-bottom': '0.4em'});    
-            }     
-            */                  
         }
-        
-            
+
         this.selectGroup = this.element.find('#sel_group');
         
         //only one domain to show - as specified in options
@@ -133,7 +115,13 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         }
         
         //this.btn_search_start.removeClass('ui-button-icon-only').css('margin-left','4em');
-                      
+
+        if(this.options.select_mode=='manager'){
+            this._on(this.element.find('#dwnld_refs'), { click: function(){ this._trigger("ondownload"); } });
+        }else{
+            this.element.find('#dwnld_refs').hide();
+        }
+
         this.startSearch();   
         
         this.input_search.focus();         

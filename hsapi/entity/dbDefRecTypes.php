@@ -498,10 +498,98 @@ class DbDefRecTypes extends DbEntityBase
             
     //
     // batch action for rectypes
-    // 1) import rectype from another db
+    // 1) import rectype from another db - @todo
+    // 2) import rectype from CSV import
     //
     public function batch_action(){
-         //@todo
+
+        $mysqli = $this->system->get_mysqli();
+
+        $this->need_transaction = false;
+        $keep_autocommit = mysql__begin_transaction($mysqli);
+
+        $ret = true;
+
+        if(@$this->data['csv_import']){ // import new rectypes via CSV
+
+            if(@$this->data['fields'] && is_string($this->data['fields'])){ // new to perform extra validations first
+                $this->data['fields'] = json_decode($this->data['fields'], true);
+            }
+
+            if(count($this->data['fields'])>0){
+
+                $ret = array();
+                foreach($this->data['fields'] as $idx => $record){
+
+                    $ret[$idx] = array();
+                    if(empty(@$record['rty_Name'])){ // check that a name has been provided
+                        $ret[$idx][] = 'A record type name is required';
+                    }else{ // check that the name hasn't been used yet
+                        $exists = mysql__select_value($mysqli, 'SELECT rty_ID FROM defRecTypes WHERE rty_Name="'. $record['rty_Name'] .'"');
+                        if($exists){
+                            $ret[$idx][] = $record['rty_Name'] . ' is already in use by record type ID#' . $exists;
+                        }
+                    }
+                    if(empty(@$record['rty_Description'])){ // check that a description has been provided
+                        $ret[$idx][] = 'A record type description is required';
+                    }
+
+                    if(count($ret[$idx]) != 0){ // has error
+
+                        unset($this->data['fields'][$idx]);
+                        $ret[$idx] = implode(' ', $ret[$idx]);
+                    }else{
+
+                        $ret[$idx] = '';
+
+                        if(!array_key_exists($this->data['fields'][$idx], 'rty_Plural')){ // add plural
+                            $this->data['fields'][$idx]['rty_Plural'] = $record['rty_Name'] . 's';
+                        }
+                        if(!array_key_exists($this->data['fields'][$idx], 'rty_TitleMask')){ // add default title mask
+                            $this->data['fields'][$idx]['rty_TitleMask'] = 'Please edit any <b>' . $record['rty_Name'] . '</b> record to choose fields for the constructed title';
+                        }
+                        if(!array_key_exists($this->data['fields'][$idx], 'rty_RecTypeGroupID') && isset($this->data['rtg_ID'])){ // add rectype group
+                            $this->data['fields'][$idx]['rty_RecTypeGroupID'] = $this->data['rtg_ID']; error_log(print_r($this->data['fields'][$idx], TRUE));
+                        }
+                    }
+                }
+
+                $idx_to_do = array_keys($this->data['fields']);
+                $this->data['fields'] = array_values($this->data['fields']); // re-write indexes
+
+                $result = true;
+                if(count($this->data['fields']) > 0){ // ensure there are still rectypes to define
+                    $result = $this->save();
+                }
+
+                if(!$result){
+                    $ret = false;
+                }else if(count($idx_to_do) > 0){ // check if success messages need to be added
+
+                    $i = 0;
+                    foreach ($idx_to_do as $idx){
+                        if(strlen($ret[$idx]) > 0){
+                            continue;
+                        }
+
+                        $ret[$idx] = 'Created ID#'.$this->records[$i]['rty_ID'];
+                        $i++;
+                    }
+                }
+            }else{
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'No import data has been provided. Ensure that you have enter the necessary CSV rows.<br>Please contact the Heurist team if this problem persists.');
+            }
+        }
+
+        if($ret===false){
+            $mysqli->rollback();
+        }else{
+            $mysqli->commit();    
+        }
+
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+        return $ret;
     }    
     
     //
