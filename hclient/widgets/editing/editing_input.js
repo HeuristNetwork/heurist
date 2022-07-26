@@ -174,8 +174,6 @@ $.widget( "heurist.editing_input", {
 
         }else{
 
-if(that.options.dtID==1) 
-console.log('>>>> '+that.options.dtID+'  '+lblTitle);
             //hardcoded list of fields and record types where multivalues mean translation (multilang support)
             var is_translation = this.f('rst_MultiLang') || 
                (that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']
@@ -2728,7 +2726,6 @@ console.log('>>>> '+that.options.dtID+'  '+lblTitle);
                                     $progressLabel.text( "Complete!" );
                               }
                           });
-         
          
          
         var fileupload_opts = {

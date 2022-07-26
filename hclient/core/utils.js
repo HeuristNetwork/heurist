@@ -551,7 +551,10 @@ window.hWin.HEURIST4.util = {
                     }
                     if(r.q){
                         query = r.q;
+                    }else if(r.type!=3) {
+                        query = r;
                     }
+                    
                     if(r.db){
                         db = r.db;
                     }
@@ -565,8 +568,8 @@ window.hWin.HEURIST4.util = {
                             res[key] = r[key];
                         }
                     });
-                    
-                    
+                }else{
+                    query = qsearch;
                 }
             }
             

@@ -339,7 +339,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 sAdditional_Controls += 
                 '<div><div class="header optional" style="vertical-align: top; display: table-cell;">'
                 +'<label>Select:</label></div><span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
-                +'<div class="input-cell" style="padding-bottom: 12px;"><div id="btn_select_file"></div>'+sHelp+'</div></div>';
+                +'<div class="input-cell" style="padding-bottom: 12px;">'
+                +'<div id="btn_select_file"></div><div id="btn_register_stack"></div>'+sHelp+'</div></div>';
 
                 
                 $(sAdditional_Controls)
@@ -378,8 +379,58 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                              that._initControls();
                          }
                     }); 
+                
+                if(this._additionMode=='tiled')
+                {
+                    this._edit_dialog.find('#btn_select_file').css('display','inline-block');
                     
-                    
+                    this._edit_dialog.find('#btn_register_stack')
+                        .css({'min-width':'9em','z-index':2,'margin-left':'5px','display':'inline-block'})
+                        .button({label: window.hWin.HR('Register previously uploaded image stack')
+                        ,icons: {
+                                primary: "ui-icon-grid"
+                        }})
+                        .click(function(e) {
+                            
+                            if(!that.select_folder_dlg){
+                                that.select_folder_dlg = $('<div/>').hide().appendTo( that._edit_dialog );
+                            }
+                                
+                            that.select_folder_dlg.select_folders({
+                               onselect:function(newsel){
+                                    if(newsel){
+                                        if(that.options.edit_addrecordfirst){
+                                            //that.options.edit_addrecordfirst = false;
+                                            that._initControls();
+                                             
+                                            that._currentEditID = null;
+                                            that._editing.setFieldValueByName2('ulf_ExternalFileReference', newsel+'/', false);
+                                            
+                                            var ele2 = that._editing.getFieldByName('ulf_MimeExt');
+                                            ele2.editing_input('setValue', 'png' );
+                                            ele2.show();
+                                            //that.onEditFormChange();
+                                            var interval = setInterval(function(){
+                                                if(!window.hWin.HAPI4.is_callserver_in_progress()){
+                                                    clearInterval(interval);
+                                                    interval = 0;
+                                                    that._saveEditAndClose(null);        
+                                                }
+                                            },500);
+                                            
+                                        }
+                                    }
+                               }, 
+                               root_dir: 'uploaded_tilestacks',
+                               allowEdit: false,
+                               selectedFolders: '', 
+                               multiselect: false});
+                            
+                            
+                        }); 
+                }else{
+                    this._edit_dialog.find('#btn_register_stack').hide();    
+                }
                 
                 
                     
@@ -533,7 +584,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     //
     _requestMimeTypeByURL:function(){
         
-        if(this._additionMode=='tiled'){
+        if(this._additionMode=='tiled' || this._editing.getValue('ulf_OrigFileName')[0].indexOf('_tiled')==0 ){
             //special case for tiled image stack            
             var ele2 = this._editing.getFieldByName('ulf_MimeExt');
             if(this._previousURL){
@@ -570,7 +621,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 
             }
             if(ext==null) ext = '';
-             
+
+            
             var msg_error = that._validateExt( ext );
             
             ele2.editing_input('setValue', ext );
@@ -712,7 +764,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         
         this._super(recID, is_proceed);
     },
-
+    
     //
     // open empty edit dialog
     // upload file (editing_input type file - uploads file, register it and get new ulf_ID)

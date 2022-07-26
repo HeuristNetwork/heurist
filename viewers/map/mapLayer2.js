@@ -27,13 +27,17 @@ function hMapLayer2( _options ) {
     _version   = "0.4";
 
     var options = {
-        //mapwidget:              
+        //mapwidget:        refrence to mapping.js      
+        //record_id  - loads arbitrary layer (not from mapdocument) (used for basemap image layer)
+        
         //mapdoc_recordset: // recordset to retrieve values from rec_layer and rec_datasource
         
         //rec_layer:       // record of type Heurist layer, it is needed for symbology and min/max zoom
         //rec_datasource:  // record of type map dataseource
-
-        preserveViewport: true  
+        
+        //not_init_atonce  - if true don't add to nativemap
+        //mapdocument_id
+        preserveViewport: true   //if false zoom to this layer
     };
 
     var _record,     //datasource record
@@ -52,17 +56,74 @@ function hMapLayer2( _options ) {
     function _init( _options ){
 
         options = $.extend(options, _options);
+        
+        if(options.record_id>0){
+            //search record on server side
+            _searchLayerRecord( options.record_id );
+            
+            options.record_id = -1;
+        }else{
 
-        _recordset = options.mapdoc_recordset;
-        _record = options.rec_datasource;
-        _parent_mapdoc = options.mapdocument_id;
+            _recordset = options.mapdoc_recordset;
+            _record = options.rec_datasource;
+            _parent_mapdoc = options.mapdocument_id;
+            
+            if(options.not_init_atonce) return;
+            
+            _addLayerToMap();
         
-        if(options.not_init_atonce) return;
-        
-        _addLayerToMap();
+        }
         
     }
     
+    //
+    //
+    //    
+    function _searchLayerRecord(record_id){
+        
+            var request = {
+                        q: {"ids":record_id},  
+                        rules:[{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}], //data sources linked to layers
+                        w: 'a',
+                        detail: 'detail',
+                        source: 'map_document'};
+                        
+            //perform search        
+            window.hWin.HAPI4.RecordMgr.search(request,
+                function(response){
+                    
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        var resdata = new hRecordSet(response.data);
+                        
+                        // detect map layer record                        
+                        resdata.each(function(recID, record){
+                                    
+                                    if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER)
+                                    {
+                                        var datasource_recID = resdata.fld(record, DT_DATA_SOURCE);    
+                                        var datasource_record = resdata.getById( datasource_recID );
+                                        
+                                        //creates and add layer to nativemap
+                                        //returns mapLayer object
+                                        _init({rec_layer: record, 
+                                               rec_datasource: datasource_record, 
+                                               mapdoc_recordset: resdata, //need to get fields
+                                               mapwidget: options.mapwidget});
+                                    }
+                        });
+                        
+                    }else {
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+
+                }
+            );           
+        
+    }
+    
+    //
+    //
+    //
     function _addLayerToMap()
     {
         is_inited = true;

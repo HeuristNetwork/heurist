@@ -152,10 +152,16 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
                
               $op = @$_REQUEST['operation'];
               if(!$op || $op=='list'){
-                
-                $res = folderTree(@$_REQUEST['root_dir'], array('systemFolders'=>$folders,'format'=>'fancy') ); //see utils_file
-                $res = $res['children'];
-                //$res = folderTreeToFancyTree($res, 0, $folders);
+
+                  $root_dir = null;
+                  if(@$_REQUEST['root_dir']){
+                      $root_dir = HEURIST_FILESTORE_DIR.@$_REQUEST['root_dir'];     
+                  }
+
+                  $res = folderTree($root_dir, 
+                      array('systemFolders'=>$folders,'format'=>'fancy') ); //see utils_file
+                  $res = $res['children'];
+                  //$res = folderTreeToFancyTree($res, 0, $folders);
               }else{
                   
                   $res = false;

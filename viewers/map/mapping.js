@@ -314,7 +314,16 @@ $.widget( "heurist.mapping", {
         
         $('#'+map_element_id).css('padding',0); //reset padding otherwise layout set it to 10px
         
-        this.nativemap = L.map( map_element_id, {zoomControl:false, tb_del:true} )
+        var map_options = {zoomControl:false, tb_del:true};
+        
+
+        var map_crs_simple = window.hWin.HAPI4.database == 'johns_Tilemap_Test' 
+                        || window.hWin.HAPI4.get_prefs_def('map_crs_simple',0);
+        if(map_crs_simple){
+            map_options['crs'] = L.CRS.Simple;
+        }
+
+        this.nativemap = L.map( map_element_id,  map_options)
             .on('load', function(){ } );
 
         this.nativemap.on('zoomend', function (e) {
@@ -327,8 +336,6 @@ $.widget( "heurist.mapping", {
             }
         });
                         
-                        
-            
         //init basemap layer        
 /*        
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
@@ -470,6 +477,39 @@ $.widget( "heurist.mapping", {
 
     getBaseMapFilter: function(){
         return this.basemaplayer_filter;
+    },
+    
+    //
+    // load as a base map Heurist Image Layer record
+    //
+    loadBaseMapImage: function(record_id){
+        
+        //continuousWorld
+        var basemap_layer = hMapLayer2({record_id:record_id, mapwidget:this.element});
+        
+        /*
+        var cnt = 0;
+        var that = this;
+        var interval = setInterval(function()
+        {
+            var id = basemap_layer.getNativeId();
+            
+            if(that.all_layers[id]){
+                cnt = 50;
+                var bounds = basemap_layer.getBounds();
+console.log(id);                
+console.log(bounds);
+                //that.nativemap.setMaxBounds(bounds);
+                //that.nativemap.fitBounds(bounds);        
+            }
+            cnt++;
+            if(cnt>=50){
+                clearInterval(interval);
+                interval = 0;
+            }
+            
+        },200);
+        */
     },
     
     //
@@ -3125,7 +3165,19 @@ $.widget( "heurist.mapping", {
         //$('#map-settingup-message').text('EXPERIMENTAL');
         
         // basemap: name of initial basemap
-        if(params['basemap']){
+        
+        var map_basemap_layer = window.hWin.HAPI4.get_prefs_def('map_basemap_layer',0);
+        //map_basemap_layer = 1049; //broomley map
+        if(window.hWin.HAPI4.database == 'johns_Tilemap_Test'){
+            map_basemap_layer = 10;
+        }
+        
+        
+        if(map_basemap_layer>0){
+            
+            this.loadBaseMapImage( map_basemap_layer );
+            
+        }else if(params['basemap']){
 
             this.mapManager.loadBaseMap( params['basemap'] );  
             

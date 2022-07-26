@@ -25,7 +25,11 @@ $.widget( "heurist.select_folders", {
 
         multiselect: true, 
         
+        allowEdit: true,
+        
         onselect: null,
+        
+        root_dir: null,
         
         selectedFolders: [] //array or semicolon separated list
         
@@ -117,6 +121,10 @@ $.widget( "heurist.select_folders", {
         });
         */
         
+        if(!this.options.allowEdit){
+            ent_header.hide();
+        }
+        
                 
 
         if(this.options.isdialog){
@@ -192,9 +200,14 @@ $.widget( "heurist.select_folders", {
         .appendTo( this.recordList );
          
             //search for images in given array of folder
-            var that = this;                                                
+            var that = this;                            
+            
+            var opts = {};
+            if(this.options.root_dir){
+                opts.root_dir = this.options.root_dir;
+            }
        
-            window.hWin.HAPI4.SystemMgr.get_sysfolders({}, 
+            window.hWin.HAPI4.SystemMgr.get_sysfolders(opts, 
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
                         that._initTreeView( response.data );
