@@ -103,9 +103,9 @@ $2 chmod -R ug+rwx "${base_dir}/HEURIST/$1"
 
 # Place simlinks in instance directory
 cd "${base_dir}/HEURIST/$1"
-$2 ln -s "${base_dir}/HEURIST/HEURIST_SUPPORT/external_h5" external
-$2 ln -s "${base_dir}/HEURIST/HEURIST_SUPPORT/vendor" vendor
-$2 ln -s "${base_dir}/HEURIST/HEURIST_SUPPORT/help" help
+$2 ln -s ../HEURIST_SUPPORT/external_h5 external
+$2 ln -s ../HEURIST_SUPPORT/vendor vendor
+$2 ln -s ../HEURIST_SUPPORT/help help
 
 echo "Heurist unpacked"
 
