@@ -2822,9 +2822,11 @@ console.log(bounds);
             }
         }
         
+        var is_main_ui = false;
+        
         if(this.options.element_layout){
             
-            var is_main_ui = params['ui_main']; //if true show separate toolbar for map controls
+            is_main_ui = params['ui_main']; //if true show separate toolbar for map controls
            
             if(is_main_ui){
                 layout_opts.north__size = 36;
@@ -2974,153 +2976,6 @@ console.log(bounds);
                 
                 if(that['map_'+val] && !that['map_'+val]._map) that['map_'+val].addTo(that.nativemap);
                 
-                if(is_main_ui){
-                    var toolbar = $('#mapToolbarDiv');
-                    
-                    $('.leaflet-control').css({clear:'none','margin-top':'0px'});
-                    
-                    that._on(toolbar, {click:function(e){
-                        if(!$(e.target).hasClass('ui-icon-bookmark')){
-                            that.map_bookmark.collapse();    
-                        }
-                        if(!$(e.target).hasClass('ui-icon-print')){
-                            $('.browser-print-mode').hide();
-                        }
-                    }});
-                    
-                    if(val=='legend'){
-                        
-                        toolbar.find('.ui-icon-list').attr('title','Map Legend')
-                            .button()
-                            .on({click:function(){that.mapManager.toggle();}});
-                            
-                    }else if(val=='bookmark'){
-
-                        if(that.map_bookmark){
-                            
-                            toolbar.find('.ui-icon-bookmark').attr('title','Manage spatial bookmarks')
-                                .button()
-                                .on({click:function(){
-                                    var ele = $('.bookmarks-container');
-                                    if(ele.is(':visible')){
-                                        that.map_bookmark.collapse();    
-                                    }else{
-                                        that.map_bookmark.expand();    
-                                        //ele.css({top: that.map_bookmark.position().y+10});
-                                        //left: $('a.ui-icon-bookmark').position().x});
-                                    }
-                                    
-                                    //position({of:$('a.ui-icon-bookmark'),my:'top left', at:'bottom left' });
-                            }});
-                                
-                                
-                            var ele2 = that.map_bookmark.getContainer();
-                            $(ele2).css({'margin-top':'10px'});
-                            
-                            $(that.map_bookmark.getContainer()).css({border:'none',height:'1px !important', padding: '0px', background: 'none'});
-                            $('.bookmarks-header').hide();
-                        }else{
-                            toolbar.find('.ui-icon-bookmark').hide();
-                        }
-                        
-                    }else if(val=='print'){
-
-                        if(that.map_print){
-                            toolbar.find('.ui-icon-print').button()
-                                .attr('title', window.hWin.HR('Print map'))
-                                .on({click:function(){  
-                                    $('.browser-print-mode').css('display','inline-block');
-                                }});
-                            
-                            $(that.map_print.getContainer()).css({border:'none',height:'0px !important',
-                                                    width:'0px !important','margin-left':'200px'});
-                            $('.leaflet-browser-print').hide();
-                        }else{
-                            toolbar.find('.ui-icon-print').hide();
-                        }
-                        
-                    }else if(val=='publish'){ //publish plugin
-
-                        if(that.map_publish){
-                            $(that.map_publish.getContainer()).hide();
-                            that._on(
-                            toolbar.find('.ui-icon-globe').button()
-                                .attr('title', window.hWin.HR('Publish map')),
-                                {click:function(){  
-                                    window.hWin.HEURIST4.ui.showPublishDialog( {mode:'mapquery', mapwidget:this} );
-                                }});
-                        }else{
-                            toolbar.find('.ui-icon-globe').hide();
-                        }
-                        
-                    }else if(val=='help'){ 
-
-                        if(that.map_help){
-                            $(that.map_help.getContainer()).hide();
-                            
-                            window.hWin.HEURIST4.ui.initHelper({ button:toolbar.find('.ui-icon-help').button(),
-                                url: window.hWin.HRes('mapping_overview.html #content'),
-                                position: { my: 'center center', at: 'center center', 
-                                    of: $(window.parent.document).find('#map-frame').parent() } 
-                                    , no_init:true} ); //this.element
-                        
-                        }else{
-                            toolbar.find('.ui-icon-help').hide();
-                        }
-                        
-                            
-                            
-                    }else if(val=='addmapdoc'){ //addmapdoc plugin
-                        $(that.map_addmapdoc.getContainer()).hide();
-                        
-                        toolbar.find('#btn_add_mapdoc')
-                            .attr('title', window.hWin.HR('Create new map document'))
-                                .html('<span class="ui-icon ui-map-document" style="width:22px;margin:0px;height:22px">'
-                                +'<span class="ui-icon ui-icon-plus" style="position:absolute;right:0px;font-size:12px;color:white;text-shadow: 2px 2px gray;bottom:0px" />'
-                                +'</span>')                        
-                            .button()
-                            .on({click:function(){
-                                    that.mapManager.createNewMapDocument();
-                            }});
-                            
-                    }else  if(val=='geocoder'){
-
-                        if(that.map_geocoder){
-                            $(that.map_geocoder.getContainer()).hide();
-
-                            toolbar.find('.ui-icon-search').button()
-                                .attr('title', window.hWin.HR('Search for a place'))
-                                .on({click:function(){  
-                                    $(that.map_geocoder.getContainer()).show();
-                                    that.map_geocoder._expand();
-                                }});
-                            
-                            L.DomEvent.addListener(that.map_geocoder, 'collapse', 
-                                function(){
-                                    $(that.map_geocoder.getContainer()).hide();
-                                }
-                                );
-                        }else{
-                            toolbar.find('.ui-icon-search').hide();
-                        }
-                            
-                    }else  if(val=='zoom'){
-
-
-                        toolbar.find('.ui-icon-plus').button()
-                            .attr('title', window.hWin.HR('Zoom in'))
-                            .on({click:function(){  that.nativemap.zoomIn(); }});
-                        
-                        toolbar.find('.ui-icon-minus').button()
-                            .attr('title', window.hWin.HR('Zoom out'))
-                            .on({click:function(){  that.nativemap.zoomOut(); }});
-
-                        $(that.map_zoom.getContainer()).hide();
-                    }
-                    
-                }
-                
-                
             }else if(that['map_'+val]){
                 that['map_'+val].remove();
             }
@@ -3139,23 +2994,8 @@ console.log(bounds);
         __controls('addmapdoc');    
         __controls('help');
         
-        
         if(is_main_ui){
-            var toolbar = $('#mapToolbarDiv');
-            var $mapdocSel = toolbar.find('#mapDocumentSel');
-            this._on(toolbar.find('#btn_layout_map').button({text:'Map'}),
-                {click:function(e){  
-                    this.nomap = !this.nomap;
-                    if(this.notimeline && this.nomap) this.notimeline = false;
-                    this._updatePanels()
-                }});
-            this._on(toolbar.find('#btn_layout_timeline').button({text:'Timeline'}),
-                {click:function(e){  
-                    this.notimeline = !this.notimeline;
-                    if(this.notimeline && this.nomap) this.nomap = false;
-                    this._updatePanels()
-                }});
-            this.mapManager.populateMapDocuments($mapdocSel);
+            this.initToolbarInMainUI();
         }
         
             
@@ -3193,6 +3033,166 @@ console.log(bounds);
         $('#'+map_element_id).find('#map-loading').empty();
         
         // extent: fixed extent    
+    },
+    
+    //
+    //
+    //    
+    initToolbarInMainUI: function(){
+    
+        if(this.ui_main_inited===true) return;
+        
+        this.ui_main_inited = true;
+        
+        var that = this;    
+        //need to init only once!
+
+        var toolbar = $('#mapToolbarDiv');
+
+        $('.leaflet-control').css({clear:'none','margin-top':'0px'});
+
+        that._on(toolbar, {click:function(e){
+            if(!$(e.target).hasClass('ui-icon-bookmark')){
+                that.map_bookmark.collapse();    
+            }
+            if(!$(e.target).hasClass('ui-icon-print')){
+                $('.browser-print-mode').hide();
+            }
+        }});
+
+        toolbar.find('.ui-icon-list').attr('title','Map Legend')
+        .button()
+        .on({click:function(){that.mapManager.toggle();}});
+
+        if(that.map_bookmark){
+
+            toolbar.find('.ui-icon-bookmark').attr('title','Manage spatial bookmarks')
+            .button()
+            .on({click:function(){
+                var ele = $('.bookmarks-container');
+                if(ele.is(':visible')){
+                    that.map_bookmark.collapse();    
+                }else{
+                    that.map_bookmark.expand();    
+                    //ele.css({top: that.map_bookmark.position().y+10});
+                    //left: $('a.ui-icon-bookmark').position().x});
+                }
+
+                //position({of:$('a.ui-icon-bookmark'),my:'top left', at:'bottom left' });
+            }});
+
+
+            var ele2 = that.map_bookmark.getContainer();
+            $(ele2).css({'margin-top':'10px'});
+
+            $(that.map_bookmark.getContainer()).css({border:'none',height:'1px !important', padding: '0px', background: 'none'});
+            $('.bookmarks-header').hide();
+        }else{
+            toolbar.find('.ui-icon-bookmark').hide();
+        }
+
+        if(that.map_print){
+            toolbar.find('.ui-icon-print').button()
+            .attr('title', window.hWin.HR('Print map'))
+            .on({click:function(){  
+                $('.browser-print-mode').css('display','inline-block');
+            }});
+
+            $(that.map_print.getContainer()).css({border:'none',height:'0px !important',
+                width:'0px !important','margin-left':'200px'});
+            $('.leaflet-browser-print').hide();
+        }else{
+            toolbar.find('.ui-icon-print').hide();
+        }
+
+
+        //publish plugin
+        if(that.map_publish){
+            $(that.map_publish.getContainer()).hide();
+            that._on(
+                toolbar.find('.ui-icon-globe').button()
+                .attr('title', window.hWin.HR('Publish map')),
+                {click:function(){  
+                    window.hWin.HEURIST4.ui.showPublishDialog( {mode:'mapquery', mapwidget:this} );
+            }});
+        }else{
+            toolbar.find('.ui-icon-globe').hide();
+        }
+
+        if(that.map_help){
+            $(that.map_help.getContainer()).hide();
+
+            window.hWin.HEURIST4.ui.initHelper({ button:toolbar.find('.ui-icon-help').button(),
+                url: window.hWin.HRes('mapping_overview.html #content'),
+                position: { my: 'center center', at: 'center center', 
+                    of: $(window.parent.document).find('#map-frame').parent() } 
+                , no_init:true} ); //this.element
+
+        }else{
+            toolbar.find('.ui-icon-help').hide();
+        }
+
+
+        toolbar.find('.ui-icon-plus').button()
+        .attr('title', window.hWin.HR('Zoom in'))
+        .on({click:function(){  that.nativemap.zoomIn(); }});
+
+        toolbar.find('.ui-icon-minus').button()
+        .attr('title', window.hWin.HR('Zoom out'))
+        .on({click:function(){  that.nativemap.zoomOut(); }});
+
+        $(that.map_zoom.getContainer()).hide();
+        
+
+
+        //addmapdoc plugin
+        $(that.map_addmapdoc.getContainer()).hide();
+
+        toolbar.find('#btn_add_mapdoc')
+        .attr('title', window.hWin.HR('Create new map document'))
+        .html('<span class="ui-icon ui-map-document" style="width:22px;margin:0px;height:22px">'
+            +'<span class="ui-icon ui-icon-plus" style="position:absolute;right:0px;font-size:12px;color:white;text-shadow: 2px 2px gray;bottom:0px" />'
+            +'</span>')                        
+        .button()
+        .on({click:function(){
+            that.mapManager.createNewMapDocument();
+        }});
+
+        if(that.map_geocoder){
+            $(that.map_geocoder.getContainer()).hide();
+
+            toolbar.find('.ui-icon-search').button()
+            .attr('title', window.hWin.HR('Search for a place'))
+            .on({click:function(){  
+                $(that.map_geocoder.getContainer()).show();
+                that.map_geocoder._expand();
+            }});
+
+            L.DomEvent.addListener(that.map_geocoder, 'collapse', 
+                function(){
+                    $(that.map_geocoder.getContainer()).hide();
+                }
+            );
+        }else{
+            toolbar.find('.ui-icon-search').hide();
+        }
+
+        var $mapdocSel = toolbar.find('#mapDocumentSel');
+        this._on(toolbar.find('#btn_layout_map').button({text:'Map'}),
+            {click:function(e){  
+                this.nomap = !this.nomap;
+                if(this.notimeline && this.nomap) this.notimeline = false;
+                this._updatePanels()
+            }});
+        this._on(toolbar.find('#btn_layout_timeline').button({text:'Timeline'}),
+            {click:function(e){  
+                this.notimeline = !this.notimeline;
+                if(this.notimeline && this.nomap) this.nomap = false;
+                this._updatePanels()
+            }});
+        this.mapManager.populateMapDocuments($mapdocSel);
+        
+        
     },
     
     
