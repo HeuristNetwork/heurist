@@ -108,7 +108,7 @@ if(@$_REQUEST['mode']=='2'){
         $targetdbname = $_REQUEST['targetdbname'];
 
         if(strlen($targetdbname)>64){
-                $sErrorMsg = 'Database name '.$targetdbname.' is too long. Max 64 characters allowed');
+                $sErrorMsg = 'Database name '.$targetdbname.' is too long. Max 64 characters allowed';
         }else{
             // Avoid illegal chars in db name
             $hasInvalid = preg_match('[\W]', $targetdbname);
@@ -477,7 +477,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
                 sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database sub directories', "Unable to create the sub directories within the database root directory,\nDatabase name: " . $targetdbname . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings: " . implode(",\n", $warnings));
                 if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
-                    sendEmail(HEURIST_MAIL_TO_ADMIN, "Unable to create the sub directories within the database root directory,\nDatabase name: " . $targetdbname . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings:\n" . implode(",\n", $warnings));
+                    sendEmail(HEURIST_MAIL_TO_ADMIN, "Unable to create database sub directories", "Unable to create the sub directories within the database root directory,\nDatabase name: " . $targetdbname . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings:\n" . implode(",\n", $warnings));
                 }
             }
 
