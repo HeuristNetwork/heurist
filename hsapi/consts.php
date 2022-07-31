@@ -276,6 +276,8 @@ $rtDefines = array(
     'RT_MAP_LAYER' => array(3, 1020),     
     'RT_QUERY_SOURCE' => array(3, 1021),  //RT_MAPABLE_QUERY
     'RT_TLCMAP_DATASET' => array(1271, 54),     
+    'RT_MAP_ANNOTATION' => array(2, 101),
+
 
     //Web content
     'RT_WEB_CONTENT' => array(1147, 25),

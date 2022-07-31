@@ -55,18 +55,24 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 ?>
 <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet/geocoder/Control.Geocoder.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet/leaflet-tileLayerPixelFilter.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js"></script>
 
 <!-- leaflet plugins -->
 <script src="<?php echo PDIR;?>external/leaflet/leaflet-providers.js"></script>
-<script src="<?php echo PDIR;?>external/leaflet/bookmarks/Leaflet.Bookmarks.js"></script>
+<script src="<?php echo PDIR;?>external/leaflet/bookmarks/Leaflet.Bookmarks.min.js"></script>
+<script src="<?php echo PDIR;?>external/leaflet/draw/leaflet.draw-src.js"></script>
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/bookmarks/leaflet.bookmarks.css">
 <script src="<?php echo PDIR;?>external/leaflet/leaflet.browser.print.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/draw/leaflet.draw.css">
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/markercluster/MarkerCluster.css">
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/markercluster/MarkerCluster.Default.css">
 <script src="<?php echo PDIR;?>external/leaflet/markercluster/leaflet.markercluster.js"></script>
 <script src="<?php echo PDIR;?>external/leaflet/wise-leaflet-pip.js"></script>
-<!-- <script src="<?php echo PDIR;?>external/leaflet/leaflet-iiif.js"></script> -->
 
+<link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/bookmarks/leaflet.bookmarks.css">
+
+
+<!-- <script src="<?php echo PDIR;?>external/leaflet/leaflet-iiif.js"></script> -->
 
 
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
@@ -126,6 +132,10 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     .leaflet-div-icon {
         background: none;
         border: none;
+    }
+    .leaflet-editing-icon{
+        background: #fff;
+        border: 1px solid #666;        
     }
 
     /*   
@@ -273,7 +283,8 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
             element_layout: '#mapping',
             element_map: '#map',
             layout_params:layout_params,
-            oninit: onMapInit
+            oninit: onMapInit,
+            drawMode: layout_params['ui_main']?'full':''
         });
     }
 
@@ -393,6 +404,8 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
                 <span style="display:inline-block;margin-left: 10px;font-size: small;">
                     Legend <a class="ui-icon ui-icon-list" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 5px;"></a>
                 </span>
+
+                <a id="btn_digitizing" class="ui-icon ui-icon-fullscreen-off" style="min-width:0px;width: 22px; height: 22px;padding:0px;display:inline-block;"></a>                
             </div>
         </div>
 

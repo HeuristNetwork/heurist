@@ -243,7 +243,6 @@ console.log('load google map api')
                             }else {
                                 typeCode = 'p';
                             }
-                            
                         }
                         
                         if( need_screenshot ){

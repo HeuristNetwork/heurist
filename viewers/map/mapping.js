@@ -2851,6 +2851,7 @@ console.log(bounds);
         if(params['controls']!='none'){
             controls = __splitval(params['controls']);
         }
+        
         controls.push('zoom'); //zoom is always visible
         if(!this.options.isPublished){
             controls.push('addmapdoc'); //add map doc is always visible for "non published" ui
@@ -2897,8 +2898,6 @@ console.log(bounds);
                     }else
                     if(val=='draw') //draw plugin
                     {
-                        that.drawnItems = L.featureGroup().addTo(that.nativemap);
-                        
                         //var is_geofilter = (controls.indexOf('drawfilter')>=0);
                         
                           /*
@@ -2937,38 +2936,6 @@ console.log(bounds);
                           });            
                           */
                         that.drawSetControls( that.options.drawMode );
-                        
-                        that.nativemap.tb_del = new L.EditToolbar.Delete(that.nativemap, {featureGroup: that.drawnItems});
-                        that.nativemap.tb_del.enable();
-
-                        /*                        
-                        L.Map.addInitHook('addHandler', 'tb_del', L.EditToolbar.Delete, {featureGroup: that.drawnItems});
-                        that.nativemap.tb_del.enable();
-                        */
-                        
-                        
-                        //adds  new shape to drawnItems
-                        that.nativemap.on(L.Draw.Event.CREATED, function (e) {
-                            var layer = e.layer;
-                            that.drawnItems.addLayer(layer);
-                            
-                            that.options.ondrawend.call(that, e);
-                        });        
-                        that.nativemap.on('draw:drawstart', function (e) {
-                               if($.isFunction(that.options.ondraw_addstart)){
-                                   that.options.ondraw_addstart.call(that, e);
-                               }
-                        });
-                        that.nativemap.on('draw:editstart', function (e) {
-                               if($.isFunction(that.options.ondraw_editstart)){
-                                   that.options.ondraw_editstart.call(that, e);
-                               }
-                        });
-                        that.nativemap.on('draw:edited', function (e) {
-                               if($.isFunction(that.options.ondrawend)){
-                                   that.options.ondrawend.call(that, e);
-                               }
-                        });     
                         
                     }//draw events
                     
@@ -3132,7 +3099,7 @@ console.log(bounds);
             toolbar.find('.ui-icon-help').hide();
         }
 
-
+        
         toolbar.find('.ui-icon-plus').button()
         .attr('title', window.hWin.HR('Zoom in'))
         .on({click:function(){  that.nativemap.zoomIn(); }});
@@ -3191,6 +3158,97 @@ console.log(bounds);
                 this._updatePanels()
             }});
         this.mapManager.populateMapDocuments($mapdocSel);
+        
+        
+
+        if(true){ //init digitizing tool button
+            var btn = toolbar.find('#btn_digitizing')
+                        .button()
+                        .attr('title','Create map annotation');
+            
+            this._on(btn, {click:function(e){
+                
+                //add new record 
+                if(!window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_ANNOTATION']>0){
+                    window.hWin.HEURIST4.msg.showMsgErr('Your database doesn\'t have record type "Map/Image Annotation"'
+                    +'<br>Download it from Heurist Core Definitions');
+                    return;
+                }
+                        
+                if(this.currentDrawMode=='none'){
+                    
+                    $(e.target).addClass('ui-state-active');
+                    
+                    this.drawSetControls('full');
+                    
+                    this.options.ondraw_editsave = function(e){
+                        var res = that.drawGetWkt(false);
+
+                        if( res!==false ){    
+                        
+                            var typeCode = 'm';
+                            if(res.indexOf('GEOMETRYCOLLECTION')<0 && res.indexOf('MULTI')<0){
+                                if(res.indexOf('LINESTRING')>=0){
+                                    typeCode = 'l';
+                                }else if(res.indexOf('POLYGON')>=0){
+                                    typeCode = 'pl';
+                                }else {
+                                    typeCode = 'p';
+                                }
+                            }
+                            
+                            var new_record_params = {};
+                            new_record_params['RecTypeID'] = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_ANNOTATION'];
+                            new_record_params['details'] = {};
+                            new_record_params['details'][window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']] = (typeCode+' '+res);
+
+                            window.hWin.HEURIST4.ui.openRecordEdit(-1, null,{new_record_params:new_record_params});                        
+                            
+                            that.drawClearAll();
+                        
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgFlash('You have to draw a shape', 2000);
+                        }
+                                             
+                    };
+                    
+                    
+                }else {
+                    
+                    if(this.map_draw){
+                    
+                        function __remove_all_map_edits(){
+                            that.drawClearAll();
+                            that.map_draw.remove();
+                            that.map_draw = null;
+                            that.currentDrawMode='none';
+                            //this.nativemap.removeControl( this.map_draw ); 
+                        }
+                        
+                        
+                        if(this.drawnItems && this.drawnItems.length>0) {
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+                                'You are about to delete all map edits<br><br>Are you sure?',
+                                 function(){
+                                     __remove_all_map_edits();
+                                 });
+                        }else{
+                            __remove_all_map_edits();
+                        } 
+                    
+                    }
+                    
+                    $(e.target).removeClass('ui-state-active');
+   
+                }
+
+            }});
+
+        }else{
+            toolbar.find('#btn_digitizing').hide();
+        }
+        
+        
         
         
     },
@@ -3663,6 +3721,9 @@ console.log(bounds);
         
         var that = this;
         
+        that.drawnItems = L.featureGroup().addTo(that.nativemap);
+        
+        
         if(this.currentDrawMode == mode) return;
 
         if(this.currentDrawMode=='image'){
@@ -3733,6 +3794,67 @@ console.log(bounds);
             
             this.drawSetStyleTransparent();
         }
+        
+        if(L.EditToolbar.Delete){
+           
+            that.nativemap.tb_del = new L.EditToolbar.Delete(that.nativemap, {featureGroup: that.drawnItems});
+            that.nativemap.tb_del.enable();
+            
+            var ele = $('.leaflet-draw-edit-remove').attr('title','Save edits or clear all')
+                .css('background-image','none');
+            ele.find('span.sr-only').html('Finalize');
+            $('<span class="ui-icon ui-icon-circle-b-check"/>')
+                .css('padding-top','21px')
+                .addClass('ui-icon ui-icon-circle-b-check')
+                .appendTo(ele);
+        }
+
+        /*                        
+        L.Map.addInitHook('addHandler', 'tb_del', L.EditToolbar.Delete, {featureGroup: that.drawnItems});
+        that.nativemap.tb_del.enable();
+        */
+        
+        function __set_btn_title(){
+            $('.leaflet-draw-edit-remove').attr('title','Save edits or clear all');
+        }
+        
+        //adds  new shape to drawnItems
+        that.nativemap.on(L.Draw.Event.CREATED, function (e) {
+            var layer = e.layer;
+            that.drawnItems.addLayer(layer);
+            if($.isFunction(that.options.ondrawend)){
+                that.options.ondrawend.call(that, e);
+            }
+            __set_btn_title();
+        });        
+        that.nativemap.on('draw:drawstart', function (e) {
+               if($.isFunction(that.options.ondraw_addstart)){
+                   that.options.ondraw_addstart.call(that, e);
+               }
+               __set_btn_title();
+        });
+        that.nativemap.on('draw:editstart', function (e) {
+               if($.isFunction(that.options.ondraw_editstart)){
+                   that.options.ondraw_editstart.call(that, e);
+               }
+               __set_btn_title();
+        });
+        that.nativemap.on('draw:edited', function (e) {
+               if($.isFunction(that.options.ondrawend)){
+                   that.options.ondrawend.call(that, e);
+               }
+               __set_btn_title();
+        });     
+        //on save event       
+        that.nativemap.on(L.Draw.Event.DELETED, function (e) {
+            //var layers = e.layers;
+           if($.isFunction(that.options.ondraw_editsave)){
+               that.options.ondraw_editsave.call(that, e);
+           }
+        });
+        
+        
+        that.drawSetStyle2(that.map_draw_style);
         
     },
     
