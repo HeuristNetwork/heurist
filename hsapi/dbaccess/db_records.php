@@ -2347,6 +2347,28 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                             $dtl_Value = date('Y-m-d',strtotime("-1 days"));
                         }else if($sdate=='tomorrow'){
                             $dtl_Value = date('Y-m-d',strtotime("+1 days"));
+                        }else if(strlen($dtl_Value)>=8 && strpos($dtl_Value,'-')==false){
+                            
+                            try{
+                                $t2 = new DateTime($dtl_Value);
+                                
+                                $format = 'Y-m-d';
+                                if($t2->format('H')>0 || $t2->format('i')>0 || $t2->format('s')>0){
+                                //strlen($dtl_Value)>=12 || strpos($dtl_Value,'T')>7 || strpos($dtl_Value,' ')>7){
+                                    if($t2->format('s')>0){
+                                        $format .= ' H:i:s';
+                                    }else{
+                                        $format .= ' H:i';
+                                    }
+                                }
+                                $dtl_Value = $t2->format($format);
+                                
+                            }catch(Exception  $e){
+                                //skip converion
+                                
+                            }
+                            
+                            //$dtl_Value = validateAndConvertToISO($dtl_Value);
                         }
                     }
                     break;
