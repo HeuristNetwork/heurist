@@ -751,15 +751,17 @@ function hMapDocument( _options )
             if(!(DT_MAXIMUM_ZOOM>0 && DT_MINIMUM_ZOOM>0)) return;
 
             function __updateLayers(resdata){
-                var idx, records = resdata.getRecords();
-                for(idx in records){
-                    if(idx)
-                    {
-                        var record = records[idx];
-                        var rtype = resdata.fld(record, 'rec_RecTypeID');
-                        if( (rtype==RT_MAP_LAYER || rtype==RT_TLCMAP_DATASET) && record['layer'])
+                if(resdata){
+                    var idx, records = resdata.getRecords();
+                    for(idx in records){
+                        if(idx)
                         {
-                            (record['layer']).setVisibilityForZoomRange( current_zoom );
+                            var record = records[idx];
+                            var rtype = resdata.fld(record, 'rec_RecTypeID');
+                            if( (rtype==RT_MAP_LAYER || rtype==RT_TLCMAP_DATASET) && record['layer'])
+                            {
+                                (record['layer']).setVisibilityForZoomRange( current_zoom );
+                            }
                         }
                     }
                 }

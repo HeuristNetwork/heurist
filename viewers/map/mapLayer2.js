@@ -618,7 +618,7 @@ function hMapLayer2( _options ) {
                 
                 if(_rec['maxzoom']>0 || _rec['minzoom']>=0){ //already defined
                     
-                    is_in_range = (_rec['maxzoom']>=current_zoom)
+                    is_in_range = (_rec['maxzoom']==-1 || _rec['maxzoom']>=current_zoom)
                             && (_rec['minzoom']==-1 || current_zoom>=_rec['minzoom']);
                     
                 }else{
