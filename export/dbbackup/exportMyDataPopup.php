@@ -24,6 +24,9 @@
 define('MANAGER_REQUIRED', 1);   
 define('PDIR','../../');  //need for proper path to js and css    
 
+set_time_limit(0); //no limit
+
+
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_file.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
@@ -164,8 +167,6 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
             fclose($fp);            
             */
             
-            set_time_limit(0); //no limit
-
             $separate_sql_zip = true;
 
             // 

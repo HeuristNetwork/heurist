@@ -3089,13 +3089,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 });*/
                 //@todo restore previous accodion state
                 that.editFormSummary.find('.summary-accordion').each(function(idx,item){
-                    var active = $(item).accordion('option','active');
-                    if(active!==false){
-                        $(item).accordion({active:0});
-                        if($(item).find('.summary-content').is(':empty'))
-                            that._fillSummaryPanel($(item).find('.summary-content'));
+                    if($(item).accordion('instance')){
+                        var active = $(item).accordion('option','active');
+                        if(active!==false){
+                            $(item).accordion({active:0});
+                            if($(item).find('.summary-content').is(':empty'))
+                                that._fillSummaryPanel($(item).find('.summary-content'));
+                        }
                     }
-                            
                 });
                 
             }

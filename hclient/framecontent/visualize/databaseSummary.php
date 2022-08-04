@@ -424,7 +424,7 @@ A:link {
                         //localStorage.clear();    
                     }
                     
-                    $(window).resize(onVisualizeResize)
+                    $(window).resize(onVisualizeResize);
                     
                     onVisualizeResize();
                     initVisualizeData();
