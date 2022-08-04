@@ -113,6 +113,7 @@ $.widget( "heurist.mapping", {
         ondraw_addstart:null,
         ondraw_editstart:null,
         ondrawend:null,
+        ondraw_save_on_addition: false, //if true save digitizing at once (on addition of geometry to map)
         
         isEditAllowed: true,
         isPublished: false,
@@ -126,7 +127,6 @@ $.widget( "heurist.mapping", {
         
         default_style:null,
         default_selection_style:null
-        
     },
     
     /* expremental 
@@ -142,6 +142,7 @@ $.widget( "heurist.mapping", {
     vistimeline: null,   //timeline container 
     mapManager: null,    //legend
     
+    is_crs_simple: false,
     
     available_maxzooms: [], //name of restrictions(widget, basemap, layer id, mapdoc id) => max zoom level, min zoom level
     available_minzooms: [], 
@@ -269,10 +270,12 @@ $.widget( "heurist.mapping", {
             onresize_end: function(){
                 //global 
                 //if(mapping) mapping.onWinResize();
+                //that.adjustToolbarHeight();
                 that._adjustLegendHeight();
             }
             
         };
+
         
         is_ui_main = this.options.layout_params && this.options.layout_params['ui_main'];
 
@@ -318,9 +321,13 @@ $.widget( "heurist.mapping", {
         
 
         var map_crs_simple = window.hWin.HAPI4.database == 'johns_Tilemap_Test' 
+                        || window.hWin.HAPI4.database == 'osmak_12'
                         || window.hWin.HAPI4.get_prefs_def('map_crs_simple',0);
         if(map_crs_simple){
             map_options['crs'] = L.CRS.Simple;
+            map_options['minZoom'] = 0;
+            map_options['maxZoom'] = 19;
+            this.is_crs_simple = true;
         }
 
         this.nativemap = L.map( map_element_id,  map_options)
@@ -376,7 +383,12 @@ $.widget( "heurist.mapping", {
         this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element, is_ui_main:is_ui_main});
         
         this.updateLayout();
+
+        $(window).resize(function(){
+            that.adjustToolbarHeight();    
+        });
         
+        this.adjustToolbarHeight();
         this._adjustLegendHeight();
         
     },
@@ -405,7 +417,25 @@ $.widget( "heurist.mapping", {
         // remove generated elements
         //this.select_rectype.remove();
     },
-    
+    //-------
+    adjustToolbarHeight: function(){
+        
+        
+        var is_ui_main = this.options.layout_params && this.options.layout_params['ui_main'];
+        var toolbar = $('#mapToolbarContentDiv');
+        
+        if(is_ui_main && toolbar.length>0){
+        
+            
+            var h = toolbar.height() + 5;
+
+            if($('#mapToolbarDiv').height()!=h){
+                this.mylayout.sizePane('north', h);
+            }
+        
+        }
+
+    },
     //-------
     _adjustLegendHeight: function(){
         var ele = $('#'+map_element_id);
@@ -486,8 +516,7 @@ $.widget( "heurist.mapping", {
         
         //continuousWorld
         var basemap_layer = hMapLayer2({record_id:record_id, mapwidget:this.element});
-        
-        /*
+    
         var cnt = 0;
         var that = this;
         var interval = setInterval(function()
@@ -497,10 +526,10 @@ $.widget( "heurist.mapping", {
             if(that.all_layers[id]){
                 cnt = 50;
                 var bounds = basemap_layer.getBounds();
-console.log(id);                
-console.log(bounds);
-                //that.nativemap.setMaxBounds(bounds);
-                //that.nativemap.fitBounds(bounds);        
+//console.log(id);                
+//console.log(bounds);
+                that.nativemap.setMaxBounds(bounds);
+                that.nativemap.fitBounds(bounds);        
             }
             cnt++;
             if(cnt>=50){
@@ -509,7 +538,7 @@ console.log(bounds);
             }
             
         },200);
-        */
+        
     },
     
     //
@@ -1085,7 +1114,12 @@ console.log(bounds);
     //
     // Converts zoom in km to nativemap zoom (0-22)
     //
-    convertZoomToNative: function( zoomInKM, bounds){
+    convertZoomToNative: function( zoomInKM, bounds ){
+        
+        if(this.is_crs_simple){
+            return this.nativemap.getBoundsZoom(bounds);    
+        }
+        
         
         var nativeZoom = -1;
         
@@ -1245,6 +1279,7 @@ console.log(bounds);
             
                 }else{
                     this.nativemap.fitBounds(bounds, {maxZoom: maxZoom, padding: L.point(50, 50)});   
+                    //this.nativemap.fitBounds(bounds, {maxZoom: 0});   
                 }             
             }
     },
@@ -2977,6 +3012,8 @@ console.log(bounds);
         //map_basemap_layer = 1049; //broomley map
         if(window.hWin.HAPI4.database == 'johns_Tilemap_Test'){
             map_basemap_layer = 10;
+        }else if(window.hWin.HAPI4.database == 'osmak_12'){
+            map_basemap_layer = 21;
         }
         
         
@@ -3178,6 +3215,8 @@ console.log(bounds);
                 if(this.currentDrawMode=='none'){
                     
                     $(e.target).addClass('ui-state-active');
+
+                    this.options.ondraw_save_on_addition = true;
                     
                     this.drawSetControls('full');
                     
@@ -3750,7 +3789,9 @@ console.log(bounds);
                 featureGroup: that.drawnItems,
                 poly: {
                     allowIntersection: false
-                }
+                },
+                edit: !this.options.ondraw_save_on_addition,
+                remove: !this.options.ondraw_save_on_addition
             },
             draw: {
                 polygon: (mode=='image')?false:{
@@ -3795,7 +3836,8 @@ console.log(bounds);
             this.drawSetStyleTransparent();
         }
         
-        if(L.EditToolbar.Delete){
+        if(!this.options.ondraw_save_on_addition && 
+            L.EditToolbar.Delete){
            
             that.nativemap.tb_del = new L.EditToolbar.Delete(that.nativemap, {featureGroup: that.drawnItems});
             that.nativemap.tb_del.enable();
@@ -3826,6 +3868,11 @@ console.log(bounds);
                 that.options.ondrawend.call(that, e);
             }
             __set_btn_title();
+            
+            if(that.options.ondraw_save_on_addition && $.isFunction(that.options.ondraw_editsave)){
+                that.options.ondraw_editsave.call(that, e);
+            }
+            
         });        
         that.nativemap.on('draw:drawstart', function (e) {
                if($.isFunction(that.options.ondraw_addstart)){

@@ -1181,6 +1181,8 @@ function hMapManager( _options )
 
                 mapdoc_select.hSelect('widget').find('span.ui-selectmenu-text').text('Current result set');
             });
+            
+            options.mapwidget.mapping('adjustToolbarHeight');
         },
 
         //

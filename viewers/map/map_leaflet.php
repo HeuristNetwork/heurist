@@ -376,9 +376,9 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
 
         <!-- Toolbar -->
         <div class="ui-layout-north ui-heurist-explore" id="mapToolbarDiv" style="display: block; height: 30px; z-index:999;">
-            <div style="padding-top: 5px">
+            <div id="mapToolbarContentDiv">
 
-                <span style="font-size: small;cursor: pointer;">
+                <span style="font-size: small;cursor: pointer;margin-top:5px">
                     Map 
                     <select id="mapDocumentSel"></select>
                 </span>
@@ -387,21 +387,21 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
                     New <a id="btn_add_mapdoc" style="width: 22px; height:22px;top:-1px;padding:0px;display:inline-block;margin-left: 5px;"></a>
                 </span>
 
-                <button id="btn_layout_map" class="ui-heurist-button" style="height: 24px;display:inline-block;margin-left: 10px;">Map</button>
-                <button id="btn_layout_timeline" class="ui-heurist-button" style="height: 24px;display:inline-block;">Timeline</button>
+                <button id="btn_layout_map" class="ui-heurist-button" style="margin-top:5px;height: 24px;display:inline-block;margin-left: 10px;">Map</button>
+                <button id="btn_layout_timeline" class="ui-heurist-button" style="margin-top:5px;height: 24px;display:inline-block;">Timeline</button>
 
-                <a class="ui-icon ui-icon-plus" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>
-                <a class="ui-icon ui-icon-minus" style="width: 22px; height: 22px;padding:0px;display:inline-block;"></a>
+                <a class="ui-icon ui-icon-plus" style="margin-top:5px;width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>
+                <a class="ui-icon ui-icon-minus" style="margin-top:5px;width: 22px; height: 22px;padding:0px;display:inline-block;"></a>
 
-                <a class="ui-icon ui-icon-bookmark" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>
-                <a class="ui-icon ui-icon-search" style="width: 22px; height: 22px;padding:0px;display:inline-block;"></a>
+                <a class="ui-icon ui-icon-bookmark" style="margin-top:5px;width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>
+                <a class="ui-icon ui-icon-search" style="margin-top:5px;width: 22px; height: 22px;padding:0px;display:inline-block;"></a>
 
 
-                <a class="ui-icon ui-icon-print" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>
-                <a class="ui-icon ui-icon-globe" style="width: 22px; height: 22px;padding:0px;display:inline-block;"></a>
-                <a class="ui-icon ui-icon-help" style="width: 22px; height: 22px;padding:0px;display:inline-block;"></a>
+                <a class="ui-icon ui-icon-print" style="margin-top:5px;width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>
+                <a class="ui-icon ui-icon-globe" style="margin-top:5px;width: 22px; height: 22px;padding:0px;display:inline-block;"></a>
+                <a class="ui-icon ui-icon-help" style="margin-top:5px;width: 22px; height: 22px;padding:0px;display:inline-block;"></a>
 
-                <span style="display:inline-block;margin-left: 10px;font-size: small;">
+                <span style="display:inline-block;margin-left: 10px;font-size: small;margin-top:5px">
                     Legend <a class="ui-icon ui-icon-list" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 5px;"></a>
                 </span>
 
