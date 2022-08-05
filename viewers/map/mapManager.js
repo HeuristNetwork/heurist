@@ -374,7 +374,7 @@ function hMapManager( _options )
             
             mapDocuments.loadMapDocuments( function(resdata){
                         _refreshMapDocumentTree( resdata, mapdoc_treeview );
-                        options.mapwidget.mapping('onInitComplete');
+                        options.mapwidget.mapping('onInitComplete', 'mapdocs');
                     } );
             
             content = mapdoc_treeview;        

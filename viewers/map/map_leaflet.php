@@ -292,6 +292,9 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     // init map data based on url parameters
     //
     function onMapInit( mapwdiget ){
+        
+//console.log('>>>onMapInit');
+        
         //take url parameters and open mapdocument or/and perform query
             //take from frame
             var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', location.search);

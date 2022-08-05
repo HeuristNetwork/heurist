@@ -143,6 +143,14 @@ $.widget( "heurist.mapping", {
     mapManager: null,    //legend
     
     is_crs_simple: false,
+    raster_coord: null,
+    basemap_layer: null, //user's ImageOverlay as a base map
+    basemap_layer_id: 0, //heurist layer record id for base map
+    basemap_layer_width: 0,
+    basemap_layer_height: 0,
+    
+    _inited_mapdocs: false,
+    _inited_basemap: false,
     
     available_maxzooms: [], //name of restrictions(widget, basemap, layer id, mapdoc id) => max zoom level, min zoom level
     available_minzooms: [], 
@@ -458,10 +466,16 @@ $.widget( "heurist.mapping", {
     // triggers options.oninit event handler
     //    it is invoked on completion of hMapManager initialization - map is inited and all mapdocuments are loaded
     //
-    onInitComplete:function(){
-//        console.log('onInitComplete');
-        
-        if($.isFunction(this.options.oninit)){
+    onInitComplete:function(mode_complete){
+//console.log('onInitComplete '+mode_complete);
+
+        if(mode_complete=='mapdocs'){
+            this._inited_mapdocs = true;
+        }else if(mode_complete=='basemap'){
+            this._inited_basemap = true;
+        }
+            
+        if($.isFunction(this.options.oninit) && this._inited_mapdocs && this._inited_basemap){
                 this.options.oninit.call(this, this.element);
         }
         
@@ -513,23 +527,50 @@ $.widget( "heurist.mapping", {
     // load as a base map Heurist Image Layer record
     //
     loadBaseMapImage: function(record_id){
-        
+    
+        if(this.basemap_layer_id==record_id) return;
+
         //continuousWorld
-        var basemap_layer = hMapLayer2({record_id:record_id, mapwidget:this.element});
+        this.basemap_layer = hMapLayer2({record_id:record_id, mapwidget:this.element});
+        this.basemap_layer_id = record_id;
     
         var cnt = 0;
         var that = this;
         var interval = setInterval(function()
         {
-            var id = basemap_layer.getNativeId();
+            var id = that.basemap_layer.getNativeId();
             
             if(that.all_layers[id]){
                 cnt = 50;
-                var bounds = basemap_layer.getBounds();
+                var bounds = that.basemap_layer.getBounds();
 //console.log(id);                
 //console.log(bounds);
                 that.nativemap.setMaxBounds(bounds);
                 that.nativemap.fitBounds(bounds);        
+  
+                that.basemap_layer_width = 32768;
+                that.basemap_layer_height = 15043;
+                that.basemap_layer_maxzoom =  Math.ceil(
+                    Math.log(
+                        Math.max(that.basemap_layer_width, that.basemap_layer_height) /
+                        256
+                    ) / Math.log(2)
+                );
+                
+                that.onInitComplete('basemap');
+
+  
+/*
+DEBUG                
+                //that.raster_coord = new L.RasterCoords(that.nativemap, [32768, 15043]);
+                
+                console.log('0,0 => '+that.nativemap.project([0,0], 0));
+                console.log('256,-256 => '+that.nativemap.project([256,-256], 0));
+
+                console.log('0,0 => '+that.nativemap.project([0,0], 7));
+                console.log('256,-256 => '+that.nativemap.project([256,-256], 7));
+*/
+                
             }
             cnt++;
             if(cnt>=50){
@@ -755,6 +796,147 @@ $.widget( "heurist.mapping", {
         return new_layer._leaflet_id;
     },
     
+    
+    // if to_pixels is true 
+    // for simple crs - from latlong to pixels
+    // for epsg       - from epsg to wgs
+    //  --------------------
+    // for simple crs  - convert from pixels to latlong
+    // for EPSG   - convert from WGS(laslong) to target EPSG projection
+    //
+    //
+    projectGeoJson:function(gjson, to_pixels){
+        
+        var that = this;
+        
+        
+        
+        if(gjson.type == 'FeatureCollection'){
+            var k = 0;
+            for (k=0; k<gjson.features.length; k++){
+                this.projectGeoJson(gjson.features[k], to_pixels); //another collection or feature
+            }
+        }else if($.isArray(gjson)){
+            var k = 0;
+            for (k=0; k<gjson.length; k++){
+                this.projectGeoJson(gjson[k], to_pixels); //another collection or feature
+            }
+        }else{
+            
+            var ftypes = ['Point','MultiPoint','LineString','MultiLineString','Polygon','MultiPolygon','GeometryCollection'];
+        
+            function __convert_primitive(geometry){
+
+                if($.isEmptyObject(geometry)){
+
+                }else if(geometry.type=="GeometryCollection"){
+                    var l;
+                    for (l=0; l<geometry.geometries.length; l++){
+                        __convert_primitive(geometry.geometries[l]); //another collection or feature
+                    }
+                }else{
+
+                    
+                    function _is_point(pnt){
+                            var isValid = ($.isArray(pnt) && pnt.length==2 && 
+                                $.isNumeric(pnt[0]) && $.isNumeric(pnt[1]));
+                            return isValid;
+                    }                    
+                    
+                    function _convertXY(pnt){
+                        
+                        if(to_pixels){
+                            //from lat long to pixels
+                            var pix = that.nativemap.project(pnt, that.basemap_layer_maxzoom);
+
+//console.log(pnt[0]+','+pnt[1]+' => '+that.nativemap.project(pnt, that.basemap_layer_maxzoom)
+//+' => '+Math.abs(pix.y)+','+(Math.abs(pix.x) - 15043));
+                    
+                            return [Math.round(-pix.y), Math.round(-pix.x) - that.basemap_layer_height];
+                        }else{
+                            
+//console.log(pnt[0]+','+pnt[1]+' => ');
+
+                            pnt[1] = pnt[1] + that.basemap_layer_height;
+                            pnt[1] = -pnt[1];
+                            pnt[0] = -pnt[0];
+                            
+                            var latlong = that.nativemap.unproject([pnt[1],pnt[0]], that.basemap_layer_maxzoom);
+
+//console.log( latlong.lng+','+latlong.lat );
+                            
+                            return [latlong.lat, latlong.lng];
+                        }
+                    }
+                    
+                    //for timemap
+                    function __convertCoords(coords){
+                        
+                        var res = [];
+
+                        if(_is_point(coords)){ 
+                        
+                            res = _convertXY(coords); //lat long
+                        
+                        }else {
+                            
+                            for (var m=0; m<coords.length; m++){
+                                
+                                if(_is_point(coords[m])){
+                                    pnt = _convertXY(coords[m]);
+                                    res.push(pnt);
+                                }else{
+                                    res.push(__convertCoords(coords[m]));   
+                                }
+                            }
+                        }
+                        return res;
+                    }
+
+                    var res_coords = __convertCoords(geometry.coordinates);
+                    if(res_coords.length>0){
+                            geometry.coordinates = res_coords;
+                    }
+                }
+
+            }//__convert_primitive
+        
+        
+            if(gjson.type == 'Feature' && !$.isEmptyObject(gjson.geometry)){
+                __convert_primitive(gjson.geometry);
+            }else if (gjson.type && ftypes.indexOf(gjson.type)>=0){                      
+                __convert_primitive(gjson);
+            }
+        }
+        
+        
+/*        
+            var coords = gjson.geometry.coordinates;
+            if(gjson.geometry.type=='Point'){
+                coords = [coords];
+            }else if(gjson.geometry.type=='Polygon'){
+                coords = coords[0];
+            }
+
+            for (var i=0; i<coords.length; i++){
+
+                var pix = that.nativemap.project(coords[i], that.basemap_layer_maxzoom);
+
+    //console.log(coords[i][0]+','+coords[i][1]+' => '+that.nativemap.project(coords[i], 7)
+    //                    +' => '+Math.abs(pix.y)+','+(Math.abs(pix.x) - 15043));
+                
+                coords[i][0] = Math.round(Math.abs(pix.y));
+                coords[i][1] = Math.round(Math.abs(pix.x)) - 15043;
+            }
+
+            if(gjson.geometry.type=='Point'){
+                gjson.geometry.coordinates = coords[0];
+            }else if(gjson.geometry.type=='Polygon'){
+                gjson.geometry.coordinates = [coords];
+            }
+*/
+    },
+    
     //
     // adds geojson layer to map
     // returns nativemap id
@@ -778,6 +960,10 @@ $.widget( "heurist.mapping", {
 
         if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) || 
             window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data)){
+                
+            if(this.is_crs_simple){
+                this.projectGeoJson( geojson_data, false );
+            }
                 
             var that = this;
             
@@ -3022,11 +3208,13 @@ $.widget( "heurist.mapping", {
             this.loadBaseMapImage( map_basemap_layer );
             
         }else if(params['basemap']){
-
-            this.mapManager.loadBaseMap( params['basemap'] );  
             
+            this._inited_basemap = true;
+            this.mapManager.loadBaseMap( params['basemap'] );  
             this.setBaseMapFilter( params['basemap_filter'] );
         }else{
+            
+            this._inited_basemap = true;
             this.mapManager.loadBaseMap( 0 );  
         }
 
@@ -3641,6 +3829,7 @@ $.widget( "heurist.mapping", {
     drawGetJson: function( e ){
     
         var res_gjson = []; //reset
+        var that = this;
         
         function __to_gjson( layer ){
             
@@ -3659,6 +3848,11 @@ $.widget( "heurist.mapping", {
             }
             
             var gjson = lr.toGeoJSON(6);
+            
+            if(that.is_crs_simple){
+                that.projectGeoJson( gjson, true );
+            }
+            
             if(window.hWin.HEURIST4.util.isJSON(gjson)){
                 res_gjson.push(gjson);
             }        

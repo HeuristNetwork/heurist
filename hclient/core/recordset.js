@@ -591,6 +591,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         * 0, undefined - all
         * 1 - main geo only (no links)
         * 2 - rec_Shape only (coordinates defined in field rec_Shape)
+        * 
     */
     function _toGeoJSON(filter_rt, geoType, max_limit){
 
