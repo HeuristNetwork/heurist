@@ -422,7 +422,7 @@ console.log('beforeunload MAPPEVIEW');
                         var cnt = response.data.count_imported-1;
                         if(cnt % 2 > 0){
 
-                            window.hWin.HEURIST4.msg.showMsgDlg('It appears that some of datasource records are not public and hence they are not exported. Please make sure that all datasets and datasources are public and repeat this operation. Do not forget to remove wrong mapspace', null, 'Error');
+                            window.hWin.HEURIST4.msg.showMsgDlg('It appears that some of datasource records are not public and hence they are not exported. Please make sure that all datasets and datasources are public and repeat this operation. Do not forget to remove incorrect mapspace', null, 'Error');
 
                         }else{
                             
