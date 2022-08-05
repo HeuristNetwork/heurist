@@ -17,7 +17,7 @@
 ('20','Media','functionalgroup','004','','2022-02-16 20:46:26'),
 ('21','Place, features','functionalgroup','003','','2022-02-16 20:50:35'),
 ('22','Administrative','functionalgroup','007','','2022-02-16 20:50:35'),
-('23','My record types','functionalgroup','001','Drag the record types you need into this group','2021-07-01 03:01:28'),
+('23','My record types','functionalgroup','001','Drag record types onto the group name on the left to place them in the group','2021-07-01 03:01:28'),
 >>EndData>>
 
  
