@@ -30,7 +30,7 @@
 ## These files are binary and should be left untouched
 #
 # (binary is a macro for -text -diff)
-*.png binary
+*.[pP][nN][gG] binary
 *.jpg binary
 *.jpeg binary
 *.gif binary
