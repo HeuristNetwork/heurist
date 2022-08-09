@@ -329,7 +329,8 @@ $.widget( "heurist.mapping", {
         
 
         var map_crs_simple = window.hWin.HAPI4.database == 'johns_Tilemap_Test' 
-                        || window.hWin.HAPI4.database == 'osmak_12'
+                        || window.hWin.HAPI4.database == 'osmak_12'  // 
+                        || window.hWin.HAPI4.database == 'osmak_9b'  //iiif test
                         || window.hWin.HAPI4.get_prefs_def('map_crs_simple',0);
         if(map_crs_simple){
             map_options['crs'] = L.CRS.Simple;
@@ -543,34 +544,38 @@ $.widget( "heurist.mapping", {
             if(that.all_layers[id]){
                 cnt = 50;
                 var bounds = that.basemap_layer.getBounds();
-//console.log(id);                
-//console.log(bounds);
-                that.nativemap.setMaxBounds(bounds);
-                that.nativemap.fitBounds(bounds);        
-  
-                that.basemap_layer_width = 32768;
-                that.basemap_layer_height = 15043;
+
+                if(that.basemap_layer_id==424){
+                    
+                    //bounds = L.latLngBounds(L.latLng(-256,-256), L.latLng(256,256));//soutwest northeast 
+                    
+                    //that.projectGeoJson( gjson, true );
+            
+                    that.basemap_layer_width = 16384;
+                    that.basemap_layer_height = 16384;
+                    
+                }else{
+         
+                    that.basemap_layer_width = 32768;
+                    that.basemap_layer_height = 15043;
+                }
+                
                 that.basemap_layer_maxzoom =  Math.ceil(
                     Math.log(
                         Math.max(that.basemap_layer_width, that.basemap_layer_height) /
                         256
                     ) / Math.log(2)
                 );
+
+//console.log(id);                
+//console.log(bounds);
+                if(bounds && bounds.isValid()){
+                    that.nativemap.setMaxBounds(bounds);
+                    that.nativemap.fitBounds(bounds);        
+                }
                 
                 that.onInitComplete('basemap');
 
-  
-/*
-DEBUG                
-                //that.raster_coord = new L.RasterCoords(that.nativemap, [32768, 15043]);
-                
-                console.log('0,0 => '+that.nativemap.project([0,0], 0));
-                console.log('256,-256 => '+that.nativemap.project([256,-256], 0));
-
-                console.log('0,0 => '+that.nativemap.project([0,0], 7));
-                console.log('256,-256 => '+that.nativemap.project([256,-256], 7));
-*/
-                
             }
             cnt++;
             if(cnt>=50){
@@ -851,13 +856,13 @@ DEBUG
 
 //console.log(pnt[0]+','+pnt[1]+' => '+that.nativemap.project(pnt, that.basemap_layer_maxzoom)
 //+' => '+Math.abs(pix.y)+','+(Math.abs(pix.x) - 15043));
-                    
-                            return [Math.round(-pix.y), Math.round(-pix.x) - that.basemap_layer_height];
+                            return [Math.round(-pix.y), Math.round(-pix.x)];
+                            //return [Math.round(-pix.y), Math.round(-pix.x) - that.basemap_layer_height];
                         }else{
                             
 //console.log(pnt[0]+','+pnt[1]+' => ');
 
-                            pnt[1] = pnt[1] + that.basemap_layer_height;
+                            //pnt[1] = pnt[1] + that.basemap_layer_height;
                             pnt[1] = -pnt[1];
                             pnt[0] = -pnt[0];
                             
@@ -3200,6 +3205,8 @@ DEBUG
             map_basemap_layer = 10;
         }else if(window.hWin.HAPI4.database == 'osmak_12'){
             map_basemap_layer = 21;
+        }else if(window.hWin.HAPI4.database == 'osmak_9b'){
+            map_basemap_layer = 424;
         }
         
         
@@ -3393,12 +3400,21 @@ DEBUG
             
             this._on(btn, {click:function(e){
                 
+                var this_btn = $(e.target);
                 //add new record 
-                if(!window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_ANNOTATION']>0){
-                    window.hWin.HEURIST4.msg.showMsgErr('Your database doesn\'t have record type "Map/Image Annotation"'
-                    +'<br>Download it from Heurist Core Definitions');
+                if(!(window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_ANNOTATION']>0)){
+                    
+                    window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-101',2,
+                        'You will need record types '
+                        +'2-101 "Map/Image Annotation" which are available as part of Heurist_Core_Definitions.',
+                            function(){
+                               this_btn.click(); //call itself again 
+                            }
+                        );
+
                     return;
                 }
+                
                         
                 if(this.currentDrawMode=='none'){
                     
@@ -3429,8 +3445,7 @@ DEBUG
                             new_record_params['details'] = {};
                             new_record_params['details'][window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']] = (typeCode+' '+res);
 
-                            window.hWin.HEURIST4.ui.openRecordEdit(-1, null,{new_record_params:new_record_params});                        
-                            
+                            window.hWin.HEURIST4.ui.openRecordEdit(-1, null,{new_record_params:new_record_params});                       
                             that.drawClearAll();
                         
                         }else{
@@ -3629,6 +3644,7 @@ DEBUG
     },
     
     //
+    //  Addition of wkt to drawItems
     //  force_clear - remove all current shapes on map
     //
     drawLoadWKT: function(wkt, force_clear){
@@ -3780,6 +3796,7 @@ DEBUG
     // remove all drawn items fromm map
     // 
     drawClearAll: function(){
+    
         if(this.drawnItems) {
             this.drawnItems.eachLayer(function (layer) {
                 layer.remove();
@@ -3795,7 +3812,7 @@ DEBUG
         
         var res = '', msg = null;
                     
-        var gjson = mapping.mapping( 'drawGetJson');
+        var gjson = this.drawGetJson(); //mapping.mapping( 'drawGetJson');
         
         gjson = window.hWin.HEURIST4.util.isJSON(gjson);
                 
@@ -3954,6 +3971,8 @@ DEBUG
         
         var that = this;
         
+        that.drawClearAll();
+        
         that.drawnItems = L.featureGroup().addTo(that.nativemap);
         
         
@@ -4058,6 +4077,7 @@ DEBUG
         that.nativemap.on(L.Draw.Event.CREATED, function (e) {
             var layer = e.layer;
             that.drawnItems.addLayer(layer);
+            layer.editing.enable();
             if($.isFunction(that.options.ondrawend)){
                 that.options.ondrawend.call(that, e);
             }

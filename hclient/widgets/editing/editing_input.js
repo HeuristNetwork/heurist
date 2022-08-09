@@ -2974,10 +2974,13 @@ console.log('onpaste');
                                 }
                             }
                         }
+                        
+                        var d_width = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
+                        d_height = (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95;
 
                         window.hWin.HEURIST4.msg.showDialog(url, {
-                            height:that.options.is_faceted_search?540:'900',
-                            width:that.options.is_faceted_search?600:'1000',
+                            height:that.options.is_faceted_search?540:d_height,
+                            width:that.options.is_faceted_search?600:d_width,
                             window: window.hWin,  //opener is top most heurist window
                             dialogid: 'map_digitizer_dialog',
                             default_palette_class: 'ui-heurist-populate',

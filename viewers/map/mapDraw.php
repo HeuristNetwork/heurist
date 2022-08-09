@@ -48,6 +48,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
 <?php
 }
 ?>
+<script src="<?php echo PDIR;?>external/leaflet/leaflet-iiif.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js"></script>
 <!-- leaflet plugins -->
 <script src="<?php echo PDIR;?>external/leaflet/leaflet-providers.js"></script>
@@ -75,7 +76,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
 
         <script type="text/javascript">
 
-            var mapping, initial_wkt, initial_tool, imageurl, imageOverlay=null, 
+            var mapping, is_map_inited=false, initial_wkt, initial_tool, imageurl, imageOverlay=null, 
                 need_screenshot = false, is_geofilter=false,
                 menu_datasets, btn_datasets, zoom_with_delay = true,
                 sMsgDigizeSearch = 'Digitise search area as a rectangle or polygon';
@@ -379,8 +380,10 @@ console.log('load google map api')
                 
                 is_geofilter = params && params['geofilter'];
                 need_screenshot = params && params['need_screenshot'];
-                                
-                onMapInit();
+                           
+                if(is_map_inited){
+                    onMapInit();
+                }
             } 
             
             //
@@ -406,6 +409,11 @@ console.log('load google map api')
                     $('#map_container').css({top:'0px',right:'200px'});
                 }
                 
+                //define draw controls for particular needs
+                var mode = 'full';
+                if(imageurl) mode = 'image'
+                else if (is_geofilter) mode = 'filter';
+                mapping.mapping( 'drawSetControls', mode );                
                 
                 if( !window.hWin.HEURIST4.util.isempty(initial_wkt) && initial_wkt!='undefined' ){ //params && params['wkt']
                 
@@ -413,7 +421,7 @@ console.log('load google map api')
                         $('#cbAllowMulti').prop('checked',true);
                     }
                 
-                    mapping.mapping( 'drawLoadWKT', initial_wkt, true);
+                    mapping.mapping('drawLoadWKT', initial_wkt, false);
                
                     if(zoom_with_delay){
                         setTimeout(function(){ 
@@ -462,6 +470,7 @@ console.log('load google map api')
                 var that = this;
                 
                 if(!window.hWin.HEURIST4.util.isnull(this.map_geocoder)){
+                    this.map_geocoder.off('markgeocode');
                     this.map_geocoder.on('markgeocode', function(e){ // Add map marker on top of search mark
                         
                         e.target._map.eachLayer(function(layer){ 
@@ -471,7 +480,7 @@ console.log('load google map api')
 
                                 onMapDrawAdd();
 
-                                that.drawnItems.addLayer(layer);
+                                //that.drawnItems.addLayer(layer);
 
                                 that.options.ondrawend.call(that, map);
                             }
@@ -479,12 +488,9 @@ console.log('load google map api')
                     });
                 }
                 
-                //define draw controls for particular needs
-                var mode = 'full';
-                if(imageurl) mode = 'image'
-                else if (is_geofilter) mode = 'filter';
-                mapping.mapping( 'drawSetControls', mode );
+
                
+                is_map_inited = true;
             }
             
             //
