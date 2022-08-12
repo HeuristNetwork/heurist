@@ -48,7 +48,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     last_added_vocabulary: 0,
 
     options:{
-        vocab_type:null // vocab type, enum or relation
+        vocab_type:null, // vocab type, enum or relation
+        create_one_term: false // only allow the creation of one term, returns new term's ID
     },
 
     //
@@ -1315,13 +1316,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             ele.show();
             ele.editing_input('fset', 'rst_RequirementType', 'required');
             ele.find('.header').removeClass('recommended').addClass('required');
-
-
-            if(this.options.suggested_name){
-                this._editing.setFieldValueByName('trm_Label', this.options.suggested_name, false);
-                this.options.suggested_name = null;
-            }
-
         }else
         {
 
@@ -1388,6 +1382,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             }
 
+        }
+
+        // Add suggested/provided label
+        ele = this._editing.getFieldByName('trm_Label');
+        var suggested_name = this.options.suggested_name;
+        if(!window.hWin.HEURIST4.util.isempty(suggested_name) && this._currentEditID <= 0 && ele.val() == ''){
+            if(isVocab && suggested_name.indexOf('vocab') < 0){
+                suggested_name += ' vocab';
+            }
+            this._editing.setFieldValueByName('trm_Label', this.options.suggested_name, false);
+            this.options.suggested_name = null;
         }
 
         ele = this._editing.getFieldByName('trm_Domain')
@@ -1579,6 +1584,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
+        var that = this;
         if(this.options.edit_mode=='editonly'){
             if(!this.options.container){ //for popup
             
@@ -1593,10 +1599,20 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
 
                 window.hWin.HEURIST4.msg.showMsgFlash(sName+' '+window.hWin.HR('has been saved'),300);
-                this._currentEditID = -1;
-                this._initEditForm_step3(this._currentEditID); //reload edit form 
 
-                var that = this;
+                if(this.options.create_one_term){
+                    if(that.defaultBeforeClose()){
+                        if($.isFunction(that.options.onClose)){
+                            that._currentEditID = null; 
+                            that.closeDialog(true);
+                            that.options.onClose.call(that, recID);
+                        } 
+                    }
+                }else{
+                    this._currentEditID = -1;
+                    this._initEditForm_step3(this._currentEditID); //reload edit form 
+                }
+
                 setTimeout(function(){that._editing.setFocus();},1000);
             }
             return;
