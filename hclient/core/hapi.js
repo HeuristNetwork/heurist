@@ -863,7 +863,7 @@ prof =Profile
                         
                         if (is_message==true) {
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
-                                'You may need to reload pages to see changes (ctrl-F5 will refresh data + code).');
+                                'You may need to reload pages to see changes.');
                             $dlg.parent('.ui-dialog').css({top:150,left:150});    
                         }      
                         

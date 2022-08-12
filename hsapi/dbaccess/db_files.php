@@ -53,7 +53,7 @@ require_once (dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
 * @param mixed $system
 * @param mixed $fullname
 */
-function fileRegister($system, $fullname, $description=null){
+function fileRegister($system, $fullname){
     
     
     $file_id = fileGetByFileName($system, $fullname); //apparently it is already registered
@@ -80,9 +80,6 @@ function fileRegister($system, $fullname, $description=null){
                 'ulf_FileName' => $filename_base
             )
         );
-        if($description!=null){
-            $fileinfo['fields']['ulf_Description'] = $description;
-        }
         
         $entity = new DbRecUploadedFiles($system, $fileinfo);
         $ret = $entity->save();

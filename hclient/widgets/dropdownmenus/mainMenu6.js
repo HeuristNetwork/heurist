@@ -1454,12 +1454,9 @@ $.widget( "heurist.mainMenu6", {
                         $('<span class="ui-icon '+link.attr('data-icon')+'"/>'
                          +'<span class="menu-text truncate" style="max-width: 109px;">'+window.hWin.HR( action_id )+'</span>')
                         .appendTo(item);
-
-                        if(action_id=='menu-import-get-template' || 
-                           action_id=='menu-import-csv-fieldtypes' || 
-                           action_id=='menu-import-csv-rectypes'){
+                        
+                        if(action_id=='menu-import-get-template' || action_id=='menu-import-csv-fieldtypes' || action_id=='menu-import-csv-rectypes'){
                             item.css({'font-size':'10px', padding:'0 0 0 8px','margin-top':'-1px'})
-
                         }else{
                             item.css({'font-size':'smaller', padding:'6px'})    
                         }
