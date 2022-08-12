@@ -234,9 +234,14 @@ $.widget( "heurist.search", {
             this._on( this.input_search, {  click: function(){ // open search textarea in a popup, for more space, add more instructions and include filter help link
 
                 var org_val = this.input_search.val();
+
+                if(this._is_publication || window.hWin.HEURIST4.util.isempty(org_val)){
+                    return;
+                }
+
+                /* Ian wants the popup to open regardless
                 var newline_matches = org_val.match(/\r|\n/); // check for newline characters
 
-                // Check for horizontal scrolling
                 this.input_search.css('white-space', 'nowrap');
                 var nw_scrollWidth = this.input_search[0].scrollWidth;
                 var nw_width = this.input_search.width();                
@@ -247,6 +252,7 @@ $.widget( "heurist.search", {
                         && (nw_scrollWidth <= nw_width))){ 
                     return;
                 }
+                */
 
                 var $dlg;
                 var $help_link = this.div_search_input.find('#search_help_link').clone();
@@ -285,6 +291,7 @@ $.widget( "heurist.search", {
                 $dlg.find('#search_help_container').append($help_link);
 
                 $dlg.find('#search_help_link').on('click', function(){ window.open('context_help/advanced_search.html','_blank'); });
+                $dlg.find('textarea').focus().prop('selectionStart', this.input_search.prop('selectionStart')); // place text cursor at selected location
             }});
         }
 
