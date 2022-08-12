@@ -1206,7 +1206,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                         {rty_ID:that._currentEditID, 
                             rty_TitleMask:maskvalue, path: 'widgets/entity/popups/',
                             onClose: function(newvalue){
-                                if(!window.hWin.HEURIST4.util.isnull(newvalue)){
+                                if(!window.hWin.HEURIST4.util.isempty(newvalue) && newvalue != 'false'){
                                     ele_mask.editing_input('setValue', newvalue);
                                     that._editing.setModified(true); //restore flag after autosave
                                     that.onEditFormChange();

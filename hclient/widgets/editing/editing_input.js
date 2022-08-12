@@ -844,11 +844,12 @@ $.widget( "heurist.editing_input", {
                                     }
                                 });                                        
                             }
-                            /*
+
                             editor.on('init', function(e) {
-                                $('.tox-edit-area').css({border:'1px solid blue'});
+                                setTimeout(function(){
+                                    $(editor.editorContainer).find('.tox-tbtn.tox-tbtn--select.tox-tbtn--bespoke').parent().addClass('tinymce_format_group');
+                                }, 2000);
                             });
-                            */
 
                             editor.on('change', function(e) {
 
@@ -1259,7 +1260,7 @@ $.widget( "heurist.editing_input", {
                                         }
                                     }
 
-                                    $input.hSelect('widget').find('span.ui-selectmenu-text').text(crafted_label);
+                                    $input.hSelect('widget').find('span.ui-selectmenu-text').html(crafted_label);
                                 }
                             }
                         });
@@ -1283,7 +1284,7 @@ $.widget( "heurist.editing_input", {
                                 }
                             }
 
-                            $input.hSelect('widget').find('span.ui-selectmenu-text').text(crafted_label);
+                            $input.hSelect('widget').find('span.ui-selectmenu-text').html(crafted_label);
                         }
                     }
                 }
@@ -3824,7 +3825,7 @@ console.log('onpaste');
                         var opt = $input.find('option[value="'+$input.val()+'"]');
                         var parentTerms = opt.attr('parents');
                         if(parentTerms){
-                            $input.hSelect("widget").find('.ui-selectmenu-text').text( parentTerms+'.'+opt.text() );    
+                            $input.hSelect("widget").find('.ui-selectmenu-text').html( parentTerms+'.'+opt.text() );    
                         }    
                            
                     }else{
@@ -4006,7 +4007,9 @@ console.log('onpaste');
                 +'<input class="input_menu_filter" size="15" style="outline: none;background:none;border: 1px solid lightgray;"/>'
                 +'<span class="smallbutton ui-icon ui-icon-circlesmall-close" tabindex="-1" title="Clear entered value" '
                 +'style="position:relative; cursor: pointer; outline: none; box-shadow: none; border-color: transparent;"></span>'
-                + '<div class="not-found" style="padding:10px;color:darkgreen;display:none;">No terms match the filter</div></div>';
+                + '<div class="not-found" style="padding:10px;color:darkgreen;display:none;width:210px;">No terms match the filter '
+                + '<a class="add-trm" href="#" style="padding: 0 0 0 10px;color:blue;display:inline-block;">Add term</a>'
+                +'</div></div>';
 
                 opt.value = 'select';
 
@@ -4034,6 +4037,42 @@ console.log('onpaste');
 
                             if(idx == 1){
                                 $(opt).text('<blank>');
+                            }
+                        });
+
+                        that._on($input.hSelect('menuWidget').find('a.add-trm'), {
+                            click: function(){
+
+                                var label = $input.hSelect('menuWidget').find('input.input_menu_filter').val();
+                                var vocab_id = that.f('rst_FilteredJsonTermIDTree');
+
+                                if(!window.hWin.HEURIST4.util.isempty(label)){
+
+                                    var rg_options = {
+                                        isdialog: true, 
+                                        select_mode: 'manager',
+                                        edit_mode: 'editonly',
+                                        height: 240,
+                                        rec_ID: -1,
+                                        trm_VocabularyID: vocab_id,
+                                        suggested_name: $input.hSelect('menuWidget').find('input.input_menu_filter').val(), 
+                                        create_one_term: true,
+                                        onClose: function(trm_id){
+                                            that._recreateEnumField(vocab_id);
+
+                                            var trm_info = $Db.trm(trm_id, 'trm_ParentTermID');
+                                            if(trm_info && trm_info > 0){
+                                                $input.val(trm_id);
+                                                if($input.hSelect('instance')!=undefined){
+                                                    $input.hSelect('refresh');
+                                                }
+                                                $input.change();
+                                            }
+                                        }
+                                    };
+
+                                    window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
+                                }
                             }
                         });
 

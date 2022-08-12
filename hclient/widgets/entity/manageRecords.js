@@ -3192,7 +3192,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                     if(title_mask == 'record [ID]' || !match_result){
 
-                        window.hWin.HEURIST4.msg.showMsgDlg(
+                        var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                             'You have not yet selected the fields used to create the <b>Constructed title</b><br><br>'
 
                             +'The <b>Constructed title</b> is like the reference you might find in the bibliography at the end<br>'
@@ -3207,7 +3207,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             +'We strongly recommend putting a little thought into this, as well-designed constructed titles can<br>'
                             +'greatly improve the clarity and ease of use of the database.<br>'
                             +'We recommend you read the <a href="https://heuristref.net/heurist/?db=Heurist_Help_System&website&id=39&pageid=773" target="_blank">help for Constructed titles</a>', 
-                            { 'Proceed': function(){ that.editRecordTypeTitle(); } },
+                            { 'Proceed': function(){ that.editRecordTypeTitle(); $dlg.dialog('close'); } },
                             {title:'Constructed title not yet configured', yes:'Proceed'},
                             {default_palette_class: 'ui-heurist-design'});
 

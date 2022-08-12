@@ -278,3 +278,23 @@ div.mainMenu6 > div.ui-heurist-header:hover{
 .togglerVertical{
     height: 500px !important;
 }
+
+/* TinyMCE Smaller Icons */
+.tox .tox-toolbar .tox-tbtn{
+    transform: scale(70%) !important;
+
+    width: unset !important;
+    height: unset !important;
+}
+
+.tox .tox-toolbar .tox-tbtn.tox-tbtn--select.tox-tbtn--bespoke{
+    transform: scale(80%) !important;
+
+    height: 22px !important;
+    padding: 0 !important;
+}
+
+.tox .tox-toolbar .tinymce_format_group{
+    width: 120px !important;
+    padding: 0 !important;
+}
