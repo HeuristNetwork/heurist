@@ -403,7 +403,7 @@ function executeSmartyTemplate($system, $params){
 
         if(!$is_snippet_output && !@$template_body){
             // log activity, rec ids separated by spaces
-            log_smarty_activity($results);
+            log_smarty_activity($system, $results);
             //$system->user_LogActivity('custRep', array(implode(' ',$results), count($results)), null, TRUE); 
         }
         
@@ -1144,7 +1144,7 @@ function getVariableNameForSmarty($name, $is_fieldtype = true){
 //
 // Log record ids used in smarty reports, ignore if more than 25 records are used
 //
-function log_smarty_activity($rec_ids){
+function log_smarty_activity($system, $rec_ids){
 
     if($system){
         if(count($rec_ids) > 25){ // check id count

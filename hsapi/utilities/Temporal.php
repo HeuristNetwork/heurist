@@ -188,7 +188,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
     if(!$is_strict_iso){
         $need_day = false;
     }
-    $origWithoutDays = false;
+    $origHasDays = false;
     
     //trim ? 
     $value = str_replace('?','',$value);
@@ -215,7 +215,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
 
             try{   
                 $origHasSeconds = (substr_count($value,':')>1);
-                $origWithoutDays = substr_count($value,'-')==1 || substr_count($value,' ')==1 || substr_count($value,'/')==1;
+                $origHasDays = substr_count($value,'-')>1 || substr_count($value,' ')>1 || substr_count($value,'/')>1;
                 
                 
                 $t2 = new DateTime($value);
@@ -262,7 +262,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
         if($is_greg_or_julian && !$is_strict_iso){
 
             $res2 = '';
-            if(!$need_day && $origWithoutDays){
+            if(!$need_day && !$origHasDays){
                 
             }else if(@$date['day']){
                 $res2 = $date['day']; 
@@ -278,7 +278,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
 		    if(@$date['month'] || $has_time){
 			    $res = $res.'-'.str_pad($date['month'],2,'0',STR_PAD_LEFT);
                 
-                if(!$need_day && $origWithoutDays && !$has_time){
+                if(!$need_day && !$origHasDays && !$has_time){
                 
 		        }else if(@$date['day']){ //&& ($need_day || $has_time)
 			        $res = $res.'-'.str_pad($date['day'],2,'0',STR_PAD_LEFT);

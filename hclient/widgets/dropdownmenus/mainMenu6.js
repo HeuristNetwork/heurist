@@ -916,7 +916,7 @@ $.widget( "heurist.mainMenu6", {
 
         var that = this;
 
-        if(!(this.menues && this.menues.explore)){
+        if(!(this.menues && this.menues.explore && this.menues.explore.find('ul.favourite-filters').length != 0)){
             setTimeout(function(){ that.populateFavouriteFilters(favourite_filters); }, 1000);
             return;
         }
@@ -1456,7 +1456,7 @@ $.widget( "heurist.mainMenu6", {
                         .appendTo(item);
                         
                         if(action_id=='menu-import-get-template' || action_id=='menu-import-csv-fieldtypes' || action_id=='menu-import-csv-rectypes'){
-                            item.css({'font-size':'10px', padding:'0 0 0 8px','margin-top':'-2px'})
+                            item.css({'font-size':'10px', padding:'0 0 0 8px','margin-top':'-1px'})
                         }else{
                             item.css({'font-size':'smaller', padding:'6px'})    
                         }
