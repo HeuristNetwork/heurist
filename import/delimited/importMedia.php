@@ -66,8 +66,8 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
 <div style="width:100%;height:60%;position:absolute;top:0">
 <div style="position:absolute;left:0;right:400px; height:100%; margin-right:10px; " id="divStep1">
     <div class="ent_header" style="height:8em;padding:0">
-        <p><b>Step 1</b></p>
-        <p>Paste content in area below</p>
+        <p><b>This function uploads a set of files specified by URLs.</b></p> 
+        <p><b>Step 1: </b>Paste URLs + optional description, one file to a line, in the area below. Recommended format is CSV with a header ( URL,Description ) in line 1</p>
         <input type="file" id="uploadFile" style="display:none">
       <div style="padding-top:4px">
         <h2 style="display: inline-block;margin:0">or</h2>
@@ -164,6 +164,7 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
     <div class="ent_header" style="height:10em;">
         <p><b>Step 2</b></p>
         <div>
+            <br>
             <input id="csv_header" 
                 style="margin:0 0.5em 0 0"
                 class="text ui-widget-content ui-corner-all" type="checkbox" value="1">
@@ -173,6 +174,7 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
     </div>
     <fieldset class="ent_content_full" style="top:7em;padding-top:1em;">
             <div>
+                <br><br>
                 <label for="csv_delimiter">Field separator:</label>
                 <select id="csv_delimiter" class="text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                         <option value="," selected>comma</option>
@@ -182,6 +184,7 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
                 </select>
             </div>
             <div>
+                <br>
                 <label for="csv_enclosure">Fields enclosed in:</label>
                 <select id="csv_enclosure" class="text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                         <option selected value='2'>"</option><option value="1">'</option>
@@ -218,21 +221,26 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
                 </select>
             </div>
             <div>
-                <label>Download URL and register as local file</label><br>
-                <input id="field_download" checked class="column_roles text ui-widget-content ui-corner-all" type="checkbox" value="1" style="margin-left:20px"/>
+                <br>
+                <input id="field_download" checked class="column_roles text ui-widget-content ui-corner-all" type="checkbox" value="1" style="margin-left:0px"/>
+                <label>Get file from URL, upload and register as a local file in the database</label>
             </div>
             <div>
+                <br>
                 <label>Description</label><br>
                 <select id="field_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
+            <!-- what does this do? Probably redundant. Àrtem, please remove if not required 
             <div>
                 <label>Description separator</label><br>
                 <input id="field_desc_sep" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px" value=", Download "/>
             </div>
+            -->
             <div>
-                <label>Concatenate other fields as Description</label><br>
-                <input id="field_desc_concat" checked class="column_roles text ui-widget-content ui-corner-all" type="checkbox" value="1" style="margin-left:20px"/>
+                <br>
+                <input id="field_desc_concat" checked class="column_roles text ui-widget-content ui-corner-all" type="checkbox" value="1" style="margin-left:0px"/>
+                <label> Concatenate additional fields past first delimiter with Description</label>
             </div>
             
             
@@ -249,10 +257,10 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
 
 <div style="width:100%;height:40%;position:absolute;bottom:0" >
     <div class="ent_header" style="height:2em;border-bottom:none;border-top:1px solid lightgray;padding-top:10px">
-        <b>Preview of the data as it will be imported:</b>
+        <br><b>Preview of the data as it will be imported</b> <br>(check that columns have been separated with | symbols and that column headings have been read correctly - should be shown in bold, data in normal font)<br>
         <div id="preparedInfo" style="float:right;padding-right:10px"> <!-- div to show results of data preparation --></div>
     </div>
-    <div class="ent_content_full" style="top:2.5em;font-size:0.9em;" id="divParsePreview">
+    <div class="ent_content_full" style="top:6.5em;font-size:0.9em;" id="divParsePreview">
     </div>
 </div>
 
