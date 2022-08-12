@@ -709,13 +709,19 @@ public static function assignRecordIds($params){
         // id field not defined -  it records to insert as well
         $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field." IS NULL"; 
         $cnt2 = mysql__select_value($mysqli, $select_query);
-        $cnt_insert = $cnt + (($cnt2>0)?intval($cnt2):0);
+
+        // record ids for none existing records
+        $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table
+        ." left join Records on rec_ID=".$id_field." WHERE rec_ID is null and ".$id_field.">0";
+        $cnt3 = mysql__select_value($mysqli, $select_query);
+
+        // insert count
+        $cnt_insert = (($cnt>0) ? intval($cnt) : 0) + (($cnt2>0) ? intval($cnt2) : 0) + (($cnt3>0) ? intval($cnt3) : 0);
 
         // find records to be ignored
         $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field."=''";
         $cnt_ignore = mysql__select_value($mysqli, $select_query);
 
-        
         $imp_session['validation'] = array( 
             "count_update"=>$cnt_update, 
             "count_update_rows"=>$cnt_update,
@@ -2249,7 +2255,10 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             if(!in_array($new_recordID, self::$rep_unique_ids)){
                 self::$rep_unique_ids[] = $new_recordID;
                 self::$rep_updated++;  
-            } 
+            }else if(is_numeric($new_recordID) && $new_recordID > 0){
+                self::$rep_added++;
+                self::$rep_unique_ids[] = $new_recordID;
+            }
         }
         
         //change record id in import table from negative temp to id form Huerist records (for insert)        
@@ -2481,7 +2490,7 @@ public static function performImport($params, $mode_output){
         if($ignore_insert){
             $select_query = $select_query." WHERE (".$id_field.">0) ";  //use records with defined value in index field
         }else if($ignore_update){
-            $select_query = $select_query." WHERE (NOT(".$id_field." > 0 OR ".$id_field."='')) ";
+            $select_query = $select_query." LEFT JOIN Records ON rec_ID=".$id_field." WHERE (NOT(rec_ID IS NOT NULL OR ".$id_field."='')) "; //skip updating records
         }else {
             $select_query = $select_query." WHERE (".$id_field."!='') "; //ignore empty values
         }
