@@ -845,6 +845,12 @@ $.widget( "heurist.editing_input", {
                                 });                                        
                             }
 
+                            editor.on('init', function(e) {
+                                setTimeout(function(){
+                                    $(editor.editorContainer).find('.tox-tbtn.tox-tbtn--select.tox-tbtn--bespoke').parent().addClass('tinymce_format_group');
+                                }, 2000);
+                            });
+
                             editor.on('change', function(e) {
 
                                 var newval = editor.getContent();
