@@ -740,6 +740,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         $cnt_skipped = 0;
         $cnt_imported = 0;
         $cnt_error = 0;
+        $is_download = (@$this->data['is_download']==1);
 
         if(@$this->data['csv_import']){ // import new rectypes via CSV
 
@@ -796,7 +797,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                         'ulf_Description'=>$description, 
                                         'ulf_MimeExt'=>getURLExtension($url));
                     
-                                    if(@$this->data['is_download']){
+                                    if($is_download){
                                         //download and register
                                         $ulf_ID = $this->donwloaAndRegisterdURL($url, $fields); //it returns ulf_ID    
                                     }else{
