@@ -798,6 +798,7 @@ EOD;
         
         self::$system->defineConstant('DT_PARENT_ENTITY');
 
+        $record_count = count($records);
         foreach($records as $record_src){
             
             $is_blog_record = false;
@@ -1245,7 +1246,7 @@ EOD;
             
             //no transaction, suppress parent-child
             //DEBUG $out = array('status'=>HEURIST_OK, 'data'=>1);
-            $out = recordSave(self::$system, $record, false, true, $update_mode);  //see db_records.php
+            $out = recordSave(self::$system, $record, false, true, $update_mode, $record_count);  //see db_records.php
 
             if ( @$out['status'] != HEURIST_OK ) {
 //error_log(print_r($record,true));                

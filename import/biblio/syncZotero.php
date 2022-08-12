@@ -1,7 +1,6 @@
 <?php
 
 /**
-/**
 *   Sync Heurist database with zotero group or user items
 *   zotero API key in sys_SyncDefsWithDB/HEURIST_ZOTEROSYNC and mapping are specified in zoteroMap.xml
 *
@@ -756,7 +755,7 @@ if($step=="1"){  //first step - info about current status
                     $cnt_empty++;
                 }else{
                     //DEBUG echo print_r($details, true);
-                    $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, $is_echo);
+                    $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, $is_echo, $totalitems);
                     if($new_recid){
                         if(count($unresolved_records)>0){
                             $unresolved_pointers[$new_recid] = $unresolved_records;
@@ -869,6 +868,7 @@ if($step=="1"){  //first step - info about current status
 
 
     $ptr_cnt = 0;
+    $missing_pointers_count = count($unresolved_pointers);
     foreach($unresolved_pointers as $rec_id=>$pntdata)
     {
         // pntdata = array of  detail id in main record => record id of resource =>
@@ -880,7 +880,7 @@ if($step=="1"){  //first step - info about current status
 
             foreach($recdata as $resource_rt_id=>$resource_details){ //recordtype
 
-                $recource_recid = createResourceRecord($mysqli, $resource_rt_id, $resource_details);
+                $recource_recid = createResourceRecord($mysqli, $resource_rt_id, $resource_details, $missing_pointers_count);
 
                 if(!is_array($recource_recid)){
                     $recource_recid = array("0"=>$recource_recid);
@@ -1167,17 +1167,18 @@ function assignUnresolvedPointer(&$unresolved, $key, $value){
 *
 * @param mixed $record_type - recordtype for resource
 * @param mixed $recdetails - array of dt_id=>value
+* @param integer $missing_pointers_count - count of unresolved pointers (to avoid spamming emails)
 *
 * returns array of resource record ID
 */
-function createResourceRecord($mysqli, $record_type, $recdetails){
+function createResourceRecord($mysqli, $record_type, $recdetails, $missing_pointers_count){
 
     global $alldettypes, $fi_dettype, $report_log;
 
     if(is_array($recdetails) && array_key_exists(0, $recdetails)){ //these are creators
         $recource_recids = array();
         foreach($recdetails as $idx=>$creator){
-            array_push($recource_recids, createResourceRecord($mysqli, $record_type, $creator));
+            array_push($recource_recids, createResourceRecord($mysqli, $record_type, $creator, $missing_pointers_count));
         }
         return $recource_recids;
     }
@@ -1209,7 +1210,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails){
                 $record_type_2 =  getConstrainedRecordType($dt_id);
                 if($record_type_2){
                     $recdata = array(DT_NAME=>$recdata);
-                    $value = createResourceRecord($mysqli, $record_type_2, $recdata);
+                    $value = createResourceRecord($mysqli, $record_type_2, $recdata, $missing_pointers_count);
                 }else{
                     $report_log = $report_log."<br> resource record type unconstrained for detail type: ".$dt_id;
                     continue;
@@ -1219,7 +1220,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails){
                 $value = array();
                 foreach($recdata as $record_type_2=>$recdata_nextlevel){ //recordtype
 
-                    $value = createResourceRecord($mysqli, $record_type_2, $recdata_nextlevel); //return rec_id
+                    $value = createResourceRecord($mysqli, $record_type_2, $recdata_nextlevel, $missing_pointers_count); //return rec_id
                     break;
 
                 }
@@ -1277,7 +1278,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails){
 
     if($recource_recid==null){
         //such record not found - create new one
-        $recource_recid = addRecordFromZotero(null, $record_type, null, $details, null, false);
+        $recource_recid = addRecordFromZotero(null, $record_type, null, $details, null, false, $missing_pointers_count);
     }
 
     return $recource_recid;
@@ -1360,8 +1361,10 @@ function getConstrainedRecordType($resource_dt_id){
 * @param mixed $rec_URL
 * @param mixed $details
 * @param mixed $zotero_itemid
+* @param mixed $is_echo
+* @param int $record_count - prevent spamming emails about record creation
 */
-function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, $is_echo){
+function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, $is_echo, $record_count){
 
     global $system, $rep_errors_only, $dt_SourceRecordID;
 
@@ -1385,7 +1388,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
         $record['ScratchPad'] = null;
         $record['details'] = $details;
         
-        $out = recordSave($system, $record);  //see db_records.php
+        $out = recordSave($system, $record, true, false, 0, $record_count);  //see db_records.php
         
     if ( @$out['status'] != HEURIST_OK ) {
            print "<div style='color:red'> Error: ".$out["message"]."</div>";

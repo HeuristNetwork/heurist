@@ -778,24 +778,76 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //     
     _deleteAndClose: function(unconditionally){
     
+        var that = this;
+        if(this._currentEditID==null || this._currentEditID<1) return;
+
         if(unconditionally===true){
-            this._super(); 
+
+            var request = {
+                'a'          : 'delete',
+                'entity'     : this.options.entity.entityName,
+                'request_id' : window.hWin.HEURIST4.util.random(),
+                'recID'      : this._currentEditID
+            };                
+
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        var recID = that._currentEditID;
+                        if(that.options.use_cache){
+                            //that._cachedRecordset.removeRecord( recID );
+                        }
+
+                        if(window.hWin.HAPI4.is_admin() && delete_data){
+
+                            var ids = recID.split('.'); console.log(ids);
+                            req = {
+                                'rtyID': ids[0],
+                                'dtyID': ids[1],
+                                'recIDs': 'ALL',
+                                'a': 'delete'
+                            };
+                            window.hWin.HAPI4.RecordMgr.batch_details(req, function(res){ console.log(res);
+                                if(res.status != window.hWin.ResponseStatus.OK){
+                                    window.hWin.HEURIST4.msg.showMsgErr(res);                                
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgFlash('All data deleted', 1000);
+                                }
+                                that._afterDeleteEvenHandler( recID );
+                            });
+                        }else{
+                            that._afterDeleteEvenHandler( recID );
+                        }
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                }
+            );
         }else{
-            var that = this;
-            
+
             var rst_ID = this._currentEditID;
             if(rst_ID.indexOf('.')>0){
                 rst_ID = rst_ID.split('.')[1];
             }
-            
-            window.hWin.HEURIST4.msg.showMsgDlg(
+
+            var display = window.hWin.HAPI4.is_admin() && $Db.dty(rst_ID, 'dty_Type') != 'separator' ? 'inline-block' : 'none';
+
+            var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete field "'
                 + window.hWin.HEURIST4.util.htmlEscape(this._cachedRecordset.fld(rst_ID, 'rst_DisplayName'))
-                +'"?', function(){ that._deleteAndClose(true) }, 
+                +'"?<br><br><span style="display:'+display+';">Additionally, remove all data from this field in all records? <input type="checkbox" id="delData" /></span>', 
+                {
+                    'Proceed': function(){ 
+                        var delData = display != 'none' && $dlg.find('#delData').is(':checked') ? 1 : 0; 
+                        $dlg.dialog('close'); 
+                        that._deleteAndClose(true, delData); 
+                    },
+                    'Cancel': function(){ $dlg.dialog('close'); }
+                }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'},
                 {default_palette_class:this.options.default_palette_class});        
         }
-        
     },
     
     //
@@ -1307,7 +1359,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                                 if(isSep ||
                                   window.hWin.HAPI4.get_prefs_def('edit_rts_open_formlet_after_add',0)==1){
                                     that2._clear_title_for_separator = isSep; // clear title for separator
-                                    that2.editField( that2._open_formlet_for_recID); 
+                                    //that2.editField( that2._open_formlet_for_recID); does not open formlet, seems to be called too early
+                                    setTimeout(function(id){ that2.editField(id); }, 2000, that2._open_formlet_for_recID);
                                 }
                             }
                             that2._show_optional = false;
@@ -2404,6 +2457,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     _afterDeleteEvenHandler: function( recID ){
         
+        var that = this;
         if(recID.indexOf(this.options.rty_ID+'.')===0){
             recID = recID.substring(recID.indexOf('.')+1);
         }
@@ -2428,9 +2482,25 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }
             node.remove();
         }
-        
+
+        var usage = $Db.rst_usage(recID);
+        var is_reserved = $Db.dty(recID, 'dty_Status') == "reserved";
+        if(window.hWin.HAPI4.is_admin() && !is_reserved && (usage.length == 0 || usage.length == 1 && usage.includes( String(this.options.rty_ID) ) )){ // ask if to delete base field
+
+            var msg = 'The base field ' + $Db.dty(recID, 'dty_Name') + '(#'+ recID +') is not used in any other record structure.<br>Would you like to delete this un-used base field?';
+
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, {
+                'Delete field': function(){ 
+                    that._deleteBaseField(recID);
+                    $dlg.dialog('close'); 
+                },
+                'Keep field': function(){ 
+                    $dlg.dialog('close'); 
+                }
+            }, {title: 'Delete un-used field', yes: 'Delete field', no: 'Keep field'}, {default_palette_class: 'ui-heurist-design'});
+        }
+
         this._showRecordEditorPreview(); //redraw 
-        
     },
     
     //
@@ -2637,6 +2707,40 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         return true;
     },
     
-    
+    //
+    // Delete base field 
+    //
+    _deleteBaseField: function(dtyid){
+
+        var that = this;
+        if(window.hWin.HEURIST4.util.isempty(dtyid) || !$Db.dty(dtyid)){
+            return;
+        }
+
+        var label = $Db.dty(dtyid, 'dty_Name');
+        var usage = $Db.rst_usage(recID);
+        var is_reserved = $Db.dty(recID, 'dty_Status') == "reserved";
+
+        if(is_reserved || usage.length != 0){
+            return;
+        }
+
+        var request = {
+            'a': 'delete',
+            'entity': 'defDetailTypes',
+            'recID': dtyid,
+            'request_id': window.hWin.HEURIST4.util.random()
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+            if(response.status == hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgFlash('Base field '+label+' (#'+dtyid+') has been deleted', 2000);
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('dty', null); // refresh local cache
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
+
+    }
     
 });

@@ -257,7 +257,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
                 $cond_mask[0] = trim($cond_mask[0], ' {}'); // remove curly brackets
 
                 $cond_parts = explode("\\", $cond_mask[0]); // split apart
-                if(is_numeric($cond_parts[0]) || empty($cond_parts[0])){
+                if(is_numeric(trim($cond_parts[0])) || empty($cond_parts[0])){
                     $str_maxlen = intval($cond_parts[0]);
                     array_shift($cond_parts);
                 }
