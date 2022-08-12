@@ -2168,7 +2168,7 @@ private static function findOriginalRecord($recordId){
 //
 private static function doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
                                                                     $details, $id_field, $old_id_in_idfield, $mode_output,
-                                                                    $ignore_errors){
+                                                                    $ignore_errors, $record_count){
 
     //check permission beforehand
     if($recordId>0){
@@ -2195,7 +2195,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
     $record['details'] = $details;
     
     //DEBUG 
-    $out = recordSave(self::$system, $record, false);  //see db_records.php
+    $out = recordSave(self::$system, $record, false, false, 0, $record_count);  //see db_records.php
     //$out = array('status'=>HEURIST_OK, 'data'=>$recordId);
     //$out = array('status'=>HEURIST_ERROR, 'message'=>'Fake error message');
     
@@ -2565,7 +2565,8 @@ public static function performImport($params, $mode_output){
         if($use_transaction){
             $keep_autocommit = mysql__begin_transaction(self::$mysqli);    
         }
-        
+
+        $record_count = $res ? $res->num_rows : 0;
 
         while ($row = $res->fetch_row()){
 
@@ -2607,7 +2608,7 @@ public static function performImport($params, $mode_output){
                             //import detail is sorted by rec_id -0 thus it is possible to assign the same recId for several imp_id
                             $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
                                                         $details, $id_field, $prev_ismulti_id?$prev_recid_in_idfield:null, $mode_output,
-                                                        $ignore_errors);
+                                                        $ignore_errors, $record_count);
                             
                             if($prev_recid_in_idfield!=null) $pairs[$prev_recid_in_idfield] = $new_id;//new_A                            
                             
@@ -3047,7 +3048,7 @@ public static function performImport($params, $mode_output){
                         
                         $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
                                                     $details, $id_field, $ismulti_id?$recid_in_idfield:null, $mode_output,
-                                                    $ignore_errors);
+                                                    $ignore_errors, $record_count);
                         if($recid_in_idfield!=null) $pairs[$recid_in_idfield] = $new_id;//new_A
 
                         $details = array();
@@ -3097,7 +3098,7 @@ public static function performImport($params, $mode_output){
             
                 $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
                                                     $details, $id_field, $ismulti_id?$recid_in_idfield:null,  $mode_output,
-                                                    $ignore_errors);
+                                                    $ignore_errors, $record_count);
                 if($recid_in_idfield!=null) $pairs[$recid_in_idfield] = $new_id;//new_A
             
             }
