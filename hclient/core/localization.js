@@ -195,6 +195,7 @@ regional['en'] = {
     'Media Files': '',
         menu_files_upload: 'Upload media files',
         menu_files_index: 'Index media files',
+        menu_files_csv: 'Register files from CSV',
         menu_files_upload_hint: 'Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files',
         menu_files_index_hint: 'Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)',
         
