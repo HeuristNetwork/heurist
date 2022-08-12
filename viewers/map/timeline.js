@@ -255,6 +255,7 @@ $.widget( "heurist.timeline", {
             
             var timeline_content = $(this.timeline_ele).find('.vis-itemset');
             timeline_content.hide();
+            window.hWin.HEURIST4.msg.bringCoverallToFront($(this.timeline_ele), {'background-color': "#000", opacity: '0.6', color: 'white', 'font-size': '16px'}, 'loading dates ...');
             
             this.vis_timeline.itemSet.setOptions({groupOrder:function (a, b) {
                     var av = a['content'];
@@ -281,6 +282,7 @@ $.widget( "heurist.timeline", {
             
             
             this._timelineZoomToAll();
+            window.hWin.HEURIST4.msg.sendCoverallToBack($(this.timeline_ele));
             timeline_content.show();
         }
         

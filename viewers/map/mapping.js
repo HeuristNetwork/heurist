@@ -623,6 +623,8 @@ $.widget( "heurist.mapping", {
                 this.basemaplayer = L.tileLayer.provider(provider['name'], provider['options'] || {})
                     .addTo(this.nativemap);        
 
+                this.basemaplayer.bringToBack(); // ensure basemap is below all map documents
+
                 if(this.basemaplayer_filter){
                     this.applyBaseMapFilter();
                 }
