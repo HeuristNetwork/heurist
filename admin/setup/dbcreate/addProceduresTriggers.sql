@@ -29,8 +29,10 @@ DROP FUNCTION IF EXISTS NEW_LIPOSUCTION;
 
 DROP TRIGGER IF EXISTS sysUGrps_last_insert;
 DROP TRIGGER IF EXISTS sysUGrps_last_update;
+DROP TRIGGER IF EXISTS sysUGrps_last_delete;
 DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_insert;
 DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_update;
+DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_delete;
 DROP TRIGGER IF EXISTS defDetailTypes_last_insert;
 DROP TRIGGER IF EXISTS defDetailTypes_last_update;
 DROP TRIGGER IF EXISTS defDetailTypes_delete;
