@@ -2032,12 +2032,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         setTimeout(function(){that._editing.getFieldByName('rst_DisplayWidth').hide();}, 200);
 
-        var width = this._editing.getValue('rst_DisplayWidth')[0];
+        var curr_width = this._editing.getValue('rst_DisplayWidth')[0];
         var $ele = this._editing.getFieldByName('rst_DisplayWidth_ext').find('.input-div');
 
         $ele.empty();
 
-        var is_max = width == 0;
+        var is_max = (curr_width == 0);
 
         $('<div style="line-height:2ex;padding-top:4px">'
                 +'<input type="radio" value="0" name="widthType">'
@@ -2054,10 +2054,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 var is_max = $ele.find('input[name="widthType"]:checked').val() == '1';
 
                 window.hWin.HEURIST4.util.setDisabled($input, is_max);
-                $input.val(is_max?'':40);
+                $input.val(is_max?'': (curr_width>0?curr_width:40));
 
                 var val = is_max ? 0 : $input.val();
-                if(width != val){
+                if(curr_width != val){
                     this._editing.setFieldValueByName('rst_DisplayWidth', val, true); //hidden field
                 }
             }
@@ -2072,7 +2072,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         $ele.find('input[name="widthType"][value="'+(is_max ? 1 : 0)+'"]').prop('checked', true).change();
         if(!is_max){
-            $ele.find('input.text').val(width);
+            $ele.find('input.text').val(curr_width);
         }
     },
 

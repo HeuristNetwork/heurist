@@ -725,10 +725,12 @@ $.widget( "heurist.editing_input", {
             function __adjustTextareaHeight(){
                 $input.attr('rows', 2);
                 var dheight = that.f('rst_DisplayHeight');  //max height 
-                var lht = parseInt($input.css('lineHeight'),10);
-                if(!(lht>0)) lht = parseInt($input.css('font-size'))*1.3;
-                var cnt = ($input.prop('scrollHeight') / lht).toFixed();            
+                var lht = parseInt($input.css('lineHeight'),10); 
+                if(!(lht>0)) lht = parseInt($input.css('font-size')); //*1.3
+                
+                var cnt = ($input.prop('scrollHeight') / lht).toFixed(); //visible number of lines
                 if(cnt>0){
+//console.log('lines count: '+$input.prop('scrollHeight')+'/'+lht+'='+cnt);                                   
                     if(cnt>dheight && dheight>2){
                         $input.attr('rows', dheight);    
                     }else{
