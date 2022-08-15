@@ -192,10 +192,9 @@ regional['en'] = {
         menu_import_xml_hint: 'Import records from another database',
         menu_import_kml_hint: 'Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)',
         menu_import_get_template_hint: 'Get XML template that describes database structure', 
-    'Media Files': '',
         menu_files_upload: 'Upload media files',
+        menu_files_csv: 'Upload media from URLs',
         menu_files_index: 'Index media files',
-        menu_files_csv: 'Register files from CSV',
         menu_files_upload_hint: 'Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files',
         menu_files_index_hint: 'Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)',
         
