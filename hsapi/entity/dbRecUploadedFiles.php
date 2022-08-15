@@ -1074,7 +1074,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     * @param mixed $needclean - remove file from temp location after reg
     * @returns record or false
     */
-    public function registerFile($file, $newname, $needclean = true, $tiledImageStack=false, $_fields=null){
+    public function registerFile($file, $newname, $needclean = true, $tiledImageStack=false){
         
        $this->records = null; //reset 
         
@@ -1088,10 +1088,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $fields['ulf_PreferredSource'] = 'tiled';
                 }else{
                     $fields['ulf_PreferredSource'] = 'local';
-                }
-                
-                if(@$_fields['ulf_Description']!=null){
-                    $fields['ulf_Description'] = $_fields['ulf_Description'];
                 }
            
                 $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
@@ -1113,7 +1109,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     * 
     * @param mixed $url
     */
-    public function donwloaAndRegisterdURL($url, $fields=null){
+    public function donwloaAndRegisterdURL($url){
         
         $orig_name = basename($url);
         if(strpos($orig_name,'%')!==false){
@@ -1122,7 +1118,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         $tmp_file = HEURIST_SCRATCH_DIR.$orig_name;
         
         if(saveURLasFile($url, $tmp_file)>0){
-            $ulf_ID = $this->registerFile($tmp_file, null, false, false, $fields);
+            $ulf_ID = $this->registerFile($tmp_file, null);
             if($ulf_ID && is_array($ulf_ID)) $ulf_ID = $ulf_ID[0];
             return $ulf_ID;
         }else{
@@ -1135,30 +1131,25 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     * Register remote resource - used to fix flaw in database - detail type "file" has value but does not have registered
     * It may happen when user converts text field to "file"
     * 
-    * $dtl_ID - update recDetails as well
-    * 
     * @param mixed $url
     * @param mixed $generate_thumbmail
     */
-    public function registerURL($url, $tiledImageStack=false, $dtl_ID=0, $fields=null){
+    public function registerURL($url, $tiledImageStack=false, $dtl_ID=0){
         
        $this->records = null; //reset 
        
-       if($fields==null)$fields = array();
+       $fields = array();
        $fields['ulf_PreferredSource'] = $tiledImageStack?'tiled':'external';
        $fields['ulf_OrigFileName']    = $tiledImageStack?'_tiled@':'_remote';  //or _iiif
        $fields['ulf_ExternalFileReference'] = $url;
-
-       if(!@$fields['ulf_MimeExt']){
-           if($tiledImageStack){
-                $fields['ulf_MimeExt'] = 'png';
+       if($tiledImageStack){
+            $fields['ulf_MimeExt'] = 'png';
+       }else{
+           $ext = recognizeMimeTypeFromURL($this->system->get_mysqli(), $url);
+           if(@$ext['extension']){
+               $fields['ulf_MimeExt'] = $ext['extension'];
            }else{
-               $ext = recognizeMimeTypeFromURL($this->system->get_mysqli(), $url);
-               if(@$ext['extension']){
-                   $fields['ulf_MimeExt'] = $ext['extension'];
-               }else{
-                   $fields['ulf_MimeExt'] = 'bin';  //default value
-               }
+               $fields['ulf_MimeExt'] = 'bin';  //default value
            }
        }
        $fields['ulf_UploaderUGrpID'] = $this->system->get_user_id(); 
