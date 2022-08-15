@@ -1494,6 +1494,21 @@ error_log('http code = '.$code.'  curl error='.$error);
     
     return $content_type;
 }
+
+//
+// 
+//
+function getURLExtension($url){
+    $extension = null;
+    $ap = parse_url($url);
+    if( array_key_exists('path', $ap) ){
+        $path = $ap['path'];
+        if($path){
+            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        }
+    }
+    return $extension;
+}
   
 //
 // recognize mime type from url, update ext table if missed and returns extension
@@ -1523,13 +1538,7 @@ function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
             $force_add = "('youtube','video/youtube', '0','','Youtube Video','')";
         }else{
             //get extension from url - unreliable
-            /*$ap = parse_url($r_value);
-            if( array_key_exists('path', $ap) ){
-                $path = $ap['path'];
-                if($path){
-                    $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-                }
-            }*/    
+            //$f_extension = getURLExtension($url)
 
             $mimeType = loadRemoteURLContentType($url); 
             
