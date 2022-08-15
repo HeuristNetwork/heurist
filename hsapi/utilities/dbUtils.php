@@ -360,7 +360,7 @@ class DbUtils {
         
         if($database_name==null){
             $msg = 'Database parameter not defined';
-            $system->addError(HEURIST_INVALID_REQUEST, $msg);
+            self::$system->addError(HEURIST_INVALID_REQUEST, $msg);
             if($verbose) echo '<br>'.$msg;
             return false;
         }
@@ -669,6 +669,7 @@ class DbUtils {
         
             self::initialize();
             $mysqli = self::$mysqli;
+            $system = self::$system;
         
             if($templateFileName==null){
                 $templateFileName = HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt";
@@ -933,6 +934,7 @@ class DbUtils {
         
         self::initialize();
         $mysqli = self::$mysqli;
+        $system  = self::$system;
         
         if($database_name!=HEURIST_DBNAME){ //switch to database
            $connected = mysql__usedatabase($mysqli, $database_name_full);

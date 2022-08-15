@@ -1049,6 +1049,15 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
 function unzipArchive($zipfile, $destination, $entries=null){
 
     if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
+        
+        $dest = realpath($destination);
+        if ($dest !== false) {
+            if (strpos($dest, $system->getFileStoreRootFolder()) !== 0) {
+            //HEURIST_SCRATCH_DIR
+            //HEURIST_TILESTACKS_DIR
+                    return false; //not allowed
+            }
+        }
 
         $zip = new ZipArchive;
         if ($zip->open($zipfile) === TRUE) {
@@ -1059,9 +1068,9 @@ function unzipArchive($zipfile, $destination, $entries=null){
             error_log( $entry );
             }*/
             if($entries==null){
-                $zip->extractTo($destination);//, array()
+                $zip->extractTo($dest);//, array()
             }else{
-                $zip->extractTo($destination, $entries);
+                $zip->extractTo($dest, $entries);
             }
             $zip->close();
             return true;
