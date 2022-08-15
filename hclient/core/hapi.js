@@ -984,15 +984,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     if (success) {
 
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
-<<<<<<< HEAD
-
-                        if (is_message == true) {
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>' +
-                                'You may need to reload pages to see changes.');
-                            $dlg.parent('.ui-dialog').css({ top: 150, left: 150 });
-                        }
-
-=======
                         
                         if (is_message==true) {
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
@@ -1000,7 +991,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             $dlg.parent('.ui-dialog').css({top:150,left:150});    
                         }      
                         
->>>>>>> ad0a85ae7bb786f9c26f86d48383e60006cec004
                         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
                         if ($.isFunction(callback)) callback.call(that, true);
 
