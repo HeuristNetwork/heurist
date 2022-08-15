@@ -54,6 +54,8 @@ $recstructures = array();
 $detailtypes   = array();
 $terms         = null;
 
+$block_swf_email = false;
+
 /**
 * Creates temporary record for given user
 */
@@ -272,6 +274,8 @@ function recordAdd($system, $record, $return_id_only=false){
 *   - 3 Add new values only if field is empty (new values ignored for non-empty fields) 
 *   - 4 Replace existing values with new values, retain existing value if no new value supplied
 * 
+* @param int $total_record_count - Count of records to be (or should be) saved, used to avoid sending several emails to users
+*
 *  Add new values without deletion of existing values (duplicates are ignored)
 Load new values, replacing all existing values for these records/fields
 Other options
@@ -284,7 +288,9 @@ Replace existing values with new values, retain existing value if no new value s
 * error array
 *
 */
-function recordSave($system, $record, $use_transaction=true, $suppress_parent_child=false, $update_mode=0){
+function recordSave($system, $record, $use_transaction=true, $suppress_parent_child=false, $update_mode=0, $total_record_count=1){
+
+    global $block_swf_email;
 
     //check capture for newsletter subscription
     if (@$record['Captcha'] && @$_SESSION["captcha_code"]){
@@ -760,21 +766,29 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     }
     
     //send notification email
-    if($swf_emails!=null){
+    if($swf_emails!=null && !$block_swf_email){
         
         $stage_name = mysql__select_value($mysqli, 'select trm_Label from defTerms where trm_ID='.$new_swf_stage);
         $user = $system->getCurrentUser();
         $user = @$user['ugr_FullName'];
         
         $title = 'Workflow Stage change';
-        $msg = '<b>'.$title.'</b>'
+        $msg = '<b>'.$title.'</b> '
         .'<a href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&recID='.$recID.'&fmt=html">Record #'.$recID
         .'  "'.strip_tags($newTitle).'"</a><br>'
         .' has been changed to "'.$stage_name
-        .'"<br> by user: '.($user?$user:$system->get_user_id());
-     
-        sendPHPMailer(null, 'Heurist DB '.HEURIST_DBNAME.'. ID: '.$recID, //'Workflow stage update notification', 
-                    $swf_emails, $title, $msg, null, true);
+        .'"<br><br> by user: '.($user?$user:$system->get_user_id());
+
+        if($total_record_count > 1){
+            $msg = $msg . '<br><br><i>This is the first of multiple records'. ($modeImport > 0 ? ' imported' : '') .'. Please visit database for additional records.</i>';
+        }
+
+        $res = sendPHPMailer('info@HeuristNetwork.org', 'Heurist DB '.HEURIST_DBNAME.'. ID: '.$recID, //'Workflow stage update notification', 
+                    $swf_emails, $title, $msg, null);
+
+        if($total_record_count > 1 && $res){ // block further emails for imports, only if the email was sent
+            $block_swf_email = true;
+        }
     }
     
 

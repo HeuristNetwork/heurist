@@ -343,7 +343,7 @@ function hSvsEdit(args) {
             var qsearch = svs[_QUERY];
             var r = window.hWin.HEURIST4.util.parseHeuristQuery(qsearch);
             var mode = 'saved';
-            if(r==3){
+            if(r.type==3){
                 mode = 'faceted';
             }else if(window.hWin.HEURIST4.util.isempty(r.q)){
                 mode = 'rules';

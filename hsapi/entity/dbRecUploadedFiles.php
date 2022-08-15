@@ -723,6 +723,119 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }//after save loop
         return $ret;
     } 
+    
+    //   Actions:
+    //   register URL/Path in batch
+    //   optionally: download URL and register locally
+    //   
+    //    
+    public function batch_action(){
+
+        $mysqli = $this->system->get_mysqli();
+
+        $this->need_transaction = false;
+        $keep_autocommit = mysql__begin_transaction($mysqli);
+
+        $ret = true;
+        $cnt_skipped = 0;
+        $cnt_imported = 0;
+        $cnt_error = 0;
+        $is_download = (@$this->data['is_download']==1);
+
+        if(@$this->data['csv_import']){ // import new rectypes via CSV
+
+            if(@$this->data['fields'] && is_string($this->data['fields'])){ // new to perform extra validations first
+                $this->data['fields'] = json_decode($this->data['fields'], true);
+            }
+
+            if(count($this->data['fields'])>0){
+                
+                set_time_limit(0);
+
+                foreach($this->data['fields'] as $idx => $record){
+                    
+                    $is_url = false;
+                    //url or relative path
+                    $url = trim($record['ulf_ExternalFileReference']);
+                    $description = @$record['ulf_Description'];                    
+                    
+                    if(strpos($url,'http')===0){
+                        //find if url is already registered
+                        $is_url = true;
+                        $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'
+                        .$mysqli->real_escape_string($url).'"';
+
+                    }else{
+
+                        $k = strpos($url,'uploaded_files/');
+                        if($k===false) $k ==strpos($url,'file_uploads/');
+
+                        if($k===0 || $k===1){
+                            //relative path in database folder
+                            $filename = HEURIST_FILESTORE_DIR.$url;
+                            if(file_exists($url)){
+                                //this methods checks if file is already registered
+                                $fres = fileRegister($this->system, $filename, $description); //see db_files.php
+                            }
+                        }else {
+                            $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ObfuscatedFileID="'
+                            .$mysqli->real_escape_string($url).'"';
+                        }
+                    }
+
+                    if($file_query){
+                        $fres = mysql__select_value($mysqli, $file_query);    
+                    }                    
+                    
+                                if($fres>0){
+                                    $ulf_ID = $fres;
+                                    $cnt_skipped++;
+                                    
+                                }else if($is_url) {
+
+                                    $fields = array(
+                                        'ulf_Description'=>$description, 
+                                        'ulf_MimeExt'=>getURLExtension($url));
+                    
+                                    if($is_download){
+                                        //download and register
+                                        $ulf_ID = $this->donwloaAndRegisterdURL($url, $fields); //it returns ulf_ID    
+                                    }else{
+                                        $ulf_ID = $this->registerURL( $url, false, 0, $fields);    
+                                    }
+                                    
+                                    if($ulf_ID>0){
+                                        $cnt_imported++;    
+                                    }else {
+                                        $cnt_error++;    
+                                    }
+                                }
+                                
+                } //foreach
+                    
+            }else{
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'No import data has been provided. Ensure that you have enter the necessary CSV rows.<br>Please contact the Heurist team if this problem persists.');
+            }
+        }
+
+        if($ret===false){
+            $mysqli->rollback();
+        }else{
+            $mysqli->commit();    
+        }
+
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        
+        if($ret){
+            $ret = 'Registered '.$cnt_imported.' media resources. ';
+            if($cnt_skipped>0){
+                $ret = $ret.' Skipped/Already exists '.$cnt_skipped.' resources';    
+            }
+        }
+
+        return $ret;
+            
+    }    
 
     //
     //
@@ -961,7 +1074,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     * @param mixed $needclean - remove file from temp location after reg
     * @returns record or false
     */
-    public function registerFile($file, $newname, $needclean = true, $tiledImageStack=false){
+    public function registerFile($file, $newname, $needclean = true, $tiledImageStack=false, $_fields=null){
         
        $this->records = null; //reset 
         
@@ -975,6 +1088,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $fields['ulf_PreferredSource'] = 'tiled';
                 }else{
                     $fields['ulf_PreferredSource'] = 'local';
+                }
+                
+                if(@$_fields['ulf_Description']!=null){
+                    $fields['ulf_Description'] = $_fields['ulf_Description'];
                 }
            
                 $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
@@ -996,7 +1113,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     * 
     * @param mixed $url
     */
-    public function donwloaAndRegisterdURL($url){
+    public function donwloaAndRegisterdURL($url, $fields=null){
         
         $orig_name = basename($url);
         if(strpos($orig_name,'%')!==false){
@@ -1005,7 +1122,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         $tmp_file = HEURIST_SCRATCH_DIR.$orig_name;
         
         if(saveURLasFile($url, $tmp_file)>0){
-            $ulf_ID = $this->registerFile($tmp_file, null);
+            $ulf_ID = $this->registerFile($tmp_file, null, false, false, $fields);
             if($ulf_ID && is_array($ulf_ID)) $ulf_ID = $ulf_ID[0];
             return $ulf_ID;
         }else{
@@ -1018,25 +1135,30 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     * Register remote resource - used to fix flaw in database - detail type "file" has value but does not have registered
     * It may happen when user converts text field to "file"
     * 
+    * $dtl_ID - update recDetails as well
+    * 
     * @param mixed $url
     * @param mixed $generate_thumbmail
     */
-    public function registerURL($url, $tiledImageStack=false, $dtl_ID=0){
+    public function registerURL($url, $tiledImageStack=false, $dtl_ID=0, $fields=null){
         
        $this->records = null; //reset 
        
-       $fields = array();
+       if($fields==null)$fields = array();
        $fields['ulf_PreferredSource'] = $tiledImageStack?'tiled':'external';
        $fields['ulf_OrigFileName']    = $tiledImageStack?'_tiled@':'_remote';  //or _iiif
        $fields['ulf_ExternalFileReference'] = $url;
-       if($tiledImageStack){
-            $fields['ulf_MimeExt'] = 'png';
-       }else{
-           $ext = recognizeMimeTypeFromURL($this->system->get_mysqli(), $url);
-           if(@$ext['extension']){
-               $fields['ulf_MimeExt'] = $ext['extension'];
+
+       if(!@$fields['ulf_MimeExt']){
+           if($tiledImageStack){
+                $fields['ulf_MimeExt'] = 'png';
            }else{
-               $fields['ulf_MimeExt'] = 'bin';  //default value
+               $ext = recognizeMimeTypeFromURL($this->system->get_mysqli(), $url);
+               if(@$ext['extension']){
+                   $fields['ulf_MimeExt'] = $ext['extension'];
+               }else{
+                   $fields['ulf_MimeExt'] = 'bin';  //default value
+               }
            }
        }
        $fields['ulf_UploaderUGrpID'] = $this->system->get_user_id(); 

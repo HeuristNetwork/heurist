@@ -425,11 +425,11 @@ class DbSysGroups extends DbEntityBase
         
         $keep_autocommit = mysql__begin_transaction($mysqli);
             
-        $query = 'DELETE FROM sysUsrGrpLinks'
+        $query2 = 'DELETE FROM sysUsrGrpLinks'
             . ' WHERE ugl_GroupID in (' . implode(',', $this->recordIDs) . ')'
             . ' AND ugl_UserID in (' . implode(',', $assignIDs) . ')';
             
-        $res = $mysqli->query($query);
+        $res = $mysqli->query($query2);
         if(!$res){
             $this->system->addError(HEURIST_DB_ERROR, 'Can\'t remove users from workgroup', $mysqli->error );
             $ret = false;
@@ -448,7 +448,8 @@ class DbSysGroups extends DbEntityBase
                 if(!$res){
                     $ret = false;
                     $mysqli->rollback();
-                    $this->system->addError(HEURIST_DB_ERROR, 'Can\'t set role in workgroup #'.$groupID, $mysqli->error );
+                    $this->system->addError(HEURIST_DB_ERROR, 
+                        'Can\'t set role in workgroup #'.$groupID, $mysqli->error );
                     break;
                 }
             }//foreach      

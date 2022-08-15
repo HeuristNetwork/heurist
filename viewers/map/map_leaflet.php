@@ -72,7 +72,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/bookmarks/leaflet.bookmarks.css">
 
 
-<!-- <script src="<?php echo PDIR;?>external/leaflet/leaflet-iiif.js"></script> -->
+<script src="<?php echo PDIR;?>external/leaflet/leaflet-iiif.js"></script>
 
 
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />

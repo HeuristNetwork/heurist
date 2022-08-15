@@ -696,7 +696,8 @@ class DbSysUsers extends DbEntityBase
                 $res = $mysqli->query($query);
                 if(!$res){
                     $ret = false;
-                    $this->system->addError(HEURIST_DB_ERROR, 'Can\'t set role in workgroup #'.$groupID, $mysqli->error );
+                    $this->system->addError(HEURIST_DB_ERROR, 
+                    'Can\'t set role in workgroup #'.$groupID, $mysqli->error );
                     break;
                 }                            
                 

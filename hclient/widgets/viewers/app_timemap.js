@@ -58,7 +58,7 @@ $.widget( "heurist.app_timemap", {
     recordset_changed: true,
     
     //whether mapping widget is inited (frame is loaded)
-    map_inited: false,
+    is_map_inited: false,
     
     //it is  set to true for addSearchResult to avoid multiple mapqueries @todo REVISE
     map_curr_search_inited: false,  
@@ -357,18 +357,18 @@ console.log(re);
             var that = this;
 
             if(!mapping){
-                this.map_inited = false; 
+                this.is_map_inited = false; 
                 cnt_call = (cnt_call>0) ?cnt_call+1 :1;
                 setTimeout(function(){ that._initmap(cnt_call); }, 1000); //bad idea
                 return;
             }
             
 
-            if(this.map_inited && cnt_call>0) return;
+            if(this.is_map_inited && cnt_call>0) return;
             
             if(this.options.leaflet){ //LEAFLET
             
-                if(!this.map_inited){ //once
+                if(!this.is_map_inited){ //once
                             
                     mapping.mapping('option', {'layout_params':this.options.layout_params});        
                 }    
@@ -401,7 +401,7 @@ console.log(re);
                     }
                 //}else if(this.options.selection){
                 }
-                if(!this.map_inited){
+                if(!this.is_map_inited){
                     //assign listener
                
                     mapping.mapping('option','onselect',function(selected ) {
@@ -418,7 +418,7 @@ console.log(re);
 
                     });
                 
-                    this.map_inited = true;
+                    this.is_map_inited = true;
                     
                     if($.isFunction(this.options.onMapInit)){
                         this.options.onMapInit.call();
@@ -436,7 +436,7 @@ console.log(re);
             
             }else{
                 //google to remove
-                this.map_inited = true;
+                this.is_map_inited = true;
                 
                 mapping.load( null, //mapdataset,
                     this.options.selection,  //array of record ids
@@ -684,7 +684,7 @@ console.log(re);
     }
     
     , isMapInited: function(){
-        return this.map_inited;
+        return this.is_map_inited;
     }
     /*
     , getNativeMap: function(){
