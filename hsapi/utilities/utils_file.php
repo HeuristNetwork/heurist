@@ -1030,7 +1030,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
 
         if($verbose) {
             echo "<br/>Successfully dumped data from ". $source ." to ".$destination;
-            echo "<br/>The zip file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
+            echo "<br/>The zip file contains ".htmlspecialchars($numFiles." files and is ".sprintf("%.2f", $size))."MB";
         }
     }else{
         return false;    

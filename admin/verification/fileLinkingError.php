@@ -216,7 +216,7 @@ $mysqli = $system->get_mysqli();
                             
                             $pref = '';
                             foreach ($files_orphaned as $row) { //to remove
-                                print $pref.'['.$row['ulf_ID'].','.$row['isfound'].']';
+                                print htmlspecialchars($pref.'['.$row['ulf_ID'].','.$row['isfound'].']');
                                 $pref = ',';
                             }
                             
@@ -224,14 +224,14 @@ $mysqli = $system->get_mysqli();
                             $pref = '';
                             //to remove from recDetails and recUplodedFiles
                             foreach ($files_notfound as $row) { 
-                                print $pref.$row['ulf_ID'];
+                                print htmlspecialchars($pref.$row['ulf_ID']);
                                 $pref = ',';
                             }
                             print '],"fixpath":[';
                             $pref = '';
                             
                             foreach ($files_path_to_correct as $row) {
-                                print $pref.$row['ulf_ID'];
+                                print htmlspecialchars($pref.$row['ulf_ID']);
                                 $pref = ',';
                             }
                         ?>]};
@@ -278,8 +278,8 @@ $mysqli = $system->get_mysqli();
                     */
                 foreach ($files_orphaned as $row) {
                     ?>
-                    <div class="msgline"><b><?php echo $row['ulf_ID'];?></b> 
-                            <?php echo @$row['res_fullpath']?$row['res_fullpath']:@$row['ulf_ExternalFileReference'];?>
+                    <div class="msgline"><b><?php echo htmlspecialchars($row['ulf_ID']);?></b> 
+                            <?php echo htmlspecialchars(@$row['res_fullpath']?$row['res_fullpath']:@$row['ulf_ExternalFileReference']);?>
                     </div>
                     <?php
                 }//for
@@ -306,8 +306,8 @@ $mysqli = $system->get_mysqli();
                         $log_data = $log_data.$db.','.$row['ulf_ID'].','.$row['db_fullpath'].','.$row['rec_ID']."\n";
                         ?>
                         <div class="msgline">
-                                <b><?php echo $row['ulf_ID'];?></b> 
-                                <?php echo $row['db_fullpath'];?>
+                                <b><?php echo htmlspecialchars($row['ulf_ID']);?></b> 
+                                <?php echo htmlspecialchars($row['db_fullpath']);?>
                         </div>
                         <?php
                     }
@@ -332,8 +332,9 @@ $mysqli = $system->get_mysqli();
                 foreach ($files_path_to_correct as $row) {
                     ?>
                     
-                    <div class="msgline"><b><?php echo $row['ulf_ID'];?></b> 
-                            <?php echo $row['res_fullpath'].' &nbsp;&nbsp;&nbsp;&nbsp; '.$row['ulf_FilePath'].' -&gt; '.$row['res_relative']; ?>
+                    <div class="msgline"><b><?php echo htmlspecialchars($row['ulf_ID']);?></b> 
+                            <?php echo htmlspecialchars($row['res_fullpath']).' &nbsp;&nbsp;&nbsp;&nbsp; '
+                            .htmlspecialchars($row['ulf_FilePath']).' -&gt; '.htmlspecialchars($row['res_relative']); ?>
                     </div>
                     <?php
                 }

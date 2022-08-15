@@ -1590,14 +1590,14 @@ function print_relation_details($bib) {
 		left join Records on rec_ID = dtl_RecID
 		where dtl_DetailTypeID = '.$relSrcDT.
 		' and rec_RecTypeID = '.$relRT.
-		' and dtl_Value = ' . $bib['rec_ID']);        //primary resource
+		' and dtl_Value = ' . $mysqli->real_escape_string($bib['rec_ID']));        //primary resource
 
     $to_res = $mysqli->query('select recDetails.*
 		from recDetails
 		left join Records on rec_ID = dtl_RecID
 		where dtl_DetailTypeID = '.$relTrgDT.
 		' and rec_RecTypeID = '.$relRT.
-		' and dtl_Value = ' . $bib['rec_ID']);          //linked resource
+		' and dtl_Value = ' . $mysqli->real_escape_string($bib['rec_ID']));          //linked resource
 
     if (($from_res==false || $from_res->num_rows <= 0)  &&  
 		 ($to_res==false || $to_res->num_rows<=0)){
@@ -1839,7 +1839,7 @@ function print_linked_details($bib, $link_cnt)
     }
 
     $query = 'SELECT rec_ID, rec_RecTypeID, rec_Title FROM recLinks, Records '
-                .'where rl_TargetID = '.$bib['rec_ID']
+                .'where rl_TargetID = '.$mysqli->real_escape_string($bib['rec_ID'])
                 .' AND (rl_RelationID IS NULL) AND rl_SourceID=rec_ID '
                 .$ignored_ids
     .' and (rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '

@@ -329,7 +329,7 @@ $.widget( "heurist.editing_input", {
         this.input_prompt.appendTo( this.input_cell );
 
         // Add extended description, if available, viewable via clicking more... and collapsible with less...
-        var extend_help_text = this.f('rst_DisplayExtendedDescription');
+        var extend_help_text = window.hWin.HEURIST4.util.htmlEscape(this.f('rst_DisplayExtendedDescription'));
         if(help_text && !this.options.suppress_prompts 
             && extend_help_text && this.options.recordset && this.options.recordset.entityName == 'Records'){
 

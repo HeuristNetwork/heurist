@@ -156,8 +156,8 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
             $squery2 = $squery2." from Records ".$detTable2." where rec_ID in (".implode(",", $rec_ids).") ".$ourwhere2;
 
     }else{
-        $squery = $squery." from Records ".$detTable." where rec_ID=".$_REQUEST["id"].$ourwhere;
-        $squery2 = $squery2." from Records ".$detTable2." where rec_ID=".$_REQUEST["id"].$ourwhere2;
+        $squery = $squery." from Records ".$detTable." where rec_ID=".$mysqli->real_escape_string($_REQUEST["id"]).$ourwhere;
+        $squery2 = $squery2." from Records ".$detTable2." where rec_ID=".$mysqli->real_escape_string($_REQUEST["id"]).$ourwhere2;
     }
 
     $wkt_reccount=0;
@@ -204,16 +204,16 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
                                 if($d1==null){
                                     $d1 = $d2;
                                 }
-                                print "<TimeStamp><when>".$d1."</when></TimeStamp>";
+                                print "<TimeStamp><when> $d1 </when></TimeStamp>";
 
                             }else{
                                 if($d2 && $d3){
-                                    print "<TimeSpan><begin>".$d2."</begin><end>".$d3."</end></TimeSpan>";
+                                    print "<TimeSpan><begin> $d2 </begin><end> $d3 </end></TimeSpan>";
                                 }
                             }
                         }
 
-                        print '<id>'.$row[0].'</id>';
+                        print '<id>'.htmlspecialchars($row[0]).'</id>';
                         print '<name>'.htmlspecialchars ($row[2]).'</name>';
                         if($row[1]){
                             print '<description><![CDATA[ <a href="'.$row[1].'">link</a>]]></description>'; 										}
@@ -238,11 +238,13 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
         if($kml_reccount>0){
             while ($file_data = $res2->fetch_row()) {
                 if ($file_data[3]) {
+                    
+                    $file_id = $file_data[0];
 
                     print "<NetworkLink>";
-                    print "<name>".$file_data[2]."</name>";
-                    print "<Link id=\"".$file_data[0]."\">";
-                    print "<href>".HEURIST_BASE_URL."export/xml/kml.php?id=".$file_data[0]."</href>";
+                    print "<name>".htmlspecialchars($file_data[2])."</name>";
+                    print "<Link id=\"$file_id\">";
+                    print "<href>".HEURIST_BASE_URL."export/xml/kml.php?id=$file_id</href>";
                     print "</Link>";
                     print "</NetworkLink>";
                 }

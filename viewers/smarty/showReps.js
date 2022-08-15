@@ -676,7 +676,7 @@ function ShowReps( is_snippet_editor ) {
                 
                     if(unconditionally){
                     
-                        document.getElementById("edTemplateName").innerHTML = unconditionally;    
+                        document.getElementById("edTemplateName").textContent = unconditionally;    
                         template_file = unconditionally;    
                     }else{
                         window.hWin.HEURIST4.msg.showPrompt('Please enter template name', function(tmp_name){

@@ -47,9 +47,9 @@ if (@$_REQUEST['finished_merge']==1){
 }
 //store the master record id
 if (@$_REQUEST['keep'])  {
-    $master_rec_id = $_REQUEST['keep'];   
+    $master_rec_id = $mysqli->real_escape_string($_REQUEST['keep']);   
 }else{
-    $master_rec_id = @$_REQUEST['master_rec_id']; 
+    $master_rec_id = $mysqli->real_escape_string(@$_REQUEST['master_rec_id']0; 
 }
 
 //get all enumeration fields - global
@@ -58,7 +58,7 @@ $enum_bdts = mysql__select_assoc2($mysqli,
 
 if (@$_REQUEST['keep']  &&  @$_REQUEST['duplicate']){  //user has select master and dups- time to merge details
     $do_merge_details = true;
-    $_REQUEST['bib_ids'] = join(',',array_merge($_REQUEST['duplicate'],array($_REQUEST['keep']))); //copy only the selected items
+    $_REQUEST['bib_ids'] = implode(',',array_merge($_REQUEST['duplicate'],array($_REQUEST['keep']))); //copy only the selected items
 
 }else if(@$_REQUEST['commit']){
     do_fix_dupe();
@@ -69,6 +69,10 @@ if (! @$_REQUEST['bib_ids']){
     header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Wrong parameter. List of record ids is not defined'));
     exit();
 } 
+
+$bib_ids = explode(',',$_REQUEST['bib_ids']);
+$bib_ids = array_map(array($mysqli,'real_escape_string'), $bib_ids);
+$bib_ids_list = implode(',', $bib_ids);
 
 $bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from defDetailTypes');
 $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from defDetailTypes where dty_Type="resource"');
@@ -177,11 +181,11 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                         }
                         
                         
-                        print '<input type="hidden" name="bib_ids" value="'.$_REQUEST['bib_ids'].'">';
+                        print '<input type="hidden" name="bib_ids" value="'.$bib_ids_list.'">';
 
                         $rtyNameLookup = mysql__select_assoc2($mysqli, 
                             'select rty_ID, rty_Name from Records left join defRecTypes on rty_ID=rec_RecTypeID '
-                            .'where rec_ID in ('.$_REQUEST['bib_ids'].')');
+                            .'where rec_ID in ('.$bib_ids_list.')');
 
                         $temptypes = '';
                         if (count($rtyNameLookup) > 0) {
@@ -205,7 +209,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                         }
                         $res->close();
 
-                        $query2 = 'select * from Records where rec_ID in ('.$_REQUEST['bib_ids'].') order by find_in_set(rec_ID, "'.$_REQUEST['bib_ids'].'")';
+                        $query2 = 'select * from Records where rec_ID in ('.$bib_ids_list.') order by find_in_set(rec_ID, "'.$bib_ids_list.'")';
                         $res = $mysqli->query($query2);
                         $records = array();
                         $counts = array();
@@ -672,9 +676,10 @@ function do_fix_dupe()
 
     
     $dup_rec_ids=array();
-    if(in_array($master_rec_id,explode(',',$_REQUEST['bib_ids']))){
-        $dup_rec_ids = array_diff(explode(',',$_REQUEST['bib_ids']),array($master_rec_id) );
+    if(in_array($master_rec_id, $bib_ids )){
+        $dup_rec_ids = array_diff($bib_ids, array($master_rec_id) );
     }
+
     $dup_rec_list = '(' . join(',', $dup_rec_ids) . ')';
     $add_dt_ids = array();   // array of detail ids to insert for the master record grouped by detail type is
     $update_dt_ids = array(); // array of detail ids to get value for updating the master record
@@ -890,6 +895,6 @@ function do_fix_dupe()
     //2020-03-23 $mysqli->query('update Records set rec_Hash = hhash(rec_ID) where rec_ID='.$master_rec_id);
 
     //reload with flag that operation is completed
-    header('Location: combineDuplicateRecords.php?db='.HEURIST_DBNAME.'&finished_merge=1&bib_ids='.$_REQUEST['bib_ids']);
+    header('Location: combineDuplicateRecords.php?db='.HEURIST_DBNAME.'&finished_merge=1&bib_ids='.$bib_ids_list);
 }
 ?>

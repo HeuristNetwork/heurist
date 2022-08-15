@@ -354,10 +354,10 @@ if($active_all || in_array('owner_ref', $active)) {
                 echo '<script>$(".owner_ref").css("background-color", "#E60000");</script>';
                 print '<div>';
                 if($wrongUser_Add>0){
-                    print '<h3>'.$wrongUser_Add.' records are owned by non-existent users</h3>';
+                    print "<h3> $wrongUser_Add records are owned by non-existent users</h3>";
                 }
                 if($wrongUser_Owner>0){
-                    print '<h3>'.$wrongUser_Owner.' records are owned by non-existent users</h3>';
+                    print "<h3> $wrongUser_Owner records are owned by non-existent users</h3>";
                 }
                 ?>
                 <button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixusers=1','_self')">
@@ -514,15 +514,15 @@ if($active_all || in_array('field_type', $active)) {
                         <?php
                         $isfirst = true;
                         foreach ($dtysWithInvalidTerms as $row) {
-                            print ($isfirst?"":",")."[".$row['dty_ID'].", 0, '".$row['validTermsString']."']";
+                            print htmlspecialchars(($isfirst?"":",")."[".$row['dty_ID'].", 0, '".$row['validTermsString']."']");
                             $isfirst = false;
                         }
                         foreach ($dtysWithInvalidNonSelectableTerms as $row) {
-                            print ($isfirst?"":",")."[".$row['dty_ID'].", 1, '".$row['validNonSelTermsString']."']";
+                            print htmlspecialchars(($isfirst?"":",")."[".$row['dty_ID'].", 1, '".$row['validNonSelTermsString']."']");
                             $isfirst = false;
                         }
                         foreach ($dtysWithInvalidRectypeConstraint as $row) {
-                            print ($isfirst?"":",")."[".$row['dty_ID'].", 2, '".$row['validRectypeConstraint']."']";
+                            print htmlspecialchars(($isfirst?"":",")."[".$row['dty_ID'].", 2, '".$row['validRectypeConstraint']."']");
                             $isfirst = false;
                         }
                     ?>];
@@ -554,7 +554,8 @@ if($active_all || in_array('field_type', $active)) {
             <?php 
             foreach ($dtysWithInvalidTerms as $row) {
                 ?>
-                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has
+                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'>
+                    <?php echo htmlspecialchars( $row['dty_Name']); ?></a></b> field (code <?= $row['dty_ID'] ?>) has
                     <?= count($row['invalidTermIDs'])?> invalid term ID<?=(count($row['invalidTermIDs'])>1?"s":"")?>
                     (code: <?= implode(",",$row['invalidTermIDs'])?>)
                 </div>
@@ -562,7 +563,8 @@ if($active_all || in_array('field_type', $active)) {
             }//for
             foreach ($dtysWithInvalidNonSelectableTerms as $row) {
                 ?>
-                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has
+                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'>
+                    <?php echo htmlspecialchars($row['dty_Name']); ?></a></b> field (code <?= $row['dty_ID'] ?>) has
                     <?= count($row['invalidNonSelectableTermIDs'])?> invalid non selectable term ID<?=(count($row['invalidNonSelectableTermIDs'])>1?"s":"")?>
                     (code: <?= implode(",",$row['invalidNonSelectableTermIDs'])?>)
                 </div>
@@ -570,7 +572,8 @@ if($active_all || in_array('field_type', $active)) {
             }
             foreach ($dtysWithInvalidRectypeConstraint as $row) {
                 ?>
-                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has
+                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'>
+                    <?php echo htmlspecialchars( $row['dty_Name']); ?></a></b> field (code <?= $row['dty_ID'] ?>) has
                     <?= count($row['invalidRectypeConstraint'])?> invalid record type constraint<?=(count($row['invalidRectypeConstraint'])>1?"s":"")?>
                     (code: <?= implode(",",$row['invalidRectypeConstraint'])?>)
                 </div>
@@ -610,8 +613,9 @@ if($active_all || in_array('default_values', $active)) {
             <?php 
             foreach ($rtysWithInvalidDefaultValues as $row) {
                 ?>
-                <div class="msgline"><b><a href="#" onclick='{ onEditRtStructure(<?= $row['rst_RecTypeID'] ?>); return false}'><?= $row['rst_DisplayName'] ?></a></b> field (code <?= $row['dty_ID'] ?>) in record type <?= $row['rty_Name'] ?>  has invalid default value (<?= ($row['dty_Type']=='resource'?'record ID ':'term ID ').$row['rst_DefaultValue'] ?>)
-                    <span style="font-style:italic"><?=$row['reason'] ?></span>
+                <div class="msgline"><b><a href="#" onclick='{ onEditRtStructure(<?= $row['rst_RecTypeID'] ?>); return false}'>
+                    <?php echo htmlspecialchars($row['rst_DisplayName']); ?></a></b> field (code <?= $row['dty_ID'] ?>) in record type <?= $row['rty_Name'] ?>  has invalid default value (<?= ($row['dty_Type']=='resource'?'record ID ':'term ID ').$row['rst_DefaultValue'] ?>)
+                    <span style="font-style:italic"><?php echo htmlspecialchars($row['reason']); ?></span>
                 </div>
                 <?php
             }//for
@@ -1706,8 +1710,8 @@ if($active_all || in_array('expected_terms', $active)) {
 ?>                    
                         <tr>
                             <td style="width: 50px;"><?php echo $dty_ID;?></td>
-                            <td style="width: 55ex;"><?php echo $row[2];?></td>
-                            <td style="width: 25ex;"><?php echo $row[1];?></td>
+                            <td style="width: 55ex;"><?php echo htmlspecialchars($row[2]);?></td>
+                            <td style="width: 25ex;"><?php echo htmlspecialchars($row[1]);?></td>
                         </tr>
 <?php                    
                 }

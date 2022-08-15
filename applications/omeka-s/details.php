@@ -257,7 +257,7 @@ if ($res){
             if($currID != $rty_ID){
                 $currID = $rty_ID;
                 $order = 1;
-                echo "add str ".$currID."</br>";
+                echo "add str ".htmlspecialchars($currID)."</br>";
             }else{
                 $order = $order+1;
             }

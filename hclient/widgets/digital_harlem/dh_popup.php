@@ -199,7 +199,7 @@
 <div class="infowindow infowindow-map">
     <h3><?php echo getFieldValue($records, $recID, 'rec_Title') ?></h3>
 
-    <p><b><?php echo $person_role; ?></b>
+    <p><b><?php echo htmlspecialchars($person_role); ?></b>
 
     in the event: <b><?php echo getFieldValue($records, $eventID, DT_NAME); ?></b>
 

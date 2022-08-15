@@ -547,7 +547,7 @@ $.widget( "heurist.mapping", {
 
                 if(that.basemap_layer_id==424){
                     
-                    //bounds = L.latLngBounds(L.latLng(-256,-256), L.latLng(256,256));//soutwest northeast 
+                    bounds = L.latLngBounds(L.latLng(-256,-256), L.latLng(256,256));//soutwest northeast 
                     
                     //that.projectGeoJson( gjson, true );
             
@@ -3218,7 +3218,7 @@ console.log(bounds);
         }else if(window.hWin.HAPI4.database == 'osmak_12'){
             map_basemap_layer = 21;
         }else if(window.hWin.HAPI4.database == 'osmak_9b'){
-            //map_basemap_layer = 424;
+            map_basemap_layer = 424;
         }
         
         

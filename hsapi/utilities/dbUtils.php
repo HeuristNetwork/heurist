@@ -1077,12 +1077,12 @@ class DbUtils {
 
                         if($res){
                                 if($verbose) {
-                                    echo (" > " . $table . ": ".$mysqli->affected_rows . "  ");
+                                    echo (" > " . htmlspecialchars($table) . ": ".$mysqli->affected_rows . "  ");
                                 }
                         }else{
                                 if($table=='usrReportSchedule'){
                                     if($verbose) {
-                                        echo ("<br/><p class=\"error\">Warning: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
+                                        echo ("<br/><p class=\"error\">Warning: Unable to add records into ".htmlspecialchars($table)." - SQL error: ".$mysqli->error."</p>");
                                     }
                                 }else{
                                     $message = "Unable to add records into ".$table." - SQL error: ".$mysqli->error;
@@ -1165,7 +1165,7 @@ class DbUtils {
 
         if(!$res){
             if($verbose) {
-                if($message) echo $message;
+                if($message) echo htmlspecialchars($message);
             }else{
                 self::$system->addError(HEURIST_ERROR, $message);
             }
