@@ -1,4 +1,8 @@
-//find heurist object in parent windows or init new one if current window is a top most
+/**
+ * Find heurist object in parent windows or init new one if current window is a top most
+ * 
+ * @param {Window} win
+ */
 function _detectHeurist( win ){
     if(win.HEURIST4){ //defined
         return win;
@@ -21,6 +25,7 @@ function _detectHeurist( win ){
 //detect wether this window is top most or inside frame
 if(!window.hWin) window.hWin = _detectHeurist(window);
 
+//create canonical list of possible responses to server calls and append to hWin object
 if(!window.hWin.ResponseStatus){
     
     window.hWin.ResponseStatus =
