@@ -1450,9 +1450,15 @@ $.widget( "heurist.mainMenu6", {
                     var link = widget.mainMenu('menuGetActionLink', action_id);    
                     
                     if(link!=null){
+                        
+                        var title = window.hWin.HR( action_id );
+console.log(action_id+'  '+title);                        
+                        if(!title){
+                            title = link.text();
+                        }
                     
                         $('<span class="ui-icon '+link.attr('data-icon')+'"/>'
-                         +'<span class="menu-text truncate" style="max-width: 109px;">'+window.hWin.HR( action_id )+'</span>')
+                         +'<span class="menu-text truncate" style="max-width: 109px;">'+title+'</span>')
                         .appendTo(item);
 
                         if(action_id=='menu-import-get-template' || 
@@ -1464,7 +1470,7 @@ $.widget( "heurist.mainMenu6", {
                             item.css({'font-size':'smaller', padding:'6px'})    
                         }
                         
-                        item.attr('title',window.hWin.HR(action_id+'_hint')); //link.attr('title')
+                        item.attr('title',window.hWin.HR(action_id+'-hint')); //link.attr('title')
                         
                     }
                 }

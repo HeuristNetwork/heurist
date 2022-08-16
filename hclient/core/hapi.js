@@ -2307,9 +2307,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     return '';
                 }
                 var key = res.trim();
-                if (key.indexOf('menu-') == 0) {
-                    key = key.replaceAll('-', '_');
-                }
+                //if (key.indexOf('menu-') == 0) {
+                //    key = key.replaceAll('-', '_');
+                //}
 
                 if (_regional && _regional[key]) {
                     return _regional[key];
@@ -2319,7 +2319,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                         return regional['en'][key];
 
-                    } else if (key.indexOf('menu_') == 0) {
+                    } else if (key.indexOf('menu-') == 0) {
 
                         return '';
                     } else {
