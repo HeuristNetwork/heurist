@@ -1452,7 +1452,6 @@ $.widget( "heurist.mainMenu6", {
                     if(link!=null){
                         
                         var title = window.hWin.HR( action_id );
-console.log(action_id+'  '+title);                        
                         if(!title){
                             title = link.text();
                         }

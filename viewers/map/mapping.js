@@ -3118,7 +3118,17 @@ console.log(bounds);
                     }else
                     if(val=='geocoder'){ //geocoder plugin
                         that.map_geocoder = L.Control.geocoder({ position: 'topleft', 
-                            geocoder: new L.Control.Geocoder.Google('AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk') });
+                            geocoder: L.Control.Geocoder.nominatim()
+                            //geocoder: L.Control.Geocoder.photon()
+                            //geocoder: new L.Control.Geocoder.Google('AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk') 
+                        });
+                            
+                            /*
+                            'Bing': L.Control.Geocoder.bing({
+                                        apiKey: 'AlsFLEm5UIoF-8kfQdB-XlTCGU_pLLNliREprSZFOZfEr08UCqD0OCzhL5jWAwQn'}),
+                            'Mapbox': L.Control.Geocoder.mapbox({ apiKey: LCG.apiToken }),
+                            */
+                            
                     }else
                     //print plugin
                     if(val=='print'){
