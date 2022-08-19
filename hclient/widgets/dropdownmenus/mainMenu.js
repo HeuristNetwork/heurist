@@ -664,8 +664,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         item.attr('data-link', href);
                     }
                 }
-                //localization
-                if(item.attr('id').indexOf('menu-')==0){
+                //localization   (without id - divider)
+                if(item.attr('id') && item.attr('id').indexOf('menu-')==0){
                     var title = window.hWin.HR( item.attr('id') );
                     if(title) item.text( title );
                     title = window.hWin.HR( item.attr('id')+'-hint' );
