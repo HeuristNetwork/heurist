@@ -895,6 +895,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                     //filtered
                     var treedata = $Db.trm_TreeData(vocab_id, 'tree'); //tree data
+                    
                     // subset.getTreeViewData('trm_Label', 'trm_ParentTermID',vocab_id);
                     var tree = this.recordTree.fancytree('getTree');
                     tree.reload(treedata);
@@ -1036,11 +1037,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             +sLabel+'</div>'; // $Db.trm(recID, 'trm_Parents')+'  '+recID+' '+
             //+sPad            
 
+            var html_thumb = '';
+            
             var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
 
-            var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
-            +recThumb+'&quot;);opacity:1"></div>';
-
+            html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
+                    +recThumb+'&quot;);opacity:1"></div>';
+                    
             sPad = lvl==1?0:(lvl==2?(lvl-0.5):lvl);                                                                         
             var exp_btn_style = 'width:20px;display:inline-block;vertical-align:bottom;margin-left:'+sPad+'em;';
 
@@ -1062,7 +1065,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     {key:'expand',label:'Show/hide children',            
                         title:'', icon:'ui-icon-triangle-1-s', class: 'has_child_terms'},
                     null,'icon_text',exp_btn_style)
-                    : '<div style="'+exp_btn_style+'" class="no_child_terms" title="Drag terms onto this term or create with + icon to create child terms">'
+                : '<div style="'+exp_btn_style+'visibility:hidden" class="no_child_terms" title="Drag terms onto this term or create with + icon to create child terms">'
                         + alt_btn_content 
                      +'</div>') 
             + '<div class="recordSelector" style="display:inline-block;"><input type="checkbox" /></div>'
@@ -1151,12 +1154,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 });
             }else if(this.options.auxilary=='term'){
 
+                //Show grayed arrows next to terms with child terms or on the same level as a term with child terms    
                 if(record_divs.find('.has_child_terms').length == 0){
-                    record_divs.find('.no_child_terms').css('visibility', 'hidden');
+                    //record_divs.find('.no_child_terms').css('visibility', 'hidden');
                 }else{
 
+                    // Artem: code is remarked dur it causes huge workload if vocabulary has more then 100 terms
+                    // Besides it seems senceless. It just hides edit button for children terms
+                    /*
                     $.each(record_divs, function(idx, term_div){
-
+                        
                         var parent_ids = $(term_div).attr('data-parent');
                         var child_divs = record_divs.parent().find('[data-parent^="'+ parent_ids +'"]').filter(
                             function(i, ele){
@@ -1171,6 +1178,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             $(term_div).find('div:first-child').css('visibility', 'hidden');
                         }
                     });
+                    */
                 }
             }
         }

@@ -27,7 +27,7 @@ $.widget( "heurist.resultList", {
         widget_id: null, //outdated: user identificator to find this widget custom js script on web/CMS page
         is_h6style: false,
         view_mode: null, // 'list','icons','thumbs','thumbs3','horizontal','vertical','icons_list','record_content' 
-        list_mode_is_table: false,
+        list_mode_is_table: false, //if table - adjust header columns width to column width in content div
 
         select_mode:null,//none, manager, select_single, select_multi
         selectbutton_label:'Select',
@@ -3043,7 +3043,6 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         var rec_onpage = [];
 
         var html = '', html_groups = {}, recID;
-        
         for(; (idx<len && this._count_of_divs<pagesize); idx++) {
             recID = rec_order[idx];
             if(recID){
@@ -3122,7 +3121,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         }
         
         this.div_content[0].innerHTML += html;
-        
+
         if(this.options.groupByField){ //init show/hide btn for groups
             if(this.options.groupByCss!=null){
                 this.div_content.find('div[data-grp-content]').css( this.options.groupByCss );
@@ -3193,7 +3192,6 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             }
         }
         
-
         /*var lastdiv = this.div_content.last( ".recordDiv" ).last();
         this._on( lastdiv.nextAll(), {
         click: this._recordDivOnClick
@@ -3363,7 +3361,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         }
 
         //rec_toload - list of ids
-        //load full record info - record header111
+        //load full record info - record header
         if(rec_toload.length>0){
             var that = this;
 
