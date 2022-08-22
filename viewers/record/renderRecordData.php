@@ -1838,6 +1838,8 @@ function print_linked_details($bib, $link_cnt)
         $ignored_ids = ' AND rl_SourceID NOT IN ('.implode(',', $already_linked_ids).')';
     }
 
+    $mysqli = $system->get_mysqli();
+
     $query = 'SELECT rec_ID, rec_RecTypeID, rec_Title FROM recLinks, Records '
                 .'where rl_TargetID = '.$mysqli->real_escape_string($bib['rec_ID'])
                 .' AND (rl_RelationID IS NULL) AND rl_SourceID=rec_ID '
@@ -1845,8 +1847,6 @@ function print_linked_details($bib, $link_cnt)
     .' and (rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '
     .($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")')
                 .' ORDER BY rec_RecTypeID, rec_Title';    
-    
-    $mysqli = $system->get_mysqli();
     
     $res = $mysqli->query($query);
 
