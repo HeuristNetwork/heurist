@@ -787,7 +787,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 'a'          : 'delete',
                 'entity'     : this.options.entity.entityName,
                 'request_id' : window.hWin.HEURIST4.util.random(),
-                'recID'      : this._currentEditID
+                'recID'      : this._currentEditID   //  rty_ID.dty_ID
             };                
 
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
@@ -798,17 +798,21 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         if(that.options.use_cache){
                             //that._cachedRecordset.removeRecord( recID );
                         }
+                        
+                        var ids = recID.split('.'); //console.log(ids);
+                        var sType = $Db.dty(ids[1], 'dty_Type');
 
-                        if(window.hWin.HAPI4.is_admin() && delete_data){
-
-                            var ids = recID.split('.'); console.log(ids);
+                        if(window.hWin.HAPI4.is_admin() && sType!='separator'){
+                            //delete fields from records
+                            
                             req = {
                                 'rtyID': ids[0],
                                 'dtyID': ids[1],
                                 'recIDs': 'ALL',
                                 'a': 'delete'
                             };
-                            window.hWin.HAPI4.RecordMgr.batch_details(req, function(res){ console.log(res);
+                            window.hWin.HAPI4.RecordMgr.batch_details(req, function(res){ 
+                                //console.log(res);
                                 if(res.status != window.hWin.ResponseStatus.OK){
                                     window.hWin.HEURIST4.msg.showMsgErr(res);                                
                                 }else{
