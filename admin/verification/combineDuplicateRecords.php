@@ -49,7 +49,7 @@ if (@$_REQUEST['finished_merge']==1){
 if (@$_REQUEST['keep'])  {
     $master_rec_id = $mysqli->real_escape_string($_REQUEST['keep']);   
 }else{
-    $master_rec_id = $mysqli->real_escape_string(@$_REQUEST['master_rec_id']0; 
+    $master_rec_id = $mysqli->real_escape_string(@$_REQUEST['master_rec_id']); 
 }
 
 //get all enumeration fields - global
@@ -60,19 +60,21 @@ if (@$_REQUEST['keep']  &&  @$_REQUEST['duplicate']){  //user has select master 
     $do_merge_details = true;
     $_REQUEST['bib_ids'] = implode(',',array_merge($_REQUEST['duplicate'],array($_REQUEST['keep']))); //copy only the selected items
 
-}else if(@$_REQUEST['commit']){
-    do_fix_dupe();
-    return;
 }
+
+$bib_ids = explode(',',$_REQUEST['bib_ids']);
+$bib_ids = array_map(array($mysqli,'real_escape_string'), $bib_ids);
+$bib_ids_list = implode(',', $bib_ids);
 
 if (! @$_REQUEST['bib_ids']){
     header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Wrong parameter. List of record ids is not defined'));
     exit();
 } 
 
-$bib_ids = explode(',',$_REQUEST['bib_ids']);
-$bib_ids = array_map(array($mysqli,'real_escape_string'), $bib_ids);
-$bib_ids_list = implode(',', $bib_ids);
+if(@$_REQUEST['commit']){
+    do_fix_dupe();
+    return;
+}
 
 $bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from defDetailTypes');
 $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from defDetailTypes where dty_Type="resource"');
@@ -646,7 +648,7 @@ function detail_str($rd_type, $rd_val)
 // function to actually fix stuff on form submission
 function do_fix_dupe() 
 {
-    global $mysqli, $master_rec_id, $finished_merge, $enum_bdts;
+    global $mysqli, $master_rec_id, $finished_merge, $enum_bdts, $bib_ids_list, $bib_ids;
     
     $finished_merge = true;
     
