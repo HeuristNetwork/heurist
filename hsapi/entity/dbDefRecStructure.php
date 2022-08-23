@@ -238,8 +238,8 @@ class DbDefRecStructure extends DbEntityBase
                 
             $row = mysql__select_row_assoc($mysqli,
                 'SELECT rst_ID, rst_OriginatingDBID FROM '.$this->config['tableName']
-                .' WHERE rst_DetailTypeID='.$mysqli->real_escape_string( $this->records[$idx]['rst_DetailTypeID'])
-                .' AND rst_RecTypeID='.$mysqli->real_escape_string( $this->records[$idx]['rst_RecTypeID']) );
+                .' WHERE rst_DetailTypeID='.intval( $this->records[$idx]['rst_DetailTypeID'] )
+                .' AND rst_RecTypeID='.intval( $this->records[$idx]['rst_RecTypeID']) );
 
             $isInsert = !(@$row['rst_ID']>0);
 
@@ -247,6 +247,10 @@ class DbDefRecStructure extends DbEntityBase
                 $this->records[$idx]['rst_ID'] = -1;
                 $this->records[$idx]['rst_LocallyModified'] = 0;
                 if(!@$this->records[$idx]['rst_Status']) $this->records[$idx]['rst_Status'] = 'open';
+                
+                if($this->records[$idx]['rst_DefaultValue']=='tabs' && !@$this->records[$idx]['rst_DisplayName']){
+                    $this->records[$idx]['rst_DisplayName'] = 'Divider '.$idx;
+                }
             }else{
                 $this->records[$idx]['rst_ID'] = $row['rst_ID'];
                 $this->records[$idx]['rst_LocallyModified'] = ($row['rst_OriginatingDBID']>0)?1:0;
