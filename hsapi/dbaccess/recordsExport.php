@@ -864,7 +864,7 @@ XML;
             
             
             //save into specified file in scratch folder
-            $file_records  = $originalFileName.'.'.$params['format'];
+            $file_records  = $originalFileName.'.'.($params['format']=='gephi'?'gexf':$params['format']);
 
             //archive into zip    
             $file_zip = $originalFileName.'.zip';
@@ -913,7 +913,7 @@ XML;
                 if($params['format']=='iiif'){
                     $filename = 'manifest_'.$params['db'].'_'.date("YmdHis").'.json';
                 }else{
-                    $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.'.$params['format'];    
+                    $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.'.($params['format']=='gephi'?'gexf':$params['format']);    
                 }
                 
                 header('Content-Disposition: attachment; filename='.$filename);
