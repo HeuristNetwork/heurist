@@ -431,7 +431,8 @@ if(!($is_map_popup || $without_header)){
                     }
                 }
 
-                if($rel_section.find('div[data-id]').length == 0){
+                // hide 'relation' section if there isn't any relmarkers to display
+                if($rel_section.find('div[data-id]:visible').length == 0){
                     $rel_section.hide();
                 }
             }
