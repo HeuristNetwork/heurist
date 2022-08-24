@@ -378,6 +378,167 @@ class DbDefDetailTypes extends DbEntityBase
         }
         return $ret;
     }
-    
+
+    //
+    // batch action for rectypes
+    // 1) import rectype from another db
+    //
+    public function batch_action(){
+         
+        $mysqli = $this->system->get_mysqli();
+
+        $this->need_transaction = false;
+        $keep_autocommit = mysql__begin_transaction($mysqli);
+
+        $ret = true;
+
+        if(@$this->data['csv_import']){ // import new rectypes via CSV
+
+            if(@$this->data['fields'] && is_string($this->data['fields'])){ // new to perform extra validations first
+                $this->data['fields'] = json_decode($this->data['fields'], true);
+            }
+
+            if(count($this->data['fields'])>0){
+
+                $ret = array();
+                foreach($this->data['fields'] as $idx => $record){
+
+                    $ret[$idx] = array();
+                    if(empty(@$record['dty_Name'])){ // check that a name has been provided
+                        $ret[$idx][] = 'A name is required';
+                    }else{ // check that the name hasn't been used yet
+                        $exists = mysql__select_value($mysqli, 'SELECT dty_ID FROM defDetailTypes WHERE dty_Name="'. $record['rty_Name'] .'"');
+                        if($exists){
+                            $ret[$idx][] = $record['rty_Name'] . ' is already in use by record type ID#' . $exists;
+                        }
+                    }
+                    if(empty(@$record['dty_Description'])){ // check that a description has been provided
+                        $ret[$idx][] = 'A description is required';
+                    }
+                    if(empty(@$record['dty_Type'])){ // check that a type has been provided
+                        $ret[$idx][] = 'A field type is required';
+                    }else{
+                        $record['dty_Type'] = strtolower($record['dty_Type']);
+                        switch ($record['dty_Type']) {
+                            case 'text':
+                            case 'freetext':
+                                $this->data['fields'][$idx]['dty_Type'] = 'freetext';
+                                break;
+                            case 'memo':
+                            case 'blocktext':
+                                $this->data['fields'][$idx]['dty_Type'] = 'blocktext';
+                                break;
+                            case 'date':
+                                $this->data['fields'][$idx]['dty_Type'] = 'date';
+                                break;
+                            case 'terms':
+                            case 'term':
+                            case 'enum':
+                                $this->data['fields'][$idx]['dty_Type'] = 'enum';
+                                break;
+                            case 'recpointer':
+                            case 'resource':
+                                $this->data['fields'][$idx]['dty_Type'] = 'resource';
+                                break;
+                            case 'relmarker':
+                                $this->data['fields'][$idx]['dty_Type'] = 'relmarker';
+                                break;
+                            default:
+                                $ret[$idx][] = $record['dty_Type'] . ' type is not handled';
+                                break;
+                        }
+
+                        if($record['dty_Type'] == 'enum' || $record['dty_Type'] == 'relmarker'){
+                            if(empty(@$record['dty_JsonTermIDTree'])){
+                                $ret[$idx][] = 'A Vocabulary ID is needed for this field';
+                            }else{
+                                $trm_query = 'SELECT trm_ID, trm_Domain, trm_Label FROM defTerms WHERE trm_ID = ' . $record['dty_JsonTermIDTree'];
+                                $trm_res = mysql__select_value($mysqli, $trm_query);
+
+                                if(!$trm_res){
+                                    $ret[$idx][] = 'Unable to find vocab id #' . $record['dty_JsonTermIDTree'];
+                                }else if($record['dty_Type'] == 'relmarker' && $trm_res[1] == 'enum'){
+                                    $ret[$idx][] = $trm_res[2] . ' (#' . $trm_res[0] . ') is not setup as relation terms';
+                                }
+                            }
+                        }
+
+                        if($record['dty_Type'] == 'resource' || $record['dty_Type'] == 'relmarker'){
+                            if(empty(@$record['dty_PtrTargetRectypeIDs'])){
+                                $ret[$idx][] = 'A Record Type target is needed for this field';
+                            }else{
+                                $rty_query = 'SELECT rty_ID FROM defRecTypes WHERE rty_ID = ' . $record['dty_PtrTargetRectypeIDs'];
+                                $rty_res = mysql__select_value($mysqli, $rty_query);
+
+                                if(!$rty_res){
+                                    $ret[$idx][] = 'Unable to find rectype id #' . $record['dty_PtrTargetRectypeIDs'];
+                                } 
+                            }
+                        }
+                    }
+
+
+                    if(count($ret[$idx]) != 0){ // has error
+
+                        unset($this->data['fields'][$idx]);
+                        $ret[$idx] = implode(', ', $ret[$idx]);
+                    }else{
+                        $ret[$idx] = '';
+
+                        if(!array_key_exists($this->data['fields'][$idx], 'dty_HelpText')){ // add help text
+                            $this->data['fields'][$idx]['dty_HelpText'] = 'Please provide a short explanation for the user ...';
+                        }
+                        if(!array_key_exists($this->data['fields'][$idx], 'dty_Status')){ // add status
+                            $this->data['fields'][$idx]['dty_Status'] = 'open';
+                        }
+                        if(!array_key_exists($this->data['fields'][$idx], 'dty_ShowInLists')){ // add show in list
+                            $this->data['fields'][$idx]['dty_ShowInLists'] = '1';
+                        }
+                        if(!array_key_exists($this->data['fields'][$idx], 'dty_NonOwnerVisibility')){ // add field visibility
+                            $this->data['fields'][$idx]['dty_NonOwnerVisibility'] = 'viewable';
+                        }
+                        if(!array_key_exists($this->data['fields'][$idx], 'dty_DetailTypeGroupID') && isset($this->data['dtg_ID'])){ // add detail type group 
+                            $this->data['fields'][$idx]['dty_DetailTypeGroupID'] = $this->data['dtg_ID'];
+                        }
+                    }
+                }
+
+                $idx_to_do = array_keys($this->data['fields']);
+                $this->data['fields'] = array_values($this->data['fields']); // re-write indexes
+
+                $result = true;
+                if(count($this->data['fields']) > 0){ // ensure there are still rectypes to define
+                    $result = $this->save();
+                }
+
+                if(!$result){
+                    $ret = false;
+                }else if(count($idx_to_do) > 0){ // check if success messages need to be added
+
+                    $i = 0;
+                    foreach ($idx_to_do as $idx){
+                        if(strlen($ret[$idx]) > 0){
+                            continue;
+                        }
+
+                        $ret[$idx] = 'Created ID#'.$this->records[$i]['dty_ID'];
+                        $i++;
+                    }
+                }
+            }else{
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'No import data has been provided. Ensure that you have enter the necessary CSV rows.<br>Please contact the Heurist team if this problem persists.');
+            }
+        }
+
+        if($ret===false){
+            $mysqli->rollback();
+        }else{
+            $mysqli->commit();    
+        }
+
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+        return $ret;
+    }
 }
 ?>
