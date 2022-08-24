@@ -194,6 +194,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         +'<option>5</option><option>10</option><option>20</option><option>30</option>'
                         +'<option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>'
                         +'<option>120</option><option>150</option>'
+                        +'<option>200</option><option>250</option>'
                         +'<option value="0">Max</option></select></div>'
 
                    +'<span class="edit_rts_btn" style="top:24px;left:80px;position:absolute;background:lightblue;display:none" '
@@ -302,13 +303,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                         }
                                         
                                         if((dtFields['dty_Type'] == 'freetext' || dtFields['dty_Type'] == 'blocktext' || dtFields['dty_Type'] == 'float') 
-												&& dtFields['rst_DisplayWidth'] == 0){
+                                                && dtFields['rst_DisplayWidth'] == 0){
 
-                                            var width = that.editForm.width() * ((this.options.rts_editor) ? 0.75 : 0.8);;
-
-                                            if(inpt.parents('fieldset').length > 0){ // check for parent fieldset
-                                                width = inpt.parents('fieldset').width() * ((this.options.rts_editor) ? 0.75 : 0.8);
-                                            }
+                                            var width = that.editForm.width() * ((that.options.rts_editor) ? 0.7 : 0.8);
 
                                             inpt.find('input, textarea').css({'min-width': width, width: width});
                                         }
@@ -2966,7 +2963,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             header_to_tabs_ignore = (header_to_tabs_ignore != null) ? JSON.parse(header_to_tabs_ignore) : {};
 
-            if(window.hWin.HAPI4.has_access(1) && !hasTabs && group_fields && Object.keys(group_fields).length > 2
+            // Check if there are headers, and whether none of them are tabs - session only
+            if(window.hWin.HAPI4.has_access(1) && !hasTabs && temp_group_details && Object.keys(temp_group_details).length > 2
                 && this.options.edit_structure == undefined && this.options.rts_editor == undefined){
 
                 if(header_to_tabs_ignore[window.hWin.HAPI4.database] == null 
@@ -2978,7 +2976,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     btns[window.hWin.HR('Convert to tabs')] = function(){
                         $dlg.dialog('close');
 
-                        //Convert all groups to tabs
+                        //Convert all headers to tabs
                         var request = {
                             'a': 'save',
                             'entity': 'defRecStructure',
@@ -3165,19 +3163,33 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 }
                 this.options.edit_obstacle = false;
             } 
-            
-            
+
+            // Add tab paging icons and activation handling
             var eles = this.editForm.find('.ui-tabs');
-            /*
-                eles.tabs('paging',{
-                    nextButton: '<span style="font-size:1.2em;font-weight:900">&#187;</span>', // Text displayed for next button.
-                    prevButton: '<span style="font-size:1.2em;font-weight:900">&#171;</span>' // Text displayed for previous button.
-                });
-            */    
             for (var i=0; i<eles.length; i++){
                 $(eles[i]).attr('data-id','idx'+i).tabs('paging',{
                     nextButton: '<span style="font-size:2em;font-weight:900;line-height:5px">&#187;</span>', // Text displayed for next button.
                     prevButton: '<span style="font-size:2em;font-weight:900;line-height:5px">&#171;</span>' // Text displayed for previous button.
+                });
+
+                // onActivate handle
+                $(eles[i]).on('tabsactivate', function(event, ui){
+                    if(ui.newPanel && ui.newPanel.find('.enum_input:visible').length > 0){ // fix terms as button widths
+
+                        var $input_divs = ui.newPanel.find('.enum_input:visible').parent();
+
+                        $.each($input_divs, function(i, input_div){
+
+                            var $inputdiv = $(input_div);
+                            var $input = $inputdiv.find('.enum_input');
+
+                            if($input.first().height()*2 < $inputdiv.height()){
+                                $input.css('min-width', '120px');
+                            }else{
+                                $input.css('min-width', '');
+                            }
+                        });
+                    }
                 });
             }
 
@@ -3214,23 +3226,36 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         return;
                     }
                 }
-            }else if(max_length_fields.length > 0){
+            }
 
-                var popup_maxw = this.editForm.width() * ((this.options.rts_editor) ? 0.75 : 0.8);
+            if(max_length_fields.length > 0){ // Set the selected freetext and memo/blocktext fields to 'max' width
+
+                var popup_maxw = this.editForm.width() * ((this.options.rts_editor) ? 0.7 : 0.8);
 
                 for(var i = 0; i < max_length_fields.length; i++){
 
                     var width = popup_maxw;
                     var field = this._editing.getFieldByName(max_length_fields[i]);
 
-                    if(field.parents('fieldset').length > 0){ // check for parent fieldset
-                        width = field.parents('fieldset').width() * ((this.options.rts_editor) ? 0.75 : 0.8);
-                    }
-
                     field.find('input, textarea').css({'width': width, 'max-width': width});
                 }
-            }
+            }else if(terms_as_buttons.length > 0){ // Set terms as button fields, if more than one line, set width 
 
+                for(var j = 0; j < terms_as_buttons.length; j++){
+
+                    var field = this._editing.getFieldByName(terms_as_buttons[j]);
+
+                    if(field.is(':visible')){
+
+                        var $inputdiv = field.find('.input-div');
+                        var $input = $inputdiv.find('.enum_input');
+
+                        if($input.first().height()*2 < $inputdiv.height()){
+                            $input.css('min-width', '120px');
+                        }
+                    }
+                }
+            }
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);
         }
