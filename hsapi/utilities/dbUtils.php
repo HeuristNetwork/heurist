@@ -313,7 +313,7 @@ class DbUtils {
                 $email_title = 'Database registration ID: '.$dbID.'. User ['.$indexdb_user_id.']';
 
                 //sendEmail($dbowner_Email, $email_title, $email_text);
-                sendEmail_native($dbowner_Email, $email_title, $email_text);
+                sendEmail_native($dbowner_Email, $email_title, $email_text, null);
                 //END email -----------------------------------
 
                 

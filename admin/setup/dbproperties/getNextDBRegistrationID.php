@@ -31,13 +31,12 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
 // TO DO: WE NEED SOME MECHANISM TO AVOID DENIAL OF SERVICE ATTACK WHICH REPEATEDLY REQUESTS REGISTRATIONS
 
 // TODO: We may need to hobble/delete some of the functionality on Heurist Reference Index db (HEURIST_INDEX_DATABASE) to avoid people
 // creating unwanted records or importing random crap into it
 require_once (dirname(__FILE__).'/../../../hsapi/System.php');
+require_once (dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
 
 if(@$_REQUEST["db"]!=HEURIST_INDEX_DATABASE){
     echo '0,This script allowed for Master Index database only';

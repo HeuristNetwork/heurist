@@ -382,6 +382,8 @@ function registerDatabase() {
                 $data = loadRemoteURLContentSpecial($reg_url); //without proxy
                 */
                 
+                $mysqli = $system->get_mysqli();
+                
                 $dbID = intval($data);
                 
                 if ($dbID == 0) { // Unable to allocate a new database identifier
