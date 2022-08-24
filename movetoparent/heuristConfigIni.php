@@ -21,14 +21,18 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-// See configIni.php for documentation. If this file is placed in the parent directory of Heurist, eg. the web root,
-// and renamed heuristConfigIni.php, the values in this file will overide those given (if any) in the
-// configIni.php file in each copy of Heurist
+// See configIni.php for documentation. 
+// This file shoudl be placed in the parent directory of Heurist, eg. the web root,
+// and renamed heuristConfigIni.php, the values in this file will then overide those given (if any) 
+// in the configIni.php file in each copy of Heurist on the server (in practice the
+// configIni.php fiel does NOT specify the values, since heuritConfigIni.php
+// provides all copies with shared values)
 
 if (!@$serverName) $serverName = null; // override default taken from request header SERVER_NAME
 if (!@$mailDomain) $mailDomain = null; // You may need to set mail domain if it does not use server domain
 
-if (!@$heuristReferenceServer) $heuristReferenceServer = null; // address of the "reference server", ie. the server where the master index and code updates are located 
+if (!@$heuristReferenceServer) $heuristReferenceServer = "https://heuristref.net"; 
+// address of the "reference server", ie. the server where the master index and code updates are located 
 
 // ------ VALUES YOU SHOULD SET -------------------------------------------------------------------------------------------
 
