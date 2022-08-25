@@ -58,7 +58,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
 
 if($is_debug) print HEURIST_BASE_URL.'  '.HEURIST_MAIN_SERVER.'<br>';
         
-        if(strpos(HEURIST_BASE_URL, HEURIST_MAIN_SERVER) !== false){ // currently on server where ESTC DB is located
+        if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){ // currently on server where ESTC DB is located
 
             if(array_key_exists('entity', $params)){ // retrieve entity info (term lookup)
                 require_once (dirname(__FILE__).'/entityScrud.php');

@@ -169,7 +169,7 @@ class DbUtils {
         // if database is on main server it is possible to register database with user-defined ID        
         if($newid>0){ 
 
-            if(!(strpos($serverURL_lc, HEURIST_MAIN_SERVER)===0)){ 
+            if(!(strpos(strtolower($serverURL_lc), strtolower(HEURIST_MAIN_SERVER))===0)){ 
             
                 return '0,It is possible to assign arbitrary ID for databases on heurist servers only';
             }
@@ -313,7 +313,7 @@ class DbUtils {
                 $email_title = 'Database registration ID: '.$dbID.'. User ['.$indexdb_user_id.']';
 
                 //sendEmail($dbowner_Email, $email_title, $email_text);
-                sendEmail_native($dbowner_Email, $email_title, $email_text, null);
+//TEMP it is very slow on intersect server                sendEmail_native($dbowner_Email, $email_title, $email_text, null);
                 //END email -----------------------------------
 
                 

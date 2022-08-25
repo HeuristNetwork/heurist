@@ -1333,7 +1333,7 @@ function loadRemoteURLContentSpecial($url){
         //if requested url is on the same server 
         //replace URL to script path in current installation folder
         //and execute script 
-        if(strpos($url, HEURIST_INDEX_BASE_URL)===0){
+        if(strpos(strtolower($url), strtolower(HEURIST_INDEX_BASE_URL))===0){
             $path = str_replace(HEURIST_INDEX_BASE_URL, HEURIST_DIR, $url);
         }else{
             $path = str_replace(HEURIST_BASE_URL, HEURIST_DIR, $url);
@@ -1394,7 +1394,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     curl_setopt($ch, CURLOPT_HEADER, 0);    //don't include header in output
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // follow server header redirects
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
-    if(strpos($url, HEURIST_MAIN_SERVER)===0){
+    if(strpos(strtolower($url), strtolower(HEURIST_MAIN_SERVER))===0){
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
     }
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);    // timeout after ten seconds

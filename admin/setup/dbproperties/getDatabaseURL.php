@@ -28,7 +28,7 @@
 */
 require_once(dirname(__FILE__)."/../../../hsapi/System.php");
 
-$isOutSideRequest = (strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===false); //this is reference server
+$isOutSideRequest = (strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===false); //this is reference server
 if($isOutSideRequest){ //this is request from outside - redirect to master index    
 
     $reg_url = HEURIST_INDEX_BASE_URL 

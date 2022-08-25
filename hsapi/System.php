@@ -1597,7 +1597,8 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             
             
             $superuser = false;
-            if(false){
+            if(false)
+            {
                 $user_id = is_numeric($username)?$username:2;
                 $user = user_getById($this->mysqli, $user_id);
                 $superuser = true;
@@ -1847,7 +1848,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             // HEURIST_INDEX_DATABASE is the refernece standard for current database version
             // Maybe this should be changed to Heurist_Sandpit?. Note: sandpit no longer needed, or used, from late 2015
 
-            if(strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===0){ //same domain
+            if(strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===0){ //same domain
        
                 $mysql_indexdb = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DB_PORT);
                 if ( !is_array($mysql_indexdb) && mysql__usedatabase($mysql_indexdb, HEURIST_INDEX_DATABASE)){
