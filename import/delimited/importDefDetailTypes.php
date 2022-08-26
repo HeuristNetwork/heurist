@@ -7,6 +7,7 @@
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2020 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+	* @author      Brandon McKay   <blmckay13@gmail.com>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     6
     */
