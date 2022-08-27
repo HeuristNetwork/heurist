@@ -158,10 +158,14 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
             }
 
             if($response===false){
+                global $glb_curl_error;
+                $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
+
                 $msg = 'We are having trouble performing your request on the ESTC server.<br>'
                     . 'Please try norrowing down the search with more specific criteria before running this request again.<br><br>'
-                    . 'If this problem persists, please contact the Heurist team.<br>'
-                    . 'Request URL: ' . $url;
+                    . 'If this problem persists, please contact the Heurist team.<br><br>'
+                    . $error_code . '<br>'
+                    . 'Request URL: ' . $url . '<br><br>';
                 $response = array('status' => HEURIST_ERROR, 'message' => $msg);
             }
         }else{ // no access

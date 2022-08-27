@@ -362,10 +362,13 @@ function registerDatabase() {
                     $data = loadRemoteURLContentWithRange($reg_url, null, true);
                     
                     if (!isset($data) || $data==null) {
-                        
+                        global $glb_curl_error;
+                        $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
+
                         echo '<p class="ui-state-error">'
-                            .'Unable to connect Heurist master index, possibly due to timeout or proxy setting<br />'
-                            ."URL requested: <a href='$reg_url'>$reg_url</a></p>";
+                            .'Unable to connect Heurist master index, possibly due to timeout or proxy setting<br><br>'
+                            . $error_code . '<br>'
+                            ."URL requested: $reg_url</p><br>";
                         return false;
                     }
                     
