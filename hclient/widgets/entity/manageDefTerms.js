@@ -410,9 +410,15 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this.rbMergeOnDnD = this.searchForm.find('#rbDnD_merge');
 
                 this._dropped = false;
-                
+
+                var trm_empty_remark = 'No terms in selected vocabulary.<br><br>Add or import new ones<br><br>'
+                    + '<div style="display: inline-block;margin: 10px 0 0 35px;color: green;font-style: italic;">'
+                        + 'Terms can be added directly when editing the data for a record.<br><br>'
+                        + 'Terms are added automatically when importing data from a<br>CSV, XML, or JSON file containing terms.'
+                    + '</div>';
+
                 this.options.recordList = {
-                    empty_remark: 'No terms in selected vocabulary.<br/><br/>Add or import new ones',
+                    empty_remark: trm_empty_remark,
                     show_toolbar: false,
                     view_mode: 'list',
                     pagesize: 999999,
