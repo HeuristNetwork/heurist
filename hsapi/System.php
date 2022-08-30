@@ -148,6 +148,8 @@ error_log('init systme '.$_SERVER['PHP_SELF']);
 error_log(print_r($_REQUEST, true));
 */            
             $this->is_inited = true;
+            
+            
             return true;
         }else{
             return false;
@@ -1074,7 +1076,7 @@ error_log(print_r($_REQUEST, true));
                     "db_managers_groupid"=>($this->get_system('sys_OwnerGroupID')>0?$this->get_system('sys_OwnerGroupID'):1),
                     "help"=>HEURIST_HELP,
                     
-                    //code version
+                    //code version from configIni.php
                     "version"=>HEURIST_VERSION,    
                     "version_new"=>$lastCode_VersionOnServer, //version on main index database server
                     //db version
@@ -1337,7 +1339,7 @@ error_log(print_r($_REQUEST, true));
         if (session_status() != PHP_SESSION_ACTIVE) {
             
             $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-            session_name('heurist-sessionid');
+            session_name('heurist-sessionid'); //set session name
             //session_set_cookie_params ( 0, '/', '', $is_https);
             session_cache_limiter('none');
 
@@ -1388,9 +1390,6 @@ error_log(print_r($_REQUEST, true));
             return false;
         }
         
-        
-//        @session_start();
-
         return true;
     }
 
@@ -1499,7 +1498,6 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
 }
             }*/
             
-            session_write_close();
         }
         return $islogged;
     }

@@ -303,10 +303,11 @@
                 @$_SESSION[$dbname]["ugr_Preferences"][$property] = $value;    
             }
         }
-        if($ugrID>0)
-        $res = mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr', array(
-                    'ugr_ID'=>$ugrID,
-                    'ugr_Preferences'=>json_encode($_SESSION[$dbname]["ugr_Preferences"]) ));
+        if($ugrID>0){
+            $res = mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr', array(
+                        'ugr_ID'=>$ugrID,
+                        'ugr_Preferences'=>json_encode($_SESSION[$dbname]["ugr_Preferences"]) ));
+        }
     }
 
     //
