@@ -353,6 +353,13 @@ if(!($is_map_popup || $without_header)){
 
                         $field_container.appendTo($group_container);
                     });
+
+                    $.each($group_container.find('fieldset'), function(idx, fieldset){
+                        if($(fieldset).find('div').length == 0){
+                            $(fieldset).hide();
+                            $group_container.find('h4[data-order="'+ $(fieldset).attr('id') +'"]').hide();
+                        }
+                    });
                 }
             }
 
@@ -777,40 +784,26 @@ function print_header_line($bib) {
     ?>
 
     <div class=HeaderRow style="margin-bottom:<?php echo $is_map_popup?5:15?>px;min-height:0px;">
-        <h2 style="text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
+        <h2 style="text-transform:none;line-height:16px;font-size:1.4em;margin-bottom:0;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
                 <?= strip_tags($bib['rec_Title']) ?>
         </h2>
-    <?php 
 
-        if($system->has_access()){ //is logged in
-            ?>
+        <div <?="style='padding:0 10px 0 22px;margin:10px 0 0;height:20px;background-repeat: no-repeat;background-image:url("
+                    .HEURIST_RTY_ICON.$bib['rty_ID'].")' title='".htmlspecialchars($bib['rty_Description'])."'" ?> >
+            Type&nbsp;<?= htmlspecialchars($bib['rty_Name']) .': id '. htmlspecialchars($bib['rec_ID']) ?>
 
-            <div id=recID style="padding-right:10px;margin-top: -10px;">
-                 ID:<?= htmlspecialchars($bib['rec_ID']) ?>
-                <span class="link"><a id=edit-link class="normal"
-                            onClick="return sane_link_opener(this);"
-                            target=_new href="<?php echo HEURIST_BASE_URL;?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
-                            <img class="rv-editpencil" src="<?php echo HEURIST_BASE_URL;?>hclient/assets/edit-pencil.png" title="Edit record" style="vertical-align: bottom"></a>
-                </span>
-            </div>
-            <?php
-        }else{
-            print '<div id=recID style="padding-right:10px">ID:'.htmlspecialchars($bib['rec_ID']).'</div>';
-        }
-        
-    if(true){  //font-size:1.1em;
-    ?>
-        <h3 style="padding:10px 10px 0px 2px;margin:0;color: #DC8501;">
-            <div <?="style='padding-left:20px;height:20px;background-repeat: no-repeat;background-image:url("
-                        .HEURIST_RTY_ICON.$bib['rty_ID'].")' title='".htmlspecialchars($bib['rty_Description'])."'" ?> >
-                Type&nbsp;<?= $bib['rty_ID'].': '.htmlspecialchars($bib['rty_Name'])." " ?>
-            </div>
-        </h3>
-    <?php                    
-    } 
-    ?>
-    
-    </div>       
+        <?php if($system->has_access()){ ?>
+
+            <span class="link"><a id=edit-link class="normal"
+                onClick="return sane_link_opener(this);"
+                target=_new href="<?php echo HEURIST_BASE_URL;?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
+                <img class="rv-editpencil" src="<?php echo HEURIST_BASE_URL;?>hclient/assets/edit-pencil.png" title="Edit record" style="vertical-align: bottom"></a>
+            </span>
+
+        <?php } ?>
+        </div>
+
+    </div>
     <?php 
 }
 
@@ -1860,8 +1853,8 @@ function print_linked_details($bib, $link_cnt)
        print '<div class="detailRowHeader" style="float:left">Linked from</div><div>'; 
        if(!$is_production){
     ?>
-        <div class=detailRow>
-            <div class=detailType>Referenced by</div>
+        <div style="position: relative;top: -7px;margin-bottom: 5px;">
+            <div class=detailType style="width: auto;">Referenced by</div>
             <div class="detail"><a href="<?=HEURIST_BASE_URL?>?db=<?=HEURIST_DBNAME?>&w=all&q=linkedto:<?=$bib['rec_ID']?>" 
                     onClick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a>
                 <!--  <br> <i>Search = linkedto:<?=$bib['rec_ID']?> <br>(returns records pointing TO this record)</i> -->

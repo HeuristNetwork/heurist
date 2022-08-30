@@ -320,7 +320,6 @@ if(@$_REQUEST['mode']=='2'){
                 class="ui-button-action"/>
         </div>
 
-    </div>
     </form>
 </div>
         </body>

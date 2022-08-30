@@ -1853,12 +1853,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     };
 
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                        function(response){ console.log('delete done ', response);
+                        function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
 
-                                if(that.options.use_cache){
-                                    that._cachedRecordset.removeRecord( res.dty_id );
-                                }
+                                $Db.dty().removeRecord( res.dty_id );
 
                                 $dlg.dialog('close');
                                 that._saveEditAndClose();
@@ -1866,7 +1864,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 if(that.searchForm){
                                     that.searchForm.searchDefDetailTypes('startSearch');
                                 }
-                                that._triggerRefresh('dty');
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
@@ -1892,13 +1889,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                                     that._currentEditID = res.dty_id;
                                     that._saveEditAndClose({dty_Name: new_name, dty_ID: res.dty_id}, 
-                                        function(id, flds){ console.log('rename done ', id, flds);
+                                        function(id, flds){
 
                                             $Db.dty().setRecord(id, flds);
-
-                                            if(that.options.use_cache){
-                                                that._cachedRecordset.setRecord(id, flds);
-                                            }
 
                                             $rdlg.dialog('close');
                                             $dlg.dialog('close');
@@ -1906,7 +1899,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                             that._currentEditID = -1;
                                             that._saveEditAndClose();
                                         }, 
-                                        function(response){ console.log('renamed failed ', response);
+                                        function(response){
                                             if(!response.sysmsg){
                                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                                             }
@@ -1928,8 +1921,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             window.hWin.HEURIST4.msg.showMsgErr(response);    
         }
     },
-    
-    
     
     //  -----------------------------------------------------
     //

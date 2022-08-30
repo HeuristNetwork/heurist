@@ -776,7 +776,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     // can remove group with assigned fields
     //     
-    _deleteAndClose: function(unconditionally){
+    _deleteAndClose: function(unconditionally, delete_data=false){
     
         var that = this;
         if(this._currentEditID==null || this._currentEditID<1) return;
@@ -795,16 +795,13 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     if(response.status == window.hWin.ResponseStatus.OK){
 
                         var recID = that._currentEditID;
-                        if(that.options.use_cache){
-                            //that._cachedRecordset.removeRecord( recID );
-                        }
                         
-                        var ids = recID.split('.'); //console.log(ids);
+                        var ids = recID.split('.');
                         var sType = $Db.dty(ids[1], 'dty_Type');
 
-                        if(window.hWin.HAPI4.is_admin() && sType!='separator'){
+                        if(window.hWin.HAPI4.is_admin() && sType!='separator' && delete_data){
                             //delete fields from records
-                            
+
                             req = {
                                 'rtyID': ids[0],
                                 'dtyID': ids[1],
@@ -2722,8 +2719,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }
 
         var label = $Db.dty(dtyid, 'dty_Name');
-        var usage = $Db.rst_usage(recID);
-        var is_reserved = $Db.dty(recID, 'dty_Status') == "reserved";
+        var usage = $Db.rst_usage(dtyid);
+        var is_reserved = $Db.dty(dtyid, 'dty_Status') == "reserved";
 
         if(is_reserved || usage.length != 0){
             return;
