@@ -3239,7 +3239,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                     field.find('input, textarea').css({'width': width, 'max-width': width});
                 }
-            }else if(terms_as_buttons.length > 0){ // Set terms as button fields, if more than one line, set width 
+            }else if(terms_as_buttons && terms_as_buttons.length > 0){ // Set terms as button fields, if more than one line, set width 
 
                 for(var j = 0; j < terms_as_buttons.length; j++){
 
