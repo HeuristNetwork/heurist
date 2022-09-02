@@ -5024,5 +5024,29 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             setTimeout(function(){ $dlg.dialog('close'); }, 2000);
         }
+    },
+
+    focusField: function(field_id){
+
+        var $ele = this._editing.getFieldByName(field_id);
+
+        if($ele.parents('.ui-tabs').length > 0){
+            var index = $ele.parents('fieldset:first').attr('data-tabindex'); console.log(index, $ele.parents('.ui-tabs').tabs('instance'));
+            $ele.parents('.ui-tabs').tabs('option', 'active', index);
+        }else if($ele.parents('.ui-accordion').length > 0){
+            var accordion_content = $ele.parents('.ui-accordion-content');
+            if(!accordion_content.is(':visible')){
+                var id = accordion_content.attr('aria-labelledby');
+                $.each($ele.parents('.ui-accordion-header'), function(idx, item){
+                    if($(item).attr('id') == id){
+                        $ele.parents('.ui-accordion:first').accordion('option', 'active', idx);
+                        return false;
+                    }
+                });
+            }
+        }
+
+        $ele[0].scrollIntoView();
+        $ele.editing_input('focus');
     }
 });

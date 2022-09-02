@@ -82,8 +82,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this.options.layout_mode = 
                 '<div class="treeview_with_header" style="background:white">'
                     +'<div style="padding:10px 20px 4px 10px;border-bottom:1px solid lightgray">' //instruction and close button
-                        +'<span style="font-style:italic;display:inline-block">Drag to reposition<br>'
-                        +'Select or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
+                        +'<span style="font-style:italic;display:inline-block">Drag to reposition<br>Select to navigate<br>'
+                        +'Double click or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
                         //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
                         +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
                     +'</div>'
@@ -350,19 +350,27 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             },
             */
             
-            click: function(event, data){
+            click: function(event, data){ // navigate to field, and close formlet if already open
+
+                window.hWin.HEURIST4.util.stopEvent(event);
 
                 var ele = $(event.target);
                 if(!ele.hasClass('ui-icon')){
                     if(data.node.isActive()){
-                        window.hWin.HEURIST4.util.stopEvent(event);
                         that._saveEditAndClose(null, 'close'); //close editor on second click
                     }
                 }
-                    //add new group/separator
-                    //that.addNewSeparator();
-                    //window.hWin.HEURIST4.util.stopEvent(event)
-                
+
+                if(data.node.key < 1){
+                    return;
+                }
+
+                if(that.previewEditor){
+                    that.previewEditor.manageRecords('focusField', data.node.key);
+                }
+            },
+            dblclick: function(event, data){ // open formlet for field
+                data.tree.getNodeByKey(data.node.key).setActive();
             },
             activate: function(event, data) { 
                 //main entry point to start edit rts field - open formlet
