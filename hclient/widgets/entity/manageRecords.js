@@ -2862,6 +2862,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             var hasField = false; // check for any fields
             var temp_group_details = [], hasTabs = false; // check if any groupings are set to tabs
             var max_length_fields = []; // freetext, blobktext, and float fields that are set to max width
+            var terms_as_buttons = [];
 
             for(var k=0; k<s_fields.length; k++){
 
@@ -2920,6 +2921,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         && dtFields['rst_RequirementType'] != 'forbidden' && dtFields['rst_DisplayWidth'] == '0'){ // set field width to max
 
                         max_length_fields.push(dtFields['dt_ID']);
+                    }else if(dtFields['dty_Type'] == 'enum' && dtFields['rst_TermsAsButtons'] == 1){
+                        terms_as_buttons.push(dtFields['dt_ID']);
                     }
                 }
             }//for s_fields
