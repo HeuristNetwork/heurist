@@ -1598,8 +1598,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         //add show explanation checkbox
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
-        var ele = $('<div><label style="float:right;padding-right:30px"><input type="checkbox" '
-                        +(ishelp_on?'checked':'')+'/>show explanations</label></div>').prependTo(this.editForm);
+        var ele = $('<div id="help_container" style="display:inline-block;position:relative;top:5px;left:130px;"><label><input type="checkbox" '
+                        +(ishelp_on?'checked':'')+'/>show explanations</label></div>')
+                    .prependTo(this.editForm);
         
         this._on( ele.find('input'), {change: function( event){
             var ishelp_on = $(event.target).is(':checked');
@@ -1659,7 +1660,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }
             
             var ele = $('<div style="font-style:italic;padding:10px;display:inline-block">'
-                +s+'<a href="#">Edit base field definitions</a></div>');
+                +'<span id="edit_bf_extra">'+ s +'</span>'
+                +'<a class="edit_basefield" href="#">Edit base field definitions</a></div>');
             if(s==''){
                 ele.appendTo(bottom_div); //usual field
             }else{
@@ -1668,7 +1670,11 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 ele.css({'border-top':'1px lightgray solid','padding':'10px 0px 0px',margin:'10px 0 0 126px'});
                 ele.insertBefore(edit_ele);                
             }
-            this._on(ele.find('a'),{click: this.showBaseFieldEditor}); 
+            ele.clone()
+               .appendTo(this.editForm.find('#help_container'))
+               .css({ border: 'none', padding: '4px 0 0', margin: '0 0 0 190px' })
+               .find('#edit_bf_extra').hide();
+            this._on(this.editForm.find('a.edit_basefield'),{click: this.showBaseFieldEditor});  
             
             
             $('<span style="padding-left:40px;color:gray;cursor:pointer">ID: '
@@ -1702,6 +1708,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             var ele = this._editing.getInputs('rst_DisplayName');
             this._on( $(ele[0]), {
                 keypress: window.hWin.HEURIST4.ui.preventChars} );
+
+            $('<label style="margin-left:195px;"><input id="alter_basefield" type="checkbox" tabindex="-1"> also change base field name and help</label>')
+                .insertAfter($(edit_ele[0]).parent());
 
             edit_ele = this._editing.getFieldByName('rst_TermsAsButtons');
             if(dt_type=='enum'){
@@ -2276,7 +2285,15 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         if(is_usual_way){
             //window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been saved'),500);
         }
-            
+
+        // Check if user is going to update the base field's name or help text
+        if(this.editForm.find('input#alter_basefield').is(':checked')){
+
+            var name = this._editing.getValue('rst_DisplayName');
+            var helptext = this._editing.getValue('rst_DisplayHelpText');
+
+            this.updateBaseFieldDefinition(recID, name, helptext);
+        }
 
         //recordset was updated in manageEntity._saveEditAndClose so we pass null
         this.refreshRecset_Definition_TreeNodeItem(recID, null);    
@@ -2821,6 +2838,96 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     }
                 }, {title: 'Base field deletion', yes: 'Proceed', no: 'Cancel'}, {default_palette_class: 'ui-heurist-design'});
             }
+        });
+    },
+
+    //
+    // Popup to update a base field's name and help text with provided values
+    // NOTE: does NOT update each base field's usage within rectypes
+    //
+    updateBaseFieldDefinition: function(dtyID, name, helptext){
+
+        var that = this;
+
+        if(!$Db.dty(dtyID)){
+            return;
+        }
+
+        var msg = 'Base field <strong>' + $Db.dty(dtyID, 'dty_Name') + '</strong>'
+                + '<span style="float: right;"><a href="#">Edit base field definitions</a></span>'
+                + '<br><br>This base field has been used by the following field:<br><br>';
+
+        var rst_usage = $Db.rst_usage(dtyID);
+
+        for(var i = 0; i < rst_usage.length; i++){
+            msg += $Db.rty(rst_usage[i], 'rty_Name') + ' . <strong>' + $Db.rst(rst_usage[i], dtyID, 'rst_DisplayName') + '</strong><br>';
+        }
+
+        msg += '<br>'
+
+            + '<label><input type="checkbox" id="chg_name" checked="true" /> Change base field name to </label><input type="text" value="'+ name +'" style="width:263px;" /> <br><br>'
+            + '<label style="vertical-align: top;"><input type="checkbox" id="chg_help" checked="true" /> Change base field help to </label>'
+                + '<textarea rows="5" cols="50" style="margin-left:7px;">'+ helptext +'</textarea> <br><br>'
+
+            + '<span style="font-style: italic">(this will not change the names in the individual records)</span>';
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, {
+            'Proceed': function(){ 
+
+                name = null, helptext = null;
+                var fields = {dty_ID: dtyID};
+                var error = '';
+
+                if($dlg.find('#chg_name').is(':checked')){
+                    name = $dlg.find('input[type="text"]').val();
+                    if(name == null || name == ''){
+                        error += 'Name'
+                    }else{
+                        fields['dty_Name'] = name;
+                    }
+                }
+                if($dlg.find('#chg_help').is(':checked')){
+                    helptext = $dlg.find('textarea').val();
+                    if(helptext == null || helptext == ''){
+                        error = (error != '') ? error + ' and Help text' : 'Help text';
+                    }else{
+                        fields['dty_HelpText'] = helptext;
+                    }
+                }
+
+                if(error != ''){
+                    error += error + ((error.indexOf('and') != -1) ? ' needs a value' : ' are missing values');
+                    window.hWin.HEURIST4.msg.showMsgFlash(error, 2000);
+                    return;
+                }
+
+                $dlg.dialog('close');
+
+                var request = {
+                    'a': 'save',
+                    'entity': 'defDetailTypes',
+                    'fields': fields,
+                    'request_id': window.hWin.HEURIST4.util.random()
+                };
+
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            window.hWin.HEURIST4.msg.showMsgFlash('Base field has been updated', 2000);
+                            $Db.dty(dtyID, null, fields); //add on client side
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+                );
+            },
+            'Cancel': function(){ 
+                $dlg.dialog('close'); 
+            }
+        }, {title: 'Base field rename', yes: 'Proceed', no: 'Cancel'}, {default_palette_class: 'ui-heurist-design', dialogId: 'bf-rename'});
+
+        $dlg.find('span a').on('click', function(event){
+            that.showBaseFieldEditor(dtyID, null, true, null); 
         });
     }
     
