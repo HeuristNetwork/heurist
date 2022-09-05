@@ -471,7 +471,8 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                     }
             }
         }
-
+      
+        
         var that = this;
         var request = { data:JSON.stringify(treeData) };
         window.hWin.HAPI4.SystemMgr.ssearch_savetree( request, function(response){
@@ -1229,8 +1230,11 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
         var tree = this.treeviews[groupID];
         var node = tree.rootNode;
         node.folder = true;
+        
+        var dt = {title:"", folder:true};
+        if(this.options.filter_by_type==2) dt.data = {isrule:true};
 
-        node.editCreateNode( "child", {title:"", folder:true}); //New folder
+        node.editCreateNode( "child", dt); //New folder
         this._saveTreeData( groupID );
         $("#addlink"+groupID).css('display', 'none');
     },
@@ -1383,6 +1387,8 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                         }
                         //.html(s1 +
                         //    '<div style="display:inline-block;vertical-align:top;">'+node.title+'</div>');  //padding:2 0 0 3;
+                        
+                        $span.attr('filter_type', node.data.isrule?2:0);
 
                     }else{
 
@@ -1430,7 +1436,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                             s_hint2 = s_hint2 + '\nRules: '+prms.rules;
                             hasRules = true;
                         }
-
+            
                         s = '';
                         if(prms.type==3){ //node.data.isfaceted
                             s = '<span class="ui-icon ui-icon-box svs-type-icon" title="faceted" ></span>';
@@ -1731,7 +1737,10 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                             node = wtree.rootNode;
                             }*/
                             //node = node.parent;
-                            node.editCreateNode( node.folder?"child":"after", {title:"", folder:true}); //New folder
+                            var dt = {title:"", folder:true};
+                            if(that.options.filter_by_type==2) dt.data = {isrule:true};
+                            
+                            node.editCreateNode( node.folder?"child":"after", dt); //New folder
 
                             break;
 
@@ -1745,7 +1754,10 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                             break;
 
                         case "addChild":
-                            node.editCreateNode("child", "New folder");
+                            var dt = {title:"", folder:true};
+                            if(that.options.filter_by_type==2) dt.data = {isrule:true};
+                        
+                            node.editCreateNode("child", dt); //New folder
                             break;
                         case "addSibling":
                             node.editCreateNode("after", "New node");
@@ -2088,6 +2100,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
             if(value!=0){
                     
                 this.treeviews[groupID].filterNodes(function(node){
+                    
                     var res = true;
                     if(value==2){ //rules only
                         res = ($(node.span).attr('filter_type')==2);    

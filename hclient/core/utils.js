@@ -556,7 +556,7 @@ window.hWin.HEURIST4.util = {
                     }
                     if(r.q){
                         query = r.q;
-                    }else if(r.type!=3) {
+                    }else if(r.type!=3 && !r.rules) {
                         query = r;
                     }
                     
@@ -573,7 +573,7 @@ window.hWin.HEURIST4.util = {
                             res[key] = r[key];
                         }
                     });
-                }else{
+                }else{ //usual string
                     query = qsearch;
                 }
             }
