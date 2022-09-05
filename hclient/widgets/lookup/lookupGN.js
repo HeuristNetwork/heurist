@@ -255,7 +255,7 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
         var sURL = 'http://api.geonames.org/searchJSON?username=osmakov';
 
         if(this.element.find('#inpt_placename').val()!=''){
-            sURL += '&name=' + this.element.find('#inpt_placename').val();
+            sURL += '&name=' + encodeURIComponent(this.element.find('#inpt_placename').val());
         }
         if(this.element.find('#inpt_country').val()!=''){
 
