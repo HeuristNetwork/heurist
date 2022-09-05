@@ -267,7 +267,7 @@ if(!defined('PDIR')){
                                 </p>
 
                                 <table>
-                                    <?=$scripts_info?>
+                                    <?php echo $scripts_info;?>
                                 </table>
                                 <br>
                                 <p>

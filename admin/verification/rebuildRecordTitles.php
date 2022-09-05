@@ -45,8 +45,18 @@ require_once(dirname(__FILE__).'/../../hsapi/utilities/titleMask.php');
 $init_client = (@$_REQUEST['verbose']!=1);
 
 if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client side
+
+    $rty_ids_list = null;
+    //sanitize
+    if(@$_REQUEST['recTypeIDs']){
+        $rty_ids = explode(',',$_REQUEST['recTypeIDs']);
+        $rty_ids = array_map(array($mysqli,'real_escape_string'), $rty_ids);
+        $rty_ids_list = implode(',', $rty_ids);
+    }
+
+
     
-    $res = doRecTitleUpdate($system, @$_REQUEST['session'], @$_REQUEST['recTypeIDs'] );
+    $res = doRecTitleUpdate($system, @$_REQUEST['session'],  $rty_ids_list);
     
     if(@$_REQUEST['session']>0)
     {

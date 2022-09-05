@@ -127,7 +127,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
                     if ($upload["error"] > 0 && $upload["error"] < 4)
                     {
-                        echo "<p class='err_message'>Upload error: ".$upload["error"]."</p>";
+                        echo "<p class='err_message'>Upload error: ".htmlspecialchars($upload["error"])."</p>";
                         if($upload['error']==1){
                             echo "<p class='err_message'>The uploaded file exceeds the upload_max_filesize directive in php.ini.</p>";
                         }else if($upload['error']==1){
@@ -184,7 +184,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                             print "<br>".$upload["name"]."   ".$tarfile."<br>";
                             */
 
-                            print "<h3>Extracting FAIMS database from tarball to<br />".$folder_proj."/db.sqlite3</h3><br>";
+                            print "<h3>Extracting FAIMS database from tarball to<br />".htmlspecialchars($folder_proj)."/db.sqlite3</h3><br>";
                             ob_flush();flush();
 
 

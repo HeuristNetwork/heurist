@@ -27,7 +27,7 @@ $.widget( "heurist.resultList", {
         widget_id: null, //outdated: user identificator to find this widget custom js script on web/CMS page
         is_h6style: false,
         view_mode: null, // 'list','icons','thumbs','thumbs3','horizontal','vertical','icons_list','record_content' 
-        list_mode_is_table: false,
+        list_mode_is_table: false, //if table - adjust header columns width to column width in content div
 
         select_mode:null,//none, manager, select_single, select_multi
         selectbutton_label:'Select',
@@ -1642,15 +1642,29 @@ $.widget( "heurist.resultList", {
             // Displays owner group ID, green if hidden, gray if visible to others, red if public visibility
             html_owner =  '<span class="rec_owner logged-in-only" style="width:20px;padding-top:2px;display:inline-block;color:'
                      + clr + '" title="' + hint + '"><b>' + owner_id + '</b></span>';
-            
-            if(clr != 'blue')         
-            html_owner =  html_owner + '<span class="ui-icon ui-icon-cancel" '
-            +'style="color:darkgray;display:inline;font-size:1.3em;vertical-align: -1px"></span>'
-                +'<span class="ui-icon ui-icon-eye" style="font-size:0.8em;color:darkgray;display:inline;vertical-align:0px" title="'
-                + window.hWin.HR('resultList_private_record')
-                + '" ></span>';
-                     
 
+            // Display eye if record is publicly viewable, otherwise use a crossed out eye - Both icons come from: iconoir.com
+            var vis_icon = '<svg width="20px" height="20px" stroke-width="1.23" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000">'
+                            + '<path d="M12 14a2 2 0 100-4 2 2 0 000 4z" stroke="#000000" stroke-width="1.23" stroke-linecap="round" stroke-linejoin="round"></path>'
+                            + '<path d="M21 12c-1.889 2.991-5.282 6-9 6s-7.111-3.009-9-6c2.299-2.842 4.992-6 9-6s6.701 3.158 9 6z"'
+                                + 'stroke="#000000" stroke-width="1.23" stroke-linecap="round" stroke-linejoin="round"></path>'
+                         + '</svg>';
+            var vis_title = '';
+
+            if(clr != 'blue'){
+
+                vis_icon = '<svg width="20px" height="20px" stroke-width="1.23" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000">'
+                            + '<path d="M3 3l18 18M10.5 10.677a2 2 0 002.823 2.823" stroke="#000000" stroke-width="1.23" stroke-linecap="round" stroke-linejoin="round"></path>'
+                            + '<path d="M7.362 7.561C5.68 8.74 4.279 10.42 3 12c1.889 2.991 5.282 6 9 6 1.55 0 3.043-.523 4.395-1.35M12 6c4.008 0 6.701 3.158 9 6a15.66 15.66 0 01-1.078 1.5"'
+                                + 'stroke="#000000" stroke-width="1.23" stroke-linecap="round" stroke-linejoin="round">'
+                         + '</svg>';
+
+                vis_title = window.hWin.HR('resultList_private_record');
+            }
+            html_owner = html_owner 
+            + '<span title="'+vis_title+'" style="position:relative;top:3px;left:-8px;vertical-align:-1px">'
+                + vis_icon
+            + '</span>';
         }
         
         var btn_icon_only = window.hWin.HEURIST4.util.isempty(this.options.recordDivClass)
@@ -3043,7 +3057,6 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         var rec_onpage = [];
 
         var html = '', html_groups = {}, recID;
-        
         for(; (idx<len && this._count_of_divs<pagesize); idx++) {
             recID = rec_order[idx];
             if(recID){
@@ -3122,7 +3135,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         }
         
         this.div_content[0].innerHTML += html;
-        
+
         if(this.options.groupByField){ //init show/hide btn for groups
             if(this.options.groupByCss!=null){
                 this.div_content.find('div[data-grp-content]').css( this.options.groupByCss );
@@ -3193,7 +3206,6 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             }
         }
         
-
         /*var lastdiv = this.div_content.last( ".recordDiv" ).last();
         this._on( lastdiv.nextAll(), {
         click: this._recordDivOnClick
@@ -3363,7 +3375,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         }
 
         //rec_toload - list of ids
-        //load full record info - record header111
+        //load full record info - record header
         if(rec_toload.length>0){
             var that = this;
 

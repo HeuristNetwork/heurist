@@ -169,7 +169,7 @@ class DbUtils {
         // if database is on main server it is possible to register database with user-defined ID        
         if($newid>0){ 
 
-            if(!(strpos($serverURL_lc, HEURIST_MAIN_SERVER)===0)){ 
+            if(!(strpos(strtolower($serverURL_lc), strtolower(HEURIST_MAIN_SERVER))===0)){ 
             
                 return '0,It is possible to assign arbitrary ID for databases on heurist servers only';
             }
@@ -313,7 +313,7 @@ class DbUtils {
                 $email_title = 'Database registration ID: '.$dbID.'. User ['.$indexdb_user_id.']';
 
                 //sendEmail($dbowner_Email, $email_title, $email_text);
-                sendEmail_native($dbowner_Email, $email_title, $email_text);
+//TEMP it is very slow on intersect server                sendEmail_native($dbowner_Email, $email_title, $email_text, null);
                 //END email -----------------------------------
 
                 
@@ -360,7 +360,7 @@ class DbUtils {
         
         if($database_name==null){
             $msg = 'Database parameter not defined';
-            $system->addError(HEURIST_INVALID_REQUEST, $msg);
+            self::$system->addError(HEURIST_INVALID_REQUEST, $msg);
             if($verbose) echo '<br>'.$msg;
             return false;
         }
@@ -669,6 +669,7 @@ class DbUtils {
         
             self::initialize();
             $mysqli = self::$mysqli;
+            $system = self::$system;
         
             if($templateFileName==null){
                 $templateFileName = HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt";
@@ -933,6 +934,7 @@ class DbUtils {
         
         self::initialize();
         $mysqli = self::$mysqli;
+        $system  = self::$system;
         
         if($database_name!=HEURIST_DBNAME){ //switch to database
            $connected = mysql__usedatabase($mysqli, $database_name_full);
@@ -1077,12 +1079,12 @@ class DbUtils {
 
                         if($res){
                                 if($verbose) {
-                                    echo (" > " . $table . ": ".$mysqli->affected_rows . "  ");
+                                    echo (" > " . htmlspecialchars($table) . ": ".$mysqli->affected_rows . "  ");
                                 }
                         }else{
                                 if($table=='usrReportSchedule'){
                                     if($verbose) {
-                                        echo ("<br/><p class=\"error\">Warning: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
+                                        echo ("<br/><p class=\"error\">Warning: Unable to add records into ".htmlspecialchars($table)." - SQL error: ".$mysqli->error."</p>");
                                     }
                                 }else{
                                     $message = "Unable to add records into ".$table." - SQL error: ".$mysqli->error;
@@ -1165,7 +1167,7 @@ class DbUtils {
 
         if(!$res){
             if($verbose) {
-                if($message) echo $message;
+                if($message) echo htmlspecialchars($message);
             }else{
                 self::$system->addError(HEURIST_ERROR, $message);
             }

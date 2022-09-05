@@ -120,7 +120,7 @@ foreach($list as $row){
                 }else{
                     $rty_ID = $mysqli->insert_id;
                 }
-print $row[F_TABLE].'<br>';             
+print htmlspecialchars($row[F_TABLE]).'<br>';             
             }
     }
 
@@ -133,7 +133,7 @@ print $row[F_TABLE].'<br>';
     if($detal_rec!=null){
         if($detal_rec[1]==$dty_Type || ($row[F_TYPE]=='TEXT' && $detal_rec[1]=='blocktext')){
             $dty_ID = $detal_rec[0];
-print '&nbsp;&nbsp;&nbsp;'.$detal_rec[0].'  ('.$row[F_FIELD].'  '.$detal_rec[1].')<br>';    
+print '&nbsp;&nbsp;&nbsp;'.htmlspecialchars($detal_rec[0].'  ('.$row[F_FIELD].'  '.$detal_rec[1]).')<br>';    
 
             if(mysql__select_value($mysqli, 'select rst_ID from defRecStructure where rst_RecTypeID='.$rty_ID.
             ' AND rst_DetailTypeID='.$dty_ID)>0){
@@ -145,7 +145,7 @@ print '&nbsp;&nbsp;&nbsp; already exist<br>';
          
         }else{
             $row[F_FIELD] = $row[F_FIELD].' (EdArc)';
-print '&nbsp;&nbsp;&nbsp;'.$row[F_FIELD].'  ['.$row[F_TYPE].'  '.$detal_rec[1].'])<br>';             
+print '&nbsp;&nbsp;&nbsp;'.htmlspecialchars($row[F_FIELD].'  ['.$row[F_TYPE].'  '.$detal_rec[1]).'])<br>';             
         }
     }
     

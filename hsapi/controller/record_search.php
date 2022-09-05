@@ -80,7 +80,7 @@ detectLargeInputs('COOKIE record_search', $_COOKIE);
 
     //get list of registered database and master index db on the same server
     if(@$_REQUEST['remote'] == 'master' &&
-       strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===0){ //the same server  - switch database only
+       strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===0){ //the same server  - switch database only
        
        unset($_REQUEST['remote']);
        $_REQUEST['db'] = HEURIST_INDEX_DATABASE;

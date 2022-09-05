@@ -43,8 +43,8 @@ function getDatabaseName() {
 function getGephiFormat() {
     // Get data
     var data = settings.getData.call(this, settings.data);
-    console.log("GEPHI DATA");
-    console.log(data);
+//console.log("GEPHI DATA");
+//console.log(data);
                                                              
     // META
     var gexf = '<?xml version="1.0" encoding="UTF-8"?>';
@@ -84,15 +84,16 @@ gexf += ' version="1.2">';
         //var name = (node.name?node.name.replace(/&/g,'&amp;').replace(/"/g, '&quot;'):'');
         var name = window.hWin.HEURIST4.util.htmlEscape(node.name);
         var rectype = '';
-        if(node.image && node.image.indexOf('&id=')){
-             rectype = node.image.substring(node.image.indexOf('&id=')+4);
+        if(node.image && node.image.indexOf('&icon=')>0){
+             rectype = parseInt(node.image.substring(node.image.indexOf('&icon=')+6));
         }
+        var image_url = window.hWin.HEURIST4.util.htmlEscape(node.image);
         
         
         gexf += '<node id="'+node.id+'" label="'+name+'">';
         gexf +=     '<attvalues>';
         gexf +=         '<attvalue for="0" value="'+name+'"/>';
-        gexf +=         '<attvalue for="1" value="'+(node.image?node.image.replace(/&/g,'&amp;'):'')+'"/>';
+        gexf +=         '<attvalue for="1" value="'+image_url+'"/>'; //(node.image?node.image.replace(/&/g,'&amp;'):'')
         gexf +=         '<attvalue for="2" value="'+rectype+'"/>';
         if(node.count>0){
         gexf +=         '<attvalue for="3" value="'+node.count+'"/>';

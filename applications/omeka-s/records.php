@@ -234,7 +234,7 @@ if ($res){
                 $res2 = $mysqli->query($query);
                 if(!$res2){
                     $ret = false;
-                    echo $rec_ID.'  '.$mysqli->error;
+                    echo htmlspecialchars($rec_ID).'  '.$mysqli->error;
                     break; 
                 }
             }
@@ -269,7 +269,7 @@ if ($res){
             $res2 = $mysqli->query($query);
             if(!$res2){
                 $ret = false;
-                echo $det_ID.'  '.$mysqli->error;
+                echo htmlspecialchars($det_ID).'  '.$mysqli->error;
                 break; 
             }
             

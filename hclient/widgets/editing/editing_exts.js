@@ -502,7 +502,6 @@ function browseRecords(_editing_input, $input){
     
     var that = _editing_input;
     
-    
     var $inputdiv = $input.parent(); //div.input-div
 
     if ($inputdiv.find('.sel_link2 > .ui-button-icon').hasClass('rotate')) return;
@@ -640,13 +639,30 @@ function browseRecords(_editing_input, $input){
         
         // select target record from cached drop down
         //
-        var __show_select_dropdown = function(event){
+        var __show_select_dropdown = function(event_or_id){
           
             if(that.is_disabled) return;
-        
-            if(event!==false){
+            
+            var $input, $inputdiv, ref_id;
+            
+            if(typeof event_or_id == 'string'){
+                
+                ref_id = event_or_id;
+                $input = that.element.find('#'+ref_id);
+                $inputdiv = $input.parents('.input-div');
+                
+            }else
+            if(event_or_id && event_or_id.target){
+                
+                var event = event_or_id;
+            
+                $inputdiv = $(event.target).parents('.input-div');
+                $input = $inputdiv.find('div:first');
+                ref_id = $input.attr('id');
+
                 if(event) event.preventDefault();
             }
+            
             
             var key = that.f('rst_RecTypeID')+'-'+that.f('rst_DetailTypeID');
 			var recordMax = 1000;
@@ -744,7 +760,7 @@ function browseRecords(_editing_input, $input){
                                        if(response['records'] && response['records'].length>0){
                                            //keep in cache
                                            __assignCache(response['records']);
-                                           __show_select_dropdown();
+                                           __show_select_dropdown(ref_id); //call again after loading list of records
 
                                        }else{
                                            //nothing found
@@ -763,7 +779,9 @@ function browseRecords(_editing_input, $input){
                         
                     return;
             }else{
+                //load from cache
                 
+                //recreate dropdown
                 if(!that.selObj || !$(that.selObj).hSelect('instance')){
 
                     if(that.selObj){
@@ -803,7 +821,6 @@ function browseRecords(_editing_input, $input){
                         $(opt).attr('data-rty', item['rec_RecTypeID']);
                     });
                     
-//console.log('init hselect '+key);                    
                     function __onSelectMenu( event ){
                         var targetID = $(event.target).val();
                         if(!targetID) return;
@@ -813,7 +830,12 @@ function browseRecords(_editing_input, $input){
                         if(targetID=='select'){
                            __show_select_dialog(); 
                         }else{
+
+                            var ref_id = $(that.selObj).attr('ref-id');
                             
+                            var $input = $('#'+ref_id);
+                            var $inputdiv = $('#'+ref_id).parent();
+
                             var opt = $(that.selObj).find('option:selected');
                             
                             var rec_Title = opt.text();
@@ -860,12 +882,18 @@ function browseRecords(_editing_input, $input){
                     that._off($(that.selObj), 'change');    
                 }
                 
-                var $inpt_ele = $inputdiv.find('.sel_link2');
+                //that.find('.selectmenu-parent').removeClass('selectmenu-parent');
+                
+                var $inpt_ele = $inputdiv.find('.sel_link2'); //button
+                var _ref_id = $input.attr('id');
+                //$input.addClass('selectmenu-parent');
+                
                 if($inpt_ele.is(':hidden') && $inputdiv.find('.link-div').length == 1){
                     $inpt_ele = $inputdiv.find('.link-div');
                 }
-
-                that.selObj.val('');
+                
+                //that.selObj.val('');
+                that.selObj.attr('ref-id', _ref_id);
                 that.selObj.hSelect('open');
                 that.selObj.hSelect('widget').hide();
                 that.selObj.hSelect('menuWidget')
@@ -873,10 +901,10 @@ function browseRecords(_editing_input, $input){
                 //that._on($(that.selObj),{change:f(){}});
                 
             }
-        }
+        } //__show_select_dropdown
         
     
-        that._on( $inputdiv.find('.sel_link2'), { click: __show_select_dropdown } );
+        that._on( $inputdiv.find('.sel_link2'), { click: __show_select_dropdown } ); //main invocation of dialog - via button "select record"
 
         return __show_select_dropdown;
     }else{

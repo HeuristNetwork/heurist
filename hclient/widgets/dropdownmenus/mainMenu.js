@@ -18,9 +18,30 @@
 */
 
 /*
+
+    Main menu is list of Heurist operations. They are grouped in several sections:
+    Admin, Database, Export, Import, Help, Profile, Management etc. Each menu entry defined as <li> element
+    with the following attributes:
+    data-user-admin-status - accessibility according to user level (2 db owner, 1 - db admin, 0 - logged in, -1 - all)
+    data-logaction  - log tag 
+    data-icon - icon in menu
+    data-container - target element where to load dialog/form
+    
+    Action is defined by "id" attribute (like id="menu-database-clone")
+    
+    Menu Title and Hine are taken from localization files via id (dashes are replace to underscores: menu_database_clone).
+    If there is not localised version it takes title and hint from <li><a>
+    
+    Main menu can be visible as standard horizontal menu (as in previous layout) or can be hidden. 
+    Even if it is hidden, this widget is main hadler for execution of operation via methods: menuActionById or menuActionHandler.
+    Other widgets, dialogs and functions (for example: menu v6, dashboard, export menu) calls Heurist actions via this widget.
+    
+    For example, the new menu groups the actions in different groups and in different order, however it uses menu actions id and 
+    calls this widget methods to execute an operation.
+
     menuGetAllActions - returns array of {key:id,title:topmenu>name}
     menuActionById - finds and executes menu entry by id
-    menuActionHandler - main event handker
+    menuActionHandler - main event handler
     menuGetActionLink - returns link 
 */
 
@@ -643,10 +664,12 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         item.attr('data-link', href);
                     }
                 }
-                //localization
-                if(item.attr('id').indexOf('menu-')==0){
-                    item.text(window.hWin.HR( item.attr('id') ));
-                    item.attr('title',window.hWin.HR(item.attr('id')+'_hint'));
+                //localization   (without id - divider)
+                if(item.attr('id') && item.attr('id').indexOf('menu-')==0){
+                    var title = window.hWin.HR( item.attr('id') );
+                    if(title) item.text( title );
+                    title = window.hWin.HR( item.attr('id')+'-hint' );
+                    if(title) item.attr('title', title );
                 }
             });
             
@@ -834,7 +857,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
                 window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
 
-        }else if(action == "menu-cms-create"){
+        }
+        else if(action == "menu-cms-create"){
 
             window.hWin.HAPI4.SystemMgr.check_allow_cms({a:'check_allow_cms'}, function(response){
 
@@ -907,7 +931,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 }
             });
 
-        }else if(action == 'menu-cms-edit-page' || action == 'menu-cms-view-page'){
+        }
+        else if(action == 'menu-cms-edit-page' || action == 'menu-cms-view-page'){
 
             if(popup_dialog_options.record_id>0){
                 window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options );                    
@@ -931,7 +956,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 });
             }
 
-        }else if(action == 'menu-cms-edit'){
+        }
+        else if(action == 'menu-cms-edit'){
 
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
                 
@@ -1021,11 +1047,13 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             window.hWin.HEURIST4.ui.showRecordActionDialog('embedDialog', 
                                 {cms_popup_dialog_options:popup_dialog_options, path: 'widgets/cms/',title:'Web Page' });
             
-        }else if(action == "menu-database-properties"){
+        }
+        else if(action == "menu-database-properties"){
 
             window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification', entity_dialog_options);
             
-        }else if(action == "menu-lookup-config"){
+        }
+        else if(action == "menu-lookup-config"){
 
             popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
             popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['service_config'];
@@ -1034,31 +1062,37 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
             window.hWin.HEURIST4.ui.showRecordActionDialog('lookupConfig', popup_dialog_options);
 
-        }else if(action == "menu-database-rollback"){
+        }
+        else if(action == "menu-database-rollback"){
 
             window.hWin.HEURIST4.msg.showMsgDlg('Although rollback data has been recorded, '
                                     + 'there is currently no end-user interface way of rolling '
                                     + 'back the database. <br><br>'+window.hWin.HR('New_Function_Contact_Team'));
 
-        }else if(action == "menu-structure-rectypes"){
+        }
+        else if(action == "menu-structure-rectypes"){
 
             window.hWin.HEURIST4.defRecTypes_calls = 0;
             
             window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', entity_dialog_options);
                                     
-        }else if(action == "menu-structure-fieldtypes"){
+        }
+        else if(action == "menu-structure-fieldtypes"){
 
             window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', entity_dialog_options);
                                     
-        }else if(action == "menu-structure-workflowstages"){
+        }
+        else if(action == "menu-structure-workflowstages"){
 
             window.hWin.HEURIST4.ui.showEntityDialog('sysWorkflowRules', entity_dialog_options);
                                     
-        }else if(action == "menu-structure-vocabterms"){
+        }
+        else if(action == "menu-structure-vocabterms"){
 
             window.hWin.HEURIST4.ui.showEntityDialog('defTerms', entity_dialog_options);
                                     
-        }else if(action == "menu-structure-import" || action == "menu-structure-import-express"){
+        }
+        else if(action == "menu-structure-import" || action == "menu-structure-import-express"){
 
             var opts = {};
             if(action == "menu-structure-import-express"){
@@ -1082,77 +1116,80 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 
             }
             
-        }else 
-        if(action == "menu-structure-mimetypes"){
+        }
+        else if(action == "menu-structure-mimetypes"){
             
                 window.hWin.HEURIST4.ui.showEntityDialog('defFileExtToMimetype',
                                                 {edit_mode:'inline', width:900});
 
-        }else 
-        if(action == "menu-structure-refresh"){
+        }
+        else if(action == "menu-structure-refresh"){
             
                 window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
                 window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin.document);
                                                 
-        }else 
-        if(action == "menu-records-archive"){
+        }
+        else if(action == "menu-records-archive"){
             
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordArchive');
         
-        }else 
-        if(action == "menu-structure-duplicates"){
+        }
+        else if(action == "menu-structure-duplicates"){
             
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordFindDuplicates',popup_dialog_options);
         
-        }else 
-        if(action == "menu-export-csv"){
+        }
+        else if(action == "menu-export-csv"){
             
             popup_dialog_options.format = 'csv';
             that._exportRecords(popup_dialog_options);
 
-        }else 
-        if(action == "menu-export-hml-resultset"){
+        }
+        else if(action == "menu-export-hml-resultset"){
             
             popup_dialog_options.format = 'xml';
             that._exportRecords(popup_dialog_options);
             
-        }else 
-        if(action == "menu-export-hml-multifile"){
+        }
+        else if(action == "menu-export-hml-multifile"){
             //that._exportRecords({format:'hml', multifile:true});
-        }else if(action == "menu-export-json"){ 
+        }
+        else if(action == "menu-export-json"){ 
             
             popup_dialog_options.format = 'json';
             that._exportRecords(popup_dialog_options);
             
-        }else if(action == "menu-export-geojson"){ 
+        }
+        else if(action == "menu-export-geojson"){ 
             
             popup_dialog_options.format = 'geojson';
             that._exportRecords(popup_dialog_options);
             
-        }else if(action == "menu-export-gephi"){    
+        }
+        else if(action == "menu-export-gephi"){    
             
             popup_dialog_options.format = 'gephi';
             that._exportRecords(popup_dialog_options);
             
-        }else 
-        if(action == "menu-export-kml"){
+        }
+        else if(action == "menu-export-kml"){
             
             popup_dialog_options.format = 'kml';
             that._exportRecords(popup_dialog_options);
             
-        }else 
-        if(action == "menu-export-iiif"){
+        }
+        else if(action == "menu-export-iiif"){
             
             popup_dialog_options.format = 'iiif';
             that._exportRecords(popup_dialog_options);
             
-        }else 
-        if(action == "menu-import-add-record"){
+        }
+        else if(action == "menu-import-add-record"){
             
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd');
             
-        }else 
-        if(action == "menu-import-email" || 
+        }
+        else if(action == "menu-import-email" || 
            action == "menu-faims-import" || action == "menu-faims-export"
            ){
 
@@ -1160,11 +1197,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     + '<br><br>'+window.hWin.HR('New_Function_Contact_Team'));
                  
                  
-        }else 
-        if(action == "menu-import-get-template"){
+        }
+        else if(action == "menu-import-get-template"){
             that._generateHeuristTemplate();
-        }else
-        if(action == 'menu-extract-pdf'){
+        }
+        else if(action == 'menu-extract-pdf'){
             
             //this menu should not be in main menu. IJ request
             var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetById('heurist_resultList');
@@ -1172,16 +1209,16 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 $(app.widget).resultList('callResultListMenu', 'menu-selected-extract-pdf'); //call method
             }
             
-        }else 
-        if(action == 'menu-subset-set'){
+        }
+        else if(action == 'menu-subset-set'){
             
             var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
             if(widget){
                 widget.resultList('callResultListMenu', 'menu-subset-set'); //call method
             }
             
-        }else 
-        if(action == "menu-manage-dashboards"){
+        }
+        else if(action == "menu-manage-dashboards"){
            
            entity_dialog_options['is_iconlist_mode'] = false;
            entity_dialog_options['isViewMode'] = false;
@@ -1191,13 +1228,13 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
            window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard', entity_dialog_options);
         
-        }else
-        if(action == "menu-help-online"){
+        }
+        else if(action == "menu-help-online"){
             
             window.open( window.hWin.HAPI4.sysinfo.referenceServerURL+'?db=Heurist_Help_System&website', target );
             
-        }else
-        if(action == "menu-help-bugreport"){
+        }
+        else if(action == "menu-help-bugreport"){
             
            window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport');
         }else 

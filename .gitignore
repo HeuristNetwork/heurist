@@ -227,3 +227,6 @@ composer.lock
 *.lock
 *.lock
 composer.lock
+
+# VSCode
+.vscode

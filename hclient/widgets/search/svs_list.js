@@ -1856,7 +1856,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                         var cur_fav = window.hWin.HAPI4.get_prefs_def('favourite_filters', ['']);
 
                         if(cur_fav[0] != '' && cur_fav.findIndex(filter => filter[0] == node.key) != -1){
-                            tree.contextmenu('updateEntry', 'favourite', {title: 'Unfaviourite', uiIcon: 'ui-icon-star'});
+                            tree.contextmenu('updateEntry', 'favourite', {title: 'Unfavourite', uiIcon: 'ui-icon-star'});
                         }else{
                             tree.contextmenu('updateEntry', 'favourite', {title: 'Faviourite', uiIcon: 'ui-icon-star-b'});
                         }

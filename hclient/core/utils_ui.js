@@ -2648,7 +2648,7 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
             help_text='';
         }
         
-        return help_text;        
+        return window.hWin.HEURIST4.util.htmlEscape(help_text);        
     },
     
     

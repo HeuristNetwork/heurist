@@ -1078,7 +1078,11 @@ $mysqli->commit();
 
             $defs = loadRemoteURLContent($remoteURL);
             if(!$defs){ // unable to connect to Heurist Reference Index
+                global $glb_curl_error;
+                $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
+
                 $this->system->addError(HEURIST_ERROR, "Unable to connect Heurist Reference Index, possibly due to timeout or proxy setting<br>"
+                    . $error_code . "<br>"
                     ."URL requested: " . $database_url . "<br><br>");
             }
 

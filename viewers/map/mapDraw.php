@@ -470,9 +470,8 @@ console.log('load google map api')
                 var that = this;
                 
                 if(!window.hWin.HEURIST4.util.isnull(this.map_geocoder)){
-                    this.map_geocoder.off('markgeocode');
+
                     this.map_geocoder.on('markgeocode', function(e){ // Add map marker on top of search mark
-                        
                         e.target._map.eachLayer(function(layer){ 
                             if(layer._icon){
                                 var map = {};
@@ -486,9 +485,9 @@ console.log('load google map api')
                             }
                         }); 
                     });
-                }
-                
-
+                    
+                    }
+                $('.leaflet-control-geocoder-form > input').focus();    
                
                 is_map_inited = true;
             }

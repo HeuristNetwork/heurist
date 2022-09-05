@@ -329,7 +329,7 @@ $.widget( "heurist.editing_input", {
         this.input_prompt.appendTo( this.input_cell );
 
         // Add extended description, if available, viewable via clicking more... and collapsible with less...
-        var extend_help_text = this.f('rst_DisplayExtendedDescription');
+        var extend_help_text = window.hWin.HEURIST4.util.htmlEscape(this.f('rst_DisplayExtendedDescription'));
         if(help_text && !this.options.suppress_prompts 
             && extend_help_text && this.options.recordset && this.options.recordset.entityName == 'Records'){
 
@@ -725,10 +725,12 @@ $.widget( "heurist.editing_input", {
             function __adjustTextareaHeight(){
                 $input.attr('rows', 2);
                 var dheight = that.f('rst_DisplayHeight');  //max height 
-                var lht = parseInt($input.css('lineHeight'),10);
-                if(!(lht>0)) lht = parseInt($input.css('font-size'))*1.3;
-                var cnt = ($input.prop('scrollHeight') / lht).toFixed();            
+                var lht = parseInt($input.css('lineHeight'),10); 
+                if(!(lht>0)) lht = parseInt($input.css('font-size')); //*1.3
+                
+                var cnt = ($input.prop('scrollHeight') / lht).toFixed(); //visible number of lines
                 if(cnt>0){
+//console.log('lines count: '+$input.prop('scrollHeight')+'/'+lht+'='+cnt);                                   
                     if(cnt>dheight && dheight>2){
                         $input.attr('rows', dheight);    
                     }else{
@@ -5498,7 +5500,7 @@ console.log('onpaste');
                             .addClass('truncate enum_input')
                             .css({
                                 'max-width': '120px',
-                                'min-width': '120px',
+                                //'min-width': '120px',
                                 'display': 'inline-block',
                                 'margin-right': '15px'
                             })

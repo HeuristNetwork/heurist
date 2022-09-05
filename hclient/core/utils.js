@@ -131,8 +131,7 @@ window.hWin.HEURIST4.util = {
         return (emSize * input);
     },
 
-    // get current font size in pixels
-    px: function(input, ele) {
+    em2px: function(ele) {
         
         if(!ele) {
             ele = $("body");   
@@ -148,7 +147,13 @@ window.hWin.HEURIST4.util = {
         rele.remove();
         return res;
         */
-        var emSize = parseFloat(fs);
+        return parseFloat(fs);
+        
+    },
+    
+    // get current font size in pixels
+    px: function(input, ele) {
+        var emSize = window.hWin.HEURIST4.util.em2px(ele);
         return (input.length * emSize);
     },
 

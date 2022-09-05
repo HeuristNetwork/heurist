@@ -82,8 +82,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this.options.layout_mode = 
                 '<div class="treeview_with_header" style="background:white">'
                     +'<div style="padding:10px 20px 4px 10px;border-bottom:1px solid lightgray">' //instruction and close button
-                        +'<span style="font-style:italic;display:inline-block">Drag to reposition<br>'
-                        +'Select or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
+                        +'<span style="font-style:italic;display:inline-block">Drag to reposition<br>Select to navigate<br>'
+                        +'Double click or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
                         //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
                         +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
                     +'</div>'
@@ -350,19 +350,27 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             },
             */
             
-            click: function(event, data){
+            click: function(event, data){ // navigate to field, and close formlet if already open
+
+                window.hWin.HEURIST4.util.stopEvent(event);
 
                 var ele = $(event.target);
                 if(!ele.hasClass('ui-icon')){
                     if(data.node.isActive()){
-                        window.hWin.HEURIST4.util.stopEvent(event);
                         that._saveEditAndClose(null, 'close'); //close editor on second click
                     }
                 }
-                    //add new group/separator
-                    //that.addNewSeparator();
-                    //window.hWin.HEURIST4.util.stopEvent(event)
-                
+
+                if(data.node.key < 1){
+                    return;
+                }
+
+                if(that.previewEditor){
+                    that.previewEditor.manageRecords('focusField', data.node.key);
+                }
+            },
+            dblclick: function(event, data){ // open formlet for field
+                data.tree.getNodeByKey(data.node.key).setActive();
             },
             activate: function(event, data) { 
                 //main entry point to start edit rts field - open formlet
@@ -776,7 +784,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     // can remove group with assigned fields
     //     
-    _deleteAndClose: function(unconditionally){
+    _deleteAndClose: function(unconditionally, delete_data=false){
     
         var that = this;
         if(this._currentEditID==null || this._currentEditID<1) return;
@@ -787,7 +795,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 'a'          : 'delete',
                 'entity'     : this.options.entity.entityName,
                 'request_id' : window.hWin.HEURIST4.util.random(),
-                'recID'      : this._currentEditID
+                'recID'      : this._currentEditID   //  rty_ID.dty_ID
             };                
 
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
@@ -795,20 +803,21 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     if(response.status == window.hWin.ResponseStatus.OK){
 
                         var recID = that._currentEditID;
-                        if(that.options.use_cache){
-                            //that._cachedRecordset.removeRecord( recID );
-                        }
+                        
+                        var ids = recID.split('.');
+                        var sType = $Db.dty(ids[1], 'dty_Type');
 
-                        if(window.hWin.HAPI4.is_admin() && delete_data){
+                        if(window.hWin.HAPI4.is_admin() && sType!='separator' && delete_data){
+                            //delete fields from records
 
-                            var ids = recID.split('.'); console.log(ids);
                             req = {
                                 'rtyID': ids[0],
                                 'dtyID': ids[1],
                                 'recIDs': 'ALL',
                                 'a': 'delete'
                             };
-                            window.hWin.HAPI4.RecordMgr.batch_details(req, function(res){ console.log(res);
+                            window.hWin.HAPI4.RecordMgr.batch_details(req, function(res){ 
+                                //console.log(res);
                                 if(res.status != window.hWin.ResponseStatus.OK){
                                     window.hWin.HEURIST4.msg.showMsgErr(res);                                
                                 }else{
@@ -1256,6 +1265,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     fields['rst_ID'] = rec_ID; // set id values
 
                     that._cachedRecordset.setRecord(rec_ID, fields); // update cached record
+                    $Db.rst(that.options.rty_ID).setRecord(recID, fields);
                     
                     var tree = that._treeview.fancytree("getTree"); // get fancytree to update
                     var parentnode;
@@ -1596,8 +1606,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         //add show explanation checkbox
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
-        var ele = $('<div><label style="float:right;padding-right:30px"><input type="checkbox" '
-                        +(ishelp_on?'checked':'')+'/>show explanations</label></div>').prependTo(this.editForm);
+        var ele = $('<div id="help_container" style="display:inline-block;position:relative;top:5px;left:130px;"><label><input type="checkbox" '
+                        +(ishelp_on?'checked':'')+'/>show explanations</label></div>')
+                    .prependTo(this.editForm);
         
         this._on( ele.find('input'), {change: function( event){
             var ishelp_on = $(event.target).is(':checked');
@@ -1657,7 +1668,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }
             
             var ele = $('<div style="font-style:italic;padding:10px;display:inline-block">'
-                +s+'<a href="#">Edit base field definitions</a></div>');
+                +'<span id="edit_bf_extra">'+ s +'</span>'
+                +'<a class="edit_basefield" href="#">Edit base field definitions</a></div>');
             if(s==''){
                 ele.appendTo(bottom_div); //usual field
             }else{
@@ -1666,7 +1678,11 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 ele.css({'border-top':'1px lightgray solid','padding':'10px 0px 0px',margin:'10px 0 0 126px'});
                 ele.insertBefore(edit_ele);                
             }
-            this._on(ele.find('a'),{click: this.showBaseFieldEditor}); 
+            ele.clone()
+               .appendTo(this.editForm.find('#help_container'))
+               .css({ border: 'none', padding: '4px 0 0', margin: '0 0 0 190px' })
+               .find('#edit_bf_extra').hide();
+            this._on(this.editForm.find('a.edit_basefield'),{click: this.showBaseFieldEditor});  
             
             
             $('<span style="padding-left:40px;color:gray;cursor:pointer">ID: '
@@ -1700,6 +1716,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             var ele = this._editing.getInputs('rst_DisplayName');
             this._on( $(ele[0]), {
                 keypress: window.hWin.HEURIST4.ui.preventChars} );
+
+            $('<label style="margin-left:195px;"><input id="alter_basefield" type="checkbox" tabindex="-1"> also change base field name and help</label>')
+                .insertAfter($(edit_ele[0]).parent());
 
             edit_ele = this._editing.getFieldByName('rst_TermsAsButtons');
             if(dt_type=='enum'){
@@ -2032,12 +2051,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         setTimeout(function(){that._editing.getFieldByName('rst_DisplayWidth').hide();}, 200);
 
-        var width = this._editing.getValue('rst_DisplayWidth')[0];
+        var curr_width = this._editing.getValue('rst_DisplayWidth')[0];
         var $ele = this._editing.getFieldByName('rst_DisplayWidth_ext').find('.input-div');
 
         $ele.empty();
 
-        var is_max = width == 0;
+        var is_max = (curr_width == 0);
 
         $('<div style="line-height:2ex;padding-top:4px">'
                 +'<input type="radio" value="0" name="widthType">'
@@ -2054,10 +2073,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 var is_max = $ele.find('input[name="widthType"]:checked').val() == '1';
 
                 window.hWin.HEURIST4.util.setDisabled($input, is_max);
-                $input.val(is_max?'':40);
+                $input.val(is_max?'': (curr_width>0?curr_width:40));
 
                 var val = is_max ? 0 : $input.val();
-                if(width != val){
+                if(curr_width != val){
                     this._editing.setFieldValueByName('rst_DisplayWidth', val, true); //hidden field
                 }
             }
@@ -2072,7 +2091,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         $ele.find('input[name="widthType"][value="'+(is_max ? 1 : 0)+'"]').prop('checked', true).change();
         if(!is_max){
-            $ele.find('input.text').val(width);
+            $ele.find('input.text').val(curr_width);
         }
     },
 
@@ -2274,7 +2293,15 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         if(is_usual_way){
             //window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been saved'),500);
         }
-            
+
+        // Check if user is going to update the base field's name or help text
+        if(this.editForm.find('input#alter_basefield').is(':checked')){
+
+            var name = this._editing.getValue('rst_DisplayName');
+            var helptext = this._editing.getValue('rst_DisplayHelpText');
+
+            this.updateBaseFieldDefinition(recID, name, helptext);
+        }
 
         //recordset was updated in manageEntity._saveEditAndClose so we pass null
         this.refreshRecset_Definition_TreeNodeItem(recID, null);    
@@ -2485,19 +2512,24 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         var usage = $Db.rst_usage(recID);
         var is_reserved = $Db.dty(recID, 'dty_Status') == "reserved";
-        if(window.hWin.HAPI4.is_admin() && !is_reserved && (usage.length == 0 || usage.length == 1 && usage.includes( String(this.options.rty_ID) ) )){ // ask if to delete base field
+        if(window.hWin.HAPI4.is_admin() && $Db.dty(recID) && !is_reserved){ // ask if to delete base field
 
-            var msg = 'The base field ' + $Db.dty(recID, 'dty_Name') + '(#'+ recID +') is not used in any other record structure.<br>Would you like to delete this un-used base field?';
+            if(usage.length == 0){ // Un-used field
 
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, {
-                'Delete field': function(){ 
-                    that._deleteBaseField(recID);
-                    $dlg.dialog('close'); 
-                },
-                'Keep field': function(){ 
-                    $dlg.dialog('close'); 
-                }
-            }, {title: 'Delete un-used field', yes: 'Delete field', no: 'Keep field'}, {default_palette_class: 'ui-heurist-design'});
+                var msg = 'The base field ' + $Db.dty(recID, 'dty_Name') + '(#'+ recID +') is not used in any other record structure.<br>Would you like to delete this un-used base field?';
+
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, {
+                    'Delete field': function(){ 
+                        that._deleteBaseField(recID);
+                        $dlg.dialog('close'); 
+                    },
+                    'Keep field': function(){ 
+                        $dlg.dialog('close'); 
+                    }
+                }, {title: 'Delete un-used field', yes: 'Delete field', no: 'Keep field'}, {default_palette_class: 'ui-heurist-design'});
+            }else{ // Used field, check if any data exists
+                this.checkFieldForData(recID);
+            }
         }
 
         this._showRecordEditorPreview(); //redraw 
@@ -2718,13 +2750,15 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }
 
         var label = $Db.dty(dtyid, 'dty_Name');
-        var usage = $Db.rst_usage(recID);
-        var is_reserved = $Db.dty(recID, 'dty_Status') == "reserved";
+        var usage = $Db.rst_usage(dtyid);
+        var is_reserved = $Db.dty(dtyid, 'dty_Status') == "reserved";
 
-        if(is_reserved || usage.length != 0){
+        if(is_reserved){
+            window.hWin.HEURIST4.msg.showMsgErr('Unable to delete field ' + label + ' as it\'s a reserved field');
             return;
         }
 
+        // Remove base field
         var request = {
             'a': 'delete',
             'entity': 'defDetailTypes',
@@ -2733,14 +2767,176 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         };
 
         window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
-            if(response.status == hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.showMsgFlash('Base field '+label+' (#'+dtyid+') has been deleted', 2000);
-                window.hWin.HAPI4.EntityMgr.refreshEntityData('dty', null); // refresh local cache
+            if(response.status == window.hWin.ResponseStatus.OK){
+
+                if(usage && usage.length > 0){
+
+                    // Update rec structures
+                    var req = {
+                        'a': 'delete',
+                        'entity': 'defRecStructure',
+                        'dtyID': dtyid,
+                        'request_id': window.hWin.HEURIST4.util.random()
+                    };
+
+                    window.hWin.HAPI4.EntityMgr.doRequest(req, function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            window.hWin.HEURIST4.msg.showMsgFlash('Base field '+label+' (#'+dtyid+') has been deleted', 2000);
+                            window.hWin.HAPI4.EntityMgr.refreshEntityData('dty,rst', null); // refresh local caches
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgFlash('Base field '+label+' (#'+dtyid+') has been deleted', 2000);
+                    window.hWin.HAPI4.EntityMgr.refreshEntityData('dty', null); // refresh local caches
+                }
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });
+    },
 
+    //
+    // Check base field for any data
+    //
+    checkFieldForData: function(dtyid){
+
+        var that = this;
+        if(dtyid < 1 || $Db.dty(dtyid) == null){
+            return;
+        }
+
+        var request = {
+            'a': 'counts',
+            'mode': 'record_usage',
+            'entity': 'defDetailTypes',
+            'recID': dtyid,
+            'request_id': window.hWin.HEURIST4.util.random()
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){ console.log(response);
+            if(response.status == window.hWin.ResponseStatus.OK && response.data == 0){
+                // Allow deletion
+                var msg = 'Base field <strong>' + $Db.dty(dtyid, 'dty_Name') + '</strong><br><br>This base field is not used by any of the fields which reference it:<br><br>';
+
+                var rst_usage = $Db.rst_usage(dtyid);
+
+                for(var i = 0; i < rst_usage.length; i++){
+                    msg += $Db.rty(rst_usage[i], 'rty_Name') + ' . ' + $Db.rst(rst_usage[i], dtyid, 'rst_DisplayName') + '<br>';
+                }
+
+                msg += '<br>'
+                    + '<label>'
+                        + '<input type="checkbox" id="delBaseField" /> Check this box to <span style="text-decoration:underline;">permanently</span>'
+                        + ' remove this base field from the database<br><span style="display: inline-block; margin-left: 21px">(this will remove the fields listed above)</span>'
+                    + '</label>';
+
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, {
+                    'Proceed': function(){ 
+
+                        if($dlg.find('#delBaseField').is(':checked')){
+                            that._deleteBaseField(dtyid);
+                        }
+
+                        $dlg.dialog('close'); 
+                    },
+                    'Cancel': function(){ 
+                        $dlg.dialog('close'); 
+                    }
+                }, {title: 'Base field deletion', yes: 'Proceed', no: 'Cancel'}, {default_palette_class: 'ui-heurist-design'});
+            }
+        });
+    },
+
+    //
+    // Popup to update a base field's name and help text with provided values
+    // NOTE: does NOT update each base field's usage within rectypes
+    //
+    updateBaseFieldDefinition: function(dtyID, name, helptext){
+
+        var that = this;
+
+        if(!$Db.dty(dtyID)){
+            return;
+        }
+
+        var msg = 'Base field <strong>' + $Db.dty(dtyID, 'dty_Name') + '</strong>'
+                + '<span style="float: right;"><a href="#">Edit base field definitions</a></span>'
+                + '<br><br>This base field has been used by the following field:<br><br>';
+
+        var rst_usage = $Db.rst_usage(dtyID);
+
+        for(var i = 0; i < rst_usage.length; i++){
+            msg += $Db.rty(rst_usage[i], 'rty_Name') + ' . <strong>' + $Db.rst(rst_usage[i], dtyID, 'rst_DisplayName') + '</strong><br>';
+        }
+
+        msg += '<br>'
+
+            + '<label><input type="checkbox" id="chg_name" checked="true" /> Change base field name to </label><input type="text" value="'+ name +'" style="width:263px;" /> <br><br>'
+            + '<label style="vertical-align: top;"><input type="checkbox" id="chg_help" checked="true" /> Change base field help to </label>'
+                + '<textarea rows="5" cols="50" style="margin-left:7px;">'+ helptext +'</textarea> <br><br>'
+
+            + '<span style="font-style: italic">(this will not change the names in the individual records)</span>';
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, {
+            'Proceed': function(){ 
+
+                name = null, helptext = null;
+                var fields = {dty_ID: dtyID};
+                var error = '';
+
+                if($dlg.find('#chg_name').is(':checked')){
+                    name = $dlg.find('input[type="text"]').val();
+                    if(name == null || name == ''){
+                        error += 'Name'
+                    }else{
+                        fields['dty_Name'] = name;
+                    }
+                }
+                if($dlg.find('#chg_help').is(':checked')){
+                    helptext = $dlg.find('textarea').val();
+                    if(helptext == null || helptext == ''){
+                        error = (error != '') ? error + ' and Help text' : 'Help text';
+                    }else{
+                        fields['dty_HelpText'] = helptext;
+                    }
+                }
+
+                if(error != ''){
+                    error += error + ((error.indexOf('and') != -1) ? ' needs a value' : ' are missing values');
+                    window.hWin.HEURIST4.msg.showMsgFlash(error, 2000);
+                    return;
+                }
+
+                $dlg.dialog('close');
+
+                var request = {
+                    'a': 'save',
+                    'entity': 'defDetailTypes',
+                    'fields': fields,
+                    'request_id': window.hWin.HEURIST4.util.random()
+                };
+
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            window.hWin.HEURIST4.msg.showMsgFlash('Base field has been updated', 2000);
+                            $Db.dty(dtyID, null, fields); //add on client side
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+                );
+            },
+            'Cancel': function(){ 
+                $dlg.dialog('close'); 
+            }
+        }, {title: 'Base field rename', yes: 'Proceed', no: 'Cancel'}, {default_palette_class: 'ui-heurist-design', dialogId: 'bf-rename'});
+
+        $dlg.find('span a').on('click', function(event){
+            that.showBaseFieldEditor(dtyID, null, true, null); 
+        });
     }
     
 });

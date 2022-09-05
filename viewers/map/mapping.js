@@ -329,9 +329,9 @@ $.widget( "heurist.mapping", {
         
 
         var map_crs_simple = window.hWin.HAPI4.database == 'johns_Tilemap_Test' 
-                        || window.hWin.HAPI4.database == 'osmak_12'  // 
-                        || window.hWin.HAPI4.database == 'osmak_9b'  //iiif test
-                        || window.hWin.HAPI4.get_prefs_def('map_crs_simple',0);
+                        || window.hWin.HAPI4.database == 'osmak_12';
+                        //|| window.hWin.HAPI4.database == 'osmak_9b';  //iiif test
+                        //|| window.hWin.HAPI4.get_prefs_def('map_crs_simple',0);
         if(map_crs_simple){
             map_options['crs'] = L.CRS.Simple;
             map_options['minZoom'] = 0;
@@ -547,7 +547,7 @@ $.widget( "heurist.mapping", {
 
                 if(that.basemap_layer_id==424){
                     
-                    //bounds = L.latLngBounds(L.latLng(-256,-256), L.latLng(256,256));//soutwest northeast 
+                    bounds = L.latLngBounds(L.latLng(-256,-256), L.latLng(256,256));//soutwest northeast 
                     
                     //that.projectGeoJson( gjson, true );
             
@@ -555,8 +555,10 @@ $.widget( "heurist.mapping", {
                     that.basemap_layer_height = 16384;
                     
                 }else{
+                    
+                    bounds = L.latLngBounds(L.latLng(-256, 0), L.latLng(-138, 256));//soutwest northeast 
          
-                    that.basemap_layer_width = 32768;
+                    that.basemap_layer_width = 32700;
                     that.basemap_layer_height = 15043;
                 }
                 
@@ -567,8 +569,8 @@ $.widget( "heurist.mapping", {
                     ) / Math.log(2)
                 );
 
-//console.log(id);                
-//console.log(bounds);
+console.log(id);                
+console.log(bounds);
                 if(bounds && bounds.isValid()){
                     that.nativemap.setMaxBounds(bounds);
                     that.nativemap.fitBounds(bounds);        
@@ -761,7 +763,7 @@ $.widget( "heurist.mapping", {
                 layer_options['missRGBA'] =  null; //replace that not match
                 layer_options['pixelCodes'] = [ [255, 255, 255] ]; //search for
                 layer_options['getBounds'] = function(){
-                            return this.options._extent;  
+                            return this._extent;  
                         };
                         
                 new_layer = new L.tileLayerPixelFilter(layer_url, layer_options).addTo(this.nativemap);
@@ -1248,8 +1250,16 @@ $.widget( "heurist.mapping", {
             
             var affected_layer = this.all_layers[layer_id];
             if(affected_layer){
-                var bnd = affected_layer.getBounds()
-                bounds.push( bnd );
+                var bnd;
+                
+                if($.isFunction(affected_layer.getBounds)){
+                    bnd = affected_layer.getBounds();
+                }else if($.isFunction(affected_layer.options.getBounds)){
+                    bnd = affected_layer.options.getBounds();
+                }
+                if(bnd){
+                    bounds.push( bnd );
+                }
                 
                 if(window.hWin.HEURIST4.util.isArrayNotEmpty( this.all_markers[layer_id] ) 
                         && this.all_clusters[layer_id])
@@ -3108,7 +3118,17 @@ $.widget( "heurist.mapping", {
                     }else
                     if(val=='geocoder'){ //geocoder plugin
                         that.map_geocoder = L.Control.geocoder({ position: 'topleft', 
-                            geocoder: new L.Control.Geocoder.Google('AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk') });
+                            geocoder: L.Control.Geocoder.nominatim()
+                            //geocoder: L.Control.Geocoder.photon()
+                            //geocoder: new L.Control.Geocoder.Google('AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk') 
+                        });
+                            
+                            /*
+                            'Bing': L.Control.Geocoder.bing({
+                                        apiKey: 'AlsFLEm5UIoF-8kfQdB-XlTCGU_pLLNliREprSZFOZfEr08UCqD0OCzhL5jWAwQn'}),
+                            'Mapbox': L.Control.Geocoder.mapbox({ apiKey: LCG.apiToken }),
+                            */
+                            
                     }else
                     //print plugin
                     if(val=='print'){

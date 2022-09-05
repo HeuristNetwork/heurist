@@ -1348,7 +1348,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         google.maps.event.addListener(gmap, 'click', clearSelection);
         google.maps.event.addListener(gmap, 'mousemove', function (event) {
             var pnt = event.latLng;
-            $('#coords2').html(formatPnt(pnt,5));
+            $('#coords2').text(formatPnt(pnt,5));
         });        
 
         buildColorPalette();

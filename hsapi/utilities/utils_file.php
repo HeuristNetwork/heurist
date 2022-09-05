@@ -1030,7 +1030,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
 
         if($verbose) {
             echo "<br/>Successfully dumped data from ". $source ." to ".$destination;
-            echo "<br/>The zip file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
+            echo "<br/>The zip file contains ".htmlspecialchars($numFiles." files and is ".sprintf("%.2f", $size))."MB";
         }
     }else{
         return false;    
@@ -1049,6 +1049,15 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
 function unzipArchive($zipfile, $destination, $entries=null){
 
     if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
+        
+        $dest = realpath($destination);
+        if ($dest !== false) {
+            if (strpos($dest, $system->getFileStoreRootFolder()) !== 0) {
+            //HEURIST_SCRATCH_DIR
+            //HEURIST_TILESTACKS_DIR
+                    return false; //not allowed
+            }
+        }
 
         $zip = new ZipArchive;
         if ($zip->open($zipfile) === TRUE) {
@@ -1059,9 +1068,9 @@ function unzipArchive($zipfile, $destination, $entries=null){
             error_log( $entry );
             }*/
             if($entries==null){
-                $zip->extractTo($destination);//, array()
+                $zip->extractTo($dest);//, array()
             }else{
-                $zip->extractTo($destination, $entries);
+                $zip->extractTo($dest, $entries);
             }
             $zip->close();
             return true;
@@ -1324,7 +1333,7 @@ function loadRemoteURLContentSpecial($url){
         //if requested url is on the same server 
         //replace URL to script path in current installation folder
         //and execute script 
-        if(strpos($url, HEURIST_INDEX_BASE_URL)===0){
+        if(strpos(strtolower($url), strtolower(HEURIST_INDEX_BASE_URL))===0){
             $path = str_replace(HEURIST_INDEX_BASE_URL, HEURIST_DIR, $url);
         }else{
             $path = str_replace(HEURIST_BASE_URL, HEURIST_DIR, $url);
@@ -1361,10 +1370,9 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     $glb_curl_error = null;
 
     if(!function_exists("curl_init"))  {
+
         $glb_curl_code = HEURIST_SYSTEM_FATAL;
         $glb_curl_error = 'Cannot init curl extension. Verify php installation';
-
-//error_log('CURL ERROR: '.$glb_curl_error);
         
         return false;
     }
@@ -1385,7 +1393,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     curl_setopt($ch, CURLOPT_HEADER, 0);    //don't include header in output
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // follow server header redirects
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
-    if(strpos($url, HEURIST_MAIN_SERVER)===0){
+    if(strpos(strtolower($url), strtolower(HEURIST_MAIN_SERVER))===0){
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
     }
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);    // timeout after ten seconds
@@ -1419,18 +1427,21 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
         
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
-        $glb_curl_error = 'http code = '.$code.'  curl error='.$error;
-//error_log('CURL ERROR: '.$glb_curl_error);
+        if(strpos($glb_curl_error, $code) !== false){ // http error
+            $glb_curl_error = explode(': ', $glb_curl_error)[1];
+            $glb_curl_error = 'Error Code : '.$error;
+        }
 
         curl_close($ch);
         return false;
     } else {
         if(!$data){
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+
             $glb_curl_code = HEURIST_SYSTEM_FATAL;
-            $glb_curl_error = 'It does not return data. HTTP code '.$code;
-//error_log('CURL ERROR: '.$url.' curl error='.$glb_curl_error);
+            $glb_curl_error = 'HTTP Response Code: '.$code;
         }
+
         curl_close($ch);
         return $data;
     }
@@ -1485,6 +1496,21 @@ error_log('http code = '.$code.'  curl error='.$error);
     
     return $content_type;
 }
+
+//
+// 
+//
+function getURLExtension($url){
+    $extension = null;
+    $ap = parse_url($url);
+    if( array_key_exists('path', $ap) ){
+        $path = $ap['path'];
+        if($path){
+            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        }
+    }
+    return $extension;
+}
   
 //
 // recognize mime type from url, update ext table if missed and returns extension
@@ -1514,13 +1540,7 @@ function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
             $force_add = "('youtube','video/youtube', '0','','Youtube Video','')";
         }else{
             //get extension from url - unreliable
-            /*$ap = parse_url($r_value);
-            if( array_key_exists('path', $ap) ){
-                $path = $ap['path'];
-                if($path){
-                    $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-                }
-            }*/    
+            //$f_extension = getURLExtension($url)
 
             $mimeType = loadRemoteURLContentType($url); 
             

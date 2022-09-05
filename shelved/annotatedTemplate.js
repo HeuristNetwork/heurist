@@ -57,8 +57,10 @@ function sendMessage(message){
     // Specify origin. Should be a domain or a wildcard "*"
     if (win === null || !window['postMessage'])
         alert("postMessage is not supported");
-    else
-        win.postMessage(message, "*"); 
+    else{
+        //2022-08-15 snyc report: win.postMessage(message, "*"); 
+    }
+        
 }
 
 //

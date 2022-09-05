@@ -274,7 +274,7 @@ function SelectLinkField()
             rst_CreateChildIfRecPtr: "0"
             rst_DefaultValue: ""
             rst_SeparatorType: ""
-            rst_DisplayExtendedDescription: "Please provide an extended description for display on rollover ..."
+            rst_DisplayExtendedDescription: "You can add additional information in extended description for display on rollover"
             rst_Status: "open"
             rst_NonOwnerVisibility: "viewable"
             rst_LocallyModified: "1"    

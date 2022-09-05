@@ -540,5 +540,25 @@ class DbDefDetailTypes extends DbEntityBase
 
         return $ret;
     }
+
+    public function counts(){
+
+        $mysqli = $this->system->get_mysqli();
+        $res = null;
+
+        if(@$this->data['mode'] == 'record_usage'){
+
+            $dty_ID = @$this->data['recID'];
+
+            if(isset($dty_ID) && is_numeric($dty_ID) && $dty_ID > 0){
+                $res = mysql__select_value($mysqli, 'SELECT count(dtl_ID) FROM recDetails WHERE dtl_DetailTypeID = ' . $dty_ID);
+            }else{
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Invalid base field id provided ' . $dty_ID);
+                $res = false;
+            }
+        }
+
+        return $res;
+    }
 }
 ?>

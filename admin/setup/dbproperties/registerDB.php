@@ -202,7 +202,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             
             $is_SpecialAdminUseOnly = strlen(@$passwordForServerFunctions)>6 && 
             @$cuser['ugr_Preferences']['userCompetencyLevel']==0 &&
-            strpos(HEURIST_SERVER_URL, HEURIST_MAIN_SERVER)===0;  //we are on main reference server
+            strpos(strtolower(HEURIST_SERVER_URL), strtolower(HEURIST_MAIN_SERVER))===0;  //we are on main reference server
             
 ?>
 
@@ -362,10 +362,13 @@ function registerDatabase() {
                     $data = loadRemoteURLContentWithRange($reg_url, null, true);
                     
                     if (!isset($data) || $data==null) {
-                        
+                        global $glb_curl_error;
+                        $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
+
                         echo '<p class="ui-state-error">'
-                            .'Unable to connect Heurist master index, possibly due to timeout or proxy setting<br />'
-                            ."URL requested: <a href='$reg_url'>$reg_url</a></p>";
+                            .'Unable to connect Heurist master index, possibly due to timeout or proxy setting<br><br>'
+                            . $error_code . '<br>'
+                            ."URL requested: $reg_url</p><br>";
                         return false;
                     }
                     
@@ -381,6 +384,8 @@ function registerDatabase() {
                 ."&serverURL=" . rawurlencode($serverURL);
                 $data = loadRemoteURLContentSpecial($reg_url); //without proxy
                 */
+                
+                $mysqli = $system->get_mysqli();
                 
                 $dbID = intval($data);
                 

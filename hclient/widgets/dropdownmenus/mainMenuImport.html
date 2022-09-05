@@ -25,7 +25,7 @@
             data-logaction="add_Record" data-header="Add new record"
             data-icon="ui-icon-file-plus"
             title="Add new record of specified record type">
-            Add record</a>
+            Add record</a> <!-- Holding value, substituted from localisation file using id -->
     </li>
 
 <li style="display:none">-</li>
@@ -39,7 +39,7 @@
             data-help="importRecordsCSV"
             data-icon="ui-icon-file-table"
             data-container="populate">
-            Delimited text / CSV</a>
+            Delimited text / CSV</a> <!-- Holding value, substituted from localisation file using id -->
     </li>
     <li>
         <a href="import/biblio/syncZotero.php"
@@ -49,7 +49,7 @@
             data-help="syncZotero"
             data-icon="ui-icon-book-b"
             data-container="populate">
-            Zotero bibliography sync</a>
+            Zotero bibliography sync</a> <!-- Holding value, substituted from localisation file using id -->
     </li>
     <li>
         <a href="import/delimited/importRecordsCSV.php?format=kml"
@@ -60,7 +60,7 @@
             data-help="importRecordsKML"
             data-icon="ui-icon-globe-b"
             data-container="populate">
-            KML</a>
+            KML</a> <!-- Holding value, substituted from localisation file using id -->
     </li>
 
     <li>
@@ -73,14 +73,14 @@
             data-dialog-width="760" data-dialog-height="570"
             data-icon="ui-icon-script"
             data-container="populate">
-            Heurist XML/JSon</a>
+            Heurist XML/JSon</a> <!-- Holding value, substituted from localisation file using id -->
     </li>
 
     <li>
         <a href="#"
             id="menu-import-get-template"
             target="_blank">
-            Download template (XML)</a>
+            Download template (XML)</a> <!-- Holding value, substituted from localisation file using id -->
     </li>
     
     
@@ -93,7 +93,7 @@
            data-header="Import &gt; Upload media files"
            data-icon="ui-icon-upload"
            data-container="populate">
-           Upload media files</a>
+           Upload media files</a> <!-- Holding value, substituted from localisation file using id -->
     </li>
     <li>
         <a href="import/fieldhelper/synchroniseWithFieldHelper.php"
@@ -102,19 +102,28 @@
            data-header="Import &gt; Index media files"
            data-icon="ui-icon-list"
            data-container="populate">
-           Index media files</a>
+           Index media files</a> <!-- Holding value, substituted from localisation file using id -->
+    </li>
+    <li>
+        <a href="import/delimited/importMedia.php"
+           id="menu-files-csv"
+           data-user-admin-status="1" data-size="medium" 
+           data-header="Import &gt; Media files"
+           data-icon="ui-icon-file-table"
+           data-container="populate">
+           Register files from CSV</a> <!-- Holding value, substituted from localisation file using id -->
     </li>
 
     <li>
         <a href="#" id="menu-subset-set" data-user-experience-level="3"
-           data-icon="ui-icon-lightning-explore">Set as subset</a>
+           data-icon="ui-icon-lightning-explore">Set as subset</a> <!-- Holding value, substituted from localisation file using id -->
     </li>
 
     <li>
         <a href="#" id="menu-extract-pdf" data-user-experience-level="0"
            data-icon="ui-icon-file-pdf"
            title="Extract text from PDF files">
-           Extract text from PDF (experimental)</a>
+           Extract text from PDF (experimental)</a> <!-- Holding value, substituted from localisation file using id -->
     </li>
 
     
@@ -126,12 +135,12 @@
             data-user-admin-status="1" data-size="medium" data-logaction="imp_Emails" data-user-experience-level="1"
             data-header="Import &gt; Harvest emails"
             title="Harvest email from a designated IMAP email server (set in Database > Properties)">
-            Harvest emails</a>
+            Harvest emails</a> <!-- Holding value, substituted from localisation file using id -->
     </li>
     <li>
         <a href="import/hyperlinks/importHyperlinks.php"
             data-logaction="imp_Hyperlinks" data-size="medium" data-user-experience-level="1"
             data-header="Import &gt; Records from bookmakrs file ot web page hyperlinks"
             title="Import web links from a browser bookmarks file or html web page saved as a file - use bookmarklet for web pages online">
-            Harvest hyperlinks</a>
+            Harvest hyperlinks</a> <!-- Holding value, substituted from localisation file using id -->
     </li>

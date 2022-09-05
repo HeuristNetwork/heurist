@@ -146,7 +146,7 @@ if ($res){
         //6. add new term id
         if(!($term_found>0)){
             $term_id = addTerm($entity, $parent_id, $val, null);    
-            echo 'added '.$term_id.'  '.$val.'<br>';
+            echo 'added '.htmlspecialchars($term_id.'  '.$val).'<br>';
             $term_defs[$term_id] = array($val);
         }
         //6. save term id in uri field

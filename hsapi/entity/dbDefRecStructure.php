@@ -238,8 +238,8 @@ class DbDefRecStructure extends DbEntityBase
                 
             $row = mysql__select_row_assoc($mysqli,
                 'SELECT rst_ID, rst_OriginatingDBID FROM '.$this->config['tableName']
-                .' WHERE rst_DetailTypeID='.$mysqli->real_escape_string( $this->records[$idx]['rst_DetailTypeID'])
-                .' AND rst_RecTypeID='.$mysqli->real_escape_string( $this->records[$idx]['rst_RecTypeID']) );
+                .' WHERE rst_DetailTypeID='.intval( $this->records[$idx]['rst_DetailTypeID'] )
+                .' AND rst_RecTypeID='.intval( $this->records[$idx]['rst_RecTypeID']) );
 
             $isInsert = !(@$row['rst_ID']>0);
 
@@ -247,6 +247,10 @@ class DbDefRecStructure extends DbEntityBase
                 $this->records[$idx]['rst_ID'] = -1;
                 $this->records[$idx]['rst_LocallyModified'] = 0;
                 if(!@$this->records[$idx]['rst_Status']) $this->records[$idx]['rst_Status'] = 'open';
+                
+                if($this->records[$idx]['rst_DefaultValue']=='tabs' && !@$this->records[$idx]['rst_DisplayName']){
+                    $this->records[$idx]['rst_DisplayName'] = 'Divider '.$idx;
+                }
             }else{
                 $this->records[$idx]['rst_ID'] = $row['rst_ID'];
                 $this->records[$idx]['rst_LocallyModified'] = ($row['rst_OriginatingDBID']>0)?1:0;
@@ -280,12 +284,13 @@ class DbDefRecStructure extends DbEntityBase
     
     public function delete($disable_foreign_checks = false){
         
+        $mysqli = $this->system->get_mysqli();
+
         if(@$this->data['recID'] && strpos($this->data['recID'],'.')){
             list($rty_ID, $dty_ID) = explode('.', $this->data['recID']);
             
             $this->recordIDs = 0;
             if(is_numeric($rty_ID) && $rty_ID>0 && is_numeric($dty_ID) && $dty_ID>0){
-                $mysqli = $this->system->get_mysqli();
                 $this->recordIDs = mysql__select_value($mysqli,
                     'SELECT rst_ID FROM '.$this->config['tableName']
                     .' WHERE rst_DetailTypeID='.$mysqli->real_escape_string( $dty_ID )
@@ -297,8 +302,23 @@ class DbDefRecStructure extends DbEntityBase
             }else{
                 $this->recordIDs = array($this->recordIDs);
             }
+        }else if(@$this->data['dtyID']){
+            $dty_ID = $this->data['dtyID'];
+
+            $this->recordIDs = null;
+            if(is_numeric($dty_ID) && $dty_ID > 0){
+                $this->recordIDs = mysql__select_list2($mysqli, 
+                    'SELECT rst_ID FROM '.$this->config['tableName']
+                    .' WHERE rst_DetailTypeID='.$mysqli->real_escape_string($dty_ID));
+            }
+            if(!$this->recordIDs || !is_array($this->recordIDs) || count($this->recordIDs) == 0){
+                $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete. No entries found for field ID ' . $dty_ID);
+                return false;
+            }else if(!is_array($this->recordIDs)){
+                $this->recordIDs = array($this->recordIDs);
+            }
         }
-        
+
         return parent::delete();
     }
 
