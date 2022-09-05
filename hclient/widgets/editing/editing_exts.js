@@ -435,7 +435,7 @@ function calculateImageExtentFromWorldFile(_editing){
 function openSearchMenu(that, $select, disableClick=true){
 
     var $menu = $select.hSelect('menuWidget');
-    var $inpt = $menu.find('input.input_menu_filter');
+    var $inpt = $menu.find('input.input_menu_filter'); //filter input
 
     if(!$inpt.attr('data-inited')){
 
@@ -510,7 +510,7 @@ function browseRecords(_editing_input, $input){
     var pointerMode = that.f('rst_PointerMode');
     
     if(isparententity && pointerMode!='addonly'){
-        pointerMode = 'addorbrowse';
+        pointerMode = 'dropdown_add'; //was 'addorbrowse';
     }
     
     var is_dropdown = (pointerMode && pointerMode.indexOf('dropdown')===0);
