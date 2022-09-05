@@ -370,7 +370,7 @@ $.widget( "heurist.search", {
             .css({display:'inline-block',width:90,position:'relative',top:'-3px'})
             .addClass('ui-main-color btn-aux') //was ui-icon-gear was ui-icon-filter-form
             .append('<span class="ui-icon ui-icon-box" style="font-size: larger;" />')
-            .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">Facet builders</span>')
+            .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">Filter builders</span>')
             .appendTo(this.div_buttons);
             this._on( this.btn_faceted_wiz, {  click: function(){
 

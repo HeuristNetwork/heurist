@@ -419,7 +419,7 @@ if($registrationRequired){ //show user registration dialog again after wrong cap
                 <img alt="creation ..." src="<?php echo HEURIST_BASE_URL.'hclient/assets/mini-loading.gif'?>" width="16" height="16" />
                 <strong><span id="divProgress">&nbsp; Creation of database will take a few seconds </span></strong>
                 <br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                (if no message after a minute, reload page - database should have been created)
+                (if no message after a minute, click <b>Open</b> in the menu - database will have been created)
             </div>
 
             <div id="createDBForm" style="padding-top:5px;">

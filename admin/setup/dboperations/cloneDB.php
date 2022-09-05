@@ -239,7 +239,9 @@ if(@$_REQUEST['mode']=='2'){
         <div id="page-inner" style="overflow:auto">
             <div id="loading" style="display:none;height:100%" class="loading">
                 <!-- <img alt="cloning ..." src="<?php echo HEURIST_BASE_URL.'hclient/assets/mini-loading.gif'?>" width="16" height="16" /> -->
-                <div id="divProgress" style="font-weight:bold;width:100%;">&nbsp; Cloning of database may take a few minutes for large databases.</div>
+                <div id="divProgress" style="font-weight:bold;width:100%;">Cloning of database may take a few minutes for large databases. 
+                <br>(if no message after a couple of minutes, click <b>Open</b> in the menu - database should have been created)
+                <br><br> cloning ..</div>
             </div>
       
 <?php    

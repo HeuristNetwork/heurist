@@ -843,9 +843,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             var display = window.hWin.HAPI4.is_admin() && $Db.dty(rst_ID, 'dty_Type') != 'separator' ? 'inline-block' : 'none';
 
             var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete field "'
+                'Are you sure you wish to delete field "<b>'
                 + window.hWin.HEURIST4.util.htmlEscape(this._cachedRecordset.fld(rst_ID, 'rst_DisplayName'))
-                +'"?<br><br><span style="display:'+display+';">Additionally, remove all data from this field in all records? <input type="checkbox" id="delData" /></span>', 
+                +'"</b> from this record type?<br><br><span style="display:'+display+';">Permanently delete the data from this field (applies to this record type only)? <input type="checkbox" id="delData" /></span>', 
                 {
                     'Proceed': function(){ 
                         var delData = display != 'none' && $dlg.find('#delData').is(':checked') ? 1 : 0; 
@@ -854,7 +854,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     },
                     'Cancel': function(){ $dlg.dialog('close'); }
                 }, 
-                {title:'Warning',yes:'Proceed',no:'Cancel'},
+                {title:'Field deletion',yes:'Proceed',no:'Cancel'},
                 {default_palette_class:this.options.default_palette_class});        
         }
     },
