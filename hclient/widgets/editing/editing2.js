@@ -440,13 +440,14 @@ function hEditing(_options) {
                         fields[idx].change = _onChange;
                         fields[idx].is_insert_mode = _is_insert;
                         
+                        
                         var inpt = $('<div>').css('display','block !important')
                                 .appendTo(fieldContainer).editing_input(fields[idx]);     
                         //mark each field with dty_ID         
                         if(parseInt(fields[idx]['dtID'])>0){ //for Records only
                             inpt.attr('data-dtid', fields[idx]['dtID']);
                         }
-                                
+           
                         editing_inputs.push(inpt);  
                         
                         hasVisibleFields = true;
@@ -535,6 +536,7 @@ function hEditing(_options) {
                 });
             }
         }
+        
     }
     
     //

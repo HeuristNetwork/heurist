@@ -302,7 +302,7 @@ window.hWin.HEURIST4.ui = {
             
         var data = $Db.trm_TreeData(vocab_id, 'select');                
         var termCode;
-        
+       
         //add optgroups and options
         for(var i=0; i<data.length; i++){
             
@@ -343,7 +343,7 @@ window.hWin.HEURIST4.ui = {
             }             
             */
         }//for
-        
+
         //init selectmenu
         selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect);
 
@@ -1182,7 +1182,7 @@ window.hWin.HEURIST4.ui = {
                 },*/
                 change: function( event, data ) {
  
-                        selObj.val(data.item.value);//change value for underlaying html select
+                        selObj.val((data && data.item)?data.item.value:data);//change value for underlaying html select
                         
                         
                         if($.isFunction(onSelectMenu)){

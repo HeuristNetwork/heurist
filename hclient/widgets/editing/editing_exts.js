@@ -449,6 +449,12 @@ function openSearchMenu(that, $select, disableClick=true){
             $mnu.find('div.not-found').hide();
         }});
 
+        that._on($menu.find('span.show-select-dialog'), {click:
+        function(event){
+            var foo = $select.hSelect('option','change');//.trigger('change');
+            foo.call(this, null, 'select'); //call __onSelectMenu
+        }});
+        
         //set filter
         that._on($menu, {
             click:function(event){
@@ -481,8 +487,10 @@ function openSearchMenu(that, $select, disableClick=true){
 			//stop click for menu filter option
 			that._on($menu.find('li.ui-menu-item:first'), {
 				click: function(event){
-					window.hWin.HEURIST4.util.stopEvent(event);
-					return false;
+                    if ($(event.target).parents('.show-select-dialog').length==0){
+					    window.hWin.HEURIST4.util.stopEvent(event);
+					    return false;
+                    }
 				}
 			});
 		}
@@ -803,11 +811,11 @@ function browseRecords(_editing_input, $input){
                     +'<input class="input_menu_filter" size="10" style="outline: none;background:none;border: 1px solid lightgray;"/>'
 +'<span class="smallbutton ui-icon ui-icon-circlesmall-close" tabindex="-1" title="Clear entered value" '
 +'style="position:relative; cursor: pointer; outline: none; box-shadow: none; border-color: transparent;"></span>'                   
-                    +'<span style="padding:0px 4px 0 20px;vertical-align:sub">'
+                    +'<span class="show-select-dialog"><span style="padding:0px 4px 0 20px;vertical-align:sub">'
                     +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
                     + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
                     + window.hWin.HR('Search') + (s_action=='select'?'':('/' +  window.hWin.HR('Add'))) 
-                    + '<div class="not-found" style="padding:10px;color:darkgreen;display:none;">'
+                    + '</span><div class="not-found" style="padding:10px;color:darkgreen;display:none;">'
                     +window.hWin.HR('No records match the filter')+'</div></div>');
                     
                     //$(opt).attr('icon-url', search_icon);
@@ -822,7 +830,8 @@ function browseRecords(_editing_input, $input){
                     });
                     
                     function __onSelectMenu( event ){
-                        var targetID = $(event.target).val();
+                        
+                        var targetID = (event) ?$(event.target).val() :$(that.selObj).val();
                         if(!targetID) return;
 
                         that._off($(that.selObj),'change');
