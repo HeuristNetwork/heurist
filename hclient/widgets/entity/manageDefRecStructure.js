@@ -1265,7 +1265,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     fields['rst_ID'] = rec_ID; // set id values
 
                     that._cachedRecordset.setRecord(rec_ID, fields); // update cached record
-                    $Db.rst(that.options.rty_ID).setRecord(recID, fields);
+                    $Db.rst(that.options.rty_ID).setRecord(rec_ID, fields);
                     
                     var tree = that._treeview.fancytree("getTree"); // get fancytree to update
                     var parentnode;
