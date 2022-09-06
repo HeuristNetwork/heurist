@@ -2101,20 +2101,40 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         var that = this;
         
         if(!this.options.edit_structure && this._editing.isModified()){
-            
-                var sMsg = "Click YES to save changes and modify the record structure.<br><br>"
-                            +"If you are unable to save changes, click Cancel and open<br>"
-                            +"structure modification in main menu Structure > Modify / Extend";
-                window.hWin.HEURIST4.msg.showMsgDlg(sMsg, function(){
-                    
-                        that.saveQuickWithoutValidation( function(){ //save without validation
-                            that._editing.initEditForm(null, null); //clear edit form
-                            that._initEditForm_step3(that._currentEditID); //reload edit form                       
-                            that.editRecordType(is_inline);
-                        } );
-                    
-                }, {title:'Data has been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
-                return;                           
+
+            var $dlg = null;
+
+            var sMsg = "Click Save changes to save changes and modify the record structure.<br>"
+                        +"Or click Drop changes to continue straight to modifing the record structure.<br><br>"
+                        +"If you are unable to save changes or drop changes, click Cancel and open<br>"
+                        +"structure modification in main menu Structure > Modify / Extend";
+
+            var btns = {};
+            btns[window.hWin.HR('Save changes')] = function(){
+                that.saveQuickWithoutValidation( function(){ //save without validation
+
+                    $dlg.dialog('close');
+
+                    that._editing.initEditForm(null, null); //clear edit form
+                    that._initEditForm_step3(that._currentEditID); //reload edit form                       
+                    that.editRecordType(is_inline);
+                } );
+            };
+            btns[window.hWin.HR('Drop changes')] = function(){
+
+                $dlg.dialog('close');
+
+                that._initEditForm_step3(that._currentEditID); //reload edit form                       
+                that.editRecordType(is_inline);
+            };
+            btns[window.hWin.HR('Cancel')] = function(){
+                $dlg.dialog('close');
+            };
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, btns, 
+                {title:'Data has been modified', yes:window.hWin.HR('Save changes'), ok: window.hWin.HR('Drop changes'), cancel:window.hWin.HR('Cancel')},
+                {default_palette_class: 'ui-heurist-populate'});
+
+            return;
         }
         
         if( is_inline ){
