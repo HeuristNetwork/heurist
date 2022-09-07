@@ -73,9 +73,10 @@ function onPageInit(success) //callback function of hAPI initialization
         //create RuleSets builders in case there is parameter 'rules'
         if(!window.hWin.HEURIST4.util.isempty(rules)){
 
-            if(!window.hWin.HEURIST4.util.isArray(rules)) rules = $.parseJSON(rules);
+            rules = window.hWin.HEURIST4.util.isJSON(rules);
+            //if(!window.hWin.HEURIST4.util.isArray(rules)) rules = $.parseJSON(rules);
 
-            if(rules.length>0){
+            if(rules!==false && rules.length>0){
                 var i;
                 for(i=0; i<rules.length; i++){
 

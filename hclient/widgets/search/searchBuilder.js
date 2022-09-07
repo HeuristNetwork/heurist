@@ -704,8 +704,9 @@ $.widget( "heurist.searchBuilder", {
     {
         this._doCompose();        
         
-        this.pnl_Items.children('div:not(.btn_field_add, #sortby_accordion)').remove();
+        this.pnl_Items.children('div:not(.btn_field_add, #sortby_accordion, #ruleset_accordion)').remove();
         this.sortbySection.find('#sortby_body').children('div:not(.btn_field_add)').remove();
+        this.rulesetSection.find("#svs_Rules").val('');
         this.field_array = [];
         this.sort_array = [];
         this.adjustDimension();
