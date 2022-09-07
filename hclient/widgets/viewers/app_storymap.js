@@ -554,7 +554,7 @@ $.widget( "heurist.app_storymap", {
             
             var request;
             
-            let DT_STORY_ANIMATION = $Db.getLocalID('dty', '2-1090'); //configuration field for animation
+            let DT_STORY_ANIMATION = $Db.getLocalID('dty', '2-1090'); //configuration field for animation and style
 
             if(this.options.storyFields.length>0){
                 //search for story fields for given record
@@ -1429,11 +1429,21 @@ console.log('>sctop '+ele.scrollTop());
         
         if(window.hWin.HEURIST4.util.isnull(this._L)) this._L = mapwidget.getLeaflet();
         
+        let DT_STORY_ANIMATION = $Db.getLocalID('dty', '2-1090');
+        var record = this._resultset.getRecord(recID);
+        var anime = this._resultset.fld(record, DT_STORY_ANIMATION);
+
+        
+        var default_story_element_style = 
+        window.hWin.HEURIST4.util.isempty(anime)
+                ?{"stroke":"1","color":"#00009b","fill":"1","fillColor":"#0000fa", "fillOpacity":"0.8"}
+                :null;
+        
         mapwidget.isMarkerClusterEnabled = false;
         this._nativelayer_id = mapwidget.addGeoJson(
             {geojson_data: that._cache_story_places[this._currentElementID]['geojson'],
                 timeline_data: null, //that._cache_story_places[this._currentElementID]['timeline'],
-                //layer_style: layer_style,
+                layer_style: default_story_element_style,
                 //popup_template: layer_popup_template,
                 dataset_name: 'Story Map',
                 preserveViewport: true });
@@ -1446,10 +1456,6 @@ console.log('>sctop '+ele.scrollTop());
         
         // json to describe animation
         // [{scope:begin|trans|end|all, range:0~n, actions:[{ action: duration: , steps:},..]},....] 
-
-        let DT_STORY_ANIMATION = $Db.getLocalID('dty', '2-1090');
-        var record = this._resultset.getRecord(recID);
-        var anime = this._resultset.fld(record, DT_STORY_ANIMATION);
 
 //console.log('Animation '+anime);        
 
