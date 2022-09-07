@@ -1749,9 +1749,12 @@ function downloadFileReferences($system, $ids){
 
     rewind($fd);
     $output = stream_get_contents($fd);
+    $len = strlen($output);
     fclose($fd);
 
-    header('Content-Length: ' . strlen($output));
+    if($len>0){
+        header('Content-Length: ' . $len);   
+    }
     exit($output);
 }
 
