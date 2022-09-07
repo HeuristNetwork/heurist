@@ -50,7 +50,9 @@ $.widget( "heurist.app_timemap", {
         onMapInit: null,   //event triggered when map is fully loaded/inited
         
         custom_links: null,  //links to custom css and scripts to be injected into mao iframe
-        current_search_filter: null  //additional filter for current search result
+        current_search_filter: null,  //additional filter for current search result
+        
+        init_completed: false   //flag to be set to true on full widget initializtion
     },
 
     _events: null,
@@ -419,6 +421,7 @@ console.log(re);
                     });
                 
                     this.is_map_inited = true;
+                    this.options.init_completed = true;
                     
                     if($.isFunction(this.options.onMapInit)){
                         this.options.onMapInit.call();
@@ -437,6 +440,7 @@ console.log(re);
             }else{
                 //google to remove
                 this.is_map_inited = true;
+                this.options.init_completed = true;
                 
                 mapping.load( null, //mapdataset,
                     this.options.selection,  //array of record ids

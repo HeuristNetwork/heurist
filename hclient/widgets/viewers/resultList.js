@@ -115,7 +115,9 @@ $.widget( "heurist.resultList", {
 		blog_result_list: false,    //whether the result list is used for blog records, limiting pagesize if it is
 
         auto_select_first: false,   //automatically select first record within result list
-        placeholder_text: null      //text to display while no recordset is loaded
+        placeholder_text: null,      //text to display while no recordset is loaded
+        
+        init_completed: false   //flag to be set to true on full widget initializtion
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -375,7 +377,7 @@ $.widget( "heurist.resultList", {
                     that._renderPagesNavigator();
                     that._renderSearchInfoMsg(recset);
                     
-
+                    that.options.init_completed = true;
                 }
                 else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
 
@@ -451,8 +453,13 @@ $.widget( "heurist.resultList", {
                         source:'init', search_realm: this.options.search_realm };
             window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
             
-        }else if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)){
-            this.div_content.html(this.options.placeholder_text);
+        }else{
+            
+             if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)){
+                this.div_content.html(this.options.placeholder_text);
+             }
+             
+             this.options.init_completed = true;
         }    
     }, //end _create
     

@@ -276,6 +276,7 @@ function _dout(msg){
 
 // global 
 var DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE, TRM_NO, TRM_NO_OLD;
+var timeout_count = 0;
 
 //
 // Inits page for publication version  
@@ -379,7 +380,7 @@ function initMainMenu( afterInitMainMenu ){
     
     var weblang = window.hWin.HEURIST4.util.getUrlParameter('weblang');
 
-console.log(weblang);
+//console.log(weblang);
 
     var topmenu = $('#main-menu');
 
@@ -405,20 +406,10 @@ console.log(weblang);
 //
 // Loads content of specified record to #main-content and inits all widgets 
 // pageid    - record id to be loaded 
-// eventdata - event to be triggered after page load (to perform intial search)
+// eventdata - data to be passed to afterPageLoad (to perform intial search) - it may be call from another page
 //
 function loadPageContent(pageid, eventdata){
     _dout('loadPageContent '+pageid);
-    /* @todo
-    var args = null; //arguments that will be passed to afterPageLoad
-    
-    if(typeof pageid==='string' && pageid.indexOf('-')>0){
-        args = pageid.split('-');
-        pageid = args[0];
-    }else{
-        args = [pageid];
-    }
-    */
     
     if(pageid>0){
         //window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
@@ -475,6 +466,7 @@ if($website_custom_css!=null){
                     page_target.css({'min-height':page_target.parent().height()-page_footer.height()-10 });
                 } 
 
+                timeout_count = 0;
                 afterPageLoad( document, pageid, eventdata); //execute custom script and custom css, assign page title 
             }        
 
@@ -504,7 +496,6 @@ if($website_custom_css!=null){
                                }
                                //res[DT_NAME] = res[DT_NAME]
                                //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE]
-//console.log(res);                           
                                page_cache[pageid] = res;
                                __loadPageContent();
                            }else if(pageid!=home_page_record_id){ //load home page by default
@@ -539,8 +530,6 @@ function assignPageTitle(pageid){
           page_cache[pageid][DT_CMS_PAGETITLE]!=TRM_NO && page_cache[pageid][DT_CMS_PAGETITLE]!=TRM_NO_OLD));
     var title_container = $('#main-pagetitle');
     
-//console.log( pagetitle + '  ' + page_cache[pageid][DT_CMS_PAGETITLE]);    
-    
     if(!window.hWin.HEURIST4.util.isempty(pagetitle)  && title_container.length>0 && is_show_pagetitle)
     {
         title_container.html( '<h2 style="margin:0px">'+pagetitle+'</h2>' ).show();
@@ -563,10 +552,23 @@ function assignPageTitle(pageid){
 // 3. Adds listeners for all "a" elements with href="pageid" for intepage website links
 // 4. Adds global listerner for ON_REC_SEARCHSTART and ON_REC_SELECT for interpage widget links
 //
-// args - are arguments to be passed to custom javascript function - first element of array is pageid
+// eventdata - are arguments to be passed to custom javascript function
+//             this object will be extented with url_params from current page url
 //
 function afterPageLoad(document, pageid, eventdata){
 
+    //waiting till all widgets are inited
+    var is_inited = layoutMgr.layoutCheckWidgets();
+    if (is_inited===false) {
+        timeout_count++;
+        if(timeout_count<100){
+            setTimeout(function(){ afterPageLoad(document, pageid, eventdata) },500);
+            return;
+        }else{
+            window.hWin.HEURIST4.msg.showMsgErr('Some widgets on this page may not inited properly');
+        }
+    }
+    
     _dout('afterPageLoad');
 
     assignPageTitle(pageid);
@@ -606,6 +608,20 @@ function afterPageLoad(document, pageid, eventdata){
     }
     previous_page_id = pageid;
     
+    //pass url params to custom javascript
+    var params = window.hWin.HEURIST4.util.getUrlParams(location.href);
+    params['db'] = window.hWin.HAPI4.database;
+    if(!eventdata) eventdata = {};
+    eventdata['url_params'] = params;
+    
+/* debug    
+    if(false && eventdata['url_params']['selected']>0){
+        $(document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+            {   selection:[eventdata['url_params']['selected']], 
+                source:'cms_page', 
+                search_realm:'search_group_1'});
+    }
+*/    
     
     //execute custom javascript per loaded page =========================
     if(DT_CMS_SCRIPT>0){
@@ -620,7 +636,7 @@ function afterPageLoad(document, pageid, eventdata){
                 var script = document.createElement('script');
                 script.type = 'text/javascript';
                 script.innerHTML = 'function '+func_name 
-                +'(document, pageid){\n'
+                +'(document, pageid, eventdata){\n'
                 //+' console.log("run script for '+pageid+'");\n'
                 +'try{\n' + script_code + '\n}catch(e){}}';
                 //s.src = "http://somedomain.com/somescript";
@@ -693,7 +709,6 @@ function afterPageLoad(document, pageid, eventdata){
         var href = $(link).attr('href');
         if (href && href!='#') 
         {
-//console.log(href);         
             var pageid = 0;
             if(  (href.indexOf(window.hWin.HAPI4.baseURL)===0 || href[0] == '?' 
                 || href.indexOf('../heurist/?')===0  || href.indexOf('./?')===0)
@@ -747,7 +762,7 @@ function afterPageLoad(document, pageid, eventdata){
     //_dout('MOBILE '+ele.find('a.extern').length);
     
     //Execute event
-    if(eventdata){
+    if(eventdata && eventdata.event_type){
         if(eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART 
             || eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SELECT){
             window.hWin.HAPI4.RecordSearch.doSearch( this, eventdata );
@@ -756,7 +771,7 @@ function afterPageLoad(document, pageid, eventdata){
         }
     }
     
-//console.log('init event listner');        
+    // search on different page  data.search_page!=current_page_id
     $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
             +' '+window.hWin.HAPI4.Event.ON_REC_SELECT, function(e, data) {        
                 
@@ -777,9 +792,8 @@ function afterPageLoad(document, pageid, eventdata){
                         }
                     }
                     
-//console.log(data);               
                     data.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART; //e.type;
-                    loadPageContent(new_pageid, data);
+                    loadPageContent(new_pageid, data); //eventdata
                 }
                 
             });
@@ -1053,6 +1067,11 @@ if($website_custom_css!=null){
 <?php
 // javascript from field DT_CMS_SCRIPT of home record 
 if($website_custom_javascript!=null){
+    
+    //pass url params to custom javascript
+    //var params = window.hWin.HEURIST4.util.getUrlParams(location.href);
+    //eventdata = {url_params:params};
+    
     print '<script>function afterPageLoad'.$home_page_on_init.'(document, pageid){'."\n";
     //print 'console.log("run script for HOME PAGE");'."\n";
     print "try{\n".$website_custom_javascript."\n}catch(e){}}</script>";

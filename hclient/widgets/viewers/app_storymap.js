@@ -49,8 +49,8 @@ $.widget( "heurist.app_storymap", {
 
         // timemap parameters
         keepCurrentTime: true, //keep current time on story change and load appropriate element
-        use_internal_timemap: false,
-        mapDocumentID: null, //map document to be loaded (3-1019)
+        //NOT USED use_internal_timemap: false, 
+        //NOT USED mapDocumentID: null, //map document to be loaded (3-1019)
         
         zoomAnimationTime: 5000 //default value is 5000ms, it can be overwritten by animation parameters per story element
         
@@ -64,6 +64,7 @@ $.widget( "heurist.app_storymap", {
         , markerStyle: null   // 
         , storyActions: null  // zoom_in, zoom_out, follow_path, ant_path, fade_out, bounce, highlight, show_report
         
+        , init_completed: false   //flag to be set to true on full widget initializtion
     },
 
     _resultset: null, // current story list - story elements
@@ -93,6 +94,8 @@ $.widget( "heurist.app_storymap", {
     
     _expected_onScroll_timeout: 0,
     _expected_onScroll: 0,
+    
+    _timeout_count:0,
 
     // the constructor
     _create: function() {
@@ -172,8 +175,8 @@ $.widget( "heurist.app_storymap", {
             console.log('onScroll');
         });*/
         this._resultList.resultList('applyViewMode', 'record_content', true);
-                
-        
+          
+          
         this._tabs = this.element.find('.ui-tabs:first');
         if(this._tabs.length>0 && this._tabs.tabs('instance')){  //TAB VIEW
             
@@ -239,7 +242,8 @@ $.widget( "heurist.app_storymap", {
             this._on(this.pnlStory.find('#btn-next'),{click:function(){ this._onNavigate(true); }});    
                 
             this._resultList.hide();
-        }else{ 
+        }
+        else{ 
             //vertical
             
             if(this.options.reportOverviewMode=='header'){
@@ -266,8 +270,51 @@ $.widget( "heurist.app_storymap", {
         }else if ($(".header"+that.element.attr('id')).length===0){
             this.framecontent.css('top', 0);
         }*/
-
-        if(this.options.storyRecordID){ //set as option
+        
+        //find linked mapping
+        if(this.options.map_widget_id){
+            this._mapping = $('#'+this.options.map_widget_id);
+        }
+        
+        this._initCompleted();
+        
+    }, //end _create
+    
+    
+    
+    //
+    // It is called after associated map init
+    // it init global listeners
+    //
+    _initCompleted: function(){
+        
+        var that = this;
+        
+        if(this._mapping){
+            
+            
+            if($.isFunction(this._mapping.app_timemap) && this._mapping.app_timemap('instance')){
+                //widget inited
+                if(!this._mapping.app_timemap('isMapInited')){
+                    this._mapping.app_timemap('option','onMapInit', function(){
+                        that._initCompleted();
+                    });
+                    return;
+                }
+        
+            }else{
+                
+                this._timeout_count++;
+                if(this._timeout_count<100){
+                    setTimeout(function(){ that._initCompleted(); },200);
+                    return;
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr('Mapping widget for story map is not inited properly');
+                }
+            }
+        }
+        
+        if(this.options.storyRecordID){ //story is fixed and set as an option
             this._checkForStory( this.options.storyRecordID, true );
         }else{
             //take from selected result list
@@ -310,8 +357,8 @@ $.widget( "heurist.app_storymap", {
             });
         }
         
-        
-    }, //end _create
+        this.options.init_completed = true;
+    },
 
     //
     //
@@ -323,6 +370,16 @@ $.widget( "heurist.app_storymap", {
         }
     },
     
+    _setOption: function( key, value ) {
+        if(key=='storyRecordID'){
+            this.options.storyRecordID = value;
+            if(value>0){
+                this._checkForStory( this.options.storyRecordID, true );
+            }
+        }else{
+            this._super( key, value );
+        }
+    },
     
     //
     //
@@ -600,12 +657,6 @@ $.widget( "heurist.app_storymap", {
     //
     _startNewStory: function(recID){
         
-        //find linked mapping
-        if(this.options.map_widget_id){
-            this._mapping = $('#'+this.options.map_widget_id);
-        }
-            
-
         //remove previous story layer
         if(this._mapping){
             var mapwidget = this._mapping.app_timemap('getMapping');
@@ -796,27 +847,14 @@ console.log('>sctop '+ele.scrollTop());
     },
 
     //
-    //
+    // show all elements on map for initial state
     //        
     updateInitialMap: function( recset ){
         
+        if(!this._mapping) return; //there is not associated map widget
+
         var that = this;
         
-        //find linked mapping
-        if(this.options.map_widget_id){
-            this._mapping = $('#'+this.options.map_widget_id);
-        }
-        
-        if(!this._mapping) return; //there is not associated map widget
-        
-        if(!this._mapping.app_timemap('isMapInited')){
-                
-            this._mapping.app_timemap('option','onMapInit', function(){
-                that.updateInitialMap( recset );
-            });
-            return;
-        }
-
         var mapwidget = this._mapping.app_timemap('getMapping');
         
         if(!this._mapping_onselect){ //assign event listener

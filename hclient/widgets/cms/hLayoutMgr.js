@@ -402,6 +402,8 @@ function hLayoutMgr(){
             if($.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded            
 
                 container[app.widgetname]( layout.options );   //call function
+                
+                container.attr('data-widgetname',app.widgetname);
 
             }else{
 
@@ -416,6 +418,8 @@ function hLayoutMgr(){
             }
 
         }
+        
+
     }
 
     //
@@ -963,6 +967,28 @@ function hLayoutMgr(){
         
         prepareTemplate: function(layout, callback){
             _prepareTemplate(layout, callback);
+        },
+        
+        
+        //
+        // check that all widgets are inited completely
+        //
+        layoutCheckWidgets: function(){
+            
+            var widgets = body.find('div.heurist-widget');
+            var are_all_widgets_inited = true;
+            
+            $.each(widgets, function(i, item){
+                var widgetname = $(item).attr('data-widgetname');
+                if(widgetname){
+                    var is_inited = $(item)[widgetname]('option', 'init_completed');
+                    if(is_inited===false){
+                        are_all_widgets_inited = false;
+                        return false;
+                    }
+                }
+            });        
+            return are_all_widgets_inited;
         }
         
         
