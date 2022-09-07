@@ -419,7 +419,9 @@ function loadPageContent(pageid, eventdata){
         //_dout('load page  '+pageid+'   '+page_footer.length);              
         
         var supp_options = {rec_ID:home_page_record_id, 
-            heurist_resultListExt:{record_with_custom_styles: home_page_record_id}};
+            heurist_resultListExt:{record_with_custom_styles: home_page_record_id},
+            heurist_Navigation:{aftermenuselect: initLinksAndImages}
+        };
         
 
 <?php        
@@ -699,6 +701,56 @@ function afterPageLoad(document, pageid, eventdata){
         
     }
     
+    initLinksAndImages();
+
+    //var ele = $('#mobilemenu');
+    //_dout('MOBILE '+ele.find('a.extern').length);
+    
+    //Execute event - this search has been inited from different page
+    if(eventdata && eventdata.event_type){
+        if(eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART 
+            || eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SELECT){
+            window.hWin.HAPI4.RecordSearch.doSearch( this, eventdata );
+        }else{
+            $(document).trigger(eventdata.event_type, eventdata);  //for select  
+        }
+    }
+    
+    // Init search on different page  data.search_page!=current_page_id
+    $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
+            +' '+window.hWin.HAPI4.Event.ON_REC_SELECT, function(e, data) {        
+                
+                if(data && data.search_page>0 && data.search_page!=current_page_id){
+                    
+                    var new_pageid = data.search_page;
+                    data.search_page = null
+                    
+                    if(e.type==window.hWin.HAPI4.Event.ON_REC_SELECT){
+                        if($.isArray(data.selection) && data.selection.length>0){
+                            //convert SELECT to SEARCHSTART
+                            data = {detail:'ids', neadall:1, w:'a',
+                                 q:'ids:'+data.selection.join(','),
+                                 search_realm: data.search_realm};
+                            
+                        }else{
+                            return; //ignore empty selection
+                        }
+                    }
+                    
+                    data.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART; //e.type;
+                    loadPageContent(new_pageid, data); //eventdata
+                }
+                
+            });
+        
+    
+}
+
+//
+//
+//
+function initLinksAndImages(){   
+
     
     // create internal links 
     //find all link elements for loading another page and define onclick handler - loadPageContent
@@ -758,46 +810,6 @@ function afterPageLoad(document, pageid, eventdata){
         }
     });
 
-    //var ele = $('#mobilemenu');
-    //_dout('MOBILE '+ele.find('a.extern').length);
-    
-    //Execute event
-    if(eventdata && eventdata.event_type){
-        if(eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART 
-            || eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SELECT){
-            window.hWin.HAPI4.RecordSearch.doSearch( this, eventdata );
-        }else{
-            $(document).trigger(eventdata.event_type, eventdata);  //for select  
-        }
-    }
-    
-    // search on different page  data.search_page!=current_page_id
-    $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
-            +' '+window.hWin.HAPI4.Event.ON_REC_SELECT, function(e, data) {        
-                
-                if(data && data.search_page>0 && data.search_page!=current_page_id){
-                    
-                    var new_pageid = data.search_page;
-                    data.search_page = null
-                    
-                    if(e.type==window.hWin.HAPI4.Event.ON_REC_SELECT){
-                        if($.isArray(data.selection) && data.selection.length>0){
-                            //convert SELECT to SEARCHSTART
-                            data = {detail:'ids', neadall:1, w:'a',
-                                 q:'ids:'+data.selection.join(','),
-                                 search_realm: data.search_realm};
-                            
-                        }else{
-                            return; //ignore empty selection
-                        }
-                    }
-                    
-                    data.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART; //e.type;
-                    loadPageContent(new_pageid, data); //eventdata
-                }
-                
-            });
-        
     
 }
 

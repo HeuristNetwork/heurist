@@ -24,7 +24,7 @@ $.widget( "heurist.navigation", {
        menu_recIDs:[],  //top level menu records
        main_menu: false, //search for RT_CMS_HOME as root
        orientation: 'horizontal', //vertical or treeview
-       target: 'inline', // or popup 
+       target: 'inline', // inline (#page-content) or poup or target element id
        use_next_level: false,  //if top level consists of the single entry use next level of menues
        onmenuselect: null,   //for cms edit mode it performs special behavior
        aftermenuselect: null,
@@ -568,7 +568,8 @@ $.widget( "heurist.navigation", {
                 }
 
 
-            }else{
+            }
+            else{
 
                 var page_target = '#main-content';   
                 
