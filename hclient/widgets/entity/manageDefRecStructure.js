@@ -352,13 +352,16 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             
             click: function(event, data){ // navigate to field, and close formlet if already open
 
+                var ele = $(event.originalEvent.target);
+
+                if(ele.hasClass('ui-icon') || ele.attr('data-action') == 'delete'){
+                    return;
+                }
+
                 window.hWin.HEURIST4.util.stopEvent(event);
 
-                var ele = $(event.target);
-                if(!ele.hasClass('ui-icon')){
-                    if(data.node.isActive()){
-                        that._saveEditAndClose(null, 'close'); //close editor on second click
-                    }
+                if(data.node.isActive()){
+                    that._saveEditAndClose(null, 'close'); //close editor on second click
                 }
 
                 if(data.node.key < 1){
