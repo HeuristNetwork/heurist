@@ -2115,7 +2115,11 @@ $.widget( "heurist.search_faceted", {
                                 $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values) );
                             }
 
-                            this._createOption( facet_index, 0, {title:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
+                            if(term && term.hasOwnProperty('count') && term.count == 0){
+                                this._createOption( facet_index, 0, {title:window.hWin.HR('no values'), value:null, count:0} ).appendTo($sel);
+                            }else{
+                                this._createOption( facet_index, 0, {title:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
+                            }
                             this.__drawData(term, 0, $sel, facet_index, field);
 
                             if(field.selectedvalue && field.selectedvalue.value){
@@ -2946,7 +2950,12 @@ $.widget( "heurist.search_faceted", {
         var iscurrent = false;
         
         var currval = field.selectedvalue?field.selectedvalue.value:null;
-        
+        var hideEle = false;
+
+        if(cterm.count != 'reset' && cterm.count <= 0){
+            hideEle = true;
+        }
+
         var f_link = $("<a>",{href:'#', facet_index:facet_index, 
                         facet_value: (cterm.count=='reset')?'':cterm.value, 
                         facet_label: cterm.title, 
@@ -3018,59 +3027,63 @@ $.widget( "heurist.search_faceted", {
         
         if( field.multisel || !iscurrent || cterm.count=='reset'){ 
 
-        var that = this;
+            var that = this;
 
-        this._on( f_link, {
-            click: function(event) { 
+            this._on( f_link, {
+                click: function(event) { 
 
-                var link = $(event.target).parents('.facet_link');
-                var facet_index = Number(link.attr('facet_index'));
-                var value = link.attr('facet_value');                  
-                var label = link.attr('facet_label');                  
-                var step = link.attr('step');
-                
-                var field = this.options.params.facets[facet_index];
-                
-                if(window.hWin.HEURIST4.util.isempty(value)){
-                    value = '';
-                    field.selectedvalue = null;
-                }else if(field.multisel && field.selectedvalue!=null){
+                    var link = $(event.target).parents('.facet_link');
+                    var facet_index = Number(link.attr('facet_index'));
+                    var value = link.attr('facet_value');                  
+                    var label = link.attr('facet_label');                  
+                    var step = link.attr('step');
                     
-                    var vals = field.selectedvalue.value.split(',');
-                    var k = window.hWin.HEURIST4.util.findArrayIndex(value, vals);
-                    if(k<0){ //add
-                        vals.push(value);
-                    }else{ //remove
-                        vals.splice(k,1);
-                    }
-                    if(value.length==0){
+                    var field = this.options.params.facets[facet_index];
+                    
+                    if(window.hWin.HEURIST4.util.isempty(value)){
+                        value = '';
                         field.selectedvalue = null;
+                    }else if(field.multisel && field.selectedvalue!=null){
+                        
+                        var vals = field.selectedvalue.value.split(',');
+                        var k = window.hWin.HEURIST4.util.findArrayIndex(value, vals);
+                        if(k<0){ //add
+                            vals.push(value);
+                        }else{ //remove
+                            vals.splice(k,1);
+                        }
+                        if(value.length==0){
+                            field.selectedvalue = null;
+                        }else{
+                            field.selectedvalue.value = vals.join(',');    
+                        }
                     }else{
-                        field.selectedvalue.value = vals.join(',');    
+                        field.selectedvalue = {title:label, value:value, step:step};                    
                     }
-                }else{
-                    field.selectedvalue = {title:label, value:value, step:step};                    
+                    
+                    
+                    // assign value to edit_inpout - to remove
+                    //var varid = field['var'];
+                    //$( this._input_fields[ '$X'+varid ] ).editing_input('setValue', value);
+                    
+                    // make link in bold
+                    //$("#fv_"+varid).find('.facets div a').css('font-weight','normal');
+                    //$("#fv_"+varid).find('.facet_link').css({'font-weight':'normal', 'backgground-color':'none'}); 
+                    //link.css({'font-weight':'bold', 'backgground-color':'gray'});
+                    
+                    // this._refresh();
+
+                    that.doSearch();
+                    
+                    return false;
                 }
-                
-                
-                // assign value to edit_inpout - to remove
-                //var varid = field['var'];
-                //$( this._input_fields[ '$X'+varid ] ).editing_input('setValue', value);
-                
-                // make link in bold
-                //$("#fv_"+varid).find('.facets div a').css('font-weight','normal');
-                //$("#fv_"+varid).find('.facet_link').css({'font-weight':'normal', 'backgground-color':'none'}); 
-                //link.css({'font-weight':'bold', 'backgground-color':'gray'});
-                
-                // this._refresh();
-
-                that.doSearch();
-                
-                return false;
-            }
-        });
-
+            });
         }
+
+        if(hideEle){
+            f_link.hide();
+        }
+
         return f_link;
     },
     
