@@ -1181,16 +1181,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }//!isOpenAready
 
         if(this.options.edit_structure && this.options.isdialog && this._as_dialog != null && this.options.parent_dialog != null){ // move popup position
-
-            var parent_pos = this.options.parent_dialog.position();
-            parent_pos['top'] += 40;
-            parent_pos['left'] += 25;
-
-            this._as_dialog.parent().css({
-                top: parent_pos['top'] + 'px', 
-                left: parent_pos['left'] + 'px'
-            });
+            this._as_dialog.dialog('option', 'position', {my: 'left+25 top+40', at: 'left top', of: this.options.parent_dialog});
         }
+
         this._initEditForm_step3(recID); 
     },
     
