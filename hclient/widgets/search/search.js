@@ -239,21 +239,6 @@ $.widget( "heurist.search", {
                     return;
                 }
 
-                /* Ian wants the popup to open regardless
-                var newline_matches = org_val.match(/\r|\n/); // check for newline characters
-
-                this.input_search.css('white-space', 'nowrap');
-                var nw_scrollWidth = this.input_search[0].scrollWidth;
-                var nw_width = this.input_search.width();                
-                this.input_search.css('white-space', '');
-
-                if(window.hWin.HEURIST4.util.isempty(org_val) 
-                    || (window.hWin.HEURIST4.util.isempty(newline_matches) 
-                        && (nw_scrollWidth <= nw_width))){ 
-                    return;
-                }
-                */
-
                 var $dlg;
                 var $help_link = this.div_search_input.find('#search_help_link').clone();
 
@@ -265,8 +250,10 @@ $.widget( "heurist.search", {
                 + '<br>giving a tag (generally a field ID, field name or special indicator) followed by a colon ( : ) then a '
                 + '<br>value or values. Tags and values are generally enclosed in double quotes ( " ).'
                 + '<br>Values may be repeated within a specification as in [{"t":"107,95"},{"f:36":"1275,3426"}]' 
+                + '<br><br>To run the search click \'Search\' or press the \'Enter\' key while typing in the area below,'
+                + '<br>to add a new line hold the \'Control\' (or \'Command\' for MacOS) key and press the \'Enter\' key.'
                 +'</div><br>'
-                + '<textarea style="padding: 5px; margin: 5px 0px; height: 100px; width: 500px;" class="text ui-widget-content ui-corner-all">' 
+                + '<textarea style="padding: 5px; margin: 5px 0px; height: 100px; width: 500px; font-size: 13px" class="text ui-widget-content ui-corner-all">' 
                     + org_val 
                 + '</textarea><br><div id="search_help_container"></div>';
 
@@ -276,22 +263,44 @@ $.widget( "heurist.search", {
                         var new_val = $dlg.find('textarea').val();
                         if(org_val != new_val){
 
-                            // Update value
-                            that.input_search.val(new_val);
-
+                            // Update value, remove trailing newlines and spaces
+                            that.input_search.val(new_val.trim());
                             // Perform search
                             that._doSearch();
                         }
 
                         $dlg.dialog('close');
 
-                    }, {yes: 'Search', no: 'Cancel'}, {title: 'Search filter', default_palette_class: 'ui-heurist-explore'}
+                    }, {yes: 'Search', no: 'Cancel'}, {title: 'Search filter', default_palette_class: 'ui-heurist-explore', position: {my: 'left top', at: 'left bottom', of: this.input_search}}
                 );
 
                 $dlg.find('#search_help_container').append($help_link);
 
                 $dlg.find('#search_help_link').on('click', function(){ window.open('context_help/advanced_search.html','_blank'); });
-                $dlg.find('textarea').focus().prop('selectionStart', this.input_search.prop('selectionStart')); // place text cursor at selected location
+                $dlg.find('textarea').focus().prop('selectionStart', this.input_search.prop('selectionStart')) // place text cursor at selected location
+                                    .on('keydown', function(event){ // change 'Enter' key function
+                                        //var $ele = $(this);
+                                        if(event.keyCode == 10 || event.keyCode == 13){ // 'Enter' key
+                                            if(event.ctrlKey || event.metaKey || event.shiftKey){ // 'Control' | 'Command' | 'Shift' key
+                                                // Add newline
+                                                var position = this.selectionEnd;
+                                                var new_val = this.value.substring(0, position) + '\r\n' + this.value.substring(position);
+                                                this.value = new_val; // $ele.val(new_val);
+                                            }else{
+                                                // Run search
+                                                var new_val = $dlg.find('textarea').val();
+                                                if(org_val != new_val){
+
+                                                    // Update value, remove trailing newlines and spaces
+                                                    that.input_search.val(new_val.trim());
+                                                    // Perform search
+                                                    that._doSearch();
+                                                }
+
+                                                $dlg.dialog('close');
+                                            }
+                                        }
+                                    });
             }});
         }
 
