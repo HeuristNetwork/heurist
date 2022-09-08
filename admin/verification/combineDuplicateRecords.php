@@ -272,8 +272,9 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 $is_master = ($record['rec_ID']== $master_rec_id);
                                 print '<tr'. ($is_master && !$finished_merge ? ' style="background-color: #EEE;" ': '').' id="row'.$record['rec_ID'].'">';
                                 $checkKeep =  $is_master? "checked" : "";
+                                $checkDup = !$is_master && count($records) < 5 ? "checked" : "";
                                 $disableDup = $is_master? "none" : "block";
-                                if (!$finished_merge) print '<td><input type="checkbox" name="duplicate[]" '.
+                                if (!$finished_merge) print '<td><input type="checkbox" name="duplicate[]" '.$checkDup.
                                     ' value="'.$record['rec_ID'].
                                     '" title="Check to mark this as a duplicate record for deletion"'.
                                     '  id="duplicate'.$record['rec_ID'].'" style="display:'.$disableDup.
@@ -420,10 +421,10 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     $removeIndices = array();
                                     if (!$is_master && @$master_details[$rd_type]){
                                         
-                                        $master_details =  $master_details[$rd_type];
+                                        $cur_master_detail =  $master_details[$rd_type];
                                         foreach ($detail as $i => $d_detail){
                                             
-                                            foreach ($master_details as $m_detail){
+                                            foreach ($cur_master_detail as $m_detail){
                                                 
                                                 if($m_detail['dtl_Geo']){
                                                     if(trim($d_detail['dtl_Geo']) == trim($m_detail['dtl_Geo'])){
