@@ -150,8 +150,17 @@ function editCMS2(website_document){
             
             if(isCMS_NewWebsite){
                 isCMS_NewWebsite = false;
-                window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
-                            +'hclient/widgets/cms/editCMS_NewSiteMsg.html');
+
+                var $dlg;
+                var button = {};
+                button[window.hWin.HR('OK')] = function(){
+                    var search_param = window.location.search.replace('&newlycreated', '');
+                    window.history.pushState({}, document.title, window.location.pathname + search_param);
+                    $dlg.dialog('close');
+                };
+
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
+                            +'hclient/widgets/cms/editCMS_NewSiteMsg.html', button);
             }
             
             /*window.onbeforeunload = _onbeforeunload;if(window.parent && window.parent.document.getElementById('web_preview')){
@@ -192,11 +201,9 @@ function editCMS2(website_document){
                             +'<div id="treeWebSite" style="top:43px;" class="ent_wrapper ui-cms-mainmenu">'
                                 +'<div class="toolbarWebSite ent_header" style="height:85px;padding-top:15px;">'
                                 
-                                    +'<a href="#" class="btn-website-edit" style="padding-left:20px">'
-                                        +'<span class="ui-icon ui-icon-pencil"/>&nbsp;Configure website layout</a>'
+                                    +'<span class="btn-website-edit" style="font-weight:normal !important;">Edit website layout / properties</span>'
                                     +'<br>'
-                                    +'<a href="#" class="btn-website-url" style="padding:5px 20px;display:inline-block;">'
-                                        +'<span class="ui-icon" />Get website URL</a>'
+                                    +'<a href="#" class="btn-website-url" style="padding:10px;display:inline-block;">'
 
                                     +'<span style="display:block;border-top:1px solid gray;padding:4px 8px;margin:4px 0px;">'
 
@@ -216,7 +223,7 @@ function editCMS2(website_document){
                                         
                                 +'</div>'
                                 
-                                +'<div class="treeWebSite ent_content_full" style="top:115px;padding:0px 10px;"/>' //treeview - edit website menu
+                                +'<div class="treeWebSite ent_content_full" style="top:135px;padding:0px 10px;"/>' //treeview - edit website menu
                             +'</div>'
                             +'<div id="treePage" style="font-size:1em;top:43px" class="ent_wrapper">'
                             
@@ -376,7 +383,14 @@ function editCMS2(website_document){
         }
        
         _editor_panel.find('.btn-website-homepage').click(_editHomePage);
-        _editor_panel.find('.btn-website-edit').click(_editHomePageRecord);
+        if(!isWebPage){
+            _editor_panel.find('.btn-website-edit')
+                         .button({classes:{'ui-button': 'ui-button-action'}})
+                         .css({'padding':'5px','font-size':'9px','margin-left':'20px'})
+                         .click(_editHomePageRecord);
+        }else{
+            _editor_panel.find('.btn-website-edit').click(_editHomePageRecord);
+        }
         _editor_panel.find('.btn-website-addpage').click(_addNewRootMenu); // button({icon:'ui-icon-plus'}).
         _editor_panel.find('.btn-website-url').click(function(){ // save website url to clipboard
             window.hWin.HEURIST4.util.copyStringToClipboard(window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database+'&website');
@@ -1120,23 +1134,23 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             +';font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' 
             //+ ele_ID
             + (is_intreeview?'<span class="ui-icon ui-icon-menu" style="width:20px"></span>'
-                            :'<span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;"></span>')
+                            :'<span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;" title="Edit style and properties"></span>')
             + (true || is_root || is_cardinal?'':
-                ('<span data-action="drag" style="'+(false && is_intreeview?'':'display:block;')+'padding:4px" title="Drag to reposition">' //
+                ('<span data-action="drag" style="display:block;padding:4px" title="Drag to reposition">' //
                     + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"/>Drag</span>'))               
-            + '<span data-action="edit" style="'+(false && is_intreeview?'':'display:block;')+'padding:4px" title="Edit style and properties">'
+            + '<span data-action="edit" style="display:block;padding:4px" title="Edit style and properties">'
             +'<span class="ui-icon ui-icon-pencil"/>Style</span>';               
             
             if(node.data.type=='text'){
-                actionspan += '<span data-action="translate" style="'+(false && is_intreeview?'':'display:block;')+'padding:4px"><span class="ui-icon ui-icon-translate" title="Add a new translation"/>Translate</span>';
+                actionspan += '<span data-action="translate" style="display:block;padding:4px"><span class="ui-icon ui-icon-translate" title="Add a new translation"/>Translate</span>';
             }
 
             //hide element for cardinal and delete for its panes                     
             if(node.data.type!='cardinal'){
-                actionspan += '<span data-action="element" style="'+(false && is_intreeview?'':'display:block;')+'padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new element/widget"/>Insert</span>';
+                actionspan += '<span data-action="element" style="display:block;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new element/widget"/>Insert</span>';
             }
             if(!(is_root || is_cardinal)){
-                actionspan += ('<span data-action="delete" style="'+(false && is_intreeview?'':'display:block;')+'padding:4px"><span class="ui-icon ui-icon-close" title="'
+                actionspan += ('<span data-action="delete" style="display:block;padding:4px"><span class="ui-icon ui-icon-close" title="'
                     +'Remove element from layout"/>Delete</span>');
             }
 
@@ -1160,18 +1174,13 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 actionspan.insertAfter(item); //in main-content
 
                 actionspan.find('span[data-action]').hide();
-                actionspan.find('span.ui-icon-gear').click(function(event){
+                actionspan.find('span.ui-icon-gear').click(function(event){ // edit widget
 
                     var ele = $(event.target);
                     window.hWin.HEURIST4.util.stopEvent(event);
                     ele.hide();
                     
-                    if(ele.parent().hasClass('lid-actionmenu')){
-                        ele.parent().show();    
-                    }
-                    ele.parent().find('span[data-action]').show();    
-                    
-                    
+                    ele.parent().find('span[data-action="edit"]').click();
                 });
 
                 //actionspan.appendTo(body);    

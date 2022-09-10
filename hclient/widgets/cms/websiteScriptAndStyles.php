@@ -85,7 +85,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var is_show_pagetitle_main = <?php echo $show_pagetitle?'true':'false'; ?>;  //is show page title per website 
     var isCMS_active = <?php echo (@$_REQUEST['edit']?'true':'false'); ?>; //use new CMS editor and init it once
     var isCMS_InHeuristUI = <?php echo (@$_REQUEST['edit']==4 ?'true':'false'); ?>;
-    var isCMS_NewWebsite = <?php echo (@$_REQUEST['edit']==3 ?'true':'false'); ?>;
+    var isCMS_NewWebsite = <?php echo (array_key_exists('newlycreated', $_REQUEST) ?'true':'false'); ?>;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
     var is_execute_homepage_custom_javascript = false;
     var first_not_empty_page = 0;

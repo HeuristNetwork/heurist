@@ -209,10 +209,12 @@ function editCMS_Manager( options ){
         var sURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&website&id='+options.record_id;
         
         if(options.is_open_in_new_tab){ //open in new tab
-        
-            sURL = sURL + '&edit=' + (options.is_new_website?'3':'2');
+
+            sURL = sURL + '&edit=2';
+            if(options.is_new_website){
+                sURL = sURL + '&newlycreated'; // was edit=3
+            }
             window.open(sURL, '_blank');
-            
         }else {
             
             sURL = sURL + '&edit=4';
