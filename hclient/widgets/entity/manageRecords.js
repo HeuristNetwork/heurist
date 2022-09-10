@@ -5046,6 +5046,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         var $ele = this._editing.getFieldByName(field_id);
 
+        if(!$ele || $ele.length == 0){
+            return;
+        }
+
         if($ele.parents('.ui-tabs').length > 0){
             var index = $ele.parents('fieldset:first').attr('data-tabindex'); console.log(index, $ele.parents('.ui-tabs').tabs('instance'));
             $ele.parents('.ui-tabs').tabs('option', 'active', index);

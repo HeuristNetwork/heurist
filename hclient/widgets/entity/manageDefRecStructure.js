@@ -1374,6 +1374,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                                     that2._clear_title_for_separator = isSep; // clear title for separator
                                     //that2.editField( that2._open_formlet_for_recID); does not open formlet, seems to be called too early
                                     setTimeout(function(id){ that2.editField(id); }, 2000, that2._open_formlet_for_recID);
+                                }else{
+                                    setTimeout(function(id){ that.manageRecords('focusField', id); }, 2000, that2._open_formlet_for_recID);
                                 }
                             }
                             that2._show_optional = false;
