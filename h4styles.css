@@ -694,6 +694,11 @@ div .selected_last{
     height: 96px;
     opacity: 0.5;
 }
+
+.recordDiv.rl-not-logged-in .recTypeThumb{
+    top: 0px;
+}
+
 .recordDiv .recordTitle, .recordDiv .recordDescription {
     color: #666666;
     position: absolute;
@@ -729,6 +734,9 @@ div .selected_last{
     padding: 0px;
     position: relative;
 }
+.thumbs .recordDiv.rl-not-logged-in {
+    height: 134px;
+}
 
 .thumbs .recordDiv:hover {
     z-index:10;
@@ -736,8 +744,11 @@ div .selected_last{
     -webkit-box-shadow:0px 3px 8px #666;
     box-shadow:0px 3px 8px #666;
     height:158px;
-    width:134px;
+    width:132px;
     margin:6px;
+}
+.thumbs .recordDiv.rl-not-logged-in:hover {
+    height: 138px;
 }
 
 .thumbs .recordDiv .recordTitle {
@@ -760,6 +771,10 @@ div .selected_last{
     left: 3px;
     position: absolute;
     /*width: 20px;*/
+}
+.thumbs .recordDiv.rl-not-logged-in .recordIcons,
+.thumbs3 .recordDiv.rl-not-logged-in .recordIcons {
+    display: none;
 }
 
 .thumbs .recordDiv .rec_owner{
@@ -965,6 +980,12 @@ div.div-result-list-content.icons_list{
    left: 64px;
    top: 3px;
 }
+.icons .recordDiv.rl-not-logged-in .recordIcons .ui-icon-bookmark,
+.icons .recordDiv.rl-not-logged-in .recordIcons .rec_owner,
+.icons .recordDiv.rl-not-logged-in .recordIcons .rec_visibility{
+    display: none !important;
+}
+
 .icons .rt-icon{
     display: none;
 }
@@ -1016,6 +1037,9 @@ div.div-result-list-content.icons_list{
     vertical-align: middle;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+.list .recordDiv.rl-not-logged-in .recordTitle{
+    left: 46px;
 }
 .list .recordDiv.public .recordTitle {
     left: 38px;
@@ -1122,6 +1146,9 @@ div.div-result-list-content.icons_list{
     height: 212px;
     width: 178px;
 }
+.thumbs3 .recordDiv.rl-not-logged-in {
+    height: 192px;
+}
 
 .thumbs3 .recordDiv .recTypeThumb{
     height: 148px
@@ -1135,6 +1162,9 @@ div.div-result-list-content.icons_list{
     height:216px;
     width:184px;
     margin:3px;
+}
+.thumbs3 .recordDiv.rl-not-logged-in:hover{
+    height: 195px;
 }
 
 .thumbs3 .recordDiv .recordTitle {

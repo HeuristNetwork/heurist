@@ -877,12 +877,14 @@ $.widget( "heurist.resultList", {
 
         this.applyViewMode(this.options.view_mode);
 
-        if(window.hWin.HAPI4.currentUser.ugr_ID>0){
+        if(window.hWin.HAPI4.currentUser.ugr_ID > 0){
             $(this.div_toolbar).find('.logged-in-only').css('visibility','visible');
             $(this.div_content).find('.logged-in-only').css('visibility','visible');
+            $(this.div_content).find('.recordDiv').removeClass('rl-not-logged-in');
         }else{
             $(this.div_toolbar).find('.logged-in-only').css('visibility','hidden');
             $(this.div_content).find('.logged-in-only').css('visibility','hidden');
+            $(this.div_content).find('.recordDiv').addClass('rl-not-logged-in');
         }
 
         if(this._is_publication || this.options.transparent_background){
