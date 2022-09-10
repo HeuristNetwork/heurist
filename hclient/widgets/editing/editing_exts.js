@@ -829,7 +829,19 @@ function browseRecords(_editing_input, $input){
                         $(opt).attr('data-rty', item['rec_RecTypeID']);
                     });
                     
-                    function __onSelectMenu( event ){
+                    var events = {};
+                    events['onOpenMenu'] = function(){
+
+                        var ele = that.selObj.hSelect('menuWidget');
+                        ele.css('max-width', '500px');
+                        ele.find('div.ui-menu-item-wrapper').addClass('truncate');
+                        ele.find('.rt-icon').css({width:'12px',height:'12px','margin-right':'10px'});
+                        ele.find('.rt-icon2').css({'margin-right':'0px'});
+
+                        openSearchMenu(that, that.selObj, false);
+                    };
+
+                    events['onSelectMenu'] = function ( event ){
                         
                         var targetID = (event) ?$(event.target).val() :$(that.selObj).val();
                         if(!targetID) return;
@@ -869,24 +881,13 @@ function browseRecords(_editing_input, $input){
                                 $inputdiv.find('.sel_link2').show();
                             }
                         }
-                        
                     }
 
                     $inputdiv.addClass('selectmenu-parent');
                     $(that.selObj).css('max-width','300px');
-                    that.selObj = window.hWin.HEURIST4.ui.initHSelect(that.selObj, false, null,
-                        function(){ //onOpenMenu
-                            var ele = that.selObj.hSelect('menuWidget');
-                            ele.css('max-width', '500px');
-                            ele.find('div.ui-menu-item-wrapper').addClass('truncate');
-                            ele.find('.rt-icon').css({width:'12px',height:'12px','margin-right':'10px'});
-                            ele.find('.rt-icon2').css({'margin-right':'0px'});
 
-                            openSearchMenu(that, that.selObj, false);
-                        },
-                        __onSelectMenu
-                    );
-                    
+                    $(that.selObj).css('max-width','300px');
+                    that.selObj = window.hWin.HEURIST4.ui.initHSelect(that.selObj, false,null, events);
                 }else{
                     that._off($(that.selObj), 'change');    
                 }

@@ -4019,9 +4019,10 @@ console.log('onpaste');
 
                 $input.hSelect('destroy');
 
+                var events = {};
                 var performedOnce = 0;
 
-                window.hWin.HEURIST4.ui.initHSelect($input, this.options.useHtmlSelect, null, function(){ 
+                events['onOpenMenu'] = function(){ 
 
                     if(performedOnce == 0){
 
@@ -4082,7 +4083,9 @@ console.log('onpaste');
                     }
 
                     openSearchMenu(that, $input, true); // perform special function, found under editing_exts.js
-                });
+                };
+
+                window.hWin.HEURIST4.ui.initHSelect($input, this.options.useHtmlSelect, null, events);
             }
 
             var opts = $input.find('option');      

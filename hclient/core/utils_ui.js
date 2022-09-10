@@ -295,7 +295,8 @@ window.hWin.HEURIST4.ui = {
             defaultTermID =  options.defaultTermID>0?options.defaultTermID:null,
             topOptions =  options.topOptions,
             supressTermCode = options.supressTermCode,
-            useHtmlSelect  = (options.useHtmlSelect===true);
+            useHtmlSelect  = (options.useHtmlSelect===true),
+            eventHandlers = options.eventHandlers;
         
         //create selector 
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
@@ -329,23 +330,11 @@ window.hWin.HEURIST4.ui = {
                 if (data[i].key == defaultTermID || data[i].title == defaultTermID) {
                         opt.selected = true;
                 }
-                
             }
-            /*            
-            $(opt).attr('term-img', hasImage?1:0);
-            if(useIds && termID>0){
-                $(opt).attr('entity-id', termID);
-            }
-            if(termParents!=''){
-                $(opt).attr('parents', termParents);
-                $(opt).attr('term-orig', origName);  
-                $(opt).attr('term-view', termName+termCode);
-            }             
-            */
         }//for
 
         //init selectmenu
-        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect);
+        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect, null, eventHandlers);
 
         return $(selObj);
     },
@@ -702,6 +691,7 @@ window.hWin.HEURIST4.ui = {
             initial_indent    = options['initial_indent']>0?options['initial_indent']:0;
             useHtmlSelect     = options['useHtmlSelect']!==false;
             useIds            = options['useIds']===true;
+            eventHandlers     = options['eventHandlers'];
         }
         
         //var trash_id = $Db.getTrashGroupId('dtg');
@@ -973,7 +963,7 @@ window.hWin.HEURIST4.ui = {
             $(selObj).val(selectedValue);
         }
         
-        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect); 
+        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect, null, eventHandlers);
 
         return selObj;
     },
@@ -1106,9 +1096,13 @@ window.hWin.HEURIST4.ui = {
     },
     
     //
-    //  onSelectMenu - in case defined use this callback instead of trigger
+    // eventHandlers {object} - object of event handlers ('onSelectMenu', 'onOpenMenu', 'onCloseMenu')
     //
-    initHSelect: function(selObj, useHtmlSelect, apply_style, onOpenMenu, onSelectMenu){            
+    //  onSelectMenu - in case defined use this callback instead of trigger
+    //  onOpenMenu - called after selectmenu menuWidget has been created and rendered
+    //  onCloseMenu - called after selectmenu loses focus and menuWidget is hidden
+    //
+    initHSelect: function(selObj, useHtmlSelect, apply_style, eventHandlers){            
 
         //var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
         ////depth>1 || (optgroup==null && depth>0
@@ -1169,26 +1163,36 @@ window.hWin.HEURIST4.ui = {
                 selObj.hSelect("destroy"); 
             }
             
+            var onSelectMenu, onOpenMenu, onCloseMenu;
+            if($.isPlainObject(eventHandlers)){
+                if($.isFunction(eventHandlers.onOpenMenu)){
+                    onOpenMenu = eventHandlers.onOpenMenu;
+                }
+                if($.isFunction(eventHandlers.onCloseMenu)){
+                    onCloseMenu = eventHandlers.onCloseMenu;
+                }
+                if($.isFunction(eventHandlers.onSelectMenu)){
+                    onSelectMenu = eventHandlers.onSelectMenu;
+                }
+            }else if($.isFunction(eventHandlers)){
+                onOpenMenu = eventHandlers;
+            }
+            if(Object.values(arguments).length > 4){
+                onSelectMenu = arguments[4];
+            }
  
-            var menu = selObj.hSelect(       
-              { style: 'dropdown',
+            var menu = selObj.hSelect({ 
+                style: 'dropdown',
                 position: (navigator.userAgent.indexOf('Firefox')<0)?{collision: "flip"}:{},
                 appendTo: parent_ele,
-                /*positionOptions: {
-                    collision: 'none',
-                    my: "left top",
-                    at: "left bottom",
-                    offset: null
-                },*/
                 change: function( event, data ) {
  
                         selObj.val((data && data.item)?data.item.value:data);//change value for underlaying html select
-                        
-                        
-                        if($.isFunction(onSelectMenu)){
+
+                        if(onSelectMenu && $.isFunction(onSelectMenu)){
                             onSelectMenu.call(this, event);
                         }else{
-                            selObj.trigger('change');    
+                            selObj.trigger('change');
                         }
                 },
                 open: function(event, ui){
@@ -1198,13 +1202,7 @@ window.hWin.HEURIST4.ui = {
                     wmenu.width( wmenu.width()+20 ); 
                     var wmenu_div = wmenu.parent('div.ui-selectmenu-menu');
                     var pos = wmenu_div.position().top;
-                    
-/*
-console.log( '>>> ' + wmenu.parents('body').height() );
-                    var parent_body = wmenu.parents('body');
-console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );                    
-                    var bodyheight = parent_body.height()>0?parent_body.height():parent_body[0].clientHeight;
-*/                    
+
                     var bodyheight = (window.hWin?window.hWin.innerHeight:window.innerHeight);
                     
                     if(bodyheight>0 && pos+wmenu.height()>bodyheight){
@@ -1222,17 +1220,18 @@ console.log( 'clientHeight>>> ' + parent_body[0].clientHeight );
                     }
                     
                     wmenu_div.css('zIndex',69999);
-                    
-                    if($.isFunction(onOpenMenu)){
+
+                    if(onOpenMenu && $.isFunction(onOpenMenu)){
                         onOpenMenu.call(this);
                     }
-                    
-                    //calculate position
-//console.log(pos+'+'+wmenu.height()+'>'+bodyheight);
+                },
+                close: function(event, ui){
+                    if(onCloseMenu && $.isFunction(onCloseMenu)){
+                        onCloseMenu.call(this);
+                    }
                 }
-              });
-                
-                
+            });
+
             var dwidth = selObj.css('width');    
             if(!dwidth || dwidth=='0px' || (dwidth.indexOf('px')>0 && parseFloat(dwidth)<21)) dwidth = 'auto';
             

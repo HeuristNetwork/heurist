@@ -970,18 +970,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 depth_separator = ';border-top:1px gray solid';
                             }
 
-                            /* OLD way
-                            isfound = false;
-                            for (i=0;i<rt_ids.length;i++){
-                            recTypeID = rt_ids[i];
-                            if(rtOrder['levels'][recTypeID] == depth){
-                            isfound = true;
-
-                            var depth_separator = '';
-                            if(prev_depth!=depth){
-                            prev_depth = depth;
-                            depth_separator = ';border-top:1px gray solid';
-                            }*/
                             //get hierarchy
                             var hierarchy = _getHierarchy(rtOrder['fields'], field_key);
 
@@ -1788,7 +1776,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             var idx = cb.val();//attr('id').substr(8);
             if(cb.is(':checked')){
                 $('#sa_dt_'+idx).parent().show();
-                autoMapField(idx);
+                //autoMapField(idx);
             }else{
                 $('#sa_dt_'+idx).parent().hide();
             }
@@ -1883,128 +1871,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     }
 
     //
-    // Attempt to automatically loosely match fields, excat matches happen earlier
-    //
-    function autoMapField(idx){
-
-        var $select = $('#sa_dt_'+idx);
-        if($select.length == 0 || !window.hWin.HEURIST4.util.isempty($select.val())){ // check if select already has value
-            return;
-        }
-
-        var mapped_fields = [];
-        var $selected_fields = $("select[id^='sa_dt_']").filter(function(){ 
-            if($(this).val() != ''){
-                mapped_fields.push($(this).val());
-            }
-            return $(this).val() != ''; 
-        }); // retrieve selects w/ value
-
-        var $options = $select.find('option');
-        var fcol_name = imp_session['columns'][idx];
-
-        var hs_rating = 0; // highest similarity rating
-        var hs_value = 0; // option value of highest similarity rating
-
-        $.each($options, function(i, option){
-
-            if(mapped_fields.indexOf(option.value) !== -1){ // skip option
-                return true;
-            }
-
-            var rec_column_parts = option.text.split(' [');
-            var rcol_name = '';
-
-            if(rec_column_parts.length > 2){
-                for(var j = 0; j < rec_column_parts.length-1; j++){
-                    rcol_name += rec_column_parts[j];
-                }
-            }else{
-                rcol_name = rec_column_parts[0];
-            }
-
-            if(rcol_name.toLowerCase() == fcol_name.toLowerCase()){ // excat match, missed earlier
-
-                $select.val(option.value);
-
-                if($select.hSelect("instance") != undefined){
-                    $select.hSelect("refresh");
-                }
-
-                hs_value = 0;
-                hs_rating = 0;
-
-                return false;
-            }else if(fcol_name.length >= 4 || fcol_name.length == rcol_name.length){
-                // perform partial matching, based on the Sørensen–Dice Coefficient
-
-                var rcol_bigrams = [];
-                var fcol_bigrams = [];
-                var bigger_len = (rcol_name.length > fcol_name.length) ? rcol_name.length : fcol_name.length;
-
-                // Create bigrams of both column names
-                for(var i = 0; i < bigger_len; i++){
-
-                    if(i < rcol_name.length){
-                        rcol_bigrams.push(rcol_name.substring(i, i + 2).toLowerCase());
-                    }
-                    if(i < fcol_name.length){
-                        fcol_bigrams.push(fcol_name.substring(i, i + 2).toLowerCase());
-                    }
-                }
-
-                var shared_bigrams = rcol_bigrams.filter(bigram => fcol_bigrams.includes(bigram));
-                var sdc_rating = (2 * shared_bigrams.length / (rcol_bigrams.length + fcol_bigrams.length) * 100).toFixed(2);
-
-                if(sdc_rating >= 60 && sdc_rating > hs_rating){
-                    hs_rating = sdc_rating;
-                    hs_value = option.value;
-                }else if(hs_rating == 0 && fcol_name.length < rcol_name.length && rcol_name.indexOf(fcol_name) !== -1){ // check if word chunk appears
-                    hs_rating = 50;
-                    hs_value = option.value;
-                }
-            }
-        });
-
-        if(hs_value != 0 && hs_rating != 0){
-            $select.val(hs_value);
-        }
-
-        if($select.hSelect("instance") != undefined){
-            $select.hSelect("refresh");
-        }else{
-            window.hWin.HEURIST4.ui.initHSelect($select, false, null, function(){
-
-                var ele_id = $(this).attr('id');
-
-                var $widget = $('span[id="'+ ele_id +'-button"]');
-                var $menu = $('ul[id="'+ ele_id +'-menu"]');
-                var $menu_parent = $menu.parent();
-
-                // Get parent containers bottom/end
-                var div_h = parseFloat($('#divFieldMapping').css('height'));
-                var div_t = parseFloat($('#divFieldMapping').position().top);
-                var div_b = div_h+div_t;
-
-                // Get select menu bottom/end
-                var menu_h = parseFloat($menu_parent.css('height'));
-                var menu_t = parseFloat($menu_parent.position().top);
-                var menu_b = menu_h+menu_t;
-
-                var widget_t = parseFloat($widget.position().top) + div_t;
-                var menu_mh = parseFloat($menu.css('max-height'));
-
-                if(div_b < menu_b || menu_t < widget_t){ // flip menu to top
-                    $menu.css('max-height', (widget_t-20)+'px');
-                    $menu_parent.position({my: 'left bottom', at: 'left top', of: $widget});
-                }else if(widget_t < menu_b){ // Add height to menu to bottom of page
-                    $menu.css('max-height', (menu_mh + (div_b-menu_b-10))+'px');
-                }
-            });
-        }
-    }
-
-    //
     // _adjustButtonPos
     //    
     function _adjustTablePosition(){
@@ -2061,7 +1927,226 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }
     }
     
-    
+    //
+    // Update detail type dropdown's widget and menu
+    //
+    function _onRecordDetailMenuOpen(ele_id){
+
+        var $widget = $('span[id="'+ ele_id +'-button"]');
+        var $menu = $('ul[id="'+ ele_id +'-menu"]');
+        var $menu_parent = $menu.parent();
+
+        $widget.addClass('ui-heurist-populate ui-heurist-header'); // highlight current dropdown
+        $menu.addClass('ui-heurist-populate').css('background', '');
+
+        // Get parent containers bottom/end
+        var div_h = parseFloat($('#divFieldMapping').css('height'));
+        var div_t = parseFloat($('#divFieldMapping').position().top);
+        var div_b = div_h+div_t;
+
+        // Get select menu bottom/end
+        var menu_h = parseFloat($menu_parent.css('height'));
+        var menu_t = parseFloat($menu_parent.position().top);
+        var menu_b = menu_h+menu_t;
+
+        var widget_t = parseFloat($widget.position().top) + div_t;
+        var menu_mh = parseFloat($menu.css('max-height'));
+
+        if(div_b < menu_b || menu_t < widget_t){ // flip menu to top
+            $menu.css('max-height', (widget_t-20)+'px');
+            $menu_parent.position({my: 'left-10 bottom', at: 'left top', of: $widget});
+        }else if(widget_t < menu_b){ // Add height to menu to bottom of page
+            $menu.css('max-height', (menu_mh + (div_b-menu_b-10))+'px');
+            $menu_parent.position({my: 'left-10 top', at: 'left bottom', of: $widget});
+        }
+    }
+
+    function _onRecordDetailMenuClose(ele_id){
+        var $widget = $('span[id="'+ ele_id +'-button"]');
+        $widget.removeClass('ui-heurist-populate ui-heurist-header'); // remove highlight dropdown
+    }
+
+    //
+    // Attempt to automatically loosely match fields, excat matches happen earlier
+    //
+    function _performPartialMatching(file_fields){
+
+        if(file_fields.length == 0){
+            return;
+        }
+
+        var mapped_fields = [];
+        var needs_mapping = {};
+        var $selects = $("select[id^='sa_dt_']").filter(function(idx){ 
+            if($(this).val() != ''){
+                mapped_fields.push($(this).val());
+                return false;
+            }
+            needs_mapping[idx] = $(this);
+            return true; 
+        }); // retrieve selects w/ value
+
+        if($selects.length == 0 || needs_mapping.length == 0){
+            return;
+        }
+
+        var rec_results = {};
+        var file_results = {};
+        var rec_column_parts = [];
+        var rcol_name = '';
+
+        $selects.find('option').each(function(i, option){
+
+            let cur_val = $(option).val();
+            if(mapped_fields.indexOf(cur_val) >= 0 || isNaN(cur_val) || cur_val < 1){
+                return;
+            }
+
+            rec_results[cur_val] = {};
+
+            $.each(needs_mapping, function(idx, select){
+
+                var $select = $(select);
+                if($select.find('option[value="'+ cur_val +'"]').length != 1 || $select.val() != ''){
+                    return;
+                }
+
+                rec_column_parts = option.text.split(' [');
+                rcol_name = '';
+
+                if(rec_column_parts.length > 2){
+                    for(var j = 0; j < rec_column_parts.length-1; j++){
+                        rcol_name += rec_column_parts[j];
+                    }
+                }else{
+                    rcol_name = rec_column_parts[0].trim();
+                }
+
+                if(!rec_results[cur_val][idx]){
+                    rec_results[cur_val][idx] = 0;
+                }
+
+                var fcol_name = file_fields[idx];
+
+                if(fcol_name.length >= 4 || fcol_name.length == rcol_name.length){
+                    // perform partial matching, based on the Sørensen–Dice Coefficient
+
+                    var rcol_bigrams = [];
+                    var fcol_bigrams = [];
+
+                    var bigger_len = (rcol_name.length > fcol_name.length) ? rcol_name.length : fcol_name.length;
+
+                    // Create bigrams of both column names
+                    for(var i = 0; i < bigger_len; i++){
+
+                        if(i < rcol_name.length){
+                            rcol_bigrams.push(rcol_name.substring(i, i + 2).toLowerCase());
+                        }
+                        if(i < fcol_name.length){
+                            fcol_bigrams.push(fcol_name.substring(i, i + 2).toLowerCase());
+                        }
+                    }
+
+                    var shared_bigrams = rcol_bigrams.filter(bigram => fcol_bigrams.includes(bigram));
+                    var sdc_rating = (2 * shared_bigrams.length / (rcol_bigrams.length + fcol_bigrams.length) * 100).toFixed(2);
+
+                    if(sdc_rating >= 50 && sdc_rating > rec_results[cur_val][idx]){
+                        rec_results[cur_val][idx] = sdc_rating;
+                    }else if(rec_results[cur_val][idx] < 50 && fcol_name.length < rcol_name.length && rcol_name.indexOf(fcol_name) !== -1){ // check if word chunk appears
+                        rec_results[cur_val][idx] = 50;
+                    }
+
+                    // Check without bracketed text, in case of slight differences in field names
+                    if((rcol_name.includes('(') || fcol_name.includes('(')) && rec_results[cur_val][idx] < 90){
+
+                        var rcol_name = rcol_name.split('(')[0].trim();
+                        var fcol_name = fcol_name.split('(')[0].trim();
+
+                        if(rcol_name.toLowerCase() == fcol_name.toLowerCase()){
+
+                            $select.val(cur_val);
+                            if($select.hSelect('instance') != undefined){
+                                $select.hSelect('refresh');
+                            }else{
+                                var events = {};
+                                events['onOpenMenu'] = function(){
+                                    var ele_id = $(this).attr('id');
+                                    _onRecordDetailMenuOpen(ele_id);
+                                };
+                                events['onCloseMenu'] = function(){
+                                    var ele_id = $(this).attr('id');
+                                    _onRecordDetailMenuClose(ele_id);
+                                };
+
+                                window.hWin.HEURIST4.ui.initHSelect($select, false, null, events);
+                            }
+
+                            delete rec_results[cur_val];
+                            return false;
+                        }else if(fcol_name.length >= 4 || fcol_name.length == rcol_name.length){
+                            rcol_bigrams = [];
+                            fcol_bigrams = [];
+
+                            bigger_len = (rcol_name.length > fcol_name.length) ? rcol_name.length : fcol_name.length;
+
+                            // Create bigrams of both column names
+                            for(var i = 0; i < bigger_len; i++){
+
+                                if(i < rcol_name.length){
+                                    rcol_bigrams.push(rcol_name.substring(i, i + 2).toLowerCase());
+                                }
+                                if(i < fcol_name.length){
+                                    fcol_bigrams.push(fcol_name.substring(i, i + 2).toLowerCase());
+                                }
+                            }
+
+                            shared_bigrams = rcol_bigrams.filter(bigram => fcol_bigrams.includes(bigram));
+                            sdc_rating = (2 * shared_bigrams.length / (rcol_bigrams.length + fcol_bigrams.length) * 100).toFixed(2);
+
+                            if(sdc_rating >= 50 && sdc_rating > rec_results[cur_val][idx]){
+                                rec_results[cur_val][idx] = sdc_rating;
+                            }else if(rec_results[cur_val][idx] < 50 && fcol_name.length < rcol_name.length && rcol_name.indexOf(fcol_name) !== -1){ // check if word chunk appears
+                                rec_results[cur_val][idx] = 50;
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        $.each(rec_results, function(opt_id, field_res){
+            var result = Object.entries(field_res); console.log(opt_id, result);
+            result.sort((a, b) => b[1] - a[1]);
+
+            for (var i = 0; i < result.length; i++) {
+
+                var $ele = $("select[id='sa_dt_"+ result[i][0] +"']");
+                if(result[i][1] == 0){ // reached end of useful data
+                    return;
+                }else if($ele.length == 0 || $ele.val() != ''){ // dropdown has assigned value
+                    continue;
+                }
+
+                $ele.val(opt_id);
+                if($ele.hSelect('instance') != undefined){
+                    $ele.hSelect('refresh');
+                }else{
+                    var events = {};
+                    events['onOpenMenu'] = function(){
+                        var ele_id = $(this).attr('id');
+                        _onRecordDetailMenuOpen(ele_id);
+                    };
+                    events['onCloseMenu'] = function(){
+                        var ele_id = $(this).attr('id');
+                        _onRecordDetailMenuClose(ele_id);
+                    };
+
+                    window.hWin.HEURIST4.ui.initHSelect($ele, false, null, events);
+                }
+                return;
+            }
+        });
+    }
     
     //
     // init field mapping selectors after change of rectype
@@ -2079,9 +2164,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         var mapping_flds = null;
         if(currentSeqIndex>=0){
-            
-           
-            
+
             if(currentStep!=3){
                 if(preset_mapping){
                     mapping_flds = preset_mapping;
@@ -2159,7 +2242,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                      show_dt_name:true, 
                      show_parent_rt:true, 
                      show_latlong:(currentStep==4), 
-                     show_required:(currentStep==4)});
+                     show_required:(currentStep==4),
+                     eventHandlers: {
+                        onOpenMenu: function(){
+                            var ele_id = $(this).attr('id');
+                            _onRecordDetailMenuOpen(ele_id);
+                        },
+                        onCloseMenu: function(){
+                            var ele_id = $(this).attr('id');
+                            _onRecordDetailMenuClose(ele_id);
+                        }
+                     }
+                    }
+                );
 
                if(sel.hSelect("instance")!=undefined){
                     sel.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
@@ -2207,7 +2302,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         }
                     });
                }
-               
+
                $(sel).change(function(){
                     if(currentStep==5){
                         _showStep(4); //reset to prepare step
@@ -2216,13 +2311,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     
             }
         });
-        
-
-        //for selected record type key field does not exist
-        if(keyfield_sel==''){
-            
-        }
-        
+console.log(exact_matches);        
+        _performPartialMatching(imp_session['columns']);        
         
         //show counts
         if(currentSeqIndex>=0 && 
@@ -3362,7 +3452,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             $('#mrr_warning').text('Data errors: '+res['count_warning']);
                             $('#prepareWarnings').show();//.css('display','inline-block');
                             $('#btnShowWarnings').show();
-//console.log(res);                            
+
                             if(res['missed_required']==true){
                                 window.hWin.HEURIST4.msg.showMsgErr((res['count_warning']==1?'There is one row':('There are '+res['count_warning']+' rows'))
                                 +' missing or wrong values for fields. Including Required fields.<br><br> '
@@ -4342,7 +4432,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         for(var i=0;i<newvalues.length;i++){
 
             var lbl = null;
-
+            
             if(!window.hWin.HEURIST4.util.isempty(newvalues[i])){
                 lbl = newvalues[i].trim();
             }
@@ -4361,13 +4451,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     skip_long++;
                     continue;
                 }
-
+                
                 if(lbl.indexOf('.') >= 0){
                     hasPeriod = '.';
                 }
 
             _prepareddata.push({trm_Label:lbl, trm_ParentTermID:trm_ParentTermID, trm_Domain:'enum'});
-
+                
             }else{
                 skip_na++;
             }
