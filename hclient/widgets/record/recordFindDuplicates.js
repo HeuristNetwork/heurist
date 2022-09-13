@@ -437,25 +437,31 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         var sGroupID = $(event.target).attr('data-action-merge');
         var sRecIds = Object.keys(this.dupes[sGroupID]);
 
-                var url = window.hWin.HAPI4.baseURL
-                        + 'admin/verification/combineDuplicateRecords.php?bib_ids='
-                        + sRecIds.join(',')
-                        + '&db=' + window.hWin.HAPI4.database;
-                        
-                var that = this;
+        var url = window.hWin.HAPI4.baseURL
+                + 'admin/verification/combineDuplicateRecords.php?bib_ids='
+                + sRecIds.join(',')
+                + '&db=' + window.hWin.HAPI4.database;
                 
-                window.hWin.HEURIST4.msg.showDialog(url, {
-                    width:700, height:600,
-                    default_palette_class:'ui-heurist-explore',
-                    title: window.hWin.HR('Combine duplicate records'),
-                    callback: function(context) {
-                            if(context=='commited'){
-                               that.element.find('.group_'+sGroupID).hide();
-                            }
-                    }
-                });
-                
-                return false;
+        var that = this;
+
+        window.hWin.HEURIST4.msg.showDialog(url, {
+            width:700, height:600,
+            default_palette_class:'ui-heurist-explore',
+            title: window.hWin.HR('Combine duplicate records'),
+            callback: function(context) {
+                if(context=='commited'){
+                   that.element.find('.group_'+sGroupID).hide();
+
+                   var cur_query = $.extend(true, {}, window.hWin.HEURIST4.current_query_request);
+                   cur_query.id = null;
+                   cur_query.source = null;
+
+                   window.hWin.HAPI4.RecordSearch.doSearch(that, cur_query)
+                }
+            }
+        });
+        
+        return false;
     },
     
     //
