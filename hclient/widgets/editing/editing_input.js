@@ -274,37 +274,38 @@ $.widget( "heurist.editing_input", {
         .addClass('input-cell')
         .appendTo( this.element );
         if(is_sortable){
-                this.input_cell.sortable({
-                    //containment: "parent",
-                    delay: 250,
-                    items: '.input-div',
-                    stop:function(event, ui){
-                        
-                        var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
-                        if(isparententity){ //remove parent entity flag to avoid autosave
-                            that.fset('rst_CreateChildIfRecPtr', 0);
-                        }
-                        
-                        //reorganize
-                        that.isChanged(true);
-                        that.onChange();
-                        that.btn_cancel_reorder.show();
-                        
-                        if(isparententity){//restore parent entity flag
-                            that.fset('rst_CreateChildIfRecPtr', 1);
-                        }
-                        
-                    }});            
+
+            this.input_cell.sortable({
+                //containment: "parent",
+                delay: 250,
+                items: '.input-div',
+                axis: 'y',
+                stop:function(event, ui){
                     
+                    var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
+                    if(isparententity){ //remove parent entity flag to avoid autosave
+                        that.fset('rst_CreateChildIfRecPtr', 0);
+                    }
                     
-                $('<br>').appendTo( this.header );
-                this.btn_cancel_reorder = $("<div title='Cancel reorder'>")
-                    .appendTo( this.header ).hide()
-                    .css({'padding':'1px', 'margin-top':'4px', 'font-size':'0.7em', width: '40px', float: 'right'})
-                    .button({label:'Cancel'});
-                this._on( this.btn_cancel_reorder, {
-                    click: this._restoreOrder} );
+                    //reorganize
+                    that.isChanged(true);
+                    that.onChange();
+                    that.btn_cancel_reorder.show();
                     
+                    if(isparententity){//restore parent entity flag
+                        that.fset('rst_CreateChildIfRecPtr', 1);
+                    }
+                    
+                }});            
+                
+                
+            $('<br>').appendTo( this.header );
+            this.btn_cancel_reorder = $("<div title='Cancel reorder'>")
+                .appendTo( this.header ).hide()
+                .css({'padding':'1px', 'margin-top':'4px', 'font-size':'0.7em', width: '40px', float: 'right'})
+                .button({label:'Cancel'});
+            this._on( this.btn_cancel_reorder, {
+                click: this._restoreOrder} );
         } 
         
         //add hidden error message div
@@ -396,6 +397,17 @@ $.widget( "heurist.editing_input", {
         //recreate input elements and assign given values
         this.setValue(values_to_set);
         this.options.values = this.getValues();
+
+        // add visible icon for dragging/sorting field values
+        if(is_sortable && 
+            (this.detailType=='freetext' || this.detailType=='blocktext' || this.detailType=='float' || this.detailType=='integer' || this.detailType=='url')){
+
+            $('<span>')
+                .addClass('ui-icon ui-icon-arrow-2-n-s btn_input_move')
+                .attr('title', 'Drag to re-arrange values')
+                .insertBefore(this.element.find('.btn_input_clear'));
+        }
+
         this._refresh();
     }, //end _create
 
