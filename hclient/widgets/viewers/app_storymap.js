@@ -67,14 +67,15 @@ $.widget( "heurist.app_storymap", {
         , init_completed: false   //flag to be set to true on full widget initializtion
     },
 
-    _resultset: null, // current story list - story elements
+    _resultset_main: null, // current all stories
+    _resultset: null, // current story element list - story elements
     _resultList: null,
     _tabs: null, //tabs control
     _mapping: null,    // mapping widget
     _mapping_onselect: null, //mapping event listener
     _L: null, //refrence to leaflet
     
-    _all_stories_id: 0,
+    _all_stories_id: 0, //leaflet layer id with all stories
 
     _storylayer_id: 0,
     _cache_story_geo: {},
@@ -342,12 +343,15 @@ $.widget( "heurist.app_storymap", {
                 
                     var recset = data.recordset; //record in main result set (for example Persons)
                     
+console.log('main result set loaded');
                     
                     that._initial_div_message.find('h3')
                         .text(recset.length()>0
                             ?'Please select a story in the list'
                             :'No records match the filter criteria');
                     that._initial_div_message.show();
+                    
+                    that._resultset_main = recset;
                     
                     //find filtered Story Elements
                     that.updateInitialMap( recset );
@@ -392,8 +396,8 @@ $.widget( "heurist.app_storymap", {
     
     _setOptions: function() {
         // _super and _superApply handle keeping the right this-context
-        if(key == 'storyRecordID'){
-            this._checkForStory(value); 
+        if(arguments && arguments[0] && arguments && arguments[0].storyRecordID>0){
+            this._checkForStory(arguments[0].storyRecordID, true); 
         }else{
             this._superApply( arguments );    
         }
@@ -651,11 +655,10 @@ $.widget( "heurist.app_storymap", {
         this._currentElementID = 0;
     },
     
-    // 1. Loads all story elements time data
-    // 2. loads list of story elements (this._resultset) into reulst list
-    // 3. Render overview as smarty report or renderRecordData
     //
-    _startNewStory: function(recID){
+    //
+    //
+    clearStory: function(){
         
         //remove previous story layer
         if(this._mapping){
@@ -675,8 +678,23 @@ $.widget( "heurist.app_storymap", {
         if(this._tabs){
             this._tabs.tabs('option', 'active', 0);   
         }
+        if(this.options.reportElementMode!='slide'){   
+            this._resultList.resultList('clearAllRecordDivs');
+        }
         
-        if(this.options.storyRecordID != recID) return; //story already changed to different one
+        this.pnlOverview.html('');
+    },
+    
+    
+    // 1. Loads all story elements time data
+    // 2. loads list of story elements (this._resultset) into reulst list
+    // 3. Render overview as smarty report or renderRecordData
+    //
+    _startNewStory: function(recID){
+    
+        if(this.options.storyRecordID != recID) return; //story already changed
+
+        this.clearStory();
         
         //loads list of story elements into reulst list
         if(this.options.reportElementMode!='slide'){   
@@ -860,20 +878,30 @@ console.log('>sctop '+ele.scrollTop());
         if(!this._mapping_onselect){ //assign event listener
             
             this._mapping_onselect = function( rec_ids ){
-                
+                /*                            
                 if(that._all_stories_id>0){
                     //initial map is loaded
                     $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                         {selection:rec_ids, source:that.element.attr('id'), 
                             search_realm:that.options.search_realm} ); //highlight in main resultset
-                    that._checkForStory(rec_ids[0]); //load certain story
-                }else
-                //find selected record id among story elements    
+                    that._checkForStory(rec_ids[0]); //load first story
+                }else*/
+
                 if(rec_ids.length>0){
-                    var rec = that._resultset.getById(rec_ids[0]);
+                    //find selected record id among stories
+                    var rec = that._resultset_main.getById(rec_ids[0]);
                     if(rec){
-                        that._scrollToStoryElement(rec_ids[0]); //scroll to selected story element
-                    }    
+                        $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+                            {selection:[rec_ids[0]], source:that.element.attr('id'), 
+                                search_realm:that.options.search_realm} ); //highlight in main resultset
+                        that._checkForStory(rec_ids[0]); //load first story
+                    }else{
+                        //find selected record id among story elements    
+                        rec = that._resultset.getById(rec_ids[0]);
+                        if(rec){
+                            that._scrollToStoryElement(rec_ids[0]); //scroll to selected story element
+                        }    
+                    }
                 }
                 
             }
@@ -1075,8 +1103,10 @@ console.log('>sctop '+ele.scrollTop());
             this._storylayer_id = mapwidget.addGeoJson(
                 {geojson_data: that._currentElementID>0?null:that._cache_story_geo[that.options.storyRecordID], //story element is loaded already
                  timeline_data: that._cache_story_time[that.options.storyRecordID],
-                    //layer_style: layer_style,
                     //popup_template: layer_popup_template,
+                    layer_style:{"stroke":"1","color":"#00009b","fill":"1","fillColor":"#0000fa", "fillOpacity":"0.8"},
+                    
+                 selectable: false,
                  dataset_name: 'Story Timeline',
                  preserveViewport: false });
                 
@@ -1249,8 +1279,19 @@ console.log('>sctop '+ele.scrollTop());
             
             if(this._mapping && this._mapping.length>0){
                 //this._animateStoryElement_A(recID);
-                this._animateStoryElement_B(recID);
-            
+                if(recID==0){
+                    //zoom for entire story
+                    //console.log('zoom for entire story');
+                    
+                    if(this._mapping){
+                        var mapwidget = this._mapping.app_timemap('getMapping');
+                        mapwidget.setLayerVisibility(this._storylayer_id, true);
+                        mapwidget.zoomToLayer(this._storylayer_id );
+                    }
+                    
+                }else{
+                    this._animateStoryElement_B(recID);    
+                }
             
 
             /*
@@ -1433,10 +1474,9 @@ console.log('>sctop '+ele.scrollTop());
         var record = this._resultset.getRecord(recID);
         var anime = this._resultset.fld(record, DT_STORY_ANIMATION);
 
-        
-        var default_story_element_style = 
+        let default_story_element_style = 
         window.hWin.HEURIST4.util.isempty(anime)
-                ?{"stroke":"1","color":"#00009b","fill":"1","fillColor":"#0000fa", "fillOpacity":"0.8"}
+                ?{"stroke":"1","color":"#00009b","fill":"1","fillColor":"#0000fa", "fillOpacity":"0.8"} //blue
                 :null;
         
         mapwidget.isMarkerClusterEnabled = false;
@@ -1446,6 +1486,7 @@ console.log('>sctop '+ele.scrollTop());
                 layer_style: default_story_element_style,
                 //popup_template: layer_popup_template,
                 dataset_name: 'Story Map',
+                selectable: false,
                 preserveViewport: true });
 //console.log('ADDED '+this._nativelayer_id);                
         //possible sequences

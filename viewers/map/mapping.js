@@ -62,6 +62,7 @@ Thematic mapping
     setFeatureSelection - triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
     setFeatureVisibility - applies visibility for given set of heurist recIds (filter from timeline)
     zoomToSelection
+    zoomToLayer
     setLayerVisibility - show hide entire layer
     setVisibilityAndZoom - show susbset n given recordset and zoom 
     
@@ -190,7 +191,7 @@ $.widget( "heurist.mapping", {
     //storages
     all_layers: {},    // array of all loaded TOP layers by leaflet id   
     all_clusters: {},  // markerclusters
-    all_markers: {},
+    all_markers: {},   // markers for top layer if it is clustered
     
     timeline_items: {},
     timeline_groups: [], 
@@ -569,8 +570,8 @@ $.widget( "heurist.mapping", {
                     ) / Math.log(2)
                 );
 
-console.log(id);                
-console.log(bounds);
+//console.log(id);                
+//console.log(bounds);
                 if(bounds && bounds.isValid()){
                     that.nativemap.setMaxBounds(bounds);
                     that.nativemap.fitBounds(bounds);        
@@ -957,6 +958,7 @@ console.log(bounds);
     //      layer_style
     //      popup_template   - smarty template for popup info
     //      origination_db
+    //      selectable
     //
     addGeoJson: function(options){
             
@@ -965,6 +967,7 @@ console.log(bounds);
                 layer_style = options.layer_style,
                 popup_template = options.popup_template,
                 dataset_name = options.dataset_name,
+                selectable = options.selectable,
                 preserveViewport = options.preserveViewport;
 
         if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) || 
@@ -981,6 +984,7 @@ console.log(bounds);
                     , layer_name: dataset_name
                     , popup_template: popup_template
                     , origination_db: options.origination_db
+                    , selectable: selectable
                     //The onEachFeature option is a function that gets called on each feature before adding it to a GeoJSON layer. A common reason to use this option is to attach a popup to features when they are clicked.
                    /* 
                     , onEachFeature: function(feature, layer) {
@@ -1481,7 +1485,9 @@ console.log(bounds);
                     ,duration*1000+200);      
             
                 }else{
-                    this.nativemap.fitBounds(bounds, {maxZoom: maxZoom, padding: L.point(50, 50)});   
+                    this.nativemap.fitBounds(bounds, {maxZoom: maxZoom, 
+                    paddingTopLeft:L.point(500,50),paddingBottomRight:L.point(50,0)});
+                    //padding: L.point(500, 250)});  //padding - margins for map 
                     //this.nativemap.fitBounds(bounds, {maxZoom: 0});   
                 }             
             }
@@ -1613,9 +1619,11 @@ console.log(bounds);
         }
     },
     //
-    // applies style for given top layer
+    // Applies style for given top layer
     // it takes style from options.default_style, each feature may have its own style that overwrites layer's one
-    //
+    // 
+    // It is invoked from addGeoJson or after symbology editor
+    // Besides the style it assign "selectable" property for child layer
     applyStyle: function(layer_id, newStyle) {
         
         var affected_layer = this.all_layers[layer_id];
@@ -1717,13 +1725,15 @@ console.log(bounds);
         if(is_new_markercluster){
 
             //all markers per top layer            
-            this.all_markers[layer_id] = [];
+            this.all_markers[layer_id] = []; //reset
             
             var  that = this;
 
             //get all markers (fill all_markers) within layer group and apply new style
             function __extractMarkers(layer, parent_layer, feature)
             {
+                layer.options.selectable = parent_layer.options.selectable;
+                
                 //var feature = layer.feature;    
                 if(layer instanceof L.LayerGroup){
                     layer.eachLayer( function(child_layer){__extractMarkers(child_layer, layer, feature);} );
@@ -1768,6 +1778,7 @@ console.log(bounds);
             }
 
             affected_layer.eachLayer( function(child_layer){ 
+                    child_layer.options.selectable = affected_layer.options.selectable;
                     child_layer.feature.default_style = style;
                     __extractMarkers(child_layer, affected_layer, child_layer.feature);
             } );
@@ -1839,9 +1850,9 @@ console.log(bounds);
         }
         
         if(affected_layer instanceof L.LayerGroup){
-            affected_layer.eachLayer( function(child_layer){__childLayers(child_layer, child_layer.feature) });
+            affected_layer.eachLayer( function(child_layer){ __childLayers(child_layer, child_layer.feature) });
         }else{
-            __childLayers(affected_layer, affected_layer.feature)
+            __childLayers(affected_layer, affected_layer.feature);
         }
     },
     
@@ -2043,6 +2054,11 @@ console.log(bounds);
     //
     _onLayerSelect: function(layer, latlng){
 
+        if(layer.options && layer.options.selectable===false)        
+        {
+            return;  
+        } 
+        
         var that = this;
         var popupURL;
 
