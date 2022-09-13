@@ -440,8 +440,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             };     
         fancytree_options['filter'] = { highlight:false, mode: "hide" };  
 */
-            this._treeview = this.element.find('.treeView').addClass('tree-rts')
+            this._treeview = this.element.find('.treeView').addClass('tree-rts').css('overflow-x', 'hidden')
                                 .fancytree(fancytree_options); //was recordList
+            this.element.parent().css('overflow-x', 'hidden'); // stop horizontal scrolling
             this.__updateActionIcons(500);
 
     },
@@ -2516,8 +2517,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }
 
         var usage = $Db.rst_usage(recID);
-        var is_reserved = $Db.dty(recID, 'dty_Status') == "reserved";
-        if(window.hWin.HAPI4.is_admin() && $Db.dty(recID) && !is_reserved){ // ask if to delete base field
+        var is_allowed = $Db.dty(recID, 'dty_Status') != 'reserved' && $Db.dty(recID, 'dty_Type') != 'separator' && $Db.dty(recID, 'dty_Type') != 'relmarker';
+        if(window.hWin.HAPI4.is_admin() && $Db.dty(recID) && is_allowed){ // ask if to delete base field
 
             if(usage.length == 0){ // Un-used field
 
