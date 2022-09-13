@@ -633,7 +633,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
                     $temp_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
                     if(saveURLasFile($record['ulf_TempThumbUrl'], $temp_path)){ //save to temp in scratch folder
-                        UtilsImage::createThumbnailFile($temp_path, $thumb_name); //create thumbnail from remote image
+                        UtilsImage::createThumbnailFile($temp_path, $thumb_name); //create thumbnail for iiif image
                         unlink($temp_path);       
                     }
             }else
@@ -671,7 +671,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             $mimeExt = UtilsImage::getImageType($filename);
                             
                             if($mimeExt){
-                                UtilsImage::createThumbnailFile($filename, $thumb_name);
+                                UtilsImage::createThumbnailFile($filename, $thumb_name); //create thumbnail for tiled image
                                 $file2['ulf_MimeExt'] = $mimeExt;    
                             }else{
                                 $file2['ulf_MimeExt'] = 'png';
@@ -742,7 +742,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         $cnt_error = 0;
         $is_download = (@$this->data['is_download']==1);
 
-        if(@$this->data['csv_import']){ // import new rectypes via CSV
+        if(@$this->data['csv_import']){ // import new media via CSV. See importMedia.js
 
             if(@$this->data['fields'] && is_string($this->data['fields'])){ // new to perform extra validations first
                 $this->data['fields'] = json_decode($this->data['fields'], true);

@@ -134,6 +134,7 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
             if($system->verify_credentials(@$_REQUEST['db'])>0){
                 user_setPreferences($system, $_REQUEST);
                 $res = true;
+                //session_write_close();
             }
 
         }else if ($action=="sysimages") { //get list of system images

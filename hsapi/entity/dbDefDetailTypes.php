@@ -392,7 +392,7 @@ class DbDefDetailTypes extends DbEntityBase
 
         $ret = true;
 
-        if(@$this->data['csv_import']){ // import new rectypes via CSV
+        if(@$this->data['csv_import']){ // import new detail type via CSV
 
             if(@$this->data['fields'] && is_string($this->data['fields'])){ // new to perform extra validations first
                 $this->data['fields'] = json_decode($this->data['fields'], true);

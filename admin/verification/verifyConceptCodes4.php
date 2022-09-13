@@ -106,8 +106,10 @@ if(false){
     __setTermYesNo();
 }else  if(false){
     __renameDegreeToKM();
-}else{
+}else  if(false){
     __recreateProceduresTriggers();
+}else  if(false){
+    __addOtherSources();
 }
 
 //
@@ -702,4 +704,79 @@ function getLocalCode($db_id, $id){
     $query = 'select trm_ID from defTerms where trm_OriginatingDBID='.$db_id.' and trm_IDInOriginatingDB='.$id;
     return mysql__select_value($mysqli, $query);
 }
+
+//---------------
+function __addOtherSources(){
+    global $mysqli;
+    mysql__usedatabase($mysqli, 'hdb_judaism_and_rome');
+    
+    //1. assign HID     
+    $query = 'SELECT * FROM import20220906103458';
+    $res = $mysqli->query($query);
+
+    if ($res){
+        
+        $query_match = 'SELECT dtl_RecID FROM recDetails WHERE `dtl_DetailTypeID`=36 AND dtl_Value=';
+        $query_update = 'INSERT INTO recDetails (dtl_RecID,dtl_DetailTypeID,dtl_Value,dtl_Annotation) VALUES '; //1107
+        $query_check = 'SELECT dtl_ID FROM recDetails WHERE dtl_DetailTypeID=1107 AND dtl_RecID=';
+        
+        
+        $not_found1 = array();
+        $not_found2 = array();
+        $cnt = 0;
+        $cnt2 = 0;
+        $cnt3 = 0;
+        
+        while ($row = $res->fetch_row()){
+            
+            $nid = $row[1];
+            
+            $rec_ID = mysql__select_value($mysqli, $query_match.$nid);        
+            
+            if($rec_ID>0){
+print '<br>'.$row[3];            
+                $nids = explode('|',$row[3]);
+                if(count($nids)>0){
+                    $values = array();
+                    foreach ($nids as $id=>$nid){
+                        $os_rec_ID = mysql__select_value($mysqli, $query_match.$nid);        
+                        if($os_rec_ID>0){
+                            $dtl_ID = mysql__select_value($mysqli, $query_check.$rec_ID.' AND dtl_Value='.$os_rec_ID);
+                            if($dtl_ID>0){ //already added?
+print '<br>  exist '.$os_rec_ID;                            
+                                $cnt2++;
+                            }else{
+                                $val = '('.$rec_ID.',1107,'.$os_rec_ID.',"art220906")';
+                                $values[] = $val;    
+print '<br>&nbsp;&nbsp;&nbsp;'.$val;                                
+                            }
+                        }else{
+                            $not_found2[] = $nid;    
+                        }
+                    }
+                    if(count($values)>0){
+                        $res2 = $mysqli->query($query_update.implode(',',$values));                        
+                        $cnt = $cnt + $mysqli->affected_rows;
+                    }
+                }
+            
+            }else{
+                $not_found1[] = $nid;
+                //echo 'Record not found for NID '.$nid.'<br>';
+            }
+
+        }
+        $res->close();
+        
+     
+        print '<br>AAAdded '.$cnt;
+        print '<br>Already added '.$cnt2;
+        print '<br>Not found '.implode(', ',$not_found1);
+        print '<br>Other sources not found '.implode(', ',$not_found2);
+    }
+    
+    
+    
+}
+
 ?>
