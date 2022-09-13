@@ -2821,19 +2821,15 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     trm_Children.push(trm_ID);
                 }
             });
-            /*
-            $Db.trm().each(function(trm_ID,rec){
-            if($Db.trm(trm_ID, 'trm_VocabularyGroupID')==parent_ID && !($Db.trm(trm_ID, 'trm_ParentTermID')>0)){
-            trm_Children.push(trm_ID);        
-            }
-            });     
-            */
+
             s = 'Vocabulary,Internal code,Vocabulary group,Group internal code,Standard Code,Description\n';
         }else{
             trm_Children = $Db.trm_TreeData(parent_ID, 'set');
             s = 'Term,Internal code,Parent term,Parent internal code,Standard Code,Description\n';
-        }   
+        }
 
+        var vocab_name = $Db.trm(parent_ID, 'trm_Label');
+        vocab_name = (!vocab_name) ? 'heurist' : window.hWin.HAPI4.database + '_v' + parent_ID + '_' + vocab_name;
 
         for(var i=0; i<trm_Children.length; i++){
             var trm_ID = trm_Children[i];
@@ -2854,8 +2850,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             s = s + aline.join(',') + '\n';
         }
 
-
-        window.hWin.HEURIST4.util.downloadData('heurist_vocabulary.csv', s, 'text/csv');
+        window.hWin.HEURIST4.util.downloadData(vocab_name + '_vocabulary.csv', s, 'text/csv');
     }
 
 });
