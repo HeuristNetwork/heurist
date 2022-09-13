@@ -1439,43 +1439,45 @@ $.widget( "heurist.editing_input", {
             
             // Display term selector as radio buttons/checkboxes
             var asButtons = this.options.recordset && this.options.recordset.entityName=='Records' && this.f('rst_TermsAsButtons');
-            var vocab_id = that.f('rst_FilteredJsonTermIDTree');
-            var child_terms = $Db.trm_TreeData(vocab_id, 'set');
+            if(asButtons){
+                var vocab_id = that.f('rst_FilteredJsonTermIDTree');
+                var child_terms = $Db.trm_TreeData(vocab_id, 'set');
 
-            if(asButtons == 1 && child_terms.length <= 20){
+                if(child_terms.length <= 20){
 
-                this.enum_buttons = (Number(this.f('rst_MaxValues')) != 1) ? 'checkbox' : 'radio';
-                var inpt_id = $input.attr('id');
-                var dtb_res = false;
+                    this.enum_buttons = (Number(this.f('rst_MaxValues')) != 1) ? 'checkbox' : 'radio';
+                    var inpt_id = $input.attr('id');
+                    var dtb_res = false;
 
-                if(this.enum_buttons == 'checkbox' && $inputdiv.parent().find('input:checkbox').length > 0){ // Multi value, check if checkboxes exist
+                    if(this.enum_buttons == 'checkbox' && $inputdiv.parent().find('input:checkbox').length > 0){ // Multi value, check if checkboxes exist
 
-                    $inputdiv.parent().find('input:checkbox[data-id="'+value+'"]').prop('checked', true); // Check additional value
-                    $inputdiv.hide();
+                        $inputdiv.parent().find('input:checkbox[data-id="'+value+'"]').prop('checked', true); // Check additional value
+                        $inputdiv.hide();
 
-                    dtb_res = true;
-                }else{ // Create input elements
-                    dtb_res = this._createEnumButtons(false, child_terms, $inputdiv, [value]);
-                }
-
-                if(dtb_res){
-
-                    if($input.hSelect('instance') != undefined){
-                        $input.hSelect('destroy');
+                        dtb_res = true;
+                    }else{ // Create input elements
+                        dtb_res = this._createEnumButtons(false, child_terms, $inputdiv, [value]);
                     }
-                    this._off($input, 'change');
-                    $input.remove();
 
-                    $input = $('<input type="text" class="text ui-widget-content ui-corner-all">')
-                                .attr('id', inpt_id)
-                                .val(value)
-                                .prependTo($inputdiv)
-                                .hide();
+                    if(dtb_res){
 
-                    this._on( $input, {change:this.onChange} );
+                        if($input.hSelect('instance') != undefined){
+                            $input.hSelect('destroy');
+                        }
+                        this._off($input, 'change');
+                        $input.remove();
 
-                    if(this.btn_add){
-                        this.btn_add.hide(); // Hide repeat button, removeClass('smallbutton ui-icon-circlesmall-plus')
+                        $input = $('<input type="text" class="text ui-widget-content ui-corner-all">')
+                                    .attr('id', inpt_id)
+                                    .val(value)
+                                    .prependTo($inputdiv)
+                                    .hide();
+
+                        this._on( $input, {change:this.onChange} );
+
+                        if(this.btn_add){
+                            this.btn_add.hide(); // Hide repeat button, removeClass('smallbutton ui-icon-circlesmall-plus')
+                        }
                     }
                 }
             }

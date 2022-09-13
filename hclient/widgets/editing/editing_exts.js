@@ -2,8 +2,10 @@
 * editng_exts.js - additional functions for editing_input
 *  1) editSymbology - edit map symbol properties 
 *  2) calculateImageExtentFromWorldFile - calculate image extents from worldfile
+*       3a) openSearchMenu
 *  3) browseRecords - browse records for resource fields 
-*  4) translationSupport 
+*  4) translationSupport - opens popup dialog with ability to define translations for field values
+*       4a) translationFromUI 4b) translationToUI    
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
