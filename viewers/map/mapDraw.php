@@ -477,9 +477,9 @@ console.log('load google map api')
                                 var map = {};
                                 map['layer'] = layer; 
 
-                                onMapDrawAdd();
+                                onMapDrawAdd(); //clears other markers if multiple objects are not allowed
 
-                                //that.drawnItems.addLayer(layer);
+                                that.drawnItems.addLayer(layer);
 
                                 that.options.ondrawend.call(that, map);
                             }
@@ -494,6 +494,7 @@ console.log('load google map api')
             
             //
             // users adds new draw item
+            // It clears other markers if multiple objects are not allowed
             //
             function onMapDrawAdd(e){
                 if(!$('#cbAllowMulti').is(':checked')){
