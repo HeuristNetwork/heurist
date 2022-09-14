@@ -640,7 +640,7 @@ function afterPageLoad(document, pageid, eventdata){
                 script.innerHTML = 'function '+func_name 
                 +'(document, pageid, eventdata){\n'
                 //+' console.log("run script for '+pageid+'");\n'
-                +'try{\n' + script_code + '\n}catch(e){}}';
+                +'try{\n' + script_code + '\n}catch(e){console.log(e)}}';
                 //s.src = "http://somedomain.com/somescript";
                 $("head").append(script);
                 
@@ -1086,7 +1086,7 @@ if($website_custom_javascript!=null){
     
     print '<script>function afterPageLoad'.$home_page_on_init.'(document, pageid){'."\n";
     //print 'console.log("run script for HOME PAGE");'."\n";
-    print "try{\n".$website_custom_javascript."\n}catch(e){}}</script>";
+    print "try{\n".$website_custom_javascript."\n}catch(e){console.log(e)}}</script>";
 }
     
 //generate main menu on server side - for bootstrap menu     

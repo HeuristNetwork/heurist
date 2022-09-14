@@ -385,6 +385,15 @@ console.log('main result set loaded');
         }
     },
     
+    _setOptions: function() {
+        // _super and _superApply handle keeping the right this-context
+        if(arguments && ((arguments[0] && arguments[0]['storyRecordID']>0) || arguments['storyRecordID']>0) ){
+            this._checkForStory((arguments['storyRecordID']>0)?arguments['storyRecordID']:arguments[0].storyRecordID, true); 
+        }else{
+            this._superApply( arguments );    
+        }
+    },
+
     //
     //
     //
@@ -394,15 +403,6 @@ console.log('main result set loaded');
         (this.options.search_realm && (data && this.options.search_realm==data.search_realm));
     },
     
-    _setOptions: function() {
-        // _super and _superApply handle keeping the right this-context
-        if(arguments && arguments[0] && arguments && arguments[0].storyRecordID>0){
-            this._checkForStory(arguments[0].storyRecordID, true); 
-        }else{
-            this._superApply( arguments );    
-        }
-    },
-
     //
     // Change current story element - resultList listener
     //     

@@ -127,7 +127,9 @@ $.widget( "heurist.mapping", {
         zoomMinInKM: 0,
         
         default_style:null,
-        default_selection_style:null
+        default_selection_style:null,
+        
+        map_margins: {padding: L.point(50, 50)}
     },
     
     /* expremental 
@@ -406,10 +408,20 @@ $.widget( "heurist.mapping", {
     //Called whenever the option() method is called
     //Overriding this is useful if you can defer processor-intensive changes for multiple option change
     _setOptions: function( ) {
-        
+
+                
         this._superApply( arguments );
         
-        if((arguments[0] && arguments[0]['layout_params']) || arguments['layout_params'] ){
+        if(arguments && ((arguments[0] && arguments[0]['map_margins']) || arguments['map_margins']) ){
+            if($.isArray(this.options.map_margins.paddingTopLeft) && !(this.options.map_margins.paddingTopLeft instanceof L.Point)){
+                this.options.map_margins.paddingTopLeft = L.point(this.options.map_margins.paddingTopLeft);
+            }
+            if($.isArray(this.options.map_margins.paddingBottomRight) && !(this.options.map_margins.paddingBottomRight instanceof L.Point)){
+                this.options.map_margins.paddingBottomRight = L.point(this.options.map_margins.paddingBottomRight);
+            }
+        }
+        
+        if(arguments && ((arguments[0] && arguments[0]['layout_params']) || arguments['layout_params']) ){
             this.updateLayout();
         }
     },
@@ -427,6 +439,14 @@ $.widget( "heurist.mapping", {
         // remove generated elements
         //this.select_rectype.remove();
     },
+    
+    //
+    //
+    //
+    setMapMargins: function(value){
+        this._setOptions({map_margins:value});
+    },
+    
     //-------
     adjustToolbarHeight: function(){
         
@@ -1463,6 +1483,8 @@ $.widget( "heurist.mapping", {
                 if(window.hWin.HEURIST4.util.isObject(fly_params) && (!fly_params['maxZoom'] || fly_params['maxZoom'] > maxZoom)){
                     fly_params['maxZoom'] = maxZoom;
                 }
+                
+                var zoom_params = $.extend({maxZoom: maxZoom}, this.options.map_margins);
 
                 if(fly_params){
                     var duration = 5;
@@ -1475,19 +1497,20 @@ $.widget( "heurist.mapping", {
                             fly_params.duration = duration;
                         }
                     }
+                    fly_params = $.extend(fly_params, this.options.map_margins);
                     this.nativemap.flyToBounds(bounds, fly_params);
                     
                     var that = this; //fly to bounds fits bounds wrong
                     this._zoom_timeout = setTimeout(function(){
-                            that.nativemap.fitBounds(bounds, {maxZoom: maxZoom});
+                            that.nativemap.fitBounds(bounds, zoom_params);
                             that._zoom_timeout = 0;
                     }
                     ,duration*1000+200);      
             
                 }else{
-                    this.nativemap.fitBounds(bounds, {maxZoom: maxZoom, 
-                    paddingTopLeft:L.point(500,50),paddingBottomRight:L.point(50,0)});
-                    //padding: L.point(500, 250)});  //padding - margins for map 
+                    this.nativemap.fitBounds(bounds, zoom_params);
+                    //paddingTopLeft:L.point(500,50),paddingBottomRight:L.point(50,0)});
+                    //padding: L.point(50, 50)});  //padding - margins for map 
                     //this.nativemap.fitBounds(bounds, {maxZoom: 0});   
                 }             
             }
