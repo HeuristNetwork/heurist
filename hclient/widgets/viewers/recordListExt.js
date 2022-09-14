@@ -61,7 +61,7 @@ $.widget( "heurist.recordListExt", {
         var that = this;
 
         this.div_content = this.element;
-        if(this.div_content.parent('.tab_ctrl').length==0){
+        if(this.div_content.parent('.tab_ctrl').length==0 && !this.element.attr('data-widgetid')){
             this.div_content.css({width:'100%', height:'100%'}); 
         }
         
