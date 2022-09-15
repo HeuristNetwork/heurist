@@ -382,6 +382,8 @@ if(!($is_map_popup || $without_header)){
                     var $pre_location = null;
                     var isAfter = false;
 
+                    $last_fieldset = null;
+                    
                     $.each($public_fields, function(idx, field){
 
                         var $cur_field = $(field);
@@ -396,6 +398,7 @@ if(!($is_map_popup || $without_header)){
 
                         if($cur_field.is('fieldset')){
                             cur_order = $cur_field.attr('id');
+                            $last_fieldset = $cur_field;
                         }else{
                             cur_order = $cur_field.attr('data-order');
                         }
@@ -408,7 +411,6 @@ if(!($is_map_popup || $without_header)){
                                 next_order = $next_field.attr('data-order');
                             }
                         }
-
                         if(cur_order < rl_order && (next_order == null || rl_order < next_order)){ 
 
                             if($next_field && $next_field.is('div')){
@@ -418,11 +420,13 @@ if(!($is_map_popup || $without_header)){
                             }else{
                                 $pre_location = $cur_field;
                             }
-
                             return false;
                         }
                     });
 
+                    if($pre_location == null){
+                        $pre_location = $last_fieldset;
+                    }
                     if($pre_location != null){
 
                         for(var i = 1; i < Object.keys(related_records[key]).length; i++){
@@ -431,8 +435,10 @@ if(!($is_map_popup || $without_header)){
 
                             if($pre_location.is('fieldset')){
                                 $rel_field.clone().appendTo($pre_location).show();
+                                $pre_location.show();
                             }else{
                                 $pre_location.before($rel_field.clone().show());
+                                $pre_location.parent().show();
                             }
                         }
                     }
@@ -442,7 +448,7 @@ if(!($is_map_popup || $without_header)){
                 if($rel_section.find('div[data-id]:visible').length == 0){
                     $rel_section.hide();
                 }
-            }
+            }//end moveRelatedDetails
 
             // 
             // Init thumbnails and assign mediaViewer
@@ -1241,7 +1247,8 @@ if(false){  //this query fails for maria db
                     
                 }
 
-            } else {
+            } 
+            else {
                 if (preg_match('/^https?:/', $bd['val'])) {
                     if (strlen($bd['val']) > 100)
                         $trim_url = preg_replace('/^(.{70}).*?(.{20})$/', '\\1...\\2', $bd['val']);
@@ -1665,7 +1672,7 @@ function print_relation_details($bib) {
 						}else{
 
 							$move_details[$fld_name] = array();
-							array_push($move_details[$fld_name], $relfields_details[$i][1], $bd['recID']);
+							array_push($move_details[$fld_name], $relfields_details[$i][1], $bd['recID']);  //name of field, order, related recid
 
 							$field_name = $fld_name;
 						}
@@ -1714,19 +1721,22 @@ function print_relation_details($bib) {
 		$from_res->close();
     }
     if($to_res){
+ print ('print_relation_details '.$to_res->num_rows);       
         while ($reln = $to_res->fetch_assoc()) {
 
 			$bd = fetch_relation_details($reln['dtl_RecID'], false);
-
 			// check related record
 			if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
+print ' ob, ';
 				continue;
 			}
 			$relatedRecID = $bd['RelatedRecID']['rec_ID'];
 
+         
 			if(mysql__select_value($mysqli, 
 				"select count(rec_ID) from Records where rec_ID =$relatedRecID and $accessCondition")==0){
 				//related is not accessable
+print ' na, ';           
 				continue;
 			}
 
