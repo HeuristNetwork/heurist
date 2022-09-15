@@ -1133,29 +1133,30 @@ window.hWin.HEURIST4.ui = {
                     parent_ele = $(win.frameElement).parents('.ui-dialog');
                 }
             
-                parent_ele = selObj.parents('.ui-dialog');
-                if(!parent_ele || parent_ele.length==0) {
-                    
-                    parent_ele = selObj.parents('.selectmenu-parent'); //add special class to some top most div 
-                    
-                    /*
-                    var sel = $(selObj)[0];
-                    if(sel.ownerDocument != document){ //inside iframe
-                    
+                if(!parent_ele || parent_ele.length==0){
+                    parent_ele = selObj.parents('.ui-dialog');
+                    if(!parent_ele || parent_ele.length==0) {
+
+                        parent_ele = selObj.parents('.selectmenu-parent'); //add special class to some top most div 
+
+                        /*
+                        var sel = $(selObj)[0];
+                        if(sel.ownerDocument != document){ //inside iframe
+
                         var pwin = (sel.ownerDocument.parentWindow || sel.ownerDocument.defaultView);
                         var parent_dlg_id = pwin.frameElement.getAttribute("parent-dlg-id");
                         parent_ele = $('#'+parent_dlg_id).parent();    
-                    }                
-                    //parent dialog not found
-                    if(parent_ele.length==0)
-                    */
+                        }                
+                        //parent dialog not found
+                        if(parent_ele.length==0)
+                        */
                         if(!parent_ele || parent_ele.length==0) {
                             parent_ele = $('.selectmenu-parent');
                             if(!parent_ele || parent_ele.length==0) {                
                                 parent_ele = selObj.parent();   
                             }
                         }
-                        
+                    }        
                 }
             }
             
