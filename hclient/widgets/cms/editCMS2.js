@@ -1118,6 +1118,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 console.log('DEBUG: ONLY '+ele_ID);
                 return;
             }
+
             var is_intreeview = $(item).hasClass('fancytree-node');
             if(is_intreeview && !$(item).hasClass('fancytree-hide')){       
                 $(item).css('display','block');   
@@ -1134,11 +1135,11 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             +';font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' 
             //+ ele_ID
             + (is_intreeview?'<span class="ui-icon ui-icon-menu" style="width:20px"></span>'
-                            :'<span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;" title="Edit style and properties"></span>')
+                            :'<span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;" title="Edit style and properties 2"></span>')
             + (true || is_root || is_cardinal?'':
                 ('<span data-action="drag" style="display:block;padding:4px" title="Drag to reposition">' //
                     + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"/>Drag</span>'))               
-            + '<span data-action="edit" style="display:block;padding:4px" title="Edit style and properties">'
+            + '<span data-action="edit" style="display:block;padding:4px" title="Edit style and properties 3">'
             +'<span class="ui-icon ui-icon-pencil"/>Style</span>';               
             
             if(node.data.type=='text'){
@@ -1180,13 +1181,25 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     window.hWin.HEURIST4.util.stopEvent(event);
                     ele.hide();
                     
-                    ele.parent().find('span[data-action="edit"]').click();
+                    var is_widget = ele.parent().prev().hasClass('heurist-widget');
+                    
+                    if(is_widget){
+                        ele.parent().find('span[data-action="edit"]').click();
+                    }else{
+                        if(ele.parent().hasClass('lid-actionmenu')){
+                            ele.parent().show();    
+                        }
+                        ele.parent().find('span[data-action]').show();                        
+                    }
                 });
 
                 //actionspan.appendTo(body);    
                 //actionspan.position({ my: "left top", at: "left top", of: $(item) })
             }
 
+            //
+            // menu for action span
+            //
             actionspan.find('span[data-action]').click(function(event){
                 var ele = $(event.target);
 
@@ -1384,10 +1397,17 @@ function(value){
                         */
 
                         var pos = node.position();
+                        var margin_top = parseInt(node.css('margin-top'));
+                        if(!(margin_top>0)) margin_top = 2;
+                        var margin_left = parseInt(node.css('margin-left'));
+                        if(!(margin_left>0)) margin_left = 2;
+                        
                         //console.log(pos.top + '  ' + (pos.top+parent.offset().top));                          
                         ele.find('span[data-action]').hide();  
                         ele.find('span.ui-icon-gear').show();  
-                        ele.css({top:(pos.top<0?0:pos.top)+2+'px',left:(pos.left<0?0:pos.left)+2+'px'});
+                        ele.css({
+                            top:(pos.top<0?0:pos.top)+ margin_top +'px',
+                            left:(pos.left<0?0:pos.left)+margin_left+'px'});
                         ele.show();
                         
                         ele_ID = $(node).attr('data-hid');
@@ -1509,7 +1529,6 @@ function(value){
 
         tinymce.remove('.tinymce-body'); //detach
         _layout_container.find('.lid-actionmenu').remove();
-        
         //find index in _layout_content
         var idx = -1;
         for(var i=0; i<parent_children.length; i++){
@@ -1771,7 +1790,7 @@ function(value){
                         node.setTitle(new_cfg.title);
                         _defineActionIcons($(node.li).find('span.fancytree-node:first'), new_cfg.key, 
                                     'position:absolute;right:8px;padding:2px;margin-top:0px;');
-                                    
+                               
                         if(new_cfg.type=='cardinal'){
                             //recreate cardinal layout
                             window.hWin.layoutMgr.layoutInitCardinal(new_cfg, _layout_container);
@@ -1788,6 +1807,14 @@ function(value){
                         //close element config
                         _hidePropertyView();
                     }
+
+                    // find all dragable elements - text and widgets
+                    _layout_container.find('div.brick').each(function(i, item){   //
+                        var ele_ID = $(item).attr('data-hid');
+                         //left:2px;top:2px;
+                        _defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
+                    });
+
                     
                 }, page_was_modified );
     }
