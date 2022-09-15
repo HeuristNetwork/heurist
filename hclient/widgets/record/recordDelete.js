@@ -329,14 +329,16 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
 +'&nometadatadisplay=true" target="_blank">see list</a>)'
 +' which are the target of record pointer fields in other'
 +' records (<a href="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                +'&q=ids:'+response.data.source_links+'&nometadatadisplay=true" target="_blank">see list</a>).</p>'
+                +'&q=ids:'+response.data.source_links+'&nometadatadisplay=true" target="_blank">see list</a>). '
++'This will also delete child records of the records you are deleting (if any) which may, in rare circumstances, themselves be the targets of record'
++' pointer fields from other records.</p>'
 
 +'<p>Deleting a record which is the target of a record pointer field will delete the field value, which could render the record'
 +' containing it invalid (if it is the only value remaining in a required field). If you wish to proceed, check the box below.</p>'
 
-+'<p><label style="color:red"><input type="checkbox"> Delete record pointers which target the records being deleted.</label> '
-+' Please see notes above. '
-+'If you do this, we suggest using Admin > Verify integrity to check for missing values in required fields (it never does any harm to run this function from time to time).', 
++'<p><label><input type="checkbox"> Delete records</label> which are the target of a record pointer field (along with their children, '
++'if any) and delete the record pointer values which reference them. Please see notes above. '
++'If you do this, we suggest using Admin > Verify integrity to check for missing values in required fields (it never does any harm to run thsi function from time to time).', 
 function(){
     that.doAction(true, true);
 },
