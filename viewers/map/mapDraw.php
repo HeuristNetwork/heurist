@@ -480,6 +480,8 @@ console.log('load google map api')
                                 onMapDrawAdd(); //clears other markers if multiple objects are not allowed
 
                                 that.drawnItems.addLayer(layer);
+                                layer.editing.enable();
+
 
                                 that.options.ondrawend.call(that, map);
                             }
@@ -506,12 +508,13 @@ console.log('load google map api')
             // event listener on start and end of draw 
             //
             function onMapDraw(e){
-//console.log('finished');     
                 var res = mapping.mapping( 'drawGetJson',  e);
                 if(window.hWin.HEURIST4.util.isGeoJSON(res)){
                     $('#coords1').text(JSON.stringify(res));
                     
                     refreshImageOverlay( false ); //repos
+
+console.log(JSON.stringify(res));     
                     
                 }else{
                     $('#coords1').text('');
