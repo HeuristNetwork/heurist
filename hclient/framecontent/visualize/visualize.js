@@ -580,14 +580,14 @@ function zoomToFit(){
         
     var midX = box.x + width / 2,
         midY = box.y + height / 2;
-        
-    if (width == 0 || height == 0) return; // nothing to fit
-    var scale = 0.85 / Math.max(width / fullWidth, height / fullHeight);
+
+    var scale = getFitToExtentScale();
+    if (scale != null && Number(scale) != NaN) return; // nothing to fit
+
     var translate = [
         fullWidth  / 2 - scale * midX,
         fullHeight / 2 - scale * midY
-    ];    
-    
+    ];
 
     var zoom = this.zoomBehaviour; 
 
@@ -596,6 +596,23 @@ function zoomToFit(){
         .translate(translate);    
     var transform = "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")";   
     onZoom(transform);
+}
+
+//
+// 
+//
+function getFitToExtentScale(){
+
+    var fullWidth = $("#divSvg").width();
+    var fullHeight = $("#divSvg").height();
+
+    const box = d3.select("#container").node().getBBox();
+
+    var width  = box.width,
+        height = box.height;
+
+    if (width == 0 || height == 0) return null; // nothing to fit
+    return 0.85 / Math.max(width / fullWidth, height / fullHeight);
 }
 
 //handle the zoom buttons
@@ -925,6 +942,20 @@ function tick() {
     
     // Update overlay
     updateOverlays(); 
+
+    // Update the furthest possible zoom
+    if(!settings.isDatabaseStructure){
+
+        var cur_scaleExtend = zoomBehaviour.scaleExtent();
+        var lower_extent = getFitToExtentScale();
+
+        if(lower_extent != null && Number(lower_extent) != NaN){
+            zoomBehaviour.scaleExtent([lower_extent, cur_scaleExtend[1]]);
+        }
+        if(zoomBehaviour.scale() < lower_extent){
+            zoomBehaviour.scale(lower_extent);
+        }
+    }
 }
 
 /**
