@@ -4068,7 +4068,7 @@ $.widget( "heurist.mapping", {
                 remove: !this.options.ondraw_save_on_addition
             },
             draw: {
-                polygon: (mode=='image')?false:{
+                polygon: (mode=='image' || mode=='rectangle')?false:{
                     allowIntersection: false,
                     showArea: true,
                     shapeOptions: {

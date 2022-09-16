@@ -450,21 +450,7 @@ console.log('load google map api')
                 }
 
                 if(!window.hWin.HEURIST4.util.isempty(initial_tool) && initial_tool != null){ // check if only one type of drawing tool is allowed
-                    if(initial_tool == 'rectangle'){ // only the rectangle tool is allowed
-                        $('.leaflet-draw-draw-marker').hide();
-                        $('.leaflet-draw-draw-circle').hide();
-                        $('.leaflet-draw-draw-circle').hide();
-                        $('.leaflet-draw-draw-rectangle').show();                        
-                        $('.leaflet-draw-draw-polygon').hide();
-                        $('.leaflet-draw-draw-polyline').hide();
-                    }
-                }else{
-                    $('.leaflet-draw-draw-marker').show();
-                    $('.leaflet-draw-draw-circle').show();
-                    $('.leaflet-draw-draw-circle').show();
-                    $('.leaflet-draw-draw-rectangle').show();
-                    $('.leaflet-draw-draw-polygon').show();
-                    $('.leaflet-draw-draw-polyline').show();
+                    mapping.mapping( 'drawSetControls', initial_tool);
                 }
 
                 var that = this;

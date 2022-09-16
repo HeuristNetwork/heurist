@@ -162,8 +162,8 @@ function hMapManager( _options )
             .appendTo(options.container);
 
         btn_collapse = $('<a>').attr('title', 'Minimize legend')
-            .css({'width':'16px','height':'16px','z-index':1001,float:'right',background:'none'})
-            .addClass('ui-icon ui-icon-carat-1-ne')
+            .css({'width':'16px','height':'16px','z-index':1001,background:'none',border:'none',cursor:'pointer',position:'absolute',right:'3px'})
+            .addClass('ui-icon ui-icon-caret-1-ne')
             .on({click: _onCollapse }).hide()
             .appendTo(options.container);
         
