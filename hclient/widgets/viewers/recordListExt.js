@@ -493,8 +493,6 @@ this._dout('refresh vis='+this.element.is(':visible'));
     //
     _checkRecordsetLengthAndRunSmartyReport: function(limit){
         
-console.log('_checkRecordsetLengthAndRunSmartyReport');
-        
         if(!this.options.is_frame_based) return;
 
         var showReps = this.dosframe[0].contentWindow.showReps;

@@ -1999,6 +1999,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             ON_CUSTOM_EVENT: "ON_CUSTOM_EVENT", //special event for custom link various widgets
             ON_REC_UPDATE: "ON_REC_UPDATE",
             ON_REC_SELECT: "ON_REC_SELECT",
+            ON_REC_STATUS: "ON_REC_STATUS",
             ON_REC_COLLECT: "ON_REC_COLLECT",
             ON_LAYOUT_RESIZE: "ON_LAYOUT_RESIZE",
             ON_WINDOW_RESIZE: "ON_WINDOW_RESIZE",

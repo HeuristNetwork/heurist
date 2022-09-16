@@ -199,6 +199,7 @@ $.widget( "heurist.resultList", {
                 + ' ' + window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT
+                + ' ' + window.hWin.HAPI4.Event.ON_REC_STATUS
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_COLLECT
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH;
 
@@ -387,8 +388,15 @@ $.widget( "heurist.resultList", {
                         if(data.reset){ //clear selection
                             that.setSelected(null);
                         }else{
-                            if(data.map_layer_status){  //visible hidden loading error
-                                
+                            that.setSelected(data.selection);        
+                        }
+                        
+                        
+                    }
+                } 
+                else if(e.type == window.hWin.HAPI4.Event.ON_REC_STATUS){
+                    
+                    if(data.map_layer_status){  //visible hidden loading error
                                 if(data.selection && data.selection.length==1){
                                     
                                     var rdiv = that.div_content.find('.recordDiv[recid="'+data.selection[0]+'"]');
@@ -422,14 +430,7 @@ $.widget( "heurist.resultList", {
                                     }
                                     
                                 }
-                                
-                            }else{
-                                that.setSelected(data.selection);        
-                            }
-                        }
-                        
-                        
-                    }
+                    }                    
                 }else 
                 if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE)
                 {

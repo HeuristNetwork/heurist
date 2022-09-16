@@ -414,7 +414,7 @@ console.log(re);
                     mapping.mapping('option','onlayerstatus',function( layer_id, status ) {
 
                             if(layer_id>0)
-                            $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
+                            $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_STATUS,
                                     { selection:[layer_id], map_layer_status:status,
                                       source:that.element.attr('id'), search_realm:that.options.search_realm } );
 
