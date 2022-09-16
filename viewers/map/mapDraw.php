@@ -479,9 +479,12 @@ console.log('load google map api')
 
                                 onMapDrawAdd(); //clears other markers if multiple objects are not allowed
 
-                                that.drawnItems.addLayer(layer);
-                                layer.editing.enable();
-
+                                // Draw marker on top of geocoder result, if point tool is available
+                                var marker_ele = $('.leaflet-draw-draw-marker');
+                                if(marker_ele.length == 1 && marker_ele.is(':visible')){
+                                    that.drawnItems.addLayer(layer);
+                                    layer.editing.enable();
+                                }
 
                                 that.options.ondrawend.call(that, map);
                             }
