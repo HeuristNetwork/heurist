@@ -1319,9 +1319,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     var divs = this.options.reference_trm_manger.find('div');
                     var $title_container = $(divs[divs.length-1]);
 
-                    if($title_container.find('span').length > 0){
+                    if($title_container.find('span').length > 0 && ){
 
-                        var label = $title_container.find('span').attr('title') + ' vocab';
+                        var label = $title_container.find('span').attr('title');
+                        label = label + (label.search(/vocab/i) == -1 ? ' vocab' : '');
+
                         this._editing.setFieldValueByName('trm_Label', label, true);
                     }
                 }
@@ -1402,7 +1404,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         ele = this._editing.getFieldByName('trm_Label');
         var suggested_name = this.options.suggested_name;
         if(!window.hWin.HEURIST4.util.isempty(suggested_name) && this._currentEditID <= 0 && ele.val() == ''){
-            if(isVocab && suggested_name.indexOf('vocab') < 0){
+            if(isVocab && suggested_name.search(/vocab/i) == -1){
                 suggested_name += ' vocab';
             }
             this._editing.setFieldValueByName('trm_Label', this.options.suggested_name, false);
@@ -1765,7 +1767,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             //request['trm_parentID'] = fields['trm_ParentTermID'];
         }
 
-        if(this._currentEditID == -1 && this.options.auxilary == 'vocabulary' && !fields['trm_Label'].endsWith(' vocab')){ // add 'vocab' to the end of new vocabulary
+        if(this._currentEditID == -1 && this.options.auxilary == 'vocabulary' && !fields['trm_Label'].search(/vocab/i) == -1){ // add 'vocab' to the end of new vocabulary
             fields['trm_Label'] += ' vocab';
         }
 
