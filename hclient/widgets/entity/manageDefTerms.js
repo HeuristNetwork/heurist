@@ -1319,7 +1319,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     var divs = this.options.reference_trm_manger.find('div');
                     var $title_container = $(divs[divs.length-1]);
 
-                    if($title_container.find('span').length > 0 && ){
+                    if($title_container.find('span').length > 0){
 
                         var label = $title_container.find('span').attr('title');
                         label = label + (label.search(/vocab/i) == -1 ? ' vocab' : '');
