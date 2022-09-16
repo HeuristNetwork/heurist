@@ -4203,6 +4203,25 @@ $.widget( "heurist.mapping", {
             }
         }
         
+    },
+
+    //
+    // Set nativemap's zoom
+    //
+    setMapZoom: function(zoom_value, is_KM){
+
+        var bounds = this.drawnItems.getBounds();
+        var zoom = null;
+
+        if(is_KM){ // convert KM to map native value
+            zoom = this.convertZoomToNative(zoom_value, bounds);
+        }else{
+            zoom = zoom_value;
+        }
+
+        if(zoom && zoom <= this.nativemap.getMaxZoom() && zoom >= this.nativemap.getMinZoom()){
+            this.nativemap.setZoom(zoom);
+        }
     }
     
 });

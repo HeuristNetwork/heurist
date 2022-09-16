@@ -55,6 +55,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
 <script src="<?php echo PDIR;?>external/leaflet/bookmarks/Leaflet.Bookmarks.min.js"></script>
 <script src="<?php echo PDIR;?>external/leaflet/draw/leaflet.draw-src.js"></script>
 <script src="<?php echo PDIR;?>external/leaflet/leaflet.circle.topolygon-src.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/js/cheapRuler.js" charset="utf-8"></script>
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/bookmarks/leaflet.bookmarks.css">
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/draw/leaflet.draw.css">
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
@@ -426,7 +427,11 @@ console.log('load google map api')
                     if(zoom_with_delay){
                         setTimeout(function(){ 
                                 mapping.mapping( 'drawZoomTo' ); 
-                                    
+
+                                if(initial_wkt.indexOf('POINT') >= 0){ // Zoom out to avoid a de-loaded base map
+                                    mapping.mapping('setMapZoom', 5, true); // userAgent.indexOf('Firefox') >= 0 ? 10 : 5
+                                }
+
                                 refreshImageOverlay( true );
                         }, 2000);
                     }
