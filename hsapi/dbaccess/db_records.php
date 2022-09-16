@@ -57,6 +57,103 @@ $terms         = null;
 $block_swf_email = false;
 
 /**
+* Returns default values for rec_NonOwnerVisibility, rec_NonOwnerVisibilityGroups, rec_OwnerUGrpID
+* 
+*/
+function recordAddDefaultValues($system, $record=null){
+
+    $sysvals = null;
+    $rectype = null;
+    $owner_grps = array();
+    $ownerid = -1;
+    $access = null;
+    $access_grps = null;
+    
+    
+    //obtain user preferences values
+    $addRecDefaults = $system->user_GetPreference('record-add-defaults');
+    if ($addRecDefaults){
+        if (@$addRecDefaults[0]){
+            $userDefaultRectype = intval($addRecDefaults[0]);
+        }
+        if (@$addRecDefaults[1]!=null){ //default ownership
+            if(is_string($addRecDefaults[1]) &&  $addRecDefaults[1]!=''){
+                $userDefaultOwnerGroupID = explode(',', $addRecDefaults[1]);
+            }else if(is_numeric($addRecDefaults[1])){
+                $userDefaultOwnerGroupID = intval($addRecDefaults[1]);
+            }
+        }
+        if (@$addRecDefaults[2]){
+            $userDefaultAccess = $addRecDefaults[2];
+        }
+        if (@$addRecDefaults[4]){
+            $userDefaultAccessGroups = $addRecDefaults[4];
+        }
+    }
+    
+    //from record
+    if(@$record){
+        //it is allowed with prefix rec_ and without
+        foreach ($record as $key=>$val){
+            if(strpos($key,'rec_')===0){
+                $record[substr($key,4)] = $val;
+                unset($record[$key]);
+            }
+        }
+        
+        $rectype = @$record['RecTypeID'];
+        $access = @$record['NonOwnerVisibility'];
+        $access_grps = @$record['NonOwnerVisibilityGroups'];
+        //$owner_grps = prepareIds(@$record['OwnerUGrpID'], true);
+        
+        $rectype = ConceptCode::getRecTypeLocalID($rectype);
+    }    
+    
+    
+    // RECTYPE
+    $rectype = intval($rectype);
+    if(!$rectype && isset($userDefaultRectype)){
+        $rectype = $userDefaultRectype;
+    }    
+    // OWNERSHIP
+    if(isset($userDefaultOwnerGroupID)){ // from user preferences
+        $ownerid = is_array($userDefaultOwnerGroupID)?$userDefaultOwnerGroupID:array($userDefaultOwnerGroupID);
+    }
+    if(!is_array($ownerid) || !($ownerid[0]>=0)){
+        if(!$sysvals) $sysvals = $system->get_system();
+        $ownerid = @$sysvals['sys_NewRecOwnerGrpID']; //from database properties
+    }
+    if(!is_array($ownerid) || !($ownerid[0]>=0)){
+        $ownerid = $system->get_user_id(); //by default current user
+    }
+    if(is_array($ownerid)){
+        $owner_grps = $ownerid;
+    }else if($ownerid>=0){
+        $owner_grps = array($ownerid);
+    }   
+    
+    // NON OWNER VISIBILITY
+    if(isset($userDefaultAccess)) {//from user prefs
+        $access = $userDefaultAccess;
+    }
+    if(!$access){
+        $sysvals = $system->get_system();
+        $access = @$sysvals['sys_NewRecAccess']; //from db properties
+    }
+    if(!$access){
+        $access = 'viewable'; // default value
+    }
+    //access groups
+    if($access!='viewable'){
+        $access_grps = null;
+    }else if($access_grps==null && isset($userDefaultAccessGroups)){  
+        $access_grps = $userDefaultAccessGroups;
+    }
+    
+        return array('rectype'=>$rectype, 'owner_grps'=>$owner_grps, 'access'=>$access, 'access_grps'=>$access_grps );
+}
+
+/**
 * Creates temporary record for given user
 */
 function recordAdd($system, $record, $return_id_only=false){
@@ -64,7 +161,9 @@ function recordAdd($system, $record, $return_id_only=false){
     if ( $system->get_user_id()<1 ) {
         return $system->addError(HEURIST_REQUEST_DENIED);
     }
-
+    
+    $mysqli = $system->get_mysqli();
+/*
     $addRecDefaults = $system->user_GetPreference('record-add-defaults');
     if ($addRecDefaults){
         if (@$addRecDefaults[0]){
@@ -85,7 +184,6 @@ function recordAdd($system, $record, $return_id_only=false){
         }
     }
 
-    $mysqli = $system->get_mysqli();
     $sysvals = $system->get_system();
 
     if($record){
@@ -117,10 +215,6 @@ function recordAdd($system, $record, $return_id_only=false){
         $rectype = $userDefaultRectype;
     }
 
-    if (!($rectype && dbs_GetRectypeByID($mysqli, $rectype)) ) {
-        return $system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong ('.$rectype.')');
-    }
-
     // OWNER -----------
     if(count($owner_grps)==0 || !($owner_grps[0]>=0)){
         $ownerid = -1;
@@ -141,14 +235,6 @@ function recordAdd($system, $record, $return_id_only=false){
     }
 
     // ACCESS -------------
-    // for CMS rectypes by default public and owner is Database owners group
-    if (//($system->defineConstant('RT_CMS_HOME') && $rectype==RT_CMS_HOME)||
-    ($system->defineConstant('RT_CMS_MENU') && $rectype==RT_CMS_MENU))
-    {  
-        $access = 'public';
-        $owner_grps = array(1); 
-    }
-
 
     if(!$access && isset($userDefaultAccess)) {//from user prefs
         $access = $userDefaultAccess;
@@ -165,7 +251,25 @@ function recordAdd($system, $record, $return_id_only=false){
     }else if($access_grps==null && isset($userDefaultAccessGroups)){  
         $access_grps = $userDefaultAccessGroups;
     }
+*/
+    $def_params = recordAddDefaultValues($system, $record);
+    
+    $rectype = $def_params['rectype'];
+    $owner_grps = $def_params['owner_grps'];
+    $access = $def_params['access'];
+    $access_grps = $def_params['access_grps'];
 
+    if (!($rectype && dbs_GetRectypeByID($mysqli, $rectype)) ) {
+        return $system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong ('.$rectype.')');
+    }
+    
+    // for CMS rectypes by default public and owner is Database owners group
+    if ($system->defineConstant('RT_CMS_MENU') && $rectype==RT_CMS_MENU)
+    {  
+        $access= 'public';
+        $owner_grps = array(1); 
+    }
+    
     //@todo correct for multi owners !!!!!!
     //$record['swf'] - ownership is set from swf rules
     if (!(@$record['swf'] || $system->is_admin() || $system->is_member($owner_grps))){ 
@@ -2743,15 +2847,21 @@ function recordDuplicate($system, $id){
         return $system->addError(HEURIST_INVALID_REQUEST, "Record ID is not defined");
     }
 
-    $new_owner = 0;
-
+    $def_params = recordAddDefaultValues($system);
+    $new_owner = $def_params['owner_grps'][0];
+    $access = $def_params['access'];
+    $access_grps = $def_params['access_grps'];
+    
+    $currentUserId = $system->get_user_id();
+    
     $row = mysql__select_row($mysqli, "SELECT rec_OwnerUGrpID, rec_RecTypeID FROM Records WHERE rec_ID = ".$id);
-    $owner = $row[0];
+    //$owner = $row[0];
     $recTypeID = $row[1];
-    if (!$system->is_member($owner)){   //current user is not member of current group
-        $new_owner = $system->get_user_id();
+    if (!is_numeric($new_owner) || !(intval($new_owner)>=0)){   //current user is not member of current group
+        $new_owner = $currentUserId;
         //return $system->addError(HEURIST_REQUEST_DENIED, 'User not authorised to duplicate record');
     }
+    
 
     $bkmk_count = 0;
     $rels_count = 0;
@@ -2769,12 +2879,15 @@ function recordDuplicate($system, $id){
         $new_id = mysql__duplicate_table_record($mysqli, 'Records', 'rec_ID', $id, null);
         //@todo addRecordIndexEntry(DATABASE, $recTypeID, $id);
 
-        $query = '';
-        if($new_owner>0){
-            $query = ', rec_OwnerUGrpID='.$new_owner;
+        $query = 'UPDATE Records set rec_Modified=NOW(), rec_Added=NOW(), rec_AddedByUGrpID='.$currentUserId;
+        if(is_numeric($new_owner) && intval($new_owner)>=0){
+            $query = $query.', rec_OwnerUGrpID='.$new_owner;
+        }
+        if($access){
+            $query = $query.', rec_NonOwnerVisibility="'.$access.'"';
         }
 
-        $query = 'UPDATE Records set rec_Modified=NOW()'.$query.' where rec_ID='.$new_id;
+        $query = $query.' where rec_ID='.$new_id;
         $res = $mysqli->query($query);
         if(!$res){
             $error = 'database error - ' .$mysqli->error;
@@ -2783,6 +2896,11 @@ function recordDuplicate($system, $id){
 
 
         if(!is_int($new_id)){ $error = $new_id; break; }
+        
+        
+        if($access_grps!=null){
+            updateUsrRecPermissions($mysqli, $new_id, $access_grps, null);
+        }
 
         //duplicate record details
         $res = mysql__duplicate_table_record($mysqli, 'recDetails', 'dtl_RecID', $id, $new_id);
