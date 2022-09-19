@@ -209,6 +209,9 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
     self::initialize();
     
+    //validatae filename 
+    $encoded_filename = fileNameSanitize($encoded_filename, false);
+    
     $is_kml_data = (@$params["kmldata"]===true);
     $is_csv_data = (@$params["csvdata"]===true);
     $extension = null;
