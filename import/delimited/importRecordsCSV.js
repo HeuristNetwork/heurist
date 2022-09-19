@@ -2115,7 +2115,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         });
 
         $.each(rec_results, function(opt_id, field_res){
-            var result = Object.entries(field_res); console.log(opt_id, result);
+            var result = Object.entries(field_res); 
+//console.log(opt_id, result);
             result.sort((a, b) => b[1] - a[1]);
 
             for (var i = 0; i < result.length; i++) {
@@ -2311,7 +2312,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     
             }
         });
-console.log(exact_matches);        
+//console.log(exact_matches);        
         _performPartialMatching(imp_session['columns']);        
         
         //show counts

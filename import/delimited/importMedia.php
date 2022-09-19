@@ -172,7 +172,7 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
         </div>
         <div id="btnParseData" style="margin-top: 10px;">Analyse</div>
     </div>
-    <fieldset class="ent_content_full" style="top:7em;padding-top:1em;">
+    <fieldset class="ent_content_full" style="top:10em;padding-top:1em;">
             <div>
                 <br><br>
                 <label for="csv_delimiter">Field separator:</label>
@@ -231,7 +231,7 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
                 <select id="field_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
-            <!-- what does this do? Probably redundant. Àrtem, please remove if not required 
+            <!-- Separator for description field for multivalue 
             <div>
                 <label>Description separator</label><br>
                 <input id="field_desc_sep" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px" value=", Download "/>
