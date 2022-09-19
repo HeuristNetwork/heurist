@@ -1104,14 +1104,15 @@ function unzipArchiveFlat($zipfile, $destination){
                 if (!$fp ) {
                     throw new Exception('Unable to extract the file.'); 
                 }else{                
-                    $ofp = fopen($destination.basename($entry), 'w' ); 
+                    $filename = $destination.fileNameSanitize(basename($entry));
+                    $ofp = fopen($filename, 'w' ); 
                     while ( ! feof( $fp ) ) 
                         fwrite( $ofp, fread($fp, 8192) ); 
                     
                     fclose($fp); 
                     fclose($ofp); 
                     
-                    $res[] = $destination.basename($entry);
+                    $res[] = $filename;
                 }
             } 
 
