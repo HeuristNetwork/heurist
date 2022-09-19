@@ -1509,14 +1509,19 @@ if(false){  //this query fails for maria db
 
     $prevLbl = null;
     foreach ($bds as $bd) {
-        if (defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) continue;
+        if (defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) {
+            continue;
+        }
         
         if(defined('DT_WORKFLOW_STAGE') && $bd['dty_ID']==DT_WORKFLOW_STAGE){
-
-            $query = 'SELECT rst_ID FROM defRecStructure WHERE rst_DetailTypeID ='.$bd['dty_ID']
-                .' AND rst_RecTypeID = '. $bib['rec_RecTypeID'];
-            if(!(mysql__select_value($mysqli, $query)>0)) continue; //not in structure
+            continue;
         }
+
+        $query = 'SELECT rst_ID FROM defRecStructure WHERE rst_DetailTypeID ='.$bd['dty_ID']
+                .' AND rst_RecTypeID = '. $bib['rec_RecTypeID'];
+
+        if(!(mysql__select_value($mysqli, $query)>0)) continue; //not in structure
+
 
         $is_cms_content = !$is_map_popup &&  
                           (defined('RT_CMS_MENU') && $bib['rec_RecTypeID']==RT_CMS_MENU ||
@@ -1721,13 +1726,11 @@ function print_relation_details($bib) {
 		$from_res->close();
     }
     if($to_res){
- print ('print_relation_details '.$to_res->num_rows);       
         while ($reln = $to_res->fetch_assoc()) {
 
 			$bd = fetch_relation_details($reln['dtl_RecID'], false);
 			// check related record
 			if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
-print ' ob, ';
 				continue;
 			}
 			$relatedRecID = $bd['RelatedRecID']['rec_ID'];
@@ -1736,7 +1739,6 @@ print ' ob, ';
 			if(mysql__select_value($mysqli, 
 				"select count(rec_ID) from Records where rec_ID =$relatedRecID and $accessCondition")==0){
 				//related is not accessable
-print ' na, ';           
 				continue;
 			}
 
