@@ -69,8 +69,11 @@ define ('TESTMODE', false);           // Set to true to process the file without
 $error = false;
 $errorScriptExecution = null;
 
-//
-//
+//  HEURIST_DIR."admin/setup/dbcreate/blankDBStructure.sql"
+//  HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql"
+//  HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql"
+//  HEURIST_DIR."admin/setup/dbcreate/addFunctions.sql"
+//  sqlCreateRecLinks.sql and upgrade scripts from HEURIST_DIR."admin/setup/dbupgrade
 //
 function execute_db_script($system, $database_name_full, $script_file, $message){
     global $errorScriptExecution;
@@ -236,28 +239,31 @@ do_action('database_connected');
 
 
 // Single file mode
+$param_start = 1;
+$param_fn = $filename;
+$param_foffset = 0;
+$param_totalqueries = 0;
 
-if (!$error && !isset ($_REQUEST["fn"]) && $filename!="")
+if (false && !$error && isset($_REQUEST["fn"])) //DISABLED snyk SSRF
 {
     //    echo ("<p><a href=\"".$_SERVER["PHP_SELF"]."?start=1&amp;fn=".urlencode($filename)."&amp;foffset=0&amp;totalqueries=0\">Start Import</a> from $filename into $db_name at $db_server</p>\n");
-    $_REQUEST["start"] = "1";
-    $_REQUEST["fn"] = $filename;
-    $_REQUEST["foffset"]=0;
-    $_REQUEST["totalqueries"]=0;
-    //$filename = "";
+    $param_start = $_REQUEST["start"];
+    $param_fn = $_REQUEST["fn"];
+    $param_foffset = $_REQUEST["foffset"];
+    $param_totalqueries = $_REQUEST["totalqueries"];
 }
 
 // Open the file
 
-if (!$error && isset($_REQUEST["start"]))
+if (!$error && isset($param_start))
 {
 
-    // Set current filename ($filename overrides $_REQUEST["fn"] if set)
+    // Set current filename ($filename overrides $param_fn if set)
 
     if ($filename!="")
         $curfilename=$filename;
-    else if (isset($_REQUEST["fn"]))
-        $curfilename=urldecode($_REQUEST["fn"]);
+    else if (isset($param_fn))
+        $curfilename=urldecode($param_fn);
     else
         $curfilename="";
 
@@ -299,19 +305,19 @@ if (!$error && isset($_REQUEST["start"]))
 // START IMPORT SESSION HERE
 // *******************************************************************************************
 
-if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_match("/(\.(sql|gz|csv))$/i",$curfilename))
+if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(sql|gz|csv))$/i",$curfilename))
 {
 
   do_action('session_start');
 
 // Check start and foffset are numeric values
 
-  if (!is_numeric($_REQUEST["start"]) || !is_numeric($_REQUEST["foffset"]))
+  if (!is_numeric($param_start) || !is_numeric($param_foffset))
   { error_echo ("<p class=\"error\">UNEXPECTED: Non-numeric values for start and foffset</p>\n");
   }
   else
-  {	$_REQUEST["start"]   = floor($_REQUEST["start"]);
-    $_REQUEST["foffset"] = floor($_REQUEST["foffset"]);
+  {	$param_start   = floor($param_start);
+    $param_foffset = floor($param_foffset);
   }
 
 // Set the current delimiter if defined
@@ -321,7 +327,7 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
 
 // Empty CSV table if requested
 
-  if (!$error && $_REQUEST["start"]==1 && $csv_insert_table != "" && $csv_preempty_table)
+  if (!$error && $param_start==1 && $csv_insert_table != "" && $csv_preempty_table)
   {
     $query = "DELETE FROM `$csv_insert_table`";
     if (!TESTMODE && !$mysqli->query(trim($query)))
@@ -339,35 +345,35 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
     skin_open();
     echo ("<p class=\"centr\">TEST MODE ENABLED</p>\n");
     echo ("<p class=\"centr\">Processing file: <b>".$curfilename."</b></p>\n");
-    echo ("<p class=\"smlcentr\">Starting from line: ".$_REQUEST["start"]."</p>\n");
+    echo ("<p class=\"smlcentr\">Starting from line: ".$param_start."</p>\n");
     skin_close();
   }
 
-// Check $_REQUEST["foffset"] upon $filesize (can't do it on gzipped files)
+// Check $param_foffset upon $filesize (can't do it on gzipped files)
 
-  if (!$error && !$gzipmode && $_REQUEST["foffset"]>$filesize)
+  if (!$error && !$gzipmode && $param_foffset>$filesize)
   { error_echo ("<p class=\"error\">UNEXPECTED: Can't set file pointer behind the end of file</p>\n");
   }
 
-// Set file pointer to $_REQUEST["foffset"]
+// Set file pointer to $param_foffset
 
-  if (!$error && ((!$gzipmode && fseek($file, $_REQUEST["foffset"])!=0) || ($gzipmode && gzseek($file, $_REQUEST["foffset"])!=0)))
-  { error_echo ("<p class=\"error\">UNEXPECTED: Can't set file pointer to offset: ".$_REQUEST["foffset"]."</p>\n");
+  if (!$error && ((!$gzipmode && fseek($file, $param_foffset)!=0) || ($gzipmode && gzseek($file, $param_foffset)!=0)))
+  { error_echo ("<p class=\"error\">UNEXPECTED: Can't set file pointer to offset: ".$param_foffset."</p>\n");
   }
 
 // Start processing queries from $file
 
   if (!$error)
   { $query="";
-    $queries=0;
-    $totalqueries=$_REQUEST["totalqueries"];
-    $linenumber=$_REQUEST["start"];
-    $querylines=0;
-    $inparents=false;
+    $queries = 0;
+    $totalqueries = $param_totalqueries;
+    $linenumber = $param_start;
+    $querylines = 0;
+    $inparents = false;
 
 // Stay processing as long as the $linespersession is not reached or the query is still incomplete
 
-    while ($linenumber<$_REQUEST["start"]+$linespersession || $query!="")
+    while ($linenumber<$param_start+$linespersession || $query!="")
     {
 
 // Read the whole next line
@@ -383,7 +389,7 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
 
 // Remove UTF8 Byte Order Mark at the file beginning if any
 
-      if ($_REQUEST["foffset"]==0)
+      if ($param_foffset==0)
         $dumpline=preg_replace('|^\xEF\xBB\xBF|','',$dumpline);
 
 // Create an SQL query from CSV line
@@ -536,7 +542,7 @@ skin_open();
 
   if (!$error)
   {
-    $lines_this   = $linenumber-$_REQUEST["start"];
+    $lines_this   = $linenumber-$param_start;
     $lines_done   = $linenumber-1;
     $lines_togo   = ' ? ';
     $lines_tota   = ' ? ';
@@ -546,7 +552,7 @@ skin_open();
     $queries_togo = ' ? ';
     $queries_tota = ' ? ';
 
-    $bytes_this   = $foffset-$_REQUEST["foffset"];
+    $bytes_this   = $foffset-$param_foffset;
     $bytes_done   = $foffset;
     $kbytes_this  = round($bytes_this/1024,2);
     $kbytes_done  = round($bytes_done/1024,2);
@@ -609,7 +615,7 @@ skin_open();
 
 // Finish message and restart the script
 
-    if ($linenumber<$_REQUEST["start"]+$linespersession)
+    if ($linenumber<$param_start+$linespersession)
     { echo ("<p class=\"successcentr\">Congratulations: End of file reached, assuming OK</p>\n");
 
       do_action('script_finished');

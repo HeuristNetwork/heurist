@@ -119,7 +119,9 @@
                 }else {
                     $filepath = resolveFilePath($kml_file['fullPath']);
                     
-                    if (file_exists($filepath)) {
+                    $filepath = isPathInHeuristUploadFolder($filepath); //snyk SSRF
+                    
+                    if ($filepath!==false && file_exists($filepath)) {
                         
                         $ext = strtolower(substr($filepath,-4,4));
                     }else{

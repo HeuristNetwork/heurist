@@ -338,7 +338,7 @@ function executeSmartyTemplate($system, $params){
         //this is user name $template_file = "_temp.tpl";
         $user = $system->getCurrentUser();
         
-        $template_file = "_".$user['ugr_Name'].".tpl";
+        $template_file = '_'.fileNameSanitize($user['ugr_Name']).'.tpl'; //snyk SSRF
         $template_folder = $smarty->getTemplateDir();
         if(is_array($template_folder)) $template_folder = $template_folder[0];
         $file = fopen ($template_folder.$template_file, "w"); 

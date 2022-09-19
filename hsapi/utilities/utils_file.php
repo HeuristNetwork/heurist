@@ -1104,7 +1104,7 @@ function unzipArchiveFlat($zipfile, $destination){
                 if (!$fp ) {
                     throw new Exception('Unable to extract the file.'); 
                 }else{                
-                    $filename = $destination.fileNameSanitize(basename($entry));
+                    $filename = $destination.fileNameSanitize(basename($entry)); //snyk SSRF
                     $ofp = fopen($filename, 'w' ); 
                     while ( ! feof( $fp ) ) 
                         fwrite( $ofp, fread($fp, 8192) ); 
