@@ -2806,7 +2806,7 @@ public static function performImport($params, $mode_output){
                                 $fres = null;
                                 
                                 if(is_numeric($r_value) && intval($r_value)>0){ //ulf_UD
-                                    $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE $ulf_ID='.$r_value;
+                                    $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ID='.$r_value;
                                 }else if(strpos($r_value,'http')===0){
                                     //find if url is already registered
                                     $is_url = true;
