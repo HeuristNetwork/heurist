@@ -68,9 +68,11 @@ if(@$_REQUEST['data']){
         
         $res = array();
         foreach ($files_to_remove as $file) {
+            
+            $realpath_file = isPathInHeuristUploadFolder($file);
 
-            if(file_exists($file)){
-                if(unlink($file)) array_push($res, $file);
+            if($realpath_file!==false && file_exists($realpath_file)){
+                if(unlink($realpath_file)) array_push($res, $file);
             }
         }
         $response = array("status"=>HEURIST_OK, "data"=> $res);
