@@ -1450,7 +1450,7 @@ $.widget( "heurist.editing_input", {
             }//allow edit terms only for true defTerms enum
             
             // Display term selector as radio buttons/checkboxes
-            var asButtons = this.options.recordset && this.options.recordset.entityName=='Records' && this.f('rst_TermsAsButtons');
+            var asButtons = this.options.recordset && this.options.recordset.entityName=='Records' && this.f('rst_TermsAsButtons') == 1;
             if(asButtons){
                 var vocab_id = that.f('rst_FilteredJsonTermIDTree');
                 var child_terms = $Db.trm_TreeData(vocab_id, 'set');
@@ -5278,9 +5278,9 @@ console.log('onpaste');
         var that = this;
 
         var child_terms = $Db.trm_TreeData(vocab_id, 'set');
-        var asButtons = this.options.recordset && this.options.recordset.entityName=='Records' && this.f('rst_TermsAsButtons');
+        var asButtons = this.options.recordset && this.options.recordset.entityName=='Records' && this.f('rst_TermsAsButtons') == 1;
 
-        if(asButtons == 1 && child_terms.length <= 20){ // recreate buttons/checkboxes
+        if(asButtons && child_terms.length <= 20){ // recreate buttons/checkboxes
 
             this.enum_buttons = (Number(this.f('rst_MaxValues')) != 1) ? 'checkbox' : 'radio';
             var dtb_res = this._createEnumButtons(true, child_terms);
@@ -5513,15 +5513,15 @@ console.log('onpaste');
                     that.onChange();
                 });
 
-            var $label = $('<label>', {'title': trm_label, append: [$btn, trm_label]})
-                            .addClass('truncate enum_input')
-                            .css({
-                                'max-width': '120px',
-                                //'min-width': '120px',
-                                'display': 'inline-block',
-                                'margin-right': '15px'
-                            })
-                            .appendTo($inputdiv);
+            $('<label>', {'title': trm_label, append: [$btn, trm_label]})
+                    .addClass('truncate enum_input')
+                    .css({
+                        'max-width': '120px',
+                        //'min-width': '120px',
+                        'display': 'inline-block',
+                        'margin-right': '15px'
+                    })
+                    .appendTo($inputdiv);
         }
 
         var $other_btns = $inputdiv.find('.smallicon, .smallbutton');
