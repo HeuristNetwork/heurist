@@ -286,14 +286,13 @@ div.input-div{
     padding-bottom:2px;
 }
 
-div.input-div:hover > .btn_input_clear, .btn_input_clear:hover, 
-div.input-div:hover > .btn_input_move, .btn_input_move:hover {
+div.input-div:hover > .btn_input_clear, .btn_input_clear:hover {
     display: inline-block;
 }
 div.input-div > .btn_input_clear, .btn_input_clear {
     display: none;
 }
-div.input-div > .btn_input_move, .btn_input_move,
+
 div.input-div > .btn_input_move, .btn_input_move {
     display: none;
     cursor: grab;
