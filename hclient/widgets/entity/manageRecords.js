@@ -2031,12 +2031,21 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     editRecordTypeTitle: function(){
         
+        var that = this;
         var rty_ID = this._currentEditRecTypeID;
         var maskvalue = $Db.rty(rty_ID, 'rty_TitleMask')
-        
+
+        this.element.css('cursor', 'wait');
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Preparing record type title editor...</span>');
+
         window.hWin.HEURIST4.ui.showRecordActionDialog('rectypeTitleMask',
                 {rty_ID:this._currentEditRecTypeID, rty_TitleMask:maskvalue, path: 'widgets/entity/popups/',
-                 onClose: function(newvalue){}});
+                 onClose: function(newvalue){},
+                 onInitFinished: function(){ 
+                    that.element.css('cursor', ''); 
+                    window.hWin.HEURIST4.msg.sendCoverallToBack(that.element); 
+                 }
+                });
     },
 
     //

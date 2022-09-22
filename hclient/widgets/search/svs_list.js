@@ -46,7 +46,7 @@ $.widget( "heurist.svs_list", {
 
         handle_favourites: null, // function to add/remove favourite filters
 
-        simple_search_allowed: 1, // enable 'search everything' filter
+        simple_search_allowed: 0, // enable 'search everything' filter
         simple_search_header: 'Simple search', // header text for 'search everything' filter
         simple_search_text: 'Search everything:', // field label for the simple search filter
         
@@ -510,6 +510,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                         }else{
                             that.loaded_saved_searches = response.data; //svs_id=>array()
                         }
+                        /* IAN request 2022-09-19 Just display that 'Website filters' doesn't exist/has no filters
                         if(window.hWin.HEURIST4.util.isempty(that.loaded_saved_searches) &&
                             that.options.allowed_UGrpID.length==1 && that.options.allowed_UGrpID[0]==4){
                                 //special case if allowed_UGrpID is #4 (Website filters) and this group is missed - replace it to group#2
@@ -520,8 +521,8 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                                 that.reloadSavedSearches(callback);
                                 return;
                         }
-                        
-                        
+                        */
+
                         window.hWin.HAPI4.currentUser.usr_SavedSearch = that.loaded_saved_searches
                         
                         if(that.options.buttons_mode){
@@ -816,31 +817,18 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
 
         });
 
-
-        /*this.accordeon.children()
-        .accordion({
-        active: ( ( keep_status && keep_status[ this.attr('grpid') ] )?0:false),
-        header: "> h3",
-        heightStyle: "content",
-        collapsible: true,
-        activate: function(event, ui) {
-        //save status of accordions - expandad/collapsed
-        if(ui.newHeader.length>0 && ui.oldHeader.length<1){ //activated
-        keep_status[ ui.newHeader.attr('grpid') ] = true;
-        }else{ //collapsed
-        keep_status[ ui.oldHeader.attr('grpid') ] = false;
-        }
-        //save
-        window.hWin.HAPI4.save_pref('svs_list_status', keep_status);
-        }
-        });*/
         this.accordeon.show();
-        
+
+        // add search everything above tree, only for cms widget
+        if(this.isPublished && this.options.simple_search_allowed){
+            this.addSearchEverything(false);
+            this._adjustAccordionTop();
+        }
+
         //
         if(this.isPublished && this.options.init_svsID){
             this.doSearchByID( this.options.init_svsID );
-        }        
-
+        }
     },
     
     //
@@ -1093,42 +1081,9 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
             //$(this.accordeon).css({'overflow-x':'hidden',bottom:'3em'});
             $(this.accordeon).css({'overflow':'hidden',position:'unset','padding':'4px'});
 
-            //position:absolute;bottom:0px;
-            if(!this.direct_search_div && this.options.simple_search_allowed){
-
-                var header_label = !window.hWin.HEURIST4.util.isempty(this.options.simple_search_header) ? this.options.simple_search_header : 'Simple search';
-                var field_text = !window.hWin.HEURIST4.util.isempty(this.options.simple_search_text) ? this.options.simple_search_text : 'Search everything:';
-
-                this.direct_search_div = $('<div style="height:8.5em;padding:4px;width:100%">'
-                    +'<h4 style="padding:20px 0px;margin:0">'+ header_label +'</h4><label>'+ field_text +'</label>'
-                    +'&nbsp;<input id="search_query" style="display:inline-block;width:40%" type="search" value="">'
-                    +'&nbsp;<button id="search_button"/></div>')
-                .insertAfter(this.accordeon);
-                var ele_search = this.direct_search_div.find('#search_query'); //$(window.hWin.document).find('#search_query');
-                if(ele_search.length>0){
-
-                    this._on( ele_search, {
-                        keypress: function(e){
-                            var code = (e.keyCode ? e.keyCode : e.which);
-                            if (code == 13) {
-                                window.hWin.HEURIST4.util.stopEvent(e);
-                                e.preventDefault();
-                                that.doSearch(0, '', ele_search.val(), ele_search);
-                            }
-                        }
-                    });
-
-                    var btn_search = this.direct_search_div.find('#search_button')
-                    .button({icons:{primary:'ui-icon-search'},text:false})
-                    .css({width:'18px', height:'18px', 'margin-bottom': '5px'});
-                    this._on( btn_search, {
-                        click:  function(){
-                            that.doSearch(0, '', ele_search.val(), ele_search);
-                        }
-                    });
-                }
+            if(this.options.simple_search_allowed){ // add search everything below buttons
+                this.addSearchEverything(true);
             }
-
         }
         else{
             
@@ -3076,13 +3031,60 @@ console.log(err)
         }
         
         return sMsg;
-    }
+    },
 
-            
-                            
+    //
+    // Add 'search everything' container
+    //
+    addSearchEverything: function(is_buttons=false){
 
+        var that = this;
+
+        if(this.direct_search_div){
+            this.direct_search_div.remove(); 
+            this.direct_search_div = null;
+        }
+
+        var header_label = !window.hWin.HEURIST4.util.isempty(this.options.simple_search_header) ? this.options.simple_search_header : 'Simple search';
+        var field_text = !window.hWin.HEURIST4.util.isempty(this.options.simple_search_text) ? this.options.simple_search_text : 'Search everything:';
+
+        this.direct_search_div = $('<div style="height:7.5em;padding:4px 4px 4px 15px;width:100%">'
+            +'<h4 style="padding:10px 0px;margin:0">'+ header_label +'</h4><label>'+ field_text +'</label>'
+            +'&nbsp;<input id="search_query" style="display:inline-block;width:40%" type="search" value="">'
+            +'&nbsp;<button id="search_button"/></div>');
+
+        if(is_buttons){ console.log('insert after accordeon');
+            this.direct_search_div.insertAfter(this.accordeon);
+        }else{ console.log('insert before accordeon / somewhere else');
+            this.direct_search_div.insertBefore(this.accordeon);
+        }
+
+        var ele_search = this.direct_search_div.find('#search_query');
+        if(ele_search.length>0){
+
+            this._on( ele_search, {
+                keypress: function(e){
+                    var code = (e.keyCode ? e.keyCode : e.which);
+                    if (code == 13) {
+                        window.hWin.HEURIST4.util.stopEvent(e);
+                        e.preventDefault();
+                        that.doSearch(0, '', ele_search.val(), ele_search);
+                    }
+                }
+            });
+
+            var btn_search = this.direct_search_div.find('#search_button')
+            .button({icons:{primary:'ui-icon-search'},text:false})
+            .css({width:'18px', height:'18px', 'margin-bottom': '5px'});
+            this._on( btn_search, {
+                click:  function(){
+                    that.doSearch(0, '', ele_search.val(), ele_search);
+                }
+            });
+        }
         
-
+        return this.direct_search_div;
+    }
 });
 
 /*

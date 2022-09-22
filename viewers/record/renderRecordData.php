@@ -1532,15 +1532,27 @@ if(false){  //this query fails for maria db
 
         $ele_id = ($bd['rst_DisplayOrder'] != '' || $bd['rst_DisplayOrder'] != null) ? ('data-order="' . $bd['rst_DisplayOrder']) . '"' : '';
 
-        print '<div class="detailRow fieldRow" '. $ele_id .' style="border:none 1px #00ff00;'   //width:100%;
-            .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none;':'')
-            .($is_map_popup?'':'width:100%;')
-            .$font_size
-            .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
-        .'</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').$is_cms_content.'">'
-        .' '.$bd['val'].'</div></div>';
+        if($prevLbl != $bd['name']){ // start new detail row
+
+            if($prevLbl != null){
+                print '</div></div>'; // close previous detail row
+            }
+
+            // open new detail row
+            print '<div class="detailRow fieldRow" '. $ele_id .' style="border:none 1px #00ff00;'   //width:100%;
+                    .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none;':'')
+                    .($is_map_popup?'':'width:100%;')
+                    .$font_size
+                    .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
+                . '</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').$is_cms_content.'">';
+        }
+
+        print ' ' . $bd['val'] . '<br><br>'; // add value
         $prevLbl = $bd['name'];
-        
+    }
+
+    if($prevLbl != null){
+        print '</div></div>'; // close final detail row
     }
 
     $group_details = array();

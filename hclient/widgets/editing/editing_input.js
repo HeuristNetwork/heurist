@@ -73,6 +73,8 @@ $.widget( "heurist.editing_input", {
     child_terms: null, // array of child terms for current vocabulary 
     _enumsHasImages: false, 
     
+    is_sortable: false, // values are sortable
+
     // the constructor
     _create: function() {
 
@@ -165,7 +167,7 @@ $.widget( "heurist.editing_input", {
             }
         }
         
-        var is_sortable = false;
+        this.is_sortable = false;
        
         //repeat button        
         if(this.options.readonly || this.f('rst_Display')=='readonly') {
@@ -195,7 +197,7 @@ $.widget( "heurist.editing_input", {
                 
             }else{ //multiplier button
             
-                is_sortable = !that.options.is_faceted_search; 
+                this.is_sortable = !that.options.is_faceted_search; 
             
                 var btn_cont = $('<span>')
                     .css({display:'table-cell', 'vertical-align':'top', //'padding-top':'2px',
@@ -277,7 +279,7 @@ $.widget( "heurist.editing_input", {
         this.input_cell = $( "<div>")
         .addClass('input-cell')
         .appendTo( this.element );
-        if(is_sortable){
+        if(this.is_sortable){
 
             this.input_cell.sortable({
                 //containment: "parent",
@@ -401,17 +403,6 @@ $.widget( "heurist.editing_input", {
         //recreate input elements and assign given values
         this.setValue(values_to_set);
         this.options.values = this.getValues();
-
-        // add visible icon for dragging/sorting field values
-        if(is_sortable && 
-            (this.detailType=='freetext' || this.detailType=='blocktext' || this.detailType=='float' || this.detailType=='integer' || this.detailType=='url')){
-
-            $('<span>')
-                .addClass('ui-icon ui-icon-arrow-2-n-s btn_input_move')
-                .attr('title', 'Drag to re-arrange values')
-                .insertBefore(this.element.find('.btn_input_clear'));
-        }
-
         this._refresh();
     }, //end _create
 
@@ -3405,6 +3396,32 @@ console.log('onpaste');
             }
         }
         
+        // add visible icon for dragging/sorting field values
+        if(this.is_sortable && !this.enum_buttons){
+
+            var $btn_sort = $('<span>')
+                .addClass('ui-icon ui-icon-arrow-2-n-s btn_input_move smallicon')
+                .attr('title', 'Drag to re-arrange values')
+                .css('display', 'none');
+
+            if($inputdiv.find('.btn_input_clear').length > 0){
+                $btn_sort.insertBefore($inputdiv.find('.btn_input_clear'));
+            }else{
+                $btn_sort.appendTo($inputdiv);
+            }
+
+            this._on($inputdiv, {
+                'mouseenter': function(){
+                    if($inputdiv.parent().find('.input-div').length > 1){
+                        $inputdiv.find('.btn_input_move').css('display', 'inline-block');
+                    }
+                },
+                'mouseleave': function(){
+                    $inputdiv.find('.btn_input_move').css('display', 'none');
+                }
+            });
+        }
+
         //move term error message to last 
         var trm_err = $inputdiv.find('.term-error-message');
         if(trm_err.length>0){
