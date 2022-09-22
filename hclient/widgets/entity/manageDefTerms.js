@@ -30,7 +30,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     options
     initial_filter - initial vocabulary ID
     filter_groups -  restrict domain: null-any, enum or relation
-
+    view_mode 
     */
 
     //options for special mode 

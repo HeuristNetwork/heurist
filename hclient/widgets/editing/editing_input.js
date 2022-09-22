@@ -1361,7 +1361,7 @@ $.widget( "heurist.editing_input", {
                                 title: dlg_title,
                                 hide_searchForm: true,
                                 select_mode: selectmode, 
-                                view_mode: 'icon',
+                                view_mode: 'icons',
                                 initial_filter: vocab_id,
                                 default_palette_class: 'ui-heurist-populate',
                                 onselect:function(event, data){
