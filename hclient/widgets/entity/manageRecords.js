@@ -5051,7 +5051,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
 
         if($ele.parents('.ui-tabs').length > 0){
-            var index = $ele.parents('fieldset:first').attr('data-tabindex'); console.log(index, $ele.parents('.ui-tabs').tabs('instance'));
+            var index = $ele.parents('fieldset:first').attr('data-tabindex'); 
+//DEBUG            console.log(index, $ele.parents('.ui-tabs').tabs('instance'));
             $ele.parents('.ui-tabs').tabs('option', 'active', index);
         }else if($ele.parents('.ui-accordion').length > 0){
             var accordion_content = $ele.parents('.ui-accordion-content');

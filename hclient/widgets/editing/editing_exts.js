@@ -2,8 +2,9 @@
 * editng_exts.js - additional functions for editing_input
 *  1) editSymbology - edit map symbol properties 
 *  2) calculateImageExtentFromWorldFile - calculate image extents from worldfile
-*       3a) openSearchMenu
 *  3) browseRecords - browse records for resource fields 
+*     browseTerms
+*       3a) openSearchMenu
 *  4) translationSupport - opens popup dialog with ability to define translations for field values
 *       4a) translationFromUI 4b) translationToUI    
 * 
@@ -441,6 +442,8 @@ function openSearchMenu(that, $select, disableClick=true){
 
     if(!$inpt.attr('data-inited')){
 
+        $inpt.attr('data-inited',1);
+        
         //reset filter                                
         that._on($menu.find('span.smallbutton'), {click:
         function(event){
@@ -496,9 +499,46 @@ function openSearchMenu(that, $select, disableClick=true){
 				}
 			});
 		}
+        
+        var btn_add_term = $menu.find('a.add-trm');
+        if(btn_add_term.length>0){
+            that._on(btn_add_term, {
+                click: function(){
 
-        $inpt.attr('data-inited',1);
+                    var suggested_name = $menu.find('input.input_menu_filter').val();
+                    var vocab_id = that.f('rst_FilteredJsonTermIDTree');
 
+                    if(!window.hWin.HEURIST4.util.isempty(suggested_name)){
+
+                        var rg_options = {
+                            isdialog: true, 
+                            select_mode: 'manager',
+                            edit_mode: 'editonly',
+                            height: 240,
+                            rec_ID: -1,
+                            trm_VocabularyID: vocab_id,
+                            suggested_name: suggested_name, 
+                            create_one_term: true,
+                            onClose: function(trm_id){
+                                var trm_info = $Db.trm(trm_id, 'trm_ParentTermID'); 
+                                if(trm_info > 0){
+                                    if(that.selObj){
+                                        var ref_id = that.selObj.attr('ref-id');
+                                        that.selObj.remove();    
+                                        that.selObj = null;
+                                        
+                                        var $input = that.element.find('#'+ref_id);
+                                        browseTerms(that, $input, trm_id);                                    
+                                    }
+                                }
+                            }
+                        };
+
+                        window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
+                    }
+                }
+            });        
+        }
         $inpt.parents('.ui-menu-item-wrapper').removeClass('ui-menu-item-wrapper ui-state-active');
     }
 
@@ -887,8 +927,6 @@ function browseRecords(_editing_input, $input){
 
                     $inputdiv.addClass('selectmenu-parent');
                     $(that.selObj).css('max-width','300px');
-
-                    $(that.selObj).css('max-width','300px');
                     that.selObj = window.hWin.HEURIST4.ui.initHSelect(that.selObj, false,null, events);
                 }else{
                     that._off($(that.selObj), 'change');    
@@ -925,6 +963,196 @@ function browseRecords(_editing_input, $input){
     }
 }
 
+
+//
+// Creates selectmenu that is common for input elements of editing_input
+//
+function browseTerms(_editing_input, $input, value){
+    
+    var that = _editing_input;
+    
+    var $inputdiv = $input.parent(); //div.input-div
+
+        
+    function __recreateTrmLabel($input, trm_ID){
+            $input.empty();
+            if(trm_ID>0){
+                
+                var trm_Label = $Db.trm(trm_ID, 'trm_Label');
+                var trm_info = $Db.trm(trm_ID);
+
+                if(trm_info && trm_info.trm_ParentTermID != 0){
+                    
+                    while(1){
+
+                        trm_info = $Db.trm(trm_info.trm_ParentTermID);
+
+                        if(trm_info.trm_ParentTermID == 0){
+                            break;
+                        }else{
+                             trm_Label = trm_info.trm_Label + '.' +  trm_Label;
+                        }
+                    }
+                }
+            
+                window.hWin.HEURIST4.ui.addoption($input[0], trm_ID, trm_Label);
+            }
+            $input.val(trm_ID);
+    }    
+
+    function __recreateSelector(){
+
+        if(that.selObj){
+            $(that.selObj).remove();
+        }
+
+
+        var allTerms = that.f('rst_FilteredJsonTermIDTree');        
+        //headerTerms - disabled terms
+        var headerTerms = that.f('rst_TermIDTreeNonSelectableIDs') || that.f('dty_TermIDTreeNonSelectableIDs');
+
+        if(window.hWin.HEURIST4.util.isempty(allTerms) &&
+            that.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'])
+        { //specific behaviour - show all
+            allTerms = 'relation'; //show all possible relations
+        }else if(typeof allTerms == 'string' && allTerms.indexOf('-')>0){ //vocabulary concept code
+            allTerms = $Db.getLocalID('trm', allTerms);
+        }
+
+
+        var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/filter_icon_black18.png';
+
+        var  filter_form = '<div style="width:175px;padding:10px 0px">'
+        +'<span style="padding-right:10px;vertical-align:sub">'
+        +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+        + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
+        +'<input class="input_menu_filter" size="15" style="outline: none;background:none;border: 1px solid lightgray;"/>'
+        +'<span class="smallbutton ui-icon ui-icon-circlesmall-close" tabindex="-1" title="Clear entered" '
+        +'style="position:relative; cursor: pointer; outline: none; box-shadow: none; border-color: transparent;"></span>'
+        + '<div class="not-found" style="padding:10px;color:darkgreen;display:none;width:210px;">No terms match the filter '
+        + '<a class="add-trm" href="#" style="padding: 0 0 0 10px;color:blue;display:inline-block;">Add term</a>'
+        +'</div></div>';
+
+        var topOptions = [{key:'select',title:filter_form},{key:'',title:'&lt;blank&gt;'}];
+
+        var events = {};
+        events['onOpenMenu'] = function(){
+            openSearchMenu(that, that.selObj, true);
+        };
+
+        events['onSelectMenu'] = function ( event ){
+
+            var trm_ID = (event) ?$(event.target).val() :$(that.selObj).val();
+
+            that._off($(that.selObj),'change');
+
+            var ref_id = $(that.selObj).attr('ref-id');
+
+            var $input = $('#'+ref_id);
+            //var $inputdiv = $('#'+ref_id).parent();
+            //var opt = $(that.selObj).find('option:selected');
+            that.newvalues[$input.attr('id')] = trm_ID;
+
+            __recreateTrmLabel($input, trm_ID);
+            /*
+            $input.empty(); //clear 
+            //add new value
+            $('<span tabindex="0"class="ui-selectmenu-button ui-button ui-widget ui-selectmenu-button-closed ui-corner-top" style="padding: 0px; font-size: 1.1em; width: auto; min-width: 10em;">'
+            +'<span class="ui-selectmenu-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-selectmenu-text" style="min-height: 17px;">'
+            + window.hWin.HEURIST4.util.htmlEscape(trm_Label)
+            +'</span></span>').appendTo($input);
+            */
+            that.onChange();
+
+        }
+
+
+        $inputdiv.addClass('selectmenu-parent');
+
+        that.selObj = document.createElement("select");
+        $(that.selObj).addClass('enum-selector-main')
+        .css('max-width','300px')
+        .appendTo($inputdiv);
+
+        that.selObj = window.hWin.HEURIST4.ui.createTermSelect(that.selObj,
+            {vocab_id:allTerms, //headerTermIDsList:headerTerms,
+                defaultTermID:$input.val(), topOptions:topOptions, supressTermCode:true, 
+                useHtmlSelect:false, eventHandlers:events});                
+
+        $(that.selObj).hide(); //button will be hidden        
+    }
+    
+    //
+    // select term from drop down
+    //
+    var __show_select_dropdown = function(event_or_id){
+        
+        if(that.is_disabled) return;
+        
+        var $input, $inputdiv, ref_id; 
+        
+        if(typeof event_or_id == 'string'){ //id
+            
+            ref_id = event_or_id; 
+            $input = that.element.find('#'+ref_id);
+            $inputdiv = $input.parents('.input-div');
+            
+        }else 
+        if(event_or_id && event_or_id.target){ //event
+            
+            var event = event_or_id;
+        
+            $inputdiv = $(event.target).parents('.input-div');
+            $input = $inputdiv.find('select');
+            ref_id = $input.attr('id');
+
+            if(event) event.preventDefault();
+        }
+        
+        var dty_ID = that.f('rst_DetailTypeID');
+        
+        //recreate dropdown if not inited
+        if(!that.selObj || !$(that.selObj).hSelect('instance')){
+
+                __recreateSelector();
+                
+        }else{
+            that._off($(that.selObj), 'change');    
+        }
+            
+            //Adjust position
+            var _ref_id = $input.attr('id');
+           
+            //that.selObj.val('');
+            that.selObj.attr('ref-id', _ref_id); //assign current input id for reference in onSelectMenu
+            that.selObj.hSelect('open');
+            that.selObj.hSelect('widget').hide();
+            that.selObj.hSelect('menuWidget')
+                    .position({my: "left top", at: "left bottom", of: $input});
+            //that._on($(that.selObj),{change:f(){}});
+            
+        
+    } //__show_select_dropdown
+    
+    that._off( $input, 'click');
+    that._on( $input, { click: __show_select_dropdown } ); //main invocation of dropdown
+
+    
+    if($input.is('select')){
+        $input.addClass('enum-selector').css({'min-width':'300px', width:'auto'});
+        if(value>0){
+            __recreateTrmLabel($input, value);
+        }
+        /*replace with div
+        $input = $('<div>').uniqueId()
+                .addClass('enum-selector')
+                .appendTo( $inputdiv );
+        */
+    }
+    
+    
+    return __show_select_dropdown;
+}
 
 //
 // Opens popup dialog with ability to define translations for field values

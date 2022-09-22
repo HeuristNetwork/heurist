@@ -69,6 +69,10 @@ $.widget( "heurist.editing_input", {
     linkedImgInput: null, // invisible textbox that holds icon/thumbnail value
     linkedImgContainer: null, // visible div container displaying icon/thumbnail
     
+    selObj: null, //shared selector for all enum field values
+    child_terms: null, // array of child terms for current vocabulary 
+    _enumsHasImages: false, 
+    
     // the constructor
     _create: function() {
 
@@ -1173,134 +1177,145 @@ $.widget( "heurist.editing_input", {
                 );
             }
             else{
-                $input = this._recreateSelector($input, value);
-				
-                if(this.options.recordset && this.options.recordset.entityName == 'Records' && $input.hSelect("instance")!=undefined){
-                    var tooltipDefined = false;
-                    $input.hSelect("widget").on({
-                        click: function(event, ui){ // selectmenu click extra handler
+                
+                if(true && this.options.recordset && this.options.recordset.entityName == 'Records' 
+                    && window.hWin.HEURIST4.util.isempty(this.f('rst_FieldConfig')))
+        
+                {
+                    browseTerms(this, $input, value);
+                }else{
+                    $input = this._recreateSelector($input, value); //initial create
+				    /* @todo in browseTerms: reimplement tooltips 
+                    
+                    //define tooltips on mouse over 
+                    if(this.options.recordset && this.options.recordset.entityName == 'Records' && $input.hSelect("instance")!=undefined){
+                        var tooltipDefined = false;
+                        $input.hSelect("widget").on({
+                            click: function(event, ui){ // selectmenu click extra handler
 
-                            if(!tooltipDefined){
-            					var trm_tooltip;
+                                if(!tooltipDefined){
+            					    var trm_tooltip;
 
-                                tooltipDefined = true;
-            					
-            					$input.hSelect("menuWidget").find('div').on({ // selectmenu's menu items
-            						"mouseover": function(e){ // Retrieve information then display tooltip
+                                    tooltipDefined = true;
+            					    
+            					    $input.hSelect("menuWidget").find('div').on({ // selectmenu's menu items
+            						    "mouseover": function(e){ // Retrieve information then display tooltip
 
-            							var parent_container = $input.hSelect("menuWidget")[0];
+            							    var parent_container = $input.hSelect("menuWidget")[0];
 
-            							var term_txt = $(e.target).text();
-            							var vocab_id = that.f('rst_FilteredJsonTermIDTree');
-            							var data = $Db.trm_TreeData(vocab_id, 'select');
-            							
-            							var details = "";
+            							    var term_txt = $(e.target).text();
+            							    var vocab_id = that.f('rst_FilteredJsonTermIDTree');
+            							    var data = $Db.trm_TreeData(vocab_id, 'select');
+            							    
+            							    var details = "";
 
-            							for(var i=0; i<data.length; i++){
-            								if(data[i].title == term_txt){
+            							    for(var i=0; i<data.length; i++){
+            								    if(data[i].title == term_txt){
 
-            									var rec = $Db.trm(data[i].key);
+            									    var rec = $Db.trm(data[i].key);
 
-            									if(!window.hWin.HEURIST4.util.isempty(rec.trm_Code)){
-            										details += "<span style='text-align: center;'>Code &rArr; " + rec.trm_Code + "</span>";
-            									}
+            									    if(!window.hWin.HEURIST4.util.isempty(rec.trm_Code)){
+            										    details += "<span style='text-align: center;'>Code &rArr; " + rec.trm_Code + "</span>";
+            									    }
 
-            									if(!window.hWin.HEURIST4.util.isempty(rec.trm_Description)){
+            									    if(!window.hWin.HEURIST4.util.isempty(rec.trm_Description)){
 
-            										if(window.hWin.HEURIST4.util.isempty(details)){
-            											details += "<span style='text-align: center;'>Code &rArr; N/A </span>";
-            										}
+            										    if(window.hWin.HEURIST4.util.isempty(details)){
+            											    details += "<span style='text-align: center;'>Code &rArr; N/A </span>";
+            										    }
 
-            										details += "<hr/><span>" + rec.trm_Description + "</span>";
-            									}
-            								}
-            							}
+            										    details += "<hr/><span>" + rec.trm_Description + "</span>";
+            									    }
+            								    }
+            							    }
 
-            							if(window.hWin.HEURIST4.util.isempty(details)){
-            								details = "No Description Provided";
-            							}
+            							    if(window.hWin.HEURIST4.util.isempty(details)){
+            								    details = "No Description Provided";
+            							    }
 
-            							trm_tooltip = $(parent_container).tooltip({
-            								items: "div.ui-state-active",
-            								position: { // Post it to the right of menu item
-            									my: "left+20 center",
-            									at: "right center",
-            									collision: "none"
-            								},
-            								show: { // Add delay to show
-            									delay: 2000,
-            									duration: 0
-            								},
-            								content: function(){ // Provide text
-            									return details;
-            								},
-            								open: function(event, ui){ // Add custom CSS
-            									ui.tooltip.css({
-            										"width": "200px",
-            										"background": "#D1E7E7",
-            										"font-size": "1.1em"
-            									});
-            								}
-            							});
-            						},
+            							    trm_tooltip = $(parent_container).tooltip({
+            								    items: "div.ui-state-active",
+            								    position: { // Post it to the right of menu item
+            									    my: "left+20 center",
+            									    at: "right center",
+            									    collision: "none"
+            								    },
+            								    show: { // Add delay to show
+            									    delay: 2000,
+            									    duration: 0
+            								    },
+            								    content: function(){ // Provide text
+            									    return details;
+            								    },
+            								    open: function(event, ui){ // Add custom CSS
+            									    ui.tooltip.css({
+            										    "width": "200px",
+            										    "background": "#D1E7E7",
+            										    "font-size": "1.1em"
+            									    });
+            								    }
+            							    });
+            						    },
 
-            						"mouseleave": function(){ // Ensure tooltip closes
-            							if(trm_tooltip.tooltip("instance")!=undefined){
-            								trm_tooltip.tooltip("destroy");
-            							}
-            						}
-            					});
-                            }
-                        }
-                    });
-
-                    if(this.detailType=='enum'){ // show hierarchy for the selected term, not within the menuWidget
-                        $input.hSelect({
-                            select: function(event, ui){
-                                var term_id = ui.item.value;
-                                var crafted_label = ui.item.label;
-                                var trm_info = $Db.trm(term_id);
-
-                                if(term_id && trm_info && trm_info.trm_ParentTermID != 0){
-                                    
-                                    while(1){
-
-                                        trm_info = $Db.trm(trm_info.trm_ParentTermID);
-
-                                        if(trm_info.trm_ParentTermID == 0){
-                                            break;
-                                        }else{
-                                            crafted_label = trm_info.trm_Label + '.' + crafted_label;
-                                        }
-                                    }
-
-                                    $input.hSelect('widget').find('span.ui-selectmenu-text').html(crafted_label);
+            						    "mouseleave": function(){ // Ensure tooltip closes
+            							    if(trm_tooltip.tooltip("instance")!=undefined){
+            								    trm_tooltip.tooltip("destroy");
+            							    }
+            						    }
+            					    });
                                 }
                             }
                         });
-                    }
 
-                    // Craft initial label
-                    var trm_info = $Db.trm(value);
-                    if(value && Number.isInteger(+value) && trm_info){
-                        var crafted_label = trm_info.trm_Label;
+                        if(this.detailType=='enum'){ // show hierarchy for the selected term, not within the menuWidget
+                            $input.hSelect({
+                                select: function(event, ui){
+                                    var term_id = ui.item.value;
+                                    var crafted_label = ui.item.label;
+                                    var trm_info = $Db.trm(term_id);
 
-                        if(crafted_label != undefined && trm_info.trm_ParentTermID != 0){
+                                    if(term_id && trm_info && trm_info.trm_ParentTermID != 0){
+                                        
+                                        while(1){
 
-                            while(1){
+                                            trm_info = $Db.trm(trm_info.trm_ParentTermID);
 
-                                trm_info = $Db.trm(trm_info.trm_ParentTermID);
+                                            if(trm_info.trm_ParentTermID == 0){
+                                                break;
+                                            }else{
+                                                crafted_label = trm_info.trm_Label + '.' + crafted_label;
+                                            }
+                                        }
 
-                                if(trm_info.trm_ParentTermID == 0){
-                                    break;
-                                }else{
-                                    crafted_label = trm_info.trm_Label + '.' + crafted_label;
+                                        $input.hSelect('widget').find('span.ui-selectmenu-text').html(crafted_label);
+                                    }
                                 }
-                            }
+                            });
+                        }
 
-                            $input.hSelect('widget').find('span.ui-selectmenu-text').html(crafted_label);
+                        // Craft initial label
+                        var trm_info = $Db.trm(value);
+                        if(value && Number.isInteger(+value) && trm_info){
+                            var crafted_label = trm_info.trm_Label;
+
+                            if(crafted_label != undefined && trm_info.trm_ParentTermID != 0){
+
+                                while(1){
+
+                                    trm_info = $Db.trm(trm_info.trm_ParentTermID);
+
+                                    if(trm_info.trm_ParentTermID == 0){
+                                        break;
+                                    }else{
+                                        crafted_label = trm_info.trm_Label + '.' + crafted_label;
+                                    }
+                                }
+
+                                $input.hSelect('widget').find('span.ui-selectmenu-text').html(crafted_label);
+                            }
                         }
                     }
+                    */
                 }
             }
             $input = $($input);
@@ -1330,77 +1345,47 @@ $.widget( "heurist.editing_input", {
                     })
                     .appendTo( $inputdiv )
                     .hide();
-
-                    var all_term_ids = $Db.trm_TreeData(allTerms, 'set');
-
-                    var trm_img_req = {
-                        'a': 'search',
-                        'entity': 'defTerms',
-                        'details': 'list',
-                        'trm_ID': all_term_ids,
-                        'withimages': 1,
-                        'request_id': window.hWin.HEURIST4.util.random()
-                    };
-
-                    window.hWin.HAPI4.EntityMgr.doRequest(trm_img_req, function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            var recset = new hRecordSet(response.data);
-                            if(recset.length() > 0){
-                                $btn_termsel.hide();
-                            }else{
-                                $btn_termsel.hide();
-                            }
-                        }
-                    });
+                    
+                    if(that.child_terms==null){
+                        
+                        var vocab_id = that.f('rst_FilteredJsonTermIDTree');    
+                        that.child_terms = $Db.trm_TreeData(vocab_id, 'set');
+                        
+                        that._checkTermsWithImages(); //show hide $btn_termsel
+                    }else if(that._enumsHasImages){
+                        $btn_termsel.show();
+                    }
 
                     this._on( $btn_termsel, { click: function(){
 
-                        if(this.is_disabled) return;
+                        var vocab_id = Number(this.f('rst_FilteredJsonTermIDTree'));    
+                        
+                        if(this.is_disabled || !(vocab_id>0)) return;
 
-                        trm_img_req['trm_ID'] = $Db.trm_TreeData(allTerms, 'set');
+                            var selectmode = that.enum_buttons == 'checkbox' ? 'select_multi' : 'select_single';
+                            var dlg_title = 'Term selection for ' + that.f('rst_DisplayName');
 
-                        //@todo - rewrite to $Db.trm select_single
+                            window.hWin.HEURIST4.ui.showEntityDialog('defTerms', {
+                                empty_remark: 'No terms available',
+                                title: dlg_title,
+                                hide_searchForm: true,
+                                select_mode: selectmode, 
+                                view_mode: 'icon',
+                                initial_filter: vocab_id,
+                                default_palette_class: 'ui-heurist-populate',
+                                onselect:function(event, data){
+                                    if(data && data.selection && data.selection.length > 0){
 
-                        //select term by image
-                        window.hWin.HAPI4.EntityMgr.doRequest(trm_img_req, function(response){ // check for terms with images
-
-                            if(response.status == window.hWin.ResponseStatus.OK){
-                                var recset = new hRecordSet(response.data);
-                                if(recset.length()>0){                                  
-
-                                    var selectmode = that.enum_buttons == 'checkbox' ? 'select_multi' : 'select_single';
-                                    var dlg_title = 'Term selection for ' + that.f('rst_DisplayName');
-
-                                    window.hWin.HEURIST4.ui.showEntityDialog('defTerms', {
-                                        empty_remark: 'No terms available',
-                                        title: dlg_title,
-                                        hide_searchForm: true,
-                                        select_mode: selectmode, 
-                                        view_mode: 'icon',
-                                        initial_filter: Number(allTerms),
-                                        default_palette_class: 'ui-heurist-populate',
-                                        onselect:function(event, data){
-                                            if(data && data.selection && data.selection.length > 0){
-
-                                                if(data.selection.length > 1 || selectmode == 'select_multi'){
-                                                    that.setValue(data.selection, false);
-                                                }else{
-                                                    $input.val(data.selection[0]);
-                                                    if($input.hSelect('instance') !== undefined) $input.hSelect('refresh');
-                                                    that.onChange();
-                                                }
-                                            }
+                                        if(selectmode == 'select_multi'){
+                                            that.setValue(data.selection, false);
+                                        }else{
+                                            browseTerms(that, $input, data.selection[0]);                                    
                                         }
-                                    });
-                                                                    
-                                }else{
-                                    window.hWin.HEURIST4.msg.showMsgFlash('No terms images defined');
-                                    that.input_cell.find('.ui-icon-image').hide(); // hide icon, accidental showing
+                                        that.onChange();
+                                    }
                                 }
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgErr(response);
-                            }
-                        });
+                            });
+                                                                    
                     }});
 
                     var vocab_id = Number(allTerms);
@@ -1451,11 +1436,7 @@ $.widget( "heurist.editing_input", {
             
             // Display term selector as radio buttons/checkboxes
             var asButtons = this.options.recordset && this.options.recordset.entityName=='Records' && this.f('rst_TermsAsButtons') == 1;
-            if(asButtons){
-                var vocab_id = that.f('rst_FilteredJsonTermIDTree');
-                var child_terms = $Db.trm_TreeData(vocab_id, 'set');
-
-                if(child_terms.length <= 20){
+            if(asButtons && this.child_terms  && this.child_terms.length<=20){
 
                     this.enum_buttons = (Number(this.f('rst_MaxValues')) != 1) ? 'checkbox' : 'radio';
                     var inpt_id = $input.attr('id');
@@ -1468,7 +1449,7 @@ $.widget( "heurist.editing_input", {
 
                         dtb_res = true;
                     }else{ // Create input elements
-                        dtb_res = this._createEnumButtons(false, child_terms, $inputdiv, [value]);
+                        dtb_res = this._createEnumButtons(false, $inputdiv, [value]);
                     }
 
                     if(dtb_res){
@@ -1491,7 +1472,6 @@ $.widget( "heurist.editing_input", {
                             this.btn_add.hide(); // Hide repeat button, removeClass('smallbutton ui-icon-circlesmall-plus')
                         }
                     }
-                }
             }
         }
         else if(this.detailType=='boolean'){//----------------------------------------------------
@@ -3979,6 +3959,8 @@ console.log('onpaste');
         }
         else{ //this is usual enumeration from defTerms
 
+            /* MOVED to browseTerms
+        
             var headerTerms = '';
             allTerms = this.f('rst_FilteredJsonTermIDTree');        
             //headerTerms - disabled terms
@@ -4010,6 +3992,7 @@ console.log('onpaste');
                     defaultTermID:value, topOptions:topOptions, supressTermCode:true, 
                     useHtmlSelect:this.options.useHtmlSelect});
 
+            //adds filter panel on the top of select menu        
             if(typeof openSearchMenu!=='undefined' && $.isFunction(openSearchMenu) && this.options.recordset && this.options.recordset.entityName == 'Records'){
 
                 var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/filter_icon_black18.png';
@@ -4102,17 +4085,21 @@ console.log('onpaste');
                 window.hWin.HEURIST4.ui.initHSelect($input, this.options.useHtmlSelect, null, events);
             }
 
+            //ART0921 - todo in browseTerms
             var opts = $input.find('option');      
             if(opts.length==0 || (opts.length==1 && $(opts[0]).text()=='')){
                $input.hSelect('widget').html('<span style="padding: 0.1em 2.1em 0.2em 0.2em">no terms defined, please add terms</span><span class="ui-selectmenu-icon ui-icon ui-icon-triangle-1-e"></span>'); 
             }
             
+            */
+            
+            //show error message on init -----------                   
+            //ART0921 - todo in browseTerms
             var err_ele = $input.parent().find('.term-error-message');
             if(err_ele.length>0){
                 err_ele.remove();
             }
             
-            //show error message on init                    
             //value is not allowed
             if( !window.hWin.HEURIST4.util.isempty(allTerms) &&
                 window.hWin.HEURIST4.util.isNumber(value) && $input.val()!=value){
@@ -4259,7 +4246,7 @@ console.log('onpaste');
                                     window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
                                         { source:this.uuid, type:'trm' });    
                                     if(!(newvalue>0)) newvalue = trm_ID;
-                                    that._recreateSelector($input, newvalue);
+                                    that._recreateSelector($input, newvalue); //after correction of invalid term
                                 }
                             );
                             
@@ -4270,7 +4257,7 @@ console.log('onpaste');
                 
                 
             }    
-            
+            //end of error messages ---------------
         }                                                                   
         
         return $input;
@@ -5270,6 +5257,7 @@ console.log('onpaste');
         
     },
 	
+    
 	//
 	// Recreate dropdown or checkboxes|radio buttons, called by adding new term and manage terms onClose
 	//
@@ -5277,13 +5265,13 @@ console.log('onpaste');
 
         var that = this;
 
-        var child_terms = $Db.trm_TreeData(vocab_id, 'set');
+        this.child_terms = $Db.trm_TreeData(vocab_id, 'set'); //refresh
         var asButtons = this.options.recordset && this.options.recordset.entityName=='Records' && this.f('rst_TermsAsButtons') == 1;
 
-        if(asButtons && child_terms.length <= 20){ // recreate buttons/checkboxes
+        if(asButtons && this.child_terms.length <= 20){ // recreate buttons/checkboxes
 
             this.enum_buttons = (Number(this.f('rst_MaxValues')) != 1) ? 'checkbox' : 'radio';
-            var dtb_res = this._createEnumButtons(true, child_terms);
+            var dtb_res = this._createEnumButtons(true);
 
             if(dtb_res){
 
@@ -5363,34 +5351,71 @@ console.log('onpaste');
                 }
 
                 $input.css('width','auto');
-                $input = that._recreateSelector($input, value);
-                $input.hSelect('widget').css('width','auto');
+                
+                if(true && that.options.recordset && that.options.recordset.entityName == 'Records' 
+                    && window.hWin.HEURIST4.util.isempty(that.f('rst_FieldConfig')))
+                {
+
+                    if(that.selObj) {
+                        that.selObj.remove();    
+                        that.selObj = null;
+                    }
+                    browseTerms(that, $input, value);
+                    
+                }else{
+                    $input = that._recreateSelector($input, value); //in _recreateEnumField
+                    $input.hSelect('widget').css('width','auto');
+                }
+                
                 that._on( $input, {change:that._onTermChange} );
-            });
+            });//each
         }
 
-        // Show/Hide select by picture
-        var trm_img_req = {
-            'a': 'search',
-            'entity': 'defTerms',
-            'details': 'list',
-            'trm_ID': child_terms,
-            'withimages': 1,
-            'request_id': window.hWin.HEURIST4.util.random()
-        };
-
-        window.hWin.HAPI4.EntityMgr.doRequest(trm_img_req, function(response){
-            if(response.status == window.hWin.ResponseStatus.OK){
-                var recset = new hRecordSet(response.data);
-                if(recset.length() > 0){
-                    that.input_cell.find('.ui-icon-image').show();
-                }else{
-                    that.input_cell.find('.ui-icon-image').hide();
-                }
-            }
-        });
+        
+        if(that.input_cell.find('.ui-icon-image').length>0){ //if edit allowed
+            this._checkTermsWithImages();    
+        }
     },
 
+    
+    //
+    // Show/Hide select by picture  
+    //
+    _checkTermsWithImages: function(){ 
+                           
+        this._enumsHasImages = false;
+        
+        if(this.child_terms.length>0){
+
+                var trm_img_req = {
+                    'a': 'search',
+                    'entity': 'defTerms',
+                    'details': 'list',
+                    'trm_ID': this.child_terms,
+                    'withimages': 1,
+                    'request_id': window.hWin.HEURIST4.util.random()
+                };
+
+                var that = this;
+
+                window.hWin.HAPI4.EntityMgr.doRequest(trm_img_req, function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        var recset = new hRecordSet(response.data);
+                        that._enumsHasImages = (recset.length() > 0);
+                        if(that._enumsHasImages){
+                            that.input_cell.find('.ui-icon-image').show();
+                        }else{
+                            that.input_cell.find('.ui-icon-image').hide();
+                        }
+                    }
+                });
+                
+          }
+
+          this.input_cell.find('.ui-icon-image').hide();
+    },
+
+    
     //
     // Set up checkboxes/radio buttons for enum field w/ rst_TermsAsButtons set to 1
     // Params:
@@ -5399,15 +5424,12 @@ console.log('onpaste');
     //	$inputdiv (jQuery Obj): element where inputs will be placed
     //	values (array): array of existing values to check by default
     //
-    _createEnumButtons: function(isRefresh, terms_list, $inputdiv, values){
+    _createEnumButtons: function(isRefresh, $inputdiv, values){
 
         var that = this;
+        
+        var terms_list = this.child_terms;
 
-        var vocab_id = this.f('rst_FilteredJsonTermIDTree');
-
-        if(terms_list == null){
-            terms_list = $Db.trm_TreeData(vocab_id, 'set');
-        }
         if($inputdiv == null){
             $inputdiv = $(this.inputs[0]).parent();
         }
