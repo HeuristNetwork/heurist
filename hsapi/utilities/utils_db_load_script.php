@@ -244,7 +244,8 @@ $param_fn = $filename;
 $param_foffset = 0;
 $param_totalqueries = 0;
 
-if (false && !$error && isset($_REQUEST["fn"])) //DISABLED snyk SSRF
+/* DISABLED snyk SSRF
+if (!$error && isset($_REQUEST["fn"])) 
 {
     //    echo ("<p><a href=\"".$_SERVER["PHP_SELF"]."?start=1&amp;fn=".urlencode($filename)."&amp;foffset=0&amp;totalqueries=0\">Start Import</a> from $filename into $db_name at $db_server</p>\n");
     $param_start = $_REQUEST["start"];
@@ -252,6 +253,7 @@ if (false && !$error && isset($_REQUEST["fn"])) //DISABLED snyk SSRF
     $param_foffset = $_REQUEST["foffset"];
     $param_totalqueries = $_REQUEST["totalqueries"];
 }
+*/
 
 // Open the file
 

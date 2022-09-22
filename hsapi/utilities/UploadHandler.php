@@ -1354,7 +1354,8 @@ $siz = get_php_bytes('upload_max_filesize');
     }
 
     // $uploaded_file - temp file
-    // $name - new file name
+    // $name - new file name (sanitized)
+    // $original_name
     // $subfolder - subfolder name relative to upload_dir
     // $size
     // $type - mimetype
@@ -1712,14 +1713,18 @@ $siz = get_php_bytes('upload_max_filesize');
         }
         
         if ($upload) {
+            $prefix = '';
+            if($file_name && strpos($file_name,'~')===0){
+                $prefix = '~';
+            }
             if (is_array($upload['tmp_name'])) {
                 // param_name is an array identifier like "files[]",
                 // $upload is a multi-dimensional array:
                 foreach ($upload['tmp_name'] as $index => $value) {
                     
                     
-                   //Artem Osmakov     
-                    $file_name = $file_name ? $file_name : $upload['name'][$index];
+                   //Artem Osmakov - get subfolder name by replacing Ё to /     
+                    $file_name = $prefix.fileNameSanitize($file_name ? $file_name : $upload['name'][$index], false);
                     $subfolder_name = '';
                     if(strpos($file_name,'Ё')>0){
                         $file_name = str_replace('Ё','/',$file_name);
@@ -1747,8 +1752,8 @@ $siz = get_php_bytes('upload_max_filesize');
                 // $upload is a one-dimensional array:
                 $files[] = $this->handle_file_upload(
                     isset($upload['tmp_name']) ? $upload['tmp_name'] : null,
-                    $file_name ? $file_name : (isset($upload['name']) ?
-                            $upload['name'] : null),
+                    $prefix.fileNameSanitize($file_name ? $file_name : (isset($upload['name']) ?
+                            $upload['name'] : null), false),
                     (isset($upload['name']) ? $upload['name'] : null),
                     '',        
                     $size ? $size : (isset($upload['size']) ?
