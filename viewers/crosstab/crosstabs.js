@@ -2122,12 +2122,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                             _doRender();
                         }else{
+                            _setMode(0);    
                             window.hWin.HEURIST4.msg.showMsgDlg(
                                 'The selected row and column have no related data to display.<br><br>Please re-select either the row or column fields.', null, 'Empty Set'
                                 );
                         }
 
                     }else{
+                        _setMode(0);
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });

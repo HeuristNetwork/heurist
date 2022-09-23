@@ -682,6 +682,7 @@ window.hWin.HEURIST4.ui = {
         var useHtmlSelect = true;
         var useIds = false;
         var initial_indent = 0;
+        var eventHandlers = null;
         if(options){  //at the moment it is implemented for single rectype only
             showDetailType    = options['show_dt_name']==true;
             addLatLongForGeo  = options['show_latlong']==true;
@@ -1131,6 +1132,10 @@ window.hWin.HEURIST4.ui = {
                 if ( selObj[0].ownerDocument.location !== window.location ){ //inside iframe
                     var win = selObj[0].ownerDocument.defaultView || selObj[0].ownerDocument.parentWindow;
                     parent_ele = $(win.frameElement).parents('.ui-dialog');
+                    if(parent_ele.length==0){
+                        //parent_ele = $(win.frameElement).parents('.ui-menu6-container');
+                        parent_ele = $(selObj[0].ownerDocument.body);
+                    }
                 }
             
                 if(!parent_ele || parent_ele.length==0){
@@ -1165,7 +1170,7 @@ window.hWin.HEURIST4.ui = {
             }
             
             var onSelectMenu, onOpenMenu, onCloseMenu;
-            if($.isPlainObject(eventHandlers)){
+            if(eventHandlers && $.isPlainObject(eventHandlers)){
                 if($.isFunction(eventHandlers.onOpenMenu)){
                     onOpenMenu = eventHandlers.onOpenMenu;
                 }
@@ -1175,10 +1180,10 @@ window.hWin.HEURIST4.ui = {
                 if($.isFunction(eventHandlers.onSelectMenu)){
                     onSelectMenu = eventHandlers.onSelectMenu;
                 }
-            }else if($.isFunction(eventHandlers)){
+            }else if(eventHandlers && $.isFunction(eventHandlers)){
                 onOpenMenu = eventHandlers;
             }
-            if(Object.values(arguments).length > 4){
+            if(Object.values(arguments).length > 4 && $.isFunction(arguments[4])){
                 onSelectMenu = arguments[4];
             }
  
