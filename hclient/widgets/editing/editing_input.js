@@ -1169,7 +1169,7 @@ $.widget( "heurist.editing_input", {
             }
             else{
                 
-                if(true && this.options.recordset && this.options.recordset.entityName == 'Records' 
+                if(true //&& this.options.recordset && this.options.recordset.entityName == 'Records' 
                     && window.hWin.HEURIST4.util.isempty(this.f('rst_FieldConfig')))
         
                 {
@@ -1620,7 +1620,7 @@ $.widget( "heurist.editing_input", {
                             }
                             
                             var opts = {
-                                height:280, width:750, 
+                                height:480, width:750, 
                                 title: 'Create relationship between '+rty_names+' ( Field: "'
                                     +$Db.dty(that.options.dtID, 'dty_Name')+'" )',
                                 relmarker_dty_ID: that.options.dtID,
@@ -5369,7 +5369,7 @@ console.log('onpaste');
 
                 $input.css('width','auto');
                 
-                if(true && that.options.recordset && that.options.recordset.entityName == 'Records' 
+                if(true //&& that.options.recordset && that.options.recordset.entityName == 'Records' 
                     && window.hWin.HEURIST4.util.isempty(that.f('rst_FieldConfig')))
                 {
 
