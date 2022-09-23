@@ -87,8 +87,9 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                  {key:'current_user', title:'Current user'},
                  {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName']}
                  ]);
-              
-              
+        
+        fieldSelect = window.hWin.HEURIST4.ui.initHSelect(fieldSelect, false);
+        
         this._off(fieldSelect,'change');
         this._off( this.element.find('input[name="rb_Owner"]'),'change');
         this._off( this.element.find('input[name="rb_Access"]'),'change');
@@ -96,7 +97,6 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
               
         this._on(fieldSelect,{change:
             function(){
-                
                 if(fieldSelect.val()==0){
                     this.element.find('.access-hidden').hide();   
                     if(!this.element.find('#rb_Access-public').is(':checked'))
@@ -150,6 +150,8 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             }
             */
         }
+        fieldSelect.hSelect('refresh');
+
         
         if(this.options.currentAccess){
             //fieldSelect.val(this.options.currentOwner);

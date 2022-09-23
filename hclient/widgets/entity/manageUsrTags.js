@@ -756,7 +756,10 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 __renderTags( null );
               }
         });
+        
         sel_group.change();
+        
+        window.hWin.HEURIST4.ui.initHSelect(sel_group, false);
         
         
         //add button
