@@ -231,7 +231,6 @@
                             " where ugr_ID=ugl_UserID and ugl_Role='admin' and ugr_eMail='" . addslashes($email) . "'";
                         }
                         if ($query) {
-                            $query = $mysqli->real_escape_string($query);
                             $res2 = $mysqli->query($query);
                             $cnt = $res2->num_rows; // mysql_num_rows($res2);
                             $res2->close();
@@ -268,7 +267,6 @@
         $matches = null;
         if($mysqli && $query){
             
-            $query = $mysqli->real_escape_string($query);
             $res = $mysqli->query($query);
             if ($res){
                 $matches = array();
