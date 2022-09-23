@@ -126,6 +126,10 @@ if(!$system->init(@$_REQUEST['db'])){
             
         }else if($action=='step1'){   
             //file is uploaded with help fileupload widget and controller/fileUpload.php
+            $upload_file_name = null; 
+            if(@$_REQUEST["upload_file_name"]){
+                $upload_file_name = fileNameSanitize(basename($_REQUEST["upload_file_name"]), false); //snyk SSRF
+            }
             
             //encode and invoke parse_prepare with limit
             $res = ImportParser::encodeAndGetPreview( @$_REQUEST["upload_file_name"], $_REQUEST);  
