@@ -64,7 +64,7 @@ $emails = array();
 
 $has_emails = false;
 
-$current_db = HEURIST_DB_PREFIX . $_REQUEST['db'];
+$current_db = HEURIST_DB_PREFIX . htmlspecialchars($_REQUEST['db']);
 
 $email_rectype_id = ConceptCode::getRecTypeLocalID("2-9");
 if (empty($email_rectype_id)) {
@@ -95,7 +95,7 @@ while($email = $email_list->fetch_row()){
 
 if(!$has_emails || empty($emails)) {
     print "<br><br>This function sends bulk emails based on text in a selected <i>Email</i> record<br><br>"
-    . "<strong>" . $_REQUEST['db'] . " contains no valid Email records.</strong><br><br>"
+    . "<strong>" . $current_db . " contains no valid Email records.</strong><br><br>"
     . "<strong>Please create an Email record in the database containing the text<br>"
     . "you want to send out, using ##xxxx## markers for values to be inserted.</strong><br><br>"
     . "The Email record to be used must contain a title field and a short summary field - the latter will be used as the email's body. The title and body can be edited before sending. <br>"
@@ -247,7 +247,7 @@ if(!$has_emails || empty($emails)) {
 
         <script type="text/javascript">
 
-            window.history.pushState({}, '', '<?php echo $_SERVER['PHP_SELF']; ?>');
+            window.history.pushState({}, '', '<?php echo urlencode($_SERVER['PHP_SELF']); ?>');
 
             var all_emails = <?php echo json_encode($emails)?>; // Object of Email records id->title
             
