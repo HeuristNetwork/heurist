@@ -173,7 +173,7 @@ $.widget( "heurist.mainMenu6", {
                         }
                     }
                 });
-                that._on(that.divMainMenu.find('li[data-action="recordAddSettings"]'), {
+                that._on(that.divMainMenu.find('li[data-action-popup="recordAddSettings"]'), {
                     click: that._mousein_ExploreMenu
                 });
                 that._on(that.divMainMenu.find('#filter_by_groups'),{ //, #filter_by_groups
@@ -1408,7 +1408,7 @@ $.widget( "heurist.mainMenu6", {
                                 },  this._delayOnCollapse_ExploreMenu); //600
                 }
             });
-            this._on(this.menues['explore'].find('li[data-action="recordAddSettings"]'), {
+            this._on(this.menues['explore'].find('li[data-action-popup="recordAddSettings"]'), {
                 click: this._mousein_ExploreMenu
             });
             this._updateDefaultAddRectype();
