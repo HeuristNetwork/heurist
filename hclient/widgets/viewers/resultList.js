@@ -3381,9 +3381,10 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         }
 
         
-        //hide edit link
+        // hide logged in only actions
         if(!window.hWin.HAPI4.has_access()){
             $(this.div_content).find('.logged-in-only').css('visibility','hidden');
+            $(this.div_content).find('.recordDiv').addClass('rl-not-logged-in');
         }
 
         //rec_toload - list of ids
