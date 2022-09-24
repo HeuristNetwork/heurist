@@ -616,6 +616,7 @@ skin_open();
     \n");
 
 // Finish message and restart the script
+$script_name = urlencode($_SERVER["PHP_SELF"]);
 
     if ($linenumber<$param_start+$linespersession)
     { echo ("<p class=\"successcentr\">Congratulations: End of file reached, assuming OK</p>\n");
@@ -627,13 +628,13 @@ skin_open();
     { if ($delaypersession!=0)
         echo ("<p class=\"centr\">Now I'm <b>waiting $delaypersession milliseconds</b> before starting next session...</p>\n");
       if (!$ajax)
-        echo ("<script language=\"JavaScript\" type=\"text/javascript\">window.setTimeout('location.href=\"".$_SERVER["PHP_SELF"]."?start=$linenumber&fn=".urlencode($curfilename)."&foffset=$foffset&totalqueries=$totalqueries&delimiter=".urlencode($delimiter)."\";',500+$delaypersession);</script>\n");
+        echo ("<script language=\"JavaScript\" type=\"text/javascript\">window.setTimeout('location.href=\"".$script_name."?start=$linenumber&fn=".urlencode($curfilename)."&foffset=$foffset&totalqueries=$totalqueries&delimiter=".urlencode($delimiter)."\";',500+$delaypersession);</script>\n");
 
       echo ("<noscript>\n");
-      echo ("<p class=\"centr\"><a href=\"".$_SERVER["PHP_SELF"]."?start=$linenumber&amp;fn=".urlencode($curfilename)."&amp;foffset=$foffset&amp;totalqueries=$totalqueries&amp;delimiter=".urlencode($delimiter)."\">Continue from the line $linenumber</a> (Enable JavaScript to do it automatically)</p>\n");
+      echo ("<p class=\"centr\"><a href=\"".$script_name."?start=$linenumber&amp;fn=".urlencode($curfilename)."&amp;foffset=$foffset&amp;totalqueries=$totalqueries&amp;delimiter=".urlencode($delimiter)."\">Continue from the line $linenumber</a> (Enable JavaScript to do it automatically)</p>\n");
       echo ("</noscript>\n");
 
-      echo ("<p class=\"centr\">Press <b><a href=\"".$_SERVER["PHP_SELF"]."\">STOP</a></b> to abort the import <b>OR WAIT!</b></p>\n");
+      echo ("<p class=\"centr\">Press <b><a href=\"".$script_name."\">STOP</a></b> to abort the import <b>OR WAIT!</b></p>\n");
     }
   }
   else
@@ -647,7 +648,7 @@ skin_close();
 
 
 if ($error && TESTMODE)
-  echo ("<p class=\"centr\"><a href=\"".$_SERVER["PHP_SELF"]."\">Start from the beginning</a> (DROP the old tables before restarting)</p>\n");
+  echo ("<p class=\"centr\"><a href=\"".$script_name."\">Start from the beginning</a> (DROP the old tables before restarting)</p>\n");
 
 if ($mysqli) $mysqli->close();
 if ($file && !$gzipmode) fclose($file);

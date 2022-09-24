@@ -219,7 +219,7 @@
 
         if($res){
             while ($row = $res->fetch_row()) {
-                $database  = $row[0];
+                $database  = $mysqli->real_escape_string($row[0]);
                 $test = strpos($database, $prefix);
                 if ($test === 0) {
                     if ($isFilter) {

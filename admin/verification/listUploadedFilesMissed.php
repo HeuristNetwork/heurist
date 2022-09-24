@@ -54,7 +54,7 @@ if($is_included){
         
             <span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>
             <input type="password" name="pwd" autocomplete="off" />
-            <input type="hidden" name="db" value="<?php  echo $_REQUEST['db'];?>"/>
+            <input type="hidden" name="db" value="<?php  echo htmlspecialchars($_REQUEST['db']);?>"/>
             <input type="hidden" name="all" value="1"/>
 
             <input type="submit" value="OK" />
@@ -131,7 +131,7 @@ foreach ($databases as $idx=>$db_name){
         $res2->close();
         
     }else{
-        print $db_name.' Cannot execute query. Error: '.$mysqli->error;
+        print htmlspecialchars($db_name).' Cannot execute query. Error: '.$mysqli->error;
     }
 
 }//for databases

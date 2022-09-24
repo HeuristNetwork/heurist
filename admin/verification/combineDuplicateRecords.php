@@ -183,7 +183,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                         }
                         
                         
-                        print '<input type="hidden" name="bib_ids" value="'.$bib_ids_list.'">';
+                        print '<input type="hidden" name="bib_ids" value="'.htmlspecialchars($bib_ids_list).'">';
 
                         $rtyNameLookup = mysql__select_assoc2($mysqli, 
                             'select rty_ID, rty_Name from Records left join defRecTypes on rty_ID=rec_RecTypeID '
@@ -199,7 +199,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     $temptypes .= '/'.$rtyName;
                                 }
                             }
-                            print '<tr><td colspan="3" style="text-align: center; font-weight: bold;">'.$temptypes.'</td></tr>';
+                            print '<tr><td colspan="3" style="text-align: center; font-weight: bold;">'.htmlspecialchars($temptypes).'</td></tr>';
                         }
                         
                         //get requirements for details
@@ -268,25 +268,26 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                         if (! @$do_merge_details){  // display a page to user for selecting which record should be the master record
                             //    foreach($records as $index) {
                             foreach($records as $record) {
-                                //  $record = $records[$index];
-                                $is_master = ($record['rec_ID']== $master_rec_id);
-                                print '<tr'. ($is_master && !$finished_merge ? ' style="background-color: #EEE;" ': '').' id="row'.$record['rec_ID'].'">';
+                                    //  $record = $records[$index];
+                                $rec_ID = intval($record['rec_ID']); 
+                                $is_master = ($rec_ID== $master_rec_id);
+                                print '<tr'. ($is_master && !$finished_merge ? ' style="background-color: #EEE;" ': '').' id="row'.$rec_ID.'">';
                                 $checkKeep =  $is_master? "checked" : "";
                                 $checkDup = !$is_master && count($records) < 5 ? "checked" : "";
                                 $disableDup = $is_master? "none" : "block";
                                 if (!$finished_merge) print '<td><input type="checkbox" name="duplicate[]" '.$checkDup.
-                                    ' value="'.$record['rec_ID'].
+                                    ' value="'.$rec_ID.
                                     '" title="Check to mark this as a duplicate record for deletion"'.
-                                    '  id="duplicate'.$record['rec_ID'].'" style="display:'.$disableDup.
-                                    '" onclick="if (this.checked) delete_bib('.$record['rec_ID'].'); else undelete_bib('.$record['rec_ID'].
+                                    '  id="duplicate'.$rec_ID.'" style="display:'.$disableDup.
+                                    '" onclick="if (this.checked) delete_bib('.$rec_ID.'); else undelete_bib('.$rec_ID.
                                     ');"><div style="font-size: 70%; display:'.$disableDup.';">DUPLICATE</div></td>';
                                 print '<td style="width: 500px;">';
                                 if (!$finished_merge) print '<input type="radio" name="keep" '.$checkKeep.
-                                    ' value="'.$record['rec_ID'].
+                                    ' value="'.$rec_ID.
                                     '" title="Click to select this record as the Master record"'.
-                                    ' id="keep'.$record['rec_ID'].
-                                    '" onclick="keep_bib('.$record['rec_ID'].');">';
-                                print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></span>';
+                                    ' id="keep'.$rec_ID.
+                                    '" onclick="keep_bib('.$rec_ID.');">';
+                                print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_ID.'">'.$rec_ID . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></span>';
                                 print '<table>';
                                 foreach ($record['details'] as $rd_type => $detail) {
                                     if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
@@ -368,13 +369,13 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 
                                 $kwd_count = mysql__select_value($mysqli,
                                     'select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks '
-                                    .'on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_ID'].' and rtl_ID is not null');
+                                    .'on rtl_RecID=bkm_recID where bkm_RecID='.$rec_ID.' and rtl_ID is not null');
                                     
                                 if ($kwd_count>0) print '<tr><td>Tags</td><td>'.$kwd_count.'</td></tr>';
 
                                 $res2 = $mysqli->query('select concat(ugr_FirstName," ",ugr_LastName) as name, '
                                 .'rem_Freq, rem_StartDate from usrReminders left join sysUGrps on ugr_ID=rem_OwnerUGrpID '
-                                .'where ugr_Type = "User" and rem_RecID='.$record['rec_ID']);
+                                .'where ugr_Type = "User" and rem_RecID='.$rec_ID);
                                 
                                 $rems = array();
                                 while ($rem = $res2->fetch_assoc()){
@@ -405,12 +406,13 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                             foreach($rec_keys as $index) {
                                 
                                 $record = $records[$index];
-                                $is_master = ($record['rec_ID']== $master_rec_id);
+                                $rec_ID = intval($record['rec_ID']);
+                                $is_master = ($rec_ID== $master_rec_id);
                                 print '<tr id="row'.$record['rec_ID'].'">';
                                 if ($is_master) print '<td><div><b>MASTER</b></div></td>';
                                 else print '<td><div><b>Duplicate</b></div></td>';
                                 print '<td style="width: 500px;">';
-                                print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></div>';
+                                print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_ID.'">'.$rec_ID. ' ' . '<b>'.htmlspecialchars($record['rec_Title']).'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></div>';
                                 print '<table>';
                                 if ($is_master) {
                                     $master_details = $record['details'];

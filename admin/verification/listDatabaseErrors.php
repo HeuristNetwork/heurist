@@ -331,12 +331,12 @@ if($active_all || in_array('owner_ref', $active)) {
             $res = $mysqli->query('SELECT count(distinct rec_ID) FROM Records left join sysUGrps on rec_AddedByUGrpID=ugr_ID where ugr_ID is null');
             $row = $res->fetch_row();
             if($row && $row[0]>0){
-                $wrongUser_Add = $row[0];
+                $wrongUser_Add = htmlspecialchars($row[0]);
             }
             $res = $mysqli->query('SELECT count(distinct rec_ID) FROM Records left join sysUGrps on rec_OwnerUGrpID=ugr_ID where ugr_ID is null');
             $row = $res->fetch_row();
             if($row && $row[0]>0){
-                $wrongUser_Owner = $row[0];
+                $wrongUser_Owner = htmlspecialchars($row[0]);
             }
 
             if($wrongUser_Add==0 && $wrongUser_Owner==0){
@@ -554,28 +554,28 @@ if($active_all || in_array('field_type', $active)) {
             <?php 
             foreach ($dtysWithInvalidTerms as $row) {
                 ?>
-                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'>
-                    <?php echo htmlspecialchars( $row['dty_Name']); ?></a></b> field (code <?= $row['dty_ID'] ?>) has
+                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= intval($row['dty_ID']) ?>); return false}'>
+                    <?php echo htmlspecialchars( $row['dty_Name']); ?></a></b> field (code <?= intval($row['dty_ID']) ?>) has
                     <?= count($row['invalidTermIDs'])?> invalid term ID<?=(count($row['invalidTermIDs'])>1?"s":"")?>
-                    (code: <?= implode(",",$row['invalidTermIDs'])?>)
+                    (code: <?= htmlspecialchars(implode(",",$row['invalidTermIDs']))?>)
                 </div>
                 <?php
             }//for
             foreach ($dtysWithInvalidNonSelectableTerms as $row) {
                 ?>
-                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'>
-                    <?php echo htmlspecialchars($row['dty_Name']); ?></a></b> field (code <?= $row['dty_ID'] ?>) has
+                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= intval($row['dty_ID']) ?>); return false}'>
+                    <?php echo htmlspecialchars($row['dty_Name']); ?></a></b> field (code <?= intval($row['dty_ID']) ?>) has
                     <?= count($row['invalidNonSelectableTermIDs'])?> invalid non selectable term ID<?=(count($row['invalidNonSelectableTermIDs'])>1?"s":"")?>
-                    (code: <?= implode(",",$row['invalidNonSelectableTermIDs'])?>)
+                    (code: <?= htmlspecialchars(implode(",",$row['invalidNonSelectableTermIDs']))?>)
                 </div>
                 <?php
             }
             foreach ($dtysWithInvalidRectypeConstraint as $row) {
                 ?>
-                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'>
-                    <?php echo htmlspecialchars( $row['dty_Name']); ?></a></b> field (code <?= $row['dty_ID'] ?>) has
+                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= intval($row['dty_ID']) ?>); return false}'>
+                    <?php echo htmlspecialchars( $row['dty_Name']); ?></a></b> field (code <?= intval($row['dty_ID']) ?>) has
                     <?= count($row['invalidRectypeConstraint'])?> invalid record type constraint<?=(count($row['invalidRectypeConstraint'])>1?"s":"")?>
-                    (code: <?= implode(",",$row['invalidRectypeConstraint'])?>)
+                    (code: <?= htmlspecialchars(implode(",",$row['invalidRectypeConstraint']))?>)
                 </div>
                 <?php
             }
@@ -613,8 +613,8 @@ if($active_all || in_array('default_values', $active)) {
             <?php 
             foreach ($rtysWithInvalidDefaultValues as $row) {
                 ?>
-                <div class="msgline"><b><a href="#" onclick='{ onEditRtStructure(<?= $row['rst_RecTypeID'] ?>); return false}'>
-                    <?php echo htmlspecialchars($row['rst_DisplayName']); ?></a></b> field (code <?= $row['dty_ID'] ?>) in record type <?= $row['rty_Name'] ?>  has invalid default value (<?= ($row['dty_Type']=='resource'?'record ID ':'term ID ').$row['rst_DefaultValue'] ?>)
+                <div class="msgline"><b><a href="#" onclick='{ onEditRtStructure(<?= intval($row['rst_RecTypeID']) ?>); return false}'>
+                    <?php echo htmlspecialchars($row['rst_DisplayName']); ?></a></b> field (code <?= intval($row['dty_ID']) ?>) in record type <?= htmlspecialchars($row['rty_Name']) ?>  has invalid default value (<?= ($row['dty_Type']=='resource'?'record ID ':'term ID ').htmlspecialchars($row['rst_DefaultValue']) ?>)
                     <span style="font-style:italic"><?php echo htmlspecialchars($row['reason']); ?></span>
                 </div>
                 <?php
@@ -1675,8 +1675,9 @@ if($active_all || in_array('expected_terms', $active)) {
                         list($dty_ID,$trm_id) = explode('.',$code);
                         //$existing_term_id, $row['trm_Label'], $row['dty_Name']
                     
-                        $query = 'UPDATE recDetails set dtl_Value='.$row[0].' where dtl_DetailTypeID='.$dty_ID.' and dtl_Value='.$trm_id;
-                        $res = $mysqli->query( $query );
+                        $stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Value=? WHERE dtl_DetailTypeID=? AND dtl_Value=?');
+                        $stmt->bind_param('iii', $row[0], $dty_ID, $trm_id);
+                        $res = $stmt->execute();
                         if(! $res )
                         {
                             $isOk = false;
@@ -2165,7 +2166,7 @@ if($active_all || in_array('defgroups', $active)) {
                 //find trash group
                 $trash_id = mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"');
                 if($trash_id>0){
-            
+                    $trash_id = $mysqli->real_escape_string($trash_id);
                     $mysqli->query('update defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID set trm_VocabularyGroupID='.$trash_id.' WHERE trm_ParentTermID is null and vcg_ID is null');        
                     
                     $cnt2 = $mysqli->affected_rows;

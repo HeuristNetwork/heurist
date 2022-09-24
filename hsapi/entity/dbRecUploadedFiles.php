@@ -28,9 +28,9 @@ require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 /**
 * some public methods
 * 
-    registerImage - saves encoded image data as file and register it
-    registerFile - uses getFileInfoForReg to get file info
-    registerURL - register url: retrieves MimeExt 
+*   registerImage - saves encoded image data as file and register it
+*   registerFile - uses getFileInfoForReg to get file info
+*   registerURL - register url: retrieves MimeExt 
 * 
 */
     
@@ -250,6 +250,7 @@ class DbRecUploadedFiles extends DbEntityBase
             }
      
             $mysqli = $this->system->get_mysqli();
+            $s = $mysqli->real_escape_string($s);
         
             //find all related records (that refer to this file)
             if($ids_only){
@@ -439,7 +440,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 $rx = 200 / $x;
                                 $ry = 200 / $y;
                                 
-                                $scale = $rx ? $ry ? min($rx, $ry) : $rx : $ry;
+                                $scale = $rx ? ($ry ? min($rx, $ry) : $rx) : $ry;
                                 
                                 if ($scale > 1) { //no enlarge
                                     $scale = 1;
