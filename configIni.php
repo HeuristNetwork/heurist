@@ -62,12 +62,13 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.3.7"; // sets current program version number, determined by Heurist development lead
+$version = "6.3.8"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
-// 6.3.6  08 Aug 2022 - changes to be listed
-// 6.3.5  13 July 2022 - changes to be listed
+// 6.3.8  23 sep 2022 - download spreadsheet of file information for current filtered set of files, big cleanup of edit record code resulting in huge speed improvement for compelx records with many repeated term values
+// 6.3.6  08 Aug 2022 - allow use of bootstrap in custom reports, method for defining alternative language texts in multilingual websites, allow use of unprojected and alternative projection map data, direct annotation references on map widget including pixel coordiantes on tilestacks, better handling of ISO dates, Portuguese translation of interface 
+// 6.3.5  13 July 2022 - script improvements, backup as a standalone and parameterisation, HeuristRef.net as reference server for Heuriverse, Add initial filters to map and custom report widgets, improve map zoom limit handling, improvements to IIIF partial image handling, zoom timing on Storymaps, calcualted fields using custom report to generate data, verification of remote fiel references at time of cration, auto purging of sysArchive table to zip file if over 50K records, databases_not_to_purge.txt file to protect reference databases from auto deletion when never updated, auto deletion of unused databases after 3, 6, 12 months depending on record count, new options for GeoJSon export  
 // 6.3.2  20 April 2022 Change hardcoded references to Sydney server 
 // 6.3.1  15 april 2022 Security fixes, improvements to StoryMaps including new beahviours, and map header bar
 // 6.2.32 03 April 2022 // 6.2.31 26 March 2022 // 6.2.30 10 March 2022 // 6.2.29 25 Feb 2022
