@@ -1547,7 +1547,7 @@ if(false){  //this query fails for maria db
                 . '</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').$is_cms_content.'">';
         }
 
-        print ' ' . $bd['val'] . '<br><br>'; // add value
+        print ' ' . $bd['val'] . '<br>'; // add value
         $prevLbl = $bd['name'];
     }
 
