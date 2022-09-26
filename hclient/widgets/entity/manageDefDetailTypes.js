@@ -808,7 +808,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 {
                     //limit list and disable in case one option
                     var el = $(elements[0])[0];
-                    var _dty_Type = $(el).val();
+                    //var _dty_Type = $(el).val();
+                    var _dty_Type = $Db.dty(this._currentEditID,'dty_Type');
                     
                     $(el).empty();
                     el.disabled = false;
