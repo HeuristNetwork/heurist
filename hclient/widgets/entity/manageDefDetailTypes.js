@@ -495,27 +495,30 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                 var sList = '';
                 for(var i=0; i<usage.length; i++){
-                    sList += ('<a href="#" data-rty_ID="'+usage[i]+'">'+$Db.rty(usage[i],'rty_Name')+'</a><br>');
+                    var rty_Name = $Db.rty(usage[i],'rty_Name');
+                    if(rty_Name){ //it may already deleted
+                        sList += ('<a href="#" data-rty_ID="'+usage[i]+'">'+$Db.rty(usage[i],'rty_Name')+'</a><br>');
+                    }
                 }
-                
-                var sUsage = '<div><b>Warning</b><br/><br/><b>'+$Db.dty(action.recID,'dty_Name')
-                        +'</b> is used in the following record types:<br/><br/>'
-                        +sList
-                        +'<br/><br/>'
-                        +'You have to either delete the field from the record type, '
-                        +'or delete the record type<br>(it may not be possible or desirable to delete the record type)</div>';
+                if(sList!=''){ 
+                    var sUsage = '<div><b>Warning</b><br/><br/><b>'+$Db.dty(action.recID,'dty_Name')
+                            +'</b> is used in the following record types:<br/><br/>'
+                            +sList
+                            +'<br/><br/>'
+                            +'You have to either delete the field from the record type, '
+                            +'or delete the record type<br>(it may not be possible or desirable to delete the record type)</div>';
 
-                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sUsage, null, {title:'Warning'}, 
-                            {default_palette_class:this.options.default_palette_class});        
-                
-                this._on($dlg.find('a[data-rty_ID]'),{click:function(e){
-                    //edit structure
-                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
-                        {new_record_params:{RecTypeID: $(e.target).attr('data-rty_ID')}, edit_structure:true});
+                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sUsage, null, {title:'Warning'}, 
+                                {default_palette_class:this.options.default_palette_class});        
                     
-                    return false;                    
-                }});
-                
+                    this._on($dlg.find('a[data-rty_ID]'),{click:function(e){
+                        //edit structure
+                        window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                            {new_record_params:{RecTypeID: $(e.target).attr('data-rty_ID')}, edit_structure:true});
+                        
+                        return false;                    
+                    }});
+                }
                 return;
             }
         }
@@ -552,13 +555,17 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         
                         this.fieldSelectorLast   = recID;
                         var usage = $Db.rst_usage(recID);
+                        var options = [];
                         if(usage && usage.length>0){
-                            var options = [];
                             for(var i=0; i<usage.length; i++){
                                 var rty_ID = usage[i];
-                                options.push({key:rty_ID, title:$Db.rty(rty_ID, 'rty_Name')});
-                            }   
-                        }else{
+                                var rty_Name = $Db.rty(rty_ID, 'rty_Name');
+                                if(rty_Name){
+                                    options.push({key:rty_ID, title:$Db.rty(rty_ID, 'rty_Name')});
+                                }
+                            }
+                        }   
+                        if(options.length==0){
                             this.fieldSelectorLast = -this.fieldSelectorLast;
                             window.hWin.HEURIST4.msg.showMsgFlash('Field is not in use',1000);
                             return;

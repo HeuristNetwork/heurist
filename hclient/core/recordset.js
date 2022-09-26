@@ -996,8 +996,12 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     function _getFieldValues(record, fldname){
         if(window.hWin.HEURIST4.util.isempty(fldname)) return null;
 
-        if( (!$.isPlainObject(record)) && !isnull(record) && records[record]){
-            record = records[record];
+        if( (!$.isPlainObject(record)) && !isnull(record)){
+            if(records[record]){
+                record = records[record];    
+            }else{
+                return null;
+            }
         }
         
         if(isnull(record)){
