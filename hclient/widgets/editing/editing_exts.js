@@ -456,9 +456,14 @@ function openSearchMenu(that, $select, disableClick=true){
 
         that._on($menu.find('span.show-select-dialog'), {click:
         function(event){
-            var foo = $select.hSelect('option','change');//.trigger('change');
-            foo.call(this, null, 'select'); //call __onSelectMenu
+            var $mnu = $select.hSelect('menuWidget');
+            if($mnu.find('.ui-menu-item-wrapper:first').css('cursor')!='progress'){
+                var foo = $select.hSelect('option','change');//.trigger('change');
+                foo.call(this, null, 'select'); //call __onSelectMenu
+            }
         }});
+        
+        var _timeout = 0;
         
         //set filter
         that._on($menu, {
@@ -474,6 +479,9 @@ function openSearchMenu(that, $select, disableClick=true){
                 $mnu.find('li').css('display','list-item');
                 $mnu.find('div.not-found').hide();
             }else{
+                if(_timeout==0){
+                    $mnu.find('.ui-menu-item-wrapper').css('cursor','progress');
+                }
                 $.each($mnu.find('.ui-menu-item-wrapper'),
                     function(i,item){
                         if($(item).text().toLowerCase().indexOf(val)>=0){
@@ -484,6 +492,7 @@ function openSearchMenu(that, $select, disableClick=true){
                     });    
                 $mnu.find('div.not-found').css('display',
                     $mnu.find('.ui-menu-item-wrapper:visible').length==0?'block':'none');
+                _timeout = setTimeout(function(){$mnu.find('.ui-menu-item-wrapper').css('cursor','default');_timeout=0;},500);
             }                                    
             
         }});
@@ -715,7 +724,7 @@ function browseRecords(_editing_input, $input){
             
             
             var key = that.f('rst_RecTypeID')+'-'+that.f('rst_DetailTypeID');
-			var recordMax = 1000;
+			var recordMax = 2000;
     
             if(!window.hWin.HEURIST4.browseRecordCache){
                 window.hWin.HEURIST4.browseRecordCache = {};
@@ -779,7 +788,7 @@ function browseRecords(_editing_input, $input){
                                    });
                             }
                             
-                            if(response.data.count>1000){
+                            if(response.data.count>recordMax){
                                 __assignCache(response.data.count);
                                 __show_select_dialog();
                             }else if (response.data.count==0){
@@ -816,7 +825,7 @@ function browseRecords(_editing_input, $input){
                                            //nothing found
                                            __assignCache('zero');
                                            window.hWin.HEURIST4.msg.showMsgFlash('No records for Browse filter');
-                                           setTimeout(__show_select_dialog, 1000);
+                                               setTimeout(__show_select_dialog, 1000);
                                        }
                                    }else{
                                         window.hWin.HEURIST4.msg.showMsgErr(response);       
@@ -884,6 +893,12 @@ function browseRecords(_editing_input, $input){
                     };
 
                     events['onSelectMenu'] = function ( event ){
+                        
+                        var $mnu = that.selObj.hSelect('menuWidget');
+                        if($mnu.find('.ui-menu-item-wrapper:first').css('cursor')=='progress'){
+                            openSearchMenu(that, that.selObj, false);
+                            return;
+                        }
                         
                         var targetID = (event) ?$(event.target).val() :$(that.selObj).val();
                         if(!targetID) return;
