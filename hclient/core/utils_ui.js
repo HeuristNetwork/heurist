@@ -1135,6 +1135,8 @@ window.hWin.HEURIST4.ui = {
                     if(parent_ele.length==0){
                         //parent_ele = $(win.frameElement).parents('.ui-menu6-container');
                         parent_ele = $(selObj[0].ownerDocument.body);
+                    }else{
+                        selObj.addClass('adjust-to-button');
                     }
                 }
             
@@ -1222,7 +1224,9 @@ window.hWin.HEURIST4.ui = {
                     
                     if ( selObj[0].ownerDocument.location !== window.location ){
                         var wbtn = $(event.target).hSelect('widget');
-                        wmenu_div.css('left', wbtn.position().left);    
+                        if($(event.target).hasClass('adjust-to-button')){
+                            wmenu_div.css('left', wbtn.position().left);      
+                        }
                     }
                     
                     wmenu_div.css('zIndex',69999);
