@@ -584,7 +584,12 @@ if(!($is_map_popup || $without_header)){
 
         .detail img:not(.geo-image, .rv-magglass, .rv-editpencil, .rft){
             width: 50%;
-        }		
+        }
+
+        .detail span.value:nth-last-child(n+2){
+            display: block;
+            padding-bottom: 5px;
+        }
 <?php if($is_production){
     print '.detailType {width:160px;}';
 }?>        
@@ -761,6 +766,8 @@ $_time_debug = $_time_debug2;
         <div class="map_popup"><div class="detailRow moreRow"><div class=detailType>
             <a href="#" oncontextmenu="return false;" 
                 onClick='$(".fieldRow").css("display","table-row");$(".moreRow").hide();createRecordGroups(<?php echo json_encode($group_details, JSON_FORCE_OBJECT); ?>);' style="color:blue">
+                more...
+            </a>
             </div><div class="detail"></div></div></div>
         <?php
         }
@@ -1444,23 +1451,46 @@ if(false){  //this query fails for maria db
             if(@$thumb['external_url']){
                 print '<a href="' . htmlspecialchars($thumb['external_url']) 
                                 . '" class="external-link" target=_blank>open in new tab'
-                                . (@$thumb['linked']?' (linked media)':'').'</a></div>';
+                                . (@$thumb['linked']?' (linked media)':'').'</a>';
             }else{
                 print '<a href="' . htmlspecialchars($download_url) 
                                 . '" class="external-link image_tool" target="_surf">download'
-                                . (@$thumb['linked']?' (linked media)':'').'</a></div>';
+                                . (@$thumb['linked']?' (linked media)':'').'</a>';
             }
 
             if(@$thumb['description'] != null && @$thumb['description'] != ''){
                 if(filter_var($thumb['description'], FILTER_VALIDATE_URL)){ // just a url
                     print '<a href="'.htmlspecialchars($thumb['description']).'" target="_blank">&copy; credits</a>';
-                }else{
-                    print '<span style="cursor: pointer; color: #2080C0;" '
-                        . 'onClick="window.hWin.HEURIST4.msg.showMsgDlg(\''.htmlspecialchars($thumb['description']).'\', null, \'Credits for '.htmlspecialchars($thumb['orig_name']).'\')">&copy; credits</a>';
+                }else{ // check for possible urls and linkify valid ones
+
+                    $file_desc = str_replace(array("\r\n", "\r", "\n"), '<br>', $thumb['description']);
+
+                    preg_match_all('/((?:https?|ftp|mailto))(\S)+/', $file_desc, $url_matches); // only urls that contain a protocol [http|https|ftp|mailto]
+
+                    if(is_array($url_matches) && count($url_matches[0]) > 0){
+
+                        foreach($url_matches[0] as $url){
+                            if(mb_strpos($url, '<br>')){ // remove from first br onwards, in case
+                                $url = explode('<br>', $url)[0];
+                            }
+                            if(ctype_punct(mb_substr($url, -1))){ // ensure last character isn't punctuation
+                                $url = mb_substr($url, 0, -1);
+                            }
+
+                            if(!empty($url) && is_string($url) && filter_var($url, FILTER_VALIDATE_URL)){ // php validate url
+                                $linked_url = '<a href='. $url .' target="_blank">'. $url .'</a>';
+                                $file_desc = str_replace($url, $linked_url, $file_desc);
+                            }
+                        }
+                    }
+
+                    print '<a href="#" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
+                        . 'onClick="window.hWin.HEURIST4.msg.showMsgDlg(\''.addslashes(htmlspecialchars($file_desc)).'\', null, \'Credits for '.htmlspecialchars($thumb['orig_name']).'\'); return false;">'
+                        . '&copy; credits</a>';
                 }
             }
 
-            print '</div>';
+            print '</div></div>';
             if($is_map_popup){
                 print '<br>';
                 break; //in map popup show the only thumbnail
@@ -1547,7 +1577,7 @@ if(false){  //this query fails for maria db
                 . '</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').$is_cms_content.'">';
         }
 
-        print ' ' . $bd['val'] . '<br>'; // add value
+        print '<span class="value">' . $bd['val'] . '</span>'; // add value
         $prevLbl = $bd['name'];
     }
 
