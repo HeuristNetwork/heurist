@@ -951,6 +951,7 @@ foreach($cfn_tobeimported as $cfn_ID => $rty_IDs){ //$rty_IDs $rty_ID=>$dty_ID
             $cfn_entity->setData($cfn_values);
             $cfn_entity->setRecords(null); //reset
             $new_cfn_ID = $cfn_entity->save();   //register remote url - it returns ulf_ID
+            if(is_array($new_cfn_ID)) $new_cfn_ID = $new_cfn_ID[0];
             
         }
         
@@ -976,7 +977,7 @@ foreach($cfn_tobeimported as $cfn_ID => $rty_IDs){ //$rty_IDs $rty_ID=>$dty_ID
 }//foreach calc fields
 }
 
-$mysqli->commit();        
+$mysqli->commit();   
             
             return true;
     }//doImport
