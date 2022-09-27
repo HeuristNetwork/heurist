@@ -2037,7 +2037,7 @@ class HPredicate {
     */
     function predicateRelated(){
 
-        global $top_query, $params_global;
+        global $top_query, $params_global, $mysqli;
         $not_nested = (@$params_global['nested']===false);
         
 
@@ -2060,7 +2060,7 @@ class HPredicate {
                         //if(count($ids)>2000)
                         $val = ' IN ('.implode(',',$ids).')';
                     }else{
-                        $val = ' =0';
+                        $val = ' =0'; //not found
                     }
                     
                     //OLD $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
@@ -2209,7 +2209,10 @@ class HPredicate {
             }
 
             //compose where with recLinks ($rl) fields
-            $where = "r$p.rec_ID=$rl.$part1 AND $rl.$part2".$val;
+            $where = "r$p.rec_ID=$rl.$part1 ";
+            if($val){
+                $where = $where . "AND $rl.$part2".$val;
+            }
             
             if(is_array($this->relation_types)&& count($this->relation_types)>0){
                 
@@ -2410,9 +2413,13 @@ class HPredicate {
 
         //@todo between , datetime, terms
         if(is_array($this->value)){
-            $cs_ids = getCommaSepIds($this->value);
-            if($cs_ids!=null){
-                $this->value = implode(',',$this->value);
+            if(count($this->value)>0){
+                $cs_ids = getCommaSepIds($this->value);
+                if($cs_ids!=null){
+                    $this->value = implode(',',$this->value);
+                }
+            }else{
+                return '';
             }
             /*
             error_log('value expected string - array given');
