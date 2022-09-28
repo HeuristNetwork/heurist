@@ -50,6 +50,10 @@
     </div>
 </div>
 
+<div style="display: none;" id="parententity_header" style="margin-left: 10px;">
+    <span class="ui-icon ui-icon-triangle-1-e"></span>
+    <span style="display: inline-block;padding-left: 5px;">Select existing record as child (not recommended)</span>
+</div>
 <div style="display: none;line-height: 2em" id="row_parententity_helper" class="not-addonly">
     <div class="div-table-cell"></div>
     <div class="div-table-cell heurist-helper1">Note: child records are not shown in this search</div>
@@ -60,5 +64,13 @@
         <p style="padding:10px 0"><span class="ui-icon ui-icon-arrowthick-1-n" style="width:23px;"></span>&nbsp;&nbsp;We recommend adding a new child record</p>
         <p><div id="btn_search_start2"></div>&nbsp;Click search icon to display existing records</p>
         <p style="padding:15px 0"><span style="color:red">Warning</span> selecting an existing record makes it a child record</p>
+    </div>
+</div>
+<div style="display: none;line-height: 2em;margin: 10px 0 0 10px;" id="row_parententity_helper4" class="not-addonly">
+    <div class="div-table-cell heurist-helper1">
+        If you wish to change the parent of an existing child record, you must open the child and change the<br>
+        parent from within it. If you select an existing record to become a child of this record, it will be<br>
+        converted to a child record. If these restrictions are not convenient for your database, you may<br>
+        consider converting this child pointer field into an ordinary record pointer.
     </div>
 </div>

@@ -268,8 +268,35 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }else{
             if(this.options.parententity>0){
                 
-                this.element.find('#row_parententity_helper').css({'display':'table-row'});
-                this.element.find('#row_parententity_helper2').css({'display':'table-row'});
+                this.element.find('#row_parententity_helper4').show();
+                this.element.find('#parententity_header').show();
+                this._on(this.element.find('#parententity_header'), {
+                    'click': function(event){
+
+                        let $header_icon = this.element.find('#parententity_header .ui-icon');
+                        let is_expanding = $header_icon.hasClass('ui-icon-triangle-1-e');
+                        let is_results_only = $header_icon.parent().hasClass('search-results-only');
+
+                        $header_icon.toggleClass('ui-icon-triangle-1-e ui-icon-triangle-1-s');
+
+                        if(is_expanding){
+                            if(!is_results_only){
+                                this.element.find('#row_parententity_helper, #row_parententity_helper2').css({'display':'table-row'});
+                                this.element.parent().find('.recordList').hide();
+                            }else{
+                                this.element.find('#row_parententity_helper2').hide();
+                                this.element.find('#row_parententity_helper').css({'display':'table-row'});
+                                this.element.parent().find('.recordList').show();
+                            }
+                            this.element.find('#row_parententity_helper4').hide();
+                        }else{
+                            this.element.find('#row_parententity_helper, #row_parententity_helper2').hide();
+                            this.element.parent().find('.recordList').hide();
+                            this.element.find('#row_parententity_helper4').show();
+                        }
+                    }
+                });
+                this.element.parent().find('.recordList').hide();
                 this.element.find('#row_parententity_helper2').parent('.ent_header').css({'z-index':99});
                 
                 this.btn_search_start2 = this.element.find('#btn_search_start2').css({height:'20px',width:'20px'})
@@ -304,12 +331,14 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-        var ele = this.element.find('#row_parententity_helper2')
+        var ele = this.element.find('#row_parententity_helper2').hide();
+        ele = this.element.find('#parententity_header');
+
         if(ele.is(':visible')){
-            //this.element.height('12em');
-            ele.hide();
+            ele.addClass('search-results-only');
+            ele.find('.ui-icon').addClass('ui-icon-triangle-1-s').removeClass('ui-icon-triangle-1-e');
+            this.element.parent().find('.recordList').show();
         }
-            
 
         this._super();
 
