@@ -1301,31 +1301,39 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     mergeIconThumbnailFields: function(){
         // fields
         var $icon = this._editing.getFieldByName('rty_Icon');
-        var $thumb = this._editing.getFieldByName('rty_Thumb');
+        var $thumb = this._editing.getFieldByName('rty_Thumb').hide();
 
         var thumb_header = $thumb.find('div.header.optional > label').text(); // thumbnail header
 
         // Alter icon field
         $icon.css('width', '');
+
         $icon.find('div.image_input').css({
             'min-width': '50px',
-            'min-height': '50px'
+            'min-height': '50px',
+            'margin-left': '25px',
+            'vertical-align': 'top' // for Firefox
         }); // make visual smaller
-        $icon.find('span.upload-file-text').text('Upload icon file'); // change upload file text
+
         $icon.find('div.header.optional').append($('<br><label>'+ thumb_header +'</label>')); // add thumbnail header text to icon header
-        $icon.find('div.heurist-helper1').text('Images to represent this record type');
+        $icon.find('div.heurist-helper1').text('Images to represent this record type'); // replace help text
+
+        // Move library and upload links
+        $icon.find('.file-options-container')
+             .insertBefore($icon.find('div.image_input.fileupload'))
+             .css('padding-top', '4px');
 
         // Move thumbnail field
         var $thumb_img = $thumb.find('div.image_input');
         $thumb_img.css('margin-left', '25px').insertAfter($icon.find('div.image_input.fileupload'));
-        var $icon_links = $icon.find('span.upload-file-text').parent().append($('<br><br>')); // prepare field for upload file for thumbnail field
-        $thumb.find('span.upload-file-text').text('Upload thumbnail file').parent().insertAfter($icon_links); // change upload file text and move to upload file for icon field
-        $thumb.hide();
+
+        // Hide open folder icon, usually is hidden by icon image
+        $icon.find('.input-div span:first').hide();
 
         // link fields
         $icon.editing_input('linkIconThumbnailFields', $thumb_img, $thumb);
         $thumb.editing_input('linkIconThumbnailFields', $icon.find('div.image_input'), $icon);
-        // link clear buttons
+        // link clear buttons, only icon clear button is visible
         this._on($icon.find('span.btn_input_clear'), {
             'click': function(){
                 $thumb.find('span.btn_input_clear').click();

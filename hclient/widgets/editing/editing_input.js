@@ -2671,16 +2671,16 @@ $.widget( "heurist.editing_input", {
                                 that.newvalues[$input.attr('id')] = value; 
                             }
                             
-                            var ele = $('<div style="display:inline-block;vertical-align:top;padding-left:4px"/>')
-                            .appendTo( $inputdiv );                            
-                            
-                            $('<a href="#"><span class="ui-icon ui-icon-folder-open"/>Upload file</a>')
-                                .click(function(){ $input.click() }).appendTo( ele );                            
-                            $('<br/><br/>').appendTo( ele );                            
-                            
-                            $('<a href="#" title="Or select from library"><span class="ui-icon ui-icon-grid"/>Library</a>')
-                                .click(function(){that.openIconLibrary()}).appendTo( ele );                     
-                                
+                            var ele = $('<div style="display:inline-block;vertical-align:top;padding-left:4px" class="file-options-container" />')
+                                .appendTo( $inputdiv );                            
+
+                            $('<a href="#" title="Select from a library of images"><span class="ui-icon ui-icon-grid"/>Library</a>')
+                                .click(function(){that.openIconLibrary()}).appendTo( ele );
+
+                            $('<br/><br/>').appendTo( ele );
+
+                            $('<a href="#" title="or upload a new image"><span class="ui-icon ui-icon-folder-open"/><span class="upload-file-text">Upload file</span></a>')
+                                .click(function(){ $input.click() }).appendTo( ele );
                         }
                             
                 /* 2017-11-08 no more buttons 
