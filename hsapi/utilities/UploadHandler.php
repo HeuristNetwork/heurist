@@ -32,7 +32,7 @@ class UploadHandler
     // http://php.net/manual/en/features.file-upload.errors.php
     // indexes from 1 - 8 is from $_FILES[idx]['error']
     protected $error_messages = array(
-        1 => 'The uploaded file exceeds the upload_max_filesize directive in php.ini',
+        1 => 'The uploaded file exceeds the upload_max_filesize (xxx) directive in php.ini',
         2 => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form',
         3 => 'The uploaded file was only partially uploaded',
         4 => 'No file was uploaded',
@@ -226,7 +226,14 @@ class UploadHandler
                 ),
                 */
 
-        $this->error_messages['post_max_size'] = 'The uploaded file exceeds the maximum size ('. ini_get('post_max_size') .'Bytes) set for this server (post_max_size in php.ini)';
+        // update exceeded post max with current value
+        $post_max_size = ini_get('post_max_size');
+        if($post_max_size && $post_max_size[strlen($post_max_size)-1] != 'B'){ // check if size needs to be added
+            $post_max_size .= 'B';
+        }else{
+            $post_max_size = 'Unknown';
+        }
+        $this->error_messages[1] = str_replace('xxx', $post_max_size, $this->error_messages[1]);
 
         if ($options) {
             $this->options = $options + $this->options;
@@ -507,7 +514,7 @@ $siz = get_php_bytes('upload_max_filesize');
         
         $post_max_size = $this->get_config_bytes(ini_get('post_max_size'));
         if ($post_max_size && ($content_length > $post_max_size)) {
-            $file->error = $this->get_error_message('post_max_size');
+            $file->error = $this->get_error_message(1);
             return false;
         }
 
