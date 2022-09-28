@@ -436,7 +436,7 @@ window.hWin.HEURIST4.dbs = {
                         $grouped.push(
                             {title:s, folder:true, is_generic_fields:true, children:$rl_children});
                     }
-                    
+
                     if(recTitle_item){
                         $grouped.push( recTitle_item );
                     }
@@ -493,7 +493,6 @@ window.hWin.HEURIST4.dbs = {
                     // add details --------------------------------
                     if($details)
 
-                    
                     $details.each2(function($dtID, $dtValue){
                         //@TODO forbidden for import????
                         if($dtValue['rst_RequirementType']!='forbidden'){
@@ -503,28 +502,47 @@ window.hWin.HEURIST4.dbs = {
                             if($dt_type=='resource' || $dt_type=='relmarker'){ //title mask w/o relations
                                     $new_pointer_fields.push( $dtID );
                             }
-                            
+
                             $res_dt = __getDetailSection($recTypeId, $dtID, $recursion_depth, $mode, 
                                                                     $fieldtypes, null, $new_pointer_fields);
                             if($res_dt){
                                 
                                 if($res_dt['type']=='resource' || $res_dt['type']=='relmarker'){
-                                    
-                                    
+
                                     if($mode==3 && $res_dt['constraint'] && $res_dt['constraint']>1){ 
                                         //for rectitle mask do not create additional level for  multiconstrained link
-                                        
+
+                                        let separate_meta_fields = $res_dt['constraint'] > 1;
                                         for (var i=0; i<$res_dt['constraint']; i++){
-                                            $res_dt['children'][i]['code'] = $res_dt['code']
-                                                        + _separator + '{'+$res_dt['children'][i]['title'] +'}';
-                                            $res_dt['children'][i]['title'] = $res_dt['title']
-                                                        + ' (<span style="font-weight: bold;">'+ $res_dt['children'][i]['title']+'</span>)';
-                                            $children_links.push($res_dt['children'][i]);    
+                                            $res_dt['children'][i]['code'] = '{'+$res_dt['children'][i]['title'] +'}'; // change code
+
+                                            if(separate_meta_fields){
+                                                // remove constructed title and metadata, keep fields node
+                                                //$res_dt['children'][i]['children'] = $res_dt['children'][i]['children'].slice(0, 2);
+
+                                                // move fields out of sub-heading
+                                                let fields = $res_dt['children'][i]['children'].pop();
+                                                $res_dt['children'][i]['children'] = fields['children'];
+                                            }
                                         }
-                                    }else{
-                                        $children_links.push($res_dt);    
                                     }                                           
-                                    
+                                        }
+
+                                        if(separate_meta_fields){ // if more than one rectype, place constrcuted title and metadata outside
+
+                                            let meta_fields = [
+                                                {key:'rec_ID',title:'Record ID', code:'Record ID'}, {key:'rec_RecTypeID', title:'Record TypeID', code:'Record TypeID'},
+                                                {key:'rec_TypeName', title:'Record TypeName', code:'Record TypeName'}, {key:'rec_Modified', title:"Record Modified", code:'Record Modified'}
+                                            ];
+                                            let meta_title = '<span style="font-style:italic">metadata</span>';
+
+                                            $res_dt['children'].unshift(
+                                                {key:'rec_Title', type:'freetext', title:'Constructed title', code:'Record Title'}, {title:meta_title, folder:true, is_generic_fields:true, children:meta_fields}
+                                            );
+                                        }
+                                    }
+
+                                    $children_links.push($res_dt);
                                 }else{
 									
                                     if($res_dt['type']=='enum' && $mode==3){
@@ -533,14 +551,6 @@ window.hWin.HEURIST4.dbs = {
 									
                                     $dtl_fields.push($res_dt);
                                 }
-                                /*
-                                if(is_array($res_dt) && count($res_dt)==1){
-                                $res["f".$dtID] = $res_dt[0];    
-                                }else{
-                                //multi-constrained pointers or simple variable
-                                $res["f".$dtID] = $res_dt;
-                                }
-                                */
                             }
                         }
                     });//for details
@@ -548,7 +558,6 @@ window.hWin.HEURIST4.dbs = {
                     //add resource and relation at the end of result array
                     $dtl_fields = $dtl_fields.concat($children_links);
 
-                   
                     $dtl_fields.sort(function(a,b){
                         return (a['display_order']<b['display_order'])?-1:1;
                     });
@@ -737,7 +746,7 @@ window.hWin.HEURIST4.dbs = {
 
         var $detailType = $Db.dty($dtID,'dty_Type');
         
-        if(($mode==3 || $mode==7) && $detailType=='relmarker'){
+        if(($mode==7) && $detailType=='relmarker'){ //$mode==3 || 
             return null;   
         }
         
@@ -1015,7 +1024,7 @@ window.hWin.HEURIST4.dbs = {
         }
 
         return res;
-    },    
+    },
     
     
     /**
