@@ -811,7 +811,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         var ids = recID.split('.');
                         var sType = $Db.dty(ids[1], 'dty_Type');
 
-                        if(window.hWin.HAPI4.is_admin() && sType!='separator' && delete_data){
+                        if(window.hWin.HAPI4.is_admin() && sType!='separator' && sType!='relmarker' && delete_data){
                             //delete fields from records
 
                             req = {
@@ -844,7 +844,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 rst_ID = rst_ID.split('.')[1];
             }
 
-            var display = window.hWin.HAPI4.is_admin() && $Db.dty(rst_ID, 'dty_Type') != 'separator' ? 'inline-block' : 'none';
+            var display = window.hWin.HAPI4.is_admin() && $Db.dty(rst_ID, 'dty_Type') != 'separator' && $Db.dty(rst_ID, 'dty_Type') != 'relmarker' ? 'inline-block' : 'none'; // relmarkers cannot be batch deleted
 
             var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete field "<b>'
@@ -2516,29 +2516,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             node.remove();
         }
 
-        var usage = $Db.rst_usage(recID);
         var is_allowed = $Db.dty(recID, 'dty_Status') != 'reserved' && $Db.dty(recID, 'dty_Type') != 'separator' && $Db.dty(recID, 'dty_Type') != 'relmarker';
-        if(window.hWin.HAPI4.is_admin() && $Db.dty(recID) && is_allowed){ // ask if to delete base field
-
-            if(usage.length == 0){ // Un-used field
-
-                var msg = 'The base field ' + $Db.dty(recID, 'dty_Name') + '(#'+ recID +') is not used in any other record structure.<br>Would you like to delete this un-used base field?';
-
-                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, {
-                    'Delete field': function(){ 
-                        that._deleteBaseField(recID);
-                        $dlg.dialog('close'); 
-                    },
-                    'Keep field': function(){ 
-                        $dlg.dialog('close'); 
-                    }
-                }, {title: 'Delete un-used field', yes: 'Delete field', no: 'Keep field'}, {default_palette_class: 'ui-heurist-design'});
-            }else{ // Used field, check if any data exists
-                this.checkFieldForData(recID);
-            }
+        if(window.hWin.HAPI4.is_admin() && $Db.dty(recID) && is_allowed){ // begin check for complete base field deletion
+            this.checkFieldForData(recID);
         }
 
-        this._showRecordEditorPreview(); //redraw 
+        this._showRecordEditorPreview(); //redraw
     },
     
     //
@@ -2804,7 +2787,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     },
 
     //
-    // Check base field for any data
+    // Check base field for any data, before offering to delete the base field
     //
     checkFieldForData: function(dtyid){
 
@@ -2821,36 +2804,64 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             'request_id': window.hWin.HEURIST4.util.random()
         };
 
-        window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){ console.log(response);
+        window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
             if(response.status == window.hWin.ResponseStatus.OK && response.data == 0){
-                // Allow deletion
-                var msg = 'Base field <strong>' + $Db.dty(dtyid, 'dty_Name') + '</strong><br><br>This base field is not used by any of the fields which reference it:<br><br>';
 
                 var rst_usage = $Db.rst_usage(dtyid);
 
-                for(var i = 0; i < rst_usage.length; i++){
-                    msg += $Db.rty(rst_usage[i], 'rty_Name') + ' . ' + $Db.rst(rst_usage[i], dtyid, 'rst_DisplayName') + '<br>';
+                // Allow deletion
+                var msg = '';
+                var labels = {}, btns = {};
+
+                if(rst_usage.length >= 0){ // Base field used in existing record structures
+
+                    msg = 'Base field <strong>' + $Db.dty(dtyid, 'dty_Name') + '</strong><br><br>This base field is not used by any of the fields which reference it:<br><br>';
+
+                    for(var i = 0; i < rst_usage.length; i++){
+                        msg += $Db.rty(rst_usage[i], 'rty_Name') + ' . ' + $Db.rst(rst_usage[i], dtyid, 'rst_DisplayName') + '<br>';
+                    }
+
+                    msg += '<br>'
+                        + '<label>'
+                            + '<input type="checkbox" id="delBaseField" /> Check this box to <span style="text-decoration:underline;">permanently</span>'
+                            + ' remove this base field from the database<br><span style="display: inline-block; margin-left: 21px">(this will remove the fields listed above)</span>'
+                        + '</label>';
+
+                    labels = {title: 'Base field deletion', yes: 'Proceed', no: 'Cancel'};
+
+                    btns = {
+                        'Proceed': function(){ 
+    
+                            if($dlg.find('#delBaseField').is(':checked')){
+                                that._deleteBaseField(dtyid);
+                            }
+    
+                            $dlg.dialog('close'); 
+                        },
+                        'Cancel': function(){ 
+                            $dlg.dialog('close'); 
+                        }
+                    };
+                }else if(rst_usage.length == 0){ // un-used base field
+
+                    msg = 'The base field ' + $Db.dty(dtyid, 'dty_Name') + '(#'+ dtyid +') is not used in any other record structure.<br>Would you like to delete this un-used base field?';
+
+                    labels = {title: 'Delete un-used field', yes: 'Delete field', no: 'Keep field'};
+                    
+                    btns = {
+                        'Delete field': function(){ 
+                            that._deleteBaseField(dtyid);
+                            $dlg.dialog('close'); 
+                        },
+                        'Keep field': function(){ 
+                            $dlg.dialog('close'); 
+                        }
+                    };
+                }else{ // error console.log();
+                    return;
                 }
 
-                msg += '<br>'
-                    + '<label>'
-                        + '<input type="checkbox" id="delBaseField" /> Check this box to <span style="text-decoration:underline;">permanently</span>'
-                        + ' remove this base field from the database<br><span style="display: inline-block; margin-left: 21px">(this will remove the fields listed above)</span>'
-                    + '</label>';
-
-                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, {
-                    'Proceed': function(){ 
-
-                        if($dlg.find('#delBaseField').is(':checked')){
-                            that._deleteBaseField(dtyid);
-                        }
-
-                        $dlg.dialog('close'); 
-                    },
-                    'Cancel': function(){ 
-                        $dlg.dialog('close'); 
-                    }
-                }, {title: 'Base field deletion', yes: 'Proceed', no: 'Cancel'}, {default_palette_class: 'ui-heurist-design'});
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, labels, {default_palette_class: 'ui-heurist-design'});
             }
         });
     },

@@ -741,6 +741,10 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                     $searchClause = "dtl_Value = \"".$mysqli->real_escape_string(@$this->data['sVal'])."\"";
                     $partialReplace = false;
                     break;
+                case "relmarker":
+                    $this->system->addError(HEURIST_INVALID_REQUEST, "Relationship marker fields are not supported by value-replace service");
+                    return false;
+                    break;
                 default:
                     $this->system->addError(HEURIST_INVALID_REQUEST, "$basetype fields are not supported by value-replace service");
                     return false;
@@ -997,6 +1001,10 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             case "geo":
                 $searchClause = '1';
                 $isDeleteAll = true;
+                break;
+            case "relmarker":
+                $this->system->addError(HEURIST_INVALID_REQUEST, "Relationship marker fields are not supported by batch deletion");
+                return false;
                 break;
             default:
                 $this->system->addError(HEURIST_INVALID_REQUEST, "$basetype fields are not supported by deletion service");
