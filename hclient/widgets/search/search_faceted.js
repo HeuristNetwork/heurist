@@ -2977,7 +2977,7 @@ $.widget( "heurist.search_faceted", {
                 if(this.options.is_publication){ //this is web publication  top_parent.length>0
                     f_link_content.css('width',top_parent.width()*0.6).addClass('truncate');
                 }else{
-                    f_link_content.css('width',this.element.width()-100).addClass('truncate');    //was 80 this.facets_list_container.width()*0.6
+                    f_link_content.css('width',this.element.width()-60).addClass('truncate');    //this.facets_list_container.width()*0.6
                 }
             
             
