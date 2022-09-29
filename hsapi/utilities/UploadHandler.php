@@ -227,10 +227,8 @@ class UploadHandler
                 */
 
         // update exceeded post max with current value
-        $post_max_size = ini_get('post_max_size');
-        if($post_max_size && $post_max_size[strlen($post_max_size)-1] != 'B'){ // check if size needs to be added
-            $post_max_size .= 'B';
-        }else{
+        $post_max_size = $this->get_config_bytes(ini_get('post_max_size'));
+        if(!$post_max_size){
             $post_max_size = 'Unknown';
         }
         $this->error_messages[1] = str_replace('xxx', $post_max_size, $this->error_messages[1]);
