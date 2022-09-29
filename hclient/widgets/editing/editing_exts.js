@@ -724,7 +724,7 @@ function browseRecords(_editing_input, $input){
             
             
             var key = that.f('rst_RecTypeID')+'-'+that.f('rst_DetailTypeID');
-			var recordMax = 2000;
+			var recordMax = 1000;
     
             if(!window.hWin.HEURIST4.browseRecordCache){
                 window.hWin.HEURIST4.browseRecordCache = {};
