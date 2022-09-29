@@ -1795,6 +1795,24 @@ background: #8ea9b9
 
 .ent_content_full{position:absolute;top:2.8em;bottom: 0px;left:0px;right: 1px;overflow-y:auto;}
 .ent_footer{bottom:0px;height:2.6em;}
+/* Additional stylings for CSS footers */
+.static_footer{position: static;}
+.ent_footer #main-host,
+.static_footer #main-host {
+    display: flex;
+    align-items: center;
+}
+.static_footer #main-host > *,
+.ent_footer #main-host > * {
+    padding: 0 0.25rem;
+}
+.ent_footer #main-host {
+    justify-content: start;
+}
+.static_footer #main-host {
+    justify-content: center;
+}
+
 
 .ent_wrapper.editor fieldset > div{
     display: table;

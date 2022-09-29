@@ -852,7 +852,7 @@ function onHapiInit(success){
             
             if(window.hWin.HAPI4.sysinfo.host_logo && $('#host_info').length>0){
                 
-                $('<div style="height:40px;padding-left:4px;float:right">'  //background: white;
+                $('<div>'  //background: white;
                     +'<a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
                     +'" target="_blank" style="text-decoration:none;color:black;">'
                             +'<label>at: </label>'
