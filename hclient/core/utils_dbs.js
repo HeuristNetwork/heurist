@@ -525,8 +525,7 @@ window.hWin.HEURIST4.dbs = {
                                                 $res_dt['children'][i]['children'] = fields['children'];
                                             }
                                         }
-                                    }                                           
-                                        }
+
 
                                         if(separate_meta_fields){ // if more than one rectype, place constrcuted title and metadata outside
 
