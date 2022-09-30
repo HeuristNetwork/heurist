@@ -470,6 +470,85 @@ class DbDefRecStructure extends DbEntityBase
         }
     }
     
-    
+    //
+    // Counts:
+    //  rectype_field_usage: count all bits of data for all records of the provided record type
+    //
+    public function counts(){
+
+        $mysqli = $this->system->get_mysqli();
+        $res = null;
+
+        if(@$this->data['mode'] == 'rectype_field_usage'){
+
+            $rty_ID = intval(@$this->data['rtyID'], 10);
+
+            if(isset($rty_ID) && is_numeric($rty_ID) && $rty_ID > 0){
+
+                // Get count for all details, except relmarkers
+                $query = 'SELECT dtl_DetailTypeID, count(dtl_ID) '
+                    . 'FROM recDetails '
+                    . 'INNER JOIN Records ON rec_ID=dtl_RecID '
+                    . 'WHERE rec_RecTypeID=' . $rty_ID . ' '
+                    . 'GROUP BY dtl_DetailTypeID';
+                $detail_usage = mysql__select_assoc2($mysqli, $query); // [ dty_ID1 => count1, ... ]
+                if($detail_usage){
+                    $res = $detail_usage; 
+                }else if(empty($mysqli->error)){
+                    $res = array();
+                }else{
+                    $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve field usages for record type #'.$rty_ID, $mysqli->error);
+                    return false;
+                }
+
+                // Check for relmarkers
+                $query = 'SELECT dty_ID, dty_PtrTargetRectypeIDs '
+                    . 'FROM defRecStructure '
+                    . 'INNER JOIN defDetailTypes ON rst_DetailTypeID=dty_ID '
+                    . 'WHERE dty_Type="relmarker" AND rst_RecTypeID=' . $rty_ID;
+                $relmarker_filters = mysql__select_assoc2($mysqli, $query); // [ relmarker_fld_ID1 => rty_id_list1, ... ]
+                if($relmarker_filters && count($relmarker_filters) > 0){
+
+                    // Retrieve record ids that are relevant
+                    $query = 'SELECT DISTINCT rec_ID FROM Records, recLinks WHERE rec_RecTypeID=' . $rty_ID . ' AND rl_RelationID > 0 AND (rl_SourceID=rec_ID OR rl_TargetID=rec_ID)';
+                    $ids = mysql__select_list2($mysqli, $query); // returns array of rec ids
+                    if($ids && count($ids) > 0){
+
+                        $rec_ids = implode(',', $ids);
+                        foreach ($relmarker_filters as $dty_id => $rectype_filter) {
+
+                            // Retrieve relmarker count
+                            $query = 'SELECT DISTINCT count(rl_ID) '
+                                . 'FROM recLinks '
+                                . 'LEFT JOIN Records ON rec_ID=rl_SourceID '
+                                . 'WHERE rec_RecTypeID IN (' . $rectype_filter . ') AND rl_RelationID>0 AND (rl_SourceID IN ('. $rec_ids .') OR rl_TargetID IN ('. $rec_ids .'))';
+                            $rel_usage = mysql__select_value($mysqli, $query); // returns count
+                            if($rel_usage){
+                                $res[$dty_id] = $rel_usage;
+                            }else if(!empty($mysqli->error)){
+                                $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve relationship marker usage for field #'.$dty_id.' for record type #'.$rty_ID, $mysqli->error);
+                                return false;
+                            }
+                        }
+                    }else if(!empty($mysqli->error)){
+                        $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve related records for counting relationship marker field usage for record type #'.$rty_ID, $mysqli->error);
+                        return false;
+                    }
+                }else if(!empty($mysqli->error)){
+                    $this->system->addError(HEURIST_DB_ERROR, 'Cannot check record type #'.$rty_ID.' for relationship marker fields', $mysqli->error);
+                    return false;
+                }
+
+                if(!$res || count($res) == 0){
+                    $res = [0];
+                }
+            }else{
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Invalid record type id provided '.$rty_ID);
+                $res = false;
+            }
+        }
+
+        return $res;
+    }
 }
 ?>
