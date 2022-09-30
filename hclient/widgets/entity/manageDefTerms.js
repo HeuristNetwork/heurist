@@ -396,6 +396,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     +'<label><input type="radio" name="rbDnD" id="rbDnD_merge"/>merge<label></span>')
                 .appendTo(c1);
 
+                var cal_usage_btn = {showText:true, text:window.hWin.HR('Calculate usage'), //Calculate term usages for current page
+                                    css:{'margin-left':'0.75em','display':'inline-block',padding:'2px'}, id:'btnCalUsage',
+                                    click: function() { that._onActionListener(null, 'term-usages'); }};
+                this._defineActionButton2(cal_usage_btn, c1);
+
                 //add input search
                 this._on(this.searchForm.find('.find-term'), {
                     //keypress: window.hWin.HEURIST4.ui.preventChars,
@@ -1040,7 +1045,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             recTitle = '<div class="item truncate label_term rolloverTooltip"'
             +' style="'+sFontSize+sWidth+sBold+'" '+sHint+'>'
-            +sLabel+'</div>'; // $Db.trm(recID, 'trm_Parents')+'  '+recID+' '+
+            +sLabel+'&nbsp;&nbsp;<span class="term_usage"></span></div>'; // $Db.trm(recID, 'trm_Parents')+'  '+recID+' '+
             //+sPad            
 
             var html_thumb = '';
@@ -2518,8 +2523,29 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this.recordTree.css({top:this.recordList.position().top}).show();      
                 this.recordList.hide();
 
-            }
+            }else if(action == 'term-usages'){ // retrieve term usage and update tree with data
 
+                var trm_ids = $Db.trm_TreeData(this.options.trm_VocabularyID, 3);
+                if(window.hWin.HEURIST4.util.isempty(trm_ids)){
+                    return;
+                }
+                trm_ids = trm_ids.join(',');
+
+                var req = {
+                    'trmID': trm_ids,
+                    'a': 'counts',
+                    'mode': 'term_usage',
+                    'entity': 'defTerms',
+                    'request_id': window.hWin.HEURIST4.util.random()
+                };
+                window.hWin.HAPI4.EntityMgr.doRequest(req, function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        that.updateTermUsage(response.data);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+            }
         }
     },
 
@@ -2853,6 +2879,32 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
 
         window.hWin.HEURIST4.util.downloadData(vocab_name + '_vocabulary.csv', s, 'text/csv');
+    },
+
+    //
+    // Retrieve term usage and update record list with values, placed with square brackets '[' & ']'
+    //  For terms with zero usage, set text color to grey 
+    //
+    updateTermUsage: function(term_usages){
+
+        if(window.hWin.HEURIST4.util.isempty(term_usages)){
+            return;
+        }
+
+        $.each(this.recordList.find('.recordDiv'), function(idx, record){
+
+            let $record = $(record);
+            let trm_id = $record.attr('recid');
+            let $label = $record.find('.label_term');
+
+            if(trm_id && term_usages[trm_id] && term_usages[trm_id] > 0){ // has usage
+                $label.find('.term_usage').text('[' + term_usages[trm_id] + ']');
+                $label.css('color', '');
+            }else{ // not used
+                $label.find('.term_usage').text('');
+                $label.css('color', 'gray');
+            }
+        });
     }
 
 });

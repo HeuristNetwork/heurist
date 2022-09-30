@@ -1062,6 +1062,67 @@ class DbDefTerms extends DbEntityBase
         return $ret;
         
     }
-    
+
+    //
+    // Counts:
+    //  term_usage => count the usage for the provided term ids
+    //
+    public function counts(){
+
+        $mysqli = $this->system->get_mysqli();
+        $res = null;
+
+        if(@$this->data['mode'] == 'term_usage'){
+
+            $trm_ID = @$this->data['trmID'];
+
+            if(isset($trm_ID)){
+
+                if(is_array($trm_ID)){
+                    $trm_ID = implode(',', $trm_ID);
+                }
+                $trm_ID = $mysqli->real_escape_string($trm_ID);
+
+                $query = 'SELECT trm_ID, count(dtl_ID) '
+                    . 'FROM recDetails '
+                    . 'INNER JOIN defTerms ON trm_ID = dtl_Value '
+                    . 'INNER JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID '
+                    . 'WHERE dtl_Value IN ('. $trm_ID .') AND dty_Type="enum" '
+                    . 'GROUP BY trm_ID';
+                $trm_usage = mysql__select_assoc2($mysqli, $query); // [ trm_ID1 => count1, ... ]
+                if($trm_usage){
+                    $res = $trm_usage;
+                    //return array($mysqli->error, $res, $query, $trm_usage, $trm_ID); 
+                }else if(empty($mysqli->error)){
+                    $res = $trm_ID;
+                }else{
+                    $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve term usages', $mysqli->error);
+                    return false;
+                }
+
+                // Retrieve terms used in relmarkers
+                $query = 'SELECT rl_RelationTypeID, count(rl_ID) FROM recLinks WHERE rl_RelationTypeID IN (' . $trm_ID . ') GROUP BY rl_RelationTypeID';
+                $reltype_usage = mysql__select_assoc2($mysqli, $query); // [ trm_ID1 => count1, ... ]
+                if($reltype_usage){
+                    // Add results to $res
+                    foreach ($reltype_usage as $trmid => $count) {
+                        if(array_key_exists($trmid, $res)){
+                            $res[$trmid] = intval($res['trmid']) + $count;
+                        }else{
+                            $res[$trmid] = $count;
+                        }
+                    }
+                }else if(!empty($mysqli->error)){
+                    $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve term used for relationship marker type', $mysqli->error);
+                    return false;
+                }
+            }else{
+                $this->system->addError(HEURIST_ACTION_BLOCK, 'Invalid term id(s) provided ' . $trm_ID);
+                $res = false;
+            }
+        }
+
+        return $res;
+    }
 }
 ?>
