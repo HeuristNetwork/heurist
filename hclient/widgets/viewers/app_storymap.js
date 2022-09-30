@@ -97,6 +97,8 @@ $.widget( "heurist.app_storymap", {
     _expected_onScroll: 0,
     
     _timeout_count:0,
+    
+    _btn_clear_story: null,
 
     // the constructor
     _create: function() {
@@ -277,6 +279,13 @@ $.widget( "heurist.app_storymap", {
             this._mapping = $('#'+this.options.map_widget_id);
         }
         
+        this._btn_clear_story = $('<button style="position:absolute;top:5px;right:10px;z-index:999">Close</button>')
+        .button()
+        .hide()
+        .insertBefore((this.options.reportOverviewMode=='tab')?this._tabs:this.element.find('#tabCtrl'));
+        this._on(this._btn_clear_story, {click:this.clearStory});
+        
+        
         this._initCompleted();
         
     }, //end _create
@@ -343,7 +352,7 @@ $.widget( "heurist.app_storymap", {
                 
                     var recset = data.recordset; //record in main result set (for example Persons)
                     
-console.log('main result set loaded');
+//console.log('main result set loaded');
                     
                     that._initial_div_message.find('h3')
                         .text(recset.length()>0
@@ -362,6 +371,7 @@ console.log('main result set loaded');
         }
         
         this.options.init_completed = true;
+        
     },
 
     //
@@ -683,6 +693,10 @@ console.log('main result set loaded');
         }
         
         this.pnlOverview.html('');
+        
+        this.options.storyRecordID = null;
+        this._btn_clear_story.hide();
+        if(this.options.reportOverviewMode=='tab') this._tabs.hide(); else this.element.find('#tabCtrl').hide();
     },
     
     
@@ -695,6 +709,8 @@ console.log('main result set loaded');
         if(this.options.storyRecordID != recID) return; //story already changed
 
         this.clearStory();
+        
+        if(this.options.reportOverviewMode=='tab') this._tabs.show(); else this.element.find('#tabCtrl').show();
         
         //loads list of story elements into reulst list
         if(this.options.reportElementMode!='slide'){   
@@ -733,6 +749,8 @@ console.log('main result set loaded');
             +top.HR('There are no visible story points for the selected record (they may exist but not made public)')
             +'</h3>');
         }
+        
+        if(this._btn_clear_story) this._btn_clear_story.show();
         
     },
     
