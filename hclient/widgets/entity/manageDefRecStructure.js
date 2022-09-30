@@ -81,13 +81,17 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             
             this.options.layout_mode = 
                 '<div class="treeview_with_header" style="background:white">'
-                    +'<div style="padding:10px 20px 4px 10px;border-bottom:1px solid lightgray">' //instruction and close button
-                        +'<span style="font-style:italic;display:inline-block">Drag to reposition<br>Select to navigate<br>'
+                    +'<div style="padding:0px 20px 4px 0px;border-bottom:1px solid lightgray">' //instruction and close button
+                        +'<span style="font-style:italic;display:inline-block;line-height:1.3;">Drag to reposition<br>Select to navigate<br>'
                         +'Double click or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
                         //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
                         +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
+                        +'<button id="field_usage">Calculate usage</button>'
                     +'</div>'
-                    +'<div class="treeView" style="margin-left:-27px;margin-right:-10px;"/>' //treeview
+                    +'<span title="Count of values in each field for this record type (n = '+ $Db.rty(this.options.rty_ID, 'rty_RecCount') +')"'
+                        +'style="display: inline-block;position:absolute;right:8px;padding-top:5px;cursor:default;font-weight:bold;">Count'
+                    +'</span>'
+                    +'<div class="treeView" style="margin:12px -10px 0 -27px;"/>' //treeview
                     +'<div class="editForm editFormRtStructure" style="top:0px;display:none">EDITOR</div>'
                     +'<div class="recordList" style="display:none"/>'
                 +'</div>';
@@ -264,7 +268,27 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 this.mainLayout.layout().close("west"); 
             }
         }});
-        
+
+        // Field data count
+        this.element.find('#field_usage').button().css({'padding': '3px', 'margin': '3px 0'});
+        this._on(this.element.find('#field_usage'), {click: function(){
+            var req = {
+                'rtyID': this.options.rty_ID,
+                'entity': this.options.entity.entityName,
+                'a': 'counts',
+                'mode': 'rectype_field_usage',
+                'request_id': window.hWin.HEURIST4.util.random()
+            };
+
+            window.hWin.HAPI4.EntityMgr.doRequest(req, function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    that.updateFieldUsage(response.data);
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
+        }});
+
         return true;
     },            
     
@@ -465,70 +489,68 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     // for treeview on mouse over toolbar
     //
     __defineActionIcons: function(item){ 
-           if($(item).find('.svs-contextmenu3').length==0){
-               
-               if(!$(item).hasClass('fancytree-hide')){
-                    $(item).css('display','block');   
-               }
+        if($(item).find('.svs-contextmenu3').length==0){
+            
+            if(!$(item).hasClass('fancytree-hide')){
+                $(item).css('display','block');   
+            }
 
-               var is_folder = $(item).hasClass('fancytree-folder') || $(item).hasClass('separator2'); 
-               
-               var actionspan = $('<div class="svs-contextmenu3" style="position:absolute;right:8px;display:none;padding:2px;margin-top:0px;background:#95A7B7 !important;'
-                    +'font-size:9px;font-weight:normal;text-transform:none">'
-                   //+'<span data-action="block" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Add a new group/separator">&nbsp;±&nbsp;&nbsp;Block</span>'               
-                   //+'<span data-action="field" style="background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
-                   +'<span data-action="delete" style="background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
-                        +((is_folder)?'Delete header':'Exclude field from record type')+'" style="font-size:9px;font-weight:normal"/>Delete</span>'
-                   +(true || is_folder?'':
-                    '<span class="ui-icon ui-icon-star" title="Requirement"></span>'
-                   +'<span class="ui-icon ui-icon-menu" title="Repeatability"></span>')
-                   +'</div>').appendTo(item);
-                   
-               var that = this;
+            var is_folder = $(item).hasClass('fancytree-folder') || $(item).hasClass('separator2'); 
+            
+            var actionspan = $('<div class="svs-contextmenu3" style="position:absolute;right:8px;display:none;padding:2px;margin-top:0px;background:#95A7B7 !important;'
+                +'font-size:9px;font-weight:normal;text-transform:none">'
+                //+'<span data-action="block" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Add a new group/separator">&nbsp;±&nbsp;&nbsp;Block</span>'               
+                //+'<span data-action="field" style="background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
+                +'<span data-action="delete" style="background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
+                    +((is_folder)?'Delete header':'Exclude field from record type')+'" style="font-size:9px;font-weight:normal"/>Delete</span>'
+                +(true || is_folder?'':
+                '<span class="ui-icon ui-icon-star" title="Requirement"></span>'
+                +'<span class="ui-icon ui-icon-menu" title="Repeatability"></span>')
+                +'</div>').appendTo(item);
+                
+            var that = this;
 
-               actionspan.find('span').click(function(event){
-                    var ele = $(event.target);
-                    that._lockDefaultEdit = true;
-                    //timeout need to activate current node    
-                    setTimeout(function(){
-                        that._lockDefaultEdit = false;
-                        var action = ele.attr('data-action');
-                        if(!action) action = ele.parent().attr('data-action');
-                        if(action=='field'){
-                           
-                           //add field   
-                           that.showBaseFieldEditor(-1, null);
-                            
-                        }else if(action=='block'){
-                            
-                            //add new group/separator
-                            that.addNewSeparator();
+            actionspan.find('span').click(function(event){
+                var ele = $(event.target);
+                that._lockDefaultEdit = true;
+                //timeout need to activate current node    
+                setTimeout(function(){
+                    that._lockDefaultEdit = false;
+                    var action = ele.attr('data-action');
+                    if(!action) action = ele.parent().attr('data-action');
+                    if(action=='field'){
+                        
+                        //add field   
+                        that.showBaseFieldEditor(-1, null);
+                        
+                    }else if(action=='block'){
+                        
+                        //add new group/separator
+                        that.addNewSeparator();
 
-                        }else if(action=='delete'){
-                            //different actions for separator and field
-                            that._removeField();
-                            
-                        }else if(ele.hasClass('ui-icon-star')){
-                            // requirement
-                            that._showMenu(that.menues['menu_req'], ele);
-                            
-                        }else if(ele.hasClass('ui-icon-menu')){
-                            // repeatability
-                            that._showMenu(that.menues['menu_rep'], ele);
-                            
-                        }
-                    },100); 
-                    //window.hWin.HEURIST4.util.stopEvent(event); 
-                    //return false;
-               });
-               
-               /*
-               $('<span class="ui-icon ui-icon-pencil"></span>')                                                                
-               .click(function(event){ 
-               //tree.contextmenu("open", $(event.target) ); 
-               
-               ).appendTo(actionspan);
-               */
+                    }else if(action=='delete'){
+                        //different actions for separator and field
+                        that._removeField();
+                        
+                    }else if(ele.hasClass('ui-icon-star')){
+                        // requirement
+                        that._showMenu(that.menues['menu_req'], ele);
+                        
+                    }else if(ele.hasClass('ui-icon-menu')){
+                        // repeatability
+                        that._showMenu(that.menues['menu_rep'], ele);
+                        
+                    }
+                },100); 
+                //window.hWin.HEURIST4.util.stopEvent(event); 
+                //return false;
+            });
+
+            let dtyid = $(item).find('span[data-dtid]').attr('data-dtid');
+            if($Db.dty(dtyid, 'dty_Type') != 'separator'){
+                $('<div class="detail-count" data-dtyid="'+ dtyid +'" style="position:absolute;right:8px;display:inline-block;padding:2px;margin-top:0px;'
+                    + 'font-size:10px;font-weight:normal;text-transform:none;color:black;">-</div>').appendTo(item);
+            }
 
             var field_tooltip;
 
@@ -544,8 +566,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     node = $(event.target).parents('.fancytree-node');
                     if(node) node = $(node[0]);
                 }
-                var ele = node.find('.svs-contextmenu3'); //$(event.target).children('.svs-contextmenu3');
-                ele.hide();//css('visibility','hidden');
+
+                node.find('.svs-contextmenu3').hide();//css('visibility','hidden');
+                node.find('.detail-count').css('display','inline-block');
                 that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
 
                 if(field_tooltip.tooltip("instance") !== undefined){
@@ -561,11 +584,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     }else{
                         node = $(event.target).parents('.fancytree-node');
                     }
-                    var ele = $(node).find('.svs-contextmenu3');
-                    ele.css('display','inline-block');//.css('visibility','visible');
+
+                    node.find('.svs-contextmenu3').css('display','inline-block');//.css('visibility','visible');
+                    node.find('.detail-count').hide();
 
                     //highlight in preview
-                    var dty_ID = $(node).find('span[data-dtid]').attr('data-dtid');
+                    var dty_ID = node.find('span[data-dtid]').attr('data-dtid');
                     that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
                     if(dty_ID>0){
                         that.previewEditor.find('div[data-dtid="'+dty_ID+'"]').addClass('ui-state-active');
@@ -2953,6 +2977,28 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         $dlg.find('span a').on('click', function(event){
             that.showBaseFieldEditor(dtyID, null, true, null); 
+        });
+    },
+
+    //
+    // Update field data count display within fancytree nodes (left panel of record editor)
+    //
+    updateFieldUsage: function(field_usages){
+
+        if(window.hWin.HEURIST4.util.isempty(field_usages)){
+            return;
+        }
+
+        $.each(this.element.find('.treeView .detail-count'), function(idx, div){
+
+            let $div = $(div);
+            let dtyid = $div.attr('data-dtyid');
+
+            if(dtyid && field_usages[dtyid]){
+                $div.text(field_usages[dtyid]);
+            }else{
+                $div.text('-');
+            }
         });
     }
     
