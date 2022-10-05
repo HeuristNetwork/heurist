@@ -2960,9 +2960,20 @@ console.log('onpaste');
                                         +'?db='+window.hWin.HAPI4.database
                                         +'&file='+vals['ulf_ObfuscatedFileID'];
                                 }
+                                wkt_params['tool_option'] = 'image';
+                            }else{
+                                wkt_params['tool_option'] = 'rectangle';
                             }
                         }
-                        
+
+                        if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] || this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE'] || 
+                        this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_SHP_SOURCE'] || this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'] || 
+                        this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] || this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'] || 
+                        this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']) {
+                            // assume bounding box, rectangle tool only
+                            wkt_params['tool_option'] = 'rectangle';
+                        }
+
                         var d_width = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
                         d_height = (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95;
 
@@ -3010,7 +3021,7 @@ console.log('onpaste');
                         val:value});
                 $input.parent('.evo-cp-wrap').css({display:'inline-block',width:'200px'});
 
-            }else if($Db.getConceptID('dty', this.options.dtID) == '3-1082'){ // Geo Bookmark, five input form, experimental 
+            }else if(this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_BOOKMARK']){ // Geo Bookmark, five input form, experimental 
 
                 $input.css({cursor:'hand'});
 
@@ -3055,7 +3066,7 @@ console.log('onpaste');
                         var geo_points = points[0] + ',' + points[2] + ' ' + points[1] + ',' + points[3];
 
                         var wkt_params = {'wkt': geo_points};
-                        wkt_params['start_tool'] = 'rectangle';
+                        wkt_params['tool_option'] = 'rectangle';
 
                         var d_width = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
                         d_height = (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95;
