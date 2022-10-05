@@ -340,6 +340,8 @@ $.widget( "heurist.mapping", {
             map_options['minZoom'] = 0;
             map_options['maxZoom'] = 19;
             this.is_crs_simple = true;
+        }else{
+            map_options['worldCopyJump'] = false;
         }
 
         this.nativemap = L.map( map_element_id,  map_options)
@@ -2750,12 +2752,14 @@ $.widget( "heurist.mapping", {
             
         }else{
             var bnd = layer.getBounds();
-            if(bnd){
+            if(bnd && bnd.isValid()){
                 var p1 = bnd.getSouthWest();
                 var p2 = bnd.getNorthEast();
                 if(Math.abs(p1.lat-p2.lat)<0.01 && Math.abs(p1.lng-p2.lng)<0.01){
                     return __extendBoundsForPoint(p1);
                 }
+            }else{
+                bnd = null
             }
             
             return bnd;

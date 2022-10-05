@@ -65,6 +65,8 @@ $.widget( "heurist.app_storymap", {
         , storyActions: null  // zoom_in, zoom_out, follow_path, ant_path, fade_out, bounce, highlight, show_report
         
         , init_completed: false   //flag to be set to true on full widget initializtion
+        
+        , onClearStory: null
     },
 
     _resultset_main: null, // current all stories
@@ -668,7 +670,7 @@ $.widget( "heurist.app_storymap", {
     //
     //
     //
-    clearStory: function(){
+    clearStory: function( trigger_event ){
         
         //remove previous story layer
         if(this._mapping){
@@ -694,9 +696,14 @@ $.widget( "heurist.app_storymap", {
         
         this.pnlOverview.html('');
         
+        
         this.options.storyRecordID = null;
         this._btn_clear_story.hide();
         if(this.options.reportOverviewMode=='tab') this._tabs.hide(); else this.element.find('#tabCtrl').hide();
+        
+        if(trigger_event !== false && $.isFunction(this.options.onClearStory)){
+            this.options.onClearStory.call(this);
+        }
     },
     
     
@@ -708,7 +715,7 @@ $.widget( "heurist.app_storymap", {
     
         if(this.options.storyRecordID != recID) return; //story already changed
 
-        this.clearStory();
+        this.clearStory( false );
         
         if(this.options.reportOverviewMode=='tab') this._tabs.show(); else this.element.find('#tabCtrl').show();
         
