@@ -153,9 +153,9 @@ echo -e "\n\n\n\n\n\n"
 
 echo "---- Heurist installed in ${base_dir}/HEURIST/heurist -------------------------------------------"
 echo
-echo "I there is limited space on your partition, so you may wish to move HEURIST_FILESTORE from"
+echo "If there is limited space on your partition, you may wish to move HEURIST_FILESTORE from"
 echo "its current location - ${base_dir}/HEURIST/HEURIST_FILESTORE - to a location with plenty "
-echo "of space allocated, such as /srv or /data, and add a simlink to this location in ${bbase_dir}/HEURIST "
+echo "of space allocated, such as /srv or /data, and add a simlink to this location in ${base_dir}/HEURIST "
 echo
 echo "Heurist program is accessible at https://serveraddress/heurist"
 echo "Heurist switchboard is accessible at https://serveraddress/HEURIST or http://serveraddress/heurist_switchboard"
@@ -163,7 +163,7 @@ echo "Replace https with http where appropriate"
 echo
 echo "CONFIGURATION:"
 echo
-echo "Edit ${base_dir}/HEURIST/heuristConfigIni.php to set your MySQL root user password - twice, clearly documented in file"
+echo "Edit ${base_dir}/HEURIST/heuristConfigIni.php to set your MySQL root user password -documentation is in file comments"
 echo
 echo "You can do this by pasting the following at the command line - you may need to change nano to pico on some systems:"
 echo
