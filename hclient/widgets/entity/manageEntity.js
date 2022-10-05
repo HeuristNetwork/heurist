@@ -1422,15 +1422,30 @@ $.widget( "heurist.manageEntity", {
             
             window.hWin.HEURIST4.msg.showMsgFlash('Missing or invalid data entered'
                 +((eles.length>1)?(' for '+eles.length+' fields.'):'')
-                ,1500);
+                ,3000);
                 
             var ele = $(eles[0]);
-                
-            var accrd = ele.parents('div.ui-tabs');
-            if(accrd.length>0 && accrd.tabs('instance')){
+
+            // Activate accordion or switch tabs
+            let tabs = ele.parents('div.ui-tabs');
+            let accordion = ele.parents('.ui-accordion');
+            if(tabs.length>0 && tabs.tabs('instance')){ // tab separator
                 var idx = ele.parents('fieldset.ui-tabs-panel').attr('data-tabindex');        
-                accrd.tabs('option','active', idx);
+                tabs.tabs('option','active', idx);
+            }else if(accordion.length>0 && accordion.accordion('instance')){ // accordion separator
+
+                let accordion_content = ele.parents('.ui-accordion-content');
+                if(!accordion_content.is(':visible')){
+                    let id = accordion_content.attr('aria-labelledby');
+                    $.each(ele.parents('.ui-accordion-header'), function(idx, item){
+                        if($(item).attr('id') == id){
+                            ele.parents('.ui-accordion:first').accordion('option', 'active', idx);
+                            return false;
+                        }
+                    });
+                }
             }
+
             ele.focus();
             
             return null;

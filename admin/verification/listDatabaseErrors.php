@@ -1208,6 +1208,26 @@ if($active_all || in_array('date_values', $active)) {
                     if($row['new_value']=='Temporal'){
                         continue;
                     }else if($row['new_value']==$row['dtl_Value']){ //nothing to correct - result is the same
+
+                        if(strlen($row['dtl_Value'])>=8 && strpos($row['dtl_Value'],'-')==false){ // try automatic convert to ISO format
+                            
+                            try{
+                                $t2 = new DateTime($row['dtl_Value']);
+
+                                $format = 'Y-m-d';
+                                if($t2->format('H')>0 || $t2->format('i')>0 || $t2->format('s')>0){
+                                    if($t2->format('s')>0){
+                                        $format .= ' H:i:s';
+                                    }else{
+                                        $format .= ' H:i';
+                                    }
+                                }
+                                $row['new_value'] = $t2->format($format);
+                                $row['dtl_Value'] = $row['new_value']; // for final ambiguous check
+                            }catch(Exception  $e){
+                                //skip
+                            }
+                        }
                         continue;
                     }
                     if($row['new_value']!=null && $row['new_value']!=''){

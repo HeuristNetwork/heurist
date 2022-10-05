@@ -77,7 +77,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
 
         <script type="text/javascript">
 
-            var mapping, is_map_inited=false, initial_wkt, initial_tool, imageurl, imageOverlay=null, 
+            var mapping, is_map_inited=false, initial_wkt, tool_option, imageurl, imageOverlay=null, 
                 need_screenshot = false, is_geofilter=false,
                 menu_datasets, btn_datasets, zoom_with_delay = true,
                 sMsgDigizeSearch = 'Digitise search area as a rectangle or polygon';
@@ -372,12 +372,12 @@ console.log('load google map api')
                     imageurl = null;
                 }
 
-                if(params && params['start_tool']){ // Bounding Box for Bookmarks
-                    initial_tool = params['start_tool'];
-                    window.hWin.HEURIST4.msg.showMsgDlg('Please digitise a bounding box with the rectangle tool.', null, 'Bookmark\'s Bounding Box');
+                if(params && params['tool_option']){ // Bounding Box for Bookmarks
+                    tool_option = params['tool_option'];
+                    window.hWin.HEURIST4.msg.showMsgFlash('Please digitise a bounding box with the rectangle tool.', 3000);
                 }else{
-                    initial_tool = null;
-                }                
+                    tool_option = null;
+                }
                 
                 is_geofilter = params && params['geofilter'];
                 need_screenshot = params && params['need_screenshot'];
@@ -454,8 +454,8 @@ console.log('load google map api')
                     }
                 }
 
-                if(!window.hWin.HEURIST4.util.isempty(initial_tool) && initial_tool != null){ // check if only one type of drawing tool is allowed
-                    mapping.mapping( 'drawSetControls', initial_tool);
+                if(!window.hWin.HEURIST4.util.isempty(tool_option) && tool_option != null){ // check if only one type of drawing tool is allowed
+                    mapping.mapping( 'drawSetControls', tool_option);
                 }
 
                 var that = this;

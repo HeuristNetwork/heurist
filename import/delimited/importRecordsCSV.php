@@ -187,9 +187,12 @@ if(!$format) $format='csv';
                 style="margin-left:2em;"
                 title="Return to the upload screen to select a new delimited file to upload to the server for processing">
                 Back to start</div>
-        <!--
-        <h2 style="padding: 10px 0 10px 2em;">Define parse parameters</h2>
-        -->
+
+        <div id="file_name2" style="display: inline-block;"> 
+            <span style="display: inline-block; position: relative; top: -3px;">Importing from:&nbsp;</span> 
+            <h2 class="curr_file_name truncate" style="display: inline-block;max-width: 300px;"></h2>
+        </div>
+
         <fieldset style="width:380px;">
                 <div>
                     <div class="header" style="min-width: 50px;"><label>Encoding:</label></div>
@@ -401,20 +404,24 @@ if(!$format) $format='csv';
     <div class="ent_header" style="height:362;border:none;padding:5 6 0 6;min-width:970px;margin-bottom:10px;">
     
         <div style="position:absolute;left:0;right:6;padding-left:2em">
-    
+
             <div style="max-width: 500;float:left;">
                 <div id="btnBackToStart"
                     title="Return to the upload screen to select a new delimited file to upload to the server for processing">
                     Back to start</div>
-                    
+
                 <div style="font-size:1.1em;padding: 7px 10px;border: 2px blue solid;margin: 8px 0;">
                     Target entity type: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;"></h2>
                     <a href="#" id="btnSetPrimaryRecType"
                                 title="Change primary record type"
-                    style="margin-left:10px;font-size:0.9em;text-decoration:none;color:blue;font-style:italic">change target</a>        
+                    style="margin-left:10px;font-size:0.9em;text-decoration:none;color:blue;font-style:italic">change target</a>
                                 <!-- display:none; todo restore this feature -->
-                </div>    
-            </div>        
+                </div>
+            </div>
+            <div id="file_name" style="display: inline-block;"> 
+                <span style="display: inline-block; position: relative; top: -3px;">Importing from:&nbsp;</span>  
+                <h2 class="curr_file_name truncate" style="display: inline-block;max-width: 300px;"></h2>
+            </div>
             
             <div id="btnClearFile"  style="float: right;margin-right:80px;"
                 title="Clear the data for this uploaded file from the server">
