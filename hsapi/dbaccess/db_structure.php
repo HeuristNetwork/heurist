@@ -131,6 +131,7 @@
             "if(rst_PtrFilteredIDs is not null and CHAR_LENGTH(rst_PtrFilteredIDs)>0,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
             "rst_CreateChildIfRecPtr", "rst_PointerMode", "rst_PointerBrowseFilter",
             "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified",
+            "rst_SemanticReferenceURL", "rst_TermsAsButtons",
             "dty_TermIDTreeNonSelectableIDs",
             "dty_FieldSetRectypeID",
             "dty_Type");
@@ -1013,7 +1014,7 @@ function dbs_GetRectypeConstraint($system) {
             "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues", "rst_DisplayDetailTypeGroupID",
             "rst_FilteredJsonTermIDTree", "rst_PtrFilteredIDs", "rst_CreateChildIfRecPtr", "rst_PointerMode",
             "rst_PointerBrowseFilter", "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs",
-            "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs", "dty_FieldSetRectypeID", "dty_Type", "dty_ConceptID");
+            "rst_Modified", "rst_LocallyModified", "rst_SemanticReferenceURL", "rst_TermsAsButtons", "dty_TermIDTreeNonSelectableIDs", "dty_FieldSetRectypeID", "dty_Type", "dty_ConceptID");
     }
 
     /**

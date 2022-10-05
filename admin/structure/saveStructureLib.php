@@ -92,7 +92,8 @@ $rstColumnNames = array(
     "rst_TermIDTreeNonSelectableIDs"=>"s",
     "rst_Modified"=>"s",
     "rst_LocallyModified"=>"i",
-    "rst_SemanticReferenceURL"=>"s"
+    "rst_SemanticReferenceURL"=>"s",
+    "rst_TermsAsButtons"=>"i"
 );
 
 $rcsColumnNames = array(
