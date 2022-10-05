@@ -4808,6 +4808,32 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 _onUpdateModeSet();
             }
         }
+
+        if(page>=2){
+
+            if((!upload_file_name || upload_file_name == undefined) && imp_session && !window.hWin.HEURIST4.util.isempty(imp_session['import_file'])){
+                let filename_parts = imp_session['import_file'].split(' ').slice(0, -2);
+                upload_file_name = filename_parts.join(' ');
+            }
+            if(!window.hWin.HEURIST4.util.isempty(upload_file_name) && upload_file_name != undefined){
+                $('.curr_file_name').text(upload_file_name).attr('title', upload_file_name);
+                $('.curr_file_name').parent().show();
+            }else{
+                $('.curr_file_name').parent().hide();
+            }
+
+            let position_params = {
+                my: 'left+15 center',
+                at: 'right center'
+            };
+            if(page == 2){
+                position_params['of'] = '#btnBackToStart2';
+                $('#file_name2').position(position_params);
+            }else{
+                position_params['of'] = '#btnBackToStart';
+                $('#file_name').position(position_params);
+            }
+        }
         _adjustTablePosition();
     }
     
