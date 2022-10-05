@@ -564,12 +564,12 @@ if(!($max_size>0)) $max_size = 0;
                                 swarns_exists = swarns_exists + '<br>' + '<br>'+s.substr(0,k);    
                                 cntAlreadyExists++;
                             }else
-                            if (s.indexOf('allowed mimetypes')>0){
+                            if (s.indexOf('allowed mimetypes') > 0){
                                 var k = s.indexOf('Filetype not listed among');
                                 swarns_memtypes = swarns_memtypes + '<br>'+s.substr(0,k);    
                                 cntWarnMemtypes++;
                             }else
-                            if(s.indexOf('uploaded file exceeds')<0){ // ignore msg about exceeding upload max
+                            if(s.indexOf('uploaded file exceeds') < 0){ // ignore msg about exceeding upload max
                                 swarns = swarns + '<br>'+s;    
                                 cntOtherErrors++;
                             }

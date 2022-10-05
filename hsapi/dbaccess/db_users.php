@@ -318,6 +318,7 @@
 
         $mysqli = $system->get_mysqli();
         $ugrID = $system->get_user_id();        
+        //1. from database
         if($ugrID>0){
             $res = mysql__select_value( $mysqli, 'select ugr_Preferences from sysUGrps where ugr_ID='.$ugrID);
             if($res!=null && $res!=''){
@@ -327,6 +328,7 @@
                 }
             }
         }
+        //2. from session or default
         $dbname = $system->dbname_full();
         return(@$_SESSION[$dbname]['ugr_Preferences'])
                     ?$_SESSION[$dbname]['ugr_Preferences']

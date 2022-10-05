@@ -1729,7 +1729,8 @@ $siz = get_php_bytes('upload_max_filesize');
                     
                     
                    //Artem Osmakov - get subfolder name by replacing Ё to /     
-                    $file_name = $prefix.fileNameSanitize($file_name ? $file_name : $upload['name'][$index], false);
+                    $file_name = $prefix. //($file_name ? $file_name : $upload['name'][$index]);
+                            fileNameSanitize($file_name ? $file_name : $upload['name'][$index], false);
                     $subfolder_name = '';
                     if(strpos($file_name,'Ё')>0){
                         $file_name = str_replace('Ё','/',$file_name);
@@ -1757,8 +1758,7 @@ $siz = get_php_bytes('upload_max_filesize');
                 // $upload is a one-dimensional array:
                 $files[] = $this->handle_file_upload(
                     isset($upload['tmp_name']) ? $upload['tmp_name'] : null,
-                    $prefix.fileNameSanitize($file_name ? $file_name : (isset($upload['name']) ?
-                            $upload['name'] : null), false),
+                    $prefix.fileNameSanitize($file_name ? $file_name : (isset($upload['name']) ?$upload['name'] : null), false),
                     (isset($upload['name']) ? $upload['name'] : null),
                     '',        
                     $size ? $size : (isset($upload['size']) ?
