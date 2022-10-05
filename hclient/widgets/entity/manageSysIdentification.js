@@ -135,8 +135,6 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                 return;
             }
         }
-
-        fields['sys_ExternalReferenceLookups'] = JSON.stringify(window.hWin.HAPI4.sysinfo['service_config']);
         
         this._super(fields, afterAction, onErrorAction);
     },	

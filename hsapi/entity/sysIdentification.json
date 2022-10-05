@@ -111,7 +111,8 @@
                         "dty_Type":"freetext",
                         "rst_DisplayName": "External reference lookups",
                         "rst_DisplayHelpText": "Record type-function-field specifications for lookup to external reference sources such as GeoNames",
-                        "rst_Display":"hidden"
+                        "rst_Display":"hidden",
+                        "dty_Role":"virtual"
                     }
                 }
         ]},
