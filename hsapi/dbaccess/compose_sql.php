@@ -333,7 +333,7 @@ function get_offset($params){
 * @$currUserID
 * NOTUSED @param mixed $wg_ids is a list of the workgroups we can access; records records marked with a rec_OwnerUGrpID not in this list are omitted
 */
-function parse_query($search_domain, $text, $sort_order='', $parentquery, $currUserID) {
+function parse_query($search_domain, $text, $sort_order, $parentquery, $currUserID) {
 
 
     // remove any  lone dashes outside matched quotes.
