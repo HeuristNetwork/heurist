@@ -1614,26 +1614,12 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                         case "query":
                             that._getFilterString(node.key, $(node.li));
                             break;    
-                        case "embed":   //EMBED
-                            //show popup with link
-                            if(!node.folder && node.key>0){
-                                
-                                that._showEmbedDialog(node.key);
-                                /*
-                                window.hWin.HEURIST4.msg.showMsgDlg(
-                                    'One or more saved facet (or ordinary) searches can be embedded into an iframe in a website using the following code:<br><br>'
-                                    +'<xmp style="font-size:1.2em">'
-                                    +'<iframe src="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&ll=WebSearch&searchIDs='
-                                    +node.key+'"\nwidth="100%" height="700" frameborder="0"></iframe>'
-                                    +'</xmp><br>'
-                                    +'For more than one search, separate the IDs by commas (the searches will appear as buttons). Enclose within &lt;code&gt; &lt;/code&gt; '
-                                    +'for Wordpress sites (the use of &lt;code&gt; may need to be enabled for your site). '
-                                    +'The URL can also be opened on its own in a separate tab. Note that ordinary searches can also be embedded simply through '
-                                    +'specifying the URL obtained when the search is run in the Heurist interface.',
-                                    null, 'Embedding searchs');
-                                 */   
-                            }
+                        case "embed":   //EMBED - IJ 2022-10-04 Block use here, Publish alternative are to be used instead
                             break;
+                            /*show popup with link
+                            if(!node.folder && node.key>0){
+                                that._showEmbedDialog(node.key);
+                            }*/
                         case "copy":   //duplicate saved search
                         
                             if(!node.folder && node.key>0){
@@ -2659,10 +2645,11 @@ console.log(node);
 
     
     //
-    //
+    // IJ 2022-10-04 Block use here, Publish alternative are to be used instead
     //
     _showEmbedDialog: function(svs_ID){
-        
+        window.hWin.HEURIST4.msg.showMsgErr('The embed operation is no longer available from saved lists, please use alternative options available from within the Publisher menus');
+        return;
         var query = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&ll=WebSearch&views=list,map&searchIDs='+svs_ID;
         
         window.hWin.HEURIST4.ui.showPublishDialog({mode:'websearch', url: query, url_encoded: query});
