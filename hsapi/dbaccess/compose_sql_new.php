@@ -1521,9 +1521,6 @@ class HPredicate {
                     $res = "exists (select dtl_ID from recDetails ".$p." where $recordID=".$p."dtl_RecID AND "
                     .$p.'dtl_DetailTypeID';
                     
-                    if($this->negate && ($this->field_type=='enum' || $this->field_type=='relationtype')){
-                        $res = 'NOT '.$res;       
-                    }
                 }
                 
                 if($several_ids && count($several_ids)>0){
@@ -2486,10 +2483,22 @@ class HPredicate {
         
         if($this->field_type=='enum' || $this->field_type=='relationtype'){
             
+            $parent_ids = null;
+            
+            if (preg_match('/^\d+(?:,\d*)+$/', $this->value) || intval($this->value)){   //numeric comma separated
+            
+                $parent_ids = prepareIds($this->value);
+                
+            }
+            
+            
+            /*   
             if (preg_match('/^\d+(?:,\d*)+$/', $this->value)){   //numeric comma separated
                 $res = ' in (select trm_ID from defTerms where trm_ID in ('
                     .$this->value.') or trm_ParentTermID in ('.$this->value.'))';
             }else if(preg_match('/^\d+$/', trim($this->value)) && intval($this->value)){   //integer
+
+                $parent_ids = prepareIds($this->value);
             
                 $int_v = intval($this->value);
                 $res = ' in (select trm_ID from defTerms where trm_ID='
@@ -2498,6 +2507,27 @@ class HPredicate {
                     $res = $res . ' or trm_ParentTermID='.$int_v;   
                 }
                 $res = $res.')';
+            }
+            */
+            
+            if(is_array($parent_ids) && count($parent_ids)>0){
+                
+                $all_terms = null;
+                if(!$this->exact){
+                    $all_terms = getTermChildrenAll($mysqli, $parent_ids);
+                }
+                if(is_array($all_terms) && count($all_terms)>0){
+                    $all_terms = array_merge($parent_ids, $all_terms);
+                }else{
+                    $all_terms = $parent_ids;
+                }
+                
+                if(count($all_terms)==1){
+                    $res = ($this->negate?'<>':'=').$all_terms[0];
+                }else{
+                    $res = ($this->negate?' NOT':'').' IN ('.implode(',',$all_terms).')';    
+                }
+                
                     
             }else{
                 $value = $mysqli->real_escape_string($this->value);
