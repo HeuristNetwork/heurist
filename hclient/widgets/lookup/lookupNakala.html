@@ -1,0 +1,52 @@
+<!--
+* lookupBnFLibrary_bib.html: used by lookupBnFLibrary_bib.js
+*
+* @author      Brandon McKay   <blmckay13@gmail.com>
+* @copyright   (C) 2005-2021 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     6
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+-->
+
+<!-- Search Container -->
+<div id="ent_header" style="height:7em; padding: 0.2em; width: 99%;">
+    <fieldset style="float: left;" id="search_container">
+
+        <div style="padding: 0.2em; width: 100%;" class="input" id="query_form">
+
+            <div>
+                <!-- Any -->
+                <div class="header recommended" style="text-align: right;">
+                    <label for="inpt_any">Search:</label>
+                </div>
+                <input id="inpt_any" class="text ui-widget-content ui-corner-all" style="max-width:49em;width:47em;"/>
+            </div>
+
+        </div>
+
+    </fieldset>
+
+    <div style="display: inline-block;" id="btn_container">
+        <button id="btnStartSearch">Search</button>
+
+        <div class="header optional" style="margin-top: 10px;" id="rec_limit_container">
+            <label for="rec_limit">Search for </label>
+
+            <select id="rec_limit">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="500">500</option>
+            </select>
+
+            <label for="rec_limit"> records</label>
+        </div>
+    </div>
+</div>
+
+<!-- Result List Container -->
+<div id="div_result" class="ent_content_full" style="display: none;top:9em">
+</div>

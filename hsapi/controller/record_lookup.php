@@ -510,6 +510,91 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
 		//$remote_data = json_encode($remote_data); // getRdf currently returns an error, so this isn't used
     }else if($is_estc){
         $remote_data = json_encode($remote_data);
+    }else if(@$params['serviceType'] == 'nakala_search'){ // Retrieve basic details - Citation, ID, Name(s)
+
+        $remote_data = json_decode($remote_data, TRUE);
+        if(json_last_error() == JSON_ERROR_NONE){
+
+            $results = array();
+            if(array_key_exists('totalResults', $remote_data)){
+                $results['count'] = $remote_data['totalResults'];
+                $results['records'] = array();
+    
+                if($remote_data['totalResults'] > 0){
+    
+                    foreach ($remote_data['datas'] as $records) {
+
+                        $id = @$records['identifier'];
+                        $has_files = array_key_exists('files', $records);
+
+                        // Set up basic details
+                        $results['records'][$id]['url'] = 'https://nakala.fr/' . $id;
+                        $results['records'][$id]['citation'] = @$records['citation'];
+                        $results['records'][$id]['identifier'] = @$records['identifier'];
+
+                        $results['records'][$id]['title'] = '';
+                        $results['records'][$id]['mime_type'] = '';
+                        $results['records'][$id]['author'] = array();
+                        
+                        foreach ($records['metas'] as $metadata) {
+
+                            if($metadata['value'] == null){
+                                continue;
+                            }
+
+                            if(strpos($metadata['propertyUri'], 'terms#creator') !== false){ // Author
+
+                                if(array_key_exists('fullName', $metadata['value'])){
+                                    $results['records'][$id]['author'][] = $metadata['value']['fullName'];
+                                }else{
+                                    $aut_name = '';
+                                    if(array_key_exists('givenname', $metadata['value'])){
+                                        $aut_name = $metadata['value']['givenname'];
+                                    }
+                                    if(array_key_exists('surname', $metadata['value'])){
+                                        $aut_name .= $metadata['value']['surname'];
+                                    }
+                                    if($aut_name != ''){
+                                        $results['records'][$id]['author'][] = $aut_name;
+                                    }
+                                }
+                            }else if(strpos($metadata['propertyUri'], 'creator') !== false){ // Author
+                                $results['records'][$id]['author'][] = $metadata['value'];
+                            }else if(strpos($metadata['propertyUri'], 'terms#title') !== false){ // Title
+                                $results['records'][$id]['title'] = $metadata['value'];
+                            }else if(strpos($metadata['propertyUri'], 'terms#created') !== false){ // Created Date
+                                $results['records'][$id]['date'] = $metadata['value'];
+                            }else if(strpos($metadata['propertyUri'], 'terms#license') !== false){ // License
+                                $results['records'][$id]['license'] = $metadata['value'];
+                            }else if(strpos($metadata['propertyUri'], 'abstract') !== false){ // Abstract
+                                $results['records'][$id]['abstract'] = $metadata['value'];
+                            }
+                        }
+
+                        $need_title = $results['records'][$id]['title'] == '';
+                        if($has_files){
+                            foreach ($records['files'] as $idx => $file) {
+                                if($need_title){ // Check for backup title, if necessary
+                                    $results['records'][$id]['title'] .= $file['name'];
+                                }
+                                if(array_key_exists('mime_type', $file) && $results['records'][$id]['mime_type'] == ''){ // Type
+                                    $results['records'][$id]['mime_type'] = $file['mime_type'];
+                                }
+                            }
+                        }
+
+                        $results['records'][$id]['title'] = trim($results['records'][$id]['title']);
+                        if($results['records'][$id]['title'] == ''){ // Unknown title, just in case
+                            $results['records'][$id]['title'] = 'Undetermined';
+                        }
+                    }
+                }
+            }
+
+            $remote_data = json_encode($results);
+        }else{
+            $system->error_exit_api('Service did not return data in an handled format');
+        }
     }
 
 	// Return response

@@ -1363,7 +1363,7 @@ function loadRemoteURLContent($url, $bypassProxy = true) {
 //
 // $range - loads first n bytes (for example to detect title of web page)
 //
-function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout=30) {
+function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout=30, $additional_headers=null) {
     
     global $glb_curl_code, $glb_curl_error;
     
@@ -1403,8 +1403,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     curl_setopt($ch, CURLOPT_USERAGENT, $useragent);
     curl_setopt($ch, CURLOPT_FAILONERROR, true);
     curl_setopt($ch, CURLOPT_AUTOREFERER, true);
-    //curl_setopt($ch, CURLOPT_REFERER, HEURIST_SERVER_URL);    
-    //curl_setopt($curl, CURLOPT_HTTPHEADER, array('Expect:'));
+    //curl_setopt($ch, CURLOPT_REFERER, HEURIST_SERVER_URL);
     
     if($range){
         curl_setopt($ch, CURLOPT_RANGE, $range);
@@ -1416,6 +1415,12 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
             curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
         }
     }
+
+    if(is_array($additional_headers) && count($additional_headers) > 0){ // Add additional/custom headers
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $additional_headers);
+        //curl_setopt($curl, CURLOPT_HTTPHEADER, array('Expect:'));
+    }
+
     curl_setopt($ch, CURLOPT_URL, $url);
     $data = curl_exec($ch);
 
