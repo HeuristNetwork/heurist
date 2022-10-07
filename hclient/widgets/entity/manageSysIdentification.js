@@ -136,6 +136,13 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
             }
         }
         
+        var lookup_external_service = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);
+        if(lookup_external_service){ // Valid value
+            fields['sys_ExternalReferenceLookups'] = JSON.stringify(lookup_external_service);
+        }else{ // Invalid value / None
+            fields['sys_ExternalReferenceLookups'] = JSON.stringify({});
+        }
+
         this._super(fields, afterAction, onErrorAction);
     },	
     

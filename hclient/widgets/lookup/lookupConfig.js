@@ -78,7 +78,7 @@ $.widget( "heurist.lookupConfig", {
         var that = this;
 
         this.options.service_config = window.hWin.HEURIST4.util.isJSON(this.options.service_config);
-        if(!this.options.service_config){
+        if(!this.options.service_config){ // Invalid value / None
             this.options.service_config = {};    
         } 
         
@@ -1157,7 +1157,7 @@ $.widget( "heurist.lookupConfig", {
             if(is_field_mapped){
 
                 this.options.service_config = window.hWin.HEURIST4.util.isJSON(this.options.service_config); // get existing assigned services
-                if(!this.options.service_config){
+                if(!this.options.service_config){ // Invalid value / None
                     this.options.service_config = {};    
                 } 
 
