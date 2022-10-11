@@ -1,5 +1,5 @@
 <div id="ent_header" style="height:9em; padding: 0.2em; width: 99%;" class="input">
-    <fieldset style="display:inline-block;float: left;">
+    <fieldset style="float: left;">
         <div style="padding: 0.2em; width: 100%;" class="input">
             <div class="header" style="padding: 0px 16px; width: 85px; min-width: 85px;">
                 <label for="work_name">Work Name:</label>
@@ -24,15 +24,27 @@
                 </div>
                 <input id="helsinki_id" class="text ui-widget-content ui-corner-all" style="max-width:30em;">
         </div>
+
+        <div style="padding: 0.2em; width: 100%;" class="input">
+            <div class="header" style="padding: 0px 16px; width: 85px; min-width: 85px;">
+                <label style="padding-left: 1.4em;" for="sort_by_field">Sort by:</label>
+            </div>
+            <select id="sort_by_field" class="text ui-widget-content ui-corner-all" style="max-width:130px">
+                <option value="1">Title</option>
+                <option value="276">Extended Title</option>
+                <option value="271">Project Record ID</option>
+                <option value="273">Helsinki Work Name</option>
+            </select>
+        </div>
     </fieldset>
 
-    <div>
+    <div style="display: inline-block;">
         <div style="display:grid;height:inherit;padding:7px;" class="input">
             <button id="btnLookupLRC18C"  style="border: 2.0px solid #95A7B7;" class="ui-button ui-corner-all ui-widget">Search</button>
         </div>
     </div>
 </div>
 
-<div id="div_result" class="ent_content_full" style="display: none;top:13.5em">
+<div id="div_result" class="ent_content_full" style="display: none;top:10.5em">
 </div>
 

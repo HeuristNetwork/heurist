@@ -189,7 +189,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
     _initControls: function () {
 
         var that = this;
-        this.element.find('fieldset > div > .header').css({width: '80px', 'min-width': '80px'})
+        this.element.find('fieldset > div > .header').css({width: '100px', 'min-width': '100px'})
         this.options.resultList = $.extend(this.options.resultList,
             {
                 recordDiv_class: 'recordDiv_blue',
@@ -227,7 +227,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                 }
             }
         });
-        this.element.find('fieldset > div > .header').css({width: '80px', 'min-width': '80px'})
+
         this._on(this.element.find('#btnLookupLRC18C').button(), {
             'click': this._doSearch
         });
@@ -510,8 +510,11 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
             if (this.element.find('#estc_no').val() != '') {
                 query['f:254'] = '@'+this.element.find('#estc_no').val();
             }
-            sort_by_key = "'sortby'"
-            //query[sort_by_key.slice(1, -1)] = 'f:9:'  It kills MariaDB database
+
+            if (this.element.find('#sort_by_field').val() > 0) { // Sort by field
+                sort_by_key = "'sortby'"
+                query[sort_by_key.slice(1, -1)] = 'f:' + this.element.find('#sort_by_field').val();
+            }
 
             query_string = query;
 
@@ -551,7 +554,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
             query_string = 't:30 ' + edition_name + edition_date + edition_author + edition_work + edition_place + book_format + estc_no + vol_count + vol_parts;
         }
 
-        var missingSearch = (Object.keys(query).length <= 1); // query has t and sortby keys at minimum
+        var missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
 
         if(missingSearch){
             window.hWin.HEURIST4.msg.showMsgFlash('Please specify some criteria to narrow down the search...', 1000);

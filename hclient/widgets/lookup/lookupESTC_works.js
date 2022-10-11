@@ -51,7 +51,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
     _initControls: function () {
 
         var that = this;
-        this.element.find('fieldset > div > .header').css({width: '85px', 'min-width': '85px'})
+        this.element.find('fieldset > div > .header').css({width: '100px', 'min-width': '100px'})
         this.options.resultList = $.extend(this.options.resultList,
             {
                 recordDiv_class: 'recordDiv_blue',
@@ -89,7 +89,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
                 }
             }
         });
-        this.element.find('fieldset > div > .header').css({width: '85px', 'min-width': '85px'})
+
         this._on(this.element.find('#btnLookupLRC18C').button(), {
             'click': this._doSearch
         });
@@ -112,11 +112,11 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
         });
         window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), true);
 
-        this.element.find('#btnLookupLRC18C').parent().parent().css('display', 'inline-block').position({
+        this.element.find('#btnLookupLRC18C').parent().parent().position({
             my: 'left center',
             at: 'right center',
-            of: $('#ent_header > fieldset')
-        })
+            of: '#ent_header > fieldset'
+        });
 
         //by default action button is disabled
         window.hWin.HEURIST4.util.setDisabled(this.element.parents('.ui-dialog').find('#btnDoAction'), false);
@@ -340,10 +340,12 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
             query['f:272'] = this.element.find('#helsinki_id').val();
         }
 
-        sort_by_key = "'sortby'"
-        // query[sort_by_key.slice(1, -1)] = 'f:1:' It kills MariaDB database
+        if (this.element.find('#sort_by_field').val() > 0) { // Sort by field
+            sort_by_key = "'sortby'"
+            query[sort_by_key.slice(1, -1)] = 'f:' + this.element.find('#sort_by_field').val();
+        }
 
-        var missingSearch = (Object.keys(query).length <= 1); // query has t and sortby keys at minimum
+        var missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
 
         if(missingSearch){
             window.hWin.HEURIST4.msg.showMsgFlash('Please specify some criteria to narrow down the search...', 1000);

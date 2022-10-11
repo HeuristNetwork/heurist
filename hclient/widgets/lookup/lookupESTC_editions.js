@@ -52,7 +52,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
     _initControls: function () {
 
         var that = this;
-        this.element.find('fieldset > div > .header').css({width: '80px', 'min-width': '80px'})
+        this.element.find('fieldset > div > .header').css({width: '85px', 'min-width': '85px'})
         this.options.resultList = $.extend(this.options.resultList,
             {
                 recordDiv_class: 'recordDiv_blue',
@@ -90,7 +90,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
                 }
             }
         });
-        this.element.find('fieldset > div > .header').css({width: '80px', 'min-width': '80px'})
+
         this._on(this.element.find('#btnLookupLRC18C').button(), {
             'click': this._doSearch
         });
@@ -438,10 +438,13 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
         if (this.element.find('#estc_no').val() != '') {
             query['f:254'] = '@'+this.element.find('#estc_no').val();
         }
-        sort_by_key = "'sortby'"
-        //query[sort_by_key.slice(1, -1)] = 'f:9:'  It kills MariaDB database
 
-        var missingSearch = (Object.keys(query).length <= 1); // query has t and sortby keys at minimum
+        if (this.element.find('#sort_by_field').val() > 0) { // Sort by field
+            sort_by_key = "'sortby'"
+            query[sort_by_key.slice(1, -1)] = 'f:' + this.element.find('#sort_by_field').val();
+        }
+
+        var missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
 
         if(missingSearch){
             window.hWin.HEURIST4.msg.showMsgFlash('Please specify some criteria to narrow down the search...', 1000);

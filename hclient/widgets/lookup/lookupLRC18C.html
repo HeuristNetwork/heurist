@@ -1,5 +1,6 @@
-<div id="ent_header" style="height:9em; padding: 0.2em; width: 100%;" class="input">
+<div id="ent_header" style="height:12em; padding: 0.2em; width: 100%;" class="input">
     <fieldset style="display:inline-block">
+
         <div style="padding: 0.2em; width: 100%;" class="input">
             <div class="header" style="padding: 0px 16px; width: 80px; min-width: 80px;">
                 <label for="edition_name">Edition Name:</label>
@@ -16,6 +17,7 @@
             <input id="edition_date" class="text ui-widget-content ui-corner-all" style="max-width:30em">
 
         </div>
+
         <div style="padding: 0.2em; width: 100%;" class="input">
             <div class="header" style="padding: 0px 16px; width: 80px; min-width: 80px;">
                 <label for="edition_author">Author:</label>
@@ -32,34 +34,44 @@
             </div>
             <select id="select_bf" class="text ui-widget-content ui-corner-all" style="max-width:130px"></select>
         </div>
+
         <div style="padding: 0.2em; width: 100%;" class="input">
             
-                <div class="header" style="padding: 0px 16px; width: 100px; min-width: 80px;">
-                    <label style="padding-left: 1.4em;" for="estc_no">ESTC No:</label>
-                </div>
-                <input id="estc_no" class="text ui-widget-content ui-corner-all" style="max-width:30em;">
-                
-
-                <div class="header" style="padding: 0px 16px; width: 80px; min-width: 80px;">
-                    <label for="vol_count">Volume Count:</label>
-                </div>
-                <input id="vol_count" class="text ui-widget-content ui-corner-all" style="max-width:30em;">
-                
-                <div class="header" style="padding: 0px 16px; width: 80px; min-width: 80px;">
-                    <label for="vol_parts">Volume Parts:</label>
-                </div>
-                <input id="vol_parts" class="text ui-widget-content ui-corner-all" style="max-width:30em;">
-
-            <div>
-                <div style="display:grid;height:inherit;padding:7px;" class="input">
-                    <button id="btnLookupLRC18C"  style="border: 2.0px solid #95A7B7;" class="ui-button ui-corner-all ui-widget">Search</button>
-                </div>
+            <div class="header" style="padding: 0px 16px; width: 100px; min-width: 80px;">
+                <label style="padding-left: 1.4em;" for="estc_no">ESTC No:</label>
             </div>
+            <input id="estc_no" class="text ui-widget-content ui-corner-all" style="max-width:30em;">
+            
+
+            <div class="header" style="padding: 0px 16px; width: 80px; min-width: 80px;">
+                <label for="vol_count">Volume Count:</label>
+            </div>
+            <input id="vol_count" class="text ui-widget-content ui-corner-all" style="max-width:30em;">
+            
+            <div class="header" style="padding: 0px 16px; width: 80px; min-width: 80px;">
+                <label for="vol_parts">Volume Parts:</label>
+            </div>
+            <input id="vol_parts" class="text ui-widget-content ui-corner-all" style="max-width:30em;">
         </div>
 
+        <div style="padding: 0.2em; width: 100%;" class="input">
+            <div class="header" style="padding: 0px 16px; width: 85px; min-width: 85px;">
+                <label style="padding-left: 1.4em;" for="sort_by_field">Sort by:</label>
+            </div>
+            <select id="sort_by_field" class="text ui-widget-content ui-corner-all" style="max-width:130px">
+                <option value="1">Title</option>
+                <option value="9">Year of First Volume</option>
+                <option value="275">Year of Final Volume</option>
+                <option value="256">Book Format</option>
+            </select>
+        </div>
     </fieldset>
+
+    <div style="display: grid;position: absolute; top: 115px; right: 85px;width: 120px;" class="input">
+        <button id="btnLookupLRC18C"  style="border: 2.0px solid #95A7B7;" class="ui-button ui-corner-all ui-widget">Search</button>
+    </div>
 </div>
 
-<div id="div_result" class="ent_content_full" style="display: none;top:13.5em">
+<div id="div_result" class="ent_content_full" style="display: none;top:14em">
 </div>
 
