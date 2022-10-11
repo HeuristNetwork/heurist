@@ -5054,29 +5054,50 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     focusField: function(field_id){
 
         var $ele = this._editing.getFieldByName(field_id);
+        let isSeparator = false;
 
         if(!$ele || $ele.length == 0){
+
+            if(!$Db.rst(this._currentEditRecTypeID, field_id)){ // check field is part of structure
+                return;
+            }
+            // separator
+            isSeparator = true;
+            $ele = this.editForm.find('fieldset[data-dtid='+field_id+']');
+        }
+
+        if(!$ele.is(':visible')){ // check visibility
             return;
         }
 
-        if($ele.parents('.ui-tabs').length > 0){
-            var index = $ele.parents('fieldset:first').attr('data-tabindex'); 
-//DEBUG            console.log(index, $ele.parents('.ui-tabs').tabs('instance'));
+        if($ele.parents('.ui-tabs').length > 0){ // Tabs
+
+            let index = 0;
+            if(!$ele.is('fieldset')){
+                index = $ele.parents('fieldset:first').attr('data-tabindex');
+            }else{
+                index = $ele.attr('data-tabindex');
+            }
             $ele.parents('.ui-tabs').tabs('option', 'active', index);
-        }else if($ele.parents('.ui-accordion').length > 0){
-            var accordion_content = $ele.parents('.ui-accordion-content');
+
+        }else if($ele.parents('.ui-accordion').length > 0){ // Accordion
+
+            let accordion_content = $ele.parents('.ui-accordion-content');
             if(!accordion_content.is(':visible')){
-                var id = accordion_content.attr('aria-labelledby');
-                $.each($ele.parents('.ui-accordion-header'), function(idx, item){
-                    if($(item).attr('id') == id){
+                let id = accordion_content.attr('aria-labelledby');
+                $.each($ele.parents('.ui-accordion:first').find('.ui-accordion-header'), function(idx, item){ // Find corresponding header
+                    if($(item).attr('id') == id){ console.log($(item));
                         $ele.parents('.ui-accordion:first').accordion('option', 'active', idx);
                         return false;
                     }
                 });
             }
+
         }
 
         $ele[0].scrollIntoView();
-        $ele.editing_input('focus');
+        if(!isSeparator){
+            $ele.editing_input('focus');
+        }
     }
 });
