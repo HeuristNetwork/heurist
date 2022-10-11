@@ -27,6 +27,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     fieldSelectorLast:null,
     fieldSelectorOrig: null,
     fieldSelector: null,
+
+    updatedRstField: null,
     
     //
     //
@@ -1827,8 +1829,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }else if(this._currentEditID = -1 && res.dty_id){ // attempted to create new field, name is already used
 
                 var cannotEdit = $Db.dty(res.dty_id, 'dty_Status') == 'reserved' && !window.hWin.HAPI4.sysinfo['pwd_ReservedChanges'];
-
-                var msg = 'The name you have specified for the new field is already in use for an existing base field.<br><br>';
+                var exist_name = $Db.dty(res.dty_id, 'dty_Name');
+                var msg = 'The name "<span id="field_name">'+ exist_name +'</span>" which you have specified for the new field '
+                    + 'is already in use for an existing base field (id = <span id="field_id">'+ res.dty_id +'</span>).<br><br>';
 
                 if(!cannotEdit){
 
@@ -1836,10 +1839,13 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         msg += '<span id="btnDelete">DELETE</span> <span style="margin-left: 20px">Delete the existing base field (it has not been used)</span><br><br>';
                     }
 
-                    msg += '<span id="btnRename">RENAME</span> <span style="margin-left: 20px">Rename the existing base field so you can reuse the name</span><br><br>'
+                    msg += '<span id="btnRename">RENAME</span> <span style="margin-left: 20px; display: inline-block; vertical-align: middle;">'
+                            + 'Rename the existing base field so you can use this name for the new field<br>'
+                            + '(this will not affect the name of the field in any other record type)'
+                        + '</span><br><br>'
                         + 'Simply close this popup to edit the name for the new field.';
                 }else{ // reserved and no special password
-                    msg += 'The existing field is a reserved type and so cannot be edited at this time, please close this popup give your new base field a different name.';
+                    msg += 'The existing field is a reserved type and so cannot be edited at this time, please close this popup and give your new base field a different name.';
                 }
 
                 var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Name already in use'}, {default_palette_class: 'ui-heurist-design', dialogId: 'basefield-dup-name'});
@@ -1887,6 +1893,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                         window.hWin.HEURIST4.msg.showMsgFlash('Please enter a new name', 1500);
                                         return;
                                     }
+                                    let fld_record = $Db.rst(that.options.newFieldForRtyID, res.dty_id);
 
                                     that._currentEditID = res.dty_id;
                                     that._saveEditAndClose({dty_Name: new_name, dty_ID: res.dty_id}, 
@@ -1897,14 +1904,38 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                             $rdlg.dialog('close');
                                             $dlg.dialog('close');
 
-                                            that._currentEditID = -1;
-                                            that._saveEditAndClose();
+                                            if(fld_record && fld_record['rst_DisplayName'] == exist_name){
+                                                // Update in record structure field name with new name, then save new field
+                                                let req = {
+                                                    a: 'save',
+                                                    entity: 'defRecStructure',
+                                                    fields: {
+                                                        rst_DisplayName: new_name,
+                                                        rst_DetailTypeID: res.dty_id,
+                                                        rst_RecTypeID: that.options.newFieldForRtyID
+                                                    },
+                                                    request_id: window.hWin.HEURIST4.util.random()
+                                                };
+                                                window.hWin.HAPI4.EntityMgr.doRequest(req, function(response){
+                                                    if(response.status == window.hWin.ResponseStatus.OK){ // update cache, prepare rec structure tree for updating
+                                                        $Db.rst(that.options.newFieldForRtyID).setRecord(res.dty_id, {rst_DisplayName: new_name});
+                                                        that.updatedRstField = res.dty_id;
+                                                    }
+                                                    that._currentEditID = -1;
+                                                    that._saveEditAndClose();
+                                                });
+                                            }else{ // just save new field
+                                                that._currentEditID = -1;
+                                                that._saveEditAndClose();
+                                            }
                                         }, 
                                         function(response){
                                             if(!response.sysmsg){
                                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                                             }
                                             if(response.sysmsg.dty_id){
+                                                $dlg.find('#field_name').text(new_name);
+                                                $dlg.find('#field_id').text(response.sysmsg.dty_id);
                                                 window.hWin.HEURIST4.msg.showMsgFlash('Name already taken', 2500);
                                             }
                                         }
@@ -1976,7 +2007,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                               rst_DefaultValue_resource: this._editing.getValue('rst_DefaultValue_resource')[0]
                           };
                               
-            this._resultOnSelection = { rst_fields:rst_fields };
+            this._resultOnSelection = { rst_fields:rst_fields, updatedRstField: this.updatedRstField };
         }
         
         this._super();

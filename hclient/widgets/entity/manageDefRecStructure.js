@@ -1058,6 +1058,16 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         //console.log(record);                    
                     }
                 }
+                if(res.updatedRstField && res.updatedRstField > 0 && $Db.rst(that.options.rty_ID, res.updatedRstField)){ // Update tree node's label
+                    that._treeview.find('span[data-dtid="'+ res.updatedRstField +'"]').text($Db.rst(that.options.rty_ID, res.updatedRstField, 'rst_DisplayName'));
+
+                    /*
+                    var tree = that._treeview.fancytree('getTree');
+                    tree.getNodeByKey(res.updatedRstField).setTitle( // span w/ data-dtid & left padding = 10px + more inner elements
+                        '<span data-dtid="'+ res.updatedRstField +'" style="padding-left:10px">'+ $Db.rst(that.options.rty_ID, res.updatedRstField, 'rst_DisplayName') +'</span>'
+                    );
+                    */
+                }
             };
             popup_options['multiselect'] = function(event, res)
             {
