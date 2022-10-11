@@ -86,7 +86,11 @@ $system->defineConstant('DT_PARENT_ENTITY');
 $system->defineConstant('DT_DATE');
 $system->defineConstant('DT_WORKFLOW_STAGE');
 
-
+$system->defineConstant('RT_CMS_MENU');
+$system->defineConstant('RT_CMS_HOME');
+$system->defineConstant('DT_EXTENDED_DESCRIPTION');
+$system->defineConstant('DT_CMS_HEADER');
+$system->defineConstant('DT_CMS_FOOTER');
 
 $rec_id = intval(@$_REQUEST['recID']);
 
@@ -272,7 +276,7 @@ if(!($is_map_popup || $without_header)){
                             }
                         });
 
-                        $('<div class="detail" style="cursor:pointer;text-decoration:underline;" title="Click to popup content">Web page content</div>').on('click', function(){
+                        $('<div class="detail" style="cursor:pointer;text-decoration:underline;" title="Click to view web page content in a popup">View web page content</div>').on('click', function(){
                             window.hWin.HEURIST4.msg.showElementAsDialog({'element': $ele[0], 'default_palette_class': 'ui-heurist-explore', 'title': 'Web page content'});
                         }).insertBefore($ele);
 
