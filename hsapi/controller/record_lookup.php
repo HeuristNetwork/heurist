@@ -195,7 +195,10 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
 
     $remote_data = loadRemoteURLContent($url, true);    
     if($remote_data===false){
-        $system->error_exit_api('Cannot connect/load data from the service: '.$url, HEURIST_ERROR);    
+        global $glb_curl_error;
+        $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
+
+        $system->error_exit_api('<br>Cannot connect/load data from the service: '.$url.'<br>'.$error_code, HEURIST_ERROR);
     }
 
     if(@$params['serviceType'] == 'geonames' || @$params['serviceType'] == 'tlcmap'){ // GeoName and TLCMap lookups
