@@ -1672,7 +1672,7 @@ function recordSearch($system, $params)
         $params['detail'] = 'detail';
         $needCompleteInformation = true; //all header fields, relations, full file info
     }
-
+    
     $fieldtypes_ids = null;
     if(@$params['detail']=='timemap'){ //($istimemap_request){
         $params['detail']=='detail';
@@ -2231,7 +2231,6 @@ function recordSearch($system, $params)
                     .' Please filter to a smaller set of results.');
             }
 
-
             if($is_ids_only)
             { //------------------------  LOAD and RETURN only IDS
 
@@ -2433,12 +2432,12 @@ function recordSearch($system, $params)
                                 $detail_query = $detail_query . 'UNION  '
                                 .'SELECT dtl_ID, rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo), rl_TargetID, 0, 0 '
                                 .' FROM recDetails, recLinks, Records '
-                                .' WHERE dtl_DetailTypeID='. DT_GEO_OBJECT
+                                .' WHERE (dtl_Geo IS NOT NULL) ' //'dtl_DetailTypeID='. DT_GEO_OBJECT
                                 .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID in ('. join(',', $rectypes_as_place)
                                 .') AND rl_SourceID in (' . join(',', $chunk_rec_ids) . ')';
                             }
 
-                            //error_log($detail_query);
+//error_log($detail_query);
 
                         }else{
 
@@ -3100,7 +3099,7 @@ function recordSearchGeoDetails($system, $recID, $find_places_for_geo) {
 
     $details = array();    
     
-    if($system->defineConstant('DT_GEO_OBJECT')){
+    if(true){ //$system->defineConstant('DT_GEO_OBJECT')
     
         if ($find_places_for_geo===true && $system->defineConstant('RT_PLACE')){
             $find_places_for_geo = array(RT_PLACE);
@@ -3112,7 +3111,7 @@ function recordSearchGeoDetails($system, $recID, $find_places_for_geo) {
             $squery = 'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo) as dtl_Geo, '
             .'rl_TargetID,dtl_ID,rl_DetailTypeID'
             .' FROM recDetails, recLinks, Records '
-            .' WHERE dtl_DetailTypeID='. DT_GEO_OBJECT
+            .' WHERE (dtl_Geo IS NOT NULL) '  //'dtl_DetailTypeID='. DT_GEO_OBJECT
             .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID'
                    .(count($find_places_for_geo)==1
                         ?('='.$find_places_for_geo[0])
