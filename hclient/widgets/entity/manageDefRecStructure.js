@@ -1716,14 +1716,15 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 //enum,relmarker,resource  - show vocabulary name
                 var edit_ele = this._editing.getFieldByName('rst_TermVocabularyName');
                 ele.css({'border-top':'1px lightgray solid','padding':'10px 0px 0px',margin:'10px 0 0 126px'});
-                ele.insertBefore(edit_ele);                
+                ele.insertBefore(edit_ele);
             }
+
+            let ele_left = this.editForm.width() - this.editForm.find('#help_container').width() - parseInt(this.editForm.find('#help_container').css('left'), 10) - 50;
             ele.clone()
-               .appendTo(this.editForm.find('#help_container'))
-               .css({ border: 'none', padding: '4px 0 0', margin: '0 0 0 190px' })
+               .insertAfter(this.editForm.find('#help_container'))
+               .css({ display: 'inline-block', padding: 0, position: 'relative', top: '5px', left: ele_left })
                .find('#edit_bf_extra').hide();
-            this._on(this.editForm.find('a.edit_basefield'),{click: this.showBaseFieldEditor});  
-            
+            this._on(this.editForm.find('a.edit_basefield'),{click: this.showBaseFieldEditor});
             
             $('<span style="padding-left:40px;color:gray;cursor:pointer">ID: '
                 +this._currentEditID+' Code: '+$Db.getConceptID('dty', this._currentEditID)
