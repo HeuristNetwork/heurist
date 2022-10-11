@@ -1725,7 +1725,7 @@ $.widget( "heurist.mapping", {
                                 if(top_layer.feature){
                                     selected_layers[top_layer._leaflet_id] = top_layer;
                                     var title = window.hWin.HEURIST4.util.htmlEscape( top_layer.feature.properties.rec_Title );
-                                    sText = sText + '<option title="'+ title +'" value="'+top_layer._leaflet_id+'">'+ title +'</option>';
+                                    sText = sText + '<div class="leaflet_layer_opt" title="'+ title +'" data-id="'+top_layer._leaflet_id+'">'+ title +'</div>';
                                 }
                             });
                             
@@ -2010,7 +2010,7 @@ $.widget( "heurist.mapping", {
                                     if(top_layer.contains(latlng)){
                                         selected_layers[top_layer._leaflet_id] = top_layer;
                                         var title = window.hWin.HEURIST4.util.htmlEscape( top_layer.feature.properties.rec_Title );
-                                        sText = sText + '<option title="'+title+'" value="'+top_layer._leaflet_id+'">'+title+'</option>';
+                                        sText = sText + '<div class="leaflet_layer_opt" title="'+title+'" data-id="'+top_layer._leaflet_id+'">'+title+'</div>';
                                     }
                                     
                             }
@@ -2043,9 +2043,8 @@ $.widget( "heurist.mapping", {
         this.main_popup.setLatLng(latlng)
                         .setContent('<p style="margin:12px;font-style:italic">'
                                 +found_cnt+' map objects found here. Select desired: </p>'
-                                +'<select size="'+ ((found_cnt>10)?10:found_cnt)
-                                +'" style="width:100%;overflow-y: auto;border: none;outline: none; cursor:pointer">'
-                                +sText+'</select>') 
+                                +'<div style="width:100%;max-height: 170px;overflow-y: auto;border: none;outline: none; cursor:pointer">'
+                                +sText+'</div>') 
                         .openOn(this.nativemap);
 
         $(this.main_popup.getElement()).css({
@@ -2054,12 +2053,12 @@ $.widget( "heurist.mapping", {
 
         var that = this;
             
-        var ele = $(this.main_popup._container).find('select');
-        ele.on({'change':function(evt){
-            var leaflet_id = $(evt.target).val();
+        var ele = $(this.main_popup._container).find('.leaflet_layer_opt');
+        ele.on({'click':function(evt){
+            var leaflet_id = $(evt.target).attr('data-id');
             that._onLayerSelect(selected_layers[leaflet_id], latlng);
         },'mousemove':function(evt){
-            var leaflet_id = $(evt.target).attr('value');
+            var leaflet_id = $(evt.target).attr('data-id');
             if(leaflet_id>0){
                 $(evt.target).siblings().removeClass('selected');
                 $(evt.target).addClass('selected');
