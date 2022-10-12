@@ -89,7 +89,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
             $res = getInvalidTerms($dty['dty_JsonTermIDTree'], true);
             $invalidTerms = $res[0];
             $validTermsString = $res[1];
-            if (count($invalidTerms)){
+            if (is_array($invalidTerms) && count($invalidTerms)>0){
                 $dtysWithInvalidTerms[$dtyID] = $dty;
                 $dtysWithInvalidTerms[$dtyID]['invalidTermIDs'] = $invalidTerms;
                 $dtysWithInvalidTerms[$dtyID]['validTermsString'] = $validTermsString;
@@ -101,7 +101,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
             $res = getInvalidTerms($dty['dty_TermIDTreeNonSelectableIDs'], false);
             $invalidNonSelectableTerms = $res[0];
             $validNonSelTermsString = $res[1];
-            if (count($invalidNonSelectableTerms)){
+            if (is_array($invalidNonSelectableTerms) && count($invalidNonSelectableTerms)>0){
                 $dtysWithInvalidNonSelectableTerms[$dtyID] = $dty;
                 $dtysWithInvalidNonSelectableTerms[$dtyID]['invalidNonSelectableTermIDs'] = $invalidNonSelectableTerms;
                 $dtysWithInvalidNonSelectableTerms[$dtyID]['validNonSelTermsString'] = $validNonSelTermsString;
@@ -111,7 +111,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
             $res = getInvalidRectypes($dty['dty_PtrTargetRectypeIDs']);
             $invalidRectypes = $res[0];
             $validRectypes   = $res[1];
-            if (count($invalidRectypes)){
+            if (is_array($invalidRectypes) && count($invalidRectypes)>0){
                 $dtysWithInvalidRectypeConstraint[$dtyID] = $dty;
                 $dtysWithInvalidRectypeConstraint[$dtyID]['invalidRectypeConstraint'] = $invalidRectypes;
                 $dtysWithInvalidRectypeConstraint[$dtyID]['validRectypeConstraint'] = $validRectypes;

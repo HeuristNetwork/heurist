@@ -86,7 +86,7 @@ if(@$_REQUEST['db']){
     if(@$_REQUEST['name']){
           $names = explode(' ', $_REQUEST['name']);
           $_REQUEST['ugr_FirstName'] = $names[0];
-          if(count($names)>0) $_REQUEST['ugr_LastName'] = $names[1];
+          if(is_array($names) && count($names)>0) $_REQUEST['ugr_LastName'] = $names[1];
           $isRegdataFromParams = true;
     }
     if(@$_REQUEST['email']){

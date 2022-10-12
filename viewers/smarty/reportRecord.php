@@ -639,7 +639,7 @@ class ReportRecord {
                 $query = json_encode($query);
             }
             if(strpos($query,'[ID]')!==false)
-                $query = str_replace('[ID]', $rec_ID, $query);
+                $query = str_replace('[ID]', strval($rec_ID), $query);
         }else{
             if(strpos($query,'[ID]')!==false){
                 return null;
@@ -676,7 +676,7 @@ class ReportRecord {
         $result = array();
         $idx = 0;
         
-        if(count($functions)==2 && !is_array($functions[0])){
+        if(is_array($functions) && count($functions)==2 && !is_array($functions[0])){
             $functions = array($functions);
         }
         

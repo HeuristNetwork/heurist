@@ -151,7 +151,9 @@ class DbDefCalcFunctions extends DbEntityBase
     //    
     protected function _validatePermission(){
         
-        if(!$this->system->is_admin() && (count($this->recordIDs)>0 || count($this->records)>0)){ //there are records to update/delete
+        if(!$this->system->is_admin() &&
+            ((is_array($this->recordIDs) && count($this->recordIDs)>0) 
+            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
             
             $this->system->addError(HEURIST_REQUEST_DENIED, 
                     'You are not admin and can\'t edit field calculations. Insufficient rights (logout/in to refresh) for this operation '

@@ -227,7 +227,7 @@ detectLargeInputs('COOKIE record_output', $_COOKIE);
                 exit();
             }
         }
-        
+       
         $response = recordSearch($system, $search_params);
     }
         
@@ -579,6 +579,7 @@ function output_CSV($system, $data, $params){
     $error_log[] = 'Total rec count '.count($records);
 
     $idx = 0;
+    if(is_array($records))
     while ($idx<count($records)){ //replace to WHILE
 
         $recID = $records[$idx];
@@ -624,11 +625,11 @@ function output_CSV($system, $data, $params){
             }
         }
 
-        if(count(@$details[$rty_ID])>0){
+        if(is_array(@$details[$rty_ID]) && count($details[$rty_ID])>0){
             //fils $record
             recordSearchDetails($system, $record, $details[$rty_ID]);
         }
-        if(count(@$relmarker_details[$rty_ID])>0){
+        if(is_array(@$relmarker_details[$rty_ID]) && count($relmarker_details[$rty_ID])>0){
             $related_recs = recordSearchRelated($system, array($recID), 0);
             if(@$related_recs['status']==HEURIST_OK){
                 $related_recs = $related_recs['data'];
@@ -774,7 +775,7 @@ function output_CSV($system, $data, $params){
                             }                        
                         }else if($dt_type=='enum' || $dt_type=='relationtype'){
 
-                            if(count($values)>0){
+                            if(is_array($values) && count($values)>0){
                                 foreach($values as $val){
                                     $enum_label[] = $defTerms->getTermLabel($val, $include_term_hierarchy);
                                     // @$defTerms[$val][$idx_term_label]?$defTerms[$val][$idx_term_label]:'';
@@ -830,16 +831,16 @@ function output_CSV($system, $data, $params){
             if($value===null) $value = '';                       
 
 
-            if(count($enum_label)>0){
+            if(is_array($enum_label) && count($enum_label)>0){
                 $record_row[] = implode($csv_mvsep,$enum_label);    
                 if($include_term_ids) $record_row[] = $value;
                 if($include_term_codes) $record_row[] = implode($csv_mvsep,$enum_code);    
             }else {
                 $record_row[] = $value;
 
-                if (count($resource_titles)>0){
+                if (is_array($resource_titles) && count($resource_titles)>0){
                     $record_row[] = implode($csv_mvsep,$resource_titles);    
-                }else if (count($file_urls)>0){
+                }else if (is_array($file_urls) && count($file_urls)>0){
                     $record_row[] = implode($csv_mvsep,$file_urls);    
                 }
             }
@@ -847,7 +848,7 @@ function output_CSV($system, $data, $params){
         }//for fields
 
         // write the data to csv
-        if(count($record_row)>0) {
+        if(is_array($record_row) && count($record_row)>0) {
             if($has_advanced){
                 $csvData[$rty_ID][] = $record_row;    
                 
@@ -895,7 +896,7 @@ function output_CSV($system, $data, $params){
         foreach ($csvData as $recordTypeID => $rows) {
             $streams[$recordTypeID] = fopen('php://temp/maxmemory:1048576', 'w');
 
-            if (count($rows) > 0) {
+            if (is_array($rows) && count($rows) > 0) {
                 if ($csv_header) {
                     $headerRow = array_shift($rows);
                     if (!empty($percentageColIndices[$recordTypeID])) {
@@ -912,7 +913,7 @@ function output_CSV($system, $data, $params){
                 if (!empty($percentageColIndices[$recordTypeID])) {
                     $rows = usePercentageForCSVRows($rows, $percentageColIndices[$recordTypeID]);
                 }
-                if (!empty($sortColIndices[$recordTypeID])) {
+                if (!empty($sortColIndices[$recordTypeID]) && is_array($sortColIndices[$recordTypeID])) {
                     // Mutate col indices as new columns inserted.
                     for ($i = 0; $i < count($sortColIndices[$recordTypeID]); $i++) {
                         $colIndex = $sortColIndices[$recordTypeID][$i];
@@ -936,7 +937,7 @@ function output_CSV($system, $data, $params){
     //calculate number of streams with columns more than one
     $count_streams = 0;
     foreach($headers as $rty_ID => $columns){
-        if(count($columns)>1){
+        if(is_array($columns) && count($columns)>1){
             $count_streams++;        
         }
     }
@@ -1077,7 +1078,7 @@ function output_HeaderOnly($system, $data, $params)
     }
     
     
-    if(count($terms_pickup)>0) {
+    if(is_array($terms_pickup) && count($terms_pickup)>0) {
         $defTerms = dbs_GetTerms($system);
         $defTerms = new DbsTerms($system, $defTerms);
     }
@@ -1165,7 +1166,7 @@ function writeResults( $streams, $temp_name, $headers, $error_log ) {
   
     global $defRecTypes;
     
-    if(count($streams)<2){
+    if(is_array($streams) && count($streams)<2){
         
         $out = false;
         $rty_ID = 0;
@@ -1235,7 +1236,7 @@ function writeResults( $streams, $temp_name, $headers, $error_log ) {
                     // return to the start of the stream
                     rewind($fd);
                     
-                    if($is_first || count($headers[$rty_ID])>1){
+                    if($is_first || (is_array($headers[$rty_ID]) && count($headers[$rty_ID])>1)){
                         $is_first = false;
                     
                         $content = stream_get_contents($fd);
@@ -1253,7 +1254,7 @@ function writeResults( $streams, $temp_name, $headers, $error_log ) {
                 }
             }    
             
-            if(count($error_log)>0){
+            if(is_array($error_log) && count($error_log)>0){
                 $zip->addFromString('log.txt', implode(PHP_EOL, $error_log) );
             }
             

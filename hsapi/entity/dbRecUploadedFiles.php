@@ -294,7 +294,7 @@ class DbRecUploadedFiles extends DbEntityBase
     //    
     protected function _validatePermission(){
         
-        if(!$this->system->is_dbowner() && count($this->recordIDs)>0){
+        if(!$this->system->is_dbowner() && is_array($this->recordIDs) && count($this->recordIDs)>0){
             
             $ugr_ID = $this->system->get_user_id();
             
@@ -303,11 +303,11 @@ class DbRecUploadedFiles extends DbEntityBase
             $recIDs_norights = mysql__select_list($mysqli, $this->config['tableName'], $this->primaryField, 
                     $this->primaryField.' in ('.implode(',', $this->recordIDs).') AND ulf_UploaderUGrpID != '.$ugr_ID.')');
 
-            $cnt = count($recIDs_norights);       
+            $cnt = is_array($recIDs_norights)?count($recIDs_norights):0;       
                     
             if($cnt>0){
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 
-                (($cnt==1 && (!isset($this->records) || count($this->records)==1) )
+                (($cnt==1 && (!is_array($this->records) || count($this->records)==1) )
                     ? 'File is'
                     : $cnt.' files are')
                     .' uploaded by other user. Insufficient rights (logout/in to refresh) for this operation');
@@ -749,7 +749,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $this->data['fields'] = json_decode($this->data['fields'], true);
             }
 
-            if(count($this->data['fields'])>0){
+            if(is_array($this->data['fields']) && count($this->data['fields'])>0){
                 
                 set_time_limit(0);
 
@@ -1180,7 +1180,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                //get full file info
                $fileinfo = fileGetFullInfo($this->system, $ulf_ID);
-               if(count($fileinfo)>0){
+               if(is_array($fileinfo) && count($fileinfo)>0){
                     return $fileinfo[0];
                }
 

@@ -124,7 +124,7 @@ public static function output($data, $params){
         $records = $data['records'];
     }
     
-    $records_original_count = count($records); //mainset of ids (result of search without linked/related)
+    $records_original_count = is_array($records)?count($records):0; //mainset of ids (result of search without linked/related)
     $records_out = array(); //ids already out
     $rt_counts = array(); //counts of records by record type
     
@@ -1289,7 +1289,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         unset($res['properties']['details']);
     }
     
-    if(count($geovalues)==0 && 
+    if( (!is_array($geovalues) || count($geovalues)==0) && 
         ($find_places_for_geo===true || (is_array($find_places_for_geo) && count($find_places_for_geo)>0)) ){
         
         //this record does not have geo value - find it in related/linked places
@@ -1385,12 +1385,14 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         }
     }
 
-    if(count($geovalues)>1){
-        $res['geometry'] = array('type'=>'GeometryCollection','geometries'=>$geovalues);
-    }else if(count($geovalues)==1){
-        $res['geometry'] = $geovalues[0];
-    }else{
-        //$res['geometry'] = [];
+    if(is_array($geovalues)){
+        if(count($geovalues)>1){
+            $res['geometry'] = array('type'=>'GeometryCollection','geometries'=>$geovalues);
+        }else if(count($geovalues)==1){
+            $res['geometry'] = $geovalues[0];
+        }else{
+            //$res['geometry'] = [];
+        }
     }
 
     if($date_start!=null || $date_end!=null){
@@ -1436,7 +1438,7 @@ private static function _getJsonFromWkt($wkt, $simplify=true)
             $geojson_adapter = new GeoJSON(); 
             $json = $geojson_adapter->write($geom, true); 
 
-            if(count($json['coordinates'])>0){
+            if(is_array(@$json['coordinates']) && count($json['coordinates'])>0){
 
                 if($simplify){
                     if($json['type']=='LineString'){
@@ -1563,7 +1565,7 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
                 }
             } //for detail multivalues
 
-            if(count($res[$col_name])==1){
+            if(is_array(@$res[$col_name]) && count($res[$col_name])==1){
                 $res[$col_name] = $res[$col_name][0];  
             } 
         } //for all details of record

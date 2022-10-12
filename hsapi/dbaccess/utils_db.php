@@ -70,8 +70,10 @@
 
         try{
             $mysqli = mysqli_init();
-            $mysqli -> options(MYSQLI_OPT_LOCAL_INFILE, 1);
-            $mysqli -> real_connect($dbHost, $dbUsername, $dbPassword, null, $dbPort);
+            //debug mode mysqli_report(MYSQLI_REPORT_ALL);
+            mysqli_report(MYSQLI_REPORT_STRICT); //MYSQLI_REPORT_ERROR | 
+            $mysqli->options(MYSQLI_OPT_LOCAL_INFILE, 1);
+            $mysqli->real_connect($dbHost, $dbUsername, $dbPassword, null, $dbPort);
             //if (!$mysqli->set_charset("utf8mb4")) {
             //    return array(HEURIST_SYSTEM_FATAL, 'Error loading character set utf8mb4', $mysqli->error);
             //}       
@@ -262,14 +264,13 @@
     /**
     * returns array  key_column=>val_column for given table
     */
-    function mysql__select_assoc2($mysqli, $query){
+    function mysql__select_assoc2($mysqli, $query):array{
         
-        $matches = null;
+        $matches = array();
         if($mysqli && $query){
             
             $res = $mysqli->query($query);
             if ($res){
-                $matches = array();
                 while ($row = $res->fetch_row()){
                     $matches[$row[0]] = $row[1];
                 }
@@ -285,14 +286,13 @@
     * @param mixed $mysqli
     * @param mixed $query
     */
-    function mysql__select_assoc($mysqli, $query){
+    function mysql__select_assoc($mysqli, $query):array{
         
-        $matches = null;
+        $matches = array();
         if($mysqli && $query){
             
             $res = $mysqli->query($query);
             if ($res){
-                $matches = array();
                 while ($row = $res->fetch_assoc()){
                     $key = array_shift($row);
                     $matches[$key] = $row;
@@ -306,14 +306,13 @@
     /**
     * returns array of FIRST column values
     */
-    function mysql__select_list2($mysqli, $query) {
+    function mysql__select_list2($mysqli, $query):array {
 
-        $matches = null;
+        $matches = array();
         if($mysqli && $query){
             $res = $mysqli->query($query);
 
             if ($res){
-                $matches = array();
                 while ($row = $res->fetch_row()){
                     array_push($matches, $row[0]);
                 }
@@ -324,7 +323,7 @@
         return $matches;
     }
     
-    function mysql__select_list($mysqli, $table, $column, $condition) {
+    function mysql__select_list($mysqli, $table, $column, $condition):array {
         $query = "SELECT $column FROM $table WHERE $condition";
         return mysql__select_list2($mysqli, $query);
     }
@@ -656,7 +655,7 @@
     //
     function mysql__exec_param_query($mysqli, $query, $params, $return_affected_rows=false){
 
-        if ($params == null || count($params) < 1) {// not parameterised
+        if (!is_array($params) || count($params) < 1) {// not parameterised
             if ($result = $mysqli->query($query)) {
 
                 $result = $return_affected_rows ?$mysqli->affected_rows  :true;
@@ -680,6 +679,7 @@
                 $method = $ref->getMethod("bind_param"); 
                 $method->invokeArgs($stmt, $refArr); 
 */                
+                //Call the $stmt->bind_param() method with atrguments (string $types, mixed &...$vars)
                 call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
                 if(!$stmt->execute()){
                     $result = $mysqli->error;

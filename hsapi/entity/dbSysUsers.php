@@ -210,7 +210,9 @@ class DbSysUsers extends DbEntityBase
     //    
     protected function _validatePermission(){
         
-        if(!$this->system->is_admin() && (count($this->recordIDs)>0 || count($this->records)>0)){ //there are records to update/delete
+        if(!$this->system->is_admin() && 
+            ((is_array($this->recordIDs) && count($this->recordIDs)>0) 
+            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
             
             $ugrID = $this->system->get_user_id();
             if($this->recordIDs[0]!=$ugrID || count($this->recordIDs)>1){
@@ -397,7 +399,7 @@ class DbSysUsers extends DbEntityBase
         $query = 'SELECT rec_ID FROM Records WHERE rec_OwnerUGrpID in (' 
                         . implode(',', $this->recordIDs) . ') and rec_FlagTemporary=1';
         $rec_ids_to_delete = mysql__select_list2($mysqli, $query);
-        if(count($rec_ids_to_delete)>0){
+        if(is_array($rec_ids_to_delete) && count($rec_ids_to_delete)>0){
             $res = recordDelete($this->system, $rec_ids_to_delete, false);
             if(@$res['status']!=HEURIST_OK) return false;
         }
@@ -591,7 +593,7 @@ class DbSysUsers extends DbEntityBase
         }
         //group roles 
         $roles = @$this->data['roles'];
-        if(!$roles || count($roles)==0){             
+        if(!is_array($roles) || count($roles)==0){             
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Group roles for import users are not defined');
             return false;
         }

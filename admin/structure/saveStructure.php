@@ -203,8 +203,10 @@ else
                     //$colNames = $data['colNames'];  //['defs']
                     $rv['result'] = array(); //result
 
-                    for ($ind=0; $ind<count($data); $ind++) {
-                        array_push($rv['result'], updateRelConstraint($srcID, $trgID, $data[$ind]  ));
+                    if(is_array($data)){
+                        for ($ind=0; $ind<count($data); $ind++) {
+                            array_push($rv['result'], updateRelConstraint($srcID, $trgID, $data[$ind]  ));
+                        }
                     }
                     if($terms_todel){
                         array_push($rv['result'], deleteRelConstraint($srcID, $trgID, $terms_todel));

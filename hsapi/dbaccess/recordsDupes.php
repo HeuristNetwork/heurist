@@ -515,7 +515,8 @@ public static function findDupes( $params ){
                 //fill values array    
                 array_unshift($row, $search_params); //add as a first element - list of parameter types 
 
-                $group = null;            
+                $group = null; 
+                //Call the $stmt->bind_param() method with atrguments (string $types, mixed &...$vars)           
                 call_user_func_array(array($stmt, 'bind_param'), referenceValues($row));
                 if(!$stmt->execute()){
                     self::$system->addError(HEURIST_DB_ERROR, 'Cannot execute query to find duplication records', 

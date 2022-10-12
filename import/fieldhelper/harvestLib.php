@@ -122,7 +122,7 @@ function doHarvest($dirs_and_exts, $is_report, $imode) {
         {
 
             $files = scandir($dir);
-            if($files && count($files)>0)
+            if(is_array($files) && count($files)>0)
             {
                 $subdirs = array();
 

@@ -1154,7 +1154,7 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
                         $submenu = @$record['details'][DT_CMS_TOP_MENU];
                     }
                     //has submenu
-                    if($submenu){
+                    if(is_array($submenu)){
                         //if(!is_array($submenu)) $submenu = explode(',',$submenu);
                         
                         if(count($submenu)>0){ 

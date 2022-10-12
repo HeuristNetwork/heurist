@@ -291,7 +291,7 @@ class DbDefRecTypes extends DbEntityBase
         $res = true;
         $query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=1";
         $recIds = mysql__select_list2($mysqli, $query);
-        if(count($recIds)>0) {
+        if(is_array($recIds) && count($recIds)>0) {
             $res = recordDelete($this->system, $recIds, false);   
             $res = ($res['status']==HEURIST_OK);
         }
@@ -329,7 +329,9 @@ class DbDefRecTypes extends DbEntityBase
     //    
     protected function _validatePermission(){
         
-        if(!$this->system->is_admin() && (count($this->recordIDs)>0 || count($this->records)>0)){ //there are records to update/delete
+        if(!$this->system->is_admin() &&
+            ((is_array($this->recordIDs) && count($this->recordIDs)>0) 
+            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
             
             $this->system->addError(HEURIST_REQUEST_DENIED, 
                     'You are not admin and can\'t edit record types. Insufficient rights (logout/in to refresh) for this operation');
@@ -516,7 +518,7 @@ class DbDefRecTypes extends DbEntityBase
                 $this->data['fields'] = json_decode($this->data['fields'], true);
             }
 
-            if(count($this->data['fields'])>0){
+            if(is_array($this->data['fields']) && count($this->data['fields'])>0){
 
                 $ret = array();
                 foreach($this->data['fields'] as $idx => $record){
@@ -634,7 +636,7 @@ class DbDefRecTypes extends DbEntityBase
         }else{
             $wg_ids = array(); //all groups for admin    
         }        
-        if($ugr_ID>0 && count($wg_ids)>0){
+        if($ugr_ID>0 && is_array($wg_ids) && count($wg_ids)>0){
             $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
         }
         return array($from, '(not r0.rec_FlagTemporary)'.($where2?' and ':'').$where2);

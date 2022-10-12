@@ -156,7 +156,7 @@
     ksort($dupes); //Sorts by record types
     foreach ($dupes as $typekey => $subarr) {
         //sorts methapone keys
-        array_multisort($dupes[$typekey],SORT_ASC,SORT_STRING);
+        array_multisort($dupes[$typekey], SORT_ASC, SORT_STRING);
     }
 
 ?>

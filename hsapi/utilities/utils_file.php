@@ -646,7 +646,7 @@
         }
         
         if($isFancy){
-            usort($fancytree, "cmp");
+            usort($fancytree, "__cmpTitleInTree");
             return array('children'=>$fancytree, 'count'=>$file_count);
         }else{
             asort($dirs);
@@ -656,7 +656,7 @@
     }    
     
     
-    function cmp($a, $b)
+    function __cmpTitleInTree($a, $b)
     {
         if ($a['title'] == $b['title']) {
             return 0;
@@ -675,12 +675,12 @@
             $item = array( 'key'=>$folder, 'title'=>$folder, 
                         'folder'=>($folder>=0), 'issystem'=>(@$sysfolders[$folder]!=null) );
             
-            if($children && count($children)>0){
+            if(is_array($children) && count($children)>0){
                 $item['children'] = folderTreeToFancyTree($children, $lvl+1);
             }   
             $fancytree[] = $item;
         }
-        usort($fancytree, "cmp");
+        usort($fancytree, "__cmpTitleInTree");
         return $fancytree; 
         
     }
@@ -858,7 +858,7 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
                 if (( $file != '.' ) && ( $file != '..' )) {
                     if ( is_dir($src . $file) ) {
 
-                        if($folders==null || count($folders)==0 || in_array($src.$file.'/',$folders))
+                        if(!is_array($folders) || count($folders)==0 || in_array($src.$file.'/',$folders))
                         {
                             if($file_to_copy==null || strpos($file_to_copy, $src.$file)===0 )
                             {

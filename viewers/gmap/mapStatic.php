@@ -156,7 +156,7 @@
         }
 	}
 
-	if(count($mapobjects)>0){
+	if(is_array($mapobjects) && count($mapobjects)>0){
         
         if(USE_GOOGLE){
             

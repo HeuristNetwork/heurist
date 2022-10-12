@@ -54,7 +54,7 @@ private static function getConceptID($lclID, $tableName, $fieldNamePrefix) {
         $ids = mysql__select_row(self::$system->get_mysqli(), $query);
         
         //return "".$ids[0]."-".$ids[1];
-        if ($ids && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
+        if (is_array($ids) && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
             return "" . $ids[0] . '-' . $ids[1];
         } else if (self::$database_id) {
             return '' . self::$database_id . '-' . $lclID;
@@ -120,7 +120,7 @@ private static function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
     
     $ids = explode('-', $conceptID);
     $res_id = null;
-    if ($ids && (count($ids) == 1 && is_numeric($ids[0])) 
+    if (is_array($ids) && (count($ids) == 1 && is_numeric($ids[0])) 
             || (count($ids) == 2 && is_numeric($ids[1]) && ( (!($ids[0] > 0)) || $ids[0] == self::$database_id)) ) 
     {
         //local or defined in this database
@@ -136,7 +136,7 @@ private static function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
         $res_id = mysql__select_value(self::$system->get_mysqli(), $query);
         
 
-    } else if ($ids && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
+    } else if (is_array($ids) && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
  $query = "select " . $fieldNamePrefix . "ID from $tableName where " . $fieldNamePrefix . "OriginatingDBID=" . $ids[0] . " and " . $fieldNamePrefix . "IDInOriginatingDB=" . $ids[1];
                 
         $res_id = mysql__select_value(self::$system->get_mysqli(), $query);    

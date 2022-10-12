@@ -260,8 +260,8 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     
     $csv_dateformat = @$params["csv_dateformat"];
     
-    $check_datefield = count($datefields)>0;
-    $check_keyfield = count($keyfields)>0;
+    $check_datefield = (is_array($datefields) && count($datefields)>0);
+    $check_keyfield = (is_array($keyfields) && count($keyfields)>0);
 
     $len = 0;
     $header = null;

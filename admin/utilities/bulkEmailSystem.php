@@ -95,7 +95,7 @@ class systemEmailExt {
             if(!is_array($data["databases"])){
                 $data["databases"] = explode(',',$data["databases"]);
             }
-            if(count($data["databases"]) >= 1) { // Get list of Databases
+            if(is_array($data["databases"]) && count($data["databases"]) >= 1) { // Get list of Databases
 			    $this->databases = $this->validateDatabases($data["databases"]);
             }
 		}
@@ -107,7 +107,7 @@ class systemEmailExt {
 			return -1;
 		}
 
-		if(!$this->databases || count($this->databases) == 0){
+		if(!(is_array($this->databases) && count($this->databases)>0)){
 			// No valid databases found
 			$this->set_error("All provided databases are broken or invalid, these databases are required to retrieve a list of users, the last modified records and a record count values.");
 			return -1;
@@ -159,7 +159,7 @@ class systemEmailExt {
 
 		if ($rtn != 0) {
 			return $rtn;
-		}else if(count($this->user_details) == 0){
+		}else if(is_array($this->user_details) && count($this->user_details) == 0){
 
 			$this->set_error("No users have been retrieved, no emails have been sent");
 			return -1;

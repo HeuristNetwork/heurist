@@ -196,7 +196,7 @@ if(!$system->init(@$_REQUEST['db'])){
                     $header_flds = json_decode($header_flds, true);
                     //$header_flds = explode(',',$header_flds);
                 }
-                if(count($header_flds)>0){
+                if(is_array($header_flds) && count($header_flds)>0){
                     $sz = $sz + fputcsv($fp, $header_flds, ',', '"');
                 }
                 

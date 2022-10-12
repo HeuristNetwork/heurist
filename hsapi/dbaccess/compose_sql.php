@@ -242,7 +242,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
                 $where2_conj = ' and ';
             } 
             
-            if(count($wg_ids)>0){
+            if(is_array($wg_ids) && count($wg_ids)>0){
                 $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID ';
                 if(count($wg_ids)>1){
                     $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';    
@@ -270,7 +270,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
             $wg_ids = array();
         }
         
-        if(count($wg_ids)>0 && $currUserID>0){
+        if(is_array($wg_ids) && count($wg_ids)>0 && $currUserID>0){
                 //for hidden
                 $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID ';
                 if(count($wg_ids)>1){
@@ -545,6 +545,7 @@ class Query {
         
         $where_clauses = array();
 
+        if(is_array($this->top_limbs))
         for ($i=0; $i < count($this->top_limbs); ++$i) {
 
             $or_clauses = array();
@@ -567,6 +568,7 @@ class Query {
         //WHERE
         $where_clause = '';
         $and_clauses = array();
+        if(is_array($this->top_limbs))
         for ($i=0; $i < count($this->top_limbs); ++$i) {
 
 

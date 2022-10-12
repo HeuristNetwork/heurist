@@ -797,9 +797,9 @@ function getRecordIds($system, $ptr_record_ids, $search_values){
     $mysqli = $system->get_mysqli();
     $rec_ids = array();
 
-    if(!$ptr_record_ids || count($ptr_record_ids) <= 0){
+    if(!is_array($ptr_record_ids) || count($ptr_record_ids) <= 0){
         return $system->addError(HEURIST_ERROR, "No record type ids where sent to search");
-    }else if(!$search_values || count($search_values) != count($ptr_record_ids)){
+    }else if(!is_array($search_values) || count($search_values) != count($ptr_record_ids)){
         return $system->addError(HEURIST_ERROR, "There needs to be an equal number of search values with each record type being checked");
     }
 
@@ -870,7 +870,7 @@ function getRecordIds($system, $ptr_record_ids, $search_values){
             }
         }
 
-        if(is_array($rec_ids[$key])){
+        if(is_array(@$rec_ids[$key])){
 
             if(count($rec_ids[$key]) == 1){
                 $rec_ids[$key] = $rec_ids[$key][0];
@@ -1462,7 +1462,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
                 //find ANY first home record
                 $response = recordSearch($system, array('q'=>'t:'.RT_CMS_HOME, 'detail'=>'ids', 'w'=>'a'));
                 
-                if($response['status'] == HEURIST_OK  && count($response['data']['records'])>0){
+                if($response['status'] == HEURIST_OK  && is_array(@$response['data']['records']) && count($response['data']['records'])>0){
                     $res = $response['data']['records'][0];                                                        
                 }else{
                     return $system->addError(HEURIST_ERROR, 
@@ -1702,7 +1702,7 @@ function recordSearch($system, $params)
 
         //get date,year and geo fields from structure
         $fieldtypes_ids = dbs_GetDetailTypes($system, array('date','year','geo'), 3);
-        if($fieldtypes_ids==null || count($fieldtypes_ids)==0){
+        if(!is_array($fieldtypes_ids) || count($fieldtypes_ids)==0){
             //this case nearly impossible since system always has date and geo fields 
             $fieldtypes_ids = array(DT_GEO_OBJECT, DT_DATE, DT_START_DATE, DT_END_DATE); //9,10,11,28';    
         }
@@ -1746,7 +1746,7 @@ function recordSearch($system, $params)
                         $needThumbBackground = true;
                     }
             }
-            if(count($f_res)>0){
+            if(is_array($f_res) && count($f_res)>0){
                 $fieldtypes_ids = implode(',', $f_res);
                 $params['detail'] = 'detail';
                 $needThumbField = true;
@@ -1929,6 +1929,7 @@ function recordSearch($system, $params)
 
             //split by 3000 - search based on parent ids (max 3000)
             $k = 0;
+            if(is_array($parent_ids))
             while ($k < count($parent_ids)) {
 
                 //$need_details2 = $need_details && ($is_get_relation_records || $is_last);
@@ -2264,7 +2265,7 @@ function recordSearch($system, $params)
                                         $params['links_count']['target'], 
                                     @$params['links_count']['dty_ID']);
                                     
-                        if($links_counts['status']==HEURIST_OK && count(@$links_counts['data'])>0){
+                        if($links_counts['status']==HEURIST_OK && is_array(@$links_counts['data']) && count($links_counts['data'])>0){
                             
                             //order output 
                             $res = array_keys($links_counts['data']);
@@ -2759,7 +2760,7 @@ function _createFlatRule(&$flat_rules, $r_tree, $parent_index){
                 'results'=>array(),
                 'parent'=>$parent_index,
                 'ignore'=>(@$rule['ignore']==1), //not include in final result
-                'islast'=>(!@$rule['levels'] || count($rule['levels'])==0)?1:0 );
+                'islast'=>(!is_array(@$rule['levels']) || count($rule['levels'])==0)?1:0 );
             array_push($flat_rules, $e_rule );
             _createFlatRule($flat_rules, @$rule['levels'], count($flat_rules)-1);
         }

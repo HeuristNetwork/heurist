@@ -296,7 +296,7 @@ if($recTypeID==RT_ADDRESS){
                         $records_eventreports2 = recordSearch_2(
                             '[{"t":"15"},'.$date_filter2.'{"linked_to:13:78":[{"t":"13"},{"linkedfrom:16:78":[{"t":"16"},{"linked_to:12:90":"'. $recID .'"} ] }]  }] ');
 
-                        if(count($records_eventreports2['records'])>0){
+                        if(is_array($records_eventreports2['records']) && count($records_eventreports2['records'])>0){
 
                             $records_eventreports['records'] = mergeRecordSets($records_eventreports['records'], $records_eventreports2['records']);
 
@@ -311,8 +311,8 @@ if($recTypeID==RT_ADDRESS){
                             '[{"t":"26"},'.$date_filter2.'{"linkedfrom:16:151":[{"t":"16"},{"linked_to:12:90":"'. $recID .'"} ]  }] ');
                             
                         if($sourcesInfoFromPlaceRoles!='' || 
-                            count($records_eventreports['records'])>0 || 
-                            count($records_placerolereports['records'])>0){
+                            (is_array($records_eventreports['records']) && count($records_eventreports['records'])>0) || 
+                            (is_array($records_placerolereports['records']) && count($records_placerolereports['records'])>0) ){
 
                             //DA REPORT
                             foreach($records_eventreports['order'] as $repID){

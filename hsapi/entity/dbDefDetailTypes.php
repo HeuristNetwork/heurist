@@ -202,7 +202,7 @@ class DbDefDetailTypes extends DbEntityBase
         $query = 'select dtl_RecID from recDetails where dtl_DetailTypeID='.$dtyID;
         $rec_IDs = mysql__select_list2($this->system->get_mysqli(), $query);
 
-        if($rec_IDs && count($rec_IDs) > 0){
+        if(is_array($rec_IDs) && count($rec_IDs) > 0){
 
             $query = 'select dty_Name from defDetailTypes where dty_ID='.$dtyID;
             $fld_name = mysql__select_value($this->system->get_mysqli(), $query);
@@ -224,7 +224,9 @@ class DbDefDetailTypes extends DbEntityBase
     //    
     protected function _validatePermission(){
         
-        if(!$this->system->is_admin() && (count($this->recordIDs)>0 || count($this->records)>0)){ //there are records to update/delete
+        if(!$this->system->is_admin() && 
+            ((is_array($this->recordIDs) && count($this->recordIDs)>0) 
+            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
             
             $this->system->addError(HEURIST_REQUEST_DENIED, 
                     'You are not admin and can\'t edit field types. Insufficient rights (logout/in to refresh) for this operation');

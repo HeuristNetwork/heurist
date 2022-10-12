@@ -170,7 +170,7 @@ class DbUsrTags extends DbEntityBase
     //    
     protected function _validatePermission(){
         
-        if(!$this->system->is_dbowner() && count($this->recordIDs)>0){ //there are tags to update/delete
+        if(!$this->system->is_dbowner() && is_array($this->recordIDs) && count($this->recordIDs)>0){ //there are tags to update/delete
             
             $ugrs = $this->system->get_user_group_ids();
             
@@ -184,7 +184,7 @@ class DbUsrTags extends DbEntityBase
                     
             if($cnt>0){
                 $this->system->addError(HEURIST_REQUEST_DENIED, 
-                (($cnt==1 && (!isset($this->records) || count($this->records)==1))
+                (($cnt==1 && (!is_array($this->records) || count($this->records)==1))
                     ? 'Tag belongs'
                     : $cnt.' tags belong')
                     .' to other user or workgroup you are not a member. Insufficient rights (logout/in to refresh) for this operation');

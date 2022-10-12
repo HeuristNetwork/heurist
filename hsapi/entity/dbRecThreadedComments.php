@@ -147,7 +147,7 @@ class DbRecThreadedComments extends DbEntityBase
     //    
     protected function _validatePermission(){
         
-        if(!$this->system->is_dbowner() && count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_dbowner() && is_array($this->recordIDs) &&  count($this->recordIDs)>0){ //there are records to update/delete
             
             $ugrID = $this->system->get_user_id();
             
@@ -156,11 +156,11 @@ class DbRecThreadedComments extends DbEntityBase
             $recIDs_norights = mysql__select_list($mysqli, $this->config['tableName'], $this->primaryField, 
                     'cmt_ID in ('.implode(',', $this->recordIDs).') AND cmt_OwnerUgrpID!='.$ugrID);
             
-            $cnt = count($recIDs_norights);       
+            $cnt = (is_array($recIDs_norights))?count($recIDs_norights):0;       
                     
             if($cnt>0){
                 $this->system->addError(HEURIST_REQUEST_DENIED, 
-                (($cnt==1 && (!isset($this->records) || count($this->records)==1))
+                (($cnt==1 && (!is_array($this->records) || count($this->records)==1))
                     ? 'Comment belongs'
                     : $cnt.' Comments belong')
                     .' to other user. Insufficient rights (logout/in to refresh) for this operation');

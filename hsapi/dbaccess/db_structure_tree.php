@@ -470,7 +470,7 @@
                                 $res = array();
 
 
-                                if(count($rectype_ids)>1){
+                                if(is_array($rectype_ids) && count($rectype_ids)>1){
                                     $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
                                     $res['constraint'] = count($rectype_ids);
                                     if($mode!=5) $res['children'] = array();
@@ -482,7 +482,7 @@
                                 
                                     foreach($rectype_ids as $rtID){
                                         $rt_res = __getRecordTypeTree($system, $rtID, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
-                                        if(count($rectype_ids)==1){//exact one rectype constraint
+                                        if(is_array($rectype_ids) && count($rectype_ids)==1){//exact one rectype constraint
                                             //avoid redundant level in tree
                                             $res = $rt_res;
                                             $res['constraint'] = 1;

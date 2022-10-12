@@ -167,7 +167,7 @@ class DbUsrReminders extends DbEntityBase
     //    
     protected function _validatePermission(){
         
-        if(!$this->system->is_dbowner() && count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_dbowner() && is_array($this->recordIDs) && count($this->recordIDs)>0){ //there are records to update/delete
             
             $ugrID = $this->system->get_user_id();
             
@@ -180,7 +180,7 @@ class DbUsrReminders extends DbEntityBase
                     
             if($cnt>0){
                 $this->system->addError(HEURIST_REQUEST_DENIED, 
-                (($cnt==1 && (!isset($this->records) || count($this->records)==1))
+                (($cnt==1 && (!is_array($this->records) || count($this->records)==1))
                     ? 'Reminder belongs'
                     : $cnt.' Reminders belong')
                     .' to other user. Insufficient rights (logout/in to refresh) for this operation');

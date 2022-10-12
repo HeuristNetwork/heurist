@@ -389,7 +389,7 @@
             $rty_IDs = prepareIds($rty_IDs);
             
             $labels = array();
-            if ($rty_IDs && count($rty_IDs)>0) {
+            if (is_array($rty_IDs) && count($rty_IDs)>0) {
                     $query = $query.' where rty_ID in ('.implode(',', $rty_IDs).')';
             }
         }
@@ -765,6 +765,9 @@ function dbs_GetRectypeConstraint($system) {
         }
         
         $ids = mysql__select_list2($mysqli, $query);
+        if(!is_array($ids)){
+            $ids = array();
+        }
         if($all_levels && count($ids)>0){
             $ids = array_merge($ids, getTermChildrenAll($mysqli, $ids, true));
         }
@@ -878,7 +881,7 @@ function dbs_GetRectypeConstraint($system) {
         }else{
         
             foreach($tree as $pID => $children){
-                if(count($children)>0){
+                if(is_array($children) && count($children)>0){
                     $res = getTermInTree2($children, $term_id);
                     if($res!=null){
                         return $res;
@@ -1032,7 +1035,7 @@ function dbs_GetRectypeConstraint($system) {
         }*/
         
         if (array_key_exists($childIndex, $terms)) {//check if this child is parent itself
-            if (count($terms[$childIndex])) { //has children
+            if (is_array($terms[$childIndex]) && count($terms[$childIndex])>0) { //has children
             
                 if($parents==null){
                     $parents = array($childIndex);
@@ -1111,7 +1114,7 @@ function dbs_GetRectypeConstraint($system) {
             foreach ($childIDs as $childID => $n) {
                 //check that we have a child branch
                 if ($childID != null && array_key_exists($childID, $terms)) {
-                    if (count($terms[$childID])) {//yes then attach it and it's children's branches
+                    if (is_array($terms[$childID]) && count($terms[$childID])>0) {//yes then attach it and it's children's branches
                         $terms = __attachChild($system, $parentID, $childID, $terms, null);
                     } else {//no then it's a leaf in a branch, remove this redundant node.
                         unset($terms[$childID]);

@@ -993,11 +993,11 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                 if(!($inner_rectype>0)){
                     return array("error_title" => "Syntax error", 
                                  "message" => "Unable to interpret '$inner_rectype_search' as a record type<br><br>"
-                                            + "Record types must be enclosed in curly brackets {}. If the name appears<br>"
-                                            + "correct, please check for unwanted spaces, formatting or other characters.<br><br>"
-                                            + "If you have used the tree on the left to insert a field and it insert incorrect<br>"
-                                            + "text, please let us know with name of database, record type and field name,<br>"
-                                            + "as this should not happen.");
+                                            .'Record types must be enclosed in curly brackets {}. If the name appears<br>'
+                                            .'correct, please check for unwanted spaces, formatting or other characters.<br><br>'
+                                            .'If you have used the tree on the left to insert a field and it insert incorrect<br>'
+                                            .'text, please let us know with name of database, record type and field name,<br>'
+                                            .'as this should not happen.');
                 }
             }
             

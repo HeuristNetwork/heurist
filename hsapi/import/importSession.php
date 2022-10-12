@@ -206,7 +206,7 @@ public static function getRecordsFromImportTable2( $import_table, $id_field, $mo
         $mapping = json_decode($mapping, true);
     }
     
-    if($mapping && count($mapping)>0){
+    if(is_array($mapping) && count($mapping)>0){
         
         
         $field_idx = array_keys($mapping);

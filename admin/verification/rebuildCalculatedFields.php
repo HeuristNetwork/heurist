@@ -201,7 +201,7 @@ if($init_client){
         $q_cleared = '';
     }
     
-    if(count($res['errors'])>0){        
+    if(is_array(@$res['errors']) && count($res['errors'])>0){        
         $q_errors = '';
         foreach($res['errors'] as $key=>$msg){
             $q_errors = $q_errors . $key . '  ' .$msg . '<br>';           

@@ -190,7 +190,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                             .'where rec_ID in ('.$bib_ids_list.')');
 
                         $temptypes = '';
-                        if (count($rtyNameLookup) > 0) {
+                        if (is_array($rtyNameLookup) && count($rtyNameLookup) > 0) {
                             foreach ($rtyNameLookup as $rtyID => $rtyName){
                                 if (!$temptypes) {
                                     $temptypes = $rtyName;
@@ -230,7 +230,11 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 // only store the references that are actually records
                                 $records[$index]["refs"] = mysql__select_list2($mysqli, 'select rec_ID from Records '
                                      .' WHERE rec_ID in ('.join(',', $rec_references).')');
-                                $records[$index]["ref_count"] = count($records[$index]["refs"]);
+                                if(is_array($records[$index]["refs"])){
+                                    $records[$index]["ref_count"] = count($records[$index]["refs"]);
+                                }else{
+                                    $records[$index]["ref_count"] = 0;
+                                }
                                 $counts[$index] = $records[$index]["ref_count"];
                                 $invalid_rec_references += array_diff($rec_references, $records[$index]["refs"]);
                             } else{
@@ -262,7 +266,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                         //FIXME place results into array and output record with most references and/or date rule first - not sure what to do here
                         $rec_keys = array_keys($records);
                         if (! @$master_rec_id){
-                            array_multisort($counts,SORT_NUMERIC, SORT_DESC, $rec_keys );
+                            array_multisort($counts, SORT_NUMERIC, SORT_DESC, $rec_keys );
                             $master_rec_id = $rec_keys[0];
                         }
                         if (! @$do_merge_details){  // display a page to user for selecting which record should be the master record
@@ -734,7 +738,7 @@ function do_fix_dupe()
     }
 
     //get flat array of keep detail ids
-    if ($keep_dt_ids && count($keep_dt_ids)){
+    if (is_array($keep_dt_ids) && count($keep_dt_ids)){
         $master_keep_ids = array();
         foreach($keep_dt_ids as $dt_id => $details){
             foreach($details as $detail)
@@ -815,7 +819,7 @@ function do_fix_dupe()
     // otherwise mark it for update to point to the master record
     if($dup_bkm_UGrpIDs)
     foreach ($dup_bkm_UGrpIDs as $dup_bkm_ID => $dup_bkm_UGrpID){
-        if (count(@$master_bkm_UGrpIDs) && $matching_master_bkm_ID = array_search($dup_bkm_UGrpID,$master_bkm_UGrpIDs)){
+        if (is_array($master_bkm_UGrpIDs) && count($master_bkm_UGrpIDs)>0 && $matching_master_bkm_ID = array_search($dup_bkm_UGrpID,$master_bkm_UGrpIDs)){
             array_push($delete_bkm_IDs, $dup_bkm_ID);
             $dup_delete_bkm_ID_to_master_bkm_id[$dup_bkm_ID] = $matching_master_bkm_ID;
         }else{
@@ -856,7 +860,7 @@ function do_fix_dupe()
     //get tag links for the soon to be deleted dup records
     $delete_dup_rtl_ids = mysql__select_assoc2($mysqli, 'select rtl_ID, rtl_TagID FROM usrRecTagLinks WHERE rtl_RecID in'. $dup_rec_list);
     foreach ($delete_dup_rtl_ids as $rtl_ID => $tag_id) {
-        if (count($master_tag_ids) && array_search($tag_id,$master_tag_ids)){ //if it's already linked to the master delete it
+        if (is_array($master_tag_ids) && count($master_tag_ids) && array_search($tag_id,$master_tag_ids)){ //if it's already linked to the master delete it
             $mysqli->query('delete from usrRecTagLinks where rtl_ID = '.$rtl_ID);  //FIXME add error code
         }else{ // otherwise point it to the master record
             $mysqli->query('update usrRecTagLinks set rtl_RecID='.$master_rec_id.', where rtl_ID = '.$rtl_ID);
@@ -867,7 +871,7 @@ function do_fix_dupe()
     // move reminders to master
     $mysqli->query('update usrReminders set rem_RecID='.$master_rec_id.' where rem_RecID in '.$dup_rec_list);   //?FIXME  do we need to check reminders like we checked usrBookmarks
     //delete master details
-    if($master_delete_dt_ids && count($master_delete_dt_ids)){
+    if(is_array($master_delete_dt_ids) && count($master_delete_dt_ids)){
         $master_detail_delete_list = '('.join(',',$master_delete_dt_ids).')';
         $mysqli->query('delete from recDetails where dtl_ID in '.$master_detail_delete_list);  //FIXME add error code
     }

@@ -101,7 +101,7 @@ $is_csv = (@$_REQUEST['html']!=1);
             //parse
             $terms = getTermsFromFormat(@$row[1]); //db_structure
             
-            if ( count($terms) ==1 ) { //vocabulary
+            if (is_array($terms) && count($terms) ==1 ) { //vocabulary
                     $cnt1++;
                     continue;
             }
@@ -131,7 +131,7 @@ $is_csv = (@$_REQUEST['html']!=1);
             
             
             $nonTerms = getTermsFromFormat(@$row[2]); 
-            $is_idis = (count($nonTerms)>0);
+            $is_idis = (is_array($nonTerms) && count($nonTerms)>0);
             if($is_idis){
                 $cnt3++;
             }

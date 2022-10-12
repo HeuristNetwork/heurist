@@ -391,7 +391,7 @@ if($active_all || in_array('dup_terms', $active)) {
             if(@$_REQUEST['fixterms']=="1"){
                 $mysqli->query('SET SQL_SAFE_UPDATES=0');
                 
-                if(count($trmWithWrongParents)>0){
+                if(is_array($trmWithWrongParents) && count($trmWithWrongParents)>0){
                 
                     $trash_group_id = mysql__select_value($mysqli, 'select vcg_ID from defVocabularyGroups where vcg_Name="Trash"');
 
@@ -407,7 +407,7 @@ if($active_all || in_array('dup_terms', $active)) {
                     }
                 }
 
-                if(count($trmWithWrongInverse)>0){
+                if(is_array($trmWithWrongInverse) && count($trmWithWrongInverse)>0){
                     $query = 'UPDATE defTerms set trm_InverseTermId=NULL '
                     .' WHERE trm_ID in ('.implode(',',$trmWithWrongInverse).')';
                     $res = $mysqli->query( $query );

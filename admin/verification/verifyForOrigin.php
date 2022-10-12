@@ -117,10 +117,10 @@
         
         //get record structure for origin
         $where = null;
-        if(count($ids['rty_RecTypeGroupID'])>0){
+        if(is_array(@$ids['rty_RecTypeGroupID']) && count($ids['rty_RecTypeGroupID'])>0){
             $where = 'rty_RecTypeGroupID in ('.implode(',',$ids['rty_RecTypeGroupID']).')';
         }
-        if(count($ids['rty_ID'])>0){
+        if(is_array(@$ids['rty_ID']) && count($ids['rty_ID'])>0){
             if($where) $where = $where.' OR ';
             $where = 'rty_ID in ('.implode(',',$ids['rty_ID']).')';
         }

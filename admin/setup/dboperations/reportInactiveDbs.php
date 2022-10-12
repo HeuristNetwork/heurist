@@ -464,7 +464,7 @@ if(!$arg_no_action){
 
 echo ($tabs0.'finished'.$eol);
 
-if(count($email_list)>0){
+if(is_array($email_list) && count($email_list)>0){
     
 sendEmail(HEURIST_MAIL_TO_ADMIN, "List of inactive databases on ".HEURIST_SERVER_NAME,
     "List of inactive databases for more than a year with more than 200 records:\n"

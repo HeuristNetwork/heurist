@@ -213,7 +213,9 @@ class DbDefRecStructure extends DbEntityBase
     //    
     protected function _validatePermission(){
 
-        if(!$this->system->is_admin() && (count($this->recordIDs)>0 || count($this->records)>0)){ //there are records to update/delete
+        if(!$this->system->is_admin() && 
+            ((is_array($this->recordIDs) && count($this->recordIDs)>0) 
+            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
 
             $this->system->addError(HEURIST_REQUEST_DENIED, 
                 'You are not admin and can\'t edit record type structure. Insufficient rights (logout/in to refresh) for this operation');
@@ -395,9 +397,9 @@ class DbDefRecStructure extends DbEntityBase
     private function addNewFields(){
         
         $rty_ID = $this->data['rtyID'];
-        $newfields = $this->data['newfields'];
+        $newfields = @$this->data['newfields'];
         
-        if(count($newfields)==0){             
+        if(!is_array($newfields) || count($newfields)==0){             
             //if rt structure has zero fields adds 2 default fields: DT_NAME and DT_DESCRIPTION
             $mysqli = $this->system->get_mysqli();
             if(mysql__select_value($mysqli,
@@ -512,7 +514,7 @@ class DbDefRecStructure extends DbEntityBase
                     // Retrieve record ids that are relevant
                     $query = 'SELECT DISTINCT rec_ID FROM Records, recLinks WHERE rec_RecTypeID=' . $rty_ID . ' AND rl_RelationID > 0 AND (rl_SourceID=rec_ID OR rl_TargetID=rec_ID)';
                     $ids = mysql__select_list2($mysqli, $query); // returns array of rec ids
-                    if($ids && count($ids) > 0){
+                    if(is_array($ids) && count($ids) > 0){
 
                         $rec_ids = implode(',', $ids);
                         foreach ($relmarker_filters as $dty_id => $rectype_filter) {

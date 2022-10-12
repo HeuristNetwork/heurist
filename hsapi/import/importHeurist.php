@@ -1223,7 +1223,7 @@ EOD;
                     $new_values = $values;      
                 }
                 
-                if(count($new_values)>0){
+                if(is_array($new_values) && count($new_values)>0){
                     $record['details'][$ftId] = $new_values; 
                     
                     if($is_cms_init && $dty_ID == DT_EXTENDED_DESCRIPTION && $new_values[0]=='BLOG TEMPLATE'){
@@ -1395,7 +1395,7 @@ EOD;
                 }//for
             }
             //create reverse child to parent links if required
-            if(!$is_rollback && count($parent_child_links)>0){
+            if(!$is_rollback && is_array($parent_child_links) && count($parent_child_links)>0){
                 
                 foreach($parent_child_links as $idx=>$link){
                     

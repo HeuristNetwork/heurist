@@ -98,7 +98,8 @@ if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path differ
     $installDir = $installDir.'/';
     
     $iDir = explode('/',$installDir);
-    for ($i=count($iDir)-1; $i>=0; $i--){
+    $cntDir = count($iDir)-1;
+    for ($i=$cntDir; $i>=0; $i--){
                 if($iDir[$i]!='') {
                     $iDir[$i] = 'heurist';    
                     break;   
@@ -432,7 +433,7 @@ $trmDefines = array(
 //---------------------------------
 function detectLargeInputs($name, $array)
 {
-  if(count($array) > 500){
+  if(is_array($array) && count($array) > 500){
       error_log('Large input in '.$name);
       error_log(print_r(array_slice($array, 0, 100),true));
       error_log(print_r($_SERVER, true));

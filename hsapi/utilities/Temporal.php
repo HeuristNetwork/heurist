@@ -196,7 +196,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
     if(substr_count($value, '-') == 3 && $value[0] == '-'){ // remove padding 0's
         $parts = explode('-', $value);
         if(count($parts) == 4 && empty($parts[0]) && strlen($parts[1]) == 6){
-            $new_year_val = str_pad(intval($parts[1]), 4, 0, STR_PAD_LEFT);
+            $new_year_val = str_pad(strval(intval($parts[1])), 4, '0', STR_PAD_LEFT);
             $value = str_replace($parts[1], $new_year_val, $value);
         }
     }
@@ -243,7 +243,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
 				$isbce = true;
 				$res = abs($res + 1);
 			}*/
-            $res = ''.abs($date['year']);
+            $res = strval(abs($date['year']));
             
             //year must be four digit
             if($is_strict_iso) {
@@ -276,12 +276,12 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
         }else{
         
 		    if(@$date['month'] || $has_time){
-			    $res = $res.'-'.str_pad($date['month'],2,'0',STR_PAD_LEFT);
+			    $res = $res.'-'.str_pad(strval($date['month']),2,'0',STR_PAD_LEFT);
                 
                 if(!$need_day && !$origHasDays && !$has_time){
                 
 		        }else if(@$date['day']){ //&& ($need_day || $has_time)
-			        $res = $res.'-'.str_pad($date['day'],2,'0',STR_PAD_LEFT);
+			        $res = $res.'-'.str_pad(strval($date['day']),2,'0',STR_PAD_LEFT);
 		        }
             }
         }
@@ -293,13 +293,13 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
 			    }
 
 			    if($date['hour']>0 || @$date['minute']>0 || @$date['second']>0){
-				    $res = $res.' '.str_pad(''.$date['hour'],2,'0',STR_PAD_LEFT);
+				    $res = $res.' '.str_pad(strval($date['hour']),2,'0',STR_PAD_LEFT);
 
 				    if(!@$date['minute']) { $date['minute'] = 0; }
-				    $res = $res.':'.str_pad(''.$date['minute'],2,'0',STR_PAD_LEFT);
+				    $res = $res.':'.str_pad(strval($date['minute']),2,'0',STR_PAD_LEFT);
 			    }
 			    if(@$date['second']>0 || $origHasSeconds){
-				    $res = $res.':'.str_pad(''.$date['second'],2,'0',STR_PAD_LEFT);
+				    $res = $res.':'.str_pad(strval($date['second']),2,'0',STR_PAD_LEFT);
 			    }
 		    }
         }else{   //debug
@@ -487,7 +487,7 @@ function parseDateTime($value) {
 			$res['second'] = (@$matches[3])?intval($matches[3]):0;
 		}
 
-		return count($res)?$res:null;
+		return (count($res)>0)?$res:null;
 }
 
 //

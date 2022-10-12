@@ -181,7 +181,7 @@ class DbSysGroups extends DbEntityBase
     //    
     protected function _validatePermission(){
         
-        if(!$this->system->is_dbowner() && count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_dbowner() && is_array($this->recordIDs) && count($this->recordIDs)>0){ //there are records to update/delete
             
             $ugrID = $this->system->get_user_id();
             
@@ -193,7 +193,7 @@ class DbSysGroups extends DbEntityBase
                     .') ) AND ( ugl_GroupID=ugr_ID ) AND ( ugl_Role=\'admin\' ) AND ugl_UserID!='.$ugrID);
             
             
-            $cnt = count($recIDs_norights);       
+            $cnt = is_array($recIDs_norights)?count($recIDs_norights):0;       
                     
             if($cnt>0){
                 $this->system->addError(HEURIST_REQUEST_DENIED, 
@@ -303,7 +303,7 @@ class DbSysGroups extends DbEntityBase
         $query = 'SELECT rec_ID FROM Records WHERE rec_OwnerUGrpID in (' 
                         . implode(',', $this->recordIDs) . ') and rec_FlagTemporary=1';
         $rec_ids_to_delete = mysql__select_list2($mysqli, $query);
-        if(count($rec_ids_to_delete)>0){
+        if(is_array($rec_ids_to_delete) && count($rec_ids_to_delete)>0){
             $res = recordDelete($this->system, $rec_ids_to_delete, false);
             if(@$res['status']!=HEURIST_OK) return false;
         }
@@ -340,7 +340,7 @@ class DbSysGroups extends DbEntityBase
         if($ret){
             $mysqli->commit();
             
-            if(count(@$affectedUserIds)>0)
+            if(is_array(@$affectedUserIds) && count($affectedUserIds)>0)
             foreach($affectedUserIds as $usrID)  //affected users
             if($usrID!=$this->system->get_user_id()){
                     $fname = $this->getEntityImagePath($usrID);

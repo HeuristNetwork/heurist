@@ -64,7 +64,7 @@
 
     $records = recordSearch_2('ids:'.implode(',',$ids));
 
-    if(count(@$records['records'])<$need_cnt){
+    if(is_array(@$records['records']) && count($records['records'])<$need_cnt){
         echo 'Some records not found '.implode(',',$ids).'  '.print_r($records,true);
         return;
     }

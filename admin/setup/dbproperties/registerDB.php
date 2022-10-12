@@ -392,7 +392,7 @@ function registerDatabase() {
                 if ($dbID == 0) { // Unable to allocate a new database identifier
                     $decodedData = explode(',', $data);
 
-                    if(count($decodedData)>1){
+                    if(is_array($decodedData) && count($decodedData)>1){
                         $msg = $decodedData[1];
                     }else{
                         $msg = "Problem allocating a database identifier from the Heurist master index, " .

@@ -231,7 +231,7 @@ class UploadHandler
         if(!$post_max_size){
             $post_max_size = 'Unknown';
         }
-        $this->error_messages[1] = str_replace('xxx', $post_max_size, $this->error_messages[1]);
+        $this->error_messages[1] = str_replace('xxx', strval($post_max_size), $this->error_messages[1]);
 
         if ($options) {
             $this->options = $options + $this->options;

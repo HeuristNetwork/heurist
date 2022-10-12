@@ -468,7 +468,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
             DbUtils::databaseDrop(false, $targetdbname_full, false);
 
-            if(count($warnings) == 2 && $warnings['revert']){
+            if(is_array($warnings) && count($warnings) == 2 && $warnings['revert']){
 
                 sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database root folder', $warnings['message']);
                 if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){

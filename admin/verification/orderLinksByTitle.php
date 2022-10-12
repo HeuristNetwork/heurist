@@ -86,7 +86,7 @@ print $cnt.' records updated';
 
 function updateDtlValues($mysqli, $ids, $vals, $titles){
 
-    if(count($vals)>1){
+    if(is_array($vals) && count($vals)>1){
         
         sort($ids);
         $k = 0;

@@ -388,7 +388,7 @@ class DbDefTerms extends DbEntityBase
             //go to next level
             foreach($tree as $label => $children)
             {
-                if(count($children)>0){
+                if(is_array($children) && count($children)>0){
                     $record_idx = @$this->labels_to_idx[$parentLabel.$label];
                     $ret = $this->_saveTree($children, $this->records_all[$record_idx]['trm_ID'], $parentLabel.$label.'.');
                     if($ret===false){
@@ -658,7 +658,7 @@ class DbDefTerms extends DbEntityBase
                         if($new_parent>0){
                             //get labels and codes for vocabulary
                             $labels = $this->getLabelsAndCodes($new_vocab);
-                            if(count($labels)==0) $labels = null;
+                            if(!is_array($labels) || count($labels)==0) $labels = null;
                         }
                         if($new_vocab>0 && $new_vocab!=$old_vocab){
                             $all_children = $this->getChildren($new_vocab);
@@ -717,7 +717,7 @@ class DbDefTerms extends DbEntityBase
                                 }
                             }
                             //4. term is removed from vocabulary - check its usage in recDetails
-                            if(count($check_dty_IDs)>0){ 
+                            if(is_array($check_dty_IDs) && count($check_dty_IDs)>0){ 
                                     
                                $ret = $this->findRecordWhereTermInUse($trm_ID, $check_dty_IDs);
                                
@@ -943,14 +943,14 @@ class DbDefTerms extends DbEntityBase
         }
 
         // is this used in records (find usage in recDetails)
-        if($indetails && count($ret['detailtypes'])==0){
+        if($indetails && (!is_array($ret['detailtypes']) || count($ret['detailtypes'])==0)){
             
            $ret = $this->findRecordWhereTermInUse($trm_ID, null);
        
         }
 
         //$ret['children']>0 || 
-        if(count(@$ret['detailtypes'])>0 || $ret['reccount']>0){
+        if((is_array(@$ret['detailtypes']) && count($ret['detailtypes'])>0 )|| $ret['reccount']>0){
             return $ret;    
         }else{
             return true;
@@ -999,7 +999,7 @@ class DbDefTerms extends DbEntityBase
         //find all children terms (including by reference)
         $children = $this->getChildren($trm_ID);
 
-        if(count($children)>0){
+        if(is_array($children) && count($children)>0){
                 $children[] = $trm_ID;  //itself
                 $s = 'in ('.implode(',',$children).')';
         }else{

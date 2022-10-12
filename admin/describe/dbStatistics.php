@@ -277,7 +277,7 @@ if($is_csv){
             </table>
             <div style="padding-top:20px;">
             <?php
-                if(count($broken_dbs)>0){
+                if(is_array($broken_dbs) && count($broken_dbs)>0){
                     echo '<h4>Broken databases (missed sysIdentification or Records tables)</h4>';
                     echo implode('<br>',$broken_dbs);
                 }

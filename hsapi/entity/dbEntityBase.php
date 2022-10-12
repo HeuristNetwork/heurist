@@ -57,7 +57,7 @@ class DbEntityBase
     * 
     * @var array
     */
-    protected $records = null;
+    protected $records = array();
     
     
     /**
@@ -67,7 +67,7 @@ class DbEntityBase
     * 
     * @var array
     */
-    protected $recordIDs;
+    protected $recordIDs = array();
 
     //
     // constructor - load configuration from json file

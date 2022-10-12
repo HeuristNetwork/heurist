@@ -618,7 +618,7 @@ class HQuery {
                     $wg_ids = array();
                 }
                 
-                if($this->currUserID>0 && count($wg_ids)>0){
+                if($this->currUserID>0 && is_array($wg_ids) && count($wg_ids)>0){
                     $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID ';
                     if(count($wg_ids)>1){
                         $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';    
@@ -859,7 +859,7 @@ class HLimb {
             if( array_key_exists($key, $this->allowed) ){ //this is limb
                 $limb = new HLimb($this->parent, $key, $value);
                 //echo "<br>".$limb->conjunction."  count=".count($limb->limbs);
-                if(count($limb->limbs)>0){
+                if(is_array($limb->limbs) && count($limb->limbs)>0){
                     //do not add empty limb
                     array_push( $this->limbs, $limb );
                 }
@@ -906,29 +906,31 @@ class HLimb {
         }else{
 
             $wheres = array();
-            $cnt = count($this->limbs)-1;
-            foreach ($this->limbs as $ind=>$limb){
-                $res = $limb->makeSQL();
+            if(is_array($this->limbs)){
+                $cnt = count($this->limbs)-1;
+                foreach ($this->limbs as $ind=>$limb){
+                    $res = $limb->makeSQL();
 
-                //echo print_r($res, true)."<br>";
+                    //echo print_r($res, true)."<br>";
 
-                if($res && @$res["where"]){
-                    $this->addTable(@$res["from"]);
-                    if(false && $cnt==1){
-                        $where = $res["where"];
-                    }else{
-                        array_push($wheres, "(".$res["where"].")");
-                        //$where = $where."(".$res["where"].")";
-                        //if($ind<$cnt) $where = $where.$cnj;
+                    if($res && @$res["where"]){
+                        $this->addTable(@$res["from"]);
+                        if(false && $cnt==1){
+                            $where = $res["where"];
+                        }else{
+                            array_push($wheres, "(".$res["where"].")");
+                            //$where = $where."(".$res["where"].")";
+                            //if($ind<$cnt) $where = $where.$cnj;
+                        }
+                    }else if($limb->error_message){
+                        $this->error_message = $limb->error_message;
+                        return null;
                     }
-                }else if($limb->error_message){
-                    $this->error_message = $limb->error_message;
-                    return null;
                 }
             }
 
             //IMPORTANT!!!!!!!!
-            if(count($wheres)>0){  //@TODO!  this is temporal solution!!!!!
+            if(is_array($wheres) && count($wheres)>0){  //@TODO!  this is temporal solution!!!!!
                 $where = implode($cnj, $wheres);
                 
 //DEBUG error_log("TEST $cnj >>> ".$where);
@@ -1096,7 +1098,7 @@ class HPredicate {
                     $value = $this->value;
                     
                     
-                    if(count($this->relation_fields)>0){
+                    if(is_array($this->relation_fields) && count($this->relation_fields)>0){
                         $this->relation_fields = new HLimb($this->parent, 'all', $this->relation_fields);    
                     }else{
                         $this->relation_fields = null;
@@ -1115,7 +1117,7 @@ class HPredicate {
                         }
                     }    
                 }
-                if(count($value)>0){
+                if(is_array($value) && count($value)>0){
             
                     $level = $this->parent->level."_".$this->parent->cnt_child_query;
                     $this->parent->cnt_child_query++;
@@ -1459,7 +1461,7 @@ class HPredicate {
             
             $res = "NOT exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
             .$p.' dtl_DetailTypeID';
-            if($several_ids && count($several_ids)>0){
+            if(is_array($several_ids) && count($several_ids)>0){
                 $res = $res.(count($several_ids)>1
                         ?' IN ('.implode(',',$several_ids).')'
                         :'='.$several_ids[0])
@@ -1479,7 +1481,7 @@ class HPredicate {
             $res = "(select count(dtl_ID) from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
             .$p.'dtl_DetailTypeID';
         
-            if($several_ids && count($several_ids)>0){
+            if(is_array($several_ids) && count($several_ids)>0){
                 $res = $res.(count($several_ids)>1
                         ?' IN ('.implode(',',$several_ids).')'
                         :'='.$several_ids[0])
@@ -1523,7 +1525,7 @@ class HPredicate {
                     
                 }
                 
-                if($several_ids && count($several_ids)>0){
+                if(is_array($several_ids) && count($several_ids)>0){
                     $res = $res.(count($several_ids)>1
                             ?' IN ('.implode(',',$several_ids).')'
                             :'='.$several_ids[0]);
@@ -1537,7 +1539,7 @@ class HPredicate {
                     $res = $res.' AND MATCH(dtl_Value) '.$val;
                     $list_ids = mysql__select_list2($mysqli, $res);
                     
-                    if($list_ids && count($list_ids)>0){
+                    if(is_array($list_ids) && count($list_ids)>0){
                         $res = $recordID
                             .(count($list_ids)>1
                                 ?' IN ('.implode(',',$list_ids).')'
@@ -1554,7 +1556,7 @@ class HPredicate {
                 $res = 'select dtl_RecID from recDetails where '.$field_name.$val;
                 $list_ids = mysql__select_list2($mysqli, $res);
 
-                if($list_ids && count($list_ids)>0){
+                if(is_array($list_ids) && count($list_ids)>0){
                     $res = $recordID
                         .(count($list_ids)>1
                             ?' IN ('.implode(',',$list_ids).')'
@@ -1614,7 +1616,7 @@ class HPredicate {
                 
                 $list_ids = mysql__select_list2($mysqli, $res);
                 
-                if($list_ids && count($list_ids)>0){
+                if(is_array($list_ids) && count($list_ids)>0){
                     $res = 'r'.$this->qlevel.'.rec_ID'
                         .(count($list_ids)>1
                             ?' IN ('.implode(',',$list_ids).')'

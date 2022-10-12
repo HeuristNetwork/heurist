@@ -210,14 +210,14 @@ class RecordsBatch
             
             $rtyID = @$this->data['rtyID'];
             
-            $passedRecIDCnt = count(@$recIDs);
+            $passedRecIDCnt = count($recIDs);
 
             if ($passedRecIDCnt>0) {//check editable access for passed records
             
                 if($rtyID){ //filter for record type
                     $recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_RecTypeID = $rtyID and rec_ID  in ("
                                         .implode(",",$recIDs).")");
-                    $passedRecIDCnt = count(@$recIDs);
+                    $passedRecIDCnt = is_array($recIDs)?count($recIDs):0;
                 }
                 if($passedRecIDCnt>0){
                     //exclude records if user has no right to edit
@@ -236,7 +236,7 @@ class RecordsBatch
             $this->result_data = array('passed'=> $passedRecIDCnt>0?$passedRecIDCnt:0,
                                        'noaccess'=> @$inAccessibleRecCnt ?$inAccessibleRecCnt :0);
 
-            if (count(@$this->recIDs)==0){
+            if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
                 $this->result_data['processed'] = 0;
                 return true;
             }
@@ -456,7 +456,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (count(@$this->recIDs)==0){
+        }else if (!is_array($this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -655,7 +655,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (count(@$this->recIDs)==0){
+        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -780,8 +780,8 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                     .($is_multiline?'':', dtl_Value')
                     .'  FROM recDetails ';
             
-            if($recID=='all' && $this->rtyIDs && @$this->rtyIDs[0]>0){
-                if($this->rtyIDs && @$this->rtyIDs[0]>0){
+            if($recID=='all' && is_array($this->rtyIDs) && @$this->rtyIDs[0]>0){
+                if(is_array($this->rtyIDs) && @$this->rtyIDs[0]>0){
                     
                     $query = $query.', Records '
                             .'WHERE rec_ID=dtl_RecID AND  rec_RecTypeID '
@@ -965,7 +965,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (count(@$this->recIDs)==0){
+        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -1043,7 +1043,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             if($valuesToBeDeleted==null && $mysqli->error){
                 $sqlErrors[$recID] = $mysqli->error;
                 continue;
-            }else if($valuesToBeDeleted==null || count($valuesToBeDeleted)==0){  //not found
+            }else if(!is_array($valuesToBeDeleted) || count($valuesToBeDeleted)==0){  //not found
                 array_push($undefinedFieldsRecIDs, $recID);
                 continue;
             }
@@ -1162,7 +1162,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (count(@$this->recIDs)==0){
+        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -1227,7 +1227,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (count(@$this->recIDs)==0){
+        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -1493,7 +1493,7 @@ public methods
     */
     private function _assignTagsAndReport($type, $recordIds, $baseTag)
     {        
-        if (count($recordIds)>0) {
+        if (is_array($recordIds) && count($recordIds)>0) {
             
             if($type=='errors' || $type=='parseexception' || $type=='parseempty'){
                 $this->result_data[$type.'_list'] = $recordIds;    
@@ -1675,7 +1675,7 @@ public methods
             if(intval(@$tag['tag_ID'])<1){
                 $samename = $this->_tagGetByName($tag['tag_Text'], false, $tag['tag_UGrpID']);
 
-                if(count($samename)>0){
+                if(is_array($samename) && count($samename)>0){
                     $tag['tag_ID'] = $samename[0];
                 }
             }

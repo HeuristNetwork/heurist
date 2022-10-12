@@ -371,6 +371,7 @@ private static function findRecordIds($imp_session, $params){
                         $search_stmt->bind_result($rec_ID, $rec_Title);
                         
                         //assign parameters for search query
+                        //Call the $stmt->bind_param() method with atrguments (string $types, mixed &...$vars)
                         call_user_func_array(array($search_stmt, 'bind_param'), referenceValues($a_tobind));
                         $search_stmt->execute();
                         $disamb = array();
@@ -1574,8 +1575,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                 }
             }else{ //lat long fields
                 while ($row = $res->fetch_row()){
-                    $northing = $row[0];
-                    $easting = $row[1];
+                    $northing = (float)$row[0];
+                    $easting = (float)$row[1];
                     
                     $allInteger = $allInteger && ($northing==round($northing)) && ($easting==round($easting));
                     $allOutWGS = $allOutWGS && (abs($easting)>180) && (abs($northing)>90);

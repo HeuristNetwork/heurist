@@ -246,7 +246,7 @@ $mysqli = $system->get_mysqli();
   
                 //FIX duplicates at once
                 foreach ($dups_files as $ulf_ID=>$file_a){
-                    if(count($file_a['dupes'])>0){
+                    if(is_array($file_a['dupes']) && count($file_a['dupes'])>0){
                         
                         $dup_ids = implode(',',array_keys($file_a['dupes']));
                         $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='
@@ -425,7 +425,7 @@ $mysqli = $system->get_mysqli();
        $mysqli->query($query);            
 //DEBUG       print '<div>'.$ulf_ID.'  rem '.@$row['clear_remote'].'   path='.$row['res_relative'].'  file='.$row['filename'].'</div>';
     }
-    if(count($files_path_to_correct)>0){
+    if(is_array($files_path_to_correct) && count($files_path_to_correct)>0){
             print '<div>Autorepair: corrected '.count($files_path_to_correct).' paths</div>';
             $files_path_to_correct = array();
     }
@@ -656,16 +656,16 @@ $mysqli = $system->get_mysqli();
                     print '\'<a href="#orphaned" style="white-space: nowrap;padding-right:10px">Orphaned files</a>\'+';
                 }
                 */
-                if(count($files_unused_local)>0){
+                if(is_array($files_unused_local) && count($files_unused_local)>0){
                     $smsg = $smsg.'<a href="#unused_local" style="white-space: nowrap;padding-right:20px">Unused local files</a>';
                 }
-                if(count($files_unused_remote)>0){
+                if(is_array($files_unused_remote) && count($files_unused_remote)>0){
                     $smsg = $smsg.'<a href="#unused_remote" style="white-space: nowrap;padding-right:20px">Unused remote files</a>';
                 }
-                if(count($files_notfound)>0){
+                if(is_array($files_notfound) && count($files_notfound)>0){
                     $smsg = $smsg.'<a href="#files_notfound" style="white-space: nowrap;padding-right:20px">Files not found</a>';
                 }
-                if(count($files_notreg)>0){
+                if(is_array($files_notreg) && count($files_notreg)>0){
                     $smsg = $smsg.'<a href="#files_notreg" style="white-space: nowrap;padding-right:20px">Non-registered files</a>';
                 }
                 }
@@ -676,7 +676,7 @@ $mysqli = $system->get_mysqli();
                 </script>
                 
                 <?php
-                if(count($files_unused_local)>0){
+                if(is_array($files_unused_local) && count($files_unused_local)>0){
                 ?>
                 <div id="unused_file_local" style="padding-top:20px">
                     <a name="unused_local"></a>    
@@ -697,13 +697,13 @@ $mysqli = $system->get_mysqli();
                             .'<b>'.$row['ulf_ID'].'</b> '.$row['res_fullpath'].( $row['isfound']?'':' ( file not found )' ).'</label></div>';
                                     //@$row['ulf_ExternalFileReference'];
                 }//for
-                if(count($files_unused_local)>10){
+                if(is_array($files_unused_local) && count($files_unused_local)>10){
                     print '<div><br><button onclick="doRepairAction(\'unused_file_local\')">Remove selected unused local files</button></div>';
                 }
                 print '<br><br><hr/></div>';
                 }
                 //------------------------------------------
-                if(count($files_unused_remote)>0){
+                if(is_array($files_unused_remote) && count($files_unused_remote)>0){
                 ?>
                 <div id="unused_file_remote" style="padding-top:20px">
                     <a name="unused_remote"></a>    
@@ -724,14 +724,14 @@ $mysqli = $system->get_mysqli();
                     print '<div class="msgline"><label><input type=checkbox class="unused_file_remote" data-id="'.$row['ulf_ID'].'">&nbsp;'
                             .'<b>'.$row['ulf_ID'].'</b> '.$row['ulf_ExternalFileReference'].'</label></div>';
                 }//for
-                if(count($files_unused_remote)>10){
+                if(is_array($files_unused_remote) && count($files_unused_remote)>10){
                     print '<div><br><button onclick="doRepairAction(\'unused_file_remote\')">Remove selected unused URLs</button></div>';
                 }
                 print '<br><br><hr/></div>';
                 }//if
                 
                 //------------------------------------------
-                if(count($files_notfound)>0){
+                if(is_array($files_notfound) && count($files_notfound)>0){
                 ?>
                 <div id="files_notfound" style="padding-top:20px">
                     <a name="files_notfound"></a>    
@@ -759,7 +759,7 @@ $mysqli = $system->get_mysqli();
                 }//if                
                 
                 //------------------------------------------
-                if(count($files_notreg)>0){
+                if(is_array($files_notreg) && count($files_notreg)>0){
                 ?>
                 <div id="files_notreg" style="padding-top:20px">
                     <a name="files_notreg"></a>    

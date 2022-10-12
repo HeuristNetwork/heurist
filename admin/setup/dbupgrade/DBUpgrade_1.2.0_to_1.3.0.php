@@ -416,7 +416,7 @@ $query = "CREATE TABLE defTermsLinks (
         //validate default values for record type structures
         $list = getInvalidFieldTypes($mysqli, null);
         
-        if($list && @$list['rt_defvalues'] && count($list['rt_defvalues'])>0){
+        if($list && is_array(@$list['rt_defvalues']) && count($list['rt_defvalues'])>0){
             $report[] = count($list['rt_defvalues']).' wrong default values have been cleared';                        
 /*            
             $list = $list['rt_defvalues'];
@@ -567,7 +567,7 @@ function _prepare_terms($parent_id, $terms){
     $res = array();       
     foreach($terms as $trm_ID=>$children){
         array_push($res, array($parent_id, $trm_ID));
-        if($children && count($children)>0){
+        if(is_array($children) && count($children)>0){
             $res2 = _prepare_terms($trm_ID, $children);
             $res = array_merge($res, $res2);
         }

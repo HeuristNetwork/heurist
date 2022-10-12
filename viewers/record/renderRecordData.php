@@ -662,7 +662,7 @@ if ($bkm_ID>0 || $rec_id>0) {
             $opts = '';
             $list = '';
             
-            if(count($sel_ids)>1){
+            if(is_array($sel_ids) && count($sel_ids)>1){
                     
                 $cnt = 0;
                 

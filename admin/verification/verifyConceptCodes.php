@@ -154,19 +154,19 @@ $mysqli = $system->get_mysqli();
         
         if($is_found){
             print '<h4 style="margin:0;padding-top:20px">'.substr($db_name,4).'</h4><table style="font-size:12px">';    
-            if(count($rec_types)>0){
+            if(is_array($rec_types) && count($rec_types)>0){
                 print '<tr><td colspan=4><i>Record types</i></td></tr>';
                 foreach($rec_types as $row){
                     print '<tr><td>'.implode('</td><td>',$row).'</td></tr>';
                 }
             }
-            if(count($det_types)>0){
+            if(is_array($det_types) && count($det_types)>0){
                 print '<tr><td colspan=4><i>Detail types</i></td></tr>';
                 foreach($det_types as $row){
                     print '<tr><td>'.implode('</td><td>',$row).'</td></tr>';
                 }
             }
-            if(count($terms)>0){
+            if(is_array($terms) && count($terms)>0){
                 print '<tr><td colspan=4><i>Terms</i></td></tr>';
                 foreach($terms as $row){
                     print '<tr><td>'.implode('</td><td>',$row).'</td></tr>';

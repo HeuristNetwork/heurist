@@ -152,7 +152,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
         $file_ids = array($file_ids);
     }
     
-    if(count($file_ids)>0){
+    if(is_array($file_ids) && count($file_ids)>0){
         
         $mysqli = $system->get_mysqli();
 
@@ -363,9 +363,9 @@ function getPrevailBackgroundColor2($filename){
 //
 function rgb2hex($rgb) {
    $hex = "#";
-   $hex .= str_pad(dechex($rgb[0]), 2, "0", STR_PAD_LEFT);
-   $hex .= str_pad(dechex($rgb[1]), 2, "0", STR_PAD_LEFT);
-   $hex .= str_pad(dechex($rgb[2]), 2, "0", STR_PAD_LEFT);
+   $hex .= str_pad(dechex($rgb[0]), 2, '0', STR_PAD_LEFT);
+   $hex .= str_pad(dechex($rgb[1]), 2, '0', STR_PAD_LEFT);
+   $hex .= str_pad(dechex($rgb[2]), 2, '0', STR_PAD_LEFT);
 
    return $hex; // returns the hex value including the number sign (#)
 }

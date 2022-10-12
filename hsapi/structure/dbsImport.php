@@ -225,7 +225,7 @@ $time_debug = microtime(true);
 
         $this->sourceTerms = new DbsTerms(null, $this->source_defs['terms']);
         if($entityTypeToBeImported=='term'){
-            if(count($local_ids)>0){
+            if(is_array($local_ids) && count($local_ids)>0){
                 foreach($local_ids as $local_id){ 
                     $rt = $this->sourceTerms->getTerm($local_id);        
                     if($rt!=null){
@@ -240,7 +240,7 @@ $time_debug = microtime(true);
             }
         }else{
             
-            if(count($local_ids)>0){
+            if(is_array($local_ids) && count($local_ids)>0){
                 foreach($local_ids as $local_id){ //$local_id either id in source db or concept code
 
                      if($entityTypeToBeImported=='rt' || $entityTypeToBeImported=='rectypes' || $entityTypeToBeImported=='rectype'){
@@ -374,7 +374,7 @@ $time_debug = microtime(true);
             //5. some field types may not belong to recordtypes, they should be imported too
             // {id: '1', name: 'Titre', code: '2-1'}
             $all_fieldtypes = @$data['fieldtypes'];//[$local_id]['name']  
-            if($all_fieldtypes && count($all_fieldtypes)>0){
+            if(is_array($all_fieldtypes) && count($all_fieldtypes)>0){
                 foreach ($all_fieldtypes as $ftId => $field){
                     if(!(@$this->fields_correspondence[$ftId] || in_array($ftId, $this->imp_fieldtypes) )){
 
@@ -576,7 +576,7 @@ foreach ($this->imp_recordtypes as $rtyID){
         if(!$def_rectype[$idx_origin_dbid] || !$def_rectype[$idx_origin_id]){
             if($def_rectype[$idx_ccode]){
                 $codes = explode("-",$def_rectype[$idx_ccode]);
-                if($codes && count($codes)==2){
+                if(is_array($codes) && count($codes)==2){
                     $def_rectype[$idx_origin_dbid] = $codes[0];
                     $def_rectype[$idx_origin_id] = $codes[1];
                 }
@@ -716,7 +716,7 @@ foreach ($this->imp_fieldtypes as $ftId){
     if(!$def_field[$idx_origin_dbid] || !$def_field[$idx_origin_id]){
         if($def_field[$idx_ccode]){
             $codes = explode("-",$def_field[$idx_ccode]);
-            if($codes && count($codes)==2){
+            if(is_array($codes) && count($codes)==2){
                 $def_field[$idx_origin_dbid] = $codes[0];
                 $def_field[$idx_origin_id] = $codes[1];
             }
@@ -811,7 +811,6 @@ foreach ($this->imp_recordtypes as $rtyID){
         //clear term trees and resource constraints; assign default value for terms
         foreach ($fields as $ftId => $def_field){
             
-            
             if($def_field[$idx_type] == "enum"
                 || $def_field[$idx_type] == "relationtype" 
                 || $def_field[$idx_type] == "relmarker")
@@ -824,8 +823,6 @@ foreach ($this->imp_recordtypes as $rtyID){
             $def_field[$idx_terms_disabled] = '';
             $def_field[$idx_constraints] = '';
             $fields[$ftId] = $def_field;
-            
-            
             
         }
         
@@ -886,7 +883,7 @@ if(_DBG) error_log('Total '.(microtime(true)-$time_debug2));
 // ------------------------------------------------------------------------------------------------
 
 // VII. Import calculated fields
-if(count($cfn_tobeimported)>0){
+if(is_array($cfn_tobeimported) && count($cfn_tobeimported)>0){
 
 $cfn_entity = new DbDefCalcFunctions($this->system, array('entity'=>'defCalcFunctions'));
 
@@ -1574,7 +1571,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                 if(!$term_import[$idx_origin_dbid] || !$term_import[$idx_origin_id]){
                     if($term_import[$idx_ccode]){
                         $codes = explode("-",$term_import[$idx_ccode]);
-                        if($codes && count($codes)==2){
+                        if(is_array($codes) && count($codes)==2){
                             $term_import[$idx_origin_dbid] = $codes[0];
                             $term_import[$idx_origin_id] = $codes[1];
                         }

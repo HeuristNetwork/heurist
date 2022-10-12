@@ -254,7 +254,7 @@ class DbsTerms
     //        3, set  - array of ids 
     //        4, labels - flat array of labels in lower case 
     //
-    public function treeData($parent_id, $mode){
+    public function treeData($parent_id, $mode):array{
         
         if($mode=='set'){
             $mode = 3;
@@ -298,7 +298,7 @@ class DbsTerms
                     }
                     
                     $res2 = $this->treeData($trm_ID, $mode);
-                    if(count($res2)>0){
+                    if(is_array($res2) && count($res2)>0){
                         if($mode==1){ 
                             //tree
                             $res[$trm_ID] = $res2;
@@ -395,7 +395,7 @@ class DbsTerms
                     
                     break;
                     
-                }else if(count($children)>0){
+                }else if(is_array($children) && count($children)>0){
                     $this->addChild($lvl[$trmId], $parent_id, $new_term_id);
                 }
             }
@@ -422,7 +422,7 @@ class DbsTerms
 
             if($sub_term_id == $term_id){
                 return $topmost?$topmost:$term_id;
-            }else if( count($children)>0 ) {
+            }else if(is_array($children) && count($children)>0 ) {
 
                 $res = $this->getTopMostTermParent($term_id, $children, $topmost?$topmost:$sub_term_id );
                 if($res) return $res;
