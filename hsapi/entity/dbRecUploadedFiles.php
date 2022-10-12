@@ -828,9 +828,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         if($keep_autocommit===true) $mysqli->autocommit(TRUE);
         
         if($ret){
-            $ret = 'Registered '.$cnt_imported.' media resources. ';
+            $ret = 'Uploaded / registered: '.$cnt_imported.' media resources. ';
             if($cnt_skipped>0){
-                $ret = $ret.' Skipped/Already exists '.$cnt_skipped.' resources';    
+                $ret = $ret.' Skipped/already exist: '.$cnt_skipped.' media resources';    
             }
         }
 

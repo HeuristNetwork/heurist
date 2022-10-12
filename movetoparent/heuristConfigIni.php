@@ -25,8 +25,11 @@
 // This file shoudl be placed in the parent directory of Heurist, eg. the web root,
 // and renamed heuristConfigIni.php, the values in this file will then overide those given (if any) 
 // in the configIni.php file in each copy of Heurist on the server (in practice the
-// configIni.php fiel does NOT specify the values, since heuritConfigIni.php
+// configIni.php file does NOT specify the values, since heuristConfigIni.php
 // provides all copies with shared values)
+
+// **** DO NOT EDIT THE COPY OF THIS FILE IN THE CODEBASE (..../HEURIST/movetoparent) 
+//      as this will have no effect (it is the copy in ..../HEURIST/ which is used)
 
 if (!@$serverName) $serverName = null; // override default taken from request header SERVER_NAME
 if (!@$mailDomain) $mailDomain = null; // You may need to set mail domain if it does not use server domain

@@ -143,18 +143,15 @@ $failed_exts = array();
 
         <p style="font-weight:bold;font-size:larger;padding:10 0">This function is designed for the indexing of bulk uploaded files (often images)</p>
         
-        This function reads FieldHelper (http://fieldhelper.org) XML manifest files from the folders (and their descendants)
-        listed in Database > Properties and writes the metadata as records in the current database, 
-        with pointers back to the files described by the manifests.
+        This function creates/reads XML manifest files (as defined by FieldHelper http://fieldhelper.org) in the folders (and their descendants) listed in Design > Properties and writes the metadata as Digital Media records in the database, with pointers back to the files described by the manifests. New files are added to existing manifests.
         
          <p>
-            If no manifests exist, they are created (and can be read by FieldHelper). 
-            New files are added to the existing manifests.<br>&nbsp;<br>
-            The current database may already contain data; new records are appended, existing records are unaffected.<br>&nbsp;<br>
-            Note: the folders to be indexed must be writeable by the PHP system - normally they should be owned by Apache or www-data (as appropriate).
+            The database may already contain Digital Media records; records are added for new files, existing records are unaffected.
+         </p><p>
+            Note (in case of need): If you get the message that your folders are not writeable, ask your system adminstrator to adjust the permissions on the HEURIST_FILESTORE directory and its descendants. The folders in the filestore must be writeable by the PHP system - normally they should belong to and be writable by the group heurist (which should be set up to include apache and any adminstrtors who have access to the backend), or be owned and writable by apache or www-data (as appropriate). 
          </p>   
          <p>
-            Files will need to be uploaded to the server via direct access to the server or through Import > Upload media files.
+            Files should be uploaded through Import > Upload media files (limited normally to 30M) or by direct sftp access to the server for larger files (available to system administrators only).
          </p>
          <?php
         

@@ -819,8 +819,8 @@ if($step=="1"){  //first step - info about current status
 			$err_msg = $err_msg . '\nZotero entries that are not mapped to Heurist record types: '.$cnt_ignored;
         }
         if($cnt_notmapped>0){
-            print '<br>Zotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
-            print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_notmapped).'</div>';
+            print '<br>Zotero keys that are not mapped to Heurist field types: <br>'.$cnt_notmapped;
+            print "<div style ='padding-left:20px'>- ".implode('<br>- ',$arr_notmapped).'</div>';
 			
 			$err_msg = $err_msg . '\nZotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
         }

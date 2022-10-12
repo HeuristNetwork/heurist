@@ -211,7 +211,7 @@ if(!($max_size>0)) $max_size = 0;
 
                 if ($mediaFolders=="" || count($dirs) == 1) {
                     print ("<p>If you wish to upload files to a directory other than those in the dropdown, or to define additional file extensions,<br />".
-                        "go to Design > Properties</p>");
+                        "go to "); // Design > Properties link is supplied by next block
                 }else{
                     print '<p><b>Allowable extensions for upload:</b>'.implode(', ',$allowed_exts).'</p>';
                 }
