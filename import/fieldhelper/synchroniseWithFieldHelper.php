@@ -304,20 +304,22 @@ $failed_exts = array();
                         $orig = $dir;
                         chdir(HEURIST_FILESTORE_DIR);
                         $dir = realpath($dir);
-                        
-                        //realpath gives real path on remote file server
-                        if(strpos($dir, '/srv/HEURIST_FILESTORE/')===0){  //heurx-fs-pro
-                            $dir = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $dir);
-                        }else
-                        if(strpos($dir, '/data/HEURIST_FILESTORE/')===0){  //huma-num
-                            $dir = str_replace('/data/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $dir);
-                        }else
-                        if(strpos($dir, '/misc/heur-filestore/')===0){
-                            $dir = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $dir);
+                        if($dir!==false){
+                            //realpath gives real path on remote file server
+                            if(strpos($dir, '/srv/HEURIST_FILESTORE/')===0){  //heurx-fs-pro
+                                $dir = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $dir);
+                            }else
+                            if(strpos($dir, '/data/HEURIST_FILESTORE/')===0){  //huma-num
+                                $dir = str_replace('/data/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $dir);
+                            }else
+                            if(strpos($dir, '/misc/heur-filestore/')===0){
+                                $dir = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $dir);
+                            }
+                            
+                            $dir = str_replace('\\','/',$dir);     
                         }
                         
-                        $dir = str_replace('\\','/',$dir);     
-                        if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
+                        if(!$dir || !( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
                             print "<div style=\"color:red\">$orig is ignored. Folder must be in heurist filestore directory.</div>";
                             continue;
                         }

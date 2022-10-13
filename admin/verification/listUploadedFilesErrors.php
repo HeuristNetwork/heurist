@@ -359,27 +359,31 @@ $mysqli = $system->get_mysqli();
                         $fpath = realpath($res['db_fullpath']);
                     }
 
-                    //realpath gives real path on remote file server
-                    if(strpos($fpath, '/srv/HEURIST_FILESTORE/')===0){
-                        $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $fpath);
-                    }else
-                    if(strpos($fpath, '/misc/heur-filestore/')===0){
-                        $fpath = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $fpath);
-                    }
-                    
-                    
-                    //check that the relative path is correct
-                    $path_parts = pathinfo($fpath);
-                    if(!@$path_parts['dirname']){
-                       error_log($fpath.'  '.$res['db_fullpath']);
-                       continue;
-                    }else{
-                        $dirname = $path_parts['dirname'].'/';
-                        $filename = $path_parts['basename'];
-                    }
+                    if($fpath!==false){
+                        //realpath gives real path on remote file server
+                        if(strpos($fpath, '/srv/HEURIST_FILESTORE/')===0){
+                            $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $fpath);
+                        }else
+                        if(strpos($fpath, '/misc/heur-filestore/')===0){
+                            $fpath = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $fpath);
+                        }
+                        
+                        
+                        //check that the relative path is correct
+                        $path_parts = pathinfo($fpath);
+                        if(!@$path_parts['dirname']){
+                           error_log($fpath.'  '.$res['db_fullpath']);
+                           continue;
+                        }else{
+                            $dirname = $path_parts['dirname'].'/';
+                            $filename = $path_parts['basename'];
+                        }
 
-                    $dirname = str_replace("\0", '', $dirname);
-                    $dirname = str_replace('\\', '/', $dirname);
+                        $dirname = str_replace("\0", '', $dirname);
+                        $dirname = str_replace('\\', '/', $dirname);
+                    }else{
+                        $dirname = 'xxx';
+                    }
                     
                     if(strpos($dirname, HEURIST_FILESTORE_DIR)===0){
                         

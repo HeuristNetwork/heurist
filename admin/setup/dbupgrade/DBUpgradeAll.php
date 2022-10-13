@@ -25,7 +25,7 @@
     * @subpackage  Administration
     */
 
-ini_set('max_execution_time', 0);
+ini_set('max_execution_time', '0');
 
 define('OWNER_REQUIRED',1);   
  

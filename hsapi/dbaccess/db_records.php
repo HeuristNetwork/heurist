@@ -927,7 +927,7 @@ function recordDelete($system, $recids, $need_transaction=true,
     if(count($recids)>0){
 
         if(count($recids)>100){
-            ini_set('max_execution_time', 0);
+            ini_set('max_execution_time', '0');
         }
 
 

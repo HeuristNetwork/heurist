@@ -594,7 +594,7 @@
             if($isinsert){
                 if($primary_field_type=='integer' && $fieldname==$primary_field){ //ignore primary field for update
                     if($allow_insert_with_newid){
-                        $value = abs($value);
+                        $value = abs(intval($value));
                     }else{
                         continue;     
                     }

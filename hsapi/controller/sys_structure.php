@@ -228,8 +228,8 @@ ini_set('max_execution_time', 0);
             ob_start('ob_gzhandler');
     }*/    
 /*
-    ini_set("zlib.output_compression", 4096);
-    ini_set("zlib.output_compression_level", 6);
+    ini_set("zlib.output_compression", '4096');
+    ini_set("zlib.output_compression_level", '6');
     header('Content-type: text/javascript');
     print json_encode($response);
 */

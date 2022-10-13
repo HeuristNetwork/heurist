@@ -233,9 +233,11 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
 
 		$res = "";
 		$isbce = false;
+        
+		if(is_numeric(@$date['year'])){
 
-		if(@$date['year'] || $date['year']==0){
-
+            $date['year'] = intval($date['year']);
+            
 			$isbce= ($date['year']<0);
 
 			/*$res = intval($res);

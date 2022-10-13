@@ -21,7 +21,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-ini_set('max_execution_time', 0);
+ini_set('max_execution_time', '0');
 
 define('OWNER_REQUIRED',1);   
 define('PDIR','../../');  //need for proper path to js and css    
@@ -152,24 +152,28 @@ $mysqli = $system->get_mysqli();
                         $fpath = realpath($res['db_fullpath']);
                     }
 
-                    //realpath gives real path on remote file server
-                    if(strpos($fpath, '/srv/HEURIST_FILESTORE/')===0){
-                        $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $fpath);
-                    }else
-                    if(strpos($fpath, '/misc/heur-filestore/')===0){
-                        $fpath = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $fpath);
-                    }
-                    
-                    //check that the relative path is correct
-                    $path_parts = pathinfo($fpath);
-                    $dirname = $path_parts['dirname'].'/';
-
-                    $dirname = str_replace("\0", '', $dirname);
-                    $dirname = str_replace('\\', '/', $dirname);
-                    if(strpos($dirname, $_HEURIST_FILESTORE_DIR)===0){
+                    if($fpath!==false){
+                        //realpath gives real path on remote file server
+                        if(strpos($fpath, '/srv/HEURIST_FILESTORE/')===0){
+                            $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $fpath);
+                        }else
+                        if(strpos($fpath, '/misc/heur-filestore/')===0){
+                            $fpath = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $fpath);
+                        }
                         
-                    
-                    $relative_path = getRelativePath($_HEURIST_FILESTORE_DIR, $dirname);   //db root folder
+                        //check that the relative path is correct
+                        $path_parts = pathinfo($fpath);
+                        $dirname = $path_parts['dirname'].'/';
+
+                        $dirname = str_replace("\0", '', $dirname);
+                        $dirname = str_replace('\\', '/', $dirname);
+                        if(strpos($dirname, $_HEURIST_FILESTORE_DIR)===0){
+                            
+                        
+                        $relative_path = getRelativePath($_HEURIST_FILESTORE_DIR, $dirname);   //db root folder
+                    }else{
+                        $relative_path = '';
+                    }
                     
                     if($relative_path!=@$res['ulf_FilePath']){
                         

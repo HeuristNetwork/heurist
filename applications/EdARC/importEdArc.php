@@ -29,7 +29,7 @@
 
 exit();
 
-ini_set('max_execution_time', 0);
+ini_set('max_execution_time', '0');
 
 define('OWNER_REQUIRED',1);   
 define('PDIR','../../');  //need for proper path to js and css    

@@ -97,8 +97,11 @@ function doHarvest($dirs_and_exts, $is_report, $imode) {
                 $orig = $dir;
                 chdir(HEURIST_FILESTORE_DIR);
                 $dir = realpath($dir);
-                $dir = str_replace('\\','/',$dir);     
-                if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
+                if($dir!==false){
+                    $dir = str_replace('\\','/',$dir);         
+                }
+                
+                if(!$dir || !( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
                     if($is_report){
                         print "<div style=\"color:red\">$orig is ignored. Folder must be in heurist filestore directory.</div>";    
                     }

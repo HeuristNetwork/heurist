@@ -417,7 +417,7 @@ public static function importDefintions($filename, $session_id){
         $imp_detailtypes = $data['heurist']['database']['detailtypes'];
         
         
-        ini_set('max_execution_time', 0);
+        ini_set('max_execution_time', '0');
         $importDef = new DbsImport( self::$system );
 
 //$time_debug = microtime(true);        
@@ -690,7 +690,7 @@ EOD;
         $source_url = $data['heurist']['database']['url']; //url of database
         $source_db = $data['heurist']['database']['db']; //name of datbase 
         
-        ini_set('max_execution_time', 0);
+        ini_set('max_execution_time', '0');
         
         // if database not defined or the same
         // is the same it is assumed that all local codes in $data are already found and exists in 

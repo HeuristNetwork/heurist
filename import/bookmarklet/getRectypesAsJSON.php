@@ -42,7 +42,7 @@ if(!$system->init(@$_REQUEST['db'])){
 }    
 
 // using ob_gzhandler makes this stuff up on IE6-
-ini_set("zlib.output_compression_level", 5);
+ini_set("zlib.output_compression_level", '5');
 //ob_start('ob_gzhandler');
 
 $mysqli = $system->get_mysqli();

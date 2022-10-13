@@ -51,7 +51,7 @@ if( !$system->init(@$_REQUEST['db']) ){
 
     }else if(@$_REQUEST['a'] == 'crosstab' ){
 
-ini_set('max_execution_time', 0);
+ini_set('max_execution_time', '0');
         
             $response = getCrossTab( $params );
 

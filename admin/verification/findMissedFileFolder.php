@@ -25,7 +25,7 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
 
-ini_set('max_execution_time', 0);
+ini_set('max_execution_time', '0');
  
 define('PDIR','../../');  //need for proper path to js and css    
 

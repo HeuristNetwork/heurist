@@ -1,4 +1,5 @@
 <?php
+//declare(strict_types=1);
 /**
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -436,6 +437,8 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
         $currUserID = $currentUser['ugr_ID'];
         array_push($wg_ids, $currUserID);
         
+        if(!@$params['w']) $params['w'] = 'all';
+        
     }else{
         $currUserID = 0;
         $params['w'] = 'all';
@@ -445,11 +448,11 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     $publicOnly = (@$params['publiconly']==1); //@todo change to vt - visibility type parameter of query
 
     // 2. DETECT SEARCH DOMAIN ------------------------------------------------------------------------------------------
-    if (strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'],BOOKMARK) == 0) {    // my bookmark entries
+    if (strcasecmp($params['w'],'B') == 0  ||  strcasecmp($params['w'],BOOKMARK) == 0) {    // my bookmark entries
         $search_domain = BOOKMARK;
-    } else if (@$params['w'] == 'e') { //everything - including temporary
+    } else if ($params['w'] == 'e') { //everything - including temporary
         $search_domain = EVERYTHING;
-    } else if (@$params['w'] == 'nobookmark') { //all without BOOKMARK
+    } else if ($params['w'] == 'nobookmark') { //all without BOOKMARK
         $search_domain = NO_BOOKMARK;
     } else {                // all records entries
         $search_domain = "a";

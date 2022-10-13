@@ -157,7 +157,7 @@ if (!$verbose || $ajax){
   ob_start();  
 }
 
-@ini_set('auto_detect_line_endings', true);
+@ini_set('auto_detect_line_endings', 'true');
 @set_time_limit(0);
 
 if (function_exists("date_default_timezone_set") && function_exists("date_default_timezone_get"))

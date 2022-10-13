@@ -1494,7 +1494,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
                         //copy file and create required folders
                         chdir(HEURIST_FILESTORE_DIR);  // relatively db root
                         $fpath = realpath($file['fullPath']);
-                        $fpath = str_replace('\\','/',$fpath);
+                        //$fpath = str_replace('\\','/',$fpath);
 
                         //ARTEM 2016-12-13 This recurse_copy - since ti copy everything in backup recursively!!!!
                         //moreover it is already done in exportMyDataPopup
@@ -1804,8 +1804,8 @@ if (!@$ARGV) {
     }
 }
 if (@$_REQUEST['mode'] != '1') { //not include
-    @ini_set('zlib.output_compression', 0);
-    @ini_set('implicit_flush', 1);
+    @ini_set('zlib.output_compression', '0');
+    @ini_set('implicit_flush', '1');
     for ($i = 0;$i < ob_get_level();$i++) {
         ob_end_flush();
     }

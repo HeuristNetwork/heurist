@@ -6,7 +6,7 @@
 */
 exit();
 
-ini_set('max_execution_time', 0);
+ini_set('max_execution_time', '0');
 
 define('O_DB','def19'); //OMEKA_DB
 define('HEU_DB','hdb_def19_v1');

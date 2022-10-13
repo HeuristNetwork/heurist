@@ -375,34 +375,40 @@ class ReportActions {
         }else{
             $filename = $params['tmp_name'];
             $origfilename = $params['name'];
+            $res = array("error"=>'Error occurred during upload - file does not exist');
             
             if(strpos($filename,'cms/')===0){
                 $path = dirname(__FILE__).'/../../hclient/widgets/cms/templates/snippets/';
                 $path = realpath($path);
-                $filename = $path.DIRECTORY_SEPARATOR.substr($filename,4);
+                if($path!==false){ //does not exist
+                    $filename = $path.DIRECTORY_SEPARATOR.substr($filename,4);    
+                }
             }
-
-            //read tempfile
-            $template = file_get_contents($filename);
-        
-            $res = $this->convertTemplate($template, 1);
-            
-            if(!is_array($res)){
-                $res = array('template'=>$res);
-            }
-            
-            if(!@$res['error']){
-                  //check if template with such name already exists 
-                  /*while (file_exists($this->dir.$origfilename)){
-                      $this->dir.$origfilename = $this->dir.$origfilename . "($cnt)";
-                  }*/
-                  $origfilename = $this->getUniqueTemplateName($origfilename);
+            if(file_exists($filename)){
                 
-                  $res2 = $this->saveTemplate($res['template'], $origfilename);
-                  if(count(@$res['details_not_found'])>0){
-                      $res2['details_not_found'] = $res['details_not_found'];
-                  }
-                  $res = $res2;
+                //read tempfile
+                $template = file_get_contents($filename);
+            
+                $res = $this->convertTemplate($template, 1);
+                
+                if(!is_array($res)){
+                    $res = array('template'=>$res);
+                }
+                
+                if(!@$res['error']){
+                      //check if template with such name already exists 
+                      /*while (file_exists($this->dir.$origfilename)){
+                          $this->dir.$origfilename = $this->dir.$origfilename . "($cnt)";
+                      }*/
+                      $origfilename = $this->getUniqueTemplateName($origfilename);
+                    
+                      $res2 = $this->saveTemplate($res['template'], $origfilename);
+                      if(count(@$res['details_not_found'])>0){
+                          $res2['details_not_found'] = $res['details_not_found'];
+                      }
+                      $res = $res2;
+                }
+            
             }
         }
         

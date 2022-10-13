@@ -489,7 +489,7 @@
         
         $dir = realpath($dir);
         
-        if(file_exists($dir)){
+        if($dir!==false && file_exists($dir)){
         
             $arr = glob(rtrim($dir, '/').'/*', GLOB_NOSORT);
             foreach ($arr as $each) {
@@ -508,35 +508,39 @@
 
         if (is_dir($dir) === true) {
             
+            $totalSize = 0;
+            
             $dir = realpath($dir);
             
-            $totalSize = 0;
-            $os        = strtoupper(substr(PHP_OS, 0, 3));
-            // If on a Unix Host (Linux, Mac OS)
-            if ($os !== 'WIN') {
-                $io = popen('/usr/bin/du -sb ' . $dir, 'r');
-                if ($io !== false) {
-                    $totalSize = intval(fgets($io, 80));
-                    pclose($io);
-                    return $totalSize;
-                }
-            }
-            // If on a Windows Host (WIN32, WINNT, Windows)
-            if ($os === 'WIN' && extension_loaded('com_dotnet')) {
-                $obj = new \COM('scripting.filesystemobject');
-                if (is_object($obj)) {
-                    $ref       = $obj->getfolder($dir);
-                    $totalSize = $ref->size;
-                    $obj       = null;
-                    return $totalSize;
-                }
-            }
-            // If System calls did't work, use slower PHP 5
-            $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS));
-            foreach ($files as $file) {
+            if($dir!==false){
                 
-                if(!$file->isDir()){
-                    $totalSize += $file->getSize();    
+                $os        = strtoupper(substr(PHP_OS, 0, 3));
+                // If on a Unix Host (Linux, Mac OS)
+                if ($os !== 'WIN') {
+                    $io = popen('/usr/bin/du -sb ' . $dir, 'r');
+                    if ($io !== false) {
+                        $totalSize = intval(fgets($io, 80));
+                        pclose($io);
+                        return $totalSize;
+                    }
+                }
+                // If on a Windows Host (WIN32, WINNT, Windows)
+                if ($os === 'WIN' && extension_loaded('com_dotnet')) {
+                    $obj = new \COM('scripting.filesystemobject');
+                    if (is_object($obj)) {
+                        $ref       = $obj->getfolder($dir);
+                        $totalSize = $ref->size;
+                        $obj       = null;
+                        return $totalSize;
+                    }
+                }
+                // If System calls did't work, use slower PHP 5
+                $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS));
+                foreach ($files as $file) {
+                    
+                    if(!$file->isDir()){
+                        $totalSize += $file->getSize();    
+                    }
                 }
             }
             return $totalSize;
@@ -552,16 +556,19 @@
     
         $dir = realpath($dir);
         
-        $dirs = scandir($dir);
-        foreach ($dirs as $node) {
-            if (($node == '.' ) || ($node == '..' )) {
-                continue;
-            }
-            $file = $dir.'/'.$node;
-            if(is_dir($file)){
-                return folderFirstTileImage($file);    
-            }else{
-                return $file;    
+        if($dir!==false){
+        
+            $dirs = scandir($dir);
+            foreach ($dirs as $node) {
+                if (($node == '.' ) || ($node == '..' )) {
+                    continue;
+                }
+                $file = $dir.'/'.$node;
+                if(is_dir($file)){
+                    return folderFirstTileImage($file);    
+                }else{
+                    return $file;    
+                }
             }
         }
         
@@ -942,84 +949,94 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
 
     try{
 
-    $source = str_replace('\\', '/', realpath($source));
-
-    if (is_dir($source) === true) {
-
-        chdir($source);
-        
-        $parent_dir = '';
-        //$root_dir = $source;
-        if( is_array($only_these_folders) ){
-            foreach ($only_these_folders as $idx=>$folder) {
-                $folder = str_replace('\\', '/', $folder);
-                if(strpos( $folder, $source )!==0){
-                    $folder = $source."/".$folder;    
-                }
-                $only_these_folders[$idx] = $folder;
-//error_log($folder);
+        $src = realpath($source);
+        if(!$src) {
+            if($verbose) {
+                echo '<br/>Cannot create zip archive '.$source.' is not a folder';
             }
+            return false;
         }
-        
-        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
+        $source = str_replace('\\', '/', $src);
 
-        foreach ($files as $file) {
+        if (is_dir($source) === true) {
 
-            $file = str_replace('\\', '/', $file);
-
-            // Ignore "." and ".." folders
-            if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
-                continue;
-                
-            if( is_dir($file) && substr($file,-1)!='/' ){
-                $file = $file.'/';
-            }
-
-            //ignore files that are not in list of specified folders
-            $is_filtered = true;
+            chdir($source);
+            
+            $parent_dir = '';
+            //$root_dir = $source;
             if( is_array($only_these_folders) ){
-                $is_filtered = false;
-//error_log($file);
-                foreach ($only_these_folders as $folder) {
-                    if( strpos( $file, $folder )===0 ){
-                        $is_filtered = true;
-                        break;
+                foreach ($only_these_folders as $idx=>$folder) {
+                    $folder = str_replace('\\', '/', $folder);
+                    if(strpos( $folder, $source )!==0){
+                        $folder = $source."/".$folder;    
+                    }
+                    $only_these_folders[$idx] = $folder;
+    //error_log($folder);
+                }
+            }
+            
+            $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
+
+            foreach ($files as $file) {
+
+                $file = str_replace('\\', '/', $file);
+
+                // Ignore "." and ".." folders
+                if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
+                    continue;
+                    
+                if( is_dir($file) && substr($file,-1)!='/' ){
+                    $file = $file.'/';
+                }
+
+                //ignore files that are not in list of specified folders
+                $is_filtered = true;
+                if( is_array($only_these_folders) ){
+                    $is_filtered = false;
+    //error_log($file);
+                    foreach ($only_these_folders as $folder) {
+                        if( strpos( $file, $folder )===0 ){
+                            $is_filtered = true;
+                            break;
+                        }
                     }
                 }
-            }
 
-            if(!$is_filtered) continue; //exclude not in $only_these_folders
+                if(!$is_filtered) continue; //exclude not in $only_these_folders
 
-//error_log('OK '.$file);
+    //error_log('OK '.$file);
 
-            // Determine real path
-            $file = realpath($file);
+                // Determine real path
+                $file = realpath($file);
 
-            $file2 = str_replace('\\', '/', $file);
+                if($file!==false){
+                
+                    $file2 = str_replace('\\', '/', $file);
+                    
+                    if (is_dir($file) === true) { // Directory
+                        //remove root path
+                        $newdir = str_replace($source.'/', '', $file2.'/');
+        //error_log($newdir);                    
+                        if(!$zip->addEmptyDir( $newdir )){
+                            //error_log($zip->getStatusString());
+                            return false;
+                        }
+                    }
+                    else if (is_file($file) === true) { // File
+                        $newfile = str_replace($source.'/', '', $file2); //without folder name
+        //error_log($file.'  >> '.$newfile);                    
+                        if(!$zip->addFile($file, $newfile)){
+                            return false;
+                        }
+                        //$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
+                    }
+                }
+            }//recursion
             
-            if (is_dir($file) === true) { // Directory
-                //remove root path
-                $newdir = str_replace($source.'/', '', $file2.'/');
-//error_log($newdir);                    
-                if(!$zip->addEmptyDir( $newdir )){
-                    //error_log($zip->getStatusString());
-                    return false;
-                }
-            }
-            else if (is_file($file) === true) { // File
-                $newfile = str_replace($source.'/', '', $file2); //without folder name
-//error_log($file.'  >> '.$newfile);                    
-                if(!$zip->addFile($file, $newfile)){
-                    return false;
-                }
-                //$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
-            }
-        }//recursion
-        
-    } else if (is_file($source) === true) {
-        $zip->addFile($source, basename($source));
-        //$zip->addFromString(basename($source), file_get_contents($source));
-    }
+        } else if (is_file($source) === true) {
+            $zip->addFile($source, basename($source));
+            //$zip->addFromString(basename($source), file_get_contents($source));
+        }
 
     
     // Close zip and show output if verbose
@@ -1151,8 +1168,17 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
     }
 
     try{
+        
+        $src = realpath($source);
 
-    $source = str_replace('\\', '/', realpath($source));
+        if(!$src) {
+            if($verbose) {
+                echo '<br/>Cannot create bz2 archive '.$source.' is not a folder';
+            }
+            return false;
+        }
+        
+    $source = str_replace('\\', '/', $src);
 
     if (is_dir($source) === true) {
 
@@ -1204,23 +1230,28 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
 
             // Determine real path
             $file = realpath($file);
-            $file2 = str_replace('\\', '/', $file);
             
-            if (is_dir($file) === true) { // Directory
-                //remove root path
-                $newdir = str_replace($source.'/', '', $file2.'/');
-//error_log($newdir);                    
-                $phar->addEmptyDir( $newdir );
-            }
-            else if (is_file($file) === true) { // File
-                $newfile = str_replace($source.'/', '', $file2); //without folder name
-//error_log($file.'  >> '.$newfile);                    
-
-                $phar->addFile($file, $newfile);
+            if($file!==false){
+            
+                $file2 = str_replace('\\', '/', $file);
                 
-                $numFiles++;
+                if (is_dir($file) === true) { // Directory
+                    //remove root path
+                    $newdir = str_replace($source.'/', '', $file2.'/');
+    //error_log($newdir);                    
+                    $phar->addEmptyDir( $newdir );
+                }
+                else if (is_file($file) === true) { // File
+                    $newfile = str_replace($source.'/', '', $file2); //without folder name
+    //error_log($file.'  >> '.$newfile);                    
 
-                //$phar->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
+                    $phar->addFile($file, $newfile);
+                    
+                    $numFiles++;
+
+                    //$phar->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
+                }
+                
             }
         }//recursion
         
@@ -1279,6 +1310,8 @@ function isPathInHeuristUploadFolder($path){
   
     chdir(HEURIST_FILESTORE_DIR);  // relatively db root  or HEURIST_FILES_DIR??        
     $path = realpath($path);
+    
+    if(!$path) return false;
     
     $path = str_replace('\\','/',$path);
 
@@ -1669,7 +1702,7 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
     }
     
     if($csv_linebreak=='auto' || $csv_linebreak==null || $eol==null){
-        ini_set('auto_detect_line_endings', true);
+        ini_set('auto_detect_line_endings', 'true');
         
         $line = fgets($handle, 1000000);      //read line and auto detect line break
         $position = ftell($handle);

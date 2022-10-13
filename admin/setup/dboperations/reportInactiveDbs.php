@@ -475,8 +475,8 @@ function exclusion_list(){
     
     $res = array();
     $fname = realpath(dirname(__FILE__)."/../../../databases_not_to_purge.txt");
-    if(file_exists($fname)){
-        //ini_set('auto_detect_line_endings', true);
+    if($fname!==false && file_exists($fname)){
+        //ini_set('auto_detect_line_endings', 'true');
         $handle = @fopen($fname, "r");
         while (!feof($handle)) {
             $line = trim(fgets($handle, 100));

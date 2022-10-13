@@ -1,4 +1,5 @@
-<?php
+<?php 
+//declare(strict_types=1);
 
 /**
 * @package     Heurist academic knowledge management system
@@ -97,7 +98,6 @@ class System {
         if( !$this->set_dbname_full($db, $dbrequired) ){
             return false;
         }
-
         
         //dbutils?
         $connection_ok = $this->init_db_connection();
@@ -568,17 +568,25 @@ error_log(print_r($_REQUEST, true));
                 if($is_for_backup==2 && $folder_name=='documentation_and_templates') continue;
                 
                 if($is_for_backup==2){
-                    $folder_name = str_replace('\\', '/', realpath($dbfolder.$folder_name));
+                    $folder_name = realpath($dbfolder.$folder_name);
+                    if($folder_name!==false){
+                        $folder_name = str_replace('\\', '/', $folder_name);
+                    }
                 }else{
                     $folder_name = $dbfolder.$folder_name;
                 }
                 
-                array_push($system_folders, $folder_name.'/');
+                if($folder_name!==false){
+                    array_push($system_folders, $folder_name.'/');    
+                }
             }
         }
         
         if($is_for_backup==2){
-            array_push($system_folders, str_replace('\\', '/', realpath($dbfolder.'file_uploads')).'/');
+            $folder_name = realpath($dbfolder.'file_uploads');
+            if($folder_name!==false){
+                array_push($system_folders, str_replace('\\', '/', $folder_name).'/');
+            }
         }
 
         //special case - these folders can be defined in sysIdentification and be outisde database folder            
@@ -1013,7 +1021,8 @@ error_log(print_r($_REQUEST, true));
     * 
     * it always reload user info from database
     */
-    public function getCurrentUserAndSysInfo( $include_reccount_and_dashboard_count=false ){
+    public function getCurrentUserAndSysInfo( $include_reccount_and_dashboard_count=false )
+    {
         global $passwordForDatabaseCreation, $passwordForDatabaseDeletion,
                $passwordForReservedChanges, $passwordForServerFunctions,
                $needEncodeRecordDetails;
@@ -1048,14 +1057,14 @@ error_log(print_r($_REQUEST, true));
             
             //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
             $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.jpg");
-            if(!file_exists($host_logo)){
+            if(!$host_logo || !file_exists($host_logo)){
                 $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.png");
             }
             $host_url = null;
-            if(file_exists($host_logo)){
+            if($host_logo!==false &&  file_exists($host_logo)){
                 $host_logo = HEURIST_BASE_URL.'?logo=host';
                 $host_url = realpath(dirname(__FILE__)."/../../organisation_url.txt");
-                if(file_exists($host_url)){
+                if($host_url!==false && file_exists($host_url)){
                     $host_url = file_get_contents($host_url);   
                 }else{
                     $host_url = null;
@@ -1297,6 +1306,7 @@ error_log(print_r($_REQUEST, true));
 
     /**
     * Restore session by cookie id, or start new session
+    * Refreshes cookie
     */
     private function start_my_session($check_session_folder=true){
         
@@ -1395,7 +1405,8 @@ error_log(print_r($_REQUEST, true));
 
 
     /*
-    * verify session only (without database connection and system initialization)
+    * Verifies session only (without database connection and system initialization)
+    * return current user id or false
     */
     public function verify_credentials($db){
 
@@ -1411,7 +1422,11 @@ error_log(print_r($_REQUEST, true));
     /**
     * Load user info from session - called on init only
     * 
-    * $reload_user_from_db - true reload user info from database
+    * $user = true - reload user info (id, name) from database
+    *         false -  from $_SESSION   
+    * 
+    * ugr_Preferences are always loaded from database
+    *
     */
     private function login_verify( $user ){
         
@@ -1503,7 +1518,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
     }
     
     //
-    //
+    // Update session with actual user info from database: id, name
     //
     public function updateSessionForUser( $userID ){
         
@@ -1787,8 +1802,8 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         
         $is_allowed = false;
         $fname = realpath(dirname(__FILE__)."/../../js_in_database_authorised.txt");
-        if(file_exists($fname)){
-            //ini_set('auto_detect_line_endings', true);
+        if($fname!==false && file_exists($fname)){
+            //ini_set('auto_detect_line_endings', 'true');
             $handle = @fopen($fname, "r");
             while (!feof($handle)) {
                 $line = trim(fgets($handle, 100));

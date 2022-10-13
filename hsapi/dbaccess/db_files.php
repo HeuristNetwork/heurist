@@ -474,12 +474,12 @@ function resolveFilePath($path, $db_name=null){
             
                 chdir($dir_folder);  // relatively db root
                 $fpath = realpath($path);
-                if(file_exists($fpath)){
+                if($fpath!==false && file_exists($fpath)){
                     return $fpath;
                 }else{
                     chdir($db_folder_files);          // relatively file_uploads 
                     $fpath = realpath($path);
-                    if(file_exists($fpath)){
+                    if($fpath!==false && file_exists($fpath)){
                         return $fpath;
                     }else{
                         //special case to support absolute path on file server
@@ -506,7 +506,7 @@ function resolveFilePath($path, $db_name=null){
             }else{
                 //current dir already set
                 $fpath = realpath($path);
-                if(file_exists($fpath)){
+                if($fpath!==false && file_exists($fpath)){
                     return $fpath;
                 }
             }

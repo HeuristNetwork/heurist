@@ -477,7 +477,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
         
         $lb = null;
         if($csv_linebreak=='auto'){
-            ini_set('auto_detect_line_endings', true);
+            ini_set('auto_detect_line_endings', 'true');
             $lb = null;
         }else if($csv_linebreak=='win'){
             $lb = "\r\n";
