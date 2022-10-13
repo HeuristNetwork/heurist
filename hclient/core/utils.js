@@ -254,7 +254,7 @@ window.hWin.HEURIST4.util = {
                 
                 if(!window.hWin.HEURIST4.util.isempty(query_request.q)){
                     
-                    if($.isArray(query_request.q)){
+                    if($.isArray(query_request.q) || $.isPlainObject(query_request.q)){
                         sq = JSON.stringify(query_request.q);
                     }else{
                         sq = query_request.q;
