@@ -568,7 +568,7 @@ $.widget( "heurist.mapping", {
                 cnt = 50;
                 var bounds = that.basemap_layer.getBounds();
 
-                if(that.basemap_layer_id==424){
+                if(that.basemap_layer_id==424){ //paris iiif
                     
                     bounds = L.latLngBounds(L.latLng(-256,-256), L.latLng(256,256));//soutwest northeast 
                     
@@ -577,12 +577,17 @@ $.widget( "heurist.mapping", {
                     that.basemap_layer_width = 16384;
                     that.basemap_layer_height = 16384;
                     
-                }else{
+                }else if(that.basemap_layer_id==10 || that.basemap_layer_id==12){ //Japan world map
                     
                     bounds = L.latLngBounds(L.latLng(-256, 0), L.latLng(-138, 256));//soutwest northeast 
          
                     that.basemap_layer_width = 32700;
                     that.basemap_layer_height = 15043;
+                }else{
+
+                    bounds = L.latLngBounds(L.latLng(-256,-256), L.latLng(256,256));//soutwest northeast 
+                    that.basemap_layer_width = 10000;
+                    that.basemap_layer_height = 10000;
                 }
                 
                 that.basemap_layer_maxzoom =  Math.ceil(
@@ -1711,8 +1716,10 @@ $.widget( "heurist.mapping", {
                     //console.log(a);
                     //var clusterZoom = getBoundsZoom(a.layer.getBounds());
                     
-                    if(that.nativemap.getZoom()>=that.markerClusterMaxZoom ||
-                        that.nativemap.getBoundsZoom(a.layer.getBounds())>=that.markerClusterMaxZoom ){
+                    var maxZoom = Math.min(that.nativemap.getMaxZoom(),that.markerClusterMaxZoom);
+                    
+                    if(that.nativemap.getZoom()>=maxZoom ||
+                        that.nativemap.getBoundsZoom(a.layer.getBounds())>=maxZoom ){
                         if(a.layer.getAllChildMarkers().length>that.markerClusterMaxSpider){
                             var markers = a.layer.getAllChildMarkers();
                             
@@ -3268,9 +3275,9 @@ $.widget( "heurist.mapping", {
         if(window.hWin.HAPI4.database == 'johns_Tilemap_Test'){
             map_basemap_layer = 10;
         }else if(window.hWin.HAPI4.database == 'osmak_12'){
-            map_basemap_layer = 21;
+            map_basemap_layer = 21; // Japan world map 
         }else if(window.hWin.HAPI4.database == 'osmak_9b'){
-            map_basemap_layer = 424;
+            map_basemap_layer = 424; //Paris IIIF
         }
         
         
