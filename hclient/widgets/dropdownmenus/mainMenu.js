@@ -64,6 +64,8 @@ $.widget( "heurist.mainMenu", {
     _initial_search_already_executed: false,
     _rendered_db_overview: false,
 
+    version_message: null, // container for message about available alpha/stable version
+
     // the widget's constructor
     _create: function() {
 
@@ -506,6 +508,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         if(this.options.login_inforced && !window.hWin.HAPI4.has_access()){
             this.doLogin();
         }else {
+            this._show_version_message();
             this._performInitialSearch();
 
             // Setup user favourite filters, give mainMenu time to load completely
@@ -2147,6 +2150,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 if(is_logged) {
 
                     $(that.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
+
+                    that._show_version_message();
                     that._performInitialSearch();
 
                     $('.ui-menu6').mainMenu6('populateFavouriteFilters'); // show user's favourite filters
@@ -2564,5 +2569,90 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         window.hWin.HEURIST4.util.setDisabled($dlg.find('label[for="template-json"]'), true); // disable json version, currently unavailable
 
         return false;
-    }
+    },
+
+    //
+    // Display message next to DB name, about available stable/alpha version
+    //
+    _show_version_message: function(){
+
+        var that = this;
+
+        if(this.version_message){
+            return;
+        }
+
+        this.version_message = true;
+
+        let is_alpha = window.hWin.HAPI4.baseURL.match(/h\d+-alpha|alpha/);
+        if(!is_alpha){ // need to check that an alpha version is available on this server
+            window.hWin.HAPI4.SystemMgr.check_for_alpha({a:'check_for_alpha'}, function(response){ 
+                
+                if(window.hWin.HEURIST4.util.isempty(response.data)){
+                    return;
+                }
+
+                suggestion_txt = '<a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_change">Use the latest (alpha) version</a> (recommended)';
+
+                that.version_message = $("<div>")
+                    .css({display:'inline-block', 'margin-top':' 1.2em', 'margin-left':'5em', width:'360px', 'font-size':'0.85em', cursor:'default'})
+                    .insertAfter(that.div_dbname)
+                    .html(suggestion_txt);
+
+                that._on(that.version_message.find('#lnk_change'), {
+                    click: () => { // switch to alpha
+                        location.href = response.data + location.search;
+                    }
+                });
+            });
+        }else{ // currently on alpha
+
+            suggestion_txt = 'This is the latest (alpha) version. If you are blocked by a new bug you can switch to the '
+                + '<a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_change">strandard version</a>'
+                + ' PLEASE REPORT BUGS.';
+
+            this.version_message = $("<div>")
+                .css({display:'inline-block', 'margin-top':' 0.9em', 'margin-left':'5em', width:'360px', 'font-size':'0.85em', cursor:'default'})
+                .insertAfter(this.div_dbname)
+                .html(suggestion_txt);
+
+            this._on(this.version_message.find('#lnk_change'), {
+                click: () => {
+
+                    let $dlg;
+                    let msg = 'If you encounter <span style="text-decoration: underline">any</span> bug, we ask that you report it with the <a href="#" id="msg_bug_rpt">bug reporter</a>'
+                        + ' - bugs are generally<br>'
+                        + 'fixed within a day or so.<br><br>'
+                        + 'We recommend that you use the alpha version unless you encounter a newly introduced bug<br>'
+                        + 'which blocks your work, in which case you can revert to the standard (/heurist/) version.<br><br>'
+                        + 'We recommend that you return to using the alpha version as soon as the bug is fixed (you<br>'
+                        + 'should receive an adivce email, otherwise switch back in a couple of days).';
+
+                        let btns = {};
+                        btns['Continue using alpha version'] = () => { 
+                            $dlg.dialog('close'); 
+                        };
+                        btns['Report bug and switch to standard version'] = () => {
+                            $dlg.dialog('close');
+                            window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport', {
+                                onClose: () => {
+                                    location.href = window.hWin.HAPI4.baseURL_pro + location.search;
+                                }
+                            });
+                        };
+
+                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Thanks for helping to test Heurist'}, {default_palette_class: 'ui-heurist-admin'});
+
+                    $dlg.find('#msg_bug_rpt').on('click', function(){ // same action as proceed button
+                        $dlg.dialog('close');
+                        window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport', {
+                            onClose: () => {
+                                location.href = window.hWin.HAPI4.baseURL_pro + location.search;
+                            }
+                        });
+                    });
+                }
+            });
+        }
+    },
 });

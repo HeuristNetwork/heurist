@@ -1050,6 +1050,18 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             },
 
             /**
+             * Check if current server has an alpha build setup
+             * @param {Request} [request]
+             * @param {callserverCallback} callback 
+             */
+             check_for_alpha: function (request, callback) {
+                if (!request) {
+                    request = { a: 'check_for_alpha' };
+                }
+                _callserver('usr_info', request, callback);
+            },
+
+            /**
              * Manipulate folders within HEURIST_FILESTORE_DIR on the server
              * @param {Request} [request] 
              * @param {string} [request.operation] - 'list', 'rename' or 'delete'; defaults to 'list'
