@@ -674,7 +674,12 @@ $.widget( "heurist.editing_input", {
     //
     onChange: function(event){
     
-        this.showErrorMsg(null);
+        let repeatable = (Number(this.f('rst_MaxValues')) != 1); 
+        if(this.options.values && this.options.values.length>1 && !repeatable){
+            this.showErrorMsg('Repeated value for a single value field - please correct');
+        }else{
+            this.showErrorMsg(null);
+        }
         
         this._setAutoWidth();
         
