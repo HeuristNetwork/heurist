@@ -81,7 +81,7 @@
                         "rst_DisplayName":"Requirement:",
                         "rst_DisplayHelpText": "Determine whether a value must be applied or whether the field is optional or hidden", 
                         "rst_Display":"hidden",
-                        "rst_DefaultValue":"optional",
+                        "rst_DefaultValue":"recommended",
                         "rst_FieldConfig":[
                             {"key":"required", "title":"required"},
                             {"key":"recommended", "title":"recommended"},

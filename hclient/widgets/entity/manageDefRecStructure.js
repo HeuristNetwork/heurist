@@ -2827,7 +2827,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     checkFieldForData: function(dtyid){
 
         var that = this;
-        if(dtyid < 1 || $Db.dty(dtyid) == null){
+        if(dtyid < 1 || $Db.dty(dtyid) == null || $Db.rst_usage(dtyid).length > 0){
             return;
         }
 
@@ -2848,35 +2848,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 var msg = '';
                 var labels = {}, btns = {};
 
-                if(rst_usage.length >= 0){ // Base field used in existing record structures
-
-                    msg = 'Base field <strong>' + $Db.dty(dtyid, 'dty_Name') + '</strong><br><br>This base field is not used by any of the fields which reference it:<br><br>';
-
-                    for(var i = 0; i < rst_usage.length; i++){
-                        msg += $Db.rty(rst_usage[i], 'rty_Name') + ' . ' + $Db.rst(rst_usage[i], dtyid, 'rst_DisplayName') + '<br>';
-                    }
-
-                    msg += '<br>'
-                        + '<label>'
-                            + '<input type="checkbox" id="delBaseField" /> Check this box to <span style="text-decoration:underline;">permanently</span>'
-                            + ' remove this base field from the database<br><span style="display: inline-block; margin-left: 21px">(this will remove the fields listed above)</span>'
-                        + '</label>';
-
-                    labels = {title: 'Base field deletion', yes: 'Proceed', no: 'Cancel'};
-
-                    btns = {
-                        'Proceed': function(){ 
-    
-                            if($dlg.find('#delBaseField').is(':checked')){
-                                that._deleteBaseField(dtyid);
-                            }
-    
-                            $dlg.dialog('close'); 
-                        },
-                        'Cancel': function(){ 
-                            $dlg.dialog('close'); 
-                        }
-                    };
+                if(rst_usage.length > 0){ // DISABLED - only for un-used base fields
+                    return;
                 }else if(rst_usage.length == 0){ // un-used base field
 
                     msg = 'The base field ' + $Db.dty(dtyid, 'dty_Name') + '(#'+ dtyid +') is not used in any other record structure.<br>Would you like to delete this un-used base field?';
