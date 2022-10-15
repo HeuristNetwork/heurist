@@ -2527,22 +2527,6 @@ $.widget( "heurist.editing_input", {
                                 
                                 that.newvalues[$input.attr('id')] = newvalue;
                                 that._findAndAssignTitle($input, newvalue);
-                                
-                                /*
-                                that.newvalues[$input.attr('id')] = recordset.fld(record,'ulf_ID');
-                                
-                                var rec_Title = recordset.fld(record,'ulf_ExternalFileReference');
-                                if(window.hWin.HEURIST4.util.isempty(rec_Title)){
-                                    rec_Title = recordset.fld(record,'ulf_OrigFileName');
-                                }
-                                window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title, 10);
-
-                                //url for thumb
-                                $inputdiv.find('.image_input > img').attr('src',
-                                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
-                                    recordset.fld(record,'ulf_ObfuscatedFileID'));
-                                */
-                                //if(newvalue.ulf_OrigFileName) $input.change();
                             }
                         
                      }//data
@@ -2570,7 +2554,7 @@ $.widget( "heurist.editing_input", {
                         } 
 
                         if($.isPlainObject(sels)){
-                            popup_options.selection_on_init = [sels.ulf_ID];
+                            popup_options.selection_on_init = sels;
                         }else if(!window.hWin.HEURIST4.util.isempty(sels)){
                             popup_options.selection_on_init = sels.split(',');
                         } else {
