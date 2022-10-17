@@ -1750,7 +1750,7 @@ function findAffectedCalcFields( $system, $rty_ID ){
     
     $mysqli = $system->get_mysqli();
 
-    $query = 'SELECT cfn_ID FROM defCalcFunctions WHERE find_in_set('.$mysqli->real_escape_string($rty_ID).',cfn_RecTypeIDs2) <> 0';
+    $query = 'SELECT cfn_ID FROM defCalcFunctions WHERE find_in_set('.$mysqli->real_escape_string($rty_ID).',cfn_RecTypeIDs) <> 0';
     $field_ids = mysql__select_list2($mysqli, $query);
 
     if(is_array($field_ids) && count($field_ids)>0){

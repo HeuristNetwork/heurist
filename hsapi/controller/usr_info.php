@@ -109,33 +109,41 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
         $res = '';
 
         if(!$is_alpha){
-
-            $fname = HEURIST_FILESTORE_ROOT."lastAdviceSent.ini";
-            $verison_numbers = array();
-            array_push($verison_numbers, explode('.', HEURIST_VERSION)[0]); // Check using current major version
-
-            if (file_exists($fname)){
-                list($date_last_check, $version_last_check, $release_last_check) = explode("|", file_get_contents($fname));
-                if($verison_numbers[0] < explode('.', $version_last_check)[0]){
-                    array_unshift($verison_numbers, explode('.', $version_last_check)[0]); // Check using new major version, performed first
+            
+            if(!defined('HEURIST_FILESTORE_ROOT')){
+                if($system->set_dbname_full(@$_REQUEST['db'])){
+                    $system->initPathConstants(@$_REQUEST['db']);
                 }
             }
 
-            foreach ($verison_numbers as $number) {
+            if(defined('HEURIST_FILESTORE_ROOT')){
+                $fname = HEURIST_FILESTORE_ROOT."lastAdviceSent.ini";
+                $verison_numbers = array();
+                array_push($verison_numbers, explode('.', HEURIST_VERSION)[0]); // Check using current major version
 
-                $url = HEURIST_SERVER_URL . '/h' . $number . '-alpha/';
-                $http_response = get_headers($url)[0];
-                if(strpos($http_response, '200')!==false){ // valid
-                    $res = $url;
-                    break;
+                if (file_exists($fname)){
+                    list($date_last_check, $version_last_check, $release_last_check) = explode("|", file_get_contents($fname));
+                    if($verison_numbers[0] < explode('.', $version_last_check)[0]){
+                        array_unshift($verison_numbers, explode('.', $version_last_check)[0]); // Check using new major version, performed first
+                    }
                 }
-            }
 
-            if($res == ''){ // Finally, check last supported version
-                $url = HEURIST_SERVER_URL . '/alpha/';
-                $http_response = get_headers($url)[0];
-                if(strpos($http_response, '404')===false){ // valid
-                    $res = $url;
+                foreach ($verison_numbers as $number) {
+
+                    $url = HEURIST_SERVER_URL . '/h' . $number . '-alpha/';
+                    $http_response = get_headers($url)[0];
+                    if(strpos($http_response, '200')!==false){ // valid
+                        $res = $url;
+                        break;
+                    }
+                }
+
+                if($res == ''){ // Finally, check last supported version
+                    $url = HEURIST_SERVER_URL . '/alpha/';
+                    $http_response = get_headers($url)[0];
+                    if(strpos($http_response, '404')===false){ // valid
+                        $res = $url;
+                    }
                 }
             }
         }
