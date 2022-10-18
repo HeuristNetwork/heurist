@@ -244,12 +244,16 @@ function hEditing(_options) {
                         __createGroup(fields[idx].children, groupContainer, fieldContainer);
                         continue;                        
                     }else if(fields[idx].groupType=='group'){ //group inside
-                   
-                         
+
                         var headerText = fields[idx]['groupHeader'];
                         var headerHelpText = fields[idx]['groupHelpText'];
                         var is_header_visible = fields[idx]['groupTitleVisible'];
-                                
+
+                        if(headerText == '-'){ // Placeholder for no text, just use a simple divider
+                            headerText = '';
+                            headerHelpText = '';
+                        }
+
                         var hele = $('<h4>')
                             .text(headerText).addClass('separator').appendTo(fieldContainer);
                         

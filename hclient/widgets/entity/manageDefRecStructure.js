@@ -549,7 +549,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             let dtyid = $(item).find('span[data-dtid]').attr('data-dtid');
             if($Db.dty(dtyid, 'dty_Type') != 'separator'){
                 $('<div class="detail-count" data-dtyid="'+ dtyid +'" style="position:absolute;right:8px;display:inline-block;padding:2px;margin-top:0px;'
-                    + 'font-size:10px;font-weight:normal;text-transform:none;color:black;">-</div>').appendTo(item);
+                    + 'font-size:10px;font-weight:normal;text-transform:none;color:black;">&nbsp;</div>').appendTo(item);
             }
 
             var field_tooltip;
@@ -2226,65 +2226,83 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     _saveEditAndClose: function( fields, afterAction ){
 
-            var that = this;
+        var that = this;
 
-            if(window.hWin.HAPI4.is_callserver_in_progress()) {
-                //console.log('prevent repeatative call')
-                return;   
+        if(window.hWin.HAPI4.is_callserver_in_progress()) {
+            //console.log('prevent repeatative call')
+            return;   
+        }
+
+        if(this._editing && this._editing.getValue('dty_Type') == 'separator' && window.hWin.HEURIST4.util.isempty(this._editing.getValue('rst_DisplayName'))) {
+
+            let $dlg;
+            let msg = 'You have left the Field label empty.<br>Would you like the header to be blank?';
+            let btns = {};
+            btns[window.hWin.HR('Yes')] = () => {
+
+                let fld = that._editing.getFieldByName('rst_DisplayName');
+                fld.setValue('-', false);
+
+                $dlg.dialog('close');
+                that._saveEditAndClose(fields, afterAction);
+            };
+            btns[window.hWin.HR('No')] = () => {
+                $dlg.dialog('close');
+                window.hWin.HEURIST4.msg.showMsgFlash('Please enter a Field name', 2000);
+            };
+
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Blank field name'}, {default_palette_class: this.options.default_palette_class});
+            return;
+        }
+
+        if(!fields){
+            if(this._editing && this._editing.isModified() && this._currentEditID!=null){
+                fields = this._getValidatedValues(); 
+            }else{
+                this._closeFormlet();   
             }
+                    
+        }
+        if(fields==null) return; //validation failed
+
+        var treeview = this._treeview.fancytree("getTree");
+        var recID = fields['rst_ID'];
+        var dt_type = $Db.dty(fields['rst_DetailTypeID'], 'dty_Type');
+
+        if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
+            fields['rst_DefaultValue'] = fields['rst_TermPreview'];
+        }else if(dt_type=='resource'){
+            //reset cache
+            window.hWin.HEURIST4.browseRecordCache = {};
+            window.hWin.HEURIST4.browseRecordTargets = {};
+            fields['rst_DefaultValue'] = fields['rst_DefaultValue_resource'];
+        }else if(dt_type=='separator'){
+            fields['rst_DefaultValue'] = fields['rst_SeparatorType'];
+            fields['rst_RequirementType'] = fields['rst_SeparatorRequirementType'];
+        }else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                
+            //fields['rst_DefaultValue'] = fields['rst_DefaultValue_inc'];
+        }
+        if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayOrder'])){
+            fields['rst_DisplayOrder'] = '0';
+        }
         
-            if(!fields){
-                if(this._editing && this._editing.isModified() && this._currentEditID!=null){
-                    fields = this._getValidatedValues(); 
-                }else{
-                    this._closeFormlet();   
-                }
-                        
-            }
-            if(fields==null) return; //validation failed
+        if(fields['rst_DisplayWidth']>255) fields['rst_DisplayWidth'] = 255;
+        else if(fields['rst_DisplayWidth']=='') fields['rst_DisplayWidth'] = 40;
 
-            var treeview = this._treeview.fancytree("getTree");
-            var recID = fields['rst_ID'];
-            var dt_type = $Db.dty(fields['rst_DetailTypeID'], 'dty_Type');
-            
-//console.log('SAVE '+fields['rst_DetailTypeID']+'  '+dt_type);
-            
-            if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
-                fields['rst_DefaultValue'] = fields['rst_TermPreview'];
-            }else if(dt_type=='resource'){
-                //reset cache
-                window.hWin.HEURIST4.browseRecordCache = {};
-                window.hWin.HEURIST4.browseRecordTargets = {};
-                fields['rst_DefaultValue'] = fields['rst_DefaultValue_resource'];
-            }else if(dt_type=='separator'){
-                fields['rst_DefaultValue'] = fields['rst_SeparatorType'];
-                fields['rst_RequirementType'] = fields['rst_SeparatorRequirementType'];
-            }else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                
-                //fields['rst_DefaultValue'] = fields['rst_DefaultValue_inc'];
-            }
-            if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayOrder'])){
-                fields['rst_DisplayOrder'] = '0';
-            }
-            
-            if(fields['rst_DisplayWidth']>255) fields['rst_DisplayWidth'] = 255;
-            else if(fields['rst_DisplayWidth']=='') fields['rst_DisplayWidth'] = 40;
-            
-            
-            this._stillNeedUpdateForRecID = recID;    
-            
-            if(afterAction=='close'){
-                //after save on server - close edit form and refresh preview
-                afterAction = function( recID ){
-                    that._stillNeedUpdateForRecID = 0;
-                    that._afterSaveEventHandler( recID ); //to update definitions and tree
-                    that._showRecordEditorPreview();  //refresh 
-                };
-            }
-                
-            //save record    
-            this._super( fields, afterAction );                
-            
-    },    
+        this._stillNeedUpdateForRecID = recID;    
+
+        if(afterAction=='close'){
+            //after save on server - close edit form and refresh preview
+            afterAction = function( recID ){
+                that._stillNeedUpdateForRecID = 0;
+                that._afterSaveEventHandler( recID ); //to update definitions and tree
+                that._showRecordEditorPreview();  //refresh 
+            };
+        }
+
+        //save record    
+        this._super( fields, afterAction );
+    },
     
     //
     // update tree on save/exit/load other record

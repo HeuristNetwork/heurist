@@ -5056,17 +5056,16 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         var $ele = this._editing.getFieldByName(field_id);
         let isSeparator = false;
 
-        if(!$ele || $ele.length == 0){
-
-            if(!$Db.rst(this._currentEditRecTypeID, field_id)){ // check field is part of structure
-                return;
-            }
-            // separator
+        if(!$ele || $ele.length == 0){ // assume separator
             isSeparator = true;
             $ele = this.editForm.find('fieldset[data-dtid='+field_id+']');
+
+            if($ele.length == 0){ // try simple divider
+                $ele = this.editForm.find('div[data-dtid='+ field_id +']'); console.log(field_id, $ele);
+            }
         }
 
-        if(!$ele.is(':visible')){ // check visibility
+        if($ele.length == 0){
             return;
         }
 
@@ -5079,7 +5078,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 index = $ele.attr('data-tabindex');
             }
             $ele.parents('.ui-tabs').tabs('option', 'active', index);
-
         }else if($ele.parents('.ui-accordion').length > 0){ // Accordion
 
             let accordion_content = $ele.parents('.ui-accordion-content');
@@ -5092,10 +5090,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     }
                 });
             }
-
         }
 
-        $ele[0].scrollIntoView();
+        this.editForm.animate({scrollTop: $ele.offset().top}, 1000); // scrollIntoView()
+
         if(!isSeparator){
             $ele.editing_input('focus');
         }
