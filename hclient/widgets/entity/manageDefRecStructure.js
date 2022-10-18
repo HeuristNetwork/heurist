@@ -326,28 +326,38 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
             recset.each(function(dty_ID, record){
                     
-                        var sType = $Db.dty(dty_ID, 'dty_Type');
-                        var isSep = (sType=='separator');
-                        var title = recset.fld(record,'rst_DisplayName');
-                        var req = recset.fld(record,'rst_RequirementType');
-                        if(isSep ){
-                            title = '<span data-dtid="'+dty_ID+'">' + title 
-                                    +'</span>';
-                        }else{
-                            title = '<span data-dtid="'+dty_ID+'" style="padding-left:10px">' + title 
-                                    +'</span>';
-//'<span style="font-size:smaller;"> ('+$Db.baseFieldType[sType]+')</span>';
-                        }
-                        if(req=='forbidden'){
-                            title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
-                        }
-                    
-                    var node = {title: title, key: dty_ID, extraClasses:isSep?'separator2':req};
-                    node['data'] = {header:isSep, type:'group'};
-                    treeData.push( node );
+                var sType = $Db.dty(dty_ID, 'dty_Type');
+                var isSep = (sType=='separator');
+                var title = recset.fld(record,'rst_DisplayName');
+                var req = recset.fld(record,'rst_RequirementType');
+                if(isSep){
 
-                    });
+                    let sepType = recset.fld(record, 'rst_DefaultValue');
+                    let extraStyle = '';
+                    if(sepType == 'group'){ // indent simple dividers
+                        extraStyle = 'style="padding-left:10px;display:inline-block;';
+                    }
+                    if(title == '-'){
+                        title = '<hr>';
+                        extraStyle += 'width: 150px;';
+                    }
+                    extraStyle += extraStyle != '' ? '"' : '';
+
+                    title = '<span data-dtid="'+dty_ID+'" '+extraStyle+'>' + title + '</span>';
+                }else{
+                    title = '<span data-dtid="'+dty_ID+'" style="padding-left:10px">' + title 
+                            +'</span>';
+//'<span style="font-size:smaller;"> ('+$Db.baseFieldType[sType]+')</span>';
+                }
+                if(req=='forbidden'){
+                    title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
+                }
                 
+                var node = {title: title, key: dty_ID, extraClasses:isSep?'separator2':req};
+                node['data'] = {header:isSep, type:'group'};
+                treeData.push( node );
+
+            });    
         }
         
         //init treeview
@@ -2372,57 +2382,63 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     //
     refreshRecset_Definition_TreeNodeItem: function( recID, fieldvalues ){
-      
-            //1. update recordset if fieldvalues are set
-            var recset = this.getRecordSet();
-            if(fieldvalues!=null){
-                recset.setRecord(recID, fieldvalues);  
-            }
 
-            var record = recset.getById(recID);
-            
-            /*if(fieldvalues==null){
-                fieldvalues = recset.getRecord(recID);
-            }*/
+        //1. update recordset if fieldvalues are set
+        var recset = this.getRecordSet();
+        if(fieldvalues!=null){
+            recset.setRecord(recID, fieldvalues);  
+        }
 
-            //2. update $Db
-//console.log($Db.rst(this.options.rty_ID, recID));           
-      
-            //3. refresh treeview
-            var tree = this._treeview.fancytree("getTree");
-            if(tree){
-                    var node = tree.getNodeByKey( recID );
-                    if(node) {
-                        var sType = $Db.dty(recID,'dty_Type');
-                        var isSep = (sType=='separator');
-                        var title = record['rst_DisplayName'];
-                        var req = record['rst_RequirementType'];
-                        if(isSep){
-                            title = '<span data-dtid="'+recID+'">' + title +'</span>';
-                        }else{
-                            title =  '<span  data-dtid="'+recID+'" style="padding-left:10px">' + title 
-                                        + '</span>';
-//'<span style="font-size:smaller;"> ('+$Db.baseFieldType[sType]+')</span>';
-                        }
-                        if(req=='forbidden'){
-                            title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
-                        }
-                        node.setTitle( title );   
-                        if(!node.folder){
-                            
-                            if(node.extraClasses){
-                                $(node.li).find('span.fancytree-node').removeClass(node.extraClasses);
-                            }
-                            
-                            node.extraClasses = isSep?'separator2':req;
-                            $(node.li).find('span.fancytree-node').addClass( isSep?'separator2':req );
-                        }
-                        this.__defineActionIcons( $(node.li).find('.fancytree-node') );
-//$(node.li).find('.svs-contextmenu3').css('visibility','hidden');
-                        
-                    }
-            }        
+        var record = recset.getById(recID);
         
+        /*if(fieldvalues==null){
+            fieldvalues = recset.getRecord(recID);
+        }*/
+
+//2. update $Db
+//console.log($Db.rst(this.options.rty_ID, recID));
+
+        //3. refresh treeview
+        var tree = this._treeview.fancytree("getTree");
+        if(tree){
+            var node = tree.getNodeByKey( recID );
+            if(node) {
+                var sType = $Db.dty(recID,'dty_Type');
+                var isSep = (sType=='separator');
+                var title = record['rst_DisplayName'];
+                var req = record['rst_RequirementType'];
+                if(isSep){
+                    let sepType = recset.fld(record, 'rst_DefaultValue');
+                    let extraStyle = '';
+                    if(sepType == 'group'){
+                        extraStyle = 'style="padding-left:10px;display:inline-block;';
+                    }
+                    if(title == '-'){
+                        title = '<hr>';
+                        extraStyle += 'width: 150px;';
+                    }
+                    extraStyle += extraStyle != '' ? '"' : '';
+                    title = '<span data-dtid="'+recID+'" '+extraStyle+'>' + title + '</span>';
+                }else{
+                    title =  '<span  data-dtid="'+recID+'" style="padding-left:10px">' + title 
+                                + '</span>';
+                }
+                if(req=='forbidden'){
+                    title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
+                }
+                node.setTitle( title );   
+                if(!node.folder){
+                    
+                    if(node.extraClasses){
+                        $(node.li).find('span.fancytree-node').removeClass(node.extraClasses);
+                    }
+                    
+                    node.extraClasses = isSep?'separator2':req;
+                    $(node.li).find('span.fancytree-node').addClass( isSep?'separator2':req );
+                }
+                this.__defineActionIcons( $(node.li).find('.fancytree-node') );
+            }
+        }
     },
 
     
