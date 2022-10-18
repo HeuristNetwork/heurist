@@ -65,7 +65,6 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         
         var btn_start_action = $('#btn-ok').button({label:window.hWin.HR('Go')});
         
-        
         selectRecordScope = $('#sel_record_scope')
         .on('change',
             function(e){
@@ -175,12 +174,12 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             ele.removeClass('ui-state-disabled');
             ele.click(_startAction);
         }
-
         switch(action_type) {
             case 'add_detail':
             case 'replace_detail':
             case 'delete_detail':
             case 'extract_pdf':
+            case 'url_to_file':
                 $('#div_sel_fieldtype').show();
                 _fillSelectFieldTypes();
                 break;
@@ -259,6 +258,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             
             if(action_type=='extract_pdf'){
                 allowed = ['blocktext'];    
+            }else if(action_type=='url_to_file'){
+                allowed = ['file'];    
             }
 
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect, rtyIDs, allowed, null);
@@ -334,6 +335,21 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     }
             });
             //$('.editint-inout-repeat-button').hide();
+
+        }else if(action_type=='url_to_file'){
+
+                $('<div style="padding: 0.2em; width: 100%;" class="input">'
+                +'<div class="header">'  // style="padding-left: 16px;"
+                +'<label>URL contains substring</label></div>'
+                +'<input id="url_substring" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
+                +'</div>').appendTo($fieldset);            
+            
+                $('<div style="padding: 0.2em; width: 100%;" class="input">'
+                +'<div class="header">'  // style="padding-left: 16px;"
+                +'<label for="cb_match_only">Match file name only</label></div>'
+                +'<input id="cb_match_only" type="checkbox" checked class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
+                +'<div class="heurist-helper1 style="padding: 0.2em 0px;">Looks for existing uploaded files based solely on name, and uses these rather than fetching a new copy. This will produce unwanted results if the names are re-used eg. in different folders.'
+                +'</div></div>').appendTo($fieldset);            
             
         }else if(action_type=='merge_delete_detail'){ //@todo
             _createInputElement('fld-1', window.hWin.HR('Value to remove'), init_field_value);
@@ -533,7 +549,20 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     alert('Define value to replace');
                     return;
                 }
+            
+            }else if(action_type=='url_to_file'){
+
+                request['a'] = 'url_to_file';
+
+                if($('#cb_match_only').is(':checked')){
+                    request['match_only'] = 1;
+                }
+                var url_substring = $('#url_substring').val();
+                if(!window.hWin.HEURIST4.util.isempty(url_substring)){
+                    request['url_substring'] = url_substring;
+                }
                 
+
             }else if(action_type=='delete_detail'){
 
                 request['a'] = 'delete';
@@ -673,6 +702,12 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                 +'&q=sortby:-m after:"5 minutes ago"')+
                             '&nometadatadisplay=true" target="_blank">view recent changes</a></span>';
+                        }else if(key=='fails' && response['fails_list'] && response['fails_list'].length>0){
+
+                            tag_link = '<span style="background-color:#ffcccc"><a href="'+
+                            encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                                +'&q=ids:'+response['fails_list'].join(','))+
+                            '&nometadatadisplay=true" target="_blank">view</a></span>';
                         }
                         
                         sResult = sResult + '<div style="padding:4px"><span>'+lbl+'</span><span>&nbsp;&nbsp;'
@@ -689,6 +724,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                                 sResult += '</div>';   
                             }
                         }
+                        
+                        
+                        
                     }
                 }
 

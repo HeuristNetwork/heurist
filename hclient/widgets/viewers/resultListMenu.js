@@ -435,6 +435,10 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
             this.detailBatchEditPopup('replace_detail');
 
+        }else if(action == "menu-selected-url-to-file"){
+
+            this.detailBatchEditPopup('url_to_file');
+
         }else if(action == "menu-selected-value-delete"){
 
             this.detailBatchEditPopup('delete_detail');

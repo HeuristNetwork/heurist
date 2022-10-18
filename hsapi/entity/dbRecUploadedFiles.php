@@ -800,7 +800,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     
                                     if($is_download){
                                         //download and register
-                                        $ulf_ID = $this->donwloaAndRegisterdURL($url, $fields); //it returns ulf_ID    
+                                        $ulf_ID = $this->downloadAndRegisterdURL($url, $fields); //it returns ulf_ID    
                                     }else{
                                         $ulf_ID = $this->registerURL( $url, false, 0, $fields);    
                                     }
@@ -1112,19 +1112,66 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     /**
     * Download url to server and register as local file
     * 
+    * $validate_same_file - 0: don't validate at all, 1: validata name only, 2: name and hash
+    * if the same name exists - returns ulf_ID of existing registered file
+    * 
     * @param mixed $url
     */
-    public function donwloaAndRegisterdURL($url, $fields=null){
+    public function downloadAndRegisterdURL($url, $fields=null, $validate_same_file=0){
         
-        $orig_name = basename($url);
+        $orig_name = basename($url); //get filename
         if(strpos($orig_name,'%')!==false){
             $orig_name = urldecode($orig_name);
         }
+        
+        $ulf_ID_already_reg = 0;
+        
+        if($orig_name){
+            if($validate_same_file>0){
+                //check filename
+                $mysqli = $this->system->get_mysqli();
+                $query2 = 'SELECT ulf_ID, concat(ulf_FilePath,ulf_FileName) as fullPath FROM recUploadedFiles '
+                .'WHERE ulf_OrigFileName="'.$mysqli->real_escape_string($orig_name).'"';    
+                $fileinfo = mysql__select_row($mysqli, $query2);
+                if($fileinfo!=null){
+                    
+                    $filepath = $fileinfo[1];
+                    $filepath = resolveFilePath($filepath);
+                    
+                    if(file_exists($filepath))
+                    {
+                        $ulf_ID_already_reg = $fileinfo[0];
+                        
+                        if($validate_same_file==1){
+                            //already exist
+                            return $ulf_ID_already_reg;
+                        }else if($validate_same_file==2){
+                            //get file hash of already registered local file
+                            $old_md5 = md5_file($filepath);    
+                        }
+                    }
+                }
+            }
+        }
+        
         $tmp_file = HEURIST_SCRATCH_DIR.$orig_name;
         
         if(saveURLasFile($url, $tmp_file)>0){
+            
+            if($validate_same_file==2 && $ulf_ID_already_reg>0){
+                //check file hash
+                $new_md5 = md5_file($tmp_file);
+                if($old_md5==$new_md5){
+                    //skip - this file is quite the same
+                    unlink($tmp_file);
+                    return $ulf_ID_already_reg;
+                }
+            }
+            
+            //temp file will be removed in save method
             $ulf_ID = $this->registerFile($tmp_file, null, false, false, $fields);
             if($ulf_ID && is_array($ulf_ID)) $ulf_ID = $ulf_ID[0];
+            
             return $ulf_ID;
         }else{
             return false;

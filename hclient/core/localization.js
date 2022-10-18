@@ -325,6 +325,7 @@ regional['en'] = {
         'menu-selected-rectype-change-hint': 'Change record types for filtered records',
         'menu-selected-extract-pdf': 'Extract text from PDF files',
         'menu-selected-extract-pdf-hint': 'Extract text from PDF (experimental)',
+        'menu-selected-url-to-file': 'Remote URLs to local files',
     'Share': '',
         'menu-selected-notify': 'Notify (email)',
         'menu-selected-notify-hint': 'Select one or more records, then click to send notification',
@@ -525,6 +526,7 @@ regional['en'] = {
     'ownership':'Change record access and ownership',
     'add_link':'Add new link or create a relationship between records',
     'extract_pdf':'Extract text from PDF',
+    'url_to_file':'Remote URLs to local files',
 
     //helps
     'record_action_add_record':' ',
@@ -554,6 +556,7 @@ regional['en'] = {
 +'If there is more than one PDF file, the text is placed in repeated values of the field. '
         +'<br><br>'
 +'Text is only extracted if the (corresponding value) of the field is empty to avoid overwriting any text entered manually.'),
+    'record_action_url_to_file':'This function fetches files indicated by remote URLs in the specified File field, <br>places them in the database, and replaces the remote URL with a reference to file in the database. Other fields are not affected.',
     
     //reports
     'record_action_passed': 'Records passed to process',
@@ -569,6 +572,8 @@ regional['en'] = {
     'record_action_parseexception_extract_pdf': 'Records with locked PDFs (extraction forbidden)',
     'record_action_parseempty_extract_pdf': 'Records with no text to extract (eg. images)',
     'record_action_limited_extract_pdf': 'Records with field already populated',
+    
+    'record_action_fails_url_to_file': 'Records with URL that failed to download',   
     
     'record_action_errors': 'Errors',
 

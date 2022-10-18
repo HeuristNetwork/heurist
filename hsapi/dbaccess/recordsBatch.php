@@ -1057,7 +1057,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 }else{
                     $rectype_ID = $this->rtyIDs[0];
                 }
-                if(array_search($rectype_ID, $rtyRequired)!==FALSE){ //this is required field
+                if(array_search($rectype_ID, $rtyRequired)!==false){ //this is required field
                     if(!$isDeleteAll){
                         //find total count
                         $total_cnt = mysql__select_value($mysqli, "SELECT count(*) FROM recDetails ".
@@ -1083,7 +1083,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                     
                     if(trim($newVal)==''){
                         $sql = 'delete from recDetails where dtl_ID = '.$dtlID;
-                        if ($mysqli->query($sql) === TRUE) {
+                        if ($mysqli->query($sql) === true) {
                             $sqlErrors[$recID] = $mysqli->error;
                         }
                         
@@ -1107,7 +1107,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 $sql = 'delete from recDetails where dtl_ID in ('.implode(',',array_keys($valuesToBeDeleted)).')';
             }
             
-            if ($sql===TRUE || $mysqli->query($sql) === TRUE) {
+            if ($sql===true || $mysqli->query($sql) === true) {
                array_push($processedRecIDs, $recID);
                //update record edit date
                $rec_update['rec_ID'] = $recID;
@@ -1457,6 +1457,141 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         return $this->result_data;        
     }
     
+    /**
+    * Converts remote URLs in the specified File field, places them in the database, 
+    * and replaces the remote URL with a reference to file in the database
+    * 
+    * for recIDs
+    */
+    public function changeUrlToFileInBatch(){
+        
+        if(!$this->_validateParamsAndCounts()){
+            return false;
+        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+            return $this->result_data;
+        }
+
+        $mysqli = $this->system->get_mysqli();
+
+        $date_mode = date('Y-m-d H:i:s');
+                     
+        $tot_count = count($this->recIDs);
+        
+        $dtyID = $this->data['dtyID'];
+        $dtyName = (@$this->data['dtyName'] ? "'".$this->data['dtyName']."'" : "id:".$this->data['dtyID']);
+        $baseTag = "~replace url to file $dtyName $date_mode";
+        
+        $processedRecIDs = array();
+        $sqlErrors = array();
+        $downloadError = array();
+        
+        //1. find external urls for field values
+        //2. ulf_ExternalFileReference - extract filename and decode it
+        //3. match_only!=1 Download of the remote file and check if the file already exists with the same name and checksum in the database and will not create a duplicate. 
+        //4. match_only==1 Check the file name only (avoids having to download the remote file if the name exists)
+        //5. If download - register new file
+        //6. Replace ulf_ID in dtl_UploadedFileID
+
+        $file_entity = new DbRecUploadedFiles($this->system, array('entity'=>'recUploadedFiles'));
+        
+        //1. find external urls for field values
+        $query = 'SELECT dtl_ID, ulf_ID, ulf_ExternalFileReference, dtl_RecID FROM recUploadedFiles, recDetails '
+        .'WHERE ulf_ID=dtl_UploadedFileID AND ulf_OrigFileName="_remote" AND dtl_DetailTypeID='.$dtyID
+        .' AND dtl_RecID in ('.implode(',',$this->recIDs).')';
+        
+        if($this->data['url_substring']){
+            $query = $query.' AND ulf_ExternalFileReference LIKE "%'.$mysqli->real_escape_string($this->data['url_substring']).'%"';    
+        }
+        
+        $query = $query.' ORDER BY ulf_ID';
+        
+        $res = $mysqli->query($query);
+        if ($res){
+            $ulf_ID = null;
+            $dtl_IDs = array();
+            $rec_IDs = array();
+            $ulf_ID_new = null;
+            
+            while ($row = $res->fetch_row()){
+                if($ulf_ID!=$row[1]){
+
+                    if($ulf_ID_new>0){
+                        if($this->_updateUploadedFileIDs($ulf_ID_new, $dtl_IDs, $date_mode)){
+                            $processedRecIDs = array_merge($processedRecIDs, $rec_IDs);
+                        }else{
+                            $sqlErrors = array_merge($sqlErrors, $rec_IDs);
+                        }
+                    }
+                
+                    $ulf_ID = $row[1];
+                    $dtl_IDs = array();
+                    $rec_IDs = array();
+                    $ulf_ID_new = null;
+
+                    //find local ulf_ID
+                    
+                    //2. ulf_ExternalFileReference
+                    $surl = $row[2];
+                    
+                    //5. If download - register new file
+                    $file_entity->setRecords(null);
+                    //$ulf_ID_new = false;
+                    $ulf_ID_new = $file_entity->downloadAndRegisterdURL($surl, null, (@$this->data['match_only']==1)?1:2); //it returns ulf_ID  
+                    if(!$ulf_ID_new){
+                        //can't download
+                        $downloadError[] = $row[3]; //rec_ID
+                    }
+                    
+                }
+
+                $dtl_IDs[] = $row[0];
+                $rec_IDs[] = $row[3];
+                
+
+            }//while
+            
+            if($ulf_ID_new>0){
+                if($this->_updateUploadedFileIDs($ulf_ID_new, $dtl_IDs, $date_mode)){
+                    $processedRecIDs = array_merge($processedRecIDs, $rec_IDs);
+                }else{
+                    $sqlErrors = array_merge($sqlErrors, $rec_IDs);
+                }
+            }
+        }
+
+        //$this->result_data['processed'] = $tot_count;
+        
+        //assign special system tags
+        $this->_assignTagsAndReport('processed', $processedRecIDs, $baseTag);
+        $this->_assignTagsAndReport('errors',  $sqlErrors, $baseTag);
+        $this->result_data['fails'] = count($downloadError);
+        $this->result_data['fails_list'] = $downloadError;
+        
+        return $this->result_data;
+    }
+    
+    //
+    //
+    //
+    private function _updateUploadedFileIDs($ulf_ID_new, $dtl_IDs, $date_mode){
+
+        if($ulf_ID_new>0 && count($dtl_IDs)>0){
+            $mysqli = $this->system->get_mysqli();
+            //6. Replace ulf_ID in dtl_UploadedFileID
+            $query2 = 'UPDATE recDetails SET dtl_Modified="'.$date_mode
+                .'", dtl_UploadedFileID='.$ulf_ID_new.' WHERE dtl_ID in ('.implode(',',$dtl_IDs).')';
+            $res2 = $mysqli->query($query2);
+
+            if(!$res2){
+                //$this->system->addError(HEURIST_DB_ERROR,'Cannot assign IDs for registered files', $mysqli->error );
+                return false;
+            }
+            //$tag_count = $mysqli->affected_rows;
+        }
+        return true;
+
+    }
+    
     //
     // remove long-time opeartion from session table
     //
@@ -1495,7 +1630,7 @@ public methods
     {        
         if (is_array($recordIds) && count($recordIds)>0) {
             
-            if($type=='errors' || $type=='parseexception' || $type=='parseempty'){
+            if($type=='errors' || $type=='parseexception' || $type=='parseempty' || $type=='fails'){
                 $this->result_data[$type.'_list'] = $recordIds;    
                 $recordIds = array_keys($recordIds);
             }

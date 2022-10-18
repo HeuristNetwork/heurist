@@ -2846,7 +2846,7 @@ public static function performImport($params, $mode_output){
                                     
                                     if(false){  //true || @$params['download_files']){
                                         //download and register
-                                        $ulf_ID = $entity->donwloaAndRegisterdURL($r_value, null); //it returns ulf_ID    
+                                        $ulf_ID = $entity->downloadAndRegisterdURL($r_value, null); //it returns ulf_ID    
                                     }else{
                                         $ulf_ID = $entity->registerURL( $r_value );    
                                     }
