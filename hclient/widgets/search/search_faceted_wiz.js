@@ -250,7 +250,7 @@ $.widget( "heurist.search_faceted_wiz", {
         .css({width:'100% !important', 'display':'none'})
         .appendTo(this.element);
 
-        var div_leftside = $("<div>").css({position:'absolute',top:0,bottom:0,left:0,right:'301px'}).appendTo(this.step3);
+        var div_leftside = $("<div>").css({position:'absolute',top:0,bottom:0,left:0,right:'301px',overflow:'hidden auto'}).appendTo(this.step3);
         
         var header = $("<div>").css({'font-size':'0.8em','padding':'4px 10px'}).appendTo(div_leftside);
         header.html("<label>"+window.hWin.HR("Define titles, help tips and facet type")+"</label>"
@@ -1171,177 +1171,172 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes );
 
-                            treedata[0].expanded = true; //first expanded
-                            
-                            if(!treediv.is(':empty')){
-                                treediv.fancytree("destroy");
-                            }
+                treedata[0].expanded = true; //first expanded
+                
+                if(!treediv.is(':empty')){
+                    treediv.fancytree("destroy");
+                }
 
-                            //setTimeout(function(){
-                            treediv.addClass('tree-facets').fancytree({
-                                //extensions: ["filter"],
-                                //            extensions: ["select"],
-                                checkbox: true,
-                                selectMode: 3,  // hierarchical multi-selection
-                                source: treedata,
-                                beforeSelect: function(event, data){
-                                    // A node is about to be selected: prevent this, for folder-nodes:
-                                    if( data.node.hasChildren() ){
-                                        return false;
-                                    }
-                                },
-                                renderNode: function(event, data){
-                                    
-                                    if(data.node.data.is_generic_fields) { // hide blue arrow for generic fields
-                                        $(data.node.span.childNodes[1]).hide();
-                                    }
-                                },
-                                lazyLoad: function(event, data){
-                                    
-                                    var node = data.node;
-                                    var parentcode = node.data.code; 
-                                    var rectypes = node.data.rt_ids;
-                                    
-                                    if(parentcode.split(":").length<5){  //limit with 3 levels
-                                    
-                                        var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, allowed_fieldtypes, parentcode );
-                                        if(res.length>1){
-                                            data.result = res;
-                                        }else{
-                                            data.result = res[0].children;
-                                        }
-                                    
-                                    }else{
-                                        data.result = [];
-                                    }                            
-                                    
-                                    return data;                                                   
-                                    /* from server
-                                    var node = data.node;
-                                    var sURL = window.hWin.HAPI4.baseURL + "hsapi/controller/sys_structure.php";
-                                    data.result = {
-                                        url: sURL,
-                                        data: {db:window.hWin.HAPI4.database, mode:5, parentcode:node.data.code, 
-                                            rectypes:node.data.rt_ids, fieldtypes:allowed_fieldtypes}
-                                    } 
-                                    */                                   
-                                },
-                                expand: function(e, data){
-                                    that.showHideReverse();
-                                },
-                                loadChildren: function(e, data){
-                                    setTimeout(function(){
-                                        that.showHideReverse();   
-                                        that._assignSelectedFacets();
-                                    },500);
-                                },
-                                select: function(e, data) {
-                                    /* Get a list of all selected nodes, and convert to a key array:
-                                    var selKeys = $.map(data.tree.getSelectedNodes(), function(node){
-                                    return node.key;
-                                    });
-                                    $("#echoSelection3").text(selKeys.join(", "));
-
-                                    // Get a list of all selected TOP nodes
-                                    var selRootNodes = data.tree.getSelectedNodes(true);
-                                    // ... and convert to a key array:
-                                    var selRootKeys = $.map(selRootNodes, function(node){
-                                    return node.key;
-                                    });
-                                    $("#echoSelectionRootKeys3").text(selRootKeys.join(", "));
-                                    $("#echoSelectionRoots3").text(selRootNodes.join(", "));
-                                    */
-                                },
-                                click: function(e, data){
-
-                                    var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
-
-                                    if(isExpander){
-                                        return;
-                                    }
-
-                                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
-                                        data.node.setExpanded(!data.node.isExpanded());
-                                    }else if( data.node.lazy) {
-                                        data.node.setExpanded( true );
-                                    }
-                                },
-                                dblclick: function(e, data) {
-                                    data.node.toggleSelected();
-                                },
-                                keydown: function(e, data) {
-                                    if( e.which === 32 ) {
-                                        data.node.toggleSelected();
-                                        return false;
-                                    }
-                                }
-                                // The following options are only required, if we have more than one tree on one page:
-                                //          initId: "treeData",
-                                //cookieId: "fancytree-Cb3",
-                                //idPrefix: "fancytree-Cb3-"
-                            });
-                            //},1000);
-
-                            //restore selection
-                            var facets;
-                            if(that.options.params.facets_new){ //old version
-                                facets = JSON.parse(JSON.stringify(that.options.params.facets_new));
-                                for(var i=0; i<facets.length; i++){
-                                    if(facets[i].code){ //change code to new format (with links direction)
-                                        var codes = facets[i].code.split(':');
-                                        if(codes.length>2){
-                                            var k = 1;
-                                            while(k<codes.length-2){
-                                                codes[k] = 'lt'+codes[k];
-                                                k = k+2;
-                                            }
-                                            facets[i].code = codes.join(':');
-                                        }
-                                    }
-                                }
-                                that.options.params.facets = that.options.params.facets_new;
-                            }else{
-                                facets = that.options.params.facets;
-                            }
-
-                            that._assignSelectedFacets();
-
-                            //hide all folder triangles
-                            //treediv.find('.fancytree-expander').hide();
-
-                            that.current_tree_rectype_ids = rectypeIds.join(',');
-
-                            var ele = that.element.find("#fsw_showreverse");
-                            that._on(ele,{change:function(event){
-
-                                that.showHideReverse();
-                                /*
-                                var showrev = $(event.target).is(":checked");
-                                var tree = treediv.fancytree("getTree");
-                                tree.visit(function(node){
-                                    if(node.data.isreverse==1){ //  window.hWin.HEURIST4.util.isArrayNotEmpty(node.children) &&
-                                                if(showrev===true){
-                                                    $(node.li).removeClass('fancytree-hidden');
-                                                }else{
-                                                    $(node.li).addClass('fancytree-hidden');
-                                                }
-                                    }
-                                });*/
-                            }});
-
-                            //tree.options.filter.mode = "hide";
-                            //tree.options.filter.highlight = false;
-                            ele.attr('checked', false);
-                            ele.change();
-
-/* server response
-                        }else{
-                            window.hWin.HEURIST4.msg.redirectToError(response.message);
+                //setTimeout(function(){
+                treediv.addClass('tree-facets').fancytree({
+                    //extensions: ["filter"],
+                    //            extensions: ["select"],
+                    checkbox: true,
+                    selectMode: 3,  // hierarchical multi-selection
+                    source: treedata,
+                    beforeSelect: function(event, data){
+                        // A node is about to be selected: prevent this, for folder-nodes:
+                        if( data.node.hasChildren() ){
+                            return false;
                         }
-                        window.hWin.HEURIST4.util.setDisabled($('#btnNext'), false);
-                });
-                */
+                    },
+                    renderNode: function(event, data){
+                        
+                        if(data.node.data.is_generic_fields) { // hide blue arrow for generic fields
+                            $(data.node.span.childNodes[1]).hide();
+                        }else if(data.node.data.type == 'enum'){ // TODO - Move to CSS for general use when field colours are set out
+                            $(data.node.span.childNodes[3]).css('color', '#871F78');
+                        }else if(data.node.data.type == 'date'){ // TODO - Move to CSS for general use when field colours are set out
+                            $(data.node.span.childNodes[3]).css('color', 'darkgreen');
+                        }
+                    },
+                    lazyLoad: function(event, data){
+                        
+                        var node = data.node;
+                        var parentcode = node.data.code; 
+                        var rectypes = node.data.rt_ids;
+                        
+                        if(parentcode.split(":").length<5){  //limit with 3 levels
+                        
+                            var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, allowed_fieldtypes, parentcode );
+                            if(res.length>1){
+                                data.result = res;
+                            }else{
+                                data.result = res[0].children;
+                            }
+                        
+                        }else{
+                            data.result = [];
+                        }                            
+                        
+                        return data;                                                   
+                        /* from server
+                        var node = data.node;
+                        var sURL = window.hWin.HAPI4.baseURL + "hsapi/controller/sys_structure.php";
+                        data.result = {
+                            url: sURL,
+                            data: {db:window.hWin.HAPI4.database, mode:5, parentcode:node.data.code, 
+                                rectypes:node.data.rt_ids, fieldtypes:allowed_fieldtypes}
+                        } 
+                        */                                   
+                    },
+                    expand: function(e, data){
+                        that.showHideReverse();
+                    },
+                    loadChildren: function(e, data){
+                        setTimeout(function(){
+                            that.showHideReverse();   
+                            that._assignSelectedFacets();
+                        },500);
+                    },
+                    select: function(e, data) {
+                        /* Get a list of all selected nodes, and convert to a key array:
+                        var selKeys = $.map(data.tree.getSelectedNodes(), function(node){
+                        return node.key;
+                        });
+                        $("#echoSelection3").text(selKeys.join(", "));
 
+                        // Get a list of all selected TOP nodes
+                        var selRootNodes = data.tree.getSelectedNodes(true);
+                        // ... and convert to a key array:
+                        var selRootKeys = $.map(selRootNodes, function(node){
+                        return node.key;
+                        });
+                        $("#echoSelectionRootKeys3").text(selRootKeys.join(", "));
+                        $("#echoSelectionRoots3").text(selRootNodes.join(", "));
+                        */
+                    },
+                    click: function(e, data){
+
+                        var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+
+                        if(isExpander){
+                            return;
+                        }
+
+                        if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
+                            data.node.setExpanded(!data.node.isExpanded());
+                        }else if( data.node.lazy) {
+                            data.node.setExpanded( true );
+                        }
+                    },
+                    dblclick: function(e, data) {
+                        data.node.toggleSelected();
+                    },
+                    keydown: function(e, data) {
+                        if( e.which === 32 ) {
+                            data.node.toggleSelected();
+                            return false;
+                        }
+                    }
+                    // The following options are only required, if we have more than one tree on one page:
+                    //          initId: "treeData",
+                    //cookieId: "fancytree-Cb3",
+                    //idPrefix: "fancytree-Cb3-"
+                });
+                //},1000);
+
+                //restore selection
+                var facets;
+                if(that.options.params.facets_new){ //old version
+                    facets = JSON.parse(JSON.stringify(that.options.params.facets_new));
+                    for(var i=0; i<facets.length; i++){
+                        if(facets[i].code){ //change code to new format (with links direction)
+                            var codes = facets[i].code.split(':');
+                            if(codes.length>2){
+                                var k = 1;
+                                while(k<codes.length-2){
+                                    codes[k] = 'lt'+codes[k];
+                                    k = k+2;
+                                }
+                                facets[i].code = codes.join(':');
+                            }
+                        }
+                    }
+                    that.options.params.facets = that.options.params.facets_new;
+                }else{
+                    facets = that.options.params.facets;
+                }
+
+                that._assignSelectedFacets();
+
+                //hide all folder triangles
+                //treediv.find('.fancytree-expander').hide();
+
+                that.current_tree_rectype_ids = rectypeIds.join(',');
+
+                var ele = that.element.find("#fsw_showreverse");
+                that._on(ele,{change:function(event){
+
+                    that.showHideReverse();
+                    /*
+                    var showrev = $(event.target).is(":checked");
+                    var tree = treediv.fancytree("getTree");
+                    tree.visit(function(node){
+                        if(node.data.isreverse==1){ //  window.hWin.HEURIST4.util.isArrayNotEmpty(node.children) &&
+                                    if(showrev===true){
+                                        $(node.li).removeClass('fancytree-hidden');
+                                    }else{
+                                        $(node.li).addClass('fancytree-hidden');
+                                    }
+                        }
+                    });*/
+                }});
+
+                //tree.options.filter.mode = "hide";
+                //tree.options.filter.highlight = false;
+                ele.attr('checked', false);
+                ele.change();
             }
         }
     }
@@ -1357,7 +1352,9 @@ $.widget( "heurist.search_faceted_wiz", {
 
             tree.visit(function(node){
 
-                if(node.data.isreverse==1){ 
+                if(node.data.isparent==1){ // always show parent entities
+                    $(node.li).removeClass('fancytree-hidden');
+                }else if(node.data.isreverse==1){
 
                     if(showrev===true){
                         $(node.li).removeClass('fancytree-hidden');
@@ -1438,6 +1435,10 @@ $.widget( "heurist.search_faceted_wiz", {
         if(old_facets)
         for (k=0;k<old_facets.length;k++){
             
+            if(!old_facets[k]){
+                continue;
+            }
+
             var code = old_facets[k]['code'];
             
             var isfound = false;
@@ -1639,7 +1640,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 var sContent =
                 '<div id="facet'+idd+'" style="border-top:1px lightgray solid; padding-top:4px">'
                 +'<div><span class="ui-icon ui-icon-up-down span_for_radio"></span><label>Facet </label>&nbsp;'
-                +'<label style="font-size:smaller">' + harchy.join('') + '</label></div>'
+                +'<label style="font-size:smaller">' + harchy.join('') + '</label>'
+                +'<button label="Remove" class="remove_facet" data-var="'+idd+'" /></div>'
                 
                 +'<div style="padding:5px 0 5px 29px">'
                 +'<label style="font-size:smaller" for="facet_Title'+idd+'">Label</label>&nbsp;'   //'<div class="header_narrow"></div>'
@@ -1867,7 +1869,12 @@ $.widget( "heurist.search_faceted_wiz", {
             var that = this;
             listdiv.sortable({stop: function( event, ui ) { that._refresh_FacetsPreview() } });
             listdiv.disableSelection();
-            
+
+            listdiv.find('button.remove_facet').button({showLabel: true, label: 'Remove'}).css({'padding': '2px', 'font-size': '10px', 'margin-left': '10px'});
+            this._on(listdiv.find('button.remove_facet'), {click: function(event){
+                this._remove_facet($(event.target).attr('data-var'));
+            }});
+
             listdiv.find('button[data-value="3"]').button({icon: "ui-icon-list-column",iconPosition:'end',showLabel:true,label:'list'});
             listdiv.find('button[data-value="2"]').button({icon: "ui-icon-list-inline",iconPosition:'end',showLabel:true,label:'wrapped'});
             listdiv.find('button[data-value="0"]').button({icon: "ui-icon-search",iconPosition:'end',showLabel:true,label:'search'});
@@ -2111,8 +2118,6 @@ $.widget( "heurist.search_faceted_wiz", {
         translationFromUI(this.options.params, $dlg, 'ui_additional_filter_label', 'svs_AdditionalFilterLabel', false);
         translationFromUI(this.options.params, $dlg, 'ui_spatial_filter_label', 'svs_SpatialFilterLabel', false);
         translationFromUI(this.options.params, $dlg, 'ui_exit_button_label', 'svs_ExitButtonLabel', false);
-        
-console.log(this.options.params);        
 
         var s = $dlg.find('.sa_sortby').val();
         if(s!=''){
@@ -2176,10 +2181,23 @@ console.log(this.options.params);
             }
 
         );
-
-
     }
 
+    //
+    // Remove facet from list
+    //
+    , _remove_facet: function(facetID){
+
+        var that = this;
+        $(this.step3).find("#facets_list #facet"+facetID).remove();
+        $(this.step3).find("div[data-fid='facets_list_container'] #fv_"+facetID).remove();
+
+        $.each(this.options.params.facets, (idx, facet) => {
+            if(facet && facet['var'] == facetID){
+                that.options.params.facets.splice(idx, 1);
+            }
+        });
+    }
 });
 
 function showSearchFacetedWizard( params ){
