@@ -2163,8 +2163,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             request['a']        = 'action'; //batch action
             request['entity']   = this._entityName;
             request['rtyID']    = this.options.rty_ID;
-            request['recID']    = dtyIDs;
-            request['orders']   = orders;
+            request['recID']    = dtyIDs.join(',');
+            request['orders']   = orders.join(',');
             request['request_id'] = window.hWin.HEURIST4.util.random();
             
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
