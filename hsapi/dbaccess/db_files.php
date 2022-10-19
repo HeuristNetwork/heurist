@@ -257,10 +257,12 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
     " left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt".
     " where dtl_RecID = $recID ";
     
+    // at first - try to find image that are marked as thumbnail in dedicated field
     if($system->defineConstant('DT_THUMBNAIL') & DT_THUMBNAIL>0){
         $fileid = mysql__select_value($system->get_mysqli(), $query
                 .' and dtl_DetailTypeID='.DT_THUMBNAIL.' limit 1'); 
     }
+    // if special thumbnail not found - try to find image or resource with thumbail (youtube ot iiif)
     if($fileid == null){
         $query = $query
             .' and (dtl_UploadedFileID is not null)'    // no dty_ID of zero so undefined are ignored
@@ -268,6 +270,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
             ." OR ulf_OrigFileName LIKE '_iiif%' OR ulf_PreferredSource LIKE 'iiif%')"
             .' limit 1';
         $fileid = mysql__select_value($system->get_mysqli(), $query);
+        
     }
     
     if($fileid){
@@ -985,7 +988,7 @@ function fileGetWidthHeight($fileinfo){
                 $imgw = imagesx($image);
                 $imgh = imagesy($image);
 
-                $res = array('width'=>$imgw,'height'=>$imgh);
+                $res = array('width'=>$imgw, 'height'=>$imgh);
                 
             }catch(Exception  $e){
                 

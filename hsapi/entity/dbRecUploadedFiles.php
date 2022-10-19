@@ -799,8 +799,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                         'ulf_MimeExt'=>getURLExtension($url));
                     
                                     if($is_download){
-                                        //download and register
-                                        $ulf_ID = $this->downloadAndRegisterdURL($url, $fields); //it returns ulf_ID    
+                                        //download and register , last parameter - validate name and hash
+                                        $ulf_ID = $this->downloadAndRegisterdURL($url, $fields, 2); //it returns ulf_ID    
                                     }else{
                                         $ulf_ID = $this->registerURL( $url, false, 0, $fields);    
                                     }
