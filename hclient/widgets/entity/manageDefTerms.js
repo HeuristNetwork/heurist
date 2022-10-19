@@ -627,8 +627,22 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             that.options.trm_VocabularyID = -1;
                         }
 
+                        if(that.recordList.resultList('instance') !== undefined && that.options.trm_VocabularyID != -1){
+                            let vocab_name = $Db.trm(that.options.trm_VocabularyID, 'trm_Label');
+                            if(!vocab_name){
+                                vocab_name = 'Vocabulary #' + that.options.trm_VocabularyID;
+                            }else{
+                                vocab_name += '(#'+ that.options.trm_VocabularyID +')';
+                            }
+                            that.recordList.resultList('clearAllRecordDivs',null, '<div style="padding: 10px;cursor: wait;">'
+                                            + '<span class="ui-icon ui-icon-loading-status-balls"></span> &nbsp;&nbsp;'
+                                            + 'Loading: '+ vocab_name +'</div>');
+                        }
+
                         if(that.getRecordSet()!==null){
-                            that._filterByVocabulary();
+                            setTimeout(() => {
+                                that._filterByVocabulary();
+                            }, 100);
                         }
                     }
                 };

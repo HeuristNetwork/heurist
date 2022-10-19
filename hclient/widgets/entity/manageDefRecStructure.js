@@ -326,28 +326,38 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
             recset.each(function(dty_ID, record){
                     
-                        var sType = $Db.dty(dty_ID, 'dty_Type');
-                        var isSep = (sType=='separator');
-                        var title = recset.fld(record,'rst_DisplayName');
-                        var req = recset.fld(record,'rst_RequirementType');
-                        if(isSep ){
-                            title = '<span data-dtid="'+dty_ID+'">' + title 
-                                    +'</span>';
-                        }else{
-                            title = '<span data-dtid="'+dty_ID+'" style="padding-left:10px">' + title 
-                                    +'</span>';
-//'<span style="font-size:smaller;"> ('+$Db.baseFieldType[sType]+')</span>';
-                        }
-                        if(req=='forbidden'){
-                            title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
-                        }
-                    
-                    var node = {title: title, key: dty_ID, extraClasses:isSep?'separator2':req};
-                    node['data'] = {header:isSep, type:'group'};
-                    treeData.push( node );
+                var sType = $Db.dty(dty_ID, 'dty_Type');
+                var isSep = (sType=='separator');
+                var title = recset.fld(record,'rst_DisplayName');
+                var req = recset.fld(record,'rst_RequirementType');
+                if(isSep){
 
-                    });
+                    let sepType = recset.fld(record, 'rst_DefaultValue');
+                    let extraStyle = '';
+                    if(sepType == 'group'){ // indent simple dividers
+                        extraStyle = 'style="padding-left:10px;display:inline-block;';
+                    }
+                    if(title == '-'){
+                        title = '<hr>';
+                        extraStyle += 'width: 150px;';
+                    }
+                    extraStyle += extraStyle != '' ? '"' : '';
+
+                    title = '<span data-dtid="'+dty_ID+'" '+extraStyle+'>' + title + '</span>';
+                }else{
+                    title = '<span data-dtid="'+dty_ID+'" style="padding-left:10px">' + title 
+                            +'</span>';
+//'<span style="font-size:smaller;"> ('+$Db.baseFieldType[sType]+')</span>';
+                }
+                if(req=='forbidden'){
+                    title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
+                }
                 
+                var node = {title: title, key: dty_ID, extraClasses:isSep?'separator2':req};
+                node['data'] = {header:isSep, type:'group'};
+                treeData.push( node );
+
+            });    
         }
         
         //init treeview
@@ -549,7 +559,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             let dtyid = $(item).find('span[data-dtid]').attr('data-dtid');
             if($Db.dty(dtyid, 'dty_Type') != 'separator'){
                 $('<div class="detail-count" data-dtyid="'+ dtyid +'" style="position:absolute;right:8px;display:inline-block;padding:2px;margin-top:0px;'
-                    + 'font-size:10px;font-weight:normal;text-transform:none;color:black;">-</div>').appendTo(item);
+                    + 'font-size:10px;font-weight:normal;text-transform:none;color:black;">&nbsp;</div>').appendTo(item);
             }
 
             var field_tooltip;
@@ -2226,65 +2236,83 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     _saveEditAndClose: function( fields, afterAction ){
 
-            var that = this;
+        var that = this;
 
-            if(window.hWin.HAPI4.is_callserver_in_progress()) {
-                //console.log('prevent repeatative call')
-                return;   
+        if(window.hWin.HAPI4.is_callserver_in_progress()) {
+            //console.log('prevent repeatative call')
+            return;   
+        }
+
+        if(this._editing && this._editing.getValue('dty_Type') == 'separator' && window.hWin.HEURIST4.util.isempty(this._editing.getValue('rst_DisplayName'))) {
+
+            let $dlg;
+            let msg = 'You have left the Field label empty.<br>Would you like the header to be blank?';
+            let btns = {};
+            btns[window.hWin.HR('Yes')] = () => {
+
+                let fld = that._editing.getFieldByName('rst_DisplayName');
+                fld.setValue('-', false);
+
+                $dlg.dialog('close');
+                that._saveEditAndClose(fields, afterAction);
+            };
+            btns[window.hWin.HR('No')] = () => {
+                $dlg.dialog('close');
+                window.hWin.HEURIST4.msg.showMsgFlash('Please enter a Field name', 2000);
+            };
+
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Blank field name'}, {default_palette_class: this.options.default_palette_class});
+            return;
+        }
+
+        if(!fields){
+            if(this._editing && this._editing.isModified() && this._currentEditID!=null){
+                fields = this._getValidatedValues(); 
+            }else{
+                this._closeFormlet();   
             }
+                    
+        }
+        if(fields==null) return; //validation failed
+
+        var treeview = this._treeview.fancytree("getTree");
+        var recID = fields['rst_ID'];
+        var dt_type = $Db.dty(fields['rst_DetailTypeID'], 'dty_Type');
+
+        if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
+            fields['rst_DefaultValue'] = fields['rst_TermPreview'];
+        }else if(dt_type=='resource'){
+            //reset cache
+            window.hWin.HEURIST4.browseRecordCache = {};
+            window.hWin.HEURIST4.browseRecordTargets = {};
+            fields['rst_DefaultValue'] = fields['rst_DefaultValue_resource'];
+        }else if(dt_type=='separator'){
+            fields['rst_DefaultValue'] = fields['rst_SeparatorType'];
+            fields['rst_RequirementType'] = fields['rst_SeparatorRequirementType'];
+        }else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                
+            //fields['rst_DefaultValue'] = fields['rst_DefaultValue_inc'];
+        }
+        if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayOrder'])){
+            fields['rst_DisplayOrder'] = '0';
+        }
         
-            if(!fields){
-                if(this._editing && this._editing.isModified() && this._currentEditID!=null){
-                    fields = this._getValidatedValues(); 
-                }else{
-                    this._closeFormlet();   
-                }
-                        
-            }
-            if(fields==null) return; //validation failed
+        if(fields['rst_DisplayWidth']>255) fields['rst_DisplayWidth'] = 255;
+        else if(fields['rst_DisplayWidth']=='') fields['rst_DisplayWidth'] = 40;
 
-            var treeview = this._treeview.fancytree("getTree");
-            var recID = fields['rst_ID'];
-            var dt_type = $Db.dty(fields['rst_DetailTypeID'], 'dty_Type');
-            
-//console.log('SAVE '+fields['rst_DetailTypeID']+'  '+dt_type);
-            
-            if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
-                fields['rst_DefaultValue'] = fields['rst_TermPreview'];
-            }else if(dt_type=='resource'){
-                //reset cache
-                window.hWin.HEURIST4.browseRecordCache = {};
-                window.hWin.HEURIST4.browseRecordTargets = {};
-                fields['rst_DefaultValue'] = fields['rst_DefaultValue_resource'];
-            }else if(dt_type=='separator'){
-                fields['rst_DefaultValue'] = fields['rst_SeparatorType'];
-                fields['rst_RequirementType'] = fields['rst_SeparatorRequirementType'];
-            }else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                
-                //fields['rst_DefaultValue'] = fields['rst_DefaultValue_inc'];
-            }
-            if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayOrder'])){
-                fields['rst_DisplayOrder'] = '0';
-            }
-            
-            if(fields['rst_DisplayWidth']>255) fields['rst_DisplayWidth'] = 255;
-            else if(fields['rst_DisplayWidth']=='') fields['rst_DisplayWidth'] = 40;
-            
-            
-            this._stillNeedUpdateForRecID = recID;    
-            
-            if(afterAction=='close'){
-                //after save on server - close edit form and refresh preview
-                afterAction = function( recID ){
-                    that._stillNeedUpdateForRecID = 0;
-                    that._afterSaveEventHandler( recID ); //to update definitions and tree
-                    that._showRecordEditorPreview();  //refresh 
-                };
-            }
-                
-            //save record    
-            this._super( fields, afterAction );                
-            
-    },    
+        this._stillNeedUpdateForRecID = recID;    
+
+        if(afterAction=='close'){
+            //after save on server - close edit form and refresh preview
+            afterAction = function( recID ){
+                that._stillNeedUpdateForRecID = 0;
+                that._afterSaveEventHandler( recID ); //to update definitions and tree
+                that._showRecordEditorPreview();  //refresh 
+            };
+        }
+
+        //save record    
+        this._super( fields, afterAction );
+    },
     
     //
     // update tree on save/exit/load other record
@@ -2354,57 +2382,63 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     //
     refreshRecset_Definition_TreeNodeItem: function( recID, fieldvalues ){
-      
-            //1. update recordset if fieldvalues are set
-            var recset = this.getRecordSet();
-            if(fieldvalues!=null){
-                recset.setRecord(recID, fieldvalues);  
-            }
 
-            var record = recset.getById(recID);
-            
-            /*if(fieldvalues==null){
-                fieldvalues = recset.getRecord(recID);
-            }*/
+        //1. update recordset if fieldvalues are set
+        var recset = this.getRecordSet();
+        if(fieldvalues!=null){
+            recset.setRecord(recID, fieldvalues);  
+        }
 
-            //2. update $Db
-//console.log($Db.rst(this.options.rty_ID, recID));           
-      
-            //3. refresh treeview
-            var tree = this._treeview.fancytree("getTree");
-            if(tree){
-                    var node = tree.getNodeByKey( recID );
-                    if(node) {
-                        var sType = $Db.dty(recID,'dty_Type');
-                        var isSep = (sType=='separator');
-                        var title = record['rst_DisplayName'];
-                        var req = record['rst_RequirementType'];
-                        if(isSep){
-                            title = '<span data-dtid="'+recID+'">' + title +'</span>';
-                        }else{
-                            title =  '<span  data-dtid="'+recID+'" style="padding-left:10px">' + title 
-                                        + '</span>';
-//'<span style="font-size:smaller;"> ('+$Db.baseFieldType[sType]+')</span>';
-                        }
-                        if(req=='forbidden'){
-                            title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
-                        }
-                        node.setTitle( title );   
-                        if(!node.folder){
-                            
-                            if(node.extraClasses){
-                                $(node.li).find('span.fancytree-node').removeClass(node.extraClasses);
-                            }
-                            
-                            node.extraClasses = isSep?'separator2':req;
-                            $(node.li).find('span.fancytree-node').addClass( isSep?'separator2':req );
-                        }
-                        this.__defineActionIcons( $(node.li).find('.fancytree-node') );
-//$(node.li).find('.svs-contextmenu3').css('visibility','hidden');
-                        
-                    }
-            }        
+        var record = recset.getById(recID);
         
+        /*if(fieldvalues==null){
+            fieldvalues = recset.getRecord(recID);
+        }*/
+
+//2. update $Db
+//console.log($Db.rst(this.options.rty_ID, recID));
+
+        //3. refresh treeview
+        var tree = this._treeview.fancytree("getTree");
+        if(tree){
+            var node = tree.getNodeByKey( recID );
+            if(node) {
+                var sType = $Db.dty(recID,'dty_Type');
+                var isSep = (sType=='separator');
+                var title = record['rst_DisplayName'];
+                var req = record['rst_RequirementType'];
+                if(isSep){
+                    let sepType = recset.fld(record, 'rst_DefaultValue');
+                    let extraStyle = '';
+                    if(sepType == 'group'){
+                        extraStyle = 'style="padding-left:10px;display:inline-block;';
+                    }
+                    if(title == '-'){
+                        title = '<hr>';
+                        extraStyle += 'width: 150px;';
+                    }
+                    extraStyle += extraStyle != '' ? '"' : '';
+                    title = '<span data-dtid="'+recID+'" '+extraStyle+'>' + title + '</span>';
+                }else{
+                    title =  '<span  data-dtid="'+recID+'" style="padding-left:10px">' + title 
+                                + '</span>';
+                }
+                if(req=='forbidden'){
+                    title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
+                }
+                node.setTitle( title );   
+                if(!node.folder){
+                    
+                    if(node.extraClasses){
+                        $(node.li).find('span.fancytree-node').removeClass(node.extraClasses);
+                    }
+                    
+                    node.extraClasses = isSep?'separator2':req;
+                    $(node.li).find('span.fancytree-node').addClass( isSep?'separator2':req );
+                }
+                this.__defineActionIcons( $(node.li).find('.fancytree-node') );
+            }
+        }
     },
 
     

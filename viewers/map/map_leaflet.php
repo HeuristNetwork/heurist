@@ -356,7 +356,11 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
                     }
                 });
 
-                $('<h4>').attr('data-order', order).css({'margin': '5px 0px 2px 0px', 'font-size': '1.1em'}).text(group_name).appendTo($group_container);
+                if(group_name != '-'){
+                    $('<h4>').attr('data-order', order).css({'margin': '5px 0px 2px', 'font-size': '1.1em'}).text(group_name).appendTo($group_container);
+                }else{
+                    $('<hr>').attr('data-order', order).css({'margin': '5px 0px 5px', 'border-top': '1px solid black'}).appendTo($group_container);
+                }
 
                 $field_container.appendTo($group_container);
             });

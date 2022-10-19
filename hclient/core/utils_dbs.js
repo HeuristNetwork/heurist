@@ -819,6 +819,13 @@ window.hWin.HEURIST4.dbs = {
                                 if($mode==5 || $mode==6){
                                     $res['lazy'] = true;
                                 }
+
+                                let parents = $Db.rst_links().parents[$reverseRecTypeId];
+                                if(parents && parents.includes($recTypeId) !== false){
+                                    $res['isparent'] = 1;
+                                    $res['rst_DisplayOrder'] = '0'; // place at top
+                                }
+
                                 $res['isreverse'] = 1;
                             }
                     }else{
