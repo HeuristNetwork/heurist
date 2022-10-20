@@ -78,6 +78,8 @@ if (!@$passwordForServerFunctions) $passwordForServerFunctions="";// if blank, n
 if (!@$dbHost) $dbHost= ""; //optional, blank = localhost
 if (!@$httpProxy) $httpProxy = ""; // blank = assumes direct internet access from server
 if (!@$httpProxyAuth) $httpProxyAuth = ""; // authorization for proxy server "username:password"
+// If set this will override the value of bypassProxy when making external requests via cURL within utils_file.php
+// $alwaysUseProxy = true;
 
 //  set to IP address and port of Elastic search server, if used
 if (!@$indexServerAddress) $indexServerAddress = ""; 
