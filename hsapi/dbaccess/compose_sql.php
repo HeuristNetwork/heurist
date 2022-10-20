@@ -335,6 +335,7 @@ function get_offset($params){
 */
 function parse_query($search_domain, $text, $sort_order, $parentquery, $currUserID) {
 
+    if($sort_order==null) $sort_order = '';
 
     // remove any  lone dashes outside matched quotes.
     $text = preg_replace('/- (?=[^"]*(?:"[^"]*"[^"]*)*$)|-\s*$/', ' ', $text);
