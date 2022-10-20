@@ -18,6 +18,7 @@
 # installation source: Heurist reference server
 
 ref_server=https://int-heuristweb-prod.intersect.org.au
+base_dir="/var/www/html"
 
 # -------------PRELIMINARIES ---------------------------------------------------------------------------------------------
 
@@ -48,7 +49,7 @@ echo "----------------------- Installing Update to Heurist ---------------------
 echo
 echo
 
-cd /var/www/html/HEURIST
+cd "${base_dir}/HEURIST"
 $2 mkdir -p temp_install_unzip
 $2 chmod a+rwx temp_install_unzip
 cd temp_install_unzip
@@ -61,9 +62,9 @@ $2 curl -O# $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2
 $2 tar -xjf $1.tar.bz2
 $2 rm -f $1.tar.bz2
 # remove existing directory if present then make directory and copy over Heurist
-$2 rm -Rf /var/www/html/HEURIST/$1
-$2 mkdir /var/www/html/HEURIST/$1
-$2 cp -R $1/* /var/www/html/HEURIST/$1
+$2 rm -Rf "${base_dir}/HEURIST/$1"
+$2 mkdir "${base_dir}/HEURIST/$1"
+$2 cp -R $1/* "${base_dir}/HEURIST/$1"
 
 echo
 echo Obtaining updated support files - external and help files
@@ -71,12 +72,12 @@ echo
 
 # Ensure correct ownership and mode of HEURIST_SUPPORT (added 19/7/22)
 # Worst case this won't set group if heurist group does not exist
-$2 chown -R apache /var/www/html/HEURIST/HEURIST_SUPPORT
-$2 chgrp -R heurist /var/www/html/HEURIST/HEURIST_SUPPORT
-$2 chmod -R ug+rwx /var/www/html/HEURIST/HEURIST_SUPPORT
+$2 chown -R apache "${base_dir}/HEURIST/HEURIST_SUPPORT"
+$2 chgrp -R heurist "${base_dir}/HEURIST/HEURIST_SUPPORT"
+$2 chmod -R ug+rwx "${base_dir}/HEURIST/HEURIST_SUPPORT"
 
 # Update support files
-cd /var/www/html/HEURIST/HEURIST_SUPPORT
+cd "${base_dir}/HEURIST/HEURIST_SUPPORT"
 
 $2 rm -f external_h5.tar.bz2
 $2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2
@@ -96,32 +97,32 @@ $2 rm -f help.tar.bz2
 
 # Ensure correct ownership of instance just installed (added 19/7/22)
 # Worst case this won't set group if heurist group does not exist
-$2 chown -R apache /var/www/html/HEURIST/$1
-$2 chgrp -R heurist /var/www/html/HEURIST/$1
-$2 chmod -R ug+rwx /var/www/html/HEURIST/$1
+$2 chown -R apache "${base_dir}/HEURIST/$1"
+$2 chgrp -R heurist "${base_dir}/HEURIST/$1"
+$2 chmod -R ug+rwx "${base_dir}/HEURIST/$1"
 
 # Place simlinks in instance directory
-cd /var/www/html/HEURIST/$1
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h5 external
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/vendor vendor
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
+cd "${base_dir}/HEURIST/$1"
+$2 ln -s ../HEURIST_SUPPORT/external_h5 external
+$2 ln -s ../HEURIST_SUPPORT/vendor vendor
+$2 ln -s ../HEURIST_SUPPORT/help help
 
 echo "Heurist unpacked"
 
 # This installation of elastic search generated a number of security holes rated HIGH RISK
 # We are therefore removing it pending investigation. Sept 2014
-# $2 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
-# cd /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
+# $2 mkdir "${base_dir}/HEURIST/HEURIST_SUPPORT/external/elasticsearch"
+# cd "${base_dir}/HEURIST/HEURIST_SUPPORT/external/elasticsearch"
 # $2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2.tar.gz
 # $2 tar -zxvf elasticsearch-1.3.2.tar.gz
-# cd  /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2
+# cd  "${base_dir}/HEURIST/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2"
 # ./bin/elasticsearch -d
 
 # Remove temporary unzip directory used during installation
-$2 rm -rf /var/www/html/HEURIST/temp_install_unzip/
+$2 rm -rf "${base_dir}/HEURIST/temp_install_unzip/"
 
 echo ""
 echo ""
-echo "---- Heurist update installed in /var/www/html/HEURIST/$1 -------------------------------------------"
+echo "---- Heurist update installed in ${base_dir}/HEURIST/$1 -------------------------------------------"
 echo
 echo
