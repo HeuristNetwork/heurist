@@ -990,30 +990,108 @@ function browseTerms(_editing_input, $input, value){
 
         
     function __recreateTrmLabel($input, trm_ID){
-            $input.empty();
-            if(trm_ID>0){
+
+        $input.empty();
+        if(trm_ID>0){
+            
+            var trm_Label = $Db.trm(trm_ID, 'trm_Label');
+            var trm_info = $Db.trm(trm_ID);
+
+            if(trm_info && trm_info.trm_ParentTermID != 0){
                 
-                var trm_Label = $Db.trm(trm_ID, 'trm_Label');
-                var trm_info = $Db.trm(trm_ID);
+                while(1){
 
-                if(trm_info && trm_info.trm_ParentTermID != 0){
-                    
-                    while(1){
+                    trm_info = $Db.trm(trm_info.trm_ParentTermID);
 
-                        trm_info = $Db.trm(trm_info.trm_ParentTermID);
-
-                        if(trm_info.trm_ParentTermID == 0){
-                            break;
-                        }else{
-                             trm_Label = trm_info.trm_Label + '.' +  trm_Label;
-                        }
+                    if(trm_info.trm_ParentTermID == 0){
+                        break;
+                    }else{
+                        trm_Label = trm_info.trm_Label + '.' +  trm_Label;
                     }
                 }
-            
-                window.hWin.HEURIST4.ui.addoption($input[0], trm_ID, trm_Label);
             }
-            $input.val(trm_ID);
+
+            window.hWin.HEURIST4.ui.addoption($input[0], trm_ID, trm_Label);
+            $input.css('min-width', '');
+        }else{
+            $input.css('min-width', '230px');
+        }
+        $input.val(trm_ID);
     }    
+
+    function __createTermTooltips($input){
+
+        var $menu = $input.hSelect('menuWidget');
+        if(!$input.attr('data-tooltips')){
+
+            var $tooltip = null;
+            $input.attr('data-tooltips', 1);
+
+            $menu.find('div.ui-menu-item-wrapper')//.filter(() => { return $(this).children().length == 0; })
+                 .on('mouseenter', (event) => { // create tooltip
+
+                    let $target_ele = $(event.target);
+
+                    if($target_ele.children().length != 0 || $target_ele.text() == '<blank>'){
+                        return;
+                    }
+
+                    let name = $target_ele.text();
+                    let vocab_id = that.f('rst_FilteredJsonTermIDTree');
+
+                    let term_id = $Db.getTermByLabel(vocab_id, name);
+                    let details = '';
+
+                    if(term_id){
+
+                        let term = $Db.trm(term_id);
+                        if(!window.hWin.HEURIST4.util.isempty(term.trm_Code)){
+                            details += "<span style='text-align: center;'>Code &rArr; " + term.trm_Code + "</span>";
+                        }
+
+                        if(!window.hWin.HEURIST4.util.isempty(term.trm_Description)){
+
+                            if(details == ''){
+                                details = "<span style='text-align: center;'>Code &rArr; N/A </span>";
+                            }
+                            details += "<hr/><span>" + term.trm_Description + "</span>";
+                        }
+                    }
+
+                    if(details == ''){
+                        details = "No Description Provided";
+                    }
+
+                    $tooltip = $menu.tooltip({
+                        items: "div.ui-state-active",
+                        position: { // Post it to the right of menu item
+                            my: "left+20 center",
+                            at: "right center",
+                            collision: "none"
+                        },
+                        show: { // Add slight delay to show
+                            delay: 2000,
+                            duration: 0
+                        },
+                        content: function(){ // Provide text
+                            return details;
+                        },
+                        open: function(event, ui){ // Add custom CSS + class
+                            ui.tooltip.css({
+                                "width": "200px",
+                                "background": "rgb(209, 231, 231)",
+                                "font-size": "1.1em"
+                            })//.addClass('ui-heurist-populate');
+                        }
+                    });
+                 })
+                 .on('mouseleave', (event) => { // ensure tooltip is gone
+                    if($tooltip && $tooltip.tooltip('instance') != undefined){
+                        $tooltip.tooltip('destroy');
+                    }
+                 });
+        }
+    }
 
     function __recreateSelector(){
 
@@ -1052,6 +1130,7 @@ function browseTerms(_editing_input, $input, value){
 
         var events = {};
         events['onOpenMenu'] = function(){
+            __createTermTooltips(that.selObj);
             openSearchMenu(that, that.selObj, true);
         };
 
@@ -1154,7 +1233,7 @@ function browseTerms(_editing_input, $input, value){
 
     
     if($input.is('select')){
-        $input.addClass('enum-selector').css({'min-width':'300px', width:'auto'});
+        $input.addClass('enum-selector').css({'min-width':'230px', width:'auto', 'padding-left': '15px'});
         if(value>0){
             __recreateTrmLabel($input, value);
         }
