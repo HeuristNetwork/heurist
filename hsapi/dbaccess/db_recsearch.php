@@ -1843,7 +1843,7 @@ function recordSearch($system, $params)
             
             //second parameter is link - add ids
             $keys = array_keys($params['q']);
-            array_push($params['q'][$keys[1]],array('ids'=>$params['topids']));
+            array_push($params['q'][$keys[count($keys)>1?1:0]],array('ids'=>$params['topids']));
             
         }else{
 
