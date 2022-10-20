@@ -678,7 +678,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             recTitleHint = recID+' : '+fld('ulf_ExternalFileReference');
         }else{
             recTitleHint = recID+' : '+fld('ulf_OrigFileName') + ' @ ' + fld('ulf_FilePath');
-            recTitle = '<div class="item" style="width:auto">'+fld('ulf_OrigFileName')+' &nbsp;&nbsp;[ '+fld('ulf_FilePath')+' ]</div>';
+            recTitle = '<div class="item" style="width:auto">'+fld('ulf_OrigFileName')+' &nbsp;&nbsp; [ '+fld('ulf_FilePath')+' ] &nbsp;&nbsp; [ '+fld('ulf_FileSizeKB')+'KB ]</div>';
         }
         
         var recIcon = '';//@todo take default icon from extnstions table and or for default image/audio/video
@@ -708,15 +708,17 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         
         // add edit/remove action buttons
         if(this.options.select_mode=='manager' && this.options.edit_mode!='none'){
+
+            let style = 'style="height:20px;position:relative;left:-20px"';
             html = html 
-                + '<div title="Click to edit file" class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+                + '<div title="Click to edit file" '+style+' role="button" aria-disabled="false" data-key="edit" '
+                +   'class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                 + '</div>&nbsp;&nbsp;'
-                + '<div title="Click to delete file" class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
+                + '<div title="Click to delete file" '+style+' role="button" aria-disabled="false" data-key="delete" '
+                +   'class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
                 + '</div>';
-                
-            
         }
         
         /*+ '<div title="Click to view record (opens in popup)" '
