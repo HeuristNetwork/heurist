@@ -438,6 +438,13 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         }else if(action == "menu-selected-url-to-file"){
 
             this.detailBatchEditPopup('url_to_file');
+            
+        }else if(action == "menu-selected-reset-thumbs"){
+
+            this.detailBatchEditPopup('reset_thumbs', function(){
+                that.reloadSearch();
+            });
+           
 
         }else if(action == "menu-selected-value-delete"){
 
@@ -674,12 +681,11 @@ console.log(menu.find('.ui-menu-item').css('padding'));
     //
     //  MAIN  in use
     //  
-    detailBatchEditPopup: function(action_type) {
+    detailBatchEditPopup: function(action_type, callback) {
         
         if(this.isResultSetEmpty()) return;
 
         var script_name = 'recordAction';
-        var callback = null;
         
         if(action_type=='add_link'){
             script_name = 'recordAddLink';
@@ -697,7 +703,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                                 that.executeAction( "set_wg_and_vis", context );
                         }
             };*/            
-        }else{
+        }else if(!$.isFunction(callback)){
             callback = function(context){
                 window.hWin.HAPI4.NEED_TAG_REFRESH = true; //flag to reload tags in next manageUsrTags invocation
             }

@@ -83,6 +83,10 @@ detectLargeInputs('COOKIE record_batch', $_COOKIE);
 
             $res = $dbRecDetails->changeUrlToFileInBatch();
             
+        }else if(@$_REQUEST['a'] == 'reset_thumbs'){
+
+            $res = $dbRecDetails->resetThumbnails();
+            
         }else {
 
             $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");

@@ -326,6 +326,7 @@ regional['en'] = {
         'menu-selected-extract-pdf': 'Extract text from PDF files',
         'menu-selected-extract-pdf-hint': 'Extract text from PDF (experimental)',
         'menu-selected-url-to-file': 'Remote URLs to local files',
+        'menu-selected-reset-thumbs': 'Reset thumbnails',
     'Share': '',
         'menu-selected-notify': 'Notify (email)',
         'menu-selected-notify-hint': 'Select one or more records, then click to send notification',
@@ -527,6 +528,7 @@ regional['en'] = {
     'add_link':'Add new link or create a relationship between records',
     'extract_pdf':'Extract text from PDF',
     'url_to_file':'Remote URLs to local files',
+    'reset_thumbs':'Reset thumbnails',
 
     //helps
     'record_action_add_record':' ',
@@ -557,6 +559,7 @@ regional['en'] = {
         +'<br><br>'
 +'Text is only extracted if the (corresponding value) of the field is empty to avoid overwriting any text entered manually.'),
     'record_action_url_to_file':'This function fetches files indicated by remote URLs in the specified File field, <br>places them in the database, and replaces the remote URL with a reference to file in the database. Other fields are not affected.',
+    'record_action_reset_thumbs':'This function removes thumbnail for files and external resources for selected scope of records. Thumbnails will be recreated on next demand',
     
     //reports
     'record_action_passed': 'Records passed to process',

@@ -156,6 +156,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         if(action_type=='rectype_change'){
             $('#div_sel_rectype').show();
             _fillSelectRecordTypes();
+        }else if(action_type=='reset_thumbs'){
+            $('#cb_add_tags').parent().hide();
         }
     }
 
@@ -511,6 +513,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         var request = { tag: $('#cb_add_tags').is(':checked')?1:0 };
 
+        if(action_type=='reset_thumbs'){
+           request['a'] = action_type; 
+        }else
         if(action_type!='rectype_change'){
 
             var dtyID = $('#sel_fieldtype').val();
@@ -698,10 +703,13 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             
                         }else if(key=="processed"){
                             
-                            tag_link = '<span><a href="'+
-                            encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                                +'&q=sortby:-m after:"5 minutes ago"')+
-                            '&nometadatadisplay=true" target="_blank">view recent changes</a></span>';
+                            if(action_type!='reset_thumbs'){
+                                tag_link = '<span><a href="'+
+                                encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                                    +'&q=sortby:-m after:"5 minutes ago"')+
+                                '&nometadatadisplay=true" target="_blank">view recent changes</a></span>';
+                            }
+                            
                         }else if(key=='fails' && response['fails_list'] && response['fails_list'].length>0){
 
                             tag_link = '<span style="background-color:#ffcccc"><a href="'+

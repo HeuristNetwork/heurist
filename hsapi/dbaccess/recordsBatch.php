@@ -170,7 +170,7 @@ class RecordsBatch
             return false;
         }
         
-        if(!$this->_validateDetailType()){
+        if(@$this->data['a']!='reset_thumbs' && !$this->_validateDetailType()){
             return false;
         }
 
@@ -1590,6 +1590,43 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         }
         return true;
 
+    }
+    
+    
+    /**
+    * Deletes thumbnail images for files assosiated with selected records
+    * 
+    */
+    public function resetThumbnails(){
+        
+        if(!$this->_validateParamsAndCounts()){
+            return false;
+        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+            return $this->result_data;
+        }
+
+        $mysqli = $this->system->get_mysqli();
+        
+        //1. find external urls for field values
+        $query = 'SELECT ulf_ObfuscatedFileID FROM recUploadedFiles, recDetails '
+        .'WHERE ulf_ID=dtl_UploadedFileID '
+        .' AND dtl_RecID in ('.implode(',',$this->recIDs).')';
+        
+        $cnt = 0;
+        $res = $mysqli->query($query);
+        if ($res){
+            
+            while ($row = $res->fetch_row()){        
+                $thumbnail_file = HEURIST_THUMB_DIR.'ulf_'.$row[0].'.png'; //'ulf_ObfuscatedFileID'
+                if(file_exists($thumbnail_file)){
+                    unlink($thumbnail_file);
+                    $cnt++;
+                }
+            }
+        }
+        
+        $this->result_data['processed'] = $cnt;
+        return $this->result_data;
     }
     
     //
