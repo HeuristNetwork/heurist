@@ -234,7 +234,8 @@ $.widget( "heurist.search_faceted_wiz", {
 
         header.html("<label>"+window.hWin.HR("Select fields that act as facet")+
             "</label><br><br><label for='fsw_showreverse'><input type='checkbox' id='fsw_showreverse' style='vertical-align: middle;' />&nbsp;"+
-            window.hWin.HR("Show linked-from record types (reverse pointers, indicated as &lt;&lt;)")+"</label><br><br>"+
+            window.hWin.HR("Show linked-from record types (reverse pointers, indicated as &lt;&lt;)")+"</label>"+
+            "<span id='get_usages'></span><br><br>"+
             "<label id='selectAll_container' style='font-size: 11px;position: relative;top: 10px;left: 20px;'>"+
             "<input type='checkbox' id='selectAll'>Select All Visible Options</label>");
 
@@ -1191,7 +1192,12 @@ $.widget( "heurist.search_faceted_wiz", {
                         }
                     },
                     renderNode: function(event, data){
-                        
+
+                        if(data.node.data.dtyID_local && data.node.data.code.includes(rectype+':')!==false && data.node.data.type != 'separator'){ // top level only, add usage container
+                            $(data.node.span.childNodes[3]).append(
+                                '<span style="display:inline-block;margin-left: 10px;" data-dtid="'+ data.node.data.dtyID_local +'" class="usage_count">&nbsp;</span>');
+                        }
+
                         if(data.node.data.is_generic_fields) { // hide blue arrow for generic fields
                             $(data.node.span.childNodes[1]).hide();
                         }else if(data.node.data.type == 'enum'){ // TODO - Move to CSS for general use when field colours are set out
@@ -1319,19 +1325,18 @@ $.widget( "heurist.search_faceted_wiz", {
                 that._on(ele,{change:function(event){
 
                     that.showHideReverse();
-                    /*
-                    var showrev = $(event.target).is(":checked");
-                    var tree = treediv.fancytree("getTree");
-                    tree.visit(function(node){
-                        if(node.data.isreverse==1){ //  window.hWin.HEURIST4.util.isArrayNotEmpty(node.children) &&
-                                    if(showrev===true){
-                                        $(node.li).removeClass('fancytree-hidden');
-                                    }else{
-                                        $(node.li).addClass('fancytree-hidden');
-                                    }
-                        }
-                    });*/
                 }});
+
+                // Calculate field usage button
+                ele = that.element.find("#get_usages").button({showLabel: true, label: 'Calculate Usage'}).css('margin-left', '15px');
+                if(that.current_tree_rectype_ids.includes(',')===false){
+                    ele.show();
+                    that._on(ele, {click: function(){
+                        that.calculateFieldUsage();
+                    }});
+                }else{
+                    ele.hide();
+                }
 
                 //tree.options.filter.mode = "hide";
                 //tree.options.filter.highlight = false;
@@ -2195,6 +2200,47 @@ $.widget( "heurist.search_faceted_wiz", {
         $.each(this.options.params.facets, (idx, facet) => {
             if(facet && facet['var'] == facetID){
                 that.options.params.facets.splice(idx, 1);
+            }
+        });
+    }
+
+    //
+    // Retrieve and display field usages
+    //
+    , calculateFieldUsage: function(){
+
+        if(this.current_tree_rectype_ids.includes(',')!==false){ // single record type only
+            return;
+        }
+
+        var that = this;
+
+        var req = {
+            'rtyID': this.current_tree_rectype_ids,
+            'entity': 'defRecStructure',
+            'a': 'counts',
+            'mode': 'rectype_field_usage',
+            'request_id': window.hWin.HEURIST4.util.random()
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(req, function(response){
+            if(response.status == window.hWin.ResponseStatus.OK){
+
+                let usages = response.data;
+                let $usage_eles = $(that.step2).find('#field_treeview').find('span.usage_count'); console.log($usage_eles);
+
+                $.each($usage_eles, (idx, ele) => {
+                    let $ele = $(ele);
+                    let dtid = $ele.attr('data-dtid');
+
+                    if(dtid && usages[dtid]){
+                        $ele.text('n = ' + usages[dtid]);
+                    }else{
+                        $ele.text('n = 0');
+                    }
+                });
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });
     }
