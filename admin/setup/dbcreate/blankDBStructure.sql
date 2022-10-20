@@ -18,6 +18,7 @@
 
 --    * Database structure version: 1.1.0
 --    * Database structure version: 1.2.0  @ 14/9/2017, 
+--    * Database structure version: 1.3.6  @ 20/10/2022, 
 
 --    * THE INSERTION STATEMENTS AT THE END ARE * NOT * PART OF THE DUMP
 --    * DO NOT DELETE THEM
@@ -386,6 +387,7 @@ CREATE TABLE defTerms (
   trm_SemanticReferenceURL VARCHAR( 250 ) NULL COMMENT 'The URI to a semantic definition or web page describing the term',
   trm_IllustrationURL VARCHAR( 250 ) NULL COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory',  
   trm_VocabularyGroupID smallint(5) unsigned NULL default '0' COMMENT 'Vocabulary group to which this term belongs, if a top level term (vocabulary)',
+  trm_OrderInBranch smallint(5) NULL Comment 'Defines sorting order of terms if non-alphabetic. Operates only within a single branch, including root',
   PRIMARY KEY  (trm_ID),
   KEY trm_ParentTermIDKey (trm_ParentTermID),
   KEY trm_InverseTermIDKey (trm_InverseTermId)
@@ -1011,7 +1013,7 @@ CREATE TABLE usrWorkingSubsets (
   sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
   sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
   sys_UGrpsdatabase,sys_OwnerGroupID,sys_ConstraintDefaultBehavior,sys_MediaFolders)
-  VALUES (1,0,1,3,3,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
+  VALUES (1,0,1,3,6,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
 
   -- Note: database sub version updated manually to '1' at 6pm 22/8/12
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user

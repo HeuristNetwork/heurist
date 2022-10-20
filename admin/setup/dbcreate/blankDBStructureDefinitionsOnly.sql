@@ -32,6 +32,7 @@
 
 -- ***** Database version: 1.1.0  @ 13/9/2011, update 22 July 2014 ******
 -- ***** Database version: 1.2.0  @ 14/9/2017, 
+-- ***** Database structure version: 1.3.6  @ 20/10/2022, 
 
 -- -------------------------------------------------------------------------------------------------------
 
@@ -62,9 +63,11 @@
 
 CREATE TABLE defCalcFunctions (
   cfn_ID smallint(3) unsigned NOT NULL auto_increment COMMENT 'Primary key of defCalcFunctions table',
+  cfn_Name varchar(63) NOT NULL COMMENT 'Descriptive name for function',
   cfn_Domain enum('calcfieldstring','pluginphp') NOT NULL default 'calcfieldstring' COMMENT 'Domain of application of this function specification',
-  cfn_FunctionSpecification text NOT NULL COMMENT 'A function or chain of functions, or some PHP plugin code',
+  cfn_FunctionSpecification text COMMENT 'A function or chain of functions, or some PHP plugin code',
   cfn_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
+  cfn_RecTypeIDs varchar(250) default NULL COMMENT 'CSV list of Rectype IDs that participate in formula',
   PRIMARY KEY  (cfn_ID)
 ) ENGINE=InnoDB COMMENT='Specifications for generating calculated fields, plugins and';
 
@@ -362,6 +365,7 @@ CREATE TABLE defTerms (
   trm_SemanticReferenceURL VARCHAR( 250 ) NULL COMMENT 'The URL to a semantic definition or web page describing the term',
   trm_IllustrationURL VARCHAR( 250 ) NULL COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory',  
   trm_VocabularyGroupID smallint(5) unsigned NULL default '0' COMMENT 'Vocabulary group to which this term belongs, if a top level term (vocabulary)',
+  trm_OrderInBranch smallint(5) NULL Comment 'Defines sorting order of terms if non-alphabetic. Operates only within a single branch, including root',
   PRIMARY KEY  (trm_ID),
   KEY trm_ParentTermIDKey (trm_ParentTermID),
   KEY trm_InverseTermIDKey (trm_InverseTermId)

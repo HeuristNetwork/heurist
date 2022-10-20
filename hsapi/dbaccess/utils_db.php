@@ -1231,7 +1231,7 @@ error_log('UPDATED '.$session_id.'  '.$value);
     // 
     // For Sybversion update see DBUpgrade_1.2.0_to_1.3.0.php
     //
-    // This method updates from 1.3.0 to 1.3.4
+    // This method updates from 1.3.0 to 1.3.5
     //
     function updateDatabseToLatest4($system){
         
@@ -1386,10 +1386,22 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                     return false;
                 }
             }
+            if($dbVerSubSub<6){
+                
+                if(!hasColumn($mysqli, 'defTerms', 'trm_OrderInBranch')){
+                    //alter table
+                    $query = "ALTER TABLE `defTerms` ADD `trm_OrderInBranch`  smallint(5) NULL Comment 'Defines sorting order of terms if non-alphabetic. Operates only within a single branch, including root' ";
+                    $res = $mysqli->query($query);
+                    if(!$res){
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to add trm_OrderInBranch', $mysqli->error);
+                        return false;
+                    }
+                }  
+            }
             
             //update version
-            if($dbVerSubSub<5){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=5 WHERE 1');
+            if($dbVerSubSub<6){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=6 WHERE 1');
             }
             
             

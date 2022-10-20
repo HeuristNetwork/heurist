@@ -2068,6 +2068,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                     $vocab = array($name, '0', '', 'open', $orig_db_id, $vocab_id, '0', '0', 
                             $domain, '0', '0', '0', '0', '2012-06-04 08:18:57', 
                             '0', '', '', '1', //group #1 by default
+                            '0',  //trm_OrderInBranch
                             $name, $orig_db_id.'-'.$vocab_id, false);
                     
     /*                
@@ -2091,10 +2092,11 @@ if($term_id==11 || $term_id==518 || $term_id==497){
     15: "trm_Code"
     16: "trm_SemanticReferenceURL"
     17: "trm_VocabularyGroupID"
+    18: "trm_OrderInBranch"
     
-    18: "trm_NameInOriginatingDB"
-    19: "trm_ConceptID"
-    20: "trm_HasImage"                
+    19: "trm_NameInOriginatingDB"
+    20: "trm_ConceptID"
+    21: "trm_HasImage"                
     */                
                     $this->source_defs['terms']['termsByDomainLookup'][$domain][$max_id] = $vocab;  //ERROR !!!!! assigned as ID
                     $this->source_defs['terms']['treesByDomain'][$domain][$max_id] = json_decode($dty_Tree, true);   

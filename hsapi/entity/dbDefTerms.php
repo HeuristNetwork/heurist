@@ -135,13 +135,13 @@ class DbDefTerms extends DbEntityBase
 
             $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,trm_Description,'
             .'trm_Domain,IFNULL(trm_ParentTermID, 0) as trm_ParentTermID'
-            .',trm_VocabularyGroupID,trm_Code,trm_Status';
+            .',trm_VocabularyGroupID,trm_OrderInBranch,trm_Code,trm_Status';
             
         }else if(@$this->data['details']=='full'){
 
             $this->data['details'] = 'trm_ID,trm_Label,trm_Description,trm_InverseTermId,'
             .'IFNULL(trm_ParentTermID, 0) as trm_ParentTermID'
-            .',trm_VocabularyGroupID,trm_Code,trm_Status,trm_Domain,trm_SemanticReferenceURL'
+            .',trm_VocabularyGroupID,trm_OrderInBranch,trm_Code,trm_Status,trm_Domain,trm_SemanticReferenceURL'
             .',trm_OriginatingDBID,trm_IDInOriginatingDB, "" as trm_Parents'; //trm_Modified
             
             

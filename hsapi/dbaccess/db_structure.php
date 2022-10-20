@@ -539,6 +539,9 @@ function dbs_GetRectypeConstraint($system) {
         if($dbVer==1 && $dbVerSub<3){
             $query = preg_replace("/trm_VocabularyGroupID/", "1 as trm_VocabularyGroupID", $query);
         }
+        if($dbVer==1 && $dbVerSub<4 && $system->get_system('sys_dbSubSubVersion')<6){
+            $query = preg_replace("/trm_OrderInBranch/", "0 as trm_OrderInBranch", $query);
+        }
         
         if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
             $query.= " if(trm_OriginatingDBID, concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))), concat('$dbID-',cast(trm_ID as char(5)))) as trm_ConceptID";
@@ -1134,7 +1137,7 @@ function dbs_GetRectypeConstraint($system) {
             //                    "trm_NameInOriginatingDB",
             "trm_IDInOriginatingDB", "trm_AddedByImport", "trm_IsLocalExtension", "trm_Domain", "trm_OntID", "trm_ChildCount", 
             "trm_ParentTermID", "trm_Depth", "trm_Modified", "trm_LocallyModified", "trm_Code", 
-            "trm_SemanticReferenceURL", "trm_VocabularyGroupID", "trm_NameInOriginatingDB", "trm_ConceptID");
+            "trm_SemanticReferenceURL", "trm_VocabularyGroupID", "trm_OrderInBranch", "trm_NameInOriginatingDB", "trm_ConceptID" );
     }
 
     //
