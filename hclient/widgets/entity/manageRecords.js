@@ -336,7 +336,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     if(this._rts_selector_flag || this._rts_changed_flag) return;
                     if($('.ui-selectmenu-menu.ui-selectmenu-open').length>0) return; //do not hide if dropdown is opened
 
-                    that._menuTimeoutId = setTimeout(function() {that.rts_actions_menu.hide(); }, 800);         
+                    that._menuTimeoutId = setTimeout(function() {
+                        that.rts_actions_menu.hide(); 
+                        that.options.rts_editor.manageDefRecStructure('highlightNode', null);
+                    }, 800);  
                 },
                 click: function(event){
             
@@ -474,14 +477,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 .attr('data-did', dtId)
                 .show()
                 .position({ my:'left top', at:'left+20 top', of: el});
-                /*
-                .css({position:'absolute'
-                ,left:that.editForm.parent().position().left + el.position().left
-                ,top:that.editForm.position().top + el.position().top + 26 })
-                */
+
+                that.options.rts_editor.manageDefRecStructure('highlightNode', dtId);
 
                 }, mouseout: function(event){
-                    that._menuTimeoutId = setTimeout(function() {that.rts_actions_menu.hide(); }, 800);
+                    that._menuTimeoutId = setTimeout(function() {
+                        that.rts_actions_menu.hide();
+                        that.options.rts_editor.manageDefRecStructure('highlightNode', null); 
+                    }, 800);
             }});
         }else{
             //placeholder
@@ -4351,6 +4354,35 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             // add '+' button to end of tabs, creates new tab header
             this._addNewTabButton();
+
+            // Highlight current focus in tree structure
+            this._on(this.editForm.find('div[data-dtid] input, div[data-dtid] select, div[data-dtid] textarea'), {
+                focus: (event) => { // Remove previous node focus
+                    let $target_parent = $(event.target).parents('div[data-dtid]:first');
+                    if($target_parent.length == 1){
+                        that.options.rts_editor.manageDefRecStructure('highlightNode', $target_parent.attr('data-dtid'));
+                    }
+                },
+                blur: (event) => { // Remove node focus
+
+                    let $target_ele = $(event.target);
+                    let unselect_only = false;
+                    if($target_ele.is('select')){ // Check if selectmenu is still visible
+                        let $sel = $target_ele.parent().find('select.enum-selector-main');
+                        if($sel.length == 1){
+                            let id = $sel.attr('id');
+                            if($sel.parent().find('#'+id+'-menu').is(':visible')){
+                                setTimeout(($ele)=>{ $ele.blur(); }, 100, $target_ele);
+                                return;
+                            }
+                            that.options.rts_editor.manageDefRecStructure('highlightNode', $target_ele.parents('div[data-dtid]:first').attr('data-dtid'), true);
+                            return;
+                        }
+                    }
+
+                    that.options.rts_editor.manageDefRecStructure('highlightNode', null);
+                }
+            });
         }else{
 
             $(this.element).find('.separator-hidden').hide();

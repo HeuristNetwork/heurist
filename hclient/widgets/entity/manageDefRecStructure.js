@@ -507,10 +507,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
             var is_folder = $(item).hasClass('fancytree-folder') || $(item).hasClass('separator2'); 
             
-            var actionspan = $('<div class="svs-contextmenu3" style="position:absolute;right:8px;display:none;padding:2px;margin-top:0px;background:#95A7B7 !important;'
+            var actionspan = $('<div class="svs-contextmenu3" style="position:absolute;right:2px;display:none;padding:2px;margin-top:0px;background:#95A7B7 !important;z-index:1;'
                 +'font-size:9px;font-weight:normal;text-transform:none">'
-                //+'<span data-action="block" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Add a new group/separator">&nbsp;±&nbsp;&nbsp;Block</span>'               
-                //+'<span data-action="field" style="background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
                 +'<span data-action="delete" style="background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
                     +((is_folder)?'Delete header':'Exclude field from record type')+'" style="font-size:9px;font-weight:normal"/>Delete</span>'
                 +(true || is_folder?'':
@@ -558,8 +556,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
             let dtyid = $(item).find('span[data-dtid]').attr('data-dtid');
             if($Db.dty(dtyid, 'dty_Type') != 'separator'){
-                $('<div class="detail-count" data-dtyid="'+ dtyid +'" style="position:absolute;right:8px;display:inline-block;padding:2px;margin-top:0px;'
-                    + 'font-size:10px;font-weight:normal;text-transform:none;color:black;">&nbsp;</div>').appendTo(item);
+                $('<div class="detail-count" data-dtyid="'+ dtyid +'" style="position:absolute;right:2px;display:inline-block;padding:4px 3px 0;'
+                    + 'font-size:10px;font-weight:normal;text-transform:none;color:black;"></div>').appendTo(item);
             }
 
             var field_tooltip;
@@ -3017,7 +3015,37 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }else{
                 $div.text('-');
             }
+
+            $div.parent().find('span.fancytree-title').css({'max-width': '80%', 'overflow': 'hidden'});
         });
+    },
+
+    //
+    // Add or remove fancytree-active from node(s) in structure fancytree
+    //
+    highlightNode: function(dty_ID, is_unselect=false){
+
+        if(!is_unselect && this._treeview && this._treeview.find('span.fancytree-node').length > 0){
+            this._treeview.find('span.fancytree-node').removeClass('ui-state-active');
+        }
+
+        if(!dty_ID || dty_ID < 0){
+            return;
+        }
+
+        let tree = this._treeview.fancytree("getTree");
+        let node = tree.getNodeByKey(dty_ID);
+
+        if(!node){
+            return;
+        }
+
+        if(is_unselect){
+            $(node.span).removeClass('ui-state-active');
+        }else{
+            $(node.span).addClass('ui-state-active');
+            this.element.parents('.editStructure').animate({scrollTop: $(node.span).offset().top}, 1);
+        }
     }
-    
+
 });
