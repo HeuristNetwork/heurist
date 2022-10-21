@@ -76,10 +76,13 @@ if (!@$passwordForReservedChanges) $passwordForReservedChanges="";// if blank, n
 if (!@$passwordForServerFunctions) $passwordForServerFunctions="";// if blank, no-one can run server analysis functions - risk of overload - otherwise challenge
 
 if (!@$dbHost) $dbHost= ""; //optional, blank = localhost
-if (!@$httpProxy) $httpProxy = ""; // blank = assumes direct internet access from server
-if (!@$httpProxyAuth) $httpProxyAuth = ""; // authorization for proxy server "username:password"
+
+
+$httpProxyAlwaysActive = false; // if true - always use proxy for CURL, otherwise proxy will be used for non heurist resources mostly
+if (!@$httpProxy) $httpProxy = ''; // blank = assumes direct internet access from server
+if (!@$httpProxyAuth) $httpProxyAuth = ''; // authorization for proxy server "username:password"
 // If set this will override the value of bypassProxy when making external requests via cURL within utils_file.php
-// $alwaysUseProxy = true;
+
 
 //  set to IP address and port of Elastic search server, if used
 if (!@$indexServerAddress) $indexServerAddress = ""; 

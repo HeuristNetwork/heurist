@@ -173,6 +173,7 @@ $dbPrefix = '';
 $indexServerAddress = ''; 
 $indexServerPort = '';
 
+$httpProxyAlwaysActive = false; // if true - always use proxy for CURL, otherwise proxy will be used for non heurist resources mostly
 $httpProxy = '';
 $httpProxyAuth = '';
 $indexServerAddress='';

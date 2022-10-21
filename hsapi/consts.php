@@ -44,6 +44,7 @@ define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index');
 define('HEURIST_HELP', $heuristReferenceServer.'/heurist/help');
 
 if (@$httpProxy != '') {
+    define('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE', (isset($httpProxyAlwaysActive) && $httpProxyAlwaysActive===true)); //always use proxy for CURL
     define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
     if (@$httpProxyAuth != '') {
         define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth); // "username:password" for proxy authorization

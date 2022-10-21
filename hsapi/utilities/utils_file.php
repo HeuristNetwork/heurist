@@ -1442,11 +1442,12 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
         curl_setopt($ch, CURLOPT_RANGE, $range);
     }
 
-    if(isset($alwaysUseProxy)){ // check if the proxy needs to be used, $alwaysUseProxy defined in heuristConfigIni.php
-        $bypassProxy = $alwaysUseProxy;
+    // check if the proxy needs to be used, $httpProxyActive defined in heuristConfigIni.php
+    if(defined('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE') && HEURIST_HTTP_PROXY_ALWAYS_ACTIVE){ 
+        $bypassProxy = false;
     }
 
-    if ( (!$bypassProxy) && defined("HEURIST_HTTP_PROXY") ) {
+    if ( (!$bypassProxy) && defined('HEURIST_HTTP_PROXY') ) {
         curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
         if(  defined('HEURIST_HTTP_PROXY_AUTH') ) {
             curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
@@ -1517,11 +1518,12 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
     
     curl_setopt($ch, CURLOPT_URL, $url);
 
-    if(isset($alwaysUseProxy)){ // check if the proxy needs to be used, $alwaysUseProxy defined in heuristConfigIni.php
-        $bypassProxy = $alwaysUseProxy;
+    // check if the proxy needs to be used, $httpProxyActive defined in heuristConfigIni.php
+    if(defined('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE') && HEURIST_HTTP_PROXY_ALWAYS_ACTIVE){ 
+        $bypassProxy = false;
     }
 
-    if ( (!$bypassProxy) && defined("HEURIST_HTTP_PROXY") ) {
+    if ( (!$bypassProxy) && defined('HEURIST_HTTP_PROXY') ) {
         curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
         if(  defined('HEURIST_HTTP_PROXY_AUTH') ) {
             curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
