@@ -49,11 +49,38 @@ $tabs0 = '';
 if (@$argv) {
     
 // example:
-//  sudo php -f /var/www/html/h6-alpha/export/dbbackup/reportInactiveDbs.php -- -purge
+//  sudo php -f /var/www/html/h6-alpha/setup/dboperations/reportInactiveDbs.php -- -purge
 //  sudo php -f reportInactiveDbs.php -- -purge  -  action, otherwise only report 
 
 // TODO: It would be good if this had a parameter option to also delete the database for use when transferring to a new server
 // TODO: WARNING: AT THIS TIME (21 May 2022) IT DOES NOT REPORT AN ERROR IF THERE IS NO FILESTORE FOLDER
+
+
+/*
+ This routine:
+ deletes database and keeps archives in DELETED_DATABASES
+ 
+         Deletes/archives any database not updated for more than: 
+                   3 months with 10 records or less
+                   6 months with 50 records or less
+                   one year with 200 records or less 
+         Sends sysadmin a list of databases
+                    for more than a year with more than 200 records
+ 
+ 
+ dumps import tables and bz2 them in _PURGES_IMPORTS
+           more than 2 months old
+           older than 1 month if more than 10 tables
+           reduce to 20 most recent tables if more than 20 left
+
+ it purges sysArchive tables and keeps bz2 in _PURGES_SYSARCHIVE
+           with more than 50000 entries
+
+ services files:
+     databases_not_to_purge.txt - file in heurist root wiht list of database to be excluded from this operation
+     _operation_locks.info - lock file in HEURIST_FILESTORE_ROOT
+ 
+*/
 
     // handle command-line queries
     $ARGV = array();
@@ -88,12 +115,12 @@ if (@$argv) {
 }
 
 
-require_once(dirname(__FILE__).'/../../configIni.php'); // read in the configuration file
-require_once(dirname(__FILE__).'/../../hsapi/consts.php');
-require_once(dirname(__FILE__).'/../../hsapi/System.php');
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
-require_once(dirname(__FILE__).'/../../hsapi/utilities/dbUtils.php');
-require_once(dirname(__FILE__).'/../../external/php/Mysqldump.php');
+require_once(dirname(__FILE__).'/../../../configIni.php'); // read in the configuration file
+require_once(dirname(__FILE__).'/../../../hsapi/consts.php');
+require_once(dirname(__FILE__).'/../../../hsapi/System.php');
+require_once(dirname(__FILE__).'/../../../hsapi/dbaccess/db_files.php');
+require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
+require_once(dirname(__FILE__).'/../../../external/php/Mysqldump.php');
 
 //retrieve list of databases
 $system = new System();
@@ -109,6 +136,7 @@ print 'Mail: '.HEURIST_MAIL_DOMAIN.'   Domain: '.HEURIST_SERVER_NAME."\n";
 $mysqli = $system->get_mysqli();
 $databases = mysql__getdatabases4($mysqli, false);   
 //DEBUG $databases = array('ACD_Basins','ACD_Candlesticks');
+//$databases = array('arche_proscrits_2019');
 
 $upload_root = $system->getFileStoreRootFolder();
 $backup_root = $upload_root.'DELETED_DATABASES/';
@@ -265,7 +293,6 @@ sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $
 * HEURIST_FILESTORE/_PURGES_IMPORTS/dbname_[name of original file]_yyyy-mm-dd.bz2
 */        
 
-
         $sif_purge = array();    
         $sif_purge2 = array();    
         $sif_list = mysql__select_assoc2($mysqli, 'SELECT sif_ID, sif_ProcessingInfo FROM sysImportFiles'); //sif_TempDataTable, 
@@ -332,7 +359,7 @@ sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $
             //$sif_purge = array( 3 => 'import20210531163600');
             $arc_cnt = 0;
             $cnt_dumped = 10;
-            if(false){
+            if(true){
             
             foreach($sif_purge as  $sif_id => $sif_table){
                 
@@ -474,7 +501,7 @@ sendEmail(HEURIST_MAIL_TO_ADMIN, "List of inactive databases on ".HEURIST_SERVER
 function exclusion_list(){
     
     $res = array();
-    $fname = realpath(dirname(__FILE__)."/../../../databases_not_to_purge.txt");
+    $fname = realpath(dirname(__FILE__)."/../../../../databases_not_to_purge.txt");
     if($fname!==false && file_exists($fname)){
         //ini_set('auto_detect_line_endings', 'true');
         $handle = @fopen($fname, "r");

@@ -1156,7 +1156,7 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
     if (!file_exists($source)) {
         echo "<br/>".$source." was not found";
         return false;
-    }
+    }else 
     
     $numFiles = 0;
     
@@ -1170,7 +1170,7 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
     try{
         
         $src = realpath($source);
-
+        
         if(!$src) {
             if($verbose) {
                 echo '<br/>Cannot create bz2 archive '.$source.' is not a folder';
@@ -1178,8 +1178,13 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
             return false;
         }
         
+        if($verbose){
+            echo "<br/>Source $source $src";
+        }
+        
     $source = str_replace('\\', '/', $src);
 
+    
     if (is_dir($source) === true) {
 
         chdir($source);
@@ -1266,7 +1271,7 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
             }
         }
         
-        if($verbose) echo "Add file ".basename($source)."\n";        
+        if($verbose) echo "Add file ".basename($source)." (size $size_mb)\n";        
         
         $phar->addFile($source, basename($source));
         $numFiles++;
@@ -1286,7 +1291,7 @@ function createBz2Archive($source, $only_these_folders, $destination, $verbose=t
                 echo "<br/>The archive file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
             }
         }else{
-            echo "Arhive not created\n";
+            echo "$destination.bz2 archive not created\n";
             return false;    
         }
         
