@@ -779,7 +779,7 @@ $.widget( "heurist.searchBuilder", {
 
                 //'title','modified',
                 var allowed_fieldtypes = ['header_ext','anyfield','enum','freetext','blocktext',
-                                'geo','year','date','integer','float','resource','relmarker','relationtype','file'];
+                                'geo','year','date','integer','float','resource','relmarker','relationtype','file','separator'];
                       
 /*              
                             {key:'title',title:'Title (constructed)', depth:1},
@@ -825,7 +825,10 @@ $.widget( "heurist.searchBuilder", {
                                             $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
                                         }
                                     }
-
+                                    if(data.node.data.type == 'separator'){
+                                        $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
+                                        $(data.node.span.childNodes[1]).hide(); //checkbox for separators
+                                    }
                                 },
                                 lazyLoad: function(event, data){
                                     
@@ -892,6 +895,10 @@ $.widget( "heurist.searchBuilder", {
                                 },
                                 click: function(e, data){
 
+                                    if(data.node.data.type == 'separator'){
+                                        return false;
+                                    }
+
                                     var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
 
                                     if(isExpander) return;
@@ -915,6 +922,9 @@ $.widget( "heurist.searchBuilder", {
                                     }
                                 },
                                 dblclick: function(e, data) {
+                                    if(data.node.data.type == 'separator'){
+                                        return false;
+                                    }
                                     data.node.toggleSelected();
                                 },
                                 keydown: function(e, data) {

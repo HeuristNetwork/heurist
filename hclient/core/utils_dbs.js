@@ -768,7 +768,14 @@ window.hWin.HEURIST4.dbs = {
             
         switch ($detailType) {
             case 'separator':
-                return null;
+                $res = {};
+                $res['checkbox'] = false;
+                if($dt_label == '-'){
+                    $dt_title = '<span style="display: inline-block; width: 150px;"><hr></span>'; //replace empty header w/ line
+                }else{
+                    $dt_title = '<span style="font-weight:bold">' + $dt_title + '</span>';
+                }
+                break;
             case 'enum':
             case 'relationtype':
 
@@ -921,7 +928,7 @@ window.hWin.HEURIST4.dbs = {
             $res['key'] = "f:"+$dtID;
             if($mode==4 || $mode==5 || $mode==6){
                     
-                var $stype = ($detailType=='resource' || $detailType=='relmarker')?'':$Db.baseFieldType[$detailType];
+                var $stype = ($detailType=='resource' || $detailType=='relmarker' || $detailType=='separator')?'':$Db.baseFieldType[$detailType];
                 if($reverseRecTypeId!=null){
                     //before 2017-06-20  $stype = $stype."linked from";
                     $res['isreverse'] = 1;
@@ -978,7 +985,7 @@ window.hWin.HEURIST4.dbs = {
     //========================= end internal 
 
         if(fieldtypes==null){
-            fieldtypes = ['integer','date','freetext','year','float','enum','resource','relmarker','relationtype'];
+            fieldtypes = ['integer','date','freetext','year','float','enum','resource','relmarker','relationtype','separator'];
         }else if(!$.isArray(fieldtypes) && fieldtypes!='all'){
             fieldtypes = fieldtypes.split(',');
         }
