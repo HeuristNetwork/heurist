@@ -183,7 +183,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             that.element.find('#cbIncludeResourceTitles').prop('checked',(settings.include_resource_titles==1));
             that.element.find('#chkJoinRecTypes').prop('checked',(settings.join_record_types==1));
             that.element.find('#cbIncludeMediaURL').prop('checked',(settings.include_file_url==1));
-            
+            that.element.find('#cbIncludeRecURLHTML').prop('checked',(settings.include_record_url_html==1));
+            that.element.find('#cbIncludeRecURLXML').prop('checked',(settings.include_record_url_xml==1));
         }
     },
 
@@ -485,21 +486,23 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             //DEBUG
 
         return {
-                'fields': selectedFields,
-                'main_record_type_ids': mainRecordTypeIDs,
-                'join_record_types': this.element.find('#chkJoinRecTypes').is(':checked')?1:0,
-                'advanced_options': this._getFieldAdvancedOptions(),
-                'csv_delimiter':  this.element.find('#delimiterSelect').val(),
-                'csv_enclosure':  this.element.find('#quoteSelect').val(),
-                'csv_mvsep':'|',
-                'csv_linebreak':'nix', //not used at tne moment
-                'csv_header': this.element.find('#cbNamesAsFirstRow').is(':checked')?1:0,
-                'include_term_ids': this.element.find('#cbIncludeTermIDs').is(':checked')?1:0,
-                'include_term_codes': this.element.find('#cbIncludeTermCodes').is(':checked')?1:0,
-                'include_file_url': this.element.find('#cbIncludeMediaURL').is(':checked')?1:0,
-                'include_term_hierarchy': this.element.find('#cbIncludeTermHierarchy').is(':checked')?1:0,
-                'include_resource_titles': this.element.find('#cbIncludeResourceTitles').is(':checked')?1:0
-                };
+            'fields': selectedFields,
+            'main_record_type_ids': mainRecordTypeIDs,
+            'join_record_types': this.element.find('#chkJoinRecTypes').is(':checked')?1:0,
+            'advanced_options': this._getFieldAdvancedOptions(),
+            'csv_delimiter':  this.element.find('#delimiterSelect').val(),
+            'csv_enclosure':  this.element.find('#quoteSelect').val(),
+            'csv_mvsep':'|',
+            'csv_linebreak':'nix', //not used at tne moment
+            'csv_header': this.element.find('#cbNamesAsFirstRow').is(':checked')?1:0,
+            'include_term_ids': this.element.find('#cbIncludeTermIDs').is(':checked')?1:0,
+            'include_term_codes': this.element.find('#cbIncludeTermCodes').is(':checked')?1:0,
+            'include_file_url': this.element.find('#cbIncludeMediaURL').is(':checked')?1:0,
+            'include_record_url_html': this.element.find('#cbIncludeRecURLHTML').is(':checked')?1:0,
+            'include_record_url_xml': this.element.find('#cbIncludeRecURLXML').is(':checked')?1:0,
+            'include_term_hierarchy': this.element.find('#cbIncludeTermHierarchy').is(':checked')?1:0,
+            'include_resource_titles': this.element.find('#cbIncludeResourceTitles').is(':checked')?1:0
+        };
         
     },
 
