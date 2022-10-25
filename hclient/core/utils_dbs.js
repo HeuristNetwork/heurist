@@ -1768,8 +1768,21 @@ window.hWin.HEURIST4.dbs = {
 
                 //sort children by name
                 children.sort(function(a,b){
-                    return recset.fld(a,'trm_Label').toLowerCase()<recset.fld(b,'trm_Label').toLowerCase()?-1:1;
-//return recset.fld(a,'trm_Label').localeCompare(recset.fld(b,'trm_Label')) ? 1 : -1;
+                    let a_name = recset.fld(a,'trm_Label').toLowerCase();
+                    let b_name = recset.fld(b,'trm_Label').toLowerCase();
+                    let a_order = recset.fld(a,'trm_OrderInBranch');
+                    let b_order = recset.fld(b,'trm_OrderInBranch');
+
+                    a_order = (!a_order || a_order < 1) ? null : a_order;
+                    b_order = (!b_order || b_order < 1) ? null : b_order;
+
+                    if(a_order == null && b_order == null){ // alphabetic
+                        return a_name < b_name ? -1 : 1;
+                    }else if(a_order == null || b_order == null){ // null is first
+                        return (a_order == null) ? -1 : 1;
+                    }else{ // branch order
+                        return a_order < b_order ? -1 : 1;
+                    }
                 });
                 
                 if(mode=='tree'){

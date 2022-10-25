@@ -1105,7 +1105,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 html = html + '<div class="rec_action_link2" style="margin-left:1em;'
                 +'width:'+(sRef?20:
-                        ($Db.trm(recID, 'trm_ParentTermID')!=this.options.trm_VocabularyID?80:62))
+                        ($Db.trm(recID, 'trm_ParentTermID')!=this.options.trm_VocabularyID?100:80))
                 +'px;height:20px;background:lightgray;display:inline-block;vertical-align:middle;">';
 
                 if(ref_lvl===0){
@@ -1124,6 +1124,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         null,'icon_text')
                     + this._defineActionButton({key:'add-child',label:'Add child', 
                         title:'', icon:'ui-icon-plus',class:'rec_actions_button'},
+                        null,'icon_text')
+                    + this._defineActionButton({key:'sort-branch',label:'Sort branch', 
+                        title:'', icon:'ui-icon-sorting',class:'rec_actions_button'},
                         null,'icon_text');
                         
                     if($Db.trm(recID, 'trm_ParentTermID')!=this.options.trm_VocabularyID) {
@@ -2261,6 +2264,21 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this.addEditRecord(-1);        
             return true;
 
+        }else if(action=='sort-branch'){
+
+            let $ele = this.element.find('div[recid="'+ recID +'"]');
+            let parent_codes = $ele.attr('data-parent').split(';');
+
+            let ids = [];
+            this.element.find('[data-parent="'+parent_codes.join(';')+'"]').each((idx, ele) => {
+                ids.push($(ele).attr('recID'));
+            });
+
+            if(ids.length <= 1){
+                return;
+            }
+
+            this.reoderBranch(ids);
         }else if(action=='add-reference'){
 
             if(this.options.trm_VocabularyID<0){
@@ -2918,6 +2936,126 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 $label.find('.term_usage').text('');
                 $label.css('color', 'gray');
             }
+        });
+    },
+
+    //
+    // Show popup with listed terms, and allow sorting
+    //
+    reoderBranch: function(term_ids){
+
+        if(!term_ids || term_ids.length <= 1){
+            return;
+        }
+
+        let that = this;
+        let $dlg, content;
+        let btns = {};
+
+        // Popup content - Draggable list of branch terms
+        content = '<div style="padding-bottom: 5px"><span class="heurist-helper3">drag and drop terms to re-arrange the branch<br></span>' //'any child terms will remain with its parent term'
+            + '<div class="div-result-list-content list" style="font-size: larger; max-height: 500px; overflow: hidden auto; margin: 10px 0;">';
+
+        for (let i = 0; i < term_ids.length; i++) {
+
+            let trm_id = term_ids[i];
+            let trm_name = $Db.trm(trm_id, 'trm_Label');
+
+            content += '<div class="recordDiv" data-id="' + trm_id + '" title="' + trm_name + '">' + trm_name + '</div>';
+        }
+
+        content += '</div></div>';
+        // Popup buttons
+        btns['Save order'] = () => {
+            // Set + Save trm_OrderInBranch from 1 up
+            let terms = $dlg.find('div.recordDiv');
+            let records = [];
+            let ordering = 1;
+
+            $.each(terms, (idx, term) => {
+
+                term = $(term);
+                let record = {};
+                record['trm_ID'] = term.attr('data-id');
+                record['trm_OrderInBranch'] = ordering;
+
+                ordering ++;
+                records.push(record);
+            });
+
+            let request = {
+                'a': 'save',
+                'entity': 'defTerms',
+                'fields': records,
+                'isfull': 0,
+                'request_id': window.hWin.HEURIST4.util.random()
+            };
+
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    $dlg.dialog('close');
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        for (let i = 0; i < records.length; i++) {
+                            $Db.trm(records[i]['trm_ID'], 'trm_OrderInBranch', records[i]['trm_OrderInBranch']);
+                        }
+                        //that.refreshRecordList();
+                        that._triggerRefresh(that.options.auxilary);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                }
+            );
+        };
+        btns['Alphabetic'] = () => {
+            // Set + Save trm_OrderInBranch to NULL
+            let terms = $dlg.find('div.recordDiv');
+            let records = [];
+
+            $.each(terms, (idx, term) => {
+
+                term = $(term);
+                let record = {};
+                record['trm_ID'] = term.attr('data-id');
+                record['trm_OrderInBranch'] = null;
+
+                records.push(record);
+            });
+
+            let request = {
+                'a': 'save',
+                'entity': 'defTerms',
+                'fields': JSON.stringify(records),
+                'isfull': 0,
+                'request_id': window.hWin.HEURIST4.util.random()
+            };
+
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    $dlg.dialog('close');
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        for (let i = 0; i < records.length; i++) {
+                            $Db.trm(records[i]['trm_ID'], 'trm_OrderInBranch', null);
+                        }
+                        //that.refreshRecordList();
+                        that._triggerRefresh(that.options.auxilary);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                }
+            );
+        };
+        btns['Cancel'] = () => {
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Reodering Term Branch'}, {default_palette_class: 'ui-heurist-design', width: '450px'});
+
+        $dlg.find('div.list').sortable({
+            axis: 'y',
+            containment: $dlg.find('div.list').parent(),
+            forcePlaceholderSize: true,
+            placeholder: 'ui-drag-drop',
+            cursor: 'grabbing'
         });
     }
 
