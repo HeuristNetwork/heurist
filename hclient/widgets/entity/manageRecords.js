@@ -4635,7 +4635,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 var $group = $(group);
                 var $tabs = $group.find('ul[role="tablist"]');
-                var last_dtid = $group.find('fieldset:last-child div[data-dtid]:first-child').attr('data-dtid');
+                var last_dtid = $group.find('fieldset:last-child div[data-dtid]:last-child').attr('data-dtid');
 
                 var $empty_cont = $('<div>').uniqueId();
                 var $new_tab = $('<li>').addClass('add_new_tab').append('<a href="#'+ $empty_cont.attr('id') +'"></a>').appendTo($tabs);
@@ -5116,7 +5116,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             if(!accordion_content.is(':visible')){
                 let id = accordion_content.attr('aria-labelledby');
                 $.each($ele.parents('.ui-accordion:first').find('.ui-accordion-header'), function(idx, item){ // Find corresponding header
-                    if($(item).attr('id') == id){ console.log($(item));
+                    if($(item).attr('id') == id){
                         $ele.parents('.ui-accordion:first').accordion('option', 'active', idx);
                         return false;
                     }
