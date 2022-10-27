@@ -58,6 +58,8 @@ if (!@$serverName) {
         ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80" && $_SERVER["SERVER_PORT"] != "443") 
                     ? ":" . $_SERVER["SERVER_PORT"] : "");
         define('HEURIST_DOMAIN', $_SERVER["SERVER_NAME"]);
+    }else{
+        define('HEURIST_DOMAIN', '127.0.0.1');
     }
 }else{
     $k = strpos($serverName,":");
@@ -126,8 +128,13 @@ if ($dbHost) {
     define('HEURIST_DBSERVER_NAME', $dbHost);
 } else {
     define('HEURIST_DBSERVER_NAME', "localhost"); //configure to access mysql on the same machine as the Heurist codebase
-
 }
+//to use native mysqldump you have to specify file with mysql credentials
+//mysql_config_editor set --login-path=local --host=localhost --user={usename} --password
+if(isset($dbMySQLDump)){
+    define('HEURIST_DB_MYSQLDUMP', $dbMySQLDump);
+}
+
 /*  @todo - redirect to system config error page
 
 if (!($dbAdminUsername && $dbAdminPassword)) { //if these are not specified then we can't do anything

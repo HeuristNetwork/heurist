@@ -404,7 +404,7 @@ class DbUtils {
                     return false;
             }
             
-            $db_dump_file = DbUtils::databaseDump( $verbose, $database_name, true );
+            $db_dump_file = DbUtils::databaseDump( $database_name, null, null, $verbose );
             
             if ($db_dump_file===false) {
                     $msg = $msg_prefix.'Failed to dump database to a .sql file';
@@ -512,10 +512,10 @@ class DbUtils {
     * Dump all tables (except csv import cache) into text files
     * It is assumed that all tables exist and empty in target db
     *
-    * @param mixed $db
+    * @param mixed $database_name - database name if not defined - current database
     * @param mixed $verbose
     */
-    public static function databaseDump( $verbose=true, $database_name=null, $with_triggers=true) {
+    public static function databaseDump($database_name=null, $database_dumpfile=null, $dump_options=null, $verbose=false ) {
         
         self::initialize();
         
@@ -523,7 +523,7 @@ class DbUtils {
         
         $mysqli = self::$mysqli;
 
-        if($database_name!=HEURIST_DBNAME){ //switch to database
+        if(defined('HEURIST_DBNAME') && $database_name!=HEURIST_DBNAME){ //switch to database
            $connected = mysql__usedatabase($mysqli, $database_name_full);
         }else{
            $connected = true;
@@ -532,44 +532,99 @@ class DbUtils {
         if($connected){
             
             // dump will be created in database upload folder
-            $directory = HEURIST_FILESTORE_ROOT.$database_name;
-            /*if(!folderCreate($directory, true)){
-                self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Cannot create folder for deleteted databases');                
-                if($verbose) echo 'Unable to create folder '.$directory;
-                return false;
-            }*/
-            
-            // Create DUMP file
-            $filename = $directory.'/'.$database_name_full.'_'.time().'.sql';
-            
-            if(true){
+            if($database_dumpfile==null){
+                $directory = HEURIST_FILESTORE_ROOT.$database_name;
+                /*if(!folderCreate($directory, true)){
+                    self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Cannot create folder for deleteted databases');                
+                    if($verbose) echo 'Unable to create folder '.$directory;
+                    return false;
+                }*/
                 
-                if($with_triggers){
-                    $dump_options = array(
-                            'add-drop-table' => true,
-                            'skip-triggers' => false,
-                            'single-transaction' => true,
-                            'add-drop-trigger' => true,
-                            'databases' => true,
-                            'add-drop-database' => true);
-                }else{
-                    $dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false);
+                // Define dump file name
+                $database_dumpfile = $directory.'/'.$database_name_full.'_'.time().'.sql';
+            }
+
+            if($dump_options==null){
+                $dump_options = array(
+                        'add-drop-table' => true,
+                        'skip-triggers' => false,
+                        'single-transaction' => true,
+                        'add-drop-trigger' => true,
+                        //'databases' => true,
+                        'add-drop-database' => true);
+            }else{
+                //$dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false);
+            }
+            
+            if(defined('HEURIST_DB_MYSQLDUMP')){ // use native mysqldump utility
+            
+                $tables = array();
+                $options = '';
+            
+                foreach($dump_options as $opt => $val){
+                    
+                    if($opt=='include-tables'){
+                        if(is_array($val) && count($val)>0){
+                            $tables = $val;    
+                        }
+                    }else if($val==true){
+                        $options = $options .' --'.$opt;
+                    }
                 }
+                
+                if(count($tables)>0){
+                    $tables = '--tables '.implode(' ', $tables);
+                }else{
+                    $tables = '';
+                }
+            
+                //--log-error=mysqldump_error.log -h {$server_name}
+                //--hex-blob --routines --skip-lock-tables 
+                //-u ".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD."
+                $cmd = escapeshellarg(HEURIST_DB_MYSQLDUMP)
+                ." --login-path=local {$database_name_full} {$options} {$tables} > " 
+                .$database_dumpfile;
+
+//echo $cmd."\n";                
+                $arr_out = array();
+                $return = null;
+                
+                exec($cmd, $arr_out, $return);
+                
+//echo 'return '.$return;                
+//echo print_r($arr_out,true)."\n\n";
+
+                if($return !== 0) {
+                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
+                    
+                    $msg = "mysqldump for {$database_name_full} failed with a return code of {$return}";
+                    if($verbose) echo '<br>'.$msg;
+                    /*
+                    echo "Error message was:\n";
+                    $file = escapeshellarg("mysqldump_error.log");
+                    $message = `tail -n 1 $file`;
+                    echo "- $message\n\n";
+                    */
+                    return false;
+                }
+                            
+            
+            }else if(true){
                 
                 try{
                     $dump = new Mysqldump( $database_name_full, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 
                             'mysql', $dump_options);
                             
-                    $dump->start($filename);
+                    $dump->start($database_dumpfile);
                 } catch (Exception $e) {
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $e->getMessage());
                     return false;
                 }            
 
             }            
-            else{
-                
-                $file = fopen($filename, "a+");
+            else{//NOT USED
+                //create dump manually - all tables without triggers
+                $file = fopen($database_dumpfile, "a+");
                 if(!$file){
                     $msg = 'Unable to open dump file '.$file;
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
@@ -647,16 +702,16 @@ class DbUtils {
             }
             //$mysqli->close();
             
-            chmod($filename, 0777);    
+            chmod($database_dumpfile, 0777);    
 
             // Echo output
             if($verbose) {
-                $size = filesize($filename) / pow(1024,2);
-                echo "<br/>Successfully dumped ".$database_name." to ".$filename;
+                $size = filesize($database_dumpfile) / pow(1024,2);
+                echo "<br/>Successfully dumped ".$database_name." to ".$database_dumpfile;
                 echo "<br/>Size of SQL dump: ".sprintf("%.2f", $size)." MB";
             }
 
-            return $filename;
+            return $database_dumpfile;
             
         }else{
             $msg = 'Failed to connect to database '.$database_name_full;

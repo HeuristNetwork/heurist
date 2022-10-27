@@ -137,6 +137,10 @@ $mysqli = $system->get_mysqli();
 $databases = mysql__getdatabases4($mysqli, false);   
 //DEBUG $databases = array('ACD_Basins','ACD_Candlesticks');
 //$databases = array('arche_proscrits_2019');
+// ARNP_COMET
+//$databases = array('vycao_iNprint_V3');
+    
+//Base_Demeter, efa_cid_vii
 
 $upload_root = $system->getFileStoreRootFolder();
 $backup_root = $upload_root.'DELETED_DATABASES/';
@@ -185,12 +189,16 @@ ini_set('memory_limit','1024M');
 $datetime1 = date_create('now');
 $cnt_archived = 0;
 $email_list = array();
+$email_list_deleted = array();
 
 foreach ($databases as $idx=>$db_name){
     
     if(in_array($db_name,$exclusion_list)){
         continue;
     }
+    //if(strcmp($db_name,'crvr_eglisesXX')<=0){
+    //    continue;
+    //}
     
     if(!mysql__usedatabase($mysqli, $db_name)){
         echo $system->getError()['message']."\n";
@@ -241,6 +249,9 @@ foreach ($databases as $idx=>$db_name){
             
             $res = DbUtils::databaseDrop( false, $db_name, true );
             if($res){
+                    array_push($email_list_deleted, 
+                        "<tr><td>$db_name</td><td>{$usr_owner['ugr_FirstName']} {$usr_owner['ugr_LastName']}</td><td>{$usr_owner['ugr_eMail']}</td></tr>");
+                
                     $server_name = HEURIST_SERVER_NAME;
                     $email_title = 'Your Heurist database '.$db_name.' has been archived';
                     $email_text = <<<EOD
@@ -261,7 +272,7 @@ Heurist is research-led and responds rapidly to evolving user needs - we often t
 For more information email us at support@HeuristNetwork.org and visit our website at HeuristNetwork.org. We normally respond within hours, depending on time zones. We are actively developing new documentation and training resources for version 6 and can make advance copies available on request.                    
 EOD;
                             
-sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $email_text);                
+sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text);                
                 
                 $report .= ' ARCHIVED'; 
                 $cnt_archived++;
@@ -358,89 +369,115 @@ sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $
             
             //$sif_purge = array( 3 => 'import20210531163600');
             $arc_cnt = 0;
-            $cnt_dumped = 10;
+            $cnt_dumped = 0;
             if(true){
             
             foreach($sif_purge as  $sif_id => $sif_table){
                 
                 if(hasTable($mysqli,$sif_table)){
-                    $file_name = $sif_list[$sif_id];
-                    try{
-                        $dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', 
-                            array('include-tables' => array($sif_table),
+                    $file_name = fileNameSanitize($sif_list[$sif_id]);
+                    
+//echo $file_name."\n";                    
+//echo strlen($file_name)."\n";                        
+                    $len = strlen($file_name);
+                    if($len>96){ //100 is max for tar file
+                        $len = $len-100+26;
+                        $file_name = substr($file_name,0,-$len).substr($file_name,-19);
+//echo $file_name."\n";                        
+//echo strlen($file_name)."\n";                        
+                    }
+                    
+                    $dumpfile = $backup_imports2."/".$file_name.'.sql';
+                    
+                    $opts = array('include-tables' => array($sif_table),
                                   'skip-triggers' => true,  
-                                  'add-drop-trigger' => false));
-                        $dumpfile = $backup_imports2."/".fileNameSanitize($file_name).'.sql';  //.$db_name.' '
-                        $dump->start($dumpfile);
-                        
-                        /*
-                        if($summary_size>256){
-                            $destination = $backup_imports.$db_name.' '.$datetime1->format('Y-m-d')
-                                    .($arc_cnt>0?('_'.$arc_cnt):'').'.tar';
-                            $archOK = createBz2Archive($backup_imports2, null, $destination, false);
+                                  'add-drop-trigger' => false);
+                    
+                    
+                    if(false){
+                        $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);    
+                        if($res===false){
+                            $report .= (" Error: unable to generate MySQL database dump for import table $sif_table in $db_name.\n");
+                        }else{
+                            $cnt_dumped++;
+                        }
+                    }else{
+                        try{
+                            $dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', 
+                                            $opts);
+                            $dump->start($dumpfile);
                             
-                            $arc_cnt++;
-                            if(!$archOK){
-                                $report .= " Cannot create archive import tables. Failed to archive $backup_imports2 to $destination";
-                                break;
-                            }
-                        }*/
-            
-                        $cnt_dumped++;            
-                    } catch (Exception $e) {
-                       $report .= (" Error: unable to generate MySQL database dump for import table  $db_name.".$e->getMessage());
+                            $cnt_dumped++;            
+                        } catch (Exception $e) {
+                           $report .= (" Error: unable to generate MySQL database dump for import table $sif_table in $db_name."
+                                .$e->getMessage()."\n");
+                        }
                     }
                 }
             }//foreach
             }
             
-            $archOK = true;
-            if($cnt_dumped>0){
+            if($cnt_dumped>0)
+            {
+                $archOK = true;
                 $destination = $backup_imports.$db_name.' '.$datetime1->format('Y-m-d').'.tar';
                 $archOK = createBz2Archive($backup_imports2, null, $destination, false);
-            }
-            
-            if($archOK){
-                $report .= 'd';
-                //drop tables
-                $query = 'DROP TABLE IF EXISTS '.implode(',', $sif_purge);
-                $mysqli->query($query);
-                $query = 'DELETE FROM sysImportFiles WHERE sif_ID IN ('.implode(',', array_keys($sif_purge)).')';
-                $mysqli->query($query);
-                $report .= ('   done');
-            }else{
-                $report .= " Cannot create archive import tables. Failed to archive $backup_imports2 to $destination";
+                
+                if($archOK){
+                    $report .= 'd';
+                    //drop tables
+                    $query = 'DROP TABLE IF EXISTS '.implode(',', $sif_purge);
+                    $mysqli->query($query);
+                    $query = 'DELETE FROM sysImportFiles WHERE sif_ID IN ('.implode(',', array_keys($sif_purge)).')';
+                    $mysqli->query($query);
+                    $report .= ('   done');
+                }else{
+                    $report .= " Cannot create archive import tables. Failed to archive $backup_imports2 to $destination \n";
+                }
             }
             //remove folder
             folderDelete($backup_imports2);
             chdir($upload_root);
             
             }//no action
+            
             }//cnt>0
         }//sif list
         
-        if(true){
+        if(true){ //alow archive sysArchive
         $arc_count = mysql__select_value($mysqli, 'SELECT count(arc_ID) FROM sysArchive'); //sif_TempDataTable, 
         if($arc_count>50000){
             
             if($arg_no_action){
                     $report .= (' ... sysArchive, n='.$arc_count.', archive');
             }else{
-                    try{
-                        $dumpfile = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d').'.sql';  //.$db_name.' '
-                        
-                        $dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', 
-                            array('include-tables' => array('sysArchive'),
+                
+                $dumpfile = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d').'.sql';  //.$db_name.' '
+                    $opts = array('include-tables' => array('sysArchive'),
                                   'skip-triggers' => true,  
-                                  'add-drop-trigger' => false));
-
-                        //echo $db_name.' purge sysArchive to '.$dumpfile;
+                                  'single-transaction' => false,
+                                  'add-drop-trigger' => false);
+                    
+                    if(false){
+                        $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);
+                    }else{
+                        // old way
+                        try{
+                            $dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', 
+                                $opts);
+                            //echo $db_name.' purge sysArchive to '.$dumpfile;
+                            $dump->start($dumpfile);
+                            //echo $db_name.' ... dumped ';
+                            $res = true;
+                        } catch (Exception $e) {
+                            $report .= ("Error: ".$e->getMessage()."\n");
+                            $res = false;
+                        }
+                    }
                         
-                        $dump->start($dumpfile);
-            
-                        //echo $db_name.' ... dumped ';
-                        
-                        
+                    if($res===false){
+                        $report .= (" Error: unable to generate MySQL database dump $dumpfile for sysArchive table in $db_name.\n");
+                    }else{
                         $destination = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d');
                         
                         if( extension_loaded('bz2') ){
@@ -458,16 +495,28 @@ sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $
                         
                         if($archOK){
                             //clear table
-                            $query = 'DELETE FROM sysArchive WHERE arc_ID>0';
+//                            $query = 'DELETE FROM sysArchive WHERE arc_ID>0';
+                            $query = 'DROP TABLE sysArchive';
                             $mysqli->query($query);
+                            $mysqli->query("CREATE TABLE sysArchive (
+  arc_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key of archive table',
+  arc_Table enum('rec','cfn','crw','dtg','dty','fxm','ont','rst','rtg','rty','rcs','trm','trn','urp','vcb','dtl','rfw','rrc','snd','cmt','ulf','sys','lck','tlu','ugr','ugl','bkm','hyf','rtl','rre','rem','rbl','svs','tag','wprm','chunk','wrprm','woot') NOT NULL COMMENT 'Identification of the MySQL table in which a record is being modified',
+  arc_PriKey int(10) unsigned NOT NULL COMMENT 'Primary key of the MySQL record in the table being modified',
+  arc_ChangedByUGrpID smallint(5) unsigned NOT NULL COMMENT 'User who is logged in and modifying this data',
+  arc_OwnerUGrpID smallint(5) unsigned default NULL COMMENT 'Owner of the data being modified (if applicable eg. records, bookmarks, tags)',
+  arc_RecID int(10) unsigned default NULL COMMENT 'Heurist record id (if applicable, eg. for records, bookmarks, tag links)',
+  arc_TimeOfChange timestamp NOT NULL default CURRENT_TIMESTAMP COMMENT 'Timestamp of the modification',
+  arc_DataBeforeChange mediumblob COMMENT 'A representation of the data in the MySQL record before the mod, may be a diff',
+  arc_ContentType enum('del','raw','zraw','diff','zdiff') NOT NULL default 'raw' COMMENT 'Format of the data stored, del=deleted, raw=text dump, Diff=delta, Z=zipped indicates ',
+  PRIMARY KEY  (arc_ID),
+  KEY arc_Table (arc_Table,arc_ChangedByUGrpID,arc_OwnerUGrpID,arc_RecID,arc_TimeOfChange)
+) ENGINE=InnoDB COMMENT='An archive of all (or most) changes in the database to allow'");
+                            
                             $report .= (' ... sysArchive, n='.$arc_count.', archived');
                         }else{
                             $report .= ("Cannot create archive sysArchive table. Failed to archive $dumpfile to $destination");
                         }
                         unlink($dumpfile);                        
-                        
-                    } catch (Exception $e) {
-                        $report .= ("Error: unable to generate MySQL database dump for sysArchive table in $db_name.".$e->getMessage());
                     }
             }   
             
@@ -487,6 +536,11 @@ sendEmail(array($usr_owner['ugr_eMail'], HEURIST_MAIL_TO_ADMIN), $email_title, $
 
 if(!$arg_no_action){
     echo $tabs0.'Archived '.$cnt_archived.' databases'.$eol;    
+    
+    if(count($email_list_deleted)>0){
+        $sTitle = 'Archived databases on '.HEURIST_SERVER_NAME;                
+        sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sTitle.' <table>'.implode("\n",$email_list_deleted).'</table>');
+    }
 }
 
 echo ($tabs0.'finished'.$eol);
