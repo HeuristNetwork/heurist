@@ -26,7 +26,7 @@ $.widget( "heurist.resultList", {
     options: {
         widget_id: null, //outdated: user identificator to find this widget custom js script on web/CMS page
         is_h6style: false,
-        view_mode: null, // 'list','icons','thumbs','thumbs3','horizontal','vertical','icons_list','record_content' 
+        view_mode: null, //  list , icons , thumbs , thumbs3 , horizontal , vertical , icons_list , record_content, tabs  
         list_mode_is_table: false, //if table - adjust header columns width to column width in content div
 
         select_mode:null,//none, manager, select_single, select_multi
@@ -556,6 +556,7 @@ $.widget( "heurist.resultList", {
         .css({'overflow-y':'auto'})
         .appendTo( this.element );
         
+        
         if($.isFunction(this.options.onScroll)){
             this._on(this.div_content, {'scroll':this.options.onScroll});
         }
@@ -673,15 +674,20 @@ $.widget( "heurist.resultList", {
 
 
         //------------------
+        var smodes = '<button value="list" class="btnset_radio"/>'
+            +'<button value="icons" class="btnset_radio"/>'
+            +'<button value="thumbs" class="btnset_radio"/>'
+            +'<button value="thumbs3" class="btnset_radio"/>';
+        if(this.options.entityName=='records'){
+            smodes += '<button value="record_content" class="btnset_radio"/>';
+            //smodes += '<button value="tabs" class="btnset_radio"/>';
+        }
+        
+        
         this.view_mode_selector = $( "<div>" )
         //.css({'position':'absolute','right':right_padding+'px'})
         .css({'float':'right','padding':'2px '+right_padding+'px'})
-        .html('<button value="list" class="btnset_radio"/>'
-            +'<button value="icons" class="btnset_radio"/>'
-            +'<button value="thumbs" class="btnset_radio"/>'
-            +'<button value="thumbs3" class="btnset_radio"/>'
-            +(this.options.entityName=='records'?'<button value="record_content" class="btnset_radio"/>':'')
-        )
+        .html(smodes)
         .appendTo( this.div_toolbar );
 
         if(this.options.show_fancybox_viewer){
@@ -704,6 +710,9 @@ $.widget( "heurist.resultList", {
         this.view_mode_selector.find('button[value="record_content"]')
             .button({icon: "ui-icon-template", showLabel:false, label:window.hWin.HR('Record contents')})
             .css('font-size','1em'); //ui-icon-newspaper
+        //this.view_mode_selector.find('button[value="tabs"]')
+        //    .button({icon: "ui-icon-windows", showLabel:false, label:window.hWin.HR('Tab controls')})
+        //    .css('font-size','1em'); //ui-icon-newspaper
         this.view_mode_selector.controlgroup();
         
         this._on( this.view_mode_selector.find('button'), {
@@ -1032,6 +1041,13 @@ $.widget( "heurist.resultList", {
             this.span_info.hide();
         }
         
+        if(this.options.view_mode=='tabs' && this.div_content.tabs('instance')){
+            try{
+                this.div_content.tabs('pagingResize');
+            }catch(ex){
+            }
+        }
+        
         this._adjustHeadersPos();
 
     },
@@ -1101,7 +1117,7 @@ $.widget( "heurist.resultList", {
     applyViewMode: function(newmode, forceapply){
 
         
-        var allowed = ['list','icons','thumbs','thumbs3','horizontal','vertical','icons_list','record_content'];
+        var allowed = ['list','icons','thumbs','thumbs3','horizontal','vertical','icons_list','record_content','tabs'];
         
         if(newmode=='icons_expanded') newmode=='record_content'; //backward capability 
 
@@ -1121,6 +1137,8 @@ $.widget( "heurist.resultList", {
             forceapply = this._expandAllDivs;
             this._expandAllDivs = false;
         }
+        
+        var old_mode = this.options.view_mode;
 
 
         if(!this.div_content.hasClass(newmode) || forceapply===true){
@@ -1143,7 +1161,7 @@ $.widget( "heurist.resultList", {
             }
             */
             
-            this.div_content.removeClass('list icons thumbs thumbs3 horizontal vertical icons_list');
+            this.div_content.removeClass('list icons thumbs thumbs3 horizontal vertical icons_list tabs');
             this.div_content.addClass(newmode);
             
             this._current_view_mode = newmode;
@@ -1190,7 +1208,8 @@ $.widget( "heurist.resultList", {
                         'min-height':w 
                     });
                 
-            }else{
+            }
+            else{
                 this.div_content.css('overflow-y','auto');
                 
                 if(newmode=='list' && this.options.list_mode_is_table){
@@ -1212,11 +1231,13 @@ $.widget( "heurist.resultList", {
         //show hide table header
         if($.isFunction(this.options.rendererHeader)){
             
-            var header_html = (this.options.view_mode=='list')?this.options.rendererHeader():'';
+            var header_html = (this.options.view_mode=='list')
+                    ?this.options.rendererHeader():'';
             
             //create div for table header
             if( window.hWin.HEURIST4.util.isnull(this.div_content_header )){
-                    this.div_content_header = $('<div>').addClass('table_header')
+                    this.div_content_header = $('<div>')
+                        .addClass('table_header')
                         .insertBefore(this.div_content);
                     if(this.options.list_mode_is_table){
                         this.div_content_header.css('font-size', '10px');
@@ -1229,6 +1250,10 @@ $.widget( "heurist.resultList", {
                 this.div_content_header.html( header_html ).show(); //css('display','table');
             }
         } 
+        if(this.options.view_mode=='tabs' || old_mode=='tabs'){
+            //this._renderTabHeader(); //add <ul> with list of records to div_content
+            this._renderPage(this.current_page);
+        }
     
         this._adjustHeadersPos();
         //this.element.find('input[type=radio][value="'+newmode+'"]').prop('checked', true);
@@ -1269,6 +1294,7 @@ $.widget( "heurist.resultList", {
         
 
         if(this.div_content){
+            
             var eles = this.div_content.find('div.recordTitle');
             $.each(eles,function(i,e){if($(e).tooltip('instance')) $(e).tooltip('destroy');});
             eles = this.div_content.find('div.rolloverTooltip');
@@ -1276,6 +1302,22 @@ $.widget( "heurist.resultList", {
             
             var $allrecs = this.div_content.find('.recordDiv');
             this._off( $allrecs, "click");
+            //this.div_content.empty();
+            
+            if(this.div_content.tabs('instance')){
+                //this.div_content.tabs('paging', {}); 
+                var keep_top = this.div_content.css('top');
+                var keep_classes = this.div_content.attr('class');
+                
+                this.div_content.tabs( 'destroy' ); 
+                this.div_content.remove();
+                this.div_content = $( "<div>" )
+                //.addClass('div-result-list-content ent_content_full')
+                .addClass(keep_classes)
+                .css({'overflow-y':'auto',top:keep_top})
+                .insertAfter( this.div_toolbar );
+            }
+            
             this.div_content[0].innerHTML = message?message:'';//.empty();  //clear
         }
 
@@ -1549,7 +1591,7 @@ $.widget( "heurist.resultList", {
         function fld(fldname){
             return recordset.fld(record, fldname);
         }
-
+        
         /*
         0 .'bkm_ID,'
         1 .'bkm_UGrpID,'
@@ -2615,19 +2657,29 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         }
         
         if(rdiv && rdiv.length==1){
-        
-            var spos = this.div_content.scrollTop(); //current pos
-            var spos2 = rdiv.position().top; //relative position of record div
-            var offh = spos2 + rdiv.height() - this.div_content.height() + 10;
-           
-            if(spos2 < 0 || to_top_of_viewport===true){ //above viewport
-                this.div_content.scrollTop(spos+spos2);
-            }else if ( offh > 0 )
-            {
-                var newpos = spos + offh;
-                if(newpos<0) newpos = 0;
+            
+            if(this.options.view_mode=='tabs'){
                 
-                this.div_content.scrollTop( newpos );
+                var active_tab_index = this.div_content
+                    .find('ul[role="tablist"]')
+                    .find('a[href="#rec_'+selected+'"]').parent('li').index();
+                if(active_tab_index>=0)
+                    this.div_content.tabs({active:active_tab_index});
+                
+            }else{
+                var spos = this.div_content.scrollTop(); //current pos
+                var spos2 = rdiv.position().top; //relative position of record div
+                var offh = spos2 + rdiv.height() - this.div_content.height() + 10;
+               
+                if(spos2 < 0 || to_top_of_viewport===true){ //above viewport
+                    this.div_content.scrollTop(spos+spos2);
+                }else if ( offh > 0 )
+                {
+                    var newpos = spos + offh;
+                    if(newpos<0) newpos = 0;
+                    
+                    this.div_content.scrollTop( newpos );
+                }
             }
         }
     },
@@ -3062,41 +3114,119 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         }
         
         
-        this.clearAllRecordDivs(null);
         
         var recs = recordset.getRecords();
         var rec_order = recordset.getOrder();
         var rec_toload = [];
         var rec_onpage = [];
+        
+        //for active tab
+        var tab_active_index = 0;
+        var curr_idx = 0;
+        var selected_recid = this.getSelected(true);
+        selected_recid = (selected_recid && selected_recid.length>0)?selected_recid[0]:0;
 
-        var html = '', html_groups = {}, recID;
+        this.clearAllRecordDivs(null);
+        
+        var html = '', html_groups = {}, recID, tab_header = '', stitle;
         for(; (idx<len && this._count_of_divs<pagesize); idx++) {
             recID = rec_order[idx];
             if(recID){
-                if(recs[recID]){
-                    //var recdiv = this._renderRecord(recs[recID]);
-                    var rec_div = this._renderRecord_html(recordset, recs[recID]);
-                    if(this.options.groupByField){
-                        var grp_val = recordset.fld(recs[recID], this.options.groupByField);
-                        if(!html_groups[grp_val]) html_groups[grp_val] = '';
-                        html_groups[grp_val] += rec_div;
-                    }else{
-                        html  += rec_div;
-                    }
-                    rec_onpage.push(recID);
+                if(this.options.view_mode=='tabs'){
                     
-                }else{
-                    //record is not loaded yet
-                    html  += this._renderRecord_html_stub( recID );    
-                    if(this.options.supress_load_fullrecord===false) rec_toload.push(recID);
-                }
+                    if(recs[recID]){
+                        if(selected_recid==recID) tab_active_index = curr_idx;
+                        
+                        stitle = (recs[recID]?window.hWin.HEURIST4.util.htmlEscape(
+                                    window.hWin.HEURIST4.util.stripTags(recordset.fld(recs[recID], 'rec_Title')))
+                                    :recID);
+                        
+                        tab_header += ('<li><a href="#rec_'+recID+'" title="'+stitle+'">'
+                            +stitle+'</a></li>');    
 
+                        html  += '<div class="recordDiv" id="rec_'+recID+'"' 
+                            +' recid="'+recID+'"></div>';
+                    }else{
+                        if(this.options.supress_load_fullrecord===false){
+                            rec_toload.push(recID);  
+                        }else{
+                            break;
+                        } 
+                    }
+                    curr_idx++;    
+                }else{
+            
+                    if(recs[recID]){
+                        //var recdiv = this._renderRecord(recs[recID]);
+                        var rec_div = this._renderRecord_html(recordset, recs[recID]);
+                        if(this.options.groupByField){
+                            var grp_val = recordset.fld(recs[recID], this.options.groupByField);
+                            if(!html_groups[grp_val]) html_groups[grp_val] = '';
+                            html_groups[grp_val] += rec_div;
+                        }else{
+                            html  += rec_div;
+                        }
+                        rec_onpage.push(recID);
+                        
+                    }else{
+                        //record is not loaded yet
+                        html  += this._renderRecord_html_stub( recID );    
+                        if(this.options.supress_load_fullrecord===false) rec_toload.push(recID);
+                    }
+                }
                 this._count_of_divs++;
                 /*this._on( recdiv, {
                 click: this._recordDivOnClick
                 });*/
             }
         }
+
+        //activate tab mode        
+        if(this.options.view_mode=='tabs'){
+            if(rec_toload.length>0){
+                this._loadFullRecordData( rec_toload );    
+            }else if(html){
+                
+                this.div_content[0].innerHTML += '<ul>'+tab_header+'</ul>';
+                this.div_content[0].innerHTML += html;
+                this.div_content.tabs({activate:function( event, ui ) {
+                        //load content for record 
+                        var recID = ui.newPanel.attr('recid');
+                        if(recID>0){
+                            that.div_content.find('div.recordDiv')
+                            
+                            that.expandDetailsInline( recID );
+                            //trigger selection
+                            that.div_content.find('div.recordDiv').removeClass('selected');
+                            that.div_content.find('div.recordDiv[recid="'+recID+'"]').addClass('selected');
+                            that._currentMultiSelection = [recID];
+
+                            that.triggerSelection();
+                            that.div_content.find('div.recordDiv[recid="0"]').hide(); //overview
+                        }else if(recID==0){
+                            that.closeExpandedDivs();
+                        }
+                    },active:-1});
+                this.div_content
+                    .tabs({active:tab_active_index});
+
+                var $tabs =this.div_content.find('ul[role="tablist"]').find('a');
+                var max_char = 20;
+                $tabs.css({
+                    'max-width': max_char+'ex',
+                    'width': 'auto',
+                    'margin-right': '20px'
+                }).addClass('truncate');
+
+                this.div_content.tabs('paging',{
+                    nextButton: '<span style="font-size:2em;font-weight:900;line-height:5px">&#187;</span>', // Text displayed for next button.
+                    prevButton: '<span style="font-size:2em;font-weight:900;line-height:5px">&#171;</span>' // Text displayed for previous button.
+                });
+                
+            }
+            return;
+        }
+                
         if(this.options.groupByField){
             //Object.keys(html_groups);
             var hasRender = $.isFunction(this.options.rendererGroupHeader);
@@ -3147,6 +3277,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             html = '<div>'+html+'</div>';
         }
         
+
         this.div_content[0].innerHTML += html;
 
         if(this.options.groupByField){ //init show/hide btn for groups
@@ -3186,7 +3317,6 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                         }
                     });
         }
-        
         
         function ___ontooltip(){
                 var ele = $( this );
@@ -3235,7 +3365,8 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
             });
             this.div_content.find('.recordTitleInPlaceOfThumb').css({height: h});
             
-        }else if(this.options.view_mode == 'vertical'){
+        }
+        else if(this.options.view_mode == 'vertical'){
             var w = this.div_content.width();
                 w = (((w<60) ?60 :((w>200)?230:w))-30) + 'px';
             $allrecs.css({
@@ -3379,7 +3510,6 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
         if($.isFunction(this.options.droppable)){
             this.options.droppable.call();
         }
-
         
         // hide logged in only actions
         if(!window.hWin.HAPI4.has_access()){
@@ -3389,35 +3519,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
 
         //rec_toload - list of ids
         //load full record info - record header
-        if(rec_toload.length>0){
-            var that = this;
-
-            that.loadanimation(true);
-
-            if($.isFunction(this.options.searchfull)){
-                //call custom function 
-                this.options.searchfull.call(this, rec_toload, this.current_page, 
-                    function(response){ 
-                        that._onGetFullRecordData(response, rec_toload); 
-                });
-
-            }else{
-
-                var ids = rec_toload.join(',');
-                var request = { q: '{"ids":"'+ ids+'"}',
-                    w: 'a',
-                    detail: 'header',
-                    id: window.hWin.HEURIST4.util.random(),
-                    pageno: that.current_page,
-                    source:this.element.attr('id') };
-
-                window.hWin.HAPI4.RecordMgr.search(request, function(response){
-                    that._onGetFullRecordData(response, rec_toload);   
-                });
-            }
-
-
-        }
+        this._loadFullRecordData( rec_toload );
         
         this.setCollected( null );
         
@@ -3460,6 +3562,39 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
     //
     //
     //
+    _loadFullRecordData: function( rec_toload ) {
+        if(rec_toload.length>0){
+            var that = this;
+
+            that.loadanimation(true);
+
+            if($.isFunction(this.options.searchfull)){
+                //call custom function 
+                this.options.searchfull.call(this, rec_toload, this.current_page, 
+                    function(response){ 
+                        that._onGetFullRecordData(response, rec_toload); 
+                });
+
+            }else{
+
+                var ids = rec_toload.join(',');
+                var request = { q: '{"ids":"'+ ids+'"}',
+                    w: 'a',
+                    detail: 'header',
+                    id: window.hWin.HEURIST4.util.random(),
+                    pageno: that.current_page,
+                    source:this.element.attr('id') };
+
+                window.hWin.HAPI4.RecordMgr.search(request, function(response){
+                    that._onGetFullRecordData(response, rec_toload);   
+                });
+            }
+        }
+    },
+    
+    //
+    //
+    //
     _onGetFullRecordData: function( response, rec_toload ){
 
         this.loadanimation(false);
@@ -3471,6 +3606,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 this._currentRecordset.fillHeader( resp );
 
                 //remove records that we can't recieve data
+                var i;
                 for(i in rec_toload){
                     var recID = rec_toload[i];
                     if(resp.getById(recID)==null){
