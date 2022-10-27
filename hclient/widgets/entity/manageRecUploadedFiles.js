@@ -144,7 +144,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 "searchrecuploadedfilesonaddpopup": function() {this._additionMode='local'; this.addEditRecord(-1); },
                 "searchrecuploadedfilesonaddany": function() { this._additionMode='any'; this.addEditRecord(-1); },
                 "searchrecuploadedfilesonaddlocal": this._uploadFileAndRegister,   //browse, register and exit at once
-                "searchrecuploadedfilesondownload": this._downloadFileRefs
+                "searchrecuploadedfilesondownload": this._downloadFileRefs,
+                "searchrecuploadedfilesonremoveunused": this._deleteUnused
         });
 
         return true;
@@ -966,6 +967,30 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_output.php?db=' + window.hWin.HAPI4.database + '&file_refs=1&ids=' + ids.join(',');
         window.open(url, '_blank');
-    }
+    },
+
+    //
+    // 
+    //
+    _deleteUnused: function(){
+
+        var that = this;
+
+        var ids = this.recordList ? this.recordList.resultList('getRecordSet').getIds() : 'all';
+        var request = {
+            'a': 'batch',
+            'entity': that.options.entity.entityName,
+            'delete_unused': 'all' // ids
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+        function(response){
+            if(response.status == window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgFlash(response.data + ' files deleted', 3000);
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
+    },
     
 });

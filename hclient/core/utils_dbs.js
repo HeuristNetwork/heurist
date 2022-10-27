@@ -768,7 +768,14 @@ window.hWin.HEURIST4.dbs = {
             
         switch ($detailType) {
             case 'separator':
-                return null;
+                $res = {};
+                $res['checkbox'] = false;
+                if($dt_label == '-'){
+                    $dt_title = '<span style="display: inline-block; width: 150px;"><hr></span>'; //replace empty header w/ line
+                }else{
+                    $dt_title = '<span style="font-weight:bold">' + $dt_title + '</span>';
+                }
+                break;
             case 'enum':
             case 'relationtype':
 
@@ -921,7 +928,7 @@ window.hWin.HEURIST4.dbs = {
             $res['key'] = "f:"+$dtID;
             if($mode==4 || $mode==5 || $mode==6){
                     
-                var $stype = ($detailType=='resource' || $detailType=='relmarker')?'':$Db.baseFieldType[$detailType];
+                var $stype = ($detailType=='resource' || $detailType=='relmarker' || $detailType=='separator')?'':$Db.baseFieldType[$detailType];
                 if($reverseRecTypeId!=null){
                     //before 2017-06-20  $stype = $stype."linked from";
                     $res['isreverse'] = 1;
@@ -978,7 +985,7 @@ window.hWin.HEURIST4.dbs = {
     //========================= end internal 
 
         if(fieldtypes==null){
-            fieldtypes = ['integer','date','freetext','year','float','enum','resource','relmarker','relationtype'];
+            fieldtypes = ['integer','date','freetext','year','float','enum','resource','relmarker','relationtype','separator'];
         }else if(!$.isArray(fieldtypes) && fieldtypes!='all'){
             fieldtypes = fieldtypes.split(',');
         }
@@ -1768,8 +1775,21 @@ window.hWin.HEURIST4.dbs = {
 
                 //sort children by name
                 children.sort(function(a,b){
-                    return recset.fld(a,'trm_Label').toLowerCase()<recset.fld(b,'trm_Label').toLowerCase()?-1:1;
-//return recset.fld(a,'trm_Label').localeCompare(recset.fld(b,'trm_Label')) ? 1 : -1;
+                    let a_name = recset.fld(a,'trm_Label').toLowerCase();
+                    let b_name = recset.fld(b,'trm_Label').toLowerCase();
+                    let a_order = recset.fld(a,'trm_OrderInBranch');
+                    let b_order = recset.fld(b,'trm_OrderInBranch');
+
+                    a_order = (!a_order || a_order < 1) ? null : a_order;
+                    b_order = (!b_order || b_order < 1) ? null : b_order;
+
+                    if(a_order == null && b_order == null){ // alphabetic
+                        return a_name < b_name ? -1 : 1;
+                    }else if(a_order == null || b_order == null){ // null is first
+                        return (a_order == null) ? -1 : 1;
+                    }else{ // branch order
+                        return a_order < b_order ? -1 : 1;
+                    }
                 });
                 
                 if(mode=='tree'){

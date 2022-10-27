@@ -263,6 +263,10 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                     if(data.node.parent && data.node.parent.data.type == 'resource' || data.node.parent.data.type == 'relmarker'){ // add left border+margin
                         $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
                     }
+                    if(data.node.data.type == 'separator'){
+                        $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
+                        $(data.node.span.childNodes[1]).hide(); //checkbox for separators
+                    }
                 },
                 lazyLoad: function(event, data){
                     var node = data.node;
@@ -287,6 +291,10 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                 },
                 click: function(e, data){
 
+                    if(data.node.data.type == 'separator'){
+                        return false;
+                    }
+
                     var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
 
                     if(isExpander){
@@ -305,6 +313,9 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                     }
                 },
                 dblclick: function(e, data) {
+                    if(data.node.data.type == 'separator'){
+                        return false;
+                    }
                     data.node.toggleSelected();
                 },
                 keydown: function(e, data) {

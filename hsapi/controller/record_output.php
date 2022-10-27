@@ -315,6 +315,8 @@ function output_CSV($system, $data, $params){
     $include_resource_titles =  (@$params['prefs']['include_resource_titles']==1);
     $include_term_hierarchy = (@$params['prefs']['include_term_hierarchy']==1);
     $include_file_url = (@$params['prefs']['include_file_url']==1);
+    $include_record_url_html = (@$params['prefs']['include_record_url_html']==1);
+    $include_record_url_xml = (@$params['prefs']['include_record_url_xml']==1);
 
     $fields = @$params['prefs']['fields'];
     $details = array();  //array of detail fields included into output
@@ -498,13 +500,52 @@ function output_CSV($system, $data, $params){
                     ];
                 }
 
-                if($field_type=='file' && $include_file_url){
+                if($dt_id == 'rec_ID'){
+                    if($include_record_url_html){ // Record URL in HTML
+                        array_push($headers[$rt], 'Record URL (HTML)' );
+                        $columnInfo[$rt][] = [
+                            'index' => count($headers[$rt]) - 1,
+                            'type' => 'record_url_html',
+                            'field_id' => $fieldFullID,
+                        ];
+                    }
+                    if($include_record_url_xml){ // Record URL in XML
+                        array_push($headers[$rt], 'Record URL (XML)' );
+                        $columnInfo[$rt][] = [
+                            'index' => count($headers[$rt]) - 1,
+                            'type' => 'record_url_html',
+                            'field_id' => $fieldFullID,
+                        ];
+                    }
+                }
+
+                if($field_type=='file'){ // Add extra details for files
+                    array_push($headers[$rt], $field_name.' ID' );
+                    $columnInfo[$rt][] = [
+                        'index' => count($headers[$rt]) - 1,
+                        'type' => 'file_id',
+                        'field_id' => $fieldFullID,
+                    ];
+                    array_push($headers[$rt], $field_name.' Name' );
+                    $columnInfo[$rt][] = [
+                        'index' => count($headers[$rt]) - 1,
+                        'type' => 'file_name',
+                        'field_id' => $fieldFullID,
+                    ];
+                    array_push($headers[$rt], $field_name.' Path' );
+                    $columnInfo[$rt][] = [
+                        'index' => count($headers[$rt]) - 1,
+                        'type' => 'file_path',
+                        'field_id' => $fieldFullID,
+                    ];
+                    if($include_file_url){
                         array_push($headers[$rt], $field_name.' URL' );
                         $columnInfo[$rt][] = [
                             'index' => count($headers[$rt]) - 1,
                             'type' => 'file_url',
                             'field_id' => $fieldFullID,
                         ];
+                    }
                 }
                 
                 //add title for resource fields
@@ -649,6 +690,10 @@ function output_CSV($system, $data, $params){
             $enum_code = array();
             $resource_titles = array();
             $file_urls = array();
+            $record_urls = array();
+            $file_ids = array();
+            $file_names = array();
+            $file_paths = array();
 
             $constr_rt_id = 0;
             if(strpos($dt_id,':')>0){ //for constrained resource fields
@@ -760,7 +805,20 @@ function output_CSV($system, $data, $params){
                             }
                         }else if($dt_type=='file'){
                             foreach($values as $val){
-                                $vals[] = $val['file']['ulf_ObfuscatedFileID'];
+
+                                $vals[] = 'ulf_' . $val['file']['ulf_ObfuscatedFileID'];
+
+                                $file_ids[] = $val['file']['ulf_ID'];
+                                $file_names[] = !empty($val['file']['ulf_OrigFileName']) ? $val['file']['ulf_OrigFileName'] : '_remote'; //$val['file']['ulf_ExternalFileReference']
+
+                                if(!empty($val['file']['fullPath'])){
+                                    $file_paths[] = $val['file']['fullPath'];
+                                }else if(!empty($val['file']['ulf_ExternalFileReference'])){
+                                    $file_paths[] = $val['file']['ulf_ExternalFileReference']; //'_remote'
+                                }else{
+                                    $file_paths[] = '';
+                                }
+
                                 if($include_file_url){
                                     if(@$val['file']['ulf_ExternalFileReference']){
                                         $file_urls[] = $val['file']['ulf_ExternalFileReference'];
@@ -811,8 +869,13 @@ function output_CSV($system, $data, $params){
 
                         }else if($include_resource_titles && $dt_type=='resource'){
                             $resource_titles[] = '';
-                        }else if($include_file_url && $dt_type=='file'){
-                            $file_urls[] = '';
+                        }else if($dt_type=='file'){
+                            $file_ids[] = '';
+                            $file_names[] = '';
+                            $file_paths[] = '';
+                            if($include_file_url){
+                                $file_urls[] = '';
+                            }
                         }
                     }
 
@@ -825,6 +888,15 @@ function output_CSV($system, $data, $params){
 
             }else if ($dt_id=='rec_RecTypeName'){
                 $value = $defRecTypes['names'][$rty_ID];
+            }else if ($dt_id=='rec_ID'){
+                $value = @$record[$dt_id];
+                $rec_url_base = HEURIST_BASE_URL_PRO . '?db=' . HEURIST_DBNAME . '&recID=' . $value;
+                if($include_record_url_html){ // html
+                    $record_urls[] = $rec_url_base . '&fmt=html';
+                }
+                if($include_record_url_xml){ // xml
+                    $record_urls[] = $rec_url_base;
+                }
             }else{
                 $value = @$record[$dt_id]; //from record header
             }
@@ -838,10 +910,23 @@ function output_CSV($system, $data, $params){
             }else {
                 $record_row[] = $value;
 
-                if (is_array($resource_titles) && count($resource_titles)>0){
+                // Additional File Fields
+                if (count($file_ids)>0){
+                    $record_row[] = implode($csv_mvsep,$file_ids);
+                }
+                if (count($file_names)>0){
+                    $record_row[] = implode($csv_mvsep,$file_names);
+                }
+                if (count($file_paths)>0){
+                    $record_row[] = implode($csv_mvsep,$file_paths);
+                }
+
+                if (count($resource_titles)>0){
                     $record_row[] = implode($csv_mvsep,$resource_titles);    
-                }else if (is_array($file_urls) && count($file_urls)>0){
+                }else if (count($file_urls)>0){
                     $record_row[] = implode($csv_mvsep,$file_urls);    
+                }else if (count($record_urls)>0){
+                    $record_row[] = implode($csv_delimiter,$record_urls); // two separate columns
                 }
             }
 
@@ -963,6 +1048,8 @@ function output_HeaderOnly($system, $data, $params)
     $include_resource_titles =  (@$params['prefs']['include_resource_titles']==1);
     $include_term_hierarchy = (@$params['prefs']['include_term_hierarchy']==1);
     $include_file_url = (@$params['prefs']['include_file_url']==1);
+    $include_record_url_html = (@$params['prefs']['include_record_url_html']==1);
+    $include_record_url_xml = (@$params['prefs']['include_record_url_xml']==1);
     
     $fields = @$params['prefs']['fields'];
     $details = array();  //array of detail fields included into output

@@ -1168,7 +1168,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 //window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
 
                 var allowed_fieldtypes = ['header_ext',
-                'enum','freetext','blocktext',"year","date","integer","float","resource","relmarker"];
+                'enum','freetext','blocktext',"year","date","integer","float","resource","relmarker",'separator'];
                 
                 var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes );
 
@@ -1200,6 +1200,9 @@ $.widget( "heurist.search_faceted_wiz", {
 
                         if(data.node.data.is_generic_fields) { // hide blue arrow for generic fields
                             $(data.node.span.childNodes[1]).hide();
+                        }else if(data.node.data.type == 'separator'){
+                            $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
+                            $(data.node.span.childNodes[1]).hide(); //checkbox for separators
                         }else if(data.node.data.type == 'enum'){ // TODO - Move to CSS for general use when field colours are set out
                             $(data.node.span.childNodes[3]).css('color', '#871F78');
                         }else if(data.node.data.type == 'date'){ // TODO - Move to CSS for general use when field colours are set out
@@ -1264,6 +1267,10 @@ $.widget( "heurist.search_faceted_wiz", {
                     },
                     click: function(e, data){
 
+                        if(data.node.data.type == 'separator'){
+                            return false;
+                        }
+
                         var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
 
                         if(isExpander){
@@ -1277,6 +1284,9 @@ $.widget( "heurist.search_faceted_wiz", {
                         }
                     },
                     dblclick: function(e, data) {
+                        if(data.node.data.type == 'separator'){
+                            return false;
+                        }
                         data.node.toggleSelected();
                     },
                     keydown: function(e, data) {

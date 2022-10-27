@@ -115,7 +115,13 @@
                         "dty_Role":"virtual"
                     }
                 },
-
+                {
+                    "dtID": "trm_OrderInBranch",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden"
+                    }
+                },
                 {
                 "groupHeader": "more",
                 "groupTitleVisible": true,

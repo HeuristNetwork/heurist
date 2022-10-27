@@ -1434,12 +1434,12 @@ $.widget( "heurist.manageEntity", {
                 tabs.tabs('option','active', idx);
             }else if(accordion.length>0 && accordion.accordion('instance')){ // accordion separator
 
-                let accordion_content = ele.parents('.ui-accordion-content');
+                let accordion_content = $ele.parents('.ui-accordion-content');
                 if(!accordion_content.is(':visible')){
                     let id = accordion_content.attr('aria-labelledby');
-                    $.each(ele.parents('.ui-accordion-header'), function(idx, item){
+                    $.each($ele.parents('.ui-accordion:first').find('.ui-accordion-header'), function(idx, item){ // Find corresponding header
                         if($(item).attr('id') == id){
-                            ele.parents('.ui-accordion:first').accordion('option', 'active', idx);
+                            $ele.parents('.ui-accordion:first').accordion('option', 'active', idx);
                             return false;
                         }
                     });

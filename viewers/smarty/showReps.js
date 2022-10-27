@@ -1127,7 +1127,11 @@ function ShowReps( is_snippet_editor ) {
             select: function(e, data) {
             },
             click: function(e, data){
-                
+
+                if(data.node.data.type == 'separator'){
+                    return false;
+                }
+
                 var ele = $(e.originalEvent.target);
                 if(ele.is('a')){
                     
@@ -1166,7 +1170,10 @@ function ShowReps( is_snippet_editor ) {
                 var $span = $(node.span);
                 var new_title = node.title;//debug + '('+node.data.code+'  key='+node.key+  ')';
 
-                if(node.data.type!='enum' && node.data.is_rec_fields == null && node.data.is_generic_fields == null){
+                if(data.node.data.type == 'separator'){
+                    $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
+                    $(data.node.span.childNodes[1]).hide(); //checkbox for separators
+                }else if(node.data.type!='enum' && node.data.is_rec_fields == null && node.data.is_generic_fields == null){
                     var op = '';
                     if(node.data.type=='resource' || node.title=='Relationship'){ //resource
                         op = 'repeat';

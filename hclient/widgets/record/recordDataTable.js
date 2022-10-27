@@ -495,6 +495,10 @@ console.log(name);
                     if(data.node.data.is_generic_fields) { // hide blue arrow for generic fields
                         $(data.node.span.childNodes[1]).hide();
                     }
+                    if(data.node.data.type == 'separator'){
+                        $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
+                        $(data.node.span.childNodes[1]).hide(); //checkbox for separators
+                    }
                 },
                 lazyLoad: function(event, data){
                     var node = data.node;
@@ -542,6 +546,10 @@ console.log(name);
                 },
                 click: function(e, data){
 
+                    if(data.node.data.type == 'separator'){
+                        return false;
+                    }
+
                     var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
 
                     if(isExpander){
@@ -555,6 +563,9 @@ console.log(name);
                     }
                 },
                 dblclick: function(e, data) {
+                    if(data.node.data.type == 'separator'){
+                        return false;
+                    }
                     data.node.toggleSelected();
                 },
                 keydown: function(e, data) {

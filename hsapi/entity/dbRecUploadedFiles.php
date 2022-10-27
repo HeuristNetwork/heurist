@@ -817,6 +817,27 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             }else{
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'No import data has been provided. Ensure that you have enter the necessary CSV rows.<br>Please contact the Heurist team if this problem persists.');
             }
+        }else if(@$this->data['delete_unused']){
+
+            $ids = $this->data['delete_unused'];
+            $where_clause = 'WHERE dtl_ID IS NULL';
+            if(is_array($ids) && count($ids) > 0){ // multiple
+                $where_clause = ' AND ulf_ID IN (' . implode(',', $ids) . ')';
+            }else if(is_int($ids) && $ids > 0){ // single
+                $where_clause = ' AND ulf_ID = ' . $ids;
+            }// else use all
+
+            $query = 'SELECT ulf_ID FROM ' . $this->config['tableName'] . ' LEFT JOIN recDetails ON ulf_ID = dtl_UploadedFileID ' . $where_clause;
+            $to_delete = mysql__select_list2($mysqli, $query);
+
+            if(count($to_delete) > 0){
+                $this->data[$this->primaryField] = $to_delete;
+                $res = $this->delete();
+
+                if($res === true){
+                    $ret = count($to_delete);
+                }
+            }
         }
 
         if($ret===false){
