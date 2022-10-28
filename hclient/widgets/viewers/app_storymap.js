@@ -135,7 +135,21 @@ $.widget( "heurist.app_storymap", {
                                 "recordDivClass":"outline_suppress",
                                 "show_url_as_link":true,
                                 "view_mode":"record_content",
-                                "rendererExpandDetails": this.options.reportElement,
+                                "onSelect": function(selected_ids){
+                                    //if(recID==that.options.storyRecordID)
+                                    if(selected_ids && selected_ids.length>0 
+                                    &&that.options.reportOverviewMode=='inline' && that.options.reportElementMode=='tabs'){
+                                        that._startNewStoryElement( selected_ids[0] );
+                                    }
+                                },
+                                "rendererExpandDetails": function(recset, recID){
+                                    if(recID==that.options.storyRecordID){
+                                        return that.options.reportOverview?that.options.reportOverview:'default';
+                                    }else{
+                                        return that.options.reportElement;
+                                    }
+                                                
+                                },
                                 "empty_remark": 
                         '<h3 class="not-found" style="color:teal;">'
                         + top.HR('There are no visible story points for the selected record (they may exist but not made public)')
@@ -230,7 +244,7 @@ $.widget( "heurist.app_storymap", {
             var css = ' style="height:30px;line-height:30px;display:inline-block;'
                 +'text-decoration:none;text-align: center;font-weight: bold;color:black;'
                 
-            var navbar = $('<div style="top:10px;right:10px;position:absolute;z-index: 800;border: 2px solid #ccc; background:white;'
+            var navbar = $('<div style="top:10px;right:45px;position:absolute;z-index: 800;border: 2px solid #ccc; background:white;'
                 +'background-clip: padding-box;border-radius: 4px;">' //;width:64px;
             +'<a id="btn-prev" '+css+'width:30px;border-right: 1px solid #ccc" href="#" '
                 +'title="Previous" role="button" aria-label="Previous">&lt;</a>'
@@ -288,7 +302,9 @@ $.widget( "heurist.app_storymap", {
             this._mapping = $('#'+this.options.map_widget_id);
         }
         
-        this._btn_clear_story = $('<button style="position:absolute;top:5px;right:10px;z-index:999">Close</button>')
+        this._btn_clear_story = $('<button style="position:absolute;top:5px;right:10px;z-index:999;'
+        +'border: 2px solid #ccc;background: white;background-clip: padding-box; border-radius: 4px;height: 34px;"'        
+        +'">Close</button>')
         .button()
         .hide()
         .insertBefore((this.options.reportOverviewMode=='tab')?this._tabs:this.element.find('#tabCtrl'));
@@ -473,6 +489,7 @@ $.widget( "heurist.app_storymap", {
         }else if(this.options.reportElementMode=='tabs'){
             
             this._resultList.resultList('scrollToRecordDiv', recID, true);
+            this._startNewStoryElement( recID );
             
         }else
         {
@@ -744,6 +761,8 @@ $.widget( "heurist.app_storymap", {
 
         this.clearStory( false );
         
+        this.options.storyRecordID = recID;
+        
         if(this.options.reportOverviewMode=='tab') this._tabs.show(); else this.element.find('#tabCtrl').show();
         
         //loads list of story elements into reulst list
@@ -754,6 +773,11 @@ $.widget( "heurist.app_storymap", {
                 ele.empty(); //to reset scrollbar
                 ele[0].scrollTop = 0;
             }*/
+            if(this.options.reportOverviewMode=='inline' && this.options.reportElementMode=='tabs'){
+                //show overview for current story in inline mode
+                this._resultset.addRecord(recID, {rec_ID:recID, rec_Title:'Overview'}, true);
+            }
+            
             this._resultList.resultList('updateResultSet', this._resultset);
             //add last stub element to allow proper onScroll event for last story element
             if(this.options.reportElementMode=='vertical'){
@@ -857,7 +881,9 @@ $.widget( "heurist.app_storymap", {
             //reportOverviewMode: inline | tab | header | no
             //reportElementMode: vertical | slide | tab
             
-            if(this.options.reportOverviewMode!='no'){ //inline, tab, header
+            if (!((this.options.reportOverviewMode=='no') ||
+              (this.options.reportOverviewMode=='inline' && this.options.reportElementMode=='tabs')))
+            { //inline, tab, header
                 var that = this;
                 this.pnlOverview.addClass('loading').css({'overflow-y':'auto'})
                     .load(infoURL, function(){ 
@@ -877,10 +903,11 @@ $.widget( "heurist.app_storymap", {
                                 that.pnlStoryReport.html(that.pnlOverview.html())
                             }else
                             if(that.options.reportElementMode=='tabs'){
-                                //add overview as a first tab
-                                // @todo
-                                
+                                /* dynamic addition does not work properly
                                 var tabs = that._resultList.find('.div-result-list-content');
+                                tabs.find('div.recordDiv:first').html(that.pnlOverview.html());                                
+
+                                //add overview as a first tab
                                 var tab_header = tabs.find( 'ul[role="tablist"]' );
 
                                 $(('<li><a href="#rec_0">Overview</a></li>')).prependTo(tab_header); 
@@ -896,7 +923,7 @@ $.widget( "heurist.app_storymap", {
                                 
                                 tabs.tabs({active:0});
                                 tabs.tabs( "refresh" );                                
-                                
+                                */
                             }else{
                                 var ele = that._resultList.find('.div-result-list-content');    
                                 $('<div class="recordDiv outline_suppress expanded" recid="0" tabindex="0">')
@@ -1368,7 +1395,7 @@ console.log('>sctop '+ele.scrollTop());
             
             if(this._mapping && this._mapping.length>0){
                 //this._animateStoryElement_A(recID);
-                if(recID==0){
+                if(recID==0 || recID==this.options.storyRecordID){
                     //zoom for entire story
                     //console.log('zoom for entire story');
                     

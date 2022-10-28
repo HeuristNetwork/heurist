@@ -2366,13 +2366,15 @@ $.widget( "heurist.resultList", {
                 //close other expanded recordDivs
                 if(!this._expandAllDivs) this.closeExpandedDivs();
                 
-           
+                var rendererTemplate = null;
                 //expand selected recordDiv and draw record details inline
                 if($.isFunction(this.options.rendererExpandDetails)){
-                    this.options.rendererExpandDetails.call(this, this._currentRecordset, recID);
-                    //this.options.rendererExpandDetails(recID, ele, function(){ ele.removeClass('loading'); });
+                    rendererTemplate = this.options.rendererExpandDetails.call(this, this._currentRecordset, recID);
                 }else {
-                    
+                    rendererTemplate = this.options.rendererExpandDetails?this.options.rendererExpandDetails:'default'; //use renderRecordData.php
+                }
+                if(!window.hWin.HEURIST4.util.isempty(rendererTemplate))
+                {
                     //add new record-expand-info 
                     var ele = $('<div>')
                         .attr('data-recid', recID)
@@ -2419,13 +2421,13 @@ $.widget( "heurist.resultList", {
                     var infoURL;
                     var isSmarty = false;
                     
-                    if( typeof this.options.rendererExpandDetails === 'string' 
-                            && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
+                    if( typeof rendererTemplate === 'string' 
+                            && rendererTemplate.substr(-4)=='.tpl' ){
 
                         infoURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?snippet=1&publish=1&debug=0&q=ids:'
                         + recID 
                         + '&db='+window.hWin.HAPI4.database+'&template='
-                        + encodeURIComponent(this.options.rendererExpandDetails);
+                        + encodeURIComponent(rendererTemplate);
                                 
                         isSmarty = true;
                     }else{
@@ -3202,7 +3204,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                             that._currentMultiSelection = [recID];
 
                             that.triggerSelection();
-                            that.div_content.find('div.recordDiv[recid="0"]').hide(); //overview
+                            //overview that.div_content.find('div.recordDiv[recid="0"]').hide(); 
                         }else if(recID==0){
                             that.closeExpandedDivs();
                         }

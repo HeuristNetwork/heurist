@@ -459,7 +459,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     }else{
                     that.addEditRecord(trm_id);
                     }
-
+                        return null;
                     },*/
                     draggable: function(){
 
