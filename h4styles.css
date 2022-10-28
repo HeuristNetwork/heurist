@@ -2346,7 +2346,7 @@ input[type="file"] {
     border: none;
 }
 .ui-tabs .ui-tabs-nav li a {
-    padding: 5px 10px 9px 10px !important;
+    /*padding: 5px 10px 9px 10px !important;*/
     font-size: 1.2em;
     font-weight: bold;
     /*was padding: 0.2em 0.5em !important; */

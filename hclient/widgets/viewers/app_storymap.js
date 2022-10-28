@@ -143,11 +143,13 @@ $.widget( "heurist.app_storymap", {
                                     }
                                 },
                                 "rendererExpandDetails": function(recset, recID){
-                                    if(recID==that.options.storyRecordID){
-                                        return that.options.reportOverview?that.options.reportOverview:'default';
-                                    }else{
-                                        return that.options.reportElement;
+                                    var rep = (recID==that.options.storyRecordID)
+                                        ?that.options.reportOverview
+                                        :that.options.reportElement;
+                                    if(window.hWin.HEURIST4.util.isempty(rep)){
+                                        rep = 'default';
                                     }
+                                    return rep;
                                                 
                                 },
                                 "empty_remark": 
@@ -241,10 +243,10 @@ $.widget( "heurist.app_storymap", {
             this.pnlStoryReport = $('<div>').css({overflow:'auto'})
                 .appendTo(this.pnlStory);
                 
-            var css = ' style="height:30px;line-height:30px;display:inline-block;'
+            var css = ' style="height:28px;line-height:28px;display:inline-block;'
                 +'text-decoration:none;text-align: center;font-weight: bold;color:black;'
                 
-            var navbar = $('<div style="top:10px;right:45px;position:absolute;z-index: 800;border: 2px solid #ccc; background:white;'
+            var navbar = $('<div style="top:2px;right:46px;position:absolute;z-index: 800;border: 2px solid #ccc; background:white;'
                 +'background-clip: padding-box;border-radius: 4px;">' //;width:64px;
             +'<a id="btn-prev" '+css+'width:30px;border-right: 1px solid #ccc" href="#" '
                 +'title="Previous" role="button" aria-label="Previous">&lt;</a>'
@@ -302,8 +304,8 @@ $.widget( "heurist.app_storymap", {
             this._mapping = $('#'+this.options.map_widget_id);
         }
         
-        this._btn_clear_story = $('<button style="position:absolute;top:5px;right:10px;z-index:999;'
-        +'border: 2px solid #ccc;background: white;background-clip: padding-box; border-radius: 4px;height: 34px;"'        
+        this._btn_clear_story = $('<button style="position:absolute;top:2px;right:12px;z-index:999;'
+        +'border: 2px solid #ccc;background: white;background-clip: padding-box; border-radius: 4px;height: 31px;"'        
         +'">Close</button>')
         .button()
         .hide()
@@ -814,9 +816,9 @@ $.widget( "heurist.app_storymap", {
         
         if(this._btn_clear_story){
             if(this.options.reportOverviewMode=='inline' && this.options.reportElementMode!='vertical'){
-                this._btn_clear_story.button({label:'X'});
+                this._btn_clear_story.button({icon:'ui-icon-circle-b-close', showLabel:false});
             }else{
-                this._btn_clear_story.button({label:top.HR('Close')});
+                this._btn_clear_story.button({label:top.HR('Close'),showLabel:true,icon:null});
             }
             this._btn_clear_story.show();  
         } 
@@ -873,7 +875,7 @@ $.widget( "heurist.app_storymap", {
                         + encodeURIComponent(this.options.reportOverview);
                 isSmarty = true;
             }else{
-                infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
+                infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='  //mapPopup=1&
                         +recID
                         +'&db='+window.hWin.HAPI4.database;
             }
@@ -903,6 +905,10 @@ $.widget( "heurist.app_storymap", {
                                 that.pnlStoryReport.html(that.pnlOverview.html())
                             }else
                             if(that.options.reportElementMode=='tabs'){
+                                //var tab_header = that._resultList.find( '.div-result-list-content > ul[role="tablist"]' );
+                                //tab_header.css('height','38px');
+                                //tab_header.find('.ui-tabs-nav li a').css('padding','5px 12px 9px 12px !important');
+                                
                                 /* dynamic addition does not work properly
                                 var tabs = that._resultList.find('.div-result-list-content');
                                 tabs.find('div.recordDiv:first').html(that.pnlOverview.html());                                
@@ -1338,7 +1344,7 @@ console.log('>sctop '+ele.scrollTop());
                             + encodeURIComponent(this.options.reportElement);
                     isSmarty = true;
                 }else{
-                    infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
+                    infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='  //mapPopup=1&
                             +recID
                             +'&db='+window.hWin.HAPI4.database;
                 }

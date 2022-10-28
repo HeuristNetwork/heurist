@@ -3189,13 +3189,18 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 this._loadFullRecordData( rec_toload );    
             }else if(html){
                 
-                this.div_content[0].innerHTML += '<ul>'+tab_header+'</ul>';
-                this.div_content[0].innerHTML += html;
-                this.div_content.tabs({activate:function( event, ui ) {
+                
+                function __loadTabContent( event, ui ) {
+                    
+                        var recID;
+                        if(ui && ui.newPanel){
+                            recID = ui.newPanel.attr('recid');
+                        }else{
+                            recID = that.div_content.find('div.recordDiv:first').attr('recid');
+                        }
+                    
                         //load content for record 
-                        var recID = ui.newPanel.attr('recid');
                         if(recID>0){
-                            that.div_content.find('div.recordDiv')
                             
                             that.expandDetailsInline( recID );
                             //trigger selection
@@ -3208,21 +3213,33 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                         }else if(recID==0){
                             that.closeExpandedDivs();
                         }
-                    },active:-1});
-                this.div_content
-                    .tabs({active:tab_active_index});
+                }                
+                
+                this.div_content[0].innerHTML += '<ul>'+tab_header+'</ul>';
+                this.div_content[0].innerHTML += html;
+                this.div_content.tabs({activate: __loadTabContent, active:-1});
+                if( this.div_content.find('div.recordDiv').length==1 ){
+                    __loadTabContent();
+                }else{
+                    this.div_content.tabs({active:tab_active_index});
+                }
 
-                var $tabs =this.div_content.find('ul[role="tablist"]').find('a');
+                var tab_header = this.div_content.find('ul[role="tablist"]');
+                tab_header.css('height','auto'); //33px
+                var $tabs = tab_header.find('a');
                 var max_char = 20;
                 $tabs.css({
                     'max-width': max_char+'ex',
                     'width': 'auto',
-                    'margin-right': '20px'
+                    'margin-right': '20px',
+                    'font-size': '1em',
+                    'line-height': '1.5em',
+                    'padding': '0.5em 1em !important'
                 }).addClass('truncate');
 
                 this.div_content.tabs('paging',{
-                    nextButton: '<span style="font-size:2em;font-weight:900;line-height:5px">&#187;</span>', // Text displayed for next button.
-                    prevButton: '<span style="font-size:2em;font-weight:900;line-height:5px">&#171;</span>' // Text displayed for previous button.
+                    nextButton: '<span style="font-size:2em;font-weight:900;line-height:5px;vertical-align: middle">&#187;</span>', // Text displayed for next button.
+                    prevButton: '<span style="font-size:2em;font-weight:900;line-height:5px;vertical-align: middle">&#171;</span>' // Text displayed for previous button.
                 });
                 
             }
