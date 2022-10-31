@@ -2608,7 +2608,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else{ // currently on alpha
 
             suggestion_txt = 'This is the latest (alpha) version. If you are blocked by a new bug you can switch to the '
-                + '<a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_change">strandard version</a>'
+                + '<a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_change">standard version</a>'
                 + ' PLEASE REPORT BUGS.';
 
             this.version_message = $("<div>")
