@@ -473,6 +473,8 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                         str_replace( '^^/', '../', urldecode($record['details']))));
         }else if(@$record['details_encoded']==2){
             $record['details'] = json_decode(urldecode($record['details']), true);
+        }else if(@$record['details_encoded']==3){
+            $record['details'] = json_decode($record['details'], true);
         }
         
         $detailValues = _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $modeImport);
@@ -692,8 +694,8 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
 
     $query = 'INSERT INTO recDetails '.
-    '(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo) '.
-    "VALUES ($recID, ?, ?, $addedByImport, ?, ST_GeomFromText(?) )";
+    '(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo, dtl_HideFromPublic) '.
+    "VALUES ($recID, ?, ?, $addedByImport, ?, ST_GeomFromText(?), ?)";
     $stmt = $mysqli->prepare($query);
 
     /* $query_geo = "INSERT INTO recDetails ".
@@ -701,18 +703,22 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     "VALUES ($recID, ?, ?, $addedByImport, ST_GeomFromText(?) )";
     $stmt_geo = $mysqli->prepare($query2); */
 
+    //  
+
+    
     if ($stmt) {
 
         // $stmt->bind_param('isis', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo);
-        foreach ($detailValues as $values) {
+        foreach ($detailValues as $idx=>$values) {
 
             $dtyID = $values['dtl_DetailTypeID'];
             $dtl_Value = @$values['dtl_Value'];
             if($dtl_Value) $dtl_Value = super_trim($dtl_Value); //including &nbsp; and &xef; (BOM)
             $dtl_UploadedFileID = @$values['dtl_UploadedFileID'];
             $dtl_Geo = @$values['dtl_Geo'];
+            $dtl_HideFromPublic = @$values['dtl_HideFromPublic'];
 
-            $stmt->bind_param('isis', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo);
+            $stmt->bind_param('isisi', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo, $dtl_HideFromPublic);
             if(!$stmt->execute()){
                 $syserror = $mysqli->error;
                 if($use_transaction){
@@ -2395,13 +2401,21 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
     foreach ($details2 as $dtyID => $values) {
 
         $splitValues = array();
+        $idx_in_vis = 0;
 
         foreach ($values as $eltID => $dtl_Value) {
 
             if(!is_array($dtl_Value) && strlen(super_trim($dtl_Value))==0){
+                $idx_in_vis++;
                 continue;
             }
 
+            $dtl_HideFromPublic = null;
+            if(@$record['details_visibility'][$dtyID]){
+                $dtl_HideFromPublic = (@$record['details_visibility'][$dtyID][$idx_in_vis]>0)?1:0;
+            }
+            $idx_in_vis++;
+            
             $dval = array('dtl_DetailTypeID'=>$dtyID);
 
             $dtl_UploadedFileID = null;
@@ -2718,6 +2732,8 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                     $dval['dtl_Value'] = $dtl_Value;
                     $dval['dtl_UploadedFileID'] = $dtl_UploadedFileID;
                     $dval['dtl_Geo'] = $dtl_Geo;
+                    $dval['dtl_HideFromPublic'] = $dtl_HideFromPublic;
+
                     array_push($insertValues, $dval);
                 }
             }else{

@@ -2013,6 +2013,20 @@ background: #8ea9b9
     height: 24px;
 }
 
+.ui-icon-eye-open { 
+    background-image: url(hclient/assets/eye.svg) !important; 
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+}
+
+.ui-icon-eye-crossed { 
+    background-image: url(hclient/assets/eye_crossed.svg) !important; 
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+}
+
 
 .ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon_black.png) !important; }
 

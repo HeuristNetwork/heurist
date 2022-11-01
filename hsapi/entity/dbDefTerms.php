@@ -504,6 +504,7 @@ class DbDefTerms extends DbEntityBase
             if(@$this->records[$idx]['trm_Domain']!='relation') $this->records[$idx]['trm_Domain'] = 'enum';
             if(!@$this->records[$idx]['trm_Status']) $this->records[$idx]['trm_Status'] = 'open';
             if(!(@$this->records[$idx]['trm_InverseTermId']>0)) $this->records[$idx]['trm_InverseTermId'] = null;
+            if(!(@$this->records[$idx]['trm_OrderInBranch']>0)) $this->records[$idx]['trm_OrderInBranch'] = null;
             
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['trm_ID']>0));
         }

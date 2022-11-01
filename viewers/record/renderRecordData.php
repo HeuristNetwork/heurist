@@ -1054,17 +1054,30 @@ function print_public_details($bib) {
         dtl_UploadedFileID,
         dty_Type,
         if(dtl_Geo is not null, ST_asWKT(dtl_Geo), null) as dtl_Geo,
-        if(dtl_Geo is not null, ST_asWKT(ST_Envelope(dtl_Geo)), null) as bd_geo_envelope
+        if(dtl_Geo is not null, ST_asWKT(ST_Envelope(dtl_Geo)), null) as bd_geo_envelope,
+        dtl_HideFromPublic
         from recDetails
         left join defDetailTypes on dty_ID = dtl_DetailTypeID
         left join defRecStructure rdr on rdr.rst_DetailTypeID = dtl_DetailTypeID
         and rdr.rst_RecTypeID = '.$bib['rec_RecTypeID'].'
-        where dtl_RecID = ' . $bib['rec_ID'] .'
-        order by rdr.rst_DisplayOrder is null,
+        where dtl_RecID = ' . $bib['rec_ID'];
+    
+    $detail_visibility_conditions = '  AND (rst_NonOwnerVisibility="public"';
+    if($system->has_access()){
+        $detail_visibility_conditions .= ' OR rst_NonOwnerVisibility="viewable"';
+        $rec_owner  = $bib['rec_OwnerUGrpID']; 
+        if(in_array($rec_owner, $ACCESSABLE_OWNER_IDS)){
+            $detail_visibility_conditions .= ' OR rst_NonOwnerVisibility="hidden"';
+        }
+    }    
+    $detail_visibility_conditions .= ' OR (rst_NonOwnerVisibility="pending" AND IFNULL(dtl_HideFromPublic, 0)!=1))';
+    
+    $query = $query.$detail_visibility_conditions
+        .' order by rdr.rst_DisplayOrder is null,
         rdr.rst_DisplayOrder,
         dty_ID,
-    dtl_ID';      //show null last
-
+        dtl_ID';      //show null last
+    
     $bds = array();
     $bds_temp = array();
     $thumbs = array();
@@ -1097,17 +1110,16 @@ function print_public_details($bib) {
             ($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")');
 
 //print $query;            
-            
-if(false){  //this query fails for maria db        
-        
-        $bds_res = $mysqli->query($query);     
-        if($bds_res){   
-            while ($bd = $bds_res->fetch_assoc()) {
-                $bds_temp[] = $bd;    
+        if(true){  //this query fails for maria db        
+                
+            $bds_res = $mysqli->query($query);     
+            if($bds_res){   
+                while ($bd = $bds_res->fetch_assoc()) {
+                    $bds_temp[] = $bd;    
+                }
+                $bds_res->close();
             }
-            $bds_res->close();
-        }
-}        
+        }        
         
         foreach ($bds_temp as $bd) {
 

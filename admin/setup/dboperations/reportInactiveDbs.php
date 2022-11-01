@@ -18,6 +18,7 @@
 * Dump and bzip the sysArchive table if it exceeds 50,000 records (50K records is ~10MB) 
 *   with a name structured as below.
 *          …HEURIST_FILESTORE/_PURGES_SYSARCHIVE/dbname_yyyy-mm-dd.bz2
+* @TODO: should retain last week of archive records when table is purged
 * 
 * Databases in HEURIST/databases_not_to_purge.txt are ignored
 * 

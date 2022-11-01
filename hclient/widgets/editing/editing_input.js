@@ -425,6 +425,12 @@ $.widget( "heurist.editing_input", {
         }else{
             this.element.find('.btn_input_clear').css({'visibility':'hidden','max-width':0});
         }
+    
+        if(this.f('rst_NonOwnerVisibility')=='pending'){
+            this.element.find('span.field-visibility').show();
+        }else{
+            this.element.find('span.field-visibility').hide();
+        }
         
         if(this.options.show_header){
             this.header.css('display','table-cell');//show();
@@ -469,6 +475,9 @@ $.widget( "heurist.editing_input", {
         if(this.header){
             this.header.remove();
         }
+        this._off(this.element.find('span.field-visibility'), 'click');
+        this.element.find('span.field-visibility').remove();
+        
         var that = this;
         if(this.inputs){
             $.each(this.inputs, function(index, input){ 
@@ -3200,6 +3209,7 @@ console.log('onpaste');
 
         //name="type:1[bd:138]"
 
+        
         //clear button
         //var $btn_clear = $( "<div>")
         if(this.options.showclear_button && this.options.dtID!='rec_URL')
@@ -3293,6 +3303,39 @@ console.log('onpaste');
                 }
             });
         }
+        
+        //adds individual field visibility button
+        var btn_field_visibility = $( '<span>', {title: 'Show/hide value from public'})
+                    .addClass('field-visibility smallicon ui-icon ui-icon-eye-open')
+                    .attr('data-input-id', $input.attr('id'))
+                    .css({
+                        'margin-top': '6px',
+                        'cursor': 'pointer',
+                        'vertical-align': 'top'
+                    })
+                    .insertAfter( $input )
+                    .hide();   //$inputdiv.find('.smallicon:first')
+                    
+        this._on(btn_field_visibility, {
+            'click': function(e){
+                
+                var btn = $(e.target);
+                
+                if(btn.attr('hide_field')=='1'){
+                    btn.removeClass('ui-icon-eye-crossed');            
+                    btn.addClass('ui-icon-eye-open');
+                    btn.attr('hide_field',0);
+                }else{
+                    btn.removeClass('ui-icon-eye-open');            
+                    btn.addClass('ui-icon-eye-crossed');
+                    btn.attr('hide_field',1);
+                }
+                
+                this.isChanged(true);
+                this.onChange();
+            }
+        });
+
 
         //move term error message to last 
         var trm_err = $inputdiv.find('.term-error-message');
@@ -4340,12 +4383,83 @@ console.log('onpaste');
             var ele = this.inputs[idx].parents('.input-div');
             ele.insertAfter(ele_after);
             ele_after = ele;
-        }    },
+        }    
+    },
+    
+    //
+    // returns individual visibilities (order is respected)
+    //
+    getVisibilities: function(){
+        
+        var ress2 = [];
+        if(this.f('rst_NonOwnerVisibility')=='pending')
+        {
+            var idx;
+            var ress = {};
+            
+            
+            for (idx in this.inputs) {
+                var $input = this.inputs[idx];
+                
+                var val = this._getValue($input);
+                if(!window.hWin.HEURIST4.util.isempty( val )){                 
+                
+                    var ele = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
+                    
+                    res = (ele.attr('hide_field')=='1')?1:0; //hide this field from public
+                                        
+                    var ele = $input.parents('.input-div');
+                    var k = ele.index();
+                    ress[k] = res;
+                }
+            }
+            
+            ress2 = [];
+            for(idx in ress){
+                ress2.push(ress[idx]);
+            }
+        }
+        
+        return ress2;  
+    },
+
+    //
+    // returns individual visibilities (order is respected)
+    //
+    setVisibilities: function(vals){
+        
+        if(this.f('rst_NonOwnerVisibility')=='pending')
+        {
+            var idx, k=0;
+            var ress = {};
+            
+            for (idx in this.inputs) {
+
+                var $input = this.inputs[idx];
+                var btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
+                
+                if(vals && k<vals.length && vals[k]==1){
+                    btn.removeClass('ui-icon-eye-open');            
+                    btn.addClass('ui-icon-eye-crossed');
+                    btn.attr('hide_field',1);
+                }else{
+                    btn.removeClass('ui-icon-eye-crossed');            
+                    btn.addClass('ui-icon-eye-open');
+                    btn.attr('hide_field',0);
+                }
+                k++;
+            }
+            this.element.find('span.field-visibility').show();
+        }else{
+            this.element.find('span.field-visibility').hide()
+        }
+    },
+    
     
     //
     // get all values (order is respected)
     //
-    getValues: function(){
+    getValues: function( ){
 
         if(this.options.readonly || this.f('rst_Display')=='readonly'){
             return this.options.values;

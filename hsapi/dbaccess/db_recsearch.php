@@ -2413,15 +2413,16 @@ function recordSearch($system, $params)
                         $chunk_rec_ids = array_slice($all_rec_ids, $offset, 1000); 
                         $offset = $offset + 1000;
 
-                        $ulf_fields = 'f.ulf_ObfuscatedFileID, f.ulf_Parameters';  //4,5
-
+                        $ulf_fields = 'f.ulf_ObfuscatedFileID, f.ulf_Parameters';  //5,6
+                        
                         //search for specific details
                         if($fieldtypes_ids!=null && $fieldtypes_ids!=''){
 
                             $detail_query = 'select dtl_ID, dtl_RecID,'
                             .'dtl_DetailTypeID,'     // 0
                             .'dtl_Value,'            // 1
-                            .'ST_asWKT(dtl_Geo), dtl_UploadedFileID, '
+                            .'ST_asWKT(dtl_Geo), dtl_UploadedFileID, '  //2,3
+                            .'dtl_HideFromPublic, ' //4
                             .$ulf_fields
                             .' FROM recDetails '
                             . ' left join recUploadedFiles as f on f.ulf_ID = dtl_UploadedFileID '
@@ -2431,7 +2432,7 @@ function recordSearch($system, $params)
 
                             if($find_places_for_geo){ //find location in linked Place records
                                 $detail_query = $detail_query . 'UNION  '
-                                .'SELECT dtl_ID, rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo), rl_TargetID, 0, 0 '
+                                .'SELECT dtl_ID, rl_SourceID,dtl_DetailTypeID,dtl_Value, ST_asWKT(dtl_Geo), rl_TargetID, 0, 0, 0 '
                                 .' FROM recDetails, recLinks, Records '
                                 .' WHERE (dtl_Geo IS NOT NULL) ' //'dtl_DetailTypeID='. DT_GEO_OBJECT
                                 .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID in ('. join(',', $rectypes_as_place)
@@ -2444,7 +2445,7 @@ function recordSearch($system, $params)
 
                             if($needCompleteInformation){
                                 $ulf_fields = 'f.ulf_OrigFileName,f.ulf_ExternalFileReference,f.ulf_ObfuscatedFileID,'
-                                .'f.ulf_MimeExt, f.ulf_Parameters';  //4,5,6,7,8
+                                .'f.ulf_MimeExt';  //5,6,7,8
                             }else{
 
                             }
@@ -2454,6 +2455,7 @@ function recordSearch($system, $params)
                             .'dtl_Value,'            // 1
                             .'ST_asWKT(dtl_Geo),'    // 2
                             .'dtl_UploadedFileID,'   // 3
+                            .'dtl_HideFromPublic,'   // 4
                             .$ulf_fields   
                             .' from recDetails
                             left join recUploadedFiles as f on f.ulf_ID = dtl_UploadedFileID
@@ -2492,13 +2494,13 @@ function recordSearch($system, $params)
                                         
                                         if($needCompleteInformation){
                                             $row[3] = $fileinfo['ulf_ID'];
-                                            $row[4] = $fileinfo['ulf_OrigFileName'];
-                                            $row[5] = $fileinfo['ulf_ExternalFileReference'];
-                                            $row[6] = $fileinfo['ulf_ObfuscatedFileID'];
-                                            $row[7] = $fileinfo['ulf_MimeExt'];
+                                            $row[5] = $fileinfo['ulf_OrigFileName'];
+                                            $row[6] = $fileinfo['ulf_ExternalFileReference'];
+                                            $row[7] = $fileinfo['ulf_ObfuscatedFileID'];
+                                            $row[8] = $fileinfo['ulf_MimeExt'];
                                         }else{
-                                            $row[4] = $fileinfo['ulf_ObfuscatedFileID'];
-                                            $row[5] = '';
+                                            $row[5] = $fileinfo['ulf_ObfuscatedFileID'];
+                                            $row[6] = '';
                                         }
                                     }
                                     
@@ -2510,7 +2512,8 @@ function recordSearch($system, $params)
                                     //dtl_Geo @todo convert to JSON
                                     $val = $row[1]; //geotype 
 
-                                    $linked_Place_ID = $row[3]; //linked place record id
+                                    // see $find_places_for_geo 3d value is record id of linked place     
+                                    $linked_Place_ID = $row[3]; //linked place record id 
                                     if($linked_Place_ID>0){
                                         $val = $val.':'.$linked_Place_ID;      //reference to real geo record
                                     }
@@ -2521,31 +2524,32 @@ function recordSearch($system, $params)
 
                                     if($needCompleteInformation){
 
-                                        $params = fileParseParameters($row[8]);//ulf_Parameters - @todo REMOVE
-
                                         $val = array('ulf_ID'=>$row[3],
-                                            'ulf_OrigFileName'=>$row[4],
-                                            'ulf_ExternalFileReference'=>$row[5],
-                                            'ulf_ObfuscatedFileID'=>$row[6],
-                                            'ulf_MimeExt'=>$row[7],
-                                            'mediaType'=>@$params['mediaType'],
-                                            'remoteSource'=>@$params['remoteSource']);
+                                            'ulf_OrigFileName'=>$row[5],
+                                            'ulf_ExternalFileReference'=>$row[6],
+                                            'ulf_ObfuscatedFileID'=>$row[7],
+                                            'ulf_MimeExt'=>$row[8]);
 
 
                                     }else{
-                                        $val = array($row[4], $row[5]); //obfuscated value for fileid and parameters
+                                        $val = array($row[5], $row[6]); //obfuscated value for fileid and parameters
                                     }
 
                                 }else if(@$row[1]!=null) {
-                                    $val = $row[1];
+                                    $val = $row[1]; //dtl_Value
                                 }
 
                                 if($val!=null){
                                     $fieldtypes_in_res[$dtyID] = 1;
                                     if( !array_key_exists($dtyID, $records[$recID]['d']) ){
                                         $records[$recID]['d'][$dtyID] = array();
+                                        $records[$recID]['v'][$dtyID] = array();
                                     }
                                     array_push($records[$recID]['d'][$dtyID], $val);
+                                    
+                                    //individual field visibility
+                                    array_push($records[$recID]['v'][$dtyID], $row[4]); //dtl_HideFromPublic
+                                    
                                 }
                             }//while
                             $res_det->close();
@@ -2765,28 +2769,6 @@ function _createFlatRule(&$flat_rules, $r_tree, $parent_index){
             _createFlatRule($flat_rules, @$rule['levels'], count($flat_rules)-1);
         }
     }
-
-}
-
-// @todo - ready to REMOVE
-// backward capability - remove as soon as old uploadFileOrDefineURL get rid of use 
-//
-function fileParseParameters($params){
-    $res = array();
-    if($params){
-        $pairs = explode('|', $params);
-        foreach ($pairs as $pair) {
-            if(strpos($pair,'=')>0){
-                list($k, $v) = explode("=", $pair); //array_map("urldecode", explode("=", $pair));
-                $res[$k] = $v;
-            }
-        }
-    }
-
-    $res["mediaType"] = (array_key_exists('mediatype', $res))?$res['mediatype']:null;
-    $res["remoteSource"] = (array_key_exists('source', $res))?$res['source']:null;
-
-    return $res;
 
 }
 

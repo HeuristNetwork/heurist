@@ -2961,6 +2961,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
             that._editing.editStructureFlag(this.options.edit_structure===true);
             
+            //
+            // Applies values on record edit form for individual visibility settings
+            //
+            that._editing.setFieldsVisibility( that._currentEditRecordset );
+            
             that._afterInitEditForm();
 
             if(this._keepYPos>0){
@@ -3287,8 +3292,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);
         }
-    },  //_initEditForm_step4                                                    
-    
+    },  //_initEditForm_step4                  
     
     //  -----------------------------------------------------
     //  OVERRIDE
@@ -3473,8 +3477,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 return;
             }
             
-
-       
+            //
+            // get individual visibility setting per field 
+            // See rst_NonOwnerVisibility=pending and dtl_HideFromPublic=1
+            //
+            var fields_visibility = this._editing.getFieldsVisibility(); 
+            
             var request = {ID: this._currentEditID, 
                            RecTypeID: this._currentEditRecTypeID, 
                            URL: fields['rec_URL'],
@@ -3482,7 +3490,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                            NonOwnerVisibility: fields['rec_NonOwnerVisibility'],
                            NonOwnerVisibilityGroups: fields['rec_NonOwnerVisibilityGroups'],
                            ScratchPad: fields['rec_ScratchPad'],
-                           'details': fields}; //it will be encoded in RecordMgr.saveRecord
+                           'details': fields,   //it will be encoded in encodeRequest
+                           'details_visibility': fields_visibility}; //{dty_ID:[1,1,0,0,1],.....  } 
         
             if(fields['no_validation']){
                 request['no_validation'] = 1;

@@ -1386,6 +1386,7 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                     return false;
                 }
             }
+            
             if($dbVerSubSub<6){
                 
                 if(!hasColumn($mysqli, 'defTerms', 'trm_OrderInBranch')){
@@ -1398,10 +1399,39 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
                     }
                 }  
             }
+
+            if($dbVerSubSub<7){
+                
+                if(!hasColumn($mysqli, 'recDetails', 'dtl_HideFromPublic')){
+                    //alter table
+                    $query = "ALTER TABLE `recDetails` ADD `dtl_HideFromPublic` tinyint(1) unsigned default null Comment 'If set, the value is not shown in Record View, column lists, custom reports or anywhere the value is displayed. It may still be used in filter or analysis'";
+                    
+                    $res = $mysqli->query($query);
+                    if(!$res){
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify recDetals to add dtl_HideFromPublic', $mysqli->error);
+                        return false;
+                    }
+                    
+                    //set default value for rst_NonOwnerVisibility as public
+                    $query = "ALTER TABLE `defRecStructure` "
+                    ."CHANGE COLUMN `rst_NonOwnerVisibility` `rst_NonOwnerVisibility` enum('hidden','viewable','public','pending') NOT NULL default 'public' COMMENT 'Allows restriction of visibility of a particular field in a specified record type'";
+                    $res = $mysqli->query($query);
+                    if(!$res){
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to change rst_NonOwnerVisibility', $mysqli->error);
+                        return false;
+                    }
+                    $query = "UPDATE `defRecStructure` SET `rst_NonOwnerVisibility`='public' WHERE rst_ID>0";
+                    $res = $mysqli->query($query);
+                    if(!$res){
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to set rst_NonOwnerVisibility=public', $mysqli->error);
+                        return false;
+                    }
+                }  
+            }
             
             //update version
-            if($dbVerSubSub<6){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=6 WHERE 1');
+            if($dbVerSubSub<7){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=7 WHERE 1');
             }
             
             

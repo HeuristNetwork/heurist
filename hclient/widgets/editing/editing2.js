@@ -636,6 +636,49 @@ function hEditing(_options) {
     }
     
     //
+    // get field visibilities from edit form
+    // returns object {dty_ID:[1,1,0,0,1],.....  }
+    // 
+    function _getFieldsVisibility(){
+        
+        var idx, ele, details = {};
+        for (idx in editing_inputs) {
+            ele = $(editing_inputs[idx]);
+            var dty_ID = ele.editing_input('option', 'dtID'); //field type id
+            
+            if(window.hWin.HEURIST4.util.isNumber(dty_ID) && dty_ID>0){
+                var vals = ele.editing_input('getVisibilities');
+                if(vals && vals.length>0){
+                    details[ dty_ID ] = vals;
+                }
+            }
+        }
+        return details;
+    }
+
+    //
+    // set current visibility setting in edit form from record
+    // 
+    function _setFieldsVisibility( recdata ){
+
+        if(recdata!=null){ //for edit mode
+            record = recdata.getFirstRecord();
+        
+            var idx, ele;
+            for (idx in editing_inputs) {
+                ele = $(editing_inputs[idx]);
+                
+                var dty_ID = ele.editing_input('option', 'dtID'); //field type id
+                
+                if(window.hWin.HEURIST4.util.isNumber(dty_ID) && dty_ID>0){
+                    var visibilities = recdata.getFieldVisibilites(record, dty_ID); //from record['v']
+                    ele.editing_input('setVisibilities', visibilities);
+                }
+            }
+        }
+    }
+    
+    //
     // get values from editing form and assign to underlaying recordset
     //
     function _assignValuesIntoRecord(){
@@ -796,6 +839,20 @@ function hEditing(_options) {
         //
         getValues:function(needArrays){
             return _getValues(needArrays);
+        },
+        
+        //
+        // gets individual visibility setting per field 
+        // 
+        getFieldsVisibility: function(){
+            return _getFieldsVisibility();
+        },
+        
+        //
+        // sets individual visibility setting per field 
+        //        
+        setFieldsVisibility: function(vals) {
+            _setFieldsVisibility( vals );    
         },
         
         //

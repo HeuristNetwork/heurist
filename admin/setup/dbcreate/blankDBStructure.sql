@@ -458,6 +458,7 @@ CREATE TABLE recDetails (
   dtl_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record detail, used to get last updated date for table',
   dtl_Certainty DECIMAL( 3, 2 ) NOT NULL DEFAULT '1.0' COMMENT 'A certainty value for this observation in the range 0 to 1, where 1 indicates complete certainty',
   dtl_Annotation VARCHAR( 250 ) NULL COMMENT 'A short note / annotation about this specific data value - may enlarge for example on the reasons for the certainty value',  
+  dtl_HideFromPublic tinyint(1) unsigned default NULL COMMENT 'If set, the value is not shown in Record View, column lists, custom reports or anywhere the value is displayed. It may still be used in filter or analysis',  
   PRIMARY KEY  (dtl_ID),
   KEY dtl_DetailtypeIDkey (dtl_DetailTypeID),
   KEY dtl_RecIDKey (dtl_RecID),

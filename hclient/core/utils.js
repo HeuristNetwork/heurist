@@ -601,9 +601,12 @@ window.hWin.HEURIST4.util = {
     //
     //
     //
-    encodeRequest: function(request, params){
+    encodeRequest: function(request, params, need_encode){
         
-        var need_encode = window.hWin.HAPI4.sysinfo['need_encode'];
+        if(!(need_encode>0)){
+            need_encode = window.hWin.HAPI4.sysinfo['need_encode'];
+        }
+        
         if(need_encode>0){
             var f_encode = null;
             
@@ -611,6 +614,8 @@ window.hWin.HEURIST4.util = {
                 f_encode = encodeURIComponent;
             }else  if(need_encode==1){
                 f_encode = window.hWin.HEURIST4.util.encodeSuspectedSequences;
+            }else if(need_encode==3){
+                f_encode = JSON.stringify;
             }
                 
             if(f_encode != null){

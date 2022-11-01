@@ -1197,6 +1197,20 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         calcfields:{}, //set of callback functions for calculation fields
                        // is is used tp generate value for rec_Info field for mapping popup
 
+        //
+        //
+        //                                      
+        getFieldVisibilites: function(record, fldId){
+            var res = null;
+            
+            if(!isnull(record) && fldId>0 && 
+                record['v'] && record['v'][fldId])
+            {   
+                res = record['v'][fldId];
+            }
+            return res;
+        },
+                       
         /**
         * Returns field value by fieldname for given record
         */

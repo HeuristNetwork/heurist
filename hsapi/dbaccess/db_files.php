@@ -267,8 +267,8 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
         $query = $query
             .' and (dtl_UploadedFileID is not null)'    // no dty_ID of zero so undefined are ignored
             ." and (fxm_MimeType like 'image%' OR fxm_MimeType='video/youtube' OR fxm_MimeType='video/vimeo' OR fxm_MimeType='audio/soundcloud' "
-            ." OR ulf_OrigFileName LIKE '_iiif%' OR ulf_PreferredSource LIKE 'iiif%')"
-            .' limit 1';
+            ." OR ulf_OrigFileName LIKE '_iiif%' OR ulf_PreferredSource LIKE 'iiif%')" // ORDER BY dtl_DetailTypeID, dtl_ID
+            .' LIMIT 1';
         $fileid = mysql__select_value($system->get_mysqli(), $query);
         
     }
