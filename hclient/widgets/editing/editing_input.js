@@ -197,7 +197,7 @@ $.widget( "heurist.editing_input", {
                 
             }else{ //multiplier button
             
-                this.is_sortable = !that.options.is_faceted_search; 
+                this.is_sortable = !that.is_disabled && !that.options.is_faceted_search; 
             
                 var btn_cont = $('<span>')
                     .css({display:'table-cell', 'vertical-align':'top', //'padding-top':'2px',
@@ -3279,7 +3279,7 @@ console.log('onpaste');
         }
         
         // add visible icon for dragging/sorting field values
-        if(this.is_sortable && !this.enum_buttons){
+        if(this.is_sortable && !this.is_disabled && !this.enum_buttons){
 
             var $btn_sort = $('<span>')
                 .addClass('ui-icon ui-icon-arrow-2-n-s btn_input_move smallicon')
@@ -3294,11 +3294,13 @@ console.log('onpaste');
 
             this._on($inputdiv, {
                 'mouseenter': function(){
+                    if(that.is_disabled) return;
                     if($inputdiv.parent().find('.input-div').length > 1){
                         $inputdiv.find('.btn_input_move').css('display', 'inline-block');
                     }
                 },
                 'mouseleave': function(){
+                    if(that.is_disabled) return;
                     $inputdiv.find('.btn_input_move').css('display', 'none');
                 }
             });
@@ -3318,6 +3320,7 @@ console.log('onpaste');
                     
         this._on(btn_field_visibility, {
             'click': function(e){
+                if(that.is_disabled) return;
                 
                 var btn = $(e.target);
                 
@@ -4525,6 +4528,10 @@ console.log('onpaste');
                 }
             }
             this.is_disabled = is_disabled;
+            
+            if(this.input_cell.sortable('instance')){
+               this.input_cell.sortable('option', 'disabled', is_disabled );
+            }
         }
 
     },

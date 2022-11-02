@@ -64,7 +64,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         _listeners = [],
         _is_callserver_in_progress = false,
 
-        _use_debug = true;
+        _use_debug = false;
 
     /**
     * initialization of hAPI object

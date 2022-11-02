@@ -1062,15 +1062,25 @@ function print_public_details($bib) {
         and rdr.rst_RecTypeID = '.$bib['rec_RecTypeID'].'
         where dtl_RecID = ' . $bib['rec_ID'];
     
-    $detail_visibility_conditions = '  AND (rst_NonOwnerVisibility="public"';
-    if($system->has_access()){
-        $detail_visibility_conditions .= ' OR rst_NonOwnerVisibility="viewable"';
-        $rec_owner  = $bib['rec_OwnerUGrpID']; 
-        if(in_array($rec_owner, $ACCESSABLE_OWNER_IDS)){
-            $detail_visibility_conditions .= ' OR rst_NonOwnerVisibility="hidden"';
+    
+    
+    $rec_owner  = $bib['rec_OwnerUGrpID']; 
+    if(in_array($rec_owner, $ACCESSABLE_OWNER_IDS)){
+        //owner of record can see any field
+        $detail_visibility_conditions = ''; // .= ' OR rst_NonOwnerVisibility="hidden"';
+    }else{
+        $detail_visibility_conditions = array();
+        if($system->has_access()){
+            //logged in user can see viewable
+            $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="viewable")';
         }
-    }    
-    $detail_visibility_conditions .= ' OR (rst_NonOwnerVisibility="pending" AND IFNULL(dtl_HideFromPublic, 0)!=1))';
+        $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="public")';
+        $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="pending" AND IFNULL(dtl_HideFromPublic, 0)!=1)';    
+        
+        
+        $detail_visibility_conditions = ' AND ('.implode(' OR ',$detail_visibility_conditions).')';
+    }
+        
     
     $query = $query.$detail_visibility_conditions
         .' order by rdr.rst_DisplayOrder is null,

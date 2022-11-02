@@ -5,7 +5,7 @@
 The reason is our last changes in access to records. From now the query for smarty returns only list of record IDs. Consequently all relations and pointer fields contain record ID only. As a result the performance has been increased significantly.
 Thus, we need to obtain all records data in code of report template. To achieve this goal we provide $heurist object. This object has 3 public methods
 
-getRecord - returns a record by recID or reload record if record array is given as parameter
+getRecord3 - returns a record by recID or reload record if record array is given as parameter
 getRelatedRecords - returns an array of related record for given recID or record array
 getLinkedRecords - returns array of linkedto and linkedfrom record IDs
 getWootText  - returns text related with given record ID
@@ -34,7 +34,7 @@ public methods
 */
 class ReportRecord {
     
-       protected $loaded_recs;
+       protected $loaded_recs; //cache
 
        protected $rty_Names;
        protected $dty_Types;

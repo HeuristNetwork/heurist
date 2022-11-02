@@ -2918,7 +2918,8 @@ for geo   geo => array(type=> , wkt=> )
 */
 function recordSearchDetails($system, &$record, $need_details) {
 
-    $recID = $record["rec_ID"];
+    $recID = $record['rec_ID'];
+    
     $squery =
     "select dtl_ID,
     dtl_DetailTypeID,
@@ -2932,22 +2933,55 @@ function recordSearchDetails($system, &$record, $need_details) {
     rec_Hash
     from recDetails
     left join defDetailTypes on dty_ID = dtl_DetailTypeID
-    left join Records on rec_ID = dtl_Value and dty_Type = 'resource'
-    where dtl_RecID = $recID";
+    left join Records on rec_ID = dtl_Value and dty_Type = 'resource' ";
+    
+    $swhere = " WHERE dtl_RecID = $recID";
 
     if(is_array($need_details) && count($need_details)>0 ){
 
         if(is_numeric($need_details[0]) && $need_details[0]>0){ //by id
             if(count($need_details)==1){
-                $squery = $squery. ' AND dtl_DetailTypeID = '.$need_details[0];
+                $swhere .= ' AND dtl_DetailTypeID = '.$need_details[0];
             }else{
-                $squery = $squery. ' AND dtl_DetailTypeID in ('.implode(',',$need_details).')';    
+                $swhere .= ' AND dtl_DetailTypeID in ('.implode(',',$need_details).')';    
             }
 
         }else{ //by type
-            $squery = $squery. ' AND dty_Type in ("'.implode('","',$need_details).'")';
+            $swhere .= ' AND dty_Type in ("'.implode('","',$need_details).'")';
         }
     }
+    
+    //individual visibility for fields
+    $rec_owner = @$record['rec_OwnerUGrpID'];
+    $rec_type = @$record['rec_RecTypeID'];
+    
+    if($rec_owner!=null && $rec_owner>0 && $rec_type!=null && $rec_type>0){
+        
+        $usr_groups = $system->get_user_group_ids();
+        
+        if(is_array($usr_groups) && in_array($rec_owner, $usr_groups)){
+            //owner of record can see any field
+            $detail_visibility_conditions = null; // .= ' OR rst_NonOwnerVisibility="hidden"';
+        }else{
+            $detail_visibility_conditions = array();
+            if($usr_groups!=null){
+                //logged in user can see viewable
+                $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="viewable")';
+            }
+            $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="public")';
+            $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="pending" AND IFNULL(dtl_HideFromPublic, 0)!=1)';    
+            
+            
+            $detail_visibility_conditions = ' AND ('.implode(' OR ',$detail_visibility_conditions).')';
+        }
+        
+        if($detail_visibility_conditions!=null){
+            $squery .= 'left join defRecStructure rdr on rdr.rst_DetailTypeID = dtl_DetailTypeID and rdr.rst_RecTypeID = '.$rec_type;
+            $swhere .= $detail_visibility_conditions;
+        }
+    }
+    
+    $squery .= $swhere;
 
     $mysqli = $system->get_mysqli();
     $res = $mysqli->query($squery);
