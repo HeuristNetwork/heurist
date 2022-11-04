@@ -223,7 +223,7 @@ if($isWebPage){ //set in websiteRecord.php
         <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>" 
             <?php print ($open_page_on_init>0)?'data-initid="'.$open_page_on_init.'"':''; ?> 
             data-viewonly="<?php print ($hasAccess)?0:1;?>" 
-            style="position:relative':'');?>">
+            style="position:relative">
         </div>
 <?php
             if(!$is_page_footer_fixed) print $page_footer;
