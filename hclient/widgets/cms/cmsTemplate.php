@@ -219,11 +219,11 @@ if($isWebPage){ //set in websiteRecord.php
         <div id="main-pagetitle" class="ui-heurist-bg-light"></div>       
     </div>
     <div class="ent_content_full  ui-heurist-bg-light"  id="main-content-container"
-            style="top:152px;<?php echo ($is_page_footer_fixed?'bottom:'.$page_footer_height.'px;':''); ?>padding: 5px;">
+            style="top:152px;<?php echo ($is_page_footer_fixed?'margin-bottom: 48px;':''); ?>padding: 5px;">
         <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>" 
             <?php print ($open_page_on_init>0)?'data-initid="'.$open_page_on_init.'"':''; ?> 
             data-viewonly="<?php print ($hasAccess)?0:1;?>" 
-            style="<?php echo (!$is_page_footer_fixed?'padding-bottom:'.$page_footer_height.'px;position:relative':'');?>">
+            style="position:relative':'');?>">
         </div>
 <?php
             if(!$is_page_footer_fixed) print $page_footer;
