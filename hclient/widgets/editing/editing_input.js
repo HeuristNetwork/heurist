@@ -426,8 +426,12 @@ $.widget( "heurist.editing_input", {
             this.element.find('.btn_input_clear').css({'visibility':'hidden','max-width':0});
         }
     
-        if(this.f('rst_NonOwnerVisibility')=='pending'){
+        this.element.find('div.field-visibility2').hide();
+        if(this.f('rst_NonOwnerVisibility')=='public' || this.f('rst_NonOwnerVisibility')=='pending'){
             this.element.find('span.field-visibility').show();
+            if(this.f('rst_NonOwnerVisibility')=='pending'){
+                this.element.find('div.field-visibility2').show();
+            }
         }else{
             this.element.find('span.field-visibility').hide();
         }
@@ -476,7 +480,9 @@ $.widget( "heurist.editing_input", {
             this.header.remove();
         }
         this._off(this.element.find('span.field-visibility'), 'click');
+        this._off(this.element.find('div.field-visibility2'), 'click');
         this.element.find('span.field-visibility').remove();
+        this.element.find('div.field-visibility2').remove();
         
         var that = this;
         if(this.inputs){
@@ -3317,6 +3323,35 @@ console.log('onpaste');
                     })
                     .insertAfter( $input )
                     .hide();   //$inputdiv.find('.smallicon:first')
+
+
+        var chbox_field_visibility = $( '<div><span class="smallicon ui-icon ui-icon-check-off" style="font-size:1em"/> '
+                    +'Per record visibility<div>', 
+                    {title: 'Per record visibility'})
+                    .addClass('field-visibility2 graytext')
+                    .attr('data-input-id', $input.attr('id'))
+                    .css({
+                        'margin-top': '2px',
+                        'cursor': 'pointer',
+                        'font-size': '10px',
+                        'font-style': 'italic',
+                        'padding-left': '10px'
+                    })
+                    .appendTo( $inputdiv )
+                    .hide();   //$inputdiv.find('.smallicon:first')
+
+        this._on(chbox_field_visibility, {
+            'click': function(e){
+                if(that.is_disabled) return;
+
+                var chbox = $(e.target);
+                if(chbox.is('span')) chbox = chbox.parent();
+                
+                var btn = this.element.find('span.field-visibility[data-input-id="'+chbox.attr('data-input-id')+'"]');
+                
+                btn.trigger('click');
+            }});
+                    
                     
         this._on(btn_field_visibility, {
             'click': function(e){
@@ -3324,14 +3359,25 @@ console.log('onpaste');
                 
                 var btn = $(e.target);
                 
+                var $input_div =  btn.parent('.input-div');
+                
+                var chbox = this.element.find('div.field-visibility2[data-input-id="'+btn.attr('data-input-id')+'"]');
+                    
+                
                 if(btn.attr('hide_field')=='1'){
+                    $input_div.css('background-color','transparent');
+                    $input_div.find('.text').removeClass('grayed');
                     btn.removeClass('ui-icon-eye-crossed');            
                     btn.addClass('ui-icon-eye-open');
                     btn.attr('hide_field',0);
+                    chbox.find('span.ui-icon').removeClass('ui-icon-check-on').addClass('ui-icon-check-off');
                 }else{
+                    $input_div.css('background-color','#CCCCCC');
+                    $input_div.find('.text').addClass('grayed');
                     btn.removeClass('ui-icon-eye-open');            
                     btn.addClass('ui-icon-eye-crossed');
                     btn.attr('hide_field',1);
+                    chbox.find('span.ui-icon').removeClass('ui-icon-check-off').addClass('ui-icon-check-on');
                 }
                 
                 this.isChanged(true);
@@ -4440,21 +4486,29 @@ console.log('onpaste');
 
                 var $input = this.inputs[idx];
                 var btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
+                var chbox = this.element.find('div.field-visibility2[data-input-id="'+$input.attr('id')+'"]');
                 
                 if(vals && k<vals.length && vals[k]==1){
+                    $input.parent('.input-div').css('background-color','#CCCCCC');
+                    $input.addClass('grayed');
                     btn.removeClass('ui-icon-eye-open');            
                     btn.addClass('ui-icon-eye-crossed');
                     btn.attr('hide_field',1);
+                    
+                    chbox.find('span.ui-icon').removeClass('ui-icon-check-off').addClass('ui-icon-check-on');
                 }else{
                     btn.removeClass('ui-icon-eye-crossed');            
                     btn.addClass('ui-icon-eye-open');
                     btn.attr('hide_field',0);
+                    chbox.find('span.ui-icon').removeClass('ui-icon-check-on').addClass('ui-icon-check-off');
                 }
                 k++;
             }
             this.element.find('span.field-visibility').show();
+            this.element.find('div.field-visibility2').show();
         }else{
-            this.element.find('span.field-visibility').hide()
+            this.element.find('span.field-visibility').hide();
+            this.element.find('div.field-visibility2').hide();
         }
     },
     

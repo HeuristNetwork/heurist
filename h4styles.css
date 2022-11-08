@@ -1822,6 +1822,9 @@ background: #8ea9b9
     margin: 2px 0px;
     padding: 3px;    
 }
+.ent_wrapper.editor .text.grayed{
+    background: #CCCCCC !important;
+}
 .ent_wrapper.editor .heurist-helper1{
     font-style: normal;
     font-size: 10px;
@@ -2360,9 +2363,10 @@ input[type="file"] {
     border: none;
 }
 .ui-tabs .ui-tabs-nav li a {
-    /*padding: 5px 10px 9px 10px !important;*/
     font-size: 1.2em;
     font-weight: bold;
+    outline: none;
+    /*padding: 5px 10px 9px 10px !important;*/
     /*was padding: 0.2em 0.5em !important; */
 }
 
