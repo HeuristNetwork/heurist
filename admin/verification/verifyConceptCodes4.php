@@ -110,6 +110,8 @@ if(false){
     __recreateProceduresTriggers();
 }else  if(false){
     __addOtherSources();
+}else  if(false){
+    __renameField39();
 }
 
 //
@@ -704,6 +706,11 @@ function getLocalCode($db_id, $id){
     $query = 'select trm_ID from defTerms where trm_OriginatingDBID='.$db_id.' and trm_IDInOriginatingDB='.$id;
     return mysql__select_value($mysqli, $query);
 }
+function getDtyLocalCode($db_id, $id){
+    global $mysqli;
+    $query = 'select dty_ID from defDetailTypes where dty_OriginatingDBID='.$db_id.' and dty_IDInOriginatingDB='.$id;
+    return mysql__select_value($mysqli, $query);
+}
 
 //---------------
 function __addOtherSources(){
@@ -778,5 +785,58 @@ print '<br>&nbsp;&nbsp;&nbsp;'.$val;
     
     
 }
+
+function __renameField39(){
+
+    global $mysqli, $databases; 
+    
+    print 'Rename field #2-39<br>';    
+    
+    $old1 = 'Representative image or thumbnail';
+    $new1 = 'Primary / preferred image';
+
+    $query1 = "UPDATE defDetailTypes SET dty_Name='$new1' WHERE dty_Name='$old1' AND dty_ID=";
+    $query3 = "UPDATE defRecStructure SET rst_DisplayName='$new1' WHERE rst_DisplayName='$old1' AND rst_DetailTypeID=";
+
+    $old2 = 'An image of up to 400 pixels wide, used approx. 200 pixels wide to represent the record in search results and other compact listings';
+    $new2 = 'The representative image used in record view, in search results and in other compact listings';
+    
+    $query2 = "UPDATE defDetailTypes SET dty_HelpText='$new2' WHERE dty_HelpText='$old2' AND dty_ID=";
+    $query4 = "UPDATE defRecStructure SET rst_DisplayHelpText='$new2' WHERE rst_DisplayHelpText='$old2' AND rst_DetailTypeID=";
+    
+    foreach ($databases as $idx=>$db_name){
+
+        print $db_name;
+        
+        mysql__usedatabase($mysqli, $db_name);
+        
+        $dty_ID = getDtyLocalCode(2, 39);
+        
+        if($dty_ID>0){
+            
+            //1. rename in `defDetailTypes`
+            $mysqli->query($query1.$dty_ID);
+            $c1 = $mysqli->affected_rows;
+            $mysqli->query($query2.$dty_ID);
+            $c2 = $mysqli->affected_rows;
+                
+            //2. rename in `defRecStructure`
+            $mysqli->query($query3.$dty_ID);
+            $c3 = $mysqli->affected_rows;
+            $mysqli->query($query4.$dty_ID);
+            $c4 = $mysqli->affected_rows;
+            
+            print '&nbsp;&nbsp;'.$c1.' '.$c2.' '.$c3.' '.$c4.'<br>';
+            
+        }else{
+            print '&nbsp;&nbsp;not found<br>';
+        }
+        
+        
+        
+    }
+    
+}
+
 
 ?>
