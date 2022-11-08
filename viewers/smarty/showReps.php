@@ -356,7 +356,9 @@ function executeSmartyTemplate($system, $params){
             } catch (Exception $e) {
                 $output = 'Exception on calc field execution: '.$e->getMessage();
             }
-            unlink($file);
+            if(file_exists($template_folder.$template_file)){
+                unlink($template_folder.$template_file);   
+            }
             echo $output;
             exit();
         }
