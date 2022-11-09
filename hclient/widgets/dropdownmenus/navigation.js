@@ -234,7 +234,7 @@ $.widget( "heurist.navigation", {
                     $res['page_id'] = page_id;
                     $res['page_showtitle'] = showTitle?1:0;
                     $res['page_target'] = (this.options.target=='popup')?'popup':pageTarget;
-                    $res['expanded'] = (this.options.expand_levels>1 || lvl<=this.options.expand_levels); 
+                    $res['expanded'] = (this.options.expand_levels>0 || lvl<this.options.expand_levels); 
                     $res['has_access'] = (window.hWin.HAPI4.is_admin() 
                                 || window.hWin.HAPI4.is_member(resdata.fld(record,'rec_OwnerUGrpID')));
                                         //&& menuitems.length==1);
