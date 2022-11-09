@@ -543,8 +543,17 @@ Whole value = EQUAL
             eqopts.push({key:'NULL', title:'no data (missing)'});
         }
 
+        this._off( this.select_conjunction, 'change');
+        this._off( this.select_comparison, 'change');
+        
+        var prev_opt = this.select_comparison.val()
 
         window.hWin.HEURIST4.ui.createSelector(this.select_comparison.get(0), eqopts);
+        
+        if(prev_opt) this.select_comparison.val(prev_opt);
+        if(this.select_comparison.get(0).selectedIndex<0){
+            this.select_comparison.get(0).selectedIndex = 0;
+        }
 
         this._on( this.select_conjunction, { change: function(){
             this._manageConjunction();
@@ -586,7 +595,14 @@ Whole value = EQUAL
             
         this._current_field_type = field_type;
         //clear input values
+        var prev_value = [''], prev_type = null;
         if(this._predicate_input_ele){
+            
+            if(this._predicate_input_ele.editing_input('instance')){
+               prev_value = $(this._predicate_input_ele).editing_input('getValues');    
+               prev_type = $(this._predicate_input_ele).editing_input('getDetailType');    
+            }
+            
             this.select_conjunction.appendTo(this.sel_container); //back to selcontainer
             this._predicate_input_ele.remove(); this._predicate_input_ele = null;    
         }
@@ -624,6 +640,8 @@ Whole value = EQUAL
                 ed_options.dtFields['rst_PtrFilteredIDs'] = $Db.dty(ed_options['dtID'], 'dty_PtrTargetRectypeIDs');
                 ed_options.dtFields['rst_DefaultValue'] = '';
                 ed_options.dtFields['rst_PointerMode'] = 'browseonly';
+        }else if(field_type=='freetext' || field_type=='blocktext' || field_type==prev_type){
+            ed_options.values = prev_value;
         }
         
         //init input elements

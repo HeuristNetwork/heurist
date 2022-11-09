@@ -427,7 +427,8 @@ $.widget( "heurist.editing_input", {
         }
     
         this.element.find('div.field-visibility2').hide();
-        if(this.f('rst_NonOwnerVisibility')=='public' || this.f('rst_NonOwnerVisibility')=='pending'){
+        if(this.options.showedit_button && 
+          (this.f('rst_NonOwnerVisibility')=='public' || this.f('rst_NonOwnerVisibility')=='pending')){
             this.element.find('span.field-visibility').show();
             if(this.f('rst_NonOwnerVisibility')=='pending'){
                 this.element.find('div.field-visibility2').show();
@@ -4477,7 +4478,8 @@ console.log('onpaste');
     //
     setVisibilities: function(vals){
         
-        if(this.f('rst_NonOwnerVisibility')=='pending')
+        if(this.options.showedit_button &&
+         (this.f('rst_NonOwnerVisibility')=='pending' || this.f('rst_NonOwnerVisibility')=='public'))
         {
             var idx, k=0;
             var ress = {};
@@ -4512,6 +4514,12 @@ console.log('onpaste');
         }
     },
     
+    //
+    //
+    //
+    getDetailType: function(){
+        return this.detailType;
+    },
     
     //
     // get all values (order is respected)
