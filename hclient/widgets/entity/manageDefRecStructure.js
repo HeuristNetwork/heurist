@@ -307,59 +307,95 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         var treeData = false;
 
-        //if such treeview data is missed creates new one based on header/separators and rst_DisplayOrder
-        if(!treeData){
+        //create treeview data based on header/separators and rst_DisplayOrder
             
-            //order by rts_DisplayOrder
-            var _order = recset.getOrder();
-            _order.sort(function(a,b){  
-                return (recset.fld( recset.getById(a), 'rst_DisplayOrder')
-                        <recset.fld( recset.getById(b), 'rst_DisplayOrder'))
-                                ?-1:1;
-            });
-            recset.setOrder( _order );
-            
-            treeData = [];
-            
-            var groupIdx = -1;
-            var seps = [];
-
-            recset.each(function(dty_ID, record){
-                    
-                var sType = $Db.dty(dty_ID, 'dty_Type');
-                var isSep = (sType=='separator');
-                var title = recset.fld(record,'rst_DisplayName');
-                var req = recset.fld(record,'rst_RequirementType');
-                if(isSep){
-
-                    let sepType = recset.fld(record, 'rst_DefaultValue');
-                    let extraStyle = '';
-                    if(sepType == 'group'){ // indent simple dividers
-                        extraStyle = 'style="padding-left:10px;display:inline-block;';
-                    }
-                    if(title == '-'){
-                        title = '<hr>';
-                        extraStyle += 'width: 150px;';
-                    }
-                    extraStyle += extraStyle != '' ? '"' : '';
-
-                    title = '<span data-dtid="'+dty_ID+'" '+extraStyle+'>' + title + '</span>';
-                }else{
-                    title = '<span data-dtid="'+dty_ID+'" style="padding-left:10px">' + title 
-                            +'</span>';
-//'<span style="font-size:smaller;"> ('+$Db.baseFieldType[sType]+')</span>';
-                }
-                if(req=='forbidden'){
-                    title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
-                }
-                
-                var node = {title: title, key: dty_ID, extraClasses:isSep?'separator2':req};
-                node['data'] = {header:isSep, type:'group'};
-                treeData.push( node );
-
-            });    
-        }
+        //order by rts_DisplayOrder
+        var _order = recset.getOrder();
+        _order.sort(function(a,b){  
+            return (recset.fld( recset.getById(a), 'rst_DisplayOrder')
+                    <recset.fld( recset.getById(b), 'rst_DisplayOrder'))
+                            ?-1:1;
+        });
+        recset.setOrder( _order );
         
+        treeData = [];
+        
+        var groupIdx = -1;
+        var outer_group = {};
+        var inner_group = {}; // simple dividers or accordions placed within tabs
+
+        recset.each(function(dty_ID, record){
+
+            var sType = $Db.dty(dty_ID, 'dty_Type');
+            var isSep = (sType=='separator');
+            let sepType = isSep ? recset.fld(record, 'rst_DefaultValue') : '';
+            var title = recset.fld(record,'rst_DisplayName');
+            var req = recset.fld(record,'rst_RequirementType');
+            if(isSep){
+                let extraStyle = '';
+                if(title == '-'){
+                    title = '<hr>';
+                    extraStyle = 'style="width:100px;display:inline-block;vertical-align:middle;"';
+                }
+
+                title = '<span data-dtid="'+dty_ID+'" '+extraStyle+'>' + title + '</span>';
+            }else{
+                title = '<span data-dtid="'+dty_ID+'">' + title 
+                        +'</span>';
+            }
+            if(req=='forbidden'){
+                title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
+            }
+
+            var node = {title: title, key: dty_ID, extraClasses:isSep?'separator2':req, folder:isSep, expanded:isSep};
+            node['data'] = {header:isSep, type:isSep?sepType:sType};
+
+            if(isSep){
+
+                if(sepType == 'tabs' || sepType == 'tabs_new'){ // new tabs
+                    if(!$.isEmptyObject(inner_group)){
+                        outer_group['children'].push(inner_group);
+                    }
+                    if(!$.isEmptyObject(outer_group)){
+                        treeData.push(outer_group);
+                    }
+
+                    outer_group = $.extend({}, node);
+                    outer_group['children'] = [];
+
+                    inner_group = {};
+                }else if(!$.isEmptyObject(inner_group)) { // another group within a tabs
+                    outer_group['children'].push(inner_group);
+                    inner_group = $.extend({}, node);
+                    inner_group['children'] = [];
+                }else if(outer_group.data && (outer_group.data.type == 'tabs' || outer_group.data.type == 'tabs_new')) { // new group within tabs
+                    inner_group = $.extend({}, node);
+                    inner_group['children'] = [];
+                }else{ // first non-tabs group
+                    if(!$.isEmptyObject(outer_group)){
+                        treeData.push(outer_group);
+                    }
+                    outer_group = $.extend({}, node);
+                    outer_group['children'] = [];
+                }
+            }else{
+                if(!$.isEmptyObject(inner_group)){
+                    inner_group['children'].push(node);
+                }else if(!$.isEmptyObject(outer_group)){
+                    outer_group['children'].push(node);
+                }else{
+                    treeData.push(node);
+                }
+            }
+        });
+
+        if(!$.isEmptyObject(inner_group)){
+            outer_group['children'].push(inner_group);
+        }
+        if(!$.isEmptyObject(outer_group)){
+            treeData.push(outer_group);
+        }
+
         //init treeview
         var that = this;
         
@@ -370,20 +406,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             focusOnSelect:true,
             source: treeData,
             quicksearch: true,
-            
-            /*
-            expand: function(event, data){
-                // it need to assign action after DnD (for lazy load)
-                if(data.node.children && data.node.children.length>0){
-                   setTimeout(function(){
-                    $.each( $('.fancytree-node'), function( idx, item ){
-                        that.__defineActionIcons(item);
-                    });
-                    }, 500);  
-                }
-            },
-            */
-            
+
             click: function(event, data){ // navigate to field, and close formlet if already open
 
                 var ele = $(event.originalEvent.target);
@@ -391,9 +414,14 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 if(ele.hasClass('ui-icon') || ele.attr('data-action') == 'delete'){
                     return;
                 }
+                if(ele.hasClass('fancytree-expander') && ele.parent().hasClass('fancytree-has-children')){
+                    //data.node.setExpanded(!data.node.isExpanded());
+                    return;
+                }
 
                 window.hWin.HEURIST4.util.stopEvent(event);
 
+                var ele = $(event.target);
                 if(data.node.isActive()){
                     that._saveEditAndClose(null, 'close'); //close editor on second click
                 }
@@ -431,23 +459,49 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }
         };
 
+        var drag_tooltip = null;
+
         fancytree_options['extensions'] = ["dnd"]; //, "filter", "edit"
         fancytree_options['dnd'] = {
                 autoExpandMS: 400,
                 preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
                 preventVoidMoves: true, // Prevent moving nodes 'before self', etc.
                 dragStart: function(node, data) {
+                    if(node.data.type == 'group'){ // stop simple dividers from dragging
+                        return false;
+                    }
+
+                    let count = $(node.li).find('.fancytree-node').length; // remove divider
+                    if(count > 1){
+                        drag_tooltip = that._treeview.tooltip({
+                            track: true,
+                            items: that._treeview.parent(),
+                            position:{
+                                my: 'left+10 center',
+                                at: 'right center',
+                                collision: 'none'
+                            },
+                            show:{
+                                duration: 0
+                            },
+                            content: function(){
+                                return 'n = ' + count;
+                            }
+                        });
+                    }
+
                     return that._dragIsAllowed;
                 },
                 dragEnter: function(node, data) {
                     return (node.folder) ?true :["before", "after"];
                 },
+                dragEnd: function(node, data){
+                },
                 dragDrop: function(node, data) {
-                    
                     data.otherNode.moveTo(node, data.hitMode);    
                     //save treeview in database
                     that._dragIsAllowed = false;
-                    
+
                     if(that.options.external_preview){
                         that.options.external_preview.manageRecords('saveQuickWithoutValidation',
                                function(){ that._saveRtStructureTree() });
@@ -456,29 +510,23 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                             that._saveRtStructureTree();
                         },500);
                     }
-                    
                 },
                 draggable:{
                     axis: 'y'
-                }
-            };
-/*            
-        fancytree_options['edit'] = {
-                save:function(event, data){
-                    if(''!=data.input.val()){
-                        that._avoidConflictForGroup(groupID, function(){
-                            that._saveTreeData( groupID );
-                        });
+                },
+                draggable: {
+                    stop: function(event, ui){
+                        if(drag_tooltip && drag_tooltip.tooltip('instance')!=undefined){
+                            drag_tooltip.tooltip('destroy');
+                        }
                     }
                 }
-            };     
-        fancytree_options['filter'] = { highlight:false, mode: "hide" };  
-*/
-            this._treeview = this.element.find('.treeView').addClass('tree-rts').css('overflow-x', 'hidden')
-                                .fancytree(fancytree_options); //was recordList
-            this.element.parent().css('overflow-x', 'hidden'); // stop horizontal scrolling
-            this.__updateActionIcons(500);
+            };
 
+            this._treeview = this.element.find('.treeView').addClass('tree-rts')
+                                .fancytree(fancytree_options); //was recordList
+            this._treeview.find('ul.fancytree-container').css('width', '100%');
+            this.__updateActionIcons(500);
     },
     
     //
