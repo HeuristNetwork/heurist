@@ -2649,6 +2649,10 @@ class HPredicate {
                 $res = $this->makeDateClause();
 
             } else {
+                
+                if($this->field_type=='link'){
+                    $this->fulltext = false;
+                }
 
                 if (strpos($this->value,"<>")>0) {
                     $vals = explode("<>", $this->value);
@@ -2660,7 +2664,7 @@ class HPredicate {
                         $res = $between."'".$mysqli->real_escape_string($vals[0])."' and '".$mysqli->real_escape_string($vals[1])."'";
                     }
                 
-                }else if($this->fulltext && $this->field_type!='link'){
+                }else if($this->fulltext){ // && $this->field_type!='link'){
                     
                     //1. check that fulltext index exists
                     if($this->checkFullTextIndex()){ 
@@ -2677,18 +2681,39 @@ class HPredicate {
                         //get all words
                         $pattern = "/(\w+)/";
                         if (preg_match_all($pattern, $this->value, $matches)) {
-                                 $this->value = trim($op).implode($op, $matches[0]);
+//words less than 3 characters in length or greater than 84 characters in length do not appear in an InnoDB full-text search index
+//and stopwords 
+$stopwords = array('a','about','an','are','as','at','be','by','com','de','en','for','from','how','i','in','is','it','la','of','on','or','that','the','the','this','to','und','was','what','when','where','who','will','with','www');
+                                $words = array();
+                                foreach($matches[0] as $word){
+                                    $len = strlen($word);
+                                    if($len>2 && $len<85 && !in_array($word,$stopwords)){
+                                        $words[] = $word;
+                                    }
+                                }
+                                if(count($words)>0){
+                                    $this->value = trim($op).implode($op, $words);
+                                }else{
+                                    //search phrase has only very short or long words
+                                    $this->fulltext = false;
+                                    $this->exact = false;
+                                    $this->negate = ($op==' -'); 
+                                    $this->value = implode(' ', $matches[0]);
+                                }
                         }
                         
                     }
                      
-                    if(strpos($this->value, '+')>=0 || strpos($this->value, '-')>=0){
-                        $res = ' IN BOOLEAN MODE ';
+                    if($this->fulltext){
+                        if(strpos($this->value, '+')>=0 || strpos($this->value, '-')>=0){
+                            $res = ' IN BOOLEAN MODE ';
+                        }
+                        
+                        $res = " AGAINST ('".$mysqli->real_escape_string($this->value)."'$res)";
                     }
                     
-                    $res = " AGAINST ('".$mysqli->real_escape_string($this->value)."'$res)";
-                    
-                }else{
+                }
+                if(!$this->fulltext){
 
                     if(!$this->exact){ //$eq=='=' && 
                             $eq = ($this->negate?'NOT ':'').'LIKE';
