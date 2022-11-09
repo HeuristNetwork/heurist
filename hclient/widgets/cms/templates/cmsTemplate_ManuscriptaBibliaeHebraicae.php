@@ -90,6 +90,26 @@
                 font-weight: bold;
                 color: blue;
             }
+            
+            
+/**
+* Header video
+*/
+#wrapper-video {
+    z-index:9999999;
+}
+
+#wrapper-video > .slogan {
+    font-size: 28px;
+    font-family: sans-serif;
+    text-transform: uppercase;
+    position: absolute;
+    bottom: 30px;
+    width: 100%;
+    text-align: center;
+}
+
+            
         </style>
     </head>
 
@@ -251,6 +271,26 @@ if($isWebPage){ //set in websiteRecord.php
             </footer>
         </div>
         </div>
+        
+        
+        
+        <div id="wrapper-video" onclick="{document.getElementById('wrapper-video').style.display = 'none';}">
+          <video autoplay="" loop="" muted="" 
+          poster="https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output_poster.jpg" id="video-background">
+            <source src="https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output.mp4" type="video/mp4">
+          </video>
+          <h1>Manuscripta Bibliae Hebraicae</h1>
+          <p class="subtitle">Les manuscrits de la Bible hébraïque en Europe occidentale (Angleterre, France, Allemagne, Italie du Nord) au XIIe et XIIIe siècle&nbsp;: une approche matérielle, culturelle et sociale</p>
+            <span class="logo-mbh-mini">
+                <span class="b"></span>
+                <span class="b"></span>
+                <span class="b"></span>
+                <span class="b"></span>
+                <span class="b"></span>
+                <span class="b"></span>
+              </span>
+          <p class="slogan">La base de données dédiée aux bibles médiévales hébraïques</p>
+        </div>        
     </body>
 
     </html>

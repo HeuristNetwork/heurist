@@ -80,7 +80,6 @@
         include $websiteScriptAndStyles_php;  //include heurist scripts and styles
     ?>
     
-    
 <style>
 /* page (menu) title it is added to main-pagetitle */
 .webpageheading {
@@ -143,7 +142,6 @@
     background-color: white !important;
     outline: darkblue solid 1px;
 }
-
 </style>
 </head>
 <body>
@@ -236,5 +234,6 @@ if($isWebPage){ //set in websiteRecord.php
 <?php
 }
 ?>    
+
 </body>
 </html>
