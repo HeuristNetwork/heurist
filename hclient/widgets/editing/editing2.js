@@ -519,11 +519,7 @@ function hEditing(_options) {
                 var $tabs = $(group).find('a');
                 var max_char = 30;
 
-                $tabs.css({
-                    'max-width': max_char+'ex',
-                    'width': 'auto',
-                    'margin-right': '20px'
-                }).addClass('truncate');
+                $tabs.attr('style', 'max-width:'+max_char+'ex;width:auto;padding-right:30px !important;cursor:pointer;').addClass('truncate');
             });
 			
 			if($container.find('ul[role="tablist"]').length>1){
