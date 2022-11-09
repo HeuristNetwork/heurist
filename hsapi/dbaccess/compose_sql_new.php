@@ -1521,11 +1521,15 @@ class HPredicate {
             if($this->field_id>0){ //field id defined (for example "f:25")
                 
                 if($this->fulltext){
-                    $res = 'select dtl_RecID from recDetails where dtl_DetailTypeID';
+                    $res = 'SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID';
                 }else{
-                    $res = "exists (select dtl_ID from recDetails ".$p." where $recordID=".$p."dtl_RecID AND "
+                    $res = "EXISTS (SELECT dtl_ID FROM recDetails ".$p." WHERE $recordID=".$p."dtl_RecID AND "
                     .$p.'dtl_DetailTypeID';
-                    
+                 
+                    if($this->negate){
+                        $val = $this->getFieldValue(); //this time it returns without negate
+                        $res = ' NOT '.$res;
+                    }
                 }
                 
                 if(is_array($several_ids) && count($several_ids)>0){
@@ -2404,8 +2408,7 @@ class HPredicate {
                 
     
     /**
-    * put your comment there...
-    *
+    * Returns value with compare operator
     */
     function getFieldValue(){
 
