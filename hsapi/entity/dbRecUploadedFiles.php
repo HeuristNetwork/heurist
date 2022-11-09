@@ -817,14 +817,14 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             }else{
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'No import data has been provided. Ensure that you have enter the necessary CSV rows.<br>Please contact the Heurist team if this problem persists.');
             }
-        }else if(@$this->data['delete_unused']){
+        }else if(@$this->data['delete_unused']){ // delete file records not in use
 
             $ids = $this->data['delete_unused'];
             $where_clause = 'WHERE dtl_ID IS NULL';
             if(is_array($ids) && count($ids) > 0){ // multiple
-                $where_clause = ' AND ulf_ID IN (' . implode(',', $ids) . ')';
+                $where_clause .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
             }else if(is_int($ids) && $ids > 0){ // single
-                $where_clause = ' AND ulf_ID = ' . $ids;
+                $where_clause .= ' AND ulf_ID = ' . $ids;
             }// else use all
 
             $query = 'SELECT ulf_ID FROM ' . $this->config['tableName'] . ' LEFT JOIN recDetails ON ulf_ID = dtl_UploadedFileID ' . $where_clause;
@@ -838,6 +838,92 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $ret = count($to_delete);
                 }
             }
+        }else if(@$this->data['regExternalFiles']){ // attempt to register multiple URLs at once, and return necessary information for record editor
+
+            $rec_fields = $this->data['regExternalFiles'];
+
+            if(!empty($rec_fields) && is_string($rec_fields)){
+                $rec_fields = json_decode($rec_fields, TRUE);
+            }
+
+            if(is_array($rec_fields) && count($rec_fields) > 0){
+
+                $results = array();
+
+                foreach ($rec_fields as $dt_id => $urls) {
+
+                    if(!array_key_exists($dt_id, $results)){
+                        $results[$dt_id] = array();
+                    }
+
+                    if(is_array($urls)){
+
+                        foreach ($urls as $idx => $url) {
+
+                            if(strpos($url, 'http') === 0){
+                                $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference = "' . $mysqli->real_escape_string($url) . '"';
+                                $file_id = mysql__select_value($mysqli, $query);
+        
+                                if(!$file_id){ // new external file to save
+                                    $file_id = $this->registerURL($url);
+                                }
+
+                                if($file_id > 0){ // retrieve file Obfuscated ID
+                                    $query = 'SELECT ulf_ObfuscatedFileID, ulf_MimeExt FROM recUploadedFiles WHERE ulf_ID = ' . $file_id;
+                                    $file_dtls = mysql__select_row($mysqli, $query);
+
+                                    if(!$file_dtls){
+                                        $results[$dt_id]['err_id'][$file_id] = $url; // cannot retrieve obfuscated id
+                                    }else{
+                                        $results[$dt_id][$idx] = array(
+                                            'ulf_ID' => $file_id, 
+                                            'ulf_ExternalFileReference' => $url, 
+                                            'ulf_ObfuscatedFileID' => $file_dtls[0], 
+                                            'ulf_MimeExt' => $file_dtls[1], 
+                                            'ulf_OrigFileName' => '_remote'
+                                        );
+                                    }
+                                }else{
+                                    $results[$dt_id]['err_save'][] = $url; // unable to save
+                                }
+                            }else{
+                                $results[$dt_id]['err_invalid'][] = $url; // invalid
+                            }
+                        }
+                    }else if(is_string($urls) && strpos($urls, 'http') === 0){
+
+                        $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference = "' . $mysqli->real_escape_string($urls) . '"';
+                        $file_id = mysql__select_value($mysqli, $query);
+
+                        if(!$file_id){ // new external file to save
+                            $file_id = $this->registerURL($urls);
+                        }
+
+                        if($file_id > 0){ // retrieve file Obfuscated ID
+                            $query = 'SELECT ulf_ObfuscatedFileID, ulf_MimeExt FROM recUploadedFiles WHERE ulf_ID = ' . $file_id;
+                            $file_dtls = mysql__select_row($mysqli, $query);
+
+                            if(!$file_dtls){
+                                $results[$dt_id]['err_id'] = $urls;
+                            }else{
+                                $results[$dt_id] = array(
+                                    'ulf_ID' => $file_id, 
+                                    'ulf_ExternalFileReference' => $urls, 
+                                    'ulf_ObfuscatedFileID' => $file_dtls[0], 
+                                    'ulf_MimeExt' => $file_dtls[1], 
+                                    'ulf_OrigFileName' => '_remote'
+                                );
+                            }
+                        }else{
+                            $results[$dt_id]['err_save'] = $urls;
+                        }
+                    }else if(!empty($urls)){
+                        $results[$dt_id]['err_invalid'] = $urls;
+                    }
+                }
+
+                $ret = $results;
+            }
         }
 
         if($ret===false){
@@ -848,7 +934,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
         if($keep_autocommit===true) $mysqli->autocommit(TRUE);
         
-        if($ret){
+        if($ret && @$this->data['csv_import']){
             $ret = 'Uploaded / registered: '.$cnt_imported.' media resources. ';
             if($cnt_skipped>0){
                 $ret = $ret.' Skipped/already exist: '.$cnt_skipped.' media resources';    
@@ -856,7 +942,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }
 
         return $ret;
-            
     }    
 
     //

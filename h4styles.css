@@ -1572,7 +1572,6 @@ span.fancytree-checkbox{
 /* Record structure and CMS editor */
 .tree-rts .fancytree-folder > .fancytree-title{
     text-transform: uppercase;
-    color: #999999;
     font-weight: bold !important;
 }
 .tree-rts .required, a.required{
@@ -1587,6 +1586,13 @@ span.fancytree-checkbox{
 }
 .tree-rts .optional, a.optional, .optional{
     color:black !important;
+}
+.tree-rts span.fancytree-expander{
+    display: none;
+}
+.tree-rts .fancytree-has-children span.fancytree-expander,
+.tree-rts .separator2 span.fancytree-expander{
+    display: inline-block;
 }
 
 /* Custom report */

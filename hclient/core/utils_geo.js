@@ -823,14 +823,26 @@ window.hWin.HEURIST4.geo = {
             }else{
                 if(resdata.Point.length>0) type = resdata.Point.length+' point'+((resdata.Point.length>1)?'s':'')+', ';
                 if(resdata.Polyline.length>0) type = type + resdata.Polyline.length+' path'+((resdata.Polyline.length>1)?'s':'')+', ';
-                if(resdata.Polygon.length>0) type = type + resdata.Polygon.length+' polygone'+((resdata.Polygon.length>1)?'s':'')+', ';
+                if(resdata.Polygon.length>0) type = type + resdata.Polygon.length+' polygon'+((resdata.Polygon.length>1)?'s':'')+', ';
                 type = 'Collection (' + type.substring(0,type.length-2)+')';
             }
             
             var extent = resdata._extent;
-            
-            return { type: type, summary: "X "+extent.xmin.toFixed(5)+","+extent.xmax.toFixed(5)
-                    +" Y "+extent.ymin.toFixed(5)+","+extent.ymax.toFixed(5) };
+            var decPoints = 5;
+            let summary = extraSummary+"X "+extent.xmin.toFixed(decPoints)+","+extent.xmax.toFixed(decPoints)
+                        +" Y "+extent.ymin.toFixed(decPoints)+","+extent.ymax.toFixed(decPoints);
+            if(type == 'Polygon'){
+                decPoints = extent.xmin > 180 || extent.xmax > 180 || extent.xmin < -180 || extent.xmax < -180
+                            || extent.ymin > 90 || extent.ymax > 90 || extent.ymin < -90 || extent.ymax < -90 ? 0 : 5;
+
+                let point_count = 0;
+                for(let i = 0; i < gjson.coordinates.length; i ++){
+                    point_count += gjson.coordinates[i].length;
+                }
+                summary = 'n=' + point_count + ' (' + summary + ')';
+            }
+
+            return { type: type, summary: summary};
             
         }else{
             return { type:'', summary:''};

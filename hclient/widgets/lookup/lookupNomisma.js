@@ -33,7 +33,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
     options: {
     
         height: 720,
-        width:  500,
+        width:  510,
         modal:  true,
         
         title:  'Search Nomisma database of coins and currency via several options',
@@ -81,7 +81,9 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
                entityName: this._entityName,
                
                pagesize: this.options.pagesize, // number of records to display per page
-               empty_remark: '<div style="padding:1em 0 1em 0">No Works Found</div>', // For empty results
+               empty_remark: '<div style="padding:1em 0 1em 0">No Results Found<br><br>'
+                            + 'This result may also be due to a misconfiguration/failed connection to the Nomisma server.<br>'
+                            + 'Please advise the Heurist team if this persists with searches which you are sure should return results.</div>', // For empty results
                renderer: this._rendererResultList // Record render function, is called on resultList updateResultSet
         });                
 
@@ -228,7 +230,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
         
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
         
-        sURL += this.element.find('#inpt_any').val();
+        sURL += encodeURI(this.element.find('#inpt_any').val());
 
         var request = {service:sURL, serviceType:'nomisma', 'search_type': search_type};
 
@@ -236,12 +238,12 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
             function(response){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
-                if(response){
-                    if(response.status && response.status != window.hWin.ResponseStatus.OK){
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }else{
-                        that._onSearchResult(response);
-                    }
+                if(response.status && response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }else if(window.hWin.HEURIST4.util.isArray(response) && response.length == 0){
+                    that.recordList.resultList('updateResultSet', null);
+                }else{
+                    that._onSearchResult(response);
                 }
             }
         );
@@ -302,7 +304,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
                         }
                     }      
                     
-                    if(DT_GEO_OBJECT == this.options.mapping.fields[map_flds[k]]){
+                    if(DT_GEO_OBJECT == this.options.mapping.fields[map_flds[k]]){ // looking for geospatial values
                         if(!window.hWin.HEURIST4.util.isempty(val)){
                             val = {"type": "Feature", "geometry": val};
                             var wkt = stringifyMultiWKT(val);    
@@ -324,6 +326,8 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
                                 hasGeo = true;
                             }
                         }
+                    }else{ // not looking for geospatial values
+                        hasGeo = true;
                     }
                     values.push(val);    
                 }
@@ -351,7 +355,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
         }
        
         if(is_wrong_data){
-            this.recordList.resultList('updateResultSet', null);            
+            this.recordList.resultList('updateResultSet', null);
             
             window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
         }

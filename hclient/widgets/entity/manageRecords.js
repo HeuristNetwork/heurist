@@ -63,7 +63,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         summary_width:400, 
         summary_tabs:['0','1']},
     
-    
+    term_values: null,
+    file_values: null,
+    resource_values: null,
+
     _init: function() {
         
         if(!this.options.default_palette_class){
@@ -4003,16 +4006,17 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                                 var dtyIds = Object.keys(recset);
 
                                                 var assigned_fields = []; // list of fields assigned
-                                                var recpointer_vals = []; // list of search values for recpointer fields
-                                                var hadRecpointers = false;
-                                                var term_vals = []; // list of label values for enum/term fields
 
-                                                if(recpointer_vals.length == 0 && recset['ext_url']){
-                                                    recpointer_vals.push([recset['ext_url'], 'ext']);
-                                                }else if(recpointer_vals.length == 0 && recset['heurist_url']){
-                                                    recpointer_vals.push([recset['heurist_url'], 'heurist']);
+                                                that.term_values = []; // list of label values for enum/term fields
+                                                that.file_values = {}; // list of external urls for file fields
+                                                that.resource_values = []; // list of search values for recpointer fields
+
+                                                if(that.resource_values.length == 0 && recset['ext_url']){
+                                                    that.resource_values.push([recset['ext_url'], 'ext']);
+                                                }else if(that.resource_values.length == 0 && recset['heurist_url']){
+                                                    that.resource_values.push([recset['heurist_url'], 'heurist']);
                                                 }else{
-                                                    recpointer_vals.push(['']);
+                                                    that.resource_values.push(['']);
                                                 }
 
                                                 for(var k=0; k<dtyIds.length; k++){
@@ -4023,7 +4027,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                                                         var newval = recset[dt_id];
                                                         var type = $Db.dty(dt_id, 'dty_Type');
-                                                        var extra_processing = false;
 
                                                         if(type == 'resource' || type == 'enum'){
 
@@ -4040,17 +4043,30 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                                                                     // needs additional handling
                                                                     if(type == 'resource'){
-                                                                        recpointer_vals.push([dt_id, newval[i]]);
-                                                                        hadRecpointers = true;
+                                                                        that.resource_values.push([dt_id, newval[i]]);
                                                                     }else{
 
                                                                         var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
-                                                                        var trm_id = $Db.getTermByLabel(vocab_id, newval[i]);
 
-                                                                        if(trm_id == null){
-                                                                            term_vals.push([dt_id, newval[i]]);
+                                                                        if(window.hWin.HEURIST4.util.isArray(newval[i])){
+                                                                            for(var j = 0; j < newval[i].length; j++){
+
+                                                                                var trm_id = $Db.getTermByLabel(vocab_id, newval[i][j]);
+
+                                                                                if(trm_id == null){
+                                                                                    that.term_values.push([dt_id, newval[i][j]]);
+                                                                                }else{
+                                                                                    completed.push(trm_id);
+                                                                                }
+                                                                            }
                                                                         }else{
-                                                                            completed.push(trm_id);
+                                                                            var trm_id = $Db.getTermByLabel(vocab_id, newval[i]);
+
+                                                                            if(trm_id == null){
+                                                                                that.term_values.push([dt_id, newval[i]]);
+                                                                            }else{
+                                                                                completed.push(trm_id);
+                                                                            }
                                                                         }
                                                                     }
                                                                 }
@@ -4061,15 +4077,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                                                 }else{
 
                                                                     if(type == 'resource'){
-                                                                        recpointer_vals.push([dt_id, newval]);
-                                                                        hadRecpointers = true;
+                                                                        that.resource_values.push([dt_id, newval]);
                                                                     }else{
                                                                         
                                                                         var vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
                                                                         var trm_id = $Db.getTermByLabel(vocab_id, newval);
 
                                                                         if(trm_id == null){
-                                                                            term_vals.push([dt_id, newval]);
+                                                                            that.term_values.push([dt_id, newval]);
                                                                         }else{
                                                                             completed.push(trm_id);
                                                                         }
@@ -4082,6 +4097,16 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                                                                 var fieldname = $Db.rst(that._currentEditRecTypeID, dt_id, 'rst_DisplayName');
                                                                 if(!assigned_fields.includes(fieldname)) { assigned_fields.push(fieldname); }
+                                                            }
+                                                        }else if(type == 'file'){ // need to create new remote file records
+
+                                                            if(!Object.hasOwnProperty(dt_id, that.file_values)){
+                                                                that.file_values[dt_id] = [];
+                                                            }
+                                                            if(window.hWin.HEURIST4.util.isArray(newval)){
+                                                                that.file_values[dt_id] = that.file_values[dt_id].concat(newval);
+                                                            }else{
+                                                                that.file_values[dt_id].push(newval);
                                                             }
                                                         }else{
                                                             if(!$.isArray(newval)){
@@ -4097,14 +4122,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                                     }
                                                 }
 
-                                                if(recpointer_vals.length > 0 && !hadRecpointers){
-                                                    recpointer_vals = [];
-                                                }
-
-                                                if(term_vals.length > 0){
-                                                    that.processTermFields(term_vals, recpointer_vals, assigned_fields, {});
+                                                if(that.term_values.length > 0){
+                                                    that.processTermFields(assigned_fields, {});
+                                                }else if(Object.keys(that.file_values).length > 0){
+                                                    that.processFileFields(assigned_fields);
                                                 }else{
-                                                    that.processResourceFields(recpointer_vals, assigned_fields);
+                                                    that.processResourceFields(assigned_fields);
                                                 }
                                             }
                                         }
@@ -4763,21 +4786,19 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     // Process term field values from External Lookups, that aren't integers (ids)
     //
     // Param:
-    //  term_values (array): array of field ids and term label [[dt_id, label], ...]
-    //  resource_values (array): array of field ids and field values [{[ext_url]}, [dt_id, value], ...]
     //  completed_fields (array): array of field names that have already been assigned
     //  new_terms (object): contains the values for enum fields to assign after handling all terms {dt_id: [trm_id, ...]}
     //      key => field id (dt_id), value => array of term id(s) ([trm_id1, trm_id2, ...])
     //
-    processTermFields: function(term_values, resource_values, completed_fields, new_terms){
+    processTermFields: function(completed_fields, new_terms){
 
         var that = this;
 
         if(new_terms == null) { new_terms = {}; }
 
-        if(term_values == null && Object.keys(new_terms).length == 0){ // no terms to handle
-            this.processResourceFields(resource_values, completed_fields);
-        }else if(term_values.length == 0){ // all terms handled
+        if(that.term_values == null && Object.keys(new_terms).length == 0){ // no terms to handle
+            this.processFileFields(completed_fields);
+        }else if(that.term_values.length == 0){ // all terms handled
 
             if(new_terms['refresh']){ // check whether local cache needs updating
 
@@ -4793,7 +4814,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             var fieldname = $Db.rst(that._currentEditRecTypeID, fld_id, 'rst_DisplayName');
                             if(!completed_fields.includes(fieldname)) { completed_fields.push(fieldname); }
                         }
-                        that.processResourceFields(resource_values, completed_fields);
+                        that.processFileFields(completed_fields);
                     }
                 });
             }else{ // no cache updating needed
@@ -4804,12 +4825,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     var fieldname = $Db.rst(that._currentEditRecTypeID, fld_id, 'rst_DisplayName');
                     if(!completed_fields.includes(fieldname)) { completed_fields.push(fieldname); }
                 }
-                this.processResourceFields(resource_values, completed_fields);
+                this.processFileFields(completed_fields);
             }
 
             return;
         }
-        var cur_term = term_values.shift(); // 0 => dt_id, 1 => term label
+        var cur_term = this.term_values.shift(); // 0 => dt_id, 1 => term label
         var vocab_id = $Db.dty(cur_term[0], 'dty_JsonTermIDTree');
         var field_name = $Db.rst(this._currentEditRecTypeID, cur_term[0], 'rst_DisplayName');
 
@@ -4850,7 +4871,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             }
 
             if(savedTerm){
-                that.processTermFields(term_values, resource_values, completed_fields, new_terms);
+                that.processTermFields(completed_fields, new_terms);
             }else{ // Create new term
 
                 var request = {
@@ -4870,7 +4891,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         $dlg.dialog('close');
 
                         new_terms['refresh'] = true;
-                        that.processTermFields(term_values, resource_values, completed_fields, new_terms);
+                        that.processTermFields(completed_fields, new_terms);
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -4882,21 +4903,105 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             new_terms[cur_term[0]].push('');
 
             $dlg.dialog('close');
-            that.processTermFields(term_values, resource_values, completed_fields, new_terms);
+            that.processTermFields(completed_fields, new_terms);
         };
 
         // Create dlg
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Unknown term', yes: 'Insert term', no: 'Skip'}, {default_palette_class: 'ui-heurist-design'});
     },
-	
+
+	//
+    // Process file field values from External Lookups, handles remote resources only
+    // 
+    // Param:
+    //  completed_fields (array): array of field names that have already been assigned
+    //
+    processFileFields: function(completed_fields){
+
+        var that = this;
+
+        if(Object.keys(this.file_values).length == 0){
+            this.processResourceFields(completed_fields);
+        }
+
+        var request = {
+            'a': 'batch',
+            'entity': 'recUploadedFiles',
+            'request_id': window.hWin.HEURIST4.util.random(),
+            'regExternalFiles': JSON.stringify(this.file_values)
+        };
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront(that._getEditDialog(), null, '<span style="color: white;">Processing file fields...</span>');
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+            if(response.status == window.hWin.ResponseStatus.OK){
+
+                let file_data = response.data;
+
+                let invalid_file = '';
+                let error_save = '';
+                let error_id = '';
+
+                for(let fld_id in file_data){
+
+                    let cur_file = file_data[fld_id];
+                    if(cur_file['err_save']){
+                        error_save += '<br>' + cur_file['err_save'].join('<br>');
+                        delete cur_file['err_save'];
+                    }
+                    if(cur_file['err_id']){
+                        error_id += '<br>' + cur_file['err_id'].join('<br>');
+                        delete cur_file['err_id'];
+                    }
+                    if(cur_file['err_invalid']){
+                        for(let f_id in cur_file['err_invalid']){
+                            invalid_file += '<br>' + f_id + ' => ' + cur_file['err_invalid'][f_id];
+                        }
+                        delete cur_file['err_invalid'];
+                    }
+
+                    that._editing.setFieldValueByName(fld_id, cur_file);
+
+                    let fieldname = $Db.rst(that._currentEditRecTypeID, fld_id, 'rst_DisplayName');
+                    if(!completed_fields.includes(fieldname)) { completed_fields.push(fieldname); }
+                }
+
+                if(invalid_file != '' || error_save != '' || error_id != ''){ // Display failed files
+                    let msg = 'The following URLs could not be processed.<br><br>';
+
+                    if(invalid_file != ''){
+                        msg += '<strong>Invalid URLs:</strong><br>' + invalid_file + '<br>';
+                    }
+                    if(error_save != ''){
+                        msg += '<strong>URLs failed during save:</strong><br>' + error_save + '<br>';
+                    }
+                    if(error_id != ''){
+                        msg += '<strong>Unable to retrieve File details:</strong><br>' + invalid_file + '<br>';
+                    }
+
+                    let $err_dlg;
+                    $err_dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, {'Ok': () => { 
+                        $err_dlg.dialog('close'); 
+                        that.processResourceFields(completed_fields);
+                    }}, {title: 'File saving error'}, {default_palette_class: 'ui-heurist-explore'});
+                }else{
+                    that.processResourceFields(completed_fields)
+                }
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
+    },
+
 	//
     // Process record pointer fields values from External Lookups, that aren't integers (ids)
     // 
     // Param:
-    //  resource_values (array): array of field ids and field values [{[ext_url]}, [dt_id, value], ...]
     //  completed_fields (array): array of field names that have already been assigned
     //
-    processResourceFields: function(resource_values, completed_fields){
+    processResourceFields: function(completed_fields){
 
         var that = this;
 
@@ -4909,11 +5014,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         var url = '';
         var completed = '';
 
-        var hasValue = (resource_values != null && resource_values.length > 1);
+        var hasValue = (that.resource_values != null && that.resource_values.length > 1);
 
-        if(hasValue && resource_values[0].length == 1){ // contains only the external record link
-            if(resource_values[0][1] == 'ext'){ // external link
-                url = '<a href="' + resource_values[0][0] + '" target="_blank">View external record <span style="font-size:10px;" class="ui-icon ui-icon-extlink" /></a><br><br>';
+        if(hasValue && that.resource_values[0].length == 1){ // contains only the external record link
+            if(that.resource_values[0][1] == 'ext'){ // external link
+                url = '<a href="' + that.resource_values[0][0] + '" target="_blank">View external record <span style="font-size:10px;" class="ui-icon ui-icon-extlink" /></a><br><br>';
             }
         }
 
@@ -4946,9 +5051,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             var todo_count = 0;
 
             // Add each row of record pointers
-            for(var i = 1; i < resource_values.length; i++){
+            for(var i = 1; i < that.resource_values.length; i++){
 
-                var cur_details = resource_values[i];
+                var cur_details = that.resource_values[i];
 
                 var field_name = $Db.rst(this._currentEditRecTypeID, cur_details[0], 'rst_DisplayName');
 
@@ -4970,7 +5075,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             var btn = {};
             btn['Close'] = function(){
                 // Close Recpointer Dlg
-                $dlg.dialog('close');
+                if(complete_count < todo_count){
+                    window.hWin.HEURIST4.msg.showMsgDlg((todo_count - complete_count) + ' record pointer field values have not been inserted.<br>Do you want to omit them?', 
+                        () => { $dlg.dialog('close'); }, {title: 'Task incomplete'}, {default_palette_class: 'ui-heurist-populate'});
+                }else{
+                    $dlg.dialog('close');
+                }
             }
 
             // Create Recpointer Dlg
@@ -4978,7 +5088,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 default_palette_class: 'ui-heurist-populate', 
                 modal: true, 
                 dialogId: 'lookup_RecPointers', 
-                position: {my: "left top+20", at: "left top+20", of: window}
+                position: {my: "right-50 top+45", at: "right top", of: this._getEditDialog()}
             });
 
             var complete_count = 0;
@@ -5085,7 +5195,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 
                 {title: 'Field mapping completed', ok: 'Close'}, 
-                {default_palette_class: 'ui-heurist-populate', position: {my: "left top+20", at: "left top+20", of: window}}
+                {default_palette_class: 'ui-heurist-populate', position: {my: "right-50 top+45", at: "right top", of: this._getEditDialog()}}
             );
 
             setTimeout(function(){ $dlg.dialog('close'); }, 2000);

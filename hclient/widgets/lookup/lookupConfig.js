@@ -476,6 +476,23 @@ $.widget( "heurist.lookupConfig", {
 
                     has_changes = true;
                 }
+            }else if(that.options.service_config[key]['service'] == 'nakala'){
+                
+                var n_fields = that.options.service_config[key]['fields'];
+                var hasFieldChanges = false;
+
+                if(!n_fields.hasOwnProperty('rec_url')){
+                    n_fields['rec_url'] = '';
+                }
+                if(!n_fields.hasOwnProperty('filename')){
+                    n_fields['filename'] = '';
+                }
+
+                if(hasFieldChanges){
+                    that.options.service_config[key]['fields'] = n_fields;
+
+                    has_changes = true;
+                }
             }
         });
 
@@ -1027,7 +1044,7 @@ $.widget( "heurist.lookupConfig", {
                 }
                 
                 var sel = window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele, rty_ID, 
-                    ['freetext','blocktext','enum','date','geo','float','year','integer','resource'], '...', 
+                    ['freetext','blocktext','enum','date','geo','float','year','integer','resource','file'], '...',
                     {show_latlong:true, show_dt_name:true, selectedValue:dty_ID} );
                     
                 that._on($(sel), {change:function(){that._updateStatus();}});
