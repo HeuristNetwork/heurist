@@ -186,7 +186,7 @@
     "rty_ID": "",
     "label": "Nakala Lookup",
     "dialog": "lookupNakala",
-    "description": "A proof of concept for searching via the Nomisma Library API (under development)",
+    "description": "A proof of concept for searching Nakala Records via their API (under development)",
     "fields": {
         "url": "",
         "title": "",
@@ -196,5 +196,19 @@
         "mime_type": "",
         "abstract": ""
     }
-}
+},
+{
+    "service": "nakala_author",
+    "rty_ID": "",
+    "label": "Nakala Author Lookup",
+    "dialog": "lookupNakalaAuthor",
+    "description": "A proof of concept for searching Nakala Authors via their API (under development)",
+    "fields": {
+        "givenname": "",
+        "surname": "",
+        "orcid": "",
+        "authorId": "",
+        "fullName": ""
+    }
+},
 ]
