@@ -1842,10 +1842,11 @@ window.hWin.HEURIST4.dbs = {
         
         if(vocab_id=='relation'){
             //find all vocabulary with domain "relation"
+            res = {'children':[]};
             var vocab_ids = $Db.trm_getVocabs('relation');
             for (var i=0; i<vocab_ids.length; i++){
                 var trm_ID = vocab_ids[i];
-                res = __addChilds(trm_ID, 0, true);
+                res['children'].push( __addChilds(trm_ID, 0, true) );
             }
             
         }else{

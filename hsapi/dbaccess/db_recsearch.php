@@ -135,7 +135,7 @@ function _getRt_Ft($resource)
 //      q - JSON query array
 //      field - field id to search
 //      type - field type (todo - search it dynamically with getDetailType)
-//      needcount
+//      needcount     2 - count for related records
 // @return
 //
 function recordSearchFacets($system, $params){
@@ -292,7 +292,7 @@ function recordSearchFacets($system, $params){
             }
 
         }
-        else if($dt_type=="enum" && $facet_groupby=='firstlevel' && $vocabulary_id!=null){ 
+        else if(($dt_type=="enum" || $dt_type=="reltype") && $facet_groupby=='firstlevel' && $vocabulary_id!=null){ 
 
             $params_enum = null;
             if($count_query){
@@ -382,7 +382,7 @@ function recordSearchFacets($system, $params){
                 $select_field = 'SUBSTRING(trim('.$select_field.'), 1, 1)';    //group by first charcter                }
             }
 
-                        if($params['needcount']==1){
+            if($params['needcount']==1){
 
                 $select_clause = "SELECT $select_field as rng, count(DISTINCT r0.rec_ID) as cnt ";
                 if($grouporder_clause==""){
@@ -2176,7 +2176,7 @@ function recordSearch($system, $params)
     //error_log($query);
     if(@$_REQUEST['dbg']==1) {
         print $query;
-        //exit();
+        exit();
     }
         
 

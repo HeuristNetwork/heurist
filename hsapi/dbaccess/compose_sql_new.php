@@ -205,6 +205,10 @@ $currUserID = 0;
 $params_global;
 $top_query;
 
+$rty_id_relation = 1;//$system->defineConstant('RT_RELATION');
+$dty_id_relation_type = 6;//$system->defineConstant('DT_RELATION_TYPE');
+
+
 /*
 
 [{"t":14},{"f:74":"X0"},
@@ -414,8 +418,17 @@ function parse_query_to_json($query){
 //
 function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
-    global $mysqli, $wg_ids, $currUserID, $publicOnly, $params_global, $top_query;//, $use_user_wss;
+    global $mysqli, $wg_ids, $currUserID, $publicOnly, $params_global, $top_query
+        , $rty_id_relation, $dty_id_relation_type;//, $use_user_wss;
     
+
+    if(defined('RT_RELATION')){
+        $rty_id_relation = RT_RELATION;        
+    }
+    if(defined('DT_RELATION_TYPE')){
+        $dty_id_relation_type = DT_RELATION_TYPE;        
+    }
+
     $params_global = $params;
 
     $mysqli = $db;
@@ -445,7 +458,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     }
     array_push($wg_ids, 0); // be sure to include the generic everybody workgroup
 
-    $publicOnly = (@$params['publiconly']==1); //@todo change to vt - visibility type parameter of query
+    $publicOnly = (@$params['publiconly'] == 1); //@todo change to vt - visibility type parameter of query
 
     // 2. DETECT SEARCH DOMAIN ------------------------------------------------------------------------------------------
     if (strcasecmp($params['w'],'B') == 0  ||  strcasecmp($params['w'],BOOKMARK) == 0) {    // my bookmark entries
@@ -889,6 +902,7 @@ class HLimb {
     // fills $tables and $where_clause
     //
     function makeSQL(){
+        global $rty_id_relation;
 
         $cnj = $this->allowed[$this->conjunction];
         $where = "";
@@ -910,8 +924,16 @@ class HLimb {
 
             $wheres = array();
             if(is_array($this->limbs)){
+                $is_relationship = false;
+                foreach ($this->limbs as $ind=>$limb){
+                    if($limb->pred_type=='t' && $limb->value == $rty_id_relation){
+                        $is_relationship = true;
+                        break;
+                    }
+                }
                 $cnt = count($this->limbs)-1;
                 foreach ($this->limbs as $ind=>$limb){
+                    $limb->is_relationship = $is_relationship;
                     $res = $limb->makeSQL();
 
                     //echo print_r($res, true)."<br>";
@@ -979,6 +1001,8 @@ class HPredicate {
     var $query = null;
     
     //for related_to, related_from 
+    var $is_relationship = false;
+    
     var $relation_types = null; 
     var $relation_fields = null; // field in relationshio record: array(field_id=>value)
     var $relation_prefix = ''; //prefix for recLinks
@@ -1031,7 +1055,9 @@ class HPredicate {
     */
 
 
-    function __construct(&$parent, $key, $value, $index_of_predicate) {
+    function __construct(&$parent, $key, $value, $index_of_predicate) 
+    {
+        global $dty_id_relation_type;
 
         $this->parent = &$parent;
         $this->qlevel = $this->parent->level; //
@@ -1052,7 +1078,8 @@ class HPredicate {
             { //subqueries
                 //special bahvior for relation - extract reltypes and record ids
                 $p_type = strtolower($this->pred_type);
-                if($p_type=='related_to' || $p_type=='relatedto' || $p_type=='rt' ||
+                if($p_type=='related' ||
+                   $p_type=='related_to' || $p_type=='relatedto' || $p_type=='rt' ||
                    $p_type=='related_from' || $p_type=='relatedfrom' || $p_type=='rf')
                 {
                     
@@ -1091,14 +1118,23 @@ class HPredicate {
                                                     :str_replace('relf:','f:',$rel_field);    
                                $this->relation_fields[$rel_field] = $val;       
                         
-                        }else if(is_array($val) && (@array_keys($val)[0]==='r:' || @array_keys($val)[0]==='relf:')){  //that's for [{"r:10":10},{}]
+                        }else if(is_array($val) && 
+                                    (strpos(@array_keys($val)[0],'r:')===0 || strpos(@array_keys($val)[0],'relf:')===0)){  //that's for [{"r:10":10},{}]
                             //{"t":10,"rf:245":[{"t":4},{"r":6421},{"relf:10":">2010"}]}}
                                $rel_field = array_keys($val)[0];  
-                               $rel_field2 = strpos($rel_field,'r:')===0
-                                                    ?str_replace('r:','f:',$rel_field)
-                                                    :str_replace('relf:','f:',$rel_field);    
-                            
-                                $this->relation_fields[$rel_field2] = $val[$rel_field];       
+                               if($rel_field=='r:'.$dty_id_relation_type){
+                                   
+                                   if($val[$rel_field]){
+                                        $this->relation_types = prepareIds($val[$rel_field]);        
+                                   }
+                                   
+                               }else{
+                                   $rel_field2 = strpos($rel_field,'r:')===0
+                                                        ?str_replace('r:','f:',$rel_field)
+                                                        :str_replace('relf:','f:',$rel_field);    
+                                
+                                   $this->relation_fields[$rel_field2] = $val[$rel_field];       
+                               }
                         }else{
                             $this->value[$idx] = $val;
                         }
@@ -2050,7 +2086,6 @@ class HPredicate {
 
         global $top_query, $params_global, $mysqli;
         $not_nested = (@$params_global['nested']===false);
-        
 
         $this->field_type = "link";
         $p = $this->qlevel;
@@ -2084,16 +2119,46 @@ class HPredicate {
             $val = $this->getFieldValue();
 
             if($val=='' && !$this->field_list){
-                $val = "=0";
+                $val = "!=0";
                 //@todo  findAnyField query
                 //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
             }
         }
 
-        $where = 
-        (($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :"$rl.rl_RelationID is not null")
-         ." AND ((r$p.rec_ID=$rl.rl_SourceID AND  $rl.rl_TargetID".$val
-            .") OR (r$p.rec_ID=$rl.rl_TargetID AND  $rl.rl_SourceID".$val.'))';
+        $s1 = 'rl_SourceID';
+        $s2 = 'rl_TargetID';
+        if($this->is_relationship){
+            $s1 = $s2 = 'rl_RelationID';
+        }
+        
+        $where = '';
+        
+        if(is_array($this->relation_types)&& count($this->relation_types)>0){
+            
+            $this->relation_types = array_merge($this->relation_types, 
+                            getTermChildrenAll($mysqli, $this->relation_types));
+            
+            $where = $where . "($rl.rl_RelationTypeID " .(count($this->relation_types)>1
+                        ?' IN ('.implode(',',$this->relation_types).')'
+                        :'='.$this->relation_types[0])
+                        .') AND ';    
+            
+        }else{
+            $where = $where . "$rl.rl_RelationID is not null AND";
+        }
+            
+        if($this->relation_fields!=null){
+                $this->relation_fields->setRelationPrefix($rl);
+                $w2 = $this->relation_fields->makeSQL();
+                if($w2 && trim($w2['where'])!=''){
+                    $where = $where.$w2['where'].' AND ';
+                }
+           }
+        
+        $where = $where
+        //(($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :"$rl.rl_RelationID is not null")
+         ." ((r$p.rec_ID=$rl.$s1 AND  $rl.rl_TargetID".$val
+            .") OR (r$p.rec_ID=$rl.$s2 AND  $rl.rl_SourceID".$val.'))';
 
         return array("from"=>"recLinks ".$rl, "where"=>$where);
     }

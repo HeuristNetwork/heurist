@@ -1863,7 +1863,7 @@ $.widget( "heurist.search_faceted", {
                         dty_ID = dty_ID.substr(2);    
                     }
                     
-                    if(field['type']=='enum' && field['groupby']!='firstlevel'){
+                    if((field['type']=='enum' || field['type']=='reltype') && field['groupby']!='firstlevel'){
                         
                         var is_first_level = false;
                         if(!field['step0_vals']){
@@ -1907,12 +1907,11 @@ $.widget( "heurist.search_faceted", {
                                      {title:'public', key:'public'},
                                      {title:'pending', key:'pending'}]};
                             
-                        }else{
-                        
+                        }else {    
                             //enumeration
-                            var vocab_id = $Db.dty(dty_ID, 'dty_JsonTermIDTree');    
+                            var vocab_id = (field['type']=='reltype')?'relation':$Db.dty(dty_ID, 'dty_JsonTermIDTree');    
                                                   
-    if(!(vocab_id>0)){
+    if(field['type']!='reltype' && !(vocab_id>0)){
         console.log('Field '+dty_ID+' not found!!!!');
         console.log(field);
         //search next facet
@@ -2687,7 +2686,7 @@ $.widget( "heurist.search_faceted", {
                         }
                         }
                     }
-                    else if(field['type']=='enum' && field['groupby']=='firstlevel' 
+                    else if( (field['type']=='enum' || field['type']=='reltype') && field['groupby']=='firstlevel' 
                                 && !window.hWin.HEURIST4.util.isnull(field['selectedvalue'])){
                         
                         var cterm = field.selectedvalue;
@@ -2846,7 +2845,7 @@ $.widget( "heurist.search_faceted", {
                     var title = value[0];
                     
                     //for enum get term label w/o code
-                    if(field['type']=='enum' && value[0]>0){
+                    if((field['type']=='enum' || field['type']=='reltype') && value[0]>0){
                         title = $Db.getTermValue(value[0], false);    
                     }else if( field['type']=='date' && field['groupby']=='month' ){
                         
