@@ -4507,7 +4507,12 @@ console.log('onpaste');
                 k++;
             }
             this.element.find('span.field-visibility').show();
-            this.element.find('div.field-visibility2').show();
+            if(this.f('rst_NonOwnerVisibility')=='pending'){
+                this.element.find('div.field-visibility2').show();    
+            }else{
+                this.element.find('div.field-visibility2').hide();    
+            }
+            
         }else{
             this.element.find('span.field-visibility').hide();
             this.element.find('div.field-visibility2').hide();
