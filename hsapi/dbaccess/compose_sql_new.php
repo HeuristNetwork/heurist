@@ -1067,10 +1067,15 @@ class HPredicate {
                             
                             $this->relation_types = prepareIds($val);
                             
-                        }else if (is_array($val) && @$val['r']) //for relation type
+                        }else if (is_array($val) && array_key_exists('r',$val)) //for relation type
                         {
                             $val = $val['r'];
-                            $this->relation_types = prepareIds($val);
+                            if($val){
+                                $this->relation_types = prepareIds($val);    
+                            }else{
+                                $this->relation_types = null; //not empty - any relationtype
+                            }
+                            
                             
                             //remove from array
                             //array_splice($this->value, $idx, 1);
@@ -2132,7 +2137,7 @@ class HPredicate {
             
             $rd = "rd".$this->qlevel;
             
-            if($this->field_id){
+            if($this->field_id){//relmarker field id
                 //find constraints and all terms 
                 list($vocab_id, $rty_constraints) = mysql__select_row($mysqli, 
                         'SELECT dty_JsonTermIDTree, dty_PtrTargetRectypeIDs '
