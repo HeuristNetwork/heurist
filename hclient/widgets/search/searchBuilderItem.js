@@ -450,7 +450,7 @@ $.widget( "heurist.searchBuilderItem", {
 
             eqopts = [{key:'',title:'within'}];
 
-        }else if(field_type=='enum' || field_type=='resource' || field_type=='relmarker' 
+        }else if(field_type=='enum' || field_type=='resource' || field_type=='relationtype' //|| field_type=='relmarker' 
                  || field_type=='user' || field_type=='access' || field_type=='ids'){
 
             eqopts = [{key:'',title:'equals'},
@@ -540,7 +540,9 @@ Whole value = EQUAL
         if((dty_ID>0 || dty_ID=='notes' || dty_ID=='url')){  // && field_type!='relmarker'
             eqopts.push({key:'', title:'──────────', disabled:true});
             eqopts.push({key:'any', title:'any value (exists)'});
-            eqopts.push({key:'NULL', title:'no data (missing)'});
+            if(field_type!='relationtype'){
+                eqopts.push({key:'NULL', title:'no data (missing)'});    
+            }
         }
 
         this._off( this.select_conjunction, 'change');
@@ -700,6 +702,7 @@ Whole value = EQUAL
                     op = '';
                     vals = ['NULL'];
             }else if( (this._current_field_type=='enum' 
+                        || this._current_field_type=='relationtype' 
                         || this._current_field_type=='ids'
                         || this._current_field_type=='user'
                         || this._current_field_type=='resource') 
