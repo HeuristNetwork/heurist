@@ -30,6 +30,7 @@ $.widget( "heurist.app_storymap", {
         
         storyFields: [],   // field ids that will be considered as story elements (superseed storyRectypes)
         storyRectypes: [], // ids of rectypes that will be considered as story elements (1414-100 or 9-24 or 3-1006 or similar)
+        elementOrder: '', // field ID (dty_ID) to order story elements
 
         
         // general options
@@ -604,6 +605,9 @@ $.widget( "heurist.app_storymap", {
             var request;
             
             let DT_STORY_ANIMATION = $Db.getLocalID('dty', '2-1090'); //configuration field for animation and style
+            let DT_DATE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATE'];     //9
+            let DT_START_DATE = window.hWin.HAPI4.sysinfo['dbconst']['DT_START_DATE']; //10
+            let DT_END_DATE = window.hWin.HAPI4.sysinfo['dbconst']['DT_END_DATE']; //11
 
             if(this.options.storyFields.length>0){
                 //search for story fields for given record
@@ -626,7 +630,17 @@ $.widget( "heurist.app_storymap", {
                                 recIDs = recIDs.join(',');
                                 
                                 //returns story elements in exact order
-                                var request = {q:[{ids:recIDs},{sort:('set:'+recIDs)}], detail:DT_STORY_ANIMATION};
+                                var request = {q:[{ids:recIDs},{sort:('set:'+recIDs)}]};
+                                
+                                var detail_fields = [];
+                                if(that.options.elementOrder=='def'){
+                                    detail_fields = [DT_DATE,DT_START_DATE,DT_END_DATE];
+                                }else if(that.options.elementOrder){
+                                    detail_fields = [that.options.elementOrder];
+                                }
+                                detail_fields.push(DT_STORY_ANIMATION);
+                                
+                                request['detail'] = detail_fields;
                                 
                                 if(that.options.storyRectypes.length>0){
                                     request['q'].push({t:that.options.storyRectypes.join(',')});
@@ -636,6 +650,36 @@ $.widget( "heurist.app_storymap", {
                                     function(response) {
 //console.log( response.data );                                        
                                         that._resultset = new hRecordSet(response.data);
+                                        
+                                        //sort
+                                        if(that.options.elementOrder){
+                                            var sortFields = {};
+                                            if(that.options.elementOrder=='def'){
+                                                
+                                                that._resultset.each(function(recID, record){
+                                                    var dt_st = that._resultset.fld(record, DT_START_DATE);
+                                                    var dt_end = that._resultset.fld(record, DT_END_DATE);
+                                                    if(!dt_st){
+                                                        dt_st = that._resultset.fld(record, DT_DATE);
+                                                    }
+                                                    var dres = window.hWin.HEURIST4.util.parseDates(dt_st, dt_end);
+                                                    
+                                                    that._resultset.setFld(record, DT_START_DATE, dres[0]);
+                                                    that._resultset.setFld(record, DT_END_DATE, dres[1]);
+                                                });        
+                                                
+                                                //sortFields = {"9":1,"10":1,"11":1};
+                                                //sortFields[DT_DATE] = 1;
+                                                sortFields[DT_START_DATE] = 1;
+                                                sortFields[DT_END_DATE] = 1;
+                                            }else{
+                                                sortFields[that.options.elementOrder] = 1;
+                                            }
+                                            
+                                            that._resultset.sort(sortFields);
+                                        }
+                                        
+                                        
                                         that._startNewStory(recID);        
                                     });
                             }else{

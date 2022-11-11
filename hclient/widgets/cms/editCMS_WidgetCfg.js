@@ -736,6 +736,13 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback ){
                 window.hWin.HEURIST4.ui.createTemplateSelector( $selectTemplate
                     ,[{key:'',title:'Standard record view'}], opts['reportElement']);
 
+                    
+                var $elementOrder = $dlg.find('select[name="elementOrder"]'); 
+
+                window.hWin.HEURIST4.ui.createRectypeDetailSelect( $elementOrder[0], null, ['date','year','integer']
+                    ,[{key:'',title:'As is (order in record)'},{key:'def',title:'Common date fields (##9,10,11)'}]
+                    ,{selectedValue:opts['elementOrder']});
+                    
                 /*
                 var selectFields = $dlg.find('select[name="storyFields"]'); 
                 window.hWin.HEURIST4.ui.createRectypeDetailSelect(selectFields[0], 
