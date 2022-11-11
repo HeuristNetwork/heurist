@@ -3388,7 +3388,8 @@ console.log('onpaste');
         var vis_mode = this.f('rst_NonOwnerVisibility');
 
         if(this.options.showedit_button && this.detailType!="relmarker" &&
-          (vis_mode=='public' || vis_mode=='pending'))
+           (this.options.recordset && this.options.recordset.entityName == 'Records') && 
+           (vis_mode=='public' || vis_mode=='pending'))
         {
         
             var that = this;

@@ -594,7 +594,7 @@ function hEditing(_options) {
         var idx, ele, values = [];
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
-            if(ele.editing_input('option', 'dtID')==dtID){
+            if(ele.editing_input('instance') && ele.editing_input('option', 'dtID')==dtID){
                 var vals = ele.editing_input('getValues');
                 if(vals && vals.length>0){
                     return ele.editing_input('getValues');

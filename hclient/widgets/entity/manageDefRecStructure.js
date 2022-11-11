@@ -2289,26 +2289,31 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             return;   
         }
 
-        if(this._editing && this._editing.getValue('dty_Type') == 'separator' && window.hWin.HEURIST4.util.isempty(this._editing.getValue('rst_DisplayName'))) {
+        if(this._editing && this._editing.getValue('dty_Type') == 'separator'){
+            
+            var val = this._editing.getValue('rst_DisplayName');
+            var sep_type = this._editing.getValue('rst_SeparatorType');
+            if(val && window.hWin.HEURIST4.util.isempty(val[0]) && sep_type && (sep_type[0]=='group' || sep_type[0]=='group_break')) {
 
-            let $dlg;
-            let msg = 'You have left the Field label empty.<br>Would you like the header to be blank?';
-            let btns = {};
-            btns[window.hWin.HR('Yes')] = () => {
+                let $dlg;
+                let msg = 'You have left the Field label empty.<br>Would you like the header to be blank?';
+                let btns = {};
+                btns[window.hWin.HR('Yes')] = () => {
 
-                let fld = that._editing.getFieldByName('rst_DisplayName');
-                fld.setValue('-', false);
+                    let fld = that._editing.getFieldByName('rst_DisplayName');
+                    fld.editing_input('setValue', '-', false);
 
-                $dlg.dialog('close');
-                that._saveEditAndClose(fields, afterAction);
-            };
-            btns[window.hWin.HR('No')] = () => {
-                $dlg.dialog('close');
-                window.hWin.HEURIST4.msg.showMsgFlash('Please enter a Field name', 2000);
-            };
+                    $dlg.dialog('close');
+                    that._saveEditAndClose(fields, afterAction);
+                };
+                btns[window.hWin.HR('No')] = () => {
+                    $dlg.dialog('close');
+                    window.hWin.HEURIST4.msg.showMsgFlash('Please enter a Field name', 2000);
+                };
 
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Blank field name'}, {default_palette_class: this.options.default_palette_class});
-            return;
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Blank field name'}, {default_palette_class: this.options.default_palette_class});
+                return;
+            }
         }
 
         if(!fields){
