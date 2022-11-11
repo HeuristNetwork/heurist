@@ -1471,6 +1471,67 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             
             return this.getSubSet(_records, _order);
         },
+
+        //
+        // sortFields:  { "fieldName":-1|1 }
+        //
+        sort: function(sortFields){
+            
+            var recID, fieldName, dataTypes={};
+            
+            if(sortFields==null || $.isEmptyObject(sortFields)) return
+            
+            for (fieldName in sortFields) {
+                if (sortFields.hasOwnProperty(fieldName) ){
+                    var dt_type = 'freetext';
+                    if(fieldName=='rec_RecTypeID' || fieldName=='rec_ID'){
+                        dt_type = 'integer';
+                    }else 
+                    if(Number(fieldName)>0){
+                        dt_type = $Db.dty(fieldName,'dty_Type');
+                    }
+                    if(dt_type=='resource'){
+                        dt_type = 'integer';
+                    }
+                    dataTypes[fieldName] = dt_type;
+                }
+                
+            }
+            
+            if(Object.keys(dataTypes).length>0){
+
+                order.sort(function(a,b){  
+                        var res = 0;                        
+                        for (fieldName in sortFields) {
+                            if (sortFields.hasOwnProperty(fieldName) ){
+                                var val1 = that.fld(records[a], fieldName);
+                                var val2 = that.fld(records[b], fieldName);
+                                if(dataTypes[fieldName]=='integer' || dataTypes[fieldName]=='float'){
+                                    if(Number(val1)!=Number(val1)){
+                                        res = sortFields[fieldName]*(Number(val1)<Number(val1)?-1:1);
+                                    }
+                                }else{
+                                    if(dataTypes[fieldName]=='date'){
+                                        var dres = window.hWin.HEURIST4.util.parseDates(val1, val2);
+                                        val1 = dres[0];
+                                        val2 = dres[1];
+                                    }
+                                    if(val1) val1 = val1.toLowerCase();
+                                    if(val2) val2 = val2.toLowerCase();
+                                    if(val1!=val2){
+                                        res = sortFields[fieldName]*(val1<val2?-1:1);
+                                    }
+                                }
+                                if(res!=0){
+                                    break;
+                                }
+                            }
+                        }//for
+                        return res;
+                    });
+            }
+            
+        },
         
         //
         //  returns subset by request/filter

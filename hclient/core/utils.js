@@ -1111,7 +1111,7 @@ window.hWin.HEURIST4.util = {
                     }
                 }
 
-                if(start!="" && $.type( end ) === "string") {
+                if(end!="" && $.type( end ) === "string") {
                     if(end.search(/VER=/)!==-1){
                         temporal = new Temporal(end);
                         if(temporal){
