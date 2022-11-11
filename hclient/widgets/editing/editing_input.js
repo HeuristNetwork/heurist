@@ -425,18 +425,9 @@ $.widget( "heurist.editing_input", {
         }else{
             this.element.find('.btn_input_clear').css({'visibility':'hidden','max-width':0});
         }
-    
-        this.element.find('div.field-visibility2').hide();
-        if(this.options.showedit_button && 
-          (this.f('rst_NonOwnerVisibility')=='public' || this.f('rst_NonOwnerVisibility')=='pending')){
-            this.element.find('span.field-visibility').show();
-            if(this.f('rst_NonOwnerVisibility')=='pending'){
-                this.element.find('div.field-visibility2').show();
-            }
-        }else{
-            this.element.find('span.field-visibility').hide();
-        }
         
+        this._setVisibilityStatus();
+    
         if(this.options.show_header){
             this.header.css('display','table-cell');//show();
         }else{
@@ -3224,7 +3215,7 @@ console.log('onpaste');
             if(!(this.detailType == 'enum' && this.inputs.length > 1 && this.enum_buttons == 'checkbox')){
 
                 var $btn_clear = $('<span>')
-                .addClass("smallbutton ui-icon ui-icon-circlesmall-close btn_input_clear")//   ui-icon
+                .addClass("smallbutton ui-icon ui-icon-circlesmall-close btn_input_clear show-onhover")//   ui-icon
                 .attr('tabindex', '-1')
                 .attr('title', 'Clear entered value')
                 .attr('data-input-id', $input.attr('id'))
@@ -3321,11 +3312,16 @@ console.log('onpaste');
                         'margin-top': '6px',
                         'cursor': 'pointer',
                         'vertical-align': 'top'
-                    })
-                    .insertAfter( $input )
-                    .hide();   //$inputdiv.find('.smallicon:first')
+                    });
 
 
+        if($inputdiv.find('.btn_input_clear').length > 0){
+           btn_field_visibility.insertBefore($inputdiv.find('.btn_input_clear'));
+        }else{
+           btn_field_visibility.insertAfter( $input );
+        }
+                    
+                    
         var chbox_field_visibility = $( '<div><span class="smallicon ui-icon ui-icon-check-off" style="font-size:1em"/> '
                     +'Per record visibility<div>', 
                     {title: 'Per record visibility'})
@@ -3360,26 +3356,13 @@ console.log('onpaste');
                 
                 var btn = $(e.target);
                 
-                var $input_div =  btn.parent('.input-div');
-                
-                var chbox = this.element.find('div.field-visibility2[data-input-id="'+btn.attr('data-input-id')+'"]');
-                    
-                
                 if(btn.attr('hide_field')=='1'){
-                    $input_div.css('background-color','transparent');
-                    $input_div.find('.text').removeClass('grayed');
-                    btn.removeClass('ui-icon-eye-crossed');            
-                    btn.addClass('ui-icon-eye-open');
                     btn.attr('hide_field',0);
-                    chbox.find('span.ui-icon').removeClass('ui-icon-check-on').addClass('ui-icon-check-off');
                 }else{
-                    $input_div.css('background-color','#CCCCCC');
-                    $input_div.find('.text').addClass('grayed');
-                    btn.removeClass('ui-icon-eye-open');            
-                    btn.addClass('ui-icon-eye-crossed');
                     btn.attr('hide_field',1);
-                    chbox.find('span.ui-icon').removeClass('ui-icon-check-off').addClass('ui-icon-check-on');
                 }
+                
+                this._setVisibilityStatus(btn.attr('data-input-id'));
                 
                 this.isChanged(true);
                 this.onChange();
@@ -3396,6 +3379,68 @@ console.log('onpaste');
         return $input.attr('id');
 
     }, //addInput
+    
+    //
+    //
+    //
+    _setVisibilityStatus: function(input_id){
+
+        var vis_mode = this.f('rst_NonOwnerVisibility');
+
+        if(this.options.showedit_button && this.detailType!="relmarker" &&
+          (vis_mode=='public' || vis_mode=='pending'))
+        {
+        
+            var that = this;
+            var vis_btns = this.element.find('span.field-visibility'+
+                    (input_id?'[data-input-id="'+input_id+'"]':'')); 
+            
+            $.each(vis_btns, function(idx, btn){
+
+                btn = $(btn);
+                var chbox = that.element.find('div.field-visibility2[data-input-id="'+btn.attr('data-input-id')+'"]');
+                var $input_div =  btn.parent('.input-div');
+                
+                if(btn.attr('hide_field')=='1'){
+                    $input_div.css('background-color','#CCCCCC');
+                    $input_div.find('.text').addClass('grayed');
+                    btn.removeClass('ui-icon-eye-open');            
+                    btn.addClass('ui-icon-eye-crossed');
+                    chbox.find('span.ui-icon').removeClass('ui-icon-check-off').addClass('ui-icon-check-on');
+
+                    if(vis_mode=='public'){ 
+                        btn.removeClass('show-onhover'); //show always for invisible field   
+                        btn.css('display','inline-block');                        
+                    }
+                }else{
+                    $input_div.css('background-color','transparent');
+                    $input_div.find('.text').removeClass('grayed');
+                    btn.removeClass('ui-icon-eye-crossed');            
+                    btn.addClass('ui-icon-eye-open');
+                    chbox.find('span.ui-icon').removeClass('ui-icon-check-on').addClass('ui-icon-check-off');
+
+                    if(vis_mode=='public'){
+                        btn.css('display','');    
+                        btn.addClass('show-onhover');
+                    }
+                }
+
+                if(vis_mode=='public'){
+                    chbox.hide();
+                }else{
+                    //pending
+                    chbox.show();
+                    btn.removeClass('show-onhover'); //show always for pending
+                    btn.css('display','inline-block');                        
+                }
+
+            });//each
+        
+        }else{
+            this.element.find('span.field-visibility').hide();
+            this.element.find('div.field-visibility2').hide();
+        }  
+    },
 
     //
     // Link to image fields together, to perform actions (e.g. add, change, remove) on both fields, mostly for icon and thumbnail fields
@@ -4442,7 +4487,7 @@ console.log('onpaste');
     getVisibilities: function(){
         
         var ress2 = [];
-        if(this.f('rst_NonOwnerVisibility')=='pending')
+        if(this.f('rst_NonOwnerVisibility')=='public' || this.f('rst_NonOwnerVisibility')=='pending')
         {
             var idx;
             var ress = {};
@@ -4474,44 +4519,32 @@ console.log('onpaste');
     },
 
     //
-    // returns individual visibilities (order is respected)
+    // applies visibility status 
     //
     setVisibilities: function(vals){
         
-        if(this.options.showedit_button &&
-         (this.f('rst_NonOwnerVisibility')=='pending' || this.f('rst_NonOwnerVisibility')=='public'))
+        var vis_mode = this.f('rst_NonOwnerVisibility');
+        
+        if(this.options.showedit_button && this.detailType!="relmarker" &&
+         (vis_mode=='pending' || vis_mode=='public'))
         {
             var idx, k=0;
-            var ress = {};
             
             for (idx in this.inputs) {
 
                 var $input = this.inputs[idx];
                 var btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
-                var chbox = this.element.find('div.field-visibility2[data-input-id="'+$input.attr('id')+'"]');
                 
                 if(vals && k<vals.length && vals[k]==1){
-                    $input.parent('.input-div').css('background-color','#CCCCCC');
-                    $input.addClass('grayed');
-                    btn.removeClass('ui-icon-eye-open');            
-                    btn.addClass('ui-icon-eye-crossed');
                     btn.attr('hide_field',1);
-                    
-                    chbox.find('span.ui-icon').removeClass('ui-icon-check-off').addClass('ui-icon-check-on');
                 }else{
-                    btn.removeClass('ui-icon-eye-crossed');            
-                    btn.addClass('ui-icon-eye-open');
                     btn.attr('hide_field',0);
-                    chbox.find('span.ui-icon').removeClass('ui-icon-check-on').addClass('ui-icon-check-off');
                 }
                 k++;
             }
-            this.element.find('span.field-visibility').show();
-            if(this.f('rst_NonOwnerVisibility')=='pending'){
-                this.element.find('div.field-visibility2').show();    
-            }else{
-                this.element.find('div.field-visibility2').hide();    
-            }
+            
+            this._setVisibilityStatus();
+
             
         }else{
             this.element.find('span.field-visibility').hide();
