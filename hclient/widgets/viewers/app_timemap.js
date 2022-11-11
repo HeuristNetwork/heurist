@@ -365,7 +365,6 @@ console.log(re);
                 return;
             }
             
-
             if(this.is_map_inited && cnt_call>0) return;
             
             if(this.options.leaflet){ //LEAFLET
@@ -422,7 +421,7 @@ console.log(re);
                 
                     this.is_map_inited = true;
                     this.options.init_completed = true;
-                    
+
                     if($.isFunction(this.options.onMapInit)){
                         this.options.onMapInit.call();
                     }

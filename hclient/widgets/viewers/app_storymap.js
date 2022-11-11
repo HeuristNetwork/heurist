@@ -329,6 +329,9 @@ $.widget( "heurist.app_storymap", {
         
         if(this._mapping){
             
+            if(this._mapping.length==0){
+                this._mapping = $('#'+this.options.map_widget_id);
+            }
             
             if($.isFunction(this._mapping.app_timemap) && this._mapping.app_timemap('instance')){
                 //widget inited
@@ -340,7 +343,6 @@ $.widget( "heurist.app_storymap", {
                 }
         
             }else{
-                
                 this._timeout_count++;
                 if(this._timeout_count<100){
                     setTimeout(function(){ that._initCompleted(); },200);
