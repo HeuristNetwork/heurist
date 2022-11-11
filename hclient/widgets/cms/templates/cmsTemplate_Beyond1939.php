@@ -99,7 +99,10 @@ if($isWebPage){ //set in websiteRecord.php
                 <h1 class="bor-header-title sr-only">Beyond 1939</h1>
                 <div class="bor-header-sub-title sr-only">The University of Sydney and World War II</div>
             </a>
-            <div class="col-lg-12 bor-search-body">Searchbox Placeholder</div>
+            <div class="col-lg-12 bor-search-body">
+                <input type="text" id="simple-search-input" placeholder="Search for people in the database">
+                <button id="simple-search-btn"><span class="ui-icon ui-icon-search"></span></button>
+            </div>
         </header>
         <div id="main-content"></div>
         <footer class="bor-footer">
