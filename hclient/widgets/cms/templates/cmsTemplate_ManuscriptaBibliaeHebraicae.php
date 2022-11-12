@@ -273,11 +273,12 @@ if($isWebPage){ //set in websiteRecord.php
         </div>
         
         
-        
+        <!-- https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output_poster.jpg 
+             https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output.mp4 -->
         <div id="wrapper-video" onclick="{document.getElementById('wrapper-video').style.display = 'none';}">
           <video autoplay="" loop="" muted="" 
-          poster="https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output_poster.jpg" id="video-background">
-            <source src="https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output.mp4" type="video/mp4">
+          poster="https://heurist.huma-num.fr/h6-alpha/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=62c18d37f7d63b7777e5dc0add9c5ea669d78ec7" id="video-background">
+            <source src="https://heurist.huma-num.fr/h6-alpha/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=d6d20c9e1243394fe13cbf427a11143a480f3fa5" type="video/mp4">
           </video>
           <h1>Manuscripta Bibliae Hebraicae</h1>
           <p class="subtitle">Les manuscrits de la Bible hébraïque en Europe occidentale (Angleterre, France, Allemagne, Italie du Nord) au XIIe et XIIIe siècle&nbsp;: une approche matérielle, culturelle et sociale</p>
