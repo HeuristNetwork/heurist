@@ -95,12 +95,13 @@ if($isWebPage){ //set in websiteRecord.php
     </nav>
     <div id="main-content-container" class="container">
         <header class="bor-header">
-            <a href="javascript:window.location.reload(true)" class="bor-logo">
+            <!-- 121974 is the H-ID of the homepage; it will be converted into a call to __loadPageContent by Heurist's CMS -->
+            <a href="121974" class="bor-logo">
                 <h1 class="bor-header-title sr-only">Beyond 1939</h1>
                 <div class="bor-header-sub-title sr-only">The University of Sydney and World War II</div>
             </a>
-            <div class="col-lg-12 bor-search-body">
-                <input type="text" id="simple-search-input" placeholder="Search for people in the database">
+            <div class="bor-search-body">
+                <input class="form-control input-large" type="text" id="simple-search-input" placeholder="Search for people in the database">
                 <button id="simple-search-btn"><span class="ui-icon ui-icon-search"></span></button>
             </div>
         </header>
