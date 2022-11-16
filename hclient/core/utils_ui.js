@@ -2657,7 +2657,8 @@ window.hWin.HEURIST4.ui = {
             help_text='';
         }
         
-        return window.hWin.HEURIST4.util.htmlEscape(help_text);        
+        //return window.hWin.HEURIST4.util.htmlEscape();
+        return window.hWin.HEURIST4.util.stripTags(help_text,'a, u, i, b, br, strong');        
     },
     
     
