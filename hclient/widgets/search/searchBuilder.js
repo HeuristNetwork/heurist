@@ -909,16 +909,21 @@ $.widget( "heurist.searchBuilder", {
                                         data.node.setExpanded( true );
                                     }else{
                                         var code = data.node.data.code;
-                                        var codes = code.split(':');
+                                        if(code){
+                                            var codes = code.split(':');
 
-                                        var codes2 = code.split(':');
-                                        codes2[0] = 'any';
-                                        code = codes2.join(':');
+                                            var codes2 = code.split(':');
+                                            codes2[0] = 'any';
+                                            code = codes2.join(':');
 
-                                        //add or replace field in builderItem
-                                        that.addFieldItem( code, codes, that.select_field_for_id);
-                                        that.select_field_for_id = null;
-                                        that.pnl_Tree.hide();
+                                            //add or replace field in builderItem
+                                            that.addFieldItem( code, codes, that.select_field_for_id);
+                                            that.select_field_for_id = null;
+                                            that.pnl_Tree.hide();
+                                        }else{
+                                            //debug 
+                                            console.error('code not defined for',data);
+                                        }
                                     }
                                 },
                                 dblclick: function(e, data) {
@@ -1158,6 +1163,8 @@ console.log(aCodes);
                     slink = "related_to:";
                 }else if(linktype=='rf'){
                     slink = "relatedfrom:";
+                }else if(linktype=='related'){
+                    slink = "related:";
                 }else if(linktype=='lt'){
                     slink = "linked_to:";
                 }else if(linktype=='lf'){
@@ -1244,7 +1251,15 @@ console.log(aCodes);
                             key = __convertLink(codes[k]);
 
                             is_relationship = key.indexOf('related_to:')==0
-                                            || key.indexOf('relatedfrom:')==0;
+                                              || key.indexOf('relatedfrom:')==0;
+                                              
+                            if(is_relationship && k>0 && k+1<codes.length){
+                                //change to "related" if both sides of relationship are the rectype
+                                //key.indexOf('related:')==0
+                                if(codes[k+1]==codes[k-1] || (k-1==0 && codes[k+1]==that.select_main_rectype.val())){
+                                    key = 'related:'+key.split(':')[1];        
+                                }
+                            }
                         
                             //find
                             var not_found = true;
@@ -1408,7 +1423,7 @@ console.log(aCodes);
                     this.options.menu_locked.call( this, false, false); //unlock
                 }
             },
-            callback: function(res){ console.log(res);
+            callback: function(res){
                 if(!window.hWin.HEURIST4.util.isempty(res)) {
                     that.rulesetSection.find('textarea').val( JSON.stringify(res.rules) ); //assign new rules
                 }
