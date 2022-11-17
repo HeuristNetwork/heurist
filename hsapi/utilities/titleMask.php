@@ -476,6 +476,65 @@ private static function __get_rec_detail_types($rt) {
 }
 
 /*
+Returns array of related record ids for given record and rekmarker field
+
+*/
+private static function __get_related_record_ids($rec_id, $dty_ID) {
+
+    //1. find all relation types
+    $vocab_id = mysql__select_value(self::$mysqli,
+        'SELECT dty_JsonTermIDTree FROM defDetailTypes WHERE dty_ID='.$dty_ID);
+            
+    $reltypes = null;            
+    if($vocab_id>0){
+        $reltypes = getTermChildrenAll(self::$mysqli, $vocab_id, true);
+        if(count($reltypes)==1){
+            $reltypes = '='.$reltypes[0];
+        }else{
+            $reltypes = ' IN ('.implode(',',$reltypes).')';
+        }
+    }
+    //2. find rectype constraints
+    $constr_ids = mysql__select_value(self::$mysqli,
+        'SELECT dty_PtrTargetRectypeIDs FROM defDetailTypes WHERE dty_ID='.$dty_ID);
+    $constr_ids = prepareIds($constr_ids);
+    if(count($constr_ids)==1){
+        $constr_ids = '='.$constr_ids[0];
+    }else if(count($constr_ids)>1){
+        $constr_ids = ' IN ('.implode(',',$constr_ids).')';
+    }else{
+        $constr_ids = null;
+    }
+    
+    //direct 
+    $query = 'SELECT rl_TargetID  as record_ID '
+        .'FROM recLinks, Records WHERE rl_SourceID='.$rec_id
+        .' AND rl_SourceID=rec_ID AND rec_FlagTemporary=0 ';
+    if($reltypes){
+        $query = $query.' AND rl_RelationTypeID'.$reltypes;
+    }    
+    if($constr_ids){
+        $query = $query.' AND rec_RecTypeID'.$constr_ids;
+    }    
+        
+    //reverse
+    $query = $query.' UNION '
+        .'SELECT rl_SourceID as record_ID '
+        .'FROM recLinks, Records WHERE rl_TargetID='.$rec_id
+        .' AND rl_TargetID=rec_ID AND rec_FlagTemporary=0 ';
+    if($reltypes){
+        $query = $query.' AND rl_RelationTypeID'.$reltypes;
+    }    
+    if($constr_ids){
+        $query = $query.' AND rec_RecTypeID'.$constr_ids;
+    }    
+
+    $record_ids = mysql__select_list2(self::$mysqli, $query);
+    
+    return $record_ids;
+}
+
+/*
 * load the record values (except forbidden fields)
 *
 * @param mixed $rec_id
@@ -621,48 +680,59 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
 
     if($mode==0){
 
-        $rec_values = self::__get_record_value($rec_id);
-
-        if(!$rec_values){
-            return "";
-        }else if (strcasecmp($rdt_id,'id')==0){
-            return $rec_values['rec_ID'];
-        }else if (strcasecmp($rdt_id,'rectitle')==0) {
-            return $rec_values['rec_Title'];
-        }else if (strcasecmp($rdt_id,'rectypeid')==0) {
-            return $rec_values['rec_RecTypeID'];
-        }else if (strcasecmp($rdt_id,'rectypename')==0) {
-            return $rec_values['rty_Name'];
-        }else if (strcasecmp($rdt_id,'modified')==0) {
-            return $rec_values['rec_Modified'];
+        $local_dt_id = self::__get_dt_field($rt, $rdt_id, $mode, 'dty_ID'); //local dt id
+        $dt_type = '';
+        if($local_dt_id>0){
+            $dt_type = self::__get_dt_field($rt, $local_dt_id, $mode, 'dty_Type');    
         }
+        if($dt_type=='relmarker'){
+            //find related record id
+            $res = self::__get_related_record_ids($rec_id, $local_dt_id);
+            
+        }else{
+        
+            $rec_values = self::__get_record_value($rec_id);
 
-        $rdt_id = self::__get_dt_field($rt, $rdt_id, $mode, 'dty_ID'); //local dt id
-        $dt_type = self::__get_dt_field($rt, $rdt_id, $mode, 'dty_Type');
-
-        $details = $rec_values['rec_Details'];
-
-        //dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, rst_RequirementType
-        $res = array();
-        $found = false;
-        foreach($details as $detail){
-            if($detail['dtl_DetailTypeID']==$rdt_id){
-                $found = true;
-                if($dt_type=="enum" || $dt_type=="relationtype"){
-                    $value = self::__get_enum_value($detail['dtl_Value'], $enum_param_name);
-                }else if($dt_type=="date"){
-                    $value = temporalToHumanReadableString(trim($detail['dtl_Value']));
-                }else if($dt_type=="file"){
-                    $value = self::__get_file_name($detail['dtl_UploadedFileID']);
-                }else{
-                    $value = $detail['dtl_Value'];
-                }
-                if($value!=null && $value!=''){
-                    array_push($res, $value);
-                }
-            }else if($found){
-                break;
+            if(!$rec_values){
+                return "";
+            }else if (strcasecmp($rdt_id,'id')==0){
+                return $rec_values['rec_ID'];
+            }else if (strcasecmp($rdt_id,'rectitle')==0) {
+                return $rec_values['rec_Title'];
+            }else if (strcasecmp($rdt_id,'rectypeid')==0) {
+                return $rec_values['rec_RecTypeID'];
+            }else if (strcasecmp($rdt_id,'rectypename')==0) {
+                return $rec_values['rty_Name'];
+            }else if (strcasecmp($rdt_id,'modified')==0) {
+                return $rec_values['rec_Modified'];
             }
+
+            $details = $rec_values['rec_Details'];
+            $rdt_id = $local_dt_id;
+
+            //dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, rst_RequirementType
+            $res = array();
+            $found = false;
+            foreach($details as $detail){
+                if($detail['dtl_DetailTypeID']==$rdt_id){
+                    $found = true;
+                    if($dt_type=="enum" || $dt_type=="relationtype"){
+                        $value = self::__get_enum_value($detail['dtl_Value'], $enum_param_name);
+                    }else if($dt_type=="date"){
+                        $value = temporalToHumanReadableString(trim($detail['dtl_Value']));
+                    }else if($dt_type=="file"){
+                        $value = self::__get_file_name($detail['dtl_UploadedFileID']);
+                    }else{
+                        $value = $detail['dtl_Value'];
+                    }
+                    if($value!=null && $value!=''){
+                        array_push($res, $value);
+                    }
+                }else if($found){
+                    break;
+                }
+            }
+            
         }
 
         if(count($res)==0){
@@ -936,10 +1006,10 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
             }
             
             
-            if($dt_type== 'relmarker') { //@todo - to implement it in nearest future
+            if(false && $dt_type== 'relmarker') { //@todo - to implement it in nearest future
                 return array("'$parent_field_name' is a relationship marker field type. This type is not supported at present.");
             }
-            if($dt_type!== 'resource') {
+            if($dt_type!== 'resource' && $dt_type!=='relmarker') {
                 //ERROR
                 return array("'$parent_field_name' must be either a record type name, a terms list field name or a record pointer field name. "
                     ."Periods are used as separators between record type name and field names. If you have a period in your record type name or field name, "
