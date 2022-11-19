@@ -241,7 +241,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             */    
 
             this.recordList.resultList('updateResultSet', this._cachedRecordset);
-            this._initTreeView();
+            this._initTreeView(); //on create
             this._showRecordEditorPreview( true );
         }    
         
@@ -293,6 +293,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     },            
     
     
+    //
+    // Inits or reloads rt structure treeview
+    //
     _initTreeView: function(){
         
         var recset = this._cachedRecordset;
@@ -399,7 +402,18 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         //init treeview
         var that = this;
         
-        var fancytree_options =
+        var fancytree_options = {};
+        var need_redraw = false;
+        this._treeview = this.element.find('.treeView');
+        
+        if(this._treeview.fancytree('instance')){
+            var tree = this._treeview.fancytree('getTree');
+            tree.reload(treeData)
+            //tree.render(true);
+        
+        }else{
+        
+        fancytree_options =
         {
             checkbox: false,
             //titlesTabbable: false,     // Add all node titles to TAB chain
@@ -522,11 +536,15 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     }
                 }
             };
+            
+            
+            this._treeview.addClass('tree-rts');
+            this._treeview.fancytree(fancytree_options); //was recordList
+        }    
 
-            this._treeview = this.element.find('.treeView').addClass('tree-rts')
-                                .fancytree(fancytree_options); //was recordList
-            this._treeview.find('ul.fancytree-container').css('width', '100%');
-            this.__updateActionIcons(500);
+        this._treeview.find('ul.fancytree-container').css('width', '100%');
+        
+        this.__updateActionIcons(500);
     },
     
     //
@@ -1375,8 +1393,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     
                     // insert node into rectype structured francytree
                     parentnode.addNode({key:rec_ID}, 
-                            (parentnode.isRootNode() || parentnode.folder==true)
-                                                    ?'firstChild':'after');
+                             (parentnode.isRootNode() || parentnode.folder==true)
+                                                     ?'firstChild':'after');
+                    
                     if(parentnode.folder){
                         parentnode.setExpanded(true);
                     }
@@ -2226,6 +2245,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
+                        
+                        that._initTreeView(); // on save structure (after add or dnd)
+                        
                         that._dragIsAllowed = true;
                         
                         that._showRecordEditorPreview();  
@@ -2454,7 +2476,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         if(tree){
             var node = tree.getNodeByKey( recID );
             if(node) {
-                var sType = $Db.dty(recID,'dty_Type');
+                var sType = $Db.dty(recID, 'dty_Type');
                 var isSep = (sType=='separator');
                 var title = record['rst_DisplayName'];
                 var req = record['rst_RequirementType'];
@@ -2462,7 +2484,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     let sepType = recset.fld(record, 'rst_DefaultValue');
                     let extraStyle = '';
                     if(sepType == 'group'){
-                        extraStyle = 'style="padding-left:10px;display:inline-block;';
+                        //padding-left:10px;
+                        extraStyle = 'style="display:inline-block;';
                     }
                     if(title == '-'){
                         title = '<hr>';
@@ -2471,7 +2494,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     extraStyle += extraStyle != '' ? '"' : '';
                     title = '<span data-dtid="'+recID+'" '+extraStyle+'>' + title + '</span>';
                 }else{
-                    title =  '<span  data-dtid="'+recID+'" style="padding-left:10px">' + title 
+                    // style="padding-left:10px"
+                    title =  '<span  data-dtid="'+recID+'">' + title 
                                 + '</span>';
                 }
                 if(req=='forbidden'){
@@ -2599,6 +2623,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             var recID = node.key;
             this._cachedRecordset.removeRecord( recID );
             this._afterDeleteEvenHandler( recID );
+            
         }else if(node.key>0){
             this._onActionListener(null,  {action:'delete', recID:(this.options.rty_ID+'.'+node.key)});
         }
@@ -2621,8 +2646,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         var tree = this._treeview.fancytree("getTree");
         var node = tree.getNodeByKey(String(recID));
+        var isfolder = false;
         if(node){
             if(node.folder){
+                isfolder = true;
                 // remove from tree
                 // all children moves to parent
                 var children = node.getChildren();
@@ -2641,6 +2668,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this.checkFieldForData(recID);
         }
 
+        if(isfolder) this._initTreeView();
         this._showRecordEditorPreview(); //redraw
     },
     
