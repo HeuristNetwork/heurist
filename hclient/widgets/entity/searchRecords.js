@@ -19,6 +19,10 @@
 
 $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
+    options:{
+        init_filter: ''
+    },
+
     _select_mode: 1, //0 - add, 1 - search
     
     //
@@ -90,7 +94,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             .addClass('ui-button-action')
             .click(function(e) {
 
-                var search_val = that.input_search.val();
+                var search_val = that.element.find('#fill_in_data').val();
+                search_val = search_val == '' ? that.options.init_filter : search_val;
                 if(!window.hWin.HEURIST4.util.isempty(search_val)){
                     window.hWin.HEURIST4.util.copyStringToClipboard(search_val);
                 }
@@ -321,9 +326,25 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         //this.searchForm.find('#input_search').focus();
         this.input_search.focus();
 
-       this._trigger( "onstart" ); //trigger ajust          
+        if(!window.hWin.HEURIST4.util.isempty(this.options.init_filter)){
+            this.input_search.val(this.options.init_filter).css({'max-width': '20em', 'width': '20em'}); // enter value
+
+            //move search box
+            this.input_search.parent().css({
+                'display': 'block',
+                'position': 'relative',
+                'z-index': 1,
+                'text-align': ''
+            });
+
+            this.element.find('#fill_in_data').val(this.options.init_filter).css({'max-width': '20em', 'width': '20em'}).parent().show();
+        }else{
+            this.element.find('#fill_in_data').parent().hide();
+        }
+
+        this._trigger( "onstart" ); //trigger ajust          
         
-       if(this.options.fixed_search) this.startSearch() 
+        if(this.options.fixed_search) this.startSearch() 
     },  
 
     //

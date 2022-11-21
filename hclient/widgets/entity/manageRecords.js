@@ -3292,6 +3292,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     }
                 }
             }
+
+            if(this.options.fill_in_data){ // force ismodified
+                that._editing.setModified(true);
+                that.onEditFormChange();
+            }
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);
         }
@@ -4672,7 +4677,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 var $empty_cont = $('<div>').uniqueId();
                 var $new_tab = $('<li>').addClass('add_new_tab').append('<a href="#'+ $empty_cont.attr('id') +'"></a>').appendTo($tabs);
 
-                var $add_tab = $('<span>')
+                $('<span>')
                         .attr({'data-dty_ID': last_dtid, 'title': 'Click to add new tab'})
                         .addClass('ui-icon ui-icon-circlesmall-plus')
                         .css({'font-size': '275%', 'height': '20px', 'width': '20px', 'top': '8px'})
@@ -5122,6 +5127,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     pointer_filter: null, // Heurist query for initial search
                     parententity: 0,
 
+                    init_filter: init_value,
+
                     height: 700,
                     width: 600,
                     modal: true,
@@ -5131,13 +5138,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         var size = init_value.length;
                         var that_searchForm = this;
                         setTimeout(function(){ 
-                            that_searchForm.searchForm.find('#input_search').val(init_value).attr('size', (size > 55) ? 55 : size).css({
-                                'width': '',
-                                'max-width': '',
-                                'min-width': '',
-                                'padding-right': '5px'
-                            }); 
-                            that_searchForm.searchForm.find('#btn_search_start').click();
+                            that_searchForm.searchForm.find('#btn_search_start').click(); // run search
                         }, 500);
                     },
 
@@ -5212,7 +5213,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             $ele = this.editForm.find('fieldset[data-dtid='+field_id+']');
 
             if($ele.length == 0){ // try simple divider
-                $ele = this.editForm.find('div[data-dtid='+ field_id +']'); console.log(field_id, $ele);
+                $ele = this.editForm.find('div[data-dtid='+ field_id +']');
             }
         }
 
