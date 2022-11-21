@@ -295,12 +295,12 @@ $.widget( "heurist.importStructure", {
 
                 window.hWin.HAPI4.RecordMgr.search(query_request, 
                     function( response ){
-                        window.hWin.HEURIST4.msg.sendCoverallToBack();
 
                         if(response.status == window.hWin.ResponseStatus.OK){
 
                             response.data.fields.push('rec_ScratchPad');
                             response.data.fields.push('rec_AllowClone');
+                            var clone_recs = {};
 
                             that._cachedRecordset_dbs = new hRecordSet(response.data);
 
@@ -319,6 +319,10 @@ $.widget( "heurist.importStructure", {
                                         dbURL = splittedURL[0];
                                         var matches = recURL.match(/db=([^&]*).*$/);
                                         dbName = (matches && matches.length>1)?matches[1]:'';
+
+                                        if(isAllowClone === 1 && recID < 1000){ // need to check that the DB is on current server
+                                            clone_recs[recID] = dbName;
+                                        }
                                     }
                                 }
                                 var url_Error = this.fld(record, 'rec_URLErrorMessage');
@@ -333,17 +337,32 @@ $.widget( "heurist.importStructure", {
                                 this.setFld(record, 'rec_ScratchPad', recDesc);
                                 this.setFld(record, 'rec_RecTypeID', recID<1000?0:1);
                                 this.setFld(record, 'rec_AllowClone', isAllowClone);                                    
-
                             });
 
-                            if(that.options.source_database_id>0){
-                                var selected_recs = that._cachedRecordset_dbs.getSubSetByIds( [that.options.source_database_id] );
-                                that._loadRecordTypesForDb( selected_recs );
-                            }else{
-                                that.startSearch_dbs(); //filterRecordList_dbs({}); 
-                            }
+                            let request = {
+                                a: 'check_for_databases', 
+                                data: JSON.stringify(clone_recs), 
+                                db: window.hWin.HAPI4.database
+                            };
+
+                            window.hWin.HAPI4.SystemMgr.check_for_databases(request, (check_response) => {
+
+                                window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                                $.each(clone_recs, (rec_ID, db_name) => {
+                                    that._cachedRecordset_dbs.setFldById(rec_ID, 'rec_AllowClone', check_response.data && check_response.data[rec_ID] == 1);
+                                });
+
+                                if(that.options.source_database_id>0){
+                                    var selected_recs = that._cachedRecordset_dbs.getSubSetByIds( [that.options.source_database_id] );
+                                    that._loadRecordTypesForDb( selected_recs );
+                                }else{
+                                    that.startSearch_dbs(); //filterRecordList_dbs({}); 
+                                }
+                            });
 
                         }else{
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     }

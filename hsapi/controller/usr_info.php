@@ -163,6 +163,38 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
         }else{
             $res = 1;
         }
+    }else if($action == 'check_for_databases'){ // check if the provided databases are available on the current server
+
+        $mysqli = $system->get_mysqli();
+        $data = $_REQUEST['data'];
+        if(!is_array($data)){
+            $data = json_decode($data, TRUE);
+        }
+
+        if(JSON_ERROR_NONE !== json_last_error() || !is_array($data)){
+            $system->addError(HEURIST_INVALID_REQUEST, 'Invalid database names were provided<br>Please contact the Heurist team.');
+            $res = false;
+        }else{
+
+            $res = array();
+            foreach ($data as $rec_id => $db_name) {
+
+                if(strpos($db_name, HEURIST_DB_PREFIX) === false){
+                    $db_name = HEURIST_DB_PREFIX . $db_name;
+                }
+
+                $query = "SHOW DATABASES WHERE `database` = '" . $db_name . "'";
+                $query_res = $mysqli->query($query);
+
+                if($query_res){
+                    $row = $query_res->fetch_row();
+                    if($row && $row[0]){
+                        $res[$rec_id] = 1;
+                    }
+                    $query_res->close();
+                }
+            }
+        }
     }else{
         
         $mysqli = $system->get_mysqli();

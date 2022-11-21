@@ -1062,6 +1062,20 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             },
 
             /**
+             * Check if the provided databases are available on the current server
+             * @param {Request} request 
+             * @param {callserverCallback} callback 
+             * @returns 
+             */
+             check_for_databases: function(request, callback){
+                if(!request){
+                    window.hWin.HEURIST4.msg.showMsgErr('Request object is missing from request to check the availability of databases.<br>Please contact the Heurist team.');
+                    return false;
+                }
+                _callserver('usr_info', request, callback);
+            },
+
+            /**
              * Manipulate folders within HEURIST_FILESTORE_DIR on the server
              * @param {Request} [request] 
              * @param {string} [request.operation] - 'list', 'rename' or 'delete'; defaults to 'list'
