@@ -829,7 +829,7 @@ window.hWin.HEURIST4.geo = {
             
             var extent = resdata._extent;
             var decPoints = 5;
-            let summary = extraSummary+"X "+extent.xmin.toFixed(decPoints)+","+extent.xmax.toFixed(decPoints)
+            let summary = "X "+extent.xmin.toFixed(decPoints)+","+extent.xmax.toFixed(decPoints)
                         +" Y "+extent.ymin.toFixed(decPoints)+","+extent.ymax.toFixed(decPoints);
             if(type == 'Polygon'){
                 decPoints = extent.xmin > 180 || extent.xmax > 180 || extent.xmin < -180 || extent.xmax < -180

@@ -153,7 +153,19 @@ console.log('load google map api')
                     var $dlg;
 
                     buttons[titleYes] = function() {
-                        mapping.mapping( 'drawLoadGeometry', $dlg.find('#geodata_textarea').val());
+
+                        let geodata = $dlg.find('#geodata_textarea').val().toUpperCase(); // ensure captialised
+                        geodata = geodata.replace(/\s\s+/g, ' ').trim(); // remove double spacing
+                        geodata = geodata.replace(/\s*\(\s*/g, '('); // remove space before+after left bracket
+                        geodata = geodata.replace(/\s*\)/g, ')'); // remove space before right bracket
+
+                        if(geodata.indexOf('POINT') !== false){
+                            geodata = geodata.replace(/\,\s*/g, ' '); // replace comma | comma+space with a single space
+                        }
+
+                        $dlg.find('#geodata_textarea').val(geodata);
+
+                        mapping.mapping( 'drawLoadGeometry', geodata);
                         $dlg.dialog( "close" );
                     };
                     buttons[titleNo] = function() {
@@ -186,7 +198,19 @@ console.log('load google map api')
                     var titleYes = window.hWin.HR('[Add to Map]');
                     var button={};
                     button[titleYes] = function() {
-                        mapping.mapping( 'drawLoadGeometry', $dlg.find('#geodata_textarea').val());
+
+                        let geodata = $dlg.find('#geodata_textarea').val().toUpperCase(); // ensure captialised
+                        geodata = geodata.replace(/\s\s+/g, ' ').trim(); // remove double spacing
+                        geodata = geodata.replace(/\s*\(\s*/g, '('); // remove space before+after left bracket
+                        geodata = geodata.replace(/\s*\)/g, ')'); // remove space before right bracket
+
+                        if(geodata.indexOf('POINT') !== false){
+                            geodata = geodata.replace(/\,\s*/g, ' '); // replace comma | comma+space with a single space
+                        }
+
+                        $dlg.find('#geodata_textarea').val(geodata);
+
+                        mapping.mapping( 'drawLoadGeometry', geodata);
                         $dlg.dialog( "close" );
                     };
 
