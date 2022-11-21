@@ -2773,14 +2773,18 @@ $.widget( "heurist.search_faceted", {
                                 $opt.attr('selected',true);
                             }
 
-                            selObj = window.hWin.HEURIST4.ui.initHSelect($sel, true);
-
-                            $sel.change(function(event){ that._onDropdownSelect(event); });
-
+                            selObj = window.hWin.HEURIST4.ui.initHSelect($sel, needsDropdown !== true ? true : false);
+                            if(needsDropdown === true){
+                                selObj.hSelect( "widget" ).css({"font-size": "0.9em", "min-width": "8em", "width": w+"px"});
+                                selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
+                            }else{
                             var sel_w = $sel.css('width', 'auto').width();
                             if(sel_w > w){
                                 $sel.css('width', w+'px');
                             }
+                        }
+
+                            $sel.change(function(event){ that._onDropdownSelect(event); });
                         }
                     }
 
