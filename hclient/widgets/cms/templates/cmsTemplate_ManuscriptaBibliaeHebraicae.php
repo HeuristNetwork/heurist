@@ -97,6 +97,8 @@
 */
 #wrapper-video {
     z-index:9999999;
+    cursor:pointer;
+    background: linear-gradient(rgba(120, 120, 120, 1), rgba(0, 0, 0, 1), rgba(120, 120, 120, 1));    
 }
 
 #wrapper-video > .slogan {
@@ -274,8 +276,10 @@ if($isWebPage){ //set in websiteRecord.php
         
         
         <!-- https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output_poster.jpg 
-             https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output.mp4 -->
-        <div id="wrapper-video" onclick="{document.getElementById('wrapper-video').style.display = 'none';}">
+             https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output.mp4 
+             document.getElementById('wrapper-video').style.display = 'none';
+             -->
+        <div id="wrapper-video" onclick="{$('#wrapper-video').fadeOut(4000);}">
           <video autoplay="" loop="" muted="" 
           poster="https://heurist.huma-num.fr/h6-alpha/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=62c18d37f7d63b7777e5dc0add9c5ea669d78ec7" id="video-background">
             <source src="https://heurist.huma-num.fr/h6-alpha/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=d6d20c9e1243394fe13cbf427a11143a480f3fa5" type="video/mp4">
@@ -290,6 +294,7 @@ if($isWebPage){ //set in websiteRecord.php
                 <span class="b"></span>
                 <span class="b"></span>
               </span>
+          <h1>Enter site &gt;&gt;</h1>
           <p class="slogan">La base de données dédiée aux bibles médiévales hébraïques</p>
         </div>        
     </body>
