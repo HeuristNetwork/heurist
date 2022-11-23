@@ -99,8 +99,6 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             
         }*/
         
-        
-        
         return res;
     },    
         
@@ -113,13 +111,13 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
         var opt, selScope = this.selectRecordScope.get(0);
         
-                this.selectRecordScope = window.hWin.HEURIST4.ui.createRectypeSelectNew( selScope,
-                {
-                    topOptions: [{key:'-1',title:'select record type to search...'}],
-                    useHtmlSelect: false,
-                    useCounts: true,
-                    showAllRectypes: true
-                });
+        this.selectRecordScope = window.hWin.HEURIST4.ui.createRectypeSelectNew( selScope,
+        {
+            topOptions: [{key:'-1',title:'select record type to search...'}],
+            useHtmlSelect: false,
+            useCounts: true,
+            showAllRectypes: true
+        });
         
         
         
@@ -129,7 +127,9 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         //if(selScope.selectedIndex<0) selScope.selectedIndex=0;
         this._onRecordScopeChange();
         
+        selScope = this.selectRecordScope.get(0);
         window.hWin.HEURIST4.ui.initHSelect(selScope);
+        //$('#sel_record_scope-button').css('line-height', '1em');
     },
             
     //

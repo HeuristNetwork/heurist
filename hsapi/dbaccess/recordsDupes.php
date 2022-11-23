@@ -196,9 +196,13 @@ public static function findDupes( $params ){
             $p = 'd'.$v;
             $detail_joins[] = ' left join recDetails '.$p.' on rec_ID='.$p.'.dtl_RecID and '.$p.'.dtl_DetailTypeID='.$v;
             
-            $s = 'NEW_LIPOSUCTION_255(IFNULL('.$p.'.dtl_Value,""))';
-            $detail_fields[$v] = $s.' as '.$p; //for retrieve       
-            $detail_fields2[$v] = $s;
+            if(self::$distance>0 && (@$dty_IDs[$v]=='freetext' || @$dty_IDs[$v]=='blocktext')){
+                $s = 'NEW_LIPOSUCTION_255(IFNULL('.$p.'.dtl_Value,""))';
+            }else{
+                $s = $p.'.dtl_Value';
+            }
+            $detail_fields[$v] = $s.' as '.$p; //for retrieve            
+            $detail_fields2[$v] = $s;    
             
             if($sort_field==$v || $sort_field==null){
                 $sort_field = $p.'.dtl_Value';           
