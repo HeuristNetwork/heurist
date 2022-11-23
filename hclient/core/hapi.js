@@ -1054,7 +1054,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              * @param {Request} [request]
              * @param {callserverCallback} callback 
              */
-             check_for_alpha: function (request, callback) {
+            check_for_alpha: function (request, callback) {
                 if (!request) {
                     request = { a: 'check_for_alpha' };
                 }
@@ -1063,15 +1063,24 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
             /**
              * Check if the provided databases are available on the current server
-             * @param {Request} request 
+             * @param data - array (registred ID => database name)
              * @param {callserverCallback} callback 
              * @returns 
              */
-             check_for_databases: function(request, callback){
-                if(!request){
-                    window.hWin.HEURIST4.msg.showMsgErr('Request object is missing from request to check the availability of databases.<br>Please contact the Heurist team.');
+            check_for_databases: function(data, callback){
+                 
+                if(!data){
+                    window.hWin.HEURIST4.msg.showMsgErr('The list of databases to be checked is missing<br>'
+                    +'Please contact the Heurist team.');
                     return false;
                 }
+                 
+                let request = {
+                    a: 'check_for_databases', 
+                    data: JSON.stringify(data), 
+                    db: window.hWin.HAPI4.database
+                };
+                
                 _callserver('usr_info', request, callback);
             },
 

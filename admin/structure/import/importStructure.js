@@ -339,13 +339,7 @@ $.widget( "heurist.importStructure", {
                                 this.setFld(record, 'rec_AllowClone', isAllowClone);                                    
                             });
 
-                            let request = {
-                                a: 'check_for_databases', 
-                                data: JSON.stringify(clone_recs), 
-                                db: window.hWin.HAPI4.database
-                            };
-
-                            window.hWin.HAPI4.SystemMgr.check_for_databases(request, (check_response) => {
+                            window.hWin.HAPI4.SystemMgr.check_for_databases(clone_recs, (check_response) => {
 
                                 window.hWin.HEURIST4.msg.sendCoverallToBack();
 
