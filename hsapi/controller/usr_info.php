@@ -445,6 +445,107 @@ detectLargeInputs('COOKIE user_info', $_COOKIE);
                 
                 $res = recognizeMimeTypeFromURL($mysqli, $url, false);
                 
+            }else if($action == 'upload_file_nakala'){
+
+                // Prepare parameters
+                $params = array();
+
+                // File
+                $params['file'] = array(
+                    'path' => HEURIST_FILESTORE_DIR . '/scratch/' . $_REQUEST['file'][0]['name'],
+                    'type' => $_REQUEST['file'][0]['type'],
+                    'name' => $_REQUEST['file'][0]['original_name']
+                );
+
+                // Metadata
+                $params['meta']['title'] = array(
+                    'value' => @$_REQUEST['meta']['title'],
+                    'lang' => null,
+                    'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                    'propertyUri' => 'http://nakala.fr/terms#title'
+                );
+
+                if(empty($_REQUEST['meta']['creator']['authorId'])){
+                    $params['meta']['creator'] = array(
+                        'value' => null,
+                        'lang' => null,
+                        'typeUri' => null,
+                        'propertyUri' => 'http://nakala.fr/terms#creator'
+                    );
+
+                    if(array_key_exists('givenname', $_REQUEST['meta']['creator']) || array_key_exists('surname', $_REQUEST['meta']['creator'])){
+
+                        $fullname = '';
+                        if(array_key_exists('givenname', $_REQUEST['meta']['creator'])){
+                            $fullname .= $_REQUEST['meta']['creator']['givenname'];
+                        }
+                        if(array_key_exists('surname', $_REQUEST['meta']['creator'])){
+                            $fullname .= ' ' . $_REQUEST['meta']['creator']['surname'];
+                        }
+                        $fullname = trim($fullname);
+
+                        $params['meta']['alt_creator'] = array(
+                            'value' => $fullname,
+                            'lang' => null,
+                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                            'propertyUri' => 'http://purl.org/dc/terms/creator'
+                        );
+                    }
+                }else{
+                    $params['meta']['creator'] = array(
+                        'value' => @$_REQUEST['meta']['creator'],
+                        'propertyUri' => 'http://nakala.fr/terms#creator'
+                    );
+                }
+
+                if(array_key_exists('created', $_REQUEST['meta']) && !empty($_REQUEST['meta']['created'])){
+                    $params['meta']['created'] = array(
+                        'value' => @$_REQUEST['meta']['created'],
+                        'lang' => null,
+                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'propertyUri' => 'http://nakala.fr/terms#created'
+                    );
+                }else{
+                    $params['meta']['created'] = array(
+                        'value' => null,
+                        'lang' => null,
+                        'typeUri' => null,
+                        'propertyUri' => 'http://nakala.fr/terms#created'
+                    );
+                }
+
+                $params['meta']['type'] = array(
+                    'value' => @$_REQUEST['meta']['type'],
+                    'lang' => null,
+                    'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
+                    'propertyUri' => 'http://nakala.fr/terms#type'
+                );
+
+                $params['meta']['license'] = array(
+                    'value' => @$_REQUEST['meta']['license'],
+                    'lang' => null,
+                    'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                    'propertyUri' => 'http://nakala.fr/terms#license'
+                );
+
+                // User API Key
+                $usr_prefs = user_getPreferences($system);
+                if(array_key_exists('nakala_api_key', $usr_prefs)){
+                    $params['api_key'] = $usr_prefs['nakala_api_key'];
+                }else{
+                    $system->addError(HEURIST_INVALID_REQUEST, 'No Nakala API Key provided, please ensure you have entered your personal key into My preferences');
+                }
+
+                $params['status'] = 'published'; // publish uploaded file, return url to newly uploaded file on Nakala
+
+                // Upload file
+                $res = uploadFileToNakala($system, $params);
+
+                if($res !== false){
+                    // delete local file after upload
+                    fileDelete(HEURIST_FILESTORE_DIR . '/scratch/' . $_REQUEST['file'][0]['name']);
+                    fileDelete(HEURIST_FILESTORE_DIR . '/scratch/thumbnail/' . $_REQUEST['file'][0]['name']);
+                }
             } else {
 
                 $system->addError(HEURIST_INVALID_REQUEST);

@@ -1931,4 +1931,290 @@ function isActionInProgress($action, $range_minutes){
     }
     return true;
 }
+
+//
+// Upload file to Nakala and return URL to new Nakala file
+// $system => Initiated System object
+// $params => array(
+//      'api_key' => User's Nakala API Key (retrieved from User Preferences)
+//      'file' => array(
+//          'path' => path to file
+//          'type' => mime type
+//          'name' => file name
+//      ),
+//      'files' => array( formatted array of files values, already uploaded to Nakala )
+//      'meta' => array( formatted array of Nakala Metadata values )
+// )
+// $uri_parts => return new file + Nakala generated DOI in array(sha1, doi) or uri format
+// $upload_only => only upload file, returns sha1 value (usually for a file part of a set of files)
+//
+function uploadFileToNakala($system, $params) {
+
+    global $glb_curl_code, $glb_curl_error, $system;
+    $glb_curl_code = null;
+    $glb_curl_error = null;
+
+    $herror = HEURIST_ACTION_BLOCKED;
+
+    if(!function_exists("curl_init"))  {
+
+        $glb_curl_code = HEURIST_SYSTEM_FATAL;
+        $glb_curl_error = 'Cannot init curl extension. Verify php installation';
+        $system->addError(HEURIST_SYSTEM_FATAL, $glb_curl_error);
+
+        return false;
+    }
+
+    $api_key = 'X-API-KEY: ' . $params['api_key'];
+    $file_sha1 = '';
+
+    $useragent = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.6) Gecko/2009011913 Firefox/3.0.6';
+
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array($api_key)); // USERs API KEY
+
+    curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);    //return the output as a string from curl_exec
+    curl_setopt($ch, CURLOPT_NOBODY, 0);
+    curl_setopt($ch, CURLOPT_HEADER, 0);            //don't include header in output
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // follow server header redirects
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
+    if(strpos($url, HEURIST_MAIN_SERVER)===0){
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+    }
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);          // timeout after sixty seconds
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 5);         // no more than 5 redirections
+
+    curl_setopt($ch, CURLOPT_USERAGENT, $useragent);
+    //curl_setopt($ch, CURLOPT_FAILONERROR, true);
+    curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+
+    if(defined("HEURIST_HTTP_PROXY")) {
+        curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+        if(defined('HEURIST_HTTP_PROXY_AUTH')) {
+            curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
+        }
+    }
+
+    if(!file_exists($params['file']['path'])){
+        $system->addError(HEURIST_ERROR, 'Could not locate the file to be uploaded to Nakala');
+        return false;
+    }
+
+    $curl_file = new CURLFile($params['file']['path'], $params['file']['type'], $file['file']['name']);
+    $local_sha1 = sha1_file($params['file']['path']);
+
+    curl_setopt($ch, CURLOPT_URL, 'https://api.nakala.fr/datas/uploads');
+
+    // Check if file has already been uploaded - may have previously failed
+    $file_list = curl_exec($ch);
+
+    $error = curl_error($ch);
+
+    if ($error) {
+
+        $glb_curl_code = 'curl';
+        $glb_curl_error = $error;
+        
+        $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+
+        if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
+            $glb_curl_error .= '<br><br>Your Nakala API key is either missing or invalid, please ensure you\'ve set it in My Preferences';
+            $herror = HEURIST_INVALID_REQUEST;
+
+            curl_close($ch);
+            $system->addError($herror, $glb_curl_error);
+
+            return false;
+        } // other error do not matter here
+    }
+
+    $file_list = json_decode($file_list, TRUE);
+    if(JSON_ERROR_NONE == json_last_error() && is_array($file_list)){
+
+        if(array_key_exists('message', $file_list)){
+            $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+
+            if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
+                $glb_curl_error .= '<br><br>Your Nakala API key is either missing or invalid, please ensure you\'ve set it in My Preferences';
+                $herror = HEURIST_INVALID_REQUEST;
+
+                curl_close($ch);
+                $system->addError($herror, $glb_curl_error);
+
+                return false;
+            } // other error do not matter here
+        }else{        
+            foreach ($file_list as $file_dtls) {
+                if($local_sha1 == $file_dtls['sha1']){
+                    $file_sha1 = $local_sha1;
+                }
+            }
+        }
+    }
+
+    if($file_sha1 == ''){ // UPLOAD FILE - (upload one file at a time, collect all SHA1 values, then process all together)
+
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, array('file' => $curl_file));
+
+        $file_details = curl_exec($ch);
+
+        $error = curl_error($ch);
+
+        if ($error) {
+
+            $glb_curl_code = 'curl';
+            $glb_curl_error = $error;
+            
+            $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+
+            if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
+                $glb_curl_error .= '<br><br>Your Nakala API key is either missing or invalid, please ensure you\'ve set it in My Preferences';
+                $herror = HEURIST_INVALID_REQUEST;
+            }else{
+                $glb_curl_error = $file_details['message'];
+            }
+
+            curl_close($ch);
+            $system->addError($herror, $glb_curl_error);
+
+            return false;
+        }
+
+        $file_details = json_decode($file_details, TRUE);
+
+        if(JSON_ERROR_NONE != json_last_error() || !is_array($file_details)){ // json error occurred | is not array | is missing information
+            curl_close($ch);
+            $system->addError(HEURIST_ACTION_BLOCKED, 'An unknown response was receiveed from Nakala after uploading the selected file.<br>Please contact the Heurist team if this persists.');
+
+            return false;
+        }
+
+        if(array_key_exists('message', $file_details)){
+
+            $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+
+            if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
+                $glb_curl_error .= '<br><br>Your Nakala API key is either missing or invalid, please ensure you\'ve set it in My Preferences';
+                $herror = HEURIST_INVALID_REQUEST;
+            }else{
+                $glb_curl_error = $file_details['message'];
+            }
+
+            curl_close($ch);
+            $system->addError($herror, $glb_curl_error);
+
+            return false;
+        }
+
+        $file_sha1 = $file_details['sha1'];
+
+        if($local_sha1 != $file_sha1){
+            $system->addError(HEURIST_ACTION_BLOCKED, 'The local file and uploaded file to Nakala do not match.<br>Please contact the Heurist team if this persists.');
+            return false;
+        }
+        //$file_title = $upload_details['name']; Don't need it
+    }
+
+    $status = 'pending';
+    if(array_key_exists('status', $params)){
+        $status = $params['status'];
+    }
+
+    // UPLOAD METADATA
+    $metadata = array('status' => $status, 'metas' => array(), 'files' => array());
+
+    $metadata['files'][] = array( 'sha1' => $file_sha1 );
+    if(!empty($params['file']['description'])){
+        $metadata['files'][0]['description'] = htmlspecialchars($params['file']['description']);
+    }
+
+    foreach ($params['meta'] as $data) {
+        $metadata['metas'][] = $data;    
+    }
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array($api_key, 'Content-Type:application/json'));
+    curl_setopt($ch, CURLOPT_URL, 'https://api.nakala.fr/datas');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($metadata));
+
+    $result = curl_exec($ch);
+
+    $error = curl_error($ch);
+
+    if ($error) {
+
+        $glb_curl_code = 'curl';
+        $glb_curl_error = $error;
+        
+        $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+
+        if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
+            $glb_curl_error .= '<br><br>Your Nakala API key is either missing or invalid, please ensure you\'ve set it in My Preferences';
+            $herror = HEURIST_INVALID_REQUEST;
+        }else{
+            $glb_curl_error = $file_details['message'];
+        }
+
+        curl_close($ch);
+        $system->addError($herror, $glb_curl_error);
+
+        return false;
+    }
+
+    $result = json_decode($result, TRUE);
+
+    if(JSON_ERROR_NONE != json_last_error() || !is_array($result)){ // json error occurred | is not array | is missing information
+        curl_close($ch);
+        $system->addError(HEURIST_ACTION_BLOCKED, 'An unknown response was receiveed from Nakala after uploading the selected file.<br>Please contact the Heurist team if this persists.');
+
+        return false;
+    }
+
+    if(array_key_exists('payload', $result)){
+        $payload = $result['payload'];
+        if(array_key_exists('id', $payload)){        
+            if(array_key_exists('return_type', $params) && $params['return_type'] == 'editor'){ // returns link to private view
+                $external_url = 'https://nakala.fr/u/datas/' . $result['payload']['id'];
+            }else{ // returns link to publically available file
+                $external_url = 'https://api.nakala.fr/data/' . $result['payload']['id'] . '/' . $file_sha1;
+            }
+        }else{
+
+            curl_close($ch);
+            $msg = '';
+            if(is_array($payload)){
+                $msg = implode('<br>', array_values($payload));
+            }else{
+                $msg = $payload;
+            }
+            $system->addError($herror, $msg);
+
+            return false;
+        }
+    }else if(array_key_exists('message', $result)){
+
+        $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+
+        if($code == 401 || $code == 403){ // invalid/missing api key, or unknown account/user
+            $glb_curl_error .= '<br><br>Your Nakala API key is either missing or invalid, please ensure you\'ve set it in My Preferences';
+            $herror = HEURIST_INVALID_REQUEST;
+        }else{
+            $glb_curl_error = $result['message'];
+        }
+
+        curl_close($ch);
+        $system->addError($herror, $glb_curl_error);
+
+        return false;
+    }else{
+        curl_close($ch);
+        $system->addError(HEURIST_ACTION_BLOCKED, 'An unknown response was receiveed from Nakala after uploading the selected file.<br>Please contact the Heurist team if this persists.');
+
+        return false;
+    }
+
+    return $external_url;
+}
 ?>
