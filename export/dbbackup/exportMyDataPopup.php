@@ -57,6 +57,8 @@ if($mode=='2' && file_exists($folder.".zip") ){
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
 
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+
         <!-- CSS -->
         <?php include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
         
@@ -64,7 +66,105 @@ if($mode=='2' && file_exists($folder.".zip") ){
             $(document).ready(function() {
                 $('input[type="submit"]').button();
                 $('input[type="button"]').button();
+
+                if($('#sel_repository').length > 0){
+                    initRepositorySelector();
+                }
             });
+
+            function initRepositorySelector(){
+
+                let available = ['Nakala'];
+                let $select = $('#sel_repository');
+
+                $.each(available, (idx, repo_name) => {
+                    window.hWin.HEURIST4.ui.addoption($select[0], repo_name, repo_name);
+                });
+                window.hWin.HEURIST4.ui.initHSelect($select, false, {width: '150px', 'margin-left': '5px'}, {
+                    onSelectMenu: () => {
+                        let value = $select.val();
+
+                        if(value == 'Nakala'){
+
+                            // Check if API Key has been provided
+                            if(window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.currentUser.ugr_Preferences['nakala_api_key'])){
+                                $select.val('');
+                                if($select.hSelect('instance') !== undefined){
+                                    $select.hSelect('refresh');
+                                }
+                                window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into My preferences > API Keys and Accounts > Personal Nakala API Key, in order to upload to Nakala.');
+                                return;
+                            }
+
+                            getNakalaLicenses();
+                        }
+                    }
+                });
+            }
+
+            function exportArchive(){
+                let is_upload = <?php echo array_key_exists('repository', $_REQUEST); ?>;
+
+                if(is_upload){
+                    let repo = $('#sel_repository').val();
+                    if(repo == ''){
+                        window.hWin.HEURIST4.msg.showMsgFlash('Please select a repository...', 2000);
+                        return;
+                    }else if(repo == 'Nakala' && window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.currentUser.ugr_Preferences.nakala_api_key)){
+                        window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into My preferences > API Keys and Accounts > Personal Nakala API Key, in order to upload to Nakala.');
+                        return;
+                    }
+                }
+
+                $('<div>Preparing archive file for download...</div>')
+                    .addClass('coverall-div')
+                    .css({'zIndex':60000,'padding':'30px 0 0 30px','font-size':'1.2em','opacity':0.8,'color':'white'})
+                    .appendTo('body'); 
+
+                document.getElementById('buttons').style.visibility = 'hidden';
+                document.forms[0].submit();
+            }
+
+            function getNakalaLicenses(){
+                let $sel_license = $('#sel_license');
+
+                if($sel_license.attr('data-init') == 'Nakala' && $sel_license.find('option').length > 1){ // already has values
+                    return;
+                }
+
+                let request = {
+                    serviceType: 'nakala_get_metadata',
+                    type: 'licenses'
+                };
+
+                window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
+
+                window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
+
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                    data = window.hWin.HEURIST4.util.isJSON(data);
+
+                    if(data.status && data.status != window.hWin.ResponseStatus.OK){
+                        window.hWin.HEURIST4.msg.showMsgErr('An error occurred while attempting to retrieve the licenses for Nakala records, however the archiving process can still be completed.<br>'
+                                + 'If this problem persists, please contact the Heurist team.');
+                        $sel_license.parent().parent().hide();
+                        return;
+                    }
+
+                    if(data.length > 0){
+                        $.each(data, (idx, license) => {
+                            window.hWin.HEURIST4.ui.addoption($sel_license[0], license, license);
+                        });
+                        window.hWin.HEURIST4.ui.initHSelect($sel_license, false, {'margin-left': '21px'});
+                        $sel_license.attr('data-init', 'Nakala');
+                        $sel_license.parent().parent().show();
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr('An unknown error has occurred while attempting to retrieve the licenses for Nakala records, however the archiving process can still be completed.<br>'
+                                + 'If this problem persists, please contact the Heurist team.');
+                        $sel_license.parent().parent().hide();
+                    }
+                });
+            }
         </script>
     </head>
     <body class="popup ui-heurist-admin">
@@ -84,6 +184,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
             </p>
             <p>The MySQL dump will contain the complete database which can be reloaded on any up-to-date MySQL database server.
             </p>
+        <?php if(!array_key_exists('repository', $_REQUEST)){?>
             <p>The output of the process will be made available as a link to a downloadable zip file
             <br>but is also available to the system adminstrator as a file in the backup directory in the database.
             </p>
@@ -91,7 +192,13 @@ if($mode=='2' && file_exists($folder.".zip") ){
             <p>Zipping databases with large numbers of images or very large files such as high 
             <br>resolution maps or video may bog down the server and the zip file may be too big to download.
             <br>In that case you may need to ask your sysadmin to give you the files separately on a USB drive.</p>
-            
+        <?php }else{ ?>
+            <p>The output of the process will be zipped and uploaded to the selected repository
+            </p>
+            <h3 class="ui-heurist-title">Warning</h3>
+            <p>Zipping databases and including lots of images or video may bog down the server and the file may not upload to the repository
+            - in that case it may be better to ask your sysadmin to give you the files separately on a USB drive and attempt to upload it yourself.</p>
+        <?php } ?>
             <p>Attached files may be omitted by unchecking the first checkbox. 
             <br>This may also be useful for databases with lots of attached files which are already backed up elsewhere.
             </p>
@@ -138,9 +245,19 @@ if($mode=='2' && file_exists($folder.".zip") ){
                     </label>
                 </div>
 
+        <?php if(array_key_exists('repository', $_REQUEST)){ ?>
+                <div class="input-row" style="padding: 20px 0 5px 0;">
+                    <label>Select a repository <select id='sel_repository' name='repository'><option value="">select a repository...</option></select></label>
+                </div>
+
+                <div class="input-row" style="display: none;padding: 5px 0 10px 0;">
+                    <label>Select a license <select id='sel_license' name='license'><option value="">select a license...</option></select></label>
+                </div>
+        <?php } ?>
+
                 <div id="buttons" class="actionButtons" style="padding-top:10px;text-align:left">
-                    <input type="button" value="Export" style="margin-right: 20px;" class="ui-button-action"
-onClick="{ $('<div>Preparing archive file for download...</div>').addClass('coverall-div').css({'zIndex':60000,'padding':'30px 0 0 30px','font-size':'1.2em','opacity':0.8,'color':'white'}).appendTo('body'); document.getElementById('buttons').style.visibility = 'hidden';  document.forms[0].submit(); }">
+                    <input type="button" value="<?php echo 'Export' . (array_key_exists('repository', $_REQUEST) ? ' / Upload' : ''); ?>" 
+                        style="margin-right: 20px;" class="ui-button-action" onClick="{ exportArchive(); }">
 <?php if(@$_REQUEST['inframe']!=1) { ?>                    
                     <input type="button" value="Cancel" onClick="window.close();">
 <?php } ?>                    
@@ -357,7 +474,7 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
             */
             if(!$res){
                 print "Directory may be non-writeable or zip function is not installed on server (error code 127) - please consult system adminstrator";
-            } else {
+            } else if(!array_key_exists('repository', $_REQUEST)) {
 ?>                
 <p>Your data have been backed up in <?php echo $folder;?></p>
 <br><br><div class='lbl_form'></div>
@@ -374,24 +491,98 @@ onClick="{ $('<div>Preparing archive file for download...</div>').addClass('cove
 <span class="heurist-helper1">
 <br><br>Note: If this file fails to download properly (eg. "Failed … file incomplete") the file is too large to download. Please ask your system administrator (<?php echo HEURIST_MAIL_TO_ADMIN; ?>) to send it to you via a large file transfer service</span>        
 <?php                
-            }
+            }else if(array_key_exists('repository', $_REQUEST)){
 
+                $repo = $_REQUEST['repository'];
+
+                echo_flush2('<hr><br>Uploading archive to ' . $repo . '...');
+
+                // Prepare metadata
+                switch ($repo) {
+                    case 'Nakala':
+                        // Title, Type, Alt Author, License, Created
+
+                        $date = date('Y-m-d');
+
+                        $params = array();
+                        $params['file'] = array(
+                            'path' => $folder . '.zip',
+                            'type' => 'application/zip',
+                            'name' => HEURIST_DBNAME . '.zip'
+                        );
+
+                        $params['meta']['title'] = array(
+                            'value' => 'Archive of ' . HEURIST_DBNAME . ' on ' . $date,
+                            'lang' => null,
+                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                            'propertyUri' => 'http://nakala.fr/terms#title'
+                        );
+
+                        $usr = $system->getCurrentUser();
+                        if(is_array($usr) && count($usr) > 0){
+                            $params['meta']['creator'] = array(
+                                'value' => 'John Doe',//$usr['ugr_FullName'],
+                                'lang' => null,
+                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                                'propertyUri' => 'http://purl.org/dc/terms/creator'
+                            );
+                        }
+
+                        $params['meta']['created'] = array(
+                            'value' => $date,
+                            'lang' => null,
+                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                            'propertyUri' => 'http://nakala.fr/terms#created'
+                        );
+
+                        $params['meta']['type'] = array(
+                            'value' => 'http://purl.org/coar/resource_type/c_ddb1',
+                            'lang' => null,
+                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
+                            'propertyUri' => 'http://nakala.fr/terms#type'
+                        );
+
+                        if(array_key_exists('license', $_REQUEST) && !empty($_REQUEST['license'])){
+                            $params['meta']['license'] = array(
+                                'value' => $_REQUEST['license'],
+                                'lang' => null,
+                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                                'propertyUri' => 'http://nakala.fr/terms#license'
+                            );
+                        }
+
+                        $usr_prefs = user_getPreferences($system);
+                        if(array_key_exists('nakala_api_key', $usr_prefs)){
+                            $params['api_key'] = $usr_prefs['nakala_api_key'];
+
+                            $params['status'] = 'pending'; // keep new record private, so it can be deleted
+                            $params['return_type'] = 'editor'; // return link to private record, will require login
+    
+                            $rtn = uploadFileToNakala($system, $params);
+    
+                            if($rtn === false){
+                                $rtn = $system->getError()['message'];
+                                echo_flush2('failed<br>');
+                            }else{
+                                echo_flush2('finished<br>');
+                                $rtn = 'The uploaded archive is at <a href="' . $rtn . '" target="_blank">' . $rtn . '&nbsp;<span class="ui-icon ui-icon-extlink" /> </a>';
+                            }
+    
+                            echo_flush2('<br>'. $rtn .'<br>');
+                        }else{
+                            echo_flush('failed<br>Your Nakala API key cannot be retrieved, please ensure it has been entered into My preferences > API Keys and Accounts > Personal Nakala API Key');
+                        }
+
+                        break;
+                    
+                    default:
+                        print "The repository " . $repo . " is not supported please " . CONTACT_HEURIST_TEAM;
+                        break;
+                }
+            }
             print '</div><script>document.getElementById("divProgress").style.display="none";</script>';
             if(file_exists($progress_flag)) unlink($progress_flag);
         }
-
-        /*
-        function get_include_contents($filename) {
-        if (is_file($filename)) {
-        ob_start();
-        include $filename;
-        $contents = ob_get_contents();
-        ob_end_clean();
-        return $contents;
-        }
-        return false;
-        }
-        */
         ?>
 
     </body>

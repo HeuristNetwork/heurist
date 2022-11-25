@@ -35,8 +35,17 @@
         data-logaction="db_Archive" data-icon="ui-icon-file-zip"
         data-help=""
         data-container="publish"
-                title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
-        Archive package</a> <!-- Holding value, substituted from localisation file using id -->
+        title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
+        Archive file - download</a> <!-- Holding value, substituted from localisation file using id -->
+</li>
+<li>
+    <a href="export/dbbackup/exportMyDataPopup.php?repository=1" data-user-admin-status="1" id="menu-manage-archive-upload"
+        data-logaction="db_Archive_Repository" 
+        data-icon="ui-icon-file-zip"
+        data-help=""
+        data-container="publish"
+        title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which is then uploaded to the selected repository">
+        Archive file - to repository</a>
 </li>
 
 <li data-user-admin-status="1">-</li>
