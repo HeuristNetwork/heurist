@@ -68,6 +68,8 @@ $.widget( "heurist.app_storymap", {
         , init_completed: false   //flag to be set to true on full widget initializtion
         
         , onClearStory: null
+
+        , storyPlaceholder: 'Please select a story in the list' // placeholder text
     },
 
     _resultset_main: null, // current all stories
@@ -313,7 +315,10 @@ $.widget( "heurist.app_storymap", {
         .insertBefore((this.options.reportOverviewMode=='tab')?this._tabs:this.element.find('#tabCtrl'));
         this._on(this._btn_clear_story, {click:this.clearStory});
         
-        
+        if(window.hWin.HEURIST4.util.isempty(this.options.storyPlaceholder)){
+            this.options.storyPlaceholder = 'Please select a story in the list';
+        }
+
         this._initCompleted();
         
     }, //end _create
@@ -386,7 +391,7 @@ $.widget( "heurist.app_storymap", {
                     
                     that._initial_div_message.find('h3')
                         .text(recset.length()>0
-                            ?'Please select a story in the list'
+                            ?that.options.storyPlaceholder
                             :'No records match the filter criteria');
                     that._initial_div_message.show();
                     
