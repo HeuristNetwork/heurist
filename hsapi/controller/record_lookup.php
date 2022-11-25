@@ -44,7 +44,7 @@ detectLargeInputs('COOKIE record_lookup', $_COOKIE);
                 @$params['action'] == 'import_records')
                 );
 
-    if(!@$params['service'] && !$is_estc){
+    if(!@$params['service'] && !$is_estc && @$params['serviceType'] != 'nakala_get_metadata'){
         $system->error_exit_api('Service parameter is not defined or has wrong value'); //exit from script
     }
 
@@ -193,8 +193,19 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
         $url = $params['service'];
     }
 
-    $remote_data = loadRemoteURLContent($url, true);    
+    if(@$params['serviceType'] == 'nakala_get_metadata'){
+        $response = getNakalaMetadata($system, @$params['type']);
+        $response = json_encode($response);
+
+        header('Content-Type: application/json');
+        header('Content-Length: ' . strlen($response));
+        exit($response);
+    }
+
+
+    $remote_data = loadRemoteURLContentWithRange($url, null, true, 30);
     if($remote_data===false){
+
         global $glb_curl_error;
         $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
 
@@ -210,10 +221,7 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
         json_decode($remote_data);
         if(json_last_error() == JSON_ERROR_NONE){
         }else{
-    /*        
-            $array = array_map("str_getcsv", explode("\n", $csv));
-            $json = json_encode($array);
-    */
+
             $hasGeo = false;
             $remote_data = str_getcsv($remote_data, "\n"); //parse the rows
             if(is_array($remote_data) && count($remote_data)>1){
@@ -534,13 +542,18 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                         $id = @$records['identifier'];
                         $has_files = array_key_exists('files', $records);
 
-                        // Set up basic details
-                        $results['records'][$id]['url'] = 'https://nakala.fr/' . $id;
+                        if($has_files){ // datas, files
+                            $results['records'][$id]['rec_url'] = 'https://nakala.fr/' . $id;
+                        }else{ // collection, should be filtered out by request - just in case
+                            continue;
+                        }
+
                         $results['records'][$id]['citation'] = @$records['citation'];
                         $results['records'][$id]['identifier'] = @$records['identifier'];
 
-                        $results['records'][$id]['title'] = '';
-                        $results['records'][$id]['mime_type'] = '';
+                        $results['records'][$id]['title'] = array();
+                        $results['records'][$id]['mime_type'] = array();
+                        $results['records'][$id]['url'] = array();
                         $results['records'][$id]['author'] = array();
                         
                         foreach ($records['metas'] as $metadata) {
@@ -568,7 +581,7 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                             }else if(strpos($metadata['propertyUri'], 'creator') !== false){ // Author
                                 $results['records'][$id]['author'][] = $metadata['value'];
                             }else if(strpos($metadata['propertyUri'], 'terms#title') !== false){ // Title
-                                $results['records'][$id]['title'] = $metadata['value'];
+                                $results['records'][$id]['title'][] = $metadata['value'];
                             }else if(strpos($metadata['propertyUri'], 'terms#created') !== false){ // Created Date
                                 $results['records'][$id]['date'] = $metadata['value'];
                             }else if(strpos($metadata['propertyUri'], 'terms#license') !== false){ // License
@@ -578,21 +591,25 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
                             }
                         }
 
-                        $need_title = $results['records'][$id]['title'] == '';
                         if($has_files){
                             foreach ($records['files'] as $idx => $file) {
-                                if($need_title){ // Check for backup title, if necessary
-                                    $results['records'][$id]['title'] .= $file['name'];
+                                if(array_key_exists('name', $file)){ // Name
+                                    $results['records'][$id]['filename'][] = $file['name'];
                                 }
-                                if(array_key_exists('mime_type', $file) && $results['records'][$id]['mime_type'] == ''){ // Type
-                                    $results['records'][$id]['mime_type'] = $file['mime_type'];
+                                if(array_key_exists('mime_type', $file)){ // Type
+                                    $results['records'][$id]['mime_type'][] = $file['mime_type'];
+                                }
+                                if(array_key_exists('sha1', $file)){ // File URI
+                                    $results['records'][$id]['url'][] = 'https://api.nakala.fr/data/' . $id . '/' . $file['sha1'];
                                 }
                             }
                         }
 
-                        $results['records'][$id]['title'] = trim($results['records'][$id]['title']);
-                        if($results['records'][$id]['title'] == ''){ // Unknown title, just in case
+                        if(count($results['records'][$id]['title']) == 0){
                             $results['records'][$id]['title'] = 'Undetermined';
+                        }
+                        if(count($results['records'][$id]['author']) == 0){
+                            $results['records'][$id]['author'] = 'Anonymous';
                         }
                     }
                 }
@@ -611,4 +628,180 @@ if($is_debug) print print_r($response, true).'!!!!!<br>';
     //header('Content-Disposition: attachment; filename=output.json');
     header('Content-Length: ' . strlen($remote_data));
     exit($remote_data);
+
+    function getNakalaMetadata($system, $type){
+        // check NAKALA_metadata_values.json
+        // if date in file is old (data.last_update), update metadata first (all types)
+        // then return data.types
+
+        $type = empty($type) ? 'all' : $type;
+        $nakala_file = HEURIST_FILESTORE_ROOT . 'NAKALA_metadata_values.json';
+        $data = array();
+        $fd = fileOpen($nakala_file);
+
+        if($fd <= 0){ // create new file
+            $data = updateNakalaMetadata($system);
+        }else{ // read from file
+
+            fclose($fd);
+            $data = file_get_contents($nakala_file, filesize($nakala_file));
+            $already_updated = false;
+
+            if(!$data || empty($data)){
+                $data = updateNakalaMetadata($system);
+                $already_updated = true;
+            }else{
+                $data = json_decode($data, TRUE);
+            }
+
+            if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || $data['last_update'] < date('Y-m-d')){
+                if($already_updated){
+                    $system->error_exit_api('Unable to retrieve Nakala metadata due to unknown error.');
+                    exit();
+                }
+                $data = updateNakalaMetadata($system);
+            }
+        }
+
+        if(!$data || !is_array($data) || count($data) == 0){
+            return array();
+        }
+
+        $data_rtn = array();
+        if($type == 'types'){
+            $data_rtn = $data['types'];
+        }
+        if($type == 'licenses'){
+            $data_rtn = $data['licenses'];
+        }
+        if($type == 'years'){
+            $data_rtn = $data['years'];
+        }
+
+        if(empty($data_rtn) || count($data_rtn) == 0){ // all
+            return $data;
+        }else{
+            return $data_rtn;
+        }
+    }
+    function updateNakalaMetadata($system){
+        // update NAKALA_metadata_values.json
+        $nakala_file = HEURIST_FILESTORE_ROOT . 'NAKALA_metadata_values.json';
+
+        $page = 1;
+        $totalPages = 10;
+        $data_rtn = array('years' => array(), 'licenses' => array(), 'types' => array());
+
+        // Get datatype names, Nakala only provides the datatype ids
+        $datatypes_xml = loadRemoteURLContentWithRange('https://vocabularies.coar-repositories.org/resource_types/resource_types_for_dspace.xml', null, true, 60);
+        $datatypes_xml = simplexml_load_string($datatypes_xml, null, LIBXML_PARSEHUGE);
+
+        while ($page <= $totalPages) {
+
+            $results = loadRemoteURLContentWithRange('https://api.nakala.fr/search?fq=scope%3Ddata&order=relevance&page='.$page.'&size=1000', null, true, 60);
+
+            if($results === false){
+                $system->error_exit_api('Unable to retrieve metadata values from Nakala');
+                exit();
+            }
+
+            $results = json_decode($results, TRUE);
+            if(json_last_error() == JSON_ERROR_NONE){
+
+                //$totalPages = ceil($results['totalResults'] / 1000); Can only retrieve first ~10,000 records
+
+                if($results['totalResults'] > 0 && count($results['datas']) > 0){
+
+                    foreach ($results['datas'] as $records) {
+
+                        $handled_type = false;
+                        $handled_license = false;
+                        $handled_year = false;
+                        
+                        foreach ($records['metas'] as $metadata) {
+
+                            if($metadata['value'] == null){
+                                continue;
+                            }
+
+                            if(strpos($metadata['propertyUri'], 'terms#created') !== false){ // Created Date
+
+                                if(strpos($metadata['value'], '-') !== false){ // YYYY-MM | YYYY-MM-DD
+                                    $metadata['value'] = explode('-', $metadata['value'])[0];
+                                }
+
+                                if(!in_array($metadata['value'], $data_rtn['years'])){
+                                    $data_rtn['years'][] = $metadata['value'];
+                                }
+
+                                $handled_year = true;
+                            }else if(strpos($metadata['propertyUri'], 'terms#license') !== false && !in_array($metadata['value'], $data_rtn['licenses'])){ // License
+                                $data_rtn['licenses'][] = $metadata['value'];
+                                $handled_license = true;
+                            }else if(strpos($metadata['propertyUri'], 'terms#type') !== false){ // Type
+
+                                //Retrieve type name from XML object
+                                $code = explode('/', $metadata['value']);
+                                $code = $code[count($code) - 1];
+                                $label = $code;
+
+                                if(strpos($code, 'c_') === false){
+                                    $code = $metadata['value'];
+                                }
+
+                                if(!array_key_exists($code, $data_rtn['types'])){
+
+                                    if(strpos($code, 'c_') !== false){
+
+                                        $nodes = $datatypes_xml->xpath("//node[@id='". $code ."']");
+                                        if(is_array($nodes) && count($nodes) > 0){
+                                            $label = $nodes[0]->attributes()->label;
+                                            $label = ucfirst($label);
+                                        }else{
+                                            $label .= ' (deprecated type)';
+                                        }
+                                    }
+    
+                                    $data_rtn['types'][$code] = $label;
+                                }
+
+                                $handled_type = true;
+                            }
+
+                            if($handled_year && $handled_type && $handled_license){ // handled all necessary metadata for current record
+                                break;
+                            }
+                        }
+                    }
+                }else{ // no more records
+                    break;
+                }
+            }else{
+                $system->error_exit_api('Unable to retrieve metadata values from Nakala, receieved a response not in a JSON format');
+                exit();
+            }
+
+            $page ++;
+        }
+
+        if(count($data_rtn['years']) > 0){ // sort years
+            sort($data_rtn['years']);
+        }
+        if(count($data_rtn['types']) > 0){
+            sort($data_rtn['types']);
+        }
+        if(count($data_rtn['licenses']) > 0){
+            sort($data_rtn['licenses']);
+        }
+
+        $data_rtn['last_update'] = date('Y-m-d');
+
+        $file_size = fileSave(json_encode($data_rtn), $nakala_file);
+        if($file_size <= 0){
+            $system->error_exit_api('Cannot save Nakala metadata into local file store');
+            exit();
+        }else{
+            return $data_rtn;
+        }
+    }
 ?>

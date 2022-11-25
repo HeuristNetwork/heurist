@@ -1,8 +1,8 @@
 <!--
-* lookupBnFLibrary_bib.html: used by lookupBnFLibrary_bib.js
+* lookupNakala.html: used by lookupNakala.js
 *
 * @author      Brandon McKay   <blmckay13@gmail.com>
-* @copyright   (C) 2005-2021 University of Sydney
+* @copyright   (C) 2005-2022 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     6
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -10,7 +10,7 @@
 -->
 
 <!-- Search Container -->
-<div id="ent_header" style="height:7em; padding: 0.2em; width: 99%;">
+<div id="ent_header" style="height:7em; padding: 0.2em; width: 100%;">
     <fieldset style="float: left;" id="search_container">
 
         <div style="padding: 0.2em; width: 100%;" class="input" id="query_form">
@@ -18,9 +18,41 @@
             <div>
                 <!-- Any -->
                 <div class="header recommended" style="text-align: right;">
-                    <label for="inpt_any">Search:</label>
+                    <label for="inpt_any">All metadata/content:</label>
                 </div>
                 <input id="inpt_any" class="text ui-widget-content ui-corner-all" style="max-width:49em;width:47em;"/>
+            </div>
+
+            <div style="margin: 10px 0;">
+                <!-- Scope -- DATA ONLY
+                <select>
+                    <option value="data">Data</option>
+                    <option value="collection">Collection</option>
+                </select> -->
+
+                <!-- Created year --> 
+                <div class="header optional" style="text-align: right;">
+                    <label for="inpt_year">Years: </label>
+                </div>
+                <select id="inpt_year">
+                    <option value="all" selected>All Years</option>
+                </select> 
+
+                <!-- Type -->
+                <div class="header optional" style="text-align: right;">
+                    <label for="inpt_type">Type: </label>
+                </div>
+                <select id="inpt_type">
+                    <option value="all" selected>All Types</option>
+                </select>
+
+                <!-- License -->
+                <div class="header optional" style="text-align: right;">
+                    <label for="inpt_license">License: </label>
+                </div>
+                <select id="inpt_license">
+                    <option value="all" selected>All Licenses</option>
+                </select> 
             </div>
 
         </div>
@@ -48,5 +80,5 @@
 </div>
 
 <!-- Result List Container -->
-<div id="div_result" class="ent_content_full" style="display: none;top:9em">
+<div id="div_result" class="ent_content_full" style="display:none;top:8.5em">
 </div>

@@ -26,7 +26,7 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
     options: {
     
         height: 700,
-        width:  800,
+        width:  850,
         modal:  true,
         
         title:  "Search the publically available Nakala records",
@@ -52,8 +52,9 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
         var that = this;
 
         // Extra field styling
-        this.element.find('#search_container > div > div > .header.recommended').css({width:'60px', 'min-width':'60px', display: 'inline-block'});
-        this.element.find('#btn_container').position({my: 'left top', at: 'right top', of: '#search_container'});
+        this.element.find('#search_container > div > div > .header.recommended').css({width:'120px', 'min-width':'120px', display: 'inline-block'});
+        this.element.find('#search_container > div > div > .header.optional').css({width:'60px', 'min-width':'60px', display: 'inline-block'});
+        this.element.find('#btn_container').position({my: 'left bottom', at: 'right bottom', of: '#search_container'});
         // Action button styling
         this.element.find('#btnStartSearch').addClass("ui-button-action");
 
@@ -107,6 +108,52 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
             'keypress':this.startSearchOnEnterPress
         });
 
+        var request = {
+            serviceType: 'nakala_get_metadata' // file types used by Nakala
+        };
+        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
+
+            data = window.hWin.HEURIST4.util.isJSON(data);
+
+            if(data.status && data.status != window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgErr(data);
+                return;
+            }
+
+            let $select = that.element.find('#inpt_type');
+            if(data.hasOwnProperty('types')){
+                $.each(data['types'], (code, label) => {
+                    window.hWin.HEURIST4.ui.addoption($select[0], code, label);
+                });
+                window.hWin.HEURIST4.ui.initHSelect($select, false);
+            }else{
+                $select.hide();
+                that.element.find('[for="inpt_type"]').hide();
+            }
+
+            $select = that.element.find('#inpt_license');
+            if(data.hasOwnProperty('licenses')){
+                $.each(data['licenses'], (idx, license) => {
+                    window.hWin.HEURIST4.ui.addoption($select[0], license, license);
+                });
+                window.hWin.HEURIST4.ui.initHSelect($select, false);
+            }else{
+                $select.hide();
+                that.element.find('[for="inpt_license"]').hide();
+            }
+
+            $select = that.element.find('#inpt_year');
+            if(data.hasOwnProperty('years')){
+                $.each(data['years'], (idx, year) => {
+                    window.hWin.HEURIST4.ui.addoption($select[0], year, year);
+                });
+                window.hWin.HEURIST4.ui.initHSelect($select, false);
+            }else{
+                $select.hide();
+                that.element.find('[for="inpt_year"]').hide();
+            }
+        });
+
         return this._super();
     },
     
@@ -151,30 +198,21 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
 
             var s = recordset.fld(record, fldname);
 
-            if(window.hWin.HEURIST4.util.isArray(s)){
-                s = window.hWin.HEURIST4.util.htmlEscape(s.join('; '));
-            }else if(window.hWin.HEURIST4.util.isObject(s)){
-
-            	var display_val = '';
-
-            	for(var key in s){
-
-                    if(display_val != ''){
-                        display_val += ', ';
-                    }
-                    display_val += s[key];
-                }
-
-                s = display_val;
-            }else{
-                s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
+            if(window.hWin.HEURIST4.util.isempty(s) && s !== ''){
+                s = '';
             }
 
-            title = s;
+            if(window.hWin.HEURIST4.util.isArray(s)){
+                s = s.join('; ');
+            }else if(window.hWin.HEURIST4.util.isObject(s)){
+            	s = Object.values(s).join('; ');
+            }
 
-            if(fldname == 'url'){ // create anchor tag for link to external record
-                s = '<a href="' + s + '" target="_blank"> view here </a>';
-                title = 'View bibliographic record';
+            title = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
+
+            if(fldname == 'rec_url'){ // create anchor tag for link to external record
+                s = '<a href="' + s + '" target="_blank"> view record </a>';
+                title = 'View Nakala record';
             }
             
             if(width>0){
@@ -189,7 +227,7 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
         var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;' + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
-        var recTitle = fld('author', 40) + fld('date', 12) + fld('title', 75) + fld('url', 12); 
+        var recTitle = fld('author', 40) + fld('date', 12) + fld('title', 85) + fld('rec_url', 12); 
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
             + html_thumb
@@ -223,16 +261,16 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
      * 
      * Param: None
      */
-    doAction: function(){
+    doAction: function(recset){
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
         var that = this;
 
-        this.added_terms = false;
-
-        // get selected recordset
-        var recset = this.recordList.resultList('getSelected', false);
+        if(!recset){
+            // get selected recordset
+            recset = this.recordList.resultList('getSelected', false);
+        }
 
         if(recset && recset.length() == 1){
 
@@ -240,8 +278,6 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
             var rec = recset.getFirstRecord(); // get selected record
 
             var map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
-
-            var new_terms = []; // array of terms that need to be created, [vocab id, detail id, value]
 
             // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
             for(var k=0; k<map_flds.length; k++){
@@ -253,81 +289,38 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
                 if(val != null){
 
                     if(field_type == 'resource' && !res['ext_url']){
-                        res['ext_url'] = recset.fld(rec, 'url');
+                        res['ext_url'] = recset.fld(rec, 'rec_url');
                     }
-
-                    var val_isArray = window.hWin.HEURIST4.util.isArray(val);
-                    var val_isObject = window.hWin.HEURIST4.util.isObject(val);
-
-                    var search_val = '';
 
                     // Match term labels with val, need to return the term's id to properly save its value
                     if(field_type == 'enum'){
 
-                        if(val_isObject){ 
-
-                            if(Object.keys(val).length > 1){ // should not be a term, or alternative handling required
-                                continue;
-                            }else{ // take first option
-                                val = val[Object.keys(val)[0]];
-                            }
+                        if(window.hWin.HEURIST4.util.isObject(val)){ 
+                            val = Object.values(val);
                         }
 
                         var vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
                         var term_Ids = $Db.trm_TreeData(vocab_ID, 'set');
 
-                        var term_found = false;
-
                         for(var i=0; i<term_Ids.length; i++){
 
                             var trm_Label = $Db.trm(term_Ids[i], 'trm_Label').toLowerCase();
 
-                            if(val_isArray){ // multiple values, Language usually has two values and Type only has one
+                            if(window.hWin.HEURIST4.util.isArray(val)){ // multiple values
 
                                 for(var j = 0; j < val.length; j++){
 
                                     if(val[j].toLowerCase() == trm_Label){
-
-                                        val = term_Ids[i];
-                                        term_found = true;
-                                        break;
+                                        val[j] = term_Ids[i];
                                     }
                                 }
                             }else if(val){ // In case of one single value
                                 
                                 if(val.toLowerCase() == trm_Label){
-
                                     val = term_Ids[i];
-                                    term_found = true;
-                                    break;
                                 }
                             }
-
-                            if(term_found){
-                                break;
-                            }
                         }
-
-                        // Check if a value was found, if not prepare for creating new term
-                        if(!term_found){
-                            
-                            if(val_isArray){
-                                new_terms.push([vocab_ID, dty_ID, val[0]]); 
-                            }else{
-                                new_terms.push([vocab_ID, dty_ID, val]);
-                            }
-                        }
-                    }else if(field_type == 'resource'){ // prepare search string for user to select/create a record
-
-                        search_val = '';
-
-                        if(val_isArray){
-                            search_val = val.join(', ');
-                        }else{
-                            search_val = val;
-                        }
-
-                        val = search_val;                        
                     }
                 }
 
@@ -339,17 +332,9 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
                     }
 
                     if(window.hWin.HEURIST4.util.isObject(val)){
-
-                        var complete_val = '';
-                        for(var key in val){
-                            complete_val += val[key] + ', ';
-                        }
-
-                        res[dty_ID].push(complete_val.slice(0, -2));
-                    }else if(field_type != 'resource' && window.hWin.HEURIST4.util.isArray(val)){
-                        res[dty_ID].push(val.join('; '));
+                        res[dty_ID] = res[dty_ID].concat(Object.values(val));
                     }else{
-                        res[dty_ID].push(val);    
+                        res[dty_ID] = res[dty_ID].concat(val);    
                     }
                 }
             }
@@ -391,20 +376,58 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
         var that = this;
 
         // Construct base url for external request
-        var sURL = 'https://api.nakala.fr/search?q='; // base URL for BnF request
-
-        // Check that something has been entered
-        if(this.element.find('#inpt_any').val()==''){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a value in the search field...', 1000);
-            return;
-        }
+        var sURL = 'https://api.nakala.fr/search?q='; // base URL for Nakala request
+        var filter_query = 'scope=datas'; // no collections
         
         // Construct query portion of url
-        var query = '';
         // any field
         if(this.element.find('#inpt_any').val()!=''){
             sURL += encodeURIComponent(this.element.find('#inpt_any').val());
         }
+
+        if(this.element.find('#inpt_license').val() != 'all'){
+            filter_query += ';license=' + this.element.find('#inpt_license').val();
+        }
+        if(this.element.find('#inpt_year').val() != 'all'){
+
+            let years = this.element.find('#inpt_year').val();
+            if(years.length > 4){
+                if(years.indexOf(',') === -1 && years.indexOf(' ') === -1){
+                    years = years.replace(/.{4}/g, '$&,');
+                }
+                if(years.indexOf(',') === -1){
+                    years = years.replaceAll(' ', ',');
+                }
+                if(years.indexOf(', ') !== -1){
+                    years = years.replaceAll(', ', ',');
+                }
+            }
+            filter_query += ';year=' + years;
+        }
+        if(this.element.find('#inpt_type').val() != 'all'){
+
+            let type = this.element.find('#inpt_type').val();
+
+            if(type.indexOf('http') === -1){
+                type = 'http://purl.org/coar/resource_type/' + type;
+            }
+
+            filter_query += ';type=' + type;
+        }
+
+        if(filter_query != ''){
+            sURL += '&fq=' + encodeURIComponent(filter_query);
+        }
+
+        // Check that something has been entered
+        if(this.element.find('#inpt_any').val()=='' && filter_query == ''){
+            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a value in the search field or select a filter...', 1000);
+            return;
+        }
+
+        let maxRecords = $('#rec_limit').val(); // limit number of returned records
+        maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
+        sURL += '&size=' + maxRecords;
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent()); // show loading cover
 
@@ -439,7 +462,7 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
      * Param:
      *  json_data (json) => search response
      */
-    _onSearchResult: function(json_data){ console.log('original results => ', json_data);
+    _onSearchResult: function(json_data){
 
         this.recordList.show();
 
@@ -450,16 +473,14 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
 
         json_data = window.hWin.HEURIST4.util.isJSON(json_data);
 
-        if (json_data) {
-            
-            if(!json_data.records) return false;
+        if (json_data && json_data.records && json_data.records.length > 0) {
 
             var res_records = {}, res_orders = [];
 
             // Prepare fields for mapping
             var fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
-            var map_flds = Object.keys(this.options.mapping.fields);
-            fields = fields.concat(map_flds);            
+            var map_flds = Object.keys(this.options.mapping.fields).concat('rec_url');
+            fields = fields.concat(map_flds);
 
             // Parse json to Record Set
             var i=0;
