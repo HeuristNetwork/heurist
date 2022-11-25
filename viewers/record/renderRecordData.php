@@ -586,7 +586,7 @@ if(!($is_map_popup || $without_header)){
             padding-top: 0.3em;
         }      
 
-        .detail > p{
+        .detail p{
             margin-block: 0;
         }
 
