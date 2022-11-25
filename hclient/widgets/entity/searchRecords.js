@@ -48,12 +48,20 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             rt_list = [];
         }
         
+        let recType_topOption = window.hWin.HR('Any Record Type');
+        if(!window.hWin.HEURIST4.util.isempty(this.options.rectype_set)){
+
+            if(this.options.rectype_set.indexOf(',') !== -1){
+                recType_topOption = [{key: this.options.rectype_set, title: 'All Record Types', selected: true}]; // search all record types
+            }else{
+                recType_topOption = '';
+            }
+        }
+
         this.selectRectype.empty();
         window.hWin.HEURIST4.ui.createRectypeSelect(this.selectRectype.get(0), 
             this.options.rectype_set, 
-            window.hWin.HEURIST4.util.isempty(this.options.rectype_set)
-            ?window.hWin.HR('Any Record Type')
-                :'',  // (this.options.parententity>0)?window.hWin.HR('select record type')
+            recType_topOption, 
             false);
             
         this.btn_add_record = this.element.find('#btn_add_record');    
@@ -100,7 +108,11 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     window.hWin.HEURIST4.util.copyStringToClipboard(search_val);
                 }
 
-                that._trigger( "onaddrecord", null, {'_rectype_id': that.selectRectype.val(), 'fill_in_data': search_val} );
+                if(that.selectRectype.val().indexOf(',') === -1){
+                    that._trigger( "onaddrecord", null, {'_rectype_id': that.selectRectype.val(), 'fill_in_data': search_val} );
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgFlash('Cannot create a record of all types', 3000);
+                }
             }); 
         if(is_browse){
             this.element.find('#lbl_add_record').text('Select in list');
@@ -109,7 +121,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             this.btn_add_record.show();
         }
         
-            
         // create list of tabs for every rectype in this.options.rectype_set
         if(!is_addonly && is_expand_rt_list){ //(rt_list.length>1 && rt_list.length<20)
             
@@ -120,6 +131,12 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
             var groupTabHeader = $('<ul>').appendTo(cont);
             
+            if(rt_list.length > 1){
+                    $('<li>').html('<a href="#rty'+ rt_list.join(',') +'"><span style="font-weight:bold">All types</span></a>')
+                        .appendTo(groupTabHeader);
+                    $('<div id="rty'+ rt_list.join(',') +'">').appendTo(cont);
+            }
+
             for(var idx=0; idx<rt_list.length; idx++){
                 
                 var rectypeID = rt_list[idx];
@@ -128,7 +145,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     var label = window.hWin.HEURIST4.util.htmlEscape(name.trim());
                     if(!name) continue;
 
-            
                     $('<li>').html('<a href="#rty'+rectypeID
                                         +'"><span style="font-weight:bold">'
                                         +label+'</span></a>')
@@ -215,7 +231,18 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 this.btn_select_rt.hide();
                 
                 if(is_addonly){
-                    that._trigger( "onaddrecord", null, that.selectRectype.val() );
+
+                    var search_val = that.element.find('#fill_in_data').val();
+                    search_val = search_val == '' ? that.options.init_filter : search_val;
+                    if(!window.hWin.HEURIST4.util.isempty(search_val)){
+                        window.hWin.HEURIST4.util.copyStringToClipboard(search_val);
+                    }
+
+                    if(that.selectRectype.val().indexOf(',') === -1){
+                        that._trigger( "onaddrecord", null, {'_rectype_id': that.selectRectype.val(), 'fill_in_data': search_val} );
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgFlash('Cannot create a record of all types', 3000);
+                    }
                 }else if (is_browse) {
                     //this.element.find('#addrec_helper').hide();
                 }
@@ -228,20 +255,30 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         // change label for btn_add_record 
         //
         function __onSelectRecType(sel){
+
+            let is_any = sel.val().indexOf(',') !== -1;
+            if(is_browse || is_any){
+                that.btn_add_record.hide();
+            }else{
+                that.btn_add_record.show();
+            }
+
             if(that.btn_add_record.is(':visible')){
-                /*
-                if(sel.val()>0){
-                    lbl = window.hWin.HR(is_browse?'Select':'Add')+' '+ sel.find( "option:selected" ).text().trim();
-                }else{
-                    lbl = window.hWin.HR(is_browse?"Search Record":"Add Record");
-                }
-                */
+
                 if(sel.val()>0){
                     lbl = window.hWin.HR('Add')+' '+ sel.find( "option:selected" ).text().trim();
                 }else{
                     lbl = window.hWin.HR('Add Record');
                 }
                 that.btn_add_record.button('option','label',lbl);
+            }
+
+            if(is_browse || is_any){
+                that.element.find('#lbl_add_record').text('Select in list');
+            }else if(is_addonly){
+                that.element.find('#lbl_add_record').text('Add new');
+            }else{
+                that.element.find('#lbl_add_record').text('Select in list or add new');
             }
         }
         //force search if rectype_set is defined
@@ -316,7 +353,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     ele.find('span').text( $Db.rty(this.options.parentselect,'rty_Name') );
                 }
                 //start search
-                if(this.selectRectype.val()>0){
+                if(!window.hWin.HEURIST4.util.isempty(this.selectRectype.val())){
                     this.selectRectype.change(); 
                 }
             }
@@ -370,18 +407,19 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         var links_count = null;
         
         //by record type
-        if(this.selectRectype.val()!=''){
-            qstr = qstr + 't:'+this.selectRectype.val();
-            qobj.push({"t":this.selectRectype.val()});
+        let rectype_filter = this.selectRectype.val();
+        if(rectype_filter!=''){
+            qstr = qstr + 't:'+rectype_filter;
+            qobj.push({"t":rectype_filter});
             
             if(this.options.pointer_field_id>0 && this.options.pointer_source_rectype>0){
                 if(this.element.find('#cb_getcounts').is(':checked')){
                     links_count = {source:this.options.pointer_source_rectype, 
-                                   target:this.selectRectype.val(),
+                                   target:this.rectype_filter,
                                    dty_ID:this.options.pointer_field_id};
                 }            
             }    
-        }   
+        }
 
         //by title        
         if(this.input_search.val().trim()!=''){
