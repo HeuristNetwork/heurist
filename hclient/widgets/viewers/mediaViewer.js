@@ -254,11 +254,26 @@ $.widget( "heurist.mediaViewer", {
                     if(external_url || filename === '_iiif' || filename === '_remote')  //@todo check preferred source
                     {
                         if(!external_url) external_url = fileURL; 
-                        
-                        $('<a>', {href:external_url, target:'_blank'})
+                               
+                        if(filename.indexOf('_iiif')>=0){
+                            external_url =  this.options.baseURL 
+                                     + 'hclient/widgets/viewers/miradorViewer.php?db='
+                                     +  this.options.database
+                                     + '&'+filename.substring(1)+'='+obf_recID;  //either iiif or iiif_image
+                        }                
+                       
+                        $('<a href="'+external_url+'" target="_blank">'
+                    +'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
+                    +'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
+                    +'"></span>&nbsp;open in Mirador</a>')
+                        .appendTo(this.mediacontent);
+                       
+                       /* 
+                       $('<a>', {href:external_url, target:'_blank'})
                                 .text('OPEN IN NEW TAB')
                                 .addClass('external-link')
                                 .appendTo(this.mediacontent);
+                       */
                     }else{
                         $('<a>', {href:(fileURL+'&download=1'), target:'_surf'})   //&debug=3
                                 .text('DOWNLOAD')
@@ -353,10 +368,10 @@ $.widget( "heurist.mediaViewer", {
                         
                             //for link below thumb                        
                             external_url =  that.options.baseURL 
-                                     + "hclient/widgets/viewers/miradorViewer.php?db=" 
+                                     + 'hclient/widgets/viewers/miradorViewer.php?db='
                                      +  that.options.database
                                      + '&' + param; // + '='+obf_recID;
-    console.log(external_url);                        
+//    console.log(external_url);                        
                             //on thumbnail click
                             that._on($alink, {click:function(e){
                                 
@@ -373,7 +388,7 @@ $.widget( "heurist.mediaViewer", {
                                   }
                                   
                                   var url =  that.options.baseURL 
-                                        + "hclient/widgets/viewers/miradorViewer.php?db=" 
+                                        + 'hclient/widgets/viewers/miradorViewer.php?db='
                                         +  that.options.database
                                         + '&' + param;// + '='+obf_recID;
                                      

@@ -216,7 +216,7 @@ public static function output($data, $params){
             fwrite($fd, '{"records":[');             
         }
 
-    }else if($params['format']=='iiif'){
+    }else if($params['format']=='iiif'){ //it creates iiif manifest see _getIiifCanvas
         
         self::$version = (@$params['version']==2 || @$params['v']==2)?2:3;
         
@@ -1724,7 +1724,8 @@ private static function _getMediaViewerData($record){
 
 
 //
-// convert heurist record to iiif canvas json
+// Converts heurist record to iiif canvas json
+// It allows to see any media in mirador viewer
 // 
 // return null if not media content found
 //

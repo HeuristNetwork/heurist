@@ -2074,6 +2074,22 @@ background: #8ea9b9
     height: 24px;
 }
 
+.ui-icon-iiif { 
+    background-image: url(hclient/assets/iiif_logo.png) !important; 
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+    filter: grayscale(100%);
+}
+
+.ui-icon-mirador { 
+    background-image: url(hclient/assets/mirador_logo.png) !important; 
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+}
+
+
 .tooltip-inner{
     /*background:black;
     color:white;*/

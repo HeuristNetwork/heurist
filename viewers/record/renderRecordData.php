@@ -116,10 +116,10 @@ if(!($is_map_popup || $without_header)){
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="<?php echo HEURIST_BASE_URL;?>h4styles.css">
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
         <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+        <link rel="stylesheet" type="text/css" href="<?php echo HEURIST_BASE_URL;?>h4styles.css">
 
         <script type="text/javascript" src="../../hclient/core/hintDiv.js"></script> <!-- for mapviewer roolover -->
         <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
@@ -486,6 +486,43 @@ if(!($is_map_popup || $without_header)){
                         
                     //setTimeout(function(){$('.thumbnail').mediaViewer('show');},1000);
                 }
+                //init open in mirador links
+                $('.miradorViewer_link').click(function(event){
+                    var param,  obf_recID;
+                    var ele = $(event.target)
+
+                    if(ele.attr('data-id')){
+                        obf_recID = ele.attr('data-id');
+                    }else{
+                        ele = ele.parents('[data-id]');
+                        obf_recID = ele.attr('data-id');
+                    }
+
+                    var url =  baseURL
+                    + 'hclient/widgets/viewers/miradorViewer.php?db=' 
+                    +  database
+                    + '&iiif_image=' + obf_recID;
+
+                    if(window.hWin && window.hWin.HEURIST4){
+                        //borderless:true, 
+                        window.hWin.HEURIST4.msg.showDialog(url, 
+                            {dialogid:'mirador-viewer',
+                                //resizable:false, draggable: false, 
+                                //maximize:true, 
+                                default_palette_class: 'ui-heurist-explore',
+                                width:'90%',height:'95%',
+                                allowfullscreen:true,'padding-content':'0px'});   
+
+                        $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
+
+                        $dlg.parent().css('top','50px');
+                    }else{
+                        window.open(url, '_blank');        
+                    }                      
+
+                    //data-id
+                });
+
                 
             }
 
@@ -1476,6 +1513,7 @@ function print_public_details($bib) {
                         .$thumb['id'].', this.parentNode)">show thumbnail</a>';
                 }
                 
+                
             }
             
             if(@$thumb['external_url']){
@@ -1487,6 +1525,17 @@ function print_public_details($bib) {
                                 . '" class="external-link image_tool" target="_surf">download'
                                 . (@$thumb['linked']?' (linked media)':'').'</a>';
             }
+            
+            if(strpos($thumb['mimeType'],'image/')===0 || ($isAudioVideo &&
+                 ( strpos($thumb['mimeType'],'youtube')===false || 
+                   strpos($thumb['mimeType'],'vimeo')===false || 
+                   strpos($thumb['mimeType'],'soundcloud')===false)) )
+            {
+                print '<a href="#" data-id="'.$thumb['nonce'].'" class="miradorViewer_link">'
+                    .'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
+                    .'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
+                    .'"></span>&nbsp;open in Mirador</a>&nbsp;&nbsp;';
+            }        
 
             if(@$thumb['description'] != null && @$thumb['description'] != ''){
                 if(filter_var($thumb['description'], FILTER_VALIDATE_URL)){ // just a url

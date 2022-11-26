@@ -34,13 +34,15 @@
             $url = str_replace('hclient/widgets/viewers/miradorViewer.php','', $url);
             $url = str_replace($_SERVER['QUERY_STRING'],
                 'db='.$_REQUEST['db']
-                    .'&file='.($_REQUEST['manifest']?@$_REQUEST['manifest']:@$_REQUEST['iiif']),$url);
+                    .'&file='.(@$_REQUEST['manifest']?$_REQUEST['manifest']:@$_REQUEST['iiif']),$url);
         }else{
             if(@$_REQUEST['iiif_image']){ //file obfuscatin id
-                //find record linked to this media 
+                //find record linked to this media
                 $url = $url.'&q=*file @'.$_REQUEST['iiif_image'];
+            }else if(!@$_REQUEST['q']){ //query not defined
+                exit('Need to define either query or file ID');
             }
-            //create manifest dynamically
+            //record_output creates manifest dynamically
             $url = str_replace('hclient/widgets/viewers/miradorViewer.php','hsapi/controller/record_output.php', $url);
             
         }

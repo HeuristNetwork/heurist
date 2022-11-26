@@ -89,15 +89,6 @@ body.popup {
     background-size: contain;
 }
 
-.ui-icon-iiif { 
-    background-image: url(hclient/assets/iiif_logo.png) !important; 
-    width: 18px;
-    height: 18px;
-    background-size: contain;
-    filter: grayscale(100%);
-}
-
-
 .ui-icon-entity { 
     background-image: url(hclient/assets/v6/entity-000000.png) !important; 
     width: 18px;
