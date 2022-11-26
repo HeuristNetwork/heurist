@@ -284,12 +284,21 @@ class DbsTerms
             if(is_array($children) && count($children)>0){
 
                 foreach($children as $trm_ID){
+                    
+                    if($trm_ID==$parent_id){
+                        error_log('!!!!Database '.HEURIST_DBNAME
+                            .' Recursive tree for term '.$trm_ID.' parent '.$parent_id);
+                        continue;
+                    }
 
                     if($mode==1){ //tree
                         $res[$parent_id][$trm_ID] = array(); 
+                    
                     }else if($mode==3){
-                        if(in_array($trm_ID,$res)){ //already in set
-                            //error_log('!!!! Recursive tree or duplication for term '.$trm_ID);
+                        if(in_array($trm_ID, $res)){ //already in set
+                            error_log('!!!!Database '.HEURIST_DBNAME
+                                .' Recursive tree or duplication for term '.$trm_ID.' parent '.$parent_id);
+                            continue;
                         }else{
                             array_push($res, $trm_ID);    
                         }
