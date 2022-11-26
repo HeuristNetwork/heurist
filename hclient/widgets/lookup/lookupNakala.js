@@ -473,7 +473,7 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
 
         json_data = window.hWin.HEURIST4.util.isJSON(json_data);
 
-        if (json_data && json_data.records && json_data.records.length > 0) {
+        if (json_data && json_data.records && Object.keys(json_data.records).length > 0) {
 
             var res_records = {}, res_orders = [];
 
@@ -521,7 +521,9 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
             }
         }
 
-        if(is_wrong_data){
+        if(Object.keys(json_data.records).length == 0){
+            this.recordList.resultList('updateResultSet', null);
+        }else if(is_wrong_data){
             this.recordList.resultList('updateResultSet', null);
             window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
         }
