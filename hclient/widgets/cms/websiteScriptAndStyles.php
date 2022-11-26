@@ -470,7 +470,7 @@ if($website_custom_css!=null){
 
                 timeout_count = 0;
                 afterPageLoad( document, pageid, eventdata); //execute custom script and custom css, assign page title 
-            }        
+            } // END __loadPageContent       
 
             if(page_cache[pageid]){ //this page has been already loaded
                 __loadPageContent();
@@ -551,14 +551,14 @@ function assignPageTitle(pageid){
 // 1. Replaces old custom css per page with new one (from DT_CMS_CSS)
 // 2. Adds custom script (DT_CMS_SCRIPT) to header and executes it  
 //      it wraps this script into function afterPageLoad_[pageid](args) 
-// 3. Adds listeners for all "a" elements with href="pageid" for intepage website links
+// 3. Adds listeners for all "a" elements with href="pageid" for intepage website links (converts links)
 // 4. Adds global listerner for ON_REC_SEARCHSTART and ON_REC_SELECT for interpage widget links
 //
 // eventdata - are arguments to be passed to custom javascript function
 //             this object will be extented with url_params from current page url
 //
 function afterPageLoad(document, pageid, eventdata){
-
+    
     //waiting till all widgets are inited
     var is_inited = layoutMgr.layoutCheckWidgets();
     if (is_inited===false) {
@@ -701,6 +701,7 @@ function afterPageLoad(document, pageid, eventdata){
         
     }
     
+    // add listeners for internal links  
     initLinksAndImages();
 
     //var ele = $('#mobilemenu');
@@ -747,11 +748,10 @@ function afterPageLoad(document, pageid, eventdata){
 }
 
 //
-//
+// Adds listeners for all "a" elements with href="pageid" for intepage website links (converts links)
 //
 function initLinksAndImages(){   
 
-    
     // create internal links 
     //find all link elements for loading another page and define onclick handler - loadPageContent
     $('a').each(function(i,link){
@@ -770,6 +770,9 @@ function initLinksAndImages(){
                 pageid = window.hWin.HEURIST4.util.getUrlParameter('pageid',href);
             }else if(href.indexOf(window.hWin.HAPI4.baseURL)===0){
                 pageid = href.substr(window.hWin.HAPI4.baseURL.length);
+            }else if(href.indexOf('./')===0){
+                href = href.substring(2);
+                pageid = href;
             }else if(href>0){
                 pageid = href;
             }
