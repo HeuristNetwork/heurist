@@ -50,6 +50,7 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
     //sanitize
     if(@$_REQUEST['recTypeIDs']){
         $rty_ids = explode(',',$_REQUEST['recTypeIDs']);
+        $mysqli = $system->get_mysqli();
         $rty_ids = array_map(array($mysqli,'real_escape_string'), $rty_ids);
         $rty_ids_list = implode(',', $rty_ids);
     }
