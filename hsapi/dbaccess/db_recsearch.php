@@ -2914,9 +2914,9 @@ for geo   geo => array(type=> , wkt=> )
 * 
 * @param mixed $system
 * @param mixed $record - record array - details to be added
-* @param mixed $need_details - array of dty_ID or dty_Type
+* @param mixed $detail_types - array of dty_ID or dty_Type or true (all details)
 */
-function recordSearchDetails($system, &$record, $need_details) {
+function recordSearchDetails($system, &$record, $detail_types) {
 
     $recID = $record['rec_ID'];
     
@@ -2937,17 +2937,17 @@ function recordSearchDetails($system, &$record, $need_details) {
     
     $swhere = " WHERE dtl_RecID = $recID";
 
-    if(is_array($need_details) && count($need_details)>0 ){
+    if(is_array($detail_types) && count($detail_types)>0 ){
 
-        if(is_numeric($need_details[0]) && $need_details[0]>0){ //by id
-            if(count($need_details)==1){
-                $swhere .= ' AND dtl_DetailTypeID = '.$need_details[0];
+        if(is_numeric($detail_types[0]) && $detail_types[0]>0){ //by id
+            if(count($detail_types)==1){
+                $swhere .= ' AND dtl_DetailTypeID = '.$detail_types[0];
             }else{
-                $swhere .= ' AND dtl_DetailTypeID in ('.implode(',',$need_details).')';    
+                $swhere .= ' AND dtl_DetailTypeID in ('.implode(',',$detail_types).')';    
             }
 
         }else{ //by type
-            $swhere .= ' AND dty_Type in ("'.implode('","',$need_details).'")';
+            $swhere .= ' AND dty_Type in ("'.implode('","',$detail_types).'")';
         }
     }
     
@@ -2963,7 +2963,7 @@ function recordSearchDetails($system, &$record, $need_details) {
             //owner of record can see any field
             $detail_visibility_conditions = null; // .= ' OR rst_NonOwnerVisibility="hidden"';
         }else{
-            $detail_visibility_conditions = array();
+            $detail_visibility_conditions = array('(rst_NonOwnerVisibility IS NULL)'); //not standard
             if($usr_groups!=null){
                 //logged in user can see viewable
                 $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="viewable")';
