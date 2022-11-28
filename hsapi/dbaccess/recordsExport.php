@@ -1857,7 +1857,7 @@ SERVICE3;
         $tumbnail_width = 200;
 
         if(self::$version==2){
-
+                      
 $item = <<<CANVAS2
 {
         "@id": "http://$canvas_uri",
@@ -1892,7 +1892,7 @@ CANVAS2;
     
 //$annotation_uri = self::gen_uuid();
 //  "duration": 5,
-    
+$label = preg_replace('/\r|\n/','\n',trim($label));
 $item = <<<CANVAS3
 {
       "id": "https://$canvas_uri",
