@@ -1,6 +1,6 @@
 
 /**
-* emailForm widget - either create form or use given one
+* emailForm widget - either creates form or use given one
 * send email to address defined in given record id, if record not define 
 * it sends email to database owner
 *
@@ -46,7 +46,7 @@ $.widget( "heurist.emailForm", {
         htmlContent: 'emailForm.html',
         helpContent: null,
         
-        rec_ID: null, //website home page record id with email
+        website_record_id: null, //website home page record id with email
         useCaptcha: true,
         
         //listeners
@@ -403,7 +403,7 @@ $.widget( "heurist.emailForm", {
         if(err_text==''){
 
             var fields = {
-                website_id: this.options.rec_ID,
+                website_id: this.options.website_record_id,
                 person: this._element_form.find('#letter_name').val(),
                 email: this._element_form.find('#letter_email').val(),
                 content: this._element_form.find('#letter_content').val(),

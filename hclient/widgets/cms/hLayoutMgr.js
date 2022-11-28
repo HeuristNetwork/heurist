@@ -374,7 +374,6 @@ function hLayoutMgr(){
     //
     function _layoutInitWidget(layout, container){
 
-        
         //var layout = _layoutContentFindElement(_layout_cfg, container.attr('data-lid'));
 
         var app = _getWidgetById(layout.appid); //find in app array (appid is heurist_Search for example)
@@ -387,8 +386,7 @@ function hLayoutMgr(){
         }
         
         if(_supp_options){
-            if(_supp_options.rec_ID) _supp_options.rec_ID = null; //@todo remove assignment - we don't use it
-            
+
             if(_supp_options[layout.appid]){
                 layout.options = $.extend(layout.options, _supp_options[layout.appid]);        
             }

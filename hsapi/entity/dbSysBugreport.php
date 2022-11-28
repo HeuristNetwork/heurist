@@ -50,13 +50,13 @@ class DbSysBugreport extends DbEntityBase
              $this->system->addError(HEURIST_REQUEST_DENIED, 
                     'You must be logged in for bug reporting. Insufficient rights (logout/in to refresh) for this operation');
              return false;
-        }
+       }
         
         return true;
     }
     
     //      
-    //
+    //   This is virtual "save". In fact it sends email
     //
     public function save(){
 
@@ -228,6 +228,9 @@ class DbSysBugreport extends DbEntityBase
                 $email_title = 'From website '.recordGetField($record, DT_NAME).'.';
                 $email_to = recordGetField($record, DT_EMAIL);
             }
+            $email_from_name = 'Website contact';
+        }else{
+            $email_from_name = 'Bug reporter';
         }
         if(!$email_to){
             $email_to = user_getDbOwner($this->system->get_mysqli(), 'ugr_eMail');
@@ -244,7 +247,7 @@ class DbSysBugreport extends DbEntityBase
         $email_from_name = null;
     
     
-        if(sendPHPMailer(null, 'Bug reporter', $email_to, 
+        if(sendPHPMailer(null, $email_from_name, $email_to, 
                 $email_title, 
                 $email_text,
                 null, true))

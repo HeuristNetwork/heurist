@@ -26,8 +26,6 @@ use PHPMailer\PHPMailer\Exception;
     //
     // Uses PHPMailer
     //    
-    
-    
     function sendEmail($email_to, $email_title, $email_text, $is_html=false, $email_attachment=null)
     {
         return sendPHPMailer(null, null, $email_to, $email_title, $email_text, $email_attachment, $is_html);

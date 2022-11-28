@@ -313,13 +313,13 @@ function onPageInit(success)
     
     $('#main-menu').hide();
     
-    hLayoutMgr(); //init global var
+    hLayoutMgr(); //init global var layoutMgr
     
     //cfg_widgets is from layout_defaults.js
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
     
     //reload website by click on logo, opens first page with content
-    $("#main-logo").click(function(event){
+    $("#main-logo,#custom-logo").click(function(event){
             //location.reload();
             var load_initially = home_page_record_id;
             <?php if($isEmptyHomePage){
@@ -418,9 +418,9 @@ function loadPageContent(pageid, eventdata){
         var page_target = $('#main-content');
         //_dout('load page  '+pageid+'   '+page_footer.length);              
         
-        var supp_options = {rec_ID:home_page_record_id, 
-            heurist_resultListExt:{record_with_custom_styles: home_page_record_id},
-            heurist_Navigation:{aftermenuselect: initLinksAndImages}
+        var supp_options = {heurist_emailForm: {website_record_id: home_page_record_id},
+            heurist_resultListExt: {record_with_custom_styles: home_page_record_id},
+            heurist_Navigation: {aftermenuselect: initLinksAndImages}
         };
         
 
