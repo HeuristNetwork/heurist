@@ -217,11 +217,10 @@ function hImportMedia() {
                     if(s.indexOf('url')>=0 || s.indexOf('path')>=0 || s.indexOf('uri')>=0){
                         $('#field_url').val(j);
                         _doPrepare();
-                        _setCurtain(3);
                         break;
                     }
                 }
-                
+                _setCurtain(3);
             }
         
     }
@@ -278,7 +277,6 @@ function hImportMedia() {
                                 }
                                 
                                 _redrawPreviewTable();
-                                
                                 
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -438,7 +436,7 @@ function hImportMedia() {
     
     
     //
-    // save terms
+    // Start import
     //
     function _doPost(){
         

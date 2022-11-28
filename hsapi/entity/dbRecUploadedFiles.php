@@ -729,7 +729,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //   register URL/Path in batch
     //   optionally: download URL and register locally
     //   
-    //    
+    //    csv_import (with optional is_download)
+    //    delete_unused 
+    //    regExternalFiles (with optional is_download)
     public function batch_action(){
 
         $mysqli = $this->system->get_mysqli();
@@ -742,6 +744,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         $cnt_imported = 0;
         $cnt_error = 0;
         $is_download = (@$this->data['is_download']==1);
+        
+        if($is_download){
+            ini_set('max_execution_time', '0');
+        }
 
         if(@$this->data['csv_import']){ // import new media via CSV. See importMedia.js
 
@@ -817,7 +823,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             }else{
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'No import data has been provided. Ensure that you have enter the necessary CSV rows.<br>Please contact the Heurist team if this problem persists.');
             }
-        }else if(@$this->data['delete_unused']){ // delete file records not in use
+        }
+        else if(@$this->data['delete_unused']){ // delete file records not in use
 
             $ids = $this->data['delete_unused'];
             $where_clause = 'WHERE dtl_ID IS NULL';
@@ -838,7 +845,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $ret = count($to_delete);
                 }
             }
-        }else if(@$this->data['regExternalFiles']){ // attempt to register multiple URLs at once, and return necessary information for record editor
+        }
+        else if(@$this->data['regExternalFiles']){ // attempt to register multiple URLs at once, and return necessary information for record editor
 
             $rec_fields = $this->data['regExternalFiles'];
 
