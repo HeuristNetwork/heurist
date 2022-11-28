@@ -996,13 +996,7 @@ div.div-result-list-content.icons_list{
 .icons .rt-icon{
     display: none;
 }
-.recid-in-list{
-    display:none;
-    padding-left:10px;
-}
-.icons .recid-in-list{
-    display:inline-block;
-}
+
 .rt-icon{
     background-repeat: no-repeat;
     background-position: center;
