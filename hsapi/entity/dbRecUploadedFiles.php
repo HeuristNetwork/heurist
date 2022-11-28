@@ -740,6 +740,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
         $ret = true;
+        $is_csv_import = false;
         $cnt_skipped = 0;
         $cnt_imported = 0;
         $cnt_error = 0;
@@ -750,6 +751,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }
 
         if(@$this->data['csv_import']){ // import new media via CSV. See importMedia.js
+        
+            $is_csv_import = true;
 
             if(@$this->data['fields'] && is_string($this->data['fields'])){ // new to perform extra validations first
                 $this->data['fields'] = json_decode($this->data['fields'], true);
@@ -942,7 +945,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
         if($keep_autocommit===true) $mysqli->autocommit(TRUE);
         
-        if($ret && @$this->data['csv_import']){
+        if($ret && $is_csv_import){
             $ret = 'Uploaded / registered: '.$cnt_imported.' media resources. ';
             if($cnt_skipped>0){
                 $ret = $ret.' Skipped/already exist: '.$cnt_skipped.' media resources';    
