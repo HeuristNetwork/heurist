@@ -2605,7 +2605,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
     //  -----------------------------------------------------
     //
-    // remove field, special mode for separator/group
+    // remove field from tree, special mode for separator/group
     //
     _removeField: function(recID){
         
@@ -2618,13 +2618,16 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }
         if(!node) return;
         
+        /*
         if(node.folder){
             //remove from recset
             var recID = node.key;
+            
             this._cachedRecordset.removeRecord( recID );
             this._afterDeleteEvenHandler( recID );
             
-        }else if(node.key>0){
+        }else */
+        if(node.key>0){
             this._onActionListener(null,  {action:'delete', recID:(this.options.rty_ID+'.'+node.key)});
         }
      
@@ -2634,6 +2637,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     //
     _afterDeleteEvenHandler: function( recID ){
+        
+console.log('_afterDeleteEvenHandler');
         
         var that = this;
         if(recID.indexOf(this.options.rty_ID+'.')===0){
