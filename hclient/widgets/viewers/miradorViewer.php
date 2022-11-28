@@ -15,7 +15,16 @@
 </head>
 <body>
 <?php
+/*
+Parameters:
 
+manifest or iiif - obfuscation id for registred manifest
+OR
+iiif_image - obfuscation id for image,video or audio - manifest will be generated dynamically
+OR
+q  - standard heurist query - all suitable media files linked to records will be included into generated manifest 
+
+*/
         $https = (isset($_SERVER['HTTPS']) &&
                     ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == 1) ||
                     isset($_SERVER['HTTP_X_FORWARDED_PROTO']) &&

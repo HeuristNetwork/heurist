@@ -12,6 +12,7 @@
 * fileGetByFileName
 * fileGetFullInfo  - local paths, external links, mimetypes and parameters (mediatype and source)
 * fileGetThumbnailURL - URL to thumbnail for given record ID and specified bg color
+* fileGetMetadata - return metadata for registered media, plus width,height for images
 * getImageFromFile - return image object for given file
 * getPrevailBackgroundColor2  - not used
 * getPrevailBackgroundColor 
@@ -952,9 +953,10 @@ function youtube_id_from_url($url) {
 
 
 //
+// Returns registered media(file) metadata as json
+// Additionally it obtains width and height for images
 //
-//
-function fileGetWidthHeight($fileinfo){
+function fileGetMetadata($fileinfo){
 
     
     $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
@@ -995,13 +997,17 @@ function fileGetWidthHeight($fileinfo){
                 $res = 'Cannot get image dimensions';
             }
         }else{
-            $res = 'Cannot load image file to get dimensions';
+            $res = array('error'=>'Image is not loaded'); //Cannot load image file to get dimensions
         }
         
     }else{
-        $res = 'Resource is not an image';
+        $res = array();
     }
     
+    $res['mimetype'] = $mimeType;
+    $res['original_name'] = $originalFileName;
+    $res['size_KB'] = $fileinfo['ulf_FileSizeKB'];
+    $res['description'] = $fileinfo['ulf_Description'];
 
     header('Content-type: application/json;charset=UTF-8');
     $response = array('status'=>HEURIST_OK, 'data'=>$res);

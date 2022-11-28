@@ -418,7 +418,7 @@ function calculateImageExtentFromWorldFile(_editing){
                     });
 
                 },
-                {title:'Calculate image extent',yes:'Proceed',no:'Cancel'});
+                {title:'Calculate image extent', yes:'Proceed', no:'Cancel'});
 
         }                    
     }else if(!ulf_ID){

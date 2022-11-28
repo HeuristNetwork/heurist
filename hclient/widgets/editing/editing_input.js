@@ -2179,9 +2179,9 @@ $.widget( "heurist.editing_input", {
                 /* Anchors (download and show thumbnail) container */
                 $dwnld_anchor = $('<br /><div class="download_link">'
                     + '<a id="lnk'+f_id+'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px;text-decoration:underline;color:blue"'
-                    + '>SHOW THUMBNAIL</a>'
+                        + '>SHOW THUMBNAIL</a>'
                     + '<a id="dwn'+f_id+'" href="'+window.hWin.HEURIST4.util.htmlEscape(dwnld_link)+'" target="_surf" class="external-link image_tool'
-                    + '"style="display:inline-block;text-decoration:underline;color:blue">DOWNLOAD</a>'
+                        + '"style="display:inline-block;text-decoration:underline;color:blue">DOWNLOAD</a>'
                     + '</div>')
                 .clone()
                 .appendTo( $inputdiv )
@@ -2337,9 +2337,12 @@ $.widget( "heurist.editing_input", {
                 }); 
 
 				/* for closing inline image when 'frozen' */
-                $hide_thumb = $('<span class="hideTumbnail" style="padding-left:5px;color:gray;cursor:pointer;font-size:smaller;">'
+                var $hide_thumb = $('<span class="hideTumbnail" style="padding-left:5px;color:gray;cursor:pointer;font-size:smaller;">'
                                 + 'CLOSE IMAGE</span>').appendTo( $dwnld_anchor ).show();
-                $hide_thumb.on("click", function(event){
+                                
+                this._on($hide_thumb, 
+                {click:function(event)
+                {
 
                     isClicked = 0;
 
@@ -2353,7 +2356,7 @@ $.widget( "heurist.editing_input", {
                     }else{
                         $input_img.hide().css('cursor', 'pointer');
                     }
-                });
+                }});
 
 				/* Show Thumbnail handler */
                 $('#lnk'+f_id).on("click", function(event){
@@ -2361,6 +2364,46 @@ $.widget( "heurist.editing_input", {
 					
                     $(event.target.parentNode.parentNode).find('.hideTumbnail').show();
 				});
+                
+                var $mirador_link = $('<a href="#" data-id="'+f_nonce+'" class="miradorViewer_link">'
+                    +'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
+                    +'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
+                    +'"></span>&nbsp;open in Mirador</a>').appendTo( $dwnld_anchor ).hide();
+                    
+                this._on($mirador_link, {click:function(event){
+                    var obf_recID;
+                    var ele = $(event.target)
+
+                    if(!ele.attr('data-id')){
+                        ele = ele.parents('[data-id]');
+                    }
+                    var obf_recID = ele.attr('data-id');
+                    var is_manifest = (ele.attr('data-manifest')==1);
+
+                    var url =  window.hWin.HAPI4.baseURL
+                    + 'hclient/widgets/viewers/miradorViewer.php?db=' 
+                    +  window.hWin.HAPI4.database
+                    + '&' + (is_manifest?'iiif':'iiif_image') + '=' + obf_recID;
+
+                    if(true){
+                        //borderless:true, 
+                        window.hWin.HEURIST4.msg.showDialog(url, 
+                            {dialogid:'mirador-viewer',
+                                //resizable:false, draggable: false, 
+                                //maximize:true, 
+                                default_palette_class: 'ui-heurist-explore',
+                                width:'90%',height:'95%',
+                                allowfullscreen:true,'padding-content':'0px'});   
+
+                        $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
+
+                        $dlg.parent().css('top','50px');
+                    }else{
+                        window.open(url, '_blank');        
+                    }                      
+
+                    //data-id
+                }});
 
                 /* Check User Preferences, displays thumbnail inline by default if set */
                 if (window.hWin.HAPI4.get_prefs_def('imageRecordEditor', 0)!=0 && value.ulf_ID) {
@@ -3641,35 +3684,68 @@ console.log('onpaste');
                     window.hWin.HAPI4.checkImage("Records", value["ulf_ObfuscatedFileID"], null, function(response) {
 
                         if(response.data && response.status == window.hWin.ResponseStatus.OK) {
+                            
+                            ele.attr('data-mimetype', response.data.mimetype);
+                            
+                            if(response.data.mimetype && response.data.mimetype.indexOf('image/')===0)
+                            {
+                                ele.parent().find('.image_input > img').attr('src',
+								    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+									    value.ulf_ObfuscatedFileID);
+                                        
+                                if(response.data.width > 0 && response.data.height > 0) {
 
-                            ele.parent().find('.image_input > img').attr('src',
-								window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
-									value.ulf_ObfuscatedFileID);
+                                    ele.parent().find('.smallText').text('Click image to freeze in place').css({
+                                        "font-size": "smaller", 
+                                        "color": "grey", 
+                                        "position": "", 
+                                        "top": ""
+                                    })
+                                    .removeClass('invalidImg');
 
-                            if($.isPlainObject(response.data) && response.data.width > 0 && response.data.height > 0) {
+                                    that.newvalues[ele.attr('id')] = value;
+                                }else{
 
-                                ele.parent().find(".smallText").text("Click image to freeze in place").css({
-                                    "font-size": "smaller", 
-                                    "color": "grey", 
-                                    "position": "", 
-                                    "top": ""
-                                })
-                                .removeClass('invalidImg');
+                                    ele.parent().find('.image_input > img').removeAttr('src');
+                                    ele.parent().find(".smallText").text("This file cannot be rendered").css({
+                                        "font-size": "larger", 
+                                        "color": "black", 
+                                        "position": "relative", 
+                                        "top": "60px"
+                                    })
+                                    .addClass('invalidImg');
 
-                                that.newvalues[ele.attr('id')] = value;
+                                    ele.parent().find('.hideTumbnail').click();
+                                    ele.parent().find('.hideTumbnail').hide();
+                                }
+                                
                             }else{
-
-                                ele.parent().find('.image_input > img').removeAttr('src');
-                                ele.parent().find(".smallText").text("This file cannot be rendered").css({
-                                    "font-size": "larger", 
-                                    "color": "black", 
-                                    "position": "relative", 
-                                    "top": "60px"
-                                })
-                                .addClass('invalidImg');
-
-                                ele.parent().find('.hideTumbnail').click();
+                                ele.parent().find('.image_input').hide();
+                                ele.parent().find('.hideTumbnail').hide();
                             }
+                            
+                            var mirador_link = ele.parent().find('.miradorViewer_link');
+                            var mimetype = response.data.mimetype;
+                            if(response.data.original_name.indexOf('_iiif')===0){
+                                
+                                if(response.data.original_name=='_iiif'){
+                                    mirador_link.attr('data-manifest', '1');    
+                                }
+                                
+                                mirador_link.show();
+                            }else
+                            if(mimetype.indexOf('image/')===0 || (
+                                    (mimetype.indexOf('video/')===0 || mimetype.indexOf('audio/')===0) &&
+                                 ( mimetype.indexOf('youtube')<0 && 
+                                   mimetype.indexOf('vimeo')<0 && 
+                                   mimetype.indexOf('soundcloud')<0)) ){
+                                   
+                                mirador_link.show();
+                            }else{
+                                mirador_link.hide();           
+                            }
+                            
+                            
                             ele.change();
                         }
                     });

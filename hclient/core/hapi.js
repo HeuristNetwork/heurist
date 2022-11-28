@@ -2481,7 +2481,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
 
         //
-        //
+        // Requests 
         //
         , checkImage: function (entityName, recID, version, callback) {
 
@@ -2489,8 +2489,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 var request = {
                     db: window.hWin.HAPI4.database,
-                    file: recID,  //ulf_ID
-                    mode: 'size'
+                    file: recID,  // ulf_ID
+                    mode: 'metaonly'  // get width and height for image file
                 };
 
                 window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + 'hsapi/controller/file_download.php',

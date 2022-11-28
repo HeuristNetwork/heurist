@@ -488,15 +488,13 @@ if(!($is_map_popup || $without_header)){
                 }
                 //init open in mirador links
                 $('.miradorViewer_link').click(function(event){
-                    var param,  obf_recID;
+                   
                     var ele = $(event.target)
 
-                    if(ele.attr('data-id')){
-                        obf_recID = ele.attr('data-id');
-                    }else{
+                    if(!ele.attr('data-id')){
                         ele = ele.parents('[data-id]');
-                        obf_recID = ele.attr('data-id');
                     }
+                    var obf_recID = ele.attr('data-id');
 
                     var url =  baseURL
                     + 'hclient/widgets/viewers/miradorViewer.php?db=' 
@@ -1527,8 +1525,8 @@ function print_public_details($bib) {
             }
             
             if(strpos($thumb['mimeType'],'image/')===0 || ($isAudioVideo &&
-                 ( strpos($thumb['mimeType'],'youtube')===false || 
-                   strpos($thumb['mimeType'],'vimeo')===false || 
+                 ( strpos($thumb['mimeType'],'youtube')===false && 
+                   strpos($thumb['mimeType'],'vimeo')===false && 
                    strpos($thumb['mimeType'],'soundcloud')===false)) )
             {
                 print '<a href="#" data-id="'.$thumb['nonce'].'" class="miradorViewer_link">'

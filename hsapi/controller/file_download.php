@@ -116,7 +116,7 @@ if(!$error){
             $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
             $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
             $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
-            $sourceType = $fileinfo['ulf_PreferredSource'];
+            $sourceType = $fileinfo['ulf_PreferredSource']; //not used
             $originalFileName = $fileinfo['ulf_OrigFileName'];
             $fileSize = $fileinfo['ulf_FileSizeKB'];
             $fileExt = $fileinfo['ulf_MimeExt'];
@@ -136,9 +136,9 @@ if(!$error){
 
                 $filepath = resolveFilePath( $filepath );
                 
-                if( @$_REQUEST['mode']=='size'){ //get width and height for image file
+                if( @$_REQUEST['mode']=='metaonly'){ //get width and height for image file
 
-                    fileGetWidthHeight($fileinfo);
+                    fileGetMetadata($fileinfo);
 
                 }else if(@$_REQUEST['metadata']){//download zip file: registered file and file with links to html and xml
                 
