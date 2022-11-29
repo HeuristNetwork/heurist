@@ -254,11 +254,20 @@ public static function output($data, $params){
             "canvases": [
 IIIF;
         }else{
+            
+            
+$pageURL = 'http';
+
+        /*if ($_SERVER["HTTPS"] == "on") {
+            $pageURL .= "s";
+        }
+        $pageURL .= "://";        $_SERVER["SERVER_NAME"] */     
+        $manifest_uri = HEURIST_SERVER_URL.$_SERVER["REQUEST_URI"];
     
     $iiif_header = <<<IIIF
 {
   "@context": "http://iiif.io/api/presentation/3/context.json",
-  "id": "https://$manifest_uri",
+  "id": "$manifest_uri",
   "type": "Manifest",
   "label": {
     "en": [
@@ -633,13 +642,15 @@ XML;
 
         }else if($params['format']=='iiif'){ 
             
-            $canvas = self::_getIiifCanvas($record);
+            $canvas = self::_getIiifCanvas($record, @$params['iiif_image']);
             if($canvas && $canvas!=''){
                 fwrite($fd, $comma.$canvas);
                 $comma = ",\n";
                 $cnt++;
             }
-            if($cnt>1000) break;
+            //not more than 1000 records per manifest
+            //or the only image if it is specified
+            if($cnt>1000 || $params['iiif_image']) break;
             
         }else if($params['format']=='gephi'){ 
             
@@ -1729,7 +1740,7 @@ private static function _getMediaViewerData($record){
 // 
 // return null if not media content found
 //
-private static function _getIiifCanvas($record){
+private static function _getIiifCanvas($record, $ulf_ObfuscatedFileID){
 
     $canvas = '';    
     $comma = '';
@@ -1740,7 +1751,15 @@ private static function _getIiifCanvas($record){
     //1. get "file" field values
     foreach ($record['details'] as $dty_ID=>$field_details) {
         foreach($field_details as $dtl_ID=>$file){
-            array_push($info, $file['file']);
+            
+            if($ulf_ObfuscatedFileID){
+                if($file['file']['ulf_ObfuscatedFileID']==$ulf_ObfuscatedFileID){
+                    array_push($info, $file['file']);
+                    break 2;
+                }
+            }else{
+                array_push($info, $file['file']);    
+            }
         }
     }
     
@@ -1913,7 +1932,9 @@ $item = <<<CANVAS3
                 $service
                 "id": "$resource_url",
                 "type": "$resource_type",
-                "format": "$mimeType"
+                "format": "$mimeType",
+        "height": $height,
+        "width": $width
               },
               "target": "https://$canvas_uri"
             }

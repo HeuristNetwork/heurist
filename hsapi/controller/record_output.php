@@ -120,6 +120,10 @@ detectLargeInputs('COOKIE record_output', $_COOKIE);
         $search_params['q'] = array('ids'=>$params['recID']);
     }else if(@$params['ids']){
         $search_params['q'] = array('ids'=>implode(',', prepareIds($params['ids']) ));
+    }else  if(@$params['iiif_image']){
+        $params['format'] = 'iiif';
+        $search_params['q'] = '*file @'.$params['iiif_image'];
+        
     }else{
         $search_params['q'] = @$params['q'];
     }

@@ -24,6 +24,10 @@ iiif_image - obfuscation id for image,video or audio - manifest will be generate
 OR
 q  - standard heurist query - all suitable media files linked to records will be included into generated manifest 
 
+if iiif_image is defined only this image will be included into manifest
+if q only defined all images linked to record(s) will be included
+
+
 */
         $https = (isset($_SERVER['HTTPS']) &&
                     ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == 1) ||
@@ -45,20 +49,20 @@ q  - standard heurist query - all suitable media files linked to records will be
                 'db='.$_REQUEST['db']
                     .'&file='.(@$_REQUEST['manifest']?$_REQUEST['manifest']:@$_REQUEST['iiif']),$url);
         }else{
-            if(@$_REQUEST['iiif_image']){ //file obfuscatin id
+            if(!@$_REQUEST['q'] && @$_REQUEST['iiif_image']){ //file obfuscatin id
                 //find record linked to this media
-                $url = $url.'&q=*file @'.$_REQUEST['iiif_image'];
+                //$url = $url.'&q=*file @'.$_REQUEST['iiif_image'];
             }else if(!@$_REQUEST['q']){ //query not defined
                 exit('Need to define either query or file ID');
+            }else{
+                if(strpos('format=iiif',$url)===false){
+                        $url = $url.'&format=iiif';    
+                }
             }
             //record_output creates manifest dynamically
             $url = str_replace('hclient/widgets/viewers/miradorViewer.php','hsapi/controller/record_output.php', $url);
-            
         }
         
-        if(strpos('format=iiif',$url)===false){
-                $url = $url.'&format=iiif';    
-        }
     
     //$_SERVER['QUERY_STRING'];
         $manifest_url = $url;
