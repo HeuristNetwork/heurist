@@ -1033,7 +1033,24 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             $baseTag = "~delete field $dtyName $now";
         }
         
+        //
+        if($this->recIDs[0]=='all' && is_array($this->rtyIDs) && count($this->rtyIDs)>0)
+        {
+            $query = 'SELECT rec_ID FROM Records WHERE rec_RecTypeID '
+                    .((count($this->rtyIDs)==1)
+                            ?('='.$this->rtyIDs[0])
+                            :('in ('.implode(',', $this->rtyIDs).')'));            
+                            
+            $this->recIDs = mysql__select_list2($mysqli, $query);
+            if($mysqli->error!=null || $mysqli->error!=''){
+                $this->result_data['processed'] = 0;
+                $this->result_data['error'] = $mysqli->error;
+                return $this->result_data;
+            }        
+        }
+        
         foreach ($this->recIDs as $recID) {
+            
             //get matching detail value for record if there is one
             $query = "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause";
             $valuesToBeDeleted = mysql__select_assoc2($mysqli, $query);
