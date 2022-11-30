@@ -92,7 +92,7 @@ regional['en'] = {
     //explore menu
     'Filters': '',
     'Recent': '',
-    'All': '',
+    'All': 'All by date', // for a longer label
     'Entities': '',
     'Saved filters': '',
     'Build': '',

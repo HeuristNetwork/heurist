@@ -495,11 +495,11 @@ $.widget( "heurist.mainMenu6", {
             
             if(that.menues_explore_gap) that.menues_explore_gap.hide();
 
-            that.divMainMenu.find('.rectype-name').css({'width': '80px', 'max-width': '80px'});
+            that.divMainMenu.find('li.menu-explore, div.menu-explore').css('background','none'); // remove leftover highlight
+            that.divMainMenu.find('.rectype-name').css({'width': '80px', 'max-width': '80px', 'margin-left': '10px'});
 
-            that.divMainMenu.find('ul').css({'padding-right':'30px'});
-            that.divMainMenu.find('li.menu-explore, div.menu-explore').css({padding:'6px 2px 6px 0px',background:'none'});
-            that.divMainMenu.find('.menu-explore[data-action-popup="recordAddSettings"]').css('width', '85px');
+            that.divMainMenu.find('.menu-explore[data-action-popup="recordAdd"]').css('padding', '6px 20px 6px 0px');
+            that.divMainMenu.find('.menu-explore[data-action-popup="recordAddSettings"]').css({padding:'6px 2px 6px 0px', width: '85px'});
 
             that.divMainMenu.find('.ui-heurist-quicklinks').css({'text-align':'center'});
             
@@ -549,9 +549,10 @@ $.widget( "heurist.mainMenu6", {
                 that.divMainMenu.find('.ui-heurist-quicklinks').css({'text-align':'left'});
                 that.divMainMenu.find('.section-head').css({'padding-left':'12px'});
 
-                that.divMainMenu.find('.rectype-name').css({'width': '', 'max-width': ''});
+                that.divMainMenu.find('.rectype-name').css({'width': '', 'max-width': '', 'margin-left': '0px'});
 
                 that.divMainMenu.css({bottom:'4px',height:'auto'});
+
                 that.divMainMenu.find('.menu-explore[data-action-popup="recordAdd"]').css('padding', '6px 2px 6px 16px');
                 that.divMainMenu.find('.menu-explore[data-action-popup="recordAddSettings"]').css({padding:'6px 2px 6px 16px', width: ''});
                 
