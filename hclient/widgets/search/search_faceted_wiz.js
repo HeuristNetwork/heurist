@@ -235,12 +235,16 @@ $.widget( "heurist.search_faceted_wiz", {
         header.html("<label>"+window.hWin.HR("Select fields that act as facet")+
             "</label><br><br><label for='fsw_showreverse'><input type='checkbox' id='fsw_showreverse' style='vertical-align: middle;' />&nbsp;"+
             window.hWin.HR("Show linked-from record types (reverse pointers, indicated as &lt;&lt;)")+"</label>"+
-            "<span id='get_usages'></span><br><br>"+
+            // Get usages
+            "<span id='get_usages'></span><br>"+
+            // Tree order options
+            "<label> Tree: </label>"+
+            "<label for='order_alphabetic'><input type='radio' name='tree_order' id='order_alphabetic' style='vertical-align: middle;' value='1' />&nbsp;Alphabetic</label>"+
+            "<label for='order_default'><input type='radio' name='tree_order' id='order_default' style='vertical-align: middle;' value='0' checked />&nbsp;Form order</label>"+
+            "<br><br>"+
+            // Check all visible options
             "<label id='selectAll_container' style='font-size: 11px;position: relative;top: 10px;left: 20px;'>"+
             "<input type='checkbox' id='selectAll'>Select All Visible Options</label>");
-
-        //$("<label>").text(window.hWin.HR("Select fields that act as facet")).appendTo(header);
-        //$("<checkbox>").text(window.hWin.HR("Show linked-from record types (reverse pointers)")).appendTo(header);
 
         $("<div>",{id:'field_treeview'}).appendTo(this.step2);
         this.step_panels.push(this.step2);
@@ -1167,12 +1171,16 @@ $.widget( "heurist.search_faceted_wiz", {
                     rectype = this.options.params.rectypes.join(',');
                 }
                 
-                //window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
+            let node_order = sessionStorage.getItem('heurist_ftorder_facetbuilder');
+            if(window.hWin.HEURIST4.util.isempty(node_order) || !Number.isInteger(+node_order)){
+                node_order = 0; // default to form order
+            }
+            $(this.step2).find('[name="tree_order"]').filter('[value="'+ node_order +'"]').prop('checked', true);
 
                 var allowed_fieldtypes = ['header_ext',
                 'enum','freetext','blocktext',"year","date","integer","float","resource","relmarker",'separator'];
                 
-                var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes );
+            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes, null, node_order );
 
                 treedata[0].expanded = true; //first expanded
                 
@@ -1195,6 +1203,8 @@ $.widget( "heurist.search_faceted_wiz", {
                     },
                     renderNode: function(event, data){
 
+                        let order = $(that.step2).find('[name="tree_order"]:checked').val();
+
                         if(data.node.data.dtyID_local && data.node.data.code.includes(rectype+':')!==false && data.node.data.type != 'separator'){ // top level only, add usage container
                             $(data.node.span.childNodes[3]).append(
                                 '<span style="display:inline-block;margin-left: 10px;" data-dtid="'+ data.node.data.dtyID_local +'" class="usage_count">&nbsp;</span>');
@@ -1205,6 +1215,10 @@ $.widget( "heurist.search_faceted_wiz", {
                         }else if(data.node.data.type == 'separator'){
                             $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
                             $(data.node.span.childNodes[1]).hide(); //checkbox for separators
+
+                            if(order == 1){
+                                $(data.node.li).addClass('fancytree-hidden');
+                            }
                         }else if(data.node.data.type == 'enum'){ // TODO - Move to CSS for general use when field colours are set out
                             $(data.node.span.childNodes[3]).css('color', '#871F78');
                         }else if(data.node.data.type == 'date'){ // TODO - Move to CSS for general use when field colours are set out
@@ -1219,7 +1233,9 @@ $.widget( "heurist.search_faceted_wiz", {
                         
                         if(parentcode.split(":").length<5){  //limit with 3 levels
                         
-                            var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, allowed_fieldtypes, parentcode );
+                            let node_order = $(that.step2).find('[name="tree_order"]:checked').val();
+
+                            var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, allowed_fieldtypes, parentcode, node_order );
                             if(res.length>1){
                                 data.result = res;
                             }else{
@@ -1350,8 +1366,21 @@ $.widget( "heurist.search_faceted_wiz", {
                     ele.hide();
                 }
 
-                //tree.options.filter.mode = "hide";
-                //tree.options.filter.highlight = false;
+                // Reorder tree nodes
+                this._off($('[name="tree_order"]'), 'change');
+                this._on($('[name="tree_order"]'), {
+                    change: () => {
+                        let order = $('[name="tree_order"]:checked').val();
+                        sessionStorage.setItem('heurist_ftorder_facetbuilder', order);
+
+                        if(treediv.fancytree('instance')!==undefined){
+
+                            window.hWin.HEURIST4.ui.reorderFancytreeNodes_rst(treediv, order);
+                            that.showHideReverse();
+                        }
+                    }
+                });
+
                 ele.attr('checked', false);
                 ele.change();
             }

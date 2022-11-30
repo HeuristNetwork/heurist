@@ -278,9 +278,12 @@ window.hWin.HEURIST4.dbs = {
      *               parent_link - include field DT_PARENT_ENTITY - link to parent record
      *       header - all+header fields
      * @param {string} parentcode  - prefix for code
+     * @param {string} field_order - field ordering
+     *    0 | null - Record structure order
+     *    1 - Alphabetic Order
      * @returns {Array} res 
      */
-    createRectypeStructureTree: function( db_structure, $mode, rectypeids, fieldtypes, parentcode ) {
+    createRectypeStructureTree: function( db_structure, $mode, rectypeids, fieldtypes, parentcode, field_order ) {
         
         var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
         
@@ -558,7 +561,11 @@ window.hWin.HEURIST4.dbs = {
                     $dtl_fields = $dtl_fields.concat($children_links);
 
                     $dtl_fields.sort(function(a,b){
-                        return (a['display_order']<b['display_order'])?-1:1;
+                        if(field_order == 1){
+                            return (a['name'].toLowerCase()<b['name'].toLowerCase())?-1:1;
+                        }else{
+                            return (a['display_order']<b['display_order'])?-1:1;
+                        }
                     });
 
                     if($fieldtypes.indexOf('anyfield')>=0){ //for filter builder 
