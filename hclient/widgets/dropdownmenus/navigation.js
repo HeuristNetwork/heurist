@@ -180,6 +180,7 @@ $.widget( "heurist.navigation", {
             DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'],
             DT_CMS_TARGET = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TARGET'],//target element on page or popup
             DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],//show page title above content
+            DT_CMS_TOPMENUSELECTABLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOPMENUSELECTABLE'],//top menu selectable, if a submenu is available
             DT_THUMBNAIL = window.hWin.HAPI4.sysinfo['dbconst']['DT_THUMBNAIL'],
             
             TERM_NO = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'], //$Db.getLocalID('trm','2-531'),
@@ -210,8 +211,10 @@ $.widget( "heurist.navigation", {
                 var pageTarget = resdata.fld(record, DT_CMS_TARGET);
                 var pageStyle = resdata.fld(record, DT_CMS_CSS);
                 var showTitle = resdata.fld(record, DT_CMS_PAGETITLE); 
+                var selectable = resdata.fld(record, DT_CMS_TOPMENUSELECTABLE);
                 
                 showTitle = (showTitle!==TERM_NO && showTitle!==TERM_NO_old);
+                selectable = (selectable!==TERM_NO && selectable!==TERM_NO_old) || selectable == null;
                 
                 var hasContent = !window.hWin.HEURIST4.util.isempty(resdata.fld(record, DT_EXTENDED_DESCRIPTION))
                 
@@ -251,6 +254,7 @@ $.widget( "heurist.navigation", {
                                     +'" data-pageid="'+ page_id + '"'
                                     + (pageTarget?' data-target="' + pageTarget +'"':'')
                                     + (showTitle?' data-showtitle="1"':'')
+                                    + (selectable?' data-checksubmenu="1"':'')
                                     + (hasContent?' data-hascontent="1"':'')
                                     + ' title="'+window.hWin.HEURIST4.util.htmlEscape(menuTitle)+'">'
                                     
@@ -462,6 +466,10 @@ $.widget( "heurist.navigation", {
         $(event.target).parents('.ui-menu[data-level!=0]').hide();
         /*var mele = $(event.target).parents('.ui-menu[data-level!=0]');
         if(mele.attr('data-level')!=0) mele.hide();*/
+        let check_selectable = $(event.target).attr('data-checksubmenu');
+        if(check_selectable && $(event.target).parent().find('ul').length != 0){ // stop click if a submenu exists
+            return;
+        }
         
         if(!data.hasContent && !$.isFunction(this.options.onmenuselect)){
             //no action if content is not defined
