@@ -971,44 +971,48 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
         $dtyID = $this->data['dtyID'];
         $dtyName = (@$this->data['dtyName'] ? "'".$this->data['dtyName']."'" : "id:".$this->data['dtyID']);
-        $isDeleteAll = (!array_key_exists("sVal",$this->data) || $this->data['sVal']=='');
+        $isDeleteAll = (!array_key_exists("sVal",$this->data) || $this->data['sVal']=='');  //without conditions
+        $unconditionally = false;
+        
+        $isDeleteInAllRecords = $this->recIDs[0]=='all' && is_array($this->rtyIDs) && count($this->rtyIDs)>0;
         
         $mysqli = $this->system->get_mysqli();
         
-        $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);
-        switch ($basetype) {
-            case "freetext":
-            case "blocktext":
-                if($isDeleteAll){
-                    $searchClause = '1';
-                }else if(@$this->data['subs']==1){
-                    $unconditionally = true;
-                    $searchClause = "dtl_Value like \"%".$mysqli->real_escape_string($this->data['sVal'])."%\"";
-                }else {
+        if($isDeleteAll){
+            $searchClause = '1';
+        }else{
+        
+            $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);
+            switch ($basetype) {
+                case "freetext":
+                case "blocktext":
+                    if(@$this->data['subs']==1){
+                        $unconditionally = true;
+                        $searchClause = "dtl_Value like \"%".$mysqli->real_escape_string($this->data['sVal'])."%\"";
+                    }else {
+                        $searchClause = "dtl_Value = \"".$mysqli->real_escape_string($this->data['sVal'])."\"";
+                    }
+                    break;
+                case "enum":
+                case "relationtype":
+                case "float":
+                case "integer":
+                case "resource":
+                case "date":
                     $searchClause = "dtl_Value = \"".$mysqli->real_escape_string($this->data['sVal'])."\"";
-                }
-                break;
-            case "enum":
-            case "relationtype":
-            case "float":
-            case "integer":
-            case "resource":
-            case "date":
-                $searchClause = ($isDeleteAll) 
-                            ? '1'
-                            : "dtl_Value = \"".$mysqli->real_escape_string($this->data['sVal'])."\"";
-                break;
-            case "geo":
-                $searchClause = '1';
-                $isDeleteAll = true;
-                break;
-            case "relmarker":
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Relationship marker fields are not supported by batch deletion");
-                return false;
-                break;
-            default:
-                $this->system->addError(HEURIST_INVALID_REQUEST, "$basetype fields are not supported by deletion service");
-                return false;
+                    break;
+                case "geo":
+                    $searchClause = '1';
+                    $isDeleteAll = true;
+                    break;
+                case "relmarker":
+                    $this->system->addError(HEURIST_INVALID_REQUEST, "Relationship marker fields are not supported by batch deletion");
+                    return false;
+                    break;
+                default:
+                    $this->system->addError(HEURIST_INVALID_REQUEST, "$basetype fields are not supported by deletion service");
+                    return false;
+            }
         }
         
         
@@ -1019,7 +1023,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
         $undefinedFieldsRecIDs = array(); //value not found
         $processedRecIDs = array();       //success  
-        $limitedRecIDs = array(); //it is npt possible to delete requried fields
+        $limitedRecIDs = array(); //it is not possible to delete requried fields
         $sqlErrors = array();
         
         $now = date('Y-m-d H:i:s');
@@ -1033,9 +1037,33 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             $baseTag = "~delete field $dtyName $now";
         }
         
+        
+        
         //
-        if($this->recIDs[0]=='all' && is_array($this->rtyIDs) && count($this->rtyIDs)>0)
+        if($isDeleteInAllRecords) 
         {
+            
+            //special case remove field for all records of specified record type
+            if($isDeleteAll){  //for admin only
+             
+                $query = 'DELETE d FROM recDetails d, Records r WHERE r.rec_ID=d.dtl_RecID AND r.rec_RecTypeID '
+                        .((count($this->rtyIDs)==1)
+                                ?('='.$this->rtyIDs[0])
+                                :('in ('.implode(',', $this->rtyIDs).')'))
+                        .' AND d.dtl_DetailTypeID='.$dtyID;
+                $mysqli->query($query);        
+             
+                if($mysqli->error!=null || $mysqli->error!=''){
+                    $this->result_data['processed'] = 0;
+                    $this->result_data['error'] = $mysqli->error;
+                    return $this->result_data;
+                }else{
+                    $this->result_data['processed'] = $mysqli->affected_rows;
+                    return $this->result_data;    
+                }        
+            }
+            
+            //find all records of particular record type
             $query = 'SELECT rec_ID FROM Records WHERE rec_RecTypeID '
                     .((count($this->rtyIDs)==1)
                             ?('='.$this->rtyIDs[0])
@@ -1140,7 +1168,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             } else {
                $sqlErrors[$recID] = $mysqli->error;
             }
-        }//for recors
+        }//for records
         
         
         //assign special system tags
