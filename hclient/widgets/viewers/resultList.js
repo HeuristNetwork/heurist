@@ -2318,6 +2318,9 @@ $.widget( "heurist.resultList", {
             && this.options.expandDetailsOnClick){ // && this.options.view_mode=='list'
 
             this.expandDetailsInline( selected_rec_ID );
+            
+            //adjust selection in focus
+            this.scrollToRecordDiv( selected_rec_ID, true );
         }
         
 
