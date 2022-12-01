@@ -3363,6 +3363,7 @@ console.log('onpaste');
         }else{
            btn_field_visibility.insertAfter( $input );
         }
+        btn_field_visibility.hide();
                     
                     
         var chbox_field_visibility = $( '<div><span class="smallicon ui-icon ui-icon-check-off" style="font-size:1em"/> '
@@ -3429,7 +3430,7 @@ console.log('onpaste');
     _setVisibilityStatus: function(input_id){
 
         var vis_mode = this.f('rst_NonOwnerVisibility');
-
+        
         if(this.options.showedit_button && this.detailType!="relmarker" &&
            (this.options.recordset && this.options.recordset.entityName == 'Records') && 
            (vis_mode=='public' || vis_mode=='pending'))

@@ -30,6 +30,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     _requestForMimeType:false,
 
     _init_ExternalFileReference: null,
+    _init_MimeExt: null,
     
     _external_repositories: ['Nakala'], // list of external repositories
     _last_upload_details: [], // last uploaded file details
@@ -68,7 +69,12 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         ?(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95:this.options.height;
 
         if($.isPlainObject(this.options.selection_on_init)){
-            this._init_ExternalFileReference = this.options.selection_on_init.ulf_ExternalFileReference ? this.options.selection_on_init.ulf_ExternalFileReference : null;
+console.log( this.options.selection_on_init);            
+            this._init_ExternalFileReference = this.options.selection_on_init.ulf_ExternalFileReference 
+                                                ? this.options.selection_on_init.ulf_ExternalFileReference :null;
+            this._init_MimeExt = this.options.selection_on_init.ulf_MimeExt
+                                        ?this.options.selection_on_init.ulf_MimeExt :null; 
+                                        
             this.options.selection_on_init = [this.options.selection_on_init.ulf_ID];
         }
 
@@ -188,8 +194,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         this.options.entity.fields[i_url_ext].dtFields['rst_DisplayHelpText'] =
             'URL of an external file. This must DIRECTLY point to a renderable file or stream eg. image, video.<br>'
             +'Note: the URL MUST load the image alone without any page furniture or labelling<br>'
-            +'NOT the page containing the image (the extension at the end of the URL can be misleading)<br>'
-            +').';
+            +'NOT the page containing the image (the extension at the end of the URL can be misleading)';
         
         if(this._additionMode=='any' ||  this._additionMode=='tiled'){ //uncertain addition show both upload and url
           //only addition
@@ -268,7 +273,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         this._super();
 
         var isLocal = true;
-        
+
         if(this._currentEditRecordset){ //edit       
 
             //add media viewer below edit form and load media content
@@ -284,7 +289,6 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     filename: this._editing.getValue('ulf_OrigFileName')[0], 
                     mimeType: this._editing.getValue('fxm_MimeType')[0]}]}); //nonce + memtype
                 
-            
             //list of records that refer to this file    
             var relations = this._currentEditRecordset.getRelations();    
             if(relations && relations.direct && relations.direct.length>0){
@@ -549,7 +553,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             //ele.editing_input('option', 'change', function(){
                 this._on($(inpt[0]), {
                     blur:function(){
-
+                        
                         var ele = that._editing.getFieldByName('ulf_ExternalFileReference');    
                     
                         if (ele.editing_input('instance')==undefined) return;
@@ -565,13 +569,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                             
                             that._requestMimeTypeByURL();
                         }
-                    }, 
-                    paste: function(){
+                    }
+                    /*,paste: function(){
                         let ele = that._editing.getFieldByName('ulf_ExternalFileReference');
                         if(ele.editing_input('instance') !== undefined){ // trigger blur event on paste
                             ele.editing_input('getInputs')[0].blur();
                         }
-                    }
+                    } */
                 });
             
             ele.editing_input('focus');
@@ -587,6 +591,22 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         // If already existing, add the current external reference value 
         if(this._init_ExternalFileReference){
             this._editing.setFieldValueByName2('ulf_ExternalFileReference', this._init_ExternalFileReference, false);
+            this._previousURL = this._init_ExternalFileReference;
+            
+            if(this._init_MimeExt){
+                //this._editing.setFieldValueByName2('ulf_MimeExt', this._init_MimeExt, false);    
+                var ele3 = this._editing.getFieldByName('ulf_MimeExt');
+                ele3.editing_input('setValue', this._init_MimeExt, false );
+                ele3.show();
+            }
+            
+        }else{
+            var urls = this._editing.getValue('ulf_ExternalFileReference');
+            if(urls){
+                this._previousURL = urls[0];    
+            }else{
+                this._previousURL = null;
+            }
         }
 
         //hide after edit init btnRecRemove

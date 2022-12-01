@@ -4748,7 +4748,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
 
         // Display record title
-        var ele = this._editing.getFieldByName('rec_Title').show().editing_input('setDisabled', true);
+        var ele = this._editing.getFieldByName('rec_Title');
+        ele.show();
+        ele.editing_input('setDisabled', true);
 
         // remove opacity change and set background to lighter background
         var cur_styling = ele.find('input').attr('style');
