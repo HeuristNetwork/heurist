@@ -210,17 +210,23 @@ class DbSysUsers extends DbEntityBase
     //    
     protected function _validatePermission(){
         
+        $ugrID = $this->system->get_user_id();
+
         if(!$this->system->is_admin() && 
             ((is_array($this->recordIDs) && count($this->recordIDs)>0) 
             || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
-            
-            $ugrID = $this->system->get_user_id();
+
             if($this->recordIDs[0]!=$ugrID || count($this->recordIDs)>1){
                 
                 $this->system->addError(HEURIST_REQUEST_DENIED, 
                     'You are not admin and can\'t edit another user. Insufficient rights (logout/in to refresh) for this operation');
                 return false;
             }
+        }else if($ugrID != 2 && is_array($this->recordIDs) && in_array(2, $this->recordIDs)){
+            $this->system->addError(HEURIST_REQUEST_DENIED, 
+                'You do not have permission to alter the database owner\'s account.');
+
+            return false;
         }
         
         return true;
@@ -452,13 +458,19 @@ class DbSysUsers extends DbEntityBase
         $mysqli = $this->system->get_mysqli();  // MySQL connection
         $return = true; // Control variable
         $recID = $this->data['ugr_ID'];     // Selected User ID
-        
+
+        $current_userid = $this->system->get_user_id();
+        if($current_userid != 2){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Only the current database owner can transfer database ownership.');
+            return false;
+        }
+
         if(!is_numeric($recID)){    /* Check if ID is a number */
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Provided ID is Invalid');
             return false;
         }
         settype($recID, "integer");     /* For Comparison and Use */
-        if($recID == 2){   /* Check if selected ID is alreayd the Owner */
+        if($recID == 2){   /* Check if selected ID is alreay the Owner */
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot transfer Database Ownership to the current Database Owner');
             return false;
         }

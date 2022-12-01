@@ -775,25 +775,19 @@ $.widget( "heurist.searchBuilder", {
                 }
                 */
                 
+                let node_order = sessionStorage.getItem('heurist_ftorder_filterbuilder');
+                if(window.hWin.HEURIST4.util.isempty(node_order) || !Number.isInteger(+node_order)){
+                    node_order = 0; // default to form order
+                }
+                this.element.find('[name="tree_order"]').filter('[value="'+ node_order +'"]').prop('checked', true);
+
                 //window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
 
                 //'title','modified',
                 var allowed_fieldtypes = ['header_ext','anyfield','enum','freetext','blocktext',
                                 'geo','year','date','integer','float','resource','relmarker','relationtype','file','separator'];
                       
-/*              
-                            {key:'title',title:'Title (constructed)', depth:1},
-                            {key:'added',title:'Date added', depth:1},
-                            {key:'modified',title:'Date modified', depth:1},
-                            {key:'addedby',title:'Creator (user)', depth:1},
-                            {key:'url',title:'URL', depth:1},
-                            {key:'notes',title:'Notes', depth:1},
-                            {key:'owner',title:'Owner (user or group)', depth:1},
-                            {key:'access',title:'Visibility', depth:1},
-                            {key:'tag',title:'Tags', depth:1}
-*/              
-                
-                var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes );
+                var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes, null, node_order );
 
                             treedata[0].expanded = true; //first expanded
 
@@ -816,6 +810,8 @@ $.widget( "heurist.searchBuilder", {
                                 },
                                 renderNode: function(event, data){
                                     
+                                    let order = that.element.find('[name="tree_order"]:checked').val();
+
                                     if(data.node.data.is_generic_fields || data.node.data.is_rec_fields){
                                         $(data.node.span.childNodes[0]).css('display', 'inline-block');
                                         $(data.node.span.childNodes[1]).hide();
@@ -828,6 +824,10 @@ $.widget( "heurist.searchBuilder", {
                                     if(data.node.data.type == 'separator'){
                                         $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
                                         $(data.node.span.childNodes[1]).hide(); //checkbox for separators
+
+                                        if(order == 1){
+                                            $(data.node.li).addClass('fancytree-hidden');
+                                        }
                                     }
                                 },
                                 lazyLoad: function(event, data){
@@ -836,8 +836,9 @@ $.widget( "heurist.searchBuilder", {
                                     var parentcode = node.data.code; 
                                     var rectypes = node.data.rt_ids;
 
+                                    let node_order = that.element.find('[name="tree_order"]:checked').val();
                                     var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, 
-                                                                                            allowed_fieldtypes, parentcode );
+                                                                                            allowed_fieldtypes, parentcode, node_order );
                                                                                             
                                     if(res.length>1){
                                         data.result = res;
@@ -854,15 +855,6 @@ $.widget( "heurist.searchBuilder", {
                                                                                             
 
                                     return data;                                                   
-                                    /* from server
-                                    var node = data.node;
-                                    var sURL = window.hWin.HAPI4.baseURL + "hsapi/controller/sys_structure.php";
-                                    data.result = {
-                                        url: sURL,
-                                        data: {db:window.hWin.HAPI4.database, mode:5, parentcode:node.data.code, 
-                                            rectypes:node.data.rt_ids, fieldtypes:allowed_fieldtypes}
-                                    } 
-                                    */                                   
                                 },
                                 expand: function(e, data){
                                     that.showHideReverse(data);
@@ -938,34 +930,16 @@ $.widget( "heurist.searchBuilder", {
                                         return false;
                                     }
                                 }
-                                // The following options are only required, if we have more than one tree on one page:
-                                //          initId: "treeData",
-                                //cookieId: "fancytree-Cb3",
-                                //idPrefix: "fancytree-Cb3-"
                             });
-                            //},1000);
-
 
                             //hide all folder triangles
                             //treediv.find('.fancytree-expander').hide();
 
                             that.current_tree_rectype_ids = rectypeIds.join(',');
 
-                            $("#fsw_showreverse").change(function(event){
 
+                            $("#fsw_showreverse").change(function(event){
                                 that.showHideReverse();
-                                /*
-                                var showrev = $(event.target).is(":checked");
-                                var tree = treediv.fancytree("getTree");
-                                tree.visit(function(node){
-                                    if(node.data.isreverse==1){ //  window.hWin.HEURIST4.util.isArrayNotEmpty(node.children) &&
-                                                if(showrev===true){
-                                                    $(node.li).removeClass('fancytree-hidden');
-                                                }else{
-                                                    $(node.li).addClass('fancytree-hidden');
-                                                }
-                                    }
-                                });*/
                             });
 
                             //tree.options.filter.mode = "hide";
@@ -973,14 +947,19 @@ $.widget( "heurist.searchBuilder", {
                             $("#fsw_showreverse").attr('checked', false);
                             $("#fsw_showreverse").change();
 
-/* server response
-                        }else{
-                            window.hWin.HEURIST4.msg.redirectToError(response.message);
-                        }
-                        window.hWin.HEURIST4.util.setDisabled($('#btnNext'), false);
-                });
-                */
+                            this._off($('[name="tree_order"]'), 'change');
+                            this._on($('[name="tree_order"]'), {
+                                change: () => {
+                                    let order = $('[name="tree_order"]:checked').val();
+                                    sessionStorage.setItem('heurist_ftorder_filterbuilder', order);
 
+                                    if(treediv.fancytree('instance')!==undefined){
+
+                                        window.hWin.HEURIST4.ui.reorderFancytreeNodes_rst(treediv, order);
+                                        that.showHideReverse();
+                                    }
+                                }
+                            });
             }
         }
     }

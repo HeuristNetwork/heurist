@@ -275,7 +275,7 @@ function _dout(msg){
 }
 
 // global 
-var DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE, TRM_NO, TRM_NO_OLD;
+var DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE, TRM_NO, TRM_NO_OLD;
 var timeout_count = 0;
 
 //
@@ -301,6 +301,7 @@ function onPageInit(success)
     DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
     DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'],
     DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],
+    DT_CMS_TOPMENUSELECTABLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOPMENUSELECTABLE'],
     TRM_NO = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'],
     TRM_NO_OLD = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO_OLD'];
 
@@ -480,7 +481,7 @@ if($website_custom_css!=null){
                     q: 'ids:'+pageid,
                     restapi: 1,
                     columns: 
-                    ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE],
+                    ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE],
                     zip: 1,
                     format:'json'};
                 

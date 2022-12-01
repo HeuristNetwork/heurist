@@ -412,6 +412,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_HEADER' => array(2, 929),
     'DT_CMS_CSS' => array(99, 946),
     'DT_CMS_PAGETITLE' => array(99, 952),   //show page title above content
+    'DT_CMS_TOPMENUSELECTABLE' => array(2, 938), // allow top menu to be selectable, if a submenu is present
     //'DT_CMS_BANNER' => array(99, 951),
     //'DT_CMS_ALTLOGO' => array(2, 926),  
     //'DT_CMS_ALTLOGO_URL' => array(2, 943),  

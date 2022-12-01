@@ -3047,6 +3047,46 @@ window.hWin.HEURIST4.ui = {
 
   },
 
+    //
+    // Reorder the fancytree nodes for record field trees
+    // tree => Fancytree element
+    // order => order for nodes
+    //      0 : display order (default)
+    //      1 : display name
+    //
+    reorderFancytreeNodes_rst: function($tree_element, order){
+
+        if($tree_element.length > 0 && $tree_element.fancytree('instance') !== undefined){
+
+            var root = $tree_element.fancytree('getRootNode');
+
+            root.sortChildren((a, b) => {
+
+                if(!Number.isInteger(+a.data.dtyID_local) || !Number.isInteger(+b.data.dtyID_local)){
+                    return 0;
+                }
+
+                let a_rtyid = (a.data.rt_ids) ? a.data.rt_ids : a.data.code.split(':')[0];
+                let b_rtyid = (b.data.rt_ids) ? b.data.rt_ids : b.data.code.split(':')[0];
+
+                if(!Number.isInteger(+a_rtyid) || !Number.isInteger(+b_rtyid) || a_rtyid != b_rtyid){
+                    return 0;
+                }
+
+                let a_dtls = $Db.rst(a_rtyid, a.data.dtyID_local);
+                let b_dtls = $Db.rst(b_rtyid, b.data.dtyID_local);
+
+                if(!a_dtls || !b_dtls){
+                    return 0;
+                }
+                if(order == 1){
+                    return (a_dtls['rst_DisplayName'].toLowerCase()<b_dtls['rst_DisplayName'].toLowerCase())?-1:1;
+                }else{
+                    return (a_dtls['rst_DisplayOrder']<b_dtls['rst_DisplayOrder'])?-1:1;
+                }
+            }, true);
+        }
+    },
   
 }//end ui
 

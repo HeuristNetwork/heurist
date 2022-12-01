@@ -125,6 +125,8 @@ ui_additional_filter - show search everything input (for add_filter)
 ui_additional_filter_label
 
 viewport - collapse facet to limit count of items
+accordion_view - make each facet a togglable accordion container
+show_accordion_icons - show or hide toggle arrow in accordion header
 
 rectypes[0] 
 */            
@@ -1006,23 +1008,32 @@ $.widget( "heurist.search_faceted", {
              if(!facet_rollover) facet_rollover = '';
                
              if(field['isfacet']!=that._FT_INPUT){
-                    
-                    //inpt.find('.input-div').hide();
-                    //inpt.find('.header').css({'background-color': 'lightgray', 'padding': '5px', 'width': '100%'});
-                    //inpt.find('.editint-inout-repeat-button').hide();
-                    
-                    $("<div>",{id: "fv_"+field['var'] }).html(      //!!!!
-                        '<div class="header" title="'+facet_rollover+'">'   // style="width: 100%; background-color: lightgray; padding: 5px; width:100%"
-                              +(that.options.params.title_hierarchy?harchy:'')
-                              +'<h4 style="display:inline-block;margin:0;">'
-                              + facet_title + '</h4>'+  //field['order']+'  '+
-                              ((facet_rollover)?'<span class="bor-tooltip ui-icon ui-icon-circle-help" '
-                              +'style="width:17px;height:17px;margin-left:4px;display:inline-block;vertical-align:text-bottom;" title="'
-                              +facet_rollover+'"></span>':'')+
-                        '</div>'+
-                        '<div class="input-cell" style="display:block;"></div>').appendTo($fieldset);    //width:100%
-                  
-             }else{
+
+                let $container = $("<div>",{id: "fv_"+field['var'] }).html(      //!!!!
+                    '<div class="header" title="'+facet_rollover+'">'   // style="width: 100%; background-color: lightgray; padding: 5px; width:100%"
+                          +(that.options.params.title_hierarchy?harchy:'')
+                          +'<h4 style="display:inline-block;margin:0;">'
+                          + facet_title + '</h4>'+  //field['order']+'  '+
+                          ((facet_rollover)?'<span class="bor-tooltip ui-icon ui-icon-circle-help" '
+                          +'style="width:17px;height:17px;margin-left:4px;display:inline-block;vertical-align:text-bottom;" title="'
+                          +facet_rollover+'"></span>':'')+
+                    '</div>'+
+                    '<div class="input-cell" style="display:block;border:none;background:none;"></div>').appendTo($fieldset);    //width:100%
+
+                // Setup as an accordion
+                if(that.options.params.accordion_view){
+                    $container.accordion({
+                        collapsible: true,
+                        heightStyle: 'content'
+                    });
+                    if(that.options.params.show_accordion_icons === false){ // hide expand/collapse icons
+                        $container.accordion('option', 'icons', false);
+                    }
+                    if(field['accordion_hide'] === true){
+                        $container.accordion('option', 'active', false);
+                    }
+                }
+            }else{
                  //instead of list of links it is possible to allow enter search value directly into input field
                  var rtid = field['rtid'];
                  if(rtid.indexOf(',')>0){  //if multirectype use only first one
@@ -1073,6 +1084,25 @@ $.widget( "heurist.search_faceted", {
                         .css('display','block')
                         .html('<h4 style="display:inline-block;margin:0;">'+facet_title+'</h4>');
                                                                         
+                    inpt.find('.input-cell').css({
+                        border: 'none',
+                        background: 'none'
+                    });
+                    // Setup as an accordion
+                    if(that.options.params.accordion_view){
+                        inpt.find('.editint-inout-repeat-button').remove(); // repeating not used here, remove to avoid confusing the accordion
+                        inpt.accordion({
+                            collapsible: true,
+                            heightStyle: 'content'
+                        });
+                        if(that.options.params.show_accordion_icons === false){ // hide expand/collapse icons
+                            inpt.accordion('option', 'icons', false);
+                        }
+                        if(field['accordion_hide'] === true){
+                            inpt.accordion('option', 'active', false);
+                        }
+                    }
+
                     //@todo make as event listeneres
                     //assign event listener
                     //var $inputs = inpt.editing_input('getInputs');

@@ -96,7 +96,7 @@
 {
     "service": "ESTC_editions",
     "rty_ID": "",
-    "label": "ESTC Editions lookup",
+    "label": "ESTC Editions (restricted)",
     "description": "Lookup ESTC Book(Editions) records",
     "dialog": "lookupESTC_editions",
     "fields": {
@@ -119,7 +119,7 @@
 {
     "service": "ESTC_works",
     "rty_ID": "",
-    "label": "ESTC Works lookup",
+    "label": "ESTC Works (restricted)",
     "description": "Lookup ESTC Work records",
     "dialog": "lookupESTC_works",
     "fields": {
@@ -154,7 +154,7 @@
 {
     "service": "bnfLibraryAut",
     "rty_ID": "",
-    "label": "BnF Library - authoritative records",
+    "label": "BnF Library - authority records",
     "dialog": "lookupBnFLibrary_aut",
     "description": "A proof of concept for searching via the BnF Library API for Authoritative Records (under development)",
     "fields": {

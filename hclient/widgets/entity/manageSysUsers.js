@@ -419,19 +419,22 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 //html = html + '<div style="min-width:78px;"></div>';
             }
             
+            if(recID == 2 && window.hWin.HAPI4.has_access(2)){ // only db owner can edit db owner
+                html = html 
+                    + '<div title="Click to edit user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
+                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+                    + '</div>&nbsp;&nbsp;';
+            }else
             if( window.hWin.HAPI4.is_admin() ) {//current user is admin of database managers
                 
                 html = html 
                     + '<div title="Click to edit user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-                    + '</div>&nbsp;&nbsp;';
-               if(recID != 2){ //owner
-
-                    html = html      
+                    + '</div>&nbsp;&nbsp;'
+                    // delete button
                     + '<div title="Click to delete user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" style="height:16px">'
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
                     + '</div>';
-               }
                
             }else{
                /*

@@ -22,9 +22,18 @@
         <div id="export_format_container" style="display: inline-block;margin-bottom: 15px;margin-left: 10px;">
             <label><input type="radio" name="export-format" id="chkJoinRecTypes" style="vertical-align: 0px;" checked>Single joined file</label>
             <label style="display: inline-block;margin-left: 15px;"><input type="radio" name="export-format" id="chkSingleFile" style="vertical-align: 0px;"> File by record type</label>
+
+            <br><br>
+
+            <label style="padding: 0px 16px 0px 5px;"> Tree: </label>
+            <label for="order_alphabetic"><input type="radio" name="tree_order" id="order_alphabetic" style="vertical-align: middle;" value="1" />&nbsp;
+                Alphabetic</label>
+            <label for="order_default"><input type="radio" name="tree_order" id="order_default" style="vertical-align: middle;" value="0" checked />&nbsp;
+                Form order</label>
         </div>
 
         <div class="export-field-tree-container">
+
             <div class="header" style="padding: 0 16px 0 16px;display: inline-block;vertical-align:top"><label>Select fields to export:</label></div>
 
             <div style="display: inline-block;outline: none;">

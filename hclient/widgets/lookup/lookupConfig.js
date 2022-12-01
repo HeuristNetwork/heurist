@@ -588,16 +588,6 @@ $.widget( "heurist.lookupConfig", {
 
         var values = {};
 
-        values = {
-            title: 'select a service...',
-            key: '',
-            disabled: true,
-            selected: true,
-            hidden: true
-        }; // top option
-
-        options.push(values);
-
         for(idx in this._available_services){
 
             values = {
@@ -611,6 +601,18 @@ $.widget( "heurist.lookupConfig", {
             options.push(values);
         }
 
+        options.sort((a, b) => { return a.title > b.title; });
+
+        values = {
+            title: 'select a service...',
+            key: '',
+            disabled: true,
+            selected: true,
+            hidden: true
+        }; // top option
+
+        options.unshift(values);
+
         this.selectServiceType = window.hWin.HEURIST4.ui.createSelector(this.selectServiceType.get(0), options); // create dropdown
         this.selectServiceType = $(this.selectServiceType);
         window.hWin.HEURIST4.ui.initHSelect(this.selectServiceType, false); // initial selectmenu
@@ -618,6 +620,7 @@ $.widget( "heurist.lookupConfig", {
         if(this.selectServiceType.hSelect('instance')!=undefined){
 
             this.selectServiceType.hSelect('widget').css('width', 'auto');
+            this.selectServiceType.hSelect('menuWidget').css('max-height', ''); // remove to force dropdown to scroll
         }
 
     },    

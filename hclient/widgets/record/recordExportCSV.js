@@ -112,27 +112,19 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             container.scrollTop(container[0].scrollHeight);
         });
 
-        this.element.find('#selectAll').on("click", function(e){
-            var treediv = that.element.find('.rtt-tree');
+        // Reorder tree nodes
+        this._on($('[name="tree_order"]'), {
+            change: () => {
+                let order = $('[name="tree_order"]:checked').val();
+                sessionStorage.setItem('heurist_ftorder_exportcsv', order);
 
-            var check_status = $(e.target).is(":checked");
+                var treediv = that.element.find('.rtt-tree');
 
-            if(!treediv.is(':empty') && treediv.fancytree("instance")){
-                var tree = treediv.fancytree("getTree");
-                tree.visit(function(node){
-                    if(!node.hasChildren() && node.data.type != "relmarker" && node.data.type != "resource" 
-                        && (node.getLevel()==that.MAX_LEVEL || (!window.hWin.HEURIST4.util.isempty(node.span) && $(node.span.parentNode.parentNode).is(":visible")))
-                    ){    
-                        node.setSelected(check_status);
-                    }
-                });
+                if(treediv.length > 0 && treediv.fancytree('instance')!==undefined){
+                    window.hWin.HEURIST4.ui.reorderFancytreeNodes_rst(treediv, order);
+                }
             }
         });
-        /*this.element.find('#selectAll_container').css("padding-left", "21px");
-        this.element.find('#chkJoinRecTypes_container').css({
-            "display": "inline-block",
-            "margin-left": "10px"
-        });*/
 
         return true;
     },
@@ -553,8 +545,14 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             
             this._selectedRtyID = rtyID;
             
+            let node_order = sessionStorage.getItem('heurist_ftorder_exportcsv');
+            if(window.hWin.HEURIST4.util.isempty(node_order) || !Number.isInteger(+node_order)){
+                node_order = 0; // default to form order
+            }
+            this.element.find('[name="tree_order"]').filter('[value="'+ node_order +'"]').prop('checked', true);
+            
             //generate treedata from rectype structure
-            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, ['header_ext','all','parent_link'] );
+            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, ['header_ext','all','parent_link'], null, node_order );
             
             treedata[0].expanded = true; //first expanded
             
@@ -589,12 +587,18 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 },
                 renderNode: function(event, data){
 
+                    let order = that.element.find('[name="tree_order"]:checked').val();
+
                     if(data.node.parent && data.node.parent.data.type == 'resource' || data.node.parent.data.type == 'relmarker'){ // add left border+margin
                         $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
                     }
                     if(data.node.data.type == 'separator'){
                         $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
                         $(data.node.span.childNodes[1]).hide(); //checkbox for separators
+
+                        if(order == 1){
+                            $(data.node.li).addClass('fancytree-hidden');
+                        }
                     }
                 },
                 lazyLoad: function(event, data){
@@ -604,8 +608,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     
                     if(parentcode.split(":").length< that.MAX_LEVEL*2+1){  //7 limit with 4 levels (till 2021-10-15 were 3 levels)
                     
+                        let node_order = that.element.find('[name="tree_order"]:checked').val();
+
                         var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
-                                                            rectypes, ['header_ext','all'], parentcode );
+                                                            rectypes, ['header_ext','all'], parentcode, node_order );
                         if(res.length>1){
                             data.result = res;
                         }else{
