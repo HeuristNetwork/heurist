@@ -1,17 +1,16 @@
 
-Directory:	/installers
+Directory:	/server_scripts
 
-Overview:	Screipts for installation, update and verification of instances
+Overview:	Scripts for installation, update and verification of instances
+            and management of databases on a server
 
-Notes:		Mostly work in progress
-
-Updated: 	24th Feb 2016
+Created: 	24th Feb 2016, Mostly work in progress @ oct 2022
 
 ---------------------------------------------------------------------
 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2022 University of Sydney
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @version     6
