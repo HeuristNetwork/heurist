@@ -81,27 +81,6 @@ if(!$error){
             exit;
         }
         
-        if( @$_REQUEST['mode']=='page')     //return full page with embed player
-        {
-                $url = HEURIST_BASE_URL.'?mode=tag&db='.$db.'&file='.$fileid.'&size='.$size;
-            
-                ?>
-                <html xmlns="http://www.w3.org/1999/xhtml">
-                    <head>
-                        <title>Heurist mediaplayer</title>
-                        <base href="<?php echo HEURIST_BASE_URL;?>">
-                    </head>
-                    <body>
-                       <?php 
-                         print file_get_contents($url);   //execute this script to get html tag for player
-                       ?>
-                    </body>
-                </html>
-                <?php
-                exit();
-                
-        }    
-        
         if(!$system->init($db, true, false)){
             exit;
         }
@@ -122,6 +101,33 @@ if(!$error){
             $fileExt = $fileinfo['ulf_MimeExt'];
             $params = null;
             
+            if( @$_REQUEST['mode']=='page')     //return full page with embed player
+            {
+                if($fileExt=='nxz' || $fileExt=='ply' || $fileExt=='nxs'){
+                    
+                    $url = HEURIST_BASE_URL.'hclient/widgets/viewers/3dhopViewer.php?db='.$db.'&file='.$fileid;
+                
+                    header('Location: '.$url);
+                    
+                }else{
+                    $url = HEURIST_BASE_URL.'?mode=tag&db='.$db.'&file='.$fileid.'&size='.$size;
+                
+                    ?>
+                    <html xmlns="http://www.w3.org/1999/xhtml">
+                        <head>
+                            <title>Heurist mediaplayer</title>
+                            <base href="<?php echo HEURIST_BASE_URL;?>">
+                        </head>
+                        <body>
+                           <?php 
+                             print file_get_contents($url);   //execute this script to get html tag for player
+                           ?>
+                        </body>
+                    </html>
+                    <?php
+                }
+                    
+            }else    
             if( @$_REQUEST['mode']=='tag'){
 
                 //rquest may have special parameters for audio/video players
@@ -167,11 +173,19 @@ if(!$error){
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
                         header('Location: '.$direct_url);
                         
-                    }else{
+                    }else if($fileExt=='nxz' || $fileExt=='nxs' || $fileExt=='ply'){
+                        
+                        //for 3D viewer - direct url to file
+                        $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
+                        
+                        header('Location: '.$direct_url);
+                        
+                    }else {
                         //see db_files
                         downloadFile($mimeType, $filepath, @$_REQUEST['embedplayer']==1?null:$originalFileName);
                     }
-                }else if($external_url){
+                }
+                else if($external_url){
 //DEBUG error_log('External '.$external_url);
 
                     if(@$_REQUEST['mode']=='url'){

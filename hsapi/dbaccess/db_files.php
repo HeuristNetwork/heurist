@@ -565,6 +565,14 @@ function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true, $orig
 function downloadFile($mimeType, $filename, $originalFileName=null){
 
     if (file_exists($filename)) {
+        
+        $range = @$_SERVER['HTTP_RANGE'];
+        $range_max = 0;
+        if($range){
+            //get bytes range  bytes=0-88
+            list($dim, $range) = explode('=', $range);
+            list($range_min,$range_max) = explode('-', $range);
+        }        
 
         header('Content-Description: File Transfer');
         $is_zip = false;
@@ -599,7 +607,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');
-        header('Content-Length: ' . filesize($filename));
+        header('Content-Length: ' . ($range_max>0?($range_max-$range_min+1):filesize($filename)));
         @ob_clean();
         ob_end_flush(); //flush();
         
@@ -615,9 +623,18 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
                 readfile($filename);  //if less than 10MB download at once  
             }else{
                 $handle = fopen($filename, "rb");
-                while (!feof($handle)) {
-                    echo fread($handle, 1000);  //by chunks
-                }            
+                if($range_max>0){
+                    if($range_min>0) fseek($handle,$range_min);
+                    $chunk = fread($handle, $range_max-$range_min+1);
+                    //echo unpack("c2/n",$chunk); 
+                    echo $chunk; 
+                    //fread($handle, $range_max-$range_min+1);  //by chunks
+                }else{
+                    while (!feof($handle)) {
+                        echo fread($handle, 1000);  //by chunks
+                    }            
+                }
+                
             }
         }
     }
