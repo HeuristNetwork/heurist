@@ -49,7 +49,7 @@ if($system->init($db, true, false)){
         if(is_array($listpaths) && count($listpaths)>0){
             $fileinfo = $listpaths[0]; //
             $fileExt = $fileinfo['ulf_MimeExt'];
-            if($fileExt=='nxs' || $fileExt=='nxz'){
+            if($fileExt=='nxs' || $fileExt=='nxz' || $fileExt=='ply'){
                 
                 $url = HEURIST_BASE_URL.'?db='.$db.'&file='.$fileid;
                 $is_not_inited = false;    

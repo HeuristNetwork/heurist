@@ -127,7 +127,7 @@ $.widget( "heurist.mediaViewer", {
                 if(idx>=0){ 
                     var file = this.options.rec_Files[idx];
                     
-                    var obf_recID, mimeType, filetitle = '', filename = null, external_url= null, rec_ID=0;
+                    var obf_recID, mimeType, filetitle = '', filename = null, external_url= null, rec_ID=0, is_3dhop = false;
                     
                     if($.isPlainObject(file)){
                         rec_ID = file.rec_ID;
@@ -136,6 +136,7 @@ $.widget( "heurist.mediaViewer", {
                         filename = file.filename; //to detect _iiif or _tiled
                         filetitle = file.title;
                         external_url = file.external;
+                        is_3dhop = (file.is_3dhop==1);
                     }else{
                         obf_recID = file[0];
                         mimeType = file[1]; //($.isArray(file) ?file[2] :file ) ;
@@ -279,6 +280,20 @@ $.widget( "heurist.mediaViewer", {
                                 .text('DOWNLOAD')
                                 .addClass('external-link image_tool')
                                 .appendTo(this.mediacontent);
+                                
+                        if (is_3dhop) {
+
+                            external_url =  this.options.baseURL 
+                                     + 'hclient/widgets/viewers/3dhopViewer.php?db='
+                                     +  this.options.database
+                                     + '&file='+obf_recID;
+                        
+                        $('<a href="'+external_url+'" target="_blank">'
+                    +'<span class="ui-icon ui-icon-box" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
+                    +'"></span>&nbsp;open in 3DHOP</a>')
+                        .appendTo(this.mediacontent);
+                        
+                        }
                     }
                     $('<br>').appendTo(this.mediacontent);
                 }
@@ -331,7 +346,8 @@ $.widget( "heurist.mediaViewer", {
                         mimeType = file.mimeType,
                         filename = file.filename, //to detect _iiif or _tiled
                         filetitle = file.title,
-                        external_url = file.external;
+                        external_url = file.external,
+                        is_3dhop = (file.is_3dhop==1);
                     
                         if(!mimeType) mimeType = '';
 
@@ -375,17 +391,13 @@ $.widget( "heurist.mediaViewer", {
                             //on thumbnail click
                             that._on($alink, {click:function(e){
                                 
-                                  var param, obf_recID;
                                 
                                   var ele = $(e.target)
-                                  if(ele.attr('data-iiif')){
-                                      param  = ele.attr('data-iiif');
-                                      obf_recID = ele.attr('data-id');
-                                  }else{
+                                  if(!ele.attr('data-iiif')){
                                       ele = ele.parents('[data-iiif]');
-                                      param  = ele.attr('data-iiif');
-                                      obf_recID = ele.attr('data-id');
                                   }
+                                  var param  = ele.attr('data-iiif');
+                                  var obf_recID = ele.attr('data-id');
                                   
                                   var url =  that.options.baseURL 
                                         + 'hclient/widgets/viewers/miradorViewer.php?db='
@@ -411,6 +423,46 @@ $.widget( "heurist.mediaViewer", {
                                   }
           
                             }});
+                            
+                        }else
+                        if(is_3dhop){
+                            
+                            $alink
+                                .css('cursor','pointer')
+                                .attr('data-id', obf_recID);
+                                
+                            //on thumbnail click
+                            that._on($alink, {click:function(e){
+                        
+                                  var ele = $(e.target)
+                                  if(!ele.attr('data-id')){
+                                      ele = ele.parents('[data-id]');
+                                  }
+                                  var obf_recID = ele.attr('data-id');
+                                  
+                                  var url =  that.options.baseURL 
+                                     + 'hclient/widgets/viewers/3dhopViewer.php?db='
+                                     +  that.options.database+'&file='+obf_recID;
+                                    
+                                  if(window.hWin && window.hWin.HEURIST4){
+                                        //borderless:true, 
+                                        window.hWin.HEURIST4.msg.showDialog(url, 
+                                            {dialogid:'mirador-viewer',
+                                             //resizable:false, draggable: false, 
+                                             //maximize:true, 
+                                             default_palette_class: 'ui-heurist-explore',
+                                             width:'90%',height:'95%',
+                                             allowfullscreen:true,'padding-content':'0px'});   
+                                             
+                                        //$dlg = $(window.hWin?window.hWin.document:document).find('body #3dhop-viewer');
+                                        //$dlg.parent().css('top','50px');
+                                  }else{
+                                        window.open(url, '_blank');        
+                                  }
+                                     
+                                     
+                            }});
+                            
                             
                         }else
                         if(mimeType.indexOf('image')===0){
