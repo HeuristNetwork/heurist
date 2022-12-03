@@ -1007,6 +1007,7 @@ function smarty_function_wrap($params, &$smarty)
                 $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
                 $file_desc = htmlspecialchars(strip_tags($fileinfo['ulf_Description']));
                 $mimeType = $fileinfo['fxm_MimeType'];
+                $file_Ext= $fileinfo['ulf_MimeExt'];
                 $sourceType = $fileinfo['ulf_PreferredSource'];
                     
                 $file_playerURL = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce.'&mode=tag';
@@ -1037,10 +1038,14 @@ function smarty_function_wrap($params, &$smarty)
                 }
                 
                 if(@$params['fancybox']){
+                    
+                    $is_3dhop = ($file_Ext=='nxz' || $file_Ext=='nxs' || $file_Ext=='ply')?1:0;
+                    
                     $sres .= ('<script>rec_Files.push({'
                             .'rec_ID:'.$fileinfo['rec_ID']
                             .',id:"'.$file_nonce
                             .'",mimeType:"'.$mimeType
+                            .'",is_3dhop:"'.$is_3dhop
                             .'",filename:"'.htmlspecialchars($originalFileName)
                             .'",external:"'.htmlspecialchars($external_url).'"});</script>');
                 }
