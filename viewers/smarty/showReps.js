@@ -133,15 +133,17 @@ function ShowReps( is_snippet_editor ) {
             document.getElementById('snippet_output').innerHTML = context;
             
         }else{
-
+            
+            var txt = (context && context.message)?context.message:context
+            
             var iframe = document.getElementById("rep_container_frame");
             iframe.contentWindow.document.open();
-            iframe.contentWindow.document.write(context);
+            iframe.contentWindow.document.write( txt );
             iframe.contentWindow.document.close();
             
             //document.getElementById('rep_container').innerHTML = context;
 
-            _needSelection = (context && context.indexOf("Select records to see template output")>0);
+            _needSelection = (txt && txt.indexOf("Select records to see template output")>0);
             
         }
     }
