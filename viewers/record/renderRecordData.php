@@ -131,7 +131,7 @@ if(!($is_map_popup || $without_header)){
         <script type="text/javascript">
         
             var rec_Files = [];
-            var rec_Files_IIIF_and_3DHOP = [];
+            var rec_Files_IIIF_and_3D = [];
             var baseURL = '<?php echo HEURIST_BASE_URL;?>';                
             var database = '<?php echo HEURIST_DBNAME;?>';                
         
@@ -463,14 +463,14 @@ if(!($is_map_popup || $without_header)){
             //
             function showMediaViewer(){
                 //2021-12-17 fancybox viewer is disabled IJ doesn't like it - Except iiif and 3dhop
-                if(rec_Files_IIIF_and_3DHOP.length>0){
+                if(rec_Files_IIIF_and_3D.length>0){
 
                     if(window.hWin && window.hWin.HAPI4){
-                        $('.thumbnail2').mediaViewer({rec_Files:rec_Files_IIIF_and_3DHOP, 
+                        $('.thumbnail2').mediaViewer({rec_Files:rec_Files_IIIF_and_3D, 
                                 showLink:true, database:database, baseURL:baseURL});    
                     }else{
                         $.getScript(baseURL+'external/jquery.fancybox/jquery.fancybox.js', function(){
-                            $('.thumbnail2').mediaViewer({rec_Files:rec_Files_IIIF_and_3DHOP, 
+                            $('.thumbnail2').mediaViewer({rec_Files:rec_Files_IIIF_and_3D, 
                                 showLink:true, database:database, baseURL:baseURL});
                         });
                     }
@@ -1294,7 +1294,7 @@ function print_public_details($bib) {
                         'sourceType'=>$sourceType,
                         'mimeType'=>$mimeType, 
                         'file_size'=>$fileSize,
-                        'is_3dhop' => ($file_Ext=='nxz' || $file_Ext=='nxs' || $file_Ext=='ply')?1:0,
+                        'mode_3d_viewer' => detect3D_byExt($file_Ext),
                         'thumb' => $file_thumbURL,
                         'player' => $file_playerURL,
                         'nonce' => $file_nonce,
@@ -1415,11 +1415,11 @@ function print_public_details($bib) {
     if(!($is_map_popup || $without_header)){
         print '<script>';
         foreach ($thumbs as $thumb) {
-            if(strpos($thumb['orig_name'],'_iiif')===0 || $thumb['is_3dhop']==1){
-                print 'rec_Files_IIIF_and_3DHOP.push({rec_ID:'.$bib['rec_ID']
+            if(strpos($thumb['orig_name'], '_iiif')===0 || $thumb['mode_3d_viewer']!=''){
+                print 'rec_Files_IIIF_and_3D.push({rec_ID:'.$bib['rec_ID']
                                             .', id:"'.$thumb['nonce']
                                             .'",mimeType:"'.$thumb['mimeType']
-                                            .'",is_3dhop:"'.$thumb['is_3dhop']
+                                            .'",mode_3d_viewer:"'.$thumb['mode_3d_viewer']
                                             .'",filename:"'.htmlspecialchars($thumb['orig_name'])
                                             .'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
                 //if($is_map_popup) break;
@@ -1454,7 +1454,7 @@ function print_public_details($bib) {
         foreach ($thumbs as $k => $thumb) {
             
             if(strpos($thumb['orig_name'],'_iiif')===0 || 
-                      $thumb['is_3dhop'] == 1 ) continue;
+                      $thumb['mode_3d_viewer'] != '' ) continue;
             
             $isAudioVideo = (strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0);
             

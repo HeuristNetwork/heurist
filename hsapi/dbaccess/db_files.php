@@ -26,6 +26,7 @@
 * 
 * downloadViaProxy - Blocked because of possible Remote file disclosure
 * 
+* detect3D_byExt - returns 3d or 3dhop depends on extension parameter
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -1192,5 +1193,26 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             }
         }
     }
+}
+
+/**
+* returns 3d or 3dhop depends on extension parameter
+* 
+* @param mixed $fileExt - file extension
+*/
+function detect3D_byExt($fileExt){
+    
+    $mode_3d_viewer = '';
+
+    if($fileExt=='nxz' || $fileExt=='nxs'){
+        $mode_3d_viewer = '3dhop';
+    }else {
+        $allowed_exts = array('obj', '3ds', 'stl', 'ply', 'gltf', 'glb', 'off', '3dm', 'fbx', 'dae', 'wrl', '3mf', 'ifc', 'brep', 'step', 'iges', 'fcstd', 'bim');
+        if(in_array($fileExt, $allowed_exts)){
+            $mode_3d_viewer = '3d';
+        }
+    }
+    
+    return $mode_3d_viewer;
 }
 ?>

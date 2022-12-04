@@ -103,10 +103,11 @@ if(!$error){
             
             if( @$_REQUEST['mode']=='page')     //return full page with embed player
             {
-                if($fileExt=='nxz' || $fileExt=='ply' || $fileExt=='nxs'){
-                    
-                    $url = HEURIST_BASE_URL.'hclient/widgets/viewers/3dhopViewer.php?db='.$db.'&file='.$fileid;
+                $mode_3d_viewer = detect3D_byExt($fileExt);
                 
+                if($mode_3d_viewer!=''){
+                    
+                    $url = HEURIST_BASE_URL.'hclient/widgets/viewers/'.$mode_3d_viewer.'Viewer.php?db='.$db.'&file='.$fileid;
                     header('Location: '.$url);
                     
                 }else{
@@ -173,7 +174,7 @@ if(!$error){
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
                         header('Location: '.$direct_url);
                         
-                    }else if($fileExt=='nxz' || $fileExt=='nxs' || $fileExt=='ply'){
+                    }else if($fileExt=='nxz' || $fileExt=='nxs' || $fileExt=='ply' || $fileExt=='fbx' || $fileExt=='obj'){
                         
                         //for 3D viewer - direct url to file
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];

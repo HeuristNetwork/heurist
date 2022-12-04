@@ -127,7 +127,7 @@ $.widget( "heurist.mediaViewer", {
                 if(idx>=0){ 
                     var file = this.options.rec_Files[idx];
                     
-                    var obf_recID, mimeType, filetitle = '', filename = null, external_url= null, rec_ID=0, is_3dhop = false;
+                    var obf_recID, mimeType, filetitle = '', filename = null, external_url= null, rec_ID=0, mode_3d_viewer = '';
                     
                     if($.isPlainObject(file)){
                         rec_ID = file.rec_ID;
@@ -136,7 +136,7 @@ $.widget( "heurist.mediaViewer", {
                         filename = file.filename; //to detect _iiif or _tiled
                         filetitle = file.title;
                         external_url = file.external;
-                        is_3dhop = (file.is_3dhop==1);
+                        mode_3d_viewer = file.mode_3d_viewer; //3dhop or 3d or ''
                     }else{
                         obf_recID = file[0];
                         mimeType = file[1]; //($.isArray(file) ?file[2] :file ) ;
@@ -281,16 +281,16 @@ $.widget( "heurist.mediaViewer", {
                                 .addClass('external-link image_tool')
                                 .appendTo(this.mediacontent);
                                 
-                        if (is_3dhop) {
+                        if (mode_3d_viewer!=null && mode_3d_viewer!='') { //3d or 3dhop
 
                             external_url =  this.options.baseURL 
-                                     + 'hclient/widgets/viewers/3dhopViewer.php?db='
+                                     + 'hclient/widgets/viewers/'+mode_3d_viewer+'Viewer.php?db='
                                      +  this.options.database
                                      + '&file='+obf_recID;
                         
                         $('<a href="'+external_url+'" target="_blank">'
                     +'<span class="ui-icon ui-icon-box" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
-                    +'"></span>&nbsp;open in 3DHOP</a>')
+                    +'"></span>&nbsp;open in 3D viewer</a>')
                         .appendTo(this.mediacontent);
                         
                         }
@@ -347,7 +347,7 @@ $.widget( "heurist.mediaViewer", {
                         filename = file.filename, //to detect _iiif or _tiled
                         filetitle = file.title,
                         external_url = file.external,
-                        is_3dhop = (file.is_3dhop==1);
+                        mode_3d_viewer = file.mode_3d_viewer;
                     
                         if(!mimeType) mimeType = '';
 
@@ -425,7 +425,7 @@ $.widget( "heurist.mediaViewer", {
                             }});
                             
                         }else
-                        if(is_3dhop){
+                        if(mode_3d_viewer!=null && mode_3d_viewer!=''){
                             
                             $alink
                                 .css('cursor','pointer')
@@ -441,7 +441,7 @@ $.widget( "heurist.mediaViewer", {
                                   var obf_recID = ele.attr('data-id');
                                   
                                   var url =  that.options.baseURL 
-                                     + 'hclient/widgets/viewers/3dhopViewer.php?db='
+                                     + 'hclient/widgets/viewers/'+mode_3d_viewer+'Viewer.php?db='
                                      +  that.options.database+'&file='+obf_recID;
                                     
                                   if(window.hWin && window.hWin.HEURIST4){

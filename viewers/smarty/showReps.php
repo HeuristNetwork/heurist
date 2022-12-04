@@ -1039,13 +1039,13 @@ function smarty_function_wrap($params, &$smarty)
                 
                 if(@$params['fancybox']){
                     
-                    $is_3dhop = ($file_Ext=='nxz' || $file_Ext=='nxs' || $file_Ext=='ply')?1:0;
+                    $mode_3d_viewer = detect3D_byExt($file_Ext);
                     
                     $sres .= ('<script>rec_Files.push({'
                             .'rec_ID:'.$fileinfo['rec_ID']
                             .',id:"'.$file_nonce
                             .'",mimeType:"'.$mimeType
-                            .'",is_3dhop:"'.$is_3dhop
+                            .'",mode_3d_viewer:"'.$mode_3d_viewer
                             .'",filename:"'.htmlspecialchars($originalFileName)
                             .'",external:"'.htmlspecialchars($external_url).'"});</script>');
                 }

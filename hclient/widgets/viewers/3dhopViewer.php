@@ -49,21 +49,21 @@ if($system->init($db, true, false)){
         if(is_array($listpaths) && count($listpaths)>0){
             $fileinfo = $listpaths[0]; //
             $fileExt = $fileinfo['ulf_MimeExt'];
-            if($fileExt=='nxs' || $fileExt=='nxz' || $fileExt=='ply'){
+            if ($fileExt=='nxs' || $fileExt=='nxz' || $fileExt=='ply'){
                 
                 $url = HEURIST_BASE_URL.'?db='.$db.'&file='.$fileid;
                 $is_not_inited = false;    
                 
             }else{
-                $this->addError(HEURIST_ACTION_BLOCKED, 'Requested media is not NEXUS format');      
+                $system->addError(HEURIST_ACTION_BLOCKED, 'Requested media is not NEXUS format');      
             }
                 
         }else{
-            $this->addError(HEURIST_NOT_FOUND, 'Requested file is not found. Check parameter "file"');      
+            $system->addError(HEURIST_NOT_FOUND, 'Requested file is not found. Check parameter "file"');      
         }
         
     }else{ // if(@$_REQUEST['id']){
-        $this->addError(HEURIST_INVALID_REQUEST, 'Parameter "file" is not defined');
+        $system->addError(HEURIST_INVALID_REQUEST, 'Parameter "file" is not defined');
     }
 }
 
