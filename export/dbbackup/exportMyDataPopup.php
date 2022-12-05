@@ -103,7 +103,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
             }
 
             function exportArchive(){
-                let is_upload = <?php echo array_key_exists('repository', $_REQUEST); ?>;
+                let is_upload = <?php echo array_key_exists('repository', $_REQUEST) ? 1 : -1; ?>;
 
                 if(is_upload){
                     let repo = $('#sel_repository').val();

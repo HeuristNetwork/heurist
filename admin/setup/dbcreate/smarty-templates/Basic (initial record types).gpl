@@ -39,7 +39,7 @@
      {* --------------------------------------------------*}
 
 
-     {if ($r.recTypeID==constant("RT_MEDIA_RECORD"))}{* Digital media item *}
+     {if ($r.recTypeID==$heurist->constant("RT_MEDIA_RECORD"))}{* Digital media item *}
 
        Media: <b>{$r.recID}  {* the unique record ID *}
 
@@ -57,7 +57,7 @@
      {* --------------------------------------------------*}
 
 
-     {if ($r.recTypeID==constant("RT_ORGANISATION"))}{* Organisation *}
+     {if ($r.recTypeID==$heurist->constant("RT_ORGANISATION"))}{* Organisation *}
 
        Organisation: <b>{$r.recID} {* the unique record ID *}
 
@@ -89,7 +89,7 @@
      {* --------------------------------------------------*}
 
 
-     {if ($r.recTypeID==constant("RT_PERSON"))}{* Person - detailed *}
+     {if ($r.recTypeID==$heurist->constant("RT_PERSON"))}{* Person - detailed *}
 
        Person: <b>{$r.recID}  {* the unique record ID *}
 
@@ -141,7 +141,7 @@
      {* --------------------------------------------------*}
 
 
-     {if ($r.recTypeID==constant("RT_INTERNET_BOOKMARK"))}{* Web site / page *}
+     {if ($r.recTypeID==$heurist->constant("RT_INTERNET_BOOKMARK"))}{* Web site / page *}
 
        URL: <b>{$r.recID}  {* the unique record ID *}
 
@@ -159,7 +159,7 @@
      {* --------------------------------------------------*}
 
 
-     {if ($r.recTypeID==constant("RT_PLACE"))}{* Place *}
+     {if ($r.recTypeID==$heurist->constant("RT_PLACE"))}{* Place *}
 
        Place: <b>{$r.recID}  {* the unique record ID *}
 
@@ -176,7 +176,7 @@
      {* --------------------------------------------------*}
 
 
-     {if ($r.recTypeID==constant("RT_NOTE"))}{* Notes *}
+     {if ($r.recTypeID==$heurist->constant("RT_NOTE"))}{* Notes *}
 
        Note: <b>{$r.recID}</b>  {* the unique record ID *}
 

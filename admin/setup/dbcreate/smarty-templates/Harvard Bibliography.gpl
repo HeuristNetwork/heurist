@@ -5,12 +5,12 @@
 
 {$recognized = true}
 
-{if ($r.recTypeID==constant("RT_INTERNET_BOOKMARK"))} {*Internet bookmark*}
+{if ($r.recTypeID==$heurist->constant("RT_INTERNET_BOOKMARK"))} {*Internet bookmark*}
 <div>
    {$r.f2_9} {$r.f2_1} [Web site]<br/>
    {$r.f2_3}
 </div>
-{elseif ($r.recTypeID==constant("RT_BOOK"))} {*Book*}
+{elseif ($r.recTypeID==$heurist->constant("RT_BOOK"))} {*Book*}
 
 <div>
 {$editors = $r.f2_15s}
@@ -31,7 +31,7 @@
 
 </div>
 
-{elseif ($r.recTypeID==constant("RT_BOOK_CHAPTER"))}
+{elseif ($r.recTypeID==$heurist->constant("RT_BOOK_CHAPTER"))}
 
 <div>
 
@@ -68,7 +68,7 @@ In {$editors = $book.f2_15s}
 {if (isset($r.f3_1026))}{$r.f3_1026}-{$r.f3_1027}{/if}. {*start end pages*}
 </div>
 
-{elseif ($r.recTypeID==constant("RT_JOURNAL_ARTICLE"))}
+{elseif ($r.recTypeID==$heurist->constant("RT_JOURNAL_ARTICLE"))}
 <div>
 {$cnt = count($r.f2_15s)}
 {foreach $r.f2_15s as $idx=>$auth}
@@ -92,7 +92,7 @@ In {$editors = $book.f2_15s}
 
 </div>
 
-{elseif ($r.recTypeID==constant("RT_MAGAZINE_ARTICLE"))}
+{elseif ($r.recTypeID==$heurist->constant("RT_MAGAZINE_ARTICLE"))}
 
 <div>
 {$cnt = count($r.f2_15s)}
@@ -115,7 +115,7 @@ In {$editors = $book.f2_15s}
 
 </div>
 
-{elseif ($r.recTypeID==constant("RT_NEWSPAPER_ARTICLE"))}
+{elseif ($r.recTypeID==$heurist->constant("RT_NEWSPAPER_ARTICLE"))}
 
 <div>
 
@@ -139,7 +139,7 @@ In {$editors = $book.f2_15s}
 
 </div>
 
-{elseif ($r.recTypeID==constant("RT_REPORT"))}
+{elseif ($r.recTypeID==$heurist->constant("RT_REPORT"))}
 <div>
 {$cnt = count($r.f2_15s)}
 {foreach $r.f2_15s as $idx=>$auth}
@@ -162,7 +162,7 @@ In {$editors = $book.f2_15s}
 
 </div>
 
-{elseif ($r.recTypeID==constant("RT_ARCHIVAL_RECORD"))}
+{elseif ($r.recTypeID==$heurist->constant("RT_ARCHIVAL_RECORD"))}
 
 <div>
 
@@ -186,7 +186,7 @@ In {$editors = $book.f2_15s}
 
 </div>
 
-{elseif ($r.recTypeID==constant("RT_OTHER_DOC") || $r.recTypeID==constant("RT_PERSONAL_COMMUNICATION") )}
+{elseif ($r.recTypeID==$heurist->constant("RT_OTHER_DOC") || $r.recTypeID==$heurist->constant("RT_PERSONAL_COMMUNICATION") )}
 
 <div>
 {$cnt = count($r.f2_15s)}

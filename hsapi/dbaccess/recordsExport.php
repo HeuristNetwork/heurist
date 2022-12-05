@@ -1911,6 +1911,9 @@ CANVAS2;
     
 //$annotation_uri = self::gen_uuid();
 //  "duration": 5,
+//        "height": $height,
+//        "width": $width
+
 $label = preg_replace('/\r|\n/','\n',trim($label));
 $item = <<<CANVAS3
 {
@@ -1932,9 +1935,7 @@ $item = <<<CANVAS3
                 $service
                 "id": "$resource_url",
                 "type": "$resource_type",
-                "format": "$mimeType",
-        "height": $height,
-        "width": $width
+                "format": "$mimeType"
               },
               "target": "https://$canvas_uri"
             }

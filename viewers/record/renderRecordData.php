@@ -131,7 +131,7 @@ if(!($is_map_popup || $without_header)){
         <script type="text/javascript">
         
             var rec_Files = [];
-            var rec_Files_IIIF = [];
+            var rec_Files_IIIF_and_3D = [];
             var baseURL = '<?php echo HEURIST_BASE_URL;?>';                
             var database = '<?php echo HEURIST_DBNAME;?>';                
         
@@ -462,14 +462,16 @@ if(!($is_map_popup || $without_header)){
             // Init thumbnails and assign mediaViewer
             //
             function showMediaViewer(){
-                //2021-12-17 fancybox viewer is disabled IJ doesn't like it - Except iiif
-                if(rec_Files_IIIF.length>0){
+                //2021-12-17 fancybox viewer is disabled IJ doesn't like it - Except iiif and 3dhop
+                if(rec_Files_IIIF_and_3D.length>0){
 
                     if(window.hWin && window.hWin.HAPI4){
-                        $('.thumbnail2').mediaViewer({rec_Files:rec_Files_IIIF, showLink:true, database:database, baseURL:baseURL});    
+                        $('.thumbnail2').mediaViewer({rec_Files:rec_Files_IIIF_and_3D, 
+                                showLink:true, database:database, baseURL:baseURL});    
                     }else{
                         $.getScript(baseURL+'external/jquery.fancybox/jquery.fancybox.js', function(){
-                            $('.thumbnail2').mediaViewer({rec_Files:rec_Files_IIIF, showLink:true, database:database, baseURL:baseURL});
+                            $('.thumbnail2').mediaViewer({rec_Files:rec_Files_IIIF_and_3D, 
+                                showLink:true, database:database, baseURL:baseURL});
                         });
                     }
                 }
@@ -1272,6 +1274,7 @@ function print_public_details($bib) {
                     $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
                     $mimeType = $fileinfo['fxm_MimeType'];  // fxm_MimeType
                     $sourceType = $fileinfo['ulf_PreferredSource'];  
+                    $file_Ext = $fileinfo['ulf_MimeExt'];
                     $originalFileName = $fileinfo['ulf_OrigFileName'];
                     $fileSize = $fileinfo['ulf_FileSizeKB'];
                     $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
@@ -1291,6 +1294,7 @@ function print_public_details($bib) {
                         'sourceType'=>$sourceType,
                         'mimeType'=>$mimeType, 
                         'file_size'=>$fileSize,
+                        'mode_3d_viewer' => detect3D_byExt($file_Ext),
                         'thumb' => $file_thumbURL,
                         'player' => $file_playerURL,
                         'nonce' => $file_nonce,
@@ -1411,10 +1415,11 @@ function print_public_details($bib) {
     if(!($is_map_popup || $without_header)){
         print '<script>';
         foreach ($thumbs as $thumb) {
-            if(strpos($thumb['orig_name'],'_iiif')===0){
-                print 'rec_Files_IIIF.push({rec_ID:'.$bib['rec_ID']
+            if(strpos($thumb['orig_name'], '_iiif')===0 || $thumb['mode_3d_viewer']!=''){
+                print 'rec_Files_IIIF_and_3D.push({rec_ID:'.$bib['rec_ID']
                                             .', id:"'.$thumb['nonce']
                                             .'",mimeType:"'.$thumb['mimeType']
+                                            .'",mode_3d_viewer:"'.$thumb['mode_3d_viewer']
                                             .'",filename:"'.htmlspecialchars($thumb['orig_name'])
                                             .'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
                 //if($is_map_popup) break;
@@ -1448,7 +1453,8 @@ function print_public_details($bib) {
     if(true) // use/hide old thumbnails   
         foreach ($thumbs as $k => $thumb) {
             
-            if(strpos($thumb['orig_name'],'_iiif')===0) continue;
+            if(strpos($thumb['orig_name'],'_iiif')===0 || 
+                      $thumb['mode_3d_viewer'] != '' ) continue;
             
             $isAudioVideo = (strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0);
             
@@ -1533,7 +1539,7 @@ function print_public_details($bib) {
                     .'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
                     .'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
                     .'"></span>&nbsp;open in Mirador</a>&nbsp;&nbsp;';
-            }        
+            }
 
             if(@$thumb['description'] != null && @$thumb['description'] != ''){
                 if(filter_var($thumb['description'], FILTER_VALIDATE_URL)){ // just a url

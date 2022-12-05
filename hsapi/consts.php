@@ -108,8 +108,8 @@ if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path differ
                     break;   
                 }
     }
-    $installDir_pro = implode('/',$iDir);
-    
+    $installDir_pro = implode('/', $iDir);
+    //DEBUG  $installDir_pro = $installDir; 
 }
 
 if(@$_SERVER["REQUEST_URI"]) define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);

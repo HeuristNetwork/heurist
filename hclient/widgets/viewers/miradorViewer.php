@@ -76,7 +76,7 @@ var mirador = Mirador.viewer({
   "windows": [
     {
       "loadedManifest": "<?php echo $manifest_url;?>",
-      "thumbnailNavigationPosition": 'far-bottom'
+      "thumbnailNavigationPosition": "far-bottom"
     }
   ]
 });
