@@ -2111,8 +2111,11 @@ $.widget( "heurist.search_faceted", {
                             $span.append(f_link).appendTo($facet_values);
                         }                        
 
-                        if (field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST) { // List/Wrapped List
+                        if (field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST) { // List/Wrapped List, or Accordion for Terms
 
+                            if(field['trm_tree'] && field['trm_tree'] === true){
+                                this._drawTermAsTree(term['children'], 0, $facet_values, facet_index);
+                            }else{
                                 this.__drawData(term, 0, $facet_values, facet_index, field); //term is a tree for vocabulary
                                 
                                 //show viewport collapse/exand control
@@ -2122,7 +2125,7 @@ $.widget( "heurist.search_faceted", {
 
                                     needsDropdown = field['isfacet'];
                                 }
-                                
+                            }                                
                         }else{
                             needsDropdown = true;
                         }
@@ -2925,6 +2928,102 @@ $.widget( "heurist.search_faceted", {
             for (var k=0; k<data.children.length; k++){
                 this.__drawData(data.children[k], level+1, $container, f_index, field);
             }
+        }
+    }
+
+    //
+    // Draw term tree as a FancyTree
+    //  TODO - Fix isfacet to not rely on FT_LIST (3) in search_faceted & search_faceted_wiz
+    //
+    , _drawTermAsTree: function(data, level, $facet_container, facet_index){
+
+        var that = this;
+
+        let nodes = [];
+        for(var i = 0; i < data.length; i++){
+
+            let cur_data = data[i];
+            let node = {};
+
+            let key = cur_data['value'];
+            if(key === null){
+                continue;
+            }
+
+            let title = '<span title="' + cur_data['title'] + '" data-value="' + key + '">' + cur_data['title'] + '</span>'
+                      + '<span style="float: right;" class="badge">' + cur_data['count'] + '</span>';
+
+            node['title'] = title;
+            node['key'] = key;
+            node['expanded'] = false;
+            node['data'] = {
+                'index': facet_index,
+                'value': key,
+                'label': cur_data['title']
+            };
+
+            if(cur_data['children'] && cur_data['children'].length > 0){
+                let child_nodes = this._drawTermAsTree(cur_data['children'], level+1, null, facet_index); //$container
+                node['children'] = child_nodes;
+            }
+
+            nodes.push(node);
+        }
+
+        if(level == 0){
+
+            $('<div class="tree facet-item">').appendTo($facet_container);
+            $facet_container.find('div.tree').fancytree({
+                checkbox: false,
+                source: nodes,
+                click: (e, data) => {
+
+                    let isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+
+                    if(isExpander){
+                        return; //data.node.setExpanded(!data.node.isExpanded());
+                    }
+
+                    if($(e.originalEvent.target).is('span') && !data.node.isExpanded() && data.node.children && data.node.children.length>0){
+                        data.node.setExpanded(!data.node.isExpanded());
+                    }else{
+
+                        let f_index = data.node.data['index'];
+                        let value = data.node.data['value'];
+                        let label = data.node.data['label'];
+                        let step = data.node.data['step'];
+
+                        let field = this.options.params.facets[f_index];
+                        
+                        if(window.hWin.HEURIST4.util.isempty(value)){
+                            value = '';
+                            field.selectedvalue = null;
+                        }else if(field.multisel && field.selectedvalue!=null){
+                            
+                            let vals = field.selectedvalue.value.split(',');
+                            let k = window.hWin.HEURIST4.util.findArrayIndex(value, vals);
+                            if(k < 0){ //add
+                                vals.push(value);
+                            }else{ //remove
+                                vals.splice(k,1);
+                            }
+                            if(value.length==0){
+                                field.selectedvalue = null;
+                            }else{
+                                field.selectedvalue.value = vals.join(',');    
+                            }
+                        }else{
+                            field.selectedvalue = {title:label, value:value, step:step};                    
+                        }
+
+                        that.doSearch();
+                        
+                        return false;
+                    }
+                }
+            });
+        }else{
+            return nodes;
         }
     }
 
