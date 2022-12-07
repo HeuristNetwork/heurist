@@ -2158,7 +2158,7 @@ $.widget( "heurist.editing_input", {
                     .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input ); 
                 
                 /* Image and Player (enalrged image) container */
-                $input_img = $('<br/><div class="image_input ui-widget-content ui-corner-all thumb_image" style="margin:5px 0px;border:none;background:transparent;">'
+                $input_img = $('<br><div class="image_input ui-widget-content ui-corner-all thumb_image" style="margin:5px 0px;border:none;background:transparent;">'
                 + '<img id="img'+f_id+'" class="image_input" style="max-width:none;">'
                 + '<div id="player'+f_id+'" style="min-height:100px;min-width:200px;display:none;"></div>'
                 + '</div>')
@@ -2166,7 +2166,7 @@ $.widget( "heurist.editing_input", {
                 .hide();
 
 				/* Record Type help text for Record Editor */
-				$small_text = $('<br /><div class="smallText" style="display:block;color:gray;font-size:smaller;">'
+				$small_text = $('<br><div class="smallText" style="display:block;color:gray;font-size:smaller;">'
                     + 'Click image to freeze in place</div>')
                 .clone()
                 .insertAfter( $clear_container )
@@ -2177,11 +2177,11 @@ $.widget( "heurist.editing_input", {
                 var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+f_nonce+'&mode=tag&origin=recview'; 
 
                 /* Anchors (download and show thumbnail) container */
-                $dwnld_anchor = $('<br /><div class="download_link">'
-                    + '<a id="lnk'+f_id+'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px;text-decoration:underline;color:blue"'
-                        + '>SHOW THUMBNAIL</a>'
+                $dwnld_anchor = $('<br><div class="download_link" style="font-size: smaller;">'
+                    + '<a id="lnk'+f_id+'" href="#" oncontextmenu="return false;" style="display:none;padding-right:5px;text-decoration:underline;color:blue"'
+                    + '>show thumbnail</a>'
                     + '<a id="dwn'+f_id+'" href="'+window.hWin.HEURIST4.util.htmlEscape(dwnld_link)+'" target="_surf" class="external-link image_tool'
-                        + '"style="display:inline-block;text-decoration:underline;color:blue">DOWNLOAD</a>'
+                        + '"style="display:inline-block;text-decoration:underline;color:blue" title="Download image"><span class="ui-icon ui-icon-download" />download</a>'
                     + '</div>')
                 .clone()
                 .appendTo( $inputdiv )
@@ -2298,16 +2298,21 @@ $.widget( "heurist.editing_input", {
 
                     var elem = event.target;
                     
-                    if (isClicked==0 && !$(elem.parentNode.parentNode).find('div.smallText').hasClass('invalidImg')){
+                    if($(elem).hasClass('ui-icon-window-close')){
+                        return;
+                    }
+
+                    if (isClicked==0 && !$inputdiv.find('div.smallText').hasClass('invalidImg')){
                         isClicked=1;
                         
                         that._off($input_img,'mouseout');
 
-                        $(elem.parentNode.parentNode).find('div.smallText').hide(); // Hide image help text
+                        $inputdiv.find('div.smallText').hide(); // Hide image help text
 
                         $dwnld_anchor = $($(elem.parentNode.parentNode).find('div.download_link')); // Find the download anchors
                         
                         $dwnld_anchor.show();
+                        $inputdiv.find('.ui-icon-window-close').show();
 
                         if ($dwnld_anchor.find('a#dwnundefined')){  // Need to ensure the links are setup
                             $dwnld_anchor.find('a#dwnundefined').attr({'id':'dwn'+f_id, 'href':dwnld_link});
@@ -2323,6 +2328,7 @@ $.widget( "heurist.editing_input", {
                         /* Enlarge Image, display player */
                         if ($(elem.parentNode).hasClass("thumb_image")) {
                             $(elem.parentNode.parentNode).find('.hideTumbnail').hide();
+                            $inputdiv.find('.ui-icon-window-close').hide();
 
                             $input_img.css('cursor', 'zoom-out');
 
@@ -2330,33 +2336,38 @@ $.widget( "heurist.editing_input", {
                         }
                         else {  // Srink Image, display thumbnail
                             $($input_img[1].parentNode).find('.hideTumbnail').show();
+                            $inputdiv.find('.ui-icon-window-close').show();
 
                             $input_img.css('cursor', 'zoom-in');
                         }
                     }
                 }); 
 
-				/* for closing inline image when 'frozen' */
-                var $hide_thumb = $('<span class="hideTumbnail" style="padding-left:5px;color:gray;cursor:pointer;font-size:smaller;">'
-                                + 'CLOSE IMAGE</span>').appendTo( $dwnld_anchor ).show();
-                                
-                this._on($hide_thumb, 
-                {click:function(event)
-                {
+				// for closing inline image when 'frozen'
+                var $hide_thumb = $('<span class="hideTumbnail" style="padding-right:10px;color:gray;cursor:pointer;" title="Hide image thumbnail">'
+                                + 'close</span>').prependTo( $($dwnld_anchor[1]) ).show();
+                // Alternative button for closing inline image
+                var $alt_close = $('<span class="ui-icon ui-icon-window-close" title="Hide image display (image shows on rollover of the field)"'
+                    + ' style="display: none;cursor: pointer;float:right;">&nbsp;</span>').appendTo( $input_img );
 
-                    isClicked = 0;
+                this._on($hide_thumb.add($alt_close), {
+                    click:function(event){
 
-                    that._on($input, {mouseout:__hideImagePreview});
-                    that._on($input_img, {mouseout:__hideImagePreview});
+                        isClicked = 0;
 
-                    $(event.target.parentNode).hide();
+                        that._on($input, {mouseout:__hideImagePreview});
+                        that._on($input_img, {mouseout:__hideImagePreview});
 
-                    if($(event.target.parentNode).find('div.smallText').hasClass('invalidImg')){
-                        $input_img.hide().css('cursor', '');
-                    }else{
-                        $input_img.hide().css('cursor', 'pointer');
+                            $dwnld_anchor.hide();
+                            $inputdiv.find('.ui-icon-window-close').hide();
+
+                            if($inputdiv.find('div.smallText').find('div.smallText').hasClass('invalidImg')){
+                            $input_img.hide().css('cursor', '');
+                        }else{
+                            $input_img.hide().css('cursor', 'pointer');
+                        }
                     }
-                }});
+                });
 
 				/* Show Thumbnail handler */
                 $('#lnk'+f_id).on("click", function(event){
@@ -2365,10 +2376,10 @@ $.widget( "heurist.editing_input", {
                     $(event.target.parentNode.parentNode).find('.hideTumbnail').show();
 				});
                 
-                var $mirador_link = $('<a href="#" data-id="'+f_nonce+'" class="miradorViewer_link">'
+                var $mirador_link = $('<a href="#" data-id="'+f_nonce+'" class="miradorViewer_link" style="color: blue;" title="Open image in Mirador">'
                     +'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
                     +'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
-                    +'"></span>&nbsp;open in Mirador</a>').appendTo( $dwnld_anchor ).hide();
+                    +'"></span>&nbsp;Mirador</a>').appendTo( $dwnld_anchor ).hide();
                     
                 this._on($mirador_link, {click:function(event){
                     var obf_recID;
@@ -2409,12 +2420,9 @@ $.widget( "heurist.editing_input", {
                 if (window.hWin.HAPI4.get_prefs_def('imageRecordEditor', 0)!=0 && value.ulf_ID) {
                     $input_img.show();
                     $dwnld_anchor.show();
-
-                    $dwnld_anchor.appendTo( $inputdiv );
+                    $inputdiv.find('.ui-icon-window-close').show();
 
                     $input_img.css('cursor', 'zoom-in');
-                    
-                    $small_text.hide();
 
                     $input.off("mouseout");
 

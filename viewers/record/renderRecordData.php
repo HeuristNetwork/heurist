@@ -589,6 +589,10 @@ if(!($is_map_popup || $without_header)){
             padding-top: 4px;
         }
         
+        div.thumbnail{
+            margin-left: 0px;
+        }
+
         div.thumbnail img {
             width: 80px;
             border: 2px solid #FFF;
@@ -602,7 +606,6 @@ if(!($is_map_popup || $without_header)){
             vertical-align: middle;
         }   
         .thumb_image {
-            clear: both;
             margin: 5px;
             cursor: url(../../hclient/assets/zoom-in.png),pointer;
         }
@@ -613,7 +616,9 @@ if(!($is_map_popup || $without_header)){
             cursor: url(../../hclient/assets/zoom-out.png),pointer;
         }        
         .download_link{
-            padding: 15px 0;
+            float: left;
+            text-align: right;
+            padding: 15px 10px;
             font-size: 9px;
         }
         .prompt {
@@ -1474,62 +1479,20 @@ function print_public_details($bib) {
                         :(HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['nonce']);
             $download_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&debug=3&download=1&file='.$thumb['nonce'];
 
-            if($thumb['player'] && !$is_map_popup){
-
-                if($isAudioVideo){
-                    //audio or video is maximized at once
-                    
-                    print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;text-align:left;">';
-
-                    print fileGetPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']); //see db_files
-                    
-                    //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null); 
-                    print '</div>';    
-                }else{
-                    print '<img id="img'.$thumb['id'].'" style="width:200px" src="'.htmlspecialchars($thumb['thumb']).'"';
-                    if($isImageOrPdf && !$without_header){                        
-                        print ' onClick="window.hWin.HEURIST4.ui.showPlayer(this,this.parentNode,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')"';
-                    }
-                    print '><div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
-                }
-            }else{  //for usual image
-                print '<img src="'.htmlspecialchars($thumb['thumb']).'" '
-                    .(($is_map_popup || $without_header)
-                        ?''
-                        :'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
-            }
-            print '<br/><div class="download_link">';
+            print '<div class="download_link">';
 
             if(!$is_map_popup){
             
                 if($k==0 && $several_media>1){
                     print '<a href="#" onclick="$(\'.media-content\').show()">'
-                    .'<span class="ui-icon ui-icon-menu" style="font-size:1em;display:inline-block;vertical-align: middle;"></span>all images</a>&nbsp;&nbsp;';
+                    .'<span class="ui-icon ui-icon-menu" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;all images</a><br><br>';
                 }
                 if(count($thumbs)>0 && !$isAudioVideo){
                     print '<a href="#" data-id="'.$thumb['nonce'].'" class="mediaViewer_link">'
-                    .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1em;display:inline-block;vertical-align: middle;"></span>full screen</a>&nbsp;&nbsp;';
+                    .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;full screen</a><br><br>';
                 }
-                //.'onclick="initMediaViewer(); event.preventDefault(); return false;"
+            }
 
-                if($thumb['player'] && !$without_header){
-                    print '<a id="lnk'.$thumb['id'].'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px" onclick="window.hWin.HEURIST4.ui.hidePlayer('
-                        .$thumb['id'].', this.parentNode)">show thumbnail</a>';
-                }
-                
-                
-            }
-            
-            if(@$thumb['external_url']){
-                print '<a href="' . htmlspecialchars($thumb['external_url']) 
-                                . '" class="external-link" target=_blank>open in new tab'
-                                . (@$thumb['linked']?' (linked media)':'').'</a>';
-            }else{
-                print '<a href="' . htmlspecialchars($download_url) 
-                                . '" class="external-link image_tool" target="_surf">download'
-                                . (@$thumb['linked']?' (linked media)':'').'</a>';
-            }
-            
             if(strpos($thumb['mimeType'],'image/')===0 || ($isAudioVideo &&
                  ( strpos($thumb['mimeType'],'youtube')===false && 
                    strpos($thumb['mimeType'],'vimeo')===false && 
@@ -1538,12 +1501,24 @@ function print_public_details($bib) {
                 print '<a href="#" data-id="'.$thumb['nonce'].'" class="miradorViewer_link">'
                     .'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
                     .'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
-                    .'"></span>&nbsp;open in Mirador</a>&nbsp;&nbsp;';
+                    .'"></span>&nbsp;Mirador</a><br><br>';
             }
+
+            if(@$thumb['external_url']){
+                print '<a href="' . htmlspecialchars($thumb['external_url']) 
+                                . '" class="external-link" target=_blank>open in new tab'
+                                . (@$thumb['linked']?' (linked media)':'').'</a>';
+            }else{
+                print '<a href="' . htmlspecialchars($download_url) 
+                                . '" class=" image_tool" target="_surf">'
+                                . '<span class="ui-icon ui-icon-download" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;'
+                                . 'download' . (@$thumb['linked']?' (linked media)':'').'</a>';
+            }
+            print '<br><br>';
 
             if(@$thumb['description'] != null && @$thumb['description'] != ''){
                 if(filter_var($thumb['description'], FILTER_VALIDATE_URL)){ // just a url
-                    print '<a href="'.htmlspecialchars($thumb['description']).'" target="_blank">&copy; credits</a>';
+                    print '<a href="'.htmlspecialchars($thumb['description']).'" target="_blank">&copy;&nbsp;credits</a>';
                 }else{ // check for possible urls and linkify valid ones
 
                     $file_desc = str_replace(array("\r\n", "\r", "\n"), '<br>', $thumb['description']);
@@ -1569,11 +1544,53 @@ function print_public_details($bib) {
 
                     print '<a href="#" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
                         . 'onClick="window.hWin.HEURIST4.msg.showMsgDlg(\''.addslashes(htmlspecialchars($file_desc)).'\', null, \'Credits for '.htmlspecialchars($thumb['orig_name']).'\'); return false;">'
-                        . '&copy; credits</a>';
+                        . '&copy;&nbsp;credits</a><br><br>';
                 }
             }
 
-            print '</div></div>';
+            if(!$is_map_popup && $thumb['player'] && !$without_header){
+                print '<a id="lnk'.$thumb['id'].'" href="#" oncontextmenu="return false;" style="display:none;" onclick="window.hWin.HEURIST4.ui.hidePlayer('
+                        .$thumb['id'].', this.parentNode)">show thumbnail</a>';
+            }
+
+            print '</div>';
+
+            if($thumb['player'] && !$is_map_popup && $isAudioVideo){
+                print '<div class="fullSize media-content" style="text-align:left;'
+                    .($is_production?'margin-left:100px':'')
+                    .($k>0?'display:none;':'').'">';
+            }else{
+                print '<div class="thumb_image media-content"  style="'.($isImageOrPdf?'':'cursor:default;')
+                    .($k>0?'display:none;':'').'">';
+            }
+            print '<h5 style="margin-block:0.5em;">LINKED MEDIA</h5>';
+
+            if($thumb['player'] && !$is_map_popup){
+
+                if($isAudioVideo){
+                    //audio or video is maximized at once
+                    
+                    print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;text-align:left;">';
+
+                    print fileGetPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']); //see db_files
+                    
+                    //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null); 
+                    print '</div>';    
+                }else{
+                    print '<img id="img'.$thumb['id'].'" style="width:200px" src="'.htmlspecialchars($thumb['thumb']).'"';
+                    if($isImageOrPdf && !$without_header){                        
+                        print ' onClick="window.hWin.HEURIST4.ui.showPlayer(this,this.parentNode,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')"';
+                    }
+                    print '><div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
+                }
+            }else{  //for usual image
+                print '<img src="'.htmlspecialchars($thumb['thumb']).'" '
+                    .(($is_map_popup || $without_header)
+                        ?''
+                        :'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
+            }
+
+            print '</div>';
             if($is_map_popup){
                 print '<br>';
                 break; //in map popup show the only thumbnail
