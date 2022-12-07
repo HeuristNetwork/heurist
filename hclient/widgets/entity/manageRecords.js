@@ -63,6 +63,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         summary_width:400, 
         summary_tabs:['0','1']},
     
+    // For external lookups, holds values that need to be processed
     term_values: null,
     file_values: null,
     resource_values: null,
@@ -496,6 +497,93 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
     },
     
+    //
+    //
+    //
+    _createNonStandardField: function(dtId, div_ele){
+
+        var that = this;
+
+        if(dtId == null || $Db.rst(this._currentEditRecTypeID, dtId) != null || $Db.dty(dtId, 'dty_Type') == 'separator'){
+            return;
+        }
+
+        if(!div_ele || div_ele.length == 0){
+            div_ele = this.element.find('div[data-dtid="'+ dtId +'"] .input-cell');
+
+            if(div_ele.length == 0){
+                return;
+            }
+        }
+
+        let max_values = 1;
+        if(div_ele.length > 1){ // place in front of first input
+            div_ele = $(div_ele[0]);
+            max_values = 0; // force repeating
+        }
+
+        let $arrow_ele = $('<div data-dtid="'+ dtId +'" title="Add this base field and content to the current record type">'
+            + '<span class="ui-icon ui-icon-arrowthick-1-n" style="font-size: 17px;"></span></div>')
+        .css({
+            display: 'table-cell',
+            'min-width': '15px',
+            cursor: 'pointer',
+            'padding-top': '7px'
+        }).insertBefore(div_ele);
+
+        this._on($arrow_ele, {
+            'click': (event) => {
+
+                let $ele = $(event.target);
+
+                let dtid = $ele.attr('data-dtid');
+                if(!(dtid>0)) dtid = $ele.parents('div[data-dtid]').attr('data-dtid');
+
+                let display_order = '001';
+                $Db.rst(that._currentEditRecTypeID).each2((id, f) => {
+                    if(f['rst_DisplayOrder'] > display_order){
+                        display_order = String(+f['rst_DisplayOrder'] + 1).padStart(3, 0);
+                    }
+                });
+
+                let fields = {
+                    rst_ID: dtid,
+                    rst_RecTypeID: that._currentEditRecTypeID,
+                    rst_DisplayOrder: display_order,
+                    rst_DetailTypeID: dtid,
+                    rst_DisplayName: $Db.dty(dtid,'dty_Name'),
+                    rst_DisplayHelpText: $Db.dty(dtid,'dty_HelpText'),
+                    rst_RequirementType: 'optional',
+                    rst_MaxValues: max_values,
+                    rst_DisplayWidth: '100',  
+                    rst_SemanticReferenceURL: $Db.dty(dtid,'dty_SemanticReferenceURL'),
+                    rst_TermsAsButtons: 0
+                };
+
+                var request = {
+                    'a'          : 'save',
+                    'entity'     : 'defRecStructure',
+                    'request_id' : window.hWin.HEURIST4.util.random(),
+                    'fields'     : fields
+                };
+
+                let $dlg = that._getEditDialog();
+                if($dlg) window.hWin.HEURIST4.msg.bringCoverallToFront($dlg);
+
+                window.hWin.HAPI4.EntityMgr.doRequest(request, (response) => {
+
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        $Db.rst(that._currentEditRecTypeID).setRecord(dtid, fields);
+                        that.reloadEditForm(true);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+            }
+        });
+    },
     
     //  
     // invoked from _init after load entity config    
@@ -747,7 +835,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             if(!window.hWin.HEURIST4.util.isempty(recset)){
 
                                 recset.each2(function(id, f){
-                                    if(f.rst_DefaultValue == 'tabs' || f.rst_DefaultValue == 'group'){ return; }
+                                    if($Db.dty(f.rst_ID, 'dty_Type') == 'separator'){ return; }
                                     hasField = true;
                                 });
                             }
@@ -2890,7 +2978,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             var hasField = false; // check for any fields
             var temp_group_details = [], hasTabs = false; // check if any groupings are set to tabs
             var max_length_fields = []; // freetext, blobktext, and float fields that are set to max width
-            var terms_as_buttons = [];
+            var terms_as_buttons = []; // enum fields, for adjusting each button+label's width
 
             for(var k=0; k<s_fields.length; k++){
 
@@ -4321,6 +4409,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 var dtId = parseInt($(item).attr('data-dtid'));
                 if(dtId>0){
                     that._createRtsEditButton(dtId, item);
+
+                    if(dtId != 9999999 && $Db.rst(that._currentEditRecTypeID, dtId) === null){ // non-standard field, add 'Add to record structure' button
+                        that._createNonStandardField(dtId, $(item).find('div.input-cell'));
+                    }
                 }
             });
             //add action button for accordion panels
