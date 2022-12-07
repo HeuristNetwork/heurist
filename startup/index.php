@@ -889,7 +889,16 @@ a{
                 <label>Filter: </label>
                 <input id="filter_database" class="text ui-widget-content ui-corner-all" value="" autocomplete="off"/>
                 <button id="btnNewDatabase" onclick="_showStep(1)" class="ui-button-action" style="float:right;display:none">New Database</button>
-                <ul class="db-list" style="display:none">
+
+                <?php if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){ ?>
+                <span style="float:right;position:relative;bottom:25px;">
+                    <span style="color: red;">If your database has disappeared:</span> Databases which have not been updated for more than 3 / 6 / 12 months, depending on size, will be archived unless marked for retention.<br>
+                    Databases can be recovered later but it makes work for us, so please just create a new one if you did not enter any data.<br>
+                    If you have a reference database which will never be updated or there will be a hiatus > 3 months in use of your database please inform us so we can protect it from deletion.
+                </span>
+                <?php } ?>
+
+                <ul class="db-list" style="display:none;clear:both;">
                 </ul>
                 
                 <div style="text-align: center;padding: 60px 0;">
