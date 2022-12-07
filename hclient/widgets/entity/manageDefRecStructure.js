@@ -88,8 +88,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
                         +'<button id="field_usage">Calculate usage</button>'
                     +'</div>'
-                    +'<span title="Count of values in each field for this record type (n = '+ $Db.rty(this.options.rty_ID, 'rty_RecCount') +')"'
-                        +'style="display: inline-block;position:absolute;right:8px;padding-top:5px;cursor:default;font-weight:bold;">Count'
+                    +'<span id="field_ttl_usage" title="Count of values in each field for this record type (n = '+ $Db.rty(this.options.rty_ID, 'rty_RecCount') +')"'
+                        +'style="display: inline-block;position:absolute;right:8px;padding-top:5px;cursor:default;font-weight:bold;cursor:pointer;">Count'
                     +'</span>'
                     +'<div class="treeView" style="margin:12px -10px 0 -27px;"/>' //treeview
                     +'<div class="editForm editFormRtStructure" style="top:0px;display:none">EDITOR</div>'
@@ -271,7 +271,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         // Field data count
         this.element.find('#field_usage').button().css({'padding': '3px', 'margin': '3px 0'});
-        this._on(this.element.find('#field_usage'), {click: function(){
+        this._on(this.element.find('#field_usage, #field_ttl_usage'), {click: function(){
             var req = {
                 'rtyID': this.options.rty_ID,
                 'entity': this.options.entity.entityName,
@@ -660,7 +660,15 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     }
 
                     node.find('.svs-contextmenu3').css('display','inline-block');//.css('visibility','visible');
-                    node.find('.detail-count').hide();
+
+                    // update button position based on existance of usage
+                    let $ele_usage = node.find('.detail-count');
+                    if($ele_usage.attr('data-empty') == 1 || window.hWin.HEURIST4.util.isempty($ele_usage.text())){ // no usage
+                        $ele_usage.hide();
+                        node.find('.svs-contextmenu3').css('right', '2px');
+                    }else if(!window.hWin.HEURIST4.util.isempty($ele_usage.text())){
+                        node.find('.svs-contextmenu3').css('right', '20px'); // leave external link icon visible
+                    }
 
                     //highlight in preview
                     var dty_ID = node.find('span[data-dtid]').attr('data-dtid');
@@ -3087,6 +3095,7 @@ console.log('_afterDeleteEvenHandler');
     //
     updateFieldUsage: function(field_usages){
 
+        var that = this;
         if(window.hWin.HEURIST4.util.isempty(field_usages)){
             return;
         }
@@ -3098,8 +3107,36 @@ console.log('_afterDeleteEvenHandler');
 
             if(dtyid && field_usages[dtyid]){
                 $div.text(field_usages[dtyid]);
+
+                if($div.find('.ui-icon').length == 0){
+                    $div.append($('<span class="ui-icon ui-icon-extlink" />'));
+
+                    that._on($div.find('.ui-icon'), {
+                        'click': (event) => {
+                            let $ele = $(this);
+                            if(!$ele.is('div[data-dtyid]')){
+                                $ele = $ele.parents('div[data-dtyid]');
+                            }
+                            if($ele.attr('data-empty') == 1){
+                                $ele.hide();
+                                return;
+                            }
+
+                            let fld_id = $ele.attr('data-dtyid');
+
+                            if(fld_id > 0 && $Db.rst(that.options.rty_ID, fld_id) != null){
+
+                                let query = '[{"t":"' + that.options.rty_ID + '"},{"f:' + fld_id + '":""}]'; console.log(encodeURIComponent(query));
+                                window.open(window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&q=' + encodeURIComponent(query), '_blank');
+                            }
+                        }
+                    });
+                }
+
+                $div.attr('data-empty', 0);
             }else{
                 $div.text('-');
+                $div.attr('data-empty', 1);
             }
 
             $div.parent().find('span.fancytree-title').css({'max-width': '80%', 'overflow': 'hidden'});
