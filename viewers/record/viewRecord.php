@@ -113,7 +113,6 @@ $record_renderer_url = HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db=
 </head>
 
 <body style="margin: 0px;<?php if (@$_REQUEST['popup']) { ?>width: 480px; height: 600px; background-color: transparent;<?php } ?>" class="popup">
-	<div><h2>Record details</h2></div>
 	<div>
 	<!--<h3><?= htmlspecialchars($rec_title) ?></h3>-->
 	<iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?php echo $record_renderer_url;?>"></iframe>
